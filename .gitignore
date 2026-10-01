@@ -1,0 +1,32 @@
+# Unity generated files
+[Ll]ibrary/
+[Tt]emp/
+[Oo]bj/
+[Ll]ogs/
+[Bb]uild/
+[Bb]uilds/
+[Mm]emoryCaptures/
+UserSettings/
+
+# IDE and generated solution files
+.vs/
+.idea/
+.vscode/.ropeproject/
+*.csproj
+*.sln
+*.slnx
+*.user
+*.userprefs
+*.pidb
+*.booproj
+*.svclog
+*.pdb
+*.mdb
+
+# Unity crash and profiler output
+sysinfo.txt
+*.stacktrace
+
+# OS files
+.DS_Store
+Thumbs.db
