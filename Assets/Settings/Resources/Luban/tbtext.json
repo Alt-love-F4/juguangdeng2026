@@ -1,0 +1,12 @@
+[
+  {
+    "key": "mainmenu.title",
+    "text": "银星劫",
+    "comment": "主菜单标题"
+  },
+  {
+    "key": "mainmenu.subtitle",
+    "text": "文本由 Luban Excel 注入",
+    "comment": "文本配表示例说明"
+  }
+]

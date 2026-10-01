@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<module name="">
+  <bean name="TextEntry">
+    <var name="key" type="string"/>
+    <var name="text" type="string"/>
+    <var name="comment" type="string"/>
+  </bean>
+  <table name="TbText" value="TextEntry" mode="map" index="key" input="Text.xlsx"/>
+</module>

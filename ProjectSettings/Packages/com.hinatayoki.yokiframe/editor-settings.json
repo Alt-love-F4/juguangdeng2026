@@ -1,0 +1,35 @@
+{
+  "formatVersion": 1,
+  "settings": [
+    {
+      "kit": "AudioKit",
+      "key": "index.scanFolder",
+      "value": "Assets/Art/Audio"
+    },
+    {
+      "kit": "AudioKit",
+      "key": "index.outputPath",
+      "value": "Assets/Scripts/Generated/AudioIds.cs"
+    },
+    {
+      "kit": "AudioKit",
+      "key": "index.manifestPath",
+      "value": "Assets/Settings/YokiFrame/audio-index.json"
+    },
+    {
+      "kit": "AudioKit",
+      "key": "index.namespaceName",
+      "value": "GameAudio"
+    },
+    {
+      "kit": "AudioKit",
+      "key": "index.className",
+      "value": "AudioIds"
+    },
+    {
+      "kit": "AudioKit",
+      "key": "index.startId",
+      "value": "1001"
+    }
+  ]
+}
