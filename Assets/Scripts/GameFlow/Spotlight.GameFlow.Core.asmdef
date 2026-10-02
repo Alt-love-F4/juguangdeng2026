@@ -1,0 +1,6 @@
+{
+    "name": "Spotlight.GameFlow.Core",
+    "rootNamespace": "Spotlight.GameFlow",
+    "references": [],
+    "autoReferenced": true
+}

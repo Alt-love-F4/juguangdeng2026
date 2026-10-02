@@ -1,0 +1,19 @@
+{
+    "name": "Spotlight.GameFlow.UI",
+    "rootNamespace": "Spotlight.GameFlow",
+    "references": [
+        "Spotlight.GameFlow.Core",
+        "Spotlight.GameFlow.Saving",
+        "Spotlight.GameFlow.Settings",
+        "Spotlight.GameFlow.Loading",
+        "Unity.TextMeshPro",
+        "Unity.ugui",
+        "Unity.InputSystem",
+        "Unity.InputSystem.UI",
+        "YokiFrame.UIKit.Unity",
+        "YokiFrame.UIKit.DOTween",
+        "YokiFrame.UIKit.InputSystem",
+        "DOTween"
+    ],
+    "autoReferenced": true
+}

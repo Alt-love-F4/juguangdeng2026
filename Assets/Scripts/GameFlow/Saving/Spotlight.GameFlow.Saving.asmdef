@@ -1,0 +1,9 @@
+{
+    "name": "Spotlight.GameFlow.Saving",
+    "rootNamespace": "Spotlight.GameFlow",
+    "references": [
+        "YokiFrame.SaveKit",
+        "YokiFrame.SaveKit.Unity"
+    ],
+    "autoReferenced": true
+}

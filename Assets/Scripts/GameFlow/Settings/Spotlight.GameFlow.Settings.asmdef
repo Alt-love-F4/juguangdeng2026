@@ -1,0 +1,8 @@
+{
+    "name": "Spotlight.GameFlow.Settings",
+    "rootNamespace": "Spotlight.GameFlow",
+    "references": [
+        "YokiFrame.AudioKit"
+    ],
+    "autoReferenced": true
+}
