@@ -1,0 +1,22 @@
+{
+  "name": "Spotlight.Gameplay.PlayModeTests",
+  "rootNamespace": "Spotlight.Gameplay.Tests",
+  "references": [
+    "Spotlight.Gameplay",
+    "Spotlight.Interaction",
+    "Spotlight.GameFlow.Saving",
+    "Unity.ugui",
+    "Unity.TextMeshPro",
+    "Spotlight.GameFlow.UI",
+    "Spotlight.GameFlow.Core",
+    "YokiFrame",
+    "YokiFrame.UIKit.Unity"
+  ],
+  "autoReferenced": false,
+  "defineConstraints": [
+    "UNITY_INCLUDE_TESTS"
+  ],
+  "optionalUnityReferences": [
+    "TestAssemblies"
+  ]
+}

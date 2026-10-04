@@ -1,0 +1,21 @@
+{
+  "name": "Spotlight.Gameplay.Editor",
+  "rootNamespace": "Spotlight.Gameplay.EditorTools",
+  "references": [
+    "Spotlight.Gameplay",
+    "Spotlight.GameFlow.Core",
+    "Spotlight.GameFlow.UI",
+    "YokiFrame",
+    "YokiFrame.UIKit.Unity",
+    "Unity.TextMeshPro",
+    "Unity.ugui",
+    "DOTween",
+    "Spotlight.Interaction",
+    "Unity.InputSystem",
+    "Unity.InputSystem.UI"
+  ],
+  "includePlatforms": [
+    "Editor"
+  ],
+  "autoReferenced": true
+}

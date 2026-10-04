@@ -6,4 +6,81 @@
     <var name="comment" type="string"/>
   </bean>
   <table name="TbText" value="TextEntry" mode="map" index="key" input="Text.xlsx"/>
+
+  <bean name="RecipeEntry">
+    <var name="id" type="string"/>
+    <var name="name_key" type="string"/>
+    <var name="unlock_rep" type="int"/>
+    <var name="price" type="int"/>
+    <var name="cup_size" type="string"/>
+    <var name="needs_latte_art" type="bool"/>
+    <var name="steps" type="string"/>
+    <var name="comment" type="string"/>
+  </bean>
+  <table name="TbRecipe" value="RecipeEntry" mode="map" index="id" input="Recipe.xlsx"/>
+
+  <bean name="IngredientEntry">
+    <var name="id" type="string"/>
+    <var name="name_key" type="string"/>
+    <var name="max_stock" type="int"/>
+    <var name="refill_cost" type="int"/>
+    <var name="unlock_rep" type="int"/>
+    <var name="comment" type="string"/>
+  </bean>
+  <table name="TbIngredient" value="IngredientEntry" mode="map" index="id" input="Ingredient.xlsx"/>
+
+  <bean name="DeviceEntry">
+    <var name="id" type="string"/>
+    <var name="name_key" type="string"/>
+    <var name="base_time" type="float"/>
+    <var name="upgraded_time" type="float"/>
+    <var name="upgrade_cost" type="int"/>
+    <var name="unlock_rep" type="int"/>
+    <var name="comment" type="string"/>
+  </bean>
+  <table name="TbDevice" value="DeviceEntry" mode="map" index="id" input="Device.xlsx"/>
+
+  <bean name="GameParamEntry">
+    <var name="key" type="string"/>
+    <var name="value" type="string"/>
+    <var name="comment" type="string"/>
+  </bean>
+  <table name="TbGameParam" value="GameParamEntry" mode="map" index="key" input="GameParam.xlsx"/>
+
+  <bean name="WorldObjectEntry">
+    <var name="id" type="string"/>
+    <var name="role" type="string"/>
+    <var name="name" type="string"/>
+    <var name="item_id" type="string"/>
+    <var name="tags" type="string"/>
+    <var name="accepts" type="string"/>
+    <var name="behavior_id" type="string"/>
+    <var name="sprite_path" type="string"/>
+    <var name="x" type="float"/>
+    <var name="y" type="float"/>
+    <var name="height" type="float"/>
+    <var name="capacity" type="int"/>
+  </bean>
+  <table name="TbWorldObject" value="WorldObjectEntry" mode="map" index="id" input="WorldObject.xlsx"/>
+
+  <bean name="RecipeStepEntry">
+    <var name="id" type="string"/>
+    <var name="recipe_id" type="string"/>
+    <var name="sequence" type="int"/>
+    <var name="operation" type="string"/>
+    <var name="target_id" type="string"/>
+    <var name="device_id" type="string"/>
+    <var name="amount" type="int"/>
+  </bean>
+  <table name="TbRecipeStep" value="RecipeStepEntry" mode="map" index="id" input="RecipeStep.xlsx"/>
+
+  <bean name="NpcEntry">
+    <var name="id" type="string"/>
+    <var name="name" type="string"/>
+    <var name="social_id" type="int"/>
+    <var name="unlock_rep" type="int"/>
+    <var name="sprite_path" type="string"/>
+    <var name="dialogue" type="string"/>
+  </bean>
+  <table name="TbNpc" value="NpcEntry" mode="map" index="id" input="Npc.xlsx"/>
 </module>

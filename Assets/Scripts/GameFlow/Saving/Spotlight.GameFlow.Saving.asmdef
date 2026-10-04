@@ -2,6 +2,7 @@
     "name": "Spotlight.GameFlow.Saving",
     "rootNamespace": "Spotlight.GameFlow",
     "references": [
+        "Spotlight.GameFlow.Core",
         "YokiFrame.SaveKit",
         "YokiFrame.SaveKit.Unity"
     ],

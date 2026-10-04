@@ -1,0 +1,72 @@
+[
+  {
+    "id": "espresso",
+    "name_key": "recipe.espresso",
+    "unlock_rep": 0,
+    "price": 20,
+    "cup_size": "small",
+    "needs_latte_art": false,
+    "steps": "",
+    "comment": "意式浓缩"
+  },
+  {
+    "id": "macchiato",
+    "name_key": "recipe.macchiato",
+    "unlock_rep": 0,
+    "price": 30,
+    "cup_size": "small",
+    "needs_latte_art": false,
+    "steps": "",
+    "comment": "玛奇朵"
+  },
+  {
+    "id": "latte",
+    "name_key": "recipe.latte",
+    "unlock_rep": 0,
+    "price": 40,
+    "cup_size": "large",
+    "needs_latte_art": true,
+    "steps": "",
+    "comment": "拿铁（拉花）"
+  },
+  {
+    "id": "matcha_latte",
+    "name_key": "recipe.matcha_latte",
+    "unlock_rep": 20,
+    "price": 50,
+    "cup_size": "large",
+    "needs_latte_art": false,
+    "steps": "",
+    "comment": "抹茶拿铁"
+  },
+  {
+    "id": "honey_latte",
+    "name_key": "recipe.honey_latte",
+    "unlock_rep": 20,
+    "price": 55,
+    "cup_size": "large",
+    "needs_latte_art": false,
+    "steps": "",
+    "comment": "蜂蜜拿铁"
+  },
+  {
+    "id": "hot_chocolate",
+    "name_key": "recipe.hot_chocolate",
+    "unlock_rep": 20,
+    "price": 45,
+    "cup_size": "large",
+    "needs_latte_art": false,
+    "steps": "",
+    "comment": "热可可"
+  },
+  {
+    "id": "mocha",
+    "name_key": "recipe.mocha",
+    "unlock_rep": 40,
+    "price": 60,
+    "cup_size": "large",
+    "needs_latte_art": false,
+    "steps": "",
+    "comment": "摩卡"
+  }
+]

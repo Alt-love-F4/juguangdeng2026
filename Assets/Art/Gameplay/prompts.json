@@ -1,0 +1,182 @@
+{
+  "name": "coffee_shop_art_prompts",
+  "description": "《Spotlight》咖啡店玩法 2D 美术生成提示词清单（供 Trae Work 逐张生成）。生成保存到 output 指定路径后，运行 python Assets/ConfigTables/apply_ai_art.py 做后处理并覆盖到最终路径。",
+  "style_guide": {
+    "keywords": "Flat vector cartoon illustration, 2D mobile game art style, clean bold shapes, crisp outlines, warm cozy color palette of cream, wood brown and warm orange light.",
+    "forbidden": "No text, no letters, no numbers, no watermark, no signature.",
+    "transparent_requirement": "人物与道具必须输出带透明通道的 PNG（transparent PNG with alpha channel）。若所用生成器不支持透明背景，请改用纯净的纯品红 #FF00FF 纯色背景，后处理脚本会自动抠图。"
+  },
+  "assets": [
+    {
+      "id": "bg_coffee_shop",
+      "output": "Assets/Art/Gameplay/AI/bg_coffee_shop.png",
+      "size": "1920x1080",
+      "size_note": "16:9 横图；若生成器有分辨率上限，则输出 16:9 比例下的最高可用分辨率，不低于 1280x720",
+      "transparent_background": false,
+      "postprocess": "none",
+      "prompt": "Cozy coffee shop interior background for a 2D game, wide 16:9 composition. A wooden counter bar runs along the bottom third of the image with its top surface edge at about 68% of the image height. The counter area between 15% and 40% of the image width must stay simple and uncluttered (game props will be placed there), and the area around 70-80% of the image width below mid height must stay open (a character stands there). On the back wall: wooden shelves holding cups, jars and small potted plants; a dark green chalkboard menu; a large window on the left with soft daylight; three warm pendant lamps hanging from the ceiling. Flat vector cartoon illustration, 2D mobile game art style, clean bold shapes, crisp outlines, warm cozy color palette of cream, wood brown and warm orange light. No people. No text, no letters, no numbers, no watermark, no signature."
+    },
+    {
+      "id": "customer_1",
+      "output": "Assets/Art/Gameplay/AI/customer_1.png",
+      "size": "1024x1024",
+      "size_note": "正方形",
+      "transparent_background": true,
+      "postprocess": "trim-or-circle",
+      "prompt": "Bust portrait of a young woman with a brown hair bun and round glasses, friendly smile, facing the viewer, head and shoulders filling most of the frame, perfectly centered. Natural colors: brown hair, teal shirt. Flat vector cartoon illustration, 2D mobile game art style, clean bold shapes, crisp outlines, warm cozy color palette. Isolated on a fully transparent background (transparent PNG with alpha channel), nothing else in the frame. No text, no letters, no numbers, no watermark, no signature."
+    },
+    {
+      "id": "customer_2",
+      "output": "Assets/Art/Gameplay/AI/customer_2.png",
+      "size": "1024x1024",
+      "size_note": "正方形",
+      "transparent_background": true,
+      "postprocess": "trim-or-circle",
+      "prompt": "Bust portrait of a cheerful bearded man wearing a red flannel shirt, friendly smile, facing the viewer, head and shoulders filling most of the frame, perfectly centered. Natural colors: dark brown hair and beard. Flat vector cartoon illustration, 2D mobile game art style, clean bold shapes, crisp outlines, warm cozy color palette. Isolated on a fully transparent background (transparent PNG with alpha channel), nothing else in the frame. No text, no letters, no numbers, no watermark, no signature."
+    },
+    {
+      "id": "customer_3",
+      "output": "Assets/Art/Gameplay/AI/customer_3.png",
+      "size": "1024x1024",
+      "size_note": "正方形",
+      "transparent_background": true,
+      "postprocess": "trim-or-circle",
+      "prompt": "Bust portrait of a gentle elderly lady with gray hair and a purple knitted scarf, warm smile, facing the viewer, head and shoulders filling most of the frame, perfectly centered. Flat vector cartoon illustration, 2D mobile game art style, clean bold shapes, crisp outlines, warm cozy color palette. Isolated on a fully transparent background (transparent PNG with alpha channel), nothing else in the frame. No text, no letters, no numbers, no watermark, no signature."
+    },
+    {
+      "id": "cup_empty",
+      "output": "Assets/Art/Gameplay/AI/cup_empty.png",
+      "size": "1024x1024",
+      "size_note": "正方形",
+      "transparent_background": true,
+      "postprocess": "trim-or-key",
+      "prompt": "An empty white ceramic coffee cup standing on a small round saucer, front view slightly angled from above. Flat vector cartoon illustration, 2D mobile game art style, clean bold shapes, crisp outlines, warm cozy color palette. Isolated on a fully transparent background (transparent PNG with alpha channel), nothing else in the frame. No text, no letters, no numbers, no watermark, no signature."
+    },
+    {
+      "id": "cup_latte",
+      "output": "Assets/Art/Gameplay/AI/cup_latte.png",
+      "size": "1024x1024",
+      "size_note": "正方形",
+      "transparent_background": true,
+      "postprocess": "trim-or-key",
+      "prompt": "A white ceramic coffee cup on a small saucer filled with latte, showing a white heart shape latte art on the brown coffee surface, front view slightly angled from above. Flat vector cartoon illustration, 2D mobile game art style, clean bold shapes, crisp outlines, warm cozy color palette. Isolated on a fully transparent background (transparent PNG with alpha channel), nothing else in the frame. No text, no letters, no numbers, no watermark, no signature."
+    },
+    {
+      "id": "machine_espresso",
+      "output": "Assets/Art/Gameplay/AI/machine_espresso.png",
+      "size": "1024x1024",
+      "size_note": "正方形",
+      "transparent_background": true,
+      "postprocess": "trim-or-key",
+      "prompt": "A stovetop moka pot coffee brewer with an octagonal aluminum body and a black handle, standing upright. Flat vector cartoon illustration, 2D mobile game art style, clean bold shapes, crisp outlines, warm cozy color palette. Isolated on a fully transparent background (transparent PNG with alpha channel), nothing else in the frame. No text, no letters, no numbers, no watermark, no signature."
+    },
+    {
+      "id": "machine_grinder",
+      "output": "Assets/Art/Gameplay/AI/machine_grinder.png",
+      "size": "1024x1024",
+      "size_note": "正方形",
+      "transparent_background": true,
+      "postprocess": "trim-or-key",
+      "prompt": "A manual wooden coffee grinder with a small front drawer and a crank handle on top. Flat vector cartoon illustration, 2D mobile game art style, clean bold shapes, crisp outlines, warm cozy color palette. Isolated on a fully transparent background (transparent PNG with alpha channel), nothing else in the frame. No text, no letters, no numbers, no watermark, no signature."
+    },
+    {
+      "id": "machine_milk_pot",
+      "output": "Assets/Art/Gameplay/AI/machine_milk_pot.png",
+      "size": "1024x1024",
+      "size_note": "正方形",
+      "transparent_background": true,
+      "postprocess": "trim-or-key",
+      "prompt": "A small stainless steel milk warming pot with a long handle and a pouring spout, filled with fresh white milk, standing upright. Flat vector cartoon illustration, 2D mobile game art style, clean bold shapes, crisp outlines, warm cozy color palette. Isolated on a fully transparent background (transparent PNG with alpha channel), nothing else in the frame. No text, no letters, no numbers, no watermark, no signature."
+    },
+    {
+      "id": "machine_cocoa_pot",
+      "output": "Assets/Art/Gameplay/AI/machine_cocoa_pot.png",
+      "size": "1024x1024",
+      "size_note": "正方形",
+      "transparent_background": true,
+      "postprocess": "trim-or-key",
+      "prompt": "A small copper chocolate melting pot with a wooden handle, filled with glossy melted dark chocolate, standing upright. Flat vector cartoon illustration, 2D mobile game art style, clean bold shapes, crisp outlines, warm cozy color palette. Isolated on a fully transparent background (transparent PNG with alpha channel), nothing else in the frame. No text, no letters, no numbers, no watermark, no signature."
+    },
+    {
+      "id": "machine_matcha_grinder",
+      "output": "Assets/Art/Gameplay/AI/machine_matcha_grinder.png",
+      "size": "1024x1024",
+      "size_note": "正方形",
+      "transparent_background": true,
+      "postprocess": "trim-or-key",
+      "prompt": "A traditional Japanese matcha grinding set: a ceramic bowl with vibrant green matcha powder and a bamboo whisk standing in it. Flat vector cartoon illustration, 2D mobile game art style, clean bold shapes, crisp outlines, warm cozy color palette. Isolated on a fully transparent background (transparent PNG with alpha channel), nothing else in the frame. No text, no letters, no numbers, no watermark, no signature."
+    },
+    {
+      "id": "cup_small",
+      "output": "Assets/Art/Gameplay/AI/cup_small.png",
+      "size": "1024x1024",
+      "size_note": "正方形",
+      "transparent_background": true,
+      "postprocess": "trim-or-key",
+      "prompt": "A small white ceramic espresso cup on a tiny saucer, front view slightly angled from above, noticeably smaller and narrower than a regular coffee cup. Flat vector cartoon illustration, 2D mobile game art style, clean bold shapes, crisp outlines, warm cozy color palette. Isolated on a fully transparent background (transparent PNG with alpha channel), nothing else in the frame. No text, no letters, no numbers, no watermark, no signature."
+    },
+    {
+      "id": "ing_coffee_beans",
+      "output": "Assets/Art/Gameplay/AI/ing_coffee_beans.png",
+      "size": "1024x1024",
+      "size_note": "正方形",
+      "transparent_background": true,
+      "postprocess": "trim-or-key",
+      "prompt": "A small open burlap sack filled with roasted coffee beans, a few beans scattered at the base. Flat vector cartoon illustration, 2D mobile game art style, clean bold shapes, crisp outlines, warm cozy color palette. Isolated on a fully transparent background (transparent PNG with alpha channel), nothing else in the frame. No text, no letters, no numbers, no watermark, no signature."
+    },
+    {
+      "id": "ing_milk",
+      "output": "Assets/Art/Gameplay/AI/ing_milk.png",
+      "size": "1024x1024",
+      "size_note": "正方形",
+      "transparent_background": true,
+      "postprocess": "trim-or-key",
+      "prompt": "A plain white milk carton with a simple blue cap, no label design, standing upright. Flat vector cartoon illustration, 2D mobile game art style, clean bold shapes, crisp outlines, warm cozy color palette. Isolated on a fully transparent background (transparent PNG with alpha channel), nothing else in the frame. No text, no letters, no numbers, no watermark, no signature."
+    },
+    {
+      "id": "ing_matcha",
+      "output": "Assets/Art/Gameplay/AI/ing_matcha.png",
+      "size": "1024x1024",
+      "size_note": "正方形",
+      "transparent_background": true,
+      "postprocess": "trim-or-key",
+      "prompt": "A small round green tea tin canister with its lid resting beside it, revealing vibrant green matcha powder inside. Flat vector cartoon illustration, 2D mobile game art style, clean bold shapes, crisp outlines, warm cozy color palette. Isolated on a fully transparent background (transparent PNG with alpha channel), nothing else in the frame. No text, no letters, no numbers, no watermark, no signature."
+    },
+    {
+      "id": "ing_chocolate",
+      "output": "Assets/Art/Gameplay/AI/ing_chocolate.png",
+      "size": "1024x1024",
+      "size_note": "正方形",
+      "transparent_background": true,
+      "postprocess": "trim-or-key",
+      "prompt": "A small glass jar filled with dark chocolate chunks and cocoa powder, with a cork lid. Flat vector cartoon illustration, 2D mobile game art style, clean bold shapes, crisp outlines, warm cozy color palette. Isolated on a fully transparent background (transparent PNG with alpha channel), nothing else in the frame. No text, no letters, no numbers, no watermark, no signature."
+    },
+    {
+      "id": "ing_honey",
+      "output": "Assets/Art/Gameplay/AI/ing_honey.png",
+      "size": "1024x1024",
+      "size_note": "正方形",
+      "transparent_background": true,
+      "postprocess": "trim-or-key",
+      "prompt": "A small glass honey jar with golden honey and a wooden honey dipper resting against it. Flat vector cartoon illustration, 2D mobile game art style, clean bold shapes, crisp outlines, warm cozy color palette. Isolated on a fully transparent background (transparent PNG with alpha channel), nothing else in the frame. No text, no letters, no numbers, no watermark, no signature."
+    },
+    {
+      "id": "ing_cream",
+      "output": "Assets/Art/Gameplay/AI/ing_cream.png",
+      "size": "1024x1024",
+      "size_note": "正方形",
+      "transparent_background": true,
+      "postprocess": "trim-or-key",
+      "prompt": "A whipped cream dispenser canister in cream white color with a metal nozzle top, standing upright. Flat vector cartoon illustration, 2D mobile game art style, clean bold shapes, crisp outlines, warm cozy color palette. Isolated on a fully transparent background (transparent PNG with alpha channel), nothing else in the frame. No text, no letters, no numbers, no watermark, no signature."
+    },
+    {
+      "id": "serve_window",
+      "output": "Assets/Art/Gameplay/AI/serve_window.png",
+      "size": "1024x1024",
+      "size_note": "正方形",
+      "transparent_background": true,
+      "postprocess": "trim-or-key",
+      "prompt": "A cozy wooden serving hatch window for a coffee shop counter: a small rectangular wooden frame opening with a brass service bell on its shelf ledge, viewed from the front. Flat vector cartoon illustration, 2D mobile game art style, clean bold shapes, crisp outlines, warm cozy color palette. Isolated on a fully transparent background (transparent PNG with alpha channel), nothing else in the frame. No text, no letters, no numbers, no watermark, no signature."
+    }
+  ]
+}

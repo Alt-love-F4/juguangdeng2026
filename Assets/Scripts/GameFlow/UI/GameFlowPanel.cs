@@ -25,6 +25,9 @@ namespace Spotlight.GameFlow
 
         protected GameFlowBootstrap Flow { get; private set; }
 
+        /// <summary>场景内面板（非 UIKit 实例化）由钩子直接设置 Flow 时调用。</summary>
+        protected void SetFlow(GameFlowBootstrap flow) => Flow = flow;
+
         protected void SetModal(bool value) => modal = value;
 
         protected virtual void Awake()

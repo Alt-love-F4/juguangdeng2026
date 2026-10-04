@@ -82,7 +82,15 @@ namespace Spotlight.GameFlow
         {
             gameplay = true;
             paused = false;
-            LoadThen(OpenGameplayPlaceholder, config.GameplayScene);
+            // 场景切换开关：留空则留在当前场景，直接打开玩法面板
+            if (string.IsNullOrWhiteSpace(config.GameplayScene))
+            {
+                OpenGameplayPlaceholder();
+            }
+            else
+            {
+                LoadThen(OpenGameplayPlaceholder, config.GameplayScene);
+            }
         }
 
         public void OpenPause()
@@ -142,7 +150,12 @@ namespace Spotlight.GameFlow
                 }
                 playtime = (float)data.ElapsedPlaytimeSeconds;
                 gameplay = true;
-                LoadThen(OpenGameplayPlaceholder, data.SceneName);
+                GameSaveParticipantRegistry.PendingRestore = data.Participants;
+                if (!string.IsNullOrWhiteSpace(data.SceneName)
+                    && data.SceneName != SceneManager.GetActiveScene().name)
+                    LoadThen(OpenGameplayPlaceholder, data.SceneName);
+                else
+                    OpenGameplayPlaceholder();
             }, "取消", () => { });
         }
 
@@ -241,7 +254,9 @@ namespace Spotlight.GameFlow
                 UIKit.GetPanel<ResultPanel>()?.CloseFromFlow();
             else if (topType == typeof(SettingsPanel) || topType == typeof(SaveManagementPanel))
                 BackToPrevious();
-            else if (gameplay && !paused && topType == typeof(GameplayPlaceholderPanel))
+            else if (gameplay && !paused && (topType == typeof(GameplayPlaceholderPanel) || (GameplayPanelHooks.PanelType != null && topType == GameplayPanelHooks.PanelType)))
+                OpenPause();
+            else if (gameplay && !paused && GameplayPanelHooks.IsScenePanel && topType == null)
                 OpenPause();
             else if (paused && topType == typeof(PauseMenuPanel))
                 ResumeGame();
@@ -252,6 +267,12 @@ namespace Spotlight.GameFlow
             Time.timeScale = 1f;
             paused = gameplay = false;
             UIKit.ClearStack(MainStack, true);
+            if (GameplayPanelHooks.IsScenePanel && GameplayPanelHooks.OpenPanel != null)
+            {
+                // 场景内面板在回到主菜单时隐藏
+                var scenePanel = FindFirstObjectByType(GameplayPanelHooks.PanelType, FindObjectsInactive.Include) as GameFlowPanel;
+                if (scenePanel != null) scenePanel.gameObject.SetActive(false);
+            }
             MainMenuPanel panel = UIKit.OpenPanel<MainMenuPanel>(UILevel.Common, Data(), cachePolicy: PanelCachePolicy.Reusable);
             StartCoroutine(PushPanelWhenReady(panel, false, ++rootNavigationVersion));
         }
@@ -263,8 +284,17 @@ namespace Spotlight.GameFlow
             paused = false;
             gameplay = true;
             UIKit.ClearStack(MainStack, true);
-            GameplayPlaceholderPanel panel = UIKit.OpenPanel<GameplayPlaceholderPanel>(UILevel.Hud, Data(true), cachePolicy: PanelCachePolicy.Reusable);
-            panel.Refresh(SceneManager.GetActiveScene().name, FormatTime(playtime));
+            GameFlowPanel panel;
+            if (GameplayPanelHooks.OpenPanel != null)
+            {
+                panel = GameplayPanelHooks.OpenPanel(this);
+            }
+            else
+            {
+                GameplayPlaceholderPanel placeholder = UIKit.OpenPanel<GameplayPlaceholderPanel>(UILevel.Hud, Data(true), cachePolicy: PanelCachePolicy.Reusable);
+                placeholder.Refresh(SceneManager.GetActiveScene().name, FormatTime(playtime));
+                panel = placeholder;
+            }
             StartCoroutine(PushPanelWhenReady(panel, false, ++rootNavigationVersion));
         }
 
@@ -368,13 +398,18 @@ namespace Spotlight.GameFlow
 
         private GameFlowPanelData Data(bool fromGameplay = false) => new GameFlowPanelData(this, fromGameplay);
 
-        private GameSaveData CaptureSaveData() => new GameSaveData
+        private GameSaveData CaptureSaveData()
         {
-            SceneName = SceneManager.GetActiveScene().name,
-            ElapsedPlaytimeSeconds = playtime,
-            CheckpointId = "start",
-            State = gameplay ? "gameplay" : "menu"
-        };
+            var data = new GameSaveData
+            {
+                SceneName = SceneManager.GetActiveScene().name,
+                ElapsedPlaytimeSeconds = playtime,
+                CheckpointId = "start",
+                State = gameplay ? "gameplay" : "menu"
+            };
+            data.Participants.AddRange(GameSaveParticipantRegistry.CaptureAll());
+            return data;
+        }
 
         private static int FindBuildIndex(string scene)
         {

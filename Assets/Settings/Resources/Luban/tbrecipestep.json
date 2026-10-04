@@ -1,0 +1,488 @@
+[
+  {
+    "id": "espresso.1",
+    "recipe_id": "espresso",
+    "sequence": 1,
+    "operation": "SelectCup",
+    "target_id": "small",
+    "device_id": "",
+    "amount": 1
+  },
+  {
+    "id": "espresso.2",
+    "recipe_id": "espresso",
+    "sequence": 2,
+    "operation": "AddIngredient",
+    "target_id": "coffee_bean",
+    "device_id": "",
+    "amount": 1
+  },
+  {
+    "id": "espresso.3",
+    "recipe_id": "espresso",
+    "sequence": 3,
+    "operation": "BeanSelection",
+    "target_id": "",
+    "device_id": "",
+    "amount": 1
+  },
+  {
+    "id": "espresso.4",
+    "recipe_id": "espresso",
+    "sequence": 4,
+    "operation": "GrindClick",
+    "target_id": "",
+    "device_id": "grinder",
+    "amount": 3
+  },
+  {
+    "id": "espresso.5",
+    "recipe_id": "espresso",
+    "sequence": 5,
+    "operation": "Process",
+    "target_id": "",
+    "device_id": "moka_pot",
+    "amount": 1
+  },
+  {
+    "id": "espresso.6",
+    "recipe_id": "espresso",
+    "sequence": 6,
+    "operation": "Serve",
+    "target_id": "",
+    "device_id": "",
+    "amount": 1
+  },
+  {
+    "id": "macchiato.1",
+    "recipe_id": "macchiato",
+    "sequence": 1,
+    "operation": "SelectCup",
+    "target_id": "small",
+    "device_id": "",
+    "amount": 1
+  },
+  {
+    "id": "macchiato.2",
+    "recipe_id": "macchiato",
+    "sequence": 2,
+    "operation": "AddIngredient",
+    "target_id": "coffee_bean",
+    "device_id": "",
+    "amount": 1
+  },
+  {
+    "id": "macchiato.3",
+    "recipe_id": "macchiato",
+    "sequence": 3,
+    "operation": "BeanSelection",
+    "target_id": "",
+    "device_id": "",
+    "amount": 1
+  },
+  {
+    "id": "macchiato.4",
+    "recipe_id": "macchiato",
+    "sequence": 4,
+    "operation": "GrindClick",
+    "target_id": "",
+    "device_id": "grinder",
+    "amount": 3
+  },
+  {
+    "id": "macchiato.5",
+    "recipe_id": "macchiato",
+    "sequence": 5,
+    "operation": "Process",
+    "target_id": "",
+    "device_id": "moka_pot",
+    "amount": 1
+  },
+  {
+    "id": "macchiato.6",
+    "recipe_id": "macchiato",
+    "sequence": 6,
+    "operation": "AddIngredient",
+    "target_id": "milk",
+    "device_id": "",
+    "amount": 1
+  },
+  {
+    "id": "macchiato.7",
+    "recipe_id": "macchiato",
+    "sequence": 7,
+    "operation": "Process",
+    "target_id": "",
+    "device_id": "milk_cup",
+    "amount": 1
+  },
+  {
+    "id": "macchiato.8",
+    "recipe_id": "macchiato",
+    "sequence": 8,
+    "operation": "Serve",
+    "target_id": "",
+    "device_id": "",
+    "amount": 1
+  },
+  {
+    "id": "latte.1",
+    "recipe_id": "latte",
+    "sequence": 1,
+    "operation": "SelectCup",
+    "target_id": "large",
+    "device_id": "",
+    "amount": 1
+  },
+  {
+    "id": "latte.2",
+    "recipe_id": "latte",
+    "sequence": 2,
+    "operation": "AddIngredient",
+    "target_id": "coffee_bean",
+    "device_id": "",
+    "amount": 1
+  },
+  {
+    "id": "latte.3",
+    "recipe_id": "latte",
+    "sequence": 3,
+    "operation": "BeanSelection",
+    "target_id": "",
+    "device_id": "",
+    "amount": 1
+  },
+  {
+    "id": "latte.4",
+    "recipe_id": "latte",
+    "sequence": 4,
+    "operation": "GrindClick",
+    "target_id": "",
+    "device_id": "grinder",
+    "amount": 3
+  },
+  {
+    "id": "latte.5",
+    "recipe_id": "latte",
+    "sequence": 5,
+    "operation": "Process",
+    "target_id": "",
+    "device_id": "moka_pot",
+    "amount": 1
+  },
+  {
+    "id": "latte.6",
+    "recipe_id": "latte",
+    "sequence": 6,
+    "operation": "AddIngredient",
+    "target_id": "milk",
+    "device_id": "",
+    "amount": 1
+  },
+  {
+    "id": "latte.7",
+    "recipe_id": "latte",
+    "sequence": 7,
+    "operation": "Process",
+    "target_id": "",
+    "device_id": "milk_cup",
+    "amount": 1
+  },
+  {
+    "id": "latte.8",
+    "recipe_id": "latte",
+    "sequence": 8,
+    "operation": "LatteArt",
+    "target_id": "",
+    "device_id": "",
+    "amount": 1
+  },
+  {
+    "id": "latte.9",
+    "recipe_id": "latte",
+    "sequence": 9,
+    "operation": "Serve",
+    "target_id": "",
+    "device_id": "",
+    "amount": 1
+  },
+  {
+    "id": "matcha_latte.1",
+    "recipe_id": "matcha_latte",
+    "sequence": 1,
+    "operation": "SelectCup",
+    "target_id": "large",
+    "device_id": "",
+    "amount": 1
+  },
+  {
+    "id": "matcha_latte.2",
+    "recipe_id": "matcha_latte",
+    "sequence": 2,
+    "operation": "AddIngredient",
+    "target_id": "matcha",
+    "device_id": "",
+    "amount": 1
+  },
+  {
+    "id": "matcha_latte.3",
+    "recipe_id": "matcha_latte",
+    "sequence": 3,
+    "operation": "Process",
+    "target_id": "",
+    "device_id": "matcha_bowl",
+    "amount": 1
+  },
+  {
+    "id": "matcha_latte.4",
+    "recipe_id": "matcha_latte",
+    "sequence": 4,
+    "operation": "AddIngredient",
+    "target_id": "milk",
+    "device_id": "",
+    "amount": 1
+  },
+  {
+    "id": "matcha_latte.5",
+    "recipe_id": "matcha_latte",
+    "sequence": 5,
+    "operation": "Process",
+    "target_id": "",
+    "device_id": "milk_cup",
+    "amount": 1
+  },
+  {
+    "id": "matcha_latte.6",
+    "recipe_id": "matcha_latte",
+    "sequence": 6,
+    "operation": "Serve",
+    "target_id": "",
+    "device_id": "",
+    "amount": 1
+  },
+  {
+    "id": "honey_latte.1",
+    "recipe_id": "honey_latte",
+    "sequence": 1,
+    "operation": "SelectCup",
+    "target_id": "large",
+    "device_id": "",
+    "amount": 1
+  },
+  {
+    "id": "honey_latte.2",
+    "recipe_id": "honey_latte",
+    "sequence": 2,
+    "operation": "AddIngredient",
+    "target_id": "coffee_bean",
+    "device_id": "",
+    "amount": 1
+  },
+  {
+    "id": "honey_latte.3",
+    "recipe_id": "honey_latte",
+    "sequence": 3,
+    "operation": "BeanSelection",
+    "target_id": "",
+    "device_id": "",
+    "amount": 1
+  },
+  {
+    "id": "honey_latte.4",
+    "recipe_id": "honey_latte",
+    "sequence": 4,
+    "operation": "GrindClick",
+    "target_id": "",
+    "device_id": "grinder",
+    "amount": 3
+  },
+  {
+    "id": "honey_latte.5",
+    "recipe_id": "honey_latte",
+    "sequence": 5,
+    "operation": "Process",
+    "target_id": "",
+    "device_id": "moka_pot",
+    "amount": 1
+  },
+  {
+    "id": "honey_latte.6",
+    "recipe_id": "honey_latte",
+    "sequence": 6,
+    "operation": "AddIngredient",
+    "target_id": "milk",
+    "device_id": "",
+    "amount": 1
+  },
+  {
+    "id": "honey_latte.7",
+    "recipe_id": "honey_latte",
+    "sequence": 7,
+    "operation": "Process",
+    "target_id": "",
+    "device_id": "milk_cup",
+    "amount": 1
+  },
+  {
+    "id": "honey_latte.8",
+    "recipe_id": "honey_latte",
+    "sequence": 8,
+    "operation": "AddIngredient",
+    "target_id": "honey",
+    "device_id": "",
+    "amount": 1
+  },
+  {
+    "id": "honey_latte.9",
+    "recipe_id": "honey_latte",
+    "sequence": 9,
+    "operation": "Serve",
+    "target_id": "",
+    "device_id": "",
+    "amount": 1
+  },
+  {
+    "id": "hot_chocolate.1",
+    "recipe_id": "hot_chocolate",
+    "sequence": 1,
+    "operation": "SelectCup",
+    "target_id": "large",
+    "device_id": "",
+    "amount": 1
+  },
+  {
+    "id": "hot_chocolate.2",
+    "recipe_id": "hot_chocolate",
+    "sequence": 2,
+    "operation": "AddIngredient",
+    "target_id": "chocolate",
+    "device_id": "",
+    "amount": 1
+  },
+  {
+    "id": "hot_chocolate.3",
+    "recipe_id": "hot_chocolate",
+    "sequence": 3,
+    "operation": "CocoaMinigame",
+    "target_id": "",
+    "device_id": "cocoa_pot",
+    "amount": 1
+  },
+  {
+    "id": "hot_chocolate.4",
+    "recipe_id": "hot_chocolate",
+    "sequence": 4,
+    "operation": "AddIngredient",
+    "target_id": "milk",
+    "device_id": "",
+    "amount": 1
+  },
+  {
+    "id": "hot_chocolate.5",
+    "recipe_id": "hot_chocolate",
+    "sequence": 5,
+    "operation": "Process",
+    "target_id": "",
+    "device_id": "milk_cup",
+    "amount": 1
+  },
+  {
+    "id": "hot_chocolate.6",
+    "recipe_id": "hot_chocolate",
+    "sequence": 6,
+    "operation": "Serve",
+    "target_id": "",
+    "device_id": "",
+    "amount": 1
+  },
+  {
+    "id": "mocha.1",
+    "recipe_id": "mocha",
+    "sequence": 1,
+    "operation": "SelectCup",
+    "target_id": "large",
+    "device_id": "",
+    "amount": 1
+  },
+  {
+    "id": "mocha.2",
+    "recipe_id": "mocha",
+    "sequence": 2,
+    "operation": "AddIngredient",
+    "target_id": "coffee_bean",
+    "device_id": "",
+    "amount": 1
+  },
+  {
+    "id": "mocha.3",
+    "recipe_id": "mocha",
+    "sequence": 3,
+    "operation": "BeanSelection",
+    "target_id": "",
+    "device_id": "",
+    "amount": 1
+  },
+  {
+    "id": "mocha.4",
+    "recipe_id": "mocha",
+    "sequence": 4,
+    "operation": "GrindClick",
+    "target_id": "",
+    "device_id": "grinder",
+    "amount": 3
+  },
+  {
+    "id": "mocha.5",
+    "recipe_id": "mocha",
+    "sequence": 5,
+    "operation": "Process",
+    "target_id": "",
+    "device_id": "moka_pot",
+    "amount": 1
+  },
+  {
+    "id": "mocha.6",
+    "recipe_id": "mocha",
+    "sequence": 6,
+    "operation": "AddIngredient",
+    "target_id": "chocolate",
+    "device_id": "",
+    "amount": 1
+  },
+  {
+    "id": "mocha.7",
+    "recipe_id": "mocha",
+    "sequence": 7,
+    "operation": "CocoaMinigame",
+    "target_id": "",
+    "device_id": "cocoa_pot",
+    "amount": 1
+  },
+  {
+    "id": "mocha.8",
+    "recipe_id": "mocha",
+    "sequence": 8,
+    "operation": "AddIngredient",
+    "target_id": "milk",
+    "device_id": "",
+    "amount": 1
+  },
+  {
+    "id": "mocha.9",
+    "recipe_id": "mocha",
+    "sequence": 9,
+    "operation": "Process",
+    "target_id": "",
+    "device_id": "milk_cup",
+    "amount": 1
+  },
+  {
+    "id": "mocha.10",
+    "recipe_id": "mocha",
+    "sequence": 10,
+    "operation": "Serve",
+    "target_id": "",
+    "device_id": "",
+    "amount": 1
+  }
+]

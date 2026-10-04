@@ -1,0 +1,47 @@
+[
+  {
+    "id": "moka_pot",
+    "name_key": "device.moka_pot",
+    "base_time": 5.0,
+    "upgraded_time": 2.5,
+    "upgrade_cost": 1,
+    "unlock_rep": 0,
+    "comment": "摩卡壶"
+  },
+  {
+    "id": "milk_cup",
+    "name_key": "device.milk_cup",
+    "base_time": 5.0,
+    "upgraded_time": 2.5,
+    "upgrade_cost": 1,
+    "unlock_rep": 0,
+    "comment": "牛奶杯/加热"
+  },
+  {
+    "id": "cocoa_pot",
+    "name_key": "device.cocoa_pot",
+    "base_time": 5.0,
+    "upgraded_time": 2.5,
+    "upgrade_cost": 1,
+    "unlock_rep": 20,
+    "comment": "可可壶"
+  },
+  {
+    "id": "grinder",
+    "name_key": "device.grinder",
+    "base_time": 1.5,
+    "upgraded_time": 0.7,
+    "upgrade_cost": 1,
+    "unlock_rep": 0,
+    "comment": "咖啡研磨器（每次点击）"
+  },
+  {
+    "id": "matcha_bowl",
+    "name_key": "device.matcha_bowl",
+    "base_time": 5.0,
+    "upgraded_time": 2.5,
+    "upgrade_cost": 1,
+    "unlock_rep": 20,
+    "comment": "抹茶研磨碗"
+  }
+]

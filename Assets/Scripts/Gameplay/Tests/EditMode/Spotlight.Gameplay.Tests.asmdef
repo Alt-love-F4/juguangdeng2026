@@ -1,0 +1,20 @@
+{
+  "name": "Spotlight.Gameplay.Tests",
+  "rootNamespace": "Spotlight.Gameplay.Tests",
+  "references": [
+    "Spotlight.Gameplay",
+    "Spotlight.Interaction"
+  ],
+  "includePlatforms": [
+    "Editor"
+  ],
+  "overrideReferences": true,
+  "precompiledReferences": [
+    "nunit.framework.dll"
+  ],
+  "autoReferenced": false,
+  "defineConstraints": [
+    "UNITY_INCLUDE_TESTS"
+  ],
+  "testAssemblies": true
+}

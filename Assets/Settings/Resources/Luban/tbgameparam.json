@@ -1,0 +1,82 @@
+[
+  {
+    "key": "base_customers",
+    "value": "12",
+    "comment": "基础客流上限"
+  },
+  {
+    "key": "customers_per_orders",
+    "value": "30",
+    "comment": "每完成30单增加1上限"
+  },
+  {
+    "key": "max_customers",
+    "value": "24",
+    "comment": "最大客流上限"
+  },
+  {
+    "key": "reputation_per_10orders",
+    "value": "10",
+    "comment": "10单基准声望"
+  },
+  {
+    "key": "skillpoint_per_10rep",
+    "value": "1",
+    "comment": "每10声望1技能点"
+  },
+  {
+    "key": "daily_duration_sec",
+    "value": "300",
+    "comment": "每日营业时长(秒)=5分钟"
+  },
+  {
+    "key": "wrong_ingredient_penalty",
+    "value": "5",
+    "comment": "加错原料扣金币"
+  },
+  {
+    "key": "cocoa_game_fail_penalty",
+    "value": "10",
+    "comment": "可可小游戏失败扣金币"
+  },
+  {
+    "key": "cocoa_game_max_mistakes",
+    "value": "2",
+    "comment": "可可小游戏最大容错次数"
+  },
+  {
+    "key": "latte_art_max_score",
+    "value": "100",
+    "comment": "拉花满分"
+  },
+  {
+    "key": "grinder_click_count",
+    "value": "3",
+    "comment": "研磨器点击次数"
+  },
+  {
+    "key": "milk_add_time",
+    "value": "5",
+    "comment": "加牛奶耗时秒"
+  },
+  {
+    "key": "moka_brew_time",
+    "value": "5",
+    "comment": "摩卡壶煮制秒"
+  },
+  {
+    "key": "matcha_grind_time",
+    "value": "5",
+    "comment": "抹茶研磨秒"
+  },
+  {
+    "key": "cocoa_minigame_time",
+    "value": "5",
+    "comment": "可可小游戏时长秒"
+  },
+  {
+    "key": "starting_gold",
+    "value": "80",
+    "comment": "初始周转资金；补货由玩家主动操作"
+  }
+]

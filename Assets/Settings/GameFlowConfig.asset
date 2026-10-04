@@ -13,7 +13,7 @@ MonoBehaviour:
   m_Name: GameFlowConfig
   m_EditorClassIdentifier: Spotlight.GameFlow.UI::Spotlight.GameFlow.GameFlowConfig
   MainMenuScene: SampleScene
-  GameplayScene: SampleScene
+  GameplayScene: CoffeeShop
   Font: {fileID: 0}
   MenuArtwork: {fileID: 0}
   MinimumLoadingSeconds: 1

@@ -1,0 +1,9 @@
+{
+    "name": "Spotlight.TextLocalization",
+    "rootNamespace": "",
+    "references": [
+        "Unity.TextMeshPro",
+        "Unity.ugui"
+    ],
+    "autoReferenced": true
+}

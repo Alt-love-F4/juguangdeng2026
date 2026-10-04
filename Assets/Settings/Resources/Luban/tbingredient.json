@@ -1,0 +1,50 @@
+[
+  {
+    "id": "coffee_bean",
+    "name_key": "ingredient.coffee_bean",
+    "max_stock": 5,
+    "refill_cost": 20,
+    "unlock_rep": 0,
+    "comment": "咖啡豆"
+  },
+  {
+    "id": "milk",
+    "name_key": "ingredient.milk",
+    "max_stock": 8,
+    "refill_cost": 15,
+    "unlock_rep": 0,
+    "comment": "牛奶"
+  },
+  {
+    "id": "matcha",
+    "name_key": "ingredient.matcha",
+    "max_stock": 8,
+    "refill_cost": 25,
+    "unlock_rep": 0,
+    "comment": "抹茶粉"
+  },
+  {
+    "id": "chocolate",
+    "name_key": "ingredient.chocolate",
+    "max_stock": 8,
+    "refill_cost": 25,
+    "unlock_rep": 0,
+    "comment": "可可粉"
+  },
+  {
+    "id": "honey",
+    "name_key": "ingredient.honey",
+    "max_stock": 10,
+    "refill_cost": 20,
+    "unlock_rep": 20,
+    "comment": "蜂蜜"
+  },
+  {
+    "id": "cream",
+    "name_key": "ingredient.cream",
+    "max_stock": 10,
+    "refill_cost": 20,
+    "unlock_rep": 40,
+    "comment": "奶油顶"
+  }
+]

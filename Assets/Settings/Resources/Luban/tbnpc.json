@@ -1,0 +1,26 @@
+[
+  {
+    "id": "student",
+    "name": "林同学",
+    "social_id": 1,
+    "unlock_rep": 0,
+    "sprite_path": "Assets/Art/Gameplay/customer_1.png",
+    "dialogue": "最近学校附近都在讨论那家新书店。先来一杯咖啡，提提神吧。"
+  },
+  {
+    "id": "worker",
+    "name": "周编辑",
+    "social_id": 2,
+    "unlock_rep": 0,
+    "sprite_path": "Assets/Art/Gameplay/customer_2.png",
+    "dialogue": "街区每天都有新消息。你的咖啡，是我上班前最期待的一件事。"
+  },
+  {
+    "id": "regular",
+    "name": "陈阿姨",
+    "social_id": 3,
+    "unlock_rep": 20,
+    "sprite_path": "Assets/Art/Gameplay/customer_3.png",
+    "dialogue": "老街最近热闹起来了。慢慢做，我不着急。"
+  }
+]
