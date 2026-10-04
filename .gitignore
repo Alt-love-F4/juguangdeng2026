@@ -8,6 +8,9 @@
 [Mm]emoryCaptures/
 UserSettings/
 
+# YokiFrame editor bridge runtime state
+.yokiframe/
+
 # IDE and generated solution files
 .vs/
 .idea/
