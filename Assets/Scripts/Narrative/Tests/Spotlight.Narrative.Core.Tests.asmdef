@@ -1,0 +1,9 @@
+{
+  "name": "Spotlight.Narrative.Core.Tests",
+  "references": ["Spotlight.Narrative", "Spotlight.Config"],
+  "overrideReferences": true,
+  "precompiledReferences": ["Newtonsoft.Json.dll"],
+  "includePlatforms": ["Editor"],
+  "optionalUnityReferences": ["TestAssemblies"],
+  "autoReferenced": false
+}

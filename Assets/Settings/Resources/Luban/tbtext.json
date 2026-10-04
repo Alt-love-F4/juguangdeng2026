@@ -1,5 +1,430 @@
 [
   {
+    "key": "npc.a.name",
+    "text": "艾德里安",
+    "comment": "A · 短工佣人，出身寒微"
+  },
+  {
+    "key": "npc.a.desc",
+    "text": "在王都打短工的年轻人，读过几本禁书。",
+    "comment": "A 角色描述"
+  },
+  {
+    "key": "npc.b.name",
+    "text": "塞西莉亚",
+    "comment": "B · 没落王选者家的小姐"
+  },
+  {
+    "key": "npc.b.desc",
+    "text": "家道中落的贵族小姐，不甘于被安排的婚事。",
+    "comment": "B 角色描述"
+  },
+  {
+    "key": "npc.c.name",
+    "text": "朱利安",
+    "comment": "C · 普通王选者家族的少爷"
+  },
+  {
+    "key": "npc.c.desc",
+    "text": "出身体面的年轻贵族，一心想娶塞西莉亚。",
+    "comment": "C 角色描述"
+  },
+  {
+    "key": "npc.d.name",
+    "text": "老伯爵瓦尔蒙",
+    "comment": "D · 塞西莉亚的父亲"
+  },
+  {
+    "key": "npc.d.desc",
+    "text": "固执的旧贵族，把家族的体面看得比女儿重要。",
+    "comment": "D 角色描述"
+  },
+  {
+    "key": "player.name",
+    "text": "你",
+    "comment": "玩家 · 咖啡馆的旁观者"
+  },
+  {
+    "key": "player.desc",
+    "text": "你坐在咖啡馆的角落，看着这一切发生。你可以插手，也可以只是看着。",
+    "comment": "玩家描述"
+  },
+  {
+    "key": "world.name",
+    "text": "奥尔狄亚王国",
+    "comment": "世界观"
+  },
+  {
+    "key": "world.desc",
+    "text": "一个王权将倾的王国。咖啡馆里，新旧思想正在交锋。",
+    "comment": "世界描述"
+  },
+  {
+    "key": "bar.a.thought.name",
+    "text": "进步思想",
+    "comment": "A 的思想觉悟"
+  },
+  {
+    "key": "bar.a.trust_b.name",
+    "text": "A对B的爱慕",
+    "comment": "A 对 B 的感情"
+  },
+  {
+    "key": "bar.a.respect_c.name",
+    "text": "A对C的敬服",
+    "comment": "A 对 C 的态度"
+  },
+  {
+    "key": "bar.b.trust_a.name",
+    "text": "B对A的爱慕",
+    "comment": "B 对 A 的感情"
+  },
+  {
+    "key": "bar.b.trust_c.name",
+    "text": "B对C的情谊",
+    "comment": "B 对 C 的感情"
+  },
+  {
+    "key": "bar.b.trust_d.name",
+    "text": "B对父亲的信任",
+    "comment": "B 对 D 的信任"
+  },
+  {
+    "key": "bar.b.rebel.name",
+    "text": "B的叛逆",
+    "comment": "B 的叛逆程度"
+  },
+  {
+    "key": "bar.c.wealth.name",
+    "text": "C的家产",
+    "comment": "C 的家产与地位"
+  },
+  {
+    "key": "bar.c.trust_b.name",
+    "text": "C对B的爱慕",
+    "comment": "C 对 B 的感情"
+  },
+  {
+    "key": "bar.stability.name",
+    "text": "王国稳定",
+    "comment": "王国的稳定程度"
+  },
+  {
+    "key": "bar.calendar.name",
+    "text": "日期",
+    "comment": "第几天"
+  },
+  {
+    "key": "ev.act.meet.title",
+    "text": "咖啡馆的私语",
+    "comment": ""
+  },
+  {
+    "key": "ev.act.meet.p1",
+    "text": "你替艾德里安和塞西莉亚在咖啡馆后座留了位置。",
+    "comment": ""
+  },
+  {
+    "key": "ev.act.meet.p2",
+    "text": "两人说了很久的话。离开时，塞西莉亚的脸上有一点笑意。",
+    "comment": ""
+  },
+  {
+    "key": "ev.act.cwithb.title",
+    "text": "让让他们独处",
+    "comment": ""
+  },
+  {
+    "key": "ev.act.cwithb.p1",
+    "text": "你替朱利安制造了一个和塞西莉亚独处的下午。",
+    "comment": ""
+  },
+  {
+    "key": "ev.act.cwithb.p2",
+    "text": "他讲了些得体的笑话，塞西莉亚礼貌地听着。",
+    "comment": ""
+  },
+  {
+    "key": "ev.act.salon.title",
+    "text": "改革派沙龙",
+    "comment": ""
+  },
+  {
+    "key": "ev.act.salon.p1",
+    "text": "你把艾德里安带进了改革派的沙龙。",
+    "comment": ""
+  },
+  {
+    "key": "ev.act.salon.p2",
+    "text": "他听得很认真，末了问了一句让全场安静下来的话。",
+    "comment": ""
+  },
+  {
+    "key": "ev.act.peer.title",
+    "text": "伯爵的关系",
+    "comment": ""
+  },
+  {
+    "key": "ev.act.peer.p1",
+    "text": "你替朱利安搭上了伯爵的门路。",
+    "comment": ""
+  },
+  {
+    "key": "ev.act.peer.p2",
+    "text": "一个月后，他谋到了一个体面的职位。",
+    "comment": ""
+  },
+  {
+    "key": "ev.talk.cafe.title",
+    "text": "咖啡馆的午后",
+    "comment": ""
+  },
+  {
+    "key": "ev.talk.cafe.p1",
+    "text": "塞西莉亚坐在窗边，用勺子搅着已经凉掉的咖啡。她说：「你说，人是不是只能过一种人生。」",
+    "comment": ""
+  },
+  {
+    "key": "choice.talk.cafe.a",
+    "text": "「你可以选别人没走过的那条。」",
+    "comment": ""
+  },
+  {
+    "key": "choice.talk.cafe.b",
+    "text": "「回去吧，别让你父亲担心。」",
+    "comment": ""
+  },
+  {
+    "key": "choice.talk.cafe.c",
+    "text": "「时代要变了，你我都看得见。」",
+    "comment": ""
+  },
+  {
+    "key": "ev.ab.swear.title",
+    "text": "私定终生",
+    "comment": ""
+  },
+  {
+    "key": "ev.ab.swear.p1",
+    "text": "塞西莉亚摘下颈上那枚旧坠子，塞进艾德里安手里。",
+    "comment": ""
+  },
+  {
+    "key": "ev.ab.swear.p2",
+    "text": "「等春天，我们就走。」",
+    "comment": ""
+  },
+  {
+    "key": "ev.ab.swear.p3",
+    "text": "咖啡馆的灯影在窗上晃了一下，谁也没有再说话。",
+    "comment": ""
+  },
+  {
+    "key": "ev.bc.swear.title",
+    "text": "门当户对",
+    "comment": ""
+  },
+  {
+    "key": "ev.bc.swear.p1",
+    "text": "朱利安跪在塞西莉亚面前，捧出家族的戒指。",
+    "comment": ""
+  },
+  {
+    "key": "ev.bc.swear.p2",
+    "text": "「我会给你一个体面的家。」",
+    "comment": ""
+  },
+  {
+    "key": "ev.bc.swear.p3",
+    "text": "塞西莉亚看了很久，最后点了点头。",
+    "comment": ""
+  },
+  {
+    "key": "ev.standoff.title",
+    "text": "三人的对峙",
+    "comment": ""
+  },
+  {
+    "key": "ev.standoff.p1",
+    "text": "咖啡馆打烊了，只剩下三个人和一盏灯。",
+    "comment": ""
+  },
+  {
+    "key": "ev.standoff.p2",
+    "text": "「你凭什么？」朱利安说。艾德里安没有回答。",
+    "comment": ""
+  },
+  {
+    "key": "ev.standoff.p3",
+    "text": "塞西莉亚站在中间，谁也没有看。",
+    "comment": ""
+  },
+  {
+    "key": "ev.comrade.title",
+    "text": "同志",
+    "comment": ""
+  },
+  {
+    "key": "ev.comrade.p1",
+    "text": "艾德里安把一本小册子推到朱利安面前。",
+    "comment": ""
+  },
+  {
+    "key": "ev.comrade.p2",
+    "text": "朱利安读了一夜。天亮时他说：「你说得对。」",
+    "comment": ""
+  },
+  {
+    "key": "ev.prison.title",
+    "text": "冤狱",
+    "comment": ""
+  },
+  {
+    "key": "ev.prison.p1",
+    "text": "塞西莉亚被指控窝藏禁书，押进了圣西尔万的黑牢。",
+    "comment": ""
+  },
+  {
+    "key": "ev.prison.p2",
+    "text": "老伯爵在门外站了很久，最终没有进去。",
+    "comment": ""
+  },
+  {
+    "key": "ev.rescue.title",
+    "text": "捞人",
+    "comment": ""
+  },
+  {
+    "key": "ev.rescue.p1",
+    "text": "你动用了积攒多年的关系。",
+    "comment": ""
+  },
+  {
+    "key": "ev.rescue.p2",
+    "text": "三天后，塞西莉亚从牢里走了出来，瘦了一圈。",
+    "comment": ""
+  },
+  {
+    "key": "ev.dq1.title",
+    "text": "第一次顶撞",
+    "comment": ""
+  },
+  {
+    "key": "ev.dq1.p1",
+    "text": "「我不嫁。」塞西莉亚说。",
+    "comment": ""
+  },
+  {
+    "key": "ev.dq1.p2",
+    "text": "老伯爵把茶杯顿在桌上，没有再说一个字。",
+    "comment": ""
+  },
+  {
+    "key": "ev.dq2.title",
+    "text": "第二次顶撞",
+    "comment": ""
+  },
+  {
+    "key": "ev.dq2.p1",
+    "text": "「你从来只想着你那个姓氏！」",
+    "comment": ""
+  },
+  {
+    "key": "ev.dq2.p2",
+    "text": "这一次，塞西莉亚摔门而出。",
+    "comment": ""
+  },
+  {
+    "key": "ev.dqn.title",
+    "text": "沉默的餐桌",
+    "comment": ""
+  },
+  {
+    "key": "ev.dqn.p1",
+    "text": "父女二人隔着一张长桌吃饭，全程没有人开口。",
+    "comment": ""
+  },
+  {
+    "key": "ev.elope.title",
+    "text": "私奔",
+    "comment": ""
+  },
+  {
+    "key": "ev.elope.p1",
+    "text": "没有婚礼，没有嫁妆。两个人趁着夜色出了城门。",
+    "comment": ""
+  },
+  {
+    "key": "ev.elope.p2",
+    "text": "塞西莉亚回头看了一眼，老伯爵的宅邸没有一盏灯是亮的。",
+    "comment": ""
+  },
+  {
+    "key": "ev.flee.title",
+    "text": "家族的出走",
+    "comment": ""
+  },
+  {
+    "key": "ev.flee.p1",
+    "text": "恐怖统治的前夜，瓦尔蒙一家收拾了细软，连夜离开了奥尔狄亚。",
+    "comment": ""
+  },
+  {
+    "key": "ev.flee.p2",
+    "text": "塞西莉亚什么也没带走，除了一把旧提琴。",
+    "comment": ""
+  },
+  {
+    "key": "ev.rev.title",
+    "text": "圣西尔万堡垒",
+    "comment": ""
+  },
+  {
+    "key": "ev.rev.p1",
+    "text": "起义的旗帜插上了圣西尔万堡垒的残垣。",
+    "comment": ""
+  },
+  {
+    "key": "ev.rev.p2",
+    "text": "艾德里安倒在城墙下，手里还攥着那枚旧坠子。",
+    "comment": ""
+  },
+  {
+    "key": "ev.rev.p3",
+    "text": "多年以后，人们把这一天写进了教科书。",
+    "comment": ""
+  },
+  {
+    "key": "ev.musician.title",
+    "text": "多年以后",
+    "comment": ""
+  },
+  {
+    "key": "ev.musician.p1",
+    "text": "多年以后，邻国的音乐厅里，一位女提琴手正在演奏一首无人听过的曲子。",
+    "comment": ""
+  },
+  {
+    "key": "ev.musician.p2",
+    "text": "有人问她这首曲子叫什么。她说：「《奥尔狄亚的春天》。」",
+    "comment": ""
+  },
+  {
+    "key": "ev.world.day3.title",
+    "text": "第三日的晨报",
+    "comment": "保留原示例"
+  },
+  {
+    "key": "ev.world.day3.p1",
+    "text": "街口传来报童的声音：商队今天抵达。",
+    "comment": "保留原示例"
+  },
+  {
+    "key": "ev.world.day3.p2",
+    "text": "咖啡馆里多了一些陌生面孔，老陈擦亮了门前的招牌。",
+    "comment": "保留原示例"
+  },
+  {
     "key": "mainmenu.title",
     "text": "银星劫",
     "comment": "主菜单标题"
@@ -7,6 +432,46 @@
   {
     "key": "mainmenu.subtitle",
     "text": "文本由 Luban Excel 注入",
-    "comment": "文本配表示例说明"
+    "comment": ""
+  },
+  {
+    "key": "npc.chen.name",
+    "text": "老陈",
+    "comment": "原示例"
+  },
+  {
+    "key": "npc.chen.desc",
+    "text": "守着咖啡馆的老陈。",
+    "comment": "原示例"
+  },
+  {
+    "key": "ev.chen.tea.title",
+    "text": "老陈递来一杯茶",
+    "comment": "原示例"
+  },
+  {
+    "key": "ev.chen.tea.p1",
+    "text": "“喝口茶吧。”",
+    "comment": "原示例"
+  },
+  {
+    "key": "ev.chen.tea.p2",
+    "text": "屋里的灯光暖了些。",
+    "comment": "原示例"
+  },
+  {
+    "key": "bar.trust.name",
+    "text": "信任",
+    "comment": "原示例"
+  },
+  {
+    "key": "bar.willpower.name",
+    "text": "意志",
+    "comment": "原示例"
+  },
+  {
+    "key": "choice.tea.accept",
+    "text": "接过茶杯",
+    "comment": "原示例"
   }
 ]

@@ -7,6 +7,7 @@ using UnityEngine.EventSystems;
 using UnityEngine.InputSystem;
 using UnityEngine.SceneManagement;
 using YokiFrame;
+using Spotlight.Narrative;
 
 namespace Spotlight.GameFlow
 {
@@ -27,6 +28,9 @@ namespace Spotlight.GameFlow
         private bool paused;
         private float playtime;
         private float previousTimeScale = 1f;
+        private NarrativeGameFlowIntegration narrativeIntegration;
+        private NarrativeSnapshot pendingNarrativeRestore;
+        private bool loadingSavedSession;
 
         public GameSettings CurrentSettings => settings.Current;
         public IReadOnlyList<ResolutionOption> ResolutionOptions => settings.ResolutionOptions;
@@ -56,6 +60,13 @@ namespace Spotlight.GameFlow
             settings.Apply();
             saves = new GameSaveService();
             tips = new LoadingTipSequence(config.LoadingTips);
+            narrativeIntegration = NarrativeGameFlowIntegration.Instance;
+            if (narrativeIntegration == null)
+            {
+                GameObject runtimeObject = new GameObject("NarrativeGameFlowRuntime");
+                narrativeIntegration = runtimeObject.AddComponent<NarrativeGameFlowIntegration>();
+            }
+            narrativeIntegration.EnsureRuntime();
             if (showMainMenuOnStart)
                 OpenMainMenu();
             else
@@ -69,6 +80,9 @@ namespace Spotlight.GameFlow
                 HandleEscape();
             if (gameplay && !paused)
                 playtime += Time.unscaledDeltaTime;
+            if (narrativeIntegration?.GameplayHUD != null)
+                narrativeIntegration.GameplayHUD.CanInteract = CanUseGameplayControls;
+            narrativeIntegration?.Runtime?.Presenter?.SetSuspended(!CanUseGameplayControls());
             if (loadingPanel != null && keyboard != null)
             {
                 if (keyboard.rightArrowKey.wasPressedThisFrame || keyboard.downArrowKey.wasPressedThisFrame)
@@ -80,6 +94,10 @@ namespace Spotlight.GameFlow
 
         public void StartGame()
         {
+            playtime = 0f;
+            pendingNarrativeRestore = null;
+            loadingSavedSession = false;
+            narrativeIntegration.ResetSession();
             gameplay = true;
             paused = false;
             LoadThen(OpenGameplayPlaceholder, config.GameplayScene);
@@ -87,7 +105,7 @@ namespace Spotlight.GameFlow
 
         public void OpenPause()
         {
-            if (!gameplay || paused) return;
+            if (!gameplay || paused || (narrativeIntegration?.Runtime?.BlocksGameplayInput ?? false)) return;
             paused = true;
             previousTimeScale = Time.timeScale;
             Time.timeScale = 0f;
@@ -140,7 +158,14 @@ namespace Spotlight.GameFlow
                     ShowResult("读取失败", error, () => { });
                     return;
                 }
+                if (!NarrativeSaveBridge.TryRead(data, out NarrativeSnapshot snapshot, out error))
+                {
+                    ShowResult("读取失败", error, () => { });
+                    return;
+                }
                 playtime = (float)data.ElapsedPlaytimeSeconds;
+                pendingNarrativeRestore = snapshot;
+                loadingSavedSession = true;
                 gameplay = true;
                 LoadThen(OpenGameplayPlaceholder, data.SceneName);
             }, "取消", () => { });
@@ -173,7 +198,12 @@ namespace Spotlight.GameFlow
 
         public void QuickSave()
         {
-            if (saves.TryQuickSave(CaptureSaveData(), out int slot, out string error))
+            if (!TryCaptureSaveData(out GameSaveData data, out string error))
+            {
+                ShowResult("保存失败", error, () => { });
+                return;
+            }
+            if (saves.TryQuickSave(data, out int slot, out error))
                 ShowResult("保存成功", "已保存到存档 " + slot, () => { });
             else if (error != null && error.Contains("occupied", StringComparison.OrdinalIgnoreCase))
                 OpenSaves(true);
@@ -192,7 +222,12 @@ namespace Spotlight.GameFlow
         {
             ShowConfirmation("退出游戏", "是否保存游戏并退出？", "保存并退出", () =>
             {
-                if (saves.TryQuickSave(CaptureSaveData(), out _, out string error))
+                if (!TryCaptureSaveData(out GameSaveData data, out string error))
+                {
+                    ShowResult("保存失败", error, () => { });
+                    return;
+                }
+                if (saves.TryQuickSave(data, out _, out error))
                     QuitGame();
                 else
                     ShowResult("保存失败", error ?? "无法保存游戏", () => { });
@@ -201,7 +236,12 @@ namespace Spotlight.GameFlow
 
         private void SaveAndReturnToTitle()
         {
-            if (saves.TryQuickSave(CaptureSaveData(), out _, out string error))
+            if (!TryCaptureSaveData(out GameSaveData data, out string error))
+            {
+                ShowResult("保存失败", error, () => { });
+                return;
+            }
+            if (saves.TryQuickSave(data, out _, out error))
                 LoadThen(OpenMainMenu, config.MainMenuScene);
             else
                 ShowResult("保存失败", error ?? "无法保存游戏", () => { });
@@ -230,8 +270,13 @@ namespace Spotlight.GameFlow
 #endif
         }
 
+        private bool CanUseGameplayControls()
+            => gameplay && !paused && !loadingTransitioning && UIKit.PeekPanel(MainStack) is GameplayPlaceholderPanel;
+
         private void HandleEscape()
         {
+            if (CanUseGameplayControls() && (narrativeIntegration?.Runtime?.BlocksGameplayInput ?? false))
+                return;
             if (loadingTransitioning)
                 return;
             Type topType = UIKit.PeekPanel(MainStack)?.GetType();
@@ -249,6 +294,8 @@ namespace Spotlight.GameFlow
 
         private void OpenMainMenu()
         {
+            narrativeIntegration?.SetGameplayVisible(false);
+            narrativeIntegration?.Runtime?.Presenter?.SetSuspended(true);
             Time.timeScale = 1f;
             paused = gameplay = false;
             UIKit.ClearStack(MainStack, true);
@@ -258,6 +305,15 @@ namespace Spotlight.GameFlow
 
         private void OpenGameplayPlaceholder()
         {
+            if (loadingSavedSession)
+            {
+                if (pendingNarrativeRestore != null) narrativeIntegration.Runtime.RestoreSnapshot(pendingNarrativeRestore);
+                else narrativeIntegration.ResetSession();
+                pendingNarrativeRestore = null;
+                loadingSavedSession = false;
+            }
+            narrativeIntegration?.SetGameplayVisible(true);
+            narrativeIntegration?.Runtime?.Presenter?.SetSuspended(false);
             Time.timeScale = 1f;
             previousTimeScale = 1f;
             paused = false;
@@ -299,6 +355,7 @@ namespace Spotlight.GameFlow
         {
             int version = ++loadingVersion;
             loadingTransitioning = true;
+            narrativeIntegration?.SetGameplayVisible(false);
             if (loadingRoutine != null)
                 StopCoroutine(loadingRoutine);
             if (loadingPanel != null)
@@ -312,6 +369,7 @@ namespace Spotlight.GameFlow
         private IEnumerator LoadRoutine(Action completed, string sceneName, int version)
         {
             float elapsed = 0f;
+            float displayedProgress = 0f;
             int buildIndex = FindBuildIndex(sceneName);
             AsyncOperation operation = null;
             if (buildIndex >= 0 && buildIndex != SceneManager.GetActiveScene().buildIndex)
@@ -326,11 +384,38 @@ namespace Spotlight.GameFlow
 
             while (elapsed < config.MinimumLoadingSeconds || operation != null && !operation.isDone)
             {
-                elapsed += Time.unscaledDeltaTime;
-                if (tips.Tick(Time.unscaledDeltaTime) && loadingPanel != null)
+                float deltaTime = Time.unscaledDeltaTime;
+                elapsed += deltaTime;
+                if (tips.Tick(deltaTime) && loadingPanel != null)
                     loadingPanel.SetTip(tips.CurrentTip);
-                if (operation != null && operation.progress >= 0.9f && elapsed >= config.MinimumLoadingSeconds)
-                    operation.allowSceneActivation = true;
+
+                float targetProgress;
+                if (operation != null)
+                {
+                    targetProgress = operation.isDone ? 1f : Mathf.Clamp01(operation.progress / 0.9f) * 0.9f;
+                    if (operation.progress >= 0.9f && elapsed >= config.MinimumLoadingSeconds
+                        && displayedProgress >= 0.9f)
+                        operation.allowSceneActivation = true;
+                }
+                else
+                {
+                    float progressDuration = Mathf.Max(config.MinimumLoadingSeconds, 3f);
+                    targetProgress = Mathf.Min(0.9f, elapsed / progressDuration);
+                    if (elapsed >= config.MinimumLoadingSeconds)
+                        targetProgress = 1f;
+                }
+
+                displayedProgress = Mathf.MoveTowards(displayedProgress, targetProgress, deltaTime * 0.8f);
+                if (loadingPanel != null)
+                    loadingPanel.SetProgress(displayedProgress);
+                yield return null;
+            }
+
+            while (displayedProgress < 1f)
+            {
+                displayedProgress = Mathf.MoveTowards(displayedProgress, 1f, Time.unscaledDeltaTime * 0.8f);
+                if (loadingPanel != null)
+                    loadingPanel.SetProgress(displayedProgress);
                 yield return null;
             }
 
@@ -353,7 +438,12 @@ namespace Spotlight.GameFlow
 
         private void SaveManual(int index)
         {
-            if (!saves.TrySaveManual(index, CaptureSaveData(), out string error))
+            if (!TryCaptureSaveData(out GameSaveData data, out string error))
+            {
+                ShowResult("保存失败", error, RefreshSavePanel);
+                return;
+            }
+            if (!saves.TrySaveManual(index, data, out error))
                 ShowResult("保存失败", error, RefreshSavePanel);
             else
                 ShowResult("保存成功", "存档 " + index + " 已保存", RefreshSavePanel);
@@ -368,13 +458,32 @@ namespace Spotlight.GameFlow
 
         private GameFlowPanelData Data(bool fromGameplay = false) => new GameFlowPanelData(this, fromGameplay);
 
-        private GameSaveData CaptureSaveData() => new GameSaveData
+        public bool TryCaptureSaveData(out GameSaveData data, out string error)
         {
-            SceneName = SceneManager.GetActiveScene().name,
-            ElapsedPlaytimeSeconds = playtime,
-            CheckpointId = "start",
-            State = gameplay ? "gameplay" : "menu"
-        };
+            data = new GameSaveData
+            {
+                SceneName = SceneManager.GetActiveScene().name,
+                ElapsedPlaytimeSeconds = playtime,
+                CheckpointId = "start",
+                State = gameplay ? "gameplay" : "menu"
+            };
+            NarrativeRuntime runtime = narrativeIntegration?.Runtime;
+            if (runtime == null || !runtime.IsReady)
+            {
+                data = null;
+                error = "NCS runtime is not ready; save was not written.";
+                return false;
+            }
+            if (NarrativeSaveBridge.TryCapture(data, runtime.CaptureSnapshot, out error)) return true;
+            data = null;
+            return false;
+        }
+
+        public bool TryAutoSave(out string error)
+        {
+            if (!TryCaptureSaveData(out GameSaveData data, out error)) return false;
+            return saves.TryAutoSave(data, out error);
+        }
 
         private static int FindBuildIndex(string scene)
         {

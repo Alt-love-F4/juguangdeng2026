@@ -1,0 +1,16 @@
+[
+  {
+    "eventId": "EV_TALK_CAFE",
+    "day": 3,
+    "timeSlot": "morning",
+    "repeatRule": "once",
+    "priority": 50
+  },
+  {
+    "eventId": "EV_REVOLUTION",
+    "day": 60,
+    "timeSlot": "morning",
+    "repeatRule": "once",
+    "priority": 60
+  }
+]

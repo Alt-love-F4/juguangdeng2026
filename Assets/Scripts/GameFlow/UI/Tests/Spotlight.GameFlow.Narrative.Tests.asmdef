@@ -1,0 +1,8 @@
+{
+    "name": "Spotlight.GameFlow.Narrative.Tests",
+    "rootNamespace": "Spotlight.GameFlow.Tests",
+    "references": ["Spotlight.GameFlow.UI", "Spotlight.GameFlow.Saving", "Spotlight.Narrative"],
+    "includePlatforms": ["Editor"],
+    "optionalUnityReferences": ["TestAssemblies"],
+    "autoReferenced": false
+}

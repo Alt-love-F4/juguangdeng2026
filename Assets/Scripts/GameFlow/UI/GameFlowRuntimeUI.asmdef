@@ -6,6 +6,8 @@
         "Spotlight.GameFlow.Saving",
         "Spotlight.GameFlow.Settings",
         "Spotlight.GameFlow.Loading",
+        "Spotlight.Narrative",
+        "Unity.Newtonsoft.Json",
         "Unity.TextMeshPro",
         "Unity.ugui",
         "Unity.InputSystem",

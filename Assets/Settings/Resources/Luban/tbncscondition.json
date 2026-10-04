@@ -1,0 +1,189 @@
+[
+  {
+    "conditionId": "C_AB_SWEAR_NBC",
+    "ownerType": "event",
+    "ownerId": "EV_AB_SWEAR",
+    "groupIndex": 1,
+    "condType": "EVENT_NOT_HAPPENED",
+    "target": "event:EV_BC_SWEAR",
+    "op": "",
+    "value": "true",
+    "notFlag": false
+  },
+  {
+    "conditionId": "C_BC_SWEAR_NAB",
+    "ownerType": "event",
+    "ownerId": "EV_BC_SWEAR",
+    "groupIndex": 1,
+    "condType": "EVENT_NOT_HAPPENED",
+    "target": "event:EV_AB_SWEAR",
+    "op": "",
+    "value": "true",
+    "notFlag": false
+  },
+  {
+    "conditionId": "C_PRISON_1",
+    "ownerType": "event",
+    "ownerId": "EV_PRISON",
+    "groupIndex": 1,
+    "condType": "BAR_GTE",
+    "target": "bar:npc_c.wealth",
+    "op": ">=",
+    "value": "8",
+    "notFlag": false
+  },
+  {
+    "conditionId": "C_PRISON_2",
+    "ownerType": "event",
+    "ownerId": "EV_PRISON",
+    "groupIndex": 1,
+    "condType": "BAR_LTE",
+    "target": "bar:npc_a.respect_c",
+    "op": "<=",
+    "value": "-1",
+    "notFlag": false
+  },
+  {
+    "conditionId": "C_PRISON_3",
+    "ownerType": "event",
+    "ownerId": "EV_PRISON",
+    "groupIndex": 1,
+    "condType": "BAR_LTE",
+    "target": "bar:npc_a.thought",
+    "op": "<=",
+    "value": "8",
+    "notFlag": false
+  },
+  {
+    "conditionId": "C_COMRADE_1",
+    "ownerType": "event",
+    "ownerId": "EV_COMRADE",
+    "groupIndex": 1,
+    "condType": "BAR_GTE",
+    "target": "bar:npc_a.thought",
+    "op": ">=",
+    "value": "9",
+    "notFlag": false
+  },
+  {
+    "conditionId": "C_ELOPE_1",
+    "ownerType": "event",
+    "ownerId": "EV_ELOPE",
+    "groupIndex": 1,
+    "condType": "EVENT_NOT_HAPPENED",
+    "target": "event:EV_BC_SWEAR",
+    "op": "",
+    "value": "true",
+    "notFlag": false
+  },
+  {
+    "conditionId": "C_ELOPE_2",
+    "ownerType": "event",
+    "ownerId": "EV_ELOPE",
+    "groupIndex": 1,
+    "condType": "BAR_GTE",
+    "target": "bar:npc_b.rebel",
+    "op": ">=",
+    "value": "5",
+    "notFlag": false
+  },
+  {
+    "conditionId": "C_ELOPE_3",
+    "ownerType": "event",
+    "ownerId": "EV_ELOPE",
+    "groupIndex": 1,
+    "condType": "BAR_LTE",
+    "target": "bar:npc_b.trust_d",
+    "op": "<=",
+    "value": "2",
+    "notFlag": false
+  },
+  {
+    "conditionId": "C_ELOPE_4",
+    "ownerType": "event",
+    "ownerId": "EV_ELOPE",
+    "groupIndex": 1,
+    "condType": "EVENT_HAPPENED",
+    "target": "event:EV_AB_SWEAR",
+    "op": "",
+    "value": "true",
+    "notFlag": false
+  },
+  {
+    "conditionId": "C_FLEE_1",
+    "ownerType": "event",
+    "ownerId": "EV_FLEE",
+    "groupIndex": 2,
+    "condType": "EVENT_NOT_HAPPENED",
+    "target": "event:EV_BC_SWEAR",
+    "op": "",
+    "value": "true",
+    "notFlag": false
+  },
+  {
+    "conditionId": "C_FLEE_2",
+    "ownerType": "event",
+    "ownerId": "EV_FLEE",
+    "groupIndex": 2,
+    "condType": "EVENT_NOT_HAPPENED",
+    "target": "event:EV_AB_SWEAR",
+    "op": "",
+    "value": "true",
+    "notFlag": false
+  },
+  {
+    "conditionId": "C_FLEE_3",
+    "ownerType": "event",
+    "ownerId": "EV_FLEE",
+    "groupIndex": 1,
+    "condType": "BAR_GTE",
+    "target": "bar:npc_b.trust_d",
+    "op": ">=",
+    "value": "5",
+    "notFlag": false
+  },
+  {
+    "conditionId": "C_RESCUE_1",
+    "ownerType": "event",
+    "ownerId": "EV_RESCUE",
+    "groupIndex": 1,
+    "condType": "FLAG_SET",
+    "target": "flag:player_influence",
+    "op": "",
+    "value": "true",
+    "notFlag": false
+  },
+  {
+    "conditionId": "C_MUSICIAN_1",
+    "ownerType": "event",
+    "ownerId": "EV_MUSICIAN",
+    "groupIndex": 1,
+    "condType": "EVENT_NOT_HAPPENED",
+    "target": "event:EV_AB_SWEAR",
+    "op": "",
+    "value": "true",
+    "notFlag": false
+  },
+  {
+    "conditionId": "C_MUSICIAN_2",
+    "ownerType": "event",
+    "ownerId": "EV_MUSICIAN",
+    "groupIndex": 1,
+    "condType": "EVENT_NOT_HAPPENED",
+    "target": "event:EV_BC_SWEAR",
+    "op": "",
+    "value": "true",
+    "notFlag": false
+  },
+  {
+    "conditionId": "C_CHOICE_1",
+    "ownerType": "choice",
+    "ownerId": "choice.talk.cafe.c",
+    "groupIndex": 1,
+    "condType": "FLAG_SET",
+    "target": "flag:a_educated",
+    "op": "",
+    "value": "true",
+    "notFlag": false
+  }
+]

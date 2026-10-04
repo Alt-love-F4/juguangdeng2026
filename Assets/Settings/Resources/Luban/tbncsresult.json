@@ -1,0 +1,425 @@
+[
+  {
+    "resultId": "R_ACT_MEET_1",
+    "eventId": "EV_ACT_MEET",
+    "seq": 1,
+    "resultType": "BAR_ADD",
+    "target": "bar:npc_a.trust_b",
+    "value": "+1",
+    "note": "A对B倾心"
+  },
+  {
+    "resultId": "R_ACT_MEET_2",
+    "eventId": "EV_ACT_MEET",
+    "seq": 2,
+    "resultType": "BAR_ADD",
+    "target": "bar:npc_b.trust_a",
+    "value": "+1",
+    "note": "B对A倾心"
+  },
+  {
+    "resultId": "R_ACT_MEET_3",
+    "eventId": "EV_ACT_MEET",
+    "seq": 3,
+    "resultType": "BAR_ADD",
+    "target": "bar:npc_b.trust_c",
+    "value": "-1",
+    "note": "疏远C"
+  },
+  {
+    "resultId": "R_ACT_MEET_4",
+    "eventId": "EV_ACT_MEET",
+    "seq": 4,
+    "resultType": "BAR_ADD",
+    "target": "bar:npc_a.respect_c",
+    "value": "-1",
+    "note": "与C生隙"
+  },
+  {
+    "resultId": "R_ACT_MEET_5",
+    "eventId": "EV_ACT_MEET",
+    "seq": 5,
+    "resultType": "BAR_ADD",
+    "target": "bar:npc_b.trust_d",
+    "value": "-1",
+    "note": "父亲不悦"
+  },
+  {
+    "resultId": "R_ACT_MEET_6",
+    "eventId": "EV_ACT_MEET",
+    "seq": 6,
+    "resultType": "SET_FLAG",
+    "target": "flag:met_in_secret",
+    "value": "true",
+    "note": "记录私会"
+  },
+  {
+    "resultId": "R_ACT_CWB_1",
+    "eventId": "EV_ACT_C_WITH_B",
+    "seq": 1,
+    "resultType": "BAR_ADD",
+    "target": "bar:npc_b.trust_c",
+    "value": "+1",
+    "note": "B对C亲近"
+  },
+  {
+    "resultId": "R_ACT_CWB_2",
+    "eventId": "EV_ACT_C_WITH_B",
+    "seq": 2,
+    "resultType": "BAR_ADD",
+    "target": "bar:npc_c.trust_b",
+    "value": "+1",
+    "note": "C对B更痴"
+  },
+  {
+    "resultId": "R_ACT_CWB_3",
+    "eventId": "EV_ACT_C_WITH_B",
+    "seq": 3,
+    "resultType": "BAR_ADD",
+    "target": "bar:npc_b.trust_d",
+    "value": "+1",
+    "note": "父亲欣慰"
+  },
+  {
+    "resultId": "R_ACT_CWB_4",
+    "eventId": "EV_ACT_C_WITH_B",
+    "seq": 4,
+    "resultType": "BAR_ADD",
+    "target": "bar:npc_a.trust_b",
+    "value": "-1",
+    "note": "冷落A"
+  },
+  {
+    "resultId": "R_ACT_CWB_5",
+    "eventId": "EV_ACT_C_WITH_B",
+    "seq": 5,
+    "resultType": "BAR_ADD",
+    "target": "bar:npc_a.respect_c",
+    "value": "-1",
+    "note": "A心有不甘"
+  },
+  {
+    "resultId": "R_ACT_SALON_1",
+    "eventId": "EV_ACT_SALON",
+    "seq": 1,
+    "resultType": "BAR_ADD",
+    "target": "bar:npc_a.thought",
+    "value": "+2",
+    "note": "学习进步思想"
+  },
+  {
+    "resultId": "R_ACT_SALON_2",
+    "eventId": "EV_ACT_SALON",
+    "seq": 2,
+    "resultType": "SET_FLAG",
+    "target": "flag:a_educated",
+    "value": "true",
+    "note": "A已开蒙"
+  },
+  {
+    "resultId": "R_ACT_PEER_1",
+    "eventId": "EV_ACT_C_PEER",
+    "seq": 1,
+    "resultType": "BAR_ADD",
+    "target": "bar:npc_c.wealth",
+    "value": "+2",
+    "note": "获得职位"
+  },
+  {
+    "resultId": "R_AB_SWEAR_1",
+    "eventId": "EV_AB_SWEAR",
+    "seq": 1,
+    "resultType": "SET_FLAG",
+    "target": "flag:ab_swear",
+    "value": "true",
+    "note": "A与B私定终生"
+  },
+  {
+    "resultId": "R_AB_SWEAR_2",
+    "eventId": "EV_AB_SWEAR",
+    "seq": 2,
+    "resultType": "BAR_SET",
+    "target": "bar:npc_b.trust_c",
+    "value": "0",
+    "note": "B与C情谊归零"
+  },
+  {
+    "resultId": "R_AB_SWEAR_3",
+    "eventId": "EV_AB_SWEAR",
+    "seq": 3,
+    "resultType": "BAR_ADD",
+    "target": "bar:npc_b.rebel",
+    "value": "+2",
+    "note": "违逆父命"
+  },
+  {
+    "resultId": "R_AB_SWEAR_4",
+    "eventId": "EV_AB_SWEAR",
+    "seq": 4,
+    "resultType": "BAR_HINT",
+    "target": "bar:npc_a.trust_b",
+    "value": "+0",
+    "note": "里程碑提示"
+  },
+  {
+    "resultId": "R_BC_SWEAR_1",
+    "eventId": "EV_BC_SWEAR",
+    "seq": 1,
+    "resultType": "SET_FLAG",
+    "target": "flag:bc_swear",
+    "value": "true",
+    "note": "B与C私定终生"
+  },
+  {
+    "resultId": "R_BC_SWEAR_2",
+    "eventId": "EV_BC_SWEAR",
+    "seq": 2,
+    "resultType": "BAR_SET",
+    "target": "bar:npc_a.trust_b",
+    "value": "0",
+    "note": "A的爱慕归零"
+  },
+  {
+    "resultId": "R_BC_SWEAR_3",
+    "eventId": "EV_BC_SWEAR",
+    "seq": 3,
+    "resultType": "BAR_ADD",
+    "target": "bar:npc_b.trust_d",
+    "value": "+1",
+    "note": "父亲认可"
+  },
+  {
+    "resultId": "R_BC_SWEAR_4",
+    "eventId": "EV_BC_SWEAR",
+    "seq": 4,
+    "resultType": "BAR_HINT",
+    "target": "bar:npc_b.trust_c",
+    "value": "+0",
+    "note": "里程碑提示"
+  },
+  {
+    "resultId": "R_STANDOFF_1",
+    "eventId": "EV_STANDOFF",
+    "seq": 1,
+    "resultType": "SET_FLAG",
+    "target": "flag:standoff_done",
+    "value": "true",
+    "note": "对峙已发生"
+  },
+  {
+    "resultId": "R_STANDOFF_2",
+    "eventId": "EV_STANDOFF",
+    "seq": 2,
+    "resultType": "BAR_ADD",
+    "target": "bar:npc_a.respect_c",
+    "value": "-1",
+    "note": "A与C对立"
+  },
+  {
+    "resultId": "R_COMRADE_1",
+    "eventId": "EV_COMRADE",
+    "seq": 1,
+    "resultType": "SET_FLAG",
+    "target": "flag:comrade",
+    "value": "true",
+    "note": "C被说服"
+  },
+  {
+    "resultId": "R_COMRADE_2",
+    "eventId": "EV_COMRADE",
+    "seq": 2,
+    "resultType": "BAR_ADD",
+    "target": "bar:npc_a.respect_c",
+    "value": "+2",
+    "note": "A敬服C"
+  },
+  {
+    "resultId": "R_PRISON_1",
+    "eventId": "EV_PRISON",
+    "seq": 1,
+    "resultType": "SET_FLAG",
+    "target": "flag:b_arrested",
+    "value": "true",
+    "note": "B入狱"
+  },
+  {
+    "resultId": "R_PRISON_2",
+    "eventId": "EV_PRISON",
+    "seq": 2,
+    "resultType": "BAR_ADD",
+    "target": "bar:npc_b.trust_d",
+    "value": "-1",
+    "note": "父亲袖手"
+  },
+  {
+    "resultId": "R_PRISON_3",
+    "eventId": "EV_PRISON",
+    "seq": 3,
+    "resultType": "BAR_ADD",
+    "target": "bar:npc_b.rebel",
+    "value": "+2",
+    "note": "叛逆激增"
+  },
+  {
+    "resultId": "R_RESCUE_1",
+    "eventId": "EV_RESCUE",
+    "seq": 1,
+    "resultType": "CLEAR_FLAG",
+    "target": "flag:b_arrested",
+    "value": "false",
+    "note": "B出狱"
+  },
+  {
+    "resultId": "R_RESCUE_2",
+    "eventId": "EV_RESCUE",
+    "seq": 2,
+    "resultType": "BAR_ADD",
+    "target": "bar:npc_b.trust_d",
+    "value": "+1",
+    "note": "父女缓和"
+  },
+  {
+    "resultId": "R_DQ1_1",
+    "eventId": "EV_D_QUARREL_1",
+    "seq": 1,
+    "resultType": "BAR_ADD",
+    "target": "bar:npc_b.rebel",
+    "value": "+1",
+    "note": "第一次争吵"
+  },
+  {
+    "resultId": "R_DQ1_2",
+    "eventId": "EV_D_QUARREL_1",
+    "seq": 2,
+    "resultType": "BAR_HINT",
+    "target": "bar:npc_b.rebel",
+    "value": "+1",
+    "note": "叛逆提示"
+  },
+  {
+    "resultId": "R_DQ2_1",
+    "eventId": "EV_D_QUARREL_2",
+    "seq": 1,
+    "resultType": "BAR_ADD",
+    "target": "bar:npc_b.rebel",
+    "value": "+2",
+    "note": "第二次争吵"
+  },
+  {
+    "resultId": "R_DQ2_2",
+    "eventId": "EV_D_QUARREL_2",
+    "seq": 2,
+    "resultType": "BAR_HINT",
+    "target": "bar:npc_b.rebel",
+    "value": "+2",
+    "note": "叛逆提示"
+  },
+  {
+    "resultId": "R_DQN_1",
+    "eventId": "EV_D_QUARREL_N",
+    "seq": 1,
+    "resultType": "BAR_ADD",
+    "target": "bar:npc_b.rebel",
+    "value": "+1",
+    "note": "持续摩擦"
+  },
+  {
+    "resultId": "R_ELOPE_1",
+    "eventId": "EV_ELOPE",
+    "seq": 1,
+    "resultType": "SET_FLAG",
+    "target": "flag:eloped",
+    "value": "true",
+    "note": "B与A私奔"
+  },
+  {
+    "resultId": "R_ELOPE_2",
+    "eventId": "EV_ELOPE",
+    "seq": 2,
+    "resultType": "BAR_ADD",
+    "target": "bar:npc_b.trust_d",
+    "value": "-2",
+    "note": "与父亲决裂"
+  },
+  {
+    "resultId": "R_FLEE_1",
+    "eventId": "EV_FLEE",
+    "seq": 1,
+    "resultType": "SET_FLAG",
+    "target": "flag:fled",
+    "value": "true",
+    "note": "家族出逃"
+  },
+  {
+    "resultId": "R_FLEE_2",
+    "eventId": "EV_FLEE",
+    "seq": 2,
+    "resultType": "BAR_ADD",
+    "target": "bar:world.stability",
+    "value": "-2",
+    "note": "动荡加剧"
+  },
+  {
+    "resultId": "R_REV_1",
+    "eventId": "EV_REVOLUTION",
+    "seq": 1,
+    "resultType": "SET_FLAG",
+    "target": "flag:revolution",
+    "value": "true",
+    "note": "投身革命"
+  },
+  {
+    "resultId": "R_REV_2",
+    "eventId": "EV_REVOLUTION",
+    "seq": 2,
+    "resultType": "BAR_ADD",
+    "target": "bar:world.stability",
+    "value": "-3",
+    "note": "王国动荡"
+  },
+  {
+    "resultId": "R_MUSICIAN_1",
+    "eventId": "EV_MUSICIAN",
+    "seq": 1,
+    "resultType": "SET_FLAG",
+    "target": "flag:musician_end",
+    "value": "true",
+    "note": "B成为音乐家"
+  },
+  {
+    "resultId": "R_TALK_CAFE_A",
+    "eventId": "choice.talk.cafe.a.result",
+    "seq": 1,
+    "resultType": "BAR_ADD",
+    "target": "bar:npc_b.trust_a",
+    "value": "+1",
+    "note": "安慰她"
+  },
+  {
+    "resultId": "R_TALK_CAFE_B",
+    "eventId": "choice.talk.cafe.b.result",
+    "seq": 1,
+    "resultType": "BAR_ADD",
+    "target": "bar:npc_b.trust_d",
+    "value": "+1",
+    "note": "劝她回家"
+  },
+  {
+    "resultId": "R_TALK_CAFE_C",
+    "eventId": "choice.talk.cafe.c.result",
+    "seq": 1,
+    "resultType": "BAR_ADD",
+    "target": "bar:npc_a.thought",
+    "value": "+1",
+    "note": "谈论时事"
+  },
+  {
+    "resultId": "R_CHEN_TEA_CHOICE",
+    "eventId": "choice.chen.tea.result",
+    "seq": 1,
+    "resultType": "SET_FLAG",
+    "target": "flag:accepted_tea",
+    "value": "true",
+    "note": "接受茶杯"
+  }
+]
