@@ -15,6 +15,8 @@ namespace Spotlight.Gameplay
     /// </summary>
     public sealed class CoffeeUIDebugOverlay : MonoBehaviour
     {
+        public GameObject debugPanel;
+        public Button debugToggleButton;
         public TMP_Text statusText;
         public TMP_Text logText;
         public Button startDayButton;
@@ -54,6 +56,7 @@ namespace Spotlight.Gameplay
 
         private void BindButtons(bool bind)
         {
+            Bind(debugToggleButton, TogglePanel, bind);
             Bind(startDayButton, StartDay, bind);
             Bind(talkButton, TalkCustomer, bind);
             Bind(selectCupButton, SelectCup, bind);
@@ -78,6 +81,11 @@ namespace Spotlight.Gameplay
             if (button == null) return;
             if (bind) button.onClick.AddListener(handler);
             else button.onClick.RemoveListener(handler);
+        }
+        private void TogglePanel()
+        {
+            if (debugPanel != null) debugPanel.SetActive(!debugPanel.activeSelf);
+            refreshRequested = true;
         }
         private void OnAutoRefreshChanged(bool _) => refreshRequested = true;
         private void OnRefreshRateChanged(float _) => refreshRequested = true;

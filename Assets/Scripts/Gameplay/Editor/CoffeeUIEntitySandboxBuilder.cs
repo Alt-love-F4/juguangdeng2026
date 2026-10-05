@@ -51,11 +51,11 @@ namespace Spotlight.Gameplay.EditorTools
             var canvas = canvasGo.GetComponent<Canvas>();
             canvas.renderMode = RenderMode.ScreenSpaceOverlay;
             canvas.overrideSorting = true;
-            canvas.sortingOrder = 500;
+            canvas.sortingOrder = 700;
             var scaler = canvasGo.GetComponent<CanvasScaler>();
             scaler.uiScaleMode = CanvasScaler.ScaleMode.ScaleWithScreenSize;
             scaler.referenceResolution = new Vector2(1920, 1080);
-            scaler.matchWidthOrHeight = .5f;
+            scaler.matchWidthOrHeight = 1f;
 
             var root = canvasGo.transform as RectTransform;
             root.anchorMin = Vector2.zero;
@@ -96,6 +96,13 @@ namespace Spotlight.Gameplay.EditorTools
             log.color = new Color(1f, .82f, .55f);
 
             var debug = canvasGo.GetComponent<CoffeeUIDebugOverlay>();
+            debug.debugPanel = panel.gameObject;
+            var toggle = CreateButton(root, "DebugToggleButton", "调试面板 / Debug", new Vector2(-18, -20));
+            var toggleRect = (RectTransform)toggle.transform;
+            toggleRect.anchorMin = toggleRect.anchorMax = Vector2.one; toggleRect.pivot = new Vector2(1, 1);
+            debug.debugToggleButton = toggle;
+            // 默认收起，避免诊断浮层抢走营业区右侧入口的射线。
+            panel.gameObject.SetActive(false);
             debug.statusText = status;
             debug.logText = log;
             debug.startDayButton = start;

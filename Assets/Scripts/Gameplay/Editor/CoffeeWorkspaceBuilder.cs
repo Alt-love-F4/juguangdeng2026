@@ -47,6 +47,17 @@ namespace Spotlight.Gameplay.EditorTools
             Directory.CreateDirectory(PrefabDir + "/Items"); Directory.CreateDirectory(PrefabDir + "/Entities"); Directory.CreateDirectory(PrefabDir + "/UI");
             var scene = SceneManager.GetActiveScene();
             if (scene.path != ScenePath) throw new InvalidOperationException("请先打开 CoffeeShop 场景");
+            var runtimeComponent = Object.FindObjectsByType<CoffeeWorldRuntime>(
+                FindObjectsInactive.Include, FindObjectsSortMode.None)
+                .FirstOrDefault(x => x.gameObject.scene == scene);
+            if (runtimeComponent != null)
+            {
+                var workspaceRoot = runtimeComponent.transform.parent != null &&
+                                    runtimeComponent.transform.parent.name == "InteractionRuntime"
+                    ? runtimeComponent.transform.parent.gameObject
+                    : runtimeComponent.gameObject;
+                Object.DestroyImmediate(workspaceRoot);
+            }
             var generated = scene.GetRootGameObjects().FirstOrDefault(g => g.name == "CoffeeWorkspace"); if (generated != null) Object.DestroyImmediate(generated);
             var generatedCanvas = scene.GetRootGameObjects().FirstOrDefault(g => g.name == "CafeHUD"); if (generatedCanvas != null) Object.DestroyImmediate(generatedCanvas);
             // Preserve the original art/layout as disabled migration reference; never rebuild user art files.
@@ -59,22 +70,31 @@ namespace Spotlight.Gameplay.EditorTools
             if (cam.GetComponent<Physics2DRaycaster>() == null) cam.gameObject.AddComponent<Physics2DRaycaster>();
             if (Object.FindFirstObjectByType<EventSystem>() == null) new GameObject("EventSystem", typeof(EventSystem), typeof(InputSystemUIInputModule));
             var workspace = new GameObject("CoffeeWorkspace"); var runtime = workspace.AddComponent<CoffeeWorldRuntime>();
+            var cafeEntities = new GameObject("CafeEntities"); cafeEntities.transform.SetParent(workspace.transform, false);
+            var counterEntities = new GameObject("ServingCounterEntities"); counterEntities.transform.SetParent(workspace.transform, false);
+            var sources = new GameObject("ItemSources"); sources.transform.SetParent(counterEntities.transform, false);
+            var stations = new GameObject("Stations"); stations.transform.SetParent(counterEntities.transform, false);
+            var placements = new GameObject("PlacementSlots"); placements.transform.SetParent(counterEntities.transform, false);
+            var carryables = new GameObject("CarryableItems"); carryables.transform.SetParent(counterEntities.transform, false);
             var prefabs = GameplayConfigService.AllEntities.Select(CreateEntityPrefab).ToArray();
             runtime.itemPrefabs = prefabs.Where(p => p is CarryableEntity).Cast<CarryableEntity>().ToArray();
             runtime.npcSprites = GameplayConfigService.AllNpcs.Select(n => SpriteFor(n.sprite_path)).ToArray();
             runtime.finishedCupSprite = SpriteFor("Assets/Art/Gameplay/cup_latte.png");
             foreach (var prefab in prefabs.Where(p => !(p is CarryableEntity)))
             {
-                var instance = (GameObject)PrefabUtility.InstantiatePrefab(prefab.gameObject, workspace.transform);
+                var prefabEntity = prefab.GetComponent<InteractiveEntity>();
+                var parent = prefabEntity is NpcEntity ? cafeEntities.transform : prefabEntity is ItemSourceEntity ? sources.transform : GameplayConfigService.GetEntity(prefabEntity.definitionId).role == "machine" ? stations.transform : placements.transform;
+                var instance = (GameObject)PrefabUtility.InstantiatePrefab(prefab.gameObject, parent);
                 var entity = instance.GetComponent<InteractiveEntity>();
                 var d = GameplayConfigService.GetEntity(entity.definitionId); entity.transform.position = new Vector3(d.x, d.y, 0);
             }
+            runtime.carryableRoot = carryables.transform;
             var workspaceAsset = PrefabUtility.SaveAsPrefabAsset(workspace, PrefabDir + "/CoffeeWorkspace.prefab");
             Object.DestroyImmediate(workspace); PrefabUtility.InstantiatePrefab(workspaceAsset, scene);
             var beanSelectionButtonPrefab = CreateBeanSelectionButtonPrefab();
             var hud = BuildHud(beanSelectionButtonPrefab); var hudAsset = PrefabUtility.SaveAsPrefabAsset(hud, PrefabDir + "/CafeHUD.prefab");
             Object.DestroyImmediate(hud); PrefabUtility.InstantiatePrefab(hudAsset, scene);
-            EditorSceneManager.MarkSceneDirty(scene); EditorSceneManager.SaveScene(scene); AssetDatabase.SaveAssets();
+            CoffeeLocationSceneBuilder.Build(scene);
             Debug.Log("[CafeBuild] 咖啡店已装配为数据驱动的实体预制体；原布局保留为禁用参考。");
         }
         private static Sprite SpriteFor(string path) => AssetDatabase.LoadAssetAtPath<Sprite>(path) ?? AssetDatabase.LoadAllAssetsAtPath(path).OfType<Sprite>().FirstOrDefault();
@@ -114,8 +134,8 @@ namespace Spotlight.Gameplay.EditorTools
         private static GameObject BuildHud(GameObject beanSelectionButtonPrefab)
         {
             var canvas = new GameObject("CafeHUD", typeof(RectTransform), typeof(Canvas), typeof(CanvasScaler), typeof(GraphicRaycaster));
-            var canvasComponent = canvas.GetComponent<Canvas>(); canvasComponent.renderMode = RenderMode.ScreenSpaceOverlay; canvasComponent.overrideSorting = true; canvasComponent.sortingOrder = 100;
-            var scaler = canvas.GetComponent<CanvasScaler>(); scaler.uiScaleMode = CanvasScaler.ScaleMode.ScaleWithScreenSize; scaler.referenceResolution = new Vector2(1920, 1080); scaler.matchWidthOrHeight = .5f;
+            var canvasComponent = canvas.GetComponent<Canvas>(); canvasComponent.renderMode = RenderMode.ScreenSpaceOverlay; canvasComponent.overrideSorting = true; canvasComponent.sortingOrder = 500;
+            var scaler = canvas.GetComponent<CanvasScaler>(); scaler.uiScaleMode = CanvasScaler.ScaleMode.ScaleWithScreenSize; scaler.referenceResolution = new Vector2(1920, 1080); scaler.matchWidthOrHeight = 1f;
             var root = Rect(canvas.transform, "CoffeeGameplayPanel", Vector2.zero, new Vector2(1920, 1080)); Stretch(root);
             root.gameObject.AddComponent<CanvasGroup>(); var panel = root.gameObject.AddComponent<CoffeeGameplayPanel>();
             Rect(root, "PanelV3", Vector2.zero, Vector2.zero);
@@ -164,7 +184,61 @@ namespace Spotlight.Gameplay.EditorTools
             panel.addChocoButton = Button(bottom, "AddChocoButton", "可可", new Vector2(-170, -53), new Vector2(140, 38));
             panel.addHoneyButton = Button(bottom, "AddHoneyButton", "蜂蜜", new Vector2(0, -53), new Vector2(140, 38));
             Text(bottom, "Note", "世界拖拽与辅助按钮使用同一套规则 · Esc 暂停", new Vector2(525, -53), new Vector2(710, 38), 18);
-            BuildMinigames(root, panel); return canvas;
+            BuildMinigames(root, panel); LayoutLocationHud(root, panel); return canvas;
+        }
+        private static void LayoutLocationHud(RectTransform root, CoffeeGameplayPanel panel)
+        {
+            var context = root.gameObject.AddComponent<CoffeeLocationHudUI>();
+            var top = (RectTransform)root.Find("TopBar");
+            top.anchorMin = new Vector2(0, 1); top.anchorMax = Vector2.one; top.pivot = new Vector2(.5f, 1);
+            top.offsetMin = new Vector2(0, -160); top.offsetMax = Vector2.zero;
+            top.GetComponent<Image>().color = Color.black;
+            Move(top.Find("GoldText"), top, new Vector2(-815, -30), new Vector2(210, 42), true);
+            Move(top.Find("RepText"), top, new Vector2(-590, -30), new Vector2(200, 42), true);
+            Move(top.Find("SkillText"), top, new Vector2(-380, -30), new Vector2(210, 42), true);
+            Move(top.Find("TimerText"), top, new Vector2(80, -30), new Vector2(640, 48), true);
+            Move(top.Find("PendingText"), top, new Vector2(510, -30), new Vector2(230, 42), true);
+            Move(panel.stepText.transform, top, new Vector2(-230, -95), new Vector2(1400, 45), true);
+            Move(panel.timerSlider.transform, top, new Vector2(-225, -139), new Vector2(550, 12), true);
+            context.ordersButton = Button(top, "OrdersToggle", "订单", new Vector2(735, -75), new Vector2(105, 42));
+            context.inventoryButton = Button(top, "InventoryToggle", "库存", new Vector2(855, -75), new Vector2(105, 42));
+            context.upgradesButton = Button(top, "UpgradesToggle", "设备升级", new Vector2(795, -126), new Vector2(220, 40));
+            // Button helper uses center anchors; switch the menu buttons to the bar's top edge.
+            foreach (var button in new[] { context.ordersButton, context.inventoryButton, context.upgradesButton })
+                ((RectTransform)button.transform).anchorMin = ((RectTransform)button.transform).anchorMax = new Vector2(.5f, 1);
+            context.ordersPanel = root.Find("OrderCard").gameObject;
+            context.inventoryPanel = panel.inventoryRows.gameObject; context.upgradesPanel = panel.deviceRows.gameObject;
+            Move(context.ordersPanel.transform, root, new Vector2(-800, 220), new Vector2(270, 370));
+            Move(context.inventoryPanel.transform, root, new Vector2(620, 255), new Vector2(500, 235));
+            Move(context.upgradesPanel.transform, root, new Vector2(620, 260), new Vector2(485, 207));
+            context.ordersPanel.SetActive(false); context.inventoryPanel.SetActive(false); context.upgradesPanel.SetActive(false);
+            var bottom = (RectTransform)root.Find("CommandBar");
+            bottom.anchorMin = bottom.anchorMax = Vector2.zero; bottom.pivot = Vector2.zero;
+            bottom.anchoredPosition = Vector2.zero; bottom.sizeDelta = new Vector2(1490, 160);
+            bottom.GetComponent<Image>().color = Color.black;
+            Move(panel.hintText.transform, bottom, new Vector2(-20, 52), new Vector2(1400, 30));
+            panel.hintText.fontSize = 18;
+            var firstRow = new[] { panel.startDayButton, panel.takeOrderButton, panel.selectCupButton, panel.grindButton, panel.serveButton, panel.discardButton, panel.clearItemsButton, panel.endDayButton, panel.pauseButton, panel.quickSaveButton };
+            for (int i = 0; i < firstRow.Length; i++)
+            {
+                Move(firstRow[i].transform, bottom, new Vector2(-670 + i * 145, 10), new Vector2(138, 40));
+                var label = firstRow[i].GetComponentInChildren<TMP_Text>(); if (label != null) label.fontSize = 16;
+            }
+            var shortcuts = new[] { panel.addCoffeeButton, panel.addMilkButton, panel.addMatchaButton, panel.addChocoButton, panel.addHoneyButton };
+            for (int i = 0; i < shortcuts.Length; i++) Move(shortcuts[i].transform, bottom, new Vector2(-520 + i * 145, -43), new Vector2(134, 35));
+            Move(bottom.Find("ShortcutLabel"), bottom, new Vector2(-670, -43), new Vector2(140, 35));
+            Move(bottom.Find("Note"), bottom, new Vector2(475, -43), new Vector2(475, 34));
+            bottom.Find("Note").GetComponent<TMP_Text>().text = "右侧进入出餐台 · Esc 暂停";
+            bottom.Find("Note").GetComponent<TMP_Text>().fontSize = 16;
+            context.businessControls = new[] { panel.startDayButton.gameObject, panel.takeOrderButton.gameObject, panel.discardButton.gameObject, panel.endDayButton.gameObject };
+            context.counterControls = new[] { panel.selectCupButton.gameObject, panel.grindButton.gameObject, panel.serveButton.gameObject, panel.clearItemsButton.gameObject, panel.addCoffeeButton.gameObject, panel.addMilkButton.gameObject, panel.addMatchaButton.gameObject, panel.addChocoButton.gameObject, panel.addHoneyButton.gameObject, bottom.Find("ShortcutLabel").gameObject };
+        }
+        private static void Move(Transform target, Transform parent, Vector2 position, Vector2 size, bool top = false)
+        {
+            // Only used on the temporary HUD before it is saved as a prefab.
+            target.SetParent(parent, false); var rect = (RectTransform)target;
+            rect.anchorMin = rect.anchorMax = new Vector2(.5f, top ? 1 : .5f);
+            rect.pivot = new Vector2(.5f, .5f); rect.anchoredPosition = position; rect.sizeDelta = size;
         }
         private static void BuildMinigames(RectTransform root, CoffeeGameplayPanel panel)
         {

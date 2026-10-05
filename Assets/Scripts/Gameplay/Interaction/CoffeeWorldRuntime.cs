@@ -13,9 +13,17 @@ namespace Spotlight.Gameplay
         public CarryableEntity[] itemPrefabs;
         public Sprite[] npcSprites;
         public Sprite finishedCupSprite;
+        [Tooltip("动态生成的杯子与原料统一放在出餐台的可移动物体根节点。未绑定时回退到本对象。")]
+        public Transform carryableRoot;
         public string Hint { get; private set; } = "开始营业后点击顾客接单；从杯子堆拖出杯子到工作台。";
         protected override IInteractionRules Rules => this;
         private CoffeeGameplayController ctrl;
+        public CoffeeLocationController locationController;
+        private bool CanUseCounter()
+        {
+            if (locationController == null || locationController.CurrentLocation == CoffeeLocationId.FirstFloorServingCounter) return true;
+            ShowHint("请先进入一楼右侧的出餐台"); return false;
+        }
         private const string SaveId = "world.placements";
         public override bool InputBlocked => base.InputBlocked || CoffeeGameplayPanel.IsMinigameOpen;
         public ItemState ActiveCup => ctrl?.CurrentOrder == null ? null : Ledger.Items.FirstOrDefault(i => i.bindingId == ctrl.CurrentOrder.OrderId.ToString() && Ledger.Definition(i.definitionId).HasTag("cup"));
@@ -52,7 +60,7 @@ namespace Spotlight.Gameplay
         {
             var prefab = itemPrefabs.FirstOrDefault(p => p != null && p.definitionId == item.definitionId);
             if (prefab == null) { ShowHint("缺少物品预制体：" + item.definitionId); return null; }
-            var view = Instantiate(prefab, transform); view.name = string.IsNullOrEmpty(item.instanceId) ? "DragPreview" : item.instanceId;
+            var view = Instantiate(prefab, carryableRoot != null ? carryableRoot : transform); view.name = string.IsNullOrEmpty(item.instanceId) ? "DragPreview" : item.instanceId;
             view.Bind(item); view.Initialize(Ledger.Definition(item.definitionId), this); view.Renderer.sortingOrder = 8; return view;
         }
         public InteractionResult CanTake(InteractiveEntity source) => CanTake(source.Definition, source.Item);
@@ -172,6 +180,7 @@ namespace Spotlight.Gameplay
         }
         public void SelectCupFromButton()
         {
+            if (!CanUseCounter() || InputBlocked) return;
             var size = ctrl.CurrentOrder?.Recipe?.cup_size; if (size == null) { ShowHint("请先接单"); return; }
             var existing = Ledger.Items.FirstOrDefault(i => Ledger.Definition(i.definitionId).HasTag("cup") && Ledger.Definition(i.definitionId).behavior_id == size && i.contents.Count == 0 && string.IsNullOrEmpty(i.bindingId));
             if (existing != null) { Apply(existing, entityForLocation(existing.locationId), false); return; }
@@ -180,6 +189,7 @@ namespace Spotlight.Gameplay
         }
         public void AddFromButton(string id)
         {
+            if (!CanUseCounter() || InputBlocked) return;
             if (ActiveCup == null || !views.TryGetValue(ActiveCup.instanceId, out var cup)) { ShowHint("请先取出并放置当前订单的杯子"); return; }
             var source = GetComponentsInChildren<ItemSourceEntity>().FirstOrDefault(e => Ledger.Definition(e.Definition.item_id).behavior_id == id && Ledger.Definition(e.Definition.item_id).HasTag("ingredient"));
             if (source == null) return;
@@ -189,24 +199,28 @@ namespace Spotlight.Gameplay
         public void UseCurrentDeviceFromButton() { var id = ctrl.Session?.CurrentStep?.DeviceId; if (id != null) UseDeviceFromButton(id); }
         public void UseDeviceFromButton(string id)
         {
+            if (!CanUseCounter() || InputBlocked) return;
             if (ActiveCup == null) { ShowHint("没有当前订单杯子"); return; }
             var target = GetComponentsInChildren<PlacementEntity>().FirstOrDefault(e => e.Definition.role == "machine" && e.Definition.behavior_id == id);
             if (target != null) Apply(ActiveCup, target, false);
         }
         public void ServeFromButton()
         {
+            if (!CanUseCounter() || InputBlocked) return;
             if (ActiveCup == null) { ShowHint("没有可上餐的饮品"); return; }
             var target = GetComponentsInChildren<PlacementEntity>().FirstOrDefault(e => e.Definition.behavior_id == "serve");
             if (target != null) Apply(ActiveCup, target, false);
         }
         public void PerformCurrentStep()
         {
+            if (!CanUseCounter() || InputBlocked) return;
             if (ctrl.Session?.CurrentStep?.Kind is RecipeStepKind.BeanSelection or RecipeStepKind.LatteArt) FindFirstObjectByType<CoffeeGameplayPanel>()?.OpenStepMinigame();
             else if (ctrl.Session?.CurrentStep?.Kind == RecipeStepKind.Serve) ServeFromButton();
             else UseCurrentDeviceFromButton();
         }
         public void ClearLooseItems()
         {
+            if (!CanUseCounter() || InputBlocked) return;
             CancelDrag();
             foreach (var item in Ledger.Items.ToArray())
             {

@@ -20,6 +20,7 @@ namespace Spotlight.Gameplay.Tests
             yield return null; yield return null;
             var ctrl = CoffeeGameplayController.Instance; var world = Object.FindFirstObjectByType<CoffeeWorldRuntime>(); var panel = Object.FindFirstObjectByType<CoffeeGameplayPanel>();
             Assert.That(world, Is.Not.Null); Assert.That(panel.beanSelectionPanel, Is.Not.Null); Assert.That(panel.latteArtPanel, Is.Not.Null); Assert.That(panel.cocoaQTEPanel, Is.Not.Null);
+            Object.FindFirstObjectByType<CoffeeLocationController>().Enter(CoffeeLocationId.FirstFloorServingCounter);
             ctrl.Profile.Reputation = 40; ctrl.StartDay();
             // A source stays fixed and canceled pickup changes neither stock nor committed placements.
             var source = world.GetComponentsInChildren<ItemSourceEntity>().First(e => e.definitionId == "source.coffee_bean");
