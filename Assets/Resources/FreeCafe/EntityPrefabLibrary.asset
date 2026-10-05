@@ -1,0 +1,71 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 35b62bc6f7156d24a9222bfd21e0cd5f, type: 3}
+  m_Name: EntityPrefabLibrary
+  m_EditorClassIdentifier: Spotlight.FreeCafe.Unity::Spotlight.FreeCafe.FreeCafeEntityPrefabLibrary
+  entries:
+  - specId: cup.small
+    prefab: {fileID: 2682706586563431562, guid: a2ac3e2d4eb4eda4b8b8178b745f243a, type: 3}
+  - specId: cup.large
+    prefab: {fileID: 6565322091112726965, guid: b50824651adfbad4ca90ab83be90d197, type: 3}
+  - specId: beans
+    prefab: {fileID: 1118843499487462069, guid: 2bebbc40d51c01f47837db8282c3555a, type: 3}
+  - specId: grounds
+    prefab: {fileID: 4426863409936568722, guid: e95bce2bfc5627b4ab9bbf0466e1e1c3, type: 3}
+  - specId: coffee
+    prefab: {fileID: 4627094430453797958, guid: 7ec6394f0732aa84b8447a39acfeb28e, type: 3}
+  - specId: milk
+    prefab: {fileID: 7597229014769477674, guid: c715ac020af298b4eb92a630a35ba958, type: 3}
+  - specId: hotmilk
+    prefab: {fileID: 2322658024527779180, guid: 6d9332241aa70f641b71ff7f51600d14, type: 3}
+  - specId: matcha.powder
+    prefab: {fileID: 3918094523296106947, guid: d4b0addbc837b5d4e9ce40345f77b246, type: 3}
+  - specId: matcha.drink
+    prefab: {fileID: 5196702927919497820, guid: eeb27024fda3db2499966ee43223b746, type: 3}
+  - specId: cocoa.powder
+    prefab: {fileID: 8522865664481793094, guid: 6165da495162e3b4ea185cd07a30fead, type: 3}
+  - specId: cocoa.drink
+    prefab: {fileID: 1654161658571379018, guid: 684cba8eea4338d47b3f4199904ddc80, type: 3}
+  - specId: honey
+    prefab: {fileID: 1634072258374127555, guid: 537ebfa8a14c8be478a5bf76c25dc5e0, type: 3}
+  - specId: cream
+    prefab: {fileID: 5821321212857635709, guid: 24500e554b83c1147a16093036741e81, type: 3}
+  - specId: source.cups.small
+    prefab: {fileID: 2648426237884271453, guid: bd45b88139171a049900bc7933708f02, type: 3}
+  - specId: source.cups.large
+    prefab: {fileID: 1968333095752825430, guid: d1776553553a21e428273bfe4d3ff5b0, type: 3}
+  - specId: source.beans
+    prefab: {fileID: 3227741897281811637, guid: f611258fdc1a0c54ab8aa6858ac5a25f, type: 3}
+  - specId: source.milk
+    prefab: {fileID: 4429255547901887098, guid: ab1aa2638fce848488b5c5ac9b88c9aa, type: 3}
+  - specId: source.matcha
+    prefab: {fileID: 5937196261006192290, guid: a94b88dd7d95ce74e88cd9dd07be532c, type: 3}
+  - specId: source.cocoa
+    prefab: {fileID: 5898182740505635847, guid: f9a6b74af92949b4da4768a3c7f74ead, type: 3}
+  - specId: source.cream
+    prefab: {fileID: 4460120797200826770, guid: ef4b287874219d44f9ff08df1edff268, type: 3}
+  - specId: source.honey
+    prefab: {fileID: 7102349185315103382, guid: a53d61605cdc1f044badd5c61276abdc, type: 3}
+  - specId: machine.grinder
+    prefab: {fileID: 2569011987121936156, guid: 0bc2283710eb277438667aa4e5905c10, type: 3}
+  - specId: machine.brewer
+    prefab: {fileID: 2674263020061534411, guid: 50dc4201fea351c44b676d74ecc9c0a8, type: 3}
+  - specId: machine.heater
+    prefab: {fileID: 7861327396805801002, guid: 1f1ee30dd8829e546ad6915525bc34c0, type: 3}
+  - specId: machine.mixer
+    prefab: {fileID: 4092521632305140622, guid: 1b074098536fad841a55ca4e4e097625, type: 3}
+  - specId: customer
+    prefab: {fileID: 4153310833950330234, guid: 4f14aaa3bad33474483314f54db1be15, type: 3}
+  - specId: delivery
+    prefab: {fileID: 6340538246285857094, guid: 90554fea77660bc448e22bc4d3bd3e41, type: 3}
+  - specId: trash
+    prefab: {fileID: 3767004638102603034, guid: 0512ad7da673f864ab19c148837685c7, type: 3}

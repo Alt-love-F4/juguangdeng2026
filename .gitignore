@@ -10,6 +10,7 @@ UserSettings/
 
 # YokiFrame editor bridge runtime state
 .yokiframe/
+策划文件/
 
 # IDE and generated solution files
 .vs/
@@ -33,3 +34,16 @@ sysinfo.txt
 # OS files
 .DS_Store
 Thumbs.db
+
+# Unity MCP / CLI bridge runtime state
+.unity/
+
+# Python cache
+__pycache__/
+__pycache__.meta
+*.pyc
+*.pyc.meta
+
+# Root scratch temp files
+Temp_*.mjs
+Temp_runconsole.json

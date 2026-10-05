@@ -1,0 +1,154 @@
+# FreeCafe：自由空间经营架构
+
+## 目标
+
+FreeCafe 是当前项目的新主架构。它不再把咖啡制作建模为“订单步骤 -> 指定按钮 -> 工作台槽位”，而是把整个咖啡店视为一个由实体、能力、空间和数据规则组成的可持续世界：
+
+```text
+玩家输入
+  -> 空间中的实体交互
+  -> 能力与配表规则校验
+  -> 实体状态/内容变化
+  -> 订单在交付时评价结果
+```
+
+当前正式场景是 `Assets/Scenes/CoffeeShop.unity`，测试场景是 `Assets/Scenes/CoffeeUIEntitySandbox.unity`。
+
+## 分层
+
+### 1. Domain：纯 C# 世界状态
+
+`Assets/Scripts/FreeCafe/Domain/`
+
+- `CafeWorld`：唯一的运行时领域状态源。
+- `CafeTypes`：实体、能力、设备任务、订单、快照和配表结构。
+- 不依赖 `GameObject`、Unity 输入、UI 或预制体，因此可以在 EditMode 测试、存档恢复和未来服务器模拟中复用。
+
+领域层只做规则，不负责表现：
+
+- 实体唯一 ID 和空间坐标。
+- 物品跨区域移动。
+- 容器内容物。
+- 设备独立任务和并行加工。
+- 取出、移动、组合、加工、交付、丢弃、补货。
+- 存档验证和 ID 分配。
+
+### 2. Unity：表现与输入适配
+
+`Assets/Scripts/FreeCafe/Unity/`
+
+- `FreeCafeRuntime`：把领域状态驱动到场景，并接收拖拽、点击、暂停、存档等输入。
+- `FreeEntityView`：一个实体预制体的通用视图。实体状态变化时更新同一个视图，不通过销毁/重建来表达普通状态变化。
+- `FreeCafeHud`：黑边 UI、订单摘要、营业、补货、暂停、存档和楼层切换。
+- `FreeCafePortal`：一楼营业区、出餐台、顶楼、地下室之间的入口。
+- `FreeCafeViewport`：镜头和 UI 安全区。
+
+### 3. Data：配表驱动
+
+`Assets/Resources/FreeCafe/catalog.json` 是玩法配表；`art-briefs.json` 是美术合同。
+
+实体通过 `EntitySpec` 描述：
+
+- `id` / `label` / `artId`
+- `capabilities`
+- `capacity` / `initialStock` / `refillCost`
+- `width` / `height`
+- 来源物品 `sourceItemId`
+
+加工通过 `OperationSpec` 描述：
+
+- 设备、输入、输出、耗时。
+
+商品通过 `ProductSpec` 描述：
+
+- 杯型、配料、价格。
+
+因此新增一种材料、机器或商品时，优先新增配表和白模资产合同，而不是在控制器中增加 `if/else`。
+
+## 实体和状态
+
+### 实体不是状态机节点的替身
+
+杯子、咖啡豆、设备、顾客都保留自己的实体 ID。普通变化直接修改实体：
+
+- 杯子加入牛奶：`contents` 增加一份 `Portion`。
+- 咖啡豆研磨完成：同一个实体的 `specId` 从 `beans` 变为 `grounds`。
+- 设备运行：设备的 `task.phase` 变为 `Running`。
+- 设备完成：`task.phase` 变为 `Ready`，玩家取走后回到空闲。
+
+只有“真正生成了新的对象”时才生成新 ID，例如从来源堆取出一份咖啡豆。这样可以稳定处理拖拽、存档、引用和未来网络同步。
+
+### 能力组合
+
+`Capability` 是可组合的标签，不用深层继承树表达玩法：
+
+- `Movable`：可以拖动。
+- `Source`：可以取出物品。
+- `Portion`：可以作为材料加入容器/设备。
+- `Container`：可以接收材料。
+- `Processor`：拥有独立加工任务。
+- `Customer`：可以承接订单。
+- `Delivery`：交付区域。
+- `Discard`：废弃。
+
+例如杯子是 `Movable + Container`，一份咖啡豆是 `Movable + Portion`，研磨器是 `Processor`。以后加入报纸、热点词条和印刷机时，复用相同的实体/能力/交互管线即可，不需要为每类物体重新写一套拖拽框架。
+
+## 交互语义
+
+- 普通拖拽：落到容器、设备、顾客或交付区时尝试执行组合。
+- `Shift` 拖拽：只摆放，不执行组合。
+- 拖拽到黑边 UI、越界或容量不足：拒绝，原物品和库存不改变。
+- 加工中的输入不能移动；点击设备可在确认后中止，输入保留。
+- 订单不锁定制作顺序；玩家可以先做库存、并行做多个杯子，然后在交付时评价最终内容。
+- 跨区域携带是显式选项。关闭时切换区域不改变世界状态；开启时选中的物品跟随玩家移动到新区域。
+
+空间仍然有意义：实体必须在同一区域才能直接组合，物理上不允许隔着楼层把杯子放进顾客手中。玩家应先把物品拖到顾客所在区域，或者使用一楼出餐区的交付实体。
+
+## 后续拓展
+
+### NPC 与热点词条
+
+NPC 仍然是 `WorldEntity`，但可以在配表中增加：
+
+- 对话节点/事件 ID。
+- 关键词奖励。
+- 关系、记忆和当天可用信息。
+
+白天交流只改变玩家的知识/词条库存，不直接强制改变咖啡制作流程。
+
+### 地下室印刷
+
+建议继续复用实体能力：
+
+- 热点词条：`Movable + Portion + Topic`（未来可扩展能力标志）。
+- 报纸版面：`Container + DocumentSurface`。
+- 印刷机：`Processor`。
+- 印刷成品：新的可交付实体。
+
+拖动词条到报纸版面时由领域规则校验版面容量、栏目位置和组合结果；印刷机用独立 `ProcessingTask`。不需要为报纸再创建“工作台槽位系统”。
+
+### 更自由的空间玩法
+
+后续可以增加：
+
+- 碰撞/遮挡/可达区域规则，但应作为独立 `PlacementPolicy`，不要把槽位重新写回实体核心。
+- 物品堆叠、数量拆分、合并和批量拖动。
+- 多人或 NPC 自动搬运：调用和玩家相同的 `Move` / `Interact` 命令。
+- 事件记录和回放：记录领域命令，而不是记录 GameObject 状态。
+
+## 美术资产合同
+
+所有白模和提示词由 `ArtRequirementTag` 与 `CafeArtLibrary` 关联。规范文件：
+
+- `Docs/FreeCafe/ArtGenerationBriefs.md`
+- `Assets/Resources/FreeCafe/art-briefs.json`
+- `Assets/Resources/FreeCafe/ArtLibrary.asset`
+- `Assets/Art/FreeCafe/Whitebox/`
+
+生成正式美术时保持同一 asset ID、画布尺寸、pivot 和主体轮廓，只替换 `ArtLibrary` 的 `variants`。顶楼、地下室已经预留未来词条、报纸和印刷机白模，不要先把未来系统硬编码进咖啡制作。
+
+## 旧框架策略
+
+`Assets/Scripts/Interaction/`、`Assets/Scripts/Gameplay/` 中的旧咖啡工作流保留作为迁移参考，但不再参与 FreeCafe 主场景。旧的自动场景装配和面板注册已经被禁用，避免它们在编译/加载时重新生成 `CoffeeWorldRoot`、旧工作台或 `CoffeeGameplayPanel`。
+
+新功能应只依赖 `Spotlight.FreeCafe.Domain` 和 `Spotlight.FreeCafe.Unity`。不要向旧 `CoffeeGameplayController` 添加新的咖啡逻辑。

@@ -13,6 +13,8 @@ namespace Spotlight.Gameplay
         public static CoffeeGameplayController Instance { get; private set; }
         public static CoffeeGameplayController EnsureExists()
         {
+            var scene = UnityEngine.SceneManagement.SceneManager.GetActiveScene();
+            if (scene.name == "CoffeeShop" || scene.name == "CoffeeUIEntitySandbox") return null;
             if (Instance == null) new GameObject(nameof(CoffeeGameplayController)).AddComponent<CoffeeGameplayController>();
             return Instance;
         }

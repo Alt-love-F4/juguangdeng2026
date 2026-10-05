@@ -12,20 +12,11 @@ namespace Spotlight.Gameplay
         [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.AfterAssembliesLoaded)]
         private static void Register()
         {
-            // 场景内已放置未激活的 CoffeeGameplayPanel，运行时直接激活，不走 UIKit 动态加载
-            GameplayPanelHooks.OpenPanel = flow =>
-            {
-                CoffeeGameplayController.EnsureExists();
-                var panel = Object.FindFirstObjectByType<CoffeeGameplayPanel>(FindObjectsInactive.Include);
-                if (panel != null)
-                {
-                    panel.gameObject.SetActive(true);
-                    panel.OpenFromFlow(flow);
-                }
-                return panel;
-            };
-            GameplayPanelHooks.PanelType = typeof(CoffeeGameplayPanel);
-            GameplayPanelHooks.IsScenePanel = true;
+            // The legacy gameplay panel is intentionally not registered. CoffeeShop and
+            // CoffeeUIEntitySandbox are owned exclusively by the FreeCafe runtime now.
+            GameplayPanelHooks.OpenPanel = null;
+            GameplayPanelHooks.PanelType = null;
+            GameplayPanelHooks.IsScenePanel = false;
         }
     }
 }

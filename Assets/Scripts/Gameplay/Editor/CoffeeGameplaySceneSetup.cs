@@ -28,7 +28,8 @@ namespace Spotlight.Gameplay.EditorTools
 
         private static void EnsureScene()
         {
-            if (EditorApplication.isPlayingOrWillChangePlaymode) return;
+                        if(File.Exists("Assets/Resources/FreeCafe/catalog.json")) return;
+if (EditorApplication.isPlayingOrWillChangePlaymode) return;
             if (!File.Exists(ScenePath)) return;
 
             string yaml = File.ReadAllText(ScenePath);

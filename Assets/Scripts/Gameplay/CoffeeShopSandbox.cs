@@ -15,27 +15,10 @@ namespace Spotlight.Gameplay
         [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.AfterSceneLoad)]
         private static void AutoInit()
         {
-            // 正式咖啡店与独立 UI/实体测试场景使用同一引导。
+            // CoffeeShop and CoffeeUIEntitySandbox now belong to FreeCafeRuntime. The legacy
+            // bootstrap must not create CoffeeGameplayController or CoffeeGameplayPanel there.
             var scene = UnityEngine.SceneManagement.SceneManager.GetActiveScene();
-            if (scene.name != "CoffeeShop" && scene.name != "CoffeeUIEntitySandbox") return;
-
-            EnsureEventSystem();
-            EnsureCameraRaycaster();
-            InitDOTween();
-
-            // 确保控制器存在
-            var ctrl = CoffeeGameplayController.EnsureExists();
-
-            // 激活场景内面板
-            var panel = Object.FindFirstObjectByType<CoffeeGameplayPanel>(FindObjectsInactive.Include);
-            if (panel != null)
-            {
-                panel.gameObject.SetActive(true);
-                // 沙盒模式下没有 GameFlowBootstrap，直接打开
-                panel.OpenFromFlow(null);
-            }
-
-            Debug.Log("[Sandbox] CoffeeShop 沙盒模式已启动，可直接测试玩法。");
+            if (scene.name == "CoffeeShop" || scene.name == "CoffeeUIEntitySandbox") return;
         }
 
         /// <summary>UI 按钮点击依赖 EventSystem；项目用新 Input System，必须配 InputSystemUIInputModule。</summary>

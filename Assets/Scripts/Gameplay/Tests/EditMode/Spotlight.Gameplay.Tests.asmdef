@@ -14,7 +14,8 @@
   ],
   "autoReferenced": false,
   "defineConstraints": [
-    "UNITY_INCLUDE_TESTS"
+    "UNITY_INCLUDE_TESTS",
+    "FREECAFE_LEGACY_TESTS"
   ],
   "testAssemblies": true
 }

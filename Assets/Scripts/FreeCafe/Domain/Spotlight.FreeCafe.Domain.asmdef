@@ -1,0 +1,7 @@
+{
+  "name": "Spotlight.FreeCafe.Domain",
+  "rootNamespace": "Spotlight.FreeCafe",
+  "references": [],
+  "autoReferenced": true,
+  "noEngineReferences": true
+}

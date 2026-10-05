@@ -1,0 +1,1018 @@
+{
+  "startingMoney": 500,
+  "daySeconds": 300,
+  "customerPatience": 180,
+  "customerInterval": 18,
+  "entities": [
+    {
+      "id": "cup.small",
+      "label": "小杯",
+      "artId": "cup.small",
+      "capabilities": 9,
+      "width": 0.8,
+      "height": 1,
+      "capacity": 2
+    },
+    {
+      "id": "cup.large",
+      "label": "大杯",
+      "artId": "cup.large",
+      "capabilities": 9,
+      "width": 1,
+      "height": 1.2,
+      "capacity": 6
+    },
+    {
+      "id": "beans",
+      "label": "咖啡豆",
+      "artId": "beans",
+      "capabilities": 5,
+      "width": 0.65,
+      "height": 0.65
+    },
+    {
+      "id": "grounds",
+      "label": "咖啡粉",
+      "artId": "grounds",
+      "capabilities": 5,
+      "width": 0.65,
+      "height": 0.65
+    },
+    {
+      "id": "coffee",
+      "label": "咖啡液",
+      "artId": "coffee",
+      "capabilities": 5,
+      "width": 0.65,
+      "height": 0.65
+    },
+    {
+      "id": "milk",
+      "label": "冷牛奶",
+      "artId": "milk",
+      "capabilities": 5,
+      "width": 0.65,
+      "height": 0.65
+    },
+    {
+      "id": "hotmilk",
+      "label": "热牛奶",
+      "artId": "hotmilk",
+      "capabilities": 5,
+      "width": 0.65,
+      "height": 0.65
+    },
+    {
+      "id": "matcha.powder",
+      "label": "抹茶粉",
+      "artId": "matcha.powder",
+      "capabilities": 5,
+      "width": 0.65,
+      "height": 0.65
+    },
+    {
+      "id": "matcha.drink",
+      "label": "抹茶液",
+      "artId": "matcha.drink",
+      "capabilities": 5,
+      "width": 0.65,
+      "height": 0.65
+    },
+    {
+      "id": "cocoa.powder",
+      "label": "可可粉",
+      "artId": "cocoa.powder",
+      "capabilities": 5,
+      "width": 0.65,
+      "height": 0.65
+    },
+    {
+      "id": "cocoa.drink",
+      "label": "可可液",
+      "artId": "cocoa.drink",
+      "capabilities": 5,
+      "width": 0.65,
+      "height": 0.65
+    },
+    {
+      "id": "honey",
+      "label": "蜂蜜",
+      "artId": "honey",
+      "capabilities": 5,
+      "width": 0.65,
+      "height": 0.65
+    },
+    {
+      "id": "cream",
+      "label": "奶油顶",
+      "artId": "honey",
+      "capabilities": 5,
+      "width": 0.65,
+      "height": 0.65
+    },
+    {
+      "id": "source.cups.small",
+      "label": "小杯堆",
+      "artId": "source.cups.small",
+      "capabilities": 2,
+      "width": 1,
+      "height": 1.15,
+      "sourceItemId": "cup.small",
+      "initialStock": 30,
+      "refillCost": 0,
+      "unitCost": 8
+    },
+    {
+      "id": "source.cups.large",
+      "label": "大杯堆",
+      "artId": "source.cups.large",
+      "capabilities": 2,
+      "width": 1,
+      "height": 1.15,
+      "sourceItemId": "cup.large",
+      "initialStock": 30,
+      "refillCost": 0,
+      "unitCost": 8
+    },
+    {
+      "id": "source.beans",
+      "label": "咖啡豆袋",
+      "artId": "source.beans",
+      "capabilities": 2,
+      "width": 1,
+      "height": 1.15,
+      "sourceItemId": "beans",
+      "initialStock": 5,
+      "refillCost": 0,
+      "unitCost": 0
+    },
+    {
+      "id": "source.milk",
+      "label": "牛奶瓶",
+      "artId": "source.milk",
+      "capabilities": 2,
+      "width": 1,
+      "height": 1.15,
+      "sourceItemId": "milk",
+      "initialStock": 8,
+      "refillCost": 0,
+      "unitCost": 5
+    },
+    {
+      "id": "source.matcha",
+      "label": "抹茶罐",
+      "artId": "source.matcha",
+      "capabilities": 2,
+      "width": 1,
+      "height": 1.15,
+      "sourceItemId": "matcha.powder",
+      "initialStock": 8,
+      "refillCost": 0,
+      "unitCost": 5
+    },
+    {
+      "id": "source.cocoa",
+      "label": "可可罐",
+      "artId": "source.cocoa",
+      "capabilities": 2,
+      "width": 1,
+      "height": 1.15,
+      "sourceItemId": "cocoa.powder",
+      "initialStock": 8,
+      "refillCost": 0,
+      "unitCost": 10
+    },
+    {
+      "id": "source.cream",
+      "label": "奶油顶罐（占位）",
+      "artId": "source.honey",
+      "capabilities": 2,
+      "width": 1,
+      "height": 1.15,
+      "sourceItemId": "cream",
+      "initialStock": 8,
+      "refillCost": 0,
+      "unitCost": 5
+    },
+    {
+      "id": "source.honey",
+      "label": "蜂蜜罐",
+      "artId": "source.honey",
+      "capabilities": 2,
+      "width": 1,
+      "height": 1.15,
+      "sourceItemId": "honey",
+      "initialStock": 8,
+      "refillCost": 0,
+      "unitCost": 5
+    },
+    {
+      "id": "machine.grinder",
+      "label": "研磨器",
+      "artId": "machine.grinder",
+      "capabilities": 16,
+      "width": 1.45,
+      "height": 1.6
+    },
+    {
+      "id": "machine.brewer",
+      "label": "咖啡壶",
+      "artId": "machine.brewer",
+      "capabilities": 16,
+      "width": 1.45,
+      "height": 1.6
+    },
+    {
+      "id": "machine.heater",
+      "label": "牛奶加热器",
+      "artId": "machine.heater",
+      "capabilities": 16,
+      "width": 1.45,
+      "height": 1.6
+    },
+    {
+      "id": "machine.mixer",
+      "label": "搅拌器",
+      "artId": "machine.mixer",
+      "capabilities": 16,
+      "width": 1.45,
+      "height": 1.6
+    },
+    {
+      "id": "customer",
+      "label": "顾客",
+      "artId": "customer",
+      "capabilities": 32,
+      "width": 1.5,
+      "height": 2.8
+    },
+    {
+      "id": "delivery",
+      "label": "交付区",
+      "artId": "delivery",
+      "capabilities": 64,
+      "width": 1.6,
+      "height": 1.2
+    },
+    {
+      "id": "trash",
+      "label": "废弃桶",
+      "artId": "trash",
+      "capabilities": 128,
+      "width": 1,
+      "height": 1.3
+    }
+  ],
+  "operations": [
+    {
+      "id": "grind",
+      "label": "研磨咖啡豆",
+      "machineSpecId": "machine.grinder",
+      "inputSpecId": "beans",
+      "outputSpecId": "grounds",
+      "seconds": 3,
+      "control": 1,
+      "clicks": 3,
+      "clickInterval": 0.5,
+      "acceptsContainer": true
+    },
+    {
+      "id": "brew",
+      "label": "萃取咖啡",
+      "machineSpecId": "machine.brewer",
+      "inputSpecId": "grounds",
+      "outputSpecId": "coffee",
+      "seconds": 5,
+      "control": 0,
+      "acceptsContainer": true
+    },
+    {
+      "id": "heat",
+      "label": "加热牛奶",
+      "machineSpecId": "machine.heater",
+      "inputSpecId": "milk",
+      "outputSpecId": "hotmilk",
+      "seconds": 5,
+      "control": 0,
+      "acceptsContainer": true
+    },
+    {
+      "id": "matcha",
+      "label": "调制抹茶",
+      "machineSpecId": "machine.mixer",
+      "inputSpecId": "matcha.powder",
+      "outputSpecId": "matcha.drink",
+      "seconds": 4,
+      "control": 1,
+      "clicks": 3,
+      "clickInterval": 0.5,
+      "acceptsContainer": true
+    },
+    {
+      "id": "cocoa",
+      "label": "调制可可",
+      "machineSpecId": "machine.mixer",
+      "inputSpecId": "cocoa.powder",
+      "outputSpecId": "cocoa.drink",
+      "seconds": 4,
+      "control": 2,
+      "acceptsContainer": true
+    }
+  ],
+  "products": [
+    {
+      "id": "espresso",
+      "label": "意式浓缩",
+      "cupSpecId": "cup.small",
+      "price": 50,
+      "ingredients": [
+        {
+          "specId": "coffee",
+          "units": 1
+        }
+      ],
+      "unlockReputation": 0,
+      "qualityPriceStep": 50,
+      "requiresLatteArt": false,
+      "recipeId": "espresso"
+    },
+    {
+      "id": "latte",
+      "label": "拿铁",
+      "cupSpecId": "cup.large",
+      "price": 80,
+      "ingredients": [
+        {
+          "specId": "coffee",
+          "units": 1
+        },
+        {
+          "specId": "hotmilk",
+          "units": 2
+        }
+      ],
+      "unlockReputation": 0,
+      "qualityPriceStep": 50,
+      "requiresLatteArt": true,
+      "recipeId": "latte"
+    },
+    {
+      "id": "honeylatte",
+      "label": "蜂蜜拿铁",
+      "cupSpecId": "cup.large",
+      "price": 100,
+      "ingredients": [
+        {
+          "specId": "coffee",
+          "units": 1
+        },
+        {
+          "specId": "hotmilk",
+          "units": 2
+        },
+        {
+          "specId": "honey",
+          "units": 1
+        }
+      ],
+      "unlockReputation": 0,
+      "qualityPriceStep": 50,
+      "requiresLatteArt": false,
+      "recipeId": "honeylatte"
+    },
+    {
+      "id": "matchalatte",
+      "label": "抹茶",
+      "cupSpecId": "cup.large",
+      "price": 80,
+      "ingredients": [
+        {
+          "specId": "matcha.drink",
+          "units": 1
+        },
+        {
+          "specId": "hotmilk",
+          "units": 2
+        }
+      ],
+      "unlockReputation": 0,
+      "qualityPriceStep": 50,
+      "requiresLatteArt": false,
+      "recipeId": "matchalatte"
+    },
+    {
+      "id": "cocoa",
+      "label": "热可可",
+      "cupSpecId": "cup.large",
+      "price": 100,
+      "ingredients": [
+        {
+          "specId": "cocoa.drink",
+          "units": 1
+        },
+        {
+          "specId": "hotmilk",
+          "units": 2
+        }
+      ],
+      "unlockReputation": 0,
+      "qualityPriceStep": 50,
+      "requiresLatteArt": false,
+      "recipeId": "cocoa"
+    },
+    {
+      "id": "macchiato",
+      "label": "玛奇朵",
+      "cupSpecId": "cup.small",
+      "recipeId": "macchiato",
+      "price": 80,
+      "ingredients": [
+        {
+          "specId": "coffee",
+          "units": 1
+        },
+        {
+          "specId": "hotmilk",
+          "units": 1
+        }
+      ],
+      "unlockReputation": 0,
+      "qualityPriceStep": 50,
+      "requiresLatteArt": false
+    },
+    {
+      "id": "mocha",
+      "label": "摩卡",
+      "cupSpecId": "cup.large",
+      "recipeId": "mocha",
+      "price": 120,
+      "ingredients": [
+        {
+          "specId": "coffee",
+          "units": 1
+        },
+        {
+          "specId": "hotmilk",
+          "units": 2
+        },
+        {
+          "specId": "cocoa.drink",
+          "units": 1
+        },
+        {
+          "specId": "cream",
+          "units": 1
+        }
+      ],
+      "unlockReputation": 0,
+      "qualityPriceStep": 50,
+      "requiresLatteArt": false
+    }
+  ],
+  "layout": [
+    {
+      "id": "s.cups.small",
+      "specId": "source.cups.small",
+      "area": 1,
+      "x": -7.3,
+      "y": 3.6
+    },
+    {
+      "id": "s.cups.large",
+      "specId": "source.cups.large",
+      "area": 1,
+      "x": -5.1,
+      "y": 3.6
+    },
+    {
+      "id": "s.beans",
+      "specId": "source.beans",
+      "area": 1,
+      "x": -2.9,
+      "y": 3.6
+    },
+    {
+      "id": "s.milk",
+      "specId": "source.milk",
+      "area": 1,
+      "x": -0.7,
+      "y": 3.6
+    },
+    {
+      "id": "s.matcha",
+      "specId": "source.matcha",
+      "area": 1,
+      "x": 1.5,
+      "y": 3.6
+    },
+    {
+      "id": "s.cocoa",
+      "specId": "source.cocoa",
+      "area": 1,
+      "x": 3.7,
+      "y": 3.6
+    },
+    {
+      "id": "s.honey",
+      "specId": "source.honey",
+      "area": 1,
+      "x": 5.9,
+      "y": 3.6
+    },
+    {
+      "id": "s.cream",
+      "specId": "source.cream",
+      "area": 1,
+      "x": 7.8,
+      "y": 3.6
+    },
+    {
+      "id": "m.grinder",
+      "specId": "machine.grinder",
+      "area": 1,
+      "x": -6.4,
+      "y": 1.2
+    },
+    {
+      "id": "m.brewer",
+      "specId": "machine.brewer",
+      "area": 1,
+      "x": -2.8,
+      "y": 1.2
+    },
+    {
+      "id": "m.heater",
+      "specId": "machine.heater",
+      "area": 1,
+      "x": 0.8,
+      "y": 1.2
+    },
+    {
+      "id": "m.mixer",
+      "specId": "machine.mixer",
+      "area": 1,
+      "x": 4.4,
+      "y": 1.2
+    },
+    {
+      "id": "service",
+      "specId": "delivery",
+      "area": 1,
+      "x": 7.25,
+      "y": -1.5
+    },
+    {
+      "id": "waste",
+      "specId": "trash",
+      "area": 1,
+      "x": -7.4,
+      "y": -3.6
+    }
+  ],
+  "areas": [
+    {
+      "id": 0,
+      "label": "一楼 · 营业区",
+      "artId": "area.cafe",
+      "halfWidth": 9,
+      "halfHeight": 5
+    },
+    {
+      "id": 1,
+      "label": "一楼 · 出餐台",
+      "artId": "area.counter",
+      "halfWidth": 9,
+      "halfHeight": 5
+    },
+    {
+      "id": 2,
+      "label": "顶楼",
+      "artId": "area.top",
+      "halfWidth": 9,
+      "halfHeight": 5
+    },
+    {
+      "id": 3,
+      "label": "地下室",
+      "artId": "area.basement",
+      "halfWidth": 9,
+      "halfHeight": 5
+    }
+  ],
+  "economy": {
+    "baseCustomers": 12,
+    "customerGrowthEvery": 30,
+    "maxCustomers": 24,
+    "initialSeats": 3,
+    "wastePenalty": 10,
+    "wrongOrderPenalty": 10,
+    "hireCost": 200,
+    "expansionCost": 200,
+    "extraMachineCost": 200,
+    "upgradeCost": 100,
+    "seatsPerExpansion": 2,
+    "maxStaff": 4,
+    "maxMachineCopies": 3,
+    "autoSeconds": 20,
+    "autoChance": 0.2,
+    "staffSpeedPerHire": 0.1,
+    "timerUpgradeMultiplier": 0.5,
+    "priceUpgradeMultiplier": 1.5,
+    "beanUnitPrices": [
+      5,
+      10,
+      15
+    ]
+  },
+  "npcs": [
+    {
+      "id": "barista_topic_1",
+      "name": "常客",
+      "dialogue": "最近街角的报纸摊总在谈论港口的新消息。",
+      "topic": "港口新消息",
+      "unlockReputation": 0,
+      "minimumBeanQuality": 0
+    },
+    {
+      "id": "barista_topic_2",
+      "name": "记者",
+      "dialogue": "如果你听到关于市政厅的传闻，记得告诉我。",
+      "topic": "市政厅传闻",
+      "unlockReputation": 5,
+      "minimumBeanQuality": 1
+    }
+  ],
+  "recipes": [
+    {
+      "id": "espresso",
+      "productId": "espresso",
+      "label": "意式浓缩",
+      "steps": [
+        {
+          "id": "1",
+          "kind": "select_cup",
+          "label": "选择小杯",
+          "targetSpecId": "cup.small"
+        },
+        {
+          "id": "2",
+          "kind": "select_ingredient",
+          "label": "取咖啡豆",
+          "inputSpecId": "beans"
+        },
+        {
+          "id": "3",
+          "kind": "operate",
+          "label": "研磨咖啡豆（点击3次）",
+          "operationId": "grind"
+        },
+        {
+          "id": "4",
+          "kind": "operate",
+          "label": "摩卡壶煮咖啡（等待5秒）",
+          "operationId": "brew"
+        },
+        {
+          "id": "5",
+          "kind": "take_output",
+          "label": "取出咖啡液",
+          "outputSpecId": "coffee"
+        },
+        {
+          "id": "6",
+          "kind": "confirm_serve",
+          "label": "确认上餐"
+        }
+      ]
+    },
+    {
+      "id": "macchiato",
+      "productId": "macchiato",
+      "label": "玛奇朵",
+      "steps": [
+        {
+          "id": "1",
+          "kind": "select_cup",
+          "label": "选择小杯",
+          "targetSpecId": "cup.small"
+        },
+        {
+          "id": "2",
+          "kind": "select_ingredient",
+          "label": "取咖啡豆",
+          "inputSpecId": "beans"
+        },
+        {
+          "id": "3",
+          "kind": "operate",
+          "label": "研磨咖啡豆（点击3次）",
+          "operationId": "grind"
+        },
+        {
+          "id": "4",
+          "kind": "operate",
+          "label": "摩卡壶煮咖啡（等待5秒）",
+          "operationId": "brew"
+        },
+        {
+          "id": "5",
+          "kind": "take_output",
+          "label": "取出咖啡液",
+          "outputSpecId": "coffee"
+        },
+        {
+          "id": "6",
+          "kind": "select_ingredient",
+          "label": "取牛奶",
+          "inputSpecId": "milk"
+        },
+        {
+          "id": "7",
+          "kind": "operate",
+          "label": "煮牛奶（等待5秒）",
+          "operationId": "heat"
+        },
+        {
+          "id": "8",
+          "kind": "confirm_serve",
+          "label": "确认上餐"
+        }
+      ]
+    },
+    {
+      "id": "latte",
+      "productId": "latte",
+      "label": "拿铁",
+      "steps": [
+        {
+          "id": "1",
+          "kind": "select_cup",
+          "label": "选择大杯",
+          "targetSpecId": "cup.large"
+        },
+        {
+          "id": "2",
+          "kind": "select_ingredient",
+          "label": "取咖啡豆",
+          "inputSpecId": "beans"
+        },
+        {
+          "id": "3",
+          "kind": "operate",
+          "label": "研磨咖啡豆（点击3次）",
+          "operationId": "grind"
+        },
+        {
+          "id": "4",
+          "kind": "operate",
+          "label": "摩卡壶煮咖啡（等待5秒）",
+          "operationId": "brew"
+        },
+        {
+          "id": "5",
+          "kind": "take_output",
+          "label": "取出咖啡液",
+          "outputSpecId": "coffee"
+        },
+        {
+          "id": "6",
+          "kind": "select_ingredient",
+          "label": "取牛奶",
+          "inputSpecId": "milk"
+        },
+        {
+          "id": "7",
+          "kind": "operate",
+          "label": "煮牛奶（等待5秒）",
+          "operationId": "heat"
+        },
+        {
+          "id": "8",
+          "kind": "latte_art",
+          "label": "拖动完成拉花"
+        },
+        {
+          "id": "9",
+          "kind": "confirm_serve",
+          "label": "确认上餐"
+        }
+      ]
+    },
+    {
+      "id": "matchalatte",
+      "productId": "matchalatte",
+      "label": "抹茶",
+      "steps": [
+        {
+          "id": "1",
+          "kind": "select_cup",
+          "label": "选择大杯",
+          "targetSpecId": "cup.large"
+        },
+        {
+          "id": "2",
+          "kind": "select_ingredient",
+          "label": "加入抹茶粉",
+          "inputSpecId": "matcha.powder"
+        },
+        {
+          "id": "3",
+          "kind": "operate",
+          "label": "研磨抹茶粉（点击3次）",
+          "operationId": "matcha"
+        },
+        {
+          "id": "4",
+          "kind": "select_ingredient",
+          "label": "取牛奶",
+          "inputSpecId": "milk"
+        },
+        {
+          "id": "5",
+          "kind": "operate",
+          "label": "煮牛奶（等待5秒）",
+          "operationId": "heat"
+        },
+        {
+          "id": "6",
+          "kind": "confirm_serve",
+          "label": "确认上餐"
+        }
+      ]
+    },
+    {
+      "id": "honeylatte",
+      "productId": "honeylatte",
+      "label": "蜂蜜拿铁",
+      "steps": [
+        {
+          "id": "1",
+          "kind": "select_cup",
+          "label": "选择大杯",
+          "targetSpecId": "cup.large"
+        },
+        {
+          "id": "2",
+          "kind": "select_ingredient",
+          "label": "取咖啡豆",
+          "inputSpecId": "beans"
+        },
+        {
+          "id": "3",
+          "kind": "operate",
+          "label": "研磨咖啡豆（点击3次）",
+          "operationId": "grind"
+        },
+        {
+          "id": "4",
+          "kind": "operate",
+          "label": "摩卡壶煮咖啡（等待5秒）",
+          "operationId": "brew"
+        },
+        {
+          "id": "5",
+          "kind": "take_output",
+          "label": "取出咖啡液",
+          "outputSpecId": "coffee"
+        },
+        {
+          "id": "6",
+          "kind": "select_ingredient",
+          "label": "取牛奶",
+          "inputSpecId": "milk"
+        },
+        {
+          "id": "7",
+          "kind": "operate",
+          "label": "煮牛奶（等待5秒）",
+          "operationId": "heat"
+        },
+        {
+          "id": "8",
+          "kind": "select_ingredient",
+          "label": "加入蜂蜜",
+          "inputSpecId": "honey"
+        },
+        {
+          "id": "9",
+          "kind": "confirm_serve",
+          "label": "确认上餐"
+        }
+      ]
+    },
+    {
+      "id": "cocoa",
+      "productId": "cocoa",
+      "label": "热可可",
+      "steps": [
+        {
+          "id": "1",
+          "kind": "select_cup",
+          "label": "选择大杯",
+          "targetSpecId": "cup.large"
+        },
+        {
+          "id": "2",
+          "kind": "select_ingredient",
+          "label": "加入可可粉",
+          "inputSpecId": "cocoa.powder"
+        },
+        {
+          "id": "3",
+          "kind": "operate",
+          "label": "融化巧克力（无惩罚QTE）",
+          "operationId": "cocoa"
+        },
+        {
+          "id": "4",
+          "kind": "select_ingredient",
+          "label": "取牛奶",
+          "inputSpecId": "milk"
+        },
+        {
+          "id": "5",
+          "kind": "operate",
+          "label": "煮牛奶（等待5秒）",
+          "operationId": "heat"
+        },
+        {
+          "id": "6",
+          "kind": "confirm_serve",
+          "label": "确认上餐"
+        }
+      ]
+    },
+    {
+      "id": "mocha",
+      "productId": "mocha",
+      "label": "摩卡",
+      "steps": [
+        {
+          "id": "1",
+          "kind": "select_cup",
+          "label": "选择大杯",
+          "targetSpecId": "cup.large"
+        },
+        {
+          "id": "2",
+          "kind": "select_ingredient",
+          "label": "取咖啡豆",
+          "inputSpecId": "beans"
+        },
+        {
+          "id": "3",
+          "kind": "operate",
+          "label": "研磨咖啡豆（点击3次）",
+          "operationId": "grind"
+        },
+        {
+          "id": "4",
+          "kind": "operate",
+          "label": "摩卡壶煮咖啡（等待5秒）",
+          "operationId": "brew"
+        },
+        {
+          "id": "5",
+          "kind": "take_output",
+          "label": "取出咖啡液",
+          "outputSpecId": "coffee"
+        },
+        {
+          "id": "6",
+          "kind": "select_ingredient",
+          "label": "取牛奶",
+          "inputSpecId": "milk"
+        },
+        {
+          "id": "7",
+          "kind": "operate",
+          "label": "煮牛奶（等待5秒）",
+          "operationId": "heat"
+        },
+        {
+          "id": "8",
+          "kind": "select_ingredient",
+          "label": "选择可可粉",
+          "inputSpecId": "cocoa.powder"
+        },
+        {
+          "id": "9",
+          "kind": "operate",
+          "label": "融化巧克力（无惩罚QTE）",
+          "operationId": "cocoa"
+        },
+        {
+          "id": "10",
+          "kind": "select_ingredient",
+          "label": "加奶油顶",
+          "inputSpecId": "cream"
+        },
+        {
+          "id": "11",
+          "kind": "confirm_serve",
+          "label": "确认上餐"
+        }
+      ]
+    }
+  ]
+}

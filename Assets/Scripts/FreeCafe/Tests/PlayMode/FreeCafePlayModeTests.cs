@@ -1,0 +1,159 @@
+using System.Collections;
+using System.Collections.Generic;
+using NUnit.Framework;
+using Spotlight.GameFlow;
+using UnityEngine;
+using UnityEngine.EventSystems;
+using UnityEngine.InputSystem;
+using UnityEngine.InputSystem.LowLevel;
+using UnityEngine.InputSystem.UI;
+using UnityEngine.UI;
+using UnityEngine.SceneManagement;
+using UnityEngine.TestTools;
+
+namespace Spotlight.FreeCafe.Tests
+{
+    public sealed class FreeCafePlayModeTests
+    {
+        [UnitySetUp] public IEnumerator Setup()
+        {
+            Time.timeScale=1;GameSaveParticipantRegistry.PendingRestore=null;
+            yield return SceneManager.LoadSceneAsync("CoffeeShop",LoadSceneMode.Single);yield return null;yield return null;
+        }
+        [UnityTearDown] public IEnumerator Cleanup() { Time.timeScale=1;yield return null; }
+        private PointerEventData Pointer(FreeCafeRuntime app,float x,float y) => new PointerEventData(EventSystem.current) {position=app.worldCamera.WorldToScreenPoint(new Vector3(x,y,0))};
+        [UnityTest] public IEnumerator CupShowsEmptyPartialAndFullFillStatesWithoutHoverReset()
+        {
+            var app=Object.FindFirstObjectByType<FreeCafeRuntime>();
+            app.Enter(AreaId.Counter); yield return null;
+            app.World.Take("s.cups.large",AreaId.Counter,0,-1,out var cup);
+            var view=app.View(cup.id); Assert.That(view,Is.Not.Null);
+            var status=view.transform.Find("FillStatus").GetComponent<TMPro.TMP_Text>();
+            Assert.That(status.text,Does.Contain("空杯"));
+            view.SetHovered(true); var hoverColor=view.body.color;
+            view.Refresh(cup); Assert.That(view.body.color,Is.EqualTo(hoverColor),"Periodic world refresh must not erase hover state");
+            cup.contents.Add(new Portion{specId="coffee",units=1}); view.Refresh(cup);
+            Assert.That(status.text,Does.Contain("有内容"));
+            cup.contents[0].units=6; view.Refresh(cup);
+            Assert.That(status.text,Does.Contain("容量已满"));
+            view.SetHovered(false); yield return null;
+        }
+        [UnityTest] public IEnumerator ActualSourceDragCanDropAtArbitraryNonSlotCoordinate()
+        {
+            var app=Object.FindFirstObjectByType<FreeCafeRuntime>();Assert.That(app,Is.Not.Null);
+            Assert.That(GameObject.Find("CoffeeGameplayController"),Is.Null,"Legacy global recipe controller must not be spawned");
+            app.Enter(AreaId.Counter);yield return null;
+            var source=app.View("s.beans");var record=app.World.Find("s.beans");int stock=record.stock;
+            var pointer=Pointer(app,record.x,record.y);app.BeginDrag(source,pointer);Assert.That(app.IsDragging,Is.True);
+            pointer.position=app.worldCamera.WorldToScreenPoint(new Vector3(2.137f,-2.613f,0));app.MoveDrag(pointer);Physics2D.SyncTransforms();app.EndDrag(pointer);yield return null;
+            Assert.That(app.World.Find("s.beans").stock,Is.EqualTo(stock-1));
+            WorldEntity placed=null;foreach(var entity in app.World.State.entities) if(entity.specId=="beans") placed=entity;
+            Assert.That(placed,Is.Not.Null);Assert.That(placed.x,Is.EqualTo(2.137f).Within(.01));Assert.That(placed.y,Is.EqualTo(-2.613f).Within(.01));
+            Assert.That(app.View(placed.id).art.prompt,Is.Not.Empty);Assert.That(app.World.State.requests.Count,Is.Zero);
+        }
+        [UnityTest] public IEnumerator CancelAndUiDropDoNotConsumeStock()
+        {
+            var app=Object.FindFirstObjectByType<FreeCafeRuntime>();app.Enter(AreaId.Counter);yield return null;
+            var source=app.World.Find("s.beans");int stock=source.stock;
+            var pointer=Pointer(app,source.x,source.y);app.BeginDrag(app.View(source.id),pointer);app.CancelDrag();yield return null;
+            Assert.That(app.World.Find(source.id).stock,Is.EqualTo(stock));
+            app.BeginDrag(app.View(source.id),pointer);pointer.position=new Vector2(Screen.width*.5f,Screen.height-5);app.EndDrag(pointer);yield return null;
+            Assert.That(app.World.Find(source.id).stock,Is.EqualTo(stock));Assert.That(app.IsDragging,Is.False);
+        }
+        [UnityTest] public IEnumerator RoomNavigationAndPortalHaveUnblockedRaycasts()
+        {
+            var app=Object.FindFirstObjectByType<FreeCafeRuntime>();var hud=Object.FindFirstObjectByType<FreeCafeHud>();
+            var portal=Object.FindFirstObjectByType<FreeCafePortal>();Physics2D.SyncTransforms();
+            var pointer=new PointerEventData(EventSystem.current) {position=app.worldCamera.WorldToScreenPoint(portal.transform.position)};
+            var hits=new List<RaycastResult>();EventSystem.current.RaycastAll(pointer,hits);Assert.That(hits.Count,Is.GreaterThan(0));Assert.That(hits[0].gameObject.GetComponentInParent<FreeCafePortal>(),Is.EqualTo(portal));
+            ExecuteEvents.Execute(portal.gameObject,pointer,ExecuteEvents.pointerClickHandler);Assert.That(app.World.State.currentArea,Is.EqualTo(AreaId.Counter));
+            foreach(var area in new[]{AreaId.TopFloor,AreaId.Basement,AreaId.Cafe,AreaId.Counter})
+            {
+                Canvas.ForceUpdateCanvases();var button=hud.areaButtons[(int)area];pointer.position=RectTransformUtility.WorldToScreenPoint(null,button.transform.position);hits.Clear();EventSystem.current.RaycastAll(pointer,hits);
+                Assert.That(hits.Count,Is.GreaterThan(0),button.name);Assert.That(hits[0].gameObject.GetComponentInParent<UnityEngine.UI.Button>(),Is.EqualTo(button));ExecuteEvents.Execute(button.gameObject,pointer,ExecuteEvents.pointerClickHandler);Assert.That(app.World.State.currentArea,Is.EqualTo(area));yield return null;
+            }
+        }
+        [UnityTest] public IEnumerator QueuedMouseInputStartsBusinessAndNavigatesAllRooms()
+        {
+            var app = Object.FindFirstObjectByType<FreeCafeRuntime>();
+            var hud = Object.FindFirstObjectByType<FreeCafeHud>();
+            var module = EventSystem.current.GetComponent<InputSystemUIInputModule>();
+            Assert.That(hud.GetComponent<Canvas>().renderMode, Is.EqualTo(RenderMode.ScreenSpaceOverlay));
+            Assert.That(module.point.action.enabled, Is.True);
+            Assert.That(module.leftClick.action.enabled, Is.True);
+            var originalDevices = new List<InputDevice>(InputSystem.devices);
+            var previousBackground = InputSystem.settings.backgroundBehavior;
+            var mouse = InputSystem.AddDevice<Mouse>("FreeCafeRegressionMouse");
+            try
+            {
+                // Automated tests may run while the editor is unfocused. Restore this setting below.
+                InputSystem.settings.backgroundBehavior = InputSettings.BackgroundBehavior.IgnoreFocus;
+                yield return ClickWithQueuedMouse(mouse, hud.startButton);
+                Assert.That(app.World.State.open, Is.True, "Must pass through actions, raycast and pointer press/release; not onClick.Invoke");
+                foreach (var area in new[] { AreaId.Counter, AreaId.TopFloor, AreaId.Basement, AreaId.Cafe })
+                {
+                    yield return ClickWithQueuedMouse(mouse, hud.areaButtons[(int)area]);
+                    Assert.That(app.World.State.currentArea, Is.EqualTo(area));
+                }
+            }
+            finally
+            {
+                // Never remove all devices: native mouse/keyboard belong to the editor, not this test.
+                InputSystem.RemoveDevice(mouse);
+                InputSystem.settings.backgroundBehavior = previousBackground;
+            }
+            foreach (var device in originalDevices)
+                Assert.That(device.added, Is.True, "Test removed an input device it does not own: " + device);
+        }
+        private IEnumerator ClickWithQueuedMouse(Mouse mouse, Button button)
+        {
+            Canvas.ForceUpdateCanvases();
+            var position = RectTransformUtility.WorldToScreenPoint(null, button.transform.position);
+            Assert.That(position.x, Is.InRange(0, Screen.width), button.name);
+            Assert.That(position.y, Is.InRange(0, Screen.height), button.name);
+            InputSystem.QueueStateEvent(mouse, new MouseState { position = position });
+            yield return null; yield return null;
+            InputSystem.QueueStateEvent(mouse, new MouseState { position = position }.WithButton(MouseButton.Left));
+            yield return null; yield return null;
+            InputSystem.QueueStateEvent(mouse, new MouseState { position = position });
+            yield return null; yield return null;
+        }
+        [UnityTest] public IEnumerator CarrySelectionPreservesCoordinatesAcrossFloorsAndPauseCancelsDrag()
+        {
+            var app=Object.FindFirstObjectByType<FreeCafeRuntime>();app.Enter(AreaId.Counter);
+            app.World.Take("s.cups.large",AreaId.Counter,2.27f,-2.77f,out var cup);app.Select(cup.id);app.CarrySelection=true;
+            app.Enter(AreaId.Basement);yield return null;Assert.That(cup.area,Is.EqualTo(AreaId.Basement));Assert.That(cup.x,Is.EqualTo(2.27f));Assert.That(app.View(cup.id).gameObject.activeInHierarchy,Is.True);
+            var pointer=Pointer(app,cup.x,cup.y);app.BeginDrag(app.View(cup.id),pointer);Assert.That(app.IsDragging,Is.True);app.TogglePause();Assert.That(app.IsDragging,Is.False);Assert.That(cup.x,Is.EqualTo(2.27f));app.Enter(AreaId.Cafe);Assert.That(app.World.State.currentArea,Is.EqualTo(AreaId.Basement));app.TogglePause();
+        }
+        [UnityTest] public IEnumerator MachineClickAndRightClickFollowFreeformTransferRules()
+        {
+            var app=Object.FindFirstObjectByType<FreeCafeRuntime>();app.Enter(AreaId.Counter);yield return null;
+            app.World.Take("s.beans",AreaId.Counter,0,-2,out var bean);app.World.Interact(bean.id,"m.grinder");
+            app.Click(app.View("m.grinder"));Assert.That(app.World.Find("m.grinder").task.clicksDone,Is.EqualTo(1));
+            app.World.Tick(.5f);app.Click(app.View("m.grinder"));app.World.Tick(.5f);app.Click(app.View("m.grinder"));
+            Assert.That(bean.specId,Is.EqualTo("grounds"));Assert.That(app.World.Find("m.grinder").task.phase,Is.EqualTo(MachinePhase.Ready));
+            app.World.Take("s.cups.large",AreaId.Counter,2,-2,out var cup);Assert.That(app.World.Interact(cup.id,"m.grinder").success,Is.True);
+            Assert.That(cup.contents.Count,Is.EqualTo(1));Assert.That(cup.contents[0].specId,Is.EqualTo("grounds"));
+            app.World.Take("s.milk",AreaId.Counter,4,-2,out var milk);Assert.That(app.World.Interact(milk.id,"m.heater").success,Is.True);
+            app.CancelProcessing(app.View("m.heater"));Assert.That(app.World.Find("m.heater").task,Is.Null);Assert.That(milk.ownerId,Is.Null);
+            yield return null;
+        }
+        [UnityTest] public IEnumerator IndependentJobsAndSaveRegistrySurviveFloorSwitch()
+        {
+            var app=Object.FindFirstObjectByType<FreeCafeRuntime>();app.Enter(AreaId.Counter);
+            app.World.Take("s.beans",AreaId.Counter,0,-2,out var bean);app.World.Take("s.milk",AreaId.Counter,2,-2,out var milk);
+            app.World.Interact(bean.id,"m.grinder");for(int i=0;i<3;i++){app.World.Operate("m.grinder");if(i<2)app.World.Tick(.5f);}app.World.Interact(milk.id,"m.heater");app.Enter(AreaId.TopFloor);app.World.Tick(6);yield return null;
+            Assert.That(app.World.Find("m.grinder").task.phase,Is.EqualTo(MachinePhase.Ready));Assert.That(app.World.Find("m.heater").task.phase,Is.EqualTo(MachinePhase.Ready));
+            string json=app.CaptureJson();app.RestoreJson(json);Assert.That(app.World.Find(bean.id).specId,Is.EqualTo("grounds"));Assert.That(app.World.Find(milk.id).specId,Is.EqualTo("hotmilk"));
+            Assert.That(GameSaveParticipantRegistry.Capturers.ContainsKey(FreeCafeRuntime.SaveId),Is.True);
+            Assert.That(GameSaveParticipantRegistry.Capturers.ContainsKey("world.placements"),Is.False);
+        }
+        [UnityTest] public IEnumerator WhiteboxesAllCarryArtContracts()
+        {
+            var app=Object.FindFirstObjectByType<FreeCafeRuntime>();Assert.That(app.artLibrary.entries.Length,Is.EqualTo(38));
+            foreach(var entry in app.artLibrary.entries) { Assert.That(entry.whitebox,Is.Not.Null,entry.brief.id);Assert.That(entry.brief.prompt,Is.Not.Empty,entry.brief.id);Assert.That(entry.brief.width,Is.GreaterThan(0)); }
+            foreach(var entity in app.World.State.entities) { var view=app.View(entity.id);Assert.That(view.art.assetId,Is.EqualTo(app.World.Spec(entity.specId).artId));Assert.That(view.art.prompt,Is.Not.Empty); }
+            var tags=Object.FindObjectsByType<ArtRequirementTag>(FindObjectsInactive.Include,FindObjectsSortMode.None);Assert.That(tags.Length,Is.GreaterThan(35));yield return null;
+        }
+    }
+}

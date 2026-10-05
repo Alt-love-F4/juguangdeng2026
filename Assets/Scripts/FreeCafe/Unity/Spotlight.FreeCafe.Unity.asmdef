@@ -1,0 +1,13 @@
+{
+  "name": "Spotlight.FreeCafe.Unity",
+  "rootNamespace": "Spotlight.FreeCafe",
+  "references": [
+    "Spotlight.FreeCafe.Domain",
+    "Spotlight.GameFlow.Saving",
+    "Unity.TextMeshPro",
+    "Unity.ugui",
+    "Unity.InputSystem",
+    "Unity.InputSystem.UI"
+  ],
+  "autoReferenced": true
+}

@@ -13,7 +13,8 @@
     "Unity.InputSystem",
     "Unity.InputSystem.UI",
     "DOTween",
-    "Spotlight.Interaction"
+    "Spotlight.Interaction",
+    "Spotlight.FreeCafe.Unity"
   ],
   "autoReferenced": true
 }
