@@ -1,0 +1,27 @@
+# Narrative Configuration
+
+Narrative uses only the standard Luban Excel -> generated C# + JSON pipeline. `LubanNarrativeLoader.Load()` returns a plain `NarrativeConfiguration`; it is not a ScriptableObject. There is no custom XLSX importer, workbook parser, or NarrativeConfiguration asset creation.
+
+Narrative data is authored in `Assets/ConfigTables/Data/Narrative.xlsx`. The workbook `Assets/游戏叙事控制系统.xlsx` is a design specification and is intentionally not an import source.
+
+Keep the standard Excel first four rows: `##var` field names, `##type` Luban types, `##group` export groups, and `##` descriptions. Column A is the row marker; data begins at row 5. Do not replace these rows with a one-row header. Run `Assets/ConfigTables/GenerateAll.bat` (or `Spotlight/Narrative/Generate Luban`) for cs-json output in `Assets/Scripts/Config/Generated` and `Assets/Settings/Resources/Luban`. The same GenerateAll entry regenerates the shared text table. Check generation exit status, let Unity apply generated C# changes, then run `Spotlight/Narrative/Validate Luban`.
+
+Narrative sheets: `Object`, `Bar`, `Trigger`, `Event`, `EventDate`, `Result`, `Condition`, `Template`, `SetupParams`, `Choice`. All text lives in the unified `Assets/ConfigTables/Data/Text.xlsx`, not a Narrative-local Text sheet. Generated `cfg.Tables` includes `TbText`; the loader uses its existing keys/content for narrative text resolution. `Event.contentKey` maps to `contentKeys`, `Bar.barId` combines with `ownerId` into `barKey`, and `SetupParams.slotValues` maps comma-separated `slot=value` assignments into parsed parameters.
+
+The validator checks IDs, cross-table references, relation targets, setup/template links, threshold bounds, derived sources, and the fixed ranges `0..20`, `0..10`, and `-2..5`; `world.calendar` alone may use another range. Weekly empty day normalizes to day 1 and yearly day must be within 1..365. Anchor status is read-only and derived only when every trigger path is monotonic and no event gate condition exists. A calendar condition alone is never enough to classify an anchor. `EventByBar and Anchors` shows the derived paths and reverse relationships.
+
+The core semantics remain explicit: trigger `once` is separate from event lifetime `onceOnly`; `resetOnExit` resets reach counters and must be identical across rows sharing `(barKey, threshold, direction)`; queued requests retain their captured event/trigger data; generated data order is retained, with EventDate rowIndex storing the zero-based generated record index (not an Excel row number). The loader rejects unsupported runtime effects or condition types.
+
+## Sample And Template Contract
+
+The sample has nine presets: `Tpl_TwoPersonTalk`, `Tpl_MonoTalk`, `Tpl_Narration`, `Tpl_WorldBroadcast`, `Tpl_LetterRead`, `Tpl_Timeskip`, `Tpl_CutScene`, `Tpl_ChoiceOnly`, `Tpl_BarMilestone`. These are reusable atom sequences, not promises of dedicated UI screens. `slotDef` declares required assignments as `slot:type`; optional presenter slots omitted from a preset use their runtime defaults. Every declared slot must be assigned in its SetupParams row. `slotValues` separates assignments with commas; `lines` separates text keys with `|`; `opts` references a Choice.groupKey. Text lines and titles resolve through localization with shared TbText content.
+
+The tea setup uses `lines=ev.chen.tea.p1|ev.chen.tea.p2,opts=tea.response`, with a separate result owner for the accept choice. Raising `npc_chen.trust` from 1 to 2 triggers it. `EV_WORLD_DAY3` uses only EventDate day 3 / morning / once; it has no Trigger row or gate condition. This short sample date does not alter the original design workbook's day-30 examples. Neither runnable setup requires external audio, image, or FX resources.
+
+`PLAY_SETUP` results cannot reference a setup containing `A_CHOICE` with nonempty `opts`: effect replay has no event choice transaction. Invoke that setup through a narrative Event instead. `setup:key` and bare setup keys are accepted as result targets.
+
+Presenter defaults confirmed by the presentation implementation: omitted background/portrait resources leave the optional stage unchanged or cleared without missing-resource warnings; supplied invalid paths are errors. `A_WAIT` defaults to `duration=0,untilClick=false`; camera defaults to `zoom=1,shake=0,duration=0.3`; audio volume defaults to 1 and delay/fades to 0; `A_FADE` duration defaults to 0.3. SFX and FX require a valid resource path when invoked; empty BGM stops music. See the presentation agent's separate `PresentationREADME.md` for the current full contract.
+
+Validate Luban logs report derived anchor count/percentage and warn at zero or above 40%; nothing is written into core metadata. Date-only sources count as anchors when not gated; mixed trigger paths require every path to be enabled, upward, and guaranteed monotonic.
+
+EventByBar loads generated Luban data and offers separate reverse Bar/Trigger suggestions to the clipboard. Output is tab-separated data rows with an empty A column and no headers; paste into the matching standard Excel sheet at row 5 or below, never over metadata. It does not mutate configuration, save XLSX, or create SO assets. Review owner/bar IDs, derived sources, event IDs and event onceOnly before generation: reverse triggers share the original event and do not bypass its lifetime lock. Add both suggested Bar and Trigger rows together before GenerateAll.

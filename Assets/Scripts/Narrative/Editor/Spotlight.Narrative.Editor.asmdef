@@ -1,0 +1,6 @@
+{
+  "name": "Spotlight.Narrative.Editor",
+  "references": ["Spotlight.Narrative"],
+  "includePlatforms": ["Editor"],
+  "autoReferenced": true
+}

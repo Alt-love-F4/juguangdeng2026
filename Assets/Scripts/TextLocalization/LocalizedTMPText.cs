@@ -5,7 +5,7 @@ using UnityEngine;
 [RequireComponent(typeof(TMP_Text))]
 public sealed class LocalizedTMPText : MonoBehaviour
 {
-    [Tooltip("策划在 TextTable 中维护的唯一 key，例如 mainmenu.title")]
+    [Tooltip("策划在 Text.xlsx 中维护的唯一 key，例如 mainmenu.title")]
     [SerializeField] private string key;
 
     private TMP_Text target;

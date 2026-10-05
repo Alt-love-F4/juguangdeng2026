@@ -1,0 +1,2175 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>聚光灯2026 · 叙事配置</title>
+    <style>
+        :root {
+            /* 派大星配色：绿粉马卡龙 */
+            --pink: #FFB6C1;
+            --pink-light: #FFD1DC;
+            --pink-dark: #FF91A4;
+            --green: #98FB98;
+            --green-light: #C1FFC1;
+            --green-dark: #7FDD7F;
+            --mint: #F0FFF0;
+            --cream: #FFF8DC;
+            --white: #FFFFFF;
+            --text-dark: #5D4E5D;
+            --text-soft: #8B7B8B;
+            --shadow: rgba(255, 182, 193, 0.3);
+        }
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: 'Segoe UI', 'Microsoft YaHei', sans-serif;
+            background: linear-gradient(135deg, var(--mint) 0%, var(--pink-light) 50%, var(--green-light) 100%);
+            color: var(--text-dark);
+            min-height: 100vh;
+        }
+        
+        /* 顶部导航 */
+        .header {
+            background: var(--white);
+            padding: 16px 32px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            box-shadow: 0 2px 12px var(--shadow);
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+        .header h1 {
+            font-size: 20px;
+            color: var(--pink-dark);
+            font-weight: 600;
+        }
+        .header-actions {
+            display: flex;
+            gap: 12px;
+        }
+        .btn {
+            padding: 10px 20px;
+            border: none;
+            border-radius: 20px;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: 600;
+            transition: all 0.2s;
+        }
+        .btn-pink {
+            background: var(--pink);
+            color: var(--text-dark);
+        }
+        .btn-pink:hover { background: var(--pink-dark); transform: scale(1.02); }
+        .btn-green {
+            background: var(--green);
+            color: var(--text-dark);
+        }
+        .btn-green:hover { background: var(--green-dark); transform: scale(1.02); }
+        .btn-outline {
+            background: var(--white);
+            border: 2px solid var(--pink);
+            color: var(--pink-dark);
+        }
+        .btn-outline:hover { background: var(--pink-light); }
+        
+        /* 主容器 */
+        .main-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 24px;
+        }
+        
+        /* 数据流卡片 */
+        .flow-card {
+            background: var(--white);
+            border-radius: 24px;
+            padding: 32px;
+            margin-bottom: 24px;
+            box-shadow: 0 4px 20px var(--shadow);
+        }
+        .flow-title {
+            font-size: 18px;
+            color: var(--pink-dark);
+            margin-bottom: 20px;
+            text-align: center;
+        }
+        .flow-steps {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 12px;
+        }
+        .flow-step {
+            background: var(--pink-light);
+            padding: 16px 20px;
+            border-radius: 16px;
+            text-align: center;
+            min-width: 100px;
+            transition: all 0.2s;
+            cursor: pointer;
+        }
+        .flow-step:hover {
+            background: var(--pink);
+            transform: translateY(-2px);
+        }
+        .flow-step .icon {
+            font-size: 24px;
+            margin-bottom: 8px;
+        }
+        .flow-step .name {
+            font-weight: 600;
+            font-size: 14px;
+        }
+        .flow-step .count {
+            font-size: 12px;
+            color: var(--text-soft);
+            margin-top: 4px;
+        }
+        .flow-arrow {
+            color: var(--pink-dark);
+            font-size: 20px;
+        }
+        
+        /* 快速操作区 */
+        .quick-actions {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 16px;
+            margin-bottom: 24px;
+        }
+        .action-card {
+            background: var(--white);
+            border-radius: 16px;
+            padding: 24px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.2s;
+            box-shadow: 0 2px 8px var(--shadow);
+            border: 2px solid transparent;
+        }
+        .action-card:hover {
+            border-color: var(--pink);
+            transform: translateY(-4px);
+            box-shadow: 0 8px 24px var(--shadow);
+        }
+        .action-card .icon {
+            font-size: 32px;
+            margin-bottom: 12px;
+        }
+        .action-card .title {
+            font-weight: 600;
+            margin-bottom: 4px;
+        }
+        .action-card .desc {
+            font-size: 12px;
+            color: var(--text-soft);
+        }
+        
+        /* 当前配置概览 */
+        .overview-section {
+            background: var(--white);
+            border-radius: 24px;
+            padding: 32px;
+            box-shadow: 0 4px 20px var(--shadow);
+        }
+        .section-title {
+            font-size: 18px;
+            color: var(--pink-dark);
+            margin-bottom: 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .item-list {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+        .item {
+            background: var(--mint);
+            padding: 16px 20px;
+            border-radius: 12px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border: 2px solid transparent;
+            transition: all 0.2s;
+        }
+        .item:hover {
+            border-color: var(--green);
+        }
+        .item-info {
+            flex: 1;
+        }
+        .item-name {
+            font-weight: 600;
+            margin-bottom: 4px;
+        }
+        .item-detail {
+            font-size: 12px;
+            color: var(--text-soft);
+        }
+        .item-actions {
+            display: flex;
+            gap: 8px;
+        }
+        .icon-btn {
+            width: 36px;
+            height: 36px;
+            border: none;
+            border-radius: 50%;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 16px;
+            transition: all 0.2s;
+        }
+        .icon-btn.edit {
+            background: var(--pink-light);
+            color: var(--pink-dark);
+        }
+        .icon-btn.edit:hover { background: var(--pink); }
+        .icon-btn.delete {
+            background: #FFE4E1;
+            color: #CD5C5C;
+        }
+        .icon-btn.delete:hover { background: #FFB6C1; }
+        .empty-hint {
+            text-align: center;
+            padding: 40px;
+            color: var(--text-soft);
+        }
+        .empty-hint .icon {
+            font-size: 48px;
+            margin-bottom: 16px;
+            opacity: 0.5;
+        }
+        
+        /* 弹窗 */
+        .modal-overlay {
+            display: none;
+            position: fixed;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background: rgba(93, 78, 93, 0.5);
+            z-index: 1000;
+            justify-content: center;
+            align-items: center;
+        }
+        .modal-overlay.active { display: flex; }
+        .modal {
+            background: var(--white);
+            border-radius: 24px;
+            width: 90%;
+            max-width: 600px;
+            max-height: 85vh;
+            overflow-y: auto;
+            box-shadow: 0 8px 40px var(--shadow);
+        }
+        .modal-header {
+            padding: 24px;
+            border-bottom: 2px solid var(--pink-light);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .modal-header h3 {
+            color: var(--pink-dark);
+            font-size: 20px;
+        }
+        .modal-close {
+            background: none;
+            border: none;
+            color: var(--text-soft);
+            font-size: 28px;
+            cursor: pointer;
+            line-height: 1;
+        }
+        .modal-body {
+            padding: 24px;
+        }
+        .form-group {
+            margin-bottom: 20px;
+        }
+        .form-label {
+            display: block;
+            margin-bottom: 8px;
+            font-size: 14px;
+            font-weight: 600;
+            color: var(--text-dark);
+        }
+        .form-input, .form-select, .form-textarea {
+            width: 100%;
+            padding: 12px 16px;
+            background: var(--mint);
+            border: 2px solid var(--pink-light);
+            border-radius: 12px;
+            color: var(--text-dark);
+            font-size: 14px;
+            transition: all 0.2s;
+        }
+        .form-input:focus, .form-select:focus, .form-textarea:focus {
+            outline: none;
+            border-color: var(--pink);
+        }
+        .form-textarea {
+            min-height: 100px;
+            resize: vertical;
+        }
+        .form-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 16px;
+        }
+        .form-hint {
+            font-size: 12px;
+            color: var(--text-soft);
+            margin-top: 6px;
+        }
+        .form-actions {
+            display: flex;
+            gap: 12px;
+            justify-content: flex-end;
+            margin-top: 24px;
+            padding-top: 20px;
+            border-top: 2px solid var(--pink-light);
+        }
+        .tag {
+            display: inline-block;
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 600;
+        }
+        .tag-npc { background: var(--pink-light); color: var(--pink-dark); }
+        .tag-player { background: var(--green-light); color: var(--green-dark); }
+        .tag-world { background: #E6E6FA; color: #7B68EE; }
+        .tag-stat { background: #E0FFFF; color: #008B8B; }
+        .tag-relation { background: #FFE4E1; color: #CD5C5C; }
+        
+        /* 隐藏的面板 */
+        .panel { display: none; }
+        .panel.active { display: block; }
+        
+        /* 步骤指引 */
+        .guide-steps {
+            background: var(--cream);
+            border-radius: 16px;
+            padding: 24px;
+            margin-bottom: 24px;
+        }
+        .guide-steps h4 {
+            color: var(--pink-dark);
+            margin-bottom: 16px;
+        }
+        .guide-steps ol {
+            padding-left: 20px;
+            color: var(--text-soft);
+            line-height: 2;
+        }
+        
+        /* 布局：AI 侧栏 + 主区 */
+        .layout { display: flex; align-items: flex-start; }
+        .layout .main-container { flex: 1; min-width: 0; }
+        
+        /* AI 侧栏 */
+        .ai-sidebar {
+            width: 320px;
+            min-width: 320px;
+            background: var(--white);
+            padding: 24px 20px;
+            box-shadow: 2px 0 12px var(--shadow);
+            position: sticky;
+            top: 66px;
+            max-height: calc(100vh - 66px);
+            overflow-y: auto;
+        }
+        .ai-title { font-size: 18px; color: var(--pink-dark); font-weight: 600; margin-bottom: 4px; }
+        .ai-desc { font-size: 12px; color: var(--text-soft); margin-bottom: 16px; line-height: 1.6; }
+        .ai-sidebar .form-input, .ai-sidebar .form-textarea { margin-bottom: 12px; }
+        .ai-meta {
+            font-size: 12px;
+            color: var(--text-soft);
+            background: var(--cream);
+            border-radius: 12px;
+            padding: 10px 12px;
+            margin-bottom: 12px;
+            line-height: 1.8;
+            word-break: break-all;
+        }
+        .ai-status { font-size: 13px; margin-top: 12px; min-height: 18px; color: var(--text-soft); }
+        .ai-review {
+            background: var(--mint);
+            border: 2px solid var(--green);
+            border-radius: 12px;
+            padding: 16px;
+            margin-top: 12px;
+            font-size: 13px;
+            display: none;
+        }
+        .ai-review.active { display: block; }
+        .ai-review h4 { color: var(--green-dark); margin-bottom: 8px; }
+        .ai-review .review-line { padding: 2px 0; }
+        .ai-review .review-btns { display: flex; gap: 8px; margin-top: 12px; }
+        .ai-review details { margin-top: 10px; font-size: 12px; }
+        .ai-review pre {
+            max-height: 160px; overflow: auto;
+            background: var(--white); padding: 8px; border-radius: 8px;
+            font-size: 11px;
+        }
+        
+        /* 侧栏折叠 */
+        .ai-sidebar { transition: width .25s, min-width .25s, padding .25s; }
+        .ai-title { display: flex; justify-content: space-between; align-items: center; }
+        .ai-fold-btn {
+            background: none; border: none; color: var(--text-soft);
+            cursor: pointer; font-size: 12px; white-space: nowrap;
+        }
+        .ai-fold-btn:hover { color: var(--pink-dark); }
+        .ai-strip { display: none; }
+        .ai-sidebar.collapsed { width: 48px; min-width: 48px; padding: 16px 4px; }
+        .ai-sidebar.collapsed .ai-content { display: none; }
+        .ai-sidebar.collapsed .ai-strip { display: block; }
+        .ai-strip {
+            writing-mode: vertical-rl;
+            letter-spacing: 4px;
+            color: var(--pink-dark);
+            font-weight: 600;
+            font-size: 14px;
+            cursor: pointer;
+            text-align: center;
+            padding: 8px 0;
+            user-select: none;
+        }
+        .ai-step { font-weight: 600; color: var(--text-dark); margin: 10px 0 6px; font-size: 13px; }
+        
+        /* 跑一遍按钮 */
+        .run-row { text-align: center; margin-top: 20px; }
+        
+        /* 数据流高亮（预览时） */
+        .flow-step.flow-active {
+            background: var(--pink-dark);
+            color: var(--white);
+            animation: pulse 1s infinite;
+        }
+        .flow-step.flow-active .count { color: var(--white); }
+        @keyframes pulse {
+            50% { transform: scale(1.08); box-shadow: 0 0 0 8px rgba(255,145,164,.25); }
+        }
+        
+        /* 预览播放器 */
+        .player-overlay {
+            display: none;
+            position: fixed;
+            inset: 0;
+            background: rgba(93,78,93,0.6);
+            z-index: 2000;
+            justify-content: center;
+            align-items: center;
+        }
+        .player-overlay.active { display: flex; }
+        .player-box {
+            width: 92%;
+            max-width: 720px;
+            max-height: 90vh;
+            background: var(--white);
+            border-radius: 24px;
+            box-shadow: 0 8px 40px var(--shadow);
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+        }
+        .player-header {
+            padding: 16px 24px;
+            border-bottom: 2px solid var(--pink-light);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .player-header .p-title { color: var(--pink-dark); font-weight: 600; font-size: 18px; }
+        .player-bars {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            padding: 12px 24px;
+            background: var(--mint);
+        }
+        .p-bar {
+            background: var(--white);
+            border-radius: 12px;
+            padding: 6px 12px;
+            font-size: 12px;
+            min-width: 130px;
+            border: 2px solid var(--green-light);
+            transition: border-color .3s;
+            position: relative;
+        }
+        .p-bar.changed { border-color: var(--pink-dark); }
+        .p-bar .p-bar-name { color: var(--text-soft); margin-right: 6px; }
+        .p-bar .p-bar-val { font-weight: 700; color: var(--green-dark); }
+        .p-bar .p-bar-track {
+            height: 6px;
+            background: var(--pink-light);
+            border-radius: 3px;
+            margin-top: 4px;
+            overflow: hidden;
+        }
+        .p-bar .p-bar-fill {
+            height: 100%;
+            background: var(--green);
+            border-radius: 3px;
+            transition: width .5s;
+        }
+        .float-delta {
+            position: absolute;
+            top: -10px;
+            right: 8px;
+            color: var(--pink-dark);
+            font-weight: 700;
+            font-size: 14px;
+            animation: floatUp 1.2s forwards;
+        }
+        @keyframes floatUp {
+            from { opacity: 1; transform: translateY(0); }
+            to { opacity: 0; transform: translateY(-18px); }
+        }
+        .player-stage { padding: 24px 24px 8px; overflow-y: auto; }
+        .event-tag { font-size: 12px; color: var(--text-soft); margin-bottom: 10px; }
+        .dlg-box {
+            background: linear-gradient(135deg, var(--pink-light), var(--green-light));
+            border-radius: 20px;
+            padding: 24px;
+            position: relative;
+            min-height: 130px;
+            border: 3px solid var(--white);
+            box-shadow: 0 4px 16px var(--shadow);
+        }
+        .dlg-name {
+            position: absolute;
+            top: -14px;
+            left: 20px;
+            background: var(--pink);
+            color: var(--text-dark);
+            padding: 4px 16px;
+            border-radius: 14px;
+            font-weight: 600;
+            font-size: 14px;
+        }
+        .dlg-text { font-size: 16px; line-height: 1.9; min-height: 56px; margin-top: 8px; }
+        .dlg-hint {
+            text-align: right;
+            font-size: 12px;
+            color: var(--text-soft);
+            margin-top: 8px;
+            animation: blink 1.2s infinite;
+        }
+        @keyframes blink { 50% { opacity: .3; } }
+        .player-choices {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            padding: 0 24px;
+        }
+        .choice-btn {
+            background: var(--white);
+            border: 2px solid var(--green);
+            border-radius: 14px;
+            padding: 12px 18px;
+            cursor: pointer;
+            font-size: 14px;
+            text-align: left;
+            transition: all .2s;
+        }
+        .choice-btn:hover { background: var(--green-light); transform: translateX(4px); }
+        .player-log {
+            background: var(--cream);
+            border-radius: 12px;
+            padding: 12px 16px;
+            margin: 16px 24px 0;
+            font-size: 12px;
+            color: var(--text-soft);
+            max-height: 110px;
+            overflow-y: auto;
+            line-height: 1.8;
+        }
+        .player-log .log-fire { color: var(--pink-dark); font-weight: 600; }
+        .player-controls {
+            padding: 16px 24px;
+            display: flex;
+            gap: 12px;
+            justify-content: flex-end;
+        }
+        .icon-btn.play { background: var(--green-light); color: var(--green-dark); }
+        .icon-btn.play:hover { background: var(--green); }
+        
+        /* 配置分类 */
+        .cat-block {
+            scroll-margin-top: 90px;
+            border-radius: 12px;
+            padding: 8px;
+            margin: -8px;
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+        .cat-block.flash { animation: catFlash 1.2s; }
+        @keyframes catFlash {
+            0%, 60% { background: var(--cream); }
+            100% { background: transparent; }
+        }
+        .cat-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 0 4px;
+        }
+        .cat-name { font-weight: 600; color: var(--pink-dark); font-size: 15px; }
+        .cat-count {
+            background: var(--pink-light);
+            border-radius: 10px;
+            padding: 1px 8px;
+            font-size: 12px;
+            margin-left: 6px;
+        }
+        .cat-add {
+            background: var(--white);
+            border: 1px solid var(--green-dark);
+            color: var(--green-dark);
+            border-radius: 12px;
+            padding: 3px 12px;
+            font-size: 12px;
+            cursor: pointer;
+        }
+        .cat-add:hover { background: var(--green-light); }
+        
+        @media (max-width: 900px) {
+            .layout { flex-direction: column; }
+            .ai-sidebar { width: 100%; min-width: 0; position: static; max-height: none; }
+        }
+        @media (max-width: 768px) {
+            .flow-steps { flex-direction: column; }
+            .flow-arrow { transform: rotate(90deg); }
+            .form-row { grid-template-columns: 1fr; }
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1>聚光灯2026 · 叙事配置</h1>
+        <div class="header-actions">
+            <button class="btn btn-outline" onclick="exportConfig()">导出</button>
+            <button class="btn btn-outline" onclick="importConfig()">导入</button>
+            <button class="btn btn-pink" onclick="generateLuban()">生成 Excel</button>
+        </div>
+    </div>
+
+    <div class="layout">
+        <!-- AI 侧栏 -->
+        <aside class="ai-sidebar collapsed" id="ai-sidebar">
+            <div class="ai-strip" onclick="toggleAiSidebar()">AI 助手 ▸</div>
+            <div class="ai-content">
+                <div class="ai-title">
+                    <span>AI 剧情助手</span>
+                    <button class="ai-fold-btn" onclick="toggleAiSidebar()">◂ 收起</button>
+                </div>
+                <div class="ai-desc">不给工具配 API，改用你自己的网页 AI：复制提示词 → 发给 AI → 把返回的 JSON 粘回来</div>
+                <div class="ai-step">第 1 步：写剧情</div>
+                <textarea class="form-textarea" id="ai-story" placeholder="例如：老陈是茶馆老板，初始对玩家信任为 0。玩家陪他喝茶，信任 +1；信任到 2 时，老陈会送玩家一包茶叶。"></textarea>
+                <button class="btn btn-green" style="width:100%" onclick="copyAiPrompt()">第 2 步：复制提示词（含剧情）</button>
+                <div class="ai-step">第 3 步：粘回 AI 返回的 JSON</div>
+                <textarea class="form-textarea" id="ai-json" placeholder="把网页 AI 返回的 JSON 原样粘贴到这里"></textarea>
+                <button class="btn btn-pink" style="width:100%" onclick="parseAiJson()">解析并预览</button>
+                <div class="ai-status" id="ai-status"></div>
+                <div class="ai-review" id="ai-review"></div>
+            </div>
+        </aside>
+
+        <div class="main-container">
+        <!-- 数据流主页 -->
+        <div class="flow-card">
+            <div class="flow-title">叙事是怎么流动的？</div>
+            <div class="flow-steps">
+                <div class="flow-step" id="fs-objects" onclick="showPanel('objects')">
+                    <div class="name">对象</div>
+                    <div class="count" id="count-objects">0 个</div>
+                </div>
+                <div class="flow-arrow">&#10148;</div>
+                <div class="flow-step" id="fs-bars" onclick="showPanel('bars')">
+                    <div class="name">进度条</div>
+                    <div class="count" id="count-bars">0 条</div>
+                </div>
+                <div class="flow-arrow">&#10148;</div>
+                <div class="flow-step" id="fs-triggers" onclick="showPanel('triggers')">
+                    <div class="name">触发点</div>
+                    <div class="count" id="count-triggers">0 个</div>
+                </div>
+                <div class="flow-arrow">&#10148;</div>
+                <div class="flow-step" id="fs-events" onclick="showPanel('events')">
+                    <div class="name">事件</div>
+                    <div class="count" id="count-events">0 个</div>
+                </div>
+                <div class="flow-arrow">&#10148;</div>
+                <div class="flow-step" id="fs-results" onclick="showPanel('results')">
+                    <div class="name">结果</div>
+                    <div class="count" id="count-results">0 条</div>
+                </div>
+            </div>
+            <div class="run-row">
+                <button class="btn btn-pink" onclick="startPreview()">跑一遍（预览整条剧情链）</button>
+            </div>
+        </div>
+
+        <!-- 快速操作 -->
+        <div class="quick-actions">
+            <div class="action-card" onclick="openModal('object')">
+                <div class="title">添加角色</div>
+                <div class="desc">NPC / 玩家 / 世界</div>
+            </div>
+            <div class="action-card" onclick="openModal('bar')">
+                <div class="title">添加进度条</div>
+                <div class="desc">信任 / 天数 / 状态</div>
+            </div>
+            <div class="action-card" onclick="openModal('event')">
+                <div class="title">添加事件</div>
+                <div class="desc">对话 / 剧情</div>
+            </div>
+            <div class="action-card" onclick="openModal('text')">
+                <div class="title">添加文本</div>
+                <div class="desc">标题 / 对话内容</div>
+            </div>
+        </div>
+
+        <!-- 步骤指引 -->
+        <div class="guide-steps">
+            <h4>怎么写一个剧情？</h4>
+            <ol>
+                <li>先添加「对象」：谁参与了剧情（如：老陈）</li>
+                <li>添加「进度条」：记录什么状态（如：老陈对玩家的信任）</li>
+                <li>添加「触发点」：信任到几点触发事件</li>
+                <li>添加「事件」：触发后发生什么对话</li>
+                <li>添加「文本」：对话的具体内容</li>
+                <li>添加「结果」：对话后信任 +1</li>
+                <li>点「跑一遍」预览整条剧情链</li>
+            </ol>
+            <div style="margin-top:12px;font-size:13px;color:var(--text-soft)">也可以直接在左侧用大白话写剧情，让 AI 帮你生成以上全部配置</div>
+        </div>
+
+        <!-- 当前配置 -->
+        <div class="overview-section">
+            <div class="section-title">
+                <span>当前配置</span>
+                <span style="font-size:14px;color:var(--text-soft)" id="total-count">共 0 项</span>
+            </div>
+            <div class="item-list" id="overview-list">
+                <div class="empty-hint">
+                    <div>还没有配置，点击上方按钮开始创作</div>
+                </div>
+            </div>
+        </div>
+        </div>
+    </div>
+
+    <!-- 预览播放器 -->
+    <div class="player-overlay" id="player-overlay">
+        <div class="player-box">
+            <div class="player-header">
+                <span class="p-title">剧情预览</span>
+                <button class="modal-close" onclick="closePlayer()">&times;</button>
+            </div>
+            <div class="player-bars" id="player-bars"></div>
+            <div class="player-stage" id="player-dialog"></div>
+            <div class="player-choices" id="player-choices"></div>
+            <div class="player-log" id="player-log"></div>
+            <div class="player-controls">
+                <button class="btn btn-outline" onclick="skipEvent()">跳过事件</button>
+                <button class="btn btn-pink" id="btn-next-line" onclick="nextLine()">下一句</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- 弹窗 -->
+    <div class="modal-overlay" id="modal-overlay" onclick="closeModalOnOverlay(event)">
+        <div class="modal">
+            <div class="modal-header">
+                <h3 id="modal-title">新建</h3>
+                <button class="modal-close" onclick="closeModal()">&times;</button>
+            </div>
+            <div class="modal-body" id="modal-body"></div>
+        </div>
+    </div>
+
+    <script>
+        // ==================== 数据存储 ====================
+        let config = {
+            objects: [],
+            bars: [],
+            triggers: [],
+            events: [],
+            eventDates: [],
+            results: [],
+            conditions: [],
+            setups: [],
+            choices: [],
+            texts: []
+        };
+        
+        // 当前显示的详细面板
+        let currentPanel = 'overview';
+
+        // ==================== 工具函数 ====================
+        function generateId(prefix) {
+            return prefix + '_' + Date.now().toString(36) + '_' + Math.random().toString(36).substr(2, 5);
+        }
+
+        function showPanel(type) {
+            // 点击数据流节点：跳到下方对应分类并高亮；该分类还没有配置则直接打开新建表单
+            const el = document.getElementById('cat-' + type);
+            if (el) {
+                el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                el.classList.remove('flash');
+                void el.offsetWidth; // 重启动画
+                el.classList.add('flash');
+            } else {
+                openModal(type);
+            }
+        }
+
+        function openModal(type, editIndex = -1) {
+            const overlay = document.getElementById('modal-overlay');
+            const title = document.getElementById('modal-title');
+            const body = document.getElementById('modal-body');
+            overlay.classList.add('active');
+            
+            const forms = {
+                object: getObjectForm,
+                bar: getBarForm,
+                trigger: getTriggerForm,
+                event: getEventForm,
+                date: getDateForm,
+                result: getResultForm,
+                condition: getConditionForm,
+                setup: getSetupForm,
+                choice: getChoiceForm,
+                text: getTextForm
+            };
+            
+            const names = {
+                object: '对象', bar: '进度条', trigger: '触发点', event: '事件',
+                date: '日期事件', result: '结果', condition: '条件',
+                setup: '演出', choice: '选项', text: '文本'
+            };
+            
+            title.textContent = (editIndex >= 0 ? '编辑' : '新建') + names[type];
+            body.innerHTML = forms[type](editIndex);
+            
+            if (type === 'text') {
+                setTimeout(() => updateKeyPreview(), 100);
+            }
+        }
+
+        function closeModal() {
+            document.getElementById('modal-overlay').classList.remove('active');
+        }
+
+        function closeModalOnOverlay(e) {
+            if (e.target === document.getElementById('modal-overlay')) closeModal();
+        }
+
+        // ==================== 表单生成 ====================
+        function getObjectForm(editIndex) {
+            const item = editIndex >= 0 ? config.objects[editIndex] : {};
+            return `
+                <div class="form-group">
+                    <label class="form-label">ID（英文，如 npc_chen）*</label>
+                    <input class="form-input" id="f-objId" value="${item.objId || ''}" placeholder="npc_角色英文名">
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label class="form-label">类型 *</label>
+                        <select class="form-select" id="f-objType">
+                            <option value="npc" ${item.objType === 'npc' ? 'selected' : ''}>NPC</option>
+                            <option value="player" ${item.objType === 'player' ? 'selected' : ''}>玩家</option>
+                            <option value="world" ${item.objType === 'world' ? 'selected' : ''}>世界</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">名字（text key）*</label>
+                        <input class="form-input" id="f-nameText" value="${item.nameText || ''}" placeholder="如 npc.chen.name">
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label class="form-label">头像路径</label>
+                    <input class="form-input" id="f-iconPath" value="${item.iconPath || ''}" placeholder="如 Art/Npc/chen.png">
+                </div>
+                <div class="form-actions">
+                    <button class="btn btn-outline" onclick="closeModal()">取消</button>
+                    <button class="btn btn-pink" onclick="saveObject(${editIndex})">保存</button>
+                </div>
+            `;
+        }
+
+        function getBarForm(editIndex) {
+            const item = editIndex >= 0 ? config.bars[editIndex] : {};
+            const objOptions = config.objects.map(o => `<option value="${o.objId}" ${item.ownerId === o.objId ? 'selected' : ''}>${o.objId}</option>`).join('');
+            return `
+                <div class="form-row">
+                    <div class="form-group">
+                        <label class="form-label">归属对象 *</label>
+                        <select class="form-select" id="f-ownerId">${objOptions}</select>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">条名（英文，如 trust）*</label>
+                        <input class="form-input" id="f-barId" value="${item.barId || ''}" placeholder="如 trust">
+                    </div>
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label class="form-label">类型 *</label>
+                        <select class="form-select" id="f-barType">
+                            <option value="stat" ${item.barType === 'stat' ? 'selected' : ''}>属性（0~20）</option>
+                            <option value="relation" ${item.barType === 'relation' ? 'selected' : ''}>关系（-2~5）</option>
+                            <option value="world" ${item.barType === 'world' ? 'selected' : ''}>世界（0~10）</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">关系目标（如 player）</label>
+                        <select class="form-select" id="f-targetId">
+                            <option value="">无</option>
+                            ${config.objects.map(o => `<option value="${o.objId}" ${item.targetId === o.objId ? 'selected' : ''}>${o.objId}</option>`).join('')}
+                        </select>
+                    </div>
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label class="form-label">初始值</label>
+                        <input class="form-input" type="number" id="f-initValue" value="${item.initValue || 0}">
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">推进方式</label>
+                        <select class="form-select" id="f-advanceMode">
+                            <option value="event_driven" ${item.advanceMode === 'event_driven' ? 'selected' : ''}>事件驱动</option>
+                            <option value="monotonic" ${item.advanceMode === 'monotonic' ? 'selected' : ''}>自动推进</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label class="form-label">名字（text key）*</label>
+                    <input class="form-input" id="f-nameText" value="${item.nameText || ''}" placeholder="如 bar.trust.name">
+                </div>
+                <div class="form-actions">
+                    <button class="btn btn-outline" onclick="closeModal()">取消</button>
+                    <button class="btn btn-pink" onclick="saveBar(${editIndex})">保存</button>
+                </div>
+            `;
+        }
+
+        function getTriggerForm(editIndex) {
+            const item = editIndex >= 0 ? config.triggers[editIndex] : {};
+            const barOptions = config.bars.map(b => `<option value="${b.barKey || b.ownerId + '.' + b.barId}" ${item.barKey === (b.barKey || b.ownerId + '.' + b.barId) ? 'selected' : ''}>${b.barKey || b.ownerId + '.' + b.barId}</option>`).join('');
+            const eventOptions = config.events.map(e => `<option value="${e.eventId}" ${item.eventId === e.eventId ? 'selected' : ''}>${e.eventId}</option>`).join('');
+            return `
+                <div class="form-group">
+                    <label class="form-label">触发点 ID *</label>
+                    <input class="form-input" id="f-triggerId" value="${item.triggerId || ''}" placeholder="如 T_CHEN_TRUST_2">
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label class="form-label">绑定进度条 *</label>
+                        <select class="form-select" id="f-barKey">${barOptions}</select>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">阈值 *</label>
+                        <input class="form-input" type="number" id="f-threshold" value="${item.threshold || 1}">
+                    </div>
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label class="form-label">方向</label>
+                        <select class="form-select" id="f-direction">
+                            <option value="up" ${item.direction === 'up' ? 'selected' : ''}>上升穿过</option>
+                            <option value="down" ${item.direction === 'down' ? 'selected' : ''}>下降穿过</option>
+                            <option value="both" ${item.direction === 'both' ? 'selected' : ''}>双向</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">触发方式</label>
+                        <select class="form-select" id="f-crossType">
+                            <option value="cross" ${item.crossType === 'cross' ? 'selected' : ''}>穿过时触发</option>
+                            <option value="hold" ${item.crossType === 'hold' ? 'selected' : ''}>持续停留触发</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label class="form-label">次数</label>
+                        <select class="form-select" id="f-onceType">
+                            <option value="once" ${item.onceType === 'once' ? 'selected' : ''}>只触发一次</option>
+                            <option value="repeat" ${item.onceType === 'repeat' ? 'selected' : ''}>每次穿过都触发</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">触发事件 *</label>
+                        <select class="form-select" id="f-eventId">${eventOptions}</select>
+                    </div>
+                </div>
+                <div class="form-actions">
+                    <button class="btn btn-outline" onclick="closeModal()">取消</button>
+                    <button class="btn btn-pink" onclick="saveTrigger(${editIndex})">保存</button>
+                </div>
+            `;
+        }
+
+        function getEventForm(editIndex) {
+            const item = editIndex >= 0 ? config.events[editIndex] : {};
+            const objOptions = config.objects.map(o => `<option value="${o.objId}" ${item.actorId === o.objId ? 'selected' : ''}>${o.objId}</option>`).join('');
+            const setupOptions = config.setups.map(s => `<option value="${s.setupKey}" ${item.setupKey === s.setupKey ? 'selected' : ''}>${s.setupKey}</option>`).join('');
+            return `
+                <div class="form-group">
+                    <label class="form-label">事件 ID *</label>
+                    <input class="form-input" id="f-eventId" value="${item.eventId || ''}" placeholder="如 EV_CHEN_TEA">
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label class="form-label">类型 *</label>
+                        <select class="form-select" id="f-eventKind">
+                            <option value="actor" ${item.eventKind === 'actor' ? 'selected' : ''}>人物事件</option>
+                            <option value="world" ${item.eventKind === 'world' ? 'selected' : ''}>世界事件</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">施动者 *</label>
+                        <select class="form-select" id="f-actorId">${objOptions}</select>
+                    </div>
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label class="form-label">受动者</label>
+                        <select class="form-select" id="f-targetId">
+                            <option value="">无</option>
+                            ${config.objects.map(o => `<option value="${o.objId}" ${item.targetId === o.objId ? 'selected' : ''}>${o.objId}</option>`).join('')}
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">标题（text key）*</label>
+                        <input class="form-input" id="f-titleText" value="${item.titleText || ''}" placeholder="如 ev.chen_tea.title">
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label class="form-label">正文 keys（用 | 分隔）*</label>
+                    <input class="form-input" id="f-contentKeys" value="${item.contentKeys || ''}" placeholder="如 ev.chen_tea.body.1|ev.chen_tea.body.2">
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label class="form-label">演出参数集</label>
+                        <select class="form-select" id="f-setupKey">
+                            <option value="">自动创建</option>
+                            ${setupOptions}
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">只播放一次</label>
+                        <select class="form-select" id="f-onceOnly">
+                            <option value="true" ${item.onceOnly !== false ? 'selected' : ''}>是</option>
+                            <option value="false" ${item.onceOnly === false ? 'selected' : ''}>否</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="form-actions">
+                    <button class="btn btn-outline" onclick="closeModal()">取消</button>
+                    <button class="btn btn-pink" onclick="saveEvent(${editIndex})">保存</button>
+                </div>
+            `;
+        }
+
+        function getResultForm(editIndex) {
+            const item = editIndex >= 0 ? config.results[editIndex] : {};
+            const eventOptions = config.events.map(e => `<option value="${e.eventId}" ${item.eventId === e.eventId ? 'selected' : ''}>${e.eventId}</option>`).join('');
+            return `
+                <div class="form-group">
+                    <label class="form-label">结果 ID *</label>
+                    <input class="form-input" id="f-resultId" value="${item.resultId || ''}" placeholder="如 R_CHEN_TRUST_1">
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label class="form-label">所属事件 *</label>
+                        <select class="form-select" id="f-eventId">${eventOptions}</select>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">顺序</label>
+                        <input class="form-input" type="number" id="f-seq" value="${item.seq || 0}">
+                    </div>
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label class="form-label">结果类型 *</label>
+                        <select class="form-select" id="f-resultType">
+                            <option value="BAR_ADD" ${item.resultType === 'BAR_ADD' ? 'selected' : ''}>进度条增减</option>
+                            <option value="BAR_SET" ${item.resultType === 'BAR_SET' ? 'selected' : ''}>进度条赋值</option>
+                            <option value="SET_FLAG" ${item.resultType === 'SET_FLAG' ? 'selected' : ''}>置位标记</option>
+                            <option value="CLEAR_FLAG" ${item.resultType === 'CLEAR_FLAG' ? 'selected' : ''}>清除标记</option>
+                            <option value="SPAWN_NPC" ${item.resultType === 'SPAWN_NPC' ? 'selected' : ''}>NPC 登场</option>
+                            <option value="DESPAWN_NPC" ${item.resultType === 'DESPAWN_NPC' ? 'selected' : ''}>NPC 离场</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">目标 *</label>
+                        <input class="form-input" id="f-target" value="${item.target || ''}" placeholder="如 bar:npc_chen.trust">
+                    </div>
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label class="form-label">参数值</label>
+                        <input class="form-input" id="f-value" value="${item.value || ''}" placeholder="如 +1 或 true">
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">备注</label>
+                        <input class="form-input" id="f-note" value="${item.note || ''}" placeholder="说明作用">
+                    </div>
+                </div>
+                <div class="form-actions">
+                    <button class="btn btn-outline" onclick="closeModal()">取消</button>
+                    <button class="btn btn-pink" onclick="saveResult(${editIndex})">保存</button>
+                </div>
+            `;
+        }
+
+        function getTextForm(editIndex) {
+            const item = editIndex >= 0 ? config.texts[editIndex] : {};
+            return `
+                <div class="form-group">
+                    <label class="form-label">文本 Key *</label>
+                    <div style="display:flex;gap:8px">
+                        <input class="form-input" id="f-key" value="${item.key || ''}" placeholder="如 ev.chen_tea.title" oninput="updateKeyPreview()">
+                        <button type="button" class="btn btn-green" onclick="autoGenerateKey()" style="white-space:nowrap;padding:0 16px">自动生成</button>
+                    </div>
+                    <div id="key-suggestions" style="margin-top:8px;font-size:12px"></div>
+                </div>
+                <div class="form-group">
+                    <label class="form-label">文本内容 *</label>
+                    <textarea class="form-textarea" id="f-content" placeholder="输入显示的文本">${item.content || ''}</textarea>
+                </div>
+                <div class="form-group">
+                    <label class="form-label">备注</label>
+                    <input class="form-input" id="f-comment" value="${item.comment || ''}" placeholder="这段文字用在哪里">
+                </div>
+                <div class="form-group" style="background:var(--cream);padding:16px;border-radius:12px">
+                    <label class="form-label" style="margin-bottom:8px">这个 Key 会被谁使用？</label>
+                    <div id="key-usage" style="font-size:13px;color:var(--text-soft)">输入 key 后自动检测</div>
+                </div>
+                <div class="form-actions">
+                    <button class="btn btn-outline" onclick="closeModal()">取消</button>
+                    <button class="btn btn-pink" onclick="saveText(${editIndex})">保存</button>
+                </div>
+            `;
+        }
+
+        function getSetupForm(editIndex) {
+            const item = editIndex >= 0 ? config.setups[editIndex] : {};
+            return `
+                <div class="form-group">
+                    <label class="form-label">参数集 Key *</label>
+                    <input class="form-input" id="f-setupKey" value="${item.setupKey || ''}" placeholder="如 chen_tea">
+                </div>
+                <div class="form-group">
+                    <label class="form-label">对话内容（text keys，用 | 分隔）*</label>
+                    <textarea class="form-textarea" id="f-slotValues" placeholder="lines=ev.chen_tea.body.1|ev.chen_tea.body.2">${item.slotValues || ''}</textarea>
+                    <div class="form-hint">格式：lines=key1|key2|key3，speaker=角色ID，opts=选项组key</div>
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label class="form-label">可跳过</label>
+                        <select class="form-select" id="f-skipAble">
+                            <option value="false" ${item.skipAble !== true ? 'selected' : ''}>否</option>
+                            <option value="true" ${item.skipAble === true ? 'selected' : ''}>是</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">自动推进</label>
+                        <select class="form-select" id="f-autoAdvance">
+                            <option value="false" ${item.autoAdvance !== true ? 'selected' : ''}>否</option>
+                            <option value="true" ${item.autoAdvance === true ? 'selected' : ''}>是</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="form-actions">
+                    <button class="btn btn-outline" onclick="closeModal()">取消</button>
+                    <button class="btn btn-pink" onclick="saveSetup(${editIndex})">保存</button>
+                </div>
+            `;
+        }
+
+        function getChoiceForm(editIndex) {
+            const item = editIndex >= 0 ? config.choices[editIndex] : {};
+            return `
+                <div class="form-group">
+                    <label class="form-label">选项 ID *</label>
+                    <input class="form-input" id="f-choiceId" value="${item.choiceId || ''}" placeholder="如 CHOICE_TEA_A">
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label class="form-label">选项组 *</label>
+                        <input class="form-input" id="f-groupKey" value="${item.groupKey || ''}" placeholder="如 tea_choice">
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">文本 key *</label>
+                        <input class="form-input" id="f-textKey" value="${item.textKey || ''}" placeholder="如 choice.tea.a">
+                    </div>
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label class="form-label">结果宿主 ID</label>
+                        <input class="form-input" id="f-resultOwnerId" value="${item.resultOwnerId || ''}" placeholder="默认同选项 ID">
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">排序</label>
+                        <input class="form-input" type="number" id="f-seq" value="${item.seq || 0}">
+                    </div>
+                </div>
+                <div class="form-actions">
+                    <button class="btn btn-outline" onclick="closeModal()">取消</button>
+                    <button class="btn btn-pink" onclick="saveChoice(${editIndex})">保存</button>
+                </div>
+            `;
+        }
+
+        function getConditionForm(editIndex) {
+            const item = editIndex >= 0 ? config.conditions[editIndex] : {};
+            return `
+                <div class="form-group">
+                    <label class="form-label">条件 ID *</label>
+                    <input class="form-input" id="f-conditionId" value="${item.conditionId || ''}" placeholder="如 C_CHEN_TRUST_3">
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label class="form-label">宿主类型</label>
+                        <select class="form-select" id="f-ownerType">
+                            <option value="event" ${item.ownerType === 'event' ? 'selected' : ''}>事件</option>
+                            <option value="choice" ${item.ownerType === 'choice' ? 'selected' : ''}>选项</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">宿主 ID *</label>
+                        <input class="form-input" id="f-ownerId" value="${item.ownerId || ''}" placeholder="如 EV_CHEN_TEA">
+                    </div>
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label class="form-label">条件类型 *</label>
+                        <select class="form-select" id="f-condType">
+                            <option value="BAR_GTE" ${item.condType === 'BAR_GTE' ? 'selected' : ''}>进度条 >=</option>
+                            <option value="BAR_LTE" ${item.condType === 'BAR_LTE' ? 'selected' : ''}>进度条 <=</option>
+                            <option value="FLAG_SET" ${item.condType === 'FLAG_SET' ? 'selected' : ''}>标记已置位</option>
+                            <option value="FLAG_CLEAR" ${item.condType === 'FLAG_CLEAR' ? 'selected' : ''}>标记未置位</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">目标 *</label>
+                        <input class="form-input" id="f-target" value="${item.target || ''}" placeholder="如 bar:npc_chen.trust">
+                    </div>
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label class="form-label">比较值</label>
+                        <input class="form-input" id="f-value" value="${item.value || ''}" placeholder="如 3">
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">分组</label>
+                        <input class="form-input" type="number" id="f-groupIndex" value="${item.groupIndex || 0}">
+                    </div>
+                </div>
+                <div class="form-actions">
+                    <button class="btn btn-outline" onclick="closeModal()">取消</button>
+                    <button class="btn btn-pink" onclick="saveCondition(${editIndex})">保存</button>
+                </div>
+            `;
+        }
+
+        function getDateForm(editIndex) {
+            const item = editIndex >= 0 ? config.eventDates[editIndex] : {};
+            const eventOptions = config.events.map(e => `<option value="${e.eventId}" ${item.eventId === e.eventId ? 'selected' : ''}>${e.eventId}</option>`).join('');
+            return `
+                <div class="form-group">
+                    <label class="form-label">事件 *</label>
+                    <select class="form-select" id="f-eventId">${eventOptions}</select>
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label class="form-label">第几天 *</label>
+                        <input class="form-input" type="number" id="f-day" value="${item.day || 1}">
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">时段</label>
+                        <select class="form-select" id="f-timeSlot">
+                            <option value="morning" ${item.timeSlot === 'morning' ? 'selected' : ''}>早上</option>
+                            <option value="noon" ${item.timeSlot === 'noon' ? 'selected' : ''}>中午</option>
+                            <option value="night" ${item.timeSlot === 'night' ? 'selected' : ''}>晚上</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label class="form-label">重复</label>
+                        <select class="form-select" id="f-repeatRule">
+                            <option value="once" ${item.repeatRule === 'once' ? 'selected' : ''}>只一次</option>
+                            <option value="daily" ${item.repeatRule === 'daily' ? 'selected' : ''}>每天</option>
+                            <option value="weekly" ${item.repeatRule === 'weekly' ? 'selected' : ''}>每周</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">优先级</label>
+                        <input class="form-input" type="number" id="f-priority" value="${item.priority || 100}">
+                    </div>
+                </div>
+                <div class="form-actions">
+                    <button class="btn btn-outline" onclick="closeModal()">取消</button>
+                    <button class="btn btn-pink" onclick="saveDate(${editIndex})">保存</button>
+                </div>
+            `;
+        }
+
+        // ==================== 保存函数 ====================
+        function saveObject(editIndex) {
+            const item = {
+                objId: document.getElementById('f-objId').value.trim(),
+                objType: document.getElementById('f-objType').value,
+                nameText: document.getElementById('f-nameText').value.trim(),
+                iconPath: document.getElementById('f-iconPath').value.trim()
+            };
+            if (!item.objId || !item.nameText) { alert('请填写必填字段'); return; }
+            if (editIndex >= 0) config.objects[editIndex] = item;
+            else config.objects.push(item);
+            closeModal();
+            renderAll();
+        }
+
+        function saveBar(editIndex) {
+            const ownerId = document.getElementById('f-ownerId').value;
+            const barId = document.getElementById('f-barId').value.trim();
+            const item = {
+                barKey: ownerId + '.' + barId,
+                ownerId: ownerId,
+                barId: barId,
+                targetId: document.getElementById('f-targetId').value,
+                barType: document.getElementById('f-barType').value,
+                min: document.getElementById('f-barType').value === 'relation' ? -2 : 0,
+                max: document.getElementById('f-barType').value === 'relation' ? 5 : (document.getElementById('f-barType').value === 'stat' ? 20 : 10),
+                direction: 'highIsGood',
+                advanceMode: document.getElementById('f-advanceMode').value,
+                initValue: parseInt(document.getElementById('f-initValue').value) || 0,
+                nameText: document.getElementById('f-nameText').value.trim()
+            };
+            if (!item.barId || !item.nameText) { alert('请填写必填字段'); return; }
+            if (editIndex >= 0) config.bars[editIndex] = item;
+            else config.bars.push(item);
+            closeModal();
+            renderAll();
+        }
+
+        function saveTrigger(editIndex) {
+            const item = {
+                triggerId: document.getElementById('f-triggerId').value.trim(),
+                barKey: document.getElementById('f-barKey').value,
+                threshold: parseInt(document.getElementById('f-threshold').value) || 1,
+                direction: document.getElementById('f-direction').value,
+                crossType: document.getElementById('f-crossType').value,
+                onceType: document.getElementById('f-onceType').value,
+                reachCount: 'all',
+                resetOnExit: true,
+                eventId: document.getElementById('f-eventId').value,
+                priority: 100,
+                enabled: true
+            };
+            if (!item.triggerId || !item.eventId) { alert('请填写必填字段'); return; }
+            if (editIndex >= 0) config.triggers[editIndex] = item;
+            else config.triggers.push(item);
+            closeModal();
+            renderAll();
+        }
+
+        function saveEvent(editIndex) {
+            const setupKey = document.getElementById('f-setupKey').value || document.getElementById('f-eventId').value.trim().toLowerCase();
+            const item = {
+                eventId: document.getElementById('f-eventId').value.trim(),
+                eventKind: document.getElementById('f-eventKind').value,
+                actorId: document.getElementById('f-actorId').value,
+                targetId: document.getElementById('f-targetId').value,
+                titleText: document.getElementById('f-titleText').value.trim(),
+                contentKeys: document.getElementById('f-contentKeys').value.trim(),
+                setupType: 'Tpl_Dialogue',
+                setupKey: setupKey,
+                onceOnly: document.getElementById('f-onceOnly').value === 'true',
+                logTag: ''
+            };
+            if (!item.eventId || !item.titleText || !item.contentKeys) { alert('请填写必填字段'); return; }
+            if (editIndex >= 0) config.events[editIndex] = item;
+            else config.events.push(item);
+            closeModal();
+            renderAll();
+        }
+
+        function saveResult(editIndex) {
+            const item = {
+                resultId: document.getElementById('f-resultId').value.trim(),
+                eventId: document.getElementById('f-eventId').value,
+                seq: parseInt(document.getElementById('f-seq').value) || 0,
+                resultType: document.getElementById('f-resultType').value,
+                target: document.getElementById('f-target').value.trim(),
+                value: document.getElementById('f-value').value.trim(),
+                note: document.getElementById('f-note').value.trim()
+            };
+            if (!item.resultId || !item.eventId || !item.target) { alert('请填写必填字段'); return; }
+            if (editIndex >= 0) config.results[editIndex] = item;
+            else config.results.push(item);
+            closeModal();
+            renderAll();
+        }
+
+        function saveText(editIndex) {
+            const item = {
+                key: document.getElementById('f-key').value.trim(),
+                content: document.getElementById('f-content').value.trim(),
+                comment: document.getElementById('f-comment').value.trim()
+            };
+            if (!item.key || !item.content) { alert('请填写必填字段'); return; }
+            if (editIndex >= 0) config.texts[editIndex] = item;
+            else config.texts.push(item);
+            closeModal();
+            renderAll();
+        }
+
+        function saveSetup(editIndex) {
+            const item = {
+                setupKey: document.getElementById('f-setupKey').value.trim(),
+                tplName: 'Tpl_Dialogue',
+                slotValues: document.getElementById('f-slotValues').value.trim(),
+                skipAble: document.getElementById('f-skipAble').value === 'true',
+                autoAdvance: document.getElementById('f-autoAdvance').value === 'true'
+            };
+            if (!item.setupKey || !item.slotValues) { alert('请填写必填字段'); return; }
+            if (editIndex >= 0) config.setups[editIndex] = item;
+            else config.setups.push(item);
+            closeModal();
+            renderAll();
+        }
+
+        function saveChoice(editIndex) {
+            const item = {
+                choiceId: document.getElementById('f-choiceId').value.trim(),
+                groupKey: document.getElementById('f-groupKey').value.trim(),
+                textKey: document.getElementById('f-textKey').value.trim(),
+                resultOwnerId: document.getElementById('f-resultOwnerId').value.trim() || document.getElementById('f-choiceId').value.trim(),
+                seq: parseInt(document.getElementById('f-seq').value) || 0
+            };
+            if (!item.choiceId || !item.groupKey || !item.textKey) { alert('请填写必填字段'); return; }
+            if (editIndex >= 0) config.choices[editIndex] = item;
+            else config.choices.push(item);
+            closeModal();
+            renderAll();
+        }
+
+        function saveCondition(editIndex) {
+            const item = {
+                conditionId: document.getElementById('f-conditionId').value.trim(),
+                ownerType: document.getElementById('f-ownerType').value,
+                ownerId: document.getElementById('f-ownerId').value.trim(),
+                groupIndex: parseInt(document.getElementById('f-groupIndex').value) || 0,
+                condType: document.getElementById('f-condType').value,
+                target: document.getElementById('f-target').value.trim(),
+                op: '',
+                value: document.getElementById('f-value').value.trim(),
+                notFlag: false
+            };
+            if (!item.conditionId || !item.ownerId || !item.target) { alert('请填写必填字段'); return; }
+            if (editIndex >= 0) config.conditions[editIndex] = item;
+            else config.conditions.push(item);
+            closeModal();
+            renderAll();
+        }
+
+        function saveDate(editIndex) {
+            const item = {
+                eventId: document.getElementById('f-eventId').value,
+                day: parseInt(document.getElementById('f-day').value) || 1,
+                timeSlot: document.getElementById('f-timeSlot').value,
+                repeatRule: document.getElementById('f-repeatRule').value,
+                priority: parseInt(document.getElementById('f-priority').value) || 100
+            };
+            if (!item.eventId) { alert('请选择事件'); return; }
+            if (editIndex >= 0) config.eventDates[editIndex] = item;
+            else config.eventDates.push(item);
+            closeModal();
+            renderAll();
+        }
+
+        // ==================== 删除函数 ====================
+        function deleteItem(type, index) {
+            if (!confirm('确定删除吗？')) return;
+            config[type].splice(index, 1);
+            renderAll();
+        }
+
+        // ==================== 渲染 ====================
+        // 分类定义：key=config 字段名，type=弹窗表单类型
+        const CATEGORIES = [
+            { key: 'objects', type: 'object', name: '对象', render: (o, i) => ({
+                name: o.objId,
+                detail: `<span class="tag tag-${o.objType}">${o.objType}</span> ${o.nameText}`,
+                actions: itemActions('object', i)
+            })},
+            { key: 'bars', type: 'bar', name: '进度条', render: (b, i) => ({
+                name: b.barKey,
+                detail: `<span class="tag tag-${b.barType}">${b.barType}</span> 初始值: ${b.initValue} | ${b.advanceMode}`,
+                actions: itemActions('bar', i)
+            })},
+            { key: 'triggers', type: 'trigger', name: '触发点', render: (t, i) => ({
+                name: t.triggerId,
+                detail: `${t.barKey} @${t.threshold} → ${t.eventId}`,
+                actions: itemActions('trigger', i)
+            })},
+            { key: 'events', type: 'event', name: '事件', render: (e, i) => ({
+                name: e.eventId,
+                detail: `${e.actorId} ${e.targetId ? '→ ' + e.targetId : ''} | ${e.titleText}`,
+                actions: `<button class="icon-btn play" title="预览" onclick="previewEvent('${e.eventId}')">播</button>` + itemActions('event', i)
+            })},
+            { key: 'texts', type: 'text', name: '文本', render: (t, i) => ({
+                name: t.key,
+                detail: `${(t.content || '').substring(0, 30)}${(t.content || '').length > 30 ? '...' : ''}`,
+                actions: itemActions('text', i)
+            })},
+            { key: 'results', type: 'result', name: '结果', render: (r, i) => ({
+                name: r.resultId,
+                detail: `${r.eventId} → ${r.resultType} ${r.target} ${r.value}`,
+                actions: itemActions('result', i)
+            })},
+            { key: 'setups', type: 'setup', name: '演出', render: (s, i) => ({
+                name: s.setupKey,
+                detail: `${s.tplName} | ${(s.slotValues || '').substring(0, 40)}${(s.slotValues || '').length > 40 ? '...' : ''}`,
+                actions: itemActions('setup', i)
+            })},
+            { key: 'choices', type: 'choice', name: '选项', render: (c, i) => ({
+                name: c.choiceId,
+                detail: `组 ${c.groupKey} | ${c.textKey}`,
+                actions: itemActions('choice', i)
+            })},
+            { key: 'conditions', type: 'condition', name: '条件', render: (c, i) => ({
+                name: c.conditionId,
+                detail: `${c.ownerId} | ${c.condType} ${c.target} ${c.value}`,
+                actions: itemActions('condition', i)
+            })},
+            { key: 'eventDates', type: 'date', name: '日期', render: (d, i) => ({
+                name: d.eventId,
+                detail: `第 ${d.day} 天 ${d.timeSlot} | ${d.repeatRule}`,
+                actions: itemActions('date', i)
+            })}
+        ];
+
+        function itemActions(type, i) {
+            return `<button class="icon-btn edit" onclick="openModal('${type}', ${i})">改</button>
+                    <button class="icon-btn delete" onclick="deleteItem('${CATEGORIES.find(c => c.type === type).key}', ${i})">&times;</button>`;
+        }
+
+        function renderAll() {
+            // 更新计数
+            document.getElementById('count-objects').textContent = config.objects.length + ' 个';
+            document.getElementById('count-bars').textContent = config.bars.length + ' 条';
+            document.getElementById('count-triggers').textContent = config.triggers.length + ' 个';
+            document.getElementById('count-events').textContent = config.events.length + ' 个';
+            document.getElementById('count-results').textContent = config.results.length + ' 条';
+            
+            // 更新总数
+            const total = CATEGORIES.reduce((sum, c) => sum + config[c.key].length, 0);
+            document.getElementById('total-count').textContent = `共 ${total} 项`;
+            
+            // 渲染概览列表（按分类分组）
+            const list = document.getElementById('overview-list');
+            if (total === 0) {
+                list.innerHTML = `
+                    <div class="empty-hint">
+                        <div>还没有配置，点击上方按钮开始创作</div>
+                    </div>
+                `;
+                return;
+            }
+            
+            list.innerHTML = CATEGORIES
+                .filter(c => config[c.key].length > 0)
+                .map(c => `
+                    <div class="cat-block" id="cat-${c.key}">
+                        <div class="cat-header">
+                            <span><span class="cat-name">${c.name}</span><span class="cat-count">${config[c.key].length}</span></span>
+                            <button class="cat-add" onclick="openModal('${c.type}')">+ 添加</button>
+                        </div>
+                        ${config[c.key].map((item, i) => {
+                            const r = c.render(item, i);
+                            return `
+                                <div class="item">
+                                    <div class="item-info">
+                                        <div class="item-name">${r.name}</div>
+                                        <div class="item-detail">${r.detail}</div>
+                                    </div>
+                                    <div class="item-actions">${r.actions}</div>
+                                </div>
+                            `;
+                        }).join('')}
+                    </div>
+                `).join('');
+        }
+
+        // ==================== Key 工具 ====================
+        function autoGenerateKey() {
+            const content = document.getElementById('f-content').value.trim();
+            if (!content) {
+                alert('请先填写文本内容');
+                return;
+            }
+            
+            const suggestions = [];
+            const words = content.match(/[一-龥]+/g) || [];
+            
+            let prefix = 'ev.';
+            let name = 'story';
+            let suffix = '.body.1';
+            
+            // 简单关键词识别
+            if (content.length < 20) suffix = '.title';
+            if (content.includes('选择') || content.includes('选项')) { prefix = 'choice.'; suffix = '.a'; }
+            
+            suggestions.push(`${prefix}${name}${suffix}`);
+            suggestions.push(`${prefix}${name}.body.2`);
+            
+            document.getElementById('key-suggestions').innerHTML = 
+                '建议: ' + suggestions.map(s => 
+                    `<span style="cursor:pointer;color:var(--pink-dark);margin-right:12px" onclick="document.getElementById('f-key').value='${s}';updateKeyPreview()">${s}</span>`
+                ).join('');
+        }
+
+        function updateKeyPreview() {
+            const key = document.getElementById('f-key').value.trim();
+            const usageDiv = document.getElementById('key-usage');
+            if (!key) {
+                usageDiv.innerHTML = '输入 key 后自动检测';
+                return;
+            }
+            
+            const usages = [];
+            config.events.forEach(e => {
+                if (e.titleText === key) usages.push(`事件「${e.eventId}」的标题`);
+                if (e.contentKeys && e.contentKeys.includes(key)) usages.push(`事件「${e.eventId}」的正文`);
+            });
+            config.objects.forEach(o => {
+                if (o.nameText === key) usages.push(`对象「${o.objId}」的名字`);
+            });
+            config.choices.forEach(c => {
+                if (c.textKey === key) usages.push(`选项「${c.choiceId}」`);
+            });
+            
+            usageDiv.innerHTML = usages.length > 0 
+                ? usages.map(u => `<div style="color:var(--green-dark)">✓ ${u}</div>`).join('')
+                : '<div style="color:var(--pink-dark)">暂未找到引用</div>';
+        }
+
+        // ==================== 导入导出 ====================
+        function exportConfig() {
+            const data = JSON.stringify(config, null, 2);
+            const blob = new Blob([data], { type: 'application/json' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = 'narrative_config.json';
+            a.click();
+            URL.revokeObjectURL(url);
+        }
+
+        function importConfig() {
+            const input = document.createElement('input');
+            input.type = 'file';
+            input.accept = '.json';
+            input.onchange = e => {
+                const file = e.target.files[0];
+                const reader = new FileReader();
+                reader.onload = event => {
+                    try {
+                        const data = JSON.parse(event.target.result);
+                        Object.assign(config, data);
+                        renderAll();
+                        alert('导入成功');
+                    } catch (err) {
+                        alert('导入失败: ' + err.message);
+                    }
+                };
+                reader.readAsText(file);
+            };
+            input.click();
+        }
+
+        // ==================== 生成 Excel ====================
+        async function generateLuban() {
+            if (typeof XLSX === 'undefined') {
+                await loadScript('https://cdn.sheetjs.com/xlsx-0.20.1/package/dist/xlsx.full.min.js');
+            }
+            
+            const wb = XLSX.utils.book_new();
+            
+            // Object
+            const objHeaders = [
+                ['##var', 'objId', 'objType', 'nameText', 'iconPath', 'descText', 'tags'],
+                ['##type', 'string', 'enum', 'string', 'string', 'string', 'string'],
+                ['##group', 'c', 'c', 'c', 'c', 'c', 'c'],
+                ['##', '对象ID', 'npc/player/world', '名字key', '头像', '描述key', '标签']
+            ];
+            const objData = config.objects.map(o => [null, o.objId, o.objType, o.nameText, o.iconPath || '', '', '']);
+            XLSX.utils.book_append_sheet(wb, XLSX.utils.aoa_to_sheet([...objHeaders, ...objData]), 'Object');
+            
+            // Bar
+            const barHeaders = [
+                ['##var', 'barId', 'ownerId', 'targetId', 'barType', 'min', 'max', 'direction', 'advanceMode', 'initValue', 'nameText', 'derivedFormula', 'derivedSources', 'derivedWeights', 'autoStep'],
+                ['##type', 'string', 'string', 'string', 'enum', 'int', 'int', 'enum', 'enum', 'int', 'string', 'string', 'string', 'string', 'int'],
+                ['##group', 'c', 'c', 'c', 'c', 'c', 'c', 'c', 'c', 'c', 'c', 'c', 'c', 'c', 'c'],
+                ['##', '条名', '归属', '目标', '类型', '下限', '上限', '方向', '推进', '初值', '名字key', '公式', '源', '权重', '步进']
+            ];
+            const barData = config.bars.map(b => [null, b.barId, b.ownerId, b.targetId || '', b.barType, b.min, b.max, b.direction, b.advanceMode, b.initValue, b.nameText, '', '', '', 1]);
+            XLSX.utils.book_append_sheet(wb, XLSX.utils.aoa_to_sheet([...barHeaders, ...barData]), 'Bar');
+            
+            // Trigger
+            const triggerHeaders = [
+                ['##var', 'triggerId', 'barKey', 'threshold', 'direction', 'crossType', 'onceType', 'reachCount', 'resetOnExit', 'eventId', 'priority', 'enabled'],
+                ['##type', 'string', 'string', 'int', 'enum', 'enum', 'enum', 'string', 'bool', 'string', 'int', 'bool'],
+                ['##group', 'c', 'c', 'c', 'c', 'c', 'c', 'c', 'c', 'c', 'c', 'c'],
+                ['##', '触发点ID', '进度条', '阈值', '方向', '穿过/停留', '次数', '第几次', '离开清零', '事件ID', '优先级', '启用']
+            ];
+            const triggerData = config.triggers.map(t => [null, t.triggerId, t.barKey, t.threshold, t.direction, t.crossType, t.onceType, t.reachCount, t.resetOnExit, t.eventId, t.priority, t.enabled]);
+            XLSX.utils.book_append_sheet(wb, XLSX.utils.aoa_to_sheet([...triggerHeaders, ...triggerData]), 'Trigger');
+            
+            // Event
+            const eventHeaders = [
+                ['##var', 'eventId', 'eventKind', 'actorId', 'targetId', 'titleText', 'contentKey', 'setupType', 'setupKey', 'onceOnly', 'logTag'],
+                ['##type', 'string', 'enum', 'string', 'string', 'string', 'string', 'string', 'string', 'bool', 'string'],
+                ['##group', 'c', 'c', 'c', 'c', 'c', 'c', 'c', 'c', 'c', 'c'],
+                ['##', '事件ID', '类型', '施动者', '受动者', '标题key', '正文key', '演出模板', '参数集', '只播一次', '日志']
+            ];
+            const eventData = config.events.map(e => [null, e.eventId, e.eventKind, e.actorId, e.targetId || '', e.titleText, e.contentKeys, e.setupType, e.setupKey, e.onceOnly, e.logTag]);
+            XLSX.utils.book_append_sheet(wb, XLSX.utils.aoa_to_sheet([...eventHeaders, ...eventData]), 'Event');
+            
+            // Result
+            const resultHeaders = [
+                ['##var', 'resultId', 'eventId', 'seq', 'resultType', 'target', 'value', 'note'],
+                ['##type', 'string', 'string', 'int', 'enum', 'string', 'string', 'string'],
+                ['##group', 'c', 'c', 'c', 'c', 'c', 'c', 'c'],
+                ['##', '结果ID', '事件ID', '顺序', '类型', '目标', '值', '备注']
+            ];
+            const resultData = config.results.map(r => [null, r.resultId, r.eventId, r.seq, r.resultType, r.target, r.value, r.note]);
+            XLSX.utils.book_append_sheet(wb, XLSX.utils.aoa_to_sheet([...resultHeaders, ...resultData]), 'Result');
+            
+            // Text
+            const textHeaders = [
+                ['##var', 'key', 'text', 'comment'],
+                ['##type', 'string', 'string', 'string'],
+                ['##group', 'c', 'c', 'c'],
+                ['##', '文本key', '内容', '备注']
+            ];
+            const textData = config.texts.map(t => [null, t.key, t.content, t.comment]);
+            XLSX.utils.book_append_sheet(wb, XLSX.utils.aoa_to_sheet([...textHeaders, ...textData]), 'Text');
+            
+            const fileName = `Narrative_${new Date().toISOString().slice(0,10)}.xlsx`;
+            XLSX.writeFile(wb, fileName);
+            alert(`已生成: ${fileName}\n\n请放入 Assets/ConfigTables/Data/ 目录`);
+        }
+
+        function loadScript(src) {
+            return new Promise((resolve, reject) => {
+                const script = document.createElement('script');
+                script.src = src;
+                script.onload = resolve;
+                script.onerror = reject;
+                document.head.appendChild(script);
+            });
+        }
+
+        // ==================== AI 助手（复制粘贴模式） ====================
+        let aiPendingConfig = null;
+
+        function buildPromptText(story) {
+            const existing = {
+                objects: config.objects.map(o => o.objId),
+                bars: config.bars.map(b => b.barKey),
+                events: config.events.map(e => e.eventId)
+            };
+            return `你是游戏叙事配置助手。请把我用大白话写的剧情，转成下面这套 JSON 配置。只输出 JSON 本体，不要输出任何解释、markdown 标记或代码块符号。
+{
+  "objects": [{"objId":"npc_xxx","objType":"npc","nameText":"npc.xxx.name","iconPath":""}],
+  "bars": [{"barKey":"npc_xxx.trust","ownerId":"npc_xxx","barId":"trust","targetId":"player","barType":"relation","min":-2,"max":5,"direction":"highIsGood","advanceMode":"event_driven","initValue":0,"nameText":"bar.trust.name"}],
+  "triggers": [{"triggerId":"T_XXX","barKey":"npc_xxx.trust","threshold":2,"direction":"up","crossType":"cross","onceType":"once","reachCount":"all","resetOnExit":true,"eventId":"EV_XXX","priority":100,"enabled":true}],
+  "events": [{"eventId":"EV_XXX","eventKind":"actor","actorId":"npc_xxx","targetId":"player","titleText":"ev.xxx.title","contentKeys":"ev.xxx.body.1|ev.xxx.body.2","setupType":"Tpl_Dialogue","setupKey":"xxx","onceOnly":true,"logTag":""}],
+  "setups": [{"setupKey":"xxx","tplName":"Tpl_Dialogue","slotValues":"lines=ev.xxx.body.1|ev.xxx.body.2,speaker=npc_xxx","skipAble":false,"autoAdvance":false}],
+  "results": [{"resultId":"R_XXX","eventId":"EV_XXX","seq":0,"resultType":"BAR_ADD","target":"bar:npc_xxx.trust","value":"+1","note":""}],
+  "texts": [{"key":"ev.xxx.title","content":"中文内容","comment":""}]
+}
+规则：
+1. barType：relation=人际关系(-2~5)，stat=个人属性(0~20)，world=世界状态(0~10)
+2. 每个事件：titleText 是标题 key，contentKeys 是正文对话 key（按顺序用 | 分隔），每个 key 都必须在 texts 里有对应中文内容
+3. setups 的 slotValues：lines= 与 contentKeys 一致，speaker= 说话角色的 objId
+4. 剧情里数值变化就写 results：BAR_ADD 增减（value 如 +1 / -1）或 BAR_SET 赋值
+5. 数值到阈值触发新剧情就写 triggers：threshold 是阈值，eventId 是被触发的事件
+6. 对象名、进度条名也要在 texts 里（如 npc.xxx.name、bar.trust.name）
+7. id 命名：对象 npc_英文名/player，事件 EV_大写，触发点 T_大写，结果 R_大写；text key 全小写点分
+8. 不需要的数组留空数组 []
+
+已有配置（ID 可复用，不要重复造）：${JSON.stringify(existing)}
+
+我的剧情：
+${story}`;
+        }
+
+        function copyAiPrompt() {
+            const story = document.getElementById('ai-story').value.trim();
+            const status = document.getElementById('ai-status');
+            if (!story) { status.textContent = '请先写一段剧情'; return; }
+            const prompt = buildPromptText(story);
+            const done = ok => { status.textContent = ok ? '提示词已复制，去你的网页 AI 里粘贴发送' : '复制失败，请手动复制'; };
+            if (navigator.clipboard && navigator.clipboard.writeText) {
+                navigator.clipboard.writeText(prompt).then(() => done(true)).catch(() => fallbackCopy(prompt, done));
+            } else {
+                fallbackCopy(prompt, done);
+            }
+        }
+
+        function fallbackCopy(text, done) {
+            const ta = document.createElement('textarea');
+            ta.value = text;
+            document.body.appendChild(ta);
+            ta.select();
+            try { done(document.execCommand('copy')); } catch (e) { done(false); }
+            document.body.removeChild(ta);
+        }
+
+        function parseAiJson() {
+            const raw = document.getElementById('ai-json').value.trim();
+            const status = document.getElementById('ai-status');
+            if (!raw) { status.textContent = '请先粘贴 AI 返回的 JSON'; return; }
+            try {
+                const parsed = extractJson(raw);
+                aiPendingConfig = parsed;
+                renderAiReview(parsed);
+                status.textContent = '解析成功，请审核下方配置';
+            } catch (err) {
+                status.textContent = 'JSON 解析失败：' + err.message;
+            }
+        }
+
+        function toggleAiSidebar() {
+            document.getElementById('ai-sidebar').classList.toggle('collapsed');
+        }
+
+        function extractJson(text) {
+            let t = text.trim();
+            const fence = t.match(/```(?:json)?\s*([\s\S]*?)```/);
+            if (fence) t = fence[1].trim();
+            const start = t.indexOf('{');
+            const end = t.lastIndexOf('}');
+            if (start >= 0 && end > start) t = t.slice(start, end + 1);
+            return JSON.parse(t);
+        }
+
+        function renderAiReview(parsed) {
+            const box = document.getElementById('ai-review');
+            const counts = [
+                ['对象', parsed.objects], ['进度条', parsed.bars], ['触发点', parsed.triggers],
+                ['事件', parsed.events], ['演出', parsed.setups], ['结果', parsed.results], ['文本', parsed.texts]
+            ].filter(x => Array.isArray(x[1]) && x[1].length > 0);
+            box.innerHTML = `
+                <h4>AI 生成了这些配置：</h4>
+                ${counts.map(([n, arr]) => `<div class="review-line">· ${n} × ${arr.length}</div>`).join('') || '（空）'}
+                <details><summary>查看 JSON</summary><pre>${JSON.stringify(parsed, null, 2).replace(/</g, '&lt;')}</pre></details>
+                <div class="review-btns">
+                    <button class="btn btn-green" onclick="mergeAiConfig()">合并</button>
+                    <button class="btn btn-outline" onclick="discardAiConfig()">丢弃</button>
+                </div>
+            `;
+            box.classList.add('active');
+        }
+
+        function mergeAiConfig() {
+            if (!aiPendingConfig) return;
+            const mergeBy = (list, incoming, keyFn) => {
+                (incoming || []).forEach(item => {
+                    const k = keyFn(item);
+                    const i = list.findIndex(x => keyFn(x) === k);
+                    if (i >= 0) list[i] = item; else list.push(item);
+                });
+            };
+            mergeBy(config.objects, aiPendingConfig.objects, x => x.objId);
+            mergeBy(config.bars, aiPendingConfig.bars, x => x.barKey || (x.ownerId + '.' + x.barId));
+            mergeBy(config.triggers, aiPendingConfig.triggers, x => x.triggerId);
+            mergeBy(config.events, aiPendingConfig.events, x => x.eventId);
+            mergeBy(config.setups, aiPendingConfig.setups, x => x.setupKey);
+            mergeBy(config.results, aiPendingConfig.results, x => x.resultId);
+            mergeBy(config.texts, aiPendingConfig.texts, x => x.key);
+            aiPendingConfig = null;
+            document.getElementById('ai-review').classList.remove('active');
+            document.getElementById('ai-status').textContent = '已合并到当前配置';
+            renderAll();
+        }
+
+        function discardAiConfig() {
+            aiPendingConfig = null;
+            document.getElementById('ai-review').classList.remove('active');
+            document.getElementById('ai-status').textContent = '已丢弃';
+        }
+
+        // ==================== 剧情预览（跑一遍） ====================
+        let sim = null;
+
+        function findText(key) {
+            const t = config.texts.find(x => x.key === key);
+            return t ? t.content : null;
+        }
+        function textOr(key, fallback) {
+            return findText(key) || fallback || key;
+        }
+
+        function initSim() {
+            sim = { bars: {}, flags: {}, played: {}, fired: {}, queue: [], current: null, lines: [], optsGroup: null, lineIndex: 0, typing: null, fullText: '', finishing: false };
+            config.bars.forEach(b => { sim.bars[b.barKey] = b.initValue || 0; });
+            document.getElementById('player-log').innerHTML = '';
+            document.getElementById('player-choices').innerHTML = '';
+            renderSimBars();
+        }
+
+        function startPreview() {
+            if (config.events.length === 0) { alert('还没有事件，先添加一个或用 AI 生成'); return; }
+            initSim();
+            const dated = config.eventDates.slice().sort((a, b) => (a.day - b.day) || (a.priority - b.priority));
+            const queue = [];
+            dated.forEach(d => { if (!queue.includes(d.eventId)) queue.push(d.eventId); });
+            config.events.forEach(e => { if (!queue.includes(e.eventId)) queue.push(e.eventId); });
+            sim.queue = queue;
+            document.getElementById('player-overlay').classList.add('active');
+            simLog('开始预览，共 ' + queue.length + ' 个事件');
+            nextEvent();
+        }
+
+        function previewEvent(eventId) {
+            initSim();
+            sim.queue = [eventId];
+            document.getElementById('player-overlay').classList.add('active');
+            simLog('单独预览事件 ' + eventId + '（触发链也会播放）');
+            nextEvent();
+        }
+
+        function nextEvent() {
+            setFlowStage(null);
+            sim.finishing = false;
+            document.getElementById('player-choices').innerHTML = '';
+            document.getElementById('btn-next-line').disabled = false;
+            if (!sim.queue.length) { endPreview(); return; }
+            const eventId = sim.queue.shift();
+            const ev = config.events.find(e => e.eventId === eventId);
+            if (!ev) { simLog('找不到事件 ' + eventId); nextEvent(); return; }
+            if (ev.onceOnly && sim.played[eventId]) { simLog('「' + eventId + '」已播放过，跳过'); nextEvent(); return; }
+            sim.played[eventId] = true;
+            sim.current = ev;
+            setFlowStage('events');
+            simLog('播放事件 ' + eventId, true);
+
+            const parsed = resolveLines(ev);
+            sim.lines = parsed.lines;
+            sim.optsGroup = parsed.optsGroup;
+            sim.lineIndex = 0;
+            showCurrentLine();
+        }
+
+        function resolveLines(ev) {
+            let keys = [], speaker = ev.actorId, optsGroup = null;
+            const setup = config.setups.find(s => s.setupKey === ev.setupKey);
+            if (setup && setup.slotValues) {
+                setup.slotValues.split(',').forEach(part => {
+                    const kv = part.split('=');
+                    if (kv.length < 2) return;
+                    const k = kv[0].trim(), v = kv.slice(1).join('=').trim();
+                    if (k === 'lines') keys = v.split('|').map(x => x.trim()).filter(Boolean);
+                    else if (k === 'speaker') speaker = v;
+                    else if (k === 'opts') optsGroup = v;
+                });
+            }
+            if (!keys.length && ev.contentKeys) keys = ev.contentKeys.split('|').map(x => x.trim()).filter(Boolean);
+            const lines = keys.map(k => ({ speaker, text: textOr(k, '缺文本 ' + k) }));
+            if (!lines.length) lines.push({ speaker, text: '（没有配置对话内容）' });
+            return { lines, optsGroup };
+        }
+
+        function showCurrentLine() {
+            const dlg = document.getElementById('player-dialog');
+            const line = sim.lines[sim.lineIndex];
+            const spk = config.objects.find(o => o.objId === line.speaker);
+            const spkName = spk ? textOr(spk.nameText, line.speaker) : (line.speaker || '旁白');
+            dlg.innerHTML = `
+                <div class="event-tag">${sim.current.eventId} · 第 ${sim.lineIndex + 1}/${sim.lines.length} 句</div>
+                <div class="dlg-box">
+                    <div class="dlg-name">${spkName}</div>
+                    <div class="dlg-text" id="dlg-text"></div>
+                    <div class="dlg-hint">点击「下一句」继续</div>
+                </div>`;
+            typeText(line.text);
+        }
+
+        function typeText(text) {
+            const el = document.getElementById('dlg-text');
+            clearInterval(sim.typing);
+            sim.fullText = text;
+            let i = 0;
+            el.textContent = '';
+            sim.typing = setInterval(() => {
+                el.textContent = text.slice(0, ++i);
+                if (i >= text.length) { clearInterval(sim.typing); sim.typing = null; }
+            }, 35);
+        }
+
+        function nextLine() {
+            if (!sim || sim.finishing) return;
+            // 打字中 → 先补全当前句
+            if (sim.typing) {
+                clearInterval(sim.typing);
+                sim.typing = null;
+                const el = document.getElementById('dlg-text');
+                if (el) el.textContent = sim.fullText;
+                return;
+            }
+            sim.lineIndex++;
+            if (sim.lineIndex < sim.lines.length) showCurrentLine();
+            else maybeChoicesOrFinish();
+        }
+
+        function maybeChoicesOrFinish() {
+            const group = sim.optsGroup;
+            const choices = group ? config.choices.filter(c => c.groupKey === group).sort((a, b) => a.seq - b.seq) : [];
+            if (choices.length) {
+                document.getElementById('player-choices').innerHTML = choices.map(c =>
+                    `<button class="choice-btn" onclick="pickChoice('${c.choiceId}')">${textOr(c.textKey, c.choiceId)}</button>`
+                ).join('');
+                document.getElementById('btn-next-line').disabled = true;
+                simLog('等待选择…');
+            } else {
+                finishEvent();
+            }
+        }
+
+        function pickChoice(choiceId) {
+            const c = config.choices.find(x => x.choiceId === choiceId);
+            document.getElementById('player-choices').innerHTML = '';
+            document.getElementById('btn-next-line').disabled = false;
+            simLog('选择了「' + (c ? textOr(c.textKey, choiceId) : choiceId) + '」');
+            if (c) applyResults(c.resultOwnerId || choiceId);
+            finishEvent();
+        }
+
+        function finishEvent() {
+            sim.finishing = true;
+            document.getElementById('btn-next-line').disabled = true;
+            setFlowStage('results');
+            applyResults(sim.current.eventId);
+            setTimeout(nextEvent, 1000);
+        }
+
+        function applyResults(ownerId) {
+            const results = config.results.filter(r => r.eventId === ownerId).sort((a, b) => a.seq - b.seq);
+            results.forEach(r => {
+                const target = (r.target || '').replace(/^bar:/, '');
+                if (r.resultType === 'BAR_ADD' || r.resultType === 'BAR_SET') {
+                    if (!(target in sim.bars)) { simLog('找不到进度条 ' + target); return; }
+                    const oldV = sim.bars[target];
+                    const num = parseFloat(r.value) || 0;
+                    const bar = config.bars.find(b => b.barKey === target);
+                    let newV = r.resultType === 'BAR_ADD' ? oldV + num : num;
+                    if (bar) newV = Math.max(bar.min, Math.min(bar.max, newV));
+                    sim.bars[target] = newV;
+                    simLog('进度条 ' + target + '：' + oldV + ' → ' + newV);
+                    setFlowStage('bars');
+                    renderSimBars(target, newV - oldV);
+                    checkTriggers(target, oldV, newV);
+                } else if (r.resultType === 'SET_FLAG') {
+                    sim.flags[target] = true; simLog('置位标记 ' + target);
+                } else if (r.resultType === 'CLEAR_FLAG') {
+                    delete sim.flags[target]; simLog('清除标记 ' + target);
+                } else if (r.resultType === 'SPAWN_NPC') {
+                    simLog('NPC 登场：' + target);
+                } else if (r.resultType === 'DESPAWN_NPC') {
+                    simLog('NPC 离场：' + target);
+                }
+            });
+        }
+
+        function checkTriggers(barKey, oldV, newV) {
+            config.triggers.forEach(t => {
+                if (t.barKey !== barKey || t.enabled === false) return;
+                if (t.onceType !== 'repeat' && sim.fired[t.triggerId]) return;
+                const th = t.threshold;
+                const crossed =
+                    (t.direction !== 'down' && oldV < th && newV >= th) ||
+                    (t.direction !== 'up' && oldV > th && newV <= th);
+                if (!crossed) return;
+                sim.fired[t.triggerId] = true;
+                setFlowStage('triggers');
+                simLog('触发 ' + t.triggerId + ' → ' + t.eventId, true);
+                sim.queue.unshift(t.eventId); // 紧接当前事件后播放
+            });
+        }
+
+        function renderSimBars(changedKey, delta) {
+            const box = document.getElementById('player-bars');
+            box.innerHTML = config.bars.map(b => {
+                const v = sim.bars[b.barKey];
+                const pct = Math.max(0, Math.min(100, (v - b.min) / (b.max - b.min) * 100));
+                const isChg = b.barKey === changedKey;
+                return `<div class="p-bar${isChg ? ' changed' : ''}">
+                    <span class="p-bar-name">${textOr(b.nameText, b.barKey)}</span>
+                    <span class="p-bar-val">${v}</span>
+                    ${isChg && delta ? `<span class="float-delta">${delta > 0 ? '+' + delta : delta}</span>` : ''}
+                    <div class="p-bar-track"><div class="p-bar-fill" style="width:${pct}%"></div></div>
+                </div>`;
+            }).join('');
+        }
+
+        function setFlowStage(stage) {
+            document.querySelectorAll('.flow-step').forEach(el => el.classList.remove('flow-active'));
+            if (stage) { const el = document.getElementById('fs-' + stage); if (el) el.classList.add('flow-active'); }
+        }
+
+        function simLog(msg, highlight) {
+            const log = document.getElementById('player-log');
+            log.innerHTML += `<div${highlight ? ' class="log-fire"' : ''}>${msg}</div>`;
+            log.scrollTop = log.scrollHeight;
+        }
+
+        function skipEvent() {
+            if (!sim) return;
+            clearInterval(sim.typing);
+            sim.typing = null;
+            simLog('跳过当前事件');
+            nextEvent();
+        }
+
+        function endPreview() {
+            setFlowStage(null);
+            document.getElementById('btn-next-line').disabled = true;
+            document.getElementById('player-dialog').innerHTML = `
+                <div class="dlg-box" style="text-align:center">
+                    <div class="dlg-text" style="margin-top:20px">全部事件播放完毕</div>
+                </div>`;
+            simLog('预览结束');
+        }
+
+        function closePlayer() {
+            if (sim) clearInterval(sim.typing);
+            document.getElementById('player-overlay').classList.remove('active');
+            setFlowStage(null);
+        }
+
+        // ==================== 初始化 ====================
+        renderAll();
+    </script>
+</body>
+</html>

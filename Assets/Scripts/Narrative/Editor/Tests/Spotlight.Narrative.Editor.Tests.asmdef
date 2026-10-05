@@ -1,0 +1,7 @@
+{
+  "name": "Spotlight.Narrative.Editor.Tests",
+  "references": ["Spotlight.Narrative.Editor", "Spotlight.Narrative"],
+  "includePlatforms": ["Editor"],
+  "optionalUnityReferences": ["TestAssemblies"],
+  "autoReferenced": false
+}

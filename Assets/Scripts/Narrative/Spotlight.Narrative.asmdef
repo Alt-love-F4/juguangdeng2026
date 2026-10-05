@@ -1,0 +1,12 @@
+{
+    "name": "Spotlight.Narrative",
+    "rootNamespace": "Spotlight.Narrative",
+    "references": [
+        "Unity.TextMeshPro",
+        "Unity.ugui",
+        "Unity.InputSystem",
+        "Spotlight.Config",
+        "Unity.Newtonsoft.Json"
+    ],
+    "autoReferenced": true
+}

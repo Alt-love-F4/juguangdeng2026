@@ -1,0 +1,247 @@
+using System;
+using System.Collections.Generic;
+using System.Globalization;
+using System.IO;
+using Newtonsoft.Json.Linq;
+using UnityEngine;
+
+namespace Spotlight.Narrative
+{
+    public static class LubanNarrativeLoader
+    {
+        public static NarrativeConfiguration Load()
+        {
+            return FromTables(new cfg.Tables(name =>
+            {
+                TextAsset asset = Resources.Load<TextAsset>("Luban/" + name);
+                if (asset == null) throw new FileNotFoundException("Missing Luban table: Resources/Luban/" + name + ".json");
+                return JArray.Parse(asset.text);
+            }));
+        }
+
+        public static NarrativeConfiguration FromTables(cfg.Tables tables)
+        {
+            if (tables == null) throw new ArgumentNullException(nameof(tables));
+            var config = new NarrativeConfiguration();
+            foreach (var row in tables.TbNcsObject.DataList)
+                config.objects.Add(new NarrativeObjectDefinition
+                {
+                    objId = row.ObjId, objType = ObjectType(row.ObjType), nameText = row.NameText,
+                    iconPath = row.IconPath, descText = row.DescText, tags = row.Tags
+                });
+            var barKeys = new HashSet<string>(StringComparer.Ordinal);
+            foreach (var row in tables.TbNcsBar.DataList)
+            {
+                string key = row.OwnerId + "." + row.BarId;
+                if (string.IsNullOrWhiteSpace(row.OwnerId) || string.IsNullOrWhiteSpace(row.BarId) || !barKeys.Add(key))
+                    throw new FormatException("Invalid or duplicate narrative bar key: " + key);
+                config.bars.Add(new NarrativeBarDefinition
+                {
+                    barKey = key, ownerId = row.OwnerId, targetId = row.TargetId, barType = BarType(row.BarType),
+                    min = row.Min, max = row.Max, direction = Direction(row.Direction), advanceMode = AdvanceMode(row.AdvanceMode),
+                    initValue = row.InitValue, reverseInitValue = row.ReverseInitValue, nameText = row.NameText, derivedFormula = row.DerivedFormula,
+                    derivedSources = Strings(row.DerivedSources), derivedWeights = Weights(row.DerivedWeights), autoStep = row.AutoStep
+                });
+            }
+            foreach (var row in tables.TbNcsTrigger.DataList)
+                config.triggers.Add(new NarrativeTriggerDefinition
+                {
+                    triggerId = row.TriggerId, barKey = row.BarKey, threshold = row.Threshold,
+                    direction = TriggerDirection(row.Direction), crossType = CrossType(row.CrossType), onceType = OnceType(row.OnceType),
+                    reachCount = row.ReachCount, resetOnExit = row.ResetOnExit, eventId = row.EventId,
+                    priority = row.Priority, enabled = row.Enabled
+                });
+            foreach (var row in tables.TbNcsEvent.DataList)
+                config.events.Add(new NarrativeEventDefinition
+                {
+                    eventId = row.EventId, eventKind = EventKind(row.EventKind), actorId = row.ActorId, targetId = row.TargetId,
+                    titleText = row.TitleText, contentKeys = Strings(row.ContentKey), setupType = row.SetupType,
+                    setupKey = row.SetupKey, onceOnly = row.OnceOnly, logTag = row.LogTag, conditionOwnerId = row.EventId
+                });
+            int dateIndex = 0;
+            foreach (var row in tables.TbNcsEventDate.DataList)
+            {
+                NarrativeRepeatRule repeat = RepeatRule(row.RepeatRule);
+                config.eventDates.Add(new NarrativeEventDateDefinition
+                {
+                    eventId = row.EventId, day = row.Day == 0 && (repeat == NarrativeRepeatRule.Daily || repeat == NarrativeRepeatRule.Weekly) ? 1 : row.Day,
+                    timeSlot = TimeSlot(row.TimeSlot), repeatRule = repeat, priority = row.Priority, rowIndex = dateIndex++
+                });
+            }
+            foreach (var row in tables.TbNcsCondition.DataList)
+                config.conditions.Add(new NarrativeConditionDefinition
+                {
+                    conditionId = row.ConditionId, ownerType = string.IsNullOrWhiteSpace(row.OwnerType) ? "event" : row.OwnerType,
+                    ownerId = row.OwnerId, groupIndex = row.GroupIndex, condType = row.CondType, target = row.Target,
+                    op = row.Op, value = row.Value, notFlag = row.NotFlag
+                });
+            foreach (var row in tables.TbNcsResult.DataList)
+                config.results.Add(new NarrativeResultDefinition
+                {
+                    resultId = row.ResultId, eventId = row.EventId, seq = row.Seq, resultType = ResultType(row.ResultType),
+                    target = row.Target, value = row.Value, note = row.Note
+                });
+            foreach (var row in tables.TbNcsTemplate.DataList)
+                config.templates.Add(new NarrativeTemplateDefinition
+                {
+                    tplName = row.TplName, descText = row.DescText, interruptType = row.InterruptType,
+                    atomSeq = row.AtomSeq, slotDef = row.SlotDef, defaultSkip = row.DefaultSkip
+                });
+            foreach (var row in tables.TbNcsSetupParams.DataList)
+            {
+                var setup = new NarrativeSetupParamsDefinition
+                {
+                    setupKey = row.SetupKey, tplName = row.TplName, slotValues = row.SlotValues,
+                    skipAble = row.SkipAble, autoAdvance = row.AutoAdvance
+                };
+                foreach (var slot in PresentationSlots.Parse(setup))
+                    setup.parameters.Add(new NarrativeAtomParameter { slot = slot.Key, value = slot.Value });
+                config.setups.Add(setup);
+            }
+            foreach (var row in tables.TbNcsChoice.DataList)
+                config.choices.Add(new NarrativeChoiceDefinition
+                {
+                    choiceId = row.ChoiceId, groupKey = row.GroupKey, textKey = row.TextKey,
+                    resultOwnerId = row.ResultOwnerId, seq = row.Seq
+                });
+            foreach (var row in tables.TbText.DataList)
+                config.texts.Add(new NarrativeTextDefinition { key = row.Key, content = row.Text });
+            ValidateLinks(config);
+            return config;
+        }
+
+        private static void ValidateLinks(NarrativeConfiguration config)
+        {
+            var objects = new HashSet<string>(StringComparer.Ordinal);
+            foreach (var item in config.objects) AddId(objects, item.objId, "object");
+            var bars = new HashSet<string>(StringComparer.Ordinal);
+            foreach (var item in config.bars)
+            {
+                AddId(bars, item.barKey, "bar");
+                Require(objects, item.ownerId, "bar owner");
+                if (item.min > item.max || item.initValue < item.min || item.initValue > item.max)
+                    throw new FormatException("Invalid narrative bar range or initial value: " + item.barKey);
+                if (item.advanceMode == NarrativeAdvanceMode.Derived && item.derivedWeights.Count > 0 && item.derivedWeights.Count != item.derivedSources.Count)
+                    throw new FormatException("Narrative derived weights do not match sources: " + item.barKey);
+            }
+            var events = new HashSet<string>(StringComparer.Ordinal);
+            foreach (var item in config.events) AddId(events, item.eventId, "event");
+            var templates = new HashSet<string>(StringComparer.Ordinal);
+            foreach (var item in config.templates) AddId(templates, item.tplName, "template");
+            var setups = new HashSet<string>(StringComparer.Ordinal);
+            foreach (var item in config.setups)
+            {
+                AddId(setups, item.setupKey, "setup");
+                Require(templates, item.tplName, "setup template");
+            }
+            foreach (var item in config.bars)
+                foreach (string source in item.derivedSources) Require(bars, source, "derived source");
+            foreach (var item in config.events)
+            {
+                Require(templates, item.setupType, "event template");
+                Require(setups, item.setupKey, "event setup");
+            }
+            foreach (var item in config.triggers)
+            {
+                Require(events, item.eventId, "trigger event");
+                Require(bars, item.barKey, "trigger bar");
+                NarrativeBarDefinition bar = config.bars.Find(candidate => candidate.barKey == item.barKey);
+                if (item.threshold < bar.min || item.threshold > bar.max) throw new FormatException("Narrative trigger threshold is out of range: " + item.triggerId);
+            }
+            foreach (var item in config.eventDates) Require(events, item.eventId, "date event");
+            var texts = new HashSet<string>(StringComparer.Ordinal);
+            foreach (var item in config.texts) AddId(texts, item.key, "text");
+            foreach (var item in config.choices) Require(texts, item.textKey, "choice text");
+        }
+
+        private static void AddId(HashSet<string> ids, string id, string field)
+        {
+            if (string.IsNullOrWhiteSpace(id) || !ids.Add(id)) throw new FormatException("Invalid or duplicate narrative " + field + " ID: " + id);
+        }
+
+        private static void Require(HashSet<string> ids, string id, string field)
+        {
+            if (string.IsNullOrWhiteSpace(id) || !ids.Contains(id)) throw new FormatException("Missing narrative " + field + ": " + id);
+        }
+
+        private static List<string> Strings(string value)
+        {
+            var result = new List<string>();
+            foreach (string part in (value ?? string.Empty).Split(new[] { '|', ',', ';', '\n' }, StringSplitOptions.RemoveEmptyEntries))
+                if (!string.IsNullOrWhiteSpace(part)) result.Add(part.Trim());
+            return result;
+        }
+
+        private static List<float> Weights(string value)
+        {
+            var result = new List<float>();
+            foreach (string part in Strings(value))
+            {
+                float weight = float.Parse(part, NumberStyles.Float, CultureInfo.InvariantCulture);
+                if (float.IsNaN(weight) || float.IsInfinity(weight)) throw new FormatException("Non-finite narrative derived weight: " + part);
+                result.Add(weight);
+            }
+            return result;
+        }
+
+        private static FormatException Unknown(string field, string value) => new FormatException("Unknown narrative " + field + ": " + value);
+        private static NarrativeObjectType ObjectType(string value) => value switch
+        {
+            "npc" => NarrativeObjectType.Npc, "player" => NarrativeObjectType.Player, "world" => NarrativeObjectType.World,
+            _ => throw Unknown("objType", value)
+        };
+        private static NarrativeBarType BarType(string value) => value switch
+        {
+            "stat" => NarrativeBarType.Stat, "relation" => NarrativeBarType.Relation, "world" => NarrativeBarType.World,
+            _ => throw Unknown("barType", value)
+        };
+        private static NarrativeDirection Direction(string value) => value switch
+        {
+            "highIsGood" => NarrativeDirection.HighIsGood, "lowIsGood" => NarrativeDirection.LowIsGood,
+            _ => throw Unknown("direction", value)
+        };
+        private static NarrativeAdvanceMode AdvanceMode(string value) => value switch
+        {
+            "monotonic" => NarrativeAdvanceMode.Monotonic, "event_driven" => NarrativeAdvanceMode.EventDriven,
+            "derived" => NarrativeAdvanceMode.Derived, _ => throw Unknown("advanceMode", value)
+        };
+        private static NarrativeTriggerDirection TriggerDirection(string value) => value switch
+        {
+            "up" => NarrativeTriggerDirection.Up, "down" => NarrativeTriggerDirection.Down, "both" => NarrativeTriggerDirection.Both,
+            _ => throw Unknown("trigger direction", value)
+        };
+        private static NarrativeCrossType CrossType(string value) => value switch
+        {
+            "cross" => NarrativeCrossType.Cross, "hold" => NarrativeCrossType.Hold, _ => throw Unknown("crossType", value)
+        };
+        private static NarrativeOnceType OnceType(string value) => value switch
+        {
+            "once" => NarrativeOnceType.Once, "repeat" => NarrativeOnceType.Repeat, _ => throw Unknown("onceType", value)
+        };
+        private static NarrativeEventKind EventKind(string value) => value switch
+        {
+            "actor" => NarrativeEventKind.Actor, "world" => NarrativeEventKind.World, _ => throw Unknown("eventKind", value)
+        };
+        private static NarrativeTimeSlot TimeSlot(string value) => value switch
+        {
+            "morning" => NarrativeTimeSlot.Morning, "noon" => NarrativeTimeSlot.Noon, "night" => NarrativeTimeSlot.Night,
+            _ => throw Unknown("timeSlot", value)
+        };
+        private static NarrativeRepeatRule RepeatRule(string value) => value switch
+        {
+            "once" => NarrativeRepeatRule.Once, "daily" => NarrativeRepeatRule.Daily, "weekly" => NarrativeRepeatRule.Weekly,
+            "yearly" => NarrativeRepeatRule.Yearly, _ => throw Unknown("repeatRule", value)
+        };
+        private static NarrativeResultType ResultType(string value) => value switch
+        {
+            "BAR_ADD" => NarrativeResultType.BarAdd, "BAR_SET" => NarrativeResultType.BarSet,
+            "REL_ADD" => NarrativeResultType.RelAdd, "SET_FLAG" => NarrativeResultType.SetFlag,
+            "CLEAR_FLAG" => NarrativeResultType.ClearFlag, "SET_SWITCH" => NarrativeResultType.SetSwitch,
+            "OBJ_STATE" => NarrativeResultType.ObjectState, "OBJECT_STATE" => NarrativeResultType.ObjectState, "UNLOCK_EVENT" => NarrativeResultType.UnlockEvent,
+            "LOCK_EVENT" => NarrativeResultType.LockEvent, "ADVANCE_DAY" => NarrativeResultType.AdvanceDay,
+            "AWARD_ACH" => NarrativeResultType.AwardAchievement, "AWARD_ACHIEVEMENT" => NarrativeResultType.AwardAchievement, "PLAY_SETUP" => NarrativeResultType.PlaySetup,
+            "BAR_HINT" => NarrativeResultType.BarHint, "SPAWN_NPC" => NarrativeResultType.SpawnNpc,
+            "DESPAWN_NPC" => NarrativeResultType.DespawnNpc, _ => throw Unknown("resultType", value)
+        };
+    }
+}

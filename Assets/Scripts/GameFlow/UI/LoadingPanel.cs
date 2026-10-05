@@ -8,12 +8,27 @@ namespace Spotlight.GameFlow
     {
         [SerializeField] private TMP_Text tipText;
         [SerializeField] private RectTransform logo;
+        [SerializeField] private RectTransform progressFill;
         [SerializeField, Min(0.1f)] private float pulseDuration = 1.2f;
         private Tween pulse;
+
+        public void SetProgress(float progress)
+        {
+            if (progressFill == null) return;
+            Vector2 anchorMax = progressFill.anchorMax;
+            anchorMax.x = Mathf.Clamp01(progress);
+            progressFill.anchorMax = anchorMax;
+        }
 
         public void SetTip(string tip)
         {
             if (tipText != null) tipText.text = tip ?? string.Empty;
+        }
+
+        protected override void OnOpen(YokiFrame.IUIData data = null)
+        {
+            base.OnOpen(data);
+            SetProgress(0f);
         }
 
         protected override void OnShow()

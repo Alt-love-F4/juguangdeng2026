@@ -1,0 +1,74 @@
+[
+  {
+    "tplName": "Tpl_TwoPersonTalk",
+    "descText": "双人对话与选项",
+    "interruptType": "progressive",
+    "atomSeq": "A_BG,A_PORTRAIT,A_DIALOG,A_CHOICE",
+    "slotDef": "lines:textList,opts:optionList",
+    "defaultSkip": false
+  },
+  {
+    "tplName": "Tpl_MonoTalk",
+    "descText": "单人独白",
+    "interruptType": "progressive",
+    "atomSeq": "A_PORTRAIT,A_DIALOG",
+    "slotDef": "lines:textList",
+    "defaultSkip": false
+  },
+  {
+    "tplName": "Tpl_Narration",
+    "descText": "纯旁白推进",
+    "interruptType": "progressive",
+    "atomSeq": "A_NARRATE",
+    "slotDef": "lines:textList",
+    "defaultSkip": false
+  },
+  {
+    "tplName": "Tpl_WorldBroadcast",
+    "descText": "世界事件播报；用于行动与系统提示",
+    "interruptType": "progressive",
+    "atomSeq": "A_NARRATE",
+    "slotDef": "titleKey:textKey,lines:textList",
+    "defaultSkip": false
+  },
+  {
+    "tplName": "Tpl_LetterRead",
+    "descText": "读信/文书",
+    "interruptType": "progressive",
+    "atomSeq": "A_NARRATE",
+    "slotDef": "titleKey:textKey,lines:textList",
+    "defaultSkip": false
+  },
+  {
+    "tplName": "Tpl_Timeskip",
+    "descText": "时间跳过（可跳过）",
+    "interruptType": "playback",
+    "atomSeq": "A_FADE,A_NARRATE",
+    "slotDef": "type:fadeType,duration:float,lines:textList",
+    "defaultSkip": true
+  },
+  {
+    "tplName": "Tpl_CutScene",
+    "descText": "过场演出（可跳过）",
+    "interruptType": "playback",
+    "atomSeq": "A_BG,A_CAMERA,A_NARRATE",
+    "slotDef": "zoom:float,shake:float,duration:float,lines:textList",
+    "defaultSkip": true
+  },
+  {
+    "tplName": "Tpl_ChoiceOnly",
+    "descText": "纯选项",
+    "interruptType": "progressive",
+    "atomSeq": "A_NARRATE,A_CHOICE",
+    "slotDef": "textKey:textKey,opts:optionList",
+    "defaultSkip": false
+  },
+  {
+    "tplName": "Tpl_BarMilestone",
+    "descText": "数值里程碑反馈",
+    "interruptType": "progressive",
+    "atomSeq": "A_BAR_HINT,A_NARRATE",
+    "slotDef": "barKey:barKey,delta:int,textKey:textKey",
+    "defaultSkip": false
+  }
+]

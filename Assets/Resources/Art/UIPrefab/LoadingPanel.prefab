@@ -197,6 +197,7 @@ MonoBehaviour:
   canvasGroup: {fileID: 6819703153961562409}
   tipText: {fileID: 3322766899746848892}
   logo: {fileID: 2682551591176552826}
+  progressFill: {fileID: 8952845970469252602}
   pulseDuration: 1.2
   references:
     version: 2

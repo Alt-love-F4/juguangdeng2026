@@ -1,0 +1,30 @@
+[
+  {
+    "choiceId": "choice.talk.cafe.a",
+    "groupKey": "talk.cafe.response",
+    "textKey": "choice.talk.cafe.a",
+    "resultOwnerId": "choice.talk.cafe.a.result",
+    "seq": 1
+  },
+  {
+    "choiceId": "choice.talk.cafe.b",
+    "groupKey": "talk.cafe.response",
+    "textKey": "choice.talk.cafe.b",
+    "resultOwnerId": "choice.talk.cafe.b.result",
+    "seq": 2
+  },
+  {
+    "choiceId": "choice.talk.cafe.c",
+    "groupKey": "talk.cafe.response",
+    "textKey": "choice.talk.cafe.c",
+    "resultOwnerId": "choice.talk.cafe.c.result",
+    "seq": 3
+  },
+  {
+    "choiceId": "choice.chen.tea",
+    "groupKey": "tea.response",
+    "textKey": "choice.tea.accept",
+    "resultOwnerId": "choice.chen.tea.result",
+    "seq": 1
+  }
+]
