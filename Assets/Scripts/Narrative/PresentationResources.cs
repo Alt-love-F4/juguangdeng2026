@@ -154,7 +154,9 @@ namespace Spotlight.Narrative
 
         public void Dispose()
         {
-            RestoreCamera(); music.Stop(); sfx.Stop();
+            RestoreCamera();
+            if (music != null) music.Stop();
+            if (sfx != null) sfx.Stop();
             foreach (GameObject effect in effects) if (effect != null) UnityEngine.Object.Destroy(effect);
             foreach (GameObject npc in npcs.Values) if (npc != null) UnityEngine.Object.Destroy(npc);
             effects.Clear(); npcs.Clear();

@@ -1,5 +1,75 @@
 [
   {
+    "key": "mainmenu.title",
+    "text": "银星劫",
+    "comment": "主菜单标题"
+  },
+  {
+    "key": "mainmenu.subtitle",
+    "text": "文本由 Luban Excel 注入",
+    "comment": "文本配表示例说明"
+  },
+  {
+    "key": "recipe.espresso",
+    "text": "意式浓缩",
+    "comment": "配方名"
+  },
+  {
+    "key": "recipe.macchiato",
+    "text": "玛奇朵",
+    "comment": "配方名"
+  },
+  {
+    "key": "recipe.latte",
+    "text": "拿铁（拉花）",
+    "comment": "配方名"
+  },
+  {
+    "key": "recipe.matcha_latte",
+    "text": "抹茶拿铁",
+    "comment": "配方名"
+  },
+  {
+    "key": "recipe.honey_latte",
+    "text": "蜂蜜拿铁",
+    "comment": "配方名"
+  },
+  {
+    "key": "recipe.hot_chocolate",
+    "text": "热可可",
+    "comment": "配方名"
+  },
+  {
+    "key": "recipe.mocha",
+    "text": "摩卡",
+    "comment": "配方名"
+  },
+  {
+    "key": "ing.coffee_bean",
+    "text": "咖啡豆",
+    "comment": "原料名"
+  },
+  {
+    "key": "ing.milk",
+    "text": "牛奶",
+    "comment": "原料名"
+  },
+  {
+    "key": "ing.matcha",
+    "text": "抹茶",
+    "comment": "原料名"
+  },
+  {
+    "key": "ing.chocolate",
+    "text": "可可",
+    "comment": "原料名"
+  },
+  {
+    "key": "ing.honey",
+    "text": "蜂蜜",
+    "comment": "原料名"
+  },
+  {
     "key": "npc.a.name",
     "text": "艾德里安",
     "comment": "A · 短工佣人，出身寒微"
@@ -425,79 +495,6 @@
     "comment": "保留原示例"
   },
   {
-    "key": "mainmenu.title",
-    "text": "银星劫",
-    "comment": "主菜单标题"
-  },
-  {
-    "key": "mainmenu.subtitle",
-    "text": "文本由 Luban Excel 注入",
-<<<<<<< HEAD
-    "comment": "文本配表示例说明"
-  },
-  {
-    "key": "recipe.espresso",
-    "text": "意式浓缩",
-    "comment": "配方名"
-  },
-  {
-    "key": "recipe.macchiato",
-    "text": "玛奇朵",
-    "comment": "配方名"
-  },
-  {
-    "key": "recipe.latte",
-    "text": "拿铁（拉花）",
-    "comment": "配方名"
-  },
-  {
-    "key": "recipe.matcha_latte",
-    "text": "抹茶拿铁",
-    "comment": "配方名"
-  },
-  {
-    "key": "recipe.honey_latte",
-    "text": "蜂蜜拿铁",
-    "comment": "配方名"
-  },
-  {
-    "key": "recipe.hot_chocolate",
-    "text": "热可可",
-    "comment": "配方名"
-  },
-  {
-    "key": "recipe.mocha",
-    "text": "摩卡",
-    "comment": "配方名"
-  },
-  {
-    "key": "ing.coffee_bean",
-    "text": "咖啡豆",
-    "comment": "原料名"
-  },
-  {
-    "key": "ing.milk",
-    "text": "牛奶",
-    "comment": "原料名"
-  },
-  {
-    "key": "ing.matcha",
-    "text": "抹茶",
-    "comment": "原料名"
-  },
-  {
-    "key": "ing.chocolate",
-    "text": "可可",
-    "comment": "原料名"
-  },
-  {
-    "key": "ing.honey",
-    "text": "蜂蜜",
-    "comment": "原料名"
-=======
-    "comment": ""
-  },
-  {
     "key": "npc.chen.name",
     "text": "老陈",
     "comment": "原示例"
@@ -536,6 +533,5 @@
     "key": "choice.tea.accept",
     "text": "接过茶杯",
     "comment": "原示例"
->>>>>>> origin/main
   }
 ]

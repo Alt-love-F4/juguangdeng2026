@@ -8,8 +8,8 @@
     "accepts": "",
     "behavior_id": "small",
     "sprite_path": "Assets/Art/Gameplay/cup_small.png",
-    "x": 0.0,
-    "y": 0.0,
+    "x": 0,
+    "y": 0,
     "height": 0.85,
     "capacity": 4
   },
@@ -22,8 +22,8 @@
     "accepts": "",
     "behavior_id": "large",
     "sprite_path": "Assets/Art/Gameplay/cup_empty.png",
-    "x": 0.0,
-    "y": 0.0,
+    "x": 0,
+    "y": 0,
     "height": 1.05,
     "capacity": 6
   },
@@ -36,9 +36,9 @@
     "accepts": "",
     "behavior_id": "",
     "sprite_path": "Assets/Art/Gameplay/cup_small.png",
-    "x": -8.0,
+    "x": -8,
     "y": -0.7,
-    "height": 1.0,
+    "height": 1,
     "capacity": 1
   },
   {
@@ -50,7 +50,7 @@
     "accepts": "",
     "behavior_id": "",
     "sprite_path": "Assets/Art/Gameplay/cup_empty.png",
-    "x": -8.0,
+    "x": -8,
     "y": -2.25,
     "height": 1.2,
     "capacity": 1
@@ -64,8 +64,8 @@
     "accepts": "",
     "behavior_id": "coffee_bean",
     "sprite_path": "Assets/Art/Gameplay/ing_coffee_beans.png",
-    "x": 0.0,
-    "y": 0.0,
+    "x": 0,
+    "y": 0,
     "height": 0.58,
     "capacity": 1
   },
@@ -92,8 +92,8 @@
     "accepts": "",
     "behavior_id": "milk",
     "sprite_path": "Assets/Art/Gameplay/ing_milk.png",
-    "x": 0.0,
-    "y": 0.0,
+    "x": 0,
+    "y": 0,
     "height": 0.58,
     "capacity": 1
   },
@@ -120,8 +120,8 @@
     "accepts": "",
     "behavior_id": "matcha",
     "sprite_path": "Assets/Art/Gameplay/ing_matcha.png",
-    "x": 0.0,
-    "y": 0.0,
+    "x": 0,
+    "y": 0,
     "height": 0.58,
     "capacity": 1
   },
@@ -134,7 +134,7 @@
     "accepts": "",
     "behavior_id": "matcha",
     "sprite_path": "Assets/Art/Gameplay/ing_matcha.png",
-    "x": 5.0,
+    "x": 5,
     "y": 3.65,
     "height": 0.9,
     "capacity": 1
@@ -148,8 +148,8 @@
     "accepts": "",
     "behavior_id": "chocolate",
     "sprite_path": "Assets/Art/Gameplay/ing_chocolate.png",
-    "x": 0.0,
-    "y": 0.0,
+    "x": 0,
+    "y": 0,
     "height": 0.58,
     "capacity": 1
   },
@@ -176,8 +176,8 @@
     "accepts": "",
     "behavior_id": "honey",
     "sprite_path": "Assets/Art/Gameplay/ing_honey.png",
-    "x": 0.0,
-    "y": 0.0,
+    "x": 0,
+    "y": 0,
     "height": 0.58,
     "capacity": 1
   },
@@ -204,8 +204,8 @@
     "accepts": "",
     "behavior_id": "cream",
     "sprite_path": "Assets/Art/Gameplay/ing_cream.png",
-    "x": 0.0,
-    "y": 0.0,
+    "x": 0,
+    "y": 0,
     "height": 0.58,
     "capacity": 1
   },
@@ -302,7 +302,7 @@
     "accepts": "cup|ingredient",
     "behavior_id": "workbench",
     "sprite_path": "",
-    "x": -5.0,
+    "x": -5,
     "y": -2.6,
     "height": 0.45,
     "capacity": 1
@@ -316,7 +316,7 @@
     "accepts": "cup|ingredient",
     "behavior_id": "workbench",
     "sprite_path": "",
-    "x": -2.0,
+    "x": -2,
     "y": -2.6,
     "height": 0.45,
     "capacity": 1
@@ -330,7 +330,7 @@
     "accepts": "cup|ingredient",
     "behavior_id": "workbench",
     "sprite_path": "",
-    "x": 1.0,
+    "x": 1,
     "y": -2.6,
     "height": 0.45,
     "capacity": 1

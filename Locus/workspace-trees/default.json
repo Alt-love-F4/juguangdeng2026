@@ -3,8 +3,8 @@
   "presetId": "default",
   "name": "Default",
   "projectId": "unity-f7823e4bb0c191f5d2881c10",
-  "revision": 50,
-  "lastOperationId": "9a6af62c-e412-4b57-98ab-33b53fd06ed4",
+  "revision": 56,
+  "lastOperationId": "ba7b483f-cd4f-4106-a929-720c22ca5a69",
   "nodes": [
     {
       "nodeId": "resource:system:3956246e-0490-4517-b93b-f0838df2fb6f",
@@ -76,7 +76,7 @@
       "resourceKind": "session",
       "resourceId": "24e76f42-e533-4d9e-899b-f78b4bdbcf48",
       "hidden": false,
-      "position": 9
+      "position": 8
     },
     {
       "nodeId": "resource:session:add059cc-54b1-48cd-9af8-4edf03a44c9a",
@@ -85,7 +85,7 @@
       "resourceKind": "session",
       "resourceId": "cca5fd49-aa05-4183-a521-53db781c83bf",
       "hidden": false,
-      "position": 24
+      "position": 27
     },
     {
       "nodeId": "resource:session:a8caf199-3b08-400e-9bf4-897d0f207120",
@@ -194,7 +194,7 @@
       "resourceKind": "session",
       "resourceId": "47e21aa3-e90f-4e86-b830-8780b24f9963",
       "hidden": false,
-      "position": 23
+      "position": 26
     },
     {
       "nodeId": "resource:session:afc2d266-9754-4a7f-888a-b613a78c3cc1",
@@ -203,7 +203,7 @@
       "resourceKind": "session",
       "resourceId": "e71b0b8b-e1ee-4185-9174-fb9f444944b0",
       "hidden": false,
-      "position": 22
+      "position": 25
     },
     {
       "nodeId": "resource:session:3382b813-0a46-4dd2-93bf-18ec66bbf23e",
@@ -242,7 +242,7 @@
       "resourceKind": "session",
       "resourceId": "6dd4eb84-eb49-41f7-b1b3-70e6d95c065b",
       "hidden": false,
-      "position": 21
+      "position": 24
     },
     {
       "nodeId": "resource:session:5dce9194-9e67-4cbb-af3a-6a50c540ae89",
@@ -251,7 +251,7 @@
       "resourceKind": "session",
       "resourceId": "4af6cf7b-3798-4059-a348-77ae6ab46c7d",
       "hidden": false,
-      "position": 20
+      "position": 23
     },
     {
       "nodeId": "resource:session:605bb9c9-a213-4953-8c55-55813fb15807",
@@ -260,7 +260,7 @@
       "resourceKind": "session",
       "resourceId": "57d867e0-f6f7-4841-9795-cbeaec0f4155",
       "hidden": false,
-      "position": 19
+      "position": 22
     },
     {
       "nodeId": "resource:session:87fdfbe4-f815-44d5-9873-4eb458f23403",
@@ -289,7 +289,7 @@
       "resourceKind": "session",
       "resourceId": "4cfa6dbe-a0ee-44f0-8b80-601e9e1b7eb3",
       "hidden": false,
-      "position": 18
+      "position": 21
     },
     {
       "nodeId": "resource:session:93c5e6e3-e323-459b-a02d-de63cc2f1c82",
@@ -328,7 +328,7 @@
       "resourceKind": "session",
       "resourceId": "4ee3046e-b06a-4747-b2b5-5cbcbc0a2c11",
       "hidden": false,
-      "position": 17
+      "position": 20
     },
     {
       "nodeId": "resource:session:3fa7fd86-8497-48e1-9d00-5a93e4055be4",
@@ -337,7 +337,7 @@
       "resourceKind": "session",
       "resourceId": "58fbdc0b-bede-4544-9e7e-cb092cd34f5c",
       "hidden": false,
-      "position": 16
+      "position": 19
     },
     {
       "nodeId": "resource:session:7f2f1d43-cc97-42e6-986f-999423a3749c",
@@ -346,7 +346,7 @@
       "resourceKind": "session",
       "resourceId": "73631be7-f430-4bab-8c25-e8fd981dfdf8",
       "hidden": false,
-      "position": 15
+      "position": 18
     },
     {
       "nodeId": "resource:session:0ed60ecd-b0ba-4900-9e52-7a69eb5bac6d",
@@ -415,7 +415,7 @@
       "resourceKind": "session",
       "resourceId": "bda501b6-539a-4996-947f-876ea29ce13d",
       "hidden": false,
-      "position": 14
+      "position": 17
     },
     {
       "nodeId": "resource:session:d7ff8ab9-eda6-416a-afad-b078d6444d1b",
@@ -474,7 +474,7 @@
       "resourceKind": "session",
       "resourceId": "4e87d95d-9902-4af0-a138-22f65f6d6f33",
       "hidden": false,
-      "position": 13
+      "position": 16
     },
     {
       "nodeId": "resource:session:532d24dd-3209-42ea-ae4b-994b0576995c",
@@ -483,7 +483,7 @@
       "resourceKind": "session",
       "resourceId": "03d64090-47f0-418c-8b4a-06b6f803b80a",
       "hidden": false,
-      "position": 12
+      "position": 15
     },
     {
       "nodeId": "resource:session:225d0c56-a9ba-4f35-8833-e94039ee5f69",
@@ -492,7 +492,7 @@
       "resourceKind": "session",
       "resourceId": "9c5e8f77-b4d7-44b3-9798-93cc992e4323",
       "hidden": false,
-      "position": 11
+      "position": 14
     },
     {
       "nodeId": "resource:session:6f703385-a24c-4c16-9d85-41b01a3f0841",
@@ -501,7 +501,7 @@
       "resourceKind": "session",
       "resourceId": "abba14b0-1e3d-4d9b-b336-026e2009e580",
       "hidden": false,
-      "position": 7
+      "position": 11
     },
     {
       "nodeId": "resource:session:1fcc8a6a-debf-4b02-a6e8-685c8fcaba6e",
@@ -510,7 +510,7 @@
       "resourceKind": "session",
       "resourceId": "e660c058-38d0-47ad-a710-f64e7e5e03c3",
       "hidden": false,
-      "position": 10
+      "position": 13
     },
     {
       "nodeId": "resource:session:486c6cc3-b461-4483-9af9-8b14a9770e5c",
@@ -529,8 +529,46 @@
       "resourceKind": "session",
       "resourceId": "fc5b1982-2b38-4650-9562-6cca0477bf94",
       "hidden": false,
-      "position": 8
+      "position": 12
+    },
+    {
+      "nodeId": "resource:session:9165bd5e-529b-4dea-a8e2-543e5d516d51",
+      "projectId": "unity-f7823e4bb0c191f5d2881c10",
+      "nodeKind": "resource",
+      "resourceKind": "session",
+      "resourceId": "da60426d-1901-4a3d-baf8-0348aea36f4b",
+      "hidden": false,
+      "position": 10
+    },
+    {
+      "nodeId": "resource:session:1d9c071b-cdec-4265-866c-b9a378df1caf",
+      "projectId": "unity-f7823e4bb0c191f5d2881c10",
+      "nodeKind": "resource",
+      "resourceKind": "session",
+      "resourceId": "b6f53862-10b9-4e9a-873b-803d9c114faa",
+      "hidden": false,
+      "position": 9
+    },
+    {
+      "nodeId": "resource:session:10157b54-5858-4754-84d4-1cb558b95416",
+      "projectId": "unity-f7823e4bb0c191f5d2881c10",
+      "nodeKind": "resource",
+      "resourceKind": "session",
+      "resourceId": "0db416d3-d2be-47c5-9f74-e51f9ac06d85",
+      "hidden": false,
+      "position": 7
     }
   ],
-  "itemStates": []
+  "itemStates": [
+    {
+      "nodeId": "resource:session:10157b54-5858-4754-84d4-1cb558b95416",
+      "pinned": true,
+      "highlighted": false
+    },
+    {
+      "nodeId": "resource:session:866e4107-aa6b-4193-b450-37b3e09b4789",
+      "pinned": true,
+      "highlighted": false
+    }
+  ]
 }

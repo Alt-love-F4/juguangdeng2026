@@ -488,25 +488,17 @@ namespace Spotlight.GameFlow
 
         private GameFlowPanelData Data(bool fromGameplay = false) => new GameFlowPanelData(this, fromGameplay);
 
-<<<<<<< HEAD
-        private GameSaveData CaptureSaveData()
-        {
-            var data = new GameSaveData
-=======
         public bool TryCaptureSaveData(out GameSaveData data, out string error)
         {
             data = new GameSaveData
->>>>>>> origin/main
             {
                 SceneName = SceneManager.GetActiveScene().name,
                 ElapsedPlaytimeSeconds = playtime,
                 CheckpointId = "start",
                 State = gameplay ? "gameplay" : "menu"
             };
-<<<<<<< HEAD
             data.Participants.AddRange(GameSaveParticipantRegistry.CaptureAll());
-            return data;
-=======
+
             NarrativeRuntime runtime = narrativeIntegration?.Runtime;
             if (runtime == null || !runtime.IsReady)
             {
@@ -519,11 +511,15 @@ namespace Spotlight.GameFlow
             return false;
         }
 
+        private GameSaveData CaptureSaveData()
+        {
+            return TryCaptureSaveData(out GameSaveData data, out _) ? data : null;
+        }
+
         public bool TryAutoSave(out string error)
         {
             if (!TryCaptureSaveData(out GameSaveData data, out error)) return false;
             return saves.TryAutoSave(data, out error);
->>>>>>> origin/main
         }
 
         private static int FindBuildIndex(string scene)

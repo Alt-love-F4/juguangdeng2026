@@ -1,6 +1,5 @@
 {
   "dependencies": {
-    "com.akiojin.unity-cli-bridge": "file:D:/Unity/plugin/unity-cli-bridge",
     "com.coplaydev.unity-mcp": "https://github.com/CoplayDev/unity-mcp.git?path=/MCPForUnity#main",
     "com.cysharp.unitask": "https://github.com/Cysharp/UniTask.git?path=src/UniTask/Assets/Plugins/UniTask",
     "com.hinatayoki.yokiframe": "https://github.com/HinataYoki/YokiFrame.git",

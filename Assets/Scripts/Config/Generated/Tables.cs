@@ -14,6 +14,13 @@ namespace cfg
 public partial class Tables
 {
     public TbText TbText {get; }
+    public TbRecipe TbRecipe {get; }
+    public TbIngredient TbIngredient {get; }
+    public TbDevice TbDevice {get; }
+    public TbGameParam TbGameParam {get; }
+    public TbWorldObject TbWorldObject {get; }
+    public TbRecipeStep TbRecipeStep {get; }
+    public TbNpc TbNpc {get; }
     public TbNcsObject TbNcsObject {get; }
     public TbNcsBar TbNcsBar {get; }
     public TbNcsTrigger TbNcsTrigger {get; }
@@ -29,6 +36,13 @@ public partial class Tables
       public Tables(System.Func<string, JArray> loader)
     {
         TbText = new TbText(loader("tbtext"));
+        TbRecipe = new TbRecipe(loader("tbrecipe"));
+        TbIngredient = new TbIngredient(loader("tbingredient"));
+        TbDevice = new TbDevice(loader("tbdevice"));
+        TbGameParam = new TbGameParam(loader("tbgameparam"));
+        TbWorldObject = new TbWorldObject(loader("tbworldobject"));
+        TbRecipeStep = new TbRecipeStep(loader("tbrecipestep"));
+        TbNpc = new TbNpc(loader("tbnpc"));
         TbNcsObject = new TbNcsObject(loader("tbncsobject"));
         TbNcsBar = new TbNcsBar(loader("tbncsbar"));
         TbNcsTrigger = new TbNcsTrigger(loader("tbncstrigger"));
@@ -45,6 +59,13 @@ public partial class Tables
      private void ResolveRef()
     {
         TbText.ResolveRef(this);
+        TbRecipe.ResolveRef(this);
+        TbIngredient.ResolveRef(this);
+        TbDevice.ResolveRef(this);
+        TbGameParam.ResolveRef(this);
+        TbWorldObject.ResolveRef(this);
+        TbRecipeStep.ResolveRef(this);
+        TbNpc.ResolveRef(this);
         TbNcsObject.ResolveRef(this);
         TbNcsBar.ResolveRef(this);
         TbNcsTrigger.ResolveRef(this);
