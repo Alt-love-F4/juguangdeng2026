@@ -30,3 +30,19 @@
 ## 设备拖出产物
 
 `entities.dragOutput` 控制设备是否允许拖出已完成的产物；当前仅研磨器启用。投入咖啡豆、完成点击研磨后，从研磨器拖出咖啡粉，可投到摩卡炉、杯子或放在场景空地。拖动的是产物预览，不是设备；取消、UI 区域和无效目标不清空设备。成功松手才提交原有产物，不额外消耗豆子或复制产物。
+
+## 普通摄像机与实体输入
+
+已移除 `FreeCafeViewport`。世界摄像机使用完整 Viewport Rect (0,0,1,1)，不再每帧修改 Camera.rect。场景生成器默认 Orthographic Size 为 7.5；已编辑场景保留手动设定的镜头大小，可以直接在 Camera Inspector 调整。上下黑边仍由 ScreenSpaceOverlay HUD 绘制，黑边和按钮拦截鼠标，非 UI 区域由实体 Collider2D 和摄像机 Physics2DRaycaster 接收点击/拖拽。
+
+FreeCafeRuntime.World Camera 应指向实际启用且显示世界的摄像机。同一台摄像机上启用 Physics2DRaycaster，EventSystem 使用 InputSystemUIInputModule。拖拽优先使用 PointerEventData.pressEventCamera，并在拖拽期间固定该摄像机，通过 ScreenPointToRay 投射到实体平面；未提供事件摄像机的测试调用才使用 World Camera。无需额外视口服务。
+
+拖拽偏移以鼠标按下的 `pressPosition` 为基准，不以超过拖动阈值后才触发的 BeginDrag 当前坐标为基准，避免实体始终偏离鼠标和正确接收目标。制作提示面板在 HUD Awake 默认关闭，主动打开后才阻挡实体输入。
+
+## 三层楼与四个小区域
+
+楼层布局与镜头构图属于场景配置，不属于咖啡配方数值表：在 `BuildingViews` 下配置 `floor2`、`floor1`、`floorB1`；一楼的 `Cafe` / `Counter` 共用 `floor1`，各有独立 `CameraAnchor`。`FreeCafeApp` 的 `FreeCafeAreaManager.areas` 将区域 ID、楼层、内容根和镜头锚点连接起来。
+
+`areas.halfWidth/halfHeight`、`layout.x/y`、存档实体 `x/y` 都是对应区域根下的局部坐标，不要给配表加上楼层的世界坐标偏移。移动楼层根后，配置与实体仍然跟随该根显示。当前地下室根的缩放也会参与局部/世界坐标转换。
+
+导航按钮与入口继续调用 `FreeCafeRuntime.Enter(AreaId)`，不直接移动摄像机：该入口同时处理当前区域、拖拽取消、物品携带与输入隔离。完整层级和配置说明见 `Docs/FreeCafe/InSceneAreas.md`。

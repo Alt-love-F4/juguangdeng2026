@@ -1,0 +1,11 @@
+{
+    "name": "Spotlight.GameFlow.Architecture",
+    "rootNamespace": "Spotlight.GameFlow",
+    "references": [
+        "Spotlight.GameFlow.Core",
+        "Spotlight.GameFlow.Saving",
+        "Spotlight.GameFlow.Settings",
+        "YokiFrame"
+    ],
+    "autoReferenced": true
+}

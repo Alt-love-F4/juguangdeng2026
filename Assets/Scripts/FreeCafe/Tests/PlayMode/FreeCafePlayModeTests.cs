@@ -21,7 +21,99 @@ namespace Spotlight.FreeCafe.Tests
             yield return SceneManager.LoadSceneAsync("CoffeeShop",LoadSceneMode.Single);yield return null;yield return null;
         }
         [UnityTearDown] public IEnumerator Cleanup() { Time.timeScale=1;yield return null; }
-        private PointerEventData Pointer(FreeCafeRuntime app,float x,float y) => new PointerEventData(EventSystem.current) {position=app.worldCamera.WorldToScreenPoint(new Vector3(x,y,0))};
+        private PointerEventData Pointer(FreeCafeRuntime app,float x,float y) => new PointerEventData(EventSystem.current) {position=app.worldCamera.WorldToScreenPoint(app.AreaToWorld(app.World.State.currentArea,x,y))};
+        [UnityTest] public IEnumerator ThreeFloorLayoutMovesOnlyCameraAndKeepsAllAreasAlive()
+        {
+            var app=Object.FindFirstObjectByType<FreeCafeRuntime>();var manager=app.areaManager;
+            Assert.That(manager,Is.Not.Null);Assert.That(manager.areas.Length,Is.EqualTo(4));
+            Assert.That(app.areaRoots[0].parent,Is.SameAs(app.areaRoots[1].parent));
+            Assert.That(app.areaRoots[2].position.y,Is.GreaterThan(app.areaRoots[0].position.y));
+            Assert.That(app.areaRoots[3].position.y,Is.LessThan(app.areaRoots[0].position.y));
+            Assert.That(Vector3.Distance(app.areaRoots[0].position,app.areaRoots[1].position),Is.GreaterThan(20));
+            var grinder=app.World.Find("m.grinder");var grinderView=app.View(grinder.id);var instanceId=grinderView.GetInstanceID();var worldPosition=grinderView.transform.position;
+            var scene=SceneManager.GetActiveScene();
+            foreach(var area in new[]{AreaId.Counter,AreaId.TopFloor,AreaId.Basement,AreaId.Cafe})
+            {
+                app.Enter(area);yield return null;
+                Assert.That(SceneManager.GetActiveScene(),Is.EqualTo(scene));Assert.That(manager.CurrentArea,Is.EqualTo(area));
+                Assert.That(app.worldCamera.transform.position,Is.EqualTo(manager.Find(area).cameraAnchor.position+manager.cameraOffset));
+                foreach(var root in app.areaRoots)Assert.That(root.gameObject.activeInHierarchy,Is.True,"Navigation must not disable an area");
+                Assert.That(app.View(grinder.id).GetInstanceID(),Is.EqualTo(instanceId));Assert.That(grinderView.transform.position,Is.EqualTo(worldPosition));
+                Assert.That(grinderView.hitbox.enabled,Is.EqualTo(area==AreaId.Counter));
+            }
+        }
+        [UnityTest] public IEnumerator BasementDraggingStoresLocalCoordinatesAndRestoreReturnsCameraToSavedArea()
+        {
+            var app=Object.FindFirstObjectByType<FreeCafeRuntime>();app.Enter(AreaId.Basement);yield return null;
+            Assert.That(app.World.Take("s.cups.large",AreaId.Counter,1,-1,out var cup).success,Is.True);
+            Assert.That(app.World.Move(cup.id,AreaId.Basement,1,-1).success,Is.True);
+            Physics2D.SyncTransforms();var pointer=Pointer(app,cup.x,cup.y);app.BeginDrag(app.View(cup.id),pointer);Assert.That(app.IsDragging,Is.True);
+            app.EndDrag(Pointer(app,3,-2));yield return null;
+            Assert.That(cup.x,Is.EqualTo(3).Within(.01));Assert.That(cup.y,Is.EqualTo(-2).Within(.01));
+            Assert.That(Vector3.Distance(app.View(cup.id).transform.position,app.AreaToWorld(AreaId.Basement,3,-2)),Is.LessThan(.01f));
+            string json=app.CaptureJson();app.Enter(AreaId.Cafe);app.RestoreJson(json);yield return null;
+            Assert.That(app.World.State.currentArea,Is.EqualTo(AreaId.Basement));Assert.That(app.areaManager.CurrentArea,Is.EqualTo(AreaId.Basement));
+            Assert.That(app.worldCamera.transform.position,Is.EqualTo(app.areaManager.Find(AreaId.Basement).cameraAnchor.position+app.areaManager.cameraOffset));
+            Assert.That(app.World.Find(cup.id).x,Is.EqualTo(3).Within(.01));
+        }
+        [UnityTest] public IEnumerator AreaSwitchCancelsProvisionalDragAndNonCurrentEntityCannotBeClicked()
+        {
+            var app=Object.FindFirstObjectByType<FreeCafeRuntime>();app.Enter(AreaId.Counter);yield return null;
+            var source=app.World.Find("s.beans");var stock=source.stock;
+            app.BeginDrag(app.View(source.id),Pointer(app,source.x,source.y));Assert.That(app.IsDragging,Is.True);
+            app.Enter(AreaId.TopFloor);yield return null;Assert.That(app.IsDragging,Is.False);Assert.That(source.stock,Is.EqualTo(stock));
+            app.Click(app.View(source.id));app.BeginDrag(app.View(source.id),Pointer(app,0,0));
+            Assert.That(source.stock,Is.EqualTo(stock));Assert.That(app.IsDragging,Is.False);
+        }
+        [UnityTest] public IEnumerator FullScreenCameraSupportsQueuedMouseButtonsAndExistingEntityDrag()
+        {
+            var app=Object.FindFirstObjectByType<FreeCafeRuntime>();var hud=Object.FindFirstObjectByType<FreeCafeHud>();
+            Assert.That(hud.recipePanel.activeSelf,Is.False,"Recipe modal must not block entities at startup");
+            Assert.That(app.worldCamera.isActiveAndEnabled,Is.True);Assert.That(app.worldCamera.rect,Is.EqualTo(new Rect(0,0,1,1)));
+            Assert.That(app.worldCamera.GetComponent<Physics2DRaycaster>().isActiveAndEnabled,Is.True);
+            foreach(var component in app.worldCamera.GetComponents<MonoBehaviour>())
+                Assert.That(component.GetType().Name,Is.Not.EqualTo("FreeCafeViewport"));
+            var previousBackground=InputSystem.settings.backgroundBehavior;var mouse=InputSystem.AddDevice<Mouse>("FreeCafeStandardCameraMouse");
+            try
+            {
+                InputSystem.settings.backgroundBehavior=InputSettings.BackgroundBehavior.IgnoreFocus;
+                yield return ClickWithQueuedMouse(mouse,hud.startButton);
+                Assert.That(app.World.State.open,Is.True,"Start button must receive actual pointer input");
+                yield return ClickWithQueuedMouse(mouse,hud.areaButtons[(int)AreaId.Counter]);
+                Assert.That(app.World.State.currentArea,Is.EqualTo(AreaId.Counter));
+                app.World.Take("s.cups.large",AreaId.Counter,1,-1,out var cup);Physics2D.SyncTransforms();
+                Vector2 start=app.worldCamera.WorldToScreenPoint(app.View(cup.id).transform.position);
+                Vector2 end=app.worldCamera.WorldToScreenPoint(app.AreaToWorld(AreaId.Counter,3,-2));
+                InputSystem.QueueStateEvent(mouse,new MouseState{position=start});yield return null;yield return null;
+                InputSystem.QueueStateEvent(mouse,new MouseState{position=start}.WithButton(MouseButton.Left));yield return null;yield return null;
+                InputSystem.QueueStateEvent(mouse,new MouseState{position=start+new Vector2(25,0)}.WithButton(MouseButton.Left));yield return null;yield return null;
+                Assert.That(app.IsDragging,Is.True,"Mouse must reach Collider2D through Physics2DRaycaster without a viewport component");
+                InputSystem.QueueStateEvent(mouse,new MouseState{position=end}.WithButton(MouseButton.Left));yield return null;yield return null;
+                InputSystem.QueueStateEvent(mouse,new MouseState{position=end});yield return null;yield return null;
+                Assert.That(app.IsDragging,Is.False);Assert.That(cup.x,Is.EqualTo(3).Within(.01));Assert.That(cup.y,Is.EqualTo(-2).Within(.01));
+                Assert.That(app.worldCamera.rect,Is.EqualTo(new Rect(0,0,1,1)),"No script should crop the camera during interaction");
+            }
+            finally {InputSystem.RemoveDevice(mouse);InputSystem.settings.backgroundBehavior=previousBackground;}
+        }
+        [UnityTest] public IEnumerator DragUsesPressEventCameraAndRayPlaneInsteadOfHardcodedCameraDepth()
+        {
+            var app=Object.FindFirstObjectByType<FreeCafeRuntime>();app.Enter(AreaId.Counter);yield return null;
+            app.World.Take("s.cups.large",AreaId.Counter,0,-1,out var cup);
+            var camera=app.worldCamera;var oldPosition=camera.transform.position;var oldRotation=camera.transform.rotation;
+            var wrongCameraGo=new GameObject("NotThePointerCamera",typeof(Camera));var wrongCamera=wrongCameraGo.GetComponent<Camera>();wrongCamera.enabled=false;
+            try
+            {
+                camera.transform.position=app.areaRoots[(int)AreaId.Counter].position+new Vector3(0,2,-10);camera.transform.rotation=Quaternion.Euler(10,0,0);
+                app.worldCamera=wrongCamera;
+                var pointer=new PointerEventData(EventSystem.current){position=camera.WorldToScreenPoint(app.AreaToWorld(AreaId.Counter,cup.x,cup.y)),pointerPressRaycast=new RaycastResult{module=camera.GetComponent<Physics2DRaycaster>()}};
+                pointer.pressPosition=pointer.position;
+                Assert.That(pointer.pressEventCamera,Is.SameAs(camera));app.BeginDrag(app.View(cup.id),pointer);Assert.That(app.IsDragging,Is.True);
+                pointer.position=camera.WorldToScreenPoint(app.AreaToWorld(AreaId.Counter,2,-2));Physics2D.SyncTransforms();app.EndDrag(pointer);
+                Assert.That(cup.x,Is.EqualTo(2).Within(.01));Assert.That(cup.y,Is.EqualTo(-2).Within(.01));
+            }
+            finally {app.CancelDrag();app.worldCamera=camera;camera.transform.SetPositionAndRotation(oldPosition,oldRotation);Object.Destroy(wrongCameraGo);}
+            yield return null;
+        }
         [UnityTest] public IEnumerator CupShowsEmptyPartialAndFullFillStatesWithoutHoverReset()
         {
             var app=Object.FindFirstObjectByType<FreeCafeRuntime>();
@@ -45,7 +137,7 @@ namespace Spotlight.FreeCafe.Tests
             app.Enter(AreaId.Counter);yield return null;
             var source=app.View("s.beans");var record=app.World.Find("s.beans");int stock=record.stock;
             var pointer=Pointer(app,record.x,record.y);app.BeginDrag(source,pointer);Assert.That(app.IsDragging,Is.True);
-            pointer.position=app.worldCamera.WorldToScreenPoint(new Vector3(2.137f,-2.613f,0));app.MoveDrag(pointer);Physics2D.SyncTransforms();app.EndDrag(pointer);yield return null;
+            pointer.position=app.worldCamera.WorldToScreenPoint(app.AreaToWorld(AreaId.Counter,2.137f,-2.613f));app.MoveDrag(pointer);Physics2D.SyncTransforms();app.EndDrag(pointer);yield return null;
             Assert.That(app.World.Find("s.beans").stock,Is.EqualTo(stock-1));
             WorldEntity placed=null;foreach(var entity in app.World.State.entities) if(entity.specId=="beans") placed=entity;
             Assert.That(placed,Is.Not.Null);Assert.That(placed.x,Is.EqualTo(2.137f).Within(.01));Assert.That(placed.y,Is.EqualTo(-2.613f).Within(.01));
@@ -143,7 +235,7 @@ namespace Spotlight.FreeCafe.Tests
             {
                 InputSystem.settings.backgroundBehavior=InputSettings.BackgroundBehavior.IgnoreFocus;
                 Vector2 start=app.worldCamera.WorldToScreenPoint(original);
-                Vector2 end=app.worldCamera.WorldToScreenPoint(new Vector3(cup.x,cup.y,0));
+                Vector2 end=app.worldCamera.WorldToScreenPoint(app.AreaToWorld(AreaId.Counter,cup.x,cup.y));
                 InputSystem.QueueStateEvent(mouse,new MouseState{position=start});yield return null;yield return null;
                 InputSystem.QueueStateEvent(mouse,new MouseState{position=start}.WithButton(MouseButton.Left));yield return null;yield return null;
                 InputSystem.QueueStateEvent(mouse,new MouseState{position=start+new Vector2(30,0)}.WithButton(MouseButton.Left));yield return null;yield return null;
@@ -167,7 +259,7 @@ namespace Spotlight.FreeCafe.Tests
             int stock=app.World.Find("s.beans").stock;var pointer=Pointer(app,grinder.x,grinder.y);
             app.BeginDrag(view,pointer);Assert.That(app.IsDragging,Is.True);Assert.That(bean.ownerId,Is.EqualTo(grinder.id));
             Assert.That(view.transform.position,Is.EqualTo(original));
-            var brewer=app.World.Find("m.brewer");pointer.position=app.worldCamera.WorldToScreenPoint(new Vector3(brewer.x,brewer.y,0));
+            var brewer=app.World.Find("m.brewer");pointer.position=app.worldCamera.WorldToScreenPoint(app.AreaToWorld(AreaId.Counter,brewer.x,brewer.y));
             Physics2D.SyncTransforms();app.EndDrag(pointer);yield return null;
             Assert.That(app.IsDragging,Is.False);Assert.That(grinder.task,Is.Null);Assert.That(bean.ownerId,Is.EqualTo(brewer.id));
             Assert.That(brewer.task.inputId,Is.EqualTo(bean.id));Assert.That(view.transform.position,Is.EqualTo(original));

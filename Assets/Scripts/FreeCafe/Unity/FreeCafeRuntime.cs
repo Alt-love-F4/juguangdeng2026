@@ -19,6 +19,7 @@ namespace Spotlight.FreeCafe
         public FreeEntityView entityPrefab;
         public FreeCafeEntityPrefabLibrary prefabLibrary;
         public Camera worldCamera;
+        public FreeCafeAreaManager areaManager;
         public Transform[] areaRoots;
         public GameObject[] authoringPreviews;
         public CafeWorld World { get; private set; }
@@ -35,12 +36,25 @@ namespace Spotlight.FreeCafe
         private FreeEntityView draggedView,receiver;
         private string dragItemId,dragSourceId,dragMachineId,dragOutputId,confirmCancelId;
         private Vector3 origin,offset;
+        private Camera dragCamera;
+        private Plane dragPlane;
         private Vector2 pointerScreen;
         private bool overUI;
         private int dragFinishedFrame=-1;
         private float nextVisualRefresh;
         private void Awake()
         {
+            if(worldCamera==null) worldCamera=Camera.main;
+            if(worldCamera==null || !worldCamera.isActiveAndEnabled || worldCamera.GetComponent<Physics2DRaycaster>()==null)
+                Debug.LogError("[FreeCafe Input] 请为 World Camera 指定启用的游戏摄像机，并在同一对象上添加 Physics2DRaycaster。",this);
+            if(areaManager==null) areaManager=GetComponent<FreeCafeAreaManager>();
+            if(areaManager==null) throw new InvalidOperationException("Configure FreeCafeAreaManager on FreeCafeApp before playing");
+            areaManager.Initialize(worldCamera);
+            for(int i=0;i<areaRoots.Length;i++)
+            {
+                var entry=areaManager.Find((AreaId)i);
+                if(entry==null || entry.contentRoot!=areaRoots[i]) throw new InvalidOperationException("Area manager and runtime roots disagree: "+(AreaId)i);
+            }
             World=new CafeWorld(JsonUtility.FromJson<CafeCatalog>(catalogAsset.text));
             if(authoringPreviews!=null) foreach(var preview in authoringPreviews) if(preview!=null) preview.SetActive(false);
             World.Changed+=SyncViews;
@@ -101,10 +115,13 @@ namespace Spotlight.FreeCafe
                     view.Refresh(entity);
                 }
             }
-            for(int i=0;i<areaRoots.Length;i++) areaRoots[i].gameObject.SetActive(i==(int)World.State.currentArea);
+            areaManager.Focus(World.State.currentArea);
             if(SelectedId!=null && World.Find(SelectedId)==null) SelectedId=null;
             ViewChanged?.Invoke();
         }
+        public Vector3 AreaToWorld(AreaId area,float x,float y) => areaRoots[(int)area].TransformPoint(new Vector3(x,y,0));
+        public Vector3 WorldToArea(AreaId area,Vector3 position) => areaRoots[(int)area].InverseTransformPoint(position);
+        public bool IsCurrentAreaTransform(Transform target) => World!=null && target!=null && target.IsChildOf(areaRoots[(int)World.State.currentArea]);
         public FreeEntityView View(string id) => id!=null && views.TryGetValue(id,out var view) ? view : null;
         public void ShowHint(string message)
         {
@@ -131,7 +148,7 @@ namespace Spotlight.FreeCafe
         public void Click(FreeEntityView view)
         {
             if(InputBlocked || IsDragging || dragFinishedFrame==Time.frameCount) return;
-            var entity=World.Find(view.EntityId); if(entity==null) return;
+            var entity=World.Find(view.EntityId); if(entity==null || entity.area!=World.State.currentArea) return;
             var spec=World.Spec(entity.specId);
             if(spec.Has(Capability.Source))
             {
@@ -177,16 +194,26 @@ namespace Spotlight.FreeCafe
         {
             if(InputBlocked || IsDragging) return;
             var entity=World.Find(view.EntityId);
-            if(entity==null || !World.Spec(entity.specId).Has(Capability.Processor)) return;
+            if(entity==null || entity.area!=World.State.currentArea || !World.Spec(entity.specId).Has(Capability.Processor)) return;
             if(entity.task==null) { ShowHint("设备当前没有加工任务。"); return; }
             confirmCancelId=null;
             Report(World.Release(entity.id,true));
         }
-        private Vector3 ToWorld(Vector2 screen) { var point=worldCamera.ScreenToWorldPoint(new Vector3(screen.x,screen.y,-worldCamera.transform.position.z)); point.z=0; return point; }
+        // Standard screen ray -> entity plane. No viewport/layout component participates in input.
+        private bool TryToWorld(Vector2 screen,out Vector3 point)
+        {
+            point=default;
+            if(dragCamera==null || !dragCamera.isActiveAndEnabled) return false;
+            var ray=dragCamera.ScreenPointToRay(screen);
+            if(!dragPlane.Raycast(ray,out var distance)) return false;
+            point=ray.GetPoint(distance);return true;
+        }
         public void BeginDrag(FreeEntityView view,PointerEventData e)
         {
-            if(InputBlocked || IsDragging) return;
-            var entity=World.Find(view.EntityId); if(entity==null) return; var spec=World.Spec(entity.specId);
+            if(InputBlocked || IsDragging || view==null || e==null) return;
+            var inputCamera=e.pressEventCamera!=null ? e.pressEventCamera : worldCamera;
+            if(inputCamera==null || !inputCamera.isActiveAndEnabled) { ShowHint("游戏摄像机未启用，无法拖拽实体"); return; }
+            var entity=World.Find(view.EntityId); if(entity==null || entity.area!=World.State.currentArea) return; var spec=World.Spec(entity.specId);
             if(World.Locked(entity)) { ShowHint("正在加工，点击设备可中止"); return; }
             if(spec.Has(Capability.Source))
             {
@@ -206,7 +233,13 @@ namespace Spotlight.FreeCafe
             }
             else if(spec.Has(Capability.Movable)) { dragItemId=entity.id; draggedView=view; SelectedId=entity.id; }
             else return;
-            origin=draggedView.transform.position; offset=origin-ToWorld(e.position);
+            dragCamera=inputCamera;origin=draggedView.transform.position;
+            dragPlane=new Plane(Vector3.forward,origin);
+            // BeginDrag occurs only after the mouse has crossed the drag threshold.
+            // Anchor at the original press, not the moved cursor, to avoid a permanent offset.
+            var pressPosition=e.pointerPressRaycast.module!=null ? e.pressPosition : e.position;
+            if(!TryToWorld(pressPosition,out var point)) { CancelDrag();ShowHint("鼠标射线无法命中实体所在平面");return; }
+            offset=origin-point;
             draggedView.hitbox.enabled=false; MoveDrag(e);
         }
         private WorldEntity DragData()
@@ -231,7 +264,8 @@ namespace Spotlight.FreeCafe
                 var view=hit.gameObject.GetComponentInParent<FreeEntityView>();
                 if(view!=null && view!=draggedView)
                 {
-                    if(World.IsReceiver(World.Find(view.EntityId))) receiver=view;
+                    var entity=World.Find(view.EntityId);
+                    if(entity!=null && entity.area==World.State.currentArea && World.IsReceiver(entity)) receiver=view;
                     return;
                 }
             }
@@ -239,10 +273,11 @@ namespace Spotlight.FreeCafe
         public void MoveDrag(PointerEventData e)
         {
             if(!IsDragging) return;
-            pointerScreen=e.position; draggedView.transform.position=ToWorld(e.position)+offset;
+            if(InputBlocked || !TryToWorld(e.position,out var point)) { CancelDrag(); return; }
+            pointerScreen=e.position; draggedView.transform.position=point+offset;
             draggedView.body.sortingOrder=2000; FindReceiver(e);
             bool placeOnly=Keyboard.current!=null && (Keyboard.current.leftShiftKey.isPressed || Keyboard.current.rightShiftKey.isPressed);
-            var item=DragData(); if(item==null) { CancelDrag(); ShowHint("设备产物已变化，拖拽已取消"); return; } var pos=draggedView.transform.position;
+            var item=DragData(); if(item==null) { CancelDrag(); ShowHint("设备产物已变化，拖拽已取消"); return; } var pos=WorldToArea(World.State.currentArea,draggedView.transform.position);
             var result=receiver!=null && !placeOnly ? World.Preview(item,World.Find(receiver.EntityId)) : World.CanPosition(item.specId,World.State.currentArea,pos.x,pos.y);
             if(receiver!=null && !placeOnly) receiver.SetDropTarget(true,!result.success);
             ShowHint(overUI ? "不能放在 UI 黑边；松手取消" : result.message+(placeOnly ? " · 仅摆放" : " · Shift 可仅摆放"));
@@ -256,8 +291,8 @@ namespace Spotlight.FreeCafe
             bool placeOnly=Keyboard.current!=null && (Keyboard.current.leftShiftKey.isPressed || Keyboard.current.rightShiftKey.isPressed);
             string itemId=dragItemId,sourceId=dragSourceId,targetId=receiver==null ? null : receiver.EntityId;
             string machineId=dragMachineId,outputId=dragOutputId;
-            var ghost=draggedView; var position=ghost.transform.position;
-            bool validScreen=worldCamera.pixelRect.Contains(e.position) && !overUI;
+            var ghost=draggedView; var position=WorldToArea(World.State.currentArea,ghost.transform.position);
+            bool validScreen=dragCamera!=null && dragCamera.pixelRect.Contains(e.position) && !overUI;
             // Release pointer ownership before the model synchronizes/consumes any view.
             ClearDrag(); ActionResult result;
             if(!validScreen) result=ActionResult.No("已取消，库存与物品位置未改变");
@@ -277,8 +312,8 @@ namespace Spotlight.FreeCafe
         private void ClearDrag()
         {
             if(receiver!=null) receiver.SetDropTarget(false,false);
-            if(draggedView!=null && dragItemId!=null) draggedView.hitbox.enabled=true;
-            draggedView=null; receiver=null; dragSourceId=dragItemId=dragMachineId=dragOutputId=null; dragFinishedFrame=Time.frameCount;
+            if(draggedView!=null && dragItemId!=null) draggedView.hitbox.enabled=World.Find(dragItemId)?.area==World.State.currentArea;
+            draggedView=null; receiver=null; dragCamera=null; dragSourceId=dragItemId=dragMachineId=dragOutputId=null; dragFinishedFrame=Time.frameCount;
         }
         public void CancelDrag()
         {
@@ -289,7 +324,9 @@ namespace Spotlight.FreeCafe
         }
         public void Enter(AreaId area)
         {
-            if(InputBlocked) return; CancelDrag();
+            if(InputBlocked) return;
+            if(World.Area(area)==null || areaManager.Find(area)==null) { ShowHint("未配置的小场景："+area);return; }
+            CancelDrag();
             if(CarrySelection && SelectedId!=null)
             {
                 var item=World.Find(SelectedId);

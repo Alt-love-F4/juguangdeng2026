@@ -46,15 +46,23 @@ namespace Spotlight.FreeCafe.Editor
             var scene=EditorSceneManager.NewScene(NewSceneSetup.EmptyScene,NewSceneMode.Single);
             var app=new GameObject("FreeCafeApp");var runtime=app.AddComponent<FreeCafeRuntime>();
             runtime.catalogAsset=catalogAsset;runtime.artLibrary=library;runtime.entityPrefab=prefab;runtime.prefabLibrary=prefabLibrary;
-            var cameraGo=new GameObject("Main Camera",typeof(Camera),typeof(Physics2DRaycaster),typeof(FreeCafeViewport));
+            var cameraGo=new GameObject("Main Camera",typeof(Camera),typeof(Physics2DRaycaster));
             cameraGo.tag="MainCamera";cameraGo.transform.position=new Vector3(0,0,-10);
-            var camera=cameraGo.GetComponent<Camera>();camera.orthographic=true;camera.orthographicSize=5;camera.clearFlags=CameraClearFlags.SolidColor;camera.backgroundColor=new Color(.16f,.18f,.2f);
+            var camera=cameraGo.GetComponent<Camera>();camera.orthographic=true;camera.orthographicSize=7.5f;camera.rect=new Rect(0,0,1,1);camera.clearFlags=CameraClearFlags.SolidColor;camera.backgroundColor=new Color(.16f,.18f,.2f);
             runtime.worldCamera=camera;
             new GameObject("EventSystem",typeof(EventSystem),typeof(InputSystemUIInputModule));
             var building=new GameObject("BuildingViews"); runtime.areaRoots=new Transform[4];
+            var floor1=new GameObject("floor1").transform;floor1.SetParent(building.transform,false);
+            var floor2=new GameObject("floor2").transform;floor2.SetParent(building.transform,false);floor2.localPosition=new Vector3(0,40,0);
+            var floorB1=new GameObject("floorB1").transform;floorB1.SetParent(building.transform,false);floorB1.localPosition=new Vector3(0,-40,0);
+            var manager=app.AddComponent<FreeCafeAreaManager>();runtime.areaManager=manager;manager.worldCamera=camera;
+            manager.areas=new CafeAreaAnchor[4];
             foreach(var area in catalog.areas)
             {
-                var room=new GameObject(area.id.ToString());room.transform.SetParent(building.transform,false);runtime.areaRoots[(int)area.id]=room.transform;
+                var room=new GameObject(area.id.ToString());room.transform.SetParent(area.id==AreaId.TopFloor ? floor2 : area.id==AreaId.Basement ? floorB1 : floor1,false);runtime.areaRoots[(int)area.id]=room.transform;
+                if(area.id==AreaId.Counter) room.transform.localPosition=new Vector3(60,0,0);
+                var cameraAnchor=new GameObject("CameraAnchor").transform;cameraAnchor.SetParent(room.transform,false);
+                manager.areas[(int)area.id]=new CafeAreaAnchor{area=area.id,floor=area.id==AreaId.TopFloor ? CafeFloor.Second : area.id==AreaId.Basement ? CafeFloor.Basement : CafeFloor.First,contentRoot=room.transform,cameraAnchor=cameraAnchor};
                 var back=new GameObject("Background_WHITEBOX",typeof(SpriteRenderer),typeof(ArtRequirementTag));back.transform.SetParent(room.transform,false);
                 var sr=back.GetComponent<SpriteRenderer>();sr.sprite=LoadSketchSprite(SketchBackgrounds[(int)area.id]) ?? library.Resolve(area.artId);sr.sortingOrder=-100;
                 var size=sr.sprite.bounds.size;back.transform.localScale=new Vector3(area.halfWidth*2/size.x,area.halfHeight*2/size.y,1);
@@ -62,7 +70,7 @@ namespace Spotlight.FreeCafe.Editor
                 var note=new GameObject("AreaArtNote",typeof(TextMeshPro),typeof(ArtRequirementTag));note.transform.SetParent(room.transform,false);note.transform.localPosition=new Vector3(0,4.8f,0);
                 var label=note.GetComponent<TextMeshPro>();label.font=Font;label.fontSize=2.4f;label.alignment=TextAlignmentOptions.Center;label.text="白模 / "+area.label+" / "+area.artId;label.color=new Color(.32f,.36f,.39f);label.GetComponent<MeshRenderer>().sortingOrder=0;
                 note.GetComponent<ArtRequirementTag>().Bind(library,area.artId);
-                room.SetActive(area.id==AreaId.Cafe);
+                room.SetActive(true);
             }
             Portal(runtime,library,runtime.areaRoots[0],AreaId.Counter,7.8f,0,"进入出餐台 →");
             Portal(runtime,library,runtime.areaRoots[1],AreaId.Cafe,8f,3.5f,"← 营业区");
@@ -84,7 +92,7 @@ namespace Spotlight.FreeCafe.Editor
                 var label=labelGo.GetComponent<TextMeshPro>();label.font=Font;label.fontSize=2;label.text=spec.label;label.alignment=TextAlignmentOptions.Center;label.color=new Color(.2f,.24f,.28f);label.GetComponent<MeshRenderer>().sortingOrder=200;
             }
             BuildHud(runtime,library);
-            cameraGo.GetComponent<FreeCafeViewport>().Apply();
+            manager.Initialize(camera);manager.Focus(AreaId.Cafe,true);
             EditorSceneManager.MarkSceneDirty(scene);
             if(!EditorSceneManager.SaveScene(scene,Main)) throw new IOException("Cannot save "+Main);
             // Overwrite the production scene contents, not its GUID. Build settings and references stay intact.
@@ -281,7 +289,7 @@ namespace Spotlight.FreeCafe.Editor
                 EditorSceneManager.SaveScene(scene, path);
             }
             AssetDatabase.SaveAssets();
-            Debug.Log("[FreeCafeInput] HUD switched to ScreenSpaceOverlay; world camera remains cropped independently.");
+            Debug.Log("[FreeCafeInput] HUD switched to ScreenSpaceOverlay; world interaction uses the normal camera raycaster.");
         }
         [MenuItem("Tools/Free Cafe/Capture Preview")]
         public static void Capture()

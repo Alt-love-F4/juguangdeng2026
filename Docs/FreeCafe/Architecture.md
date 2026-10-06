@@ -12,7 +12,7 @@ FreeCafe 是当前项目的新主架构。它不再把咖啡制作建模为“�
   -> 订单在交付时评价结果
 ```
 
-当前正式场景是 `Assets/Scenes/CoffeeShop.unity`。FreeCafe 的领域 EditMode/PlayMode 测试位于 `Assets/Scripts/FreeCafe/Tests/`；不再维护独立的旧 Sandbox 场景。
+当前正式场景是 `Assets/Scenes/CoffeeShop.unity`。三层楼、四个小区域都在这个 Unity Scene 内；FreeCafe 的领域 EditMode/PlayMode 测试位于 `Assets/Scripts/FreeCafe/Tests/`，PlayMode 测试直接加载此场景验证交互，不依赖已删除的独立 Sandbox 场景。
 
 ## 分层
 
@@ -41,7 +41,8 @@ FreeCafe 是当前项目的新主架构。它不再把咖啡制作建模为“�
 - `FreeEntityView`：一个实体预制体的通用视图。实体状态变化时更新同一个视图，不通过销毁/重建来表达普通状态变化。
 - `FreeCafeHud`：黑边 UI、订单摘要、营业、补货、暂停、存档和楼层切换。
 - `FreeCafePortal`：一楼营业区、出餐台、顶楼、地下室之间的入口。
-- `FreeCafeViewport`：镜头和 UI 安全区。
+- `FreeCafeAreaManager`：同一 Unity Scene 内的镜头锚点管理。三层楼、四个区域通过主摄像机位置切换，不加载 Scene、不停用楼层、不重建实体。
+- 普通 Camera + Physics2DRaycaster：实体点击和拖拽；上下黑边由 Overlay UI 绘制。旧视口组件已删除。
 
 ### 3. Data：配表驱动
 
@@ -103,6 +104,18 @@ FreeCafe 是当前项目的新主架构。它不再把咖啡制作建模为“�
 - 跨区域携带是显式选项。关闭时切换区域不改变世界状态；开启时选中的物品跟随玩家移动到新区域。
 
 空间仍然有意义：实体必须在同一区域才能直接组合，物理上不允许隔着楼层把杯子放进顾客手中。玩家应先把物品拖到顾客所在区域，或者使用一楼出餐区的交付实体。
+
+## 同场景内的楼层与区域
+
+楼层是空间分组，区域是交互范围与镜头目的地，两者不应混用。一楼大厅 `Cafe` 与出餐台 `Counter` 同属 `floor1`，但有独立区域根和镜头锚点；顶楼 `TopFloor` 属于 `floor2`，地下室 `Basement` 属于 `floorB1`。
+
+切换入口统一调用 `FreeCafeRuntime.Enter(AreaId)`：检查目标配置、取消未提交的拖拽、按携带选项移动选中物品、更新领域当前区域，再同步视图和镜头。`FreeCafeAreaManager.Focus` 只负责镜头，不代替领域区域切换；不要让 UI 直接调用它。
+
+- 四个区域根保持激活，已有设备任务与实体状态继续存在。
+- 非当前区域的实体碰撞体关闭，点击/拖拽/入口还会校验当前区域，避免跨楼误操作。
+- 领域中的实体 `x/y`、配置 `layout` 和区域边界均为区域局部坐标。输入提交用 `InverseTransformPoint`，世界位置用 `TransformPoint`，不把楼层偏移写入存档。
+- 镜头仅在区域变化时跳转，不每帧重置位置，不修改 `Camera.rect`；黑边/HUD 继续使用 Overlay UI。
+- 布局、Inspector 配置和扩展步骤见 `Docs/FreeCafe/InSceneAreas.md`。
 
 ## 后续拓展
 

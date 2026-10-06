@@ -61,9 +61,11 @@ namespace Spotlight.GameFlow
                 return;
             }
 
-            settings = new GameSettingsService();
+            GameSettingsServiceAdapter settingsAdapter = SpotlightArchitecture.Interface.GetService<GameSettingsServiceAdapter>();
+            GameSaveServiceAdapter saveAdapter = SpotlightArchitecture.Interface.GetService<GameSaveServiceAdapter>();
+            settings = settingsAdapter.Service;
             settings.Apply();
-            saves = new GameSaveService();
+            saves = saveAdapter.Service;
             tips = new LoadingTipSequence(config.LoadingTips);
             if (enableNarrative)
             {
