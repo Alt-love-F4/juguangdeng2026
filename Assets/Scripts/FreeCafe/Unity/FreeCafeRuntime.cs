@@ -35,12 +35,17 @@ namespace Spotlight.FreeCafe
         private FreeEntityView draggedView,receiver;
         private string dragItemId,dragSourceId,dragMachineId,dragOutputId,confirmCancelId;
         private Vector3 origin,offset;
+        private Camera dragCamera;
+        private Plane dragPlane;
         private Vector2 pointerScreen;
         private bool overUI;
         private int dragFinishedFrame=-1;
         private float nextVisualRefresh;
         private void Awake()
         {
+            if(worldCamera==null) worldCamera=Camera.main;
+            if(worldCamera==null || !worldCamera.isActiveAndEnabled || worldCamera.GetComponent<Physics2DRaycaster>()==null)
+                Debug.LogError("[FreeCafe Input] 请为 World Camera 指定启用的游戏摄像机，并在同一对象上添加 Physics2DRaycaster。",this);
             World=new CafeWorld(JsonUtility.FromJson<CafeCatalog>(catalogAsset.text));
             if(authoringPreviews!=null) foreach(var preview in authoringPreviews) if(preview!=null) preview.SetActive(false);
             World.Changed+=SyncViews;
@@ -182,10 +187,20 @@ namespace Spotlight.FreeCafe
             confirmCancelId=null;
             Report(World.Release(entity.id,true));
         }
-        private Vector3 ToWorld(Vector2 screen) { var point=worldCamera.ScreenToWorldPoint(new Vector3(screen.x,screen.y,-worldCamera.transform.position.z)); point.z=0; return point; }
+        // Standard screen ray -> entity plane. No viewport/layout component participates in input.
+        private bool TryToWorld(Vector2 screen,out Vector3 point)
+        {
+            point=default;
+            if(dragCamera==null || !dragCamera.isActiveAndEnabled) return false;
+            var ray=dragCamera.ScreenPointToRay(screen);
+            if(!dragPlane.Raycast(ray,out var distance)) return false;
+            point=ray.GetPoint(distance);return true;
+        }
         public void BeginDrag(FreeEntityView view,PointerEventData e)
         {
-            if(InputBlocked || IsDragging) return;
+            if(InputBlocked || IsDragging || view==null || e==null) return;
+            var inputCamera=e.pressEventCamera!=null ? e.pressEventCamera : worldCamera;
+            if(inputCamera==null || !inputCamera.isActiveAndEnabled) { ShowHint("游戏摄像机未启用，无法拖拽实体"); return; }
             var entity=World.Find(view.EntityId); if(entity==null) return; var spec=World.Spec(entity.specId);
             if(World.Locked(entity)) { ShowHint("正在加工，点击设备可中止"); return; }
             if(spec.Has(Capability.Source))
@@ -206,7 +221,13 @@ namespace Spotlight.FreeCafe
             }
             else if(spec.Has(Capability.Movable)) { dragItemId=entity.id; draggedView=view; SelectedId=entity.id; }
             else return;
-            origin=draggedView.transform.position; offset=origin-ToWorld(e.position);
+            dragCamera=inputCamera;origin=draggedView.transform.position;
+            dragPlane=new Plane(Vector3.forward,origin);
+            // BeginDrag occurs only after the mouse has crossed the drag threshold.
+            // Anchor at the original press, not the moved cursor, to avoid a permanent offset.
+            var pressPosition=e.pointerPressRaycast.module!=null ? e.pressPosition : e.position;
+            if(!TryToWorld(pressPosition,out var point)) { CancelDrag();ShowHint("鼠标射线无法命中实体所在平面");return; }
+            offset=origin-point;
             draggedView.hitbox.enabled=false; MoveDrag(e);
         }
         private WorldEntity DragData()
@@ -239,7 +260,8 @@ namespace Spotlight.FreeCafe
         public void MoveDrag(PointerEventData e)
         {
             if(!IsDragging) return;
-            pointerScreen=e.position; draggedView.transform.position=ToWorld(e.position)+offset;
+            if(InputBlocked || !TryToWorld(e.position,out var point)) { CancelDrag(); return; }
+            pointerScreen=e.position; draggedView.transform.position=point+offset;
             draggedView.body.sortingOrder=2000; FindReceiver(e);
             bool placeOnly=Keyboard.current!=null && (Keyboard.current.leftShiftKey.isPressed || Keyboard.current.rightShiftKey.isPressed);
             var item=DragData(); if(item==null) { CancelDrag(); ShowHint("设备产物已变化，拖拽已取消"); return; } var pos=draggedView.transform.position;
@@ -257,7 +279,7 @@ namespace Spotlight.FreeCafe
             string itemId=dragItemId,sourceId=dragSourceId,targetId=receiver==null ? null : receiver.EntityId;
             string machineId=dragMachineId,outputId=dragOutputId;
             var ghost=draggedView; var position=ghost.transform.position;
-            bool validScreen=worldCamera.pixelRect.Contains(e.position) && !overUI;
+            bool validScreen=dragCamera!=null && dragCamera.pixelRect.Contains(e.position) && !overUI;
             // Release pointer ownership before the model synchronizes/consumes any view.
             ClearDrag(); ActionResult result;
             if(!validScreen) result=ActionResult.No("已取消，库存与物品位置未改变");
@@ -278,7 +300,7 @@ namespace Spotlight.FreeCafe
         {
             if(receiver!=null) receiver.SetDropTarget(false,false);
             if(draggedView!=null && dragItemId!=null) draggedView.hitbox.enabled=true;
-            draggedView=null; receiver=null; dragSourceId=dragItemId=dragMachineId=dragOutputId=null; dragFinishedFrame=Time.frameCount;
+            draggedView=null; receiver=null; dragCamera=null; dragSourceId=dragItemId=dragMachineId=dragOutputId=null; dragFinishedFrame=Time.frameCount;
         }
         public void CancelDrag()
         {

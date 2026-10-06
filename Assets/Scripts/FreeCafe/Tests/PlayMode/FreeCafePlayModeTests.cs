@@ -22,6 +22,55 @@ namespace Spotlight.FreeCafe.Tests
         }
         [UnityTearDown] public IEnumerator Cleanup() { Time.timeScale=1;yield return null; }
         private PointerEventData Pointer(FreeCafeRuntime app,float x,float y) => new PointerEventData(EventSystem.current) {position=app.worldCamera.WorldToScreenPoint(new Vector3(x,y,0))};
+        [UnityTest] public IEnumerator FullScreenCameraSupportsQueuedMouseButtonsAndExistingEntityDrag()
+        {
+            var app=Object.FindFirstObjectByType<FreeCafeRuntime>();var hud=Object.FindFirstObjectByType<FreeCafeHud>();
+            Assert.That(hud.recipePanel.activeSelf,Is.False,"Recipe modal must not block entities at startup");
+            Assert.That(app.worldCamera.isActiveAndEnabled,Is.True);Assert.That(app.worldCamera.rect,Is.EqualTo(new Rect(0,0,1,1)));
+            Assert.That(app.worldCamera.GetComponent<Physics2DRaycaster>().isActiveAndEnabled,Is.True);
+            foreach(var component in app.worldCamera.GetComponents<MonoBehaviour>())
+                Assert.That(component.GetType().Name,Is.Not.EqualTo("FreeCafeViewport"));
+            var previousBackground=InputSystem.settings.backgroundBehavior;var mouse=InputSystem.AddDevice<Mouse>("FreeCafeStandardCameraMouse");
+            try
+            {
+                InputSystem.settings.backgroundBehavior=InputSettings.BackgroundBehavior.IgnoreFocus;
+                yield return ClickWithQueuedMouse(mouse,hud.startButton);
+                Assert.That(app.World.State.open,Is.True,"Start button must receive actual pointer input");
+                yield return ClickWithQueuedMouse(mouse,hud.areaButtons[(int)AreaId.Counter]);
+                Assert.That(app.World.State.currentArea,Is.EqualTo(AreaId.Counter));
+                app.World.Take("s.cups.large",AreaId.Counter,1,-1,out var cup);Physics2D.SyncTransforms();
+                Vector2 start=app.worldCamera.WorldToScreenPoint(app.View(cup.id).transform.position);
+                Vector2 end=app.worldCamera.WorldToScreenPoint(new Vector3(3,-2,0));
+                InputSystem.QueueStateEvent(mouse,new MouseState{position=start});yield return null;yield return null;
+                InputSystem.QueueStateEvent(mouse,new MouseState{position=start}.WithButton(MouseButton.Left));yield return null;yield return null;
+                InputSystem.QueueStateEvent(mouse,new MouseState{position=start+new Vector2(25,0)}.WithButton(MouseButton.Left));yield return null;yield return null;
+                Assert.That(app.IsDragging,Is.True,"Mouse must reach Collider2D through Physics2DRaycaster without a viewport component");
+                InputSystem.QueueStateEvent(mouse,new MouseState{position=end}.WithButton(MouseButton.Left));yield return null;yield return null;
+                InputSystem.QueueStateEvent(mouse,new MouseState{position=end});yield return null;yield return null;
+                Assert.That(app.IsDragging,Is.False);Assert.That(cup.x,Is.EqualTo(3).Within(.01));Assert.That(cup.y,Is.EqualTo(-2).Within(.01));
+                Assert.That(app.worldCamera.rect,Is.EqualTo(new Rect(0,0,1,1)),"No script should crop the camera during interaction");
+            }
+            finally {InputSystem.RemoveDevice(mouse);InputSystem.settings.backgroundBehavior=previousBackground;}
+        }
+        [UnityTest] public IEnumerator DragUsesPressEventCameraAndRayPlaneInsteadOfHardcodedCameraDepth()
+        {
+            var app=Object.FindFirstObjectByType<FreeCafeRuntime>();app.Enter(AreaId.Counter);yield return null;
+            app.World.Take("s.cups.large",AreaId.Counter,0,-1,out var cup);
+            var camera=app.worldCamera;var oldPosition=camera.transform.position;var oldRotation=camera.transform.rotation;
+            var wrongCameraGo=new GameObject("NotThePointerCamera",typeof(Camera));var wrongCamera=wrongCameraGo.GetComponent<Camera>();wrongCamera.enabled=false;
+            try
+            {
+                camera.transform.position=new Vector3(0,2,-10);camera.transform.rotation=Quaternion.Euler(10,0,0);
+                app.worldCamera=wrongCamera;
+                var pointer=new PointerEventData(EventSystem.current){position=camera.WorldToScreenPoint(new Vector3(cup.x,cup.y,0)),pointerPressRaycast=new RaycastResult{module=camera.GetComponent<Physics2DRaycaster>()}};
+                pointer.pressPosition=pointer.position;
+                Assert.That(pointer.pressEventCamera,Is.SameAs(camera));app.BeginDrag(app.View(cup.id),pointer);Assert.That(app.IsDragging,Is.True);
+                pointer.position=camera.WorldToScreenPoint(new Vector3(2,-2,0));Physics2D.SyncTransforms();app.EndDrag(pointer);
+                Assert.That(cup.x,Is.EqualTo(2).Within(.01));Assert.That(cup.y,Is.EqualTo(-2).Within(.01));
+            }
+            finally {app.CancelDrag();app.worldCamera=camera;camera.transform.SetPositionAndRotation(oldPosition,oldRotation);Object.Destroy(wrongCameraGo);}
+            yield return null;
+        }
         [UnityTest] public IEnumerator CupShowsEmptyPartialAndFullFillStatesWithoutHoverReset()
         {
             var app=Object.FindFirstObjectByType<FreeCafeRuntime>();

@@ -47,3 +47,7 @@ __pycache__.meta
 # Root scratch temp files
 Temp_*.mjs
 Temp_runconsole.json
+temp_packy_cafe_prompt.txt
+
+# Local generated output
+output/

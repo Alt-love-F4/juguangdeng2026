@@ -46,9 +46,9 @@ namespace Spotlight.FreeCafe.Editor
             var scene=EditorSceneManager.NewScene(NewSceneSetup.EmptyScene,NewSceneMode.Single);
             var app=new GameObject("FreeCafeApp");var runtime=app.AddComponent<FreeCafeRuntime>();
             runtime.catalogAsset=catalogAsset;runtime.artLibrary=library;runtime.entityPrefab=prefab;runtime.prefabLibrary=prefabLibrary;
-            var cameraGo=new GameObject("Main Camera",typeof(Camera),typeof(Physics2DRaycaster),typeof(FreeCafeViewport));
+            var cameraGo=new GameObject("Main Camera",typeof(Camera),typeof(Physics2DRaycaster));
             cameraGo.tag="MainCamera";cameraGo.transform.position=new Vector3(0,0,-10);
-            var camera=cameraGo.GetComponent<Camera>();camera.orthographic=true;camera.orthographicSize=5;camera.clearFlags=CameraClearFlags.SolidColor;camera.backgroundColor=new Color(.16f,.18f,.2f);
+            var camera=cameraGo.GetComponent<Camera>();camera.orthographic=true;camera.orthographicSize=7.5f;camera.rect=new Rect(0,0,1,1);camera.clearFlags=CameraClearFlags.SolidColor;camera.backgroundColor=new Color(.16f,.18f,.2f);
             runtime.worldCamera=camera;
             new GameObject("EventSystem",typeof(EventSystem),typeof(InputSystemUIInputModule));
             var building=new GameObject("BuildingViews"); runtime.areaRoots=new Transform[4];
@@ -84,7 +84,6 @@ namespace Spotlight.FreeCafe.Editor
                 var label=labelGo.GetComponent<TextMeshPro>();label.font=Font;label.fontSize=2;label.text=spec.label;label.alignment=TextAlignmentOptions.Center;label.color=new Color(.2f,.24f,.28f);label.GetComponent<MeshRenderer>().sortingOrder=200;
             }
             BuildHud(runtime,library);
-            cameraGo.GetComponent<FreeCafeViewport>().Apply();
             EditorSceneManager.MarkSceneDirty(scene);
             if(!EditorSceneManager.SaveScene(scene,Main)) throw new IOException("Cannot save "+Main);
             // Overwrite the production scene contents, not its GUID. Build settings and references stay intact.
@@ -281,7 +280,7 @@ namespace Spotlight.FreeCafe.Editor
                 EditorSceneManager.SaveScene(scene, path);
             }
             AssetDatabase.SaveAssets();
-            Debug.Log("[FreeCafeInput] HUD switched to ScreenSpaceOverlay; world camera remains cropped independently.");
+            Debug.Log("[FreeCafeInput] HUD switched to ScreenSpaceOverlay; world interaction uses the normal camera raycaster.");
         }
         [MenuItem("Tools/Free Cafe/Capture Preview")]
         public static void Capture()

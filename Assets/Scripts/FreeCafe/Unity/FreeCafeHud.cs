@@ -22,6 +22,8 @@ namespace Spotlight.FreeCafe
         protected override void Awake()
         {
             base.Awake();
+            // Authoring may leave the guide visible. Gameplay starts with no modal over the world.
+            if(recipePanel!=null) recipePanel.SetActive(false);
             TryBind();
         }
         private void OnEnable() => TryBind();

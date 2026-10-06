@@ -23,6 +23,26 @@ namespace Spotlight.FreeCafe.Editor
                 lines.Add($"device={device} enabled={device.enabled} native={device.native} position={(device is Mouse m ? m.position.ReadValue().ToString() : "n/a")}");
             if (!InputSystem.devices.Any(d => d is Mouse && d.native))
                 lines.Add("WARNING: Native mouse is missing. CLI virtual mice are not OS mice. If Simulator touch works but Game mouse does not, restart Unity to rediscover native devices; do not run bridge InputSystemHandlerTests in this editor session.");
+            var runtime=UnityEngine.Object.FindFirstObjectByType<FreeCafeRuntime>();
+            if(runtime!=null)
+            {
+                var worldCamera=runtime.worldCamera;
+                lines.Add($"worldCamera={worldCamera?.name} active={worldCamera!=null && worldCamera.isActiveAndEnabled} rect={worldCamera?.rect} pixelRect={worldCamera?.pixelRect}");
+                var worldRaycaster=worldCamera!=null ? worldCamera.GetComponent<Physics2DRaycaster>() : null;
+                lines.Add($"worldRaycaster={worldRaycaster?.name} enabled={worldRaycaster!=null && worldRaycaster.isActiveAndEnabled}");
+                if(runtime.World!=null && es!=null && worldCamera!=null)
+                {
+                    Physics2D.SyncTransforms();
+                    foreach(var entity in runtime.World.State.entities)
+                    {
+                        if(entity.area!=runtime.World.State.currentArea || runtime.World.Locked(entity)) continue;
+                        var view=runtime.View(entity.id);if(view==null) continue;
+                        var screen=(Vector2)worldCamera.WorldToScreenPoint(view.transform.position);
+                        var worldHits=new List<RaycastResult>();es.RaycastAll(new PointerEventData(es){position=screen},worldHits);
+                        lines.Add($"entity={entity.id} collider={view.hitbox.enabled} screen={screen} hits={string.Join(",",worldHits.Select(h=>h.gameObject.name))}");
+                    }
+                }
+            }
             var module = es != null ? es.GetComponent<InputSystemUIInputModule>() : null;
             if (module != null)
             {
