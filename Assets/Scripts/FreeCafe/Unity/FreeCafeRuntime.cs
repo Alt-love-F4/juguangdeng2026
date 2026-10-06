@@ -8,9 +8,12 @@ using UnityEngine.InputSystem;
 namespace Spotlight.FreeCafe
 {
     /// <summary>Owns domain world and input transaction; never creates the legacy gameplay controller.</summary>
-    public sealed class FreeCafeRuntime : MonoBehaviour
+    public sealed class FreeCafeRuntime : MonoBehaviour, IDayFlowGameplayEndpoint
     {
         public const string SaveId="freecafe.world.v1";
+        public bool DayFlowBusinessActive => World != null && World.State.businessPhase == BusinessPhase.Open;
+        public bool DayFlowBusinessFinished => World != null && World.State.businessPhase == BusinessPhase.Night;
+
         public TextAsset catalogAsset;
         public CafeArtLibrary artLibrary;
         public FreeEntityView entityPrefab;
@@ -290,6 +293,9 @@ namespace Spotlight.FreeCafe
             Report(saves.TryQuickSave(data,out var slot,out var error) ? ActionResult.Yes("已保存到空槽位 "+slot) : ActionResult.No("保存失败："+error));
         }
         public void StartBusiness() { if(!InputBlocked) Report(World.StartDay()); }
+        public void EndBusiness() { if(!InputBlocked) Report(World.EndDay()); }
+        public void StartDayFlowBusiness() => StartBusiness();
+        public void EndDayFlowBusiness() => EndBusiness();
         public void RefillSources() { if(!InputBlocked) Report(World.Refill()); }
         public void RotateSelected() { if(!InputBlocked) World.Rotate(SelectedId); }
     }

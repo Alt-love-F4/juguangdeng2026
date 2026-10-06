@@ -10,7 +10,7 @@ if not exist "%LUBAN_DIR%\Luban.exe" (
   exit /b 1
 )
 
-:: python ¶µµ×£ºUnity ¿ÉÄÜ¼Ì³Ð¾É PATH µ¼ÖÂ 9009£¬²¹³ä±¾»ú Python Â·¾¶
+:: python ï¿½ï¿½ï¿½×£ï¿½Unity ï¿½ï¿½ï¿½Ü¼Ì³Ð¾ï¿½ PATH ï¿½ï¿½ï¿½ï¿½ 9009ï¿½ï¿½ï¿½ï¿½ï¿½ä±¾ï¿½ï¿½ Python Â·ï¿½ï¿½
 where python >nul 2>nul
 if errorlevel 1 (
   if exist "D:\Mamba\python.exe" set "PATH=D:\Mamba;%PATH%"
@@ -21,24 +21,24 @@ if errorlevel 1 (
   exit /b 1
 )
 
-:: ²½Öè 1: ½öµ±´æÔÚ·Ö±í£¨Narrative_*.xlsx / Text_*.xlsx£©Ê±²ÅºÏ²¢£¬·ñÔòÖ±½ÓÊ¹ÓÃÖ÷±í
+:: ï¿½ï¿½ï¿½ï¿½ 1: ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ú·Ö±ï¿½ï¿½ï¿½Narrative_*.xlsx / Text_*.xlsxï¿½ï¿½Ê±ï¿½ÅºÏ²ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ö±ï¿½ï¿½Ê¹ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
 set "NEED_MERGE="
 dir /b "%PROJECT_DIR%Data\Narrative_*.xlsx" >nul 2>nul && set "NEED_MERGE=1"
 dir /b "%PROJECT_DIR%Data\Text_*.xlsx" >nul 2>nul && set "NEED_MERGE=1"
 
 if defined NEED_MERGE (
-  echo [1/2] ºÏ²¢·ÖÉ¢µÄÐðÊÂÅäÖÃ...
+  echo [1/2] ï¿½Ï²ï¿½ï¿½ï¿½É¢ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½...
   python "%PROJECT_DIR%merge_narrative.py"
   if errorlevel 1 (
-    echo ERROR: ºÏ²¢Ê§°Ü£¬´æÔÚÖ÷¼ü³åÍ»!
+    echo ERROR: ï¿½Ï²ï¿½Ê§ï¿½Ü£ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Í»!
     exit /b 1
   )
 ) else (
-  echo [1/2] Î´ÕÒµ½·Ö±í£¬Ìø¹ýºÏ²¢£¬Ö±½ÓÊ¹ÓÃÖ÷±í Narrative.xlsx / Text.xlsx
+  echo [1/2] Î´ï¿½Òµï¿½ï¿½Ö±ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ï²ï¿½ï¿½ï¿½Ö±ï¿½ï¿½Ê¹ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ Narrative.xlsx / Text.xlsx
 )
 
-:: ²½Öè 2: ÔËÐÐ Luban Éú³É
-echo [2/2] Éú³É Luban ÅäÖÃ...
+:: ï¿½ï¿½ï¿½ï¿½ 2: ï¿½ï¿½ï¿½ï¿½ Luban ï¿½ï¿½ï¿½ï¿½
+echo [2/2] ï¿½ï¿½ï¿½ï¿½ Luban ï¿½ï¿½ï¿½ï¿½...
 pushd "%PROJECT_DIR%"
 "%LUBAN_DIR%\Luban.exe" --conf luban.conf -t client -c cs-newtonsoft-json -d json --strict -x outputCodeDir="%UNITY_CODE_OUTPUT%" -x outputDataDir="%UNITY_DATA_OUTPUT%"
 set "EXIT_CODE=%ERRORLEVEL%"

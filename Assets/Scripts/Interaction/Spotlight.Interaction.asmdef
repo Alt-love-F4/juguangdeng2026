@@ -1,8 +1,0 @@
-{
-  "name": "Spotlight.Interaction",
-  "rootNamespace": "Spotlight.Interaction",
-  "references": [
-    "Unity.ugui"
-  ],
-  "autoReferenced": true
-}

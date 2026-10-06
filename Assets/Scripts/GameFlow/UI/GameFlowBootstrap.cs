@@ -32,6 +32,8 @@ namespace Spotlight.GameFlow
         private NarrativeGameFlowIntegration narrativeIntegration;
         private NarrativeSnapshot pendingNarrativeRestore;
         private bool loadingSavedSession;
+        private DayFlowController dayFlow;
+        private EventSystem persistentEventSystem;
 
         public GameSettings CurrentSettings => settings.Current;
         public IReadOnlyList<ResolutionOption> ResolutionOptions => settings.ResolutionOptions;
@@ -46,8 +48,10 @@ namespace Spotlight.GameFlow
         private void Awake()
         {
             DontDestroyOnLoad(gameObject);
-            if (EventSystem.current != null)
-                DontDestroyOnLoad(EventSystem.current.gameObject);
+            persistentEventSystem = EventSystem.current;
+            if (persistentEventSystem != null)
+                DontDestroyOnLoad(persistentEventSystem.gameObject);
+            SceneManager.sceneLoaded += OnSceneLoaded;
             if (config == null)
                 config = Resources.Load<GameFlowConfig>("GameFlowConfig");
             if (config == null)
@@ -71,10 +75,29 @@ namespace Spotlight.GameFlow
                 }
                 narrativeIntegration.EnsureRuntime();
             }
+            dayFlow = GetComponent<DayFlowController>();
+            if (dayFlow == null)
+                dayFlow = gameObject.AddComponent<DayFlowController>();
+            dayFlow.Initialize(this);
             if (showMainMenuOnStart)
                 OpenMainMenu();
             else
-                OpenGameplayPlaceholder();
+                StartGame();
+        }
+
+        private void OnDestroy()
+        {
+            SceneManager.sceneLoaded -= OnSceneLoaded;
+        }
+
+        private void OnSceneLoaded(Scene scene, LoadSceneMode mode)
+        {
+            EventSystem[] systems = FindObjectsByType<EventSystem>(FindObjectsInactive.Include, FindObjectsSortMode.None);
+            foreach (EventSystem system in systems)
+            {
+                if (system == persistentEventSystem) continue;
+                Destroy(system.gameObject);
+            }
         }
 
         private void Update()
@@ -108,10 +131,15 @@ namespace Spotlight.GameFlow
             if (string.IsNullOrWhiteSpace(config.GameplayScene))
             {
                 OpenGameplayPlaceholder();
+                dayFlow?.BeginNewDayFlow();
             }
             else
             {
-                LoadThen(OpenGameplayPlaceholder, config.GameplayScene);
+                LoadThen(() =>
+                {
+                    OpenGameplayPlaceholder();
+                    dayFlow?.BeginNewDayFlow();
+                }, config.GameplayScene);
             }
         }
 
@@ -288,7 +316,9 @@ namespace Spotlight.GameFlow
         }
 
         private bool CanUseGameplayControls()
-            => gameplay && !paused && !loadingTransitioning && UIKit.PeekPanel(MainStack) is GameplayPlaceholderPanel;
+            => gameplay && !paused && !loadingTransitioning
+                && (GameplayPanelHooks.PanelType != null && GameplayPanelHooks.PanelType.IsInstanceOfType(UIKit.PeekPanel(MainStack))
+                    || GameplayPanelHooks.IsScenePanel && UIKit.PeekPanel(MainStack) == null);
 
         private void HandleEscape()
         {
@@ -303,7 +333,7 @@ namespace Spotlight.GameFlow
                 UIKit.GetPanel<ResultPanel>()?.CloseFromFlow();
             else if (topType == typeof(SettingsPanel) || topType == typeof(SaveManagementPanel))
                 BackToPrevious();
-            else if (gameplay && !paused && (topType == typeof(GameplayPlaceholderPanel) || (GameplayPanelHooks.PanelType != null && topType == GameplayPanelHooks.PanelType)))
+            else if (gameplay && !paused && GameplayPanelHooks.PanelType != null && topType == GameplayPanelHooks.PanelType)
                 OpenPause();
             else if (gameplay && !paused && GameplayPanelHooks.IsScenePanel && topType == null)
                 OpenPause();
@@ -317,6 +347,7 @@ namespace Spotlight.GameFlow
             narrativeIntegration?.Runtime?.Presenter?.SetSuspended(true);
             Time.timeScale = 1f;
             paused = gameplay = false;
+            dayFlow?.HideForMainMenu();
             UIKit.ClearStack(MainStack, true);
             if (GameplayPanelHooks.IsScenePanel && GameplayPanelHooks.OpenPanel != null)
             {
@@ -351,9 +382,8 @@ namespace Spotlight.GameFlow
             }
             else
             {
-                GameplayPlaceholderPanel placeholder = UIKit.OpenPanel<GameplayPlaceholderPanel>(UILevel.Hud, Data(true), cachePolicy: PanelCachePolicy.Reusable);
-                placeholder.Refresh(SceneManager.GetActiveScene().name, FormatTime(playtime));
-                panel = placeholder;
+                Debug.LogError("No gameplay panel is registered for scene " + SceneManager.GetActiveScene().name + ".", this);
+                return;
             }
             StartCoroutine(PushPanelWhenReady(panel, false, ++rootNavigationVersion));
         }

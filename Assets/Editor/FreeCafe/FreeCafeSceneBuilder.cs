@@ -18,7 +18,6 @@ namespace Spotlight.FreeCafe.Editor
     {
         private const string Root="Assets/Resources/FreeCafe";
         private const string Main="Assets/Scenes/CoffeeShop.unity";
-        private const string Sandbox="Assets/Scenes/CoffeeUIEntitySandbox.unity";
         private static TMP_FontAsset Font=>AssetDatabase.LoadAssetAtPath<TMP_FontAsset>("Assets/Resources/Fonts/SimHei SDF.asset");
         private static readonly string[] SketchBackgrounds={
             "Assets/Art/Background/一楼背景.png",
@@ -41,7 +40,6 @@ namespace Spotlight.FreeCafe.Editor
             string backup=Path.Combine("RecoveryBackups-FreeCafe-20261005","Build-"+DateTime.Now.ToString("HHmmss"));
             Directory.CreateDirectory(backup);
             if(File.Exists(Main)) File.Copy(Main,Path.Combine(backup,"CoffeeShop.unity"));
-            if(File.Exists(Sandbox)) File.Copy(Sandbox,Path.Combine(backup,"CoffeeUIEntitySandbox.unity"));
             var library=BuildLibrary(briefs);
             var prefab=BuildPrefab(library);
             var prefabLibrary=BuildPrefabLibrary(catalog,library,prefab);
@@ -89,8 +87,7 @@ namespace Spotlight.FreeCafe.Editor
             cameraGo.GetComponent<FreeCafeViewport>().Apply();
             EditorSceneManager.MarkSceneDirty(scene);
             if(!EditorSceneManager.SaveScene(scene,Main)) throw new IOException("Cannot save "+Main);
-            // Overwrite scene contents, not GUIDs. Production build settings and references stay intact.
-            if(!EditorSceneManager.SaveScene(scene,Sandbox,true)) throw new IOException("Cannot save "+Sandbox);
+            // Overwrite the production scene contents, not its GUID. Build settings and references stay intact.
             AssetDatabase.SaveAssets();
             Debug.Log("[FreeCafeBuild] Independent freeform whitebox scene saved; 38 art contracts, no legacy rules or workbench slots. Backup: "+backup);
         }
@@ -272,7 +269,7 @@ namespace Spotlight.FreeCafe.Editor
         public static void FixHudInputRouting()
         {
             if (EditorApplication.isPlayingOrWillChangePlaymode) throw new InvalidOperationException("Exit Play Mode first");
-            foreach (var path in new[] { Main, Sandbox })
+            foreach (var path in new[] { Main })
             {
                 var scene = EditorSceneManager.OpenScene(path, OpenSceneMode.Single);
                 var hud = GameObject.Find("FreeCafeHUD");
