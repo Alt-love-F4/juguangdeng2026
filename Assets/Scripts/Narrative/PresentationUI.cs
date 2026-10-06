@@ -21,6 +21,7 @@ namespace Spotlight.Narrative
         private GameObject noticeRoot;
         private TMP_Text noticeText;
         private float noticeUntil;
+        private bool disposed;
         public bool IsProgressing { get; private set; }
         public bool IsSuspended => suspended;
         public event Action Escape;
@@ -205,8 +206,17 @@ namespace Spotlight.Narrative
         }
         public void Dispose()
         {
-            if (noticeRoot != null) { noticeRoot.SetActive(false); Destroy(noticeRoot); }
-            gameObject.SetActive(false); Destroy(gameObject);
+            if (disposed || !this) return;
+            disposed = true;
+            if (noticeRoot != null)
+            {
+                noticeRoot.SetActive(false);
+                Destroy(noticeRoot);
+                noticeRoot = null;
+                noticeText = null;
+            }
+            gameObject.SetActive(false);
+            Destroy(gameObject);
         }
     }
 }

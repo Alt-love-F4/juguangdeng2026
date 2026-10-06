@@ -257,11 +257,11 @@ namespace Spotlight.Narrative
         {
             if (disposed) return;
             disposed = true;
-            if (routine != null) ui.StopAllCoroutines();
+            if (ui != null) ui.StopAllCoroutines();
             completion = drainCompleted = null;
             effects.Clear();
             resources.Dispose();
-            ui.Dispose();
+            if (ui != null) ui.Dispose();
         }
     }
 }

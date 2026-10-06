@@ -6,7 +6,6 @@
     <var name="comment" type="string"/>
   </bean>
   <table name="TbText" value="TextEntry" mode="map" index="key" input="Text.xlsx"/>
-<<<<<<< HEAD
 
   <bean name="RecipeEntry">
     <var name="id" type="string"/>
@@ -84,7 +83,6 @@
     <var name="dialogue" type="string"/>
   </bean>
   <table name="TbNpc" value="NpcEntry" mode="map" index="id" input="Npc.xlsx"/>
-=======
   <bean name="NcsObjectEntry">
     <var name="objId" type="string"/>
     <var name="objType" type="string#set=npc,player,world"/>
@@ -194,5 +192,4 @@
     <var name="seq" type="int"/>
   </bean>
   <table name="TbNcsChoice" value="NcsChoiceEntry" mode="map" index="choiceId" input="Choice@Narrative.xlsx"/>
->>>>>>> origin/main
 </module>

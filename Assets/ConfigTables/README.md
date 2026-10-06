@@ -1,4 +1,3 @@
-<<<<<<< HEAD
 # 咖啡店数据表
 
 策划来源是 Data 下的 Excel，运行时读取 Assets/Settings/Resources/Luban 下的生成JSON。
@@ -20,7 +19,7 @@
 只调价格/时间/库存时重新生成表即可，无需重装场景。
 
 完整说明见 Docs/CafeArchitecture.md。
-=======
+
 # Luban 配表管线
 
 全部叙事配置使用 **Excel → Luban generated C# + JSON**，不使用 ScriptableObject 作为配置来源。
@@ -134,4 +133,3 @@ JSON 文件位于 `Assets/Settings/Resources/Luban/`，上表 Resources 路径�
 迁移时执行过真实 Luban strict 生成（退出 0），以及隔离副本检查：重复 Object 主键、重复 Bar 复合索引、非法 objType、坏 Trigger eventId 均退出 1；不同 owner 的同名 BarId 退出 0。正式数据不受这些负例修改。
 
 `LocalizedTMPText` 仍通过 TMP 初始 text 作为 key 注入 `tbtext`。非配表动态数值不需要挂载。旧 TextTable 归档及 GenerateText 兼容入口已移除，只维护 Excel。
->>>>>>> origin/main
