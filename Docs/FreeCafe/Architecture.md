@@ -12,7 +12,7 @@ FreeCafe 是当前项目的新主架构。它不再把咖啡制作建模为“�
   -> 订单在交付时评价结果
 ```
 
-当前正式场景是 `Assets/Scenes/CoffeeShop.unity`，测试场景是 `Assets/Scenes/CoffeeUIEntitySandbox.unity`。
+当前正式场景是 `Assets/Scenes/CoffeeShop.unity`。FreeCafe 的领域 EditMode/PlayMode 测试位于 `Assets/Scripts/FreeCafe/Tests/`；不再维护独立的旧 Sandbox 场景。
 
 ## 分层
 
@@ -149,6 +149,4 @@ NPC 仍然是 `WorldEntity`，但可以在配表中增加：
 
 ## 旧框架策略
 
-`Assets/Scripts/Interaction/`、`Assets/Scripts/Gameplay/` 中的旧咖啡工作流保留作为迁移参考，但不再参与 FreeCafe 主场景。旧的自动场景装配和面板注册已经被禁用，避免它们在编译/加载时重新生成 `CoffeeWorldRoot`、旧工作台或 `CoffeeGameplayPanel`。
-
-新功能应只依赖 `Spotlight.FreeCafe.Domain` 和 `Spotlight.FreeCafe.Unity`。不要向旧 `CoffeeGameplayController` 添加新的咖啡逻辑。
+旧版 `Gameplay` / `Interaction` 咖啡工作流已经从项目中清理，不再参与 FreeCafe 主场景。当前新功能应只依赖 `Spotlight.FreeCafe.Domain`、`Spotlight.FreeCafe.Unity` 和共享的 `Spotlight.GameFlow` 边界，不要重新引入旧控制器或旧工作台系统。

@@ -8,6 +8,7 @@ namespace Spotlight.Narrative
     public sealed class NarrativeGameFlowIntegration : MonoBehaviour
     {
         public static NarrativeGameFlowIntegration Instance { get; private set; }
+        public static bool ModuleEnabled { get; private set; } = false;
         private NarrativeConfiguration configuration;
         [SerializeField] private string gameplaySceneName = "SampleScene";
         private NarrativeRuntime runtime;
@@ -16,7 +17,7 @@ namespace Spotlight.Narrative
         [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.AfterSceneLoad)]
         private static void CreateOnLoad()
         {
-            if (Instance != null) return;
+            if (!ModuleEnabled || Instance != null) return;
             GameObject root = new GameObject("NarrativeGameFlowRuntime");
             Instance = root.AddComponent<NarrativeGameFlowIntegration>();
             DontDestroyOnLoad(root);
@@ -34,7 +35,28 @@ namespace Spotlight.Narrative
         private void OnDestroy()
         {
             SceneManager.sceneLoaded -= OnSceneLoaded;
-            if (Instance == this) Instance = null;
+            if (Instance != this) return;
+            hud?.gameObject.SetActive(false);
+            runtime?.gameObject.SetActive(false);
+            Instance = null;
+        }
+
+        public static void EnableModule()
+        {
+            ModuleEnabled = true;
+            if (Instance == null) CreateOnLoad();
+            else
+            {
+                if (Instance.runtime != null) Instance.runtime.gameObject.SetActive(true);
+                if (Instance.hud != null) Instance.hud.gameObject.SetActive(true);
+                Instance.SetGameplayVisible(false);
+            }
+        }
+
+        public static void DisableModule()
+        {
+            ModuleEnabled = false;
+            if (Instance != null) Destroy(Instance.gameObject);
         }
 
         public NarrativeRuntime Runtime => runtime;

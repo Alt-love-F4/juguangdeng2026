@@ -45,7 +45,6 @@
         "**/*.unity": true,
         "build/": true,
         "Build/": true,
-
         "obj/": true,
         "Obj/": true,
         "Logs/": true,
@@ -59,12 +58,12 @@
         "*.asset": "yaml",
         "*.meta": "yaml",
         "*.prefab": "yaml",
-        "*.unity": "yaml",
+        "*.unity": "yaml"
     },
     "explorer.fileNesting.enabled": true,
     "explorer.fileNesting.patterns": {
         "*.sln": "*.csproj",
         "*.slnx": "*.csproj"
     },
-    "dotnet.defaultSolution": "unity_p_taptap2026.slnx"
+    "dotnet.defaultSolution": "聚光灯2026.slnx"
 }

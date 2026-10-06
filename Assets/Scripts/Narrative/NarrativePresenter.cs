@@ -17,6 +17,9 @@ namespace Spotlight.Narrative
         private Coroutine routine;
         private NarrativeEventRequest request;
         private bool draining, disposed, skipRequested, allowSkip, choosing;
+        private int pageIndex;
+        private bool choicesEverShown, continueEverShown, finishPresentation;
+        private readonly List<string> pages = new List<string>();
 
         public bool IsPresenting => completion != null || draining || effects.Count > 0;
         public event Action<NarrativeEventRequest> Started;
@@ -66,6 +69,7 @@ namespace Spotlight.Narrative
             skipRequested = false;
             allowSkip = string.Equals(template?.interruptType, "playback", StringComparison.OrdinalIgnoreCase) && (setup?.skipAble ?? template?.defaultSkip ?? false);
             ui.Show(resolve(Get("titleKey", definition.titleText)));
+            pageIndex = 0; choicesEverShown = false; continueEverShown = false; finishPresentation = false; pages.Clear();
             string[] atoms = PresentationSlots.Sequence(template?.atomSeq);
             if (atoms.Length == 0)
             {
@@ -79,18 +83,16 @@ namespace Spotlight.Narrative
                 string name = atom.Trim().ToUpperInvariant();
                 if (skipRequested && name != "A_CHOICE") continue;
                 while (ui.IsSuspended) yield return null;
+                if (finishPresentation) break;
                 switch (name)
                 {
                     case "A_DIALOG":
                     case "A_NARRATE":
                         string lines = Get("lines", Get("textKey"));
                         IList<string> keys = string.IsNullOrWhiteSpace(lines) ? definition.contentKeys : lines.Split('|');
-                        if (keys != null)
-                            foreach (string key in keys)
-                            {
-                                if (skipRequested) break;
-                                yield return Dialogue(resolve(key.Trim()), setup?.autoAdvance ?? false);
-                            }
+                        pages.Clear();
+                        if (keys != null) foreach (string key in keys) pages.Add(resolve(key.Trim()));
+                        if (pages.Count > 0) yield return DialoguePages(setup?.autoAdvance ?? false);
                         break;
                     case "A_BG": resources.Background(Get("bg")); break;
                     case "A_PORTRAIT":
@@ -128,13 +130,55 @@ namespace Spotlight.Narrative
             }
         }
 
-        private IEnumerator Dialogue(string text, bool autoAdvance)
+        private IEnumerator DialoguePages(bool autoAdvance)
         {
-            ui.ShowLine(text);
-            ui.ResetSubmit();
-            yield return ui.Reveal(() => skipRequested);
-            if (autoAdvance) yield return Wait(.7f);
-            else while (!skipRequested && !ui.ConsumeSubmit()) yield return null;
+            pageIndex = Mathf.Clamp(pageIndex, 0, pages.Count - 1);
+            while (!skipRequested && !finishPresentation)
+            {
+                if (pageIndex >= pages.Count) yield break;
+                ui.ShowLine(pages[pageIndex]);
+                ui.ResetSubmit();
+                yield return ui.Reveal(() => skipRequested);
+                bool lastPage = pageIndex == pages.Count - 1;
+                bool showContinue = lastPage && (continueEverShown || !HasChoicesAfterCurrent());
+                if (showContinue) continueEverShown = true;
+                bool choicesFollow = lastPage && HasChoicesAfterCurrent();
+                ui.SetNavigation(pageIndex > 0, !lastPage || choicesFollow, showContinue,
+                    () => { if (pageIndex > 0) pageIndex--; },
+                    () => { if (pageIndex < pages.Count - 1) pageIndex++; else if (choicesFollow) pageIndex = pages.Count; },
+                    () => finishPresentation = true);
+                if (autoAdvance && !choicesEverShown && !continueEverShown) yield return Wait(.7f);
+                else while (!skipRequested && !finishPresentation && !ui.ConsumeSubmit()) yield return null;
+                if (finishPresentation || skipRequested) yield break;
+                pageIndex = Mathf.Clamp(pageIndex, 0, pages.Count);
+                if (pageIndex >= pages.Count) yield break;
+            }
+        }
+
+        private string ChoiceRequirement(string choiceId)
+        {
+            List<NarrativeConditionDefinition> requirements = configuration?.conditions?.FindAll(c => c != null && c.ownerType == "choice" && c.ownerId == choiceId) ?? new List<NarrativeConditionDefinition>();
+            if (requirements.Count == 0) return "条件未满足";
+            List<string> descriptions = new List<string>();
+            foreach (NarrativeConditionDefinition condition in requirements)
+            {
+                NarrativeBarDefinition bar = configuration.bars.Find(b => b != null && b.barKey == condition.target);
+                string label = bar != null ? resolve(bar.nameText) : condition.target;
+                descriptions.Add(label + " " + condition.op + " " + condition.value);
+            }
+            return string.Join(" / ", descriptions);
+        }
+
+        private bool HasChoicesAfterCurrent()
+        {
+            NarrativeSetupParamsDefinition setup = FindSetup(request.Event.setupKey);
+            if (setup == null) return false;
+            foreach (string assignment in (setup.slotValues ?? string.Empty).Split(','))
+            {
+                int equals = assignment.IndexOf('=');
+                if (equals > 0 && assignment.Substring(0, equals).Trim() == "opts" && !string.IsNullOrWhiteSpace(assignment.Substring(equals + 1))) return true;
+            }
+            return false;
         }
 
         private IEnumerator Choice(string group)
@@ -152,18 +196,21 @@ namespace Spotlight.Narrative
             bool selected = false;
             foreach (NarrativeChoiceDefinition choice in choices)
                 if (request.SelectedChoices != null && Contains(request.SelectedChoices, choice.choiceId)) selected = true;
-            if (!selected)
+            pageIndex = pages.Count;
+            choicesEverShown = true;
+            ui.ShowChoices(choices, resolve, id => ChoiceUnlocked?.Invoke(id, request.Context) ?? false, ChoiceRequirement,
+                request.SelectedChoices, id =>
             {
-                ui.ShowChoices(choices, resolve, id => ChoiceUnlocked?.Invoke(id, request.Context) ?? false, id =>
-                {
-                    if (selected || ChoiceSelected == null || !ChoiceSelected.Invoke(id)) return;
-                    selected = true;
-                });
-                while (!selected) yield return null;
-            }
-            ui.ClearChoices();
+                if (selected || ChoiceSelected == null || !ChoiceSelected.Invoke(id)) return;
+                selected = true;
+            });
+            if (!selected) while (!selected) yield return null;
+            choicesEverShown = true;
+            continueEverShown = true;
             choosing = false;
             ui.ResetSubmit();
+            ui.SetNavigation(false, false, true, null, null,
+                () => finishPresentation = true);
         }
 
         private static bool Contains(IReadOnlyList<string> values, string value)

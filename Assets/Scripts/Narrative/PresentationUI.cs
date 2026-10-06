@@ -12,6 +12,9 @@ namespace Spotlight.Narrative
     {
         private CanvasGroup group;
         private TMP_Text title, body, hint;
+        private Button previousButton, nextButton, continueButton;
+        private Action previousPage, nextPage, continuePresentation;
+        private bool navigationActive;
         private Image background, portraitA, portraitB, fade;
         private GameObject dialogue, choicesPanel;
         private RectTransform choicesContent;
@@ -57,7 +60,13 @@ namespace Spotlight.Narrative
             bodyScroll.viewport = bodyViewport.rectTransform; bodyScroll.content = bodyRect;
             bodyViewport.gameObject.AddComponent<Button>().onClick.AddListener(Submit);
             hint = Text("Notice", transform, new Vector2(.05f, .92f), new Vector2(.95f, .98f), 22); hint.alignment = TextAlignmentOptions.Center;
-            choicesPanel = Image("Choices", transform, new Vector2(.12f, .38f), new Vector2(.88f, .84f), new Color(.035f, .035f, .045f, .98f)).gameObject;
+            choicesPanel = Image("Choices", transform, new Vector2(.18f, .38f), new Vector2(.82f, .72f), new Color(.035f, .035f, .045f, .98f)).gameObject;
+            previousButton = NavigationButton("Previous", new Vector2(.04f, .045f), new Vector2(.14f, .11f), "‹");
+            nextButton = NavigationButton("Next", new Vector2(.86f, .045f), new Vector2(.96f, .11f), "›");
+            continueButton = NavigationButton("Continue", new Vector2(.43f, .045f), new Vector2(.57f, .11f), "继续");
+            previousButton.onClick.AddListener(() => previousPage?.Invoke());
+            nextButton.onClick.AddListener(() => nextPage?.Invoke());
+            continueButton.onClick.AddListener(() => continuePresentation?.Invoke());
             ScrollRect scroll = choicesPanel.AddComponent<ScrollRect>(); scroll.horizontal = false;
             Image viewport = Image("Viewport", choicesPanel.transform, new Vector2(.025f, .025f), new Vector2(.975f, .975f), Color.clear);
             viewport.gameObject.AddComponent<RectMask2D>();
@@ -68,6 +77,15 @@ namespace Spotlight.Narrative
             scroll.viewport = viewport.rectTransform; scroll.content = choicesContent;
             background.enabled = portraitA.enabled = portraitB.enabled = false;
             Hide();
+        }
+
+        private Button NavigationButton(string name, Vector2 min, Vector2 max, string label)
+        {
+            Image image = Image(name, transform, min, max, new Color(.12f, .16f, .2f, .96f));
+            Button button = image.gameObject.AddComponent<Button>();
+            ColorBlock colors = button.colors; colors.highlightedColor = new Color(.32f, .52f, .62f); colors.pressedColor = new Color(.08f, .35f, .46f); button.colors = colors;
+            TMP_Text text = Text("Label", image.transform, Vector2.zero, Vector2.one, 26); text.alignment = TextAlignmentOptions.Center; text.text = label;
+            return button;
         }
 
         private static Image Image(string name, Transform parent, Vector2 min, Vector2 max, Color color)
@@ -85,10 +103,22 @@ namespace Spotlight.Narrative
             text.textWrappingMode = TextWrappingModes.Normal; text.overflowMode = TextOverflowModes.Overflow; return text;
         }
 
+        public void SetNavigation(bool canPrevious, bool canNext, bool canContinue, Action previous, Action next, Action finish)
+        {
+            previousPage = () => { previous?.Invoke(); submitted = true; };
+            nextPage = () => { next?.Invoke(); submitted = true; };
+            continuePresentation = () => { finish?.Invoke(); submitted = true; };
+            navigationActive = canPrevious || canNext || canContinue;
+            previousButton.interactable = canPrevious; previousButton.gameObject.SetActive(canPrevious);
+            nextButton.interactable = canNext; nextButton.gameObject.SetActive(canNext);
+            continueButton.gameObject.SetActive(canContinue);
+        }
+
         public void Show(string heading)
         {
             visible = true; group.alpha = suspended ? 0 : 1; group.blocksRaycasts = group.interactable = !suspended; title.text = heading ?? string.Empty;
             ClearChoices(); hint.text = string.Empty; ResetSubmit();
+            SetNavigation(false, false, false, null, null, null);
             background.enabled = portraitA.enabled = portraitB.enabled = false;
             fade.color = new Color(0, 0, 0, 0); body.text = string.Empty;
         }
@@ -120,6 +150,7 @@ namespace Spotlight.Narrative
         {
             if (!visible || suspended || choicesPanel.activeSelf) return;
             if (IsProgressing) revealNow = true;
+            else if (navigationActive && nextPage != null) nextPage();
             else submitted = true;
         }
         public void RevealImmediately() { if (IsProgressing) revealNow = true; }
@@ -144,25 +175,46 @@ namespace Spotlight.Narrative
         public void SetBackground(Sprite sprite) { background.sprite = sprite; background.enabled = sprite != null; }
         public Image Portrait(bool right) => right ? portraitB : portraitA;
 
-        public void ShowChoices(IReadOnlyList<NarrativeChoiceDefinition> choices, Func<string, string> resolve, Func<string, bool> unlocked, Action<string> selected)
+        public void ShowChoices(IReadOnlyList<NarrativeChoiceDefinition> choices, Func<string, string> resolve, Func<string, bool> unlocked, Func<string, string> requirement, IReadOnlyList<string> selectedIds, Action<string> selected)
         {
             ClearChoices(); choicesPanel.SetActive(true); ResetSubmit();
             foreach (NarrativeChoiceDefinition choice in choices)
             {
                 Image row = Image("Choice_" + choice.choiceId, choicesContent, Vector2.zero, Vector2.one, new Color(.17f, .19f, .22f));
-                Button button = row.gameObject.AddComponent<Button>(); button.interactable = unlocked(choice.choiceId);
+                Button button = row.gameObject.AddComponent<Button>(); bool isUnlocked = unlocked(choice.choiceId);
+                bool isSelected = false;
+                if (selectedIds != null) for (int i = 0; i < selectedIds.Count; i++) if (selectedIds[i] == choice.choiceId) isSelected = true;
+                button.interactable = isUnlocked && !isSelected;
+                ColorBlock buttonColors = button.colors; buttonColors.highlightedColor = new Color(.38f, .5f, .58f); buttonColors.pressedColor = new Color(.1f, .36f, .42f); button.colors = buttonColors;
                 LayoutElement element = row.gameObject.AddComponent<LayoutElement>(); element.preferredHeight = 104; element.minHeight = 104;
                 TMP_Text label = Text("Label", row.transform, new Vector2(.035f, .1f), new Vector2(.965f, .9f), 25); label.alignment = TextAlignmentOptions.MidlineLeft;
                 label.enableAutoSizing = true; label.fontSizeMin = 18; label.fontSizeMax = 25; label.text = resolve(choice.textKey);
+                if (isSelected) label.text = "✓ " + label.text + "  [已选择]";
+                else if (!isUnlocked) label.text += "  [" + (requirement?.Invoke(choice.choiceId) ?? "条件未满足") + "]";
                 label.color = button.interactable ? Color.white : new Color(.6f, .6f, .6f);
-                string id = choice.choiceId; button.onClick.AddListener(() => selected(id));
+                string id = choice.choiceId; button.onClick.AddListener(() =>
+                {
+                    row.color = new Color(.28f, .58f, .52f);
+                    selected(id);
+                    MarkChoiceSelected(id);
+                });
             }
             LayoutRebuilder.ForceRebuildLayoutImmediate(choicesContent);
         }
 
-        public void ClearChoices()
+        public void MarkChoiceSelected(string choiceId)
         {
-            choicesPanel.SetActive(false);
+            Transform row = choicesContent.Find("Choice_" + choiceId);
+            if (row == null) return;
+            Button button = row.GetComponent<Button>();
+            if (button != null) button.interactable = false;
+            TMP_Text label = row.Find("Label")?.GetComponent<TMP_Text>();
+            if (label != null && !label.text.StartsWith("✓ ")) label.text = "✓ " + label.text + "  [已选择]";
+        }
+
+        public void ClearChoices(bool hidePanel = true)
+        {
+            if (hidePanel) choicesPanel.SetActive(false);
             for (int i = choicesContent.childCount - 1; i >= 0; i--)
             {
                 GameObject child = choicesContent.GetChild(i).gameObject; child.SetActive(false); Destroy(child);
