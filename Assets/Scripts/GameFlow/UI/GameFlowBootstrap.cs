@@ -16,6 +16,7 @@ namespace Spotlight.GameFlow
         private const string MainStack = "game-flow-main";
         [SerializeField] private GameFlowConfig config;
         [SerializeField] private bool showMainMenuOnStart = true;
+        [SerializeField] private bool enableNarrative;
         private GameSettingsService settings;
         private GameSaveService saves;
         private LoadingTipSequence tips;
@@ -60,13 +61,16 @@ namespace Spotlight.GameFlow
             settings.Apply();
             saves = new GameSaveService();
             tips = new LoadingTipSequence(config.LoadingTips);
-            narrativeIntegration = NarrativeGameFlowIntegration.Instance;
-            if (narrativeIntegration == null)
+            if (enableNarrative)
             {
-                GameObject runtimeObject = new GameObject("NarrativeGameFlowRuntime");
-                narrativeIntegration = runtimeObject.AddComponent<NarrativeGameFlowIntegration>();
+                narrativeIntegration = NarrativeGameFlowIntegration.Instance;
+                if (narrativeIntegration == null)
+                {
+                    GameObject runtimeObject = new GameObject("NarrativeGameFlowRuntime");
+                    narrativeIntegration = runtimeObject.AddComponent<NarrativeGameFlowIntegration>();
+                }
+                narrativeIntegration.EnsureRuntime();
             }
-            narrativeIntegration.EnsureRuntime();
             if (showMainMenuOnStart)
                 OpenMainMenu();
             else
@@ -97,7 +101,7 @@ namespace Spotlight.GameFlow
             playtime = 0f;
             pendingNarrativeRestore = null;
             loadingSavedSession = false;
-            narrativeIntegration.ResetSession();
+            narrativeIntegration?.ResetSession();
             gameplay = true;
             paused = false;
             // 场景切换开关：留空则留在当前场景，直接打开玩法面板
@@ -328,8 +332,8 @@ namespace Spotlight.GameFlow
         {
             if (loadingSavedSession)
             {
-                if (pendingNarrativeRestore != null) narrativeIntegration.Runtime.RestoreSnapshot(pendingNarrativeRestore);
-                else narrativeIntegration.ResetSession();
+                if (pendingNarrativeRestore != null && narrativeIntegration?.Runtime != null) narrativeIntegration.Runtime.RestoreSnapshot(pendingNarrativeRestore);
+                else narrativeIntegration?.ResetSession();
                 pendingNarrativeRestore = null;
                 loadingSavedSession = false;
             }

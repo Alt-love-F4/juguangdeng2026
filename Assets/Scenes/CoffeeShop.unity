@@ -6439,6 +6439,22 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 8740b951046e9614fb66dcb4da5dcdb9, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Spotlight.FreeCafe.Unity::Spotlight.FreeCafe.FreeCafeHud
+  mShowAnimationConfig:
+    rid: -2
+  mHideAnimationConfig:
+    rid: -2
+  mAutoFocusOnShow: 0
+  mDefaultSelectable: {fileID: 0}
+  showDuration: 0.22
+  hideDuration: 0.14
+  showOffset: 22
+  hideOffset: 12
+  showStartScale: 0.98
+  hideEndScale: 0.98
+  showEase: 9
+  hideEase: 8
+  modal: 0
+  canvasGroup: {fileID: 0}
   runtime: {fileID: 1136182484}
   summary: {fileID: 1113241398}
   hint: {fileID: 1334741508}
@@ -6469,6 +6485,11 @@ MonoBehaviour:
   recipeTitle: {fileID: 1865540303}
   recipeBody: {fileID: 312979102}
   recipeCloseButton: {fileID: 885249406}
+  references:
+    version: 2
+    RefIds:
+    - rid: -2
+      type: {class: , ns: , asm: }
 --- !u!114 &1051994479
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -7023,6 +7044,7 @@ GameObject:
   m_Component:
   - component: {fileID: 1136182485}
   - component: {fileID: 1136182484}
+  - component: {fileID: 1136182486}
   m_Layer: 0
   m_Name: FreeCafeApp
   m_TagString: Untagged
@@ -7072,6 +7094,19 @@ Transform:
   m_Children: []
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &1136182486
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1136182483}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 9c8c02887cbaf7544aed950c360e4b0d, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Spotlight.FreeCafe.Unity::Spotlight.FreeCafe.FreeCafeGameFlowBridge
+  hud: {fileID: 1051994478}
 --- !u!1 &1138363188
 GameObject:
   m_ObjectHideFlags: 0

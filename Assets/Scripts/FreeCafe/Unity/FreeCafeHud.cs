@@ -3,10 +3,11 @@ using System.Text;
 using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
+using Spotlight.GameFlow;
 
 namespace Spotlight.FreeCafe
 {
-    public sealed class FreeCafeHud : MonoBehaviour
+    public sealed class FreeCafeHud : GameFlowPanel
     {
         public FreeCafeRuntime runtime;
         public TMP_Text summary,hint,selection,areaName;
@@ -18,7 +19,11 @@ namespace Spotlight.FreeCafe
         public Button recipeCloseButton;
         private readonly string[] requestIds=new string[3];
         private bool bound;
-        private void Awake() => TryBind();
+        protected override void Awake()
+        {
+            base.Awake();
+            TryBind();
+        }
         private void OnEnable() => TryBind();
         private void Start() { TryBind(); Refresh(); }
         private void TryBind()
@@ -27,7 +32,7 @@ namespace Spotlight.FreeCafe
                 return;
             bound=true;
             runtime.ViewChanged+=Refresh;
-            startButton.onClick.AddListener(runtime.StartBusiness); pauseButton.onClick.AddListener(runtime.TogglePause);
+            startButton.onClick.AddListener(runtime.StartBusiness); pauseButton.onClick.AddListener(Pause);
             saveButton.onClick.AddListener(runtime.Save); refillButton.onClick.AddListener(runtime.RefillSources); rotateButton.onClick.AddListener(runtime.RotateSelected);
             artButton.onClick.AddListener(ToggleArtIds); carryButton.onClick.AddListener(ToggleCarry); recipeButton.onClick.AddListener(ToggleRecipeTips);
             if(recipeCloseButton!=null) recipeCloseButton.onClick.AddListener(CloseRecipeTips);
@@ -40,7 +45,7 @@ namespace Spotlight.FreeCafe
             bound=false;
             if(runtime==null) return;
             runtime.ViewChanged-=Refresh;
-            startButton.onClick.RemoveListener(runtime.StartBusiness); pauseButton.onClick.RemoveListener(runtime.TogglePause);
+            startButton.onClick.RemoveListener(runtime.StartBusiness); pauseButton.onClick.RemoveListener(Pause);
             saveButton.onClick.RemoveListener(runtime.Save); refillButton.onClick.RemoveListener(runtime.RefillSources); rotateButton.onClick.RemoveListener(runtime.RotateSelected);
             artButton.onClick.RemoveListener(ToggleArtIds); carryButton.onClick.RemoveListener(ToggleCarry); recipeButton.onClick.RemoveListener(ToggleRecipeTips);
             if(recipeCloseButton!=null) recipeCloseButton.onClick.RemoveListener(CloseRecipeTips);
@@ -51,8 +56,23 @@ namespace Spotlight.FreeCafe
         private void Top()=>runtime.Enter(AreaId.TopFloor); private void Basement()=>runtime.Enter(AreaId.Basement);
         private void Order0()=>Focus(0); private void Order1()=>Focus(1); private void Order2()=>Focus(2);
         private void Focus(int i) { if(!runtime.InputBlocked) runtime.World.Focus(requestIds[i]); }
+        public void OpenFromFlow(GameFlowBootstrap flow)
+        {
+            if (flow != null) SetFlow(flow);
+            TryBind();
+        }
         private void ToggleArtIds() { runtime.ShowAssetIds=!runtime.ShowAssetIds; runtime.ShowHint("美术编号 "+(runtime.ShowAssetIds ? "显示" : "隐藏")+"；选中白模可在 Inspector 读取提示词"); }
         private void ToggleCarry() { runtime.CarrySelection=!runtime.CarrySelection; Refresh(); }
+        private void Pause()
+        {
+            if (runtime != null) runtime.CancelDrag();
+            if (Flow != null)
+            {
+                Flow.OpenPause();
+                return;
+            }
+            runtime?.TogglePause();
+        }
         private void ToggleRecipeTips()
         {
             if(recipePanel==null) return;

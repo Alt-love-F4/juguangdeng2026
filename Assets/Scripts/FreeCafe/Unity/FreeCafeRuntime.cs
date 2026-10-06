@@ -66,10 +66,10 @@ namespace Spotlight.FreeCafe
         {
             if(World==null) return;
             World.Tick(Time.deltaTime);
-            if(Keyboard.current!=null && Keyboard.current.escapeKey.wasPressedThisFrame)
-            {
-                if(IsDragging) CancelDrag(); else TogglePause();
-            }
+            // GameFlowBootstrap owns the global Escape/pause flow. FreeCafe only
+            // cancels an active drag; the shared pause panel handles everything else.
+            if(Keyboard.current!=null && Keyboard.current.escapeKey.wasPressedThisFrame && IsDragging)
+                CancelDrag();
             if(IsDragging && InputBlocked) CancelDrag();
             if(Time.unscaledTime>=nextVisualRefresh)
             {

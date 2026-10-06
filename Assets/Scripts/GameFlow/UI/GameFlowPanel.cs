@@ -35,11 +35,7 @@ namespace Spotlight.GameFlow
             if (canvasGroup == null)
                 canvasGroup = GetComponent<CanvasGroup>();
             if (canvasGroup == null)
-            {
-                Debug.LogError("UIKit GameFlow panels require a serialized CanvasGroup on the Prefab root.", this);
-                enabled = false;
-                return;
-            }
+                canvasGroup = gameObject.AddComponent<CanvasGroup>();
             panelRect = transform as RectTransform;
             if (panelRect != null)
             {
