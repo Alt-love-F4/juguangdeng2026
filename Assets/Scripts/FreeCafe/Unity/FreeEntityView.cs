@@ -100,12 +100,16 @@ namespace Spotlight.FreeCafe
             if(entity.task!=null)
             {
                 if(entity.task.phase==MachinePhase.Running) caption+=" · "+entity.task.remaining.ToString("0.0")+"s";
-                else if(Runtime.World.Catalog.operations!=null)
+                else if(entity.task.phase==MachinePhase.Loaded)
                 {
-                    var operation=Runtime.World.Catalog.operations.Length>0 ? Runtime.World.Catalog.operations[0] : null;
-                    string output="产物";
-                    foreach(var candidate in Runtime.World.Catalog.operations) if(candidate.id==entity.task.operationId) { output=Runtime.World.Spec(candidate.outputSpecId).label; break; }
-                    caption+=" · 就绪 · 拖杯接取"+output;
+                    var operation=Runtime.World.Operation(entity.task.operationId);
+                    caption+=operation.control==OperationControl.Clicks ? " · 研磨 "+entity.task.clicksDone+"/"+Runtime.World.RequiredClicks(entity) : " · 已装料 · 点击操作";
+                }
+                else if(entity.task.phase==MachinePhase.Ready)
+                {
+                    var operation=Runtime.World.Operation(entity.task.operationId);
+                    string output=Runtime.World.Spec(operation.outputSpecId).label;
+                    caption+=" · 就绪 · "+(spec.dragOutput ? "拖出" : "拖杯接取")+output;
                 }
             }
             if(spec.Has(Capability.Customer))

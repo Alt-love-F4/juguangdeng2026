@@ -23,6 +23,52 @@ namespace Spotlight.FreeCafe.Tests
             var bean=Take("s.beans");Assert.That(world.Interact(bean.id,"m.grinder").success,Is.True);Grind();
             Assert.That(world.Release("m.grinder").success,Is.True);Assert.That(world.Interact(bean.id,"m.brewer").success,Is.True);world.Tick(6);world.Release("m.brewer");return bean;
         }
+        [Test] public void OutputDragPreviewIsDetachedAndDoesNotReleaseOrDuplicateGrounds()
+        {
+            var bean=Take("s.beans");world.Interact(bean.id,"m.grinder");
+            Assert.That(world.DragOutputPreview("m.grinder"),Is.Null);Grind();
+            var task=world.Find("m.grinder").task;int count=world.State.entities.Count,stock=world.Find("s.beans").stock;
+            var preview=world.DragOutputPreview("m.grinder");
+            Assert.That(preview,Is.Not.SameAs(bean));Assert.That(preview.id,Is.EqualTo(bean.id));Assert.That(preview.ownerId,Is.Null);
+            preview.x=5;Assert.That(bean.ownerId,Is.EqualTo("m.grinder"));Assert.That(world.Find("m.grinder").task,Is.SameAs(task));
+            Assert.That(world.State.entities.Count,Is.EqualTo(count));Assert.That(world.Find("s.beans").stock,Is.EqualTo(stock));
+        }
+        [Test] public void DragOutputTransfersOriginalGroundsToBrewerExactlyOnce()
+        {
+            var bean=Take("s.beans");bean.quality=2;world.Interact(bean.id,"m.grinder");Grind();int stock=world.Find("s.beans").stock;
+            Assert.That(world.TakeMachineOutput("m.grinder",bean.id,"m.brewer",AreaId.Counter,0,0).success,Is.True);
+            Assert.That(world.Find("m.grinder").task,Is.Null);Assert.That(world.Find("m.brewer").task.inputId,Is.EqualTo(bean.id));
+            Assert.That(bean.ownerId,Is.EqualTo("m.brewer"));Assert.That(bean.quality,Is.EqualTo(2));Assert.That(world.Find(bean.id),Is.SameAs(bean));
+            Assert.That(world.TakeMachineOutput("m.grinder",bean.id,"m.brewer",AreaId.Counter,0,0).success,Is.False);
+            Assert.That(world.Find("s.beans").stock,Is.EqualTo(stock));
+        }
+        [Test] public void DragOutputIntoCupStoresGroundsAndClearsMachine()
+        {
+            var bean=Take("s.beans");bean.quality=1;world.Interact(bean.id,"m.grinder");Grind();var cup=Take("s.cups.large");
+            Assert.That(world.TakeMachineOutput("m.grinder",bean.id,cup.id,AreaId.Counter,0,-2).success,Is.True);
+            Assert.That(cup.contents[0].specId,Is.EqualTo("grounds"));Assert.That(cup.contents[0].units,Is.EqualTo(1));
+            Assert.That(cup.contents[0].quality,Is.EqualTo(1));Assert.That(world.Find(bean.id),Is.Null);Assert.That(world.Find("m.grinder").task,Is.Null);
+        }
+        [Test] public void RejectedOutputDropsLeaveReadyJobAndGroundsUntouched()
+        {
+            var bean=Take("s.beans");world.Interact(bean.id,"m.grinder");Grind();var job=world.Find("m.grinder").task;
+            var cup=Take("s.cups.small");cup.contents.Add(new Portion{specId="milk",units=world.Spec(cup.specId).capacity});
+            foreach(var target in new[]{cup.id,"m.heater","missing","m.grinder"})
+                Assert.That(world.TakeMachineOutput("m.grinder",bean.id,target,AreaId.Counter,0,0).success,Is.False);
+            Assert.That(world.TakeMachineOutput("m.grinder",bean.id,null,AreaId.Counter,100,100).success,Is.False);
+            Assert.That(world.TakeMachineOutput("m.grinder",bean.id,null,AreaId.Cafe,0,0).success,Is.False);
+            Assert.That(world.TakeMachineOutput("m.grinder","stale",null,AreaId.Counter,0,0).success,Is.False);
+            Assert.That(bean.ownerId,Is.EqualTo("m.grinder"));Assert.That(world.Find("m.grinder").task,Is.SameAs(job));Assert.That(job.phase,Is.EqualTo(MachinePhase.Ready));
+        }
+        [Test] public void OutputCanBePlacedFreelyAndTheNextBatchUsesNewIdentity()
+        {
+            var bean=Take("s.beans");world.Interact(bean.id,"m.grinder");Grind();
+            Assert.That(world.TakeMachineOutput("m.grinder",bean.id,null,AreaId.Counter,2,-2).success,Is.True);
+            Assert.That(bean.ownerId,Is.Null);Assert.That(bean.x,Is.EqualTo(2));Assert.That(world.Find(bean.id),Is.SameAs(bean));
+            var next=Take("s.beans");world.Interact(next.id,"m.grinder");Grind();
+            Assert.That(world.TakeMachineOutput("m.grinder",bean.id,null,AreaId.Counter,0,0).success,Is.False);
+            Assert.That(world.DragOutputPreview("m.grinder").id,Is.EqualTo(next.id));
+        }
         [Test] public void TakeBeforeOpeningOrOrderConsumesExactlyOneStock()
         { int before=world.Find("s.beans").stock;var item=Take("s.beans");Assert.That(world.State.requests.Count,Is.Zero);Assert.That(world.State.open,Is.False);Assert.That(world.Find("s.beans").stock,Is.EqualTo(before-1));Assert.That(item.id,Is.Not.Empty); }
         [Test] public void AnyCoordinatesAndOverlappingPositionsAreAllowedWithoutSlots()

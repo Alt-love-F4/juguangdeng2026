@@ -1,5 +1,6 @@
 {
   "dependencies": {
+    "com.bytedance.ide.trae": "https://github.com/Pico-Developer/TRAE-Editor-Unity.git",
     "com.coplaydev.unity-mcp": "https://github.com/CoplayDev/unity-mcp.git?path=/MCPForUnity#main",
     "com.cysharp.unitask": "https://github.com/Cysharp/UniTask.git?path=src/UniTask/Assets/Plugins/UniTask",
     "com.hinatayoki.yokiframe": "https://github.com/HinataYoki/YokiFrame.git",
