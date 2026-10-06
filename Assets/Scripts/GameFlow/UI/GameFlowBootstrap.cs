@@ -37,6 +37,9 @@ namespace Spotlight.GameFlow
 
         public GameSettings CurrentSettings => settings.Current;
         internal bool GameplayControlsAvailable => CanUseGameplayControls();
+        internal bool CanPreviewDialogue => !paused && !loadingTransitioning
+            && !(narrativeIntegration?.Runtime?.BlocksGameplayInput ?? false)
+            && (!gameplay || CanUseGameplayControls());
         public IReadOnlyList<ResolutionOption> ResolutionOptions => settings.ResolutionOptions;
         public string WindowModeLabel => settings.Current.WindowMode switch
         {
@@ -82,6 +85,9 @@ namespace Spotlight.GameFlow
             if (dayFlow == null)
                 dayFlow = gameObject.AddComponent<DayFlowController>();
             dayFlow.Initialize(this);
+#if UNITY_EDITOR || DEVELOPMENT_BUILD
+            if (GetComponent<DialoguePreviewHotkey>() == null) gameObject.AddComponent<DialoguePreviewHotkey>();
+#endif
             if (showMainMenuOnStart)
                 OpenMainMenu();
             else
@@ -91,6 +97,7 @@ namespace Spotlight.GameFlow
         private void OnDestroy()
         {
             SceneManager.sceneLoaded -= OnSceneLoaded;
+            DialoguePlayback.Stop();
         }
 
         private void OnSceneLoaded(Scene scene, LoadSceneMode mode)
@@ -124,6 +131,7 @@ namespace Spotlight.GameFlow
 
         public void StartGame()
         {
+            DialoguePlayback.Stop();
             playtime = 0f;
             pendingNarrativeRestore = null;
             loadingSavedSession = false;
@@ -148,7 +156,7 @@ namespace Spotlight.GameFlow
 
         public void OpenPause()
         {
-            if (!gameplay || paused || loadingTransitioning
+            if (DialoguePanel.IsAnyPlaying || !gameplay || paused || loadingTransitioning
                 || (dayFlow != null && dayFlow.BlocksGameplayInput)
                 || (narrativeIntegration?.Runtime?.BlocksGameplayInput ?? false)) return;
             paused = true;
@@ -321,13 +329,14 @@ namespace Spotlight.GameFlow
         }
 
         private bool CanUseGameplayControls()
-            => gameplay && !paused && !loadingTransitioning
+            => gameplay && !paused && !loadingTransitioning && !DialoguePanel.IsAnyPlaying
                 && (dayFlow == null || !dayFlow.BlocksGameplayInput)
                 && (GameplayPanelHooks.PanelType != null && GameplayPanelHooks.PanelType.IsInstanceOfType(UIKit.PeekPanel(MainStack))
                     || GameplayPanelHooks.IsScenePanel && UIKit.PeekPanel(MainStack) == null);
 
         private void HandleEscape()
         {
+            if (DialoguePanel.BlocksEscapeThisFrame) return;
             if (CanUseGameplayControls() && (narrativeIntegration?.Runtime?.BlocksGameplayInput ?? false))
                 return;
             if (loadingTransitioning || (dayFlow != null && dayFlow.BlocksGameplayInput))
@@ -349,6 +358,7 @@ namespace Spotlight.GameFlow
 
         private void OpenMainMenu()
         {
+            DialoguePlayback.Stop();
             narrativeIntegration?.SetGameplayVisible(false);
             narrativeIntegration?.Runtime?.Presenter?.SetSuspended(true);
             Time.timeScale = 1f;

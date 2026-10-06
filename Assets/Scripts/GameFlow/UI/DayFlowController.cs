@@ -14,7 +14,9 @@ namespace Spotlight.GameFlow
         CityMapLeisure,
         PreNight,
         HomeNight,
-        DayComplete
+        DayComplete,
+        // Append only: retain numeric IDs of existing save phases.
+        IntroLetter
     }
 
     /// <summary>
@@ -25,11 +27,12 @@ namespace Spotlight.GameFlow
     public sealed class DayFlowController : MonoBehaviour
     {
         public const string SaveId = "game.day-flow.v1";
-        private const string InitialDate = "王国纪元 674年9月19日";
+        private const string InitialDate = "王国纪元 670年10月5日";
+        private static readonly DateTime FirstDayDate = new DateTime(670, 10, 6);
         private const string PresentationTag = "game-day-presentation";
 
         private GameFlowBootstrap flow;
-        private DayFlowPresentationPanel currentPanel;
+        private UIPanel currentPanel;
         private BusinessControlsPanel businessControls;
         private MonoBehaviour endpointOwner;
         private IDayFlowGameplayEndpoint gameplayEndpoint;
@@ -40,10 +43,10 @@ namespace Spotlight.GameFlow
         private int day = 1;
 
         public DayFlowState State { get; private set; } = DayFlowState.DateTransition;
-        public string CurrentDate => "王国纪元 674年9月" + (19 + day) + "日";
+        public string CurrentDate => FormatDate(FirstDayDate.AddDays(day - 1));
         // Phase pages remain blocking while they wait for a player confirmation.
         public bool BlocksGameplayInput => running && State != DayFlowState.FreeCafeBusiness;
-        public IDayFlowPresentation CurrentPresentation => currentPanel;
+        public IDayFlowPresentation CurrentPresentation => currentPanel as IDayFlowPresentation;
 
         public void Initialize(GameFlowBootstrap owner)
         {
@@ -73,12 +76,21 @@ namespace Spotlight.GameFlow
             gameplayEndpoint = null;
         }
 
-        public void BeginNewSession()
+        public void BeginNewSession(bool playLetter = true)
         {
             HideForMainMenu();
             day = 1;
             previousDate = InitialDate;
-            BeginNewDayFlow();
+            if (!playLetter)
+            {
+                BeginNewDayFlow();
+                return;
+            }
+            running = true;
+            HideBusinessControls();
+            HideGameplayPanel();
+            SetState(DayFlowState.IntroLetter);
+            ShowPresentation<FirstDayLetterPanel>(BeginNewDayFlow);
         }
 
         public void BeginNewDayFlow()
@@ -167,7 +179,7 @@ namespace Spotlight.GameFlow
         }
 
         private void ShowPresentation<T>(Action onFinished, Action<T> configure = null)
-            where T : DayFlowPresentationPanel
+            where T : UIPanel, IDayFlowPresentation
         {
             ClosePresentation();
             int version = presentationVersion;
@@ -188,7 +200,7 @@ namespace Spotlight.GameFlow
         private void ClosePresentation()
         {
             ++presentationVersion;
-            DayFlowPresentationPanel panel = currentPanel;
+            UIPanel panel = currentPanel;
             currentPanel = null;
             if (panel == null) return;
             ((IDayFlowPresentation)panel).Stop();
@@ -244,6 +256,9 @@ namespace Spotlight.GameFlow
             if (panel != null) panel.gameObject.SetActive(true);
         }
 
+        private static string FormatDate(DateTime date)
+            => "王国纪元 " + date.Year + "年" + date.Month + "月" + date.Day + "日";
+
         [Serializable]
         private sealed class SaveState
         {
@@ -283,6 +298,7 @@ namespace Spotlight.GameFlow
             if (State != DayFlowState.FreeCafeBusiness) HideGameplayPanel();
             switch (State)
             {
+                case DayFlowState.IntroLetter: ShowPresentation<FirstDayLetterPanel>(BeginNewDayFlow); break;
                 case DayFlowState.DateTransition: BeginNewDayFlow(); break;
                 case DayFlowState.PreBusiness: EnterPreBusiness(); break;
                 case DayFlowState.BusinessTransition: EnterBusinessTransition(); break;
