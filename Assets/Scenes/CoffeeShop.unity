@@ -1759,7 +1759,7 @@ Transform:
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
   m_LocalPosition: {x: 0, y: 0, z: 0}
-  m_LocalScale: {x: 5, y: 5, z: 5}
+  m_LocalScale: {x: 4.71715, y: 4.71715, z: 4.71715}
   m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 529006844}
@@ -1832,7 +1832,7 @@ SpriteRenderer:
   m_SortingLayer: 0
   m_SortingOrder: -100
   m_MaskInteraction: 0
-  m_Sprite: {fileID: 2291890589619680057, guid: 44975f658ca33ed4eac932f3e0bfb6f2, type: 3}
+  m_Sprite: {fileID: -7073290527110540525, guid: 2e44a2d5587a5ea49a1b1b41c39ea327, type: 3}
   m_Color: {r: 1, g: 1, b: 1, a: 1}
   m_FlipX: 0
   m_FlipY: 0
@@ -4859,8 +4859,8 @@ Transform:
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
   m_LocalPosition: {x: 0, y: 0, z: 0}
-  m_LocalScale: {x: 5, y: 5, z: 5}
-  m_ConstrainProportionsScale: 0
+  m_LocalScale: {x: 3.27, y: 3.27, z: 3.27}
+  m_ConstrainProportionsScale: 1
   m_Children: []
   m_Father: {fileID: 788075139}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
@@ -4932,7 +4932,7 @@ SpriteRenderer:
   m_SortingLayer: 0
   m_SortingOrder: -100
   m_MaskInteraction: 0
-  m_Sprite: {fileID: -7071942772910268434, guid: d9d186998541b6d4db2d6b5a139d4f8e, type: 3}
+  m_Sprite: {fileID: 2616537598996475371, guid: 721f13d7b80898e4d9661726ef928977, type: 3}
   m_Color: {r: 1, g: 1, b: 1, a: 1}
   m_FlipX: 0
   m_FlipY: 0
@@ -6955,7 +6955,7 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 98281159fd0f4cdb9f6d6db7bef30212, type: 3}
-  m_Name:
+  m_Name: 
   m_EditorClassIdentifier: Spotlight.FreeCafe.Unity::Spotlight.FreeCafe.FreeCafeAreaManager
   worldCamera: {fileID: 1317875312}
   cameraOffset: {x: 0, y: 0, z: -10}
@@ -8633,7 +8633,7 @@ Transform:
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
   m_LocalPosition: {x: 0, y: 0, z: 0}
-  m_LocalScale: {x: 5.3, y: 5.3, z: 5.3}
+  m_LocalScale: {x: 3.27, y: 3.27, z: 3.27}
   m_ConstrainProportionsScale: 1
   m_Children: []
   m_Father: {fileID: 849610677}
@@ -8706,7 +8706,7 @@ SpriteRenderer:
   m_SortingLayer: 0
   m_SortingOrder: -100
   m_MaskInteraction: 0
-  m_Sprite: {fileID: -4873955913855061587, guid: b81779868f8164a4caad66320757a0b1, type: 3}
+  m_Sprite: {fileID: 2616537598996475371, guid: 721f13d7b80898e4d9661726ef928977, type: 3}
   m_Color: {r: 1, g: 1, b: 1, a: 1}
   m_FlipX: 0
   m_FlipY: 0
@@ -13592,7 +13592,7 @@ Transform:
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
   m_LocalPosition: {x: 0, y: 0, z: 0}
-  m_LocalScale: {x: 5, y: 5, z: 5}
+  m_LocalScale: {x: 3.27, y: 3.27, z: 3.27}
   m_ConstrainProportionsScale: 1
   m_Children: []
   m_Father: {fileID: 48360247}
@@ -13665,7 +13665,7 @@ SpriteRenderer:
   m_SortingLayer: 0
   m_SortingOrder: -100
   m_MaskInteraction: 0
-  m_Sprite: {fileID: -5400606365373312496, guid: e058ed58a2791c641b6f743bd2eff4ea, type: 3}
+  m_Sprite: {fileID: -8521567130405782554, guid: a1082315192cf8a4abc22d638f601311, type: 3}
   m_Color: {r: 1, g: 1, b: 1, a: 1}
   m_FlipX: 0
   m_FlipY: 0
