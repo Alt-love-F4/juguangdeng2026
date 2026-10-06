@@ -208,6 +208,7 @@
     },
     {
       "id": "machine.grinder",
+      "dragOutput": true,
       "label": "研磨器",
       "artId": "machine.grinder",
       "capabilities": 16,

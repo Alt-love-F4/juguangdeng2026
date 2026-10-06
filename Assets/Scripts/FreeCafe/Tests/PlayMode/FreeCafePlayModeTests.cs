@@ -125,6 +125,74 @@ namespace Spotlight.FreeCafe.Tests
             app.Enter(AreaId.Basement);yield return null;Assert.That(cup.area,Is.EqualTo(AreaId.Basement));Assert.That(cup.x,Is.EqualTo(2.27f));Assert.That(app.View(cup.id).gameObject.activeInHierarchy,Is.True);
             var pointer=Pointer(app,cup.x,cup.y);app.BeginDrag(app.View(cup.id),pointer);Assert.That(app.IsDragging,Is.True);app.TogglePause();Assert.That(app.IsDragging,Is.False);Assert.That(cup.x,Is.EqualTo(2.27f));app.Enter(AreaId.Cafe);Assert.That(app.World.State.currentArea,Is.EqualTo(AreaId.Basement));app.TogglePause();
         }
+        private WorldEntity PrepareGrounds(FreeCafeRuntime app)
+        {
+            Assert.That(app.World.Take("s.beans",AreaId.Counter,0,-2,out var bean).success,Is.True);
+            Assert.That(app.World.Interact(bean.id,"m.grinder").success,Is.True);
+            for(int i=0;i<3;i++) { Assert.That(app.World.Operate("m.grinder").success,Is.True);if(i<2) app.World.Tick(.5f); }
+            return bean;
+        }
+        [UnityTest] public IEnumerator QueuedMouseDragsGroundsFromGrinderThroughEventSystemIntoCup()
+        {
+            var app=Object.FindFirstObjectByType<FreeCafeRuntime>();app.Enter(AreaId.Counter);yield return null;
+            var bean=PrepareGrounds(app);var grinder=app.World.Find("m.grinder");
+            app.World.Take("s.cups.large",AreaId.Counter,2,-2,out var cup);Physics2D.SyncTransforms();
+            var original=app.View(grinder.id).transform.position;
+            var previousBackground=InputSystem.settings.backgroundBehavior;var mouse=InputSystem.AddDevice<Mouse>("FreeCafeGrinderDragMouse");
+            try
+            {
+                InputSystem.settings.backgroundBehavior=InputSettings.BackgroundBehavior.IgnoreFocus;
+                Vector2 start=app.worldCamera.WorldToScreenPoint(original);
+                Vector2 end=app.worldCamera.WorldToScreenPoint(new Vector3(cup.x,cup.y,0));
+                InputSystem.QueueStateEvent(mouse,new MouseState{position=start});yield return null;yield return null;
+                InputSystem.QueueStateEvent(mouse,new MouseState{position=start}.WithButton(MouseButton.Left));yield return null;yield return null;
+                InputSystem.QueueStateEvent(mouse,new MouseState{position=start+new Vector2(30,0)}.WithButton(MouseButton.Left));yield return null;yield return null;
+                Assert.That(app.IsDragging,Is.True,"Must enter drag through pointer action and raycast, not a direct BeginDrag call");
+                Assert.That(bean.ownerId,Is.EqualTo(grinder.id));
+                InputSystem.QueueStateEvent(mouse,new MouseState{position=end}.WithButton(MouseButton.Left));yield return null;yield return null;
+                InputSystem.QueueStateEvent(mouse,new MouseState{position=end});yield return null;yield return null;
+                Assert.That(app.IsDragging,Is.False);Assert.That(grinder.task,Is.Null);Assert.That(app.World.Find(bean.id),Is.Null);
+                Assert.That(cup.contents.Count,Is.EqualTo(1));Assert.That(cup.contents[0].specId,Is.EqualTo("grounds"));
+                Assert.That(app.View(grinder.id).transform.position,Is.EqualTo(original));
+            }
+            finally
+            {
+                InputSystem.RemoveDevice(mouse);InputSystem.settings.backgroundBehavior=previousBackground;
+            }
+        }
+        [UnityTest] public IEnumerator DraggingReadyGrinderTransfersGroundsToBrewerWithoutMovingMachine()
+        {
+            var app=Object.FindFirstObjectByType<FreeCafeRuntime>();app.Enter(AreaId.Counter);yield return null;
+            var bean=PrepareGrounds(app);var grinder=app.World.Find("m.grinder");var view=app.View(grinder.id);var original=view.transform.position;
+            int stock=app.World.Find("s.beans").stock;var pointer=Pointer(app,grinder.x,grinder.y);
+            app.BeginDrag(view,pointer);Assert.That(app.IsDragging,Is.True);Assert.That(bean.ownerId,Is.EqualTo(grinder.id));
+            Assert.That(view.transform.position,Is.EqualTo(original));
+            var brewer=app.World.Find("m.brewer");pointer.position=app.worldCamera.WorldToScreenPoint(new Vector3(brewer.x,brewer.y,0));
+            Physics2D.SyncTransforms();app.EndDrag(pointer);yield return null;
+            Assert.That(app.IsDragging,Is.False);Assert.That(grinder.task,Is.Null);Assert.That(bean.ownerId,Is.EqualTo(brewer.id));
+            Assert.That(brewer.task.inputId,Is.EqualTo(bean.id));Assert.That(view.transform.position,Is.EqualTo(original));
+            Assert.That(app.World.Find("s.beans").stock,Is.EqualTo(stock));
+        }
+        [UnityTest] public IEnumerator OutputDragCanFillCupAndRejectsBusyFullInvalidOrCancelledDrops()
+        {
+            var app=Object.FindFirstObjectByType<FreeCafeRuntime>();app.Enter(AreaId.Counter);yield return null;
+            var grinder=app.World.Find("m.grinder");var view=app.View(grinder.id);var pointer=Pointer(app,grinder.x,grinder.y);
+            app.BeginDrag(view,pointer);Assert.That(app.IsDragging,Is.False);
+            app.World.Take("s.beans",AreaId.Counter,0,-2,out var bean);app.World.Interact(bean.id,grinder.id);
+            Assert.That(view.label.text,Does.Contain("研磨 0/3"));Assert.That(view.label.text,Does.Not.Contain("就绪"));
+            app.BeginDrag(view,pointer);Assert.That(app.IsDragging,Is.False);
+            for(int i=0;i<3;i++) { app.World.Operate(grinder.id);if(i<2) app.World.Tick(.5f); }
+            var job=grinder.task;int count=app.World.State.entities.Count;
+            app.BeginDrag(view,pointer);app.CancelDrag();yield return null;
+            Assert.That(grinder.task,Is.SameAs(job));Assert.That(bean.ownerId,Is.EqualTo(grinder.id));Assert.That(app.World.State.entities.Count,Is.EqualTo(count));
+            app.BeginDrag(view,Pointer(app,grinder.x,grinder.y));pointer.position=new Vector2(Screen.width*.5f,Screen.height-2);app.EndDrag(pointer);yield return null;
+            Assert.That(grinder.task,Is.SameAs(job));Assert.That(bean.ownerId,Is.EqualTo(grinder.id));
+            app.World.Take("s.cups.small",AreaId.Counter,2,-2,out var cup);cup.contents.Add(new Portion{specId="milk",units=app.World.Spec(cup.specId).capacity});
+            app.View(cup.id).Refresh(cup);Physics2D.SyncTransforms();app.BeginDrag(view,Pointer(app,grinder.x,grinder.y));app.EndDrag(Pointer(app,cup.x,cup.y));yield return null;
+            Assert.That(grinder.task,Is.SameAs(job));Assert.That(bean.ownerId,Is.EqualTo(grinder.id));
+            cup.contents.Clear();app.View(cup.id).Refresh(cup);Physics2D.SyncTransforms();app.BeginDrag(view,Pointer(app,grinder.x,grinder.y));app.EndDrag(Pointer(app,cup.x,cup.y));yield return null;
+            Assert.That(grinder.task,Is.Null);Assert.That(app.World.Find(bean.id),Is.Null);Assert.That(cup.contents.Count,Is.EqualTo(1));Assert.That(cup.contents[0].specId,Is.EqualTo("grounds"));
+        }
         [UnityTest] public IEnumerator MachineClickAndRightClickFollowFreeformTransferRules()
         {
             var app=Object.FindFirstObjectByType<FreeCafeRuntime>();app.Enter(AreaId.Counter);yield return null;

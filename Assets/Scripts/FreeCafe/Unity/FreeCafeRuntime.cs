@@ -33,7 +33,7 @@ namespace Spotlight.FreeCafe
         private readonly List<string> removeIds=new List<string>();
         private readonly List<RaycastResult> hits=new List<RaycastResult>();
         private FreeEntityView draggedView,receiver;
-        private string dragItemId,dragSourceId,confirmCancelId;
+        private string dragItemId,dragSourceId,dragMachineId,dragOutputId,confirmCancelId;
         private Vector3 origin,offset;
         private Vector2 pointerScreen;
         private bool overUI;
@@ -195,6 +195,15 @@ namespace Spotlight.FreeCafe
                 draggedView=Instantiate(entityPrefab,areaRoots[(int)World.State.currentArea]); draggedView.name="UncommittedPickup";
                 draggedView.Bind(this,new WorldEntity { specId=spec.sourceItemId,area=entity.area,x=entity.x,y=entity.y },true);
             }
+            else if(spec.Has(Capability.Processor) && spec.dragOutput)
+            {
+                var output=World.DragOutputPreview(entity.id);
+                if(output==null) { ShowHint(entity.task==null ? "先放入咖啡豆并完成研磨，再拖出咖啡粉" : "研磨尚未完成，完成后可拖出咖啡粉"); return; }
+                dragMachineId=entity.id;dragOutputId=output.id;
+                var prefab=prefabLibrary==null ? null : prefabLibrary.Resolve(output.specId);
+                draggedView=Instantiate(prefab!=null ? prefab : entityPrefab,areaRoots[(int)World.State.currentArea]);draggedView.name="UncommittedMachineOutput";
+                draggedView.Bind(this,output,true);
+            }
             else if(spec.Has(Capability.Movable)) { dragItemId=entity.id; draggedView=view; SelectedId=entity.id; }
             else return;
             origin=draggedView.transform.position; offset=origin-ToWorld(e.position);
@@ -203,6 +212,11 @@ namespace Spotlight.FreeCafe
         private WorldEntity DragData()
         {
             if(dragItemId!=null) return World.Find(dragItemId);
+            if(dragMachineId!=null)
+            {
+                var output=World.DragOutputPreview(dragMachineId);
+                return output!=null && output.id==dragOutputId ? output : null;
+            }
             var source=World.Find(dragSourceId);
             return source==null ? null : new WorldEntity { specId=World.Spec(source.specId).sourceItemId,area=World.State.currentArea };
         }
@@ -228,7 +242,7 @@ namespace Spotlight.FreeCafe
             pointerScreen=e.position; draggedView.transform.position=ToWorld(e.position)+offset;
             draggedView.body.sortingOrder=2000; FindReceiver(e);
             bool placeOnly=Keyboard.current!=null && (Keyboard.current.leftShiftKey.isPressed || Keyboard.current.rightShiftKey.isPressed);
-            var item=DragData(); var pos=draggedView.transform.position;
+            var item=DragData(); if(item==null) { CancelDrag(); ShowHint("设备产物已变化，拖拽已取消"); return; } var pos=draggedView.transform.position;
             var result=receiver!=null && !placeOnly ? World.Preview(item,World.Find(receiver.EntityId)) : World.CanPosition(item.specId,World.State.currentArea,pos.x,pos.y);
             if(receiver!=null && !placeOnly) receiver.SetDropTarget(true,!result.success);
             ShowHint(overUI ? "不能放在 UI 黑边；松手取消" : result.message+(placeOnly ? " · 仅摆放" : " · Shift 可仅摆放"));
@@ -238,13 +252,17 @@ namespace Spotlight.FreeCafe
             if(!IsDragging) return;
             if(InputBlocked) { CancelDrag(); return; }
             MoveDrag(e);
+            if(!IsDragging) return;
             bool placeOnly=Keyboard.current!=null && (Keyboard.current.leftShiftKey.isPressed || Keyboard.current.rightShiftKey.isPressed);
             string itemId=dragItemId,sourceId=dragSourceId,targetId=receiver==null ? null : receiver.EntityId;
+            string machineId=dragMachineId,outputId=dragOutputId;
             var ghost=draggedView; var position=ghost.transform.position;
             bool validScreen=worldCamera.pixelRect.Contains(e.position) && !overUI;
             // Release pointer ownership before the model synchronizes/consumes any view.
             ClearDrag(); ActionResult result;
             if(!validScreen) result=ActionResult.No("已取消，库存与物品位置未改变");
+            else if(machineId!=null)
+                result=World.TakeMachineOutput(machineId,outputId,placeOnly ? null : targetId,World.State.currentArea,position.x,position.y);
             else if(sourceId!=null)
             {
                 if(targetId!=null && !placeOnly) result=World.TakeAndInteract(sourceId,targetId,World.State.currentArea,position.x,position.y);
@@ -252,7 +270,7 @@ namespace Spotlight.FreeCafe
             }
             else if(targetId!=null && !placeOnly) result=World.Interact(itemId,targetId);
             else result=World.Move(itemId,World.State.currentArea,position.x,position.y);
-            if(sourceId!=null) Destroy(ghost.gameObject);
+            if(sourceId!=null || machineId!=null) Destroy(ghost.gameObject);
             else if(!result.success && ghost!=null) ghost.transform.position=origin;
             SyncViews(); Report(result);
         }
@@ -260,12 +278,12 @@ namespace Spotlight.FreeCafe
         {
             if(receiver!=null) receiver.SetDropTarget(false,false);
             if(draggedView!=null && dragItemId!=null) draggedView.hitbox.enabled=true;
-            draggedView=null; receiver=null; dragSourceId=dragItemId=null; dragFinishedFrame=Time.frameCount;
+            draggedView=null; receiver=null; dragSourceId=dragItemId=dragMachineId=dragOutputId=null; dragFinishedFrame=Time.frameCount;
         }
         public void CancelDrag()
         {
             if(!IsDragging) return;
-            var view=draggedView; bool provisional=dragSourceId!=null; ClearDrag();
+            var view=draggedView; bool provisional=dragSourceId!=null || dragMachineId!=null; ClearDrag();
             if(provisional) Destroy(view.gameObject); else view.transform.position=origin;
             SyncViews(); ShowHint("拖拽取消，库存不变");
         }

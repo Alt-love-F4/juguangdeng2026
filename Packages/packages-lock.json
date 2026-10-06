@@ -1,5 +1,14 @@
 {
   "dependencies": {
+    "com.bytedance.ide.trae": {
+      "version": "https://github.com/Pico-Developer/TRAE-Editor-Unity.git",
+      "depth": 0,
+      "source": "git",
+      "dependencies": {
+        "com.unity.test-framework": "1.1.33"
+      },
+      "hash": "f03a90c02b221544002791e8e792bfbcd9cd685d"
+    },
     "com.coplaydev.unity-mcp": {
       "version": "https://github.com/CoplayDev/unity-mcp.git?path=/MCPForUnity#main",
       "depth": 0,
