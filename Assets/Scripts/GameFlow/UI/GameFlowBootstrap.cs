@@ -36,6 +36,7 @@ namespace Spotlight.GameFlow
         private EventSystem persistentEventSystem;
 
         public GameSettings CurrentSettings => settings.Current;
+        internal bool GameplayControlsAvailable => CanUseGameplayControls();
         public IReadOnlyList<ResolutionOption> ResolutionOptions => settings.ResolutionOptions;
         public string WindowModeLabel => settings.Current.WindowMode switch
         {
@@ -133,21 +134,23 @@ namespace Spotlight.GameFlow
             if (string.IsNullOrWhiteSpace(config.GameplayScene))
             {
                 OpenGameplayPlaceholder();
-                dayFlow?.BeginNewDayFlow();
+                dayFlow?.BeginNewSession();
             }
             else
             {
                 LoadThen(() =>
                 {
                     OpenGameplayPlaceholder();
-                    dayFlow?.BeginNewDayFlow();
+                    dayFlow?.BeginNewSession();
                 }, config.GameplayScene);
             }
         }
 
         public void OpenPause()
         {
-            if (!gameplay || paused || (narrativeIntegration?.Runtime?.BlocksGameplayInput ?? false)) return;
+            if (!gameplay || paused || loadingTransitioning
+                || (dayFlow != null && dayFlow.BlocksGameplayInput)
+                || (narrativeIntegration?.Runtime?.BlocksGameplayInput ?? false)) return;
             paused = true;
             previousTimeScale = Time.timeScale;
             Time.timeScale = 0f;
@@ -319,6 +322,7 @@ namespace Spotlight.GameFlow
 
         private bool CanUseGameplayControls()
             => gameplay && !paused && !loadingTransitioning
+                && (dayFlow == null || !dayFlow.BlocksGameplayInput)
                 && (GameplayPanelHooks.PanelType != null && GameplayPanelHooks.PanelType.IsInstanceOfType(UIKit.PeekPanel(MainStack))
                     || GameplayPanelHooks.IsScenePanel && UIKit.PeekPanel(MainStack) == null);
 
@@ -326,7 +330,7 @@ namespace Spotlight.GameFlow
         {
             if (CanUseGameplayControls() && (narrativeIntegration?.Runtime?.BlocksGameplayInput ?? false))
                 return;
-            if (loadingTransitioning)
+            if (loadingTransitioning || (dayFlow != null && dayFlow.BlocksGameplayInput))
                 return;
             Type topType = UIKit.PeekPanel(MainStack)?.GetType();
             if (topType == typeof(ConfirmationPanel))
@@ -363,6 +367,7 @@ namespace Spotlight.GameFlow
 
         private void OpenGameplayPlaceholder()
         {
+            bool restoreDayFlow = loadingSavedSession;
             if (loadingSavedSession)
             {
                 if (pendingNarrativeRestore != null && narrativeIntegration?.Runtime != null) narrativeIntegration.Runtime.RestoreSnapshot(pendingNarrativeRestore);
@@ -388,6 +393,7 @@ namespace Spotlight.GameFlow
                 return;
             }
             StartCoroutine(PushPanelWhenReady(panel, false, ++rootNavigationVersion));
+            if (restoreDayFlow && dayFlow != null) dayFlow.RestoreSavedDayFlow();
         }
 
         private IEnumerator PushPanelWhenReady(GameFlowPanel panel, bool hidePrevious, int navigationVersion = -1)
@@ -419,6 +425,7 @@ namespace Spotlight.GameFlow
 
         private void LoadThen(Action completed, string sceneName)
         {
+            if (dayFlow != null) dayFlow.HideForMainMenu();
             int version = ++loadingVersion;
             loadingTransitioning = true;
             narrativeIntegration?.SetGameplayVisible(false);

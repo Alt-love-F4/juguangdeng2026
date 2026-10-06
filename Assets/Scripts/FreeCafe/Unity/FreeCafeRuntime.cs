@@ -28,7 +28,8 @@ namespace Spotlight.FreeCafe
         public bool CarrySelection { get; set; }
         public bool ShowAssetIds { get; set; }
         public bool IsDragging => draggedView!=null;
-        public bool InputBlocked => Time.timeScale<=0;
+        public bool InputBlocked => Time.timeScale<=0 || (dayFlow != null && dayFlow.BlocksGameplayInput);
+        private DayFlowController dayFlow;
         public event Action ViewChanged;
         private readonly Dictionary<string,FreeEntityView> views=new Dictionary<string,FreeEntityView>();
         private readonly List<string> removeIds=new List<string>();
@@ -64,6 +65,7 @@ namespace Spotlight.FreeCafe
         }
         private void Start()
         {
+            dayFlow = FindFirstObjectByType<DayFlowController>();
             string pending=GameSaveParticipantRegistry.TakePending(SaveId);
             if(!string.IsNullOrEmpty(pending)) RestoreJson(pending); else SyncViews();
             if(World.State.currentArea==AreaId.Cafe)

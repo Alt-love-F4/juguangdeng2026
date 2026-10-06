@@ -875,6 +875,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Spotlight.GameFlow.UI::Spotlight.GameFlow.GameFlowBootstrap
   config: {fileID: 11400000, guid: a621eaea06cadd54b860854eb2c6a8d1, type: 2}
   showMainMenuOnStart: 1
+  enableNarrative: 0
 --- !u!4 &1579857166
 Transform:
   m_ObjectHideFlags: 0
