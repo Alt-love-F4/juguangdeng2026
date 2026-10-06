@@ -76,7 +76,7 @@ namespace Spotlight.FreeCafe
             label.GetComponent<MeshRenderer>().sortingOrder=body.sortingOrder+1;
             bool visible=string.IsNullOrEmpty(entity.ownerId);
             gameObject.SetActive(visible);
-            hitbox.enabled=!preview;
+            hitbox.enabled=!preview && entity.area==Runtime.World.State.currentArea;
             string caption=spec.label;
             if(spec.Has(Capability.Source)) caption+=" ["+entity.stock+"]";
             if(spec.Has(Capability.Container))
