@@ -74,7 +74,7 @@ namespace Spotlight.GameFlow.Tests
             Assert.That(flow.CurrentDate, Is.EqualTo("王国纪元 670年10月6日"));
             Assert.That(flow.BlocksGameplayInput, Is.True);
             Assert.That(endpoint.starts, Is.Zero);
-            Assert.That(flow.CurrentDialogue.transform.Find("LeftPortraitFrame").GetComponent<Image>().enabled, Is.False);
+            Assert.That(flow.CurrentDialogue.LeftPortrait.transform.parent.GetComponent<Image>().enabled, Is.False);
             yield return FinishDialogue();
             Assert.That(endpoint.starts, Is.EqualTo(1));
             Assert.That(flow.BlocksGameplayInput, Is.False);
@@ -93,7 +93,7 @@ namespace Spotlight.GameFlow.Tests
             flow.BeginNewSession(playLetter: false);
             yield return ReachIntroduction();
             Assert.That(source.Reads, Is.EqualTo(1));
-            Assert.That(flow.CurrentDialogue.transform.Find("DialogueBox/Dialogue").GetComponent<TMPro.TMP_Text>().text, Is.EqualTo("测试数据源台词"));
+            Assert.That(flow.CurrentDialogue.EffectStage.Find("DialogueBox/Dialogue").GetComponent<TMPro.TMP_Text>().text, Is.EqualTo("测试数据源台词"));
             yield return FinishDialogue();
             Assert.That(endpoint.starts, Is.EqualTo(1));
         }
@@ -245,7 +245,7 @@ namespace Spotlight.GameFlow.Tests
             DialoguePanel panel = flow.CurrentDialogue;
             SetField(panel, "charactersPerSecond", 100000f);
             float deadline = Time.realtimeSinceStartup + 8f;
-            var button = panel.transform.Find("DialogueBox/Continue").GetComponent<Button>();
+            var button = panel.EffectStage.Find("DialogueBox/Continue").GetComponent<Button>();
             while (panel.IsPlaying)
             {
                 Assert.That(Time.realtimeSinceStartup, Is.LessThan(deadline), "Dialogue did not finish.");

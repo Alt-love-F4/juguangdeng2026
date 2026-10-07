@@ -7,7 +7,7 @@ namespace Spotlight.GameFlow
     public enum DialogueSpeaker { Narrator, Left, Right }
     public enum DialogueGesture { None, Nod, Shake }
 
-    /// <summary>当前由硬编码剧本实现，后续可由 Luban 数据源实现；加载由调用方负责。</summary>
+    /// <summary>当前由硬编码剧本实现，后续可由 Luban/NCS 数据源实现；加载由调用方负责。</summary>
     public interface IDialogueScriptSource
     {
         DialogueScript CreateScript();
@@ -24,12 +24,16 @@ namespace Spotlight.GameFlow
     [Serializable]
     public sealed class DialogueCharacter
     {
+        [SerializeField] private string characterKey;
         [SerializeField] private string displayName;
         [SerializeField] private Sprite portrait;
+        public string CharacterKey => characterKey ?? string.Empty;
         public string DisplayName => displayName ?? string.Empty;
         public Sprite Portrait => portrait;
-        public DialogueCharacter(string displayName, Sprite portrait)
+        public DialogueCharacter(string displayName, Sprite portrait) : this(string.Empty, displayName, portrait) { }
+        public DialogueCharacter(string characterKey, string displayName, Sprite portrait)
         {
+            this.characterKey = characterKey ?? string.Empty;
             this.displayName = displayName;
             this.portrait = portrait;
         }
@@ -47,21 +51,27 @@ namespace Spotlight.GameFlow
         [SerializeField] private DialogueCharacter leftCharacter;
         [SerializeField] private bool replaceRight;
         [SerializeField] private DialogueCharacter rightCharacter;
+        // Matches NCS line field names; no NCS table/runtime access in the presentation layer.
+        [SerializeField] private string accentFxKey;
+        [SerializeField] private string accentTargetKey;
         public DialogueSpeaker Speaker => speaker;
         public string Text => text ?? string.Empty;
         public string SpeakerNameOverride => speakerNameOverride;
         public DialogueGesture Gesture => gesture;
-        // 0 = 等待玩家。计时从当前页文字全部显示后开始。
+        // 0 waits for the player; the timer starts only after the visible page is fully revealed.
         public float AutoAdvanceSeconds => autoAdvanceSeconds;
         public bool ReplaceLeft => replaceLeft;
         public DialogueCharacter LeftCharacter => leftCharacter;
         public bool ReplaceRight => replaceRight;
         public DialogueCharacter RightCharacter => rightCharacter;
+        public string AccentFxKey => accentFxKey ?? string.Empty;
+        public string AccentTargetKey => accentTargetKey ?? string.Empty;
 
         public DialogueLine(DialogueSpeaker speaker, string text, string speakerNameOverride = null,
             DialogueGesture gesture = DialogueGesture.None, float autoAdvanceSeconds = 0f,
             bool replaceLeft = false, DialogueCharacter leftCharacter = null,
-            bool replaceRight = false, DialogueCharacter rightCharacter = null)
+            bool replaceRight = false, DialogueCharacter rightCharacter = null,
+            string accentFxKey = null, string accentTargetKey = null)
         {
             if (!Enum.IsDefined(typeof(DialogueSpeaker), speaker)) throw new ArgumentOutOfRangeException(nameof(speaker));
             if (!Enum.IsDefined(typeof(DialogueGesture), gesture)) throw new ArgumentOutOfRangeException(nameof(gesture));
@@ -76,6 +86,8 @@ namespace Spotlight.GameFlow
             this.leftCharacter = leftCharacter;
             this.replaceRight = replaceRight;
             this.rightCharacter = rightCharacter;
+            this.accentFxKey = accentFxKey;
+            this.accentTargetKey = accentTargetKey;
         }
     }
 

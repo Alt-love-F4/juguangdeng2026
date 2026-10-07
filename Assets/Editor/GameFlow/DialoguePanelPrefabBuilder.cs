@@ -13,6 +13,7 @@ namespace Spotlight.GameFlow.Editor
     public static class DialoguePanelPrefabBuilder
     {
         private const string PrefabPath = "Assets/Resources/Art/UIPrefab/DialoguePanel.prefab";
+        private const string LibraryPath = "Assets/Resources/Dialogue/PresentationEffectLibrary.asset";
         private const string SamplePath = "Assets/Resources/Dialogue/DialoguePreview.asset";
         private static TMP_FontAsset Font => AssetDatabase.LoadAssetAtPath<TMP_FontAsset>("Assets/Resources/Fonts/SimHei SDF.asset");
         private static readonly Color Gold = new Color(1f, .88f, .66f);
@@ -39,6 +40,10 @@ namespace Spotlight.GameFlow.Editor
             Texture2D background = AssetDatabase.LoadAssetAtPath<Texture2D>(
                 "Assets/Resources/Art/Gameplay/DayFlow/phase_business_transition.png");
             if (background == null) throw new InvalidOperationException("Missing cafe background.");
+            if (!AssetDatabase.IsValidFolder("Assets/Resources/Dialogue"))
+                AssetDatabase.CreateFolder("Assets/Resources", "Dialogue");
+            if (AssetDatabase.LoadAssetAtPath<PresentationEffectLibrary>(LibraryPath) == null)
+                AssetDatabase.CreateAsset(ScriptableObject.CreateInstance<PresentationEffectLibrary>(), LibraryPath);
             CreatePanel(left, right, background);
             CreateSample(left, right, background);
             AssetDatabase.SaveAssets();
@@ -86,6 +91,7 @@ namespace Spotlight.GameFlow.Editor
                 TMP_Text hint = Text(box.transform, "Hint", "空格 / 回车 / 点击 · 继续", new Vector2(.025f, .035f), new Vector2(.65f, .19f), 19f, new Color(.72f, .67f, .57f));
                 Button next = Button(box.transform, "Continue", "继续  >", new Vector2(.81f, .035f), new Vector2(.975f, .20f));
                 var serialized = new SerializedObject(panel);
+                Set(serialized, "effectLibrary", AssetDatabase.LoadAssetAtPath<PresentationEffectLibrary>(LibraryPath));
                 Set(serialized, "canvasGroup", root.GetComponent<CanvasGroup>());
                 Set(serialized, "background", background);
                 Set(serialized, "leftPortrait", leftImage);
@@ -110,7 +116,7 @@ namespace Spotlight.GameFlow.Editor
         {
             Image frame = Image(parent, name + "Frame", new Vector2(minX - .004f, .30f), new Vector2(maxX + .004f, .885f), new Color(.23f, .16f, .10f, .95f));
             frame.raycastTarget = false;
-            Image portrait = Image(parent, name, new Vector2(minX, .307f), new Vector2(maxX, .878f), Color.white);
+            Image portrait = Image(frame.transform, name, new Vector2(.012f, .012f), new Vector2(.988f, .988f), Color.white);
             portrait.sprite = sprite;
             portrait.preserveAspect = true;
             portrait.raycastTarget = false;
