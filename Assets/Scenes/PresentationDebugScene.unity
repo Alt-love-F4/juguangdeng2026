@@ -2663,7 +2663,7 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_text: "E   \u53CC\u89D2\u8272\u5BF9\u8BDD\uFF08\u542B\u957F\u6587\u672C\uFF09"
+  m_text: "E   NCS \u5BF9\u8BDD\uFF08Shift\uFF1A\u957F\u6587\u672C\u6D4B\u8BD5\uFF09"
   m_isRightToLeft: 0
   m_fontAsset: {fileID: 11400000, guid: deafa00ea26fb5945ada4150d6615468, type: 2}
   m_sharedMaterial: {fileID: 1574795732, guid: deafa00ea26fb5945ada4150d6615468, type: 2}
@@ -6062,7 +6062,7 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_text: "W   \u7B2C\u4E00\u5929\u6765\u4FE1"
+  m_text: "W   NCS \u6765\u4FE1\uFF08Shift\uFF1A\u8349\u7A3F\uFF09"
   m_isRightToLeft: 0
   m_fontAsset: {fileID: 11400000, guid: deafa00ea26fb5945ada4150d6615468, type: 2}
   m_sharedMaterial: {fileID: 1574795732, guid: deafa00ea26fb5945ada4150d6615468, type: 2}
@@ -9065,7 +9065,7 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_text: "F   \u7B2C\u4E00\u5929\u963F\u9EDB\u5C14\u5F15\u5165\u5BF9\u8BDD"
+  m_text: "F   NCS \u7B2C\u4E00\u5929\u963F\u9EDB\u5C14\u5F15\u5165"
   m_isRightToLeft: 0
   m_fontAsset: {fileID: 11400000, guid: deafa00ea26fb5945ada4150d6615468, type: 2}
   m_sharedMaterial: {fileID: 1574795732, guid: deafa00ea26fb5945ada4150d6615468, type: 2}

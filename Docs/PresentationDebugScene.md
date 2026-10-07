@@ -11,8 +11,8 @@ Unity 菜单 `Tools > Game Flow > Open Presentation Debug Scene`，进入 Play M
 | 按键 | 实际演出 |
 |---|---|
 | Q | 新一天 / DateChangePanel |
-| W | 第一天来信 / FirstDayLetterPanel |
-| E | 双角色长剧本 / DialoguePanel |
+| W | NCS 信件 / FirstDayLetterPanel（Shift+W：面板草稿） |
+| E | NCS 对话 / DialoguePanel（Shift+E：原硬编码长文本） |
 | V | 阅读演出 / ReadingPanel（多页、长文本分页、配图、旁白/头像对话） |
 | B | 通知演出 / NoticePanel（时间、配图、进度提示） |
 | N | 视频过场 / CutScenePanel（无视频时显示占位，长按 Enter 跳过） |
@@ -23,7 +23,7 @@ Unity 菜单 `Tools > Game Flow > Open Presentation Debug Scene`，进入 Play M
 | I | 夜晚前 / PreNightPanel |
 | O | 住房夜晚 / HomeNightPanel |
 | P | 一天结束 / DayEndPanel |
-| F | 首次角色登场对话 |
+| F | NCS 首次角色登场对话，默认 first_day_cafe |
 | G | 独立特效试验台 |
 | 1~0 | 黑影入场、受惊、轻/重震屏、白闪、黑场、换位、镜头推近/复位、淡出 |
 | Space / Enter | 对话/阅读先补全文字，再翻页 / 下一句；通知确认关闭 |
@@ -68,5 +68,13 @@ Unity Test Runner PlayMode：`Spotlight.GameFlow.Tests.PresentationDebugSceneTes
 
 ## 特效试验台
 
-G 与 1~0 共用实际 DialoguePanel；没有对话时数字键自动打开试验台。角色 ID、效果 ID 和镜头/黑场入口留给后续 NCS 适配，本轮不连接 NCS。
+G 与 1~0 共用实际 DialoguePanel；没有对话时数字键自动打开试验台。角色 ID、效果 ID 和镜头/黑场入口仍留给后续 NCS 原子调度适配；本轮只接对话/信件内容。
 资源参数集中在 PresentationEffectLibrary.asset，详见 `Docs/PresentationEffects.md`。
+
+## NCS 内容调试
+
+W/E/F 现在读取指定 NCS 内容，默认对话 ID `first_day_cafe`；信件使用 `opening.letter.body` / `opening.letter.signature`。
+在场景中 `PresentationDebugSceneController` 的 NCS content selection 字段可改 ID/key，不需要新建场景。
+有已初始化运行时则使用当前配置和文本 resolver；未启用 NCS 时直接读取已有 Luban 数据，不创建 NCS Runtime，也不推进事件和存档。
+Shift+W / Shift+E 和公共 `PlayHardcodedLetter()` / `PlayHardcodedDialogue()` 保留原测试入口。
+详情见 `Docs/NcsOpeningPresentation.md`；轻量回归为 `NcsOpeningDataTests` 和 `NcsOpeningPresentationSmokeTests`。

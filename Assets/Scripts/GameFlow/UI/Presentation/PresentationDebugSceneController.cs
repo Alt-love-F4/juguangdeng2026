@@ -4,6 +4,7 @@ using TMPro;
 using UnityEngine;
 using UnityEngine.InputSystem;
 using YokiFrame;
+using Spotlight.Narrative;
 
 namespace Spotlight.GameFlow
 {
@@ -14,7 +15,7 @@ namespace Spotlight.GameFlow
         public const string ScenePath = "Assets/Scenes/PresentationDebugScene.unity";
         public const string DefaultHint = "按键/按钮可随时切换演出。Esc 关闭 · Backspace 重播 · H 收起说明 · F9 切换暂停时间。";
 
-        public enum Preview { DateChange, Letter, Dialogue, PreBusiness, CafeOpening, BusinessEnd, CityMap, PreNight, HomeNight, DayEnd, Introduction, Effects, Reading, Notice, CutScene }
+        public enum Preview { DateChange, Letter, Dialogue, PreBusiness, CafeOpening, BusinessEnd, CityMap, PreNight, HomeNight, DayEnd, Introduction, Effects, Reading, Notice, CutScene, HardcodedDialogue, HardcodedLetter }
 
         [Header("Scene bindings")]
         [SerializeField] private TMP_Text statusText;
@@ -25,6 +26,11 @@ namespace Spotlight.GameFlow
         [SerializeField] private string previousDate = "王国纪元 670年10月6日";
         [SerializeField] private string currentDate = "王国纪元 670年10月7日";
         [SerializeField] private bool enableKeyboardShortcuts = true;
+
+        [Header("NCS content selection (read-only; no event settlement)")]
+        [SerializeField] private string openingPresentationId = NarrativePresentationDataAdapter.DefaultOpeningPresentationId;
+        [SerializeField] private string letterBodyKey = NarrativePresentationDataAdapter.DefaultFirstDayLetterBodyKey;
+        [SerializeField] private string letterSignatureKey = NarrativePresentationDataAdapter.DefaultFirstDayLetterSignatureKey;
 
         private UIPanel currentPanel;
         private Coroutine pendingEffectCue;
@@ -60,9 +66,10 @@ namespace Spotlight.GameFlow
             if (keyboard.f9Key.wasPressedThisFrame) { ToggleTimePause(); return; }
             if (keyboard.f12Key.wasPressedThisFrame) { ResetHelp(); return; }
             if (keyboard.backspaceKey.wasPressedThisFrame) { ReplayLast(); return; }
+            bool draftPreview = keyboard.leftShiftKey.isPressed || keyboard.rightShiftKey.isPressed;
             if (keyboard.qKey.wasPressedThisFrame) PlayDateChange();
-            else if (keyboard.wKey.wasPressedThisFrame) PlayLetter();
-            else if (keyboard.eKey.wasPressedThisFrame) PlayDialogue();
+            else if (keyboard.wKey.wasPressedThisFrame) { if (draftPreview) PlayHardcodedLetter(); else PlayLetter(); }
+            else if (keyboard.eKey.wasPressedThisFrame) { if (draftPreview) PlayHardcodedDialogue(); else PlayDialogue(); }
             else if (keyboard.vKey.wasPressedThisFrame) PlayReading();
             else if (keyboard.bKey.wasPressedThisFrame) PlayNotice();
             else if (keyboard.nKey.wasPressedThisFrame) PlayCutScene();
@@ -90,6 +97,8 @@ namespace Spotlight.GameFlow
         public void PlayDateChange() => PlayPreview(Preview.DateChange);
         public void PlayLetter() => PlayPreview(Preview.Letter);
         public void PlayDialogue() => PlayPreview(Preview.Dialogue);
+        public void PlayHardcodedDialogue() => PlayPreview(Preview.HardcodedDialogue);
+        public void PlayHardcodedLetter() => PlayPreview(Preview.HardcodedLetter);
         public void PlayReading() => PlayPreview(Preview.Reading);
         public void PlayNotice() => PlayPreview(Preview.Notice);
         public void PlayCutScene() => PlayPreview(Preview.CutScene);
@@ -164,13 +173,19 @@ namespace Spotlight.GameFlow
                         date.SetDates(previousDate, currentDate);
                         date.Play(() => Complete(version));
                         break;
-                    case Preview.Letter: Open<FirstDayLetterPanel>().Play(() => Complete(version)); break;
-                    case Preview.Dialogue: PlayDialogueSample(DialoguePreviewDialogue.Create(), version); break;
+                    case Preview.Letter:
+                        var letter = Open<FirstDayLetterPanel>();
+                        TryApplyNcsLetter(letter);
+                        letter.Play(() => Complete(version));
+                        break;
+                    case Preview.Dialogue: PlayDialogueSample(new LubanOpeningDialogueSource(openingPresentationId).CreateScript(), version); break;
+                    case Preview.HardcodedDialogue: PlayDialogueSample(DialoguePreviewDialogue.Create(), version); break;
+                    case Preview.HardcodedLetter: Open<FirstDayLetterPanel>().Play(() => Complete(version)); break;
                     case Preview.Reading: PlayReadingSample(version); break;
                     case Preview.Notice: PlayNoticeSample(version); break;
                     case Preview.CutScene: PlayCutSceneSample(version); break;
                     case Preview.Effects: PlayDialogueSample(PresentationEffectsPreview.Create(), version); break;
-                    case Preview.Introduction: PlayDialogueSample(new LubanOpeningDialogueSource().CreateScript(), version); break;
+                    case Preview.Introduction: PlayDialogueSample(new LubanOpeningDialogueSource(openingPresentationId).CreateScript(), version); break;
                     case Preview.PreBusiness: Open<PreBusinessPanel>().Play(() => Complete(version)); break;
                     case Preview.CafeOpening: Open<CafeOpeningPanel>().Play(() => Complete(version)); break;
                     case Preview.BusinessEnd: Open<BusinessEndPanel>().Play(() => Complete(version)); break;
@@ -181,8 +196,8 @@ namespace Spotlight.GameFlow
                     default: throw new ArgumentOutOfRangeException(nameof(preview));
                 }
                 SetStatus("播放中", preview.ToString());
-                SetHint(preview == Preview.Letter ? "点击信封 → 阅读 → 点击署名。面板右下角可跳过；Esc 取消。"
-                    : preview == Preview.Dialogue || preview == Preview.Introduction || preview == Preview.Effects ? "空格/回车/面板继续按钮：先补全文字，再换页/换句。Esc 取消。"
+                SetHint(preview == Preview.Letter || preview == Preview.HardcodedLetter ? "点击信封 → 阅读 → 点击署名。面板右下角可跳过；Esc 取消。"
+                    : preview == Preview.Dialogue || preview == Preview.HardcodedDialogue || preview == Preview.Introduction || preview == Preview.Effects ? "空格/回车/面板继续按钮：先补全文字，再换页/换句。Esc 取消。"
                     : preview == Preview.Reading ? "V：阅读；空格/回车补全文字 → 下一行/页，← 或上一页返回；Esc 取消。"
                     : preview == Preview.Notice ? "B：通知演出；空格/回车或确认按钮关闭；Esc 取消。"
                     : preview == Preview.CutScene ? "N：视频过场；当前无视频时显示占位；长按 Enter 跳过。Esc 取消。"
@@ -246,6 +261,27 @@ namespace Spotlight.GameFlow
             currentPanel = null;
             SetStatus("已取消", lastPreview.ToString());
             SetHint(DefaultHint);
+        }
+
+        private void TryApplyNcsLetter(FirstDayLetterPanel panel)
+        {
+            try
+            {
+                NarrativeRuntime runtime = NarrativeRuntime.Instance;
+                bool resolved;
+                string error;
+                FirstDayLetterContent content;
+                if (runtime != null && runtime.IsReady)
+                    resolved = NarrativePresentationDataAdapter.TryResolveFirstDayLetter(runtime, letterBodyKey, letterSignatureKey, null, out content, out error);
+                else
+                    resolved = NarrativePresentationDataAdapter.TryResolveFirstDayLetter(LubanNarrativeLoader.Load(), letterBodyKey, letterSignatureKey, null, out content, out error);
+                if (resolved) panel.SetContent(content);
+                else Debug.LogWarning("[PresentationDebug] " + error + "; using panel draft fallback.", this);
+            }
+            catch (Exception error)
+            {
+                Debug.LogWarning("[PresentationDebug] NCS 信件使用 Panel 草稿：" + error.Message, this);
+            }
         }
 
         private void PlayDialogueSample(DialogueScript script, int version)

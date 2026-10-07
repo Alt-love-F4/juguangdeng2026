@@ -14,6 +14,8 @@ namespace Spotlight.Narrative
         private Func<string, string> textResolver;
 
         public static NarrativeRuntime Instance { get; private set; }
+        /// <summary>当前 NCS 会话使用的配置快照。演出适配层只读访问，不修改 NCS 数据。</summary>
+        public NarrativeConfiguration Configuration => configuration;
         public NarrativeController Controller => controller;
         public NarrativePresenter Presenter => runtimePresenter;
         public bool IsReady => controller != null;

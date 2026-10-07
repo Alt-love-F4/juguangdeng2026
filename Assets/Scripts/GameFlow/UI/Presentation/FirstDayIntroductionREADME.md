@@ -15,3 +15,10 @@
 完成前不启动经营；取消回到准备并可重试；每次新游戏第一天一次；完成状态随存档记录；对话阶段读档从第一句开始。第二天、已在经营/后续阶段的旧存档、缺少日程数据的旧存档均不补播。
 
 `IDialogueScriptSource` 保留为测试替身和可注入扩展点。传入 null 会使用默认 Luban 开场，不再回退到硬编码教程。存档中的 JSON 序列化与台词配表无关。
+
+## 当前会话内容与信件
+
+正式对话默认 ID 为 `first_day_cafe`。DayFlow 的 `openingPresentationId` 和调试场景同名字段可指定其他 OpeningPresentation。
+有已初始化 `NarrativeRuntime` 时读取 `Configuration` 并使用 `ResolveText`（保留注入 resolver 优先）；没有运行时也能直接读取 Luban 配置，不启用剧情模块。
+开头信件读取共享 Text 表的 `opening.letter.body` / `opening.letter.signature`，通过 `FirstDayLetterContent` 注入既有面板；正文/署名 key 可在 DayFlow Inspector 修改。
+新游戏和 IntroLetter 存档恢复都走相同接口，动画和完成/取消流程不变。详见 `Docs/NcsOpeningPresentation.md`。

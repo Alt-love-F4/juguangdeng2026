@@ -5,9 +5,9 @@
 ## 正式第一天流程
 
 阿黛尔引入已接在：信件 → 第一天日期 → 营业准备 → 咖啡馆入场 → 对话 → 开始经营。
-第一天正式台词由 `FirstDayIntroductionDialogue.cs` 硬编码，F8 示例台词由 `DialoguePreviewDialogue.cs` 硬编码。
-两份视觉资源仅存立绘/背景引用，不存台词。当前不读取 JSON 或配表。
-保留 `IDialogueScriptSource`，未来再接 Luban；详见 `FirstDayIntroductionREADME.md`。
+第一天正式台词由 `LubanOpeningDialogueSource` 按 NCS 的 `OpeningPresentation` / `OpeningLine` 读取，F8 示例台词由 `DialoguePreviewDialogue.cs` 硬编码。
+两份视觉资源仅存立绘/背景引用，不存台词。正式开场读取既有 Luban/NCS 配表；Panel 不直接读取表。
+保留 `IDialogueScriptSource`，显式注入仍优先；详见 `FirstDayIntroductionREADME.md`。
 
 ## 快速测试
 
@@ -35,8 +35,8 @@ DialoguePlayback.Play(script,
     onCancelled: () => { /* 玩家取消；不应结算正常完成 */ });
 ```
 
-- `IDialogueScriptSource.CreateScript()`：当前由硬编码剧本实现，后续 Luban 数据源可实现同一接口；面板不负责 I/O。
-- `DialogueVisualsAsset` 只配置立绘和背景；正式/演示台词都在 C# 中，不使用资源中的台词列表。既有 `DialogueScriptAsset` 类型保留兼容，但不用于当前剧情播放。
+- `IDialogueScriptSource.CreateScript()`：由 Luban/NCS 数据源或硬编码示例实现；面板不负责 I/O。`DialoguePlayback.PlayNcsOpening(presentationId, ...)` 可直接读取指定开场。
+- `DialogueVisualsAsset` 只配置立绘和背景；正式台词来自 NCS，演示台词保留在 C# 中，不使用资源中的台词列表。既有 `DialogueScriptAsset` 类型保留兼容，但不用于当前剧情播放。
 - `DialoguePlayback.Play(source)` 自动打开面板，正常结束后先关闭，再调用完成回调。
 - `IDialoguePresentation.Play(script, onFinished, onCancelled)` / `Advance()` / `Stop()` 是底层演出接口；直接调用 Panel.Play 的调用方负责正常结束时关闭面板。
 - `DialogueScript` 复制台词列表作为只读快照，不受调用者后续 Clear/Add 影响；拒绝空脚本、null 行。

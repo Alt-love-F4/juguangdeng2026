@@ -118,7 +118,7 @@ namespace Spotlight.GameFlow.Editor
             TMP_Text active = Text(sidebar.transform, "Active", "当前 / 无", new Vector2(.045f, .872f), new Vector2(.955f, .905f), 17f, Muted);
 
             PresentationDebugSceneController controller = root.AddComponent<PresentationDebugSceneController>();
-            string[] labels = { "Q   新一天 / 日期切换", "W   第一天来信", "E   双角色对话（含长文本）", "R   经营前阶段", "T   开店演出", "Y   经营结束", "U   城区地图", "I   夜晚前阶段", "O   住房夜晚", "P   一天结束", "F   第一天阿黛尔引入对话", "G   特效试验台（1~0）", "V   阅读（图文 / 旁白 / 对话）", "B   单页事件通知", "N   视频过场 / 长按跳过" };
+            string[] labels = { "Q   新一天 / 日期切换", "W   NCS 来信（Shift：草稿）", "E   NCS 对话（Shift：长文本测试）", "R   经营前阶段", "T   开店演出", "Y   经营结束", "U   城区地图", "I   夜晚前阶段", "O   住房夜晚", "P   一天结束", "F   NCS 第一天阿黛尔引入", "G   特效试验台（1~0）", "V   阅读（图文 / 旁白 / 对话）", "B   单页事件通知", "N   视频过场 / 长按跳过" };
             for (int i = 0; i < labels.Length; i++)
             {
                 float top = .855f - i * .028f;

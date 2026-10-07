@@ -13,8 +13,8 @@ Assets/Scenes/PresentationDebugScene.unity
 进入 Play Mode 后使用以下按键：
 
 - `Q`：新一天 / `DateChangePanel`
-- `W`：第一天来信 / `FirstDayLetterPanel`
-- `E`：双角色对话 / `DialoguePanel`
+- `W`：NCS 第一天来信 / `FirstDayLetterPanel`；`Shift+W` 使用面板草稿
+- `E`：NCS 指定开场对话 / `DialoguePanel`；`Shift+E` 使用硬编码长文本示例
 - `V`：阅读 / `ReadingPanel`，空格或 Enter 补全文字再翻行/页，← 返回
 - `B`：事件通知 / `NoticePanel`，空格或 Enter 确认关闭
 - `N`：视频过场 / `CutScenePanel`，长按 Enter 跳过（默认 1.2 秒，调试占位不代表真实视频）
@@ -25,7 +25,7 @@ Assets/Scenes/PresentationDebugScene.unity
 - `I`：夜晚前阶段 / `PreNightPanel`
 - `O`：住房夜晚 / `HomeNightPanel`
 - `P`：一天结束 / `DayEndPanel`
-- `F`：首次登场对话 / `FirstDayIntroductionDialogue`
+- `F`：NCS 首次登场对话（默认 `first_day_cafe`）
 - `G`：独立特效试验台；`1~0`：黑影入场、受惊、轻/重震屏、白闪、黑场、换位、镜头推近/复位、淡出
 - `Space` / `Enter`：继续（对话先补全文字）
 - `Esc`：关闭当前演出
@@ -34,7 +34,7 @@ Assets/Scenes/PresentationDebugScene.unity
 - `F9`：切换 timeScale 暂停，验证非缩放时间演出
 - `F12`：恢复说明与调试提示
 
-场景中右侧也会显示完整按键说明，底部会提示当前状态。所有演出使用硬编码测试数据，不推进 DayFlow、不写入存档。修改已有演出 Panel 后，应在这个场景回归验证。
+场景中右侧也会显示完整按键说明，底部会提示当前状态。W/E/F 只读 NCS 配置（有运行时则优先使用其文本解析器，否则直接读取 Luban 数据）；Shift+W/Shift+E 保留硬编码入口，其余样例仍为硬编码。不启动 NCS 事件、不推进 DayFlow、不写入存档。修改已有演出 Panel 后，应在这个场景回归验证。
 
 如果场景缺失，使用 Unity 菜单：
 
@@ -58,10 +58,20 @@ Tools > Game Flow > Create Missing Presentation Debug Scene
 
 ## 演出特效边界
 
-- 特效字段来自 NCS；不要自行新增平行剧本字段标准。本轮表现层不接 NCS、不结算事件、不读取 NCS 表。
+- 特效字段来自 NCS；不要自行新增平行剧本字段标准。对话/信件已通过 `NarrativePresentationDataAdapter` 读取指定 ID/key；Panel 仍只消费快照，不依赖 NCS 全局状态，不结算事件。特效预览仍独立于 NCS 原子调度。
 - `DialoguePanel.PlayEffect` / `PlayCameraCue` / `PlayFade` 是后续适配边界；参数预设在 `PresentationEffectLibrary.asset`。
 - 角色/震屏/镜头/遮罩通道可并行；震屏按等级替换，不叠加。退出必须取消 handle、协程与回调，复位舞台。
 - 回归使用共享场景和 `PresentationEffectsTests`，详见 `Docs/PresentationEffects.md`。不另建演出场景。
+
+## NCS 内容接口（已接入）
+
+- 正式开场与恢复信件：`DayFlowController` 的 `openingPresentationId` / `firstDayLetterBodyKey` / `firstDayLetterSignatureKey` 为 Inspector 可配置字段。
+- 默认对话 ID：`first_day_cafe`，来自 `Narrative.xlsx` 的 `OpeningPresentation` / `OpeningLine`，按 `seq` 排序。
+- 默认信件 Key：`opening.letter.body` / `opening.letter.signature`，来自 `Text.xlsx` 的 `Text` sheet。找不到完整信件时明确警告并使用完整草稿，不能显示原始 key 或混合新旧内容。
+- `DialoguePlayback.PlayNcsOpening(id, ...)` 可播放任意已有 OpeningPresentation；不隐式启用 NCS 模块或触发事件结果。
+- `IDialogueScriptSource` 显式注入优先；文本解析优先使用已有 `NarrativeRuntime.ResolveText`。
+- 保持 Panel 无 NCS 依赖；不要将现有 NCS 事件/选项调度改成新的平行剧情系统。
+- 后续更改 Excel 要重新生成 Luban JSON；本轮没有改表结构，没有新增 Letter 表。详见 `Docs/NcsOpeningPresentation.md`。
 
 <!-- packy-image:start -->
 ## PackyAPI image capability (Windows, this user)

@@ -1,6 +1,7 @@
 using System;
 using UnityEngine;
 using YokiFrame;
+using Spotlight.Narrative;
 
 namespace Spotlight.GameFlow
 {
@@ -31,6 +32,11 @@ namespace Spotlight.GameFlow
         private const string InitialDate = "王国纪元 670年10月5日";
         private static readonly DateTime FirstDayDate = new DateTime(670, 10, 6);
         private const string PresentationTag = "game-day-presentation";
+
+        [Header("NCS opening content selection")]
+        [SerializeField] private string openingPresentationId = NarrativePresentationDataAdapter.DefaultOpeningPresentationId;
+        [SerializeField] private string firstDayLetterBodyKey = NarrativePresentationDataAdapter.DefaultFirstDayLetterBodyKey;
+        [SerializeField] private string firstDayLetterSignatureKey = NarrativePresentationDataAdapter.DefaultFirstDayLetterSignatureKey;
 
         private IDialogueScriptSource introductionSource;
         private DialoguePanel introductionPanel;
@@ -101,7 +107,7 @@ namespace Spotlight.GameFlow
             HideBusinessControls();
             HideGameplayPanel();
             SetState(DayFlowState.IntroLetter);
-            ShowPresentation<FirstDayLetterPanel>(BeginNewDayFlow);
+            ShowPresentation<FirstDayLetterPanel>(BeginNewDayFlow, ConfigureFirstDayLetter);
         }
 
         public void BeginNewDayFlow()
@@ -148,8 +154,40 @@ namespace Spotlight.GameFlow
 
         private DialogueScript ResolveIntroductionScript()
         {
-            IDialogueScriptSource source = introductionSource ?? new LubanOpeningDialogueSource();
+            IDialogueScriptSource source = introductionSource
+                ?? new LubanOpeningDialogueSource(openingPresentationId);
             return source.CreateScript();
+        }
+
+        private void ConfigureFirstDayLetter(FirstDayLetterPanel panel)
+        {
+            if (TryResolveFirstDayLetter(out FirstDayLetterContent content)) panel.SetContent(content);
+        }
+
+        private bool TryResolveFirstDayLetter(out FirstDayLetterContent content)
+        {
+            NarrativeRuntime runtime = NarrativeRuntime.Instance;
+            try
+            {
+                bool resolved;
+                string error;
+                if (runtime != null && runtime.IsReady)
+                    resolved = NarrativePresentationDataAdapter.TryResolveFirstDayLetter(runtime, firstDayLetterBodyKey, firstDayLetterSignatureKey, null, out content, out error);
+                else
+                    resolved = NarrativePresentationDataAdapter.TryResolveFirstDayLetter(LubanNarrativeLoader.Load(), firstDayLetterBodyKey, firstDayLetterSignatureKey, null, out content, out error);
+                if (!resolved)
+                {
+                    Debug.LogWarning("[DayFlow] " + error + "; using panel draft fallback.", this);
+                    content = null;
+                }
+                return resolved;
+            }
+            catch (Exception error)
+            {
+                Debug.LogWarning("[DayFlow] NCS first-day letter could not be read; using panel draft fallback. " + error.Message, this);
+                content = null;
+                return false;
+            }
         }
 
         private void PlayFirstDayIntroduction()
@@ -373,7 +411,7 @@ namespace Spotlight.GameFlow
             switch (State)
             {
                 case DayFlowState.FirstDayIntroduction: PlayFirstDayIntroduction(); break;
-                case DayFlowState.IntroLetter: ShowPresentation<FirstDayLetterPanel>(BeginNewDayFlow); break;
+                case DayFlowState.IntroLetter: ShowPresentation<FirstDayLetterPanel>(BeginNewDayFlow, ConfigureFirstDayLetter); break;
                 case DayFlowState.DateTransition: BeginNewDayFlow(); break;
                 case DayFlowState.PreBusiness: EnterPreBusiness(); break;
                 case DayFlowState.BusinessTransition: EnterBusinessTransition(); break;

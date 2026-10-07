@@ -35,6 +35,12 @@ namespace Spotlight.GameFlow
             }
         }
 
+        /// <summary>Read a selected NCS opening without queueing/settling an NCS event.</summary>
+        public static DialoguePanel PlayNcsOpening(
+            string presentationId = NarrativePresentationDataAdapter.DefaultOpeningPresentationId,
+            Action onFinished = null, Action onCancelled = null)
+            => Play(new LubanOpeningDialogueSource(presentationId), onFinished, onCancelled);
+
         public static void Stop()
         {
             DialoguePanel panel = UIKit.GetPanel<DialoguePanel>();

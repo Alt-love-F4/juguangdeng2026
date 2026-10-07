@@ -41,6 +41,7 @@ namespace Spotlight.GameFlow
             "如果有一天，你听见门铃响起，就替我对推门而来的人说一声：欢迎。\n\n" +
             "而这一次，是我想对你说——欢迎回家。";
         [SerializeField] private string signature = "—— 永远惦念你的叔叔";
+        private FirstDayLetterContent pendingContent;
 
         [Header("Playback (unscaled time)")]
         [SerializeField, Min(.005f)] private float characterInterval = .026f;
@@ -69,6 +70,8 @@ namespace Spotlight.GameFlow
             envelopeButton.onClick.AddListener(OpenEnvelope);
             signatureButton.onClick.AddListener(ConfirmSignature);
             skipButton.onClick.AddListener(SkipLetter);
+            letterBody.richText = false;
+            signatureText.richText = false;
         }
 
         protected override void OnOpen(IUIData data = null)
@@ -83,12 +86,29 @@ namespace Spotlight.GameFlow
             if (canvas != null) canvas.overrideSorting = true;
         }
 
+        /// <summary>在 Play 前注入已由调用方解析好的 NCS 内容。</summary>
+        public void SetContent(FirstDayLetterContent content)
+        {
+            if (IsPlaying) throw new InvalidOperationException("Set letter content before playback.");
+            pendingContent = content;
+        }
+
+        /// <summary>消费待播内容；未注入时使用面板草稿，保留旧的测试和兼容入口。</summary>
         public void Play(Action onFinished)
+        {
+            FirstDayLetterContent content = pendingContent ?? new FirstDayLetterContent(letter, signature);
+            pendingContent = null;
+            Play(content, onFinished);
+        }
+
+        /// <summary>使用指定内容播放信件，不让面板直接依赖 NCS 全局状态。</summary>
+        public void Play(FirstDayLetterContent content, Action onFinished)
         {
             ValidateBindings();
             Stop();
             CapturePose();
             RestorePose();
+            FirstDayLetterContent resolved = content ?? new FirstDayLetterContent(letter, signature);
             finished = onFinished;
             IsPlaying = true;
             Stage = LetterStage.Envelope;
@@ -103,9 +123,9 @@ namespace Spotlight.GameFlow
             signatureButton.interactable = false;
             skipButton.gameObject.SetActive(true);
             skipButton.interactable = true;
-            signatureText.text = signature;
+            signatureText.text = resolved.Signature;
             readingHint.text = "";
-            letterBody.text = letter;
+            letterBody.text = resolved.Body;
             letterBody.maxVisibleCharacters = 0;
             hintGroup.alpha = 1f;
             hintPulse = DOTween.To(() => hintGroup.alpha, value => hintGroup.alpha = value, .45f, .9f)
@@ -158,7 +178,7 @@ namespace Spotlight.GameFlow
             Stage = LetterStage.AwaitingSignature;
             signatureButton.gameObject.SetActive(true);
             signatureButton.interactable = true;
-            readingHint.text = NeedsScroll ? "可用滚轮读完信件  ·  点击叔叔的署名继续" : "读完后，点击叔叔的署名继续";
+            readingHint.text = NeedsScroll ? "可用滚轮读完信件  ·  点击署名继续" : "读完后，点击署名继续";
         }
 
         /// <summary>Completion requires a fresh click after all text has appeared.</summary>
@@ -211,6 +231,7 @@ namespace Spotlight.GameFlow
         public void Stop()
         {
             finished = null;
+            pendingContent = null;
             IsPlaying = false;
             Stage = LetterStage.Stopped;
             transition?.Kill(false);
