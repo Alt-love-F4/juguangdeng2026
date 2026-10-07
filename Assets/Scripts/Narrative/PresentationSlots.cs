@@ -21,6 +21,14 @@ namespace Spotlight.Narrative
             return slots;
         }
 
+        public static void ApplyEventProperties(Dictionary<string, string> slots, NarrativeEventDefinition definition)
+        {
+            if (slots == null || definition?.eventProperties == null) return;
+            foreach (NarrativeEventProperty property in definition.eventProperties)
+                if (property != null && !string.IsNullOrWhiteSpace(property.property))
+                    slots[property.property.Trim()] = property.value ?? string.Empty;
+        }
+
         public static float Number(string value, float fallback = 0f)
             => float.TryParse(value, NumberStyles.Float, CultureInfo.InvariantCulture, out float number) ? number : fallback;
 

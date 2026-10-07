@@ -22,6 +22,10 @@ public sealed partial class NcsEventEntry : Luban.BeanBase
         JObject _obj = _buf as JObject;
         EventId = (string)_obj.GetValue("eventId");
         EventKind = (string)_obj.GetValue("eventKind");
+        PresentationClass = (string)_obj.GetValue("presentationClass");
+        PresentationKey = (string)_obj.GetValue("presentationKey");
+        PresentationLogTag = (string)_obj.GetValue("presentationLogTag");
+        EventProperty = (string)_obj.GetValue("eventProperty");
         ActorId = (string)_obj.GetValue("actorId");
         ActorId_Ref = null;
         TargetId = (string)_obj.GetValue("targetId");
@@ -44,6 +48,10 @@ public sealed partial class NcsEventEntry : Luban.BeanBase
 
     public readonly string EventId;
     public readonly string EventKind;
+    public readonly string PresentationClass;
+    public readonly string PresentationKey;
+    public readonly string PresentationLogTag;
+    public readonly string EventProperty;
     public readonly string ActorId;
     public NcsObjectEntry ActorId_Ref;
     public readonly string TargetId;
@@ -76,6 +84,10 @@ public sealed partial class NcsEventEntry : Luban.BeanBase
         return "{ "
         + "eventId:" + EventId + ","
         + "eventKind:" + EventKind + ","
+        + "presentationClass:" + PresentationClass + ","
+        + "presentationKey:" + PresentationKey + ","
+        + "presentationLogTag:" + PresentationLogTag + ","
+        + "eventProperty:" + EventProperty + ","
         + "actorId:" + ActorId + ","
         + "targetId:" + TargetId + ","
         + "titleText:" + TitleText + ","

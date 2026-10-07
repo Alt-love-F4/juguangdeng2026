@@ -101,7 +101,7 @@ namespace Spotlight.GameFlow
             SetResolution(new ResolutionOption(width, height));
         }
 
-        public void SetResolution(ResolutionOption option)
+        public void SetResolution(ResolutionOption option, bool persist = true)
         {
             if (!ContainsResolution(option))
                 throw new ArgumentException("The resolution is not in ResolutionOptions.", nameof(option));
@@ -109,8 +109,21 @@ namespace Spotlight.GameFlow
             settings.ResolutionWidth = option.Width;
             settings.ResolutionHeight = option.Height;
             ApplyDisplay();
+            if (persist) Save();
+        }
+
+        public void RestoreResolution(int width, int height)
+        {
+            if (!ContainsResolution(new ResolutionOption(width, height)))
+                throw new ArgumentException("The resolution is not in ResolutionOptions.");
+
+            settings.ResolutionWidth = width;
+            settings.ResolutionHeight = height;
+            ApplyDisplay();
             Save();
         }
+
+        public void CommitCurrentDisplaySettings() => Save();
 
         private void ApplyAudio()
         {

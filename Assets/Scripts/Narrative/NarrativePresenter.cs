@@ -47,7 +47,7 @@ namespace Spotlight.Narrative
 
         private IEnumerator PlayEvent()
         {
-            NarrativeSetupParamsDefinition setup = FindSetup(request.Event.setupKey);
+            NarrativeSetupParamsDefinition setup = FindSetup(request.Event.setupKey ?? request.Event.presentationKey);
             yield return Sequence(request.Event, setup);
             Action callback = completion;
             completion = null;
@@ -63,8 +63,11 @@ namespace Spotlight.Narrative
 
         private IEnumerator Sequence(NarrativeEventDefinition definition, NarrativeSetupParamsDefinition setup)
         {
-            NarrativeTemplateDefinition template = configuration?.templates?.Find(item => item != null && item.tplName == (setup?.tplName ?? definition.setupType));
+            string templateName = setup?.tplName ?? definition.setupType;
+            if (!string.IsNullOrWhiteSpace(definition.presentationClass)) templateName = definition.presentationClass;
+            NarrativeTemplateDefinition template = configuration?.templates?.Find(item => item != null && item.tplName == templateName);
             Dictionary<string, string> slots = PresentationSlots.Parse(setup);
+            PresentationSlots.ApplyEventProperties(slots, definition);
             string Get(string key, string fallback = "") => slots.TryGetValue(key, out string value) ? value : fallback;
             skipRequested = false;
             allowSkip = string.Equals(template?.interruptType, "playback", StringComparison.OrdinalIgnoreCase) && (setup?.skipAble ?? template?.defaultSkip ?? false);

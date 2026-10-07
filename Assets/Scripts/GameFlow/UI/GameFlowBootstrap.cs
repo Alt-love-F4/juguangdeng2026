@@ -29,6 +29,11 @@ namespace Spotlight.GameFlow
         private bool paused;
         private float playtime;
         private float previousTimeScale = 1f;
+        private float autoSaveTimer;
+        private float resolutionConfirmTimer;
+        private int previousResolutionWidth;
+        private int previousResolutionHeight;
+        private bool awaitingResolutionConfirmation;
         private NarrativeGameFlowIntegration narrativeIntegration;
         private NarrativeSnapshot pendingNarrativeRestore;
         private bool loadingSavedSession;
@@ -115,8 +120,26 @@ namespace Spotlight.GameFlow
             Keyboard keyboard = Keyboard.current;
             if (keyboard != null && keyboard.escapeKey.wasPressedThisFrame)
                 HandleEscape();
-            if (gameplay && !paused)
-                playtime += Time.unscaledDeltaTime;
+            if (gameplay && !paused && !loadingTransitioning)
+            {
+                float deltaTime = Time.unscaledDeltaTime;
+                playtime += deltaTime;
+                if (!loadingSavedSession)
+                {
+                    autoSaveTimer += deltaTime;
+                    if (config.AutoSaveIntervalSeconds > 0f && autoSaveTimer >= config.AutoSaveIntervalSeconds)
+                    {
+                        autoSaveTimer %= config.AutoSaveIntervalSeconds;
+                        if (!TryAutoSave(out string autoSaveError))
+                            Debug.LogWarning("Autosave failed: " + autoSaveError, this);
+                    }
+                }
+            }
+            if (awaitingResolutionConfirmation)
+            {
+                resolutionConfirmTimer -= Time.unscaledDeltaTime;
+                if (resolutionConfirmTimer <= 0f) RevertResolution();
+            }
             if (narrativeIntegration?.GameplayHUD != null)
                 narrativeIntegration.GameplayHUD.CanInteract = CanUseGameplayControls;
             narrativeIntegration?.Runtime?.Presenter?.SetSuspended(!CanUseGameplayControls());
@@ -133,6 +156,7 @@ namespace Spotlight.GameFlow
         {
             DialoguePlayback.Stop();
             playtime = 0f;
+            autoSaveTimer = 0f;
             pendingNarrativeRestore = null;
             loadingSavedSession = false;
             narrativeIntegration?.ResetSession();
@@ -217,8 +241,9 @@ namespace Spotlight.GameFlow
                     return;
                 }
                 playtime = (float)data.ElapsedPlaytimeSeconds;
-                pendingNarrativeRestore = snapshot;
+                autoSaveTimer = 0f;
                 loadingSavedSession = true;
+                pendingNarrativeRestore = snapshot;
                 gameplay = true;
                 GameSaveParticipantRegistry.PendingRestore = data.Participants;
                 if (!string.IsNullOrWhiteSpace(data.SceneName)
@@ -317,7 +342,29 @@ namespace Spotlight.GameFlow
         public void SetMusicVolume(float value) => settings.SetMusicVolume(value);
         public void SetSfxVolume(float value) => settings.SetSfxVolume(value);
         public void SetWindowMode(FullScreenMode mode) => settings.SetWindowMode(mode);
-        public void SetResolution(ResolutionOption option) => settings.SetResolution(option);
+        public void SetResolution(ResolutionOption option)
+        {
+            if (awaitingResolutionConfirmation) RevertResolution();
+            previousResolutionWidth = settings.Current.ResolutionWidth;
+            previousResolutionHeight = settings.Current.ResolutionHeight;
+            settings.SetResolution(option, false);
+            awaitingResolutionConfirmation = true;
+            resolutionConfirmTimer = 10f;
+            ShowConfirmation("确认分辨率", "保持此分辨率？将在10秒后恢复原设置。", "保持", () =>
+            {
+                awaitingResolutionConfirmation = false;
+                settings.CommitCurrentDisplaySettings();
+            }, "恢复", RevertResolution);
+        }
+
+        private void RevertResolution()
+        {
+            if (!awaitingResolutionConfirmation) return;
+            awaitingResolutionConfirmation = false;
+            settings.RestoreResolution(previousResolutionWidth, previousResolutionHeight);
+            SettingsPanel panel = UIKit.GetPanel<SettingsPanel>();
+            panel?.RefreshDisplaySettings();
+        }
 
         public void QuitGame()
         {
@@ -553,6 +600,11 @@ namespace Spotlight.GameFlow
             data.Participants.AddRange(GameSaveParticipantRegistry.CaptureAll());
 
             NarrativeRuntime runtime = narrativeIntegration?.Runtime;
+            if (!enableNarrative)
+            {
+                error = null;
+                return true;
+            }
             if (runtime == null || !runtime.IsReady)
             {
                 data = null;

@@ -55,8 +55,10 @@ namespace Spotlight.Narrative
                 config.events.Add(new NarrativeEventDefinition
                 {
                     eventId = row.EventId, eventKind = EventKind(row.EventKind), actorId = row.ActorId, targetId = row.TargetId,
-                    titleText = row.TitleText, contentKeys = Strings(row.ContentKey), setupType = row.SetupType,
-                    setupKey = row.SetupKey, onceOnly = row.OnceOnly, logTag = row.LogTag, conditionOwnerId = row.EventId
+                    titleText = row.TitleText, contentKeys = Strings(row.ContentKey), presentationClass = row.PresentationClass,
+                    presentationKey = row.PresentationKey, presentationLogTag = row.PresentationLogTag,
+                    setupType = row.SetupType, setupKey = row.SetupKey, onceOnly = row.OnceOnly, logTag = row.LogTag, conditionOwnerId = row.EventId,
+                    eventProperties = ParseEventProperties(row.EventProperty)
                 });
             int dateIndex = 0;
             foreach (var row in tables.TbNcsEventDate.DataList)
@@ -170,6 +172,18 @@ namespace Spotlight.Narrative
             foreach (string part in (value ?? string.Empty).Split(new[] { '|', ',', ';', '\n' }, StringSplitOptions.RemoveEmptyEntries))
                 if (!string.IsNullOrWhiteSpace(part)) result.Add(part.Trim());
             return result;
+        }
+
+        private static List<NarrativeEventProperty> ParseEventProperties(string value)
+        {
+            var properties = new List<NarrativeEventProperty>();
+            foreach (string entry in (value ?? string.Empty).Split(new[] { '|', ';', '\n' }, StringSplitOptions.RemoveEmptyEntries))
+            {
+                int separator = entry.IndexOf('=');
+                if (separator <= 0) throw new FormatException("Invalid eventProperty entry: " + entry);
+                properties.Add(new NarrativeEventProperty { property = entry.Substring(0, separator).Trim(), value = entry.Substring(separator + 1).Trim() });
+            }
+            return properties;
         }
 
         private static List<float> Weights(string value)

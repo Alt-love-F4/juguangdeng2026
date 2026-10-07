@@ -127,6 +127,10 @@
   <bean name="NcsEventEntry">
     <var name="eventId" type="string"/>
     <var name="eventKind" type="string#set=actor,world"/>
+    <var name="presentationClass" type="string"/>
+    <var name="presentationKey" type="string"/>
+    <var name="presentationLogTag" type="string"/>
+    <var name="eventProperty" type="string"/>
     <var name="actorId" type="string#ref=TbNcsObject?"/>
     <var name="targetId" type="string#ref=TbNcsObject?"/>
     <var name="titleText" type="string#ref=TbText?"/>
