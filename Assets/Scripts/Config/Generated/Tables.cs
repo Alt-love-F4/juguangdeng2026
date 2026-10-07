@@ -31,6 +31,8 @@ public partial class Tables
     public TbNcsTemplate TbNcsTemplate {get; }
     public TbNcsSetupParams TbNcsSetupParams {get; }
     public TbNcsChoice TbNcsChoice {get; }
+    public TbOpeningPresentation TbOpeningPresentation {get; }
+    public TbOpeningLine TbOpeningLine {get; }
 
 
       public Tables(System.Func<string, JArray> loader)
@@ -53,6 +55,8 @@ public partial class Tables
         TbNcsTemplate = new TbNcsTemplate(loader("tbncstemplate"));
         TbNcsSetupParams = new TbNcsSetupParams(loader("tbncssetupparams"));
         TbNcsChoice = new TbNcsChoice(loader("tbncschoice"));
+        TbOpeningPresentation = new TbOpeningPresentation(loader("tbopeningpresentation"));
+        TbOpeningLine = new TbOpeningLine(loader("tbopeningline"));
         ResolveRef();
     }
     
@@ -76,6 +80,8 @@ public partial class Tables
         TbNcsTemplate.ResolveRef(this);
         TbNcsSetupParams.ResolveRef(this);
         TbNcsChoice.ResolveRef(this);
+        TbOpeningPresentation.ResolveRef(this);
+        TbOpeningLine.ResolveRef(this);
     }
 }
 

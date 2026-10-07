@@ -1,0 +1,119 @@
+[
+  {
+    "lineId": "opening_01",
+    "presentationId": "first_day_cafe",
+    "seq": 1,
+    "speaker": "narrator",
+    "textKey": "opening.line.01",
+    "gesture": "none",
+    "autoAdvanceSeconds": 0
+  },
+  {
+    "lineId": "opening_02",
+    "presentationId": "first_day_cafe",
+    "seq": 2,
+    "speaker": "right",
+    "textKey": "opening.line.02",
+    "gesture": "nod",
+    "autoAdvanceSeconds": 0
+  },
+  {
+    "lineId": "opening_03",
+    "presentationId": "first_day_cafe",
+    "seq": 3,
+    "speaker": "left",
+    "textKey": "opening.line.03",
+    "gesture": "none",
+    "autoAdvanceSeconds": 0
+  },
+  {
+    "lineId": "opening_04",
+    "presentationId": "first_day_cafe",
+    "seq": 4,
+    "speaker": "right",
+    "textKey": "opening.line.04",
+    "gesture": "none",
+    "autoAdvanceSeconds": 0
+  },
+  {
+    "lineId": "opening_05",
+    "presentationId": "first_day_cafe",
+    "seq": 5,
+    "speaker": "right",
+    "textKey": "opening.line.05",
+    "gesture": "none",
+    "autoAdvanceSeconds": 0
+  },
+  {
+    "lineId": "opening_06",
+    "presentationId": "first_day_cafe",
+    "seq": 6,
+    "speaker": "left",
+    "textKey": "opening.line.06",
+    "gesture": "none",
+    "autoAdvanceSeconds": 0
+  },
+  {
+    "lineId": "opening_07",
+    "presentationId": "first_day_cafe",
+    "seq": 7,
+    "speaker": "right",
+    "textKey": "opening.line.07",
+    "gesture": "none",
+    "autoAdvanceSeconds": 0
+  },
+  {
+    "lineId": "opening_08",
+    "presentationId": "first_day_cafe",
+    "seq": 8,
+    "speaker": "narrator",
+    "textKey": "opening.line.08",
+    "gesture": "none",
+    "autoAdvanceSeconds": 0
+  },
+  {
+    "lineId": "opening_09",
+    "presentationId": "first_day_cafe",
+    "seq": 9,
+    "speaker": "right",
+    "textKey": "opening.line.09",
+    "gesture": "nod",
+    "autoAdvanceSeconds": 0
+  },
+  {
+    "lineId": "opening_10",
+    "presentationId": "first_day_cafe",
+    "seq": 10,
+    "speaker": "right",
+    "textKey": "opening.line.10",
+    "gesture": "none",
+    "autoAdvanceSeconds": 0
+  },
+  {
+    "lineId": "opening_11",
+    "presentationId": "first_day_cafe",
+    "seq": 11,
+    "speaker": "right",
+    "textKey": "opening.line.11",
+    "gesture": "none",
+    "autoAdvanceSeconds": 0
+  },
+  {
+    "lineId": "opening_12",
+    "presentationId": "first_day_cafe",
+    "seq": 12,
+    "speaker": "left",
+    "textKey": "opening.line.12",
+    "gesture": "none",
+    "autoAdvanceSeconds": 0
+  },
+  {
+    "lineId": "opening_13",
+    "presentationId": "first_day_cafe",
+    "seq": 13,
+    "speaker": "right",
+    "textKey": "opening.line.13",
+    "gesture": "nod",
+    "autoAdvanceSeconds": 0
+  }
+]

@@ -15,5 +15,7 @@ namespace Spotlight.Narrative
         public List<NarrativeEventDefinition> events = new List<NarrativeEventDefinition>();
         public List<NarrativeResultDefinition> results = new List<NarrativeResultDefinition>();
         public List<NarrativeConditionDefinition> conditions = new List<NarrativeConditionDefinition>();
+        public List<NarrativeOpeningPresentationDefinition> openingPresentations = new List<NarrativeOpeningPresentationDefinition>();
+        public List<NarrativeOpeningLineDefinition> openingLines = new List<NarrativeOpeningLineDefinition>();
     }
 }

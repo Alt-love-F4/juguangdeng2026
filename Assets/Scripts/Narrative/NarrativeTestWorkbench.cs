@@ -14,7 +14,7 @@ namespace Spotlight.Narrative
         private readonly List<string> eventIds = new List<string>();
         private Selector barDropdown, eventDropdown;
         private TMP_InputField amountInput;
-        private TMP_Text status;
+        private TMP_Text status, eventDetails;
         private Transform rows;
         private bool initialized;
 
@@ -48,13 +48,16 @@ namespace Spotlight.Narrative
             amountInput = NumberInput(basePanel.transform, "Amount", "数值", new Vector2(.41f, .74f), new Vector2(.54f, .80f));
             Button(basePanel.transform, "Add", "+ 增加", new Vector2(.56f, .74f), new Vector2(.68f, .80f), () => ChangeBar(true));
             Button(basePanel.transform, "Set", "设为", new Vector2(.70f, .74f), new Vector2(.82f, .80f), () => ChangeBar(false));
-            Button(basePanel.transform, "Begin", "开始回合", new Vector2(.04f, .66f), new Vector2(.20f, .72f), () => { runtime.BeginTurn(); SetStatus("回合已开始；条值变化会在提交时判定触发"); });
-            Button(basePanel.transform, "End", "提交回合", new Vector2(.22f, .66f), new Vector2(.38f, .72f), () => runtime.EndTurn());
-            Button(basePanel.transform, "Reset", "重置会话", new Vector2(.40f, .66f), new Vector2(.56f, .72f), () => { runtime.ResetSession(); RebuildData(); SetStatus("会话已重置"); });
+            Button(basePanel.transform, "Begin", "开始回合", new Vector2(.04f, .66f), new Vector2(.19f, .72f), () => { runtime.BeginTurn(); SetStatus("回合已开始；条值变化会在提交时判定触发"); });
+            Button(basePanel.transform, "End", "提交回合", new Vector2(.21f, .66f), new Vector2(.36f, .72f), () => runtime.EndTurn());
+            Button(basePanel.transform, "Trigger", "调值并触发", new Vector2(.38f, .66f), new Vector2(.55f, .72f), ChangeBarAndCommit);
+            Button(basePanel.transform, "Demo", "演示阈值事件", new Vector2(.57f, .66f), new Vector2(.75f, .72f), PlayTriggerDemo);
+            Button(basePanel.transform, "Reset", "重置会话", new Vector2(.77f, .66f), new Vector2(.95f, .72f), () => { runtime.ResetSession(); RebuildData(); SetStatus("会话已重置"); });
             eventDropdown = SelectorControl(basePanel.transform, "Event", new Vector2(.04f, .56f), new Vector2(.68f, .63f));
             Button(basePanel.transform, "Play", "播放配置事件", new Vector2(.70f, .56f), new Vector2(.90f, .63f), PlayEvent);
-            status = Text(basePanel.transform, "Status", "", new Vector2(.04f, .48f), new Vector2(.94f, .54f), 17, TextAlignmentOptions.MidlineLeft);
-            ScrollRect scroll = Scroll(basePanel.transform, out rows, new Vector2(.04f, .06f), new Vector2(.94f, .45f));
+            status = Text(basePanel.transform, "Status", "", new Vector2(.04f, .50f), new Vector2(.94f, .54f), 15, TextAlignmentOptions.MidlineLeft);
+            eventDetails = Text(basePanel.transform, "EventDetails", "", new Vector2(.04f, .43f), new Vector2(.94f, .49f), 18, TextAlignmentOptions.MidlineLeft);
+            ScrollRect scroll = Scroll(basePanel.transform, out rows, new Vector2(.04f, .06f), new Vector2(.94f, .41f));
             scroll.vertical = true;
             RebuildData();
         }
@@ -62,11 +65,12 @@ namespace Spotlight.Narrative
         private void RebuildData()
         {
             if (runtime?.Controller == null) return;
-            barKeys.Clear(); barKeys.AddRange(runtime.Controller.State.Bars.Keys.OrderBy(x => x, StringComparer.Ordinal));
+            barKeys.Clear(); barKeys.AddRange(runtime.Controller.State.Bars.Keys.OrderBy(x => x == "npc_a.trust_b" ? 0 : 1).ThenBy(x => x, StringComparer.Ordinal));
             eventIds.Clear();
             var config = LubanNarrativeLoader.Load();
-            eventIds.AddRange(config.events.Select(x => x.eventId).OrderBy(x => x, StringComparer.Ordinal));
+            eventIds.AddRange(config.events.Select(x => x.eventId).OrderBy(x => x == "EV_TALK_CAFE" ? 0 : 1).ThenBy(x => x, StringComparer.Ordinal));
             Fill(barDropdown, barKeys); Fill(eventDropdown, eventIds);
+            RefreshEventDetails(config);
             RefreshBars();
         }
 
@@ -79,10 +83,44 @@ namespace Spotlight.Narrative
             RefreshBars();
         }
 
+        private void ChangeBarAndCommit()
+        {
+            if (!int.TryParse(amountInput.text, out int amount)) { SetStatus("请输入整数数值"); return; }
+            string key = barDropdown.Selected;
+            runtime.BeginTurn();
+            if (!runtime.AddBar(key, amount)) { SetStatus($"无法修改 {key}；检查范围或当前状态"); return; }
+            runtime.EndTurn();
+            SetStatus($"已提交 {key} +{amount}，正在按触发器判定事件");
+            RefreshBars();
+        }
+
+        private void PlayTriggerDemo()
+        {
+            runtime.ResetSession();
+            runtime.BeginTurn();
+            runtime.SetBar("npc_a.trust_b", 3);
+            runtime.AddBar("npc_a.trust_b", 1);
+            runtime.EndTurn();
+            SetStatus("样例触发：npc_a.trust_b 穿过 4，等待 EV_STANDOFF 演出完成");
+            RefreshBars();
+        }
+
         private void PlayEvent()
         {
             string id = eventDropdown.Selected;
             SetStatus(runtime.QueueEvent(id) ? $"已排队：{id}" : $"事件未排队：{id}（条件不满足、已发生或当前繁忙）");
+        }
+
+        private void RefreshEventDetails(NarrativeConfiguration config = null)
+        {
+            if (eventDetails == null) return;
+            config ??= LubanNarrativeLoader.Load();
+            NarrativeEventDefinition definition = config.events.FirstOrDefault(item => item.eventId == eventDropdown?.Selected);
+            if (definition == null) { eventDetails.text = ""; return; }
+            NarrativeSetupParamsDefinition setup = config.setups.FirstOrDefault(item => item.setupKey == (string.IsNullOrWhiteSpace(definition.setupKey) ? definition.presentationKey : definition.setupKey));
+            string template = setup?.tplName ?? definition.setupType ?? definition.presentationClass ?? "(未指定)";
+            string lines = string.Join(" | ", definition.contentKeys ?? new List<string>());
+            eventDetails.text = $"{definition.eventId}  [{definition.presentationClass ?? template}]  setup={setup?.setupKey ?? definition.presentationKey ?? definition.setupKey ?? "-"}\\n{definition.titleText}  {lines}";
         }
 
         private void RefreshBars()

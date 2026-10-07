@@ -22,6 +22,8 @@ except ImportError:
     sys.exit(1)
 
 DATA_DIR = os.path.join(os.path.dirname(__file__), "Data")
+NARRATIVE_DIR = os.path.join(DATA_DIR, "Narrative")
+SHARED_DIR = os.path.join(DATA_DIR, "Shared")
 LOG_FILE = os.path.join(os.path.dirname(__file__), "merge_log.json")
 
 # Luban 表头行数（前4行是表头）
@@ -30,7 +32,8 @@ HEADER_ROWS = 4
 # Narrative 的所有工作表
 NARRATIVE_SHEETS = [
     "Object", "Bar", "Trigger", "Event", "EventDate",
-    "Result", "Condition", "Template", "SetupParams", "Choice"
+    "Result", "Condition", "Template", "SetupParams", "Choice",
+    "OpeningPresentation", "OpeningLine"
 ]
 
 # Text 的工作表
@@ -156,11 +159,11 @@ def merge_sheets(source_files, target_wb, sheet_name, log_context):
 
 def merge_narrative():
     """合并所有 Narrative_*.xlsx"""
-    pattern = os.path.join(DATA_DIR, "Narrative_*.xlsx")
+    pattern = os.path.join(NARRATIVE_DIR, "Narrative_*.xlsx")
     source_files = sorted(glob.glob(pattern))
 
     # 必须包含 Core
-    core_path = os.path.join(DATA_DIR, "Narrative_Core.xlsx")
+    core_path = os.path.join(NARRATIVE_DIR, "Narrative_Core.xlsx")
     if core_path not in source_files:
         print(f"WARNING: 缺少核心文件 {core_path}")
         print("       将仅合并现有的 Narrative_*.xlsx 文件")
@@ -191,7 +194,7 @@ def merge_narrative():
         print(f"  [{sheet_name}] 合并 {rows} 行")
 
     # 保存
-    output_path = os.path.join(DATA_DIR, "Narrative.xlsx")
+    output_path = os.path.join(NARRATIVE_DIR, "Narrative.xlsx")
     # 备份旧文件
     if os.path.exists(output_path):
         backup_path = output_path.replace(".xlsx", f"_backup_{datetime.now().strftime('%m%d_%H%M')}.xlsx")
@@ -206,7 +209,7 @@ def merge_narrative():
 
 def merge_text():
     """合并所有 Text_*.xlsx"""
-    pattern = os.path.join(DATA_DIR, "Text_*.xlsx")
+    pattern = os.path.join(SHARED_DIR, "Text_*.xlsx")
     source_files = sorted(glob.glob(pattern))
 
     if not source_files:
@@ -228,7 +231,7 @@ def merge_text():
         all_conflicts.extend(conflicts)
         print(f"  [{sheet_name}] 合并 {rows} 行")
 
-    output_path = os.path.join(DATA_DIR, "Text.xlsx")
+    output_path = os.path.join(SHARED_DIR, "Text.xlsx")
     if os.path.exists(output_path):
         backup_path = output_path.replace(".xlsx", f"_backup_{datetime.now().strftime('%m%d_%H%M')}.xlsx")
         shutil.copy2(output_path, backup_path)

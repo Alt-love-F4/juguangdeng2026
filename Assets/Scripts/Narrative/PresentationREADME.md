@@ -1,6 +1,6 @@
 # Runtime Presentation
 
-Presentation configuration comes from standard Luban Excel, generated C# + JSON, and `LubanNarrativeLoader.Load()` returning a plain DTO. No Narrative ScriptableObject or custom XLSX import is used. Preserve Excel's first four rows (`##var`, `##type`, `##group`, `##` descriptions); author data from row 5. All narrative text is in shared `Assets/ConfigTables/Data/Text.xlsx`. Run `Assets/ConfigTables/GenerateAll.bat` for cs-json in `Assets/Scripts/Config/Generated` and `Assets/Settings/Resources/Luban`, then Validate Luban after generated code/import completes.
+Presentation configuration comes from standard Luban Excel, generated C# + JSON, and `LubanNarrativeLoader.Load()` returning a plain DTO. No Narrative ScriptableObject or custom XLSX import is used. Preserve Excel's first four rows (`##var`, `##type`, `##group`, `##` descriptions); author data from row 5. All narrative text is in shared `Assets/ConfigTables/Data/Shared/Text.xlsx`. Run `Assets/ConfigTables/GenerateAll.bat` for cs-json in `Assets/Scripts/Config/Generated` and `Assets/Settings/Resources/Luban`, then Validate Luban after generated code/import completes.
 
 The nine recommended templates are `Tpl_TwoPersonTalk`, `Tpl_MonoTalk`, `Tpl_Narration`, `Tpl_WorldBroadcast`, `Tpl_LetterRead`, `Tpl_Timeskip`, `Tpl_CutScene`, `Tpl_ChoiceOnly`, and `Tpl_BarMilestone`. They use the same runtime stage and ordered atom dispatcher; they are not separate scene or prefab dependencies.
 

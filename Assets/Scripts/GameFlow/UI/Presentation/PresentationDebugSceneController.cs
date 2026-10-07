@@ -161,7 +161,7 @@ namespace Spotlight.GameFlow
                     case Preview.Letter: Open<FirstDayLetterPanel>().Play(() => Complete(version)); break;
                     case Preview.Dialogue: PlayDialogueSample(DialoguePreviewDialogue.Create(), version); break;
                     case Preview.Effects: PlayDialogueSample(PresentationEffectsPreview.Create(), version); break;
-                    case Preview.Introduction: PlayDialogueSample(FirstDayIntroductionDialogue.Create(), version); break;
+                    case Preview.Introduction: PlayDialogueSample(new LubanOpeningDialogueSource().CreateScript(), version); break;
                     case Preview.PreBusiness: Open<PreBusinessPanel>().Play(() => Complete(version)); break;
                     case Preview.CafeOpening: Open<CafeOpeningPanel>().Play(() => Complete(version)); break;
                     case Preview.BusinessEnd: Open<BusinessEndPanel>().Play(() => Complete(version)); break;

@@ -40,9 +40,9 @@ namespace Spotlight.GameFlow.Tests
         }
 
         [Test]
-        public void ProductionAndPreviewAreHardcodedScriptsWithVisualOnlyAssets()
+        public void ProductionOpeningLoadsLubanScriptAndPreviewRemainsSeparate()
         {
-            DialogueScript script = FirstDayIntroductionDialogue.Create();
+            DialogueScript script = new LubanOpeningDialogueSource().CreateScript();
             Assert.That(script.Count, Is.EqualTo(13));
             Assert.That(script.RightCharacter.DisplayName, Is.EqualTo("阿黛尔"));
             Assert.That(script.RightCharacter.Portrait, Is.Not.Null);
@@ -50,11 +50,26 @@ namespace Spotlight.GameFlow.Tests
             Assert.That(script.LeftCharacter.Portrait, Is.Null);
             StringAssert.Contains("我是阿黛尔", script[1].Text);
             Assert.That(script[1].Gesture, Is.EqualTo(DialogueGesture.Nod));
+            Assert.That(script[8].Gesture, Is.EqualTo(DialogueGesture.Nod));
             Assert.That(DialoguePreviewDialogue.Create().Count, Is.EqualTo(7));
+            Assert.That(script.Title, Is.EqualTo("初来乍到 · 沸点咖啡馆"));
+            Assert.That(new LubanOpeningDialogueSource().CreateScript().Count, Is.EqualTo(13));
             Assert.That(typeof(DialogueVisualsAsset).GetFields(BindingFlags.NonPublic | BindingFlags.Instance).Length, Is.EqualTo(3));
             Assert.That((int)DayFlowState.FreeCafeBusiness, Is.EqualTo(3));
             Assert.That((int)DayFlowState.IntroLetter, Is.EqualTo(9));
             Assert.That((int)DayFlowState.FirstDayIntroduction, Is.EqualTo(10));
+        }
+
+        [Test]
+        public void LubanOpeningSourceLoadsAllConfiguredRowsAndVisuals()
+        {
+            DialogueScript script = new LubanOpeningDialogueSource().CreateScript();
+            Assert.That(script.Count, Is.EqualTo(13));
+            Assert.That(script.Title, Is.EqualTo("初来乍到 · 沸点咖啡馆"));
+            Assert.That(script.LeftCharacter.DisplayName, Is.EqualTo("你"));
+            Assert.That(script.RightCharacter.DisplayName, Is.EqualTo("阿黛尔"));
+            Assert.That(script[0].Speaker, Is.EqualTo(DialogueSpeaker.Narrator));
+            Assert.That(script[12].Speaker, Is.EqualTo(DialogueSpeaker.Right));
         }
 
         [UnityTest]

@@ -23,8 +23,8 @@ if errorlevel 1 (
 
 :: ���� 1: �������ڷֱ���Narrative_*.xlsx / Text_*.xlsx��ʱ�źϲ�������ֱ��ʹ������
 set "NEED_MERGE="
-dir /b "%PROJECT_DIR%Data\Narrative_*.xlsx" >nul 2>nul && set "NEED_MERGE=1"
-dir /b "%PROJECT_DIR%Data\Text_*.xlsx" >nul 2>nul && set "NEED_MERGE=1"
+dir /b "%PROJECT_DIR%Data\Narrative\Narrative_*.xlsx" >nul 2>nul && set "NEED_MERGE=1"
+dir /b "%PROJECT_DIR%Data\Shared\Text_*.xlsx" >nul 2>nul && set "NEED_MERGE=1"
 
 if defined NEED_MERGE (
   echo [1/2] �ϲ���ɢ����������...

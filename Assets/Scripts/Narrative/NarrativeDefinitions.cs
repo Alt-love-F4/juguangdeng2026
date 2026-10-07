@@ -136,6 +136,8 @@ namespace Spotlight.Narrative
         public int seq;
     }
     [Serializable] public sealed class NarrativeTextDefinition { public string key, content; }
+    [Serializable] public sealed class NarrativeOpeningPresentationDefinition { public string presentationId, titleKey, leftNameKey, rightNameKey, visualsResource; }
+    [Serializable] public sealed class NarrativeOpeningLineDefinition { public string lineId, presentationId, speaker, textKey, gesture; public int seq; public float autoAdvanceSeconds; }
     [Serializable] public sealed class NarrativeEventDateDefinition
     {
         public string eventId;

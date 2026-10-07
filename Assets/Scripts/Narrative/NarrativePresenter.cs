@@ -47,7 +47,7 @@ namespace Spotlight.Narrative
 
         private IEnumerator PlayEvent()
         {
-            NarrativeSetupParamsDefinition setup = FindSetup(request.Event.setupKey ?? request.Event.presentationKey);
+            NarrativeSetupParamsDefinition setup = FindSetup(string.IsNullOrWhiteSpace(request.Event.setupKey) ? request.Event.presentationKey : request.Event.setupKey);
             yield return Sequence(request.Event, setup);
             Action callback = completion;
             completion = null;
@@ -61,10 +61,22 @@ namespace Spotlight.Narrative
         private NarrativeSetupParamsDefinition FindSetup(string key)
             => configuration?.setups?.Find(item => item != null && item.setupKey == key);
 
+        private static string TemplateForPresentationClass(string presentationClass, string fallback)
+        {
+            switch ((presentationClass ?? string.Empty).Trim().ToLowerInvariant())
+            {
+                case "conversation": return "Tpl_TwoPersonTalk";
+                case "reading": return "Tpl_Narration";
+                case "notice": return "Tpl_WorldBroadcast";
+                case "cutscene": return "Tpl_CutScene";
+                default: return fallback;
+            }
+        }
+
         private IEnumerator Sequence(NarrativeEventDefinition definition, NarrativeSetupParamsDefinition setup)
         {
             string templateName = setup?.tplName ?? definition.setupType;
-            if (!string.IsNullOrWhiteSpace(definition.presentationClass)) templateName = definition.presentationClass;
+            if (!string.IsNullOrWhiteSpace(definition.presentationClass)) templateName = TemplateForPresentationClass(definition.presentationClass, templateName);
             NarrativeTemplateDefinition template = configuration?.templates?.Find(item => item != null && item.tplName == templateName);
             Dictionary<string, string> slots = PresentationSlots.Parse(setup);
             PresentationSlots.ApplyEventProperties(slots, definition);

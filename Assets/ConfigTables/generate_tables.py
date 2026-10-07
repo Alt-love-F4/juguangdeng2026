@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-等效 Luban 生成器：读取 ConfigTables/Data 下的 xlsx，输出 JSON 到 Assets/Settings/Resources/Luban/
+等效 Luban 生成器：读取 ConfigTables/Data/Simulation 下的玩法 xlsx，输出 JSON 到 Assets/Settings/Resources/Luban/
 规则：
   - 表头遵循 Luban 约定：row1=##var, row2=##type, row3=##group, row4=##, 数据从 row5 起
   - 输出文件名：tb{table_name_lower}.json，JSON 数组，字段名与 ##var 一致
@@ -14,7 +14,7 @@ from pathlib import Path
 import openpyxl
 
 ROOT = Path(__file__).resolve().parent
-DATA_DIR = ROOT / "Data"
+DATA_DIR = ROOT / "Data" / "Simulation"
 OUT_DIR = ROOT.parent / "Settings" / "Resources" / "Luban"
 
 def _to_value(type_name: str, value):
@@ -117,7 +117,7 @@ def validate(tables):
 def main():
     xlsx_files = sorted(DATA_DIR.glob("*.xlsx"))
     if not xlsx_files:
-        print("No xlsx found in Data/")
+        print("No xlsx found in Data/Simulation/")
         return 1
     tables = dict(read_table(xlsx) for xlsx in xlsx_files)
     validate(tables)

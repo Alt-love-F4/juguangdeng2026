@@ -35,6 +35,7 @@ namespace Spotlight.Narrative.Editor
             if (!Directory.Exists(dataDirectory)) { Debug.LogError("[NCS] Missing generated data directory: " + dataDirectory); return; }
             foreach (string path in Directory.GetFiles(dataDirectory, "*.json"))
                 AssetDatabase.ImportAsset(path.Replace('\\', '/'), ImportAssetOptions.ForceUpdate);
+            AssetDatabase.Refresh();
             Validate();
         }
 

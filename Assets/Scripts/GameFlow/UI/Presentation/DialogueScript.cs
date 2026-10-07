@@ -7,7 +7,7 @@ namespace Spotlight.GameFlow
     public enum DialogueSpeaker { Narrator, Left, Right }
     public enum DialogueGesture { None, Nod, Shake }
 
-    /// <summary>当前由硬编码剧本实现，后续可由 Luban/NCS 数据源实现；加载由调用方负责。</summary>
+    /// <summary>剧本由调用方提供，可来自 Luban、ScriptableObject 或测试数据源。</summary>
     public interface IDialogueScriptSource
     {
         DialogueScript CreateScript();

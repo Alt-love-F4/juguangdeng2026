@@ -54,7 +54,7 @@ namespace Spotlight.GameFlow
 
         public DialoguePanel CurrentDialogue => introductionPanel;
 
-        /// <summary>未来接入 Luban 时注入数据源；当前默认使用硬编码剧本。</summary>
+        /// <summary>Inject an alternate source for tests or a different opening presentation.</summary>
         public void SetFirstDayIntroductionSource(IDialogueScriptSource source)
             => introductionSource = source;
 
@@ -148,10 +148,8 @@ namespace Spotlight.GameFlow
 
         private DialogueScript ResolveIntroductionScript()
         {
-            // The current story text lives in code. A future Luban adapter can be injected here.
-            return introductionSource == null
-                ? FirstDayIntroductionDialogue.Create()
-                : introductionSource.CreateScript();
+            IDialogueScriptSource source = introductionSource ?? new LubanOpeningDialogueSource();
+            return source.CreateScript();
         }
 
         private void PlayFirstDayIntroduction()

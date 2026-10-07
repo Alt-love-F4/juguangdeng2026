@@ -1,6 +1,6 @@
 # Narrative Luban Editor
 
-Author `Assets/ConfigTables/Data/Narrative.xlsx` using standard Luban sheets. `Assets/游戏叙事控制系统.xlsx` remains design documentation, not an import source. Preserve the first four rows: `##var`, `##type`, `##group`, `##` descriptions; data begins at row 5 with column A reserved for the marker. Text belongs exclusively to shared `Assets/ConfigTables/Data/Text.xlsx`.
+Author `Assets/ConfigTables/Data/Narrative/Narrative.xlsx` using standard Luban sheets. `Assets/游戏叙事控制系统.xlsx` remains design documentation, not an import source. Preserve the first four rows: `##var`, `##type`, `##group`, `##` descriptions; data begins at row 5 with column A reserved for the marker. Text belongs exclusively to shared `Assets/ConfigTables/Data/Shared/Text.xlsx`.
 
 `Spotlight/Narrative/Generate Luban` runs `Assets/ConfigTables/GenerateAll.bat`. A successful exit imports generated JSON and runs business validation; failure reports its exit code. The pipeline outputs cs-json: C# in `Assets/Scripts/Config/Generated`, JSON in `Assets/Settings/Resources/Luban`. The same GenerateAll entry regenerates shared text. Allow generated C# compilation/import to finish before validating schema changes. `Spotlight/Narrative/Validate Luban` calls `LubanNarrativeLoader.Load()` and `NarrativeConfigurationValidator.Validate()`. No custom XLSX reader or ScriptableObject creation/persistence remains.
 

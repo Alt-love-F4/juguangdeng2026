@@ -5,7 +5,7 @@
     <var name="text" type="string"/>
     <var name="comment" type="string"/>
   </bean>
-  <table name="TbText" value="TextEntry" mode="map" index="key" input="Text.xlsx"/>
+  <table name="TbText" value="TextEntry" mode="map" index="key" input="Text@Shared/Text.xlsx"/>
 
   <bean name="RecipeEntry">
     <var name="id" type="string"/>
@@ -17,7 +17,7 @@
     <var name="steps" type="string"/>
     <var name="comment" type="string"/>
   </bean>
-  <table name="TbRecipe" value="RecipeEntry" mode="map" index="id" input="Recipe.xlsx"/>
+  <table name="TbRecipe" value="RecipeEntry" mode="map" index="id" input="Simulation/Recipe.xlsx"/>
 
   <bean name="IngredientEntry">
     <var name="id" type="string"/>
@@ -27,7 +27,7 @@
     <var name="unlock_rep" type="int"/>
     <var name="comment" type="string"/>
   </bean>
-  <table name="TbIngredient" value="IngredientEntry" mode="map" index="id" input="Ingredient.xlsx"/>
+  <table name="TbIngredient" value="IngredientEntry" mode="map" index="id" input="Simulation/Ingredient.xlsx"/>
 
   <bean name="DeviceEntry">
     <var name="id" type="string"/>
@@ -38,14 +38,14 @@
     <var name="unlock_rep" type="int"/>
     <var name="comment" type="string"/>
   </bean>
-  <table name="TbDevice" value="DeviceEntry" mode="map" index="id" input="Device.xlsx"/>
+  <table name="TbDevice" value="DeviceEntry" mode="map" index="id" input="Simulation/Device.xlsx"/>
 
   <bean name="GameParamEntry">
     <var name="key" type="string"/>
     <var name="value" type="string"/>
     <var name="comment" type="string"/>
   </bean>
-  <table name="TbGameParam" value="GameParamEntry" mode="map" index="key" input="GameParam.xlsx"/>
+  <table name="TbGameParam" value="GameParamEntry" mode="map" index="key" input="Simulation/GameParam.xlsx"/>
 
   <bean name="WorldObjectEntry">
     <var name="id" type="string"/>
@@ -61,7 +61,7 @@
     <var name="height" type="float"/>
     <var name="capacity" type="int"/>
   </bean>
-  <table name="TbWorldObject" value="WorldObjectEntry" mode="map" index="id" input="WorldObject.xlsx"/>
+  <table name="TbWorldObject" value="WorldObjectEntry" mode="map" index="id" input="Simulation/WorldObject.xlsx"/>
 
   <bean name="RecipeStepEntry">
     <var name="id" type="string"/>
@@ -72,7 +72,7 @@
     <var name="device_id" type="string"/>
     <var name="amount" type="int"/>
   </bean>
-  <table name="TbRecipeStep" value="RecipeStepEntry" mode="map" index="id" input="RecipeStep.xlsx"/>
+  <table name="TbRecipeStep" value="RecipeStepEntry" mode="map" index="id" input="Simulation/RecipeStep.xlsx"/>
 
   <bean name="NpcEntry">
     <var name="id" type="string"/>
@@ -82,7 +82,7 @@
     <var name="sprite_path" type="string"/>
     <var name="dialogue" type="string"/>
   </bean>
-  <table name="TbNpc" value="NpcEntry" mode="map" index="id" input="Npc.xlsx"/>
+  <table name="TbNpc" value="NpcEntry" mode="map" index="id" input="Simulation/Npc.xlsx"/>
   <bean name="NcsObjectEntry">
     <var name="objId" type="string"/>
     <var name="objType" type="string#set=npc,player,world"/>
@@ -91,7 +91,7 @@
     <var name="descText" type="string#ref=TbText?"/>
     <var name="tags" type="string"/>
   </bean>
-  <table name="TbNcsObject" value="NcsObjectEntry" mode="map" index="objId" input="Object@Narrative.xlsx"/>
+  <table name="TbNcsObject" value="NcsObjectEntry" mode="map" index="objId" input="Object@Narrative/Narrative.xlsx"/>
   <bean name="NcsBarEntry">
     <var name="barId" type="string"/>
     <var name="ownerId" type="string#ref=TbNcsObject"/>
@@ -109,7 +109,7 @@
     <var name="derivedWeights" type="string"/>
     <var name="autoStep" type="int"/>
   </bean>
-  <table name="TbNcsBar" value="NcsBarEntry" mode="list" index="ownerId+barId" input="Bar@Narrative.xlsx"/>
+  <table name="TbNcsBar" value="NcsBarEntry" mode="list" index="ownerId+barId" input="Bar@Narrative/Narrative.xlsx"/>
   <bean name="NcsTriggerEntry">
     <var name="triggerId" type="string"/>
     <var name="barKey" type="string"/>
@@ -123,7 +123,7 @@
     <var name="priority" type="int"/>
     <var name="enabled" type="bool"/>
   </bean>
-  <table name="TbNcsTrigger" value="NcsTriggerEntry" mode="map" index="triggerId" input="Trigger@Narrative.xlsx"/>
+  <table name="TbNcsTrigger" value="NcsTriggerEntry" mode="map" index="triggerId" input="Trigger@Narrative/Narrative.xlsx"/>
   <bean name="NcsEventEntry">
     <var name="eventId" type="string"/>
     <var name="eventKind" type="string#set=actor,world"/>
@@ -140,7 +140,7 @@
     <var name="onceOnly" type="bool"/>
     <var name="logTag" type="string"/>
   </bean>
-  <table name="TbNcsEvent" value="NcsEventEntry" mode="map" index="eventId" input="Event@Narrative.xlsx"/>
+  <table name="TbNcsEvent" value="NcsEventEntry" mode="map" index="eventId" input="Event@Narrative/Narrative.xlsx"/>
   <bean name="NcsEventDateEntry">
     <var name="eventId" type="string#ref=TbNcsEvent"/>
     <var name="day" type="int"/>
@@ -148,7 +148,7 @@
     <var name="repeatRule" type="string#set=once,daily,weekly,yearly"/>
     <var name="priority" type="int"/>
   </bean>
-  <table name="TbNcsEventDate" value="NcsEventDateEntry" mode="list" input="EventDate@Narrative.xlsx"/>
+  <table name="TbNcsEventDate" value="NcsEventDateEntry" mode="list" input="EventDate@Narrative/Narrative.xlsx"/>
   <bean name="NcsResultEntry">
     <var name="resultId" type="string"/>
     <var name="eventId" type="string"/>
@@ -158,7 +158,7 @@
     <var name="value" type="string"/>
     <var name="note" type="string"/>
   </bean>
-  <table name="TbNcsResult" value="NcsResultEntry" mode="map" index="resultId" input="Result@Narrative.xlsx"/>
+  <table name="TbNcsResult" value="NcsResultEntry" mode="map" index="resultId" input="Result@Narrative/Narrative.xlsx"/>
   <bean name="NcsConditionEntry">
     <var name="conditionId" type="string"/>
     <var name="ownerType" type="string#set=event,choice"/>
@@ -170,7 +170,7 @@
     <var name="value" type="string"/>
     <var name="notFlag" type="bool"/>
   </bean>
-  <table name="TbNcsCondition" value="NcsConditionEntry" mode="map" index="conditionId" input="Condition@Narrative.xlsx"/>
+  <table name="TbNcsCondition" value="NcsConditionEntry" mode="map" index="conditionId" input="Condition@Narrative/Narrative.xlsx"/>
   <bean name="NcsTemplateEntry">
     <var name="tplName" type="string"/>
     <var name="descText" type="string"/>
@@ -179,7 +179,7 @@
     <var name="slotDef" type="string"/>
     <var name="defaultSkip" type="bool"/>
   </bean>
-  <table name="TbNcsTemplate" value="NcsTemplateEntry" mode="map" index="tplName" input="Template@Narrative.xlsx"/>
+  <table name="TbNcsTemplate" value="NcsTemplateEntry" mode="map" index="tplName" input="Template@Narrative/Narrative.xlsx"/>
   <bean name="NcsSetupParamsEntry">
     <var name="setupKey" type="string"/>
     <var name="tplName" type="string#ref=TbNcsTemplate"/>
@@ -187,7 +187,7 @@
     <var name="skipAble" type="bool"/>
     <var name="autoAdvance" type="bool"/>
   </bean>
-  <table name="TbNcsSetupParams" value="NcsSetupParamsEntry" mode="map" index="setupKey" input="SetupParams@Narrative.xlsx"/>
+  <table name="TbNcsSetupParams" value="NcsSetupParamsEntry" mode="map" index="setupKey" input="SetupParams@Narrative/Narrative.xlsx"/>
   <bean name="NcsChoiceEntry">
     <var name="choiceId" type="string"/>
     <var name="groupKey" type="string"/>
@@ -195,5 +195,25 @@
     <var name="resultOwnerId" type="string"/>
     <var name="seq" type="int"/>
   </bean>
-  <table name="TbNcsChoice" value="NcsChoiceEntry" mode="map" index="choiceId" input="Choice@Narrative.xlsx"/>
+  <table name="TbNcsChoice" value="NcsChoiceEntry" mode="map" index="choiceId" input="Choice@Narrative/Narrative.xlsx"/>
+
+  <bean name="OpeningPresentationEntry">
+    <var name="presentationId" type="string"/>
+    <var name="titleKey" type="string#ref=TbText"/>
+    <var name="leftNameKey" type="string#ref=TbText"/>
+    <var name="rightNameKey" type="string#ref=TbText"/>
+    <var name="visualsResource" type="string"/>
+  </bean>
+  <table name="TbOpeningPresentation" value="OpeningPresentationEntry" mode="map" index="presentationId" input="OpeningPresentation@Narrative/Narrative.xlsx"/>
+
+  <bean name="OpeningLineEntry">
+    <var name="lineId" type="string"/>
+    <var name="presentationId" type="string#ref=TbOpeningPresentation"/>
+    <var name="seq" type="int"/>
+    <var name="speaker" type="string#set=narrator,left,right"/>
+    <var name="textKey" type="string#ref=TbText"/>
+    <var name="gesture" type="string#set=none,nod,shake"/>
+    <var name="autoAdvanceSeconds" type="float"/>
+  </bean>
+  <table name="TbOpeningLine" value="OpeningLineEntry" mode="list" input="OpeningLine@Narrative/Narrative.xlsx"/>
 </module>

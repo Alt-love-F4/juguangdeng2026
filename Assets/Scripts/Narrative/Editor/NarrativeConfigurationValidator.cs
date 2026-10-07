@@ -97,7 +97,13 @@ namespace Spotlight.Narrative.Editor
                 if (b.derivedWeights.Count != 0 && b.derivedWeights.Count != b.derivedSources.Count) e.Add($"Bar {b.barKey}: derivedWeights count must match derivedSources.");
                 if (HasCycle(b.barKey, bars, new HashSet<string>())) e.Add($"Bar {b.barKey}: derived source cycle detected.");
             }
-            foreach (var x in c.events) if (!string.IsNullOrWhiteSpace(x.setupKey) && !c.setups.Any(v => v.setupKey == x.setupKey)) e.Add($"Event {x.eventId}: unknown setup {x.setupKey}.");
+            foreach (var x in c.events)
+            {
+                string setupKey = string.IsNullOrWhiteSpace(x.setupKey) ? x.presentationKey : x.setupKey;
+                if (!string.IsNullOrWhiteSpace(setupKey) && !c.setups.Any(v => v.setupKey == setupKey)) e.Add($"Event {x.eventId}: unknown setup {setupKey}.");
+                if (string.IsNullOrWhiteSpace(x.setupType) && string.IsNullOrWhiteSpace(x.presentationClass)) e.Add($"Event {x.eventId}: missing presentation type.");
+                if (!string.IsNullOrWhiteSpace(x.presentationClass) && !new[] { "Conversation", "Reading", "Notice", "CutScene" }.Contains(x.presentationClass, StringComparer.OrdinalIgnoreCase)) e.Add($"Event {x.eventId}: unsupported presentationClass {x.presentationClass}.");
+            }
             foreach (var x in c.choices)
             {
                 if (string.IsNullOrWhiteSpace(x.groupKey)) e.Add($"Choice {x.choiceId}: missing groupKey.");

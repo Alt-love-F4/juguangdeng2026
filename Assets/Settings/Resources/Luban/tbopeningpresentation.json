@@ -1,0 +1,9 @@
+[
+  {
+    "presentationId": "first_day_cafe",
+    "titleKey": "opening.title",
+    "leftNameKey": "opening.player.name",
+    "rightNameKey": "opening.adele.name",
+    "visualsResource": "Dialogue/FirstDayIntroductionVisuals"
+  }
+]

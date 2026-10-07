@@ -63,15 +63,15 @@ Assets/ConfigTables/GenerateAll.bat
 ## 单人/兼容模式
 
 如果仍使用单文件模式，保留以下结构：
-- `Assets/ConfigTables/Data/Narrative.xlsx`：Object、Bar、Trigger、Event、EventDate、Result、Condition、Template、SetupParams、Choice 共 10 个工作表。
-- `Assets/ConfigTables/Data/Text.xlsx`：唯一文本源，包含 UI 与叙事文本。
+- `Assets/ConfigTables/Data/Narrative/Narrative.xlsx`：Object、Bar、Trigger、Event、EventDate、Result、Condition、Template、SetupParams、Choice 共 10 个工作表。
+- `Assets/ConfigTables/Data/Shared/Text.xlsx`：唯一文本源，包含 UI 与叙事文本。
 
 **注意**：单人模式与多人模式不要混用。`GenerateAll.bat` 会检测 `Narrative_*.xlsx` 是否存在，存在则优先走多人合并流程。
 
 策划从 [策划使用手册](策划使用手册.md) 开始：包含各表字段、茶话完整样例、新增事件步骤、条件/结果/演出配置与排错。
 
-- `Assets/ConfigTables/Data/Narrative.xlsx`：Object、Bar、Trigger、Event、EventDate、Result、Condition、Template、SetupParams、Choice 共 10 个工作表。
-- `Assets/ConfigTables/Data/Text.xlsx`：唯一文本源，包含 UI 与叙事文本；原 Narrative 的 Text 内容已合并，原 UI 文本完整保留。
+- `Assets/ConfigTables/Data/Narrative/Narrative.xlsx`：Object、Bar、Trigger、Event、EventDate、Result、Condition、Template、SetupParams、Choice 共 10 个工作表。
+- `Assets/ConfigTables/Data/Shared/Text.xlsx`：唯一文本源，包含 UI 与叙事文本；原 Narrative 的 Text 内容已合并，原 UI 文本完整保留。
 - `Assets/ConfigTables/Defines/schema.xml`：唯一 schema。`luban.conf` 的 client target 导出 `cfg.Tables`。
 - `Assets/游戏叙事控制系统.xlsx`：原设计文档，保留不改，不是运行时数据输入。
 

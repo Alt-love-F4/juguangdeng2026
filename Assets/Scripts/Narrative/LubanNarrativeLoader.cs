@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Globalization;
 using System.IO;
+using System.Linq;
 using Newtonsoft.Json.Linq;
 using UnityEngine;
 
@@ -108,6 +109,10 @@ namespace Spotlight.Narrative
                 });
             foreach (var row in tables.TbText.DataList)
                 config.texts.Add(new NarrativeTextDefinition { key = row.Key, content = row.Text });
+            foreach (var row in tables.TbOpeningPresentation.DataList)
+                config.openingPresentations.Add(new NarrativeOpeningPresentationDefinition { presentationId = row.PresentationId, titleKey = row.TitleKey, leftNameKey = row.LeftNameKey, rightNameKey = row.RightNameKey, visualsResource = row.VisualsResource });
+            foreach (var row in tables.TbOpeningLine.DataList)
+                config.openingLines.Add(new NarrativeOpeningLineDefinition { lineId = row.LineId, presentationId = row.PresentationId, seq = row.Seq, speaker = row.Speaker, textKey = row.TextKey, gesture = row.Gesture, autoAdvanceSeconds = row.AutoAdvanceSeconds });
             ValidateLinks(config);
             return config;
         }
@@ -140,8 +145,11 @@ namespace Spotlight.Narrative
                 foreach (string source in item.derivedSources) Require(bars, source, "derived source");
             foreach (var item in config.events)
             {
-                Require(templates, item.setupType, "event template");
-                Require(setups, item.setupKey, "event setup");
+                if (!string.IsNullOrWhiteSpace(item.setupType)) Require(templates, item.setupType, "event template");
+                string setupKey = string.IsNullOrWhiteSpace(item.setupKey) ? item.presentationKey : item.setupKey;
+                if (!string.IsNullOrWhiteSpace(setupKey)) Require(setups, setupKey, "event setup");
+                if (string.IsNullOrWhiteSpace(item.setupType) && string.IsNullOrWhiteSpace(item.presentationClass))
+                    throw new FormatException("Narrative event has no presentation type: " + item.eventId);
             }
             foreach (var item in config.triggers)
             {
@@ -154,6 +162,27 @@ namespace Spotlight.Narrative
             var texts = new HashSet<string>(StringComparer.Ordinal);
             foreach (var item in config.texts) AddId(texts, item.key, "text");
             foreach (var item in config.choices) Require(texts, item.textKey, "choice text");
+            var presentations = new HashSet<string>(StringComparer.Ordinal);
+            foreach (var item in config.openingPresentations)
+            {
+                AddId(presentations, item.presentationId, "opening presentation");
+                Require(texts, item.titleKey, "opening title");
+                Require(texts, item.leftNameKey, "opening left character name");
+                Require(texts, item.rightNameKey, "opening right character name");
+            }
+            var openingLineIds = new HashSet<string>(StringComparer.Ordinal);
+            foreach (var item in config.openingLines)
+            {
+                AddId(openingLineIds, item.lineId, "opening line");
+                Require(presentations, item.presentationId, "opening presentation");
+                Require(texts, item.textKey, "opening line text");
+                if (item.seq < 1 || !float.IsFinite(item.autoAdvanceSeconds) || item.autoAdvanceSeconds < 0)
+                    throw new FormatException("Invalid opening line sequence or auto advance: " + item.lineId);
+                if (item.speaker != "narrator" && item.speaker != "left" && item.speaker != "right") throw Unknown("opening speaker", item.speaker);
+                if (item.gesture != "none" && item.gesture != "nod" && item.gesture != "shake") throw Unknown("opening gesture", item.gesture);
+            }
+            foreach (string presentationId in presentations)
+                if (!config.openingLines.Any(item => item.presentationId == presentationId)) throw new FormatException("Opening presentation has no lines: " + presentationId);
         }
 
         private static void AddId(HashSet<string> ids, string id, string field)

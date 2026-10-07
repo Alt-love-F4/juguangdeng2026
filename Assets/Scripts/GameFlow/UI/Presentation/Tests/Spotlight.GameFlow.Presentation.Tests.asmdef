@@ -4,6 +4,7 @@
     "references": [
         "Spotlight.GameFlow.UI",
         "Spotlight.GameFlow.Saving",
+        "Spotlight.Narrative",
         "YokiFrame",
         "YokiFrame.UIKit.Unity",
         "Unity.TextMeshPro",
