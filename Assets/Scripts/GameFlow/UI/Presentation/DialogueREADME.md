@@ -2,6 +2,13 @@
 
 与日程面板一样，使用独立 `DialoguePanel.cs` / `DialoguePanel.prefab`，通过 UIKit 加载和回收。左右两个 Image 显示真实 Sprite；背景与深色暖金对话框复用项目现有美术风格。角色设计稿当前仍带原始底色，可在预制体或剧本中替换为正式透明立绘，不会改动源图。
 
+## 正式第一天流程
+
+阿黛尔引入已接在：信件 → 第一天日期 → 营业准备 → 咖啡馆入场 → 对话 → 开始经营。
+第一天正式台词由 `FirstDayIntroductionDialogue.cs` 硬编码，F8 示例台词由 `DialoguePreviewDialogue.cs` 硬编码。
+两份视觉资源仅存立绘/背景引用，不存台词。当前不读取 JSON 或配表。
+保留 `IDialogueScriptSource`，未来再接 Luban；详见 `FirstDayIntroductionREADME.md`。
+
 ## 快速测试
 
 1. 打开现有 SampleScene，进入 Play Mode。
@@ -14,7 +21,7 @@
 
 ```csharp
 var lines = new List<DialogueLine>();
-// 可从配表/JSON 构建成千上万句，不预建 UI 或每句动画。
+// 当前台词直接写在 C# 中，不预建 UI 或每句动画。
 lines.Add(new DialogueLine(DialogueSpeaker.Left, "欢迎光临。"));
 lines.Add(new DialogueLine(DialogueSpeaker.Right, "一杯热咖啡。", gesture: DialogueGesture.Nod));
 lines.Add(new DialogueLine(DialogueSpeaker.Narrator, "门铃再次响起。"));
@@ -28,8 +35,8 @@ DialoguePlayback.Play(script,
     onCancelled: () => { /* 玩家取消；不应结算正常完成 */ });
 ```
 
-- `IDialogueScriptSource.CreateScript()`：后续接配表/JSON/异步加载的边界；数据加载完成后在 Unity 主线程调用播放入口，不在 Panel 内做 I/O。
-- `DialogueScriptAsset` 实现该接口：可 `Create > Spotlight > Dialogue Script` 创建，Inspector 配置角色、背景和任意数量台词。示例位于 `Assets/Resources/Dialogue/DialoguePreview.asset`。
+- `IDialogueScriptSource.CreateScript()`：当前由硬编码剧本实现，后续 Luban 数据源可实现同一接口；面板不负责 I/O。
+- `DialogueVisualsAsset` 只配置立绘和背景；正式/演示台词都在 C# 中，不使用资源中的台词列表。既有 `DialogueScriptAsset` 类型保留兼容，但不用于当前剧情播放。
 - `DialoguePlayback.Play(source)` 自动打开面板，正常结束后先关闭，再调用完成回调。
 - `IDialoguePresentation.Play(script, onFinished, onCancelled)` / `Advance()` / `Stop()` 是底层演出接口；直接调用 Panel.Play 的调用方负责正常结束时关闭面板。
 - `DialogueScript` 复制台词列表作为只读快照，不受调用者后续 Clear/Add 影响；拒绝空脚本、null 行。

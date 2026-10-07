@@ -23,6 +23,7 @@ namespace Spotlight.GameFlow
         [SerializeField] private TMP_Text letterBody;
         [SerializeField] private TMP_Text signatureText;
         [SerializeField] private Button signatureButton;
+        [SerializeField] private Button skipButton;
         [SerializeField] private TMP_Text readingHint;
         [SerializeField] private ScrollRect letterScroll;
 
@@ -67,6 +68,7 @@ namespace Spotlight.GameFlow
             CapturePose();
             envelopeButton.onClick.AddListener(OpenEnvelope);
             signatureButton.onClick.AddListener(ConfirmSignature);
+            skipButton.onClick.AddListener(SkipLetter);
         }
 
         protected override void OnOpen(IUIData data = null)
@@ -99,6 +101,8 @@ namespace Spotlight.GameFlow
             paperGroup.alpha = 0f;
             signatureButton.gameObject.SetActive(false);
             signatureButton.interactable = false;
+            skipButton.gameObject.SetActive(true);
+            skipButton.interactable = true;
             signatureText.text = signature;
             readingHint.text = "";
             letterBody.text = letter;
@@ -171,13 +175,37 @@ namespace Spotlight.GameFlow
             {
                 transition = null;
                 if (!IsPlaying || Stage != LetterStage.Closing) return;
-                Stage = LetterStage.Finished;
-                IsPlaying = false;
-                rootGroup.interactable = rootGroup.blocksRaycasts = false;
-                Action callback = finished;
-                finished = null;
-                callback?.Invoke();
+                FinishLetter();
             });
+        }
+
+        /// <summary>跳过整段信件演出，立即调用完成回调并进入第一天流程。</summary>
+        public void SkipLetter()
+        {
+            if (!IsPlaying) return;
+            transition?.Kill(false);
+            transition = null;
+            FinishLetter();
+        }
+
+        // Commit completion before invoking external code: callbacks may close or reuse the panel.
+        private void FinishLetter()
+        {
+            if (!IsPlaying) return;
+            StopHint();
+            typeTimer = 0f;
+            letterScroll.StopMovement();
+            readingHint.text = "";
+            Stage = LetterStage.Finished;
+            IsPlaying = false;
+            rootGroup.alpha = 0f;
+            rootGroup.interactable = rootGroup.blocksRaycasts = false;
+            envelopeButton.interactable = false;
+            signatureButton.interactable = false;
+            skipButton.interactable = false;
+            Action callback = finished;
+            finished = null;
+            callback?.Invoke();
         }
 
         public void Stop()
@@ -193,6 +221,7 @@ namespace Spotlight.GameFlow
             if (rootGroup != null) rootGroup.interactable = rootGroup.blocksRaycasts = false;
             if (envelopeButton != null) envelopeButton.interactable = false;
             if (signatureButton != null) signatureButton.interactable = false;
+            if (skipButton != null) skipButton.interactable = false;
         }
 
         private void StopHint()
@@ -222,7 +251,8 @@ namespace Spotlight.GameFlow
         {
             if (rootGroup == null || envelopeGroup == null || envelope == null || envelopeButton == null
                 || hintGroup == null || paperGroup == null || paper == null || letterBody == null
-                || signatureText == null || signatureButton == null || readingHint == null || letterScroll == null)
+                || signatureText == null || signatureButton == null || skipButton == null
+                || readingHint == null || letterScroll == null)
                 throw new InvalidOperationException("FirstDayLetterPanel has incomplete prefab bindings.");
         }
 
@@ -234,6 +264,7 @@ namespace Spotlight.GameFlow
             Stop();
             if (envelopeButton != null) envelopeButton.onClick.RemoveListener(OpenEnvelope);
             if (signatureButton != null) signatureButton.onClick.RemoveListener(ConfirmSignature);
+            if (skipButton != null) skipButton.onClick.RemoveListener(SkipLetter);
             base.OnBeforeDestroy();
         }
     }

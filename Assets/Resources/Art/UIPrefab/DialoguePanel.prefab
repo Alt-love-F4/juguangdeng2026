@@ -763,6 +763,8 @@ MonoBehaviour:
   background: {fileID: 2066111870689333959}
   leftPortrait: {fileID: 6864866263736779578}
   rightPortrait: {fileID: 7641120867745744052}
+  leftPortraitFrame: {fileID: 7866652900894774482}
+  rightPortraitFrame: {fileID: 2015728249615160228}
   dialogueBox: {fileID: 6290866661532803420}
   titleText: {fileID: 2444070476703555694}
   speakerText: {fileID: 2222245198352479636}

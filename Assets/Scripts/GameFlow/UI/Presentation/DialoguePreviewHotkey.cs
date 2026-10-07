@@ -8,20 +8,13 @@ namespace Spotlight.GameFlow
     {
 #if UNITY_EDITOR || DEVELOPMENT_BUILD
         private GameFlowBootstrap flow;
-        private DialogueScriptAsset sample;
         private void Awake() => flow = GetComponent<GameFlowBootstrap>();
         private void Update()
         {
             Keyboard keyboard = Keyboard.current;
             if (keyboard == null || !keyboard.f8Key.wasPressedThisFrame || DialoguePanel.IsAnyPlaying) return;
             if (flow != null && !flow.CanPreviewDialogue) return;
-            if (sample == null) sample = Resources.Load<DialogueScriptAsset>("Dialogue/DialoguePreview");
-            if (sample == null)
-            {
-                Debug.LogError("[Dialogue] Missing DialoguePreview.asset. Run Tools/Game Flow/Create Missing Dialogue Assets.", this);
-                return;
-            }
-            DialoguePlayback.Play(sample);
+            DialoguePlayback.Play(DialoguePreviewDialogue.Create());
         }
         private void OnDisable() => DialoguePlayback.Stop();
 #endif

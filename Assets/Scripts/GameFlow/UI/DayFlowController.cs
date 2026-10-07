@@ -16,7 +16,8 @@ namespace Spotlight.GameFlow
         HomeNight,
         DayComplete,
         // Append only: retain numeric IDs of existing save phases.
-        IntroLetter
+        IntroLetter,
+        FirstDayIntroduction
     }
 
     /// <summary>
@@ -31,6 +32,9 @@ namespace Spotlight.GameFlow
         private static readonly DateTime FirstDayDate = new DateTime(670, 10, 6);
         private const string PresentationTag = "game-day-presentation";
 
+        private IDialogueScriptSource introductionSource;
+        private DialoguePanel introductionPanel;
+        private bool firstDayIntroductionCompleted;
         private GameFlowBootstrap flow;
         private UIPanel currentPanel;
         private BusinessControlsPanel businessControls;
@@ -47,6 +51,12 @@ namespace Spotlight.GameFlow
         // Phase pages remain blocking while they wait for a player confirmation.
         public bool BlocksGameplayInput => running && State != DayFlowState.FreeCafeBusiness;
         public IDayFlowPresentation CurrentPresentation => currentPanel as IDayFlowPresentation;
+
+        public DialoguePanel CurrentDialogue => introductionPanel;
+
+        /// <summary>未来接入 Luban 时注入数据源；当前默认使用硬编码剧本。</summary>
+        public void SetFirstDayIntroductionSource(IDialogueScriptSource source)
+            => introductionSource = source;
 
         public void Initialize(GameFlowBootstrap owner)
         {
@@ -76,10 +86,11 @@ namespace Spotlight.GameFlow
             gameplayEndpoint = null;
         }
 
-        public void BeginNewSession(bool playLetter = true)
+        public void BeginNewSession(bool playLetter = true, bool playIntroduction = true)
         {
             HideForMainMenu();
             day = 1;
+            firstDayIntroductionCompleted = !playIntroduction;
             previousDate = InitialDate;
             if (!playLetter)
             {
@@ -122,7 +133,58 @@ namespace Spotlight.GameFlow
         private void EnterBusinessTransition()
         {
             SetState(DayFlowState.BusinessTransition);
-            ShowPresentation<CafeOpeningPanel>(StartFreeCafeBusiness);
+            ShowPresentation<CafeOpeningPanel>(EnterFirstDayIntroductionOrBusiness);
+        }
+
+        private void EnterFirstDayIntroductionOrBusiness()
+        {
+            if (day != 1 || firstDayIntroductionCompleted || FindGameplayEndpoint() == null)
+            {
+                StartFreeCafeBusiness();
+                return;
+            }
+            PlayFirstDayIntroduction();
+        }
+
+        private DialogueScript ResolveIntroductionScript()
+        {
+            // The current story text lives in code. A future Luban adapter can be injected here.
+            return introductionSource == null
+                ? FirstDayIntroductionDialogue.Create()
+                : introductionSource.CreateScript();
+        }
+
+        private void PlayFirstDayIntroduction()
+        {
+            ClosePresentation();
+            HideBusinessControls();
+            ShowGameplayPanel();
+            SetState(DayFlowState.FirstDayIntroduction);
+            int version = presentationVersion;
+            try
+            {
+                introductionPanel = DialoguePlayback.Play(ResolveIntroductionScript(), () =>
+                {
+                    if (!running || version != presentationVersion || State != DayFlowState.FirstDayIntroduction) return;
+                    introductionPanel = null;
+                    firstDayIntroductionCompleted = true;
+                    StartFreeCafeBusiness();
+                }, () =>
+                {
+                    if (!running || version != presentationVersion || State != DayFlowState.FirstDayIntroduction) return;
+                    introductionPanel = null;
+                    // Cancel is not completion. The preparation page lets the player retry.
+                    EnterPreBusiness();
+                });
+            }
+            catch (Exception error)
+            {
+                Debug.LogException(error, this);
+                SetState(DayFlowState.PreBusiness);
+                HideGameplayPanel();
+                ShowPresentation<PreBusinessPanel>(EnterBusinessTransition,
+                    panel => panel.ShowIntroductionUnavailable());
+            }
         }
 
         private void StartFreeCafeBusiness()
@@ -200,6 +262,13 @@ namespace Spotlight.GameFlow
         private void ClosePresentation()
         {
             ++presentationVersion;
+            DialoguePanel dialogue = introductionPanel;
+            introductionPanel = null;
+            if (dialogue != null)
+            {
+                dialogue.Stop();
+                UIKit.ClosePanel(dialogue);
+            }
             UIPanel panel = currentPanel;
             currentPanel = null;
             if (panel == null) return;
@@ -265,11 +334,13 @@ namespace Spotlight.GameFlow
             public int day = 1;
             public string previousDate = InitialDate;
             public DayFlowState state = DayFlowState.DateTransition;
+            public bool firstDayIntroductionCompleted;
         }
 
         public string CaptureJson() => JsonUtility.ToJson(new SaveState
         {
-            day = day, previousDate = previousDate, state = State
+            day = day, previousDate = previousDate, state = State,
+            firstDayIntroductionCompleted = firstDayIntroductionCompleted
         });
 
         public void RestoreJson(string json)
@@ -280,6 +351,9 @@ namespace Spotlight.GameFlow
             day = Mathf.Max(1, saved.day);
             previousDate = string.IsNullOrEmpty(saved.previousDate) ? InitialDate : saved.previousDate;
             State = Enum.IsDefined(typeof(DayFlowState), saved.state) ? saved.state : DayFlowState.PreBusiness;
+            // Old saves already in/after business must not replay the introduction.
+            firstDayIntroductionCompleted = saved.firstDayIntroductionCompleted || day > 1
+                || (State >= DayFlowState.FreeCafeBusiness && State <= DayFlowState.DayComplete);
         }
 
         /// <summary>Restore the saved phase, never restart the new-game intro unconditionally.</summary>
@@ -289,6 +363,8 @@ namespace Spotlight.GameFlow
             if (!string.IsNullOrEmpty(json)) RestoreJson(json);
             else
             {
+                // Missing day-flow data belongs to a legacy loaded session, not a new game.
+                firstDayIntroductionCompleted = true;
                 IDayFlowGameplayEndpoint endpoint = FindGameplayEndpoint();
                 State = endpoint != null && endpoint.DayFlowBusinessActive
                     ? DayFlowState.FreeCafeBusiness : DayFlowState.PreBusiness;
@@ -298,6 +374,7 @@ namespace Spotlight.GameFlow
             if (State != DayFlowState.FreeCafeBusiness) HideGameplayPanel();
             switch (State)
             {
+                case DayFlowState.FirstDayIntroduction: PlayFirstDayIntroduction(); break;
                 case DayFlowState.IntroLetter: ShowPresentation<FirstDayLetterPanel>(BeginNewDayFlow); break;
                 case DayFlowState.DateTransition: BeginNewDayFlow(); break;
                 case DayFlowState.PreBusiness: EnterPreBusiness(); break;

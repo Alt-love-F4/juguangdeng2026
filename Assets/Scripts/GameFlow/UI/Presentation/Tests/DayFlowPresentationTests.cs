@@ -131,7 +131,7 @@ namespace Spotlight.GameFlow.Tests
             var endpoint = endpointObject.AddComponent<DayFlowTestEndpoint>();
             // An already-open endpoint must not bypass the date presentation.
             endpoint.active = true;
-            flow.BeginNewSession(playLetter: false);
+            flow.BeginNewSession(playLetter: false, playIntroduction: false);
             yield return null;
             Assert.That(flow.State, Is.EqualTo(DayFlowState.DateTransition));
             Assert.That(flow.BlocksGameplayInput, Is.True);
@@ -184,7 +184,7 @@ namespace Spotlight.GameFlow.Tests
             Assert.That(flow.CurrentPresentation, Is.TypeOf<PreNightPanel>());
             StringAssert.Contains("10月10日", flow.CurrentDate);
             Assert.That(GameSaveParticipantRegistry.TakePending(DayFlowController.SaveId), Is.Null);
-            flow.BeginNewSession(playLetter: false);
+            flow.BeginNewSession(playLetter: false, playIntroduction: false);
             Assert.That(flow.State, Is.EqualTo(DayFlowState.DateTransition));
             StringAssert.Contains("10月6日", flow.CurrentDate);
             flow.HideForMainMenu();

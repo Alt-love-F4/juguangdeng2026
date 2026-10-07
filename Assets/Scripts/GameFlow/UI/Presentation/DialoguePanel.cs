@@ -16,6 +16,8 @@ namespace Spotlight.GameFlow
         [SerializeField] private RawImage background;
         [SerializeField] private Image leftPortrait;
         [SerializeField] private Image rightPortrait;
+        [SerializeField] private Image leftPortraitFrame;
+        [SerializeField] private Image rightPortraitFrame;
         [SerializeField] private RectTransform dialogueBox;
         [SerializeField] private TMP_Text titleText;
         [SerializeField] private TMP_Text speakerText;
@@ -147,8 +149,8 @@ namespace Spotlight.GameFlow
             DialogueLine line = script[index];
             if (line.ReplaceLeft) left = line.LeftCharacter;
             if (line.ReplaceRight) right = line.RightCharacter;
-            ApplyPortrait(leftPortrait, left);
-            ApplyPortrait(rightPortrait, right);
+            ApplyPortrait(leftPortrait, leftPortraitFrame, left);
+            ApplyPortrait(rightPortrait, rightPortraitFrame, right);
             string name = line.Speaker == DialogueSpeaker.Left ? left?.DisplayName
                 : line.Speaker == DialogueSpeaker.Right ? right?.DisplayName : "旁白";
             speakerText.text = string.IsNullOrEmpty(line.SpeakerNameOverride) ? name ?? "旁白" : line.SpeakerNameOverride;
@@ -161,10 +163,11 @@ namespace Spotlight.GameFlow
             if (ready) AnimateFocus();
         }
 
-        private static void ApplyPortrait(Image image, DialogueCharacter character)
+        private static void ApplyPortrait(Image image, Image frame, DialogueCharacter character)
         {
             image.sprite = character == null ? null : character.Portrait;
             image.enabled = image.sprite != null;
+            if (frame != null) frame.enabled = image.enabled;
         }
 
         private void ShowPage(int number)

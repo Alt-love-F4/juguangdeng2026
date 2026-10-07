@@ -52,7 +52,7 @@ namespace Spotlight.GameFlow.Tests
             Assert.That(prefab.transform.Find("LeftPortrait").GetComponent<Image>().sprite, Is.Not.Null);
             Assert.That(prefab.transform.Find("RightPortrait").GetComponent<Image>().sprite, Is.Not.Null);
             Assert.That(prefab.transform.Find("DialogueBox/Dialogue").GetComponent<TMP_Text>().font, Is.Not.Null);
-            DialogueScript sample = Resources.Load<DialogueScriptAsset>("Dialogue/DialoguePreview").CreateScript();
+            DialogueScript sample = DialoguePreviewDialogue.Create();
             Assert.That(sample.Count, Is.GreaterThan(2));
             Assert.That(sample.LeftCharacter.Portrait, Is.Not.Null);
             Assert.That(sample.RightCharacter.Portrait, Is.Not.Null);
@@ -158,6 +158,7 @@ namespace Spotlight.GameFlow.Tests
             yield return Until(() => panel.LineIndex == 1);
             Assert.That(panel.transform.Find("DialogueBox/Speaker").GetComponent<TMP_Text>().text, Is.EqualTo("新访客"));
             Assert.That(panel.transform.Find("LeftPortrait").GetComponent<Image>().enabled, Is.False);
+            Assert.That(panel.transform.Find("LeftPortraitFrame").GetComponent<Image>().enabled, Is.False);
         }
 
         [UnityTest]
@@ -176,7 +177,7 @@ namespace Spotlight.GameFlow.Tests
         public IEnumerator PreviewCapturesTheActualPrefab()
         {
             DialoguePanel panel = Open();
-            panel.Play(Resources.Load<DialogueScriptAsset>("Dialogue/DialoguePreview").CreateScript());
+            panel.Play(DialoguePreviewDialogue.Create());
             yield return Ready(panel);
             yield return new WaitForSecondsRealtime(.25f);
             panel.Advance();

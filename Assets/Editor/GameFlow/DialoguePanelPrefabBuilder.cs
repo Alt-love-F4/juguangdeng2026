@@ -23,7 +23,7 @@ namespace Spotlight.GameFlow.Editor
             {
                 if (!EditorApplication.isPlayingOrWillChangePlaymode
                     && (AssetDatabase.LoadAssetAtPath<GameObject>(PrefabPath) == null
-                        || AssetDatabase.LoadAssetAtPath<DialogueScriptAsset>(SamplePath) == null))
+                        || AssetDatabase.LoadAssetAtPath<DialogueVisualsAsset>(SamplePath) == null))
                     CreateMissing();
             };
         }
@@ -90,6 +90,8 @@ namespace Spotlight.GameFlow.Editor
                 Set(serialized, "background", background);
                 Set(serialized, "leftPortrait", leftImage);
                 Set(serialized, "rightPortrait", rightImage);
+                Set(serialized, "leftPortraitFrame", root.transform.Find("LeftPortraitFrame").GetComponent<Image>());
+                Set(serialized, "rightPortraitFrame", root.transform.Find("RightPortraitFrame").GetComponent<Image>());
                 Set(serialized, "dialogueBox", box.rectTransform);
                 Set(serialized, "titleText", title);
                 Set(serialized, "speakerText", speaker);
@@ -117,45 +119,18 @@ namespace Spotlight.GameFlow.Editor
 
         private static void CreateSample(Sprite left, Sprite right, Texture2D background)
         {
-            if (AssetDatabase.LoadAssetAtPath<DialogueScriptAsset>(SamplePath) != null) return;
+            if (AssetDatabase.LoadMainAssetAtPath(SamplePath) != null) return;
             if (!AssetDatabase.IsValidFolder("Assets/Resources/Dialogue"))
                 AssetDatabase.CreateFolder("Assets/Resources", "Dialogue");
-            var sample = ScriptableObject.CreateInstance<DialogueScriptAsset>();
-            var serialized = new SerializedObject(sample);
-            serialized.FindProperty("title").stringValue = "咖啡馆 · 不期而至的访客";
+            var visuals = ScriptableObject.CreateInstance<DialogueVisualsAsset>();
+            var serialized = new SerializedObject(visuals);
+            Set(serialized, "leftPortrait", left);
+            Set(serialized, "rightPortrait", right);
             Set(serialized, "background", background);
-            CharacterData(serialized.FindProperty("leftCharacter"), "咖啡馆店主", left);
-            CharacterData(serialized.FindProperty("rightCharacter"), "印刷工", right);
-            string[] text =
-            {
-                "傍晚的最后一缕光穿过玻璃。门铃响起，一位带着油墨气味的客人走进咖啡馆。",
-                "欢迎光临。今天想喝点什么？",
-                "一杯热咖啡，不加糖。还有……我想在这里等一个人。",
-                "当然。靠窗的位置还空着，你可以慢慢等。",
-                "谢谢。有些话，只有在这样安静的地方才说得出口。",
-                "城里的印刷机已经停了三天，街上却比往常更加热闹。有人在寻找一封没有署名的信，也有人只想找个地方坐下来。\n\n我原本以为今天只是普通的一天，直到他把那张折了四次的纸放在桌上。纸边沾着油墨，字迹却非常清楚。那不是一张订单，而是一份名单。\n\n我没有问名单上是谁。他也没有解释。门外又传来一阵脚步声，我们同时看向窗边。\n\n有些故事，从一杯咖啡开始，却不会在咖啡凉下来时结束。",
-                "那就先喝一口吧。无论外面发生什么，这杯咖啡都还是热的。"
-            };
-            DialogueSpeaker[] speakers = { DialogueSpeaker.Narrator, DialogueSpeaker.Left, DialogueSpeaker.Right,
-                DialogueSpeaker.Left, DialogueSpeaker.Right, DialogueSpeaker.Narrator, DialogueSpeaker.Left };
-            SerializedProperty lines = serialized.FindProperty("lines");
-            lines.arraySize = text.Length;
-            for (int i = 0; i < text.Length; i++)
-            {
-                SerializedProperty line = lines.GetArrayElementAtIndex(i);
-                line.FindPropertyRelative("speaker").enumValueIndex = (int)speakers[i];
-                line.FindPropertyRelative("text").stringValue = text[i];
-                line.FindPropertyRelative("gesture").enumValueIndex = i == 3 ? (int)DialogueGesture.Nod : (int)DialogueGesture.None;
-            }
             serialized.ApplyModifiedPropertiesWithoutUndo();
-            AssetDatabase.CreateAsset(sample, SamplePath);
+            AssetDatabase.CreateAsset(visuals, SamplePath);
         }
 
-        private static void CharacterData(SerializedProperty property, string name, Sprite sprite)
-        {
-            property.FindPropertyRelative("displayName").stringValue = name;
-            property.FindPropertyRelative("portrait").objectReferenceValue = sprite;
-        }
         private static void Set(SerializedObject serialized, string name, Object value)
             => serialized.FindProperty(name).objectReferenceValue = value;
         private static GameObject Child(Transform parent, string name, params Type[] components)

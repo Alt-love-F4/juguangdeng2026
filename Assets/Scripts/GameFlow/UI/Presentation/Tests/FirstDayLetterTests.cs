@@ -46,7 +46,7 @@ namespace Spotlight.GameFlow.Tests
             Assert.That(prefab.GetComponentInChildren<ScrollRect>(true), Is.Not.Null);
             foreach (string name in new[] { "rootGroup", "envelopeGroup", "envelope", "envelopeButton",
                 "hintGroup", "paperGroup", "paper", "letterBody", "signatureText", "signatureButton",
-                "readingHint", "letterScroll" })
+                "skipButton", "readingHint", "letterScroll" })
                 Assert.That(Field(name).GetValue(panel), Is.Not.Null, name);
             StringAssert.Contains("咖啡馆", (string)Field("letter").GetValue(panel));
         }
@@ -63,6 +63,107 @@ namespace Spotlight.GameFlow.Tests
             Assert.That(panel.VisibleCharacterCount, Is.Zero);
             Assert.That(completions, Is.Zero);
             Assert.That(panel.GetComponent<Canvas>().overrideSorting, Is.True);
+        }
+
+        [UnityTest]
+        public IEnumerator SkipImmediatelyFinishesOnceFromAnyReadingStage()
+        {
+            var panel = Open();
+            int completions = 0;
+            panel.Play(() => completions++);
+            Button skipButton = (Button)Field("skipButton").GetValue(panel);
+            Assert.That(skipButton.isActiveAndEnabled, Is.True);
+            Assert.That(skipButton.interactable, Is.True);
+            skipButton.onClick.Invoke();
+            panel.SkipLetter(); // duplicate input must not invoke the callback twice
+            Assert.That(panel.IsPlaying, Is.False);
+            Assert.That(panel.Stage, Is.EqualTo(FirstDayLetterPanel.LetterStage.Finished));
+            Assert.That(completions, Is.EqualTo(1));
+
+            Field("characterInterval").SetValue(panel, .5f);
+            panel.Play(() => completions++);
+            panel.OpenEnvelope();
+            yield return WaitFor(() => panel.Stage == FirstDayLetterPanel.LetterStage.Reading);
+            panel.SkipLetter();
+            Assert.That(panel.Stage, Is.EqualTo(FirstDayLetterPanel.LetterStage.Finished));
+            Assert.That(completions, Is.EqualTo(2));
+        }
+
+        [UnityTest]
+        public IEnumerator SkipDuringOpeningStopsMotionAndCannotResumeOrCompleteAgain()
+        {
+            var panel = Open();
+            int completions = 0;
+            panel.Play(() => completions++);
+            panel.OpenEnvelope();
+            Assert.That(panel.Stage, Is.EqualTo(FirstDayLetterPanel.LetterStage.Opening));
+            panel.SkipLetter();
+            RectTransform paper = (RectTransform)Field("paper").GetValue(panel);
+            Vector2 skippedPosition = paper.anchoredPosition;
+            yield return new WaitForSecondsRealtime(.3f);
+            Assert.That(paper.anchoredPosition, Is.EqualTo(skippedPosition));
+            Assert.That(panel.Stage, Is.EqualTo(FirstDayLetterPanel.LetterStage.Finished));
+            Assert.That(panel.IsPlaying, Is.False);
+            Assert.That(completions, Is.EqualTo(1));
+            Assert.That(((CanvasGroup)Field("rootGroup").GetValue(panel)).blocksRaycasts, Is.False);
+            Assert.That(((Button)Field("skipButton").GetValue(panel)).interactable, Is.False);
+        }
+
+        [UnityTest]
+        public IEnumerator SkipDuringSignatureWaitAndFadeFinishesOnlyOnce()
+        {
+            var panel = Open();
+            int completions = 0;
+            panel.Play(() => completions++);
+            panel.OpenEnvelope();
+            yield return WaitFor(() => panel.Stage == FirstDayLetterPanel.LetterStage.AwaitingSignature);
+            panel.SkipLetter();
+            panel.ConfirmSignature();
+            Assert.That(completions, Is.EqualTo(1));
+
+            panel.Play(() => completions++);
+            panel.OpenEnvelope();
+            yield return WaitFor(() => panel.Stage == FirstDayLetterPanel.LetterStage.AwaitingSignature);
+            panel.ConfirmSignature();
+            Assert.That(panel.Stage, Is.EqualTo(FirstDayLetterPanel.LetterStage.Closing));
+            panel.SkipLetter();
+            yield return new WaitForSecondsRealtime(.3f);
+            Assert.That(completions, Is.EqualTo(2));
+            Assert.That(panel.Stage, Is.EqualTo(FirstDayLetterPanel.LetterStage.Finished));
+        }
+
+        [UnityTest]
+        public IEnumerator SkipWorksWhenPausedAndReplayReenablesButton()
+        {
+            var panel = Open();
+            int completions = 0;
+            panel.Play(() => completions++);
+            Time.timeScale = 0;
+            panel.SkipLetter();
+            Assert.That(completions, Is.EqualTo(1));
+            panel.Play(() => completions++);
+            var skip = (Button)Field("skipButton").GetValue(panel);
+            Assert.That(skip.interactable, Is.True);
+            Assert.That(panel.Stage, Is.EqualTo(FirstDayLetterPanel.LetterStage.Envelope));
+            skip.onClick.Invoke();
+            yield return null;
+            Assert.That(completions, Is.EqualTo(2));
+        }
+
+        [UnityTest]
+        public IEnumerator SkipAfterStopOrCloseNeverInvokesNormalCompletion()
+        {
+            var panel = Open();
+            int completions = 0;
+            panel.Play(() => completions++);
+            panel.Stop();
+            panel.SkipLetter();
+            Assert.That(completions, Is.Zero);
+            panel.Play(() => completions++);
+            UIKit.ClosePanel(panel);
+            panel.SkipLetter();
+            yield return null;
+            Assert.That(completions, Is.Zero);
         }
 
         [UnityTest]
@@ -192,6 +293,26 @@ namespace Spotlight.GameFlow.Tests
             Assert.That(flow.CurrentPresentation, Is.TypeOf<DateChangePanel>());
             flow.BeginNewDayFlow();
             Assert.That(flow.CurrentPresentation, Is.TypeOf<DateChangePanel>());
+            flow.HideForMainMenu();
+        }
+
+        [UnityTest]
+        public IEnumerator NewSessionSkipLetterImmediatelyEntersFirstDayDateFlow()
+        {
+            controllerObject = new GameObject("FirstDayLetterSkipFlowTest");
+            var flow = controllerObject.AddComponent<DayFlowController>();
+            flow.Initialize(null);
+            flow.BeginNewSession();
+            var panel = flow.CurrentPresentation as FirstDayLetterPanel;
+            Assert.That(panel, Is.Not.Null);
+            ((Button)Field("skipButton").GetValue(panel)).onClick.Invoke();
+            panel.SkipLetter();
+            yield return WaitFor(() => flow.State == DayFlowState.DateTransition);
+            Assert.That(flow.CurrentPresentation, Is.TypeOf<DateChangePanel>());
+            Assert.That(flow.CurrentDate, Is.EqualTo("王国纪元 670年10月6日"));
+            Assert.That(flow.CurrentDialogue, Is.Null);
+            StringAssert.Contains("\"firstDayIntroductionCompleted\":false", flow.CaptureJson());
+            Assert.That(flow.BlocksGameplayInput, Is.True);
             flow.HideForMainMenu();
         }
 

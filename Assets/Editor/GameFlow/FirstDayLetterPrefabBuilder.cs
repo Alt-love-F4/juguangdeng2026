@@ -117,6 +117,12 @@ namespace Spotlight.GameFlow.Editor
                 TopLeft(readingHint.rectTransform, new Vector2(76, -850), new Vector2(1108, 30));
                 readingHint.alignment = TextAlignmentOptions.MidlineRight;
 
+                Button skipButton = ClickTarget(root.transform, "SkipButton");
+                BottomRight(skipButton.GetComponent<RectTransform>(), new Vector2(-50, 30), new Vector2(150, 50));
+                skipButton.GetComponent<Image>().color = new Color(.12f, .08f, .05f, .82f);
+                TMP_Text skipLabel = Text(skipButton.transform, "Label", "跳过", 22f, Gold);
+                Stretch(skipLabel.rectTransform);
+
                 SerializedObject serialized = new SerializedObject(panel);
                 Set(serialized, "rootGroup", rootGroup);
                 Set(serialized, "envelopeGroup", envelopeGroup);
@@ -128,6 +134,7 @@ namespace Spotlight.GameFlow.Editor
                 Set(serialized, "letterBody", body);
                 Set(serialized, "signatureText", signature);
                 Set(serialized, "signatureButton", signatureButton);
+                Set(serialized, "skipButton", skipButton);
                 Set(serialized, "readingHint", readingHint);
                 Set(serialized, "letterScroll", scroll);
                 serialized.ApplyModifiedPropertiesWithoutUndo();
@@ -183,6 +190,8 @@ namespace Spotlight.GameFlow.Editor
         { rect.anchorMin = rect.anchorMax = rect.pivot = new Vector2(.5f, .5f); rect.anchoredPosition = position; rect.sizeDelta = size; }
         private static void TopLeft(RectTransform rect, Vector2 position, Vector2 size)
         { rect.anchorMin = rect.anchorMax = rect.pivot = new Vector2(0, 1); rect.anchoredPosition = position; rect.sizeDelta = size; }
+        private static void BottomRight(RectTransform rect, Vector2 position, Vector2 size)
+        { rect.anchorMin = rect.anchorMax = rect.pivot = new Vector2(1, 0); rect.anchoredPosition = position; rect.sizeDelta = size; }
         private static void Stretch(RectTransform rect)
         { rect.anchorMin = Vector2.zero; rect.anchorMax = Vector2.one; rect.offsetMin = rect.offsetMax = Vector2.zero; }
         private static void Set(SerializedObject serialized, string name, Object value)
