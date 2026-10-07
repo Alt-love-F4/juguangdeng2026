@@ -14,7 +14,7 @@ namespace Spotlight.GameFlow
         public const string ScenePath = "Assets/Scenes/PresentationDebugScene.unity";
         public const string DefaultHint = "按键/按钮可随时切换演出。Esc 关闭 · Backspace 重播 · H 收起说明 · F9 切换暂停时间。";
 
-        public enum Preview { DateChange, Letter, Dialogue, PreBusiness, CafeOpening, BusinessEnd, CityMap, PreNight, HomeNight, DayEnd, Introduction, Effects }
+        public enum Preview { DateChange, Letter, Dialogue, PreBusiness, CafeOpening, BusinessEnd, CityMap, PreNight, HomeNight, DayEnd, Introduction, Effects, Reading, Notice, CutScene }
 
         [Header("Scene bindings")]
         [SerializeField] private TMP_Text statusText;
@@ -63,6 +63,9 @@ namespace Spotlight.GameFlow
             if (keyboard.qKey.wasPressedThisFrame) PlayDateChange();
             else if (keyboard.wKey.wasPressedThisFrame) PlayLetter();
             else if (keyboard.eKey.wasPressedThisFrame) PlayDialogue();
+            else if (keyboard.vKey.wasPressedThisFrame) PlayReading();
+            else if (keyboard.bKey.wasPressedThisFrame) PlayNotice();
+            else if (keyboard.nKey.wasPressedThisFrame) PlayCutScene();
             else if (keyboard.rKey.wasPressedThisFrame) PlayPreBusiness();
             else if (keyboard.tKey.wasPressedThisFrame) PlayCafeOpening();
             else if (keyboard.yKey.wasPressedThisFrame) PlayBusinessEnd();
@@ -87,6 +90,9 @@ namespace Spotlight.GameFlow
         public void PlayDateChange() => PlayPreview(Preview.DateChange);
         public void PlayLetter() => PlayPreview(Preview.Letter);
         public void PlayDialogue() => PlayPreview(Preview.Dialogue);
+        public void PlayReading() => PlayPreview(Preview.Reading);
+        public void PlayNotice() => PlayPreview(Preview.Notice);
+        public void PlayCutScene() => PlayPreview(Preview.CutScene);
         public void PlayPreBusiness() => PlayPreview(Preview.PreBusiness);
         public void PlayCafeOpening() => PlayPreview(Preview.CafeOpening);
         public void PlayBusinessEnd() => PlayPreview(Preview.BusinessEnd);
@@ -160,6 +166,9 @@ namespace Spotlight.GameFlow
                         break;
                     case Preview.Letter: Open<FirstDayLetterPanel>().Play(() => Complete(version)); break;
                     case Preview.Dialogue: PlayDialogueSample(DialoguePreviewDialogue.Create(), version); break;
+                    case Preview.Reading: PlayReadingSample(version); break;
+                    case Preview.Notice: PlayNoticeSample(version); break;
+                    case Preview.CutScene: PlayCutSceneSample(version); break;
                     case Preview.Effects: PlayDialogueSample(PresentationEffectsPreview.Create(), version); break;
                     case Preview.Introduction: PlayDialogueSample(new LubanOpeningDialogueSource().CreateScript(), version); break;
                     case Preview.PreBusiness: Open<PreBusinessPanel>().Play(() => Complete(version)); break;
@@ -174,6 +183,9 @@ namespace Spotlight.GameFlow
                 SetStatus("播放中", preview.ToString());
                 SetHint(preview == Preview.Letter ? "点击信封 → 阅读 → 点击署名。面板右下角可跳过；Esc 取消。"
                     : preview == Preview.Dialogue || preview == Preview.Introduction || preview == Preview.Effects ? "空格/回车/面板继续按钮：先补全文字，再换页/换句。Esc 取消。"
+                    : preview == Preview.Reading ? "V：阅读；空格/回车补全文字 → 下一行/页，← 或上一页返回；Esc 取消。"
+                    : preview == Preview.Notice ? "B：通知演出；空格/回车或确认按钮关闭；Esc 取消。"
+                    : preview == Preview.CutScene ? "N：视频过场；当前无视频时显示占位；长按 Enter 跳过。Esc 取消。"
                     : preview == Preview.DateChange ? "日期动效自动完成；F9 可验证 timeScale=0 时仍正常播放。"
                     : "点击实际 Panel 的继续按钮，或空格/回车确认。Esc 取消；其他快捷键切换演出。");
             }
@@ -191,6 +203,49 @@ namespace Spotlight.GameFlow
             T panel = UIKit.OpenPanel<T>(UILevel.Pop, tag: DebugTag, cachePolicy: PanelCachePolicy.Transient);
             currentPanel = panel;
             return panel;
+        }
+
+        private void PlayReadingSample(int version)
+        {
+            Texture background = Resources.Load<Texture2D>("Art/Gameplay/DayFlow/phase_business_transition");
+            var pages = new[]
+            {
+                new ReadingPage("清晨的街道", new[]
+                {
+                    new ReadingLine("雨后的石板路还留着水光。", "旁白"),
+                    new ReadingLine("咖啡馆的门牌在风里轻轻摇晃。", "旁白")
+                }, background, pageId: "debug-reading-01", seq: 1),
+                new ReadingPage("一张便笺", new[]
+                {
+                    new ReadingLine("请在午后之前，去旧城区找我。", "阿黛尔",
+                        portrait: Resources.Load<DialogueVisualsAsset>("Dialogue/DialoguePreview")?.LeftPortrait, kind: ReadingLineKind.Dialogue),
+                    new ReadingLine("落款只有一个熟悉的字母。", "旁白")
+                }, pageId: "debug-reading-02", seq: 2)
+            };
+            Open<ReadingPanel>().Play(new ReadingScript(pages, "阅读演出测试"), () => Complete(version), () => Cancelled(version));
+        }
+
+        private void PlayNoticeSample(int version)
+        {
+            Texture background = Resources.Load<Texture2D>("Art/Gameplay/DayFlow/phase_business_transition");
+            var notice = new NoticeData("旧城区的风向发生了变化。今天的情报交换窗口已开启。",
+                title: "事件通知", time: "王国纪元 670年10月7日 · 08:30", image: background,
+                hasProgress: true, progressValue: .62f, progressLabel: "街区舆情：62%（仅展示提示）", noticeId: "debug-notice-01");
+            Open<NoticePanel>().Play(notice, () => Complete(version), () => Cancelled(version));
+        }
+
+        private void PlayCutSceneSample(int version)
+        {
+            var cutScene = new CutSceneData(title: "过场演出测试", videoPath: string.Empty, previewOnly: true);
+            Open<CutScenePanel>().Play(cutScene, () => Complete(version), () => Cancelled(version));
+        }
+
+        private void Cancelled(int version)
+        {
+            if (version != requestVersion) return;
+            currentPanel = null;
+            SetStatus("已取消", lastPreview.ToString());
+            SetHint(DefaultHint);
         }
 
         private void PlayDialogueSample(DialogueScript script, int version)
@@ -239,7 +294,7 @@ namespace Spotlight.GameFlow
                 if (letter.Stage == FirstDayLetterPanel.LetterStage.Envelope) letter.OpenEnvelope();
                 else if (letter.Stage == FirstDayLetterPanel.LetterStage.AwaitingSignature) letter.ConfirmSignature();
             }
-            // DialoguePanel owns its keyboard input to preserve reveal/advance and same-frame deduplication.
+            // Dialogue/Reading/Notice panels own their keyboard input to preserve reveal/advance and same-frame deduplication.
         }
 
         private void LateUpdate()

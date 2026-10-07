@@ -15,6 +15,9 @@ Assets/Scenes/PresentationDebugScene.unity
 - `Q`：新一天 / `DateChangePanel`
 - `W`：第一天来信 / `FirstDayLetterPanel`
 - `E`：双角色对话 / `DialoguePanel`
+- `V`：阅读 / `ReadingPanel`，空格或 Enter 补全文字再翻行/页，← 返回
+- `B`：事件通知 / `NoticePanel`，空格或 Enter 确认关闭
+- `N`：视频过场 / `CutScenePanel`，长按 Enter 跳过（默认 1.2 秒，调试占位不代表真实视频）
 - `R`：经营前阶段 / `PreBusinessPanel`
 - `T`：开店演出 / `CafeOpeningPanel`
 - `Y`：经营结束 / `BusinessEndPanel`
