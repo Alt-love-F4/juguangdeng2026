@@ -17,7 +17,7 @@ namespace Spotlight.Narrative.Tests
                 ["tbncsobject"] = JArray.Parse("[{ 'objId':'world', 'objType':'world', 'nameText':'title', 'iconPath':'icon', 'descText':'title', 'tags':'test' }, { 'objId':'npc', 'objType':'npc', 'nameText':'title', 'iconPath':'', 'descText':'', 'tags':'' }]"),
                 ["tbncsbar"] = new JArray(Bar("world", "calendar"), Bar("npc", "calendar")),
                 ["tbncstrigger"] = JArray.Parse("[{ 'triggerId':'trigger', 'barKey':'world.calendar', 'threshold':3, 'direction':'both', 'crossType':'hold', 'onceType':'repeat', 'reachCount':'all', 'resetOnExit':true, 'eventId':'event', 'priority':9, 'enabled':true }]"),
-                ["tbncsevent"] = JArray.Parse("[{ 'eventId':'event', 'eventKind':'world', 'actorId':'world', 'targetId':'npc', 'titleText':'title', 'contentKey':'title| second ', 'setupType':'template', 'setupKey':'setup', 'onceOnly':true, 'logTag':'log' }]"),
+                ["tbncsevent"] = JArray.Parse("[{ 'eventId':'event', 'eventKind':'world', 'presentationClass':'Conversation', 'presentationKey':'talk', 'presentationLogTag':'presentation', 'eventProperty':'bg=night|fade=0.5', 'actorId':'world', 'targetId':'npc', 'titleText':'title', 'contentKey':'title| second ', 'setupType':'template', 'setupKey':'setup', 'onceOnly':true, 'logTag':'log' }]"),
                 ["tbncseventdate"] = JArray.Parse("[{ 'eventId':'event', 'day':0, 'timeSlot':'night', 'repeatRule':'weekly', 'priority':8 }, { 'eventId':'event', 'day':5, 'timeSlot':'morning', 'repeatRule':'once', 'priority':2 }]"),
                 ["tbncsresult"] = JArray.Parse("[{ 'resultId':'result', 'eventId':'event', 'seq':2, 'resultType':'REL_ADD', 'target':'rel:npc>world', 'value':'4', 'note':'note' }]"),
                 ["tbncscondition"] = JArray.Parse("[{ 'conditionId':'condition', 'ownerType':'', 'ownerId':'event', 'groupIndex':2, 'condType':'BAR_GTE', 'target':'bar:world.calendar', 'op':'>=', 'value':'3', 'notFlag':true }]"),
@@ -65,6 +65,11 @@ namespace Spotlight.Narrative.Tests
             Assert.That(ev.actorId, Is.EqualTo("world")); Assert.That(ev.targetId, Is.EqualTo("npc"));
             Assert.That(ev.titleText, Is.EqualTo("title")); Assert.That(ev.contentKeys, Is.EqualTo(new[] { "title", "second" }));
             Assert.That(ev.setupType, Is.EqualTo("template")); Assert.That(ev.setupKey, Is.EqualTo("setup"));
+Assert.That(ev.presentationClass, Is.EqualTo("Conversation")); Assert.That(ev.presentationKey, Is.EqualTo("talk"));
+Assert.That(ev.presentationLogTag, Is.EqualTo("presentation"));
+Assert.That(ev.eventProperties, Has.Count.EqualTo(2)); Assert.That(ev.eventProperties[0].property, Is.EqualTo("bg")); Assert.That(ev.eventProperties[0].value, Is.EqualTo("night"));
+var slots = PresentationSlots.Parse(config.setups[0]); PresentationSlots.ApplyEventProperties(slots, ev);
+Assert.That(slots["bg"], Is.EqualTo("night")); Assert.That(slots["fade"], Is.EqualTo("0.5"));
             Assert.That(ev.onceOnly, Is.True); Assert.That(ev.logTag, Is.EqualTo("log"));
             Assert.That(ev.conditionOwnerId, Is.EqualTo("event"));
             Assert.That(config.eventDates[0].rowIndex, Is.LessThan(config.eventDates[1].rowIndex));

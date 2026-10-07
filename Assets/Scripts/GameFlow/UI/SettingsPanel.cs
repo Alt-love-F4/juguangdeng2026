@@ -59,7 +59,7 @@ namespace Spotlight.GameFlow
             RefreshDisplaySettings();
         }
 
-        private void RefreshDisplaySettings()
+        public void RefreshDisplaySettings()
         {
             if (Flow == null) return;
             if (windowModeText != null) windowModeText.text = Flow.WindowModeLabel;

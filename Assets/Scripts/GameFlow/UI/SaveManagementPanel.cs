@@ -37,7 +37,9 @@ namespace Spotlight.GameFlow
         public void RefreshSlots()
         {
             if (descriptionText != null)
-                descriptionText.text = fromGameplay ? "游戏中可保存、覆盖和删除" : "自动存档位只允许读取";
+                descriptionText.text = fromGameplay
+                    ? "自动存档位仅可读取；手动存档位可读取、保存或删除"
+                    : "从标题界面进入时仅可读取存档";
             var saveSlots = Flow != null ? Flow.ListSaveSlots() : null;
             for (int i = 0; i < slots.Length; i++)
                 if (slots[i] != null && saveSlots != null && i < saveSlots.Count)

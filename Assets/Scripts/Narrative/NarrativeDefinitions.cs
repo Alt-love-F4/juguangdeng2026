@@ -79,8 +79,13 @@ namespace Spotlight.Narrative
         public string targetId;
         public string titleText;
         public List<string> contentKeys = new List<string>();
+        public string presentationClass;
+        public string presentationKey;
+        public string presentationLogTag;
+        public string eventProperty;
         public string setupType;
         public string setupKey;
+        public List<NarrativeEventProperty> eventProperties = new List<NarrativeEventProperty>();
         public bool onceOnly;
         public string logTag;
         public string conditionOwnerId;
@@ -124,6 +129,7 @@ namespace Spotlight.Narrative
         public List<NarrativeAtomParameter> parameters = new List<NarrativeAtomParameter>();
     }
     [Serializable] public sealed class NarrativeAtomParameter { public string slot, value; }
+    [Serializable] public sealed class NarrativeEventProperty { public string property, value; }
     [Serializable] public sealed class NarrativeChoiceDefinition
     {
         public string choiceId, groupKey, textKey, resultOwnerId;
