@@ -21,6 +21,8 @@ Unity 菜单 `Tools > Game Flow > Open Presentation Debug Scene`，进入 Play M
 | O | 住房夜晚 / HomeNightPanel |
 | P | 一天结束 / DayEndPanel |
 | F | 首次角色登场对话 |
+| G | 独立特效试验台 |
+| 1~0 | 黑影入场、受惊、轻/重震屏、白闪、黑场、换位、镜头推近/复位、淡出 |
 | Space / Enter | 继续；对话先补全文字，再翻页 / 下一句 |
 | Esc | 停止当前演出 |
 | Backspace | 重播上一次 |
@@ -55,5 +57,10 @@ Builder 在 `Assets/Editor/GameFlow/PresentationDebugSceneBuilder.cs`，不要�
 ## 回归
 
 Unity Test Runner PlayMode：`Spotlight.GameFlow.Tests.PresentationDebugSceneTests`。
-覆盖实际共享场景层级、按钮绑定、11 类预览、QWER 键盘输入、日期结束 / 回调隔离、暂停 / 重播 / 退出清理。
-截图测试输出 `output/presentation-debug-room.png` 与 `output/presentation-debug-dialogue.png`。
+覆盖实际共享场景层级、按钮绑定、12 类预览、QWER 共用启动接口、日期结束 / 回调隔离、暂停 / 重播 / 退出清理。
+截图测试同步输出 `output/presentation-debug-room.png` 与 `output/presentation-debug-dialogue.png`。
+
+## 特效试验台
+
+G 与 1~0 共用实际 DialoguePanel；没有对话时数字键自动打开试验台。角色 ID、效果 ID 和镜头/黑场入口留给后续 NCS 适配，本轮不连接 NCS。
+资源参数集中在 PresentationEffectLibrary.asset，详见 `Docs/PresentationEffects.md`。

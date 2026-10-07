@@ -52,3 +52,13 @@ DialoguePlayback.Play(script,
 打开 `Assets/Resources/Art/UIPrefab/DialoguePanel.prefab` 可调整布局、两张角色精灵和文本样式；组件参数可调整进退场、角色聚焦和打字速度（0 立即显示）。缺失资产可通过 `Tools > Game Flow > Create Missing Dialogue Assets` 补建，已有资产不覆盖。
 
 PlayMode 测试：`Spotlight.GameFlow.Presentation.Tests` 中的 `DialoguePresentationTests`，覆盖大量台词快照、双立绘绑定、揭字/推进分离、同帧去重、分页、暂停时间播放、取消、复播重置、自动推进和关闭清理。
+
+
+## 独立特效表现层（不接 NCS）
+
+新特效统一在共享 `PresentationDebugScene` 使用 G 和 1~0 验证；不要再创建特效 Scene。
+`DialoguePanel` 实现 `IPresentationEffectPlayer`；`PlayEffect`、`PlayCameraCue`、`PlayFade`、`SwapPortraits` 是未来 NCS 适配边界，当前不访问 NCS 运行时或表。
+`DialogueLine` 增加与既有 NCS 同名的 `accentFxKey` / `accentTargetKey`，`DialogueCharacter.CharacterKey` 用于非说话人目标解析。
+参数预设集中在 `PresentationEffectLibrary.asset`，详见项目 `Docs/PresentationEffects.md`。
+所有动画通道由 Panel 拥有与清理。入场完成前不显示正文；替换先淡出旧角色再入场新角色；文字/按钮不参与角色镜像。
+运行时可视内容放在 `EffectStage`，输入遮罩仍覆盖全屏；测试/业务查询立绘应使用 `LeftPortrait` / `RightPortrait`，不要假定旧的 Transform 路径。

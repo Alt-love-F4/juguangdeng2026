@@ -1,4 +1,5 @@
 using System;
+using System.Collections;
 using TMPro;
 using UnityEngine;
 using UnityEngine.InputSystem;
@@ -13,7 +14,7 @@ namespace Spotlight.GameFlow
         public const string ScenePath = "Assets/Scenes/PresentationDebugScene.unity";
         public const string DefaultHint = "按键/按钮可随时切换演出。Esc 关闭 · Backspace 重播 · H 收起说明 · F9 切换暂停时间。";
 
-        public enum Preview { DateChange, Letter, Dialogue, PreBusiness, CafeOpening, BusinessEnd, CityMap, PreNight, HomeNight, DayEnd, Introduction }
+        public enum Preview { DateChange, Letter, Dialogue, PreBusiness, CafeOpening, BusinessEnd, CityMap, PreNight, HomeNight, DayEnd, Introduction, Effects }
 
         [Header("Scene bindings")]
         [SerializeField] private TMP_Text statusText;
@@ -26,6 +27,8 @@ namespace Spotlight.GameFlow
         [SerializeField] private bool enableKeyboardShortcuts = true;
 
         private UIPanel currentPanel;
+        private Coroutine pendingEffectCue;
+        private bool alternateBackdrop;
         private int requestVersion;
         private int startedFrame;
         private float originalTimeScale;
@@ -68,6 +71,17 @@ namespace Spotlight.GameFlow
             else if (keyboard.oKey.wasPressedThisFrame) PlayHomeNight();
             else if (keyboard.pKey.wasPressedThisFrame) PlayDayEnd();
             else if (keyboard.fKey.wasPressedThisFrame) PlayIntroduction();
+            else if (keyboard.gKey.wasPressedThisFrame) PlayEffects();
+            else if (keyboard.digit1Key.wasPressedThisFrame) PreviewEnter();
+            else if (keyboard.digit2Key.wasPressedThisFrame) PreviewStartle();
+            else if (keyboard.digit3Key.wasPressedThisFrame) PreviewShakeLight();
+            else if (keyboard.digit4Key.wasPressedThisFrame) PreviewShakeHeavy();
+            else if (keyboard.digit5Key.wasPressedThisFrame) PreviewFlash();
+            else if (keyboard.digit6Key.wasPressedThisFrame) PreviewBlack();
+            else if (keyboard.digit7Key.wasPressedThisFrame) PreviewSwap();
+            else if (keyboard.digit8Key.wasPressedThisFrame) PreviewZoom();
+            else if (keyboard.digit9Key.wasPressedThisFrame) PreviewResetCamera();
+            else if (keyboard.digit0Key.wasPressedThisFrame) PreviewExit();
         }
 
         public void PlayDateChange() => PlayPreview(Preview.DateChange);
@@ -81,6 +95,51 @@ namespace Spotlight.GameFlow
         public void PlayHomeNight() => PlayPreview(Preview.HomeNight);
         public void PlayDayEnd() => PlayPreview(Preview.DayEnd);
         public void PlayIntroduction() => PlayPreview(Preview.Introduction);
+        public void PlayEffects() => PlayPreview(Preview.Effects);
+        public void PreviewEnter() => PreviewEffectCue(1);
+        public void PreviewStartle() => PreviewEffectCue(2);
+        public void PreviewShakeLight() => PreviewEffectCue(3);
+        public void PreviewShakeHeavy() => PreviewEffectCue(4);
+        public void PreviewFlash() => PreviewEffectCue(5);
+        public void PreviewBlack() => PreviewEffectCue(6);
+        public void PreviewSwap() => PreviewEffectCue(7);
+        public void PreviewZoom() => PreviewEffectCue(8);
+        public void PreviewResetCamera() => PreviewEffectCue(9);
+        public void PreviewExit() => PreviewEffectCue(0);
+
+        private void PreviewEffectCue(int cue)
+        {
+            if (!(currentPanel is DialoguePanel panel) || !panel.IsPlaying) PlayEffects();
+            if (pendingEffectCue != null) StopCoroutine(pendingEffectCue);
+            pendingEffectCue = StartCoroutine(EffectCueWhenReady(cue, requestVersion));
+        }
+        private IEnumerator EffectCueWhenReady(int cue, int version)
+        {
+            yield return null;
+            DialoguePanel panel = currentPanel as DialoguePanel;
+            while (version == requestVersion && panel != null && panel.IsPlaying && !panel.IsReady) yield return null;
+            pendingEffectCue = null;
+            if (version != requestVersion || panel == null || !panel.IsPlaying) yield break;
+            switch (cue)
+            {
+                case 1: panel.PlayEffect(PresentationEffectIds.EnterShadowWalk, "left", true); break;
+                case 2: panel.PlayEffect(PresentationEffectIds.AccentShakeStartle, "right"); break;
+                case 3: panel.PlayEffect(PresentationEffectIds.ShakeLight); break;
+                case 4: panel.PlayEffect(PresentationEffectIds.ShakeHeavy); break;
+                case 5: panel.PlayEffect(PresentationEffectIds.FlashWhite); break;
+                case 6:
+                    panel.PlayFade("transition", .6f, () =>
+                    {
+                        alternateBackdrop = !alternateBackdrop;
+                        panel.SetBackgroundTint(alternateBackdrop ? new Color(.45f, .5f, .65f) : Color.white);
+                    }); break;
+                case 7: panel.SwapPortraits(); break;
+                case 8: panel.PlayCameraCue(1.08f, 0f, .35f, new Vector2(35f, -8f)); break;
+                case 9: panel.PlayCameraCue(); break;
+                case 0: panel.PlayEffect(PresentationEffectIds.PortraitFadeOut, "right", true); break;
+            }
+            SetHint("特效 " + cue + " 已触发。1~0 独立测试；角色/画面/镜头可并行，重震屏优先于轻震屏。");
+        }
 
         /// <summary>Add new hard-coded presentation samples here, not in a new scene or gameplay bootstrap.</summary>
         public void PlayPreview(Preview preview)
@@ -101,6 +160,7 @@ namespace Spotlight.GameFlow
                         break;
                     case Preview.Letter: Open<FirstDayLetterPanel>().Play(() => Complete(version)); break;
                     case Preview.Dialogue: PlayDialogueSample(DialoguePreviewDialogue.Create(), version); break;
+                    case Preview.Effects: PlayDialogueSample(PresentationEffectsPreview.Create(), version); break;
                     case Preview.Introduction: PlayDialogueSample(FirstDayIntroductionDialogue.Create(), version); break;
                     case Preview.PreBusiness: Open<PreBusinessPanel>().Play(() => Complete(version)); break;
                     case Preview.CafeOpening: Open<CafeOpeningPanel>().Play(() => Complete(version)); break;
@@ -113,7 +173,7 @@ namespace Spotlight.GameFlow
                 }
                 SetStatus("播放中", preview.ToString());
                 SetHint(preview == Preview.Letter ? "点击信封 → 阅读 → 点击署名。面板右下角可跳过；Esc 取消。"
-                    : preview == Preview.Dialogue || preview == Preview.Introduction ? "空格/回车/面板继续按钮：先补全文字，再换页/换句。Esc 取消。"
+                    : preview == Preview.Dialogue || preview == Preview.Introduction || preview == Preview.Effects ? "空格/回车/面板继续按钮：先补全文字，再换页/换句。Esc 取消。"
                     : preview == Preview.DateChange ? "日期动效自动完成；F9 可验证 timeScale=0 时仍正常播放。"
                     : "点击实际 Panel 的继续按钮，或空格/回车确认。Esc 取消；其他快捷键切换演出。");
             }
@@ -156,7 +216,9 @@ namespace Spotlight.GameFlow
         public void StopCurrent()
         {
             requestVersion++;
+            if (pendingEffectCue != null) { StopCoroutine(pendingEffectCue); pendingEffectCue = null; }
             currentPanel = null;
+            alternateBackdrop = false;
             // Only close the panels belonging to this scene, never a game-owned dialogue or another tag.
             UIKit.ClosePanelsByTag(DebugTag);
             SetStatus("待机", "无");

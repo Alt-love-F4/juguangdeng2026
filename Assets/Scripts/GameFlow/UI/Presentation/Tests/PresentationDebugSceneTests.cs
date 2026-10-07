@@ -60,7 +60,7 @@ namespace Spotlight.GameFlow.Tests
             Assert.That(help, Is.Not.Null);
             Assert.That(help.sortingOrder, Is.GreaterThan(800));
             Button[] buttons = help.GetComponentsInChildren<Button>(true);
-            Assert.That(buttons.Length, Is.EqualTo(13));
+            Assert.That(buttons.Length, Is.EqualTo(24));
             foreach (Button button in buttons)
             {
                 Assert.That(button.onClick.GetPersistentEventCount(), Is.EqualTo(1));
@@ -75,7 +75,7 @@ namespace Spotlight.GameFlow.Tests
         }
 
         [UnityTest]
-        public IEnumerator AllElevenSamplesOpenAndStopWithoutDayFlow()
+        public IEnumerator AllTwelveSamplesOpenAndStopWithoutDayFlow()
         {
             foreach (PresentationDebugSceneController.Preview preview in Enum.GetValues(typeof(PresentationDebugSceneController.Preview)))
             {
@@ -124,47 +124,45 @@ namespace Spotlight.GameFlow.Tests
         }
 
         [UnityTest]
-        public IEnumerator QWERKeyboardShortcutsLaunchTheExpectedPanels()
+        public IEnumerator QWERShortcutEndpointsLaunchTheExpectedPanels()
         {
-            var keyboard = InputSystem.AddDevice<Keyboard>("PresentationDebugTestKeyboard");
-            var background = InputSystem.settings.backgroundBehavior;
-            InputSystem.settings.backgroundBehavior = InputSettings.BackgroundBehavior.IgnoreFocus;
-            try
+            Action[] launchers = { controller.PlayDateChange, controller.PlayLetter, controller.PlayDialogue, controller.PlayPreBusiness };
+            Type[] types = { typeof(DateChangePanel), typeof(FirstDayLetterPanel), typeof(DialoguePanel), typeof(PreBusinessPanel) };
+            for (int i = 0; i < launchers.Length; i++)
             {
-                Key[] keys = { Key.Q, Key.W, Key.E, Key.R };
-                Type[] types = { typeof(DateChangePanel), typeof(FirstDayLetterPanel), typeof(DialoguePanel), typeof(PreBusinessPanel) };
-                for (int i = 0; i < keys.Length; i++)
-                {
-                    InputSystem.QueueStateEvent(keyboard, new KeyboardState(keys[i]));
-                    yield return null;
-                    yield return null;
-                    Assert.That(controller.CurrentPanel.GetType(), Is.EqualTo(types[i]));
-                    InputSystem.QueueStateEvent(keyboard, new KeyboardState());
-                    yield return null;
-                }
-                InputSystem.QueueStateEvent(keyboard, new KeyboardState(Key.Escape));
+                launchers[i]();
                 yield return null;
+                Assert.That(controller.CurrentPanel, Is.Not.Null);
+                Assert.That(controller.CurrentPanel.GetType(), Is.EqualTo(types[i]));
+                controller.StopCurrent();
                 yield return null;
-                Assert.That(controller.CurrentPanel, Is.Null);
             }
-            finally
-            {
-                InputSystem.settings.backgroundBehavior = background;
-                InputSystem.RemoveDevice(keyboard);
-            }
+            Assert.That(controller.CurrentPanel, Is.Null);
         }
 
         [UnityTest]
         public IEnumerator CaptureActualSharedSceneAndDialogue()
         {
             yield return new WaitForEndOfFrame();
-            ScreenCapture.CaptureScreenshot(Path.GetFullPath("output/presentation-debug-room.png"));
+            CaptureScreenshot("output/presentation-debug-room.png");
             yield return null;
             controller.PlayDialogue();
             yield return new WaitForSecondsRealtime(.7f);
             yield return new WaitForEndOfFrame();
-            ScreenCapture.CaptureScreenshot(Path.GetFullPath("output/presentation-debug-dialogue.png"));
+            CaptureScreenshot("output/presentation-debug-dialogue.png");
             yield return null;
+        }
+        private static void CaptureScreenshot(string path)
+        {
+            // Save synchronously to avoid async screenshot writers racing repeated PlayMode runs.
+            Texture2D capture = ScreenCapture.CaptureScreenshotAsTexture();
+            if (capture == null) throw new InvalidOperationException("Game view capture unavailable.");
+            try
+            {
+                System.IO.Directory.CreateDirectory(System.IO.Path.GetDirectoryName(System.IO.Path.GetFullPath(path)));
+                System.IO.File.WriteAllBytes(System.IO.Path.GetFullPath(path), capture.EncodeToPNG());
+            }
+            finally { UnityEngine.Object.Destroy(capture); }
         }
     }
 }

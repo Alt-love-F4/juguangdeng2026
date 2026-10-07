@@ -49,8 +49,8 @@ namespace Spotlight.GameFlow.Tests
             Assert.That(prefab, Is.Not.Null);
             Assert.That(prefab.GetComponent<DialoguePanel>(), Is.InstanceOf<IDialoguePresentation>());
             Assert.That(prefab.GetComponent<Canvas>().sortingOrder, Is.GreaterThan(700));
-            Assert.That(prefab.transform.Find("LeftPortrait").GetComponent<Image>().sprite, Is.Not.Null);
-            Assert.That(prefab.transform.Find("RightPortrait").GetComponent<Image>().sprite, Is.Not.Null);
+            Assert.That(FindImage(prefab, "LeftPortrait").sprite, Is.Not.Null);
+            Assert.That(FindImage(prefab, "RightPortrait").sprite, Is.Not.Null);
             Assert.That(prefab.transform.Find("DialogueBox/Dialogue").GetComponent<TMP_Text>().font, Is.Not.Null);
             DialogueScript sample = DialoguePreviewDialogue.Create();
             Assert.That(sample.Count, Is.GreaterThan(2));
@@ -78,7 +78,7 @@ namespace Spotlight.GameFlow.Tests
             yield return null;
             panel.Advance();
             Assert.That(panel.LineIndex, Is.EqualTo(1));
-            Assert.That(panel.transform.Find("DialogueBox/Speaker").GetComponent<TMP_Text>().text, Is.EqualTo("印刷工"));
+            Assert.That(FindText(panel.gameObject, "Speaker").text, Is.EqualTo("印刷工"));
         }
 
         [UnityTest]
@@ -121,12 +121,12 @@ namespace Spotlight.GameFlow.Tests
             int oldCompletions = 0;
             panel.Play(new DialogueScript(new[] { new DialogueLine(DialogueSpeaker.Left, "", replaceRight: true) }), () => oldCompletions++);
             yield return Ready(panel);
-            Assert.That(panel.transform.Find("RightPortrait").GetComponent<Image>().enabled, Is.False);
+            Assert.That(panel.RightPortrait.enabled, Is.False);
             panel.Advance();
             panel.Stop();
             panel.Play(new DialogueScript(new[] { new DialogueLine(DialogueSpeaker.Right, "新演出") }));
             yield return Ready(panel);
-            Assert.That(panel.transform.Find("RightPortrait").GetComponent<Image>().enabled, Is.True);
+            Assert.That(panel.RightPortrait.enabled, Is.True);
             Assert.That(panel.LineIndex, Is.Zero);
             Assert.That(oldCompletions, Is.Zero);
         }
@@ -156,9 +156,9 @@ namespace Spotlight.GameFlow.Tests
                     leftCharacter: new DialogueCharacter("新访客", null))
             }));
             yield return Until(() => panel.LineIndex == 1);
-            Assert.That(panel.transform.Find("DialogueBox/Speaker").GetComponent<TMP_Text>().text, Is.EqualTo("新访客"));
-            Assert.That(panel.transform.Find("LeftPortrait").GetComponent<Image>().enabled, Is.False);
-            Assert.That(panel.transform.Find("LeftPortraitFrame").GetComponent<Image>().enabled, Is.False);
+            Assert.That(FindText(panel.gameObject, "Speaker").text, Is.EqualTo("新访客"));
+            Assert.That(panel.LeftPortrait.enabled, Is.False);
+            Assert.That(FindImage(panel.gameObject, "LeftPortraitFrame").enabled, Is.False);
         }
 
         [UnityTest]
@@ -182,11 +182,22 @@ namespace Spotlight.GameFlow.Tests
             yield return new WaitForSecondsRealtime(.25f);
             panel.Advance();
             yield return new WaitForEndOfFrame();
-            ScreenCapture.CaptureScreenshot(System.IO.Path.GetFullPath("output/dialogue-preview.png"));
+            System.IO.Directory.CreateDirectory(System.IO.Path.GetFullPath("output"));
+            CaptureScreenshot("output/dialogue-preview.png");
             yield return null;
         }
+        private static Image FindImage(GameObject go, string name)
+        {
+            foreach (Image item in go.GetComponentsInChildren<Image>(true)) if (item.name == name) return item;
+            throw new InvalidOperationException("Missing image: " + name);
+        }
+        private static TMP_Text FindText(GameObject go, string name)
+        {
+            foreach (TMP_Text item in go.GetComponentsInChildren<TMP_Text>(true)) if (item.name == name) return item;
+            throw new InvalidOperationException("Missing text: " + name);
+        }
         private static DialoguePanel Open() => UIKit.OpenPanel<DialoguePanel>(UILevel.Pop, tag: Tag, cachePolicy: PanelCachePolicy.Reusable);
-        private static IEnumerator Ready(DialoguePanel panel) => Until(() => panel.transform.Find("DialogueBox/Continue").GetComponent<Button>().interactable);
+        private static IEnumerator Ready(DialoguePanel panel) => Until(() => panel.IsReady);
         private static IEnumerator Until(Func<bool> condition)
         {
             float deadline = Time.realtimeSinceStartup + 8f;
@@ -195,6 +206,18 @@ namespace Spotlight.GameFlow.Tests
                 Assert.That(Time.realtimeSinceStartup, Is.LessThan(deadline), "Dialogue timed out.");
                 yield return null;
             }
+        }
+        private static void CaptureScreenshot(string path)
+        {
+            // Save synchronously to avoid async screenshot writers racing repeated PlayMode runs.
+            Texture2D capture = ScreenCapture.CaptureScreenshotAsTexture();
+            if (capture == null) throw new InvalidOperationException("Game view capture unavailable.");
+            try
+            {
+                System.IO.Directory.CreateDirectory(System.IO.Path.GetDirectoryName(System.IO.Path.GetFullPath(path)));
+                System.IO.File.WriteAllBytes(System.IO.Path.GetFullPath(path), capture.EncodeToPNG());
+            }
+            finally { UnityEngine.Object.Destroy(capture); }
         }
     }
 }

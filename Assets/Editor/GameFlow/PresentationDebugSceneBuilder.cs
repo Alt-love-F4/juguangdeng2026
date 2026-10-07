@@ -118,12 +118,21 @@ namespace Spotlight.GameFlow.Editor
             TMP_Text active = Text(sidebar.transform, "Active", "当前 / 无", new Vector2(.045f, .872f), new Vector2(.955f, .905f), 17f, Muted);
 
             PresentationDebugSceneController controller = root.AddComponent<PresentationDebugSceneController>();
-            string[] labels = { "Q   新一天 / 日期切换", "W   第一天来信", "E   双角色对话（含长文本）", "R   经营前阶段", "T   开店演出", "Y   经营结束", "U   城区地图", "I   夜晚前阶段", "O   住房夜晚", "P   一天结束", "F   第一天阿黛尔引入对话" };
+            string[] labels = { "Q   新一天 / 日期切换", "W   第一天来信", "E   双角色对话（含长文本）", "R   经营前阶段", "T   开店演出", "Y   经营结束", "U   城区地图", "I   夜晚前阶段", "O   住房夜晚", "P   一天结束", "F   第一天阿黛尔引入对话", "G   特效试验台（1~0）" };
             for (int i = 0; i < labels.Length; i++)
             {
-                float top = .855f - i * .05f;
-                Button button = Button(sidebar.transform, "Preview_" + i, labels[i], new Vector2(.045f, top - .043f), new Vector2(.955f, top));
+                float top = .855f - i * .033f;
+                Button button = Button(sidebar.transform, "Preview_" + i, labels[i], new Vector2(.045f, top - .029f), new Vector2(.955f, top));
                 AddPreviewListener(button, controller, i);
+            }
+            string[] effectLabels = { "1 黑影入场", "2 受惊", "3 轻震屏", "4 重震屏", "5 白闪", "6 黑场切换", "7 换位", "8 镜头推近", "9 镜头复位", "0 淡出" };
+            for (int i = 0; i < effectLabels.Length; i++)
+            {
+                float top = .445f - i / 2 * .029f;
+                float left = i % 2 == 0 ? .045f : .51f;
+                Button effectButton = Button(sidebar.transform, "Effect_" + i, effectLabels[i],
+                    new Vector2(left, top - .025f), new Vector2(left + .445f, top));
+                AddEffectListener(effectButton, controller, i);
             }
             Button stop = Button(sidebar.transform, "Stop", "Esc 关闭", new Vector2(.045f, .258f), new Vector2(.47f, .297f));
             Button replay = Button(sidebar.transform, "Replay", "Backspace 重播", new Vector2(.495f, .258f), new Vector2(.955f, .297f));
@@ -155,6 +164,24 @@ namespace Spotlight.GameFlow.Editor
                 case 8: UnityEventTools.AddVoidPersistentListener(button.onClick, controller.PlayHomeNight); break;
                 case 9: UnityEventTools.AddVoidPersistentListener(button.onClick, controller.PlayDayEnd); break;
                 case 10: UnityEventTools.AddVoidPersistentListener(button.onClick, controller.PlayIntroduction); break;
+                case 11: UnityEventTools.AddVoidPersistentListener(button.onClick, controller.PlayEffects); break;
+            }
+        }
+
+        private static void AddEffectListener(Button button, PresentationDebugSceneController controller, int index)
+        {
+            switch (index)
+            {
+                case 0: UnityEventTools.AddVoidPersistentListener(button.onClick, controller.PreviewEnter); break;
+                case 1: UnityEventTools.AddVoidPersistentListener(button.onClick, controller.PreviewStartle); break;
+                case 2: UnityEventTools.AddVoidPersistentListener(button.onClick, controller.PreviewShakeLight); break;
+                case 3: UnityEventTools.AddVoidPersistentListener(button.onClick, controller.PreviewShakeHeavy); break;
+                case 4: UnityEventTools.AddVoidPersistentListener(button.onClick, controller.PreviewFlash); break;
+                case 5: UnityEventTools.AddVoidPersistentListener(button.onClick, controller.PreviewBlack); break;
+                case 6: UnityEventTools.AddVoidPersistentListener(button.onClick, controller.PreviewSwap); break;
+                case 7: UnityEventTools.AddVoidPersistentListener(button.onClick, controller.PreviewZoom); break;
+                case 8: UnityEventTools.AddVoidPersistentListener(button.onClick, controller.PreviewResetCamera); break;
+                case 9: UnityEventTools.AddVoidPersistentListener(button.onClick, controller.PreviewExit); break;
             }
         }
 

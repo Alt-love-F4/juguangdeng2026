@@ -9,7 +9,7 @@ using YokiFrame;
 namespace Spotlight.GameFlow
 {
     /// <summary>双角色对话演出。UIKit 管理实例；不推进日程、不修改剧情逻辑状态。</summary>
-    public sealed class DialoguePanel : UIPanel, IDialoguePresentation
+    public sealed partial class DialoguePanel : UIPanel, IDialoguePresentation, IPresentationEffectPlayer
     {
         [Header("Prefab bindings")]
         [SerializeField] private CanvasGroup canvasGroup;
@@ -44,12 +44,7 @@ namespace Spotlight.GameFlow
         private Sprite defaultRight;
         private Texture defaultBackground;
         private Vector2 boxPosition;
-        private Vector2 leftPosition;
-        private Vector2 rightPosition;
-        private Vector3 leftScale;
-        private Vector3 rightScale;
         private Sequence transition;
-        private Sequence focus;
         private Action finished;
         private Action cancelled;
         private bool ready;
@@ -77,13 +72,10 @@ namespace Spotlight.GameFlow
             defaultRight = rightPortrait.sprite;
             defaultBackground = background.texture;
             boxPosition = dialogueBox.anchoredPosition;
-            leftPosition = leftPortrait.rectTransform.anchoredPosition;
-            rightPosition = rightPortrait.rectTransform.anchoredPosition;
-            leftScale = leftPortrait.transform.localScale;
-            rightScale = rightPortrait.transform.localScale;
             dialogueText.overflowMode = TextOverflowModes.Page;
             // 台词作为纯文本，避免外部剧本中的 <...> 被当成 TMP 标签。
             dialogueText.richText = false;
+            InitializeEffects();
             continueButton.onClick.AddListener(Advance);
             if (cancelButton != null) cancelButton.onClick.AddListener(Cancel);
         }
@@ -103,6 +95,8 @@ namespace Spotlight.GameFlow
         public void Play(DialogueScript value, Action onFinished = null, Action onCancelled = null)
         {
             if (value == null) throw new ArgumentNullException(nameof(value));
+            for (int i = 0; i < value.Count; i++)
+                if (!string.IsNullOrWhiteSpace(value[i].AccentFxKey)) effectLibrary.Find(value[i].AccentFxKey);
             Stop();
             script = value;
             left = value.LeftCharacter ?? new DialogueCharacter(defaultLeftName, defaultLeft);
@@ -122,19 +116,15 @@ namespace Spotlight.GameFlow
             if (system != null) system.SetSelectedGameObject(null);
             ShowLine(0);
             dialogueBox.anchoredPosition = boxPosition + new Vector2(0f, -32f);
-            leftPortrait.rectTransform.anchoredPosition = leftPosition + new Vector2(-65f, 0f);
-            rightPortrait.rectTransform.anchoredPosition = rightPosition + new Vector2(65f, 0f);
+            EnterVisiblePortraits();
             transition = Sequence();
             transition.Append(DOTween.To(() => canvasGroup.alpha, v => canvasGroup.alpha = v, 1f, enterSeconds));
             transition.Join(Move(dialogueBox, boxPosition, enterSeconds).SetEase(Ease.OutCubic));
-            transition.Join(Move(leftPortrait.rectTransform, leftPosition, enterSeconds).SetEase(Ease.OutCubic));
-            transition.Join(Move(rightPortrait.rectTransform, rightPosition, enterSeconds).SetEase(Ease.OutCubic));
+
             transition.OnComplete(() =>
             {
                 transition = null;
-                ready = true;
-                continueButton.interactable = true;
-                AnimateFocus();
+                entranceComplete = true;
             });
         }
 
@@ -183,9 +173,9 @@ namespace Spotlight.GameFlow
                 pageStart = range.firstCharacterIndex;
                 pageEnd = Math.Min(info.characterCount, range.lastCharacterIndex + 1);
             }
-            revealed = pageStart;
+            revealed = charactersPerSecond <= 0f && ready ? pageEnd : pageStart;
             hold = 0f;
-            dialogueText.maxVisibleCharacters = charactersPerSecond <= 0f ? pageEnd : pageStart;
+            dialogueText.maxVisibleCharacters = (int)revealed;
             if (progressText != null)
                 progressText.text = (LineIndex + 1) + " / " + script.Count
                     + (info.pageCount > 1 ? "    页 " + page + " / " + info.pageCount : string.Empty);
@@ -194,37 +184,29 @@ namespace Spotlight.GameFlow
 
         private void AnimateFocus()
         {
-            focus?.Kill(false);
-            RestorePortraitPose();
-            DialogueLine line = script[LineIndex];
-            bool leftSpeaking = line.Speaker == DialogueSpeaker.Left;
-            bool rightSpeaking = line.Speaker == DialogueSpeaker.Right;
-            focus = Sequence();
-            focus.Append(DOTween.To(() => leftPortrait.color, v => leftPortrait.color = v,
-                leftSpeaking || line.Speaker == DialogueSpeaker.Narrator ? Color.white : inactiveTint, focusSeconds));
-            focus.Join(DOTween.To(() => rightPortrait.color, v => rightPortrait.color = v,
-                rightSpeaking || line.Speaker == DialogueSpeaker.Narrator ? Color.white : inactiveTint, focusSeconds));
-            focus.Join(leftPortrait.transform.DOScale(leftScale * (leftSpeaking ? 1.025f : 1f), focusSeconds));
-            focus.Join(rightPortrait.transform.DOScale(rightScale * (rightSpeaking ? 1.025f : 1f), focusSeconds));
-            RectTransform portrait = leftSpeaking ? leftPortrait.rectTransform : rightSpeaking ? rightPortrait.rectTransform : null;
-            if (portrait != null && line.Gesture != DialogueGesture.None)
-            {
-                Vector2 pose = portrait.anchoredPosition;
-                Vector2 offset = line.Gesture == DialogueGesture.Nod ? new Vector2(0f, -14f) : new Vector2(12f, 0f);
-                focus.Append(Move(portrait, pose + offset, .1f).SetLoops(4, LoopType.Yoyo));
-            }
+            effects.SetFocus(script[LineIndex].Speaker);
+            PlayLineAccent(script[LineIndex]);
         }
 
         private void Update()
         {
+            if (effects != null) effects.Tick(Time.unscaledDeltaTime);
             if (!IsPlaying || exiting) return;
+            if (!ready && entranceComplete && !effects.IsPortraitTransitioning && portraitChange == null && blockingEffects == 0)
+            {
+                ready = true;
+                continueButton.interactable = true;
+                AnimateFocus();
+            }
+            if (script == null || !IsPlaying) return;
             Keyboard keyboard = Keyboard.current;
             if (keyboard != null && keyboard.escapeKey.wasPressedThisFrame) { Cancel(); return; }
-            if (!ready) return;
+            if (!ready || blockingEffects > 0 || portraitChange != null) return;
             if (IsTyping)
             {
                 revealed += Time.unscaledDeltaTime * charactersPerSecond;
                 dialogueText.maxVisibleCharacters = Math.Min(pageEnd, (int)revealed);
+                if (charactersPerSecond <= 0f) { revealed = pageEnd; dialogueText.maxVisibleCharacters = pageEnd; }
                 if (!IsTyping) UpdateHint();
             }
             else if (script[LineIndex].AutoAdvanceSeconds > 0f)
@@ -239,7 +221,7 @@ namespace Spotlight.GameFlow
         /// <summary>第一次提交只补完当前页；下一次才翻页/换句。进退场期间不接受提交。</summary>
         public void Advance()
         {
-            if (!IsPlaying || !ready || exiting || lastAdvanceFrame == Time.frameCount) return;
+            if (!IsPlaying || !ready || exiting || blockingEffects > 0 || portraitChange != null || lastAdvanceFrame == Time.frameCount) return;
             lastAdvanceFrame = Time.frameCount;
             if (IsTyping)
             {
@@ -250,11 +232,12 @@ namespace Spotlight.GameFlow
                 return;
             }
             if (page < dialogueText.textInfo.pageCount) { ShowPage(page + 1); return; }
-            if (LineIndex + 1 < script.Count) { ShowLine(LineIndex + 1); return; }
+            if (LineIndex + 1 < script.Count) { PrepareNextLine(LineIndex + 1); return; }
             exiting = true;
             ready = false;
             continueButton.interactable = false;
-            focus?.Kill(false);
+            effects.Play(PresentationEffectIds.PortraitFadeOut, 0);
+            effects.Play(PresentationEffectIds.PortraitFadeOut, 1);
             transition = Sequence();
             transition.Append(DOTween.To(() => canvasGroup.alpha, v => canvasGroup.alpha = v, 0f, exitSeconds));
             transition.Join(Move(dialogueBox, boxPosition + new Vector2(0f, -24f), exitSeconds));
@@ -289,14 +272,14 @@ namespace Spotlight.GameFlow
         public void Stop()
         {
             finished = cancelled = null;
+            CancelEffectWork();
             script = null;
             left = right = null;
             IsPlaying = ready = exiting = false;
             LineIndex = -1;
             if (active == this) active = null;
             transition?.Kill(false);
-            focus?.Kill(false);
-            transition = focus = null;
+            transition = null;
             if (canvasGroup != null)
             {
                 canvasGroup.alpha = 0f;
@@ -304,15 +287,7 @@ namespace Spotlight.GameFlow
             }
             if (continueButton != null) continueButton.interactable = false;
             if (dialogueBox != null) dialogueBox.anchoredPosition = boxPosition;
-            if (leftPortrait != null && rightPortrait != null) RestorePortraitPose();
-        }
-
-        private void RestorePortraitPose()
-        {
-            leftPortrait.rectTransform.anchoredPosition = leftPosition;
-            rightPortrait.rectTransform.anchoredPosition = rightPosition;
-            leftPortrait.transform.localScale = leftScale;
-            rightPortrait.transform.localScale = rightScale;
+            if (effects != null) effects.Reset();
         }
 
         protected override void OnClose() => Stop();
@@ -320,6 +295,7 @@ namespace Spotlight.GameFlow
         protected override void OnBeforeDestroy()
         {
             Stop();
+            if (effects != null) effects.Dispose();
             if (continueButton != null) continueButton.onClick.RemoveListener(Advance);
             if (cancelButton != null) cancelButton.onClick.RemoveListener(Cancel);
             base.OnBeforeDestroy();

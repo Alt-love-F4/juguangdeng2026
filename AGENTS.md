@@ -23,6 +23,7 @@ Assets/Scenes/PresentationDebugScene.unity
 - `O`：住房夜晚 / `HomeNightPanel`
 - `P`：一天结束 / `DayEndPanel`
 - `F`：首次登场对话 / `FirstDayIntroductionDialogue`
+- `G`：独立特效试验台；`1~0`：黑影入场、受惊、轻/重震屏、白闪、黑场、换位、镜头推近/复位、淡出
 - `Space` / `Enter`：继续（对话先补全文字）
 - `Esc`：关闭当前演出
 - `Backspace`：重播上一次演出
@@ -51,6 +52,13 @@ Tools > Game Flow > Create Missing Presentation Debug Scene
 - 扩展 `Preview` / `PlayPreview` / 公共方法，再更新 builder 里的按钮与说明，重建同一个场景。不要复制 UI Prefab 或接入正式 DayFlow。
 - 打开：`Tools > Game Flow > Open Presentation Debug Scene`；重建：`Tools > Game Flow > Rebuild Presentation Debug Scene`（会覆盖此调试场景布局，需先保存场景）。
 - PlayMode 回归测试：`Spotlight.GameFlow.Tests.PresentationDebugSceneTests`。测试应加载共享场景，而不是另建测试布局。
+
+## 演出特效边界
+
+- 特效字段来自 NCS；不要自行新增平行剧本字段标准。本轮表现层不接 NCS、不结算事件、不读取 NCS 表。
+- `DialoguePanel.PlayEffect` / `PlayCameraCue` / `PlayFade` 是后续适配边界；参数预设在 `PresentationEffectLibrary.asset`。
+- 角色/震屏/镜头/遮罩通道可并行；震屏按等级替换，不叠加。退出必须取消 handle、协程与回调，复位舞台。
+- 回归使用共享场景和 `PresentationEffectsTests`，详见 `Docs/PresentationEffects.md`。不另建演出场景。
 
 <!-- packy-image:start -->
 ## PackyAPI image capability (Windows, this user)
