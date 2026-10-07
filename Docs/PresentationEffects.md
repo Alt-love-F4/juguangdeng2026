@@ -1,10 +1,49 @@
 # 独立演出特效表现层
 
+## 已补齐的三类演出入口
+
+这些面板仍属于独立表现层，本轮不接入 NCS：
+
+| 类型 | 面板 | 调试入口 | 说明 |
+|---|---|---|---|
+| Reading | `ReadingPanel` | 共享调试场景 `V` | 多页线性阅读、标题、配图、旁白/说话人、上一页/下一页。 |
+| Notice | `NoticePanel` | 共享调试场景 `B` | 单页事件通知，可展示时间、配图和进度提示；进度只展示传入值，不做真实结算。 |
+| CutScene | `CutScenePanel` | 共享调试场景 `N` | 支持调用方传入 `VideoClip`、本地绝对路径/URL 或 StreamingAssets 相对路径；调试数据显式设置 `previewOnly` 显示占位；长按 Enter 按全局配置时长跳过。 |
+
+数据接口位于 `Assets/Scripts/GameFlow/UI/Presentation/PresentationContent.cs`。
+后续 NCS 只需把表数据转换为 `ReadingScript`、`NoticeData`、`CutSceneData`，再调用对应 `Play`，不用改 UI 演出逻辑。
+
+- Reading：`ReadingLineKind.Narration` 隐藏姓名/头像；`Dialogue` 使用传入姓名与 Sprite。先补全文字，再进下一行/文本页/脚本页；无配图时扩展文本区。
+- Notice：`Visible=false` 跳过显示并完成；标题、时间、配图、进度提示都可省略。`ProgressValue` 是 0~1 的展示值，不会修改任何游戏进度。
+- CutScene：`CutScenePresentationSettings.SkipHoldSeconds` 全局默认 1.2 秒，`CutSceneData.SkipHoldSeconds > 0` 可以覆盖。松开 Enter 清空长按进度；视频结束/跳过调用完成回调，错误/主动取消调用取消回调。超时取消，停止/隐藏/销毁释放本面板的 RenderTexture。
+- `Stop()` 静默停止，不回调；`Cancel()` 停止并关闭面板且调用取消回调。正常完成的关闭交给调用方（共享调试场景已经处理）。
+- `textKey/speakerKey/voiceKey/pageCondKeys/pageBarConds` 等字段只保留为适配信息；本轮不做条件计算、翻译解析或配音加载。资源由调用方解析后传入 Texture/Sprite/VideoClip，视频 `videoPath` 则直接交给 VideoPlayer。
+
+```csharp
+// 调用方仍通过项目 UIKit 打开真实面板，然后传入表现快照。
+readingPanel.Play(new ReadingScript(new[]
+{
+    new ReadingPage("便笺", new[]
+    {
+        new ReadingLine("落款只有一个熟悉的字母。"),
+        new ReadingLine("午后见。", "阿黛尔", portrait: avatar,
+            kind: ReadingLineKind.Dialogue, speakerKey: "npc_adele")
+    }, image: illustration, pageId: "page_01")
+}), onFinished, onCancelled);
+noticePanel.Play(new NoticeData("情报窗口已开启。", title: "事件通知",
+    hasProgress: true, progressValue: .62f, progressLabel: "街区舆情：62%"),
+    onFinished, onCancelled);
+cutScenePanel.Play(new CutSceneData(videoPath: "Videos/opening.mp4"),
+    onFinished, onCancelled); // 相对于 StreamingAssets；也可传绝对路径/URL 或 VideoClip
+```
+
+
+
 ## 本次边界
 
 沿用 UIKit 的真实 DialoguePanel 与共享 PresentationDebugScene，不启动 NCS、不读取 NCS 配表、不调用触发器、不结算事件、不新增存档逻辑。
 效果字段/原子来自既有 NCS 约定；这次只建立可调用的表现入口，不新建另一套 NCS 或剧本字段标准。
-现有线性 DialogueScript 仍是本地演示入口，不代表已经实现了完整的页/选项/Reading/Notice/视频过场方案。
+现有线性 DialogueScript 仍是本地演示入口，不代表完整 NCS 调度与选项方案；Reading/Notice/视频过场已作为独立 Panel 实现。
 
 ## 已实现效果
 

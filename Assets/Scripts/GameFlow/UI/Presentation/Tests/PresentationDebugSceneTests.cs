@@ -60,7 +60,7 @@ namespace Spotlight.GameFlow.Tests
             Assert.That(help, Is.Not.Null);
             Assert.That(help.sortingOrder, Is.GreaterThan(800));
             Button[] buttons = help.GetComponentsInChildren<Button>(true);
-            Assert.That(buttons.Length, Is.EqualTo(24));
+            Assert.That(buttons.Length, Is.EqualTo(27));
             foreach (Button button in buttons)
             {
                 Assert.That(button.onClick.GetPersistentEventCount(), Is.EqualTo(1));
@@ -75,7 +75,7 @@ namespace Spotlight.GameFlow.Tests
         }
 
         [UnityTest]
-        public IEnumerator AllTwelveSamplesOpenAndStopWithoutDayFlow()
+        public IEnumerator AllSamplesOpenAndStopWithoutDayFlow()
         {
             foreach (PresentationDebugSceneController.Preview preview in Enum.GetValues(typeof(PresentationDebugSceneController.Preview)))
             {
@@ -138,6 +138,58 @@ namespace Spotlight.GameFlow.Tests
                 yield return null;
             }
             Assert.That(controller.CurrentPanel, Is.Null);
+        }
+
+        // Deliberately small smoke check: same shared scene, no full narrative/regression run.
+        [UnityTest]
+        public IEnumerator RemainingContentPanelsSmoke()
+        {
+            controller.PlayReading();
+            yield return new WaitForSecondsRealtime(.65f);
+            ReadingPanel reading = controller.CurrentPanel as ReadingPanel;
+            Assert.That(reading, Is.Not.Null);
+            Assert.That(reading.GetComponent<CanvasGroup>().alpha, Is.EqualTo(1f).Within(.01f));
+            yield return new WaitForEndOfFrame();
+            CaptureScreenshot("output/presentation-reading-smoke.png");
+            if (reading.IsTyping) { reading.Advance(); yield return null; }
+            reading.Advance();
+            Assert.That(reading.LineIndex, Is.EqualTo(1));
+            yield return null;
+            reading.Back();
+            Assert.That(reading.LineIndex, Is.EqualTo(0));
+            yield return null;
+            reading.Cancel();
+            yield return null;
+            Assert.That(controller.CurrentPanel, Is.Null);
+
+            controller.PlayNotice();
+            yield return new WaitForSecondsRealtime(.4f);
+            NoticePanel notice = controller.CurrentPanel as NoticePanel;
+            Assert.That(notice, Is.Not.Null);
+            Assert.That(notice.GetComponent<CanvasGroup>().alpha, Is.EqualTo(1f).Within(.01f));
+            Assert.That(notice.GetComponentInChildren<Slider>().value, Is.EqualTo(.62f).Within(.01f));
+            yield return new WaitForEndOfFrame();
+            CaptureScreenshot("output/presentation-notice-smoke.png");
+            notice.Confirm();
+            yield return new WaitForSecondsRealtime(.3f);
+            Assert.That(controller.CurrentPanel, Is.Null);
+
+            controller.PlayCutScene();
+            yield return new WaitForSecondsRealtime(.4f);
+            CutScenePanel cutScene = controller.CurrentPanel as CutScenePanel;
+            Assert.That(cutScene, Is.Not.Null);
+            Assert.That(cutScene.GetComponent<CanvasGroup>().alpha, Is.EqualTo(1f).Within(.01f));
+            yield return new WaitForEndOfFrame();
+            CaptureScreenshot("output/presentation-cutscene-smoke.png");
+            cutScene.UpdateSkipHold(true, .3f);
+            Assert.That(cutScene.SkipProgress, Is.GreaterThan(0f));
+            cutScene.UpdateSkipHold(false, 0f);
+            Assert.That(cutScene.SkipProgress, Is.Zero);
+            cutScene.UpdateSkipHold(true, CutScenePresentationSettings.SkipHoldSeconds + .1f);
+            Assert.That(cutScene.WasSkipped, Is.True);
+            yield return new WaitForSecondsRealtime(.3f);
+            Assert.That(controller.CurrentPanel, Is.Null);
+            Assert.That(UnityEngine.Object.FindFirstObjectByType<GameFlowBootstrap>(), Is.Null);
         }
 
         [UnityTest]

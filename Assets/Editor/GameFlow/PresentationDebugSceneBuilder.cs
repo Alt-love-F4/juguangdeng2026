@@ -118,27 +118,27 @@ namespace Spotlight.GameFlow.Editor
             TMP_Text active = Text(sidebar.transform, "Active", "当前 / 无", new Vector2(.045f, .872f), new Vector2(.955f, .905f), 17f, Muted);
 
             PresentationDebugSceneController controller = root.AddComponent<PresentationDebugSceneController>();
-            string[] labels = { "Q   新一天 / 日期切换", "W   第一天来信", "E   双角色对话（含长文本）", "R   经营前阶段", "T   开店演出", "Y   经营结束", "U   城区地图", "I   夜晚前阶段", "O   住房夜晚", "P   一天结束", "F   第一天阿黛尔引入对话", "G   特效试验台（1~0）" };
+            string[] labels = { "Q   新一天 / 日期切换", "W   第一天来信", "E   双角色对话（含长文本）", "R   经营前阶段", "T   开店演出", "Y   经营结束", "U   城区地图", "I   夜晚前阶段", "O   住房夜晚", "P   一天结束", "F   第一天阿黛尔引入对话", "G   特效试验台（1~0）", "V   阅读（图文 / 旁白 / 对话）", "B   单页事件通知", "N   视频过场 / 长按跳过" };
             for (int i = 0; i < labels.Length; i++)
             {
-                float top = .855f - i * .033f;
-                Button button = Button(sidebar.transform, "Preview_" + i, labels[i], new Vector2(.045f, top - .029f), new Vector2(.955f, top));
+                float top = .855f - i * .028f;
+                Button button = Button(sidebar.transform, "Preview_" + i, labels[i], new Vector2(.045f, top - .025f), new Vector2(.955f, top));
                 AddPreviewListener(button, controller, i);
             }
             string[] effectLabels = { "1 黑影入场", "2 受惊", "3 轻震屏", "4 重震屏", "5 白闪", "6 黑场切换", "7 换位", "8 镜头推近", "9 镜头复位", "0 淡出" };
             for (int i = 0; i < effectLabels.Length; i++)
             {
-                float top = .445f - i / 2 * .029f;
+                float top = .426f - i / 2 * .027f;
                 float left = i % 2 == 0 ? .045f : .51f;
                 Button effectButton = Button(sidebar.transform, "Effect_" + i, effectLabels[i],
-                    new Vector2(left, top - .025f), new Vector2(left + .445f, top));
+                    new Vector2(left, top - .023f), new Vector2(left + .445f, top));
                 AddEffectListener(effectButton, controller, i);
             }
             Button stop = Button(sidebar.transform, "Stop", "Esc 关闭", new Vector2(.045f, .258f), new Vector2(.47f, .297f));
             Button replay = Button(sidebar.transform, "Replay", "Backspace 重播", new Vector2(.495f, .258f), new Vector2(.955f, .297f));
             UnityEventTools.AddVoidPersistentListener(stop.onClick, controller.StopCurrent);
             UnityEventTools.AddVoidPersistentListener(replay.onClick, controller.ReplayLast);
-            Text(sidebar.transform, "Controls", "H 收起/显示说明   F12 恢复说明\nF9 暂停时间   空格/回车 继续\n对话：补全文字 → 翻页 / 换句\n来信：拆信 → 阅读 → 点击署名", new Vector2(.045f, .14f), new Vector2(.955f, .248f), 18f, Muted);
+            Text(sidebar.transform, "Controls", "H 显示说明 · F12 恢复 · F9 暂停\n空格/回车：补全 → 继续\n阅读 ← 返回 · 通知确认关闭\n视频：长按 Enter 跳过", new Vector2(.045f, .14f), new Vector2(.955f, .248f), 18f, Muted);
             TMP_Text hint = Text(sidebar.transform, "Hint", PresentationDebugSceneController.DefaultHint,
                 new Vector2(.045f, .02f), new Vector2(.955f, .13f), 17f, Pink);
             var data = new SerializedObject(controller);
@@ -147,6 +147,60 @@ namespace Spotlight.GameFlow.Editor
             data.FindProperty("hintText").objectReferenceValue = hint;
             data.FindProperty("helpGroup").objectReferenceValue = help;
             data.ApplyModifiedPropertiesWithoutUndo();
+        }
+
+        /// <summary>Patch only this scene's shortcut list, preserving camera, scene GUID and other user objects.</summary>
+        [MenuItem("Tools/Game Flow/Update Reading Notice CutScene Debug Entries")]
+        public static void UpdateContentEntries()
+        {
+            if (EditorApplication.isPlayingOrWillChangePlaymode) throw new InvalidOperationException("Exit Play Mode first.");
+            CreateMissing();
+            Scene previous = SceneManager.GetActiveScene();
+            Scene scene = SceneManager.GetSceneByPath(ScenePath);
+            bool opened = !scene.IsValid() || !scene.isLoaded;
+            if (!opened && scene.isDirty) throw new InvalidOperationException("Save the debug scene before updating shortcuts.");
+            if (opened) scene = EditorSceneManager.OpenScene(ScenePath, OpenSceneMode.Additive);
+            try
+            {
+                PresentationDebugSceneController controller = null;
+                Transform sidebar = null;
+                foreach (GameObject root in scene.GetRootGameObjects())
+                {
+                    var found = root.GetComponentInChildren<PresentationDebugSceneController>();
+                    if (found != null) controller = found;
+                    if (root.name == "DebugHelpOverlay") sidebar = root.transform.Find("ShortcutSurface");
+                }
+                if (controller == null || sidebar == null) throw new InvalidOperationException("Shared debug scene bindings not found.");
+                string[] labels = { "V   阅读（图文 / 旁白 / 对话）", "B   单页事件通知", "N   视频过场 / 长按跳过" };
+                for (int i = 0; i < 15; i++)
+                {
+                    Transform entry = sidebar.Find("Preview_" + i);
+                    float top = .855f - i * .028f;
+                    if (entry == null && i >= 12)
+                    {
+                        Button button = Button(sidebar, "Preview_" + i, labels[i - 12], new Vector2(.045f, top - .025f), new Vector2(.955f, top));
+                        AddPreviewListener(button, controller, i);
+                    }
+                    else if (entry != null) Rect((RectTransform)entry, new Vector2(.045f, top - .025f), new Vector2(.955f, top));
+                }
+                for (int i = 0; i < 10; i++)
+                {
+                    Transform effect = sidebar.Find("Effect_" + i);
+                    if (effect == null) continue;
+                    float top = .426f - i / 2 * .027f;
+                    float left = i % 2 == 0 ? .045f : .51f;
+                    Rect((RectTransform)effect, new Vector2(left, top - .023f), new Vector2(left + .445f, top));
+                }
+                var controls = sidebar.Find("Controls")?.GetComponent<TMP_Text>();
+                if (controls != null) controls.text = "H 显示说明 · F12 恢复 · F9 暂停\n空格/回车：补全 → 继续\n阅读 ← 返回 · 通知确认关闭\n视频：长按 Enter 跳过";
+                EditorSceneManager.MarkSceneDirty(scene);
+                if (!EditorSceneManager.SaveScene(scene)) throw new InvalidOperationException("Could not save shortcut update.");
+            }
+            finally
+            {
+                if (opened) EditorSceneManager.CloseScene(scene, true);
+                if (previous.IsValid() && previous.isLoaded) SceneManager.SetActiveScene(previous);
+            }
         }
 
         private static void AddPreviewListener(Button button, PresentationDebugSceneController controller, int index)
@@ -165,6 +219,9 @@ namespace Spotlight.GameFlow.Editor
                 case 9: UnityEventTools.AddVoidPersistentListener(button.onClick, controller.PlayDayEnd); break;
                 case 10: UnityEventTools.AddVoidPersistentListener(button.onClick, controller.PlayIntroduction); break;
                 case 11: UnityEventTools.AddVoidPersistentListener(button.onClick, controller.PlayEffects); break;
+                case 12: UnityEventTools.AddVoidPersistentListener(button.onClick, controller.PlayReading); break;
+                case 13: UnityEventTools.AddVoidPersistentListener(button.onClick, controller.PlayNotice); break;
+                case 14: UnityEventTools.AddVoidPersistentListener(button.onClick, controller.PlayCutScene); break;
             }
         }
 
@@ -237,5 +294,3 @@ namespace Spotlight.GameFlow.Editor
         }
     }
 }
-
-
