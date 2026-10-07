@@ -837,14 +837,10 @@ RectTransform:
   - {fileID: 1334741506}
   - {fileID: 695554275}
   - {fileID: 1945944677}
-  - {fileID: 734636704}
-  - {fileID: 717812774}
-  - {fileID: 1158213034}
   - {fileID: 1772470836}
   - {fileID: 1542412097}
-  - {fileID: 1536223045}
-  - {fileID: 1785006944}
   - {fileID: 1198553409}
+  - {fileID: 1295501998}
   m_Father: {fileID: 133374466}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0.5, y: 0.5}
@@ -3511,7 +3507,7 @@ RectTransform:
   m_ConstrainProportionsScale: 0
   m_Children:
   - {fileID: 1832589292}
-  m_Father: {fileID: 302595527}
+  m_Father: {fileID: 1295501998}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0.5, y: 0.5}
   m_AnchorMax: {x: 0.5, y: 0.5}
@@ -3652,7 +3648,7 @@ RectTransform:
   m_ConstrainProportionsScale: 0
   m_Children:
   - {fileID: 699297703}
-  m_Father: {fileID: 302595527}
+  m_Father: {fileID: 1295501998}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0.5, y: 0.5}
   m_AnchorMax: {x: 0.5, y: 0.5}
@@ -6465,6 +6461,7 @@ MonoBehaviour:
   - {fileID: 625500910}
   - {fileID: 1871422933}
   - {fileID: 1978639588}
+  debugControls: {fileID: 1295501997}
   recipePanel: {fileID: 1511201356}
   recipeTitle: {fileID: 1865540303}
   recipeBody: {fileID: 312979102}
@@ -7190,7 +7187,7 @@ RectTransform:
   m_ConstrainProportionsScale: 0
   m_Children:
   - {fileID: 1694298914}
-  m_Father: {fileID: 302595527}
+  m_Father: {fileID: 1295501998}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0.5, y: 0.5}
   m_AnchorMax: {x: 0.5, y: 0.5}
@@ -8001,6 +7998,46 @@ MonoBehaviour:
   m_OnClick:
     m_PersistentCalls:
       m_Calls: []
+--- !u!1 &1295501997
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 1295501998}
+  m_Layer: 0
+  m_Name: DebugControls
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!224 &1295501998
+RectTransform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1295501997}
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children:
+  - {fileID: 734636704}
+  - {fileID: 717812774}
+  - {fileID: 1158213034}
+  - {fileID: 1536223045}
+  - {fileID: 1785006944}
+  m_Father: {fileID: 302595527}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+  m_AnchorMin: {x: 0.5, y: 0.5}
+  m_AnchorMax: {x: 0.5, y: 0.5}
+  m_AnchoredPosition: {x: 0, y: 0}
+  m_SizeDelta: {x: 100, y: 100}
+  m_Pivot: {x: 0.5, y: 0.5}
 --- !u!1 &1314604045
 GameObject:
   m_ObjectHideFlags: 0
@@ -9817,7 +9854,7 @@ RectTransform:
   m_ConstrainProportionsScale: 0
   m_Children:
   - {fileID: 527312785}
-  m_Father: {fileID: 302595527}
+  m_Father: {fileID: 1295501998}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0.5, y: 0.5}
   m_AnchorMax: {x: 0.5, y: 0.5}
@@ -11085,7 +11122,7 @@ RectTransform:
   m_ConstrainProportionsScale: 0
   m_Children:
   - {fileID: 1415763021}
-  m_Father: {fileID: 302595527}
+  m_Father: {fileID: 1295501998}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0.5, y: 0.5}
   m_AnchorMax: {x: 0.5, y: 0.5}

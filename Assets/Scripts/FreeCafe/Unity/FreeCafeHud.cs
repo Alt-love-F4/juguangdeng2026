@@ -3,6 +3,7 @@ using System.Text;
 using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
+using UnityEngine.InputSystem;
 using Spotlight.GameFlow;
 
 namespace Spotlight.FreeCafe
@@ -14,11 +15,13 @@ namespace Spotlight.FreeCafe
         public Button startButton,pauseButton,saveButton,refillButton,rotateButton,artButton,carryButton,recipeButton;
         public Button[] areaButtons,orderButtons;
         public TMP_Text[] orderLabels;
+        public GameObject debugControls;
         public GameObject recipePanel;
         public TMP_Text recipeTitle,recipeBody;
         public Button recipeCloseButton;
         private readonly string[] requestIds=new string[3];
         private bool bound;
+        private bool debugControlsVisible=true;
         protected override void Awake()
         {
             base.Awake();
@@ -28,6 +31,14 @@ namespace Spotlight.FreeCafe
         }
         private void OnEnable() => TryBind();
         private void Start() { TryBind(); Refresh(); }
+        private void Update()
+        {
+            if(Keyboard.current!=null && Keyboard.current.f2Key.wasPressedThisFrame && runtime!=null && !runtime.InputBlocked)
+            {
+                debugControlsVisible=!debugControlsVisible;
+                if(debugControls!=null) debugControls.SetActive(debugControlsVisible);
+            }
+        }
         private void TryBind()
         {
             if(bound || runtime==null || startButton==null || pauseButton==null || saveButton==null || refillButton==null || rotateButton==null || artButton==null || carryButton==null || recipeButton==null || areaButtons==null || areaButtons.Length<4 || orderButtons==null || orderButtons.Length<3)

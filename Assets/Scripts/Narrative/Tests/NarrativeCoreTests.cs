@@ -40,6 +40,30 @@ namespace Spotlight.Narrative.Tests
         private void Condition(string owner, string type, string target, string value, int group = 0, string ownerType = "event", bool not = false) => config.conditions.Add(new NarrativeConditionDefinition { ownerId = owner, ownerType = ownerType, condType = type, target = target, value = value, groupIndex = group, notFlag = not });
         private static int Bar(NarrativeController c, string key) { Assert.That(c.State.TryGetBar(key, out int v)); return v; }
 
+        [Test] public void ManualEventUsesConditionsQueueAndEventLifetime()
+        {
+            config.events.Add(new NarrativeEventDefinition { eventId = "manual", onceOnly = true });
+            Condition("manual", "BAR_GTE", "bar:a", "2");
+            var p = new Presenter(); var c = new NarrativeController(config, p);
+            Assert.That(c.QueueEvent("manual"), Is.False);
+            c.SetBar("a", 2);
+            Assert.That(c.QueueEvent("manual"), Is.True);
+            Assert.That(p.Played, Is.EqualTo(new[] { "manual" }));
+            p.Complete();
+            Assert.That(c.QueueEvent("manual"), Is.False);
+        }
+
+        [Test] public void TriggerOnceStateDoesNotLockSharedEvent()
+        {
+            config.events.Add(new NarrativeEventDefinition { eventId = "shared" });
+            config.triggers.Add(new NarrativeTriggerDefinition { triggerId = "first", eventId = "shared", barKey = "a", threshold = 1, direction = NarrativeTriggerDirection.Up, onceType = NarrativeOnceType.Once });
+            config.triggers.Add(new NarrativeTriggerDefinition { triggerId = "second", eventId = "shared", barKey = "b", threshold = 1, direction = NarrativeTriggerDirection.Up, onceType = NarrativeOnceType.Once });
+            var p = new Presenter(); var c = new NarrativeController(config, p);
+            c.BeginTurn(); c.SetBar("a", 1); c.EndTurn(); p.Complete();
+            c.BeginTurn(); c.SetBar("b", 1); c.EndTurn(); p.Complete();
+            Assert.That(p.Played, Is.EqualTo(new[] { "shared", "shared" }));
+        }
+
         [Test] public void BoundarySortsAcrossBarsAndUsesTableOrderForTies()
         {
             Event("z", "a", priority: 5); Event("a", "b", priority: 5); Event("high", "b", priority: 10);

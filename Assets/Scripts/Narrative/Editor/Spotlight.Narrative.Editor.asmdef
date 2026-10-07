@@ -1,6 +1,6 @@
 {
   "name": "Spotlight.Narrative.Editor",
-  "references": ["Spotlight.Narrative"],
+  "references": ["Spotlight.Narrative", "Unity.InputSystem", "Unity.InputSystem.UI"],
   "includePlatforms": ["Editor"],
   "autoReferenced": true
 }

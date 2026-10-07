@@ -87,7 +87,7 @@ namespace Spotlight.Narrative.Editor
                 {
                     if (!slots.Contains(p.slot)) e.Add($"SetupParams {x.setupKey}: undeclared slot {p.slot}.");
                     if (!assigned.Add(p.slot)) e.Add($"SetupParams {x.setupKey}: duplicate slot {p.slot}.");
-                    if (string.IsNullOrWhiteSpace(p.value)) e.Add($"SetupParams {x.setupKey}: empty value for slot {p.slot}.");
+                    if (string.IsNullOrWhiteSpace(p.value) && !IsOptionalSlot(p.slot)) e.Add($"SetupParams {x.setupKey}: empty value for slot {p.slot}.");
                 }
                 foreach (var slot in slots) if (!assigned.Contains(slot)) e.Add($"SetupParams {x.setupKey}: missing slot {slot}.");
             }
@@ -133,6 +133,7 @@ namespace Spotlight.Narrative.Editor
             }
             return e;
         }
+        static bool IsOptionalSlot(string slot) => string.Equals(slot, "opts", StringComparison.OrdinalIgnoreCase) || string.Equals(slot, "optionList", StringComparison.OrdinalIgnoreCase) || string.Equals(slot, "bg", StringComparison.OrdinalIgnoreCase) || string.Equals(slot, "a", StringComparison.OrdinalIgnoreCase) || string.Equals(slot, "b", StringComparison.OrdinalIgnoreCase) || string.Equals(slot, "portrait", StringComparison.OrdinalIgnoreCase);
         static IEnumerable<string> Split(string text) => (text ?? string.Empty).Split(new[] { ',', ';', '\n' }, StringSplitOptions.RemoveEmptyEntries).Select(s => s.Trim());
         static bool HasCycle(string key, Dictionary<string, NarrativeBarDefinition> bars, HashSet<string> visiting)
         {

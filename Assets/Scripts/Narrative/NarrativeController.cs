@@ -48,6 +48,22 @@ namespace Spotlight.Narrative
             BuildIndexes();
         }
 
+        public bool QueueEvent(string eventId)
+        {
+            if (string.IsNullOrWhiteSpace(eventId) || !events.TryGetValue(eventId, out NarrativeEventDefinition definition)) return false;
+            if (activePresentation || draining || pendingEvents.Contains(eventId) || state.IsEventLocked(eventId) || state.IsFlagSet("event.once." + eventId) || definition.onceOnly && state.HasHappenedEvent(eventId)) return false;
+            if (!EvaluateConditions("event", string.IsNullOrWhiteSpace(definition.conditionOwnerId) ? eventId : definition.conditionOwnerId, Context(definition))) return false;
+            if (!turnOpen) BeginTurn();
+            pendingEvents.Add(eventId);
+            var request = new NarrativeEventRequest(definition, null, 0, null, Context(definition));
+            queue.Enqueue(request);
+            Debug.Log($"[NCS][ManualEvent] event={eventId} tag={definition.logTag}");
+            try { EventQueued?.Invoke(request); }
+            catch (Exception error) { Debug.LogException(error); }
+            ProcessQueue();
+            return true;
+        }
+
         public void BeginTurn()
         {
             if (turnOpen || IsBusy) return;
@@ -351,6 +367,7 @@ namespace Spotlight.Narrative
                 NarrativeTriggerDefinition trigger = hit.Trigger;
                 if (trigger != null)
                 {
+                    if (state.IsFlagSet("trigger.once." + trigger.triggerId)) continue;
                     if (!trigger.MatchesReach(hit.Count)) continue;
                     if (string.Equals(trigger.reachCount, "all", StringComparison.OrdinalIgnoreCase) && hits.Any(x => x.Trigger != null && CounterKey(x.Trigger) == CounterKey(trigger) && !string.Equals(x.Trigger.reachCount, "all", StringComparison.OrdinalIgnoreCase) && x.Trigger.MatchesReach(hit.Count))) continue;
                     if (trigger.onceType == NarrativeOnceType.Once && state.HasFiredTrigger(trigger.triggerId)) continue;
@@ -363,7 +380,7 @@ namespace Spotlight.Narrative
                 if (trigger != null && trigger.onceType == NarrativeOnceType.Once)
                 {
                     state.MarkTriggerFired(trigger.triggerId);
-                    state.SetFlag("event.once." + hit.Event.eventId, true);
+                    state.SetFlag("trigger.once." + trigger.triggerId, true);
                 }
                 if (hit.Event.onceOnly) state.SetFlag("event.once." + hit.Event.eventId, true);
                 if (hit.OnceDate) state.SetFlag("date.once." + hit.Date.eventId + "." + hit.Date.day + "." + hit.Date.timeSlot, true);

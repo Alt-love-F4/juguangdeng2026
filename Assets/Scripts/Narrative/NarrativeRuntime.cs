@@ -124,6 +124,7 @@ namespace Spotlight.Narrative
 
         public void BeginTurn() => controller?.BeginTurn();
         public void EndTurn() => controller?.EndTurn();
+        public bool QueueEvent(string eventId) => controller != null && controller.QueueEvent(eventId);
         public bool AddBar(string barKey, int delta) => controller != null && controller.AddBar(barKey, delta);
         public bool SetBar(string barKey, int value) => controller != null && controller.SetBar(barKey, value);
         public bool SelectChoice(string choiceId) => controller != null && controller.SelectChoice(choiceId);

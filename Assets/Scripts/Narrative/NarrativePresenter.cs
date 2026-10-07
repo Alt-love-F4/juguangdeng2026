@@ -100,8 +100,7 @@ namespace Spotlight.Narrative
                         break;
                     case "A_CHOICE":
                         string opts = Get("opts");
-                        if (!string.IsNullOrWhiteSpace(opts) || string.Equals(setup?.tplName, "Tpl_ChoiceOnly", StringComparison.OrdinalIgnoreCase) || string.Equals(setup?.tplName, "ChoiceOnly", StringComparison.OrdinalIgnoreCase))
-                            yield return Choice(opts);
+                        if (!string.IsNullOrWhiteSpace(opts)) yield return Choice(opts);
                         break;
                     case "A_WAIT":
                         ui.ResetSubmit();

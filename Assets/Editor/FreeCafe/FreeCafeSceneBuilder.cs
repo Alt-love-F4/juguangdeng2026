@@ -239,16 +239,17 @@ namespace Spotlight.FreeCafe.Editor
             }
             Text(top,"RuleNote","订单只评价交付结果，不限制备料顺序 · 错误配方也可交付并影响收入与声望",new Vector2(0,-70),new Vector2(1750,28),17);
             var controls=Box(bottom,"Controls",new Vector2(-215,0),new Vector2(1450,180),Color.clear);controls.GetComponent<Image>().raycastTarget=false;
+            var debugControls=new GameObject("DebugControls",typeof(RectTransform));debugControls.transform.SetParent(controls,false);hud.debugControls=debugControls;
             hud.hint=Text(controls,"InteractionHint","取出物品，自由摆放",new Vector2(0,64),new Vector2(1390,32),19);
             hud.selection=Text(controls,"Selection","无需先接单",new Vector2(0,27),new Vector2(1390,32),18);
             hud.startButton=Button(controls,"StartBusiness","开始营业",new Vector2(-625,-20),new Vector2(155,40),18,library);
-            hud.refillButton=Button(controls,"Refill","补货",new Vector2(-455,-20),new Vector2(155,40),18,library);
-            hud.rotateButton=Button(controls,"Rotate","旋转选中物",new Vector2(-275,-20),new Vector2(175,40),18,library);
-            hud.carryButton=Button(controls,"Carry","跨区域携带：关",new Vector2(-65,-20),new Vector2(220,40),18,library);
+            hud.refillButton=Button(debugControls.transform,"Refill","补货",new Vector2(-455,-20),new Vector2(155,40),18,library);
+            hud.rotateButton=Button(debugControls.transform,"Rotate","旋转选中物",new Vector2(-275,-20),new Vector2(175,40),18,library);
+            hud.carryButton=Button(debugControls.transform,"Carry","跨区域携带：关",new Vector2(-65,-20),new Vector2(220,40),18,library);
             hud.pauseButton=Button(controls,"Pause","暂停 / Esc",new Vector2(160,-20),new Vector2(155,40),18,library);
             hud.saveButton=Button(controls,"Save","存到空槽位",new Vector2(335,-20),new Vector2(175,40),18,library);
-            hud.artButton=Button(controls,"ArtIds","美术编号",new Vector2(530,-20),new Vector2(175,40),18,library);
-            hud.recipeButton=Button(controls,"RecipeTips","制作提示",new Vector2(720,-20),new Vector2(175,40),18,library);
+            hud.artButton=Button(debugControls.transform,"ArtIds","美术编号",new Vector2(530,-20),new Vector2(175,40),18,library);
+            hud.recipeButton=Button(debugControls.transform,"RecipeTips","制作提示",new Vector2(720,-20),new Vector2(175,40),18,library);
             Text(controls,"Help","拖拽组合 / 加工 · 点击「制作提示」查看配表流程 · Shift 仅摆放 · Esc 取消拖拽",new Vector2(0,-67),new Vector2(1390,30),17);
             var recipePanel=Box(root,"RecipePanel",Vector2.zero,new Vector2(760,650),new Color(.04f,.045f,.05f,.97f));
             recipePanel.anchorMin=recipePanel.anchorMax=new Vector2(.5f,.5f); recipePanel.pivot=new Vector2(.5f,.5f); recipePanel.anchoredPosition=Vector2.zero;

@@ -65,5 +65,5 @@
         "*.sln": "*.csproj",
         "*.slnx": "*.csproj"
     },
-    "dotnet.defaultSolution": "unity_p_taptap2026.slnx"
+    "dotnet.defaultSolution": "聚光灯2026.slnx"
 }
