@@ -68,6 +68,7 @@ namespace Spotlight.FreeCafe
             dayFlow = FindFirstObjectByType<DayFlowController>();
             string pending=GameSaveParticipantRegistry.TakePending(SaveId);
             if(!string.IsNullOrEmpty(pending)) RestoreJson(pending); else SyncViews();
+            if (FreeCafeGMPanel.Instance != null) FreeCafeGMPanel.Instance.Initialize(this);
             if(World.State.currentArea==AreaId.Cafe)
                 ShowHint("当前是营业区；点击右侧白色箭头或右下角「一楼出餐台」进入备料区。进入出餐台后，点击或拖拽物品即可交互。");
             else
@@ -355,6 +356,7 @@ namespace Spotlight.FreeCafe
         public void EndDayFlowBusiness() => EndBusiness();
         public void RefillSources() { if(!InputBlocked) Report(World.Refill()); }
         public void RotateSelected() { if(!InputBlocked) World.Rotate(SelectedId); }
+        public void DebugRefreshViews() { SyncViews(); ShowHint("经营视图已刷新"); }
     }
 }
 

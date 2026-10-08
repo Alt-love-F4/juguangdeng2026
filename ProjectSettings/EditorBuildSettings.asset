@@ -11,6 +11,9 @@ EditorBuildSettings:
   - enabled: 1
     path: Assets/Scenes/CoffeeShop.unity
     guid: 8a145da170cc09648ac4c0fe6120ab94
+  - enabled: 1
+    path: Assets/Scenes/Map.unity
+    guid: 5fb554354481b624984f09a4ff7a8155
   m_configObjects:
     com.unity.input.settings.actions: {fileID: -944628639613478452, guid: 2bcd2660ca9b64942af0de543d8d7100, type: 3}
   m_UseUCBPForAssetBundles: 0

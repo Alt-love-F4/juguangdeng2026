@@ -30,6 +30,22 @@ namespace Spotlight.Narrative
                     objId = row.ObjId, objType = ObjectType(row.ObjType), nameText = row.NameText,
                     iconPath = row.IconPath, descText = row.DescText, tags = row.Tags
                 });
+            foreach (var row in tables.TbNcsAction.DataList)
+                config.actions.Add(new NarrativeActionDefinition
+                {
+                    actionKey = row.ActionKey, type = ActionType(row.Type), mustExecute = row.MustExecute,
+                    nameText = row.NameText, descText = row.DescText, requirements = row.Requirements,
+                    resultEvents = Strings(row.ResultEvents), durationDays = row.DurationDays,
+                    progressTarget = row.ProgressTarget, nextActionKey = row.NextActionKey
+                });
+            foreach (var row in tables.TbNcsMapPosition.DataList)
+                config.mapPositions.Add(new NarrativeMapPositionDefinition
+                {
+                    positionKey = row.PositionKey, nameText = row.NameText,
+                    position = new UnityEngine.Vector2(row.PosX, row.PosY), isImportant = row.IsImportant,
+                    defaultAction = row.DefaultAction, extendedActions = Strings(row.ExtendedActions),
+                    imgPath = row.ImgPath, enabled = row.Enabled
+                });
             var barKeys = new HashSet<string>(StringComparer.Ordinal);
             foreach (var row in tables.TbNcsBar.DataList)
             {
@@ -260,6 +276,12 @@ namespace Spotlight.Narrative
         private static NarrativeOnceType OnceType(string value) => value switch
         {
             "once" => NarrativeOnceType.Once, "repeat" => NarrativeOnceType.Repeat, _ => throw Unknown("onceType", value)
+        };
+        private static NarrativeActionType ActionType(string value) => value switch
+        {
+            "REPEAT" => NarrativeActionType.Repeat, "DAILY" => NarrativeActionType.Daily, "ONCE" => NarrativeActionType.Once,
+            "TIMED" => NarrativeActionType.Timed, "PROGRESS" => NarrativeActionType.Progress, "FUTURE" => NarrativeActionType.Future,
+            _ => throw Unknown("action type", value)
         };
         private static NarrativeEventKind EventKind(string value) => value switch
         {

@@ -92,6 +92,31 @@
     <var name="tags" type="string"/>
   </bean>
   <table name="TbNcsObject" value="NcsObjectEntry" mode="map" index="objId" input="Object@Narrative/Narrative.xlsx"/>
+  <bean name="NcsActionEntry">
+    <var name="actionKey" type="string"/>
+    <var name="type" type="string#set=REPEAT,DAILY,ONCE,TIMED,PROGRESS,FUTURE"/>
+    <var name="mustExecute" type="bool"/>
+    <var name="nameText" type="string#ref=TbText?"/>
+    <var name="descText" type="string#ref=TbText?"/>
+    <var name="requirements" type="string"/>
+    <var name="resultEvents" type="string"/>
+    <var name="durationDays" type="int"/>
+    <var name="progressTarget" type="int"/>
+    <var name="nextActionKey" type="string"/>
+  </bean>
+  <table name="TbNcsAction" value="NcsActionEntry" mode="map" index="actionKey" input="Action@Narrative/Narrative.xlsx"/>
+  <bean name="NcsMapPositionEntry">
+    <var name="positionKey" type="string"/>
+    <var name="nameText" type="string#ref=TbText?"/>
+    <var name="posX" type="float"/>
+    <var name="posY" type="float"/>
+    <var name="isImportant" type="bool"/>
+    <var name="defaultAction" type="string#ref=TbNcsAction?"/>
+    <var name="extendedActions" type="string"/>
+    <var name="imgPath" type="string"/>
+    <var name="enabled" type="bool"/>
+  </bean>
+  <table name="TbNcsMapPosition" value="NcsMapPositionEntry" mode="map" index="positionKey" input="MapPosition@Narrative/Narrative.xlsx"/>
   <bean name="NcsBarEntry">
     <var name="barId" type="string"/>
     <var name="ownerId" type="string#ref=TbNcsObject"/>

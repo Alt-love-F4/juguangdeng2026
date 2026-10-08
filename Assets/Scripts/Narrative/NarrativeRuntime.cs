@@ -11,6 +11,7 @@ namespace Spotlight.Narrative
         private NarrativeController controller;
         private NarrativePresenter runtimePresenter;
         private INarrativePresenter injectedPresenter;
+        private NarrativeActionController actionController;
         private Func<string, string> textResolver;
 
         public static NarrativeRuntime Instance { get; private set; }
@@ -18,6 +19,7 @@ namespace Spotlight.Narrative
         public NarrativeConfiguration Configuration => configuration;
         public NarrativeController Controller => controller;
         public NarrativePresenter Presenter => runtimePresenter;
+        public NarrativeActionController Actions => actionController;
         public bool IsReady => controller != null;
         public bool IsPresenting => runtimePresenter != null && runtimePresenter.IsPresenting;
         public bool BlocksGameplayInput => IsPresenting || (controller != null && controller.IsBusy);
@@ -54,6 +56,7 @@ namespace Spotlight.Narrative
             if (injectedPresenter == null)
                 runtimePresenter = new NarrativePresenter(configuration, ResolveText);
             controller = new NarrativeController(configuration, injectedPresenter ?? runtimePresenter);
+            actionController = new NarrativeActionController(controller, configuration.actions);
             if (runtimePresenter != null)
             {
                 runtimePresenter.Started += request => EventPresented?.Invoke(request);
@@ -80,6 +83,7 @@ namespace Spotlight.Narrative
             runtimePresenter = null;
             injectedPresenter = null;
             controller = null;
+            actionController = null;
             if (overrideConfiguration != null) configuration = overrideConfiguration;
             Initialize(configuration, textResolver);
         }
@@ -91,6 +95,7 @@ namespace Spotlight.Narrative
             runtimePresenter?.Dispose();
             runtimePresenter = null;
             controller = null;
+            actionController = null;
             configuration = source;
             injectedPresenter = presenter;
             Initialize(source, resolver);
@@ -131,13 +136,23 @@ namespace Spotlight.Narrative
         public bool SetBar(string barKey, int value) => controller != null && controller.SetBar(barKey, value);
         public bool SelectChoice(string choiceId) => controller != null && controller.SelectChoice(choiceId);
         public bool EvaluateConditions(string ownerType, string ownerId, NarrativeConditionContext context = null) => controller != null && controller.EvaluateConditions(ownerType, ownerId, context);
-        public NarrativeSnapshot CaptureSnapshot() => controller?.CaptureSnapshot();
+        public NarrativeSnapshot CaptureSnapshot()
+        {
+            NarrativeSnapshot snapshot = controller?.CaptureSnapshot();
+            if (snapshot != null && actionController != null)
+            {
+                snapshot.actionState = new NarrativeActionStateSnapshot();
+                actionController.CaptureInto(snapshot.actionState);
+            }
+            return snapshot;
+        }
         public void RestoreSnapshot(NarrativeSnapshot snapshot)
         {
             if (snapshot == null) return;
             ResetSession(configuration);
             if (controller == null) throw new InvalidOperationException("Narrative runtime is not initialized.");
             controller.RestoreSnapshot(snapshot);
+            actionController?.RestoreFrom(snapshot.actionState);
             runtimePresenter?.SyncNpcLocations(snapshot.npcLocations);
             if (snapshot.turnEnding || snapshot.active != null || (snapshot.pending != null && snapshot.pending.Count > 0) || (snapshot.pendingEffects != null && snapshot.pendingEffects.Count > 0))
                 controller.EndTurn();

@@ -170,6 +170,7 @@ namespace Spotlight.Narrative
         public List<NarrativeBarChange> changes = new List<NarrativeBarChange>();
         public List<NarrativeStringValue> npcLocations = new List<NarrativeStringValue>();
         public List<NarrativeResultDefinition> pendingEffects = new List<NarrativeResultDefinition>();
+        public NarrativeActionStateSnapshot actionState;
     }
 
     [Serializable] public sealed class NarrativeBarValue { public string key; public int value; public bool reverse; }

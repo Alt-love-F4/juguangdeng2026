@@ -55,7 +55,7 @@ namespace Spotlight.GameFlow
         public DayFlowState State { get; private set; } = DayFlowState.DateTransition;
         public string CurrentDate => FormatDate(FirstDayDate.AddDays(day - 1));
         // Phase pages remain blocking while they wait for a player confirmation.
-        public bool BlocksGameplayInput => running && State != DayFlowState.FreeCafeBusiness;
+        public bool BlocksGameplayInput => running && State != DayFlowState.FreeCafeBusiness && State != DayFlowState.CityMapLeisure;
         public IDayFlowPresentation CurrentPresentation => currentPanel as IDayFlowPresentation;
 
         public DialoguePanel CurrentDialogue => introductionPanel;
@@ -131,9 +131,7 @@ namespace Spotlight.GameFlow
 
         private void EnterPreBusiness()
         {
-            SetState(DayFlowState.PreBusiness);
-            HideGameplayPanel();
-            ShowPresentation<PreBusinessPanel>(EnterBusinessTransition);
+            EnterCityMap();
         }
 
         private void EnterBusinessTransition()
@@ -253,7 +251,33 @@ namespace Spotlight.GameFlow
         private void EnterCityMap()
         {
             SetState(DayFlowState.CityMapLeisure);
-            ShowPresentation<CityMapPanel>(EnterPreNight);
+            ClosePresentation();
+            HideBusinessControls();
+            if (flow != null && UnityEngine.SceneManagement.SceneManager.GetActiveScene().name != "Map")
+            {
+                flow.TransitionToGameplayScene("Map", EnterCityMap);
+                return;
+            }
+            ShowGameplayPanel();
+        }
+
+        /// <summary>Called by the map when the player selects the cafe location.</summary>
+        public void StartCafeFromMap()
+        {
+            if (!running || State != DayFlowState.CityMapLeisure) return;
+            if (flow != null && UnityEngine.SceneManagement.SceneManager.GetActiveScene().name != "CoffeeShop")
+            {
+                flow.TransitionToGameplayScene("CoffeeShop", EnterBusinessTransition);
+                return;
+            }
+            EnterBusinessTransition();
+        }
+
+        /// <summary>Called by the map's home/end-day action.</summary>
+        public void EndDayFromMap()
+        {
+            if (!running || State != DayFlowState.CityMapLeisure) return;
+            EnterPreNight();
         }
 
         private void EnterPreNight()
@@ -413,7 +437,7 @@ namespace Spotlight.GameFlow
                 case DayFlowState.FirstDayIntroduction: PlayFirstDayIntroduction(); break;
                 case DayFlowState.IntroLetter: ShowPresentation<FirstDayLetterPanel>(BeginNewDayFlow, ConfigureFirstDayLetter); break;
                 case DayFlowState.DateTransition: BeginNewDayFlow(); break;
-                case DayFlowState.PreBusiness: EnterPreBusiness(); break;
+                case DayFlowState.PreBusiness: EnterCityMap(); break;
                 case DayFlowState.BusinessTransition: EnterBusinessTransition(); break;
                 case DayFlowState.FreeCafeBusiness:
                     FindGameplayEndpoint();

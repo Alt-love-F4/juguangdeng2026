@@ -152,6 +152,16 @@ namespace Spotlight.GameFlow
             }
         }
 
+        public void TransitionToGameplayScene(string sceneName, Action completed)
+        {
+            if (string.IsNullOrWhiteSpace(sceneName) || sceneName == SceneManager.GetActiveScene().name)
+            {
+                completed?.Invoke();
+                return;
+            }
+            LoadThen(completed, sceneName, true);
+        }
+
         public void StartGame()
         {
             DialoguePlayback.Stop();
@@ -480,9 +490,9 @@ namespace Spotlight.GameFlow
             StartCoroutine(PushPanelWhenReady(panel, true));
         }
 
-        private void LoadThen(Action completed, string sceneName)
+        private void LoadThen(Action completed, string sceneName, bool preserveDayFlow = false)
         {
-            if (dayFlow != null) dayFlow.HideForMainMenu();
+            if (!preserveDayFlow && dayFlow != null) dayFlow.HideForMainMenu();
             int version = ++loadingVersion;
             loadingTransitioning = true;
             narrativeIntegration?.SetGameplayVisible(false);

@@ -1,0 +1,13 @@
+# source: Assets/Art/地图.psd
+# layer: 地点图标
+# coordinates: PSD canvas pixels, origin top-left
+
+location_01,1987,0,2393,377,99037
+location_02,911,81,1293,547,70685
+location_03,2742,104,3155,547,107018
+location_04,0,129,370,604,96238
+location_05,1411,407,1822,906,97781
+location_06,2377,535,2857,1117,117495
+location_07,862,628,1239,1155,98262
+location_08,1715,964,2303,1475,109591
+location_09,2490,1408,2883,1823,86404
