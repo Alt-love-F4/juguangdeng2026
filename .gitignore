@@ -51,3 +51,7 @@ temp_packy_cafe_prompt.txt
 
 # Local generated output
 output/
+
+# Video frame extraction scratch
+_video_frames/
+extract_frames.bat

@@ -15,7 +15,7 @@ namespace Spotlight.GameFlow
         public const string ScenePath = "Assets/Scenes/PresentationDebugScene.unity";
         public const string DefaultHint = "按键/按钮可随时切换演出。Esc 关闭 · Backspace 重播 · H 收起说明 · F9 切换暂停时间。";
 
-        public enum Preview { DateChange, Letter, Dialogue, PreBusiness, CafeOpening, BusinessEnd, CityMap, PreNight, HomeNight, DayEnd, Introduction, Effects, Reading, Notice, CutScene, HardcodedDialogue, HardcodedLetter, HardcodedOptions }
+        public enum Preview { DateChange, Letter, Dialogue, PreBusiness, CafeOpening, BusinessEnd, CityMap, PreNight, HomeNight, DayEnd, Introduction, Effects, Reading, Notice, CutScene, HardcodedDialogue, HardcodedLetter, HardcodedOptions, Details }
 
         [Header("Scene bindings")]
         [SerializeField] private TMP_Text statusText;
@@ -83,6 +83,7 @@ namespace Spotlight.GameFlow
             else if (keyboard.pKey.wasPressedThisFrame) PlayDayEnd();
             else if (keyboard.fKey.wasPressedThisFrame) PlayIntroduction();
             else if (keyboard.gKey.wasPressedThisFrame) PlayEffects();
+            else if (keyboard.mKey.wasPressedThisFrame) PlayDetails();
             else if (keyboard.digit1Key.wasPressedThisFrame) PreviewEnter();
             else if (keyboard.digit2Key.wasPressedThisFrame) PreviewStartle();
             else if (keyboard.digit3Key.wasPressedThisFrame) PreviewShakeLight();
@@ -95,6 +96,7 @@ namespace Spotlight.GameFlow
             else if (keyboard.digit0Key.wasPressedThisFrame) PreviewExit();
         }
 
+        public void PlayDetails() => PlayPreview(Preview.Details);
         public void PlayDateChange() => PlayPreview(Preview.DateChange);
         public void PlayLetter() => PlayPreview(Preview.Letter);
         public void PlayDialogue() => PlayPreview(Preview.Dialogue);
@@ -196,12 +198,14 @@ namespace Spotlight.GameFlow
                     case Preview.PreNight: Open<PreNightPanel>().Play(() => Complete(version)); break;
                     case Preview.HomeNight: Open<HomeNightPanel>().Play(() => Complete(version)); break;
                     case Preview.DayEnd: Open<DayEndPanel>().Play(() => Complete(version)); break;
+                    case Preview.Details: Open<DetailsPanel>().Preview(() => Complete(version)); break;
                     default: throw new ArgumentOutOfRangeException(nameof(preview));
                 }
                 SetStatus("播放中", preview.ToString());
                 SetHint(preview == Preview.Letter || preview == Preview.HardcodedLetter ? "点击信封 → 阅读 → 点击署名。面板右下角可跳过；Esc 取消。"
                     : preview == Preview.HardcodedOptions ? "C：选项对话；空格/回车补全文字，台词结束后点击选项。灰色选项不可用；仅演示，不结算 NCS。Esc 取消。"
                     : preview == Preview.Dialogue || preview == Preview.HardcodedDialogue || preview == Preview.Introduction || preview == Preview.Effects ? "空格/回车/面板继续按钮：先补全文字，再换页/换句。Esc 取消。"
+                    : preview == Preview.Details ? "M：详情面板；点击页签切换，悬停属性/专精查看说明。关闭按钮或窗口外可关闭；全部为占位。"
                     : preview == Preview.Reading ? "V：阅读；空格/回车补全文字 → 下一行/页，← 或上一页返回；Esc 取消。"
                     : preview == Preview.Notice ? "B：通知演出；空格/回车或确认按钮关闭；Esc 取消。"
                     : preview == Preview.CutScene ? "N：视频过场；当前无视频时显示占位；长按 Enter 跳过。Esc 取消。"

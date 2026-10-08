@@ -60,7 +60,7 @@ namespace Spotlight.GameFlow.Tests
             Assert.That(help, Is.Not.Null);
             Assert.That(help.sortingOrder, Is.GreaterThan(800));
             Button[] buttons = help.GetComponentsInChildren<Button>(true);
-            Assert.That(buttons.Length, Is.EqualTo(28));
+            Assert.That(buttons.Length, Is.EqualTo(29));
             foreach (Button button in buttons)
             {
                 Assert.That(button.onClick.GetPersistentEventCount(), Is.EqualTo(1));
