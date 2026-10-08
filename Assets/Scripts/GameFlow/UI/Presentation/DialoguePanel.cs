@@ -4,11 +4,12 @@ using TMPro;
 using UnityEngine;
 using UnityEngine.InputSystem;
 using UnityEngine.UI;
+using System.Collections.Generic;
 using YokiFrame;
 
 namespace Spotlight.GameFlow
 {
-    /// <summary>双角色对话演出。UIKit 管理实例；不推进日程、不修改剧情逻辑状态。</summary>
+    /// <summary>兼容双角色的三角色对话演出。UIKit 管理实例；不推进日程、不修改剧情逻辑状态。</summary>
     public sealed partial class DialoguePanel : UIPanel, IDialoguePresentation, IPresentationEffectPlayer
     {
         [Header("Prefab bindings")]
@@ -16,8 +17,10 @@ namespace Spotlight.GameFlow
         [SerializeField] private RawImage background;
         [SerializeField] private Image leftPortrait;
         [SerializeField] private Image rightPortrait;
+        [SerializeField] private Image centerPortrait;
         [SerializeField] private Image leftPortraitFrame;
         [SerializeField] private Image rightPortraitFrame;
+        [SerializeField] private Image centerPortraitFrame;
         [SerializeField] private RectTransform dialogueBox;
         [SerializeField] private TMP_Text titleText;
         [SerializeField] private TMP_Text speakerText;
@@ -38,8 +41,13 @@ namespace Spotlight.GameFlow
         private static DialoguePanel active;
         private static int lastCancelFrame = -1;
         private DialogueScript script;
+        private readonly List<DialogueLine> activeLines = new List<DialogueLine>();
         private DialogueCharacter left;
         private DialogueCharacter right;
+        private DialogueCharacter center;
+        private PortraitLayout leftFrameLayout, rightFrameLayout, centerFrameLayout;
+        private PortraitLayout leftImageLayout, rightImageLayout, centerImageLayout;
+        private bool threePortraitLayout;
         private Sprite defaultLeft;
         private Sprite defaultRight;
         private Texture defaultBackground;
@@ -75,7 +83,15 @@ namespace Spotlight.GameFlow
             dialogueText.overflowMode = TextOverflowModes.Page;
             // 台词作为纯文本，避免外部剧本中的 <...> 被当成 TMP 标签。
             dialogueText.richText = false;
+            EnsureCenterPortrait();
+            leftFrameLayout = new PortraitLayout(leftPortraitFrame?.rectTransform);
+            rightFrameLayout = new PortraitLayout(rightPortraitFrame?.rectTransform);
+            leftImageLayout = new PortraitLayout(leftPortrait.rectTransform);
+            rightImageLayout = new PortraitLayout(rightPortrait.rectTransform);
+            centerFrameLayout = new PortraitLayout(centerPortraitFrame?.rectTransform);
+            centerImageLayout = new PortraitLayout(centerPortrait.rectTransform);
             InitializeEffects();
+            CreateOptionOverlay();
             continueButton.onClick.AddListener(Advance);
             if (cancelButton != null) cancelButton.onClick.AddListener(Cancel);
         }
@@ -99,8 +115,12 @@ namespace Spotlight.GameFlow
                 if (!string.IsNullOrWhiteSpace(value[i].AccentFxKey)) effectLibrary.Find(value[i].AccentFxKey);
             Stop();
             script = value;
+            activeLines.Clear();
+            for (int i = 0; i < value.Count; i++) activeLines.Add(value[i]);
+            SelectedOptionId = string.Empty;
             left = value.LeftCharacter ?? new DialogueCharacter(defaultLeftName, defaultLeft);
             right = value.RightCharacter ?? new DialogueCharacter(defaultRightName, defaultRight);
+            center = value.CenterCharacter;
             background.texture = value.Background != null ? value.Background : defaultBackground;
             if (titleText != null) titleText.text = string.IsNullOrEmpty(value.Title) ? "角色对话" : value.Title;
             finished = onFinished;
@@ -111,7 +131,7 @@ namespace Spotlight.GameFlow
             canvasGroup.alpha = 0f;
             canvasGroup.blocksRaycasts = canvasGroup.interactable = true;
             continueButton.interactable = false;
-            leftPortrait.color = rightPortrait.color = Color.white;
+            leftPortrait.color = rightPortrait.color = centerPortrait.color = Color.white;
             UnityEngine.EventSystems.EventSystem system = UnityEngine.EventSystems.EventSystem.current;
             if (system != null) system.SetSelectedGameObject(null);
             ShowLine(0);
@@ -136,14 +156,15 @@ namespace Spotlight.GameFlow
         private void ShowLine(int index)
         {
             LineIndex = index;
-            DialogueLine line = script[index];
+            DialogueLine line = activeLines[index];
             if (line.ReplaceLeft) left = line.LeftCharacter;
             if (line.ReplaceRight) right = line.RightCharacter;
+            if (line.ReplaceCenter) center = line.CenterCharacter;
             ApplyPortrait(leftPortrait, leftPortraitFrame, left);
             ApplyPortrait(rightPortrait, rightPortraitFrame, right);
-            string name = line.Speaker == DialogueSpeaker.Left ? left?.DisplayName
-                : line.Speaker == DialogueSpeaker.Right ? right?.DisplayName : "旁白";
-            speakerText.text = string.IsNullOrEmpty(line.SpeakerNameOverride) ? name ?? "旁白" : line.SpeakerNameOverride;
+            ApplyPortrait(centerPortrait, centerPortraitFrame, center);
+            UpdatePortraitLayout(centerPortrait.enabled);
+            RefreshSpeakerName();
             dialogueText.text = line.Text;
             dialogueText.maxVisibleCharacters = int.MaxValue;
             dialogueText.pageToDisplay = 1;
@@ -151,6 +172,71 @@ namespace Spotlight.GameFlow
             dialogueText.ForceMeshUpdate();
             ShowPage(1);
             if (ready) AnimateFocus();
+        }
+
+        // Old prefab variants need not be rebuilt merely to gain the optional third slot.
+        private void EnsureCenterPortrait()
+        {
+            if (centerPortrait != null) return;
+            GameObject frame = OptionObject(transform, "CenterPortraitFrame", typeof(Image));
+            centerPortraitFrame = frame.GetComponent<Image>();
+            OptionRect(centerPortraitFrame.rectTransform, new Vector2(.36f, .33f), new Vector2(.64f, .89f));
+            centerPortraitFrame.color = leftPortraitFrame != null ? leftPortraitFrame.color : Color.clear;
+            centerPortraitFrame.raycastTarget = false;
+            centerPortrait = OptionObject(frame.transform, "CenterPortrait", typeof(Image)).GetComponent<Image>();
+            OptionRect(centerPortrait.rectTransform, Vector2.zero, Vector2.one);
+            centerPortrait.preserveAspect = true;
+            centerPortrait.raycastTarget = false;
+            ApplyPortrait(centerPortrait, centerPortraitFrame, null);
+        }
+
+        private readonly struct PortraitLayout
+        {
+            private readonly RectTransform rect;
+            private readonly Vector2 anchorMin, anchorMax, position, size, pivot;
+            public PortraitLayout(RectTransform rect)
+            {
+                this.rect = rect;
+                anchorMin = rect != null ? rect.anchorMin : Vector2.zero;
+                anchorMax = rect != null ? rect.anchorMax : Vector2.zero;
+                position = rect != null ? rect.anchoredPosition : Vector2.zero;
+                size = rect != null ? rect.sizeDelta : Vector2.zero;
+                pivot = rect != null ? rect.pivot : new Vector2(.5f, .5f);
+            }
+            public void Restore()
+            {
+                if (rect == null) return;
+                rect.anchorMin = anchorMin; rect.anchorMax = anchorMax; rect.pivot = pivot;
+                rect.anchoredPosition = position; rect.sizeDelta = size;
+            }
+        }
+
+        private void UpdatePortraitLayout(bool showThird)
+        {
+            if (threePortraitLayout == showThird) return;
+            threePortraitLayout = showThird;
+            if (showThird)
+            {
+                SetPortraitBounds(leftPortrait, leftPortraitFrame, .035f, .315f);
+                SetPortraitBounds(centerPortrait, centerPortraitFrame, .36f, .64f);
+                SetPortraitBounds(rightPortrait, rightPortraitFrame, .685f, .965f);
+            }
+            else
+            {
+                // Keep all original artist-authored offsets/sizes for existing two-person scripts.
+                leftFrameLayout.Restore(); rightFrameLayout.Restore();
+                leftImageLayout.Restore(); rightImageLayout.Restore();
+                centerFrameLayout.Restore(); centerImageLayout.Restore();
+            }
+            effects?.RefreshPortraitPositions();
+        }
+
+        private static void SetPortraitBounds(Image image, Image frame, float min, float max)
+        {
+            RectTransform outer = frame != null ? frame.rectTransform : image.rectTransform;
+            OptionRect(outer, new Vector2(min, .33f), new Vector2(max, .89f));
+            outer.pivot = new Vector2(.5f, .5f);
+            if (frame != null) OptionRect(image.rectTransform, Vector2.zero, Vector2.one);
         }
 
         private static void ApplyPortrait(Image image, Image frame, DialogueCharacter character)
@@ -177,15 +263,15 @@ namespace Spotlight.GameFlow
             hold = 0f;
             dialogueText.maxVisibleCharacters = (int)revealed;
             if (progressText != null)
-                progressText.text = (LineIndex + 1) + " / " + script.Count
+                progressText.text = (LineIndex + 1) + " / " + activeLines.Count
                     + (info.pageCount > 1 ? "    页 " + page + " / " + info.pageCount : string.Empty);
             UpdateHint();
         }
 
         private void AnimateFocus()
         {
-            effects.SetFocus(script[LineIndex].Speaker);
-            PlayLineAccent(script[LineIndex]);
+            effects.SetFocus(activeLines[LineIndex].Speaker);
+            PlayLineAccent(activeLines[LineIndex]);
         }
 
         private void Update()
@@ -201,7 +287,7 @@ namespace Spotlight.GameFlow
             if (script == null || !IsPlaying) return;
             Keyboard keyboard = Keyboard.current;
             if (keyboard != null && keyboard.escapeKey.wasPressedThisFrame) { Cancel(); return; }
-            if (!ready || blockingEffects > 0 || portraitChange != null) return;
+            if (!ready || blockingEffects > 0 || portraitChange != null || optionsVisible) return;
             if (IsTyping)
             {
                 revealed += Time.unscaledDeltaTime * charactersPerSecond;
@@ -209,11 +295,12 @@ namespace Spotlight.GameFlow
                 if (charactersPerSecond <= 0f) { revealed = pageEnd; dialogueText.maxVisibleCharacters = pageEnd; }
                 if (!IsTyping) UpdateHint();
             }
-            else if (script[LineIndex].AutoAdvanceSeconds > 0f)
+            else if (activeLines[LineIndex].AutoAdvanceSeconds > 0f)
             {
                 hold += Time.unscaledDeltaTime;
-                if (hold >= script[LineIndex].AutoAdvanceSeconds) Advance();
+                if (hold >= activeLines[LineIndex].AutoAdvanceSeconds) Advance();
             }
+            if (TryShowOptions()) return;
             if (keyboard != null && (keyboard.spaceKey.wasPressedThisFrame || keyboard.enterKey.wasPressedThisFrame
                 || keyboard.numpadEnterKey.wasPressedThisFrame)) Advance();
         }
@@ -221,7 +308,7 @@ namespace Spotlight.GameFlow
         /// <summary>第一次提交只补完当前页；下一次才翻页/换句。进退场期间不接受提交。</summary>
         public void Advance()
         {
-            if (!IsPlaying || !ready || exiting || blockingEffects > 0 || portraitChange != null || lastAdvanceFrame == Time.frameCount) return;
+            if (!IsPlaying || !ready || optionsVisible || exiting || blockingEffects > 0 || portraitChange != null || lastAdvanceFrame == Time.frameCount) return;
             lastAdvanceFrame = Time.frameCount;
             if (IsTyping)
             {
@@ -229,15 +316,18 @@ namespace Spotlight.GameFlow
                 dialogueText.maxVisibleCharacters = pageEnd;
                 hold = 0f;
                 UpdateHint();
+                TryShowOptions();
                 return;
             }
             if (page < dialogueText.textInfo.pageCount) { ShowPage(page + 1); return; }
-            if (LineIndex + 1 < script.Count) { PrepareNextLine(LineIndex + 1); return; }
+            if (LineIndex + 1 < activeLines.Count) { PrepareNextLine(LineIndex + 1); return; }
+            if (TryShowOptions()) return;
             exiting = true;
             ready = false;
             continueButton.interactable = false;
             effects.Play(PresentationEffectIds.PortraitFadeOut, 0);
             effects.Play(PresentationEffectIds.PortraitFadeOut, 1);
+            if (centerPortrait.enabled) effects.Play(PresentationEffectIds.PortraitFadeOut, 2);
             transition = Sequence();
             transition.Append(DOTween.To(() => canvasGroup.alpha, v => canvasGroup.alpha = v, 0f, exitSeconds));
             transition.Join(Move(dialogueBox, boxPosition + new Vector2(0f, -24f), exitSeconds));
@@ -253,9 +343,13 @@ namespace Spotlight.GameFlow
         private void UpdateHint()
         {
             if (hintText == null) return;
+            if (optionsVisible) { hintText.text = "点击选项作答 · 空格 / 回车不会代选"; return; }
             hintText.text = IsTyping || dialogueText.maxVisibleCharacters < pageEnd ? "空格 / 回车 / 点击 · 显示全文"
                 : page < dialogueText.textInfo.pageCount ? "空格 / 回车 / 点击 · 下一页"
-                : LineIndex + 1 < script.Count ? "空格 / 回车 / 点击 · 继续" : "空格 / 回车 / 点击 · 结束对话";
+                : LineIndex + 1 < activeLines.Count ? "空格 / 回车 / 点击 · 继续"
+                : script.Options.Count > 0 && string.IsNullOrEmpty(SelectedOptionId) ? "即将显示选项"
+                : string.IsNullOrEmpty(SelectedOptionId) ? "空格 / 回车 / 点击 · 结束对话"
+                : "已选择回应 · 空格 / 回车 / 点击结束";
         }
 
         public void Cancel()
@@ -274,7 +368,11 @@ namespace Spotlight.GameFlow
             finished = cancelled = null;
             CancelEffectWork();
             script = null;
-            left = right = null;
+            activeLines.Clear();
+            ResetOptions();
+            left = right = center = null;
+            if (centerPortrait != null) ApplyPortrait(centerPortrait, centerPortraitFrame, null);
+            UpdatePortraitLayout(false);
             IsPlaying = ready = exiting = false;
             LineIndex = -1;
             if (active == this) active = null;

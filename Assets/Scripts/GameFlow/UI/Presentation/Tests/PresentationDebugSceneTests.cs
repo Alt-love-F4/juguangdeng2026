@@ -60,7 +60,7 @@ namespace Spotlight.GameFlow.Tests
             Assert.That(help, Is.Not.Null);
             Assert.That(help.sortingOrder, Is.GreaterThan(800));
             Button[] buttons = help.GetComponentsInChildren<Button>(true);
-            Assert.That(buttons.Length, Is.EqualTo(27));
+            Assert.That(buttons.Length, Is.EqualTo(29));
             foreach (Button button in buttons)
             {
                 Assert.That(button.onClick.GetPersistentEventCount(), Is.EqualTo(1));
@@ -72,6 +72,113 @@ namespace Spotlight.GameFlow.Tests
             yield return null;
             Assert.That(controller.CurrentPanel, Is.InstanceOf<DialoguePanel>());
             Assert.That(UnityEngine.Object.FindFirstObjectByType<GameFlowBootstrap>(), Is.Null);
+        }
+
+        [UnityTest]
+        public IEnumerator SharedSceneChoiceButtonShowsOptionsAndReplaysCleanly()
+        {
+            Button launcher = null;
+            foreach (GameObject root in debugScene.GetRootGameObjects())
+                foreach (Button button in root.GetComponentsInChildren<Button>(true))
+                    if (button.name == "Preview_15") launcher = button;
+            Assert.That(launcher, Is.Not.Null);
+            Assert.That(launcher.onClick.GetPersistentMethodName(0), Is.EqualTo("PlayDialogueOptions"));
+            launcher.onClick.Invoke();
+            var panel = controller.CurrentPanel as DialoguePanel;
+            Assert.That(panel, Is.Not.Null);
+            float deadline = Time.realtimeSinceStartup + 5f;
+            while (!panel.IsChoosing)
+            {
+                Assert.That(Time.realtimeSinceStartup, Is.LessThan(deadline));
+                if (panel.IsReady) panel.Advance();
+                yield return null;
+            }
+            Assert.That(panel.LeftPortrait.enabled && panel.CenterPortrait.enabled && panel.RightPortrait.enabled, Is.True);
+            foreach (Image portrait in new[] { panel.LeftPortrait, panel.CenterPortrait, panel.RightPortrait })
+                Assert.That(portrait.transform.localScale.x, Is.GreaterThan(0f));
+            panel.Effects.SetFocus(DialogueSpeaker.Center, immediate: true);
+            panel.Effects.Tick(0f);
+            Assert.That(panel.CenterPortrait.color.r, Is.GreaterThan(panel.LeftPortrait.color.r));
+            Assert.That(panel.CenterPortrait.color.r, Is.GreaterThan(panel.RightPortrait.color.r));
+            StringAssert.Contains("街区线人", string.Join(" ",
+                Array.ConvertAll(panel.GetComponentsInChildren<TMP_Text>(), item => item.text)));
+            Transform options = panel.transform.Find("DialogueOptions");
+            Assert.That(options.gameObject.activeInHierarchy, Is.True);
+            Button[] choices = options.GetComponentsInChildren<Button>();
+            Assert.That(choices.Length, Is.EqualTo(3));
+            Assert.That(choices[2].interactable, Is.False);
+            StringAssert.Contains("需要更多情报", choices[2].GetComponentInChildren<TMP_Text>().text);
+            panel.Advance();
+            Assert.That(panel.IsChoosing, Is.True, "Dialogue submit must not select an option.");
+            Assert.That(panel.SelectedOptionId, Is.Empty);
+            yield return new WaitForEndOfFrame();
+            Texture2D capture = ScreenCapture.CaptureScreenshotAsTexture();
+            if (capture != null)
+            {
+                Directory.CreateDirectory(Path.GetFullPath("output"));
+                File.WriteAllBytes(Path.GetFullPath("output/presentation-debug-options.png"), capture.EncodeToPNG());
+                UnityEngine.Object.Destroy(capture);
+            }
+            controller.ToggleTimePause();
+            choices[1].onClick.Invoke();
+            Assert.That(panel.SelectedOptionId, Is.EqualTo("caution"));
+            Assert.That(panel.SelectOption("support"), Is.False, "Only accept one choice.");
+            yield return new WaitForSecondsRealtime(.6f);
+            Assert.That(panel.IsChoosing, Is.False);
+            Assert.That(panel.LineIndex, Is.EqualTo(2));
+            controller.ToggleTimePause();
+            controller.ReplayLast();
+            var replay = controller.CurrentPanel as DialoguePanel;
+            Assert.That(replay, Is.Not.Null);
+            Assert.That(replay.SelectedOptionId, Is.Empty);
+            Assert.That(replay.IsChoosing, Is.False);
+            Assert.That(UnityEngine.Object.FindFirstObjectByType<GameFlowBootstrap>(), Is.Null);
+        }
+
+        [UnityTest]
+        public IEnumerator ThirdPortraitEffectsReplacementAndTwoPersonReplayKeepOriginalOrientation()
+        {
+            controller.PlayDialogueOptions();
+            var panel = controller.CurrentPanel as DialoguePanel;
+            float deadline = Time.realtimeSinceStartup + 6f;
+            while (!panel.IsReady) { Assert.That(Time.realtimeSinceStartup, Is.LessThan(deadline)); yield return null; }
+            Assert.That(panel.CenterPortrait.enabled, Is.True);
+            var centerFx = panel.PlayEffect(PresentationEffectIds.AccentShakeStartle, "debug_contact");
+            var screenFx = panel.PlayEffect(PresentationEffectIds.ShakeLight);
+            Assert.That(centerFx.Status, Is.EqualTo(PresentationEffectStatus.Playing));
+            Assert.That(screenFx.Status, Is.EqualTo(PresentationEffectStatus.Playing));
+            yield return new WaitForSecondsRealtime(.6f);
+            Assert.That(centerFx.IsCompleted, Is.True);
+            Assert.That(screenFx.IsCompleted, Is.True);
+            yield return new WaitForEndOfFrame();
+            CaptureScreenshot("output/presentation-three-portraits.png");
+
+            DialogueScript sample = DialoguePreviewDialogue.CreateOptions();
+            var replacement = new DialogueCharacter("debug_new_contact", "新线人", sample.RightCharacter.Portrait);
+            panel.Play(new DialogueScript(new[]
+            {
+                new DialogueLine(DialogueSpeaker.Center, ""),
+                new DialogueLine(DialogueSpeaker.Center, "新线人已经到场", replaceCenter: true, centerCharacter: replacement),
+                new DialogueLine(DialogueSpeaker.Left, "中间角色离开", replaceCenter: true)
+            }, sample.LeftCharacter, sample.RightCharacter, centerCharacter: sample.CenterCharacter));
+            while (!panel.IsReady) { Assert.That(Time.realtimeSinceStartup, Is.LessThan(deadline)); yield return null; }
+            panel.Advance();
+            yield return null;
+            while (!panel.IsReady) { Assert.That(Time.realtimeSinceStartup, Is.LessThan(deadline)); yield return null; }
+            Assert.That(panel.CenterCharacter, Is.SameAs(replacement));
+            Assert.That(panel.CenterPortrait.sprite, Is.SameAs(replacement.Portrait));
+            Assert.That(panel.CenterPortrait.transform.localScale.x, Is.GreaterThan(0f));
+            panel.Advance();
+            yield return null;
+            panel.Advance();
+            yield return null;
+            while (!panel.IsReady) { Assert.That(Time.realtimeSinceStartup, Is.LessThan(deadline)); yield return null; }
+            Assert.That(panel.CenterCharacter, Is.Null);
+            Assert.That(panel.CenterPortrait.enabled, Is.False);
+            panel.Play(DialoguePreviewDialogue.Create());
+            while (!panel.IsReady) { Assert.That(Time.realtimeSinceStartup, Is.LessThan(deadline)); yield return null; }
+            Assert.That(panel.CenterPortrait.enabled, Is.False);
+            Assert.That(panel.RightPortrait.transform.localScale.x, Is.GreaterThan(0f));
         }
 
         [UnityTest]

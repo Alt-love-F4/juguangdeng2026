@@ -133,3 +133,20 @@ JSON 文件位于 `Assets/Settings/Resources/Luban/`，上表 Resources 路径�
 迁移时执行过真实 Luban strict 生成（退出 0），以及隔离副本检查：重复 Object 主键、重复 Bar 复合索引、非法 objType、坏 Trigger eventId 均退出 1；不同 owner 的同名 BarId 退出 0。正式数据不受这些负例修改。
 
 `LocalizedTMPText` 仍通过 TMP 初始 text 作为 key 注入 `tbtext`。非配表动态数值不需要挂载。旧 TextTable 归档及 GenerateText 兼容入口已移除，只维护 Excel。
+
+## 本机 Luban 安装与生成（2026-10-08）
+
+已安装官方 Luban 5.1.0 到 `%LOCALAPPDATA%\Luban\5.1.0\Luban`，并配置用户环境变量 `LUBAN_DIR`。工具位于项目外，不将生成器二进制文件提交到仓库。机器已具备 .NET 8，无需重复安装。
+
+- 日常流程：保存 Excel → 执行 `Assets/ConfigTables/GenerateAll.bat` → 等待 Unity 导入 → 重新进入 Play Mode。
+- Unity 菜单 `Spotlight > Narrative > Generate Luban` 使用同一个批处理入口。
+- `GenerateAll.bat` 优先使用显式 `LUBAN_DIR`，未设置时使用上述目录；DLL 通过 `dotnet` 执行，保留仅有 EXE 的兼容入口。
+- 原有硬编码 `D:\Luban\src\Luban\bin\Release\net8.0` 已移除。启动较早的 Unity 即使未继承新环境变量，也能使用默认目录生成。
+- config 为 `Assets/ConfigTables/luban.conf`，使用 `client`、`cs-newtonsoft-json`、`json`、`--strict`。
+- C# 输出仍在 `Assets/Scripts/Config/Generated`，JSON 输出仍在 `Assets/Settings/Resources/Luban`。
+- YokiFrame TableKit 本机配置已同步工具、config、target 与输出目录，不再指向不存在的 `Luban/MiniTemplate`。
+- 未检测到分散 Excel 时直接读已保存的 Narrative.xlsx / Shared/Text.xlsx，不合并覆盖源文件；仅有分散表时调用 Python 合并。
+- 输出包含 `ERROR` 或 Luban 返回非零退出码时，生成失败；不要把旧 JSON 当成更新成功。
+- `generate_tables.py` 普通入口只生成 Simulation 表，不能代替完整入口更新 Shared/Text.xlsx。
+
+其他电脑安装官方生成器后，将 `LUBAN_DIR` 设置为包含 `Luban.dll` / `Luban.exe` 的目录；不要复制本机绝对路径。

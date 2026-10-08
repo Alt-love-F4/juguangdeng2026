@@ -58,6 +58,50 @@ namespace Spotlight.GameFlow.Tests
             Assert.That(sample.RightCharacter.Portrait, Is.Not.Null);
         }
 
+        [Test]
+        public void OptionPreviewContainsEnabledDisabledChoicesWithoutNcsResultExecution()
+        {
+            DialogueScript script = DialoguePreviewDialogue.CreateOptions();
+            Assert.That(script.CenterCharacter, Is.Not.Null);
+            Assert.That(script.CenterCharacter.Portrait, Is.Not.Null);
+            Assert.That(script[1].Speaker, Is.EqualTo(DialogueSpeaker.Center));
+            Assert.That((int)DialogueSpeaker.Right, Is.EqualTo(2), "Preserve existing serialized enum values.");
+            Assert.That(script.Options.Count, Is.EqualTo(3));
+            Assert.That(script.Options[0].Enabled, Is.True);
+            Assert.That(script.Options[1].ResultKey, Is.EqualTo("debug_caution"));
+            Assert.That(script.Options[2].Enabled, Is.False);
+            Assert.That(script.Options[2].RequirementHint, Is.EqualTo("需要更多情报"));
+            var callerOptions = new List<DialogueOption> { script.Options[0] };
+            var snapshot = new DialogueScript(new[] { script[0] }, options: callerOptions);
+            callerOptions.Clear();
+            Assert.That(snapshot.Options.Count, Is.EqualTo(1));
+            Assert.Throws<ArgumentException>(() => new DialogueScript(new[] { script[0] },
+                options: new[] { script.Options[0], script.Options[0] }));
+        }
+
+        [UnityTest]
+        public IEnumerator OptionsAppearAfterTheLastLineAndSelectionStartsResponse()
+        {
+            DialoguePanel panel = Open();
+            panel.Play(DialoguePreviewDialogue.CreateOptions());
+            yield return Ready(panel);
+
+            panel.Advance();
+            yield return null;
+            panel.Advance();
+            yield return null;
+            panel.Advance();
+            yield return null;
+
+            Assert.That(panel.IsChoosing, Is.True);
+            Assert.That(panel.SelectOption("locked"), Is.False);
+            Assert.That(panel.SelectOption("support"), Is.True);
+            yield return new WaitForSecondsRealtime(.55f);
+            Assert.That(panel.SelectedOptionId, Is.EqualTo("support"));
+            Assert.That(panel.IsChoosing, Is.False);
+            Assert.That(panel.LineIndex, Is.EqualTo(2));
+        }
+
         [UnityTest]
         public IEnumerator RevealAndAdvanceAreSeparateAndDuplicateSubmitIsIgnored()
         {

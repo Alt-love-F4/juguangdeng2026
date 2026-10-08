@@ -79,6 +79,9 @@ namespace Spotlight.GameFlow.Editor
                 Button cancel = Button(header.transform, "Cancel", "Esc · 退出", new Vector2(.83f, .15f), new Vector2(.965f, .85f));
                 Image leftImage = Character(root.transform, "LeftPortrait", left, .08f, .40f);
                 Image rightImage = Character(root.transform, "RightPortrait", right, .60f, .92f);
+                Image centerImage = Character(root.transform, "CenterPortrait", null, .36f, .64f);
+                centerImage.enabled = false;
+                root.transform.Find("CenterPortraitFrame").GetComponent<Image>().enabled = false;
                 Image box = Image(root.transform, "DialogueBox", new Vector2(.065f, .055f), new Vector2(.935f, .325f), new Color(.035f, .027f, .022f, .96f));
                 Image rule = Image(box.transform, "GoldRule", new Vector2(0f, .985f), Vector2.one, Gold);
                 rule.raycastTarget = false;
@@ -96,8 +99,10 @@ namespace Spotlight.GameFlow.Editor
                 Set(serialized, "background", background);
                 Set(serialized, "leftPortrait", leftImage);
                 Set(serialized, "rightPortrait", rightImage);
+                Set(serialized, "centerPortrait", centerImage);
                 Set(serialized, "leftPortraitFrame", root.transform.Find("LeftPortraitFrame").GetComponent<Image>());
                 Set(serialized, "rightPortraitFrame", root.transform.Find("RightPortraitFrame").GetComponent<Image>());
+                Set(serialized, "centerPortraitFrame", root.transform.Find("CenterPortraitFrame").GetComponent<Image>());
                 Set(serialized, "dialogueBox", box.rectTransform);
                 Set(serialized, "titleText", title);
                 Set(serialized, "speakerText", speaker);
@@ -132,6 +137,7 @@ namespace Spotlight.GameFlow.Editor
             var serialized = new SerializedObject(visuals);
             Set(serialized, "leftPortrait", left);
             Set(serialized, "rightPortrait", right);
+            Set(serialized, "centerPortrait", left); // Shared test art until a unique third portrait is supplied.
             Set(serialized, "background", background);
             serialized.ApplyModifiedPropertiesWithoutUndo();
             AssetDatabase.CreateAsset(visuals, SamplePath);

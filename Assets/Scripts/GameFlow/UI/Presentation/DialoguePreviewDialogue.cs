@@ -8,6 +8,37 @@ namespace Spotlight.GameFlow
     {
         public static DialogueScript Create() => new DialoguePreviewDialogue().CreateScript();
 
+        /// <summary>
+        /// 共享调试场景的选项演出样例。它只展示 DialoguePanel 的选项、禁用态、选择反馈和回应台词，
+        /// 不调用 NCS 选择结算，也不修改存档。
+        /// </summary>
+        public static DialogueScript CreateOptions()
+        {
+            var visuals = Resources.Load<DialogueVisualsAsset>("Dialogue/DialoguePreview");
+            if (visuals == null) throw new InvalidOperationException("Missing DialoguePreview visuals asset.");
+            return new DialogueScript(new[]
+            {
+                new DialogueLine(DialogueSpeaker.Right, "夜色落下来，印刷工把那份名单推到你面前。", gesture: DialogueGesture.Nod),
+                new DialogueLine(DialogueSpeaker.Center, "我也带来了消息。我们三个人得一起想想：你准备怎么处理？", gesture: DialogueGesture.Nod)
+            }, new DialogueCharacter("cafe_owner", "咖啡馆店主", visuals.LeftPortrait),
+                new DialogueCharacter("printer", "印刷工", visuals.RightPortrait),
+                centerCharacter: new DialogueCharacter("debug_contact", "街区线人", visuals.CenterPortrait ?? visuals.LeftPortrait),
+                title: "咖啡馆 · 三人选项演出测试", background: visuals.Background,
+                optionPrompt: "你要如何回应？",
+                options: new[]
+                {
+                    new DialogueOption("support", "支持他的计划",
+                        new DialogueLine(DialogueSpeaker.Left, "好，我会帮你把这件事安排下去。"),
+                        resultKey: "debug_support"),
+                    new DialogueOption("caution", "提醒他保持谨慎",
+                        new DialogueLine(DialogueSpeaker.Center, "你说得对，我们三个人更应该小心，不能因为着急就留下破绽。"),
+                        resultKey: "debug_caution"),
+                    new DialogueOption("locked", "询问只有线人知道的情报",
+                        new DialogueLine(DialogueSpeaker.Narrator, "你现在还没有足够的情报。"),
+                        enabled: false, requirementHint: "需要更多情报", resultKey: "debug_locked")
+                });
+        }
+
         public DialogueScript CreateScript()
         {
             var visuals = Resources.Load<DialogueVisualsAsset>("Dialogue/DialoguePreview");

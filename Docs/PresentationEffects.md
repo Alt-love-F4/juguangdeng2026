@@ -49,18 +49,18 @@ cutScenePanel.Play(new CutSceneData(videoPath: "Videos/opening.mp4"),
 
 | ID / 入口 | 行为 |
 |---|---|
-| fx_enter_shadow_walk | 当前立绘以黑影、小比例、远处偏移入场，随后显色落位；右侧位移镜像。首次入场与新角色替换默认调用。 |
+| fx_enter_shadow_walk | 当前立绘以黑影、小比例、远处偏移入场，随后显色落位；左右角色从各自方向入场，中间角色使用垂直偏移入场；立绘不做镜像。首次入场与新角色替换默认调用。 |
 | fx_accent_shake_startle | 单个目标角色横向震动并衰减，结束回原位；可作用于非说话人。 |
 | fx_shake_light | UI 演出舞台轻震动，固定级别 1。 |
 | fx_shake_heavy | UI 演出舞台重震动，固定级别 2。 |
 | fx_flash_white | 全屏白闪，结束清除；遮罩不拦截输入。 |
 | fx_transition_black | 压黑后恢复，可在全黑时执行画面切换回调。 |
 | fx_portrait_fade_out / fx_portrait_fade_in | 默认退场/换位用的淡出淡入。新增的是内部效果资源 ID，不是 NCS 新字段。 |
-| SwapPortraits | 淡出两侧 → 隐藏时交换角色 → 右侧图像水平镜像 → 淡入。文字与姓名条不镜像。 |
+| SwapPortraits | 淡出两侧 → 隐藏时交换角色 → 保持原图朝向 → 淡入；中间角色不参与两侧换位。 |
 | PlayCameraCue | UI 舞台的缩放、焦点偏移与震动；结束保留目标镜头，调用默认参数复位。 |
 | PlayFade | in/out/black/transition；out/black 保留黑场，in 恢复，transition 自动恢复。 |
 
-角色高亮/沉默压暗、轻微说话聚焦与旧点头指令仍保留。镜像仅作用于 portrait Image，不翻转边框、文字或按钮。
+角色高亮/沉默压暗、轻微说话聚焦与旧点头指令仍保留。所有角色位的立绘均保持原图朝向，不再水平镜像；边框、文字与按钮也不翻转。
 当前美术资源保留原始设计稿底色；效果作用于实际 Sprite。将来换正式透明立绘即可得到无底色的角色剪影，不需要改效果逻辑。
 
 ## 资源与归属
@@ -112,3 +112,5 @@ panel.PlayFade("transition", duration: .6f, atBlack: () => { /* 全黑时切换�
 PlayMode：PresentationEffectsTests、DialoguePresentationTests、PresentationDebugSceneTests、FirstDayIntroductionTests。
 菜单 `Tools > Game Flow > Run Presentation Effects Regression` 执行四组回归；详细 XML 写入 `output/presentation-effects-tests.xml`。
 新增/修改效果应复用本场景及测试，不另造测试 Scene、Panel 或 NCS 通道。
+
+三角色扩展：`DialogueSpeaker.Center` 保持已有 Narrator/Left/Right 枚举值不变；`center` 或中间角色的 `CharacterKey` 可作为特效目标。三个位拥有独立的入退场和强调通道，与全局震屏、镜头、遮罩通道互不覆盖。

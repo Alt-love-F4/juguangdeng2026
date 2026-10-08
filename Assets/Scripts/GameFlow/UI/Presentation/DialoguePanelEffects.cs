@@ -1,6 +1,8 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using DG.Tweening;
+using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -30,8 +32,10 @@ namespace Spotlight.GameFlow
         public Image EffectOverlay { get; private set; }
         public Image LeftPortrait => leftPortrait;
         public Image RightPortrait => rightPortrait;
+        public Image CenterPortrait => centerPortrait;
         public DialogueCharacter LeftCharacter => left;
         public DialogueCharacter RightCharacter => right;
+        public DialogueCharacter CenterCharacter => center;
 
         private void InitializeEffects()
         {
@@ -51,7 +55,8 @@ namespace Spotlight.GameFlow
             // Reverse enumeration above reverses sibling order. Re-establish rendering order explicitly.
             background.transform.SetAsFirstSibling();
             if (leftPortraitFrame != null) leftPortraitFrame.transform.SetSiblingIndex(1);
-            if (rightPortraitFrame != null) rightPortraitFrame.transform.SetSiblingIndex(2);
+            if (centerPortraitFrame != null) centerPortraitFrame.transform.SetSiblingIndex(2);
+            if (rightPortraitFrame != null) rightPortraitFrame.transform.SetSiblingIndex(3);
             dialogueBox.SetAsLastSibling();
             var overlayObject = new GameObject("EffectOverlay", typeof(RectTransform), typeof(CanvasRenderer), typeof(Image));
             overlayObject.transform.SetParent(transform, false);
@@ -61,18 +66,19 @@ namespace Spotlight.GameFlow
             EffectOverlay.rectTransform.offsetMin = EffectOverlay.rectTransform.offsetMax = Vector2.zero;
             EffectOverlay.raycastTarget = false;
             effects = new PresentationEffects(effectLibrary, EffectStage, EffectOverlay, leftPortrait,
-                leftPortraitFrame, rightPortrait, rightPortraitFrame, inactiveTint, focusSeconds);
+                leftPortraitFrame, rightPortrait, rightPortraitFrame, inactiveTint, focusSeconds, centerPortrait, centerPortraitFrame);
         }
         private void EnterVisiblePortraits()
         {
             if (leftPortrait.enabled) effects.Play(PresentationEffectIds.EnterShadowWalk, 0);
             if (rightPortrait.enabled) effects.Play(PresentationEffectIds.EnterShadowWalk, 1);
+            if (centerPortrait.enabled) effects.Play(PresentationEffectIds.EnterShadowWalk, 2);
         }
         private void PlayLineAccent(DialogueLine line)
         {
             if (!string.IsNullOrWhiteSpace(line.AccentFxKey)) PlayEffect(line.AccentFxKey, line.AccentTargetKey);
             else if (line.Gesture == DialogueGesture.Shake) PlayEffect(PresentationEffectIds.AccentShakeStartle);
-            else if (line.Gesture == DialogueGesture.Nod) effects.Nod(line.Speaker == DialogueSpeaker.Left ? 0 : 1);
+            else if (line.Gesture == DialogueGesture.Nod) effects.Nod(SpeakerSlot(line.Speaker));
         }
 
         /// <summary>Shared effect-ID input. A future NCS adapter resolves its target ID and calls this method.</summary>
@@ -92,14 +98,15 @@ namespace Spotlight.GameFlow
         {
             if (string.IsNullOrWhiteSpace(targetKey) || targetKey == "speaker")
             {
-                DialogueSpeaker who = script[LineIndex].Speaker;
+                DialogueSpeaker who = activeLines[LineIndex].Speaker;
                 if (who == DialogueSpeaker.Narrator) throw new ArgumentException("Narrator has no portrait: supply a target character or side.");
-                targetKey = who == DialogueSpeaker.Left ? "left" : "right";
+                targetKey = who == DialogueSpeaker.Left ? "left" : who == DialogueSpeaker.Center ? "center" : "right";
             }
             int slot = targetKey == "left" || (left != null && !string.IsNullOrEmpty(left.CharacterKey) && left.CharacterKey == targetKey) ? 0
-                : targetKey == "right" || (right != null && !string.IsNullOrEmpty(right.CharacterKey) && right.CharacterKey == targetKey) ? 1 : -1;
+                : targetKey == "right" || (right != null && !string.IsNullOrEmpty(right.CharacterKey) && right.CharacterKey == targetKey) ? 1
+                : targetKey == "center" || (center != null && !string.IsNullOrEmpty(center.CharacterKey) && center.CharacterKey == targetKey) ? 2 : -1;
             if (slot < 0) throw new ArgumentException("Effect target is not on stage: " + targetKey);
-            if (!(slot == 0 ? leftPortrait.enabled : rightPortrait.enabled))
+            if (!(slot == 0 ? leftPortrait.enabled : slot == 1 ? rightPortrait.enabled : centerPortrait.enabled))
                 throw new ArgumentException("Effect target has no visible portrait: " + targetKey);
             return slot;
         }
@@ -131,8 +138,8 @@ namespace Spotlight.GameFlow
         }
         private void PrepareNextLine(int index)
         {
-            DialogueLine line = script[index];
-            if (!line.ReplaceLeft && !line.ReplaceRight) { ShowLine(index); return; }
+            DialogueLine line = activeLines[index];
+            if (!line.ReplaceLeft && !line.ReplaceRight && !line.ReplaceCenter) { ShowLine(index); return; }
             ready = false;
             continueButton.interactable = false;
             portraitChange = StartCoroutine(ChangeCharacters(index));
@@ -140,19 +147,21 @@ namespace Spotlight.GameFlow
         private IEnumerator ChangeCharacters(int index)
         {
             yield return null; // Ensure StartCoroutine has returned before the routine may clear its owner field.
-            DialogueLine line = script[index];
+            DialogueLine line = activeLines[index];
             PresentationEffectHandle a = line.ReplaceLeft && leftPortrait.enabled ? effects.Play(PresentationEffectIds.PortraitFadeOut, 0) : null;
             PresentationEffectHandle b = line.ReplaceRight && rightPortrait.enabled ? effects.Play(PresentationEffectIds.PortraitFadeOut, 1) : null;
-            while ((a != null && !a.IsDone) || (b != null && !b.IsDone)) yield return null;
-            if ((a != null && !a.IsCompleted) || (b != null && !b.IsCompleted)) { FinishPortraitChange(); yield break; }
+            PresentationEffectHandle c = line.ReplaceCenter && centerPortrait.enabled ? effects.Play(PresentationEffectIds.PortraitFadeOut, 2) : null;
+            while ((a != null && !a.IsDone) || (b != null && !b.IsDone) || (c != null && !c.IsDone)) yield return null;
+            if ((a != null && !a.IsCompleted) || (b != null && !b.IsCompleted) || (c != null && !c.IsCompleted)) { FinishPortraitChange(); yield break; }
             ShowLine(index);
             a = line.ReplaceLeft && leftPortrait.enabled ? effects.Play(PresentationEffectIds.EnterShadowWalk, 0) : null;
             b = line.ReplaceRight && rightPortrait.enabled ? effects.Play(PresentationEffectIds.EnterShadowWalk, 1) : null;
-            while ((a != null && !a.IsDone) || (b != null && !b.IsDone)) yield return null;
+            c = line.ReplaceCenter && centerPortrait.enabled ? effects.Play(PresentationEffectIds.EnterShadowWalk, 2) : null;
+            while ((a != null && !a.IsDone) || (b != null && !b.IsDone) || (c != null && !c.IsDone)) yield return null;
             FinishPortraitChange();
-            if (IsPlaying && script != null) PlayLineAccent(script[LineIndex]);
+            if (IsPlaying && script != null) PlayLineAccent(activeLines[LineIndex]);
         }
-        /// <summary>Default left/right switch: fade out, swap resources while hidden, mirror, then fade in.</summary>
+        /// <summary>Default left/right switch: fade out, swap resources while hidden without mirroring, then fade in.</summary>
         public void SwapPortraits(Action completed = null)
         {
             if (!IsReady || exiting) return;
@@ -183,15 +192,216 @@ namespace Spotlight.GameFlow
             portraitChange = null;
             if (!IsPlaying || script == null) return;
             ready = true;
-            continueButton.interactable = true;
-            effects.SetFocus(script[LineIndex].Speaker);
+            continueButton.interactable = !optionsVisible;
+            effects.SetFocus(activeLines[LineIndex].Speaker);
         }
+        private static int SpeakerSlot(DialogueSpeaker speaker)
+            => speaker == DialogueSpeaker.Left ? 0 : speaker == DialogueSpeaker.Right ? 1
+                : speaker == DialogueSpeaker.Center ? 2 : -1;
+
         private void RefreshSpeakerName()
         {
-            DialogueLine line = script[LineIndex];
+            DialogueLine line = activeLines[LineIndex];
             string name = line.Speaker == DialogueSpeaker.Left ? left?.DisplayName
-                : line.Speaker == DialogueSpeaker.Right ? right?.DisplayName : "旁白";
+                : line.Speaker == DialogueSpeaker.Right ? right?.DisplayName
+                : line.Speaker == DialogueSpeaker.Center ? center?.DisplayName : "旁白";
             speakerText.text = string.IsNullOrEmpty(line.SpeakerNameOverride) ? name ?? "旁白" : line.SpeakerNameOverride;
+        }
+    }
+}
+
+namespace Spotlight.GameFlow
+{
+    /// <summary>End-of-script single-choice UI. Presentation snapshots only; no NCS settlement or save mutation.</summary>
+    public sealed partial class DialoguePanel
+    {
+        private readonly List<Button> optionButtons = new List<Button>();
+        private GameObject optionRoot;
+        private CanvasGroup optionGroup;
+        private TMP_Text optionPrompt;
+        private RectTransform optionContent;
+        private ScrollRect optionScroll;
+        private Tween optionFeedback;
+        private bool optionsVisible;
+        public bool IsChoosing => IsPlaying && optionsVisible;
+        public string SelectedOptionId { get; private set; } = string.Empty;
+
+        private void CreateOptionOverlay()
+        {
+            // Owned by this panel, like EffectStage. Existing prefabs need no destructive rebuilding.
+            optionRoot = OptionObject(transform, "DialogueOptions", typeof(Image), typeof(CanvasGroup));
+            var rect = (RectTransform)optionRoot.transform;
+            OptionRect(rect, new Vector2(.10f, .35f), new Vector2(.70f, .77f));
+            Image surface = optionRoot.GetComponent<Image>();
+            surface.color = new Color(.035f, .027f, .022f, .98f);
+            optionGroup = optionRoot.GetComponent<CanvasGroup>();
+            optionPrompt = OptionText(rect, "Prompt", new Vector2(.05f, .81f), new Vector2(.95f, .97f), 26f);
+            optionPrompt.color = new Color(1f, .88f, .66f);
+            optionPrompt.alignment = TextAlignmentOptions.MidlineLeft;
+
+            GameObject viewport = OptionObject(rect, "Viewport", typeof(Image), typeof(RectMask2D));
+            var viewRect = (RectTransform)viewport.transform;
+            OptionRect(viewRect, new Vector2(.05f, .07f), new Vector2(.95f, .78f));
+            viewport.GetComponent<Image>().color = new Color(0f, 0f, 0f, .01f);
+            GameObject content = OptionObject(viewRect, "Content", typeof(VerticalLayoutGroup), typeof(ContentSizeFitter));
+            optionContent = (RectTransform)content.transform;
+            optionContent.anchorMin = new Vector2(0f, 1f); optionContent.anchorMax = Vector2.one;
+            optionContent.pivot = new Vector2(.5f, 1f);
+            optionContent.offsetMin = optionContent.offsetMax = Vector2.zero;
+            VerticalLayoutGroup layout = content.GetComponent<VerticalLayoutGroup>();
+            layout.spacing = 9f;
+            layout.childControlWidth = layout.childControlHeight = true;
+            layout.childForceExpandWidth = true; layout.childForceExpandHeight = false;
+            content.GetComponent<ContentSizeFitter>().verticalFit = ContentSizeFitter.FitMode.PreferredSize;
+            optionScroll = viewport.AddComponent<ScrollRect>();
+            optionScroll.viewport = viewRect; optionScroll.content = optionContent;
+            optionScroll.horizontal = false; optionScroll.vertical = true;
+            optionScroll.movementType = ScrollRect.MovementType.Clamped;
+            optionScroll.scrollSensitivity = 35f;
+            optionRoot.SetActive(false);
+        }
+
+        private bool TryShowOptions()
+        {
+            if (!IsPlaying || !IsReady || exiting || optionsVisible || !string.IsNullOrEmpty(SelectedOptionId)
+                || script.Options.Count == 0 || IsTyping || page < dialogueText.textInfo.pageCount
+                || LineIndex != activeLines.Count - 1) return false;
+            optionsVisible = true;
+            ClearOptionButtons();
+            optionPrompt.text = string.IsNullOrEmpty(script.OptionPrompt) ? "你要怎么回应？" : script.OptionPrompt;
+            for (int i = 0; i < script.Options.Count; i++)
+            {
+                DialogueOption option = script.Options[i];
+                GameObject row = OptionObject(optionContent, "Option_" + option.OptionId,
+                    typeof(Image), typeof(Button), typeof(LayoutElement));
+                LayoutElement size = row.GetComponent<LayoutElement>();
+                size.minHeight = 68f; size.preferredHeight = 76f;
+                Image image = row.GetComponent<Image>();
+                image.color = new Color(.23f, .17f, .105f, 1f);
+                Button button = row.GetComponent<Button>();
+                button.targetGraphic = image; button.interactable = option.Enabled;
+                // Input is an explicit click, never the dialogue's Space/Enter submission.
+                button.navigation = new Navigation { mode = Navigation.Mode.None };
+                ColorBlock colors = button.colors;
+                colors.highlightedColor = new Color(1f, .89f, .68f);
+                colors.pressedColor = new Color(.64f, .80f, .66f);
+                colors.disabledColor = new Color(.48f, .48f, .48f);
+                button.colors = colors;
+                TMP_Text label = OptionText(row.transform, "Label", new Vector2(.035f, .08f), new Vector2(.965f, .92f), 24f);
+                label.text = (i + 1) + ".  " + option.Text;
+                if (!option.Enabled)
+                {
+                    label.text += "\n[" + (string.IsNullOrEmpty(option.RequirementHint) ? "条件未满足" : option.RequirementHint) + "]";
+                    label.color = new Color(.6f, .56f, .50f);
+                }
+                string id = option.OptionId;
+                button.onClick.AddListener(() => SelectOption(id));
+                optionButtons.Add(button);
+            }
+            optionRoot.SetActive(true);
+            optionGroup.alpha = 1f;
+            optionGroup.interactable = optionGroup.blocksRaycasts = true;
+            continueButton.interactable = false;
+            Canvas.ForceUpdateCanvases();
+            LayoutRebuilder.ForceRebuildLayoutImmediate(optionContent);
+            optionScroll.verticalNormalizedPosition = 1f;
+            UpdateHint();
+            return true;
+        }
+
+        /// <summary>Accept only a visible, enabled option once. Results are not executed here.</summary>
+        public bool SelectOption(string optionId)
+        {
+            if (!IsChoosing || !string.IsNullOrEmpty(SelectedOptionId) || !IsReady) return false;
+            int index = -1;
+            for (int i = 0; i < script.Options.Count; i++)
+                if (string.Equals(script.Options[i].OptionId, optionId, StringComparison.Ordinal)) { index = i; break; }
+            if (index < 0 || !script.Options[index].Enabled) return false;
+            DialogueOption option = script.Options[index];
+            SelectedOptionId = option.OptionId;
+            optionGroup.interactable = false;
+            for (int i = 0; i < optionButtons.Count; i++) optionButtons[i].interactable = false;
+            Button selected = optionButtons[index];
+            selected.GetComponent<Image>().color = new Color(.24f, .40f, .29f);
+            selected.GetComponentInChildren<TMP_Text>().text = "[已选择]  " + option.Text;
+            optionPrompt.text = "已选择 · " + option.Text;
+            if (hintText != null) hintText.text = "已选择回应";
+            // Keep selection feedback briefly; Stop/close/replay explicitly kills this owned callback.
+            optionFeedback = DOVirtual.DelayedCall(.45f, () =>
+            {
+                optionFeedback = null;
+                HideOptions();
+                optionsVisible = false;
+                lastAdvanceFrame = Time.frameCount;
+                hold = 0f;
+                if (option.Response != null)
+                {
+                    activeLines.Add(option.Response);
+                    PrepareNextLine(activeLines.Count - 1);
+                }
+                continueButton.interactable = IsReady;
+                UpdateHint();
+            }, true).SetLink(gameObject, LinkBehaviour.KillOnDestroy);
+            return true;
+        }
+
+        private void ResetOptions()
+        {
+            optionFeedback?.Kill(false);
+            optionFeedback = null;
+            optionsVisible = false;
+            SelectedOptionId = string.Empty;
+            HideOptions();
+        }
+
+        private void HideOptions()
+        {
+            if (optionGroup != null) optionGroup.interactable = optionGroup.blocksRaycasts = false;
+            if (optionScroll != null) optionScroll.StopMovement();
+            if (optionRoot != null) optionRoot.SetActive(false);
+            ClearOptionButtons();
+        }
+
+        private void ClearOptionButtons()
+        {
+            for (int i = 0; i < optionButtons.Count; i++)
+            {
+                Button button = optionButtons[i];
+                if (button == null) continue;
+                button.onClick.RemoveAllListeners();
+                button.gameObject.SetActive(false);
+                button.transform.SetParent(null, false);
+                Destroy(button.gameObject);
+            }
+            optionButtons.Clear();
+        }
+
+        private static GameObject OptionObject(Transform parent, string name, params Type[] components)
+        {
+            var go = new GameObject(name, typeof(RectTransform));
+            go.layer = parent.gameObject.layer;
+            go.transform.SetParent(parent, false);
+            foreach (Type component in components) go.AddComponent(component);
+            return go;
+        }
+
+        private static void OptionRect(RectTransform rect, Vector2 min, Vector2 max)
+        {
+            rect.anchorMin = min; rect.anchorMax = max;
+            rect.offsetMin = rect.offsetMax = Vector2.zero;
+        }
+
+        private TMP_Text OptionText(Transform parent, string name, Vector2 min, Vector2 max, float size)
+        {
+            GameObject go = OptionObject(parent, name, typeof(TextMeshProUGUI));
+            OptionRect((RectTransform)go.transform, min, max);
+            TMP_Text label = go.GetComponent<TMP_Text>();
+            label.font = dialogueText.font != null ? dialogueText.font : speakerText.font; label.fontSize = size;
+            label.enableAutoSizing = true; label.fontSizeMin = 17f; label.fontSizeMax = size;
+            label.richText = false; label.raycastTarget = false;
+            label.alignment = TextAlignmentOptions.MidlineLeft;
+            label.color = new Color(.96f, .94f, .87f);
+            return label;
         }
     }
 }
