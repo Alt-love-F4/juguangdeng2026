@@ -15,7 +15,7 @@ namespace Spotlight.GameFlow
         public const string ScenePath = "Assets/Scenes/PresentationDebugScene.unity";
         public const string DefaultHint = "按键/按钮可随时切换演出。Esc 关闭 · Backspace 重播 · H 收起说明 · F9 切换暂停时间。";
 
-        public enum Preview { DateChange, Letter, Dialogue, PreBusiness, CafeOpening, BusinessEnd, CityMap, PreNight, HomeNight, DayEnd, Introduction, Effects, Reading, Notice, CutScene, HardcodedDialogue, HardcodedLetter }
+        public enum Preview { DateChange, Letter, Dialogue, PreBusiness, CafeOpening, BusinessEnd, CityMap, PreNight, HomeNight, DayEnd, Introduction, Effects, Reading, Notice, CutScene, HardcodedDialogue, HardcodedLetter, HardcodedOptions }
 
         [Header("Scene bindings")]
         [SerializeField] private TMP_Text statusText;
@@ -70,6 +70,7 @@ namespace Spotlight.GameFlow
             if (keyboard.qKey.wasPressedThisFrame) PlayDateChange();
             else if (keyboard.wKey.wasPressedThisFrame) { if (draftPreview) PlayHardcodedLetter(); else PlayLetter(); }
             else if (keyboard.eKey.wasPressedThisFrame) { if (draftPreview) PlayHardcodedDialogue(); else PlayDialogue(); }
+            else if (keyboard.cKey.wasPressedThisFrame) PlayDialogueOptions();
             else if (keyboard.vKey.wasPressedThisFrame) PlayReading();
             else if (keyboard.bKey.wasPressedThisFrame) PlayNotice();
             else if (keyboard.nKey.wasPressedThisFrame) PlayCutScene();
@@ -98,6 +99,7 @@ namespace Spotlight.GameFlow
         public void PlayLetter() => PlayPreview(Preview.Letter);
         public void PlayDialogue() => PlayPreview(Preview.Dialogue);
         public void PlayHardcodedDialogue() => PlayPreview(Preview.HardcodedDialogue);
+        public void PlayDialogueOptions() => PlayPreview(Preview.HardcodedOptions);
         public void PlayHardcodedLetter() => PlayPreview(Preview.HardcodedLetter);
         public void PlayReading() => PlayPreview(Preview.Reading);
         public void PlayNotice() => PlayPreview(Preview.Notice);
@@ -180,6 +182,7 @@ namespace Spotlight.GameFlow
                         break;
                     case Preview.Dialogue: PlayDialogueSample(new LubanOpeningDialogueSource(openingPresentationId).CreateScript(), version); break;
                     case Preview.HardcodedDialogue: PlayDialogueSample(DialoguePreviewDialogue.Create(), version); break;
+                    case Preview.HardcodedOptions: PlayDialogueSample(DialoguePreviewDialogue.CreateOptions(), version); break;
                     case Preview.HardcodedLetter: Open<FirstDayLetterPanel>().Play(() => Complete(version)); break;
                     case Preview.Reading: PlayReadingSample(version); break;
                     case Preview.Notice: PlayNoticeSample(version); break;
@@ -197,6 +200,7 @@ namespace Spotlight.GameFlow
                 }
                 SetStatus("播放中", preview.ToString());
                 SetHint(preview == Preview.Letter || preview == Preview.HardcodedLetter ? "点击信封 → 阅读 → 点击署名。面板右下角可跳过；Esc 取消。"
+                    : preview == Preview.HardcodedOptions ? "C：选项对话；空格/回车补全文字，台词结束后点击选项。灰色选项不可用；仅演示，不结算 NCS。Esc 取消。"
                     : preview == Preview.Dialogue || preview == Preview.HardcodedDialogue || preview == Preview.Introduction || preview == Preview.Effects ? "空格/回车/面板继续按钮：先补全文字，再换页/换句。Esc 取消。"
                     : preview == Preview.Reading ? "V：阅读；空格/回车补全文字 → 下一行/页，← 或上一页返回；Esc 取消。"
                     : preview == Preview.Notice ? "B：通知演出；空格/回车或确认按钮关闭；Esc 取消。"

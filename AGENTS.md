@@ -15,6 +15,7 @@ Assets/Scenes/PresentationDebugScene.unity
 - `Q`：新一天 / `DateChangePanel`
 - `W`：NCS 第一天来信 / `FirstDayLetterPanel`；`Shift+W` 使用面板草稿
 - `E`：NCS 指定开场对话 / `DialoguePanel`；`Shift+E` 使用硬编码长文本示例
+- `C`：三人选项对话测试 / `DialoguePanel`，两句台词后展示两个可选项、一个带条件提示的灰色选项；点击后播放回应。只演示，不结算 NCS。
 - `V`：阅读 / `ReadingPanel`，空格或 Enter 补全文字再翻行/页，← 返回
 - `B`：事件通知 / `NoticePanel`，空格或 Enter 确认关闭
 - `N`：视频过场 / `CutScenePanel`，长按 Enter 跳过（默认 1.2 秒，调试占位不代表真实视频）
@@ -59,6 +60,7 @@ Tools > Game Flow > Create Missing Presentation Debug Scene
 ## 演出特效边界
 
 - 特效字段来自 NCS；不要自行新增平行剧本字段标准。对话/信件已通过 `NarrativePresentationDataAdapter` 读取指定 ID/key；Panel 仍只消费快照，不依赖 NCS 全局状态，不结算事件。特效预览仍独立于 NCS 原子调度。
+- 三人演出使用 `DialogueScript.CenterCharacter` / `DialogueSpeaker.Center`；中间特效目标为 `center` 或角色 key。没有第三角色时保持原双人布局。所有立绘不再镜像；不要恢复右侧负缩放。第三人测试图暂时复用现有资源，可换 `DialogueVisualsAsset.CenterPortrait`。
 - `DialoguePanel.PlayEffect` / `PlayCameraCue` / `PlayFade` 是后续适配边界；参数预设在 `PresentationEffectLibrary.asset`。
 - 角色/震屏/镜头/遮罩通道可并行；震屏按等级替换，不叠加。退出必须取消 handle、协程与回调，复位舞台。
 - 回归使用共享场景和 `PresentationEffectsTests`，详见 `Docs/PresentationEffects.md`。不另建演出场景。

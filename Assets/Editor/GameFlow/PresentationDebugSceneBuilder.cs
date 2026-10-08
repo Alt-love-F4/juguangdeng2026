@@ -118,10 +118,10 @@ namespace Spotlight.GameFlow.Editor
             TMP_Text active = Text(sidebar.transform, "Active", "当前 / 无", new Vector2(.045f, .872f), new Vector2(.955f, .905f), 17f, Muted);
 
             PresentationDebugSceneController controller = root.AddComponent<PresentationDebugSceneController>();
-            string[] labels = { "Q   新一天 / 日期切换", "W   NCS 来信（Shift：草稿）", "E   NCS 对话（Shift：长文本测试）", "R   经营前阶段", "T   开店演出", "Y   经营结束", "U   城区地图", "I   夜晚前阶段", "O   住房夜晚", "P   一天结束", "F   NCS 第一天阿黛尔引入", "G   特效试验台（1~0）", "V   阅读（图文 / 旁白 / 对话）", "B   单页事件通知", "N   视频过场 / 长按跳过" };
+            string[] labels = { "Q   新一天 / 日期切换", "W   NCS 来信（Shift：草稿）", "E   NCS 对话（Shift：长文本测试）", "R   经营前阶段", "T   开店演出", "Y   经营结束", "U   城区地图", "I   夜晚前阶段", "O   住房夜晚", "P   一天结束", "F   NCS 第一天阿黛尔引入", "G   特效试验台（1~0）", "V   阅读（图文 / 旁白 / 对话）", "B   单页事件通知", "N   视频过场 / 长按跳过", "C   三人选项对话" };
             for (int i = 0; i < labels.Length; i++)
             {
-                float top = .855f - i * .028f;
+                float top = .855f - i * .0263f;
                 Button button = Button(sidebar.transform, "Preview_" + i, labels[i], new Vector2(.045f, top - .025f), new Vector2(.955f, top));
                 AddPreviewListener(button, controller, i);
             }
@@ -150,6 +150,7 @@ namespace Spotlight.GameFlow.Editor
         }
 
         /// <summary>Patch only this scene's shortcut list, preserving camera, scene GUID and other user objects.</summary>
+        [MenuItem("Tools/Game Flow/Update Dialogue Options Debug Entry")]
         [MenuItem("Tools/Game Flow/Update Reading Notice CutScene Debug Entries")]
         public static void UpdateContentEntries()
         {
@@ -171,11 +172,11 @@ namespace Spotlight.GameFlow.Editor
                     if (root.name == "DebugHelpOverlay") sidebar = root.transform.Find("ShortcutSurface");
                 }
                 if (controller == null || sidebar == null) throw new InvalidOperationException("Shared debug scene bindings not found.");
-                string[] labels = { "V   阅读（图文 / 旁白 / 对话）", "B   单页事件通知", "N   视频过场 / 长按跳过" };
-                for (int i = 0; i < 15; i++)
+                string[] labels = { "V   阅读（图文 / 旁白 / 对话）", "B   单页事件通知", "N   视频过场 / 长按跳过", "C   三人选项对话" };
+                for (int i = 0; i < 16; i++)
                 {
                     Transform entry = sidebar.Find("Preview_" + i);
-                    float top = .855f - i * .028f;
+                    float top = .855f - i * .0263f;
                     if (entry == null && i >= 12)
                     {
                         Button button = Button(sidebar, "Preview_" + i, labels[i - 12], new Vector2(.045f, top - .025f), new Vector2(.955f, top));
@@ -222,6 +223,7 @@ namespace Spotlight.GameFlow.Editor
                 case 12: UnityEventTools.AddVoidPersistentListener(button.onClick, controller.PlayReading); break;
                 case 13: UnityEventTools.AddVoidPersistentListener(button.onClick, controller.PlayNotice); break;
                 case 14: UnityEventTools.AddVoidPersistentListener(button.onClick, controller.PlayCutScene); break;
+                case 15: UnityEventTools.AddVoidPersistentListener(button.onClick, controller.PlayDialogueOptions); break;
             }
         }
 

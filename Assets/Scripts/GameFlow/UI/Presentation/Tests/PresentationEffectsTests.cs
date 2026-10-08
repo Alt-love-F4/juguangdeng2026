@@ -49,9 +49,9 @@ namespace Spotlight.GameFlow.Tests
             { Assert.That(Time.realtimeSinceStartup, Is.LessThan(deadline)); yield return null; }
         }
         [UnityTest]
-        public IEnumerator DefaultEntranceMirrorsOnlyRightPortraitAndKeepsNameOnLeft()
+        public IEnumerator DefaultEntranceKeepsEveryPortraitUnmirroredAndNamesReadable()
         {
-            Assert.That(panel.RightPortrait.transform.localScale.x, Is.LessThan(0));
+            Assert.That(panel.RightPortrait.transform.localScale.x, Is.GreaterThan(0));
             Assert.That(panel.LeftPortrait.transform.localScale.x, Is.GreaterThan(0));
             Assert.That(panel.EffectStage.localScale, Is.EqualTo(Vector3.one));
             foreach (TMPro.TMP_Text label in panel.GetComponentsInChildren<TMPro.TMP_Text>())
@@ -187,7 +187,7 @@ namespace Spotlight.GameFlow.Tests
             yield return null;
         }
         [UnityTest]
-        public IEnumerator SwapFadesMirrorsAndPreservesTextThenNewCharacterReplacesOldOne()
+        public IEnumerator SwapFadesWithoutMirroringAndPreservesCharacterIdentity()
         {
             DialogueCharacter a = panel.LeftCharacter, b = panel.RightCharacter;
             int done = 0;
@@ -196,7 +196,7 @@ namespace Spotlight.GameFlow.Tests
             yield return new WaitForSecondsRealtime(.7f);
             Assert.That(panel.LeftCharacter, Is.SameAs(b));
             Assert.That(panel.RightCharacter, Is.SameAs(a));
-            Assert.That(panel.RightPortrait.transform.localScale.x, Is.LessThan(0f));
+            Assert.That(panel.RightPortrait.transform.localScale.x, Is.GreaterThan(0f));
             Assert.That(done, Is.EqualTo(1));
         }
         [UnityTest]

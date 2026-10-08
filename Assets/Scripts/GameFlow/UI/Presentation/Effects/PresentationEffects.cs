@@ -6,7 +6,7 @@ namespace Spotlight.GameFlow
 {
     /// <summary>
     /// UI-local effect runner. Channels compose instead of fighting over transforms:
-    /// two portrait motion channels + two accent channels + screen shake + camera + overlay.
+    /// independent portrait motion/accent channels (two or three slots) + screen shake + camera + overlay.
     /// Tick is unscaled; cancellation restores owned poses and never calls stale completions.
     /// </summary>
     public sealed class PresentationEffects : IDisposable
@@ -27,13 +27,17 @@ namespace Spotlight.GameFlow
             public Vector3 scale, imageScale;
             public Color frameColor;
             public float alpha = 1f, size = 1f, focus = 1f, focusTarget = 1f, shadow;
-            public bool right;
+            public float enterDirection;
         }
         private readonly PresentationEffectLibrary library;
         private readonly RectTransform stage;
         private readonly Image overlay;
-        private readonly Portrait[] portraits = new Portrait[2];
-        private readonly Channel[] channels = new Channel[7];
+        private readonly Portrait[] portraits;
+        private readonly Channel[] channels;
+        private int AccentStart => portraits.Length;
+        private int ShakeChannel => portraits.Length * 2;
+        private int CameraChannel => ShakeChannel + 1;
+        private int OverlayChannel => ShakeChannel + 2;
         private readonly Vector2 stagePosition;
         private readonly Vector3 stageScale;
         private readonly Color inactiveTint;
@@ -42,14 +46,22 @@ namespace Spotlight.GameFlow
         private int shakePriority;
         private float focusSeconds;
         private bool disposed;
-        public int ScreenShakePriority => channels[4].Active ? shakePriority : 0;
+        public int ScreenShakePriority => channels[ShakeChannel].Active ? shakePriority : 0;
         public float OverlayAlpha => overlay.color.a;
         public float CameraZoom => cameraZoom;
-        public bool IsPortraitTransitioning => channels[0].Active || channels[1].Active;
-        public bool IsOverlayPlaying => channels[6].Active;
+        public bool IsPortraitTransitioning
+        {
+            get
+            {
+                for (int i = 0; i < portraits.Length; i++) if (channels[i].Active) return true;
+                return false;
+            }
+        }
+        public bool IsOverlayPlaying => channels[OverlayChannel].Active;
 
         public PresentationEffects(PresentationEffectLibrary library, RectTransform stage, Image overlay,
-            Image left, Image leftFrame, Image right, Image rightFrame, Color inactiveTint, float focusSeconds)
+            Image left, Image leftFrame, Image right, Image rightFrame, Color inactiveTint, float focusSeconds,
+            Image center = null, Image centerFrame = null)
         {
             if (library == null || stage == null || overlay == null || left == null || right == null)
                 throw new ArgumentException("Presentation effects require a library, stage, overlay and two portrait slots.");
@@ -60,17 +72,30 @@ namespace Spotlight.GameFlow
             this.focusSeconds = Mathf.Max(.001f, focusSeconds);
             stagePosition = stage.anchoredPosition;
             stageScale = stage.localScale;
+            portraits = new Portrait[center != null ? 3 : 2];
+            channels = new Channel[portraits.Length * 2 + 3];
             for (int i = 0; i < channels.Length; i++) channels[i] = new Channel();
-            portraits[0] = Capture(left, leftFrame, false);
-            portraits[1] = Capture(right, rightFrame, true);
+            portraits[0] = Capture(left, leftFrame, -1f);
+            portraits[1] = Capture(right, rightFrame, 1f);
+            if (center != null) portraits[2] = Capture(center, centerFrame, 0f);
             Reset();
         }
-        private static Portrait Capture(Image image, Image frame, bool right)
+        private static Portrait Capture(Image image, Image frame, float enterDirection)
         {
             RectTransform rect = frame != null ? frame.rectTransform : image.rectTransform;
             return new Portrait { image = image, frame = frame, rect = rect, position = rect.anchoredPosition,
-                scale = rect.localScale, imageScale = image.transform.localScale,
-                frameColor = frame != null ? frame.color : Color.clear, right = right };
+                scale = UnmirroredScale(rect.localScale), imageScale = UnmirroredScale(image.transform.localScale),
+                frameColor = frame != null ? frame.color : Color.clear, enterDirection = enterDirection };
+        }
+
+        private static Vector3 UnmirroredScale(Vector3 scale)
+        { scale.x = Mathf.Abs(scale.x); return scale; }
+
+        /// <summary>Refresh only the rest positions after the panel changes two/three-person layout.</summary>
+        internal void RefreshPortraitPositions()
+        {
+            foreach (Portrait portrait in portraits) portrait.position = portrait.rect.anchoredPosition;
+            ApplyPose();
         }
 
         private PresentationEffectHandle Start(int index, float duration, Action<float> apply, Action cancel = null, Action complete = null)
@@ -106,26 +131,26 @@ namespace Spotlight.GameFlow
                 case PresentationEffectIds.EnterShadowWalk:
                 case PresentationEffectIds.PortraitFadeIn:
                 case PresentationEffectIds.PortraitFadeOut:
-                    if (slot < 0 || slot > 1) throw new ArgumentException("Portrait effect requires one occupied slot.");
+                    if (slot < 0 || slot >= portraits.Length) throw new ArgumentException("Portrait effect requires one occupied slot.");
                     return PortraitMotion(fx, slot, definition, completed);
                 case PresentationEffectIds.AccentShakeStartle:
-                    if (slot < 0 || slot > 1) throw new ArgumentException("Accent effect requires one occupied slot.");
+                    if (slot < 0 || slot >= portraits.Length) throw new ArgumentException("Accent effect requires one occupied slot.");
                     Portrait p = portraits[slot];
-                    return Start(2 + slot, definition.duration,
+                    return Start(AccentStart + slot, definition.duration,
                         t => p.accent = new Vector2(Mathf.Sin(t * Mathf.PI * 16f) * definition.strength * (1f-t) * (1f-t), 0f),
                         () => p.accent = Vector2.zero,
                         () => { p.accent = Vector2.zero; completed?.Invoke(); });
                 case PresentationEffectIds.ShakeLight:
                 case PresentationEffectIds.ShakeHeavy:
-                    if (channels[4].Active && shakePriority > definition.priority) return Rejected();
+                    if (channels[ShakeChannel].Active && shakePriority > definition.priority) return Rejected();
                     shakePriority = definition.priority;
-                    return Start(4, definition.duration,
+                    return Start(ShakeChannel, definition.duration,
                         t => screenOffset = new Vector2(Mathf.Sin(t * Mathf.PI * 24f), Mathf.Sin(t * Mathf.PI * 31f) * .45f)
                             * definition.strength * (1f-t) * (1f-t),
                         () => screenOffset = Vector2.zero,
                         () => { screenOffset = Vector2.zero; completed?.Invoke(); });
                 case PresentationEffectIds.FlashWhite:
-                    return Start(6, definition.duration,
+                    return Start(OverlayChannel, definition.duration,
                         t => overlay.color = new Color(1f, 1f, 1f, definition.strength * Mathf.Sin(t * Mathf.PI)),
                         () => overlay.color = Color.clear,
                         () => { overlay.color = Color.clear; completed?.Invoke(); });
@@ -146,26 +171,27 @@ namespace Spotlight.GameFlow
                 p.alpha = enter ? Mathf.Clamp01(t * 4f) : Mathf.Lerp(startAlpha, exit ? 0f : 1f, ease);
                 p.shadow = enter ? 1f - Mathf.InverseLerp(.65f, 1f, t) : 0f;
                 p.size = enter ? Mathf.Lerp(.84f, 1f, ease) : 1f;
-                p.offset = enter ? new Vector2((p.right ? 1f : -1f) * d.strength * (1f-ease), 16f * (1f-ease)) : Vector2.zero;
+                p.offset = enter ? new Vector2(p.enterDirection * d.strength * (1f-ease), 16f * (1f-ease)) : Vector2.zero;
             }, () => { p.alpha = 1f; p.shadow = 0f; p.size = 1f; p.offset = Vector2.zero; },
             () => { p.alpha = exit ? 0f : 1f; p.shadow = 0f; p.size = 1f; p.offset = Vector2.zero; complete?.Invoke(); });
         }
 
         public void SetFocus(DialogueSpeaker speaker, bool immediate = false)
         {
-            for (int i = 0; i < 2; i++)
+            for (int i = 0; i < portraits.Length; i++)
             {
                 Portrait p = portraits[i];
                 p.focusTarget = speaker == DialogueSpeaker.Narrator || (i == 0 && speaker == DialogueSpeaker.Left)
-                    || (i == 1 && speaker == DialogueSpeaker.Right) ? 1f : 0f;
+                    || (i == 1 && speaker == DialogueSpeaker.Right)
+                    || (i == 2 && speaker == DialogueSpeaker.Center) ? 1f : 0f;
                 if (immediate) p.focus = p.focusTarget;
             }
         }
         public PresentationEffectHandle Nod(int slot)
         {
-            if (slot < 0 || slot > 1) return Rejected();
+            if (slot < 0 || slot >= portraits.Length) return Rejected();
             Portrait p = portraits[slot];
-            return Start(slot + 2, .4f, t => p.accent = new Vector2(0f, -12f * Mathf.Sin(t * Mathf.PI * 4f)),
+            return Start(AccentStart + slot, .4f, t => p.accent = new Vector2(0f, -12f * Mathf.Sin(t * Mathf.PI * 4f)),
                 () => p.accent = Vector2.zero, () => p.accent = Vector2.zero);
         }
         public PresentationEffectHandle Camera(float zoom, float shake, float duration, Vector2 focus, Action completed = null)
@@ -177,20 +203,20 @@ namespace Spotlight.GameFlow
             // A_CAMERA uses UI-stage space: never Camera.main, never scales the modal input blocker.
             float fromZoom = cameraZoom;
             Vector2 fromFocus = cameraOffset;
-            CancelChannel(5);
-            if (shake > 0f && !channels[4].Active)
+            CancelChannel(CameraChannel);
+            if (shake > 0f && !channels[ShakeChannel].Active)
             {
                 shakePriority = 0;
-                Start(4, duration, t => screenOffset = new Vector2(Mathf.Sin(t * Mathf.PI * 24f), Mathf.Sin(t * Mathf.PI * 31f) * .45f)
+                Start(ShakeChannel, duration, t => screenOffset = new Vector2(Mathf.Sin(t * Mathf.PI * 24f), Mathf.Sin(t * Mathf.PI * 31f) * .45f)
                     * shake * (1f-t) * (1f-t), () => screenOffset = Vector2.zero, () => screenOffset = Vector2.zero);
             }
-            return Start(5, duration, t =>
+            return Start(CameraChannel, duration, t =>
             {
                 cameraZoom = Mathf.Lerp(fromZoom, zoom, Smooth(t));
                 cameraOffset = Vector2.Lerp(fromFocus, focus, Smooth(t));
             }, () => { cameraZoom = 1f; cameraOffset = Vector2.zero; }, completed);
         }
-        public void ResetCamera() { CancelChannel(5); cameraZoom = 1f; cameraOffset = Vector2.zero; ApplyPose(); }
+        public void ResetCamera() { CancelChannel(CameraChannel); cameraZoom = 1f; cameraOffset = Vector2.zero; ApplyPose(); }
         public PresentationEffectHandle Fade(string type, float duration, Action atBlack = null, Action completed = null)
         {
             EnsureAlive(); ValidateFinite(duration, nameof(duration), 0f);
@@ -198,7 +224,7 @@ namespace Spotlight.GameFlow
                 throw new ArgumentException("Fade type must be in, out, black or transition.", nameof(type));
             bool fired = false;
             float from = type == "in" ? 1f : overlay.color.a;
-            return Start(6, duration, t =>
+            return Start(OverlayChannel, duration, t =>
             {
                 float a = type == "in" ? 1f - Smooth(t)
                     : type == "transition" ? (t < .5f ? Smooth(t * 2f) : 1f - Smooth((t-.5f) * 2f))
@@ -230,7 +256,7 @@ namespace Spotlight.GameFlow
                     complete?.Invoke();
                 }
             }
-            for (int i = 0; i < 2; i++)
+            for (int i = 0; i < portraits.Length; i++)
                 portraits[i].focus = Mathf.MoveTowards(portraits[i].focus, portraits[i].focusTarget, seconds / focusSeconds);
             ApplyPose();
         }
@@ -239,16 +265,15 @@ namespace Spotlight.GameFlow
             if (stage == null) return;
             stage.anchoredPosition = stagePosition + cameraOffset + screenOffset;
             stage.localScale = stageScale * cameraZoom;
-            for (int i = 0; i < 2; i++)
+            for (int i = 0; i < portraits.Length; i++)
             {
                 Portrait p = portraits[i];
                 if (p.image == null || p.rect == null) continue;
                 p.rect.anchoredPosition = p.position + p.offset + p.accent;
                 p.rect.localScale = p.scale * p.size * Mathf.Lerp(1f, 1.025f, p.focus);
-                Vector3 mirror = p.imageScale;
-                mirror.x = Mathf.Abs(mirror.x) * (p.right ? -1f : 1f);
+                // Every slot keeps the source sprite orientation, including after swaps/replacements.
                 p.image.transform.localScale = p.frame == null
-                    ? mirror * p.size * Mathf.Lerp(1f, 1.025f, p.focus) : mirror;
+                    ? p.imageScale * p.size * Mathf.Lerp(1f, 1.025f, p.focus) : p.imageScale;
                 Color tint = Color.Lerp(inactiveTint, Color.white, p.focus);
                 tint = Color.Lerp(tint, new Color(.025f, .02f, .03f, tint.a), p.shadow);
                 tint.a *= p.alpha;

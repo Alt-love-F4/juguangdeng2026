@@ -1,4 +1,4 @@
-# 双角色对话演出
+# 双 / 三角色对话演出
 
 与日程面板一样，使用独立 `DialoguePanel.cs` / `DialoguePanel.prefab`，通过 UIKit 加载和回收。左右两个 Image 显示真实 Sprite；背景与深色暖金对话框复用项目现有美术风格。角色设计稿当前仍带原始底色，可在预制体或剧本中替换为正式透明立绘，不会改动源图。
 
@@ -60,5 +60,15 @@ PlayMode 测试：`Spotlight.GameFlow.Presentation.Tests` 中的 `DialoguePresen
 `DialoguePanel` 实现 `IPresentationEffectPlayer`；`PlayEffect`、`PlayCameraCue`、`PlayFade`、`SwapPortraits` 是未来 NCS 适配边界，当前不访问 NCS 运行时或表。
 `DialogueLine` 增加与既有 NCS 同名的 `accentFxKey` / `accentTargetKey`，`DialogueCharacter.CharacterKey` 用于非说话人目标解析。
 参数预设集中在 `PresentationEffectLibrary.asset`，详见项目 `Docs/PresentationEffects.md`。
-所有动画通道由 Panel 拥有与清理。入场完成前不显示正文；替换先淡出旧角色再入场新角色；文字/按钮不参与角色镜像。
+所有动画通道由 Panel 拥有与清理。入场完成前不显示正文；替换先淡出旧角色再入场新角色；立绘、文字和按钮均不做水平镜像。
 运行时可视内容放在 `EffectStage`，输入遮罩仍覆盖全屏；测试/业务查询立绘应使用 `LeftPortrait` / `RightPortrait`，不要假定旧的 Transform 路径。
+
+## 第三个角色位
+
+- `DialogueScript(..., centerCharacter: character)` 可同时展示左、中、右三人；不传中间角色时维持原双角色布局。
+- 中间角色台词用 `DialogueSpeaker.Center`；逐句替换 / 移除用 `replaceCenter: true, centerCharacter: newCharacter / null`。
+- `DialogueScriptAsset` 支持 `centerCharacter`；`DialogueVisualsAsset.CenterPortrait` 支持单独配置第三张立绘。
+- 中间角色同样支持说话高亮、沉默压暗、点头、受惊、入退场和特效目标 `center` / `CharacterKey`。
+- `SwapPortraits()` 仍只交换左 / 右角色，中间角色保持不动；所有角色保持原图朝向。
+- 共享调试场景按 C 查看三人选项对话；第三人暂时复用店主立绘，之后在 `DialoguePreview.asset` 的 Center Portrait 换图即可。
+- 本次只扩展演出数据接口，不修改 NCS Excel 表结构；现有 NCS 双人开场仍按原配置播放。

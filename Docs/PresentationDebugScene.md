@@ -13,6 +13,7 @@ Unity 菜单 `Tools > Game Flow > Open Presentation Debug Scene`，进入 Play M
 | Q | 新一天 / DateChangePanel |
 | W | NCS 信件 / FirstDayLetterPanel（Shift+W：面板草稿） |
 | E | NCS 对话 / DialoguePanel（Shift+E：原硬编码长文本） |
+| C | 三人选项对话 / DialoguePanel（两个可用选项、一个灰色条件选项，选择后播放回应） |
 | V | 阅读演出 / ReadingPanel（多页、长文本分页、配图、旁白/头像对话） |
 | B | 通知演出 / NoticePanel（时间、配图、进度提示） |
 | N | 视频过场 / CutScenePanel（无视频时显示占位，长按 Enter 跳过） |
@@ -78,3 +79,19 @@ W/E/F 现在读取指定 NCS 内容，默认对话 ID `first_day_cafe`；信件�
 有已初始化运行时则使用当前配置和文本 resolver；未启用 NCS 时直接读取已有 Luban 数据，不创建 NCS Runtime，也不推进事件和存档。
 Shift+W / Shift+E 和公共 `PlayHardcodedLetter()` / `PlayHardcodedDialogue()` 保留原测试入口。
 详情见 `Docs/NcsOpeningPresentation.md`；轻量回归为 `NcsOpeningDataTests` 和 `NcsOpeningPresentationSmokeTests`。
+
+## 选项演出测试
+
+按 `C` 或点击右侧「C 三人选项对话」按钮。用空格 / Enter / 继续按钮推进两句台词，最后一句全部显示后自动弹出选项。
+- 「支持他的计划」「提醒他保持谨慎」可以点击，短暂显示已选择反馈，然后播放对应回应台词。
+- 「询问只有线人知道的情报」显示灰色禁用态和「需要更多情报」提示，不接受选择。
+- 选项打开时空格 / Enter 不会代选；Esc 取消，Backspace 从头重播；F9 暂停仍可选择并播放回应。
+- 数据样例在 `DialoguePreviewDialogue.CreateOptions()`；公共入口是 `PresentationDebugSceneController.PlayDialogueOptions()` / `Preview.HardcodedOptions`。
+- `DialogueScript` 接受 `options` / `optionPrompt` 快照；Panel 提供 `IsChoosing` / `SelectedOptionId` / `SelectOption(id)`。选项 UI 支持列表滚动。
+- 这是单个脚本结尾的单选演出预览，不是完整 NCS 页/分支系统；`resultKey` 仅保留为数据，不执行 NCS 结果，不触发正式事件或写入存档。
+- 按钮缺失时保存共享调试场景，再执行 `Tools > Game Flow > Update Dialogue Options Debug Entry`，仅补充入口和调整快捷栏布局，不重建场景或复制 Prefab。
+
+## 三角色显示与朝向
+
+C 样例同时展示店主（左）、街区线人（中）、印刷工（右），中间角色参与台词与选项回应。第三人暂时复用店主图片；独立资源位置为 `Assets/Resources/Dialogue/DialoguePreview.asset` 的 Center Portrait。
+`DialoguePanel.prefab` 已追加中间角色节点，未重建左右原有节点。三人时使用并排布局；双人剧本和重播会恢复美术原有的左右布局。所有立绘已取消水平镜像，入场、换位与角色替换都保持原图朝向。
