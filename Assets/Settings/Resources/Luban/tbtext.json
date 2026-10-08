@@ -623,5 +623,65 @@
     "key": "opening.letter.signature",
     "text": "—— 永远惦念你的叔叔",
     "comment": "第一天开场信件署名"
+  },
+  {
+    "key": "action.meet_b.name",
+    "text": "与B见面",
+    "comment": "行动名称"
+  },
+  {
+    "key": "action.meet_b.desc",
+    "text": "前往约定地点与B见面。",
+    "comment": "行动描述"
+  },
+  {
+    "key": "action.c_with_b.name",
+    "text": "安排C与B会面",
+    "comment": "行动名称"
+  },
+  {
+    "key": "action.c_with_b.desc",
+    "text": "促成C与B进行一次会面。",
+    "comment": "行动描述"
+  },
+  {
+    "key": "action.salon.name",
+    "text": "前往沙龙",
+    "comment": "行动名称"
+  },
+  {
+    "key": "action.salon.desc",
+    "text": "参加沙龙，接触新的思想。",
+    "comment": "行动描述"
+  },
+  {
+    "key": "action.peer.name",
+    "text": "观察C的动向",
+    "comment": "行动名称"
+  },
+  {
+    "key": "action.peer.desc",
+    "text": "前往相关地点，收集C的消息。",
+    "comment": "行动描述"
+  },
+  {
+    "key": "map.position.cafe.name",
+    "text": "咖啡馆",
+    "comment": "地图地点名称"
+  },
+  {
+    "key": "map.position.market.name",
+    "text": "集市",
+    "comment": "地图地点名称"
+  },
+  {
+    "key": "map.position.library.name",
+    "text": "图书馆",
+    "comment": "地图地点名称"
+  },
+  {
+    "key": "map.position.temporary.name",
+    "text": "临时事件",
+    "comment": "地图地点名称"
   }
 ]

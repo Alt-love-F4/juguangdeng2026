@@ -1,0 +1,50 @@
+[
+  {
+    "actionKey": "act_meet_b",
+    "type": "DAILY",
+    "mustExecute": false,
+    "nameText": "action.meet_b.name",
+    "descText": "action.meet_b.desc",
+    "requirements": "ActionPoint(1)",
+    "resultEvents": "EV_ACT_MEET",
+    "durationDays": 0,
+    "progressTarget": 0,
+    "nextActionKey": ""
+  },
+  {
+    "actionKey": "act_c_with_b",
+    "type": "DAILY",
+    "mustExecute": false,
+    "nameText": "action.c_with_b.name",
+    "descText": "action.c_with_b.desc",
+    "requirements": "ActionPoint(1)",
+    "resultEvents": "EV_ACT_C_WITH_B",
+    "durationDays": 0,
+    "progressTarget": 0,
+    "nextActionKey": ""
+  },
+  {
+    "actionKey": "act_salon",
+    "type": "ONCE",
+    "mustExecute": false,
+    "nameText": "action.salon.name",
+    "descText": "action.salon.desc",
+    "requirements": "ActionPoint(1)",
+    "resultEvents": "EV_ACT_SALON",
+    "durationDays": 0,
+    "progressTarget": 0,
+    "nextActionKey": ""
+  },
+  {
+    "actionKey": "act_peer",
+    "type": "REPEAT",
+    "mustExecute": false,
+    "nameText": "action.peer.name",
+    "descText": "action.peer.desc",
+    "requirements": "ActionPoint(1)",
+    "resultEvents": "EV_ACT_C_PEER",
+    "durationDays": 0,
+    "progressTarget": 0,
+    "nextActionKey": ""
+  }
+]
