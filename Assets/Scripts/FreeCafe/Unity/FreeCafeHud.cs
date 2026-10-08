@@ -81,6 +81,17 @@ namespace Spotlight.FreeCafe
         private void RefreshRecipeTips()
         {
             if(recipeTitle==null || recipeBody==null || runtime==null || runtime.World==null) return;
+            if(runtime.World.ProductionEnabled)
+            {
+                recipeTitle.text="咖啡谱 · 已学会的餐品";
+                var productionText=new StringBuilder();
+                foreach(var id in runtime.World.State.unlockedProducts)
+                {
+                    var product=runtime.World.Product(id);
+                    productionText.Append("【").Append(product.label).Append("】").AppendLine(product.description).AppendLine(product.tutorial).AppendLine();
+                }
+                recipeBody.text=productionText.ToString(); return;
+            }
             recipeTitle.text="餐品制作提示（配表）";
             var text=new StringBuilder();
             var catalog=runtime.World.Catalog;

@@ -64,6 +64,7 @@ namespace Spotlight.FreeCafe
         /// <summary>构造时校验目录数据，让配置错误在启动时就暴露，而不是运行到一半才炸。</summary>
         private void ValidateCatalog()
         {
+            ValidateProductionCatalog();
             if (Catalog.entities == null || Catalog.operations == null || Catalog.products == null
                 || Catalog.layout == null || Catalog.areas == null || Catalog.economy == null)
             {
@@ -328,6 +329,7 @@ namespace Spotlight.FreeCafe
                 return ActionResult.No("固定设备或来源不能搬动");
             }
 
+            if (ProductionEnabled && item==ServingCup) return ActionResult.No("出餐杯固定在托盘，请出品或丢弃");
             if (Locked(item))
             {
                 return ActionResult.No("材料留在设备内；请接取产物或取消加工");
@@ -404,6 +406,8 @@ namespace Spotlight.FreeCafe
                 return ActionResult.No("无效物品");
             }
 
+            if (PreviewProduction(item, target, out var productionPreview)) return productionPreview;
+
             if (receiver.Has(Capability.Discard))
             {
                 return ActionResult.Yes("丢弃 · 扣除 " + Catalog.economy.wastePenalty + " 金币");
@@ -472,6 +476,8 @@ namespace Spotlight.FreeCafe
             }
 
             var receiver = Spec(target.specId);
+            if (ProductionEnabled && (IsProductionMachine(target) || receiver.Has(Capability.Container) || receiver.Has(Capability.Delivery)))
+                return InteractProduction(item, target);
             if (receiver.Has(Capability.Processor))
             {
                 return InteractMachine(item, target);
@@ -479,6 +485,7 @@ namespace Spotlight.FreeCafe
 
             if (receiver.Has(Capability.Discard))
             {
+                if (ProductionEnabled && item==ServingCup) return DiscardProductionCup();
                 Charge(Catalog.economy.wastePenalty);
                 State.entities.Remove(item);
                 Notify();

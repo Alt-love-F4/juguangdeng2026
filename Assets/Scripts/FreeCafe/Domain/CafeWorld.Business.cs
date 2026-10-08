@@ -7,7 +7,10 @@ namespace Spotlight.FreeCafe
     public sealed partial class CafeWorld
     {
         /// <summary>判断杯子是否符合餐品配方：杯型、配比、拉花要求都满足才算匹配。</summary>
-        public bool Matches(WorldEntity cup, ProductSpec product) => cup != null && product != null
+        public bool Matches(WorldEntity cup, ProductSpec product) => ProductionEnabled
+            ? cup != null && product != null && cup == ServingCup && EvaluateProduction(cup, product).total >= product.minimumScore
+                && (!Prep.requireLatteArt || !product.requiresLatteArt || cup.latteArt || State.automaticLatteArt)
+            : cup != null && product != null
             && cup.specId == product.cupSpecId && Evaluate(cup, product) >= .999f
             && (!product.requiresLatteArt || cup.latteArt || State.automaticLatteArt);
 
@@ -78,6 +81,7 @@ namespace Spotlight.FreeCafe
         private ActionResult Serve(WorldEntity cup, WorldEntity target)
         {
             var request = RequestForTarget(target);
+            if (ProductionEnabled) return ServeProduction(cup, request);
             var product = Product(request.productId);
             bool correct = Matches(cup, product);
             int price = correct ? SalePrice(cup, product) : 0;
@@ -336,7 +340,7 @@ namespace Spotlight.FreeCafe
                 return;
             }
 
-            bool changed = false;
+            bool changed = ProductionEnabled && TickProduction(seconds);
 
             // 设备加工：冷却和剩余时间一起走
             foreach (var entity in State.entities)

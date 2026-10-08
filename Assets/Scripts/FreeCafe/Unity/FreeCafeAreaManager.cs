@@ -12,6 +12,7 @@ namespace Spotlight.FreeCafe
         public CafeFloor floor;
         public Transform contentRoot;
         public Transform cameraAnchor;
+        public float orthographicSize; // 0 保持场景原始镜头，仅制作区使用近景
     }
 
     /// <summary>Camera destinations within ONE Unity scene. Does not own gameplay, load scenes or crop the camera.</summary>
@@ -22,6 +23,7 @@ namespace Spotlight.FreeCafe
         public CafeAreaAnchor[] areas;
         public AreaId CurrentArea { get; private set; }
         private bool hasFocus;
+        private float originalOrthographicSize;
 
         public CafeAreaAnchor Find(AreaId area)
         {
@@ -31,7 +33,7 @@ namespace Spotlight.FreeCafe
         public void Initialize(Camera camera)
         {
             if(camera==null) throw new InvalidOperationException("Area manager requires the gameplay camera");
-            worldCamera=camera;
+            worldCamera=camera; originalOrthographicSize=camera.orthographicSize;
             if(areas==null || areas.Length==0) throw new InvalidOperationException("Area manager has no anchors");
             for(int i=0;i<areas.Length;i++)
             {
@@ -48,6 +50,7 @@ namespace Spotlight.FreeCafe
             var entry=Find(area);if(entry==null || worldCamera==null) return false;
             if(!force && hasFocus && CurrentArea==area) return true;
             worldCamera.transform.position=entry.cameraAnchor.position+cameraOffset;
+            if(worldCamera.orthographic) worldCamera.orthographicSize=entry.orthographicSize>0 ? entry.orthographicSize : originalOrthographicSize;
             CurrentArea=area;hasFocus=true;
             return true;
         }
