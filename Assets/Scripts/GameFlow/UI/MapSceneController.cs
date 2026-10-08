@@ -110,11 +110,10 @@ namespace Spotlight.GameFlow
                         // Fixed UI layer: these controls are intentionally outside MapContent.
             TextMeshProUGUI header = CreateLabel("Header", root, "行动点 5 / 5    |    王国纪元 670年10月6日", 24, Color.white, TextAlignmentOptions.Center);
             header.rectTransform.SetAnchors(new Vector2(.5f, 1), new Vector2(.5f, 1), new Vector2(-100, -42), new Vector2(540, 48));
-            Button detail = CreateButton("详情面板", root, new Vector2(250, -42), new Vector2(170, 44));
+            Button detail = CreateButton("详情面板", root, Vector2.zero, new Vector2(170, 44));
             RectTransform detailRect = detail.transform as RectTransform;
-            detailRect.anchorMin = detailRect.anchorMax = new Vector2(.5f, 1f);
-            detailRect.pivot = new Vector2(.5f, 1f);
-            detailRect.anchoredPosition = new Vector2(350, -18);
+            detailRect.SetAnchors(new Vector2(1, 1), new Vector2(1, 1), new Vector2(-210, -18), new Vector2(170, 44));
+            detailRect.pivot = new Vector2(1, 1);
             detail.onClick.AddListener(() => ShowFocus("详情面板", "我的信息 / 人物关系 / 世界情况（基础占位）。"));
             Image title = CreateSpriteImage("Title", root, cityTitleSprite);
             title.rectTransform.SetAnchors(new Vector2(0, 0), new Vector2(0, 0), new Vector2(42, 42), new Vector2(366, 118));
@@ -179,6 +178,7 @@ namespace Spotlight.GameFlow
                 if (position == null || !position.enabled) continue;
                 string label = ResolveText(position.nameText, position.positionKey);
                 Vector2 mapPosition = PositionForArtwork(position.positionKey, position.position);
+                if (position.positionKey == "cafe") CreateCafePlaceholder(mapContent, mapPosition, label);
                 CreateLocation(mapContent, label, mapPosition, position.isImportant, () => OnPositionClicked(position));
             }
         }
@@ -299,26 +299,136 @@ namespace Spotlight.GameFlow
 
         private void BuildTaskPanel(Transform parent)
         {
-            GameObject panel = new GameObject("TaskPanel", typeof(RectTransform), typeof(Image), typeof(VerticalLayoutGroup));
+            const float width = 300f;
+            const float expandedHeight = 370f;
+            GameObject panel = new GameObject("TaskPanel", typeof(RectTransform), typeof(Image));
             panel.transform.SetParent(parent, false);
-            RectTransform rect = (RectTransform)panel.transform;
-            rect.SetAnchors(new Vector2(0,1), new Vector2(0,1), new Vector2(28,-170), new Vector2(270,150));
-            rect.pivot = new Vector2(0, 1);
-            panel.GetComponent<Image>().color = new Color(.04f, .07f, .07f, .9f);
-            VerticalLayoutGroup layout = panel.GetComponent<VerticalLayoutGroup>(); layout.spacing = 5; layout.padding = new RectOffset(12,12,10,10); layout.childForceExpandHeight = false;
-            CreateLabel("TaskTitle", panel.transform, "事项", 22, Color.white, TextAlignmentOptions.Left).rectTransform.sizeDelta = new Vector2(240, 30);
-            CreateTaskRow(panel.transform, "进入绿道");
-            CreateTaskRow(panel.transform, "完成今日营业");
-            CreateTaskRow(panel.transform, "探索城区的新地点");
+            RectTransform panelRect = (RectTransform)panel.transform;
+            panelRect.SetAnchors(new Vector2(0, 1), new Vector2(0, 1), new Vector2(28, -28), new Vector2(width, 44));
+            panelRect.pivot = new Vector2(0, 1);
+            panel.GetComponent<Image>().color = new Color(.04f, .07f, .07f, .94f);
+
+            Button toggle = CreateButton("TaskToggle", panel.transform, Vector2.zero, new Vector2(width, 44));
+            RectTransform toggleRect = toggle.transform as RectTransform;
+            toggleRect.SetAnchors(new Vector2(0, 1), new Vector2(1, 1), Vector2.zero, new Vector2(0, 44));
+            toggleRect.pivot = new Vector2(.5f, 1);
+            toggle.GetComponent<Image>().color = new Color(.08f, .12f, .13f, .98f);
+            SetButtonText(toggle, "事项  ﹀", 18);
+            toggle.transform.Find("Label").GetComponent<TextMeshProUGUI>().alignment = TextAlignmentOptions.Left;
+            toggle.transform.Find("Label").GetComponent<RectTransform>().offsetMin = new Vector2(14, 0);
+            toggle.transform.Find("Label").GetComponent<RectTransform>().offsetMax = new Vector2(-14, 0);
+
+            GameObject body = new GameObject("TaskBody", typeof(RectTransform));
+            body.transform.SetParent(panel.transform, false);
+            RectTransform bodyRect = (RectTransform)body.transform;
+            bodyRect.SetAnchors(new Vector2(0, 1), new Vector2(1, 1), new Vector2(0, -44), new Vector2(0, expandedHeight - 44));
+            bodyRect.pivot = new Vector2(.5f, 1);
+            body.SetActive(false);
+
+            Button inProgress = CreateButton("InProgressTab", body.transform, Vector2.zero, new Vector2(140, 34));
+            RectTransform inProgressRect = inProgress.transform as RectTransform;
+            inProgressRect.SetAnchors(new Vector2(0, 1), new Vector2(0, 1), new Vector2(8, -8), new Vector2(140, 34));
+            inProgressRect.pivot = new Vector2(0, 1);
+            SetButtonText(inProgress, "进行中", 18);
+
+            Button completed = CreateButton("CompletedTab", body.transform, Vector2.zero, new Vector2(140, 34));
+            RectTransform completedRect = completed.transform as RectTransform;
+            completedRect.SetAnchors(new Vector2(0, 1), new Vector2(0, 1), new Vector2(152, -8), new Vector2(140, 34));
+            completedRect.pivot = new Vector2(0, 1);
+            SetButtonText(completed, "已完成", 18);
+
+            RectTransform viewport = CreateRect("TaskViewport", body.transform);
+            viewport.SetAnchors(new Vector2(0, 0), new Vector2(1, 1), new Vector2(8, 8), new Vector2(-8, -50));
+            viewport.gameObject.AddComponent<RectMask2D>();
+            ScrollRect scroll = body.AddComponent<ScrollRect>();
+            scroll.viewport = viewport;
+            scroll.horizontal = false;
+            scroll.vertical = true;
+            scroll.movementType = ScrollRect.MovementType.Clamped;
+            scroll.scrollSensitivity = 30f;
+
+            RectTransform inProgressContent = CreateTaskList(viewport, "InProgressContent", new[] { "进入绿道", "完成今日营业", "探索城区的新地点", "寻找可靠的保护", "协助别人的工作", "报告街道状况" });
+            RectTransform completedContent = CreateTaskList(viewport, "CompletedContent", new[] { "修好炉灶温备用", "船队援助", "让新版本机重获自由", "救出莹莹" });
+            completedContent.gameObject.SetActive(false);
+            scroll.content = inProgressContent;
+
+            bool expanded = false;
+            toggle.onClick.AddListener(() =>
+            {
+                expanded = !expanded;
+                body.SetActive(expanded);
+                panelRect.sizeDelta = new Vector2(width, expanded ? expandedHeight : 44);
+                SetButtonText(toggle, expanded ? "事项 ︿" : "事项  ﹀", 18);
+            });
+            inProgress.onClick.AddListener(() =>
+            {
+                inProgressContent.gameObject.SetActive(true);
+                completedContent.gameObject.SetActive(false);
+                scroll.content = inProgressContent;
+                SetTabState(inProgress, true);
+                SetTabState(completed, false);
+            });
+            completed.onClick.AddListener(() =>
+            {
+                inProgressContent.gameObject.SetActive(false);
+                completedContent.gameObject.SetActive(true);
+                scroll.content = completedContent;
+                SetTabState(inProgress, false);
+                SetTabState(completed, true);
+            });
         }
 
-        private void CreateTaskRow(Transform parent, string text)
+        private static RectTransform CreateTaskList(RectTransform viewport, string name, string[] tasks)
         {
-            GameObject row = new GameObject(text, typeof(RectTransform), typeof(Image), typeof(LayoutElement)); row.transform.SetParent(parent, false); row.GetComponent<Image>().color = new Color(.12f,.16f,.16f,1f); row.GetComponent<LayoutElement>().preferredHeight = 28;
-            CreateLabel("Task", row.transform, "□  " + text, 15, Color.white, TextAlignmentOptions.Left).rectTransform.SetAnchors(Vector2.zero, Vector2.one, Vector2.zero, Vector2.zero);
+            RectTransform content = CreateRect(name, viewport);
+            content.anchorMin = new Vector2(0, 1);
+            content.anchorMax = new Vector2(1, 1);
+            content.pivot = new Vector2(.5f, 1);
+            content.anchoredPosition = Vector2.zero;
+            content.sizeDelta = new Vector2(0, Mathf.Max(44, tasks.Length * 38 + 8));
+            VerticalLayoutGroup layout = content.gameObject.AddComponent<VerticalLayoutGroup>();
+            layout.spacing = 5;
+            layout.padding = new RectOffset(0, 0, 0, 8);
+            layout.childForceExpandWidth = true;
+            layout.childForceExpandHeight = false;
+            foreach (string task in tasks) CreateTaskRow(content, task);
+            return content;
         }
 
-        private void StartCafe() { flow?.GetComponent<DayFlowController>()?.StartCafeFromMap(); }
+        private static void CreateTaskRow(Transform parent, string text)
+        {
+            GameObject row = new GameObject(text, typeof(RectTransform), typeof(Image), typeof(LayoutElement));
+            row.transform.SetParent(parent, false);
+            row.GetComponent<Image>().color = new Color(.12f, .16f, .16f, 1f);
+            row.GetComponent<LayoutElement>().preferredHeight = 32;
+            CreateLabel("Task", row.transform, "□  " + text, 15, Color.white, TextAlignmentOptions.Left).rectTransform.SetAnchors(Vector2.zero, Vector2.one, new Vector2(8, 0), new Vector2(-8, 0));
+        }
+
+        private static void SetTabState(Button button, bool selected)
+        {
+            Image image = button.GetComponent<Image>();
+            image.color = selected ? new Color(.95f, .95f, .95f, .98f) : new Color(.18f, .22f, .23f, .98f);
+            TextMeshProUGUI label = button.transform.Find("Label").GetComponent<TextMeshProUGUI>();
+            label.color = selected ? Color.black : Color.white;
+        }
+
+        private static void SetButtonText(Button button, string text, float size)
+        {
+            TextMeshProUGUI label = button.transform.Find("Label").GetComponent<TextMeshProUGUI>();
+            label.text = text;
+            label.fontSize = size;
+        }
+
+        private void StartCafe()
+        {
+            DayFlowController dayFlow = flow != null ? flow.GetComponent<DayFlowController>() : null;
+            if (dayFlow != null)
+            {
+                dayFlow.StartCafeFromMap();
+                return;
+            }
+            UnityEngine.SceneManagement.SceneManager.LoadScene("CoffeeShop");
+        }
         private void ShowFocus(string name, string message)
         {
             if (focusPanel != null) focusPanel.SetActive(true);
@@ -330,6 +440,25 @@ namespace Spotlight.GameFlow
             RebuildActionList();
             if (focusPanel != null) focusPanel.SetActive(false);
             if (status != null) status.text = "滚轮缩放，WASD移动；点击地点聚焦，右键退出聚焦";
+        }
+
+        private void CreateCafePlaceholder(RectTransform parent, Vector2 position, string label)
+        {
+            if (pinSprite == null) return;
+            Image marker = CreateSpriteImage("CafePlaceholder", parent, pinSprite);
+            RectTransform markerRect = marker.rectTransform;
+            markerRect.anchorMin = markerRect.anchorMax = new Vector2(.5f, .5f);
+            markerRect.pivot = new Vector2(.5f, 0f);
+            markerRect.anchoredPosition = position + new Vector2(0f, 85f);
+            markerRect.sizeDelta = new Vector2(86f, 110f);
+            marker.raycastTarget = false;
+            TextMeshProUGUI markerLabel = CreateLabel("CafeLabel", parent, label, 24, Color.white, TextAlignmentOptions.Center);
+            markerLabel.rectTransform.anchorMin = markerLabel.rectTransform.anchorMax = new Vector2(.5f, .5f);
+            markerLabel.rectTransform.pivot = new Vector2(.5f, 1f);
+            markerLabel.rectTransform.anchoredPosition = position + new Vector2(0f, 150f);
+            markerLabel.rectTransform.sizeDelta = new Vector2(220f, 40f);
+            markerLabel.outlineWidth = .25f;
+            markerLabel.outlineColor = Color.black;
         }
 
         private void CreateLocation(RectTransform parent, string name, Vector2 position, bool important, Action action)
