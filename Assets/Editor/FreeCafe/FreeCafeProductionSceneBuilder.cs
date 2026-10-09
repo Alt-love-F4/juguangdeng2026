@@ -29,6 +29,7 @@ namespace Spotlight.FreeCafe.Editor
             Directory.CreateDirectory("output/production-validation");
             File.Copy(ScenePath,"output/production-validation/CoffeeShop-before-production.unity",true);
             Undo.RecordObject(runtime,"Enable production interface"); runtime.productionMode=true;
+            var warmCamera=UnityEngine.Object.FindFirstObjectByType<Camera>(); if(warmCamera!=null) { Undo.RecordObject(warmCamera,"Warm camera background");warmCamera.clearFlags=CameraClearFlags.SolidColor;warmCamera.backgroundColor=new Color(.29f,.18f,.13f,1f);EditorUtility.SetDirty(warmCamera); }
             Undo.RecordObject(runtime.areaManager,"Production camera closeup");runtime.areaManager.Find(AreaId.Counter).orthographicSize=6.2f;
             DisableObsoletePrototypeImage(scene);
             var hud=runtime.GetComponent<FreeCafeProductionHud>(); if(hud==null) hud=Undo.AddComponent<FreeCafeProductionHud>(runtime.gameObject);
@@ -86,6 +87,7 @@ namespace Spotlight.FreeCafe.Editor
             BuildWorkspaceLabels(runtime);
             root.SetActive(false); // scene 默认仍从营业区入口进入
             EditorUtility.SetDirty(hud);EditorUtility.SetDirty(gateway);EditorUtility.SetDirty(runtime);
+            FreeCafeHudSceneBuilder.Apply(oldHud,hud);
             EditorSceneManager.MarkSceneDirty(scene);EditorSceneManager.SaveScene(scene);AssetDatabase.SaveAssets();
             Debug.Log("[Production] 已更新同一个 CoffeeShop 制作区域；其他楼层、镜头、实体Prefab、DayFlow保持不变。");
         }

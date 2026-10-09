@@ -29,11 +29,16 @@ namespace Spotlight.FreeCafe
         public bool CarrySelection { get; set; }
         public bool ShowAssetIds { get; set; }
         public bool IsDragging => draggedView!=null;
-        public bool InputBlocked => (gameFlow != null && gameFlow.IsMapOpen) || (World != null && World.ProductionEnabled && !string.IsNullOrEmpty(World.State.production.miniGameToken)) || Time.timeScale<=0 || DialoguePanel.IsAnyPlaying || (dayFlow != null && dayFlow.BlocksGameplayInput);
+        public bool GameplayBlocked => (gameFlow != null && gameFlow.IsMapOpen) || (World != null && World.ProductionEnabled && !string.IsNullOrEmpty(World.State.production.miniGameToken)) || Time.timeScale<=0 || DialoguePanel.IsAnyPlaying || (dayFlow != null && dayFlow.BlocksGameplayInput);
         private DayFlowController dayFlow;
         private GameFlowBootstrap gameFlow;
         public event Action ViewChanged;
         private readonly Dictionary<string,FreeEntityView> views=new Dictionary<string,FreeEntityView>();
+        private FreeCafeHud playerHud;
+        private FreeCafeProductionHud productionHud;
+        public bool InputBlocked => GameplayBlocked || (FreeCafeGMPanel.Instance!=null && FreeCafeGMPanel.Instance.IsVisible) ||
+            (playerHud!=null && playerHud.IsModalOpen) || (productionHud!=null && productionHud.IsModalOpen);
+        public void OpenPlayerMenu() { if(playerHud!=null) playerHud.OpenPlayerMenu(); }
         private readonly List<string> removeIds=new List<string>();
         private readonly List<RaycastResult> hits=new List<RaycastResult>();
         private FreeEntityView draggedView,receiver;
@@ -73,11 +78,12 @@ namespace Spotlight.FreeCafe
         {
             dayFlow = FindFirstObjectByType<DayFlowController>();
             gameFlow = FindFirstObjectByType<GameFlowBootstrap>();
+            playerHud=FindFirstObjectByType<FreeCafeHud>(); productionHud=GetComponent<FreeCafeProductionHud>();
             string pending=GameSaveParticipantRegistry.TakePending(SaveId);
             if(!string.IsNullOrEmpty(pending)) RestoreJson(pending); else SyncViews();
             if (FreeCafeGMPanel.Instance != null) FreeCafeGMPanel.Instance.Initialize(this);
             if(World.State.currentArea==AreaId.Cafe)
-                ShowHint("当前是营业区；点击右侧白色箭头或右下角「一楼出餐台」进入备料区。进入出餐台后，点击或拖拽物品即可交互。");
+                ShowHint("当前是营业区；点击场景箭头或「前往制作台」进入备料区。进入出餐台后，点击或拖拽物品即可交互。");
             else if(World.ProductionEnabled)
                 ShowHint("点击杯具选择出餐杯；原料拖到设备，点击启动。成品壶向下拖动倾倒，抬起停止。");
             else
@@ -313,7 +319,7 @@ namespace Spotlight.FreeCafe
             var item=DragData(); if(item==null) { CancelDrag(); ShowHint("设备产物已变化，拖拽已取消"); return; } var pos=WorldToArea(World.State.currentArea,draggedView.transform.position);
             var result=receiver!=null && !placeOnly ? World.Preview(item,World.Find(receiver.EntityId)) : World.CanPosition(item.specId,World.State.currentArea,pos.x,pos.y);
             if(receiver!=null && !placeOnly) receiver.SetDropTarget(true,!result.success);
-            ShowHint(overUI ? "不能放在 UI 黑边；松手取消" : result.message+(placeOnly ? " · 仅摆放" : " · Shift 可仅摆放"));
+            ShowHint(overUI ? "不能放在界面卡片上；松手取消" : result.message+(placeOnly ? " · 仅摆放" : " · Shift 可仅摆放"));
         }
         public void EndDrag(PointerEventData e)
         {

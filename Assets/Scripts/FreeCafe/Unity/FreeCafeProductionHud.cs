@@ -6,10 +6,13 @@ using UnityEngine.UI;
 
 namespace Spotlight.FreeCafe
 {
-    /// <summary>沿用 CoffeeShop 的世界实体与现有 HUD Canvas，仅替换制作区的上下操作栏。</summary>
+    /// <summary>沿用 CoffeeShop 的世界实体与现有 HUD Canvas，显示制作区的订单纸卡与出餐工具卡。</summary>
     public sealed class FreeCafeProductionHud : MonoBehaviour
     {
         public FreeCafeRuntime runtime;
+        public bool IsModalOpen => bookPanel!=null && bookPanel.activeInHierarchy;
+        public void CloseOverlays() { if(bookPanel!=null) bookPanel.SetActive(false); }
+        private static readonly Color Ink=new Color(.25f,.15f,.095f);
         public GameObject productionRoot, legacyTop, legacyBottom, bookPanel, miniGamePanel;
         public TMP_Text timeCaption, volumeCaption;
         public TMP_Text orderTitle, customerName, orderDescription, cupStatus, instruction, result, machineStatus, bookTitle, bookBody;
@@ -33,18 +36,18 @@ namespace Spotlight.FreeCafe
             returnButton.onClick.AddListener(runtime.ReturnFromProduction); bookButton.onClick.AddListener(OpenBook);
             closeBook.onClick.AddListener(CloseBook); previousRecipe.onClick.AddListener(PreviousRecipe); nextRecipe.onClick.AddListener(NextRecipe);
             miniGameButton.onClick.AddListener(OpenMiniGame); cancelMiniGame.onClick.AddListener(CancelMiniGame);
-            startBusiness.onClick.AddListener(runtime.StartBusiness); pauseButton.onClick.AddListener(runtime.TogglePause);
-            saveButton.onClick.AddListener(runtime.Save); clearMachine.onClick.AddListener(ClearMachine);
+            pauseButton.onClick.AddListener(runtime.OpenPlayerMenu);
+            clearMachine.onClick.AddListener(ClearMachine);
         }
         private void OnDisable()
         {
-            if(completionFeedback!=null) { StopCoroutine(completionFeedback); completionFeedback=null; if(result!=null) result.color=new Color(.95f,.88f,.73f); }
+            if(completionFeedback!=null) { StopCoroutine(completionFeedback); completionFeedback=null; if(result!=null) result.color=Ink; }
             if(!bound) return; bound=false;
             if(runtime!=null) runtime.ViewChanged-=Refresh;
             previousOrder.onClick.RemoveListener(PreviousOrder); nextOrder.onClick.RemoveListener(NextOrder);
             smallCup.onClick.RemoveListener(SmallCup); largeCup.onClick.RemoveListener(LargeCup);
             deliver.onClick.RemoveListener(Deliver); discard.onClick.RemoveListener(Discard);
-            if(runtime!=null) { returnButton.onClick.RemoveListener(runtime.ReturnFromProduction); startBusiness.onClick.RemoveListener(runtime.StartBusiness); pauseButton.onClick.RemoveListener(runtime.TogglePause); saveButton.onClick.RemoveListener(runtime.Save); }
+            if(runtime!=null) { returnButton.onClick.RemoveListener(runtime.ReturnFromProduction); pauseButton.onClick.RemoveListener(runtime.OpenPlayerMenu); }
             bookButton.onClick.RemoveListener(OpenBook); closeBook.onClick.RemoveListener(CloseBook);
             previousRecipe.onClick.RemoveListener(PreviousRecipe); nextRecipe.onClick.RemoveListener(NextRecipe);
             miniGameButton.onClick.RemoveListener(OpenMiniGame); cancelMiniGame.onClick.RemoveListener(CancelMiniGame); clearMachine.onClick.RemoveListener(ClearMachine);
@@ -64,7 +67,7 @@ namespace Spotlight.FreeCafe
         private IEnumerator CompletionFeedback()
         {
             float elapsed=0;
-            while(elapsed<.8f) { elapsed+=Time.unscaledDeltaTime;result.color=Color.Lerp(new Color(.52f,1,.55f),new Color(.95f,.88f,.73f),Mathf.Clamp01(elapsed/.8f));yield return null; }
+            while(elapsed<.8f) { elapsed+=Time.unscaledDeltaTime;result.color=Color.Lerp(new Color(.52f,1,.55f),Ink,Mathf.Clamp01(elapsed/.8f));yield return null; }
             completionFeedback=null;
         }
         private void Discard() { if(!runtime.InputBlocked) Execute(runtime.World.DiscardProductionCup()); }
@@ -100,7 +103,7 @@ namespace Spotlight.FreeCafe
             var world=runtime.World; var state=world.State;
             bool visible=world.ProductionEnabled && state.currentArea==AreaId.Counter;
             productionRoot.SetActive(visible);
-            if(legacyTop!=null) legacyTop.SetActive(!visible); if(legacyBottom!=null) legacyBottom.SetActive(!visible);
+            // 玩家 HUD 已改为独立纸卡布局；旧黑边不再由制作 HUD 恢复。
             if(!visible) { bookPanel.SetActive(false); miniGamePanel.SetActive(false); return; }
             bool blocked=runtime.InputBlocked; var request=world.Request(state.focusedRequestId);
             var product=request==null ? null : world.Product(request.productId);
@@ -115,7 +118,7 @@ namespace Spotlight.FreeCafe
             }
             customerName.text=name+(request==null ? "" : "  ·  耐心 "+request.patience.ToString("0")+"s");
             customerAvatar.sprite=runtime.artLibrary.Resolve(customer==null ? "customer" : world.Spec(customer.specId).artId);
-            orderDescription.text=product==null ? "可提前备料；开始营业后订单会自动到来。" : product.label+"  ·  "+product.description+"\n满意要求 ≥ "+product.minimumScore.ToString("0")+"分"+(request.remakes>0 ? "  ·  正在重做" : "");
+            orderDescription.text=product==null ? "尚无订单，可先准备原料。" : product.label+"  ·  "+product.description+"\n满意要求 ≥ "+product.minimumScore.ToString("0")+"分"+(request.remakes>0 ? "  ·  正在重做" : "");
             previousOrder.interactable=nextOrder.interactable=!blocked && state.requests.Count>1;
             var cup=world.ServingCup;
             cupStatus.text=cup==null ? "出餐托盘 · 未选杯" : world.Spec(cup.specId).label+"  "+world.LiquidVolume(cup).ToString("0")+" / "+world.LiquidCapacity(cup).ToString("0")+" ml";
@@ -123,13 +126,13 @@ namespace Spotlight.FreeCafe
             smallCup.interactable=largeCup.interactable=canChange;
             deliver.interactable=!blocked && cup!=null && request!=null; discard.interactable=!blocked && cup!=null;
             returnButton.interactable=bookButton.interactable=miniGameButton.interactable=!blocked;
-            startBusiness.interactable=!blocked && !state.open; saveButton.interactable=!blocked; pauseButton.interactable=string.IsNullOrEmpty(state.production.miniGameToken);
+            pauseButton.interactable=string.IsNullOrEmpty(state.production.miniGameToken) && !(FreeCafeGMPanel.Instance!=null && FreeCafeGMPanel.Instance.IsVisible);
             var selected=world.Find(runtime.SelectedId); clearMachine.interactable=!blocked && selected!=null && world.Spec(selected.specId).Has(Capability.Processor) && selected.contents.Count>0;
             instruction.text=runtime.Hint;
-            result.text=string.IsNullOrEmpty(state.production.lastDelivery) ? "金币 "+state.money+"  ·  声望 "+state.reputation+"  ·  自由备料，不锁订单步骤" : state.production.lastDelivery;
+            result.text=string.IsNullOrEmpty(state.production.lastDelivery) ? "王国币 "+state.money+"  ·  声望 "+state.reputation+"  ·  可提前备料" : state.production.lastDelivery;
             var brewer=world.Find("m.brewer"); var heater=world.Find("m.heater"); var settings=world.Catalog.production;
-            if(timeCaption!=null) timeCaption.text="萃取时间 / 完美 "+settings.brewIdealSeconds.ToString("0.#")+"s";
-            if(volumeCaption!=null) volumeCaption.text="注水量 / 完美 "+settings.brewIdealMl.ToString("0")+"ml";
+            if(timeCaption!=null) timeCaption.text="萃取 "+brewer.production.brewElapsed.ToString("0.0")+" s  /  理想 "+settings.brewIdealSeconds.ToString("0.#")+" s";
+            if(volumeCaption!=null) volumeCaption.text="注水 "+world.LiquidVolume(brewer).ToString("0")+" ml  /  理想 "+settings.brewIdealMl.ToString("0")+" ml";
             timeGauge.maxValue=settings.brewIdealSeconds+settings.brewGoldSeconds+settings.brewGreenSeconds+2;
             volumeGauge.maxValue=settings.brewIdealMl+settings.brewGoldMl+settings.brewGreenMl+50;
             timeGauge.value=brewer.production.brewElapsed; volumeGauge.value=world.LiquidVolume(brewer);

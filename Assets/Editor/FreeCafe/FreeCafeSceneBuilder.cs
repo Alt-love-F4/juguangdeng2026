@@ -257,6 +257,7 @@ hud.recipeButton=Button(controls,"RecipeTips","制作提示",new Vector2(520,-20
             hud.areaName=Text(nav,"CurrentArea","一楼",new Vector2(0,61),new Vector2(375,28),20);
             hud.areaButtons=new Button[4];string[] labels={"一楼营业区","一楼出餐台","顶楼","地下室"};
             for(int i=0;i<4;i++) hud.areaButtons[i]=Button(nav,"Area"+i,labels[i],new Vector2(i%2==0 ? -94 : 94,i<2 ? 12 : -45),new Vector2(178,46),18,library);
+            FreeCafeHudSceneBuilder.Apply(hud,null);
         }
         private static RectTransform Box(Transform parent,string name,Vector2 position,Vector2 size,Color color)
         {
