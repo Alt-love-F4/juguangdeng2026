@@ -18,7 +18,8 @@ namespace Spotlight.GameFlow
         DayComplete,
         // Append only: retain numeric IDs of existing save phases.
         IntroLetter,
-        FirstDayIntroduction
+        FirstDayIntroduction,
+        AvatarSelection
     }
 
     /// <summary>
@@ -40,6 +41,8 @@ namespace Spotlight.GameFlow
 
         private IDialogueScriptSource introductionSource;
         private DialoguePanel introductionPanel;
+        private PlayerAvatarSelection avatarSelection;
+        public PlayerAvatarSelection CurrentAvatarSelection => avatarSelection;
         private bool firstDayIntroductionCompleted;
         private GameFlowBootstrap flow;
         private UIPanel currentPanel;
@@ -69,6 +72,7 @@ namespace Spotlight.GameFlow
             flow = owner;
             if (initialized) return;
             initialized = true;
+            PlayerDetailsProfile.EnsureRegistered();
             GameSaveParticipantRegistry.Capturers[SaveId] = CaptureJson;
             GameSaveParticipantRegistry.Restorers[SaveId] = RestoreJson;
         }
@@ -95,19 +99,38 @@ namespace Spotlight.GameFlow
         public void BeginNewSession(bool playLetter = true, bool playIntroduction = true)
         {
             HideForMainMenu();
+            PlayerDetailsProfile.ResetForNewSession();
             day = 1;
             firstDayIntroductionCompleted = !playIntroduction;
             previousDate = InitialDate;
             if (!playLetter)
             {
-                BeginNewDayFlow();
+                EnterAvatarSelection();
                 return;
             }
             running = true;
             HideBusinessControls();
             HideGameplayPanel();
             SetState(DayFlowState.IntroLetter);
-            ShowPresentation<FirstDayLetterPanel>(BeginNewDayFlow, ConfigureFirstDayLetter);
+            ShowPresentation<FirstDayLetterPanel>(EnterAvatarSelection, ConfigureFirstDayLetter);
+        }
+
+        private void EnterAvatarSelection()
+        {
+            if (!initialized) Initialize(flow);
+            running = true;
+            ClosePresentation();
+            HideBusinessControls();
+            HideGameplayPanel();
+            SetState(DayFlowState.AvatarSelection);
+            int version = presentationVersion;
+            avatarSelection = PlayerAvatarSelection.Create(transform);
+            PlayerAvatarSelection selection = avatarSelection;
+            selection.Play(() =>
+            {
+                if (!running || version != presentationVersion || avatarSelection != selection) return;
+                BeginNewDayFlow();
+            });
         }
 
         public void BeginNewDayFlow()
@@ -264,7 +287,13 @@ namespace Spotlight.GameFlow
         /// <summary>Called by the map when the player selects the cafe location.</summary>
         public void StartCafeFromMap()
         {
-            if (!running || State != DayFlowState.CityMapLeisure) return;
+            if (UnityEngine.SceneManagement.SceneManager.GetActiveScene().name == "CoffeeShop") return;
+            if (!running)
+            {
+                flow?.TransitionToGameplayScene("CoffeeShop", null);
+                return;
+            }
+            if (State != DayFlowState.CityMapLeisure) return;
             if (flow != null && UnityEngine.SceneManagement.SceneManager.GetActiveScene().name != "CoffeeShop")
             {
                 flow.TransitionToGameplayScene("CoffeeShop", EnterBusinessTransition);
@@ -322,6 +351,13 @@ namespace Spotlight.GameFlow
         private void ClosePresentation()
         {
             ++presentationVersion;
+            PlayerAvatarSelection selection = avatarSelection;
+            avatarSelection = null;
+            if (selection != null)
+            {
+                selection.Stop();
+                Destroy(selection.gameObject);
+            }
             DialoguePanel dialogue = introductionPanel;
             introductionPanel = null;
             if (dialogue != null)
@@ -419,6 +455,7 @@ namespace Spotlight.GameFlow
         /// <summary>Restore the saved phase, never restart the new-game intro unconditionally.</summary>
         public void RestoreSavedDayFlow()
         {
+            PlayerDetailsProfile.RestorePending();
             string json = GameSaveParticipantRegistry.TakePending(SaveId);
             if (!string.IsNullOrEmpty(json)) RestoreJson(json);
             else
@@ -434,8 +471,9 @@ namespace Spotlight.GameFlow
             if (State != DayFlowState.FreeCafeBusiness) HideGameplayPanel();
             switch (State)
             {
+                case DayFlowState.AvatarSelection: EnterAvatarSelection(); break;
                 case DayFlowState.FirstDayIntroduction: PlayFirstDayIntroduction(); break;
-                case DayFlowState.IntroLetter: ShowPresentation<FirstDayLetterPanel>(BeginNewDayFlow, ConfigureFirstDayLetter); break;
+                case DayFlowState.IntroLetter: ShowPresentation<FirstDayLetterPanel>(EnterAvatarSelection, ConfigureFirstDayLetter); break;
                 case DayFlowState.DateTransition: BeginNewDayFlow(); break;
                 case DayFlowState.PreBusiness: EnterCityMap(); break;
                 case DayFlowState.BusinessTransition: EnterBusinessTransition(); break;

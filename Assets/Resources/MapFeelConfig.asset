@@ -1,0 +1,25 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 5a705cc8a50dae54bacc3d20e76955de, type: 3}
+  m_Name: MapFeelConfig
+  m_EditorClassIdentifier: Spotlight.GameFlow.UI::Spotlight.GameFlow.MapFeelConfig
+  focusSmoothTime: 0.3
+  focusZoom: 1.5
+  scrollZoomSensitivity: 1.5
+  zoomSmoothTime: 0.07
+  minimumZoom: 0.7
+  maximumZoom: 1.5
+  keyboardPanSpeed: 520
+  dragThreshold: 6
+  panVelocityResponse: 25
+  panInertiaDamping: 6
+  backgroundScale: 2.2

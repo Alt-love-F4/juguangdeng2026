@@ -9,6 +9,7 @@ namespace Spotlight.GameFlow
     public sealed class BusinessControlsPanel : UIPanel
     {
         [SerializeField] private Button endBusinessButton;
+        private Button mapButton;
         private Action endBusiness;
         private GameFlowBootstrap flow;
         private CanvasGroup group;
@@ -16,7 +17,18 @@ namespace Spotlight.GameFlow
         {
             group = GetComponent<CanvasGroup>();
             if (group == null) group = gameObject.AddComponent<CanvasGroup>();
-            if (endBusinessButton != null) endBusinessButton.onClick.AddListener(EndBusiness);
+            if (endBusinessButton != null)
+            {
+                endBusinessButton.onClick.AddListener(EndBusiness);
+                mapButton = Instantiate(endBusinessButton, endBusinessButton.transform.parent);
+                mapButton.name = "OpenMap";
+                mapButton.onClick = new Button.ButtonClickedEvent();
+                mapButton.onClick.AddListener(() => flow?.OpenMap());
+                var rect = (RectTransform)mapButton.transform;
+                rect.anchoredPosition += Vector2.left * (rect.rect.width + 16f);
+                var label = mapButton.GetComponentInChildren<TMPro.TMP_Text>();
+                if (label != null) label.text = "地图 / M";
+            }
         }
         protected override void OnShow()
         {

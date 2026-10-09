@@ -38,6 +38,14 @@ namespace Spotlight.GameFlow
         private NarrativeSnapshot pendingNarrativeRestore;
         private bool loadingSavedSession;
         private DayFlowController dayFlow;
+        private DetailsPanel detailsPanel;
+        private MapSceneController mapOverlay;
+        private bool openingMap;
+        public bool IsMapOpen => mapOverlay != null || openingMap;
+        internal bool MapControlsAvailable => gameplay && !paused && !loadingTransitioning && detailsPanel == null
+            && !DialoguePanel.IsAnyPlaying && (dayFlow == null || !dayFlow.BlocksGameplayInput);
+        private int detailsClosedFrame = -1;
+        private NarrativeRuntime detailsRuntime;
         private EventSystem persistentEventSystem;
 
         public GameSettings CurrentSettings => settings.Current;
@@ -120,6 +128,11 @@ namespace Spotlight.GameFlow
             Keyboard keyboard = Keyboard.current;
             if (keyboard != null && keyboard.escapeKey.wasPressedThisFrame)
                 HandleEscape();
+            if (keyboard != null && keyboard.mKey.wasPressedThisFrame)
+            {
+                if (IsMapOpen) CloseMap();
+                else OpenMap();
+            }
             if (gameplay && !paused && !loadingTransitioning)
             {
                 float deltaTime = Time.unscaledDeltaTime;
@@ -150,6 +163,37 @@ namespace Spotlight.GameFlow
                 else if (keyboard.leftArrowKey.wasPressedThisFrame || keyboard.upArrowKey.wasPressedThisFrame)
                     loadingPanel.SetTip(tips.Previous());
             }
+        }
+
+        public void OpenMap()
+        {
+            if (!CanUseGameplayControls() || SceneManager.GetActiveScene().name != "CoffeeShop") return;
+            openingMap = true;
+            StartCoroutine(OpenMapRoutine());
+        }
+
+        private IEnumerator OpenMapRoutine()
+        {
+            Scene scene = SceneManager.GetSceneByName("Map");
+            if (!scene.isLoaded)
+                yield return SceneManager.LoadSceneAsync("Map", LoadSceneMode.Additive);
+            scene = SceneManager.GetSceneByName("Map");
+            foreach (GameObject root in scene.GetRootGameObjects())
+            {
+                foreach (Camera camera in root.GetComponentsInChildren<Camera>(true))
+                    camera.gameObject.SetActive(false);
+                if (mapOverlay == null) mapOverlay = root.GetComponentInChildren<MapSceneController>(true);
+            }
+            if (mapOverlay != null) mapOverlay.OpenOverlay(this);
+            openingMap = false;
+        }
+
+        public void CloseMap()
+        {
+            if (openingMap || mapOverlay == null || detailsPanel != null) return;
+            mapOverlay.gameObject.SetActive(false);
+            mapOverlay = null;
+
         }
 
         public void TransitionToGameplayScene(string sceneName, Action completed)
@@ -386,14 +430,15 @@ namespace Spotlight.GameFlow
         }
 
         private bool CanUseGameplayControls()
-            => gameplay && !paused && !loadingTransitioning && !DialoguePanel.IsAnyPlaying
+            => gameplay && !paused && !loadingTransitioning && !IsMapOpen && detailsPanel == null && !DialoguePanel.IsAnyPlaying
                 && (dayFlow == null || !dayFlow.BlocksGameplayInput)
                 && (GameplayPanelHooks.PanelType != null && GameplayPanelHooks.PanelType.IsInstanceOfType(UIKit.PeekPanel(MainStack))
                     || GameplayPanelHooks.IsScenePanel && UIKit.PeekPanel(MainStack) == null);
 
         private void HandleEscape()
         {
-            if (DialoguePanel.BlocksEscapeThisFrame) return;
+            if (detailsPanel != null || detailsClosedFrame == Time.frameCount || DialoguePanel.BlocksEscapeThisFrame) return;
+            if (IsMapOpen) { CloseMap(); return; }
             if (CanUseGameplayControls() && (narrativeIntegration?.Runtime?.BlocksGameplayInput ?? false))
                 return;
             if (loadingTransitioning || (dayFlow != null && dayFlow.BlocksGameplayInput))
@@ -413,8 +458,42 @@ namespace Spotlight.GameFlow
                 ResumeGame();
         }
 
+        public void OpenDetails()
+        {
+            if (!(IsMapOpen ? MapControlsAvailable : CanUseGameplayControls())) return;
+            detailsPanel = UIKit.OpenPanel<DetailsPanel>(UILevel.Pop, DetailsGameDataAdapter.Create(), cachePolicy: PanelCachePolicy.Reusable);
+            DetailsPanel opened = detailsPanel;
+            detailsRuntime = NarrativeRuntime.Instance;
+            if (detailsRuntime != null) detailsRuntime.TurnCompleted += RefreshDetails;
+            opened.Preview(() =>
+            {
+                if (detailsPanel != opened) return;
+                if (detailsRuntime != null) detailsRuntime.TurnCompleted -= RefreshDetails;
+                detailsRuntime = null;
+                detailsPanel = null;
+                detailsClosedFrame = Time.frameCount;
+            });
+            StartCoroutine(PushPanelWhenReady(opened, false));
+        }
+
+        public void RefreshDetails()
+        {
+            if (detailsPanel != null) detailsPanel.Refresh(DetailsGameDataAdapter.Create());
+        }
+
+        private void CloseDetails()
+        {
+            if (detailsRuntime != null) detailsRuntime.TurnCompleted -= RefreshDetails;
+            detailsRuntime = null;
+            if (detailsPanel != null) UIKit.ClosePanel(detailsPanel);
+            detailsPanel = null;
+            detailsClosedFrame = Time.frameCount;
+        }
+
         private void OpenMainMenu()
         {
+            CloseDetails();
+            CloseMap();
             DialoguePlayback.Stop();
             narrativeIntegration?.SetGameplayVisible(false);
             narrativeIntegration?.Runtime?.Presenter?.SetSuspended(true);
@@ -492,6 +571,8 @@ namespace Spotlight.GameFlow
 
         private void LoadThen(Action completed, string sceneName, bool preserveDayFlow = false)
         {
+            CloseDetails();
+            CloseMap();
             if (!preserveDayFlow && dayFlow != null) dayFlow.HideForMainMenu();
             int version = ++loadingVersion;
             loadingTransitioning = true;

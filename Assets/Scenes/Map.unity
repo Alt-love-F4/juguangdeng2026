@@ -203,6 +203,7 @@ MonoBehaviour:
   marketArtwork: {fileID: -2468378117992846979, guid: d96eb0c680d0c8946b6b83ff143fd185, type: 3}
   libraryArtwork: {fileID: -7784925835315426993, guid: f3bdee71859963a4581010fe19547ad7, type: 3}
   temporaryArtwork: {fileID: 3917368293744949150, guid: 04bfb774b87bf784a9fb061528992cd2, type: 3}
+  feelConfig: {fileID: 11400000, guid: 6491299a098506b418a1e4ea69119927, type: 2}
   references:
     version: 2
     RefIds:

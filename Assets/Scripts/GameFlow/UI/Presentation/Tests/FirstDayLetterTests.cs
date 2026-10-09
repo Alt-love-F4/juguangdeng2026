@@ -271,7 +271,7 @@ namespace Spotlight.GameFlow.Tests
         }
 
         [UnityTest]
-        public IEnumerator NewSessionWaitsForLetterBeforeFirstDayAndNextDayBypassesIt()
+        public IEnumerator NewSessionWaitsForLetterAndAvatarBeforeFirstDayAndNextDayBypassesThem()
         {
             controllerObject = new GameObject("FirstDayLetterFlowTest");
             var flow = controllerObject.AddComponent<DayFlowController>();
@@ -289,7 +289,13 @@ namespace Spotlight.GameFlow.Tests
             yield return WaitFor(() => panel.Stage == FirstDayLetterPanel.LetterStage.AwaitingSignature);
             Assert.That(flow.State, Is.EqualTo(DayFlowState.IntroLetter));
             panel.ConfirmSignature();
-            yield return WaitFor(() => flow.State == DayFlowState.DateTransition);
+            yield return WaitFor(() => flow.State == DayFlowState.AvatarSelection);
+            Assert.That(flow.BlocksGameplayInput, Is.True);
+            Assert.That(flow.CurrentPresentation, Is.Null);
+            Assert.That(PlayerDetailsProfile.Current.HasSelectedAvatar, Is.False);
+            flow.CurrentAvatarSelection.Select(AvatarKind.Female);
+            Assert.That(PlayerDetailsProfile.Current.Avatar, Is.EqualTo(AvatarKind.Female));
+            Assert.That(flow.State, Is.EqualTo(DayFlowState.DateTransition));
             Assert.That(flow.CurrentPresentation, Is.TypeOf<DateChangePanel>());
             flow.BeginNewDayFlow();
             Assert.That(flow.CurrentPresentation, Is.TypeOf<DateChangePanel>());
@@ -297,7 +303,7 @@ namespace Spotlight.GameFlow.Tests
         }
 
         [UnityTest]
-        public IEnumerator NewSessionSkipLetterImmediatelyEntersFirstDayDateFlow()
+        public IEnumerator NewSessionSkipLetterEntersAvatarSelectionBeforeFirstDayDateFlow()
         {
             controllerObject = new GameObject("FirstDayLetterSkipFlowTest");
             var flow = controllerObject.AddComponent<DayFlowController>();
@@ -307,13 +313,24 @@ namespace Spotlight.GameFlow.Tests
             Assert.That(panel, Is.Not.Null);
             ((Button)Field("skipButton").GetValue(panel)).onClick.Invoke();
             panel.SkipLetter();
-            yield return WaitFor(() => flow.State == DayFlowState.DateTransition);
+            Assert.That(flow.State, Is.EqualTo(DayFlowState.AvatarSelection));
+            Assert.That(flow.BlocksGameplayInput, Is.True);
+            Assert.That(flow.CurrentPresentation, Is.Null);
+            Assert.That(PlayerDetailsProfile.Current.HasSelectedAvatar, Is.False);
+            PlayerAvatarSelection selection = flow.CurrentAvatarSelection;
+            Assert.That(selection, Is.Not.Null);
+            selection.Select(AvatarKind.Male);
+            selection.Select(AvatarKind.Female); // duplicate input must not replace the confirmed avatar
+            Assert.That(PlayerDetailsProfile.Current.Avatar, Is.EqualTo(AvatarKind.Male));
+            Assert.That(PlayerDetailsProfile.Current.HasSelectedAvatar, Is.True);
+            Assert.That(flow.State, Is.EqualTo(DayFlowState.DateTransition));
             Assert.That(flow.CurrentPresentation, Is.TypeOf<DateChangePanel>());
             Assert.That(flow.CurrentDate, Is.EqualTo("王国纪元 670年10月6日"));
             Assert.That(flow.CurrentDialogue, Is.Null);
             StringAssert.Contains("\"firstDayIntroductionCompleted\":false", flow.CaptureJson());
             Assert.That(flow.BlocksGameplayInput, Is.True);
             flow.HideForMainMenu();
+            yield break;
         }
 
         [UnityTest]
