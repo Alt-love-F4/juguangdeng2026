@@ -2,8 +2,8 @@
   {
     "positionKey": "cafe",
     "nameText": "map.position.cafe.name",
-    "posX": -360,
-    "posY": -80,
+    "posX": -1084.375,
+    "posY": 445.9375,
     "isImportant": true,
     "defaultAction": "",
     "extendedActions": "",
@@ -13,8 +13,8 @@
   {
     "positionKey": "market",
     "nameText": "map.position.market.name",
-    "posX": 190,
-    "posY": 180,
+    "posX": -189.6875,
+    "posY": 264.6875,
     "isImportant": true,
     "defaultAction": "act_meet_b",
     "extendedActions": "",
@@ -24,8 +24,8 @@
   {
     "positionKey": "library",
     "nameText": "map.position.library.name",
-    "posX": 420,
-    "posY": -220,
+    "posX": 55.625,
+    "posY": -87.1875,
     "isImportant": false,
     "defaultAction": "",
     "extendedActions": "",
@@ -35,8 +35,8 @@
   {
     "positionKey": "temporary",
     "nameText": "map.position.temporary.name",
-    "posX": -120,
-    "posY": 300,
+    "posX": 168.75,
+    "posY": 557.1875,
     "isImportant": false,
     "defaultAction": "act_c_with_b",
     "extendedActions": "",

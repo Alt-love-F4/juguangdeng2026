@@ -16,7 +16,7 @@ namespace Spotlight.GameFlow
     {
         private const float MapWidth = 2400f;
         private const float MapHeight = 1350f;
-        private const float PsdScale = 2.5f;
+        private const float PsdScale = 1.25f;
 
         [Header("PSD map layers")]
         [SerializeField] private Sprite mapBackgroundSprite;
@@ -26,15 +26,30 @@ namespace Spotlight.GameFlow
         [SerializeField] private Sprite pinSprite;
         [SerializeField] private Sprite cityTitleSprite;
         [SerializeField] private Sprite compassSprite;
+        [Serializable]
+        private sealed class LocationArtwork
+        {
+            public string positionKey;
+            public Sprite sprite;
+            public Vector2 position;
+        }
+        [SerializeField] private List<LocationArtwork> locationArtwork = new List<LocationArtwork>();
+        [SerializeField] private Sprite cafeArtwork;
+        [SerializeField] private Sprite marketArtwork;
+        [SerializeField] private Sprite libraryArtwork;
+        [SerializeField] private Sprite temporaryArtwork;
         private RectTransform mapRoot;
         private RectTransform mapContent;
         // The player moves the viewport focus in map coordinates. The map graphic is
         // positioned from this focus so its edges never leave the viewport.
         private Vector2 mapCenter;
-        private float zoom = .8f;
+        private float zoom = 1f;
         private bool dragging;
         private Vector2 dragStart;
-        private Vector2 dragOrigin;
+        private readonly List<RaycastResult> pointerHits = new List<RaycastResult>();
+        private PointerEventData mapPointerEvent;
+        private Vector2 lastPointerPosition;
+        private bool pointerDragging;
         private GameFlowBootstrap flow;
         private TextMeshProUGUI status;
         private GameObject focusPanel;
@@ -87,7 +102,6 @@ namespace Spotlight.GameFlow
             Image inputSurface = mapRoot.gameObject.AddComponent<Image>();
             inputSurface.color = new Color(0f, 0f, 0f, 0f);
             inputSurface.raycastTarget = true;
-            mapRoot.gameObject.AddComponent<MapDragReceiver>().Initialize(this);
             mapRoot.gameObject.AddComponent<RectMask2D>();
             mapContent = CreateRect("MapContent", mapRoot);
             mapContent.anchorMin = mapContent.anchorMax = new Vector2(.5f, .5f);
@@ -97,11 +111,12 @@ namespace Spotlight.GameFlow
             Image map = CreateSpriteImage("MapBackground", mapContent, mapBackgroundSprite);
             map.raycastTarget = false;
             Stretch(map.rectTransform);
+            // Location buildings are rendered as their own interactive button sprites below.
+            // Keep the sign/name overlays from the PSD, but omit the full icon layer to avoid
+            // drawing a second, non-interactive copy underneath each button.
             CreateMapLayer("LocationSigns", locationSignsSprite, new Vector2(-1.45f, 9.23f));
-            CreateMapLayer("LocationIcons", locationIconsSprite, new Vector2(-1.32f, 11.33f));
             CreateMapLayer("LocationNames", locationNamesSprite, new Vector2(-1.48f, 9.21f));
             CreateMapLayer("LocationPins", pinSprite, new Vector2(-2.19f, 4.65f));
-            mapContent.gameObject.AddComponent<MapDragReceiver>().Initialize(this);
             BuildConfiguredLocations();
             focusPanel = CreateActionPanel(root);
             actionList = focusPanel.transform.Find("ActionList") as RectTransform;
@@ -136,9 +151,52 @@ namespace Spotlight.GameFlow
             Vector2 move = Vector2.zero;
             if (key != null) { if (key.wKey.isPressed) move.y += 1; if (key.sKey.isPressed) move.y -= 1; if (key.aKey.isPressed) move.x -= 1; if (key.dKey.isPressed) move.x += 1; }
             if (move.sqrMagnitude > 0) mapCenter += move.normalized * 520f * Time.unscaledDeltaTime / Mathf.Max(zoom, .01f);
-            if (Mouse.current != null) { float wheel = Mouse.current.scroll.ReadValue().y; if (Mathf.Abs(wheel) > .01f) zoom = Mathf.Clamp(zoom + wheel * .0015f, .8f, 1.35f); }
+            if (Mouse.current != null)
+            {
+                float wheel = Mouse.current.scroll.ReadValue().y;
+                if (Mathf.Abs(wheel) > .01f && IsMapPointerTarget()) zoom = Mathf.Clamp(zoom + wheel * .0015f, .8f, 1.35f);
+                UpdatePointerPan(Mouse.current);
+            }
             ApplyMapView();
             if (Mouse.current != null && Mouse.current.rightButton.wasPressedThisFrame) HideFocus();
+        }
+
+        private void UpdatePointerPan(Mouse mouse)
+        {
+            Vector2 pointer = mouse.position.ReadValue();
+            bool pressed = mouse.leftButton.isPressed;
+            if (!pressed)
+            {
+                pointerDragging = false;
+                return;
+            }
+            if (!RectTransformUtility.RectangleContainsScreenPoint(mapRoot, pointer, null)) return;
+            if (!IsMapPointerTarget()) return;
+            if (!pointerDragging)
+            {
+                pointerDragging = true;
+                dragging = false;
+                dragStart = pointer;
+                lastPointerPosition = pointer;
+                return;
+            }
+            Vector2 delta = pointer - lastPointerPosition;
+            lastPointerPosition = pointer;
+            if ((pointer - dragStart).sqrMagnitude > 36f) dragging = true;
+            if (dragging && delta.sqrMagnitude > .01f) Pan(delta);
+        }
+
+        private bool IsMapPointerTarget()
+        {
+            if (EventSystem.current == null) return true;
+            if (mapPointerEvent == null) mapPointerEvent = new PointerEventData(EventSystem.current);
+            mapPointerEvent.Reset();
+            mapPointerEvent.position = Mouse.current.position.ReadValue();
+            pointerHits.Clear();
+            EventSystem.current.RaycastAll(mapPointerEvent, pointerHits);
+            if (pointerHits.Count == 0) return true;
+            Transform hit = pointerHits[0].gameObject.transform;
+            return hit == mapRoot || hit.IsChildOf(mapRoot);
         }
 
         internal void Pan(Vector2 delta)
@@ -153,11 +211,12 @@ namespace Spotlight.GameFlow
         {
             if (mapContent == null || mapRoot == null) return;
             Vector2 viewport = mapRoot.rect.size;
+            float minimumZoom = Mathf.Max(viewport.x / MapWidth, viewport.y / MapHeight) * 1.05f;
+            zoom = Mathf.Max(zoom, minimumZoom);
             Vector2 scaledMap = new Vector2(MapWidth, MapHeight) * zoom;
             Vector2 maxOffset = Vector2.Max(Vector2.zero, (scaledMap - viewport) * .5f);
-            Vector2 focusOffset = new Vector2(
-                Mathf.Clamp(mapCenter.x * zoom, -maxOffset.x, maxOffset.x),
-                Mathf.Clamp(mapCenter.y * zoom, -maxOffset.y, maxOffset.y));
+            mapCenter = new Vector2(Mathf.Clamp(mapCenter.x, -maxOffset.x / zoom, maxOffset.x / zoom), Mathf.Clamp(mapCenter.y, -maxOffset.y / zoom, maxOffset.y / zoom));
+            Vector2 focusOffset = mapCenter * zoom;
             mapContent.localScale = Vector3.one * zoom;
             mapContent.anchoredPosition = -focusOffset;
         }
@@ -173,13 +232,17 @@ namespace Spotlight.GameFlow
                 Debug.LogWarning("[Map] Could not load map position configuration: " + error.Message, this);
                 return;
             }
+            foreach (var artwork in locationArtwork)
+            {
+                if (!narrativeConfiguration.mapPositions.Any(p => p.positionKey == artwork.positionKey))
+                    narrativeConfiguration.mapPositions.Add(new NarrativeMapPositionDefinition { positionKey = artwork.positionKey, nameText = artwork.positionKey, position = artwork.position, enabled = true });
+            }
             foreach (NarrativeMapPositionDefinition position in narrativeConfiguration.mapPositions)
             {
                 if (position == null || !position.enabled) continue;
                 string label = ResolveText(position.nameText, position.positionKey);
                 Vector2 mapPosition = PositionForArtwork(position.positionKey, position.position);
-                if (position.positionKey == "cafe") CreateCafePlaceholder(mapContent, mapPosition, label);
-                CreateLocation(mapContent, label, mapPosition, position.isImportant, () => OnPositionClicked(position));
+                CreateLocation(mapContent, label, mapPosition, position.isImportant, FindArtwork(position.positionKey), () => OnPositionClicked(position));
             }
         }
 
@@ -194,14 +257,8 @@ namespace Spotlight.GameFlow
         {
             // Temporary visual alignment for the imported PSD. Runtime data remains
             // untouched and can replace these anchors when its coordinate schema is finalized.
-            return key switch
-            {
-                "cafe" => new Vector2(-470f, -170f),
-                "market" => new Vector2(-35f, 145f),
-                "library" => new Vector2(300f, -145f),
-                "temporary" => new Vector2(125f, 260f),
-                _ => configured
-            };
+            var artwork = locationArtwork.FirstOrDefault(item => item != null && item.positionKey == key);
+            return artwork != null ? artwork.position : configured;
         }
 
         private void OnPositionClicked(NarrativeMapPositionDefinition position)
@@ -442,35 +499,34 @@ namespace Spotlight.GameFlow
             if (status != null) status.text = "滚轮缩放，WASD移动；点击地点聚焦，右键退出聚焦";
         }
 
-        private void CreateCafePlaceholder(RectTransform parent, Vector2 position, string label)
+        private Sprite FindArtwork(string key)
         {
-            if (pinSprite == null) return;
-            Image marker = CreateSpriteImage("CafePlaceholder", parent, pinSprite);
-            RectTransform markerRect = marker.rectTransform;
-            markerRect.anchorMin = markerRect.anchorMax = new Vector2(.5f, .5f);
-            markerRect.pivot = new Vector2(.5f, 0f);
-            markerRect.anchoredPosition = position + new Vector2(0f, 85f);
-            markerRect.sizeDelta = new Vector2(86f, 110f);
-            marker.raycastTarget = false;
-            TextMeshProUGUI markerLabel = CreateLabel("CafeLabel", parent, label, 24, Color.white, TextAlignmentOptions.Center);
-            markerLabel.rectTransform.anchorMin = markerLabel.rectTransform.anchorMax = new Vector2(.5f, .5f);
-            markerLabel.rectTransform.pivot = new Vector2(.5f, 1f);
-            markerLabel.rectTransform.anchoredPosition = position + new Vector2(0f, 150f);
-            markerLabel.rectTransform.sizeDelta = new Vector2(220f, 40f);
-            markerLabel.outlineWidth = .25f;
-            markerLabel.outlineColor = Color.black;
+            Sprite configured = locationArtwork.FirstOrDefault(item => item != null && item.positionKey == key)?.sprite;
+            if (configured != null) return configured;
+            return key switch
+            {
+                "cafe" => cafeArtwork,
+                "market" => marketArtwork,
+                "library" => libraryArtwork,
+                "temporary" => temporaryArtwork,
+                _ => pinSprite
+            };
         }
 
-        private void CreateLocation(RectTransform parent, string name, Vector2 position, bool important, Action action)
+        private void CreateLocation(RectTransform parent, string name, Vector2 position, bool important, Sprite artwork, Action action)
         {
-            Button button = CreateButton(name, parent, position, important ? new Vector2(210, 130) : new Vector2(150, 100));
+            Vector2 size = artwork != null ? artwork.rect.size * .625f : (important ? new Vector2(210, 130) : new Vector2(150, 100));
+            size = Vector2.Max(size, new Vector2(64f, 80f));
+            Button button = CreateButton(name, parent, position, size);
             Image image = button.GetComponent<Image>();
-            image.color = new Color(1f, 1f, 1f, 0f);
+            image.sprite = artwork;
+            image.preserveAspect = true;
+            image.color = Color.white;
             image.raycastTarget = true;
             TextMeshProUGUI label = button.transform.Find("Label")?.GetComponent<TextMeshProUGUI>();
-            if (label != null) label.enabled = false;
-            button.onClick.AddListener(() => action?.Invoke());
-            button.gameObject.AddComponent<MapLocationHover>();
+            if (label != null) label.enabled = artwork == null;
+            button.onClick.AddListener(() => { if (!dragging) action?.Invoke(); });
+            button.gameObject.AddComponent<MapLocationHover>().Initialize(this);
         }
 
         private void CreateMapLayer(string name, Sprite sprite, Vector2 psdPosition)
@@ -508,6 +564,8 @@ namespace Spotlight.GameFlow
     internal sealed class MapLocationHover : MonoBehaviour, IPointerEnterHandler, IPointerExitHandler, IPointerDownHandler, IPointerUpHandler
     {
         private RectTransform rect;
+        private MapSceneController owner;
+        public void Initialize(MapSceneController value) => owner = value;
         private Image image;
         private Vector3 baseScale;
         private bool hovered;
@@ -523,14 +581,14 @@ namespace Spotlight.GameFlow
         {
             hovered = true;
             rect.localScale = baseScale * 1.08f;
-            if (image != null) image.color = new Color(1f, .88f, .55f, .18f);
+            if (image != null) image.color = Color.white;
         }
 
         public void OnPointerExit(PointerEventData eventData)
         {
             hovered = false;
             rect.localScale = baseScale;
-            if (image != null) image.color = new Color(1f, 1f, 1f, 0f);
+            if (image != null) image.color = Color.white;
         }
 
         public void OnPointerDown(PointerEventData eventData)
@@ -542,15 +600,7 @@ namespace Spotlight.GameFlow
         {
             rect.localScale = hovered ? baseScale * 1.08f : baseScale;
         }
-    }
 
-    internal sealed class MapDragReceiver : MonoBehaviour, IPointerDownHandler, IDragHandler, IPointerUpHandler
-    {
-        private MapSceneController owner;
-        public void Initialize(MapSceneController value) => owner = value;
-        public void OnPointerDown(PointerEventData eventData) { }
-        public void OnDrag(PointerEventData eventData) { owner?.Pan(eventData.delta); }
-        public void OnPointerUp(PointerEventData eventData) { }
     }
 
     internal static class RectTransformExtensions
