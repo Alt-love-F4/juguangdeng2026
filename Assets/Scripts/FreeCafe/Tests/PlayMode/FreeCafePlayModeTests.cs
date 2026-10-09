@@ -145,7 +145,7 @@ namespace Spotlight.FreeCafe.Tests
             Assert.That(app.World.Find("s.beans").stock,Is.EqualTo(stock-1));
             WorldEntity placed=null;foreach(var entity in app.World.State.entities) if(entity.specId=="beans") placed=entity;
             Assert.That(placed,Is.Not.Null);Assert.That(placed.x,Is.EqualTo(2.137f).Within(.01));Assert.That(placed.y,Is.EqualTo(-2.613f).Within(.01));
-            Assert.That(app.View(placed.id).art.prompt,Is.Not.Empty);Assert.That(app.World.State.requests.Count,Is.Zero);
+            Assert.That(app.View(placed.id).body.sprite,Is.Not.Null);Assert.That(app.World.State.requests.Count,Is.Zero);
         }
         [UnityTest] public IEnumerator CancelAndUiDropDoNotConsumeStock()
         {
@@ -325,12 +325,22 @@ namespace Spotlight.FreeCafe.Tests
             Assert.That(GameSaveParticipantRegistry.Capturers.ContainsKey(FreeCafeRuntime.SaveId),Is.True);
             Assert.That(GameSaveParticipantRegistry.Capturers.ContainsKey("world.placements"),Is.False);
         }
-        [UnityTest] public IEnumerator WhiteboxesAllCarryArtContracts()
+        [UnityTest] public IEnumerator ArtLibraryAndEntitySpritesWorkWithoutTagComponents()
         {
             var app=Object.FindFirstObjectByType<FreeCafeRuntime>();Assert.That(app.artLibrary.entries.Length,Is.EqualTo(38));
             foreach(var entry in app.artLibrary.entries) { Assert.That(entry.whitebox,Is.Not.Null,entry.brief.id);Assert.That(entry.brief.prompt,Is.Not.Empty,entry.brief.id);Assert.That(entry.brief.width,Is.GreaterThan(0)); }
-            foreach(var entity in app.World.State.entities) { var view=app.View(entity.id);Assert.That(view.art.assetId,Is.EqualTo(app.World.Spec(entity.specId).artId));Assert.That(view.art.prompt,Is.Not.Empty); }
-            var tags=Object.FindObjectsByType<ArtRequirementTag>(FindObjectsInactive.Include,FindObjectsSortMode.None);Assert.That(tags.Length,Is.GreaterThan(35));yield return null;
+            foreach(var entity in app.World.State.entities)
+            {
+                var view=app.View(entity.id);var spec=app.World.Spec(entity.specId);
+                Assert.That(view,Is.Not.Null,entity.id);
+                Assert.That(app.artLibrary.Find(spec.artId),Is.Not.Null,spec.artId);
+                Assert.That(view.body.sprite,Is.Not.Null,entity.id);
+            }
+            foreach(var root in SceneManager.GetActiveScene().GetRootGameObjects())
+                foreach(var transform in root.GetComponentsInChildren<Transform>(true))
+                    foreach(var component in transform.GetComponents<Component>())
+                        Assert.That(component,Is.Not.Null,transform.name+" has a missing component");
+            yield return null;
         }
     }
 }

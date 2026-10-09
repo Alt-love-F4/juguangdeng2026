@@ -26,6 +26,7 @@ namespace Spotlight.FreeCafe.Editor
             if(runtime==null || oldHud==null || Font==null) throw new InvalidOperationException("已有 CoffeeShop 运行时、HUD 或字体缺失");
             var catalog=JsonUtility.FromJson<CafeCatalog>(runtime.catalogAsset.text);
             new CafeWorld(catalog); // 修改场景前先验证配置
+            runtime.prefabLibrary=FreeCafeEntityPrefabBuilder.EnsureCatalog(catalog,runtime.artLibrary,runtime.entityPrefab);
             Directory.CreateDirectory("output/production-validation");
             File.Copy(ScenePath,"output/production-validation/CoffeeShop-before-production.unity",true);
             Undo.RecordObject(runtime,"Enable production interface"); runtime.productionMode=true;
@@ -84,7 +85,7 @@ namespace Spotlight.FreeCafe.Editor
             Text(mini,"MiniGameDescription","本轮不实现拉花小游戏。杯子和启动令牌已绑定。\n之后注入 ICafeMiniGamePresenter 即可替换此占位入口。\n取消不会扣除原料，也不会自动判定拉花成功。",new Vector2(0,14),new Vector2(740,135),23);
             hud.cancelMiniGame=Button(mini,"CancelMiniGame","取消并返回制作",new Vector2(0,-112),new Vector2(270,46));mini.gameObject.SetActive(false);
             RebuildCounterPreview(runtime,catalog);
-            BuildWorkspaceLabels(runtime);
+            FreeCafeEntityCaptionBuilder.MigrateLegacyLabels(runtime);
             root.SetActive(false); // scene 默认仍从营业区入口进入
             EditorUtility.SetDirty(hud);EditorUtility.SetDirty(gateway);EditorUtility.SetDirty(runtime);
             FreeCafeHudSceneBuilder.Apply(oldHud,hud);
@@ -106,48 +107,9 @@ namespace Spotlight.FreeCafe.Editor
                 Debug.Log("[Production] 禁用旧 Canvas/Image 默认白方块，保留原对象，避免遮住设备或阻挡世界输入。");
             }
         }
-        private static void BuildWorkspaceLabels(FreeCafeRuntime runtime)
-        {
-            var root=runtime.areaRoots[(int)AreaId.Counter];var prior=root.Find("ProductionWorkspaceLabels");
-            if(prior!=null) Undo.DestroyObjectImmediate(prior.gameObject);
-            var group=new GameObject("ProductionWorkspaceLabels");group.transform.SetParent(root,false);
-            WorldLabel(group.transform,"Cups","杯具",-6.45f,3.9f,2.1f);
-            WorldLabel(group.transform,"Ingredients","原料区 · 每次一份",-.5f,3.9f,2.1f);
-            WorldLabel(group.transform,"Toppings","小料",5.5f,3.9f,2.1f);
-            WorldLabel(group.transform,"Grinder","研磨 · 点击加速",-6.5f,1.6f,1.9f);
-            WorldLabel(group.transform,"Brewer","滴滤咖啡 · 注水萃取",-3.3f,1.6f,1.9f);
-            WorldLabel(group.transform,"Heater","加热 · 4 秒",0,1.6f,1.9f);
-            WorldLabel(group.transform,"Mixer","抹茶加工",6.6f,1.6f,1.9f);
-            WorldLabel(group.transform,"Tray","出餐托盘",4.4f,-.8f,2.1f);
-            WorldLabel(group.transform,"WaterSugar","清水 / 方糖",-2.3f,-1.9f,1.9f);
-            WorldLabel(group.transform,"ExtraHeater2","加热壶 ②\n升级预留",1.8f,.3f,1.5f);
-            WorldLabel(group.transform,"ExtraHeater3","加热壶 ③\n升级预留",3.1f,.3f,1.5f);
-        }
-        private static void WorldLabel(Transform parent,string name,string content,float x,float y,float size)
-        {
-            var go=new GameObject(name,typeof(RectTransform),typeof(TextMeshPro));go.transform.SetParent(parent,false);
-            var label=go.GetComponent<TextMeshPro>();label.font=Font;label.fontSize=size;label.text=content;label.color=new Color(.22f,.13f,.065f);label.alignment=TextAlignmentOptions.Center;
-            label.GetComponent<MeshRenderer>().sortingOrder=250;
-            label.ForceMeshUpdate(true);label.rectTransform.anchoredPosition=new Vector2(x,y);
-        }
-
         private static void RebuildCounterPreview(FreeCafeRuntime runtime,CafeCatalog catalog)
         {
-            if(runtime.authoringPreviews==null || runtime.authoringPreviews.Length<=1 || runtime.authoringPreviews[1]==null) return;
-            var root=runtime.authoringPreviews[1].transform;
-            for(int i=root.childCount-1;i>=0;i--) Undo.DestroyObjectImmediate(root.GetChild(i).gameObject);
-            foreach(var entry in catalog.layout)
-            {
-                if(entry.area!=AreaId.Counter) continue;
-                var spec=Array.Find(catalog.entities,e=>e.id==entry.specId);
-                var sprite=runtime.artLibrary.Resolve(spec.artId);
-                var go=new GameObject(entry.id,typeof(SpriteRenderer),typeof(ArtRequirementTag));go.transform.SetParent(root,false);go.transform.localPosition=new Vector3(entry.x,entry.y,0);
-                go.GetComponent<ArtRequirementTag>().Bind(runtime.artLibrary,spec.artId);
-                var renderer=go.GetComponent<SpriteRenderer>();renderer.sprite=sprite;renderer.sortingOrder=100-Mathf.RoundToInt(entry.y*10);
-                if(sprite!=null) { float fit=Mathf.Min(spec.width/sprite.bounds.size.x,spec.height/sprite.bounds.size.y);go.transform.localScale=new Vector3(fit,fit,1); }
-                var label=new GameObject(entry.id+"_Label",typeof(TextMeshPro));label.transform.SetParent(root,false);label.transform.localPosition=new Vector3(entry.x,entry.y-spec.height*.5f-.18f,0);
-                var text=label.GetComponent<TextMeshPro>();text.font=Font;text.fontSize=1.2f;text.alignment=TextAlignmentOptions.Center;text.text=spec.label;text.GetComponent<MeshRenderer>().sortingOrder=200;
-            }
+            FreeCafeEntityPrefabBuilder.RebuildAuthoredLayout(runtime,catalog);
         }
         private static RectTransform Box(Transform parent,string name,Vector2 position,Vector2 size,Color color)
         {

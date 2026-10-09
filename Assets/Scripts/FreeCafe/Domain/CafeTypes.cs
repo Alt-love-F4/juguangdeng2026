@@ -15,7 +15,8 @@ namespace Spotlight.FreeCafe
         Processor = 16,  // 加工设备，可以执行工序
         Customer = 32,   // 顾客，可以接收餐品
         Delivery = 64,   // 出餐口
-        Discard = 128    // 丢弃区
+        Discard = 128,   // 丢弃区
+        BusinessControl = 256 // 固定的开店交互实体
     }
 
     /// <summary>区域编号。</summary>
@@ -248,7 +249,8 @@ namespace Spotlight.FreeCafe
         public string id;     // 实体 id（free_ / order_ 前缀由分配器生成）
         public string specId; // 规格 id
         public string ownerId; // 若材料被锁在设备内，这里是设备 id
-        public string npcId;  // 顾客对应的 NPC id（普通顾客为空）
+        public string npcId;  // 旧版 NPC 数据兼容；不等同于 NCS 角色标识
+        public CafePersonIdentity person; // 人物身份，与座位 / 订单 / GameObject 生命周期分离
         public AreaId area;   // 所在区域
         public float x;       // 坐标 x
         public float y;       // 坐标 y

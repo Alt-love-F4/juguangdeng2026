@@ -9,14 +9,23 @@ namespace Spotlight.FreeCafe
     /// <summary>Thin input/render adapter. Identity and processing never live in the GameObject.</summary>
     public sealed class FreeEntityView : MonoBehaviour,IPointerEnterHandler,IPointerExitHandler,IPointerClickHandler,IBeginDragHandler,IDragHandler,IEndDragHandler
     {
+        [Header("Prefab / scene authoring")]
+        [SerializeField] private string prefabSpecId;
+        [SerializeField] private string authoringEntityId;
+        public string PrefabSpecId => prefabSpecId;
+        public string AuthoringEntityId => authoringEntityId;
+        [Header("Presentation extension anchors (local world units)")]
+        public Transform effectsRoot, liquidRoot, pourOrigin;
         public MonoBehaviour liquidPresenter;
         public SpriteRenderer body;
         public TMP_Text label;
+        public TMP_Text workspaceCaption;
         public BoxCollider2D hitbox;
-        public ArtRequirementTag art;
         public string EntityId { get; private set; }
         public FreeCafeRuntime Runtime { get; private set; }
-        private string specId,lastState;
+        private string specId,lastState,lastArtId;
+        private FreeCafePersonView personView;
+        private FreeCafeBusinessSignView businessSignView;
         private bool preview;
         private bool hovered, selected, dropTarget, invalidDrop;
         private TMP_Text fillStatus;
@@ -32,27 +41,71 @@ namespace Spotlight.FreeCafe
         }
         private void EnsureFillIndicator()
         {
-            if(fillStatus!=null) return;
-            var statusGo=new GameObject("FillStatus"); statusGo.transform.SetParent(transform,false);
-            fillStatus=statusGo.AddComponent<TextMeshPro>();
-            if(label!=null) fillStatus.font=label.font;
-            fillStatus.alignment=TextAlignmentOptions.Center; fillStatus.fontSize=0.62f;
-            fillStatus.color=new Color(.18f,.12f,.08f,.95f); fillStatus.raycastTarget=false;
-            var backGo=new GameObject("FillBarBackground"); backGo.transform.SetParent(transform,false);
-            fillBarBackground=backGo.AddComponent<SpriteRenderer>(); fillBarBackground.sprite=OnePixelSprite();
-            fillBarBackground.color=new Color(.06f,.04f,.03f,.72f); fillBarBackground.sortingOrder=4;
-            var barGo=new GameObject("FillBar"); barGo.transform.SetParent(transform,false);
-            fillBar=barGo.AddComponent<SpriteRenderer>(); fillBar.sprite=OnePixelSprite();
-            fillBar.sortingOrder=5;
+            // Prefab 自带状态节点；兼容旧版缺节点的资产，但不重复生成。
+            if(fillStatus==null && transform.Find("FillStatus")!=null) fillStatus=transform.Find("FillStatus").GetComponent<TMP_Text>();
+            if(fillBarBackground==null && transform.Find("FillBarBackground")!=null) fillBarBackground=transform.Find("FillBarBackground").GetComponent<SpriteRenderer>();
+            if(fillBar==null && transform.Find("FillBar")!=null) fillBar=transform.Find("FillBar").GetComponent<SpriteRenderer>();
+            if(fillStatus!=null && fillBarBackground!=null && fillBar!=null)
+            {
+                if(fillBarBackground.sprite==null) fillBarBackground.sprite=OnePixelSprite();
+                if(fillBar.sprite==null) fillBar.sprite=OnePixelSprite();
+                return;
+            }
+            if(fillStatus==null)
+            {
+                var statusGo=new GameObject("FillStatus"); statusGo.transform.SetParent(transform,false);
+                fillStatus=statusGo.AddComponent<TextMeshPro>();
+                if(label!=null) fillStatus.font=label.font;
+                fillStatus.alignment=TextAlignmentOptions.Center; fillStatus.fontSize=0.62f;
+                fillStatus.color=new Color(.18f,.12f,.08f,.95f); fillStatus.raycastTarget=false;
+            }
+            if(fillBarBackground==null)
+            {
+                var backGo=new GameObject("FillBarBackground"); backGo.transform.SetParent(transform,false);
+                fillBarBackground=backGo.AddComponent<SpriteRenderer>(); fillBarBackground.sprite=OnePixelSprite();
+                fillBarBackground.color=new Color(.06f,.04f,.03f,.72f); fillBarBackground.sortingOrder=4;
+            }
+            if(fillBar==null)
+            {
+                var barGo=new GameObject("FillBar"); barGo.transform.SetParent(transform,false);
+                fillBar=barGo.AddComponent<SpriteRenderer>(); fillBar.sprite=OnePixelSprite();
+                fillBar.sortingOrder=5;
+            }
         }
         private static Sprite OnePixelSprite()
         {
             if(onePixelSprite==null) onePixelSprite=Sprite.Create(Texture2D.whiteTexture,new Rect(0,0,1,1),new Vector2(.5f,.5f),1);
             return onePixelSprite;
         }
+        /// <summary>编辑器和运行时共用同一个 Prefab；这里只设置初始外观，不创建世界或扣库存。</summary>
+        public void ConfigureAuthoring(EntitySpec spec,CafeArtLibrary library,string entityId,float x,float y)
+        {
+            if(spec==null || library==null || body==null || label==null || hitbox==null)
+                throw new System.InvalidOperationException("实体 Prefab 缺少规格或必需组件");
+            prefabSpecId=spec.id;authoringEntityId=entityId;
+            transform.localPosition=new Vector3(x,y,0);
+            body.sprite=library.Resolve(spec.artId,"empty");
+            if(body.sprite!=null)
+            {
+                var size=body.sprite.bounds.size;
+                float fit=Mathf.Min(spec.width/size.x,spec.height/size.y);
+                body.transform.localScale=new Vector3(fit,fit,1);
+            }
+            hitbox.size=new Vector2(spec.width,spec.height);hitbox.isTrigger=true;
+            label.transform.localPosition=spec.Has(Capability.BusinessControl) ? new Vector3(0,.3f,-.1f) : new Vector3(0,-spec.height*.5f-.18f,-.1f);
+            label.text=spec.label;label.raycastTarget=false;
+            body.sortingOrder=100+Mathf.RoundToInt(-y*10)+(spec.Has(Capability.Movable) ? 30 : 0);
+            var labelRenderer=label.GetComponent<MeshRenderer>();if(labelRenderer!=null) labelRenderer.sortingOrder=body.sortingOrder+1;
+            if(workspaceCaption!=null) workspaceCaption.GetComponent<MeshRenderer>().sortingOrder=body.sortingOrder+2;
+            var sign=GetComponent<FreeCafeBusinessSignView>();if(sign!=null) sign.UpdateSorting(body.sortingOrder);
+        }
         public void Bind(FreeCafeRuntime runtime,WorldEntity entity,bool isPreview=false)
         {
+            if(runtime==null || entity==null) throw new System.ArgumentNullException("实体绑定缺少 runtime 或实体");
+            if(!string.IsNullOrEmpty(prefabSpecId) && prefabSpecId!=entity.specId)
+                throw new System.InvalidOperationException("Prefab 规格不匹配："+prefabSpecId+" / "+entity.specId);
             Runtime=runtime; EntityId=entity.id; preview=isPreview;
+            personView=GetComponent<FreeCafePersonView>();businessSignView=GetComponent<FreeCafeBusinessSignView>();
             Refresh(entity);
         }
         public void Refresh(WorldEntity entity)
@@ -62,24 +115,26 @@ namespace Spotlight.FreeCafe
             int total=Runtime.World.TotalUnits(entity);
             string state=entity.task!=null ? entity.task.phase.ToString().ToLowerInvariant() : spec.Has(Capability.Container) ? (total==0 ? "empty" : total>=Mathf.Max(1,spec.capacity) ? "full" : entity.contents.Count>1 ? "mixed" : entity.contents.Count>0 && entity.contents[0].specId=="coffee" ? "coffee" : "milk") : "default";
             if(Runtime.World.ProductionEnabled && spec.Has(Capability.Processor)) state=entity.production.phase.ToString().ToLowerInvariant();
-            if(specId!=entity.specId || lastState!=state)
+            string artId=spec.Has(Capability.Customer) && entity.person!=null && !string.IsNullOrEmpty(entity.person.visualId) && Runtime.artLibrary.Find(entity.person.visualId)!=null
+                ? entity.person.visualId : spec.artId;
+            if(specId!=entity.specId || lastState!=state || lastArtId!=artId)
             {
-                specId=entity.specId; lastState=state;
-                body.sprite=Runtime.artLibrary.Resolve(spec.artId,state);
+                specId=entity.specId; lastState=state; lastArtId=artId;
+                body.sprite=Runtime.artLibrary.Resolve(artId,state);
                 if(body.sprite!=null)
                 {
                     var size=body.sprite.bounds.size;
                     float fit=Mathf.Min(spec.width/size.x,spec.height/size.y);
                     body.transform.localScale=new Vector3(fit,fit,1);
                 }
-                art.Bind(Runtime.artLibrary,spec.artId);
                 hitbox.size=new Vector2(spec.width,spec.height);
-                label.transform.localPosition=new Vector3(0,-spec.height*.5f-.18f,-.1f);
+                label.transform.localPosition=spec.Has(Capability.BusinessControl) ? new Vector3(0,.3f,-.1f) : new Vector3(0,-spec.height*.5f-.18f,-.1f);
             }
             if(returnAnimation==null) transform.localPosition=new Vector3(entity.x,entity.y,0);
             body.transform.localRotation=Quaternion.Euler(0,0,entity.rotation);
             body.sortingOrder=preview ? 2000 : 100+Mathf.RoundToInt(-entity.y*10)+(spec.Has(Capability.Movable) ? 30 : 0);
             label.GetComponent<MeshRenderer>().sortingOrder=body.sortingOrder+1;
+            if(workspaceCaption!=null) workspaceCaption.GetComponent<MeshRenderer>().sortingOrder=body.sortingOrder+2;
             bool visible=string.IsNullOrEmpty(entity.ownerId);
             gameObject.SetActive(visible);
             hitbox.enabled=!preview && entity.area==Runtime.World.State.currentArea;
@@ -133,6 +188,7 @@ namespace Spotlight.FreeCafe
             if(Runtime.ShowAssetIds) caption+="\n["+spec.artId+"]";
             if(label.text!=caption) label.text=caption;
             selected=Runtime.SelectedId==EntityId;
+            if(personView!=null) personView.Present(entity);
             ApplyVisual();
         }
 
@@ -229,6 +285,7 @@ namespace Spotlight.FreeCafe
         private void ApplyVisual()
         {
             if(body==null) return;
+            if(businessSignView!=null && Runtime!=null) businessSignView.Present(hovered);
             body.color=invalidDrop ? new Color(1,.35f,.28f,1) : dropTarget ? new Color(.35f,1,.82f,1) : hovered ? new Color(1,.94f,.55f,1) : selected ? new Color(1,.84f,.4f,1) : preview ? new Color(1,1,1,.65f) : Color.white;
         }
         public void OnPointerEnter(PointerEventData e) { if(Runtime!=null && !Runtime.InputBlocked) { SetHovered(true); Runtime.Inspect(EntityId); } }

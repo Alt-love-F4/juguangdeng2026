@@ -322,6 +322,14 @@
       "capabilities": 0,
       "width": 1,
       "height": 1.2
+    },
+    {
+      "id": "business.start",
+      "label": "启动营业",
+      "artId": "delivery",
+      "capabilities": 256,
+      "width": 2.8,
+      "height": 2.6
     }
   ],
   "operations": [
@@ -772,6 +780,13 @@
       "area": 1,
       "x": 7.2,
       "y": -2.8
+    },
+    {
+      "id": "business.start",
+      "specId": "business.start",
+      "area": 0,
+      "x": 5.8,
+      "y": -2.25
     }
   ],
   "areas": [

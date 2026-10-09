@@ -113,21 +113,19 @@ FreeCafe 是当前项目的新主架构。它不再把咖啡制作建模为“�
 
 - 四个区域根保持激活，已有设备任务与实体状态继续存在。
 - 非当前区域的实体碰撞体关闭，点击/拖拽/入口还会校验当前区域，避免跨楼误操作。
-- 领域中的实体 `x/y`、配置 `layout` 和区域边界均为区域局部坐标。输入提交用 `InverseTransformPoint`，世界位置用 `TransformPoint`，不把楼层偏移写入存档。
+- 领域中的实体 `x/y` 和区域边界均为区域局部坐标。新游戏初始布局直接读取 Scene 中 Prefab 实例相对于区域根的位置；JSON `layout` 仅用于编辑器补缺失实例，不能覆盖已编辑的布局。读档位置仍以存档为准。输入提交用 `InverseTransformPoint`，世界位置用 `TransformPoint`，不把楼层偏移写入存档。
 - 镜头仅在区域变化时跳转，不每帧重置位置，不修改 `Camera.rect`；黑边/HUD 继续使用 Overlay UI。
 - 布局、Inspector 配置和扩展步骤见 `Docs/FreeCafe/InSceneAreas.md`。
 
 ## 后续拓展
 
-### NPC 与热点词条
+### 人物与 NCS 扩展边界
 
-NPC 仍然是 `WorldEntity`，但可以在配表中增加：
+人物仍为 `WorldEntity`，人物身份存储于 `person`（`CafePersonIdentity`），独立于座位编号和 Prefab 生命周期。当前普通客人只自动下单，点击只选择订单，不触发剧情或发放热点词条。
 
-- 对话节点/事件 ID。
-- 关键词奖励。
-- 关系、记忆和当天可用信息。
+后续通过显式 `ICafeCustomerIdentitySource` 适配现有 NCS 的角色 key、姓名和美术；该接口只提供身份快照，不能推进剧情或结算事件。真正的对话和剧情调度继续接入现有 NCS / GameFlow，不在咖啡系统新增平行剧本字段。旧 `NpcSpec` / `npcId` 保留兼容，但普通到店生成不再自动套用示例 NPC。
 
-白天交流只改变玩家的知识/词条库存，不直接强制改变咖啡制作流程。
+专用实体 Prefab、大厅营业立牌、人物视图锚点与旧存档补齐规则详见 `Docs/FreeCafe/EntityPrefabs.md`。
 
 ### 地下室印刷
 
@@ -151,7 +149,7 @@ NPC 仍然是 `WorldEntity`，但可以在配表中增加：
 
 ## 美术资产合同
 
-所有白模和提示词由 `ArtRequirementTag` 与 `CafeArtLibrary` 关联。规范文件：
+所有白模和提示词集中保存在 `CafeArtLibrary`，通过玩法配表的 `artId` 关联；场景和 Prefab 不挂载额外的美术需求标记组件。规范文件：
 
 - `Docs/FreeCafe/ArtGenerationBriefs.md`
 - `Assets/Resources/FreeCafe/art-briefs.json`

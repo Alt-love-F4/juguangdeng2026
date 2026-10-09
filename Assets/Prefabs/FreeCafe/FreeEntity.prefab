@@ -11,7 +11,6 @@ GameObject:
   - component: {fileID: 1249036517185123567}
   - component: {fileID: 1874452771854520576}
   - component: {fileID: 7209620287898279702}
-  - component: {fileID: 2343264283668008434}
   m_Layer: 0
   m_Name: FreeEntity
   m_TagString: Untagged
@@ -51,7 +50,6 @@ MonoBehaviour:
   body: {fileID: 3682444975836687023}
   label: {fileID: 7811783359825598187}
   hitbox: {fileID: 7209620287898279702}
-  art: {fileID: 2343264283668008434}
 --- !u!61 &7209620287898279702
 BoxCollider2D:
   m_ObjectHideFlags: 0
@@ -98,23 +96,6 @@ BoxCollider2D:
   m_AutoTiling: 0
   m_Size: {x: 1, y: 1}
   m_EdgeRadius: 0
---- !u!114 &2343264283668008434
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 474108883736552334}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: c79200404bd31ca4e96fc7a62d9cbb30, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Spotlight.FreeCafe.Unity::Spotlight.FreeCafe.ArtRequirementTag
-  assetId: 
-  library: {fileID: 11400000, guid: 9b6c21a17f6230147bedd80133a98c25, type: 2}
-  dimensions: 
-  prompt: 
-  negativePrompt: 
 --- !u!1 &3974006553086644641
 GameObject:
   m_ObjectHideFlags: 0

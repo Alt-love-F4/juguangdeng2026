@@ -14,6 +14,7 @@ namespace Spotlight.FreeCafe
         private readonly Dictionary<string, OperationSpec> operations = new Dictionary<string, OperationSpec>();
         private readonly Dictionary<string, ProductSpec> products = new Dictionary<string, ProductSpec>();
         private readonly Dictionary<string, RecipeSpec> recipes = new Dictionary<string, RecipeSpec>();
+        private readonly ICafeCustomerIdentitySource customerIdentities;
 
         /// <summary>完整配置目录：实体、工序、餐品、配方、布局、区域与经济参数。</summary>
         public CafeCatalog Catalog { get; }
@@ -24,8 +25,9 @@ namespace Spotlight.FreeCafe
         /// <summary>世界状态每次变化后触发，视图层据此刷新。</summary>
         public event Action Changed;
 
-        public CafeWorld(CafeCatalog catalog)
+        public CafeWorld(CafeCatalog catalog, ICafeCustomerIdentitySource customerIdentities = null)
         {
+            this.customerIdentities = customerIdentities;
             Catalog = catalog ?? throw new ArgumentNullException(nameof(catalog));
             ValidateCatalog();
 
