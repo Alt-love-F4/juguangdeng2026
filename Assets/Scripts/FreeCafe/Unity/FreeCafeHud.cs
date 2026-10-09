@@ -10,6 +10,8 @@ namespace Spotlight.FreeCafe
     public sealed class FreeCafeHud : GameFlowPanel
     {
         public FreeCafeRuntime runtime;
+        public GameObject playerRoot;
+        public bool IsModalOpen => recipePanel!=null && recipePanel.activeInHierarchy;
         public TMP_Text summary,hint,selection,areaName;
         public Button startButton,pauseButton,saveButton,recipeButton;
         public Button[] areaButtons,orderButtons;
@@ -30,14 +32,14 @@ namespace Spotlight.FreeCafe
         private void Start() { TryBind(); Refresh(); }
         private void TryBind()
         {
-            if(bound || runtime==null || startButton==null || pauseButton==null || saveButton==null || recipeButton==null || areaButtons==null || areaButtons.Length<4 || orderButtons==null || orderButtons.Length<3)
+            if(bound || runtime==null || pauseButton==null || recipeButton==null || areaButtons==null || areaButtons.Length<4 || orderButtons==null || orderButtons.Length<3)
                 return;
             bound=true;
             runtime.ViewChanged+=Refresh;
-            startButton.onClick.AddListener(runtime.StartBusiness); pauseButton.onClick.AddListener(Pause);
-            saveButton.onClick.AddListener(runtime.Save); recipeButton.onClick.AddListener(ToggleRecipeTips);
+            pauseButton.onClick.AddListener(OpenPlayerMenu);
+            recipeButton.onClick.AddListener(ToggleRecipeTips);
             if(recipeCloseButton!=null) recipeCloseButton.onClick.AddListener(CloseRecipeTips);
-            areaButtons[0].onClick.AddListener(Cafe); areaButtons[1].onClick.AddListener(Counter); areaButtons[2].onClick.AddListener(Top); areaButtons[3].onClick.AddListener(Basement);
+            if(areaButtons[0]!=null) areaButtons[0].onClick.AddListener(Cafe); if(areaButtons[1]!=null) areaButtons[1].onClick.AddListener(Counter);
             orderButtons[0].onClick.AddListener(Order0); orderButtons[1].onClick.AddListener(Order1); orderButtons[2].onClick.AddListener(Order2);
         }
         private void OnDisable()
@@ -46,14 +48,14 @@ namespace Spotlight.FreeCafe
             bound=false;
             if(runtime==null) return;
             runtime.ViewChanged-=Refresh;
-            startButton.onClick.RemoveListener(runtime.StartBusiness); pauseButton.onClick.RemoveListener(Pause);
-            saveButton.onClick.RemoveListener(runtime.Save); recipeButton.onClick.RemoveListener(ToggleRecipeTips);
+            pauseButton.onClick.RemoveListener(OpenPlayerMenu);
+            recipeButton.onClick.RemoveListener(ToggleRecipeTips);
             if(recipeCloseButton!=null) recipeCloseButton.onClick.RemoveListener(CloseRecipeTips);
-            areaButtons[0].onClick.RemoveListener(Cafe); areaButtons[1].onClick.RemoveListener(Counter); areaButtons[2].onClick.RemoveListener(Top); areaButtons[3].onClick.RemoveListener(Basement);
+            if(areaButtons[0]!=null) areaButtons[0].onClick.RemoveListener(Cafe); if(areaButtons[1]!=null) areaButtons[1].onClick.RemoveListener(Counter);
             orderButtons[0].onClick.RemoveListener(Order0); orderButtons[1].onClick.RemoveListener(Order1); orderButtons[2].onClick.RemoveListener(Order2);
         }
         private void Cafe()=>runtime.Enter(AreaId.Cafe); private void Counter()=>runtime.Enter(AreaId.Counter);
-        private void Top()=>runtime.Enter(AreaId.TopFloor); private void Basement()=>runtime.Enter(AreaId.Basement);
+
         private void Order0()=>Focus(0); private void Order1()=>Focus(1); private void Order2()=>Focus(2);
         private void Focus(int i) { if(!runtime.InputBlocked) runtime.World.Focus(requestIds[i]); }
         public void OpenFromFlow(GameFlowBootstrap flow)
@@ -61,23 +63,29 @@ namespace Spotlight.FreeCafe
             if (flow != null) SetFlow(flow);
             TryBind();
         }
-        private void Pause()
+        public void OpenPlayerMenu()
         {
-            if (runtime != null) runtime.CancelDrag();
+            if(runtime==null || runtime.World==null || (FreeCafeGMPanel.Instance!=null && FreeCafeGMPanel.Instance.IsVisible)) return;
+            CloseRecipeTips();
+            var production=runtime.GetComponent<FreeCafeProductionHud>();
+            if(production!=null) production.CloseOverlays();
+            runtime.CancelDrag();
             if (Flow != null)
             {
                 Flow.OpenPause();
                 return;
             }
-            runtime?.TogglePause();
+            var flow=UnityEngine.Object.FindFirstObjectByType<GameFlowBootstrap>();
+            if(flow!=null) { SetFlow(flow);flow.OpenPause(); }
+            else runtime.TogglePause();
         }
         private void ToggleRecipeTips()
         {
-            if(recipePanel==null) return;
-            recipePanel.SetActive(!recipePanel.activeSelf);
+            if(recipePanel==null || runtime==null || (runtime.InputBlocked && !IsModalOpen)) return;
+            runtime.CancelDrag(); recipePanel.SetActive(!recipePanel.activeSelf);
             if(recipePanel.activeSelf) RefreshRecipeTips();
         }
-        private void CloseRecipeTips() { if(recipePanel!=null) recipePanel.SetActive(false); }
+        public void CloseRecipeTips() { if(recipePanel!=null) recipePanel.SetActive(false); }
         private void RefreshRecipeTips()
         {
             if(recipeTitle==null || recipeBody==null || runtime==null || runtime.World==null) return;
@@ -134,27 +142,32 @@ namespace Spotlight.FreeCafe
         }
         private void Refresh()
         {
-            if(runtime.World==null) return;
+            if(runtime==null || runtime.World==null) return;
             var state=runtime.World.State;
-            summary.text="FREE CAFE / 配表驱动原型    金币 "+state.money+"    声望 "+state.reputation+"    第 "+state.day+" 天    "+(state.open ? "营业 "+state.timeRemaining.ToString("0")+"s" : "可自由备料 · 未营业");
+            summary.text="第 "+state.day+" 天    王国币 "+state.money+"    声望 "+state.reputation+"\n"+(state.open ? "营业中 · 剩余 "+state.timeRemaining.ToString("0")+" 秒" : "准备营业 · 可提前备料")+"    顾客 "+state.requests.Count+" 位";
+            var beans=runtime.World.Find("s.beans");var milk=runtime.World.Find("s.milk");
+            summary.text+="\n咖啡豆 "+(beans==null ? "—" : beans.stock.ToString())+"  ·  牛奶 "+(milk==null ? "—" : milk.stock.ToString());
+            if(playerRoot!=null) playerRoot.SetActive(!runtime.World.ProductionEnabled || state.currentArea!=AreaId.Counter);
             hint.text=runtime.Hint;
             var selected=runtime.World.Find(runtime.SelectedId);
-            string text=selected==null ? "拖出杯子 / 材料，在当前画面任意位置摆放；点击「制作提示」查看全部配方。" : "选中："+runtime.World.Spec(selected.specId).label+" · "+selected.id;
+            string text=selected==null ? "点击顾客查看需求；前往制作台调配饮品。" : "选中："+runtime.World.Spec(selected.specId).label+"";
             if(selected!=null) foreach(var p in selected.contents) text+=" / "+runtime.World.Spec(p.specId).label+"×"+p.units;
             selection.text=text;
             areaName.text=runtime.World.Area(state.currentArea).label;
-            for(int i=0;i<areaButtons.Length;i++) areaButtons[i].interactable=!runtime.InputBlocked && i!=(int)state.currentArea;
+            for(int i=0;i<areaButtons.Length;i++) if(areaButtons[i]!=null) areaButtons[i].interactable=!runtime.InputBlocked && i!=(int)state.currentArea;
             for(int i=0;i<orderButtons.Length;i++)
             {
-                if(i>=state.requests.Count) { requestIds[i]=null;orderLabels[i].text="空位 · 等待顾客";orderButtons[i].interactable=false;continue; }
+                if(i>=state.requests.Count) { requestIds[i]=null;orderLabels[i].text="座位 "+(i+1)+"\n等待顾客入座";orderButtons[i].interactable=false;continue; }
                 var request=state.requests[i]; requestIds[i]=request.id; var product=runtime.World.Product(request.productId);
-                string recipe=(request.id==state.focusedRequestId ? "● " : "")+product.label+" / "+request.patience.ToString("0")+"s / "+product.price+"金\n"+runtime.World.Spec(product.cupSpecId).label+"：";
-                foreach(var ing in product.ingredients) recipe+=runtime.World.Spec(ing.specId).label+"×"+ing.units+" ";
+                var customer=runtime.World.Find(request.customerId);string name="顾客";
+                if(customer!=null && runtime.World.Catalog.npcs!=null)
+                    foreach(var npc in runtime.World.Catalog.npcs) if(npc.id==customer.npcId) name=npc.name;
+                string recipe=(request.id==state.focusedRequestId ? "● " : "")+name+"  ·  "+request.patience.ToString("0")+" 秒\n"+product.label+"  /  "+product.price+" 王国币";
                 orderLabels[i].text=recipe; orderButtons[i].interactable=!runtime.InputBlocked;
             }
-            pauseButton.GetComponentInChildren<TMP_Text>().text=runtime.InputBlocked ? "继续 / Esc" : "暂停 / Esc";
-            recipeButton.GetComponentInChildren<TMP_Text>().text=recipePanel!=null && recipePanel.activeSelf ? "关闭提示" : "制作提示";
-            startButton.interactable=!runtime.InputBlocked && !state.open;
+            pauseButton.interactable=string.IsNullOrEmpty(state.production.miniGameToken) && !(FreeCafeGMPanel.Instance!=null && FreeCafeGMPanel.Instance.IsVisible);
+            recipeButton.interactable=!runtime.InputBlocked || IsModalOpen;
+
             if(recipePanel!=null && recipePanel.activeSelf) RefreshRecipeTips();
         }
     }

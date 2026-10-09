@@ -18,6 +18,7 @@ namespace Spotlight.FreeCafe.Tests
         [UnitySetUp] public IEnumerator Setup()
         {
             Time.timeScale=1;GameSaveParticipantRegistry.PendingRestore=null;
+            if(FreeCafeGMPanel.Instance!=null) FreeCafeGMPanel.Instance.SetVisible(false);
             yield return SceneManager.LoadSceneAsync("CoffeeShop",LoadSceneMode.Single);yield return null;yield return null;
             // 旧自由操作回归显式使用旧模式；新制作交互由 FreeCafeProductionPlayModeTests 覆盖。
             var app=Object.FindFirstObjectByType<FreeCafeRuntime>();app.productionMode=false;
@@ -80,8 +81,8 @@ namespace Spotlight.FreeCafe.Tests
             try
             {
                 InputSystem.settings.backgroundBehavior=InputSettings.BackgroundBehavior.IgnoreFocus;
-                yield return ClickWithQueuedMouse(mouse,hud.startButton);
-                Assert.That(app.World.State.open,Is.True,"Start button must receive actual pointer input");
+                Assert.That(app.World.StartDay().success,Is.True,"Test setup must start business through the domain");
+                Assert.That(app.World.State.open,Is.True,"Business should be open before testing queued entity input");
                 yield return ClickWithQueuedMouse(mouse,hud.areaButtons[(int)AreaId.Counter]);
                 Assert.That(app.World.State.currentArea,Is.EqualTo(AreaId.Counter));
                 app.World.Take("s.cups.large",AreaId.Counter,1,-1,out var cup);Physics2D.SyncTransforms();
@@ -152,7 +153,7 @@ namespace Spotlight.FreeCafe.Tests
             var source=app.World.Find("s.beans");int stock=source.stock;
             var pointer=Pointer(app,source.x,source.y);app.BeginDrag(app.View(source.id),pointer);app.CancelDrag();yield return null;
             Assert.That(app.World.Find(source.id).stock,Is.EqualTo(stock));
-            app.BeginDrag(app.View(source.id),pointer);pointer.position=new Vector2(Screen.width*.5f,Screen.height-5);app.EndDrag(pointer);yield return null;
+            app.BeginDrag(app.View(source.id),pointer);pointer.position=RectTransformUtility.WorldToScreenPoint(null,hudForDrop(app).pauseButton.transform.position);app.EndDrag(pointer);yield return null;
             Assert.That(app.World.Find(source.id).stock,Is.EqualTo(stock));Assert.That(app.IsDragging,Is.False);
         }
         [UnityTest] public IEnumerator RoomNavigationAndPortalHaveUnblockedRaycasts()
@@ -162,7 +163,7 @@ namespace Spotlight.FreeCafe.Tests
             var pointer=new PointerEventData(EventSystem.current) {position=app.worldCamera.WorldToScreenPoint(portal.transform.position)};
             var hits=new List<RaycastResult>();EventSystem.current.RaycastAll(pointer,hits);Assert.That(hits.Count,Is.GreaterThan(0));Assert.That(hits[0].gameObject.GetComponentInParent<FreeCafePortal>(),Is.EqualTo(portal));
             ExecuteEvents.Execute(portal.gameObject,pointer,ExecuteEvents.pointerClickHandler);Assert.That(app.World.State.currentArea,Is.EqualTo(AreaId.Counter));
-            foreach(var area in new[]{AreaId.TopFloor,AreaId.Basement,AreaId.Cafe,AreaId.Counter})
+            foreach(var area in new[]{AreaId.Cafe,AreaId.Counter})
             {
                 Canvas.ForceUpdateCanvases();var button=hud.areaButtons[(int)area];pointer.position=RectTransformUtility.WorldToScreenPoint(null,button.transform.position);hits.Clear();EventSystem.current.RaycastAll(pointer,hits);
                 Assert.That(hits.Count,Is.GreaterThan(0),button.name);Assert.That(hits[0].gameObject.GetComponentInParent<UnityEngine.UI.Button>(),Is.EqualTo(button));ExecuteEvents.Execute(button.gameObject,pointer,ExecuteEvents.pointerClickHandler);Assert.That(app.World.State.currentArea,Is.EqualTo(area));yield return null;
@@ -183,11 +184,14 @@ namespace Spotlight.FreeCafe.Tests
             {
                 // Automated tests may run while the editor is unfocused. Restore this setting below.
                 InputSystem.settings.backgroundBehavior = InputSettings.BackgroundBehavior.IgnoreFocus;
-                yield return ClickWithQueuedMouse(mouse, hud.startButton);
+                var gm=FreeCafeGMPanel.Instance;gm.SetVisible(true);gm.SelectCategory("经营流程");yield return null;
+                yield return ClickWithQueuedMouse(mouse,GmAction(gm,"开始营业"));gm.SetVisible(false);yield return null;
                 Assert.That(app.World.State.open, Is.True, "Must pass through actions, raycast and pointer press/release; not onClick.Invoke");
                 foreach (var area in new[] { AreaId.Counter, AreaId.TopFloor, AreaId.Basement, AreaId.Cafe })
                 {
-                    yield return ClickWithQueuedMouse(mouse, hud.areaButtons[(int)area]);
+                    gm.SetVisible(true);gm.SelectCategory("界面与场景");yield return null;
+                    string label=area==AreaId.Counter ? "直达制作界面" : area==AreaId.TopFloor ? "直达二楼" : area==AreaId.Basement ? "直达地下室" : "直达一楼大堂";
+                    yield return ClickWithQueuedMouse(mouse,GmAction(gm,label));
                     Assert.That(app.World.State.currentArea, Is.EqualTo(area));
                 }
             }
@@ -199,6 +203,16 @@ namespace Spotlight.FreeCafe.Tests
             }
             foreach (var device in originalDevices)
                 Assert.That(device.added, Is.True, "Test removed an input device it does not own: " + device);
+        }
+        private static FreeCafeHud hudForDrop(FreeCafeRuntime app) => Object.FindFirstObjectByType<FreeCafeHud>();
+        private static Button GmAction(FreeCafeGMPanel gm,string label)
+        {
+            foreach(var button in gm.GetComponentsInChildren<Button>())
+            {
+                var text=button.GetComponentInChildren<TMPro.TMP_Text>();
+                if(text!=null && text.text.StartsWith(label+"\n")) return button;
+            }
+            Assert.Fail("GM 操作未找到："+label);return null;
         }
         private IEnumerator ClickWithQueuedMouse(Mouse mouse, Button button)
         {

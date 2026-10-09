@@ -30,6 +30,7 @@ namespace Spotlight.FreeCafe
         private RectTransform canvasRect;
 
         public static FreeCafeGMPanel Instance { get; private set; }
+        public bool IsVisible => root!=null && root.activeSelf;
         private EventSystem fallbackEvents;
 
         [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.SubsystemRegistration)]
@@ -121,6 +122,7 @@ namespace Spotlight.FreeCafe
             categories.Add(new Category { Name = "资源数值", Build = BuildResources });
             categories.Add(new Category { Name = "时间与顾客", Build = BuildTimeAndCustomers });
             categories.Add(new Category { Name = "状态诊断", Build = BuildDiagnostics });
+            categories.Add(new Category { Name = "界面与场景", Build = BuildNavigation });
         }
 
         private void BuildShell()
@@ -201,8 +203,8 @@ namespace Spotlight.FreeCafe
 
         private void BuildBusiness()
         {
-            AddAction("开始营业", () => runtime.StartBusiness(), "会按正常规则生成当天客流");
-            AddAction("结束营业", () => ConfirmDanger("end", () => runtime.EndBusiness(), "再次点击确认结束营业"), "会结算当前订单，需二次确认");
+            AddAction("开始营业", () => Report(runtime.GameplayBlocked ? ActionResult.No("当前流程或小游戏禁止开始营业") : runtime.World.StartDay()), "会按正常规则生成当天客流");
+            AddAction("结束营业", () => ConfirmDanger("end", () => Report(runtime.GameplayBlocked ? ActionResult.No("当前流程或小游戏禁止结束营业") : runtime.World.EndDay()), "再次点击确认结束营业"), "会结算当前订单，需二次确认");
             AddAction("免费补满库存", () => Report(runtime.World.DebugRefillFree()), "不扣金币");
             AddAction("保存当前存档", () => runtime.Save(), "写入现有快速存档槽");
             AddAction("切换暂停", () => runtime.TogglePause(), "仅影响游戏时间，不影响 GM 面板");
@@ -214,7 +216,7 @@ namespace Spotlight.FreeCafe
             AddAction("金币 +1000", () => Report(runtime.World.DebugAddMoney(1000)), "受整数上限保护");
             AddAction("声望 +10", () => Report(runtime.World.DebugAddReputation(10)), "会立即检查解锁内容");
             AddAction("声望 +100", () => Report(runtime.World.DebugAddReputation(100)), "会立即检查解锁内容");
-            AddAction("正常购买补货", () => runtime.RefillSources(), "沿用经济规则，会扣金币");
+            AddAction("正常购买补货", () => Report(runtime.World.Refill()), "沿用经济规则，会扣金币");
         }
 
         private void BuildTimeAndCustomers()
@@ -227,9 +229,30 @@ namespace Spotlight.FreeCafe
 
         private void BuildDiagnostics()
         {
-            AddAction("刷新经营视图", () => runtime.SendMessage("SyncViews", SendMessageOptions.DontRequireReceiver), "重新同步实体显示");
+            AddAction("刷新经营视图", () => runtime.DebugRefreshViews(), "重新同步实体显示");
             AddAction("取消当前拖拽", () => runtime.CancelDrag(), "不改变库存");
             AddAction("显示当前状态", ShowState, "在面板底部显示快照摘要");
+            AddAction("显示 / 隐藏实体 ID", () => { runtime.ShowAssetIds=!runtime.ShowAssetIds;runtime.DebugRefreshViews();SetStatus("实体 ID："+(runtime.ShowAssetIds ? "显示" : "隐藏")); }, "美术与实体调试，不出现在玩家 HUD");
+            AddAction("查看选中实体", () => { var e=runtime.World.Find(runtime.SelectedId);SetStatus(e==null ? "尚未选中实体" : "ID "+e.id+" | 规格 "+e.specId+" | 区域 "+e.area+" | 内容物记录 "+e.contents.Count); }, "诊断实体身份与存储内容");
+        }
+
+        public bool SelectCategory(string name)
+        {
+            for(int i=0;i<categories.Count;i++) if(categories[i].Name==name) { ShowCategory(i);return true; }
+            return false;
+        }
+        private void BuildNavigation()
+        {
+            AddAction("直达一楼大堂", () => Navigate(AreaId.Cafe), "调试传送；正常游戏使用场景入口");
+            AddAction("直达制作界面", () => Navigate(AreaId.Counter), "沿用制作会话，不创建新场景");
+            AddAction("直达二楼", () => Navigate(AreaId.TopFloor), "调试传送");
+            AddAction("直达地下室", () => Navigate(AreaId.Basement), "调试传送");
+            AddAction("携带选中实体跨区域", () => { runtime.CarrySelection=!runtime.CarrySelection;SetStatus("调试携带："+(runtime.CarrySelection ? "开启" : "关闭")); }, "只影响调试区域切换");
+        }
+        private void Navigate(AreaId area)
+        {
+            // GM 关闭后再走原入口，保留既有取消拖拽与返回区域逻辑。
+            SetVisible(false);runtime.Enter(area);
         }
 
         public void AddAction(string label, Action action, string help, bool requiresCafe = true)
@@ -285,7 +308,7 @@ namespace Spotlight.FreeCafe
         public void SetVisible(bool visible)
         {
             if (root == null) return;
-            if (visible) runtime = FindFirstObjectByType<FreeCafeRuntime>();
+            if (visible) { runtime = FindFirstObjectByType<FreeCafeRuntime>();if(runtime!=null) runtime.CancelDrag(); }
             pendingDanger = null;
             root.SetActive(visible);
             UpdateEventSystem();

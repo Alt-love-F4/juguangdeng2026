@@ -255,7 +255,7 @@ namespace Spotlight.FreeCafe
             return sum;
         }
 
-        /// <summary>判断某个规格能否放在指定区域的 (x,y)：要扣除自身尺寸的一半，避免压到黑边。</summary>
+        /// <summary>判断某个规格能否放在指定区域的 (x,y)：要扣除自身尺寸的一半，避免越出场景边界。</summary>
         public ActionResult CanPosition(string specId, AreaId area, float x, float y)
         {
             var bounds = Area(area);
@@ -267,7 +267,7 @@ namespace Spotlight.FreeCafe
 
             if (Math.Abs(x) > bounds.halfWidth - spec.width * .5f || Math.Abs(y) > bounds.halfHeight - spec.height * .5f)
             {
-                return ActionResult.No("请放在画面内；上下黑边属于 UI");
+                return ActionResult.No("请放在当前场景的可用范围内");
             }
 
             return ActionResult.Yes("放在这里");
