@@ -1,0 +1,87 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 3881aa7e492a2634f86496c9252865dd, type: 3}
+  m_Name: DetailsDisplayConfig
+  m_EditorClassIdentifier: Spotlight.GameFlow.UI::Spotlight.GameFlow.DetailsDisplayConfig
+  maleAvatar: {fileID: 21300000, guid: 52b18e6e08fac1f40b2f43671367ac59, type: 3}
+  femaleAvatar: {fileID: 21300000, guid: efd4297f051ac4b4ba998dd7d602909f, type: 3}
+  unknownAvatar: {fileID: 21300000, guid: 76ba580976e8eb440b9361d75f7a1b91, type: 3}
+  characters:
+  - objectId: npc_a
+    avatar: {fileID: 0}
+    initiallyUnlocked: 0
+  - objectId: npc_b
+    avatar: {fileID: 0}
+    initiallyUnlocked: 0
+  - objectId: npc_c
+    avatar: {fileID: 0}
+    initiallyUnlocked: 0
+  - objectId: npc_d
+    avatar: {fileID: 0}
+    initiallyUnlocked: 0
+  progress:
+  - barKey: npc_a.thought
+    description: 
+    lowerDescription: 
+    upperDescription: 
+    initiallyVisible: 1
+  - barKey: npc_a.trust_b
+    description: 
+    lowerDescription: 
+    upperDescription: 
+    initiallyVisible: 1
+  - barKey: npc_a.respect_c
+    description: 
+    lowerDescription: 
+    upperDescription: 
+    initiallyVisible: 1
+  - barKey: npc_b.trust_a
+    description: 
+    lowerDescription: 
+    upperDescription: 
+    initiallyVisible: 1
+  - barKey: npc_b.trust_c
+    description: 
+    lowerDescription: 
+    upperDescription: 
+    initiallyVisible: 1
+  - barKey: npc_b.trust_d
+    description: 
+    lowerDescription: 
+    upperDescription: 
+    initiallyVisible: 1
+  - barKey: npc_b.rebel
+    description: 
+    lowerDescription: 
+    upperDescription: 
+    initiallyVisible: 1
+  - barKey: npc_c.wealth
+    description: 
+    lowerDescription: 
+    upperDescription: 
+    initiallyVisible: 1
+  - barKey: npc_c.trust_b
+    description: 
+    lowerDescription: 
+    upperDescription: 
+    initiallyVisible: 1
+  - barKey: world.stability
+    description: 
+    lowerDescription: 
+    upperDescription: 
+    initiallyVisible: 1
+  - barKey: world.calendar
+    description: 
+    lowerDescription: 
+    upperDescription: 
+    initiallyVisible: 1
+  specializations: []
