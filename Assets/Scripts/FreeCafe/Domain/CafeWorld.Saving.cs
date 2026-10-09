@@ -12,7 +12,7 @@ namespace Spotlight.FreeCafe
         /// </summary>
         public ActionResult Restore(CafeSnapshot candidate)
         {
-            if (candidate == null || (candidate.version != 1 && candidate.version != 2)
+            if (candidate == null || (candidate.version != 1 && candidate.version != 2 && candidate.version != 3)
                 || candidate.entities == null || candidate.requests == null
                 || Area(candidate.currentArea) == null || candidate.nextId < 1
                 || candidate.money < 0 || candidate.day < 1
@@ -64,7 +64,8 @@ namespace Spotlight.FreeCafe
                     return ActionResult.No("存档实体无效：" + e?.id);
                 }
 
-                if (!spec.Has(Capability.Container) && e.contents.Count != 0)
+                if (!spec.Has(Capability.Container) && e.contents.Count != 0
+                    && !(candidate.production != null && candidate.production.enabled && spec.Has(Capability.Processor)))
                 {
                     return ActionResult.No("非容器存在内容物");
                 }
@@ -78,7 +79,7 @@ namespace Spotlight.FreeCafe
                     }
                 }
 
-                if (spec.Has(Capability.Container) && TotalUnits(e) > spec.capacity)
+                if (!(candidate.production != null && candidate.production.enabled) && spec.Has(Capability.Container) && TotalUnits(e) > spec.capacity)
                 {
                     return ActionResult.No("存档容器容量超限");
                 }
@@ -185,6 +186,8 @@ namespace Spotlight.FreeCafe
                 }
             }
 
+            var productionValidation = ValidateProductionSnapshot(candidate);
+            if (!productionValidation.success) return productionValidation;
             candidate.nextId = Math.Max(candidate.nextId, maxId + 1);
             State = candidate;
             UnlockContent();

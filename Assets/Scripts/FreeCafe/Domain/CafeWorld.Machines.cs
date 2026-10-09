@@ -162,25 +162,28 @@ namespace Spotlight.FreeCafe
         }
 
         /// <summary>工序实际耗时：受店员数量、金钱升级、技能升级三方面影响。</summary>
-        private float Duration(OperationSpec op)
+        private float Duration(OperationSpec op) => MachineDuration(op.machineSpecId, op.seconds);
+
+        private float MachineDuration(string machineSpecId, float seconds)
         {
             float scale = Math.Max(.5f, 1 - State.staff * Catalog.economy.staffSpeedPerHire);
-            if (State.fasterMachines.Contains(op.machineSpecId))
+            if (State.fasterMachines.Contains(machineSpecId))
             {
                 scale *= Catalog.economy.timerUpgradeMultiplier;
             }
 
-            if (State.skillMachines.Contains(op.machineSpecId))
+            if (State.skillMachines.Contains(machineSpecId))
             {
                 scale *= .8f;
             }
 
-            return op.seconds * scale;
+            return seconds * scale;
         }
 
         /// <summary>点击设备：推进点击类工序，或在各阶段给出提示。</summary>
         public ActionResult Operate(string machineId)
         {
+            if (ProductionEnabled && IsProductionMachine(Find(machineId))) return OperateProduction(machineId);
             var machine = Find(machineId);
             var task = machine?.task;
             if (task == null)
@@ -264,6 +267,7 @@ namespace Spotlight.FreeCafe
         /// </summary>
         public WorldEntity DragOutputPreview(string machineId)
         {
+            if (ProductionEnabled) return ProductionOutputPreview(Find(machineId));
             var machine = Find(machineId);
             if (machine == null || !Spec(machine.specId).dragOutput || machine.task == null || machine.task.phase != MachinePhase.Ready)
             {
@@ -294,6 +298,7 @@ namespace Spotlight.FreeCafe
         /// </summary>
         public ActionResult TakeMachineOutput(string machineId, string expectedOutputId, string targetId, AreaId area, float x, float y)
         {
+            if (ProductionEnabled) return TakeProductionOutput(machineId, expectedOutputId, targetId, area, x, y);
             var candidate = DragOutputPreview(machineId);
             if (candidate == null || candidate.id != expectedOutputId)
             {
@@ -373,6 +378,7 @@ namespace Spotlight.FreeCafe
         /// <summary>完成拉花：杯子里必须同时有咖啡和热牛奶，且拖画覆盖率达到 75%。</summary>
         public ActionResult CompleteLatteArt(string cupId, float coverage)
         {
+            if (ProductionEnabled) return ActionResult.No("制作模式请通过小游戏启动令牌回传结果");
             var cup = Find(cupId);
             if (cup == null || !Spec(cup.specId).Has(Capability.Container) || Locked(cup)
                 || cup.contents.Find(p => p.specId == "coffee") == null

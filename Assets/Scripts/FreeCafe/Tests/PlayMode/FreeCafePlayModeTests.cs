@@ -19,6 +19,9 @@ namespace Spotlight.FreeCafe.Tests
         {
             Time.timeScale=1;GameSaveParticipantRegistry.PendingRestore=null;
             yield return SceneManager.LoadSceneAsync("CoffeeShop",LoadSceneMode.Single);yield return null;yield return null;
+            // 旧自由操作回归显式使用旧模式；新制作交互由 FreeCafeProductionPlayModeTests 覆盖。
+            var app=Object.FindFirstObjectByType<FreeCafeRuntime>();app.productionMode=false;
+            Assert.That(app.World.Restore(new CafeWorld(app.World.Catalog).State).success,Is.True);yield return null;
         }
         [UnityTearDown] public IEnumerator Cleanup() { Time.timeScale=1;yield return null; }
         private PointerEventData Pointer(FreeCafeRuntime app,float x,float y) => new PointerEventData(EventSystem.current) {position=app.worldCamera.WorldToScreenPoint(app.AreaToWorld(app.World.State.currentArea,x,y))};
@@ -87,7 +90,7 @@ namespace Spotlight.FreeCafe.Tests
                 InputSystem.QueueStateEvent(mouse,new MouseState{position=start});yield return null;yield return null;
                 InputSystem.QueueStateEvent(mouse,new MouseState{position=start}.WithButton(MouseButton.Left));yield return null;yield return null;
                 InputSystem.QueueStateEvent(mouse,new MouseState{position=start+new Vector2(25,0)}.WithButton(MouseButton.Left));yield return null;yield return null;
-                Assert.That(app.IsDragging,Is.True,"Mouse must reach Collider2D through Physics2DRaycaster without a viewport component");
+                Assert.That(app.IsDragging,Is.True,"Mouse must reach Collider2D through Physics2DRaycaster without a viewport component; hint="+app.Hint+" mouse="+mouse.position.ReadValue()+" expected="+start+" blocked="+app.InputBlocked);
                 InputSystem.QueueStateEvent(mouse,new MouseState{position=end}.WithButton(MouseButton.Left));yield return null;yield return null;
                 InputSystem.QueueStateEvent(mouse,new MouseState{position=end});yield return null;yield return null;
                 Assert.That(app.IsDragging,Is.False);Assert.That(cup.x,Is.EqualTo(3).Within(.01));Assert.That(cup.y,Is.EqualTo(-2).Within(.01));

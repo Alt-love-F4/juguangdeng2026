@@ -62,6 +62,7 @@ namespace Spotlight.FreeCafe
         public string artId;        // 美术资源 id
         public string sourceItemId; // 来源可取出的物品规格 id（仅 Source 使用）
         public Capability capabilities; // 能力标记
+        public float capacityMl;    // 制作模式的液体容量；份数容量保留给旧模式
         public int capacity;        // 容器容量（份数）
         public int initialStock;    // 来源的初始/满库存
         public int refillCost;      // 一键补货的固定费用
@@ -97,6 +98,10 @@ namespace Spotlight.FreeCafe
         public string specId; // 原料规格 id
         public int units;     // 份数
         public int quality;   // 品质（0~2，仅咖啡豆等有品质的物品使用）
+        public float milliliters;
+        public LiquidTemperature temperature;
+        public float productionScore = 100;
+        public int addedSequence;
     }
 
     /// <summary>餐品规格：配方、价格与解锁条件。</summary>
@@ -107,6 +112,13 @@ namespace Spotlight.FreeCafe
         public string label;   // 餐品显示名
         public string cupSpecId; // 指定杯型
         public string recipeId;  // 显式指定的制作流程 id（为空则按餐品 id 查找）
+        public string description;
+        public string tutorial;
+        public float idealCoffeeRatio = .5f;
+        public float idealSweetness;
+        public LiquidTemperature requiredTemperature = LiquidTemperature.Boiling;
+        public float minimumScore = 60;
+        public int maxRemakes = 1;
         public int price;        // 基础售价
         public int unlockReputation; // 解锁所需声望
         public int qualityPriceStep = 50; // 咖啡品质每高一级的加价
@@ -213,6 +225,7 @@ namespace Spotlight.FreeCafe
         public InitialEntity[] layout;       // 初始布局
         public AreaSpec[] areas;             // 区域配置
         public NpcSpec[] npcs;               // NPC 配置（可选）
+        public ProductionSettings production = new ProductionSettings();
         public EconomySpec economy = new EconomySpec(); // 经济参数
     }
 
@@ -245,6 +258,7 @@ namespace Spotlight.FreeCafe
         public int quality;    // 品质（0~2）
         public bool latteArt;  // 是否已完成拉花
         public List<Portion> contents = new List<Portion>(); // 容器内容物
+        public ProductionEntityState production = new ProductionEntityState();
         public ProcessingTask task; // 设备加工任务（非设备为空）
     }
 
@@ -255,6 +269,8 @@ namespace Spotlight.FreeCafe
         public string id;         // 订单 id
         public string customerId; // 下单顾客的实体 id
         public string productId;  // 想要的餐品
+        public int remakes;
+        public float lastProductionScore;
         public float patience;    // 剩余耐心（秒）
         public float automaticRemaining = -1; // 自动点单剩余时间，负数表示非自动点单
     }
@@ -263,6 +279,7 @@ namespace Spotlight.FreeCafe
     [Serializable]
     public sealed class CafeSnapshot
     {
+        public ProductionSession production = new ProductionSession();
         public int version = 2; // 存档版本（v1 在 Restore 时显式迁移）
         public int nextId = 1;  // 自增 id 分配器
         public int money;       // 当前金币
