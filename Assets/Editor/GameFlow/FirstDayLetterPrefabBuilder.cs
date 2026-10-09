@@ -13,7 +13,7 @@ namespace Spotlight.GameFlow.Editor
     {
         private const string PrefabPath = "Assets/Resources/Art/UIPrefab/FirstDayLetterPanel.prefab";
         private static TMP_FontAsset Font => AssetDatabase.LoadAssetAtPath<TMP_FontAsset>(
-            "Assets/Resources/Fonts/SimHei SDF.asset");
+            "Assets/Resources/Fonts/乐米曲奇方块体 SDF.asset");
         private static readonly Color Ink = new Color(.22f, .14f, .095f);
         private static readonly Color Gold = new Color(.82f, .69f, .46f);
 

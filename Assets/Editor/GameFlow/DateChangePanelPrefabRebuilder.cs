@@ -27,7 +27,7 @@ namespace Spotlight.GameFlow.Editor
                 Rebuild();
         }
         private static TMP_FontAsset Font => AssetDatabase.LoadAssetAtPath<TMP_FontAsset>(
-            "Assets/Resources/Fonts/SimHei SDF.asset");
+            "Assets/Resources/Fonts/乐米曲奇方块体 SDF.asset");
 
         [MenuItem("Tools/Game Flow/Rebuild Date Change Panel (Clock)")]
         public static void Rebuild()

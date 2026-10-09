@@ -18,7 +18,7 @@ namespace Spotlight.GameFlow.Editor
     public static class PresentationDebugSceneBuilder
     {
         public const string ScenePath = PresentationDebugSceneController.ScenePath;
-        private const string FontPath = "Assets/Resources/Fonts/SimHei SDF.asset";
+        private const string FontPath = "Assets/Resources/Fonts/乐米曲奇方块体 SDF.asset";
         private static readonly Color Surface = new Color(.12f, .10f, .16f, .97f);
         private static readonly Color Warm = new Color(1f, .84f, .69f);
         private static readonly Color Pink = new Color(.96f, .66f, .68f);

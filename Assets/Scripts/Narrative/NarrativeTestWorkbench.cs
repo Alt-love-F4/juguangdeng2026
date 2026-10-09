@@ -151,7 +151,7 @@ namespace Spotlight.Narrative
         {
             var go = new GameObject(name, typeof(RectTransform), typeof(TextMeshProUGUI)); go.transform.SetParent(parent, false);
             RectTransform r = go.GetComponent<RectTransform>(); r.anchorMin = min; r.anchorMax = max; r.offsetMin = r.offsetMax = Vector2.zero;
-            var text = go.GetComponent<TMP_Text>(); text.font = Resources.Load<TMP_FontAsset>("Fonts/SimHei SDF"); text.text = value; text.fontSize = size; text.color = Color.white; text.alignment = alignment; text.raycastTarget = false; return text;
+            var text = go.GetComponent<TMP_Text>(); text.font = Resources.Load<TMP_FontAsset>("Fonts/乐米曲奇方块体 SDF"); text.text = value; text.fontSize = size; text.color = Color.white; text.alignment = alignment; text.raycastTarget = false; return text;
         }
         private static Button Button(Transform parent, string name, string label, Vector2 min, Vector2 max, Action action)
         {

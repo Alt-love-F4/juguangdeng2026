@@ -13,7 +13,7 @@ namespace Spotlight.GameFlow.Editor
     {
         private const string Root = "Assets/Resources/Art/UIPrefab";
         private static TMP_FontAsset Font => AssetDatabase.LoadAssetAtPath<TMP_FontAsset>(
-            "Assets/Resources/Fonts/SimHei SDF.asset");
+            "Assets/Resources/Fonts/乐米曲奇方块体 SDF.asset");
 
         [MenuItem("Tools/Game Flow/Create Missing Day Flow Panels")]
         public static void CreateMissing()
@@ -76,6 +76,13 @@ namespace Spotlight.GameFlow.Editor
                 titleLabel.color = new Color(1f, .88f, .66f);
                 TMP_Text detailLabel = Text(card, "Detail", detail, new Vector2(40f, -116f), new Vector2(920f, 126f), 26f);
                 Button next = Button(card, "Continue", button, new Vector2(40f, -270f), new Vector2(340f, 66f));
+                if (typeof(T) == typeof(CityMapPanel))
+                {
+                    TMP_FontAsset mapFont = AssetDatabase.LoadAssetAtPath<TMP_FontAsset>(
+                        "Assets/Resources/Fonts/SimHei SDF.asset");
+                    foreach (TMP_Text label in card.GetComponentsInChildren<TMP_Text>(true))
+                        label.font = mapFont;
+                }
                 var serialized = new SerializedObject(panel);
                 Set(serialized, "canvasGroup", root.GetComponent<CanvasGroup>());
                 Set(serialized, "content", card);

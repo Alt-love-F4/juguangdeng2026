@@ -36,8 +36,17 @@ namespace Spotlight.Narrative
                     actionKey = row.ActionKey, type = ActionType(row.Type), mustExecute = row.MustExecute,
                     nameText = row.NameText, descText = row.DescText, requirements = row.Requirements,
                     resultEvents = Strings(row.ResultEvents), durationDays = row.DurationDays,
-                    progressTarget = row.ProgressTarget, nextActionKey = row.NextActionKey
+                    progressTarget = row.ProgressTarget, nextActionKey = row.NextActionKey,
+                    endDay = row.Type.Split(new[] { '|', '+', ',', ';' }, StringSplitOptions.RemoveEmptyEntries).Any(p => p.Trim().Equals("EndDay", StringComparison.OrdinalIgnoreCase))
                 });
+            foreach (var row in tables.TbNcsAction.DataList)
+            {
+                string[] parts = row.Type.Split(new[] { '|', '+', ',', ';' }, StringSplitOptions.RemoveEmptyEntries);
+                if (parts.Any(p => p.Equals("Timer", StringComparison.OrdinalIgnoreCase) || p.Equals("Timed", StringComparison.OrdinalIgnoreCase)) && row.DurationDays <= 0)
+                    throw new FormatException("Timer requires positive durationDays: " + row.ActionKey);
+                if (parts.Any(p => p.Equals("Progress", StringComparison.OrdinalIgnoreCase)) && row.ProgressTarget <= 0)
+                    throw new FormatException("Progress requires positive progressTarget: " + row.ActionKey);
+            }
             foreach (var row in tables.TbNcsMapPosition.DataList)
                 config.mapPositions.Add(new NarrativeMapPositionDefinition
                 {
@@ -277,12 +286,29 @@ namespace Spotlight.Narrative
         {
             "once" => NarrativeOnceType.Once, "repeat" => NarrativeOnceType.Repeat, _ => throw Unknown("onceType", value)
         };
-        private static NarrativeActionType ActionType(string value) => value switch
+        private static NarrativeActionType ActionType(string value)
         {
-            "REPEAT" => NarrativeActionType.Repeat, "DAILY" => NarrativeActionType.Daily, "ONCE" => NarrativeActionType.Once,
-            "TIMED" => NarrativeActionType.Timed, "PROGRESS" => NarrativeActionType.Progress, "FUTURE" => NarrativeActionType.Future,
-            _ => throw Unknown("action type", value)
-        };
+            string[] parts = (value ?? string.Empty).Split(new[] { '|', '+', ',', ';' }, StringSplitOptions.RemoveEmptyEntries);
+            if (parts.Length > 1)
+            {
+                var types = parts.Select(p => ActionType(p.Trim())).ToList();
+                if (types.Distinct().Count() != types.Count || types.Contains(NarrativeActionType.Future)) throw Unknown("mutually exclusive action types", value);
+                var bases = types.Where(t => t == NarrativeActionType.Repeat || t == NarrativeActionType.Daily || t == NarrativeActionType.Once).ToList();
+                if (bases.Count > 1) throw Unknown("mutually exclusive action types", value);
+                return bases.Count == 1 ? bases[0] : types.Contains(NarrativeActionType.Progress) ? NarrativeActionType.Progress : NarrativeActionType.Timed;
+            }
+            // Preserve legacy uppercase ONCE (one-time); design spelling Once means daily.
+            if (value == "ONCE") return NarrativeActionType.Once;
+            return (value ?? string.Empty).ToUpperInvariant() switch
+            {
+                "REPEAT" or "REPEATBLE" or "REPEATABLE" => NarrativeActionType.Repeat,
+                "DAILY" or "ENDDAY" or "ONCE" => NarrativeActionType.Daily,
+                "ONETIME" => NarrativeActionType.Once,
+                "TIMED" or "TIMER" => NarrativeActionType.Timed,
+                "PROGRESS" => NarrativeActionType.Progress, "FUTURE" or "UPCOMING" => NarrativeActionType.Future,
+                _ => throw Unknown("action type", value)
+            };
+        }
         private static NarrativeEventKind EventKind(string value) => value switch
         {
             "actor" => NarrativeEventKind.Actor, "world" => NarrativeEventKind.World, _ => throw Unknown("eventKind", value)

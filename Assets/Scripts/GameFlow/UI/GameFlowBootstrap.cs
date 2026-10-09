@@ -2,6 +2,7 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using UnityEngine;
 using UnityEngine.EventSystems;
 using UnityEngine.InputSystem;
@@ -47,6 +48,11 @@ namespace Spotlight.GameFlow
         private int detailsClosedFrame = -1;
         private NarrativeRuntime detailsRuntime;
         private EventSystem persistentEventSystem;
+        private bool saving;
+        private Action pendingSaveCompletion;
+        private Texture2D gameplayThumbnail;
+        private bool openingPause;
+        public bool HasReadableSave => saves.List().Any(slot => slot.CanLoad);
 
         public GameSettings CurrentSettings => settings.Current;
         internal bool GameplayControlsAvailable => CanUseGameplayControls();
@@ -64,10 +70,12 @@ namespace Spotlight.GameFlow
 
         private void Awake()
         {
-            DontDestroyOnLoad(gameObject);
+            DontDestroyOnLoad(transform.root.gameObject);
             persistentEventSystem = EventSystem.current;
-            if (persistentEventSystem != null)
-                DontDestroyOnLoad(persistentEventSystem.gameObject);
+            if (persistentEventSystem == null)
+                persistentEventSystem = CreateEventSystem();
+            DontDestroyOnLoad(persistentEventSystem.transform.root.gameObject);
+            RemoveDuplicateEventSystems(persistentEventSystem);
             SceneManager.sceneLoaded += OnSceneLoaded;
             if (config == null)
                 config = Resources.Load<GameFlowConfig>("GameFlowConfig");
@@ -102,13 +110,24 @@ namespace Spotlight.GameFlow
             if (GetComponent<DialoguePreviewHotkey>() == null) gameObject.AddComponent<DialoguePreviewHotkey>();
 #endif
             if (showMainMenuOnStart)
-                OpenMainMenu();
+                StartCoroutine(StartupRoutine());
             else
                 StartGame();
         }
 
+        private IEnumerator StartupRoutine()
+        {
+            loadingTransitioning = true;
+            LoadingPanel splash = UIKit.OpenPanel<LoadingPanel>(UILevel.AlwayTop, Data(), cachePolicy: PanelCachePolicy.Reusable);
+            while (splash.State == PanelState.Opening) yield return null;
+            splash.SetSplash(true);
+            yield return new WaitForSecondsRealtime(1.2f);
+            splash.CloseAnimated(() => LoadThen(OpenMainMenu, config.MainMenuScene));
+        }
+
         private void OnDestroy()
         {
+            if (gameplayThumbnail != null) Destroy(gameplayThumbnail);
             SceneManager.sceneLoaded -= OnSceneLoaded;
             DialoguePlayback.Stop();
         }
@@ -116,11 +135,24 @@ namespace Spotlight.GameFlow
         private void OnSceneLoaded(Scene scene, LoadSceneMode mode)
         {
             EventSystem[] systems = FindObjectsByType<EventSystem>(FindObjectsInactive.Include, FindObjectsSortMode.None);
-            foreach (EventSystem system in systems)
-            {
-                if (system == persistentEventSystem) continue;
-                Destroy(system.gameObject);
-            }
+            EventSystem preferred = persistentEventSystem != null && persistentEventSystem ? persistentEventSystem : systems.FirstOrDefault();
+            if (preferred == null)
+                preferred = CreateEventSystem();
+            persistentEventSystem = preferred;
+            DontDestroyOnLoad(persistentEventSystem.transform.root.gameObject);
+            RemoveDuplicateEventSystems(preferred);
+        }
+
+        private static EventSystem CreateEventSystem()
+        {
+            GameObject root = new GameObject("PersistentEventSystem", typeof(EventSystem), typeof(UnityEngine.InputSystem.UI.InputSystemUIInputModule));
+            return root.GetComponent<EventSystem>();
+        }
+
+        private static void RemoveDuplicateEventSystems(EventSystem keep)
+        {
+            foreach (EventSystem system in FindObjectsByType<EventSystem>(FindObjectsInactive.Include, FindObjectsSortMode.None))
+                if (system != keep) Destroy(system.gameObject);
         }
 
         private void Update()
@@ -151,16 +183,21 @@ namespace Spotlight.GameFlow
             if (awaitingResolutionConfirmation)
             {
                 resolutionConfirmTimer -= Time.unscaledDeltaTime;
-                if (resolutionConfirmTimer <= 0f) RevertResolution();
+                UIKit.GetPanel<ConfirmationPanel>()?.SetMessage($"保持此分辨率？将在 {Mathf.CeilToInt(Mathf.Max(0f, resolutionConfirmTimer))} 秒后恢复原设置。");
+                if (resolutionConfirmTimer <= 0f)
+                {
+                    RevertResolution();
+                    UIKit.GetPanel<ConfirmationPanel>()?.DismissFromFlow();
+                }
             }
             if (narrativeIntegration?.GameplayHUD != null)
                 narrativeIntegration.GameplayHUD.CanInteract = CanUseGameplayControls;
             narrativeIntegration?.Runtime?.Presenter?.SetSuspended(!CanUseGameplayControls());
             if (loadingPanel != null && keyboard != null)
             {
-                if (keyboard.rightArrowKey.wasPressedThisFrame || keyboard.downArrowKey.wasPressedThisFrame)
+                if (keyboard.rightArrowKey.wasPressedThisFrame || keyboard.dKey.wasPressedThisFrame)
                     loadingPanel.SetTip(tips.Next());
-                else if (keyboard.leftArrowKey.wasPressedThisFrame || keyboard.upArrowKey.wasPressedThisFrame)
+                else if (keyboard.leftArrowKey.wasPressedThisFrame || keyboard.aKey.wasPressedThisFrame)
                     loadingPanel.SetTip(tips.Previous());
             }
         }
@@ -237,11 +274,21 @@ namespace Spotlight.GameFlow
             if (DialoguePanel.IsAnyPlaying || !gameplay || paused || loadingTransitioning
                 || (dayFlow != null && dayFlow.BlocksGameplayInput)
                 || (narrativeIntegration?.Runtime?.BlocksGameplayInput ?? false)) return;
+            if (openingPause) return;
+            openingPause = true;
+            StartCoroutine(OpenPauseAfterRender());
+        }
+
+        private IEnumerator OpenPauseAfterRender()
+        {
+            yield return new WaitForEndOfFrame();
+            CaptureGameplayThumbnail();
+            openingPause = false;
             paused = true;
             previousTimeScale = Time.timeScale;
             Time.timeScale = 0f;
             PauseMenuPanel panel = UIKit.OpenPanel<PauseMenuPanel>(UILevel.Pop, Data(true), cachePolicy: PanelCachePolicy.Reusable);
-            StartCoroutine(PushPanelWhenReady(panel, true));
+            StartCoroutine(PushPanelWhenReady(panel, false));
         }
 
         public void ResumeGame()
@@ -271,6 +318,7 @@ namespace Spotlight.GameFlow
         public void BackToPrevious()
         {
             if (UIKit.GetStackDepth(MainStack) <= 1) return;
+            if (UIKit.PeekPanel(MainStack) is SaveManagementPanel) pendingSaveCompletion = null;
             if (UIKit.PeekPanel(MainStack) is SaveManagementPanel || UIKit.PeekPanel(MainStack) is SettingsPanel)
             {
                 if (UIKit.PeekPanel(MainStack) is GameFlowPanel panel)
@@ -282,7 +330,7 @@ namespace Spotlight.GameFlow
 
         public void ConfirmLoad(int index)
         {
-            ShowConfirmation("读取存档", $"读取存档 {index}？当前未保存的进度会丢失。", "读取", () =>
+            ShowConfirmation("读取存档", $"确认读取槽 {index + 1} 的存档？当前未保存的进度将丢失。", "确认读取", () =>
             {
                 if (!saves.TryLoad(index, out GameSaveData data, out string error))
                 {
@@ -300,11 +348,7 @@ namespace Spotlight.GameFlow
                 pendingNarrativeRestore = snapshot;
                 gameplay = true;
                 GameSaveParticipantRegistry.PendingRestore = data.Participants;
-                if (!string.IsNullOrWhiteSpace(data.SceneName)
-                    && data.SceneName != SceneManager.GetActiveScene().name)
-                    LoadThen(OpenGameplayPlaceholder, data.SceneName);
-                else
-                    OpenGameplayPlaceholder();
+                LoadThen(OpenGameplayPlaceholder, data.SceneName == "SampleScene" ? config.GameplayScene : data.SceneName);
             }, "取消", () => { });
         }
 
@@ -313,8 +357,8 @@ namespace Spotlight.GameFlow
             GameSaveSlotInfo slot = saves.GetSlot(index);
             if (slot.IsOccupied)
             {
-                ShowConfirmation("覆盖存档", $"存档 {index} 已存在，确定覆盖？", "覆盖",
-                    () => SaveManual(index), "取消", () => { });
+                ShowConfirmation("覆盖存档", $"槽 {index + 1} 已有存档，确认覆盖？原存档将被替换且无法恢复。", "确认覆盖",
+                    () => SaveManual(index), "取消", () => { pendingSaveCompletion = null; });
             }
             else
             {
@@ -324,7 +368,7 @@ namespace Spotlight.GameFlow
 
         public void ConfirmDelete(int index)
         {
-            ShowConfirmation("删除存档", $"确定永久删除存档 {index}？", "删除", () =>
+            ShowConfirmation("删除存档", $"确认删除槽 {index + 1} 的存档？删除后无法恢复。", "确认删除", () =>
             {
                 if (!saves.TryDeleteManual(index, out string error))
                     ShowResult("删除失败", error, () => { });
@@ -333,25 +377,25 @@ namespace Spotlight.GameFlow
             }, "取消", () => { });
         }
 
-        public void QuickSave()
+        public void QuickSave() => BeginQuickSave(null);
+
+        private void BeginQuickSave(Action completed)
         {
-            if (!TryCaptureSaveData(out GameSaveData data, out string error))
+            if (saving) return;
+            int slot = saves.FindFirstEmptyManualSlot();
+            if (slot < GameSaveService.FirstManualSlot)
             {
-                ShowResult("保存失败", error, () => { });
+                pendingSaveCompletion = completed;
+                OpenSaves(true);
                 return;
             }
-            if (saves.TryQuickSave(data, out int slot, out error))
-                ShowResult("保存成功", "已保存到存档 " + slot, () => { });
-            else if (error != null && error.Contains("occupied", StringComparison.OrdinalIgnoreCase))
-                OpenSaves(true);
-            else
-                ShowResult("保存失败", error ?? "无法保存游戏", () => { });
+            StartCoroutine(SaveRoutine(slot, completed));
         }
 
         public void ConfirmReturnToTitle()
         {
-            ShowConfirmation("返回标题界面", "是否保存当前游戏进度并返回标题界面？", "保存并返回标题",
-                () => SaveAndReturnToTitle(), "不保存并返回标题",
+            ShowConfirmation("退出主菜单", "是否保存当前游戏进度？不保存退出将丢失当前未保存的进度。", "保存游戏并退出",
+                () => SaveAndReturnToTitle(), "不保存游戏并退出",
                 () => LoadThen(OpenMainMenu, config.MainMenuScene));
         }
 
@@ -371,18 +415,9 @@ namespace Spotlight.GameFlow
             }, "不保存并退出", QuitGame);
         }
 
-        private void SaveAndReturnToTitle()
-        {
-            if (!TryCaptureSaveData(out GameSaveData data, out string error))
-            {
-                ShowResult("保存失败", error, () => { });
-                return;
-            }
-            if (saves.TryQuickSave(data, out _, out error))
-                LoadThen(OpenMainMenu, config.MainMenuScene);
-            else
-                ShowResult("保存失败", error ?? "无法保存游戏", () => { });
-        }
+        public void ConfirmQuitFromMenu() => ShowConfirmation("退出游戏", "确认退出游戏？", "确认退出", QuitGame, "取消", () => { });
+
+        private void SaveAndReturnToTitle() => BeginQuickSave(() => LoadThen(OpenMainMenu, config.MainMenuScene));
 
         public void CloseModalPanel(GameFlowPanel panel, Action afterClose = null)
         {
@@ -391,6 +426,9 @@ namespace Spotlight.GameFlow
             else
                 afterClose?.Invoke();
         }
+
+        public void SaveSettings() => settings.Save();
+        public string GetThumbnail(int index) => saves.TryLoad(index, out GameSaveData data, out _) ? data.ThumbnailPng : null;
 
         public void SetMasterVolume(float value) => settings.SetMasterVolume(value);
         public void SetMusicVolume(float value) => settings.SetMusicVolume(value);
@@ -408,7 +446,7 @@ namespace Spotlight.GameFlow
             {
                 awaitingResolutionConfirmation = false;
                 settings.CommitCurrentDisplaySettings();
-            }, "恢复", RevertResolution);
+            }, "恢复原设置", RevertResolution);
         }
 
         private void RevertResolution()
@@ -437,8 +475,11 @@ namespace Spotlight.GameFlow
 
         private void HandleEscape()
         {
+            if (saving || openingPause) return;
             if (detailsPanel != null || detailsClosedFrame == Time.frameCount || DialoguePanel.BlocksEscapeThisFrame) return;
-            if (IsMapOpen) { CloseMap(); return; }
+            // The map is an additive gameplay overlay. Escape should open the pause stack over it;
+            // closing the map here leaves the player without map controls after the first press.
+            if (IsMapOpen && !paused) { OpenPause(); return; }
             if (CanUseGameplayControls() && (narrativeIntegration?.Runtime?.BlocksGameplayInput ?? false))
                 return;
             if (loadingTransitioning || (dayFlow != null && dayFlow.BlocksGameplayInput))
@@ -492,6 +533,7 @@ namespace Spotlight.GameFlow
 
         private void OpenMainMenu()
         {
+            pendingSaveCompletion = null;
             CloseDetails();
             CloseMap();
             DialoguePlayback.Stop();
@@ -559,7 +601,7 @@ namespace Spotlight.GameFlow
         {
             var data = new ConfirmationPanelData(this, title, message, accept, accepted, cancel, cancelled);
             ConfirmationPanel panel = UIKit.OpenPanel<ConfirmationPanel>(UILevel.Pop, data, cachePolicy: PanelCachePolicy.Reusable);
-            StartCoroutine(PushPanelWhenReady(panel, true));
+            StartCoroutine(PushPanelWhenReady(panel, false));
         }
 
         private void ShowResult(string title, string message, Action closed)
@@ -583,16 +625,23 @@ namespace Spotlight.GameFlow
                 UIKit.ClosePanel(loadingPanel);
             loadingPanel = UIKit.OpenPanel<LoadingPanel>(UILevel.AlwayTop, Data(), tag: "game-flow-loading", cachePolicy: PanelCachePolicy.Reusable);
             tips.ResetTimer();
+            loadingPanel.SetSplash(false);
             loadingPanel.SetTip(tips.CurrentTip);
             loadingRoutine = StartCoroutine(LoadRoutine(completed, sceneName, version));
         }
 
         private IEnumerator LoadRoutine(Action completed, string sceneName, int version)
         {
+            // Let the panel open and render before scene loading can stall the main thread.
+            while (loadingPanel != null && loadingPanel.State == PanelState.Opening)
+                yield return null;
+            yield return null;
+            if (version != loadingVersion) yield break;
             float elapsed = 0f;
             float displayedProgress = 0f;
             int buildIndex = FindBuildIndex(sceneName);
             AsyncOperation operation = null;
+            ResourceRequest resourceOperation = null;
             if (buildIndex >= 0 && buildIndex != SceneManager.GetActiveScene().buildIndex)
             {
                 operation = SceneManager.LoadSceneAsync(buildIndex);
@@ -602,8 +651,10 @@ namespace Spotlight.GameFlow
             {
                 Debug.LogWarning("Configured scene is not in Build Settings: " + sceneName, this);
             }
+            if (operation == null)
+                resourceOperation = Resources.LoadAsync<GameObject>("Art/UIPrefab/MainMenuPanel");
 
-            while (elapsed < config.MinimumLoadingSeconds || operation != null && !operation.isDone)
+            while (elapsed < config.MinimumLoadingSeconds || operation != null && !operation.isDone || resourceOperation != null && !resourceOperation.isDone)
             {
                 float deltaTime = Time.unscaledDeltaTime;
                 elapsed += deltaTime;
@@ -620,10 +671,7 @@ namespace Spotlight.GameFlow
                 }
                 else
                 {
-                    float progressDuration = Mathf.Max(config.MinimumLoadingSeconds, 3f);
-                    targetProgress = Mathf.Min(0.9f, elapsed / progressDuration);
-                    if (elapsed >= config.MinimumLoadingSeconds)
-                        targetProgress = 1f;
+                    targetProgress = resourceOperation != null ? resourceOperation.progress : 1f;
                 }
 
                 displayedProgress = Mathf.MoveTowards(displayedProgress, targetProgress, deltaTime * 0.8f);
@@ -659,15 +707,47 @@ namespace Spotlight.GameFlow
 
         private void SaveManual(int index)
         {
-            if (!TryCaptureSaveData(out GameSaveData data, out string error))
+            if (!saving) StartCoroutine(SaveRoutine(index, pendingSaveCompletion));
+        }
+
+        private IEnumerator SaveRoutine(int index, Action completed)
+        {
+            saving = true;
+            PauseMenuPanel pause = UIKit.GetPanel<PauseMenuPanel>();
+            pause?.SetSaveStatus("保存中");
+            yield return null;
+            bool success = TryCaptureSaveData(out GameSaveData data, out string error)
+                && saves.TrySaveManual(index, data, out error);
+            saving = false;
+            pause?.SetSaveStatus(success ? "保存成功" : "保存失败");
+            if (!success) { ShowResult("保存失败", error, RefreshSavePanel); yield break; }
+            pendingSaveCompletion = null;
+            RefreshSavePanel();
+            if (completed != null)
             {
-                ShowResult("保存失败", error, RefreshSavePanel);
-                return;
+                yield return new WaitForSecondsRealtime(.25f);
+                completed();
             }
-            if (!saves.TrySaveManual(index, data, out error))
-                ShowResult("保存失败", error, RefreshSavePanel);
-            else
-                ShowResult("保存成功", "存档 " + index + " 已保存", RefreshSavePanel);
+            else ShowResult("保存成功", "已保存到槽 " + (index + 1), RefreshSavePanel);
+        }
+
+        private void CaptureGameplayThumbnail()
+        {
+            if (gameplayThumbnail != null) Destroy(gameplayThumbnail);
+            gameplayThumbnail = null;
+            Texture2D screen = ScreenCapture.CaptureScreenshotAsTexture();
+            if (screen == null) return;
+            RenderTexture target = RenderTexture.GetTemporary(320, 180, 0);
+            RenderTexture active = RenderTexture.active;
+            try
+            {
+                Graphics.Blit(screen, target);
+                RenderTexture.active = target;
+                gameplayThumbnail = new Texture2D(320, 180, TextureFormat.RGB24, false);
+                gameplayThumbnail.ReadPixels(new Rect(0, 0, 320, 180), 0, 0);
+                gameplayThumbnail.Apply();
+            }
+            finally { RenderTexture.active = active; RenderTexture.ReleaseTemporary(target); Destroy(screen); }
         }
 
         private void RefreshSavePanel()
@@ -686,7 +766,8 @@ namespace Spotlight.GameFlow
                 SceneName = SceneManager.GetActiveScene().name,
                 ElapsedPlaytimeSeconds = playtime,
                 CheckpointId = "start",
-                State = gameplay ? "gameplay" : "menu"
+                State = gameplay ? "gameplay" : "menu",
+                ThumbnailPng = gameplayThumbnail != null ? Convert.ToBase64String(gameplayThumbnail.EncodeToPNG()) : null
             };
             data.Participants.AddRange(GameSaveParticipantRegistry.CaptureAll());
 
@@ -714,8 +795,19 @@ namespace Spotlight.GameFlow
 
         public bool TryAutoSave(out string error)
         {
-            if (!TryCaptureSaveData(out GameSaveData data, out error)) return false;
-            return saves.TryAutoSave(data, out error);
+            error = null;
+            if (!gameplay || saving) return false;
+            StartCoroutine(AutoSaveAfterRender());
+            return true;
+        }
+
+        private IEnumerator AutoSaveAfterRender()
+        {
+            yield return new WaitForEndOfFrame();
+            if (!gameplay || paused || loadingTransitioning) yield break;
+            CaptureGameplayThumbnail();
+            if (!TryCaptureSaveData(out GameSaveData data, out string error) || !saves.TryAutoSave(data, out error))
+                Debug.LogWarning("自动存档失败：" + error, this);
         }
 
         private static int FindBuildIndex(string scene)

@@ -99,7 +99,7 @@ namespace Spotlight.Narrative
         {
             GameObject go = new GameObject(name, typeof(RectTransform), typeof(TextMeshProUGUI)); go.transform.SetParent(parent, false);
             RectTransform r = go.GetComponent<RectTransform>(); r.anchorMin = min; r.anchorMax = max; r.offsetMin = r.offsetMax = Vector2.zero;
-            TMP_Text text = go.GetComponent<TMP_Text>(); text.font = Resources.Load<TMP_FontAsset>("Fonts/SimHei SDF"); text.fontSize = size; text.color = Color.white; text.raycastTarget = false;
+            TMP_Text text = go.GetComponent<TMP_Text>(); text.font = Resources.Load<TMP_FontAsset>("Fonts/乐米曲奇方块体 SDF"); text.fontSize = size; text.color = Color.white; text.raycastTarget = false;
             text.textWrappingMode = TextWrappingModes.Normal; text.overflowMode = TextOverflowModes.Overflow; return text;
         }
 

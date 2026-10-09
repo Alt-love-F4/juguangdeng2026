@@ -11,6 +11,9 @@ namespace Spotlight.GameFlow
         [UnityEngine.SerializeField] private Button titleButton;
         [UnityEngine.SerializeField] private Button exitButton;
 
+        [UnityEngine.SerializeField] private TMPro.TMP_Text saveStatus;
+        public void SetSaveStatus(string message) { if (saveStatus != null) saveStatus.text = message; }
+
         protected override void Awake()
         {
             base.Awake();

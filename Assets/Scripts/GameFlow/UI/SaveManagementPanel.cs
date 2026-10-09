@@ -22,6 +22,7 @@ namespace Spotlight.GameFlow
                         index => Flow?.ConfirmLoad(index),
                         index => Flow?.ConfirmSave(index),
                         index => Flow?.ConfirmDelete(index));
+                if (slot != null) slot.BindSelection(SelectSlot);
             }
             backButton?.onClick.AddListener(() => Flow?.BackToPrevious());
         }
@@ -31,7 +32,14 @@ namespace Spotlight.GameFlow
             base.OnOpen(data);
             GameFlowPanelData panelData = data as GameFlowPanelData;
             fromGameplay = panelData != null && panelData.FromGameplay;
+            SelectSlot(null);
             RefreshSlots();
+        }
+
+        private void SelectSlot(SaveSlotView selected)
+        {
+            foreach (SaveSlotView slot in slots)
+                if (slot != null) slot.SetSelected(slot == selected);
         }
 
         public void RefreshSlots()
@@ -43,7 +51,10 @@ namespace Spotlight.GameFlow
             var saveSlots = Flow != null ? Flow.ListSaveSlots() : null;
             for (int i = 0; i < slots.Length; i++)
                 if (slots[i] != null && saveSlots != null && i < saveSlots.Count)
+                {
                     slots[i].Refresh(saveSlots[i], fromGameplay);
+                    slots[i].SetThumbnail(saveSlots[i].CanLoad ? Flow.GetThumbnail(i) : null);
+                }
         }
     }
 }

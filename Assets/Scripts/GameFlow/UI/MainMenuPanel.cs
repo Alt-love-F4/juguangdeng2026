@@ -1,5 +1,6 @@
 using UnityEngine;
 using UnityEngine.UI;
+using TMPro;
 
 namespace Spotlight.GameFlow
 {
@@ -9,6 +10,15 @@ namespace Spotlight.GameFlow
         [SerializeField] private Button savesButton;
         [SerializeField] private Button settingsButton;
         [SerializeField] private Button quitButton;
+        [SerializeField] private TMP_Text noSavesText;
+
+        protected override void OnShow()
+        {
+            if (savesButton != null) savesButton.interactable = true;
+            if (noSavesText != null) noSavesText.gameObject.SetActive(false);
+            SetDefaultSelectable(startButton);
+            base.OnShow();
+        }
 
         protected override void Awake()
         {
@@ -16,7 +26,7 @@ namespace Spotlight.GameFlow
             startButton?.onClick.AddListener(() => Flow?.StartGame());
             savesButton?.onClick.AddListener(() => Flow?.OpenSaves(false));
             settingsButton?.onClick.AddListener(() => Flow?.OpenSettings(false));
-            quitButton?.onClick.AddListener(() => Flow?.QuitGame());
+            quitButton?.onClick.AddListener(() => Flow?.ConfirmQuitFromMenu());
         }
     }
 }

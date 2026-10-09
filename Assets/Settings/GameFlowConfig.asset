@@ -12,7 +12,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 904db589a35ec114ea5e26115eef7ff8, type: 3}
   m_Name: GameFlowConfig
   m_EditorClassIdentifier: Spotlight.GameFlow.UI::Spotlight.GameFlow.GameFlowConfig
-  MainMenuScene: SampleScene
+  MainMenuScene: "\u542F\u52A8\u573A\u666F"
   GameplayScene: Map
   Font: {fileID: 0}
   MenuArtwork: {fileID: 0}
@@ -23,5 +23,4 @@ MonoBehaviour:
   - "\u81EA\u52A8\u5B58\u6863\u4F4D\u53EA\u53EF\u8BFB\u53D6\uFF0C\u4E0D\u53EF\u624B\u52A8\u8986\u76D6\u6216\u5220\u9664\u3002"
   - "\u4FDD\u5B58\u6E38\u620F\u65F6\u4F1A\u4F18\u5148\u9009\u62E9\u6700\u9760\u524D\u7684\u7A7A\u5B58\u6863\u4F4D\u3002"
   - "\u52A0\u8F7D\u65F6\u53EF\u4F7F\u7528\u5DE6\u53F3\u65B9\u5411\u952E\u67E5\u770B\u4E0A\u4E00\u6761\u6216\u4E0B\u4E00\u6761\u63D0\u793A\u3002"
-  - "\u53EF\u4EE5\u5728\u8BBE\u7F6E\u4E2D\u5206\u522B\u8C03\u8282\u97F3\u4E50\u548C\u97F3\u6548\u97F3\u91CF\u3002"
   - "\u53EF\u4EE5\u5728\u8BBE\u7F6E\u4E2D\u5206\u522B\u8C03\u8282\u97F3\u4E50\u548C\u97F3\u6548\u97F3\u91CF\u3002"

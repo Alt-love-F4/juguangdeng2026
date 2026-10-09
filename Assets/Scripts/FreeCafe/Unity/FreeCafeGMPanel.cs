@@ -47,7 +47,7 @@ namespace Spotlight.FreeCafe
             if (Instance != null && Instance != this) { Destroy(gameObject); return; }
             Instance = this;
             DontDestroyOnLoad(gameObject);
-            font = Resources.Load<TMP_FontAsset>("Fonts/SimHei SDF");
+            font = Resources.Load<TMP_FontAsset>("Fonts/乐米曲奇方块体 SDF");
             BuildCategories();
             BuildShell();
             SetVisible(false);

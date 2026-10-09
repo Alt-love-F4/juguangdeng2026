@@ -183,10 +183,10 @@ MonoBehaviour:
     rid: -2
   mHideAnimationConfig:
     rid: -2
-  mAutoFocusOnShow: 0
+  mAutoFocusOnShow: 1
   mDefaultSelectable: {fileID: 0}
-  showDuration: 0.22
-  hideDuration: 0.14
+  showDuration: 0.2
+  hideDuration: 0.2
   showOffset: 22
   hideOffset: 12
   showStartScale: 0.98
@@ -421,8 +421,8 @@ MonoBehaviour:
       m_Calls: []
   m_text: "\u6309 Esc \u53EF\u4EE5\u6682\u505C\u6E38\u620F\u3002"
   m_isRightToLeft: 0
-  m_fontAsset: {fileID: 11400000, guid: b1d144bbba1d46d4db22716d02880eb5, type: 2}
-  m_sharedMaterial: {fileID: -6975002358089578258, guid: b1d144bbba1d46d4db22716d02880eb5, type: 2}
+  m_fontAsset: {fileID: 11400000, guid: dcf2509fdc78e284a8ce63eca38834ed, type: 2}
+  m_sharedMaterial: {fileID: 2687705395074022517, guid: dcf2509fdc78e284a8ce63eca38834ed, type: 2}
   m_fontSharedMaterials: []
   m_fontMaterial: {fileID: 0}
   m_fontMaterials: []
@@ -633,8 +633,8 @@ MonoBehaviour:
       m_Calls: []
   m_text: "\u6B63\u5728\u51C6\u5907\u4E0B\u4E00\u6BB5\u65C5\u7A0B"
   m_isRightToLeft: 0
-  m_fontAsset: {fileID: 11400000, guid: b1d144bbba1d46d4db22716d02880eb5, type: 2}
-  m_sharedMaterial: {fileID: -6975002358089578258, guid: b1d144bbba1d46d4db22716d02880eb5, type: 2}
+  m_fontAsset: {fileID: 11400000, guid: dcf2509fdc78e284a8ce63eca38834ed, type: 2}
+  m_sharedMaterial: {fileID: 2687705395074022517, guid: dcf2509fdc78e284a8ce63eca38834ed, type: 2}
   m_fontSharedMaterials: []
   m_fontMaterial: {fileID: 0}
   m_fontMaterials: []

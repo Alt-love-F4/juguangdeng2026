@@ -1,6 +1,8 @@
 using System;
 using DG.Tweening;
 using UnityEngine;
+using UnityEngine.EventSystems;
+using UnityEngine.UI;
 using YokiFrame;
 
 namespace Spotlight.GameFlow
@@ -63,6 +65,16 @@ namespace Spotlight.GameFlow
             }
         }
 
+        protected override void OnBlur()
+        {
+            if (canvasGroup != null) canvasGroup.interactable = false;
+        }
+
+        protected override void OnFocus()
+        {
+            OnShow();
+        }
+
         protected override void OnWillHide()
         {
             if (canvasGroup != null)
@@ -75,6 +87,18 @@ namespace Spotlight.GameFlow
         protected override void OnShow()
         {
             ResetInteractionState();
+            // UIKit panels share a root canvas; keep the entire navigation stack above
+            // the scene-owned map (sorting orders 10 and 30), including save confirmations.
+            Canvas canvas = GetComponentInParent<Canvas>();
+            if (canvas != null && canvas.rootCanvas.transform != transform)
+                canvas.rootCanvas.sortingOrder = Mathf.Max(canvas.rootCanvas.sortingOrder, 100);
+            if (EventSystem.current == null) return;
+            Selectable target = GetDefaultSelectable();
+            if (target == null || !target.IsActive() || !target.IsInteractable())
+                foreach (Selectable candidate in GetComponentsInChildren<Selectable>())
+                    if (candidate.IsActive() && candidate.IsInteractable()) { target = candidate; break; }
+            if (target != null && target.IsActive() && target.IsInteractable())
+                EventSystem.current.SetSelectedGameObject(target.gameObject);
         }
 
         protected override void OnDidHide()

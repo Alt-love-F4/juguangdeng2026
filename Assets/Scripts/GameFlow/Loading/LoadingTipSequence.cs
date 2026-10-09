@@ -64,11 +64,8 @@ namespace Spotlight.GameFlow
 
         public string Previous()
         {
-            if (historyCursor > 0)
-            {
-                historyCursor--;
-                elapsed = 0f;
-            }
+            if (historyCursor > 0) historyCursor--;
+            elapsed = 0f;
             return CurrentTip;
         }
 

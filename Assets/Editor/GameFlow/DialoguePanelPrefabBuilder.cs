@@ -15,7 +15,7 @@ namespace Spotlight.GameFlow.Editor
         private const string PrefabPath = "Assets/Resources/Art/UIPrefab/DialoguePanel.prefab";
         private const string LibraryPath = "Assets/Resources/Dialogue/PresentationEffectLibrary.asset";
         private const string SamplePath = "Assets/Resources/Dialogue/DialoguePreview.asset";
-        private static TMP_FontAsset Font => AssetDatabase.LoadAssetAtPath<TMP_FontAsset>("Assets/Resources/Fonts/SimHei SDF.asset");
+        private static TMP_FontAsset Font => AssetDatabase.LoadAssetAtPath<TMP_FontAsset>("Assets/Resources/Fonts/乐米曲奇方块体 SDF.asset");
         private static readonly Color Gold = new Color(1f, .88f, .66f);
 
         static DialoguePanelPrefabBuilder()

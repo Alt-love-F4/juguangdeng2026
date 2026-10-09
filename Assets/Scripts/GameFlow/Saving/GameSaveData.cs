@@ -11,6 +11,7 @@ namespace Spotlight.GameFlow
         public double ElapsedPlaytimeSeconds;
         public string CheckpointId;
         public string State;
+        public string ThumbnailPng;
         public List<GameSaveParticipantData> Participants = new List<GameSaveParticipantData>();
     }
 

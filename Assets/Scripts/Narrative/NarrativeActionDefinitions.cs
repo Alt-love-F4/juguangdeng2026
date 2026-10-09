@@ -23,6 +23,10 @@ namespace Spotlight.Narrative
         public int durationDays;
         public int progressTarget;
         public string nextActionKey;
+        public bool endDay;
+        // Existing enum values remain stable for serialized data. Modifiers can combine with a base type.
+        public bool IsTimed => type == NarrativeActionType.Timed || (type != NarrativeActionType.Future && durationDays > 0);
+        public bool IsProgress => type == NarrativeActionType.Progress || (type != NarrativeActionType.Future && progressTarget > 0);
     }
 
     [Serializable]
@@ -63,7 +67,16 @@ namespace Spotlight.Narrative
         public List<NarrativeActionCounterValue> counters = new List<NarrativeActionCounterValue>();
         public List<NarrativeActionDayValue> daily = new List<NarrativeActionDayValue>();
         public List<NarrativeActionExpiryValue> expiry = new List<NarrativeActionExpiryValue>();
+        public List<NarrativeActionMountValue> mounts = new List<NarrativeActionMountValue>();
+        public List<string> retired = new List<string>();
+        public List<NarrativeActionCounterValue> items = new List<NarrativeActionCounterValue>();
+        public string executingAction;
+        public string currentEvent;
+        public List<string> pendingEvents = new List<string>();
+        public List<string> dueActions = new List<string>();
     }
+
+    [Serializable] public sealed class NarrativeActionMountValue { public string position; public string action; public int day; }
 
     [Serializable] public sealed class NarrativeActionCounterValue { public string key; public int value; }
     [Serializable] public sealed class NarrativeActionDayValue { public string key; public int day; }
@@ -138,13 +151,17 @@ namespace Spotlight.Narrative
                 switch (name)
                 {
                     case "Item":
-                        Require(args, 1, token); result.Add(new NarrativeActionRequirement { type = NarrativeActionRequirementType.Item, key = args[0], value = args.Length > 1 ? PositiveInt(args[1], token) : 1 }); break;
+                        Require(args, 1, token); if (args.Length > 2) throw new FormatException("Invalid Item requirement: " + token);
+                        result.Add(new NarrativeActionRequirement { type = NarrativeActionRequirementType.Item, key = args[0], value = args.Length > 1 ? PositiveInt(args[1], token) : 1 }); break;
                     case "Bar":
                         if (args.Length != 3 || string.IsNullOrWhiteSpace(args[0]) || !IsOperator(args[1])) throw new FormatException("Invalid Bar requirement: " + token);
                         result.Add(new NarrativeActionRequirement { type = NarrativeActionRequirementType.Bar, key = args[0], op = args[1], value = Int(args[2], token) }); break;
-                    case "Cond": Require(args, 1, token); result.Add(new NarrativeActionRequirement { type = NarrativeActionRequirementType.Condition, key = args[0] }); break;
-                    case "NotCond": Require(args, 1, token); result.Add(new NarrativeActionRequirement { type = NarrativeActionRequirementType.NotCondition, key = args[0] }); break;
-                    case "ActionPoint": Require(args, 1, token); result.Add(new NarrativeActionRequirement { type = NarrativeActionRequirementType.ActionPoint, value = PositiveInt(args[0], token) }); break;
+                    case "Cond":
+                        Require(args, 1, token);
+                        if (args.Length > 2 || (args.Length == 2 && args[1] != "true" && args[1] != "false")) throw new FormatException("Expected Cond(key[,true|false]): " + token);
+                        result.Add(new NarrativeActionRequirement { type = args.Length == 2 && args[1] == "false" ? NarrativeActionRequirementType.NotCondition : NarrativeActionRequirementType.Condition, key = args[0] }); break;
+                    case "NotCond": Exact(args, 1, token); result.Add(new NarrativeActionRequirement { type = NarrativeActionRequirementType.NotCondition, key = args[0] }); break;
+                    case "ActionPoint": Exact(args, 1, token); result.Add(new NarrativeActionRequirement { type = NarrativeActionRequirementType.ActionPoint, value = PositiveInt(args[0], token) }); break;
                     default: throw new FormatException("Unknown action requirement: " + name);
                 }
             }
@@ -155,6 +172,11 @@ namespace Spotlight.Narrative
         private static void Require(string[] args, int count, string token)
         {
             if (args.Length < count || string.IsNullOrWhiteSpace(args[0])) throw new FormatException("Invalid requirement: " + token);
+        }
+        private static void Exact(string[] args, int count, string token)
+        {
+            Require(args, count, token);
+            if (args.Length != count) throw new FormatException("Invalid argument count: " + token);
         }
         private static int Int(string value, string token) => int.TryParse(value, NumberStyles.Integer, CultureInfo.InvariantCulture, out int parsed) ? parsed : throw new FormatException("Invalid number in requirement: " + token);
         private static int PositiveInt(string value, string token) { int parsed = Int(value, token); if (parsed <= 0) throw new FormatException("Expected positive number in requirement: " + token); return parsed; }

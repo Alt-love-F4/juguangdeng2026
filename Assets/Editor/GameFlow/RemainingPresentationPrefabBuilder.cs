@@ -15,7 +15,7 @@ namespace Spotlight.GameFlow.Editor
     public static class RemainingPresentationPrefabBuilder
     {
         private const string Root = "Assets/Resources/Art/UIPrefab/";
-        private const string FontPath = "Assets/Resources/Fonts/SimHei SDF.asset";
+        private const string FontPath = "Assets/Resources/Fonts/乐米曲奇方块体 SDF.asset";
         private static TMP_FontAsset Font => AssetDatabase.LoadAssetAtPath<TMP_FontAsset>(FontPath);
         private static readonly Color Gold = new Color(1f, .88f, .66f);
         private static readonly Color Surface = new Color(.08f, .06f, .055f, 1f);

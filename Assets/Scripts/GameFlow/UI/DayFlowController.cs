@@ -117,20 +117,10 @@ namespace Spotlight.GameFlow
 
         private void EnterAvatarSelection()
         {
-            if (!initialized) Initialize(flow);
-            running = true;
+            // Avatar guidance will be introduced elsewhere. Keep startup unobstructed for now.
             ClosePresentation();
-            HideBusinessControls();
-            HideGameplayPanel();
-            SetState(DayFlowState.AvatarSelection);
-            int version = presentationVersion;
-            avatarSelection = PlayerAvatarSelection.Create(transform);
-            PlayerAvatarSelection selection = avatarSelection;
-            selection.Play(() =>
-            {
-                if (!running || version != presentationVersion || avatarSelection != selection) return;
-                BeginNewDayFlow();
-            });
+            PlayerDetailsProfile.Current.SelectAvatar(AvatarKind.Male);
+            BeginNewDayFlow();
         }
 
         public void BeginNewDayFlow()
@@ -139,6 +129,8 @@ namespace Spotlight.GameFlow
             running = true;
             HideBusinessControls();
             HideGameplayPanel();
+            var actions = Spotlight.Narrative.NarrativeRuntime.Instance?.Actions;
+            if (actions != null && actions.CurrentDay < day) actions.BeginDay(day);
             SetState(DayFlowState.DateTransition);
             ShowPresentation<DateChangePanel>(EnterPreBusiness,
                 panel => panel.SetDates(previousDate, CurrentDate));
@@ -146,7 +138,7 @@ namespace Spotlight.GameFlow
 
         private void Update()
         {
-            if (!running || State != DayFlowState.FreeCafeBusiness) return;
+            if (Time.timeScale == 0f || !running || State != DayFlowState.FreeCafeBusiness) return;
             // Do not let an endpoint's old state bypass an unfinished presentation.
             if (endpointOwner != null && gameplayEndpoint.DayFlowBusinessFinished)
                 FinishBusiness();
@@ -306,6 +298,8 @@ namespace Spotlight.GameFlow
         public void EndDayFromMap()
         {
             if (!running || State != DayFlowState.CityMapLeisure) return;
+            var actions = Spotlight.Narrative.NarrativeRuntime.Instance?.Actions;
+            if (actions != null && (actions.IsExecuting || actions.HasBlockingActions())) return;
             EnterPreNight();
         }
 
@@ -326,6 +320,7 @@ namespace Spotlight.GameFlow
             SetState(DayFlowState.DayComplete);
             previousDate = CurrentDate;
             day++;
+            if (flow != null && !flow.TryAutoSave(out string error)) Debug.LogWarning("日结自动存档失败：" + error, this);
             ShowPresentation<DayEndPanel>(BeginNewDayFlow);
         }
 

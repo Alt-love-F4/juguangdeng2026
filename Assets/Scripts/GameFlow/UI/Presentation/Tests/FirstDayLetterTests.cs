@@ -303,7 +303,7 @@ namespace Spotlight.GameFlow.Tests
         }
 
         [UnityTest]
-        public IEnumerator NewSessionSkipLetterEntersAvatarSelectionBeforeFirstDayDateFlow()
+        public IEnumerator NewSessionSkipLetterUsesMaleAvatarWithoutSelectionWindow()
         {
             controllerObject = new GameObject("FirstDayLetterSkipFlowTest");
             var flow = controllerObject.AddComponent<DayFlowController>();
@@ -313,14 +313,7 @@ namespace Spotlight.GameFlow.Tests
             Assert.That(panel, Is.Not.Null);
             ((Button)Field("skipButton").GetValue(panel)).onClick.Invoke();
             panel.SkipLetter();
-            Assert.That(flow.State, Is.EqualTo(DayFlowState.AvatarSelection));
-            Assert.That(flow.BlocksGameplayInput, Is.True);
-            Assert.That(flow.CurrentPresentation, Is.Null);
-            Assert.That(PlayerDetailsProfile.Current.HasSelectedAvatar, Is.False);
-            PlayerAvatarSelection selection = flow.CurrentAvatarSelection;
-            Assert.That(selection, Is.Not.Null);
-            selection.Select(AvatarKind.Male);
-            selection.Select(AvatarKind.Female); // duplicate input must not replace the confirmed avatar
+            Assert.That(flow.CurrentAvatarSelection, Is.Null);
             Assert.That(PlayerDetailsProfile.Current.Avatar, Is.EqualTo(AvatarKind.Male));
             Assert.That(PlayerDetailsProfile.Current.HasSelectedAvatar, Is.True);
             Assert.That(flow.State, Is.EqualTo(DayFlowState.DateTransition));

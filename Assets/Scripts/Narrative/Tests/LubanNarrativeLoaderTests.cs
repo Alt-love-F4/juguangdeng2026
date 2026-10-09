@@ -11,6 +11,8 @@ namespace Spotlight.Narrative.Tests
         {
             return new Dictionary<string, JArray>
             {
+                ["tbncsaction"] = new JArray(), ["tbncsmapposition"] = new JArray(),
+                ["tbopeningline"] = new JArray(), ["tbopeningpresentation"] = new JArray(),
                 ["tbtext"] = JArray.Parse("[{ 'key':'title', 'text':'Localized title', 'comment':'shared table' }]"),
                 ["tbrecipe"] = new JArray(), ["tbingredient"] = new JArray(), ["tbdevice"] = new JArray(),
                 ["tbgameparam"] = new JArray(), ["tbworldobject"] = new JArray(), ["tbrecipestep"] = new JArray(), ["tbnpc"] = new JArray(),
@@ -27,8 +29,38 @@ namespace Spotlight.Narrative.Tests
             };
         }
 
-        private static JObject Bar(string owner, string id) => JObject.Parse("{ 'barId':'" + id + "', 'ownerId':'" + owner + "', 'targetId':'npc', 'barType':'world', 'min':0, 'max':9999, 'direction':'lowIsGood', 'advanceMode':'derived', 'initValue':1, 'nameText':'title', 'derivedFormula':'weighted_sum', 'derivedSources':'world.calendar|npc.calendar', 'derivedWeights':'0.25|0.75', 'autoStep':2 }");
+        private static JObject Bar(string owner, string id) => JObject.Parse("{ 'barId':'" + id + "', 'ownerId':'" + owner + "', 'targetId':'npc', 'barType':'world', 'min':0, 'max':9999, 'direction':'lowIsGood', 'advanceMode':'derived', 'initValue':1, 'reverseInitValue':0, 'nameText':'title', 'derivedFormula':'weighted_sum', 'derivedSources':'world.calendar|npc.calendar', 'derivedWeights':'0.25|0.75', 'autoStep':2 }");
         private static NarrativeConfiguration Adapt(Dictionary<string, JArray> data) => LubanNarrativeLoader.FromTables(new cfg.Tables(name => data[name]));
+
+        [TestCase("Once|Timer|Progress", NarrativeActionType.Daily)]
+        [TestCase("OneTime", NarrativeActionType.Once)]
+        [TestCase("ONCE", NarrativeActionType.Once)]
+        [TestCase("EndDay", NarrativeActionType.Daily)]
+        [TestCase("Repeatble", NarrativeActionType.Repeat)]
+        [TestCase("Upcoming", NarrativeActionType.Future)]
+        public void MapsActionDesignTypesAndLegacyTypes(string type, NarrativeActionType expected)
+        {
+            var data = Data();
+            data["tbncsaction"].Add(new JObject { ["actionKey"]="action", ["type"]=type, ["mustExecute"]=false,
+                ["nameText"]="title", ["descText"]="title", ["requirements"]="", ["resultEvents"]="", ["durationDays"]=2,
+                ["progressTarget"]=type.Contains("Progress") ? 2 : 0, ["nextActionKey"]="" });
+            var action = Adapt(data).actions[0];
+            Assert.That(action.type, Is.EqualTo(expected));
+            Assert.That(action.endDay, Is.EqualTo(type == "EndDay"));
+            if (type.Contains("Progress")) Assert.That(action.IsProgress && action.IsTimed, Is.True);
+        }
+
+        [TestCase("Repeatble|Once")]
+        [TestCase("Once|OneTime")]
+        [TestCase("Upcoming|Timer")]
+        public void RejectsMutuallyExclusiveActionTypes(string type)
+        {
+            var data = Data();
+            data["tbncsaction"].Add(new JObject { ["actionKey"]="action", ["type"]=type, ["mustExecute"]=false,
+                ["nameText"]="title", ["descText"]="title", ["requirements"]="", ["resultEvents"]="", ["durationDays"]=2,
+                ["progressTarget"]=0, ["nextActionKey"]="" });
+            Assert.Throws<FormatException>(() => Adapt(data));
+        }
 
         [Test]
         public void MapsGeneratedTablesWithoutAnAuthoringAsset()

@@ -16,6 +16,9 @@ namespace Spotlight.Narrative
         private readonly Dictionary<string, int> dailyExecution = new Dictionary<string, int>(StringComparer.Ordinal);
         private readonly Dictionary<string, int> expiryDays = new Dictionary<string, int>(StringComparer.Ordinal);
         private INarrativeActionInventory inventory;
+        private readonly List<NarrativeActionMountValue> mounts = new List<NarrativeActionMountValue>();
+        private readonly HashSet<string> retired = new HashSet<string>(StringComparer.Ordinal);
+        private readonly Queue<string> dueActions = new Queue<string>();
         private bool executing;
         private string executingAction;
         private Queue<string> pendingEvents;
@@ -37,12 +40,13 @@ namespace Spotlight.Narrative
             foreach (NarrativeActionDefinition action in actions ?? Enumerable.Empty<NarrativeActionDefinition>())
             {
                 Validate(action);
-                if (action.type != NarrativeActionType.Repeat && action.type != NarrativeActionType.Daily && action.type != NarrativeActionType.Once)
-                    throw new NotSupportedException("Action type is reserved for the next action-system phase: " + action.type);
                 if (!definitions.TryAdd(action.actionKey, action)) throw new FormatException("Duplicate action key: " + action.actionKey);
                 if (action.parsedRequirements == null || action.parsedRequirements.Count == 0)
                     action.parsedRequirements = NarrativeActionRequirementParser.Parse(action.requirements);
             }
+            foreach (var action in definitions.Values)
+                if (action.type == NarrativeActionType.Future && (string.IsNullOrEmpty(action.nextActionKey) || Get(action.nextActionKey) == null || action.nextActionKey == action.actionKey))
+                    throw new FormatException("Future action requires a different configured nextActionKey: " + action.actionKey);
             ActionPoints = new NarrativeActionPoints(actionPointMax);
             ActionPoints.Changed += (_, __) => StateChanged?.Invoke();
             this.inventory = inventory ?? new EmptyNarrativeActionInventory();
@@ -56,29 +60,81 @@ namespace Spotlight.Narrative
         public void BeginDay(int day, int actionPointMax = -1)
         {
             if (executing) throw new InvalidOperationException("Cannot begin a day while an action is executing.");
-            if (day < 1) throw new ArgumentOutOfRangeException(nameof(day));
+            if (day < CurrentDay) throw new ArgumentOutOfRangeException(nameof(day), "Day cannot move backwards.");
+            if (day == CurrentDay) return;
+            bool advanced = day > CurrentDay;
             CurrentDay = day;
             if (actionPointMax >= 0) ActionPoints.ResetForDay(actionPointMax);
             else ActionPoints.ResetForDay(ActionPoints.Max);
+            if (advanced)
+            {
+                foreach (var action in definitions.Values)
+                    if (IsVisible(action.actionKey) && expiryDays.TryGetValue(action.actionKey, out int deadline) && CurrentDay >= deadline)
+                    {
+                        retired.Add(action.actionKey);
+                        if (action.type == NarrativeActionType.Future && !string.IsNullOrEmpty(action.nextActionKey))
+                            foreach (var position in mounts.Where(m => m.action == action.actionKey).Select(m => m.position).Distinct().ToArray())
+                                Mount(position, action.nextActionKey);
+                        dueActions.Enqueue(action.actionKey);
+                    }
+            }
             StateChanged?.Invoke();
+            PlayDueAction();
         }
 
+        public void Mount(string position, string key)
+        {
+            var action = Get(key);
+            if (action == null) throw new FormatException("Unknown mounted action: " + key);
+            if (mounts.Any(m => m.position == position && m.action == key)) return;
+            mounts.Add(new NarrativeActionMountValue { position = position, action = key, day = CurrentDay });
+            if ((action.IsTimed || action.type == NarrativeActionType.Future) && !expiryDays.ContainsKey(key))
+                expiryDays[key] = checked(CurrentDay + action.durationDays);
+        }
+
+        public IEnumerable<NarrativeActionDefinition> GetMountedActions(string position)
+            => mounts.Where(m => m.position == position).Select(m => Get(m.action)).Where(a => a != null && IsVisible(a.actionKey));
+        public bool IsVisible(string key)
+        {
+            var action = Get(key);
+            return action != null && !retired.Contains(key) && !(action.type == NarrativeActionType.Once && !action.IsProgress && GetProgress(key) > 0)
+                && !(action.IsProgress && GetProgress(key) >= action.progressTarget);
+        }
+        public int GetRemainingDays(string key) => expiryDays.TryGetValue(key, out int deadline) ? Math.Max(0, deadline - CurrentDay) : 0;
+        public int GetProgress(string key) => counters.TryGetValue(key, out int value) ? value : 0;
         public bool HasBlockingActions()
-            => definitions.Values.Any(action => action.mustExecute && IsAvailable(action.actionKey, out _));
+        {
+            foreach (var mount in mounts)
+            {
+                var action = Get(mount.action);
+                if (action != null && action.mustExecute && IsVisible(action.actionKey) && action.type != NarrativeActionType.Future
+                    && (!dailyExecution.TryGetValue(action.actionKey, out int day) || day != CurrentDay)) return true;
+            }
+            return false;
+        }
 
         public bool IsAvailable(string actionKey, out List<NarrativeActionCheck> checks)
         {
             checks = new List<NarrativeActionCheck>();
             NarrativeActionDefinition action = Get(actionKey);
-            if (action == null || executing || IsExpired(action)) return false;
-            if (action.type == NarrativeActionType.Daily && dailyExecution.TryGetValue(actionKey, out int day) && day == CurrentDay) return false;
-            if (action.type == NarrativeActionType.Once && counters.ContainsKey(actionKey)) return false;
+            if (action == null) return false;
+            bool eligible = !executing && !narrative.IsBusy && IsVisible(actionKey) && action.type != NarrativeActionType.Future;
+            if (action.endDay && HasBlockingActions()) eligible = false;
+            if (action.type == NarrativeActionType.Daily && dailyExecution.TryGetValue(actionKey, out int day) && day == CurrentDay) eligible = false;
             foreach (NarrativeActionRequirement requirement in action.parsedRequirements ?? NarrativeActionRequirementParser.Parse(action.requirements))
             {
                 NarrativeActionCheck check = Check(requirement);
                 checks.Add(check);
             }
-            return checks.All(check => check.satisfied);
+            // Repeated costs share the same stock; checking each row independently could overspend.
+            foreach (var group in action.parsedRequirements.Where(r => r.type == NarrativeActionRequirementType.Item).GroupBy(r => r.key))
+                if (group.Sum(r => (long)r.value) > inventory.GetCount(group.Key))
+                    for (int i = 0; i < action.parsedRequirements.Count; i++)
+                        if (action.parsedRequirements[i].type == NarrativeActionRequirementType.Item && action.parsedRequirements[i].key == group.Key) checks[i].satisfied = false;
+            if (action.parsedRequirements.Where(r => r.type == NarrativeActionRequirementType.ActionPoint).Sum(r => (long)r.value) > ActionPoints.Current)
+                for (int i = 0; i < action.parsedRequirements.Count; i++)
+                    if (action.parsedRequirements[i].type == NarrativeActionRequirementType.ActionPoint) checks[i].satisfied = false;
+            return eligible && checks.All(check => check.satisfied);
         }
 
         public bool Execute(string actionKey, Action<bool> completed = null)
@@ -89,7 +145,8 @@ namespace Spotlight.Narrative
             executing = true;
             executingAction = actionKey;
             pendingCompletion = completed;
-            pendingEvents = new Queue<string>(action.resultEvents ?? new List<string>());
+            pendingEvents = new Queue<string>(action.IsProgress && GetProgress(actionKey) + 1 < action.progressTarget
+                ? new List<string>() : action.resultEvents ?? new List<string>());
             ActionStarted?.Invoke(action);
             RecordExecution(action);
             PlayNextEvent();
@@ -105,6 +162,13 @@ namespace Spotlight.Narrative
             snapshot.counters = counters.Select(pair => new NarrativeActionCounterValue { key = pair.Key, value = pair.Value }).ToList();
             snapshot.daily = dailyExecution.Select(pair => new NarrativeActionDayValue { key = pair.Key, day = pair.Value }).ToList();
             snapshot.expiry = expiryDays.Select(pair => new NarrativeActionExpiryValue { key = pair.Key, day = pair.Value }).ToList();
+            snapshot.mounts = mounts.Select(m => new NarrativeActionMountValue { position = m.position, action = m.action, day = m.day }).ToList();
+            snapshot.retired = retired.ToList();
+            snapshot.executingAction = executingAction;
+            snapshot.currentEvent = currentEventId;
+            snapshot.pendingEvents = pendingEvents?.ToList() ?? new List<string>();
+            snapshot.dueActions = dueActions.ToList();
+            if (inventory is NarrativeMapInventory mapInventory) snapshot.items = mapInventory.Capture();
         }
 
         public void RestoreFrom(NarrativeActionStateSnapshot snapshot)
@@ -118,6 +182,23 @@ namespace Spotlight.Narrative
             if (snapshot.counters != null) foreach (var item in snapshot.counters) if (item != null && !string.IsNullOrEmpty(item.key)) counters[item.key] = Mathf.Max(0, item.value);
             if (snapshot.daily != null) foreach (var item in snapshot.daily) if (item != null && !string.IsNullOrEmpty(item.key)) dailyExecution[item.key] = item.day;
             if (snapshot.expiry != null) foreach (var item in snapshot.expiry) if (item != null && !string.IsNullOrEmpty(item.key)) expiryDays[item.key] = item.day;
+            if (snapshot.mounts != null && snapshot.mounts.Count > 0) { mounts.Clear(); mounts.AddRange(snapshot.mounts.Where(m => m != null && Get(m.action) != null)); }
+            retired.Clear();
+            if (snapshot.retired != null) foreach (string key in snapshot.retired) retired.Add(key);
+            foreach (var mount in mounts)
+            {
+                var action = Get(mount.action);
+                if ((action.IsTimed || action.type == NarrativeActionType.Future) && !expiryDays.ContainsKey(action.actionKey))
+                    expiryDays[action.actionKey] = checked(mount.day + action.durationDays);
+            }
+            if (inventory is NarrativeMapInventory mapInventory) mapInventory.Restore(snapshot.items);
+            dueActions.Clear();
+            if (snapshot.dueActions != null) foreach (string key in snapshot.dueActions) if (Get(key) != null) dueActions.Enqueue(key);
+            if (!string.IsNullOrEmpty(snapshot.executingAction) && Get(snapshot.executingAction) != null)
+            {
+                executing = true; executingAction = snapshot.executingAction; currentEventId = snapshot.currentEvent;
+                pendingEvents = new Queue<string>(snapshot.pendingEvents ?? new List<string>());
+            }
             StateChanged?.Invoke();
         }
 
@@ -152,40 +233,43 @@ namespace Spotlight.Narrative
 
         private bool ConsumeRequirements(NarrativeActionDefinition action)
         {
-            foreach (NarrativeActionRequirement requirement in action.parsedRequirements)
-                if (!Check(requirement).satisfied) return false;
             var consumedItems = new List<NarrativeActionRequirement>();
             foreach (NarrativeActionRequirement requirement in action.parsedRequirements)
             {
-                if (requirement.type == NarrativeActionRequirementType.ActionPoint && !ActionPoints.TryConsume(requirement.value)) return false;
                 if (requirement.type != NarrativeActionRequirementType.Item) continue;
                 if (!inventory.TryConsume(requirement.key, requirement.value))
                 {
                     foreach (NarrativeActionRequirement consumed in consumedItems) inventory.TryAdd(consumed.key, consumed.value);
-                    foreach (NarrativeActionRequirement point in action.parsedRequirements)
-                        if (point.type == NarrativeActionRequirementType.ActionPoint) ActionPoints.Add(point.value);
                     return false;
                 }
                 consumedItems.Add(requirement);
+            }
+            int pointCost = (int)action.parsedRequirements.Where(r => r.type == NarrativeActionRequirementType.ActionPoint).Sum(r => (long)r.value);
+            if (!ActionPoints.TryConsume(pointCost))
+            {
+                foreach (var consumed in consumedItems) inventory.TryAdd(consumed.key, consumed.value);
+                return false;
             }
             return true;
         }
 
         private void RecordExecution(NarrativeActionDefinition action)
         {
-            switch (action.type)
-            {
-                case NarrativeActionType.Daily: dailyExecution[action.actionKey] = CurrentDay; break;
-                case NarrativeActionType.Once: counters[action.actionKey] = 1; break;
-                case NarrativeActionType.Progress:
-                    counters[action.actionKey] = GetProgress(action.actionKey) + 1;
-                    break;
-            }
+            if (action.type == NarrativeActionType.Once && !action.IsProgress) counters[action.actionKey] = 1;
+            if (action.IsProgress) counters[action.actionKey] = Math.Min(action.progressTarget, GetProgress(action.actionKey) + 1);
+            dailyExecution[action.actionKey] = CurrentDay;
             StateChanged?.Invoke();
         }
 
-        private int GetProgress(string key) => counters.TryGetValue(key, out int value) ? value : 0;
-        private bool IsExpired(NarrativeActionDefinition action) => action.type == NarrativeActionType.Timed && expiryDays.TryGetValue(action.actionKey, out int day) && CurrentDay > day;
+        private void PlayDueAction()
+        {
+            if (executing || dueActions.Count == 0) return;
+            var action = Get(dueActions.Dequeue());
+            executing = true;
+            executingAction = action.actionKey;
+            pendingEvents = new Queue<string>(action.resultEvents ?? new List<string>());
+            PlayNextEvent();
+        }
 
         private void PlayNextEvent()
         {
@@ -216,6 +300,7 @@ namespace Spotlight.Narrative
             ActionFinished?.Invoke(action, success);
             StateChanged?.Invoke();
             callback?.Invoke(success);
+            PlayDueAction();
         }
 
         private static bool Compare(int current, string op, int expected) => op switch
@@ -226,7 +311,11 @@ namespace Spotlight.Narrative
         private static void Validate(NarrativeActionDefinition action)
         {
             if (action == null || string.IsNullOrWhiteSpace(action.actionKey)) throw new FormatException("Action key is required.");
-            if (action.mustExecute && action.type == NarrativeActionType.Once) Debug.LogWarning("[NCS][Action] Once action is marked mustExecute: " + action.actionKey);
+            if (action.durationDays < 0 || action.progressTarget < 0) throw new FormatException("Action days and progress cannot be negative: " + action.actionKey);
+            if (action.endDay && action.mustExecute) throw new FormatException("EndDay cannot itself be crucial: " + action.actionKey);
+            if (action.parsedRequirements != null && action.parsedRequirements.Count > 6) throw new FormatException("An action cannot have more than 6 requirements: " + action.actionKey);
+            if (action.type == NarrativeActionType.Future && (action.durationDays <= 0 || action.progressTarget > 0)) throw new FormatException("Future actions require positive days and cannot combine with progress: " + action.actionKey);
+            if (action.endDay && action.type != NarrativeActionType.Daily) throw new FormatException("EndDay must be Daily: " + action.actionKey);
             if (action.type == NarrativeActionType.Progress && action.progressTarget <= 0) throw new FormatException("Progress action requires a positive target: " + action.actionKey);
             if (action.type == NarrativeActionType.Timed && action.durationDays <= 0) throw new FormatException("Timed action requires positive duration: " + action.actionKey);
         }

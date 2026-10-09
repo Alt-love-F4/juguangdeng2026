@@ -11,7 +11,7 @@ namespace Spotlight.GameFlow.Editor
     public static class DetailsPanelPrefabBuilder
     {
         public const string PrefabPath = "Assets/Resources/Art/UIPrefab/DetailsPanel.prefab";
-        private static TMP_FontAsset Font => AssetDatabase.LoadAssetAtPath<TMP_FontAsset>("Assets/Resources/Fonts/SimHei SDF.asset");
+        private static TMP_FontAsset Font => AssetDatabase.LoadAssetAtPath<TMP_FontAsset>("Assets/Resources/Fonts/乐米曲奇方块体 SDF.asset");
         private static readonly Color Surface = new Color(.12f, .10f, .16f, 1f);
         private static readonly Color Card = new Color(.18f, .14f, .21f, 1f);
         private static readonly Color Warm = new Color(1f, .86f, .70f, 1f);

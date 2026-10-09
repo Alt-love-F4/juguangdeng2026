@@ -20,6 +20,7 @@ namespace Spotlight.Narrative
         public NarrativeController Controller => controller;
         public NarrativePresenter Presenter => runtimePresenter;
         public NarrativeActionController Actions => actionController;
+        public NarrativeMapInventory MapInventory { get; private set; }
         public bool IsReady => controller != null;
         public bool IsPresenting => runtimePresenter != null && runtimePresenter.IsPresenting;
         public bool BlocksGameplayInput => IsPresenting || (controller != null && controller.IsBusy);
@@ -56,7 +57,14 @@ namespace Spotlight.Narrative
             if (injectedPresenter == null)
                 runtimePresenter = new NarrativePresenter(configuration, ResolveText);
             controller = new NarrativeController(configuration, injectedPresenter ?? runtimePresenter);
-            actionController = new NarrativeActionController(controller, configuration.actions);
+            MapInventory = new NarrativeMapInventory();
+            actionController = new NarrativeActionController(controller, configuration.actions, 5, MapInventory);
+            foreach (var position in configuration.mapPositions)
+            {
+                if (position == null || !position.enabled) continue;
+                if (!string.IsNullOrWhiteSpace(position.defaultAction)) actionController.Mount(position.positionKey, position.defaultAction);
+                foreach (string key in position.extendedActions) actionController.Mount(position.positionKey, key);
+            }
             if (runtimePresenter != null)
             {
                 runtimePresenter.Started += request => EventPresented?.Invoke(request);

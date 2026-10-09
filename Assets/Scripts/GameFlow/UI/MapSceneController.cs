@@ -63,6 +63,7 @@ namespace Spotlight.GameFlow
         private float zoomVelocity;
         private bool focusZooming;
         private bool dragging;
+        private bool standaloneLoading;
         private Vector2 dragStart;
         private readonly List<RaycastResult> pointerHits = new List<RaycastResult>();
         private PointerEventData mapPointerEvent;
@@ -72,6 +73,9 @@ namespace Spotlight.GameFlow
         private TextMeshProUGUI status;
         private GameObject focusPanel;
         private RectTransform actionList;
+        private MapActionDetailsView actionDetails;
+        private MapActionInventoryView inventoryView;
+        private Button endDayButton;
         private NarrativeConfiguration narrativeConfiguration;
         private NarrativeMapPositionDefinition focusedPosition;
 
@@ -104,7 +108,7 @@ namespace Spotlight.GameFlow
             }
         }
 
-        internal bool ControlsAvailable => flow == null || flow.MapControlsAvailable;
+        internal bool ControlsAvailable => !standaloneLoading && (flow == null || flow.MapControlsAvailable);
 
         internal void OpenOverlay(GameFlowBootstrap owner)
         {
@@ -166,8 +170,9 @@ namespace Spotlight.GameFlow
             CreateMapLayer("LocationNames", locationNamesSprite, new Vector2(-1.48f, 9.21f));
             CreateMapLayer("LocationPins", pinSprite, new Vector2(-2.19f, 4.65f));
             BuildConfiguredLocations();
-            focusPanel = CreateActionPanel(root);
-            actionList = focusPanel.transform.Find("ActionList") as RectTransform;
+            focusPanel = new GameObject("LocationActionPopup", typeof(RectTransform), typeof(Image), typeof(MapActionDetailsView));
+            focusPanel.transform.SetParent(root, false);
+            actionDetails = focusPanel.GetComponent<MapActionDetailsView>();
             focusPanel.SetActive(false);
 
                         // Fixed UI layer: these controls are intentionally outside MapContent.
@@ -183,10 +188,15 @@ namespace Spotlight.GameFlow
             title.rectTransform.pivot = new Vector2(0, 0);
             Image compass = CreateSpriteImage("Compass", root, compassSprite);
             compass.rectTransform.SetAnchors(new Vector2(1, 1), new Vector2(1, 1), new Vector2(-88, -92), new Vector2(166, 184));
-            BuildInventory(root);
+            var inventoryObject = new GameObject("InventoryBar", typeof(RectTransform), typeof(Image), typeof(MapActionInventoryView));
+            inventoryObject.transform.SetParent(root, false);
+            inventoryView = inventoryObject.GetComponent<MapActionInventoryView>();
+            inventoryView.Initialize(header);
+            actionDetails.Initialize(inventoryView, () => ControlsAvailable, EndDay, StartCafe);
             BuildTaskPanel(root);
             Button endDay = CreateButton("结束当天", root, new Vector2(-110, 46), new Vector2(180, 52));
-            endDay.onClick.AddListener(() => { if (flow != null && flow.GameplayControlsAvailable) flow.GetComponent<DayFlowController>()?.EndDayFromMap(); });
+            endDayButton = endDay;
+            endDay.onClick.AddListener(EndDay);
             if (UnityEngine.SceneManagement.SceneManager.GetActiveScene().name == "CoffeeShop")
                 endDay.gameObject.SetActive(false);
             status = CreateLabel("Status", root, "滚轮缩放，WASD移动；点击地点聚焦，右键退出聚焦", 20, new Color(1,1,1,.8f), TextAlignmentOptions.Center);
@@ -196,6 +206,12 @@ namespace Spotlight.GameFlow
         private void Update()
         {
             if (!isActiveAndEnabled) return;
+            if (endDayButton != null)
+            {
+                bool blocking = NarrativeRuntime.Instance?.Actions?.HasBlockingActions() ?? false;
+                SetButtonText(endDayButton, blocking ? "有需要进行的行动" : "结束当天", 18);
+                endDayButton.GetComponent<Image>().color = blocking ? new Color(.3f, .2f, .18f) : new Color(.08f, .18f, .14f);
+            }
             if (!ControlsAvailable)
             {
                 pointerDragging = dragging = false;
@@ -222,7 +238,7 @@ namespace Spotlight.GameFlow
             UpdateZoom();
             UpdateFocusMovement();
             ApplyMapView();
-            if (Mouse.current != null && Mouse.current.rightButton.wasPressedThisFrame) HideFocus();
+            if (Mouse.current != null && Mouse.current.rightButton.wasPressedThisFrame && !actionDetails.IsBusy) HideFocus();
         }
 
         private void UpdatePointerPan(Mouse mouse)
@@ -415,7 +431,7 @@ namespace Spotlight.GameFlow
 
         private void OnPositionClicked(NarrativeMapPositionDefinition position)
         {
-            if (!ControlsAvailable) return;
+            if (!ControlsAvailable || actionDetails.IsBusy) return;
             BeginFocusMovement(PositionForArtwork(position.positionKey, position.position));
             FocusPosition(position);
         }
@@ -423,12 +439,12 @@ namespace Spotlight.GameFlow
         private void FocusPosition(NarrativeMapPositionDefinition position)
         {
             focusedPosition = position;
-            ShowFocus(ResolveText(position.nameText, position.positionKey), "请选择行动");
-            RebuildActionList();
+            actionDetails.Show(position.positionKey, ResolveText(position.nameText, position.positionKey));
         }
 
         private void RebuildActionList()
         {
+            if (actionDetails != null) { actionDetails.Refresh(); return; }
             if (actionList == null) return;
             for (int i = actionList.childCount - 1; i >= 0; i--) Destroy(actionList.GetChild(i).gameObject);
             if (focusedPosition == null || narrativeConfiguration == null) return;
@@ -437,12 +453,11 @@ namespace Spotlight.GameFlow
             if (focusedPosition.extendedActions != null) keys.AddRange(focusedPosition.extendedActions);
             NarrativeActionController actions = NarrativeRuntime.Instance?.Actions;
             int row = 0;
-            if (focusedPosition.positionKey == "cafe")
+            if (focusedPosition.positionKey == "cafe"
+                && UnityEngine.SceneManagement.SceneManager.GetActiveScene().name != "CoffeeShop")
             {
-                bool alreadyInCafe = UnityEngine.SceneManagement.SceneManager.GetActiveScene().name == "CoffeeShop";
-                Button enter = CreateButton(alreadyInCafe ? "当前正处于咖啡馆" : "进入咖啡馆", actionList,
+                Button enter = CreateButton("进入咖啡馆", actionList,
                     Vector2.zero, new Vector2(260, 48));
-                enter.interactable = !alreadyInCafe;
                 enter.onClick.AddListener(StartCafe);
                 row++;
             }
@@ -456,7 +471,10 @@ namespace Spotlight.GameFlow
             }
             if (row == 0)
             {
-                TextMeshProUGUI empty = CreateLabel("Empty", actionList, "此时此地无事可做", 18, Color.white, TextAlignmentOptions.Center);
+                bool inCafe = focusedPosition.positionKey == "cafe"
+                    && UnityEngine.SceneManagement.SceneManager.GetActiveScene().name == "CoffeeShop";
+                TextMeshProUGUI empty = CreateLabel("Empty", actionList,
+                    inCafe ? "当前正处于咖啡馆" : "此时此地无事可做", 18, Color.white, TextAlignmentOptions.Center);
                 empty.rectTransform.SetAnchors(new Vector2(0, 1), new Vector2(1, 1), new Vector2(0, -24), new Vector2(260, 48));
             }
         }
@@ -535,6 +553,29 @@ namespace Spotlight.GameFlow
             label.fontSize = size;
         }
 
+        private void EndDay()
+        {
+            if (!ControlsAvailable || actionDetails.IsBusy) return;
+            if (NarrativeRuntime.Instance?.Actions?.HasBlockingActions() ?? false)
+            {
+                status.text = "有需要进行的行动：请先完成地图上的今日必做行动";
+                var notice = MapActionDetailsView.Rect("EndDayBlockedNotice", transform);
+                notice.anchorMin = notice.anchorMax = new Vector2(.5f, .5f);
+                notice.sizeDelta = new Vector2(440, 120);
+                notice.gameObject.AddComponent<Image>().color = new Color(.16f, .07f, .07f, .98f);
+                var label = MapActionDetailsView.Label("Message", notice, "有需要进行的行动", 24);
+                MapActionDetailsView.Stretch(label.rectTransform, 16);
+                label.alignment = TextAlignmentOptions.Center;
+                Destroy(notice.gameObject, 2);
+                return;
+            }
+            var actions = NarrativeRuntime.Instance?.Actions;
+            if (actions == null || actions.IsExecuting) return;
+            var dayFlow = flow?.GetComponent<DayFlowController>();
+            if (dayFlow != null) dayFlow.EndDayFromMap();
+            else actions.BeginDay(checked(actions.CurrentDay + 1));
+        }
+
         private void StartCafe()
         {
             if (!ControlsAvailable) return;
@@ -551,8 +592,47 @@ namespace Spotlight.GameFlow
                 return;
             }
             if (flow != null) flow.TransitionToGameplayScene("CoffeeShop", null);
-            else UnityEngine.SceneManagement.SceneManager.LoadScene("CoffeeShop");
+            else StartCoroutine(LoadCafeStandalone());
         }
+        private System.Collections.IEnumerator LoadCafeStandalone()
+        {
+            if (standaloneLoading) yield break;
+            standaloneLoading = true;
+            var prefab = Resources.Load<GameObject>("Art/UIPrefab/LoadingPanel");
+            if (prefab == null)
+            {
+                Debug.LogError("Missing LoadingPanel prefab.", this);
+                standaloneLoading = false;
+                yield break;
+            }
+            GameObject screen = Instantiate(prefab);
+            DontDestroyOnLoad(screen);
+            var canvas = screen.AddComponent<Canvas>();
+            canvas.renderMode = RenderMode.ScreenSpaceOverlay;
+            canvas.sortingOrder = 1000;
+            screen.AddComponent<GraphicRaycaster>();
+            CanvasGroup group = screen.GetComponent<CanvasGroup>();
+            group.alpha = 1f; group.interactable = group.blocksRaycasts = true;
+            LoadingPanel panel = screen.GetComponent<LoadingPanel>();
+            panel.SetTip("正在进入咖啡馆……"); panel.SetProgress(0f);
+            Canvas.ForceUpdateCanvases();
+            yield return null;
+            yield return null;
+            AsyncOperation operation = UnityEngine.SceneManagement.SceneManager.LoadSceneAsync("CoffeeShop");
+            operation.allowSceneActivation = false;
+            float elapsed = 0f;
+            while (operation.progress < .9f || elapsed < .5f)
+            {
+                elapsed += Time.unscaledDeltaTime;
+                panel.SetProgress(Mathf.Clamp01(operation.progress / .9f));
+                yield return null;
+            }
+            panel.SetProgress(1f);
+            // Cleanup belongs to the persistent loading screen: this map is destroyed on activation.
+            operation.completed += _ => Destroy(screen);
+            operation.allowSceneActivation = true;
+        }
+
         private void ShowFocus(string name, string message)
         {
             if (focusPanel != null) focusPanel.SetActive(true);

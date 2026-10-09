@@ -114,7 +114,7 @@ namespace Spotlight.GameFlow
             RectTransform rect = Rect(name, parent, Vector2.one * .5f, Vector2.one * .5f, position, size);
             TextMeshProUGUI label = rect.gameObject.AddComponent<TextMeshProUGUI>();
             label.text = text;
-            label.font = Resources.Load<TMP_FontAsset>("Fonts/CactusClassicalSerif SDF") ?? TMP_Settings.defaultFontAsset;
+            label.font = Resources.Load<TMP_FontAsset>("Fonts/乐米曲奇方块体 SDF") ?? TMP_Settings.defaultFontAsset;
             label.fontSize = fontSize;
             label.alignment = TextAlignmentOptions.Center;
             label.color = new Color(.94f, .88f, .76f, 1);

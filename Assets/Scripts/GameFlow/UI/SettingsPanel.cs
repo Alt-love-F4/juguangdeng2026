@@ -14,10 +14,27 @@ namespace Spotlight.GameFlow
         [SerializeField] private Button windowModeButton;
         [SerializeField] private Button resolutionButton;
         [SerializeField] private Button backButton;
+        [SerializeField] private TMP_Dropdown resolutionDropdown;
+        [SerializeField] private TMP_Text masterValue;
+        [SerializeField] private TMP_Text musicValue;
+        [SerializeField] private TMP_Text sfxValue;
+        private void UpdateVolumeLabels()
+        {
+            if (masterValue != null) masterValue.text = Mathf.RoundToInt(masterVolume.value * 100f).ToString();
+            if (musicValue != null) musicValue.text = Mathf.RoundToInt(musicVolume.value * 100f).ToString();
+            if (sfxValue != null) sfxValue.text = Mathf.RoundToInt(sfxVolume.value * 100f).ToString();
+        }
 
         protected override void Awake()
         {
             base.Awake();
+            masterVolume?.onValueChanged.AddListener(_ => UpdateVolumeLabels());
+            musicVolume?.onValueChanged.AddListener(_ => UpdateVolumeLabels());
+            sfxVolume?.onValueChanged.AddListener(_ => UpdateVolumeLabels());
+            resolutionDropdown?.onValueChanged.AddListener(index =>
+            {
+                if (Flow != null && index >= 0 && index < Flow.ResolutionOptions.Count) Flow.SetResolution(Flow.ResolutionOptions[index]);
+            });
             masterVolume?.onValueChanged.AddListener(value => Flow?.SetMasterVolume(value));
             musicVolume?.onValueChanged.AddListener(value => Flow?.SetMusicVolume(value));
             sfxVolume?.onValueChanged.AddListener(value => Flow?.SetSfxVolume(value));
@@ -34,7 +51,21 @@ namespace Spotlight.GameFlow
             if (masterVolume != null) masterVolume.SetValueWithoutNotify(current.MasterVolume);
             if (musicVolume != null) musicVolume.SetValueWithoutNotify(current.MusicVolume);
             if (sfxVolume != null) sfxVolume.SetValueWithoutNotify(current.SfxVolume);
+            if (resolutionDropdown != null)
+            {
+                resolutionDropdown.ClearOptions();
+                var labels = new System.Collections.Generic.List<string>();
+                foreach (var option in Flow.ResolutionOptions) labels.Add(option.Width + " x " + option.Height);
+                resolutionDropdown.AddOptions(labels);
+            }
+            UpdateVolumeLabels();
             RefreshDisplaySettings();
+        }
+
+        protected override void OnClose()
+        {
+            Flow?.SaveSettings();
+            base.OnClose();
         }
 
         private void CycleWindowMode()
@@ -64,6 +95,10 @@ namespace Spotlight.GameFlow
             if (Flow == null) return;
             if (windowModeText != null) windowModeText.text = Flow.WindowModeLabel;
             if (resolutionText != null) resolutionText.text = Flow.ResolutionLabel;
+            if (resolutionDropdown != null)
+                for (int i = 0; i < Flow.ResolutionOptions.Count; i++)
+                    if (Flow.ResolutionOptions[i].Width == Flow.CurrentSettings.ResolutionWidth && Flow.ResolutionOptions[i].Height == Flow.CurrentSettings.ResolutionHeight)
+                        { resolutionDropdown.SetValueWithoutNotify(i); break; }
         }
     }
 }

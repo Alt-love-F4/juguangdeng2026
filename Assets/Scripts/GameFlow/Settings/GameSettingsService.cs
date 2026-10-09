@@ -7,6 +7,10 @@ namespace Spotlight.GameFlow
 {
     public sealed class GameSettingsService
     {
+        public static event Action<float, float, float> AudioChanged;
+        public static float MasterGain { get; private set; } = 1f;
+        public static float MusicGain { get; private set; } = 1f;
+        public static float SfxGain { get; private set; } = 1f;
         private const string PreferencesKey = "Spotlight.GameFlow.GameSettings";
 
         [Serializable]
@@ -127,6 +131,10 @@ namespace Spotlight.GameFlow
 
         private void ApplyAudio()
         {
+            MasterGain = settings.MasterVolume;
+            MusicGain = settings.MusicVolume;
+            SfxGain = settings.SfxVolume;
+            AudioChanged?.Invoke(MasterGain, MusicGain, SfxGain);
             AudioKit.SetGlobalVolume(settings.MasterVolume);
             AudioKit.SetBusVolume(AudioBus.Music, settings.MusicVolume);
             AudioKit.SetBusVolume(AudioBus.Sfx, settings.SfxVolume);
