@@ -144,7 +144,7 @@ namespace Spotlight.FreeCafe
         {
             if(runtime==null || runtime.World==null) return;
             var state=runtime.World.State;
-            summary.text="第 "+state.day+" 天    王国币 "+state.money+"    声望 "+state.reputation+"\n"+(state.open ? "营业中 · 剩余 "+state.timeRemaining.ToString("0")+" 秒" : "准备营业 · 可提前备料")+"    顾客 "+state.requests.Count+" 位";
+            summary.text="第 "+state.day+" 天    王国币 "+state.money+"    声望 "+state.reputation+"\n"+(state.open ? "营业中 · 剩余 "+state.timeRemaining.ToString("0")+" 秒" : state.businessPhase==BusinessPhase.Night ? "已打烊 · 点击立牌开始新一天" : "准备营业 · 点击大厅立牌开店")+"    顾客 "+state.requests.Count+" 位";
             var beans=runtime.World.Find("s.beans");var milk=runtime.World.Find("s.milk");
             summary.text+="\n咖啡豆 "+(beans==null ? "—" : beans.stock.ToString())+"  ·  牛奶 "+(milk==null ? "—" : milk.stock.ToString());
             if(playerRoot!=null) playerRoot.SetActive(!runtime.World.ProductionEnabled || state.currentArea!=AreaId.Counter);

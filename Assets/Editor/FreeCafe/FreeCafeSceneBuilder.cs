@@ -63,13 +63,11 @@ namespace Spotlight.FreeCafe.Editor
                 if(area.id==AreaId.Counter) room.transform.localPosition=new Vector3(60,0,0);
                 var cameraAnchor=new GameObject("CameraAnchor").transform;cameraAnchor.SetParent(room.transform,false);
                 manager.areas[(int)area.id]=new CafeAreaAnchor{area=area.id,floor=area.id==AreaId.TopFloor ? CafeFloor.Second : area.id==AreaId.Basement ? CafeFloor.Basement : CafeFloor.First,contentRoot=room.transform,cameraAnchor=cameraAnchor};
-                var back=new GameObject("Background_WHITEBOX",typeof(SpriteRenderer),typeof(ArtRequirementTag));back.transform.SetParent(room.transform,false);
+                var back=new GameObject("Background_WHITEBOX",typeof(SpriteRenderer));back.transform.SetParent(room.transform,false);
                 var sr=back.GetComponent<SpriteRenderer>();sr.sprite=LoadSketchSprite(SketchBackgrounds[(int)area.id]) ?? library.Resolve(area.artId);sr.sortingOrder=-100;
                 var size=sr.sprite.bounds.size;back.transform.localScale=new Vector3(area.halfWidth*2/size.x,area.halfHeight*2/size.y,1);
-                back.GetComponent<ArtRequirementTag>().Bind(library,area.artId);
-                var note=new GameObject("AreaArtNote",typeof(TextMeshPro),typeof(ArtRequirementTag));note.transform.SetParent(room.transform,false);note.transform.localPosition=new Vector3(0,4.8f,0);
+                var note=new GameObject("AreaArtNote",typeof(TextMeshPro));note.transform.SetParent(room.transform,false);note.transform.localPosition=new Vector3(0,4.8f,0);
                 var label=note.GetComponent<TextMeshPro>();label.font=Font;label.fontSize=2.4f;label.alignment=TextAlignmentOptions.Center;label.text="白模 / "+area.label+" / "+area.artId;label.color=new Color(.32f,.36f,.39f);label.GetComponent<MeshRenderer>().sortingOrder=0;
-                note.GetComponent<ArtRequirementTag>().Bind(library,area.artId);
                 room.SetActive(true);
             }
             Portal(runtime,library,runtime.areaRoots[0],AreaId.Counter,7.8f,0,"进入出餐台 →");
@@ -82,15 +80,8 @@ namespace Spotlight.FreeCafe.Editor
             {
                 var previews=new GameObject("EditorOnly_LayoutPreview");previews.transform.SetParent(runtime.areaRoots[i],false);runtime.authoringPreviews[i]=previews;
             }
-            foreach(var initial in catalog.layout)
-            {
-                EntitySpec spec=null;foreach(var item in catalog.entities) if(item.id==initial.specId) { spec=item;break; }
-                var preview=new GameObject("WHITEBOX_"+initial.id,typeof(SpriteRenderer),typeof(ArtRequirementTag));preview.transform.SetParent(runtime.authoringPreviews[(int)initial.area].transform,false);preview.transform.localPosition=new Vector3(initial.x,initial.y,0);
-                var sr=preview.GetComponent<SpriteRenderer>();sr.sprite=library.Resolve(spec.artId);sr.sortingOrder=100-Mathf.RoundToInt(initial.y*10);
-                float fit=Mathf.Min(spec.width/sr.sprite.bounds.size.x,spec.height/sr.sprite.bounds.size.y);preview.transform.localScale=new Vector3(fit,fit,1);preview.GetComponent<ArtRequirementTag>().Bind(library,spec.artId);
-                var labelGo=new GameObject("Label",typeof(TextMeshPro));labelGo.transform.SetParent(runtime.authoringPreviews[(int)initial.area].transform,false);labelGo.transform.localPosition=new Vector3(initial.x,initial.y-spec.height*.5f-.18f,0);
-                var label=labelGo.GetComponent<TextMeshPro>();label.font=Font;label.fontSize=2;label.text=spec.label;label.alignment=TextAlignmentOptions.Center;label.color=new Color(.2f,.24f,.28f);label.GetComponent<MeshRenderer>().sortingOrder=200;
-            }
+            runtime.prefabLibrary=FreeCafeEntityPrefabBuilder.EnsureCatalog(catalog,library,prefab);
+            FreeCafeEntityPrefabBuilder.RebuildAuthoredLayout(runtime,catalog);
             BuildHud(runtime,library);
             manager.Initialize(camera);manager.Focus(AreaId.Cafe,true);
             EditorSceneManager.MarkSceneDirty(scene);
@@ -171,16 +162,7 @@ namespace Spotlight.FreeCafe.Editor
         private static FreeEntityView BuildPrefab(CafeArtLibrary library) => BuildEntityPrefabAsset("FreeEntity",null,library,null);
         private static FreeCafeEntityPrefabLibrary BuildPrefabLibrary(CafeCatalog catalog,CafeArtLibrary library,FreeEntityView fallback)
         {
-            const string path="Assets/Resources/FreeCafe/EntityPrefabLibrary.asset";
-            var registry=AssetDatabase.LoadAssetAtPath<FreeCafeEntityPrefabLibrary>(path);
-            if(registry==null){registry=ScriptableObject.CreateInstance<FreeCafeEntityPrefabLibrary>();AssetDatabase.CreateAsset(registry,path);}
-            var entries=new List<FreeCafeEntityPrefabEntry>();
-            foreach(var spec in catalog.entities)
-            {
-                var prefab=BuildEntityPrefabAsset("FreeEntity_"+SafeName(spec.id),spec,library,fallback);
-                entries.Add(new FreeCafeEntityPrefabEntry{specId=spec.id,prefab=prefab});
-            }
-            registry.entries=entries.ToArray();EditorUtility.SetDirty(registry);return registry;
+            return FreeCafeEntityPrefabBuilder.EnsureCatalog(catalog,library,fallback);
         }
         private static string SafeName(string value)
         {
@@ -190,14 +172,13 @@ namespace Spotlight.FreeCafe.Editor
         private static FreeEntityView BuildEntityPrefabAsset(string name,EntitySpec spec,CafeArtLibrary library,FreeEntityView fallback)
         {
             Directory.CreateDirectory("Assets/Prefabs/FreeCafe");
-            var go=new GameObject(name,typeof(FreeEntityView),typeof(BoxCollider2D),typeof(ArtRequirementTag));
+            var go=new GameObject(name,typeof(FreeEntityView),typeof(BoxCollider2D));
             var body=new GameObject("Art",typeof(SpriteRenderer));body.transform.SetParent(go.transform,false);
             var label=new GameObject("Label",typeof(TextMeshPro));label.transform.SetParent(go.transform,false);
             var text=label.GetComponent<TextMeshPro>();text.font=Font;text.fontSize=2;text.alignment=TextAlignmentOptions.Center;text.color=new Color(.2f,.24f,.28f);text.rectTransform.sizeDelta=new Vector2(3.3f,.7f);
-            var view=go.GetComponent<FreeEntityView>();view.body=body.GetComponent<SpriteRenderer>();view.label=text;view.hitbox=go.GetComponent<BoxCollider2D>();view.hitbox.isTrigger=true;view.art=go.GetComponent<ArtRequirementTag>();view.art.library=library;
+            var view=go.GetComponent<FreeEntityView>();view.body=body.GetComponent<SpriteRenderer>();view.label=text;view.hitbox=go.GetComponent<BoxCollider2D>();view.hitbox.isTrigger=true;
             if(spec!=null)
             {
-                view.art.Bind(library,spec.artId);
                 view.body.sprite=library.Resolve(spec.artId);
                 view.name=name;
             }
@@ -206,19 +187,19 @@ namespace Spotlight.FreeCafe.Editor
         }
         private static void Portal(FreeCafeRuntime runtime,CafeArtLibrary library,Transform parent,AreaId destination,float x,float y,string text)
         {
-            var go=new GameObject("Portal_"+destination,typeof(BoxCollider2D),typeof(SpriteRenderer),typeof(FreeCafePortal),typeof(ArtRequirementTag));go.transform.SetParent(parent,false);go.transform.localPosition=new Vector3(x,y,0);
+            var go=new GameObject("Portal_"+destination,typeof(BoxCollider2D),typeof(SpriteRenderer),typeof(FreeCafePortal));go.transform.SetParent(parent,false);go.transform.localPosition=new Vector3(x,y,0);
             go.GetComponent<BoxCollider2D>().size=new Vector2(1.6f,1.4f);
             var sr=go.GetComponent<SpriteRenderer>();sr.sprite=library.Resolve("ui.portal");sr.sortingOrder=10;
             var size=sr.sprite.bounds.size;go.transform.localScale=new Vector3(1.1f/size.x,1.1f/size.y,1);
             go.GetComponent<BoxCollider2D>().size=new Vector2(size.x,size.y);
-            var portal=go.GetComponent<FreeCafePortal>();portal.runtime=runtime;portal.destination=destination;portal.visual=sr;go.GetComponent<ArtRequirementTag>().Bind(library,"ui.portal");
+            var portal=go.GetComponent<FreeCafePortal>();portal.runtime=runtime;portal.destination=destination;portal.visual=sr;
             var label=new GameObject("Label",typeof(TextMeshPro));label.transform.SetParent(parent,false);label.transform.localPosition=new Vector3(x,y-1,0);
             var tmp=label.GetComponent<TextMeshPro>();tmp.font=Font;tmp.fontSize=2.2f;tmp.alignment=TextAlignmentOptions.Center;tmp.text=text;tmp.color=new Color(.25f,.28f,.3f);tmp.GetComponent<MeshRenderer>().sortingOrder=11;
         }
         private static void FuturePlaceholder(CafeArtLibrary library,Transform parent,string id,string caption,float x,float y)
         {
-            var go=new GameObject("WHITEBOX_"+id,typeof(SpriteRenderer),typeof(ArtRequirementTag));go.transform.SetParent(parent,false);go.transform.localPosition=new Vector3(x,y,0);
-            var sr=go.GetComponent<SpriteRenderer>();sr.sprite=library.Resolve(id);sr.color=new Color(.85f,.87f,.89f,.65f);sr.sortingOrder=1;go.GetComponent<ArtRequirementTag>().Bind(library,id);
+            var go=new GameObject("WHITEBOX_"+id,typeof(SpriteRenderer));go.transform.SetParent(parent,false);go.transform.localPosition=new Vector3(x,y,0);
+            var sr=go.GetComponent<SpriteRenderer>();sr.sprite=library.Resolve(id);sr.color=new Color(.85f,.87f,.89f,.65f);sr.sortingOrder=1;
             var label=new GameObject("ScopeNote",typeof(TextMeshPro));label.transform.SetParent(go.transform,false);label.transform.localPosition=new Vector3(0,-1.5f,0);var tmp=label.GetComponent<TextMeshPro>();tmp.font=Font;tmp.fontSize=2.1f;tmp.alignment=TextAlignmentOptions.Center;tmp.text=caption;tmp.color=new Color(.32f,.36f,.4f);tmp.GetComponent<MeshRenderer>().sortingOrder=2;
         }
         private static void BuildHud(FreeCafeRuntime runtime,CafeArtLibrary library)
@@ -227,8 +208,8 @@ namespace Spotlight.FreeCafe.Editor
             var canvas=go.GetComponent<Canvas>();canvas.renderMode=RenderMode.ScreenSpaceOverlay;canvas.worldCamera=null;canvas.planeDistance=1f;canvas.overrideSorting=true;canvas.sortingOrder=600;
             var scaler=go.GetComponent<CanvasScaler>();scaler.uiScaleMode=CanvasScaler.ScaleMode.ScaleWithScreenSize;scaler.referenceResolution=new Vector2(1920,1080);scaler.matchWidthOrHeight=0;
             var root=(RectTransform)go.transform;root.localPosition=Vector3.zero;root.localScale=Vector3.one;root.anchorMin=Vector2.zero;root.anchorMax=Vector2.one;root.offsetMin=root.offsetMax=Vector2.zero;root.sizeDelta=Vector2.zero;
-            var top=Box(root,"TopBlackBar",Vector2.zero,new Vector2(1920,180),Color.black);top.anchorMin=new Vector2(0,1);top.anchorMax=Vector2.one;top.pivot=new Vector2(.5f,1);top.offsetMin=new Vector2(0,-180);top.offsetMax=Vector2.zero;top.gameObject.AddComponent<ArtRequirementTag>().Bind(library,"ui.panel");
-            var bottom=Box(root,"BottomBlackBar",Vector2.zero,new Vector2(1920,180),Color.black);bottom.anchorMin=Vector2.zero;bottom.anchorMax=new Vector2(1,0);bottom.pivot=new Vector2(.5f,0);bottom.offsetMin=Vector2.zero;bottom.offsetMax=new Vector2(0,180);bottom.gameObject.AddComponent<ArtRequirementTag>().Bind(library,"ui.panel");
+            var top=Box(root,"TopBlackBar",Vector2.zero,new Vector2(1920,180),Color.black);top.anchorMin=new Vector2(0,1);top.anchorMax=Vector2.one;top.pivot=new Vector2(.5f,1);top.offsetMin=new Vector2(0,-180);top.offsetMax=Vector2.zero;
+            var bottom=Box(root,"BottomBlackBar",Vector2.zero,new Vector2(1920,180),Color.black);bottom.anchorMin=Vector2.zero;bottom.anchorMax=new Vector2(1,0);bottom.pivot=new Vector2(.5f,0);bottom.offsetMin=Vector2.zero;bottom.offsetMax=new Vector2(0,180);
             var hud=go.GetComponent<FreeCafeHud>();hud.runtime=runtime;
             hud.summary=Text(top,"Summary","自由制作白模",new Vector2(0,58),new Vector2(1830,42),24);
             hud.orderButtons=new Button[3];hud.orderLabels=new TMP_Text[3];
@@ -269,7 +250,7 @@ hud.recipeButton=Button(controls,"RecipeTips","制作提示",new Vector2(520,-20
         }
         private static Button Button(Transform parent,string name,string text,Vector2 position,Vector2 size,int fontSize,CafeArtLibrary library)
         {
-            var rect=Box(parent,name,position,size,new Color(.26f,.29f,.32f));var button=rect.gameObject.AddComponent<Button>();button.targetGraphic=rect.GetComponent<Image>();Text(rect,"Label",text,Vector2.zero,size-new Vector2(10,4),fontSize);rect.gameObject.AddComponent<ArtRequirementTag>().Bind(library,"ui.button");return button;
+            var rect=Box(parent,name,position,size,new Color(.26f,.29f,.32f));var button=rect.gameObject.AddComponent<Button>();button.targetGraphic=rect.GetComponent<Image>();Text(rect,"Label",text,Vector2.zero,size-new Vector2(10,4),fontSize);return button;
         }
         [MenuItem("Tools/Free Cafe/Fix HUD Input Routing")]
         public static void FixHudInputRouting()

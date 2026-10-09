@@ -285,26 +285,6 @@ namespace Spotlight.FreeCafe
                 y = .5f - (slot / 4) * 2.5f
             };
 
-            // 满足豆子品质门槛的 NPC 轮换出场
-            if (Catalog.npcs != null)
-            {
-                var candidates = new List<NpcSpec>();
-                foreach (var n in Catalog.npcs)
-                {
-                    if (State.unlockedNpcs.Contains(n.id) && State.beanQuality >= n.minimumBeanQuality)
-                    {
-                        candidates.Add(n);
-                    }
-                }
-
-                if (candidates.Count > 0)
-                {
-                    customer.npcId = candidates[(State.requestSequence - 1) % candidates.Count].id;
-                }
-            }
-
-            State.entities.Add(customer);
-
             var request = new CustomerRequest
             {
                 id = Allocate("order_"),
@@ -312,6 +292,9 @@ namespace Spotlight.FreeCafe
                 productId = product.id,
                 patience = Catalog.customerPatience
             };
+            // 普通客人只下单。未来角色身份由显式注入的适配器提供，不自动触发 NCS。
+            customer.person = CreateCustomerIdentity(request.id, slot);
+            State.entities.Add(customer);
 
             // 招募「自动点单」店员后，有一定概率顾客自己完成点单
             if (State.automaticOrders && NextRandom() % 100 < (uint)(Catalog.economy.autoChance * 100))

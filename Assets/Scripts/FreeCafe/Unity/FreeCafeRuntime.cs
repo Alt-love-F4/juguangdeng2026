@@ -15,6 +15,8 @@ namespace Spotlight.FreeCafe
         public bool DayFlowBusinessFinished => World != null && World.State.businessPhase == BusinessPhase.Night;
 
         public bool productionMode = true;
+        [Tooltip("可选身份适配器，必须实现 ICafeCustomerIdentitySource；不负责启动剧情。") ]
+        public MonoBehaviour customerIdentitySource;
         public TextAsset catalogAsset;
         public CafeArtLibrary artLibrary;
         public FreeEntityView entityPrefab;
@@ -34,6 +36,7 @@ namespace Spotlight.FreeCafe
         private GameFlowBootstrap gameFlow;
         public event Action ViewChanged;
         private readonly Dictionary<string,FreeEntityView> views=new Dictionary<string,FreeEntityView>();
+        private FreeCafeSpawnScale spawnScale;
         private FreeCafeHud playerHud;
         private FreeCafeProductionHud productionHud;
         public bool InputBlocked => GameplayBlocked || (FreeCafeGMPanel.Instance!=null && FreeCafeGMPanel.Instance.IsVisible) ||
@@ -66,9 +69,18 @@ namespace Spotlight.FreeCafe
                 var entry=areaManager.Find((AreaId)i);
                 if(entry==null || entry.contentRoot!=areaRoots[i]) throw new InvalidOperationException("Area manager and runtime roots disagree: "+(AreaId)i);
             }
-            World=new CafeWorld(JsonUtility.FromJson<CafeCatalog>(catalogAsset.text));
+            if(customerIdentitySource!=null && !(customerIdentitySource is ICafeCustomerIdentitySource))
+                throw new InvalidOperationException("Customer identity source 必须实现 ICafeCustomerIdentitySource");
+            var authored = FreeCafeSceneLayout.FindAuthoredEntities(this);
+            var catalog = JsonUtility.FromJson<CafeCatalog>(catalogAsset.text);
+            catalog.layout = FreeCafeSceneLayout.Capture(this, authored);
+            FreeCafeSceneLayout.FitAuthoredBounds(this, catalog, authored);
+            World=new CafeWorld(catalog,customerIdentitySource as ICafeCustomerIdentitySource);
+            if(prefabLibrary==null) throw new InvalidOperationException("请配置 EntityPrefabLibrary");
+            prefabLibrary.Validate(World.Catalog);
+            spawnScale=new FreeCafeSpawnScale(this,authored,catalog);
             if(productionMode) World.EnableProduction();
-            if(authoringPreviews!=null) foreach(var preview in authoringPreviews) if(preview!=null) preview.SetActive(false);
+            AdoptAuthoredEntities(authored);
             World.Changed+=SyncViews;
             if(GameSaveParticipantRegistry.Capturers.ContainsKey(SaveId)) throw new InvalidOperationException("Duplicate FreeCafe world in loaded scenes");
             GameSaveParticipantRegistry.Capturers[SaveId]=CaptureJson;
@@ -83,7 +95,7 @@ namespace Spotlight.FreeCafe
             if(!string.IsNullOrEmpty(pending)) RestoreJson(pending); else SyncViews();
             if (FreeCafeGMPanel.Instance != null) FreeCafeGMPanel.Instance.Initialize(this);
             if(World.State.currentArea==AreaId.Cafe)
-                ShowHint("当前是营业区；点击场景箭头或「前往制作台」进入备料区。进入出餐台后，点击或拖拽物品即可交互。");
+                ShowHint("点击大厅的「启动营业」立牌开始接单；点击客人查看订单，或前往制作台备料。");
             else if(World.ProductionEnabled)
                 ShowHint("点击杯具选择出餐杯；原料拖到设备，点击启动。成品壶向下拖动倾倒，抬起停止。");
             else
@@ -115,6 +127,18 @@ namespace Spotlight.FreeCafe
                 ViewChanged?.Invoke();
             }
         }
+        private void AdoptAuthoredEntities(List<FreeEntityView> authored)
+        {
+            // 场景中真实实例与刚读取的位置一起接管；不是先按旧配表创建再覆盖。
+            foreach(var view in authored)
+            {
+                var entity=World.Find(view.AuthoringEntityId);
+                if(entity==null) throw new InvalidOperationException("场景实体未写入初始布局："+view.name);
+                view.transform.SetParent(areaRoots[(int)entity.area],true);
+                views.Add(entity.id,view);view.Bind(this,entity);
+            }
+            // 容器只是编辑器分组，保留用户额外节点；无需隐藏整个父级。
+        }
         private void SyncViews()
         {
             removeIds.Clear();
@@ -124,8 +148,7 @@ namespace Spotlight.FreeCafe
             {
                 if(!views.TryGetValue(entity.id,out var view) || view==null)
                 {
-                    var prefab=prefabLibrary==null ? null : prefabLibrary.Resolve(entity.specId);
-                    view=Instantiate(prefab!=null ? prefab : entityPrefab,areaRoots[(int)entity.area]); view.name=entity.id; views[entity.id]=view;
+                    view=CreateEntityView(entity.specId,entity.area); view.name=entity.id; views[entity.id]=view;
                     view.Bind(this,entity);
                 }
                 if(view!=draggedView)
@@ -137,6 +160,13 @@ namespace Spotlight.FreeCafe
             areaManager.Focus(World.State.currentArea);
             if(SelectedId!=null && World.Find(SelectedId)==null) SelectedId=null;
             ViewChanged?.Invoke();
+        }
+        private FreeEntityView CreateEntityView(string specId,AreaId area)
+        {
+            var prefab=prefabLibrary.Require(specId);
+            var view=Instantiate(prefab,areaRoots[(int)area]);
+            view.transform.localScale=spawnScale.Resolve(area,specId,prefab.transform.localScale);
+            return view;
         }
         public Vector3 AreaToWorld(AreaId area,float x,float y) => areaRoots[(int)area].TransformPoint(new Vector3(x,y,0));
         public Vector3 WorldToArea(AreaId area,Vector3 position) => areaRoots[(int)area].InverseTransformPoint(position);
@@ -178,6 +208,7 @@ namespace Spotlight.FreeCafe
             if(InputBlocked || IsDragging || dragFinishedFrame==Time.frameCount) return;
             var entity=World.Find(view.EntityId); if(entity==null || entity.area!=World.State.currentArea) return;
             var spec=World.Spec(entity.specId);
+            if(spec.Has(Capability.BusinessControl)) { Report(World.ActivateBusinessControl(entity.id)); return; }
             if(World.ProductionEnabled && entity.specId=="tool.latte-art") { Report(World.RequestProductionMiniGame()); return; }
             if(World.ProductionEnabled && spec.Has(Capability.Source) && World.Spec(spec.sourceItemId).Has(Capability.Container))
             { Report(World.SelectServingCup(entity.id)); return; }
@@ -258,7 +289,7 @@ namespace Spotlight.FreeCafe
             {
                 if(entity.stock<=0) { ShowHint("来源库存不足"); return; }
                 dragSourceId=entity.id;
-                draggedView=Instantiate(entityPrefab,areaRoots[(int)World.State.currentArea]); draggedView.name="UncommittedPickup";
+                draggedView=CreateEntityView(spec.sourceItemId,World.State.currentArea); draggedView.name="UncommittedPickup";
                 draggedView.Bind(this,new WorldEntity { specId=spec.sourceItemId,area=entity.area,x=entity.x,y=entity.y },true);
             }
             else if(spec.Has(Capability.Processor) && (spec.dragOutput || World.ProductionEnabled && entity.specId=="machine.mixer"))
@@ -266,8 +297,7 @@ namespace Spotlight.FreeCafe
                 var output=World.DragOutputPreview(entity.id);
                 if(output==null) { ShowHint(entity.task==null ? "先放入咖啡豆并完成研磨，再拖出咖啡粉" : "研磨尚未完成，完成后可拖出咖啡粉"); return; }
                 dragMachineId=entity.id;dragOutputId=output.id;
-                var prefab=prefabLibrary==null ? null : prefabLibrary.Resolve(output.specId);
-                draggedView=Instantiate(prefab!=null ? prefab : entityPrefab,areaRoots[(int)World.State.currentArea]);draggedView.name="UncommittedMachineOutput";
+                draggedView=CreateEntityView(output.specId,World.State.currentArea);draggedView.name="UncommittedMachineOutput";
                 draggedView.Bind(this,output,true);
             }
             else if(spec.Has(Capability.Movable)) { dragItemId=entity.id; draggedView=view; SelectedId=entity.id; }

@@ -69,3 +69,17 @@ MonoBehaviour:
     prefab: {fileID: 6340538246285857094, guid: 90554fea77660bc448e22bc4d3bd3e41, type: 3}
   - specId: trash
     prefab: {fileID: 3767004638102603034, guid: 0512ad7da673f864ab19c148837685c7, type: 3}
+  - specId: water
+    prefab: {fileID: 8553110836319358420, guid: 42e4a9b2fb28fb94586923e16ea4dec5, type: 3}
+  - specId: hotwater
+    prefab: {fileID: 1117180241824882212, guid: d34c9f9e9027ffb4caa5e48574535b41, type: 3}
+  - specId: sugar
+    prefab: {fileID: 8952279209952714317, guid: 0065c4ec04e47c7458d5c110d01e67b5, type: 3}
+  - specId: source.water
+    prefab: {fileID: 6408552334624982424, guid: d9b14d6879be8744faa268cd97a54278, type: 3}
+  - specId: source.sugar
+    prefab: {fileID: 1276427896412824058, guid: 3cd0dcf19172f8d4fab640647d99befb, type: 3}
+  - specId: tool.latte-art
+    prefab: {fileID: 4739513656803240139, guid: 2bdca34e5e8888c46867250ac78f4193, type: 3}
+  - specId: business.start
+    prefab: {fileID: 2570357490750689856, guid: e64b3c0f638a2f84fbeb9113b61696c7, type: 3}

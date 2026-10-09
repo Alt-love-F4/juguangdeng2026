@@ -189,6 +189,8 @@ namespace Spotlight.FreeCafe
             var productionValidation = ValidateProductionSnapshot(candidate);
             if (!productionValidation.success) return productionValidation;
             candidate.nextId = Math.Max(candidate.nextId, maxId + 1);
+            var people = RestorePeopleAndBusinessControls(candidate, ids);
+            if (!people.success) return people;
             State = candidate;
             UnlockContent();
             Notify();
