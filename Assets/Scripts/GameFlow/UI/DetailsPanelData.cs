@@ -16,11 +16,14 @@ namespace Spotlight.GameFlow
         public DetailsSectionData Relationships { get; }
         public DetailsSectionData World { get; }
         public bool IsPlaceholder { get; }
+        public IReadOnlyList<DetailsCharacterData> Characters { get; }
+        public IReadOnlyList<DetailsProgressData> WorldBars { get; }
 
         public DetailsPanelData(DetailsProfileData profile = null,
             IEnumerable<DetailsAttributeData> attributes = null,
             IEnumerable<DetailsSpecializationData> specializations = null,
-            DetailsSectionData relationships = null, DetailsSectionData world = null, bool isPlaceholder = false)
+            DetailsSectionData relationships = null, DetailsSectionData world = null, bool isPlaceholder = false,
+            IEnumerable<DetailsCharacterData> characters = null, IEnumerable<DetailsProgressData> worldBars = null)
         {
             Profile = profile ?? new DetailsProfileData();
             var ordered = new DetailsAttributeData[4];
@@ -43,6 +46,15 @@ namespace Spotlight.GameFlow
             Relationships = relationships ?? new DetailsSectionData("人物关系", "暂无人物关系", "尚未提供人物关系展示数据。");
             World = world ?? new DetailsSectionData("世界情况", "暂无世界情况", "尚未提供世界情况展示数据。");
             IsPlaceholder = isPlaceholder;
+            Characters = CopyItems(characters, nameof(characters));
+            WorldBars = CopyItems(worldBars, nameof(worldBars));
+        }
+
+        internal static IReadOnlyList<T> CopyItems<T>(IEnumerable<T> source, string parameter) where T : class
+        {
+            var items = source == null ? new List<T>() : new List<T>(source);
+            if (items.Exists(item => item == null)) throw new ArgumentException("Items must not contain null.", parameter);
+            return items.AsReadOnly();
         }
 
         /// <summary>Explicit preview fallback. Real callers supply their own display snapshot.</summary>
@@ -70,6 +82,55 @@ namespace Spotlight.GameFlow
                 },
                 new DetailsSectionData("人物关系 / 占位页", "关系网络尚未接入", "今后将在这里展示人物档案、关系变化与交往记录。\n当前仅为页面占位，不读取角色或关系数据。"),
                 new DetailsSectionData("世界情况 / 占位页", "世界信息尚未接入", "今后将在这里展示地区情况、势力动向与世界事件。\n当前仅为页面占位，不读取世界状态。"), true);
+        }
+    }
+
+    public sealed class DetailsCharacterData
+    {
+        public string Id { get; }
+        public string Name { get; }
+        public string Introduction { get; }
+        public Sprite Avatar { get; }
+        public bool Unlocked { get; }
+        public IReadOnlyList<DetailsProgressData> Bars { get; }
+
+        public DetailsCharacterData(string id, string name, string introduction = null, Sprite avatar = null,
+            bool unlocked = false, IEnumerable<DetailsProgressData> bars = null)
+        {
+            Id = id ?? string.Empty;
+            Name = name ?? string.Empty;
+            Introduction = introduction ?? string.Empty;
+            Avatar = avatar;
+            Unlocked = unlocked;
+            Bars = DetailsPanelData.CopyItems(bars, nameof(bars));
+        }
+    }
+
+    public sealed class DetailsProgressData
+    {
+        public string Key { get; }
+        public string Name { get; }
+        public float Value { get; }
+        public float Min { get; }
+        public float Max { get; }
+        public string LowerDescription { get; }
+        public string UpperDescription { get; }
+        public string Description { get; }
+
+        public DetailsProgressData(string key, string name, float value, float min = 0f, float max = 100f,
+            string lowerDescription = null, string upperDescription = null, string description = null)
+        {
+            if (float.IsNaN(min) || float.IsInfinity(min)) throw new ArgumentOutOfRangeException(nameof(min));
+            if (float.IsNaN(max) || float.IsInfinity(max) || max < min) throw new ArgumentOutOfRangeException(nameof(max));
+            if (float.IsNaN(value) || float.IsInfinity(value)) throw new ArgumentOutOfRangeException(nameof(value));
+            Key = key ?? string.Empty;
+            Name = name ?? string.Empty;
+            Min = min;
+            Max = max;
+            Value = Mathf.Clamp(value, min, max);
+            LowerDescription = lowerDescription ?? string.Empty;
+            UpperDescription = upperDescription ?? string.Empty;
+            Description = description ?? string.Empty;
         }
     }
 

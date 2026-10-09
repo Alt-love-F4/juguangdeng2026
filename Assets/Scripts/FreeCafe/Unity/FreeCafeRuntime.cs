@@ -31,8 +31,9 @@ namespace Spotlight.FreeCafe
         public bool CarrySelection { get; set; }
         public bool ShowAssetIds { get; set; }
         public bool IsDragging => draggedView!=null;
-        public bool GameplayBlocked => (World != null && World.ProductionEnabled && !string.IsNullOrEmpty(World.State.production.miniGameToken)) || Time.timeScale<=0 || DialoguePanel.IsAnyPlaying || (dayFlow != null && dayFlow.BlocksGameplayInput);
+        public bool GameplayBlocked => (gameFlow != null && gameFlow.IsMapOpen) || (World != null && World.ProductionEnabled && !string.IsNullOrEmpty(World.State.production.miniGameToken)) || Time.timeScale<=0 || DialoguePanel.IsAnyPlaying || (dayFlow != null && dayFlow.BlocksGameplayInput);
         private DayFlowController dayFlow;
+        private GameFlowBootstrap gameFlow;
         public event Action ViewChanged;
         private readonly Dictionary<string,FreeEntityView> views=new Dictionary<string,FreeEntityView>();
         private FreeCafeSpawnScale spawnScale;
@@ -88,6 +89,7 @@ namespace Spotlight.FreeCafe
         private void Start()
         {
             dayFlow = FindFirstObjectByType<DayFlowController>();
+            gameFlow = FindFirstObjectByType<GameFlowBootstrap>();
             playerHud=FindFirstObjectByType<FreeCafeHud>(); productionHud=GetComponent<FreeCafeProductionHud>();
             string pending=GameSaveParticipantRegistry.TakePending(SaveId);
             if(!string.IsNullOrEmpty(pending)) RestoreJson(pending); else SyncViews();

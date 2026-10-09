@@ -38,12 +38,30 @@ namespace Spotlight.GameFlow
         [SerializeField] private Sprite marketArtwork;
         [SerializeField] private Sprite libraryArtwork;
         [SerializeField] private Sprite temporaryArtwork;
+        [Header("Map camera")]
+        [SerializeField] private MapFeelConfig feelConfig;
+        private float focusSmoothTime => feelConfig.focusSmoothTime;
+        private float focusZoom => feelConfig.focusZoom;
+        private float backgroundScale => feelConfig.backgroundScale;
+        private float zoomSmoothTime => feelConfig.zoomSmoothTime;
+        private float minimumZoom => feelConfig.minimumZoom;
+        private float maximumZoom => feelConfig.maximumZoom;
+        private float scrollZoomSensitivity => feelConfig.scrollZoomSensitivity;
+        private float panInertiaDamping => feelConfig.panInertiaDamping;
+        private Vector2 panVelocity;
         private RectTransform mapRoot;
         private RectTransform mapContent;
-        // The player moves the viewport focus in map coordinates. The map graphic is
-        // positioned from this focus so its edges never leave the viewport.
+        private RectTransform mapBackground;
+        // Camera bounds use the playable map; the larger backdrop supplies overscan.
         private Vector2 mapCenter;
+        private Vector2 focusTarget;
+        private Vector2 focusVelocity;
+        private bool movingToFocus;
+        private Action afterFocus;
         private float zoom = 1f;
+        private float targetZoom = 1f;
+        private float zoomVelocity;
+        private bool focusZooming;
         private bool dragging;
         private Vector2 dragStart;
         private readonly List<RaycastResult> pointerHits = new List<RaycastResult>();
@@ -60,9 +78,19 @@ namespace Spotlight.GameFlow
         protected override void Awake()
         {
             base.Awake();
-            GameplayPanelHooks.OpenPanel = OpenPanel;
-            GameplayPanelHooks.PanelType = typeof(MapSceneController);
-            GameplayPanelHooks.IsScenePanel = true;
+            if (feelConfig == null) feelConfig = Resources.Load<MapFeelConfig>("MapFeelConfig");
+            if (feelConfig == null)
+            {
+                Debug.LogError("MapSceneController requires a MapFeelConfig asset.", this);
+                enabled = false;
+                return;
+            }
+            if (UnityEngine.SceneManagement.SceneManager.GetActiveScene().name != "CoffeeShop")
+            {
+                GameplayPanelHooks.OpenPanel = OpenPanel;
+                GameplayPanelHooks.PanelType = typeof(MapSceneController);
+                GameplayPanelHooks.IsScenePanel = true;
+            }
             BuildUi();
         }
 
@@ -73,6 +101,24 @@ namespace Spotlight.GameFlow
                 GameplayPanelHooks.OpenPanel = null;
                 GameplayPanelHooks.PanelType = null;
                 GameplayPanelHooks.IsScenePanel = false;
+            }
+        }
+
+        internal bool ControlsAvailable => flow == null || flow.MapControlsAvailable;
+
+        internal void OpenOverlay(GameFlowBootstrap owner)
+        {
+            flow = owner;
+            SetFlow(owner);
+            gameObject.SetActive(true);
+            GetComponent<Canvas>().sortingOrder = 30;
+            HideFocus();
+            if (transform.Find("返回咖啡馆 / M") == null)
+            {
+                Button close = CreateButton("返回咖啡馆 / M", transform, Vector2.zero, new Vector2(230, 48));
+                ((RectTransform)close.transform).SetAnchors(new Vector2(1, 0), new Vector2(1, 0),
+                    new Vector2(-155, 110), new Vector2(230, 48));
+                close.onClick.AddListener(owner.CloseMap);
             }
         }
 
@@ -110,7 +156,9 @@ namespace Spotlight.GameFlow
             mapContent.anchoredPosition = Vector2.zero;
             Image map = CreateSpriteImage("MapBackground", mapContent, mapBackgroundSprite);
             map.raycastTarget = false;
-            Stretch(map.rectTransform);
+            mapBackground = map.rectTransform;
+            mapBackground.anchorMin = mapBackground.anchorMax = new Vector2(.5f, .5f);
+            mapBackground.pivot = new Vector2(.5f, .5f);
             // Location buildings are rendered as their own interactive button sprites below.
             // Keep the sign/name overlays from the PSD, but omit the full icon layer to avoid
             // drawing a second, non-interactive copy underneath each button.
@@ -129,7 +177,7 @@ namespace Spotlight.GameFlow
             RectTransform detailRect = detail.transform as RectTransform;
             detailRect.SetAnchors(new Vector2(1, 1), new Vector2(1, 1), new Vector2(-210, -18), new Vector2(170, 44));
             detailRect.pivot = new Vector2(1, 1);
-            detail.onClick.AddListener(() => ShowFocus("详情面板", "我的信息 / 人物关系 / 世界情况（基础占位）。"));
+            detail.onClick.AddListener(() => flow?.OpenDetails());
             Image title = CreateSpriteImage("Title", root, cityTitleSprite);
             title.rectTransform.SetAnchors(new Vector2(0, 0), new Vector2(0, 0), new Vector2(42, 42), new Vector2(366, 118));
             title.rectTransform.pivot = new Vector2(0, 0);
@@ -138,7 +186,9 @@ namespace Spotlight.GameFlow
             BuildInventory(root);
             BuildTaskPanel(root);
             Button endDay = CreateButton("结束当天", root, new Vector2(-110, 46), new Vector2(180, 52));
-            endDay.onClick.AddListener(() => flow?.GetComponent<DayFlowController>()?.EndDayFromMap());
+            endDay.onClick.AddListener(() => { if (flow != null && flow.GameplayControlsAvailable) flow.GetComponent<DayFlowController>()?.EndDayFromMap(); });
+            if (UnityEngine.SceneManagement.SceneManager.GetActiveScene().name == "CoffeeShop")
+                endDay.gameObject.SetActive(false);
             status = CreateLabel("Status", root, "滚轮缩放，WASD移动；点击地点聚焦，右键退出聚焦", 20, new Color(1,1,1,.8f), TextAlignmentOptions.Center);
             status.rectTransform.SetAnchors(new Vector2(.5f, 0), new Vector2(.5f, 0), new Vector2(-400, 18), new Vector2(800, 32));
         }
@@ -146,17 +196,31 @@ namespace Spotlight.GameFlow
         private void Update()
         {
             if (!isActiveAndEnabled) return;
+            if (!ControlsAvailable)
+            {
+                pointerDragging = dragging = false;
+                panVelocity = Vector2.zero;
+                return;
+            }
             if (mapRoot != null && mapRoot.rect.width <= 1f) Canvas.ForceUpdateCanvases();
             Keyboard key = Keyboard.current;
             Vector2 move = Vector2.zero;
             if (key != null) { if (key.wKey.isPressed) move.y += 1; if (key.sKey.isPressed) move.y -= 1; if (key.aKey.isPressed) move.x -= 1; if (key.dKey.isPressed) move.x += 1; }
-            if (move.sqrMagnitude > 0) mapCenter += move.normalized * 520f * Time.unscaledDeltaTime / Mathf.Max(zoom, .01f);
+            if (move.sqrMagnitude > 0)
+            {
+                CancelFocusMovement();
+                panVelocity = Vector2.zero;
+                mapCenter += move.normalized * Mathf.Max(0f, feelConfig.keyboardPanSpeed) * Time.unscaledDeltaTime / Mathf.Max(zoom, .01f);
+            }
             if (Mouse.current != null)
             {
                 float wheel = Mouse.current.scroll.ReadValue().y;
-                if (Mathf.Abs(wheel) > .01f && IsMapPointerTarget()) zoom = Mathf.Clamp(zoom + wheel * .0015f, .8f, 1.35f);
+                if (Mathf.Abs(wheel) > .01f && IsMapPointerTarget()) AddScrollZoom(wheel);
                 UpdatePointerPan(Mouse.current);
             }
+            if (move.sqrMagnitude == 0) UpdatePanInertia(Time.unscaledDeltaTime);
+            UpdateZoom();
+            UpdateFocusMovement();
             ApplyMapView();
             if (Mouse.current != null && Mouse.current.rightButton.wasPressedThisFrame) HideFocus();
         }
@@ -175,6 +239,7 @@ namespace Spotlight.GameFlow
             if (!pointerDragging)
             {
                 pointerDragging = true;
+                panVelocity = Vector2.zero;
                 dragging = false;
                 dragStart = pointer;
                 lastPointerPosition = pointer;
@@ -182,8 +247,14 @@ namespace Spotlight.GameFlow
             }
             Vector2 delta = pointer - lastPointerPosition;
             lastPointerPosition = pointer;
-            if ((pointer - dragStart).sqrMagnitude > 36f) dragging = true;
-            if (dragging && delta.sqrMagnitude > .01f) Pan(delta);
+            if ((pointer - dragStart).sqrMagnitude > Mathf.Pow(Mathf.Max(0f, feelConfig.dragThreshold), 2f)) dragging = true;
+            if (dragging)
+            {
+                float deltaTime = Time.unscaledDeltaTime;
+                Vector2 velocity = deltaTime > .0001f ? -delta / (Mathf.Max(zoom, .01f) * deltaTime) : Vector2.zero;
+                panVelocity = Vector2.Lerp(panVelocity, velocity, 1f - Mathf.Exp(-Mathf.Max(.1f, feelConfig.panVelocityResponse) * deltaTime));
+                if (delta.sqrMagnitude > .01f) Pan(delta);
+            }
         }
 
         private bool IsMapPointerTarget()
@@ -203,23 +274,104 @@ namespace Spotlight.GameFlow
         {
             // Dragging changes the focus point, rather than applying an arbitrary
             // transform to the map. This keeps panning consistent at every zoom.
+            CancelFocusMovement();
             mapCenter -= delta / Mathf.Max(zoom, .01f);
             ApplyMapView();
+        }
+
+        private void OnDisable()
+        {
+            panVelocity = Vector2.zero;
+            pointerDragging = dragging = false;
+        }
+
+        private void UpdatePanInertia(float deltaTime)
+        {
+            if (pointerDragging || movingToFocus) return;
+            if (panVelocity.sqrMagnitude < 1f) { panVelocity = Vector2.zero; return; }
+            float damping = Mathf.Max(.1f, panInertiaDamping);
+            float decay = Mathf.Exp(-damping * deltaTime);
+            Vector2 requested = mapCenter + panVelocity * ((1f - decay) / damping);
+            mapCenter = ClampMapCenter(requested);
+            panVelocity *= decay;
+            if (mapCenter.x != requested.x) panVelocity.x = 0f;
+            if (mapCenter.y != requested.y) panVelocity.y = 0f;
+        }
+
+        private float MinimumZoom => Mathf.Max(.01f, minimumZoom);
+        private float MaximumZoom => Mathf.Max(MinimumZoom, maximumZoom);
+
+        private void AddScrollZoom(float wheel)
+        {
+            focusZooming = false;
+            // Proportional steps give consistent wheel response at both ends of the range.
+            targetZoom = Mathf.Clamp(targetZoom * Mathf.Exp(Mathf.Clamp(wheel * scrollZoomSensitivity, -4f, 4f)),
+                MinimumZoom, MaximumZoom);
+        }
+
+        private void UpdateZoom()
+        {
+            targetZoom = Mathf.Clamp(targetZoom, MinimumZoom, MaximumZoom);
+            zoom = Mathf.SmoothDamp(zoom, targetZoom, ref zoomVelocity,
+                Mathf.Max(.01f, focusZooming ? focusSmoothTime : zoomSmoothTime), Mathf.Infinity, Time.unscaledDeltaTime);
+            if (Mathf.Abs(zoom - targetZoom) < .0001f && Mathf.Abs(zoomVelocity) < .001f)
+            {
+                zoom = targetZoom;
+                zoomVelocity = 0f;
+                focusZooming = false;
+            }
         }
 
         private void ApplyMapView()
         {
             if (mapContent == null || mapRoot == null) return;
             Vector2 viewport = mapRoot.rect.size;
-            float minimumZoom = Mathf.Max(viewport.x / MapWidth, viewport.y / MapHeight) * 1.05f;
-            zoom = Mathf.Max(zoom, minimumZoom);
-            Vector2 scaledMap = new Vector2(MapWidth, MapHeight) * zoom;
-            Vector2 maxOffset = Vector2.Max(Vector2.zero, (scaledMap - viewport) * .5f);
-            mapCenter = new Vector2(Mathf.Clamp(mapCenter.x, -maxOffset.x / zoom, maxOffset.x / zoom), Mathf.Clamp(mapCenter.y, -maxOffset.y / zoom, maxOffset.y / zoom));
+            zoom = Mathf.Clamp(zoom, MinimumZoom, MaximumZoom);
+            mapCenter = ClampMapCenter(mapCenter);
+            // Only enlarge the backdrop, keeping buildings and PSD overlays aligned.
+            // Reserve half a viewport beyond every camera limit, including at low zoom.
+            if (mapBackground != null)
+                mapBackground.sizeDelta = Vector2.Max(new Vector2(MapWidth, MapHeight) * Mathf.Max(1f, backgroundScale),
+                    new Vector2(MapWidth, MapHeight) + viewport / MinimumZoom * 1.05f);
             Vector2 focusOffset = mapCenter * zoom;
             mapContent.localScale = Vector3.one * zoom;
             mapContent.anchoredPosition = -focusOffset;
         }
+        private static Vector2 ClampMapCenter(Vector2 center) => new Vector2(
+            Mathf.Clamp(center.x, -MapWidth * .5f, MapWidth * .5f),
+            Mathf.Clamp(center.y, -MapHeight * .5f, MapHeight * .5f));
+
+        private void BeginFocusMovement(Vector2 target, Action onComplete = null)
+        {
+            panVelocity = Vector2.zero;
+            focusTarget = ClampMapCenter(target);
+            targetZoom = Mathf.Clamp(focusZoom, MinimumZoom, MaximumZoom);
+            focusZooming = true;
+            movingToFocus = true;
+            afterFocus = onComplete;
+            // Retain velocity when retargeting so rapid selections do not stop abruptly.
+        }
+
+        private void UpdateFocusMovement()
+        {
+            if (!movingToFocus) return;
+            mapCenter = Vector2.SmoothDamp(mapCenter, focusTarget, ref focusVelocity,
+                Mathf.Max(.01f, focusSmoothTime), Mathf.Infinity, Time.unscaledDeltaTime);
+            if ((mapCenter - focusTarget).sqrMagnitude > .01f || focusVelocity.sqrMagnitude > 1f) return;
+            mapCenter = focusTarget;
+            Action completed = afterFocus;
+            CancelFocusMovement();
+            ApplyMapView();
+            completed?.Invoke();
+        }
+
+        private void CancelFocusMovement()
+        {
+            movingToFocus = false;
+            focusVelocity = Vector2.zero;
+            afterFocus = null;
+        }
+
         private void BuildConfiguredLocations()
         {
             try
@@ -263,13 +415,8 @@ namespace Spotlight.GameFlow
 
         private void OnPositionClicked(NarrativeMapPositionDefinition position)
         {
-            mapCenter = PositionForArtwork(position.positionKey, position.position);
-            ApplyMapView();
-            if (position.positionKey == "cafe")
-            {
-                StartCafe();
-                return;
-            }
+            if (!ControlsAvailable) return;
+            BeginFocusMovement(PositionForArtwork(position.positionKey, position.position));
             FocusPosition(position);
         }
 
@@ -290,6 +437,15 @@ namespace Spotlight.GameFlow
             if (focusedPosition.extendedActions != null) keys.AddRange(focusedPosition.extendedActions);
             NarrativeActionController actions = NarrativeRuntime.Instance?.Actions;
             int row = 0;
+            if (focusedPosition.positionKey == "cafe")
+            {
+                bool alreadyInCafe = UnityEngine.SceneManagement.SceneManager.GetActiveScene().name == "CoffeeShop";
+                Button enter = CreateButton(alreadyInCafe ? "当前正处于咖啡馆" : "进入咖啡馆", actionList,
+                    Vector2.zero, new Vector2(260, 48));
+                enter.interactable = !alreadyInCafe;
+                enter.onClick.AddListener(StartCafe);
+                row++;
+            }
             foreach (string key in keys.Distinct())
             {
                 NarrativeActionDefinition action = actions?.Get(key);
@@ -307,6 +463,7 @@ namespace Spotlight.GameFlow
 
         private void ExecuteAction(NarrativeActionDefinition action)
         {
+            if (!ControlsAvailable) return;
             NarrativeActionController actions = NarrativeRuntime.Instance?.Actions;
             if (actions == null) { status.text = "行动系统尚未初始化"; return; }
             if (!actions.Execute(action.actionKey, success =>
@@ -356,117 +513,19 @@ namespace Spotlight.GameFlow
 
         private void BuildTaskPanel(Transform parent)
         {
-            const float width = 300f;
-            const float expandedHeight = 370f;
-            GameObject panel = new GameObject("TaskPanel", typeof(RectTransform), typeof(Image));
+            GameObject panel = new GameObject("TaskPanel", typeof(RectTransform), typeof(Image), typeof(MapTaskPanel));
             panel.transform.SetParent(parent, false);
-            RectTransform panelRect = (RectTransform)panel.transform;
-            panelRect.SetAnchors(new Vector2(0, 1), new Vector2(0, 1), new Vector2(28, -28), new Vector2(width, 44));
-            panelRect.pivot = new Vector2(0, 1);
-            panel.GetComponent<Image>().color = new Color(.04f, .07f, .07f, .94f);
-
-            Button toggle = CreateButton("TaskToggle", panel.transform, Vector2.zero, new Vector2(width, 44));
-            RectTransform toggleRect = toggle.transform as RectTransform;
-            toggleRect.SetAnchors(new Vector2(0, 1), new Vector2(1, 1), Vector2.zero, new Vector2(0, 44));
-            toggleRect.pivot = new Vector2(.5f, 1);
-            toggle.GetComponent<Image>().color = new Color(.08f, .12f, .13f, .98f);
-            SetButtonText(toggle, "事项  ﹀", 18);
-            toggle.transform.Find("Label").GetComponent<TextMeshProUGUI>().alignment = TextAlignmentOptions.Left;
-            toggle.transform.Find("Label").GetComponent<RectTransform>().offsetMin = new Vector2(14, 0);
-            toggle.transform.Find("Label").GetComponent<RectTransform>().offsetMax = new Vector2(-14, 0);
-
-            GameObject body = new GameObject("TaskBody", typeof(RectTransform));
-            body.transform.SetParent(panel.transform, false);
-            RectTransform bodyRect = (RectTransform)body.transform;
-            bodyRect.SetAnchors(new Vector2(0, 1), new Vector2(1, 1), new Vector2(0, -44), new Vector2(0, expandedHeight - 44));
-            bodyRect.pivot = new Vector2(.5f, 1);
-            body.SetActive(false);
-
-            Button inProgress = CreateButton("InProgressTab", body.transform, Vector2.zero, new Vector2(140, 34));
-            RectTransform inProgressRect = inProgress.transform as RectTransform;
-            inProgressRect.SetAnchors(new Vector2(0, 1), new Vector2(0, 1), new Vector2(8, -8), new Vector2(140, 34));
-            inProgressRect.pivot = new Vector2(0, 1);
-            SetButtonText(inProgress, "进行中", 18);
-
-            Button completed = CreateButton("CompletedTab", body.transform, Vector2.zero, new Vector2(140, 34));
-            RectTransform completedRect = completed.transform as RectTransform;
-            completedRect.SetAnchors(new Vector2(0, 1), new Vector2(0, 1), new Vector2(152, -8), new Vector2(140, 34));
-            completedRect.pivot = new Vector2(0, 1);
-            SetButtonText(completed, "已完成", 18);
-
-            RectTransform viewport = CreateRect("TaskViewport", body.transform);
-            viewport.SetAnchors(new Vector2(0, 0), new Vector2(1, 1), new Vector2(8, 8), new Vector2(-8, -50));
-            viewport.gameObject.AddComponent<RectMask2D>();
-            ScrollRect scroll = body.AddComponent<ScrollRect>();
-            scroll.viewport = viewport;
-            scroll.horizontal = false;
-            scroll.vertical = true;
-            scroll.movementType = ScrollRect.MovementType.Clamped;
-            scroll.scrollSensitivity = 30f;
-
-            RectTransform inProgressContent = CreateTaskList(viewport, "InProgressContent", new[] { "进入绿道", "完成今日营业", "探索城区的新地点", "寻找可靠的保护", "协助别人的工作", "报告街道状况" });
-            RectTransform completedContent = CreateTaskList(viewport, "CompletedContent", new[] { "修好炉灶温备用", "船队援助", "让新版本机重获自由", "救出莹莹" });
-            completedContent.gameObject.SetActive(false);
-            scroll.content = inProgressContent;
-
-            bool expanded = false;
-            toggle.onClick.AddListener(() =>
-            {
-                expanded = !expanded;
-                body.SetActive(expanded);
-                panelRect.sizeDelta = new Vector2(width, expanded ? expandedHeight : 44);
-                SetButtonText(toggle, expanded ? "事项 ︿" : "事项  ﹀", 18);
-            });
-            inProgress.onClick.AddListener(() =>
-            {
-                inProgressContent.gameObject.SetActive(true);
-                completedContent.gameObject.SetActive(false);
-                scroll.content = inProgressContent;
-                SetTabState(inProgress, true);
-                SetTabState(completed, false);
-            });
-            completed.onClick.AddListener(() =>
-            {
-                inProgressContent.gameObject.SetActive(false);
-                completedContent.gameObject.SetActive(true);
-                scroll.content = completedContent;
-                SetTabState(inProgress, false);
-                SetTabState(completed, true);
-            });
-        }
-
-        private static RectTransform CreateTaskList(RectTransform viewport, string name, string[] tasks)
-        {
-            RectTransform content = CreateRect(name, viewport);
-            content.anchorMin = new Vector2(0, 1);
-            content.anchorMax = new Vector2(1, 1);
-            content.pivot = new Vector2(.5f, 1);
-            content.anchoredPosition = Vector2.zero;
-            content.sizeDelta = new Vector2(0, Mathf.Max(44, tasks.Length * 38 + 8));
-            VerticalLayoutGroup layout = content.gameObject.AddComponent<VerticalLayoutGroup>();
-            layout.spacing = 5;
-            layout.padding = new RectOffset(0, 0, 0, 8);
-            layout.childForceExpandWidth = true;
-            layout.childForceExpandHeight = false;
-            foreach (string task in tasks) CreateTaskRow(content, task);
-            return content;
-        }
-
-        private static void CreateTaskRow(Transform parent, string text)
-        {
-            GameObject row = new GameObject(text, typeof(RectTransform), typeof(Image), typeof(LayoutElement));
-            row.transform.SetParent(parent, false);
-            row.GetComponent<Image>().color = new Color(.12f, .16f, .16f, 1f);
-            row.GetComponent<LayoutElement>().preferredHeight = 32;
-            CreateLabel("Task", row.transform, "□  " + text, 15, Color.white, TextAlignmentOptions.Left).rectTransform.SetAnchors(Vector2.zero, Vector2.one, new Vector2(8, 0), new Vector2(-8, 0));
-        }
-
-        private static void SetTabState(Button button, bool selected)
-        {
-            Image image = button.GetComponent<Image>();
-            image.color = selected ? new Color(.95f, .95f, .95f, .98f) : new Color(.18f, .22f, .23f, .98f);
-            TextMeshProUGUI label = button.transform.Find("Label").GetComponent<TextMeshProUGUI>();
-            label.color = selected ? Color.black : Color.white;
+            MapTaskPanel view = panel.GetComponent<MapTaskPanel>();
+            view.Initialize();
+            // Existing map examples; replace through SetItems when task progression data is available.
+            var examples = new List<MapTaskItem>();
+            string[] active = { "进入绿道", "完成今日营业", "探索城区的新地点", "寻找可靠的保护", "协助别人的工作", "报告街道状况" };
+            string[] completed = { "修好炉灶温备用", "船队援助", "让新版本机重获自由", "救出莹莹" };
+            for (int i = 0; i < active.Length; i++)
+                examples.Add(new MapTaskItem { id = "map_example_active_" + i, name = active[i], description = "示例事项，尚未接入剧情任务数据。", currentTask = active[i] });
+            for (int i = 0; i < completed.Length; i++)
+                examples.Add(new MapTaskItem { id = "map_example_completed_" + i, name = completed[i], description = "示例已完成事项，尚未接入剧情任务数据。", completed = true, previousTasks = new List<string> { completed[i] } });
+            view.SetItems(examples);
         }
 
         private static void SetButtonText(Button button, string text, float size)
@@ -478,13 +537,21 @@ namespace Spotlight.GameFlow
 
         private void StartCafe()
         {
+            if (!ControlsAvailable) return;
+            if (UnityEngine.SceneManagement.SceneManager.GetActiveScene().name == "CoffeeShop")
+            {
+                RebuildActionList();
+                return;
+            }
+            CancelFocusMovement();
             DayFlowController dayFlow = flow != null ? flow.GetComponent<DayFlowController>() : null;
             if (dayFlow != null)
             {
                 dayFlow.StartCafeFromMap();
                 return;
             }
-            UnityEngine.SceneManagement.SceneManager.LoadScene("CoffeeShop");
+            if (flow != null) flow.TransitionToGameplayScene("CoffeeShop", null);
+            else UnityEngine.SceneManagement.SceneManager.LoadScene("CoffeeShop");
         }
         private void ShowFocus(string name, string message)
         {
@@ -493,6 +560,8 @@ namespace Spotlight.GameFlow
         }
         private void HideFocus()
         {
+            panVelocity = Vector2.zero;
+            CancelFocusMovement();
             focusedPosition = null;
             RebuildActionList();
             if (focusPanel != null) focusPanel.SetActive(false);

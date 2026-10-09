@@ -53,6 +53,10 @@ namespace Spotlight.GameFlow
         private bool closing;
         private readonly List<DetailsSpecializationItem> badgeViews = new List<DetailsSpecializationItem>();
         private float specializationWidth = -1f;
+        [Header("Extended pages")]
+        [SerializeField] private Sprite unknownCharacterAvatar;
+        private DetailsPagesView detailsPages;
+        public int RelationshipPageIndex => detailsPages != default ? detailsPages.RelationshipPageIndex : 0;
 
         public DetailsPanelData CurrentData { get; private set; }
         public Page CurrentPage { get; private set; }
@@ -98,6 +102,7 @@ namespace Spotlight.GameFlow
             tabButtons[0].onClick.AddListener(ShowMyInfo);
             tabButtons[1].onClick.AddListener(ShowRelationships);
             tabButtons[2].onClick.AddListener(ShowWorld);
+            EnsureDetailsPages();
         }
 
         protected override void OnOpen(IUIData data = null)
@@ -145,6 +150,36 @@ namespace Spotlight.GameFlow
             relationshipsBinding.Render(data.Relationships);
             worldBinding.Render(data.World);
             RenderSpecializations(data);
+            EnsureDetailsPages();
+            detailsPages.Refresh(data);
+        }
+
+        private void EnsureDetailsPages()
+        {
+            if (detailsPages != default) return;
+            detailsPages = gameObject.AddComponent<DetailsPagesView>();
+            detailsPages.Initialize(this, (RectTransform)pages[1].transform, (RectTransform)pages[2].transform,
+                playerNameText.font, unknownCharacterAvatar != null ? unknownCharacterAvatar : Resources.Load<DetailsDisplayConfig>("DetailsDisplayConfig")?.unknownAvatar);
+        }
+
+        public bool ShowCharacter(string id)
+        {
+            if (closing || detailsPages == default) return false;
+            return detailsPages.ShowCharacter(id);
+        }
+
+        public void ReturnToRelationships()
+        {
+            if (closing || detailsPages == default) return;
+            SelectPage(Page.Relationships);
+            detailsPages.ReturnToRelationships();
+        }
+
+        public void ChangeRelationshipPage(int delta)
+        {
+            if (closing || detailsPages == default) return;
+            SelectPage(Page.Relationships);
+            detailsPages.ChangeRelationshipPage(delta);
         }
 
         private void RenderSpecializations(DetailsPanelData data)
@@ -266,6 +301,7 @@ namespace Spotlight.GameFlow
             CurrentData = null;
             HideTooltip();
             if (avatarImage != default) avatarImage.sprite = null;
+            if (detailsPages != default) detailsPages.Clear();
             for (int i = 0; i < badgeViews.Count; i++)
                 if (badgeViews[i] != default) badgeViews[i].Clear();
             base.OnClose();

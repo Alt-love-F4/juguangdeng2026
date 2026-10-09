@@ -84,7 +84,9 @@ namespace Spotlight.GameFlow.Tests
             letter.OpenEnvelope();
             yield return Until(() => letter.Stage == FirstDayLetterPanel.LetterStage.AwaitingSignature);
             letter.ConfirmSignature();
-            yield return Until(() => flow.State == DayFlowState.DateTransition);
+            yield return Until(() => flow.State == DayFlowState.AvatarSelection);
+            SelectAvatar();
+            Assert.That(flow.State, Is.EqualTo(DayFlowState.DateTransition));
             yield return ReachIntroduction();
             Assert.That(flow.CurrentDate, Is.EqualTo("王国纪元 670年10月6日"));
             Assert.That(flow.BlocksGameplayInput, Is.True);
@@ -106,6 +108,7 @@ namespace Spotlight.GameFlow.Tests
             var source = new ShortSource();
             flow.SetFirstDayIntroductionSource(source);
             flow.BeginNewSession(playLetter: false);
+            SelectAvatar();
             yield return ReachIntroduction();
             Assert.That(source.Reads, Is.EqualTo(1));
             Assert.That(flow.CurrentDialogue.EffectStage.Find("DialogueBox/Dialogue").GetComponent<TMPro.TMP_Text>().text, Is.EqualTo("测试数据源台词"));
@@ -118,6 +121,7 @@ namespace Spotlight.GameFlow.Tests
         {
             CreateFlow(new ShortSource());
             flow.BeginNewSession(playLetter: false);
+            SelectAvatar();
             yield return ReachIntroduction();
             flow.CurrentDialogue.Cancel();
             Assert.That(flow.State, Is.EqualTo(DayFlowState.PreBusiness));
@@ -133,6 +137,7 @@ namespace Spotlight.GameFlow.Tests
         {
             CreateFlow(new ShortSource());
             flow.BeginNewSession(playLetter: false);
+            SelectAvatar();
             yield return ReachIntroduction();
             flow.HideForMainMenu();
             yield return new WaitForSecondsRealtime(.6f);
@@ -146,6 +151,7 @@ namespace Spotlight.GameFlow.Tests
         {
             CreateFlow(new ShortSource());
             flow.BeginNewSession(playLetter: false);
+            SelectAvatar();
             yield return ReachIntroduction();
             string save = flow.CaptureJson();
             flow.HideForMainMenu();
@@ -190,6 +196,7 @@ namespace Spotlight.GameFlow.Tests
         {
             CreateFlow(new ThrowingSource());
             flow.BeginNewSession(playLetter: false);
+            SelectAvatar();
             yield return Until(() => flow.State == DayFlowState.PreBusiness);
             yield return SubmitPage();
             yield return Until(() => flow.State == DayFlowState.BusinessTransition);
@@ -201,6 +208,14 @@ namespace Spotlight.GameFlow.Tests
             yield return ReachIntroduction();
             yield return FinishDialogue();
             Assert.That(endpoint.starts, Is.EqualTo(1));
+        }
+
+        private void SelectAvatar()
+        {
+            Assert.That(flow.State, Is.EqualTo(DayFlowState.AvatarSelection));
+            Assert.That(flow.BlocksGameplayInput, Is.True);
+            Assert.That(flow.CurrentAvatarSelection, Is.Not.Null);
+            flow.CurrentAvatarSelection.Select(AvatarKind.Male);
         }
 
         private void CreateFlow(IDialogueScriptSource source = null)
