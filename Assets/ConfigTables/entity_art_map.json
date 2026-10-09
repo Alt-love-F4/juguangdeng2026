@@ -1,0 +1,74 @@
+{
+  "name": "freecafe_entity_art_map",
+  "description": "把「策划文件」里已生成的多状态素材，按 实体 artId × 状态 映射到 Assets/Art/FreeCafe/Entities/<artId>/<state>.png。状态名必须与运行时枚举一致：制作模式(productionMode=1)下设备状态取自 ProductionPhase（empty/loaded/processing/ready/boiling/warm/room），容器状态取自容量逻辑（empty/coffee/milk/mixed/full），其余为 default。",
+  "source_dir": "策划文件",
+  "output_dir": "Assets/Art/FreeCafe/Entities",
+  "keying": {
+    "tolerance": 26,
+    "feather": 0.8,
+    "pad": 6,
+    "min_keep_ratio": 0.04
+  },
+  "maps": [
+    { "src": "grinder_empty.jpg",     "artId": "machine.grinder", "state": "empty",      "note": "空研磨器（没装豆、抽屉关闭）" },
+    { "src": "grinder_empty.jpg",     "artId": "machine.grinder", "state": "loaded",     "note": "已装豆待研磨（复用空态，豆在仓内不可见）" },
+    { "src": "grinder_no_drawer.jpg", "artId": "machine.grinder", "state": "processing", "note": "研磨中（抽屉被取走，露出空槽）" },
+    { "src": "grinder_done.jpg",      "artId": "machine.grinder", "state": "ready",      "note": "出粉就绪（抽屉拉出、盛满咖啡粉）" },
+
+    { "src": "drawer_powder.jpg",     "artId": "grounds",         "state": "default",    "note": "咖啡粉一份（小抽屉盛粉）" },
+
+    { "src": "pot_drip_empty.jpg",    "artId": "machine.brewer",  "state": "empty",      "note": "空滴滤壶（上壶无粉、下壶空）" },
+    { "src": "pot_drip_powder.jpg",   "artId": "machine.brewer",  "state": "loaded",     "note": "已装咖啡粉、等待注水（上壶有粉、下壶空）" },
+    { "src": "pot_lower_done.jpg",    "artId": "machine.brewer",  "state": "ready",      "note": "咖啡液就绪（下壶盛满）" },
+
+    { "src": "kettle_red.jpg",        "artId": "machine.heater",  "state": "empty",      "note": "加热壶·没装水（空奶锅）" },
+    { "src": "kettle_blue.jpg",       "artId": "machine.heater",  "state": "loaded",     "note": "加热壶·已装液体（蓝色壶身）" },
+    { "src": "kettle_blue.jpg",       "artId": "machine.heater",  "state": "processing", "note": "加热壶·加热中（蓝色壶身）" },
+    { "src": "kettle_green.jpg",      "artId": "machine.heater",  "state": "boiling",    "note": "加热壶·沸腾（绿色壶身）" },
+    { "src": "kettle_green.jpg",      "artId": "machine.heater",  "state": "warm",       "note": "加热壶·温热（绿色壶身）" },
+    { "src": "kettle_blue.jpg",       "artId": "machine.heater",  "state": "room",       "note": "加热壶·冷却到常温（蓝色壶身）" },
+
+    { "src": "cup_with_coffee.jpg",   "artId": "cup.small",       "state": "coffee",     "note": "小杯盛咖啡" },
+    { "src": "cup_with_coffee.jpg",   "artId": "cup.large",       "state": "coffee",     "note": "大杯盛咖啡" },
+
+    { "src": "ing_water.jpg",         "artId": "water",           "state": "default",    "note": "清水一份 / 清水来源（玻璃水壶）" },
+    { "src": "topping_sugar.jpg",     "artId": "sugar",           "state": "default",    "note": "方糖一份 / 方糖来源（糖块小碗）" },
+    { "src": "topping_latte_pitcher.jpg", "artId": "tool.latte-art", "state": "default", "note": "拉花奶泡壶" },
+
+    { "src": "plate_base.jpg",        "artId": "delivery",        "state": "default",    "note": "出餐口托盘（交付区）" },
+
+    { "src": "ing_beans.jpg",         "artId": "beans",           "state": "default",    "note": "一份咖啡豆（小皿）" },
+    { "src": "ing_coffee.jpg",        "artId": "coffee",          "state": "default",    "note": "一份咖啡液（小玻璃壶）" },
+    { "src": "ing_milk.jpg",          "artId": "milk",            "state": "default",    "note": "一份冷牛奶" },
+    { "src": "ing_hotmilk.jpg",       "artId": "hotmilk",         "state": "default",    "note": "一份热牛奶（冒热气）" },
+    { "src": "ing_matcha_powder.jpg", "artId": "matcha.powder",   "state": "default",    "note": "一份抹茶粉" },
+    { "src": "ing_matcha_drink.jpg",  "artId": "matcha.drink",    "state": "default",    "note": "一份抹茶液" },
+    { "src": "ing_cocoa_powder.jpg",  "artId": "cocoa.powder",    "state": "default",    "note": "一份可可粉" },
+    { "src": "ing_cocoa_drink.jpg",   "artId": "cocoa.drink",     "state": "default",    "note": "一份可可液" },
+    { "src": "ing_honey.jpg",         "artId": "honey",           "state": "default",    "note": "一份蜂蜜" },
+
+    { "src": "src_cups_small.jpg",    "artId": "source.cups.small", "state": "default",  "note": "小杯堆（固定货源）" },
+    { "src": "src_cups_large.jpg",    "artId": "source.cups.large", "state": "default",  "note": "大杯堆（固定货源）" },
+    { "src": "src_beans.jpg",         "artId": "source.beans",    "state": "default",    "note": "咖啡豆袋（固定货源）" },
+    { "src": "src_milk.jpg",          "artId": "source.milk",     "state": "default",    "note": "牛奶瓶（固定货源）" },
+    { "src": "src_matcha.jpg",        "artId": "source.matcha",   "state": "default",    "note": "抹茶罐（固定货源）" },
+    { "src": "src_cocoa.jpg",         "artId": "source.cocoa",    "state": "default",    "note": "可可罐（固定货源）" },
+    { "src": "src_honey.jpg",         "artId": "source.honey",    "state": "default",    "note": "蜂蜜罐（固定货源，source.cream 复用）" },
+
+    { "src": "mixer_empty.jpg",       "artId": "machine.mixer",   "state": "empty",      "note": "搅拌器·空" },
+    { "src": "mixer_loaded.jpg",      "artId": "machine.mixer",   "state": "loaded",     "note": "搅拌器·已装料待搅拌" },
+    { "src": "mixer_processing.jpg",  "artId": "machine.mixer",   "state": "processing", "note": "搅拌器·搅拌中" },
+    { "src": "mixer_ready.jpg",       "artId": "machine.mixer",   "state": "ready",      "note": "搅拌器·就绪" },
+
+    { "src": "trash.jpg",             "artId": "trash",           "state": "default",    "note": "废弃桶" },
+
+    { "src": "cup_small_empty.jpg",   "artId": "cup.small",       "state": "empty",      "note": "小杯·空杯" },
+    { "src": "cup_small_milk.jpg",    "artId": "cup.small",       "state": "milk",       "note": "小杯·盛牛奶" },
+    { "src": "cup_small_mixed.jpg",   "artId": "cup.small",       "state": "mixed",      "note": "小杯·混合" },
+    { "src": "cup_small_full.jpg",    "artId": "cup.small",       "state": "full",       "note": "小杯·满杯" },
+    { "src": "cup_large_empty.jpg",   "artId": "cup.large",       "state": "empty",      "note": "大杯·空杯" },
+    { "src": "cup_large_milk.jpg",    "artId": "cup.large",       "state": "milk",       "note": "大杯·盛牛奶" },
+    { "src": "cup_large_mixed.jpg",   "artId": "cup.large",       "state": "mixed",      "note": "大杯·混合" },
+    { "src": "cup_large_full.jpg",    "artId": "cup.large",       "state": "full",       "note": "大杯·满杯" }
+  ]
+}

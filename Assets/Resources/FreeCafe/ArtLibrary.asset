@@ -35,14 +35,8 @@ MonoBehaviour:
       - mixed
     whitebox: {fileID: 21300000, guid: c8466a814beb48c49b80f88dc59c6f83, type: 3}
     variants:
-    - state: empty
-      sprite: {fileID: 0}
     - state: coffee
-      sprite: {fileID: 0}
-    - state: milk
-      sprite: {fileID: 0}
-    - state: mixed
-      sprite: {fileID: 0}
+      sprite: {fileID: 21300000, guid: 17ae6137cb36dfd4f9b7953d33d7aada, type: 3}
   - brief:
       id: cup.large
       label: "\u5927\u676F"
@@ -65,14 +59,8 @@ MonoBehaviour:
       - mixed
     whitebox: {fileID: 21300000, guid: 40f889ba329cbdc41bfeec39fd366f57, type: 3}
     variants:
-    - state: empty
-      sprite: {fileID: 0}
     - state: coffee
-      sprite: {fileID: 0}
-    - state: milk
-      sprite: {fileID: 0}
-    - state: mixed
-      sprite: {fileID: 0}
+      sprite: {fileID: 21300000, guid: 299cd2bd8c38193488a945d3f4bd6ffe, type: 3}
   - brief:
       id: beans
       label: "\u5496\u5561\u8C46"
@@ -114,7 +102,7 @@ MonoBehaviour:
     whitebox: {fileID: 21300000, guid: c1d2495d389e3ae4a91babc5cd272264, type: 3}
     variants:
     - state: default
-      sprite: {fileID: 0}
+      sprite: {fileID: 21300000, guid: 7e0e281151700a346828377669146bbd, type: 3}
   - brief:
       id: coffee
       label: "\u5496\u5561\u6DB2"
@@ -451,12 +439,14 @@ MonoBehaviour:
       - ready
     whitebox: {fileID: 21300000, guid: 0faddad22f22abf469e40d6924242b48, type: 3}
     variants:
-    - state: idle
-      sprite: {fileID: 0}
-    - state: running
-      sprite: {fileID: 0}
+    - state: empty
+      sprite: {fileID: 21300000, guid: 7027ea50e1c36d44cbe20315cb12cff6, type: 3}
+    - state: loaded
+      sprite: {fileID: 21300000, guid: a12bd95264e74fb45848eaf02e594bd1, type: 3}
+    - state: processing
+      sprite: {fileID: 21300000, guid: e81c97bd09f51954194e5f3a0f69126a, type: 3}
     - state: ready
-      sprite: {fileID: 0}
+      sprite: {fileID: 21300000, guid: d585b1b4c6d799c4a91e3b9d24db22ad, type: 3}
   - brief:
       id: machine.brewer
       label: "\u5496\u5561\u58F6"
@@ -478,12 +468,12 @@ MonoBehaviour:
       - ready
     whitebox: {fileID: 21300000, guid: 6755c3fb8c4fed74d9fbfaf58bca0dab, type: 3}
     variants:
-    - state: idle
-      sprite: {fileID: 0}
-    - state: running
-      sprite: {fileID: 0}
+    - state: empty
+      sprite: {fileID: 21300000, guid: 337cc4ee5c99eac47b49d06bccfa4b2c, type: 3}
+    - state: loaded
+      sprite: {fileID: 21300000, guid: e9f6cc7289f9e96458d1334517d3753b, type: 3}
     - state: ready
-      sprite: {fileID: 0}
+      sprite: {fileID: 21300000, guid: 1137c3cc29a7b694484f2b1f17d29550, type: 3}
   - brief:
       id: machine.heater
       label: "\u725B\u5976\u52A0\u70ED\u5668"
@@ -505,12 +495,18 @@ MonoBehaviour:
       - ready
     whitebox: {fileID: 21300000, guid: fc6b98151278e084fa615ba738c4383f, type: 3}
     variants:
-    - state: idle
-      sprite: {fileID: 0}
-    - state: running
-      sprite: {fileID: 0}
-    - state: ready
-      sprite: {fileID: 0}
+    - state: boiling
+      sprite: {fileID: 21300000, guid: 4732231a42f5d584c9713434aaeb8685, type: 3}
+    - state: empty
+      sprite: {fileID: 21300000, guid: 60c499d0eaa1dc2498871ce9ed67d1dc, type: 3}
+    - state: loaded
+      sprite: {fileID: 21300000, guid: dadda7cac810bec4fa89c065cea987a6, type: 3}
+    - state: processing
+      sprite: {fileID: 21300000, guid: f5836b731151a6949ad8fc1405a6bd00, type: 3}
+    - state: room
+      sprite: {fileID: 21300000, guid: d29dbea0ff0f5a04b99cf42fe3c5e5b9, type: 3}
+    - state: warm
+      sprite: {fileID: 21300000, guid: dad0e4e52d9aa8044b1dc2904befc66f, type: 3}
   - brief:
       id: machine.mixer
       label: "\u6405\u62CC\u5668"
@@ -588,7 +584,7 @@ MonoBehaviour:
     whitebox: {fileID: 21300000, guid: 802301f28b1105f46a01183146555eba, type: 3}
     variants:
     - state: default
-      sprite: {fileID: 0}
+      sprite: {fileID: 21300000, guid: 7f0d9f03abb52594b8388342905d8fd8, type: 3}
   - brief:
       id: trash
       label: "\u5E9F\u5F03\u6876"
@@ -863,3 +859,60 @@ MonoBehaviour:
     variants:
     - state: default
       sprite: {fileID: 0}
+  - brief:
+      id: sugar
+      label: sugar
+      category: entity
+      pivot: center (0.5,0.5)
+      outputFolder: Assets/Art/FreeCafe/Entities/sugar
+      prompt: "\u624B\u7ED8\u4E8C\u7EF4\u7ECF\u8425\u6E38\u620F\uFF0C\u6E29\u6696\u590D\u53E4\u5496\u5561\u5E97\u6C14\u8D28\uFF0C\u5E72\u51C0\u6DF1\u68D5\u8272\u7EBF\u7A3F\uFF0C\u4F4E\u9971\u548C\u6696\u8272\uFF0C\u8F7B\u5FAE\u7EB8\u5F20\u8D28\u611F\uFF0C\u7B80\u6D01\u6613\u8BFB\u7684\u8F6E\u5ED3\uFF0C\u56FA\u5B9A\u6B63\u9762\u7565\u4FEF\u89C6\u89C6\u89D2\u3002"
+      negativePrompt: "\u65E0\u6587\u5B57\u3001\u65E0\u6570\u5B57\u3001\u65E0\u6C34\u5370\u3001\u65E0UI\u3001\u65E0\u80CC\u666F\u573A\u666F\u3001\u65E0\u5176\u4ED6\u7269\u4F53\u3002"
+      width: 512
+      height: 512
+      transparent: 1
+      worldWidth: 1
+      worldHeight: 1
+      states:
+      - default
+    whitebox: {fileID: 21300000, guid: c8713cb55c70d704cb7ba127b98302f7, type: 3}
+    variants:
+    - state: default
+      sprite: {fileID: 21300000, guid: c8713cb55c70d704cb7ba127b98302f7, type: 3}
+  - brief:
+      id: tool.latte-art
+      label: tool.latte-art
+      category: entity
+      pivot: center (0.5,0.5)
+      outputFolder: Assets/Art/FreeCafe/Entities/tool.latte-art
+      prompt: "\u624B\u7ED8\u4E8C\u7EF4\u7ECF\u8425\u6E38\u620F\uFF0C\u6E29\u6696\u590D\u53E4\u5496\u5561\u5E97\u6C14\u8D28\uFF0C\u5E72\u51C0\u6DF1\u68D5\u8272\u7EBF\u7A3F\uFF0C\u4F4E\u9971\u548C\u6696\u8272\uFF0C\u8F7B\u5FAE\u7EB8\u5F20\u8D28\u611F\uFF0C\u7B80\u6D01\u6613\u8BFB\u7684\u8F6E\u5ED3\uFF0C\u56FA\u5B9A\u6B63\u9762\u7565\u4FEF\u89C6\u89C6\u89D2\u3002"
+      negativePrompt: "\u65E0\u6587\u5B57\u3001\u65E0\u6570\u5B57\u3001\u65E0\u6C34\u5370\u3001\u65E0UI\u3001\u65E0\u80CC\u666F\u573A\u666F\u3001\u65E0\u5176\u4ED6\u7269\u4F53\u3002"
+      width: 512
+      height: 512
+      transparent: 1
+      worldWidth: 1
+      worldHeight: 1
+      states:
+      - default
+    whitebox: {fileID: 21300000, guid: 06344ccfa323c264dbdfb1a2d385cec1, type: 3}
+    variants:
+    - state: default
+      sprite: {fileID: 21300000, guid: 06344ccfa323c264dbdfb1a2d385cec1, type: 3}
+  - brief:
+      id: water
+      label: water
+      category: entity
+      pivot: center (0.5,0.5)
+      outputFolder: Assets/Art/FreeCafe/Entities/water
+      prompt: "\u624B\u7ED8\u4E8C\u7EF4\u7ECF\u8425\u6E38\u620F\uFF0C\u6E29\u6696\u590D\u53E4\u5496\u5561\u5E97\u6C14\u8D28\uFF0C\u5E72\u51C0\u6DF1\u68D5\u8272\u7EBF\u7A3F\uFF0C\u4F4E\u9971\u548C\u6696\u8272\uFF0C\u8F7B\u5FAE\u7EB8\u5F20\u8D28\u611F\uFF0C\u7B80\u6D01\u6613\u8BFB\u7684\u8F6E\u5ED3\uFF0C\u56FA\u5B9A\u6B63\u9762\u7565\u4FEF\u89C6\u89C6\u89D2\u3002"
+      negativePrompt: "\u65E0\u6587\u5B57\u3001\u65E0\u6570\u5B57\u3001\u65E0\u6C34\u5370\u3001\u65E0UI\u3001\u65E0\u80CC\u666F\u573A\u666F\u3001\u65E0\u5176\u4ED6\u7269\u4F53\u3002"
+      width: 512
+      height: 512
+      transparent: 1
+      worldWidth: 1
+      worldHeight: 1
+      states:
+      - default
+    whitebox: {fileID: 21300000, guid: 8e1588359a76e9f4780c0acd4c83ed50, type: 3}
+    variants:
+    - state: default
+      sprite: {fileID: 21300000, guid: 8e1588359a76e9f4780c0acd4c83ed50, type: 3}

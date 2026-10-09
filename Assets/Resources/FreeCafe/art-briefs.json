@@ -15,7 +15,8 @@
         "empty",
         "coffee",
         "milk",
-        "mixed"
+        "mixed",
+        "full"
       ],
       "outputFolder": "Assets/Art/FreeCafe/Entities/cup.small",
       "prompt": "手绘二维经营游戏，温暖复古咖啡店气质，干净深棕色线稿，低饱和暖色，轻微纸张质感，简洁易读的轮廓，固定正面略俯视视角，不使用写实摄影或3D渲染。 单个独立游戏精灵：小杯。同一杯型空杯和不同饮品内容的状态分别输出，杯体轮廓、视角、大小完全一致；不要把多个状态拼在一张图上。 对象完整居中，四周留8%透明边距，透明背景，禁止文字。",
@@ -35,7 +36,8 @@
         "empty",
         "coffee",
         "milk",
-        "mixed"
+        "mixed",
+        "full"
       ],
       "outputFolder": "Assets/Art/FreeCafe/Entities/cup.large",
       "prompt": "手绘二维经营游戏，温暖复古咖啡店气质，干净深棕色线稿，低饱和暖色，轻微纸张质感，简洁易读的轮廓，固定正面略俯视视角，不使用写实摄影或3D渲染。 单个独立游戏精灵：大杯。同一杯型空杯和不同饮品内容的状态分别输出，杯体轮廓、视角、大小完全一致；不要把多个状态拼在一张图上。 对象完整居中，四周留8%透明边距，透明背景，禁止文字。",
@@ -341,8 +343,9 @@
       "worldWidth": 1.45,
       "worldHeight": 1.6,
       "states": [
-        "idle",
-        "running",
+        "empty",
+        "loaded",
+        "processing",
         "ready"
       ],
       "outputFolder": "Assets/Art/FreeCafe/Entities/machine.grinder",
@@ -360,8 +363,8 @@
       "worldWidth": 1.45,
       "worldHeight": 1.6,
       "states": [
-        "idle",
-        "running",
+        "empty",
+        "loaded",
         "ready"
       ],
       "outputFolder": "Assets/Art/FreeCafe/Entities/machine.brewer",
@@ -379,9 +382,12 @@
       "worldWidth": 1.45,
       "worldHeight": 1.6,
       "states": [
-        "idle",
-        "running",
-        "ready"
+        "empty",
+        "loaded",
+        "processing",
+        "boiling",
+        "warm",
+        "room"
       ],
       "outputFolder": "Assets/Art/FreeCafe/Entities/machine.heater",
       "prompt": "手绘二维经营游戏，温暖复古咖啡店气质，干净深棕色线稿，低饱和暖色，轻微纸张质感，简洁易读的轮廓，固定正面略俯视视角，不使用写实摄影或3D渲染。 单个独立游戏精灵：牛奶加热器。设备闲置、运转、产物就绪状态分别输出，保留一致外轮廓和透明画布；输入输出由游戏独立精灵表达，不画入设备。 对象完整居中，四周留8%透明边距，透明背景，禁止文字。",
@@ -398,8 +404,9 @@
       "worldWidth": 1.45,
       "worldHeight": 1.6,
       "states": [
-        "idle",
-        "running",
+        "empty",
+        "loaded",
+        "processing",
         "ready"
       ],
       "outputFolder": "Assets/Art/FreeCafe/Entities/machine.mixer",
