@@ -171,6 +171,38 @@ MonoBehaviour:
   pinSprite: {fileID: 21300000, guid: 0ae0a4bf3323c8444a8194283fdd0849, type: 2}
   cityTitleSprite: {fileID: 21300000, guid: 54260b594d7fa7045843a5602dc40ca4, type: 2}
   compassSprite: {fileID: 21300000, guid: 503cf0b469622cf47b98a80fee542579, type: 2}
+  locationArtwork:
+  - positionKey: temporary
+    sprite: {fileID: 3917368293744949150, guid: 04bfb774b87bf784a9fb061528992cd2, type: 3}
+    position: {x: 300.625, y: 484.6875}
+  - positionKey: "\u5723\u897F\u5C14\u4E07\u90CA\u533A"
+    sprite: {fileID: 638425901033348431, guid: 78c12c8a51650e646ab982058e52bf72, type: 3}
+    position: {x: -379.375, y: 406.25}
+  - positionKey: "\u5723\u5F92\u8857"
+    sprite: {fileID: 58637557985996930, guid: 15524a9491c048f47945feebc5813c0e, type: 3}
+    position: {x: 774.6875, y: 399.0625}
+  - positionKey: cafe
+    sprite: {fileID: -4893751476693017904, guid: d5770fc3d2910174c85fe8195284fc6d, type: 3}
+    position: {x: -952.5, y: 373.4375}
+  - positionKey: market
+    sprite: {fileID: -2468378117992846979, guid: d96eb0c680d0c8946b6b83ff143fd185, type: 3}
+    position: {x: -57.8125, y: 192.1875}
+  - positionKey: "\u9996\u90FD\u6CD5\u9662"
+    sprite: {fileID: -4876237198412389804, guid: 3e3705b036a082d4c86a84356827bf16, type: 3}
+    position: {x: 567.5, y: 86.25}
+  - positionKey: "\u5E02\u653F\u5385"
+    sprite: {fileID: -2231998226536177986, guid: 81a94abc2d7f87d4393e6b6d1c7a5477, type: 3}
+    position: {x: -411.5625, y: 45.3125}
+  - positionKey: library
+    sprite: {fileID: -7784925835315426993, guid: f3bdee71859963a4581010fe19547ad7, type: 3}
+    position: {x: 187.5, y: -159.6875}
+  - positionKey: "\u82B1\u56ED\u533A"
+    sprite: {fileID: -7777181669565409667, guid: 7a3a64bf4912b5c448950b965c3c02f0, type: 3}
+    position: {x: 610.9375, y: -407.1875}
+  cafeArtwork: {fileID: -4893751476693017904, guid: d5770fc3d2910174c85fe8195284fc6d, type: 3}
+  marketArtwork: {fileID: -2468378117992846979, guid: d96eb0c680d0c8946b6b83ff143fd185, type: 3}
+  libraryArtwork: {fileID: -7784925835315426993, guid: f3bdee71859963a4581010fe19547ad7, type: 3}
+  temporaryArtwork: {fileID: 3917368293744949150, guid: 04bfb774b87bf784a9fb061528992cd2, type: 3}
   references:
     version: 2
     RefIds:
