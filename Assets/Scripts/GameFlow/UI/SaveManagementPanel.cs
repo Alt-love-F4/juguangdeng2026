@@ -14,6 +14,7 @@ namespace Spotlight.GameFlow
         protected override void Awake()
         {
             base.Awake();
+            ResolveSlotViews();
             for (int i = 0; i < slots.Length; i++)
             {
                 SaveSlotView slot = slots[i];
@@ -25,6 +26,22 @@ namespace Spotlight.GameFlow
                 if (slot != null) slot.BindSelection(SelectSlot);
             }
             backButton?.onClick.AddListener(() => Flow?.BackToPrevious());
+        }
+
+        private void ResolveSlotViews()
+        {
+            // Replacing/duplicating the template row in the prefab can invalidate
+            // Inspector references. Discover the existing grid rows, not new UI.
+            bool missing = slots == null || slots.Length == 0;
+            if (!missing)
+                for (int i = 0; i < slots.Length; i++)
+                    if (slots[i] == null) { missing = true; break; }
+            if (!missing) return;
+            GridLayoutGroup grid = GetComponentInChildren<GridLayoutGroup>(true);
+            slots = grid != null ? grid.GetComponentsInChildren<SaveSlotView>(true)
+                : GetComponentsInChildren<SaveSlotView>(true);
+            System.Array.Sort(slots, (left, right) =>
+                left.transform.GetSiblingIndex().CompareTo(right.transform.GetSiblingIndex()));
         }
 
         protected override void OnOpen(YokiFrame.IUIData data = null)

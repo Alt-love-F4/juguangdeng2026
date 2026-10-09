@@ -117,12 +117,21 @@ namespace Spotlight.GameFlow
 
         private IEnumerator StartupRoutine()
         {
-            loadingTransitioning = true;
-            LoadingPanel splash = UIKit.OpenPanel<LoadingPanel>(UILevel.AlwayTop, Data(), cachePolicy: PanelCachePolicy.Reusable);
-            while (splash.State == PanelState.Opening) yield return null;
-            splash.SetSplash(true);
-            yield return new WaitForSecondsRealtime(1.2f);
-            splash.CloseAnimated(() => LoadThen(OpenMainMenu, config.MainMenuScene));
+            // The startup scene already contains the title entry point. Do not run
+            // the splash or the timed loading transition just to open its menu.
+            int buildIndex = FindBuildIndex(config.MainMenuScene);
+            if (buildIndex >= 0 && buildIndex != SceneManager.GetActiveScene().buildIndex)
+            {
+                loadingTransitioning = true;
+                yield return SceneManager.LoadSceneAsync(buildIndex);
+            }
+            else if (buildIndex < 0)
+            {
+                Debug.LogWarning("Configured scene is not in Build Settings: " + config.MainMenuScene, this);
+            }
+
+            loadingTransitioning = false;
+            OpenMainMenu();
         }
 
         private void OnDestroy()

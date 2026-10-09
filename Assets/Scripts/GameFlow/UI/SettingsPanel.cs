@@ -15,6 +15,13 @@ namespace Spotlight.GameFlow
         [SerializeField] private Button resolutionButton;
         [SerializeField] private Button backButton;
         [SerializeField] private TMP_Dropdown resolutionDropdown;
+        [SerializeField] private TMP_Dropdown windowModeDropdown;
+        private static readonly FullScreenMode[] WindowModes =
+        {
+            FullScreenMode.ExclusiveFullScreen,
+            FullScreenMode.Windowed,
+            FullScreenMode.FullScreenWindow
+        };
         [SerializeField] private TMP_Text masterValue;
         [SerializeField] private TMP_Text musicValue;
         [SerializeField] private TMP_Text sfxValue;
@@ -31,10 +38,10 @@ namespace Spotlight.GameFlow
             masterVolume?.onValueChanged.AddListener(_ => UpdateVolumeLabels());
             musicVolume?.onValueChanged.AddListener(_ => UpdateVolumeLabels());
             sfxVolume?.onValueChanged.AddListener(_ => UpdateVolumeLabels());
-            resolutionDropdown?.onValueChanged.AddListener(index =>
-            {
-                if (Flow != null && index >= 0 && index < Flow.ResolutionOptions.Count) Flow.SetResolution(Flow.ResolutionOptions[index]);
-            });
+            if (windowModeDropdown != null)
+                windowModeDropdown.onValueChanged.AddListener(SelectWindowMode);
+            if (resolutionDropdown != null)
+                resolutionDropdown.onValueChanged.AddListener(SelectResolution);
             masterVolume?.onValueChanged.AddListener(value => Flow?.SetMasterVolume(value));
             musicVolume?.onValueChanged.AddListener(value => Flow?.SetMusicVolume(value));
             sfxVolume?.onValueChanged.AddListener(value => Flow?.SetSfxVolume(value));
@@ -46,6 +53,12 @@ namespace Spotlight.GameFlow
         protected override void OnOpen(YokiFrame.IUIData data = null)
         {
             base.OnOpen(data);
+            if (windowModeDropdown != null)
+            {
+                windowModeDropdown.ClearOptions();
+                windowModeDropdown.AddOptions(new System.Collections.Generic.List<string>
+                    { "全屏", "窗口", "无边框" });
+            }
             if (Flow == null) return;
             GameSettings current = Flow.CurrentSettings;
             if (masterVolume != null) masterVolume.SetValueWithoutNotify(current.MasterVolume);
@@ -55,17 +68,54 @@ namespace Spotlight.GameFlow
             {
                 resolutionDropdown.ClearOptions();
                 var labels = new System.Collections.Generic.List<string>();
-                foreach (var option in Flow.ResolutionOptions) labels.Add(option.Width + " x " + option.Height);
+                foreach (var option in Flow.ResolutionOptions) labels.Add(option.Width + "X" + option.Height);
                 resolutionDropdown.AddOptions(labels);
             }
             UpdateVolumeLabels();
             RefreshDisplaySettings();
         }
 
+        protected override void OnBlur()
+        {
+            HideDisplayChoices();
+            base.OnBlur();
+        }
+
+        protected override void OnWillHide()
+        {
+            HideDisplayChoices();
+            base.OnWillHide();
+        }
+
         protected override void OnClose()
         {
+            HideDisplayChoices();
             Flow?.SaveSettings();
             base.OnClose();
+        }
+
+        private void HideDisplayChoices()
+        {
+            if (windowModeDropdown != null) windowModeDropdown.Hide();
+            if (resolutionDropdown != null) resolutionDropdown.Hide();
+        }
+
+        private void SelectWindowMode(int index)
+        {
+            if (Flow == null || index < 0 || index >= WindowModes.Length) return;
+            FullScreenMode mode = WindowModes[index];
+            if (Flow.CurrentSettings.WindowMode != mode) Flow.SetWindowMode(mode);
+            RefreshDisplaySettings();
+        }
+
+        private void SelectResolution(int index)
+        {
+            if (Flow == null || index < 0 || index >= Flow.ResolutionOptions.Count) return;
+            ResolutionOption option = Flow.ResolutionOptions[index];
+            if (option.Width != Flow.CurrentSettings.ResolutionWidth
+                || option.Height != Flow.CurrentSettings.ResolutionHeight)
+                Flow.SetResolution(option);
+            RefreshDisplaySettings();
         }
 
         private void CycleWindowMode()
@@ -94,6 +144,11 @@ namespace Spotlight.GameFlow
         {
             if (Flow == null) return;
             if (windowModeText != null) windowModeText.text = Flow.WindowModeLabel;
+            if (windowModeDropdown != null)
+            {
+                int index = System.Array.IndexOf(WindowModes, Flow.CurrentSettings.WindowMode);
+                windowModeDropdown.SetValueWithoutNotify(index >= 0 ? index : 2);
+            }
             if (resolutionText != null) resolutionText.text = Flow.ResolutionLabel;
             if (resolutionDropdown != null)
                 for (int i = 0; i < Flow.ResolutionOptions.Count; i++)

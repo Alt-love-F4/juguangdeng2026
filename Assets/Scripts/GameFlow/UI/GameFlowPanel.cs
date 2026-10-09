@@ -92,6 +92,11 @@ namespace Spotlight.GameFlow
             Canvas canvas = GetComponentInParent<Canvas>();
             if (canvas != null && canvas.rootCanvas.transform != transform)
                 canvas.rootCanvas.sortingOrder = Mathf.Max(canvas.rootCanvas.sortingOrder, 100);
+            SelectDefaultControl();
+        }
+
+        protected virtual void SelectDefaultControl()
+        {
             if (EventSystem.current == null) return;
             Selectable target = GetDefaultSelectable();
             if (target == null || !target.IsActive() || !target.IsInteractable())

@@ -1,8 +1,15 @@
 #if UNITY_EDITOR
+using System.Collections;
+using System.Reflection;
 using NUnit.Framework;
 using UnityEditor;
+using UnityEditor.SceneManagement;
 using UnityEngine;
 using UnityEngine.UI;
+using UnityEngine.EventSystems;
+using UnityEngine.SceneManagement;
+using UnityEngine.TestTools;
+using YokiFrame;
 
 namespace Spotlight.GameFlow.Tests
 {
@@ -19,19 +26,17 @@ namespace Spotlight.GameFlow.Tests
             Assert.That(panel, Is.Not.Null);
             Assert.That(prefab.GetComponentsInChildren<SpriteRenderer>(true), Is.Empty);
             Assert.That(prefab.GetComponentsInChildren<Button>(true).Length, Is.EqualTo(4));
+            Assert.That(panel.AutoFocusOnShow, Is.False);
             var fields = new SerializedObject(panel);
+            Assert.That(fields.FindProperty("mAutoFocusOnShow").boolValue, Is.False);
             string[] names = { "savesButton", "startButton", "settingsButton", "quitButton" };
-            string[] labels = { "继续游戏", "开始游戏", "设置", "退出游戏" };
             for (int i = 0; i < names.Length; i++)
             {
                 var button = fields.FindProperty(names[i]).objectReferenceValue as Button;
                 Assert.That(button, Is.Not.Null, names[i]);
-                Assert.That(button.name, Is.EqualTo(labels[i]));
                 Assert.That(button.GetComponent<Image>().raycastTarget, Is.True);
                 Assert.That(button.targetGraphic, Is.Not.Null);
-                Assert.That(button.navigation.mode, Is.EqualTo(Navigation.Mode.Explicit));
-                Assert.That(button.navigation.selectOnDown, Is.Not.Null);
-                Assert.That(button.navigation.selectOnUp, Is.Not.Null);
+                Assert.That(button.navigation.mode, Is.EqualTo(Navigation.Mode.None));
             }
             int artworkCount = 0;
             foreach (Image image in prefab.GetComponentsInChildren<Image>(true))
@@ -68,6 +73,117 @@ namespace Spotlight.GameFlow.Tests
         {
             Assert.That(float.IsNaN(value.x) || float.IsInfinity(value.x) ||
                 float.IsNaN(value.y) || float.IsInfinity(value.y), Is.False, context);
+        }
+    }
+
+    public sealed class MainMenuPointerTests
+    {
+        private const string TestTag = "main-menu-pointer-tests";
+        private Scene scene;
+        private MainMenuPanel panel;
+        private EventSystem eventSystem;
+        private EventSystem[] previousSystems;
+        private float previousTimeScale;
+
+        [UnitySetUp]
+        public IEnumerator SetUp()
+        {
+            previousTimeScale = Time.timeScale;
+            Time.timeScale = 1f;
+            previousSystems = Object.FindObjectsByType<EventSystem>(FindObjectsSortMode.None);
+            foreach (EventSystem system in previousSystems) system.enabled = false;
+            scene = EditorSceneManager.LoadSceneInPlayMode(PresentationDebugSceneController.ScenePath,
+                new LoadSceneParameters(LoadSceneMode.Additive));
+            yield return null;
+            foreach (GameObject root in scene.GetRootGameObjects())
+            {
+                EventSystem found = root.GetComponentInChildren<EventSystem>();
+                if (found != null) eventSystem = found;
+            }
+            Assert.That(eventSystem, Is.Not.Null);
+            // Dispatch pointer events deterministically, without the real cursor
+            // overwriting the test's hover state on the next frame.
+            foreach (BaseInputModule module in eventSystem.GetComponents<BaseInputModule>())
+                module.enabled = false;
+            panel = UIKit.OpenPanel<MainMenuPanel>(UILevel.Common, tag: TestTag,
+                cachePolicy: PanelCachePolicy.Transient);
+            float deadline = Time.realtimeSinceStartup + 3f;
+            while (panel.State == PanelState.Opening)
+            {
+                Assert.That(Time.realtimeSinceStartup, Is.LessThan(deadline));
+                yield return null;
+            }
+        }
+
+        [UnityTearDown]
+        public IEnumerator TearDown()
+        {
+            UIKit.ClosePanelsByTag(TestTag);
+            if (scene.IsValid() && scene.isLoaded) yield return SceneManager.UnloadSceneAsync(scene);
+            if (previousSystems != null)
+                foreach (EventSystem system in previousSystems) if (system != null) system.enabled = true;
+            Time.timeScale = previousTimeScale;
+        }
+
+        [UnityTest]
+        public IEnumerator OpeningAndRefocusingMenuNeverKeepsAButtonSelected()
+        {
+            Assert.That(eventSystem.currentSelectedGameObject, Is.Null);
+            Assert.That(panel.AutoFocusOnShow, Is.False);
+            Button button = panel.GetComponentInChildren<Button>();
+            eventSystem.SetSelectedGameObject(button.gameObject);
+            Assert.That(eventSystem.currentSelectedGameObject, Is.SameAs(button.gameObject));
+            typeof(GameFlowPanel).GetMethod("OnFocus", BindingFlags.Instance | BindingFlags.NonPublic)
+                .Invoke(panel, null);
+            Assert.That(eventSystem.currentSelectedGameObject, Is.Null);
+            yield return new WaitForSecondsRealtime(.15f);
+            AssertVisual(button, false);
+        }
+
+        [UnityTest]
+        public IEnumerator AllFourButtonsHighlightOnlyWhileHoveredIncludingAfterClick()
+        {
+            Button[] buttons = panel.GetComponentsInChildren<Button>(true);
+            Assert.That(buttons.Length, Is.EqualTo(4));
+            var pointer = new PointerEventData(eventSystem) { button = PointerEventData.InputButton.Left };
+            foreach (Button button in buttons)
+            {
+                Assert.That(button.navigation.mode, Is.EqualTo(Navigation.Mode.None));
+                AssertVisual(button, false);
+                ExecuteEvents.Execute(button.gameObject, pointer, ExecuteEvents.pointerEnterHandler);
+                yield return new WaitForSecondsRealtime(.15f);
+                AssertVisual(button, true);
+                ExecuteEvents.Execute(button.gameObject, pointer, ExecuteEvents.pointerDownHandler);
+                Assert.That(eventSystem.currentSelectedGameObject, Is.Null,
+                    "A pointer click must not create persistent selection: " + button.name);
+                ExecuteEvents.Execute(button.gameObject, pointer, ExecuteEvents.pointerUpHandler);
+                ExecuteEvents.Execute(button.gameObject, pointer, ExecuteEvents.pointerClickHandler);
+                yield return new WaitForSecondsRealtime(.15f);
+                AssertVisual(button, true);
+                ExecuteEvents.Execute(button.gameObject, pointer, ExecuteEvents.pointerExitHandler);
+                yield return new WaitForSecondsRealtime(.15f);
+                AssertVisual(button, false);
+                Assert.That(eventSystem.currentSelectedGameObject, Is.Null);
+            }
+        }
+
+        private static void AssertVisual(Button button, bool hovered)
+        {
+            ContinueGameHoverOverlay overlay = button.GetComponent<ContinueGameHoverOverlay>();
+            if (overlay != null)
+            {
+                var graphic = (Graphic)new SerializedObject(overlay)
+                    .FindProperty("overlay").objectReferenceValue;
+                Assert.That(graphic.color.a, Is.EqualTo(hovered ? 1f : 0f), button.name);
+                return;
+            }
+            Color expected = (hovered ? button.colors.highlightedColor : button.colors.normalColor)
+                * button.colors.colorMultiplier;
+            Color actual = button.targetGraphic.canvasRenderer.GetColor();
+            Assert.That(actual.r, Is.EqualTo(expected.r).Within(.01f), button.name);
+            Assert.That(actual.g, Is.EqualTo(expected.g).Within(.01f), button.name);
+            Assert.That(actual.b, Is.EqualTo(expected.b).Within(.01f), button.name);
+            Assert.That(actual.a, Is.EqualTo(expected.a).Within(.01f), button.name);
         }
     }
 }

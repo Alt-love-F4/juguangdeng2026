@@ -63,7 +63,7 @@ namespace Spotlight.GameFlow.Editor
                     ColorBlock colors = button.colors;
                     colors.highlightedColor = new Color(1f, .94f, .84f, 1f);
                     colors.pressedColor = new Color(.78f, .72f, .67f, 1f);
-                    colors.selectedColor = colors.highlightedColor;
+                    colors.selectedColor = colors.normalColor;
                     colors.fadeDuration = .08f;
                     button.colors = colors;
                     go.AddComponent<ButtonClickFeedback>();
@@ -73,12 +73,11 @@ namespace Spotlight.GameFlow.Editor
                 {
                     buttons[i].navigation = new Navigation
                     {
-                        mode = Navigation.Mode.Explicit,
-                        selectOnUp = buttons[(i + buttons.Length - 1) % buttons.Length],
-                        selectOnDown = buttons[(i + 1) % buttons.Length]
+                        mode = Navigation.Mode.None
                     };
                 }
                 var fields = new SerializedObject(panel);
+                fields.FindProperty("mAutoFocusOnShow").boolValue = false;
                 fields.FindProperty("savesButton").objectReferenceValue = buttons[0];
                 fields.FindProperty("startButton").objectReferenceValue = buttons[1];
                 fields.FindProperty("settingsButton").objectReferenceValue = buttons[2];

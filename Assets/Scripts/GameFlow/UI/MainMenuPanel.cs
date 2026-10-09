@@ -1,5 +1,6 @@
 using UnityEngine;
 using UnityEngine.UI;
+using UnityEngine.EventSystems;
 using TMPro;
 
 namespace Spotlight.GameFlow
@@ -12,12 +13,25 @@ namespace Spotlight.GameFlow
         [SerializeField] private Button quitButton;
         [SerializeField] private TMP_Text noSavesText;
 
+        // Title buttons are pointer-only; UIKit must not restore navigation focus.
+        public override bool AutoFocusOnShow => false;
+
         protected override void OnShow()
         {
             if (savesButton != null) savesButton.interactable = true;
             if (noSavesText != null) noSavesText.gameObject.SetActive(false);
-            SetDefaultSelectable(startButton);
             base.OnShow();
+        }
+
+        protected override void SelectDefaultControl()
+        {
+            // Clear any previous title selection when reopening/refocusing the menu,
+            // without changing the selection owned by a different panel.
+            EventSystem eventSystem = EventSystem.current;
+            if (eventSystem == null) return;
+            GameObject selected = eventSystem.currentSelectedGameObject;
+            if (selected != null && selected.transform.IsChildOf(transform))
+                eventSystem.SetSelectedGameObject(null);
         }
 
         protected override void Awake()

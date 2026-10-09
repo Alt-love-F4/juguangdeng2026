@@ -20,6 +20,31 @@ namespace Spotlight.GameFlow
         private Action<int> save;
         private Action<int> delete;
         private int index;
+        private SaveSlotButtonFeedback loadFeedback;
+        private SaveSlotButtonFeedback saveFeedback;
+        private SaveSlotButtonFeedback deleteFeedback;
+
+        private void Awake()
+        {
+            loadFeedback = InitializeFeedback(loadButton);
+            saveFeedback = InitializeFeedback(saveButton);
+            deleteFeedback = InitializeFeedback(deleteButton);
+            if (loadButton != null) loadButton.onClick.AddListener(Load);
+            if (saveButton != null) saveButton.onClick.AddListener(Save);
+            if (deleteButton != null) deleteButton.onClick.AddListener(Delete);
+            if (selectButton != null) selectButton.onClick.AddListener(Select);
+        }
+
+        private static SaveSlotButtonFeedback InitializeFeedback(Button button)
+        {
+            if (button == null) return null;
+            SaveSlotButtonFeedback feedback = button.GetComponent<SaveSlotButtonFeedback>();
+            if (feedback == null) feedback = button.gameObject.AddComponent<SaveSlotButtonFeedback>();
+            // These controls use pointer hover, not persistent EventSystem selection.
+            button.navigation = new Navigation { mode = Navigation.Mode.None };
+            return feedback;
+        }
+
         [SerializeField] private RawImage thumbnail;
         private Texture2D thumbnailTexture;
         private string thumbnailData;
@@ -36,12 +61,20 @@ namespace Spotlight.GameFlow
             }
             if (thumbnail != null) { thumbnail.texture = thumbnailTexture; thumbnail.enabled = thumbnailTexture != null; }
         }
-        private void OnDestroy() { if (thumbnailTexture != null) Destroy(thumbnailTexture); }
+        private void OnDestroy()
+        {
+            if (loadButton != null) loadButton.onClick.RemoveListener(Load);
+            if (saveButton != null) saveButton.onClick.RemoveListener(Save);
+            if (deleteButton != null) deleteButton.onClick.RemoveListener(Delete);
+            if (selectButton != null) selectButton.onClick.RemoveListener(Select);
+            selected = null;
+            load = save = delete = null;
+            if (thumbnailTexture != null) Destroy(thumbnailTexture);
+        }
 
         public void BindSelection(Action<SaveSlotView> onSelected)
         {
             selected = onSelected;
-            selectButton?.onClick.AddListener(() => selected?.Invoke(this));
         }
 
         public void SetSelected(bool value)
@@ -58,9 +91,6 @@ namespace Spotlight.GameFlow
             load = onLoad;
             save = onSave;
             delete = onDelete;
-            loadButton?.onClick.AddListener(Load);
-            saveButton?.onClick.AddListener(Save);
-            deleteButton?.onClick.AddListener(Delete);
         }
 
         public void Refresh(GameSaveSlotInfo slot, bool fromGameplay)
@@ -98,8 +128,12 @@ namespace Spotlight.GameFlow
                 deleteButton.gameObject.SetActive(true);
                 deleteButton.interactable = !slot.IsAutoSave && slot.IsOccupied;
             }
+            if (loadFeedback != null) loadFeedback.RefreshAvailability();
+            if (saveFeedback != null) saveFeedback.RefreshAvailability();
+            if (deleteFeedback != null) deleteFeedback.RefreshAvailability();
         }
 
+        private void Select() => selected?.Invoke(this);
         private void Load() => load?.Invoke(index);
         private void Save() => save?.Invoke(index);
         private void Delete() => delete?.Invoke(index);

@@ -37,6 +37,14 @@ MonoBehaviour:
     variants:
     - state: coffee
       sprite: {fileID: 21300000, guid: 17ae6137cb36dfd4f9b7953d33d7aada, type: 3}
+    - state: empty
+      sprite: {fileID: 21300000, guid: 49a313529749dcd468f2b4f2572add85, type: 3}
+    - state: full
+      sprite: {fileID: 21300000, guid: 69e6832f1925ff548b855d96144deb4f, type: 3}
+    - state: milk
+      sprite: {fileID: 21300000, guid: 4273781edbd20784c8e517de4de396f8, type: 3}
+    - state: mixed
+      sprite: {fileID: 21300000, guid: 2157daa851977014eb2713f5ccecf353, type: 3}
   - brief:
       id: cup.large
       label: "\u5927\u676F"
@@ -61,6 +69,14 @@ MonoBehaviour:
     variants:
     - state: coffee
       sprite: {fileID: 21300000, guid: 299cd2bd8c38193488a945d3f4bd6ffe, type: 3}
+    - state: empty
+      sprite: {fileID: 21300000, guid: d245b3ac13082ac4b9ce3071f29e3255, type: 3}
+    - state: full
+      sprite: {fileID: 21300000, guid: f7a431bfc7c36a64eb71993e3a45249a, type: 3}
+    - state: milk
+      sprite: {fileID: 21300000, guid: 74e6688e5e4d92549bd8908a7b59885d, type: 3}
+    - state: mixed
+      sprite: {fileID: 21300000, guid: fc261778ead296941a1943807c626707, type: 3}
   - brief:
       id: beans
       label: "\u5496\u5561\u8C46"
@@ -81,7 +97,7 @@ MonoBehaviour:
     whitebox: {fileID: 21300000, guid: c1d2495d389e3ae4a91babc5cd272264, type: 3}
     variants:
     - state: default
-      sprite: {fileID: 0}
+      sprite: {fileID: 21300000, guid: be9b5a5ac7edd4a4984a4f39e96f2ff0, type: 3}
   - brief:
       id: grounds
       label: "\u5496\u5561\u7C89"
@@ -123,7 +139,7 @@ MonoBehaviour:
     whitebox: {fileID: 21300000, guid: 40f889ba329cbdc41bfeec39fd366f57, type: 3}
     variants:
     - state: default
-      sprite: {fileID: 0}
+      sprite: {fileID: 21300000, guid: d0e5251525df81e4cbe653f5695baa1f, type: 3}
   - brief:
       id: milk
       label: "\u51B7\u725B\u5976"
@@ -144,7 +160,7 @@ MonoBehaviour:
     whitebox: {fileID: 21300000, guid: d07a06a539cfa574e8c19bf8e4d109b3, type: 3}
     variants:
     - state: default
-      sprite: {fileID: 0}
+      sprite: {fileID: 21300000, guid: 11b99287b56b65e45b2c43cd1bb28ded, type: 3}
   - brief:
       id: hotmilk
       label: "\u70ED\u725B\u5976"
@@ -165,7 +181,7 @@ MonoBehaviour:
     whitebox: {fileID: 21300000, guid: d07a06a539cfa574e8c19bf8e4d109b3, type: 3}
     variants:
     - state: default
-      sprite: {fileID: 0}
+      sprite: {fileID: 21300000, guid: b3b947fd8aa3ecf4dbaf133ec54e346e, type: 3}
   - brief:
       id: matcha.powder
       label: "\u62B9\u8336\u7C89"
@@ -186,7 +202,7 @@ MonoBehaviour:
     whitebox: {fileID: 21300000, guid: c36a81f54e5cddb4a875e35533eee591, type: 3}
     variants:
     - state: default
-      sprite: {fileID: 0}
+      sprite: {fileID: 21300000, guid: aca15204eba357844b853de0ddc59429, type: 3}
   - brief:
       id: matcha.drink
       label: "\u62B9\u8336\u6DB2"
@@ -207,7 +223,7 @@ MonoBehaviour:
     whitebox: {fileID: 21300000, guid: c36a81f54e5cddb4a875e35533eee591, type: 3}
     variants:
     - state: default
-      sprite: {fileID: 0}
+      sprite: {fileID: 21300000, guid: 095dc994d9a7ca646af0b98f32ae6e45, type: 3}
   - brief:
       id: cocoa.powder
       label: "\u53EF\u53EF\u7C89"
@@ -228,7 +244,7 @@ MonoBehaviour:
     whitebox: {fileID: 21300000, guid: 80e077b40a1787749b498bc83372eb6b, type: 3}
     variants:
     - state: default
-      sprite: {fileID: 0}
+      sprite: {fileID: 21300000, guid: ea01ba42003040f4daa8e3ed0a6ec015, type: 3}
   - brief:
       id: cocoa.drink
       label: "\u53EF\u53EF\u6DB2"
@@ -249,7 +265,7 @@ MonoBehaviour:
     whitebox: {fileID: 21300000, guid: 80e077b40a1787749b498bc83372eb6b, type: 3}
     variants:
     - state: default
-      sprite: {fileID: 0}
+      sprite: {fileID: 21300000, guid: 7fac6d328307f594c940b1780d89209c, type: 3}
   - brief:
       id: honey
       label: "\u8702\u871C"
@@ -270,7 +286,7 @@ MonoBehaviour:
     whitebox: {fileID: 21300000, guid: f6aa383aa4c9d794286634a09a94068f, type: 3}
     variants:
     - state: default
-      sprite: {fileID: 0}
+      sprite: {fileID: 21300000, guid: b909585e822320c41b9868f850e84bd0, type: 3}
   - brief:
       id: source.cups.small
       label: "\u5C0F\u676F\u5806"
@@ -291,7 +307,7 @@ MonoBehaviour:
     whitebox: {fileID: 21300000, guid: c8466a814beb48c49b80f88dc59c6f83, type: 3}
     variants:
     - state: default
-      sprite: {fileID: 0}
+      sprite: {fileID: 21300000, guid: 81a747164d6386f4490267ef1733f452, type: 3}
   - brief:
       id: source.cups.large
       label: "\u5927\u676F\u5806"
@@ -312,7 +328,7 @@ MonoBehaviour:
     whitebox: {fileID: 21300000, guid: 40f889ba329cbdc41bfeec39fd366f57, type: 3}
     variants:
     - state: default
-      sprite: {fileID: 0}
+      sprite: {fileID: 21300000, guid: 270fb02606e8d70439d4383350d12437, type: 3}
   - brief:
       id: source.beans
       label: "\u5496\u5561\u8C46\u888B"
@@ -333,7 +349,7 @@ MonoBehaviour:
     whitebox: {fileID: 21300000, guid: c1d2495d389e3ae4a91babc5cd272264, type: 3}
     variants:
     - state: default
-      sprite: {fileID: 0}
+      sprite: {fileID: 21300000, guid: bee060fa09eab134a9d63009ce967393, type: 3}
   - brief:
       id: source.milk
       label: "\u725B\u5976\u74F6"
@@ -354,7 +370,7 @@ MonoBehaviour:
     whitebox: {fileID: 21300000, guid: d07a06a539cfa574e8c19bf8e4d109b3, type: 3}
     variants:
     - state: default
-      sprite: {fileID: 0}
+      sprite: {fileID: 21300000, guid: 7f2f215ed995a67408eec45ed3d0595b, type: 3}
   - brief:
       id: source.matcha
       label: "\u62B9\u8336\u7F50"
@@ -375,7 +391,7 @@ MonoBehaviour:
     whitebox: {fileID: 21300000, guid: c36a81f54e5cddb4a875e35533eee591, type: 3}
     variants:
     - state: default
-      sprite: {fileID: 0}
+      sprite: {fileID: 21300000, guid: 978092f9b2fcea148ace900606292e52, type: 3}
   - brief:
       id: source.cocoa
       label: "\u53EF\u53EF\u7F50"
@@ -396,7 +412,7 @@ MonoBehaviour:
     whitebox: {fileID: 21300000, guid: 80e077b40a1787749b498bc83372eb6b, type: 3}
     variants:
     - state: default
-      sprite: {fileID: 0}
+      sprite: {fileID: 21300000, guid: a4411a22c7195ff47ba1ff03d3f7ff25, type: 3}
   - brief:
       id: source.honey
       label: "\u8702\u871C\u7F50"
@@ -417,7 +433,7 @@ MonoBehaviour:
     whitebox: {fileID: 21300000, guid: f6aa383aa4c9d794286634a09a94068f, type: 3}
     variants:
     - state: default
-      sprite: {fileID: 0}
+      sprite: {fileID: 21300000, guid: 99b4b1ff442dc2d4fb6d757e552ff483, type: 3}
   - brief:
       id: machine.grinder
       label: "\u7814\u78E8\u5668"
@@ -528,12 +544,14 @@ MonoBehaviour:
       - ready
     whitebox: {fileID: 21300000, guid: 31e408fcde0acdc4785fe46a0ca54b3c, type: 3}
     variants:
-    - state: idle
-      sprite: {fileID: 0}
-    - state: running
-      sprite: {fileID: 0}
+    - state: empty
+      sprite: {fileID: 21300000, guid: 00c1d9b34685ed74f9b0f8f111d68a67, type: 3}
+    - state: loaded
+      sprite: {fileID: 21300000, guid: 9b01d562916a7a04380acc81e2b84be6, type: 3}
+    - state: processing
+      sprite: {fileID: 21300000, guid: a8a1277bd7bc16349a82f83513c02e17, type: 3}
     - state: ready
-      sprite: {fileID: 0}
+      sprite: {fileID: 21300000, guid: 40b27d5d0d074f54dadfb2ed0c4ffa53, type: 3}
   - brief:
       id: customer
       label: "\u987E\u5BA2"
@@ -605,7 +623,7 @@ MonoBehaviour:
     whitebox: {fileID: 7858980336673299937, guid: b69fe46044af2d340a39e3d24dd459ed, type: 3}
     variants:
     - state: default
-      sprite: {fileID: 0}
+      sprite: {fileID: 21300000, guid: 88646f64758842f42b2c2dcd7359f760, type: 3}
   - brief:
       id: area.cafe
       label: "\u4E00\u697C \xB7 \u8425\u4E1A\u533A\u80CC\u666F"
