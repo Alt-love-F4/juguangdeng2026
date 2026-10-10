@@ -153,7 +153,7 @@
     <var name="eventId" type="string"/>
     <var name="eventKind" type="string#set=actor,world"/>
     <var name="presentationClass" type="string"/>
-    <var name="presentationKey" type="string"/>
+    <var name="presentationKey" type="string#ref=TbNcsPresentationIndex?"/>
     <var name="presentationLogTag" type="string"/>
     <var name="eventProperty" type="string"/>
     <var name="actorId" type="string#ref=TbNcsObject?"/>
@@ -166,6 +166,60 @@
     <var name="logTag" type="string"/>
   </bean>
   <table name="TbNcsEvent" value="NcsEventEntry" mode="map" index="eventId" input="Event@Narrative/Narrative.xlsx"/>
+
+  <bean name="NcsPresentationIndexEntry">
+    <var name="presentationKey" type="string"/>
+    <var name="presentationClass" type="string#set=Conversation,Reading,Notice,CutScene"/>
+    <var name="logTag" type="string"/>
+  </bean>
+  <table name="TbNcsPresentationIndex" value="NcsPresentationIndexEntry" mode="map" index="presentationKey" input="PresentationIndex@Narrative/Narrative.xlsx"/>
+
+  <bean name="NcsConversationPageEntry">
+    <var name="pageId" type="string"/>
+    <var name="presentationKey" type="string#ref=TbNcsPresentationIndex"/>
+    <var name="seq" type="int"/>
+    <var name="pageCondKeys" type="string"/>
+    <var name="pageBarConds" type="string"/>
+    <var name="optionGroupKey" type="string"/>
+    <var name="bgOverride" type="string"/>
+    <var name="bgmOverride" type="string"/>
+  </bean>
+  <table name="TbNcsConversationPage" value="NcsConversationPageEntry" mode="map" index="pageId" input="ConversationPage@Narrative/Narrative.xlsx"/>
+
+  <bean name="NcsConversationLineEntry">
+    <var name="lineId" type="string"/>
+    <var name="pageId" type="string#ref=TbNcsConversationPage"/>
+    <var name="seq" type="int"/>
+    <var name="speakerKey" type="string#ref=TbNcsObject?"/>
+    <var name="side" type="string#set=left,right"/>
+    <var name="textKey" type="string#ref=TbText"/>
+    <var name="voiceKey" type="string"/><var name="emote" type="string"/><var name="sfxKey" type="string"/>
+    <var name="accentFxKey" type="string"/><var name="accentTargetKey" type="string#ref=TbNcsObject?"/>
+  </bean>
+  <table name="TbNcsConversationLine" value="NcsConversationLineEntry" mode="list" index="lineId" input="ConversationLine@Narrative/Narrative.xlsx"/>
+
+  <bean name="NcsNoticeEntry">
+    <var name="presentationKey" type="string#ref=TbNcsPresentationIndex"/>
+    <var name="titleKey" type="string#ref=TbText?"/>
+    <var name="timeKey" type="string#ref=TbText?"/><var name="imageKey" type="string"/>
+    <var name="textKey" type="string#ref=TbText"/><var name="barConds" type="string"/>
+    <var name="noticeBarConds" type="string"/>
+  </bean>
+  <table name="TbNcsNotice" value="NcsNoticeEntry" mode="map" index="presentationKey" input="Notice@Narrative/Narrative.xlsx"/>
+
+  <bean name="NcsReadingPageEntry">
+    <var name="pageId" type="string"/><var name="presentationKey" type="string#ref=TbNcsPresentationIndex"/>
+    <var name="seq" type="int"/><var name="titleKey" type="string#ref=TbText?"/>
+    <var name="imageKey" type="string"/><var name="pageCondKeys" type="string"/><var name="pageBarConds" type="string"/>
+  </bean>
+  <table name="TbNcsReadingPage" value="NcsReadingPageEntry" mode="map" index="pageId" input="ReadingPage@Narrative/Narrative.xlsx"/>
+
+  <bean name="NcsReadingLineEntry">
+    <var name="lineId" type="string"/><var name="pageId" type="string#ref=TbNcsReadingPage"/>
+    <var name="seq" type="int"/><var name="mode" type="string#set=narration,dialogue"/>
+    <var name="speakerKey" type="string#ref=TbNcsObject?"/><var name="textKey" type="string#ref=TbText"/><var name="voiceKey" type="string"/>
+  </bean>
+  <table name="TbNcsReadingLine" value="NcsReadingLineEntry" mode="list" index="lineId" input="ReadingLine@Narrative/Narrative.xlsx"/>
   <bean name="NcsEventDateEntry">
     <var name="eventId" type="string#ref=TbNcsEvent"/>
     <var name="day" type="int"/>

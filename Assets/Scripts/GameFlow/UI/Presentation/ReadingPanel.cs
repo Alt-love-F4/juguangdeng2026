@@ -153,7 +153,9 @@ namespace Spotlight.GameFlow
                 speakerPortrait.sprite = line.Portrait;
                 speakerPortrait.gameObject.SetActive(dialogue && line.Portrait != null);
             }
-            readingText.rectTransform.anchorMax = new Vector2(hasImage ? .50f : .94f, dialogue ? .68f : .78f);
+            // With no illustration, reclaim the right column so the reading copy remains legible.
+            readingText.rectTransform.anchorMin = new Vector2(.055f, dialogue ? .22f : .16f);
+            readingText.rectTransform.anchorMax = new Vector2(hasImage ? .50f : .94f, dialogue ? .68f : .82f);
             readingText.rectTransform.offsetMin = readingText.rectTransform.offsetMax = Vector2.zero;
             readingText.text = line.Text;
             readingText.overflowMode = TextOverflowModes.Page;

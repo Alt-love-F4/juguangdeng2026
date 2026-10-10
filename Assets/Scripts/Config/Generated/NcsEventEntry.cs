@@ -24,6 +24,7 @@ public sealed partial class NcsEventEntry : Luban.BeanBase
         EventKind = (string)_obj.GetValue("eventKind");
         PresentationClass = (string)_obj.GetValue("presentationClass");
         PresentationKey = (string)_obj.GetValue("presentationKey");
+        PresentationKey_Ref = null;
         PresentationLogTag = (string)_obj.GetValue("presentationLogTag");
         EventProperty = (string)_obj.GetValue("eventProperty");
         ActorId = (string)_obj.GetValue("actorId");
@@ -50,6 +51,7 @@ public sealed partial class NcsEventEntry : Luban.BeanBase
     public readonly string EventKind;
     public readonly string PresentationClass;
     public readonly string PresentationKey;
+    public NcsPresentationIndexEntry PresentationKey_Ref;
     public readonly string PresentationLogTag;
     public readonly string EventProperty;
     public readonly string ActorId;
@@ -72,6 +74,7 @@ public sealed partial class NcsEventEntry : Luban.BeanBase
 
     public  void ResolveRef(Tables tables)
     {
+        PresentationKey_Ref = tables.TbNcsPresentationIndex.GetOrDefault(PresentationKey);
         ActorId_Ref = tables.TbNcsObject.GetOrDefault(ActorId);
         TargetId_Ref = tables.TbNcsObject.GetOrDefault(TargetId);
         TitleText_Ref = tables.TbText.GetOrDefault(TitleText);

@@ -1,0 +1,17 @@
+[
+  {
+    "presentationKey": "TEST_CONVERSATION",
+    "presentationClass": "Conversation",
+    "logTag": "TEST_CONVERSATION"
+  },
+  {
+    "presentationKey": "TEST_READING",
+    "presentationClass": "Reading",
+    "logTag": "TEST_READING"
+  },
+  {
+    "presentationKey": "TEST_NOTICE",
+    "presentationClass": "Notice",
+    "logTag": "TEST_NOTICE"
+  }
+]

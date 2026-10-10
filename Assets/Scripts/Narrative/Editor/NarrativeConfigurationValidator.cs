@@ -99,9 +99,12 @@ namespace Spotlight.Narrative.Editor
             }
             foreach (var x in c.events)
             {
-                string setupKey = string.IsNullOrWhiteSpace(x.setupKey) ? x.presentationKey : x.setupKey;
+                string setupKey = x.setupKey;
                 if (!string.IsNullOrWhiteSpace(setupKey) && !c.setups.Any(v => v.setupKey == setupKey)) e.Add($"Event {x.eventId}: unknown setup {setupKey}.");
-                if (string.IsNullOrWhiteSpace(x.setupType) && string.IsNullOrWhiteSpace(x.presentationClass)) e.Add($"Event {x.eventId}: missing presentation type.");
+                bool hasPresentation = !string.IsNullOrWhiteSpace(x.presentationClass)
+                    || (!string.IsNullOrWhiteSpace(x.presentationKey)
+                        && c.presentations.index.Any(index => index.presentationKey == x.presentationKey));
+                if (string.IsNullOrWhiteSpace(x.setupType) && !hasPresentation) e.Add($"Event {x.eventId}: missing presentation type.");
                 if (!string.IsNullOrWhiteSpace(x.presentationClass) && !new[] { "Conversation", "Reading", "Notice", "CutScene" }.Contains(x.presentationClass, StringComparer.OrdinalIgnoreCase)) e.Add($"Event {x.eventId}: unsupported presentationClass {x.presentationClass}.");
             }
             foreach (var x in c.choices)

@@ -286,5 +286,53 @@
     "setupKey": "musician",
     "onceOnly": true,
     "logTag": "MUSICIAN"
+  },
+  {
+    "eventId": "EV_TEST_CONVERSATION",
+    "eventKind": "actor",
+    "presentationClass": "",
+    "presentationKey": "TEST_CONVERSATION",
+    "presentationLogTag": "TEST_CONVERSATION",
+    "eventProperty": "",
+    "actorId": "player",
+    "targetId": "npc_a",
+    "titleText": "narrative.test.conversation.title",
+    "contentKey": "",
+    "setupType": "",
+    "setupKey": "",
+    "onceOnly": false,
+    "logTag": "TEST_CONVERSATION"
+  },
+  {
+    "eventId": "EV_TEST_READING",
+    "eventKind": "world",
+    "presentationClass": "",
+    "presentationKey": "TEST_READING",
+    "presentationLogTag": "TEST_READING",
+    "eventProperty": "",
+    "actorId": "",
+    "targetId": "",
+    "titleText": "",
+    "contentKey": "",
+    "setupType": "",
+    "setupKey": "",
+    "onceOnly": false,
+    "logTag": "TEST_READING"
+  },
+  {
+    "eventId": "EV_TEST_NOTICE",
+    "eventKind": "world",
+    "presentationClass": "",
+    "presentationKey": "TEST_NOTICE",
+    "presentationLogTag": "TEST_NOTICE",
+    "eventProperty": "",
+    "actorId": "",
+    "targetId": "",
+    "titleText": "",
+    "contentKey": "",
+    "setupType": "",
+    "setupKey": "",
+    "onceOnly": false,
+    "logTag": "TEST_NOTICE"
   }
 ]

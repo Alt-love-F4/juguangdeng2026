@@ -1,0 +1,41 @@
+[
+  {
+    "lineId": "test_conv_line_01",
+    "pageId": "test_conv_page_01",
+    "seq": 1,
+    "speakerKey": "player",
+    "side": "left",
+    "textKey": "narrative.test.conversation.01",
+    "voiceKey": "",
+    "emote": "",
+    "sfxKey": "",
+    "accentFxKey": "",
+    "accentTargetKey": ""
+  },
+  {
+    "lineId": "test_conv_line_02",
+    "pageId": "test_conv_page_01",
+    "seq": 2,
+    "speakerKey": "npc_a",
+    "side": "right",
+    "textKey": "narrative.test.conversation.02",
+    "voiceKey": "",
+    "emote": "",
+    "sfxKey": "",
+    "accentFxKey": "",
+    "accentTargetKey": ""
+  },
+  {
+    "lineId": "test_conv_line_03",
+    "pageId": "test_conv_page_02",
+    "seq": 1,
+    "speakerKey": "npc_a",
+    "side": "right",
+    "textKey": "narrative.test.conversation.03",
+    "voiceKey": "",
+    "emote": "",
+    "sfxKey": "",
+    "accentFxKey": "",
+    "accentTargetKey": ""
+  }
+]

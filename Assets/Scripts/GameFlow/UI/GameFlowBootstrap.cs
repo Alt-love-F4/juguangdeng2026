@@ -101,6 +101,10 @@ namespace Spotlight.GameFlow
                     narrativeIntegration = runtimeObject.AddComponent<NarrativeGameFlowIntegration>();
                 }
                 narrativeIntegration.EnsureRuntime();
+                narrativeIntegration.Runtime.ReadingPlayback = ReadingEventPlayback.Play;
+                narrativeIntegration.Runtime.NoticePlayback = NarrativeNoticeEventPlayback.Play;
+                narrativeIntegration.Runtime.ConversationPlayback = NarrativeConversationEventPlayback.Play;
+                narrativeIntegration.Runtime.CharacterResolver = NarrativeCharacterResolver.Resolve;
             }
             dayFlow = GetComponent<DayFlowController>();
             if (dayFlow == null)

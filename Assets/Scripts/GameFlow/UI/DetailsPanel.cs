@@ -51,6 +51,7 @@ namespace Spotlight.GameFlow
         private DetailsHoverTarget tooltipOwner;
         private Action dismissed;
         private bool closing;
+        private int openedFrame;
         private readonly List<DetailsSpecializationItem> badgeViews = new List<DetailsSpecializationItem>();
         private float specializationWidth = -1f;
         [Header("Extended pages")]
@@ -111,6 +112,7 @@ namespace Spotlight.GameFlow
             SetModal(true);
             base.OnOpen(data);
             closing = false;
+            openedFrame = Time.frameCount;
             dismissed = null;
             Refresh(data as DetailsPanelData ?? DetailsPanelData.CreatePlaceholder(placeholderSpecializationIcon));
             SelectPage(Page.MyInfo);
@@ -143,8 +145,8 @@ namespace Spotlight.GameFlow
             avatarPlaceholderLabel.text = data.IsPlaceholder ? "头像占位" : "未设置头像";
             subtitleText.text = data.IsPlaceholder ? "馆长档案 / 展示原型" : "馆长档案";
             footerText.text = data.IsPlaceholder
-                ? "全部内容均为占位样例 · 悬停查看说明 · 点击窗口外或按 Esc 关闭"
-                : "悬停查看说明 · 点击窗口外或按 Esc 关闭";
+                ? "全部内容均为占位样例 · 悬停查看说明 · 点击窗口外或按 Esc / Tab 关闭"
+                : "悬停查看说明 · 点击窗口外或按 Esc / Tab 关闭";
             specializationsHintText.text = data.IsPlaceholder ? "徽章墙 · 以下专精均为展示样例" : "徽章墙 · 悬停查看专精说明";
             for (int i = 0; i < attributeBindings.Length; i++) attributeBindings[i].Render(this, data.Attributes[i]);
             relationshipsBinding.Render(data.Relationships);
@@ -285,7 +287,9 @@ namespace Spotlight.GameFlow
 
         private void Update()
         {
-            if (Keyboard.current != null && Keyboard.current.escapeKey.wasPressedThisFrame) RequestClose();
+            Keyboard keyboard = Keyboard.current;
+            if (keyboard != null && (keyboard.escapeKey.wasPressedThisFrame
+                || (Time.frameCount > openedFrame && keyboard.tabKey.wasPressedThisFrame))) RequestClose();
             if (TooltipVisible && Mouse.current != null) PositionTooltip(Mouse.current.position.ReadValue());
         }
 

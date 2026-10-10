@@ -84,7 +84,7 @@ namespace Spotlight.Narrative
                     titleText = row.TitleText, contentKeys = Strings(row.ContentKey), presentationClass = row.PresentationClass,
                     presentationKey = row.PresentationKey, presentationLogTag = row.PresentationLogTag,
                     setupType = row.SetupType, setupKey = row.SetupKey, onceOnly = row.OnceOnly, logTag = row.LogTag, conditionOwnerId = row.EventId,
-                    eventProperties = ParseEventProperties(row.EventProperty)
+                    eventProperties = ParseEventProperties(row.EventProperty), eventKindRaw = row.EventKind
                 });
             int dateIndex = 0;
             foreach (var row in tables.TbNcsEventDate.DataList)
@@ -138,6 +138,18 @@ namespace Spotlight.Narrative
                 config.openingPresentations.Add(new NarrativeOpeningPresentationDefinition { presentationId = row.PresentationId, titleKey = row.TitleKey, leftNameKey = row.LeftNameKey, rightNameKey = row.RightNameKey, visualsResource = row.VisualsResource });
             foreach (var row in tables.TbOpeningLine.DataList)
                 config.openingLines.Add(new NarrativeOpeningLineDefinition { lineId = row.LineId, presentationId = row.PresentationId, seq = row.Seq, speaker = row.Speaker, textKey = row.TextKey, gesture = row.Gesture, autoAdvanceSeconds = row.AutoAdvanceSeconds });
+            foreach (var row in tables.TbNcsPresentationIndex.DataList)
+                config.presentations.index.Add(new NarrativePresentationIndexDefinition { presentationKey = row.PresentationKey, presentationClass = row.PresentationClass, logTag = row.LogTag });
+            foreach (var row in tables.TbNcsConversationPage.DataList)
+                config.presentations.conversationPages.Add(new NarrativeConversationPageDefinition { pageId = row.PageId, presentationKey = row.PresentationKey, seq = row.Seq, pageCondKeys = row.PageCondKeys, pageBarConds = row.PageBarConds, optionGroupKey = row.OptionGroupKey, bgOverride = row.BgOverride, bgmOverride = row.BgmOverride });
+            foreach (var row in tables.TbNcsConversationLine.DataList)
+                config.presentations.conversationLines.Add(new NarrativeConversationLineDefinition { lineId = row.LineId, pageId = row.PageId, seq = row.Seq, speakerKey = row.SpeakerKey, side = row.Side, textKey = row.TextKey, voiceKey = row.VoiceKey, emote = row.Emote, sfxKey = row.SfxKey, accentFxKey = row.AccentFxKey, accentTargetKey = row.AccentTargetKey });
+            foreach (var row in tables.TbNcsNotice.DataList)
+                config.presentations.notices.Add(new NarrativeNoticeDefinition { presentationKey = row.PresentationKey, titleKey = row.TitleKey, timeKey = row.TimeKey, imageKey = row.ImageKey, textKey = row.TextKey, barConds = row.BarConds, noticeBarConds = row.NoticeBarConds });
+            foreach (var row in tables.TbNcsReadingPage.DataList)
+                config.presentations.readingPages.Add(new NarrativeReadingPageDefinition { pageId = row.PageId, presentationKey = row.PresentationKey, seq = row.Seq, titleKey = row.TitleKey, imageKey = row.ImageKey, pageCondKeys = row.PageCondKeys, pageBarConds = row.PageBarConds });
+            foreach (var row in tables.TbNcsReadingLine.DataList)
+                config.presentations.readingLines.Add(new NarrativeReadingLineDefinition { lineId = row.LineId, pageId = row.PageId, seq = row.Seq, mode = row.Mode, speakerKey = row.SpeakerKey, textKey = row.TextKey, voiceKey = row.VoiceKey });
             ValidateLinks(config);
             return config;
         }
@@ -171,9 +183,15 @@ namespace Spotlight.Narrative
             foreach (var item in config.events)
             {
                 if (!string.IsNullOrWhiteSpace(item.setupType)) Require(templates, item.setupType, "event template");
-                string setupKey = string.IsNullOrWhiteSpace(item.setupKey) ? item.presentationKey : item.setupKey;
-                if (!string.IsNullOrWhiteSpace(setupKey)) Require(setups, setupKey, "event setup");
-                if (string.IsNullOrWhiteSpace(item.setupType) && string.IsNullOrWhiteSpace(item.presentationClass))
+                if (!string.IsNullOrWhiteSpace(item.setupKey)) Require(setups, item.setupKey, "event setup");
+                string resolvedPresentationClass = item.presentationClass;
+                if (!string.IsNullOrWhiteSpace(item.presentationKey))
+                {
+                    NarrativePresentationIndexDefinition presentation = config.presentations.index.Find(candidate => candidate.presentationKey == item.presentationKey);
+                    if (presentation == null) throw new FormatException("Missing narrative presentation index: " + item.presentationKey);
+                    resolvedPresentationClass = presentation.presentationClass;
+                }
+                if (string.IsNullOrWhiteSpace(item.setupType) && string.IsNullOrWhiteSpace(resolvedPresentationClass))
                     throw new FormatException("Narrative event has no presentation type: " + item.eventId);
             }
             foreach (var item in config.triggers)

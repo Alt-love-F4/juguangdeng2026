@@ -81,8 +81,12 @@ namespace Spotlight.GameFlow
             if (bodyText != null)
             {
                 bodyText.text = value.Body;
-                bodyText.rectTransform.anchorMax = new Vector2(value.Image == null ? .93f : .53f, .66f);
-                bodyText.rectTransform.offsetMin = bodyText.rectTransform.offsetMax = Vector2.zero;
+                // The notice is a single-page card: with an image, text follows the image;
+                // without one, the text expands into the freed image area.
+                RectTransform rect = bodyText.rectTransform;
+                rect.anchorMin = new Vector2(.07f, value.Image == null ? .35f : .18f);
+                rect.anchorMax = new Vector2(.93f, value.Image == null ? .70f : .38f);
+                rect.offsetMin = rect.offsetMax = Vector2.zero;
             }
             if (progressBar != null)
             {

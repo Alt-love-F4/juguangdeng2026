@@ -36,18 +36,20 @@ namespace Spotlight.GameFlow
         {
             base.OnOpen(data);
             current = data as ConfirmationPanelData;
-            // Keep the replacement dialog artwork, overlaying the actual slot list.
-            bool saveStyle = current?.Title == "读取存档" || current?.Title == "覆盖存档" || current?.Title == "删除存档";
-            if (defaultPresentation != null) defaultPresentation.SetActive(!saveStyle);
+            // Use the save-management secondary-menu presentation for every confirmation.
+            // The old default presentation is intentionally kept as a fallback in the prefab,
+            // but should no longer be shown for the blue confirmation dialogs.
+            bool useSaveStyle = savePresentation != null;
+            if (defaultPresentation != null) defaultPresentation.SetActive(!useSaveStyle);
             if (savePresentation != null)
             {
-                savePresentation.SetActive(saveStyle);
+                savePresentation.SetActive(useSaveStyle);
                 var backdrop = savePresentation.transform.Find("SaveBackdrop");
                 if (backdrop != null) backdrop.gameObject.SetActive(false);
             }
             if (saveMessageText != null) saveMessageText.text = current?.Message ?? string.Empty;
             if (saveAcceptButton != null) saveAcceptButton.GetComponentInChildren<TMP_Text>().text = current?.AcceptLabel ?? "确定";
-            if (saveCancelButton != null) saveCancelButton.GetComponentInChildren<TMP_Text>().text = "取消";
+            if (saveCancelButton != null) saveCancelButton.GetComponentInChildren<TMP_Text>().text = current?.CancelLabel ?? "取消";
             if (titleText != null) titleText.text = current?.Title ?? string.Empty;
             if (messageText != null) messageText.text = current?.Message ?? string.Empty;
             if (acceptLabel != null) acceptLabel.text = current?.AcceptLabel ?? "确定";
