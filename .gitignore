@@ -55,3 +55,6 @@ output/
 # Video frame extraction scratch
 _video_frames/
 extract_frames.bat
+
+# Trae HTML share packages (local tool output)
+.trae-html-share-packages/

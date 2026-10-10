@@ -792,28 +792,28 @@
   "areas": [
     {
       "id": 0,
-      "label": "一楼 · 营业区",
+      "label": "一楼 · 大厅",
       "artId": "area.cafe",
       "halfWidth": 9,
       "halfHeight": 5
     },
     {
       "id": 1,
-      "label": "一楼 · 出餐台",
+      "label": "一楼 · 工作台",
       "artId": "area.counter",
       "halfWidth": 9,
       "halfHeight": 5
     },
     {
       "id": 2,
-      "label": "顶楼",
+      "label": "二楼 · 会客室",
       "artId": "area.top",
       "halfWidth": 9,
       "halfHeight": 5
     },
     {
       "id": 3,
-      "label": "地下室",
+      "label": "三楼 · 宿舍",
       "artId": "area.basement",
       "halfWidth": 9,
       "halfHeight": 5

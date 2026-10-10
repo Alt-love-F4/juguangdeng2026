@@ -22,6 +22,8 @@ namespace Spotlight.FreeCafe.Tests
             yield return SceneManager.LoadSceneAsync("CoffeeShop",LoadSceneMode.Single);yield return null;yield return null;
             // 旧自由操作回归显式使用旧模式；新制作交互由 FreeCafeProductionPlayModeTests 覆盖。
             var app=Object.FindFirstObjectByType<FreeCafeRuntime>();app.productionMode=false;
+            // 回归测试断言镜头位置，区域平移改为瞬间完成；平滑平移由专门用例覆盖。
+            app.areaManager.panSmoothTime=0;
             Assert.That(app.World.Restore(new CafeWorld(app.World.Catalog).State).success,Is.True);yield return null;
         }
         [UnityTearDown] public IEnumerator Cleanup() { Time.timeScale=1;yield return null; }
@@ -30,21 +32,63 @@ namespace Spotlight.FreeCafe.Tests
         {
             var app=Object.FindFirstObjectByType<FreeCafeRuntime>();var manager=app.areaManager;
             Assert.That(manager,Is.Not.Null);Assert.That(manager.areas.Length,Is.EqualTo(4));
-            Assert.That(app.areaRoots[0].parent,Is.SameAs(app.areaRoots[1].parent));
+            // 工作台是一楼场景的嵌套子场景：作为大厅的子物体，位于其下方
+            Assert.That(app.areaRoots[(int)AreaId.Counter].parent,Is.SameAs(app.areaRoots[(int)AreaId.Cafe]));
+            Assert.That(app.areaRoots[(int)AreaId.Counter].position.y,Is.LessThan(app.areaRoots[(int)AreaId.Cafe].position.y));
             Assert.That(app.areaRoots[2].position.y,Is.GreaterThan(app.areaRoots[0].position.y));
-            Assert.That(app.areaRoots[3].position.y,Is.LessThan(app.areaRoots[0].position.y));
+            // 三楼宿舍在最上方
+            Assert.That(app.areaRoots[3].position.y,Is.GreaterThan(app.areaRoots[0].position.y));
             Assert.That(Vector3.Distance(app.areaRoots[0].position,app.areaRoots[1].position),Is.GreaterThan(20));
-            var grinder=app.World.Find("m.grinder");var grinderView=app.View(grinder.id);var instanceId=grinderView.GetInstanceID();var worldPosition=grinderView.transform.position;
+            var grinder=app.World.Find("m.grinder");var grinderView=app.View(grinder.id);var instanceId=grinderView.GetInstanceID();
             var scene=SceneManager.GetActiveScene();
             foreach(var area in new[]{AreaId.Counter,AreaId.TopFloor,AreaId.Basement,AreaId.Cafe})
             {
                 app.Enter(area);yield return null;
                 Assert.That(SceneManager.GetActiveScene(),Is.EqualTo(scene));Assert.That(manager.CurrentArea,Is.EqualTo(area));
-                Assert.That(app.worldCamera.transform.position,Is.EqualTo(manager.Find(area).cameraAnchor.position+manager.cameraOffset));
+                // 嵌套子场景（工作台）停靠到父场景原点，镜头对准父场景视野；楼层仍走各自锚点
+                var anchor=manager.Find(area);
+                var expectedView=(anchor.dockToView ? anchor.contentRoot.parent.position : anchor.cameraAnchor.position)+manager.cameraOffset;
+                Assert.That(app.worldCamera.transform.position,Is.EqualTo(expectedView));
                 foreach(var root in app.areaRoots)Assert.That(root.gameObject.activeInHierarchy,Is.True,"Navigation must not disable an area");
-                Assert.That(app.View(grinder.id).GetInstanceID(),Is.EqualTo(instanceId));Assert.That(grinderView.transform.position,Is.EqualTo(worldPosition));
+                // 子场景停靠会移动区域根，实体世界坐标以当前根为准，但实体本身不被重建
+                Assert.That(app.View(grinder.id).GetInstanceID(),Is.EqualTo(instanceId));
+                Assert.That(Vector3.Distance(grinderView.transform.position,app.AreaToWorld(grinder.area,grinder.x,grinder.y)),Is.LessThan(.01f));
                 Assert.That(grinderView.hitbox.enabled,Is.EqualTo(area==AreaId.Counter));
             }
+        }
+        [UnityTest] public IEnumerator AreaSwitchPansCameraSmoothlyToTargetAnchor()
+        {
+            var app=Object.FindFirstObjectByType<FreeCafeRuntime>();var manager=app.areaManager;
+            manager.panSmoothTime=.25f;
+            var target=manager.Find(AreaId.TopFloor).cameraAnchor.position+manager.cameraOffset;
+            app.Enter(AreaId.TopFloor);yield return null;
+            Assert.That(manager.IsPanning,Is.True,"楼层切换应启动平滑平移");
+            Assert.That(app.worldCamera.transform.position,Is.Not.EqualTo(target),"平移第一帧不应瞬间到达");
+            float timeout=Time.unscaledTime+3;
+            while(manager.IsPanning && Time.unscaledTime<timeout) yield return null;
+            Assert.That(manager.IsPanning,Is.False,"平移应在限时内完成");
+            Assert.That(app.worldCamera.transform.position,Is.EqualTo(target));
+        }
+        [UnityTest] public IEnumerator WorkbenchDocksIntoLobbyViewWithoutMovingCamera()
+        {
+            var app=Object.FindFirstObjectByType<FreeCafeRuntime>();var manager=app.areaManager;
+            manager.panSmoothTime=.25f;
+            var counter=app.areaRoots[(int)AreaId.Counter];
+            var dock=counter.GetComponent<FreeCafeSubSceneDock>();
+            Assert.That(dock,Is.Not.Null,"工作台根需要 FreeCafeSubSceneDock");
+            var home=counter.localPosition;
+            var lobbyView=manager.Find(AreaId.Cafe).cameraAnchor.position+manager.cameraOffset;
+            app.Enter(AreaId.Counter);yield return null;
+            Assert.That(dock.IsDocked,Is.True,"进入工作台应停靠到一楼镜头前");
+            Assert.That(Vector3.Distance(counter.localPosition,home),Is.GreaterThan(.01f),"工作台根应开始滑动");
+            float timeout=Time.unscaledTime+3;
+            while(Vector3.Distance(counter.localPosition,dock.dockedLocalPosition)>.01f && Time.unscaledTime<timeout) yield return null;
+            Assert.That(Vector3.Distance(counter.localPosition,dock.dockedLocalPosition),Is.LessThan(.01f),"工作台应停靠到位");
+            Assert.That(app.worldCamera.transform.position,Is.EqualTo(lobbyView),"镜头保持一楼视野不动");
+            app.Enter(AreaId.Cafe);yield return null;
+            timeout=Time.unscaledTime+3;
+            while(Vector3.Distance(counter.localPosition,home)>.01f && Time.unscaledTime<timeout) yield return null;
+            Assert.That(dock.IsDocked,Is.False);Assert.That(Vector3.Distance(counter.localPosition,home),Is.LessThan(.01f),"离开后工作台应滑回原位");
         }
         [UnityTest] public IEnumerator BasementDraggingStoresLocalCoordinatesAndRestoreReturnsCameraToSavedArea()
         {
@@ -190,7 +234,7 @@ namespace Spotlight.FreeCafe.Tests
                 foreach (var area in new[] { AreaId.Counter, AreaId.TopFloor, AreaId.Basement, AreaId.Cafe })
                 {
                     gm.SetVisible(true);gm.SelectCategory("界面与场景");yield return null;
-                    string label=area==AreaId.Counter ? "直达制作界面" : area==AreaId.TopFloor ? "直达二楼" : area==AreaId.Basement ? "直达地下室" : "直达一楼大堂";
+                    string label=area==AreaId.Counter ? "直达制作界面" : area==AreaId.TopFloor ? "直达二楼会客室" : area==AreaId.Basement ? "直达三楼宿舍" : "直达一楼大堂";
                     yield return ClickWithQueuedMouse(mouse,GmAction(gm,label));
                     Assert.That(app.World.State.currentArea, Is.EqualTo(area));
                 }

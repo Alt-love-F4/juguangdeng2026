@@ -626,7 +626,7 @@ MonoBehaviour:
       sprite: {fileID: 21300000, guid: 88646f64758842f42b2c2dcd7359f760, type: 3}
   - brief:
       id: area.cafe
-      label: "\u4E00\u697C \xB7 \u8425\u4E1A\u533A\u80CC\u666F"
+      label: "\u4E00\u697C \xB7 \u5927\u5385\u80CC\u666F"
       category: background
       pivot: center (0.5,0.5)
       outputFolder: Assets/Art/FreeCafe/Backgrounds
@@ -647,7 +647,7 @@ MonoBehaviour:
       sprite: {fileID: 0}
   - brief:
       id: area.counter
-      label: "\u4E00\u697C \xB7 \u51FA\u9910\u53F0\u80CC\u666F"
+      label: "\u4E00\u697C \xB7 \u5DE5\u4F5C\u53F0\u80CC\u666F"
       category: background
       pivot: center (0.5,0.5)
       outputFolder: Assets/Art/FreeCafe/Backgrounds
@@ -668,7 +668,7 @@ MonoBehaviour:
       sprite: {fileID: 0}
   - brief:
       id: area.top
-      label: "\u9876\u697C\u80CC\u666F"
+      label: "\u4E8C\u697C \xB7 \u4F1A\u5BA2\u5BA4\u80CC\u666F"
       category: background
       pivot: center (0.5,0.5)
       outputFolder: Assets/Art/FreeCafe/Backgrounds
@@ -689,7 +689,7 @@ MonoBehaviour:
       sprite: {fileID: 0}
   - brief:
       id: area.basement
-      label: "\u5730\u4E0B\u5BA4\u80CC\u666F"
+      label: "\u4E09\u697C \xB7 \u5BBF\u820D\u80CC\u666F"
       category: background
       pivot: center (0.5,0.5)
       outputFolder: Assets/Art/FreeCafe/Backgrounds

@@ -21,7 +21,7 @@ namespace Spotlight.FreeCafe.Tests
             Time.timeScale=1;GameSaveParticipantRegistry.PendingRestore=null;
             if(FreeCafeGMPanel.Instance!=null) FreeCafeGMPanel.Instance.SetVisible(false);
             yield return SceneManager.LoadSceneAsync("CoffeeShop");yield return null;yield return null;
-            app=Object.FindFirstObjectByType<FreeCafeRuntime>();hud=Object.FindFirstObjectByType<FreeCafeHud>();
+            app=Object.FindFirstObjectByType<FreeCafeRuntime>();app.areaManager.panSmoothTime=0;hud=Object.FindFirstObjectByType<FreeCafeHud>();
         }
         [UnityTearDown] public IEnumerator Cleanup()
         {

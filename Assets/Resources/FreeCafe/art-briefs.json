@@ -469,7 +469,7 @@
     },
     {
       "id": "area.cafe",
-      "label": "一楼 · 营业区背景",
+      "label": "一楼 · 大厅背景",
       "category": "background",
       "width": 2048,
       "height": 1138,
@@ -486,7 +486,7 @@
     },
     {
       "id": "area.counter",
-      "label": "一楼 · 出餐台背景",
+      "label": "一楼 · 工作台背景",
       "category": "background",
       "width": 2048,
       "height": 1138,
@@ -503,7 +503,7 @@
     },
     {
       "id": "area.top",
-      "label": "顶楼背景",
+      "label": "二楼 · 会客室背景",
       "category": "background",
       "width": 2048,
       "height": 1138,
@@ -520,7 +520,7 @@
     },
     {
       "id": "area.basement",
-      "label": "地下室背景",
+      "label": "三楼 · 宿舍背景",
       "category": "background",
       "width": 2048,
       "height": 1138,

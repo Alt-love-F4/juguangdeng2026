@@ -245,8 +245,8 @@ namespace Spotlight.FreeCafe
         {
             AddAction("直达一楼大堂", () => Navigate(AreaId.Cafe), "调试传送；正常游戏使用场景入口");
             AddAction("直达制作界面", () => Navigate(AreaId.Counter), "沿用制作会话，不创建新场景");
-            AddAction("直达二楼", () => Navigate(AreaId.TopFloor), "调试传送");
-            AddAction("直达地下室", () => Navigate(AreaId.Basement), "调试传送");
+            AddAction("直达二楼会客室", () => Navigate(AreaId.TopFloor), "调试传送");
+            AddAction("直达三楼宿舍", () => Navigate(AreaId.Basement), "调试传送");
             AddAction("携带选中实体跨区域", () => { runtime.CarrySelection=!runtime.CarrySelection;SetStatus("调试携带："+(runtime.CarrySelection ? "开启" : "关闭")); }, "只影响调试区域切换");
         }
         private void Navigate(AreaId area)
