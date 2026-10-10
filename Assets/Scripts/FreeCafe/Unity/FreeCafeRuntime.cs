@@ -170,7 +170,18 @@ namespace Spotlight.FreeCafe
         }
         public Vector3 AreaToWorld(AreaId area,float x,float y) => areaRoots[(int)area].TransformPoint(new Vector3(x,y,0));
         public Vector3 WorldToArea(AreaId area,Vector3 position) => areaRoots[(int)area].InverseTransformPoint(position);
-        public bool IsCurrentAreaTransform(Transform target) => World!=null && target!=null && target.IsChildOf(areaRoots[(int)World.State.currentArea]);
+        public bool IsCurrentAreaTransform(Transform target)
+        {
+            if(World==null || target==null) return false;
+            var current=areaRoots[(int)World.State.currentArea];
+            // 区域场景可相互嵌套（工作台嵌在大厅下）：以最近的区域根判定归属
+            for(var t=target;t!=null;t=t.parent)
+            {
+                for(int i=0;i<areaRoots.Length;i++)
+                    if(t==areaRoots[i]) return t==current;
+            }
+            return false;
+        }
         public FreeEntityView View(string id) => id!=null && views.TryGetValue(id,out var view) ? view : null;
         public void ShowHint(string message)
         {
@@ -462,6 +473,8 @@ namespace Spotlight.FreeCafe
             var gateway=GetComponent<FreeCafeMiniGameGateway>(); if(gateway!=null) gateway.Abort();
             var result=World.Restore(JsonUtility.FromJson<CafeSnapshot>(json));
             if(!result.success) throw new FormatException(result.message); SelectedId=null; if(productionMode && !World.ProductionEnabled) World.EnableProduction(); SyncViews();
+            // 读档后镜头瞬间就位，不做区域切换的平滑平移
+            areaManager.SnapNow();
         }
         public void Save()
         {

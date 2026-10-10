@@ -54,15 +54,21 @@ namespace Spotlight.FreeCafe.Editor
             var building=new GameObject("BuildingViews"); runtime.areaRoots=new Transform[4];
             var floor1=new GameObject("floor1").transform;floor1.SetParent(building.transform,false);
             var floor2=new GameObject("floor2").transform;floor2.SetParent(building.transform,false);floor2.localPosition=new Vector3(0,40,0);
-            var floorB1=new GameObject("floorB1").transform;floorB1.SetParent(building.transform,false);floorB1.localPosition=new Vector3(0,-40,0);
+            var floor3=new GameObject("floor3").transform;floor3.SetParent(building.transform,false);floor3.localPosition=new Vector3(0,80,0);
             var manager=app.AddComponent<FreeCafeAreaManager>();runtime.areaManager=manager;manager.worldCamera=camera;
             manager.areas=new CafeAreaAnchor[4];
             foreach(var area in catalog.areas)
             {
-                var room=new GameObject(area.id.ToString());room.transform.SetParent(area.id==AreaId.TopFloor ? floor2 : area.id==AreaId.Basement ? floorB1 : floor1,false);runtime.areaRoots[(int)area.id]=room.transform;
-                if(area.id==AreaId.Counter) room.transform.localPosition=new Vector3(60,0,0);
+                var room=new GameObject(area.id.ToString());
+                // 工作台是一楼场景的嵌套子场景：作为大厅的子物体，位于其下方，镜头平滑平移触发
+                if(area.id==AreaId.Counter){room.transform.SetParent(runtime.areaRoots[(int)AreaId.Cafe],false);room.transform.localPosition=new Vector3(0,-40,0);}
+                else room.transform.SetParent(area.id==AreaId.TopFloor ? floor2 : area.id==AreaId.Basement ? floor3 : floor1,false);
+                runtime.areaRoots[(int)area.id]=room.transform;
                 var cameraAnchor=new GameObject("CameraAnchor").transform;cameraAnchor.SetParent(room.transform,false);
-                manager.areas[(int)area.id]=new CafeAreaAnchor{area=area.id,floor=area.id==AreaId.TopFloor ? CafeFloor.Second : area.id==AreaId.Basement ? CafeFloor.Basement : CafeFloor.First,contentRoot=room.transform,cameraAnchor=cameraAnchor};
+                var anchorEntry=new CafeAreaAnchor{area=area.id,floor=area.id==AreaId.TopFloor ? CafeFloor.Second : area.id==AreaId.Basement ? CafeFloor.Third : CafeFloor.First,contentRoot=room.transform,cameraAnchor=cameraAnchor};
+                // 工作台是嵌套子场景：聚焦时根停靠到一楼镜头前，摄像头不平移
+                if(area.id==AreaId.Counter){var dock=room.AddComponent<FreeCafeSubSceneDock>();dock.areaManager=manager;anchorEntry.dockToView=true;anchorEntry.dock=dock;}
+                manager.areas[(int)area.id]=anchorEntry;
                 var back=new GameObject("Background_WHITEBOX",typeof(SpriteRenderer));back.transform.SetParent(room.transform,false);
                 var sr=back.GetComponent<SpriteRenderer>();sr.sprite=LoadSketchSprite(SketchBackgrounds[(int)area.id]) ?? library.Resolve(area.artId);sr.sortingOrder=-100;
                 var size=sr.sprite.bounds.size;back.transform.localScale=new Vector3(area.halfWidth*2/size.x,area.halfHeight*2/size.y,1);
@@ -70,8 +76,8 @@ namespace Spotlight.FreeCafe.Editor
                 var label=note.GetComponent<TextMeshPro>();label.font=Font;label.fontSize=2.4f;label.alignment=TextAlignmentOptions.Center;label.text="白模 / "+area.label+" / "+area.artId;label.color=new Color(.32f,.36f,.39f);label.GetComponent<MeshRenderer>().sortingOrder=0;
                 room.SetActive(true);
             }
-            Portal(runtime,library,runtime.areaRoots[0],AreaId.Counter,7.8f,0,"进入出餐台 →");
-            Portal(runtime,library,runtime.areaRoots[1],AreaId.Cafe,8f,3.5f,"← 营业区");
+            Portal(runtime,library,runtime.areaRoots[0],AreaId.Counter,7.8f,0,"进入工作台 ↓");
+            Portal(runtime,library,runtime.areaRoots[1],AreaId.Cafe,8f,3.5f,"↑ 返回大厅");
             FuturePlaceholder(library,runtime.areaRoots[2],"future.topic","未来：对话 / 热点词条",-4,1);
             FuturePlaceholder(library,runtime.areaRoots[3],"future.press","未来：夜间印刷（未实现）",-4,1);
             FuturePlaceholder(library,runtime.areaRoots[3],"future.newspaper","未来：报纸自由排版（未实现）",3,-1);

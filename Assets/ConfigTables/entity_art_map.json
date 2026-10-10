@@ -21,15 +21,15 @@
     { "src": "pot_drip_powder.jpg",   "artId": "machine.brewer",  "state": "loaded",     "note": "已装咖啡粉、等待注水（上壶有粉、下壶空）" },
     { "src": "pot_lower_done.jpg",    "artId": "machine.brewer",  "state": "ready",      "note": "咖啡液就绪（下壶盛满）" },
 
-    { "src": "kettle_red.jpg",        "artId": "machine.heater",  "state": "empty",      "note": "加热壶·没装水（空奶锅）" },
-    { "src": "kettle_blue.jpg",       "artId": "machine.heater",  "state": "loaded",     "note": "加热壶·已装液体（蓝色壶身）" },
-    { "src": "kettle_blue.jpg",       "artId": "machine.heater",  "state": "processing", "note": "加热壶·加热中（蓝色壶身）" },
-    { "src": "kettle_green.jpg",      "artId": "machine.heater",  "state": "boiling",    "note": "加热壶·沸腾（绿色壶身）" },
-    { "src": "kettle_green.jpg",      "artId": "machine.heater",  "state": "warm",       "note": "加热壶·温热（绿色壶身）" },
-    { "src": "kettle_blue.jpg",       "artId": "machine.heater",  "state": "room",       "note": "加热壶·冷却到常温（蓝色壶身）" },
+    { "src": "kettle_empty.jpg",      "artId": "machine.heater",  "state": "empty",      "note": "加热壶·没装水（空铜壶）" },
+    { "src": "kettle_filled.jpg",     "artId": "machine.heater",  "state": "loaded",     "note": "加热壶·已装液体（液面平静）" },
+    { "src": "kettle_filled.jpg",     "artId": "machine.heater",  "state": "processing", "note": "加热壶·加热中（复用装液态）" },
+    { "src": "kettle_boiling.jpg",    "artId": "machine.heater",  "state": "boiling",    "note": "加热壶·沸腾（大泡+滚蒸汽）" },
+    { "src": "kettle_warm.jpg",       "artId": "machine.heater",  "state": "warm",       "note": "加热壶·温热（一缕细蒸汽）" },
+    { "src": "kettle_filled.jpg",     "artId": "machine.heater",  "state": "room",       "note": "加热壶·冷却到常温（复用装液态）" },
 
-    { "src": "cup_with_coffee.jpg",   "artId": "cup.small",       "state": "coffee",     "note": "小杯盛咖啡" },
-    { "src": "cup_with_coffee.jpg",   "artId": "cup.large",       "state": "coffee",     "note": "大杯盛咖啡" },
+    { "src": "cup_small_coffee.jpg",  "artId": "cup.small",       "state": "coffee",     "note": "小杯盛咖啡" },
+    { "src": "cup_large_coffee.jpg",  "artId": "cup.large",       "state": "coffee",     "note": "大杯盛咖啡" },
 
     { "src": "ing_water.jpg",         "artId": "water",           "state": "default",    "note": "清水一份 / 清水来源（玻璃水壶）" },
     { "src": "topping_sugar.jpg",     "artId": "sugar",           "state": "default",    "note": "方糖一份 / 方糖来源（糖块小碗）" },

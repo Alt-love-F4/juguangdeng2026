@@ -17,6 +17,8 @@ namespace Spotlight.FreeCafe
                 if (area == null) throw new InvalidOperationException("缺少场景区域根");
                 foreach (var view in area.GetComponentsInChildren<FreeEntityView>(true))
                 {
+                    // 区域场景可相互嵌套（工作台嵌在大厅下）：实体归属最近的区域根
+                    if (NearestAreaRoot(runtime, view.transform) != area) continue;
                     // 运行时新生成的杯子/顾客没有 authoring id，不属于初始布局。
                     if (string.IsNullOrEmpty(view.AuthoringEntityId))
                     {
@@ -30,6 +32,15 @@ namespace Spotlight.FreeCafe
             return result;
         }
 
+        /// <summary>沿父链向上找到包含该节点的最近区域根；区域可嵌套，越深优先级越高。</summary>
+        public static Transform NearestAreaRoot(FreeCafeRuntime runtime, Transform target)
+        {
+            for (var t = target; t != null; t = t.parent)
+                foreach (var root in runtime.areaRoots)
+                    if (t == root) return t;
+            return null;
+        }
+
         public static InitialEntity[] Capture(FreeCafeRuntime runtime, IList<FreeEntityView> entities)
         {
             var layout = new InitialEntity[entities.Count];
@@ -37,8 +48,10 @@ namespace Spotlight.FreeCafe
             {
                 var view = entities[n];
                 int areaIndex = -1;
+                // 区域场景可相互嵌套（工作台嵌在大厅下）：按最近的区域根归属
+                var owner = NearestAreaRoot(runtime, view.transform);
                 for (int i = 0; i < runtime.areaRoots.Length; i++)
-                    if (view.transform.IsChildOf(runtime.areaRoots[i])) { areaIndex = i; break; }
+                    if (owner == runtime.areaRoots[i]) { areaIndex = i; break; }
                 if (areaIndex < 0) throw new InvalidOperationException("实体不在区域根下：" + view.name);
                 var position = runtime.areaRoots[areaIndex].InverseTransformPoint(view.transform.position);
                 layout[n] = new InitialEntity

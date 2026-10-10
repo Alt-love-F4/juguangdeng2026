@@ -10,10 +10,25 @@ namespace Spotlight.GameFlow
         [SerializeField] private SaveSlotView[] slots = new SaveSlotView[6];
         [SerializeField] private Button backButton;
         private bool fromGameplay;
+        private bool initialized;
 
         protected override void Awake()
         {
             base.Awake();
+            InitializeSlots();
+        }
+
+        protected override void OnInit(YokiFrame.IUIData data = null)
+        {
+            base.OnInit(data);
+            InitializeSlots();
+        }
+
+        private void InitializeSlots()
+        {
+            if (initialized) return;
+            initialized = true;
+            // OnInit runs before OnOpen, even while UIKit's storage root is inactive.
             ResolveSlotViews();
             for (int i = 0; i < slots.Length; i++)
             {
@@ -47,6 +62,7 @@ namespace Spotlight.GameFlow
         protected override void OnOpen(YokiFrame.IUIData data = null)
         {
             base.OnOpen(data);
+            InitializeSlots();
             GameFlowPanelData panelData = data as GameFlowPanelData;
             fromGameplay = panelData != null && panelData.FromGameplay;
             SelectSlot(null);
@@ -64,13 +80,14 @@ namespace Spotlight.GameFlow
             if (descriptionText != null)
                 descriptionText.text = fromGameplay
                     ? "自动存档位仅可读取；手动存档位可读取、保存或删除"
-                    : "从标题界面进入时仅可读取存档";
+                    : "从标题界面进入时可读取存档、删除手动存档；不可保存";
             var saveSlots = Flow != null ? Flow.ListSaveSlots() : null;
             for (int i = 0; i < slots.Length; i++)
-                if (slots[i] != null && saveSlots != null && i < saveSlots.Count)
+                if (slots[i] != null)
                 {
-                    slots[i].Refresh(saveSlots[i], fromGameplay);
-                    slots[i].SetThumbnail(saveSlots[i].CanLoad ? Flow.GetThumbnail(i) : null);
+                    GameSaveSlotInfo slot = saveSlots != null && i < saveSlots.Count ? saveSlots[i] : null;
+                    slots[i].Refresh(slot, fromGameplay);
+                    slots[i].SetThumbnail(slot != null && slot.CanLoad && Flow != null ? Flow.GetThumbnail(slot.Index) : null);
                 }
         }
     }
