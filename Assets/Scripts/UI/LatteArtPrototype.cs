@@ -4,15 +4,13 @@ using UnityEngine.UI;
 using UnityEngine.EventSystems;
 using UIEventSystem = UnityEngine.EventSystems.EventSystem;
 using System.Collections.Generic;
-using YokiFrame;
 
 namespace OnePersonCompany
 {
     /// <summary>
     /// GPU incompressible NS on a MAC grid. One Shader supplies display and all solver
-    /// passes. Only GPU appearance is changed, never gameplay state. Production time
-    /// comes from TickEvent. User-approved preview fallback is restricted to scenes
-    /// without GameRoot, and never reactivates after receiving a game Tick.
+    /// passes. Only GPU appearance is changed, never gameplay state. Simulation runs on
+    /// scaled game time, so pausing the game (timeScale 0) freezes the effect.
     /// </summary>
     public sealed class LatteArtPrototype : MonoBehaviour
     {
@@ -35,9 +33,6 @@ namespace OnePersonCompany
         [Header("Mouse")]
         [Tooltip("Off: hovering pours continuously. On: hold left mouse button.")]
         [SerializeField] private bool requireLeftButton = true;
-        [Header("Standalone test scene only")]
-        [Tooltip("Preview only with no GameRoot and no received game Tick. Paused games never fall back.")]
-        [SerializeField] private bool allowUpdateFallback = true;
 
         private const float BowlRadius = 0.46f;
         private const float MaxStep = 1f / 60f;
@@ -57,9 +52,8 @@ namespace OnePersonCompany
         private RenderTexture densityRead, densityWrite, densityForward;
         private Texture originalTexture;
         private Material originalMaterial;
-        private IUnRegister tickLink;
         private Vector2 previousUV;
-        private bool wasPouring, receivedGameTick, gameClockPresent;
+        private bool wasPouring;
         private float simulationTime;
         private int simulationFrameCount;
         private PointerEventData uiPointer;
@@ -74,7 +68,6 @@ namespace OnePersonCompany
         public RenderTexture DivergenceTexture => divergence;
         public RenderTexture VelocityScratchTexture => velocityScratch;
         public int SimulationFrameCount => simulationFrameCount;
-        public bool UsesStandalonePreview => allowUpdateFallback && !receivedGameTick && !gameClockPresent;
         public Material SurfaceMaterial => surfaceMaterial;
         // These settings affect GPU appearance only, not game services/state.
         public float BrushRadius { get => brushRadius; set => brushRadius = Mathf.Clamp(value, 0.005f, 0.08f); }
@@ -129,8 +122,6 @@ namespace OnePersonCompany
                 originalRendererMaterial = worldRenderer.sharedMaterial;
                 originalMaterial = originalRendererMaterial;
             }
-            receivedGameTick = false;
-            gameClockPresent = Object.FindFirstObjectByType<GameRoot>(FindObjectsInactive.Include) != null;
             if (simulationShader == null) simulationShader = Shader.Find("LatteArt/NavierStokes");
             if (simulationShader == null || !simulationShader.isSupported ||
                 !SystemInfo.SupportsRenderTextureFormat(RenderTextureFormat.ARGBHalf))
@@ -185,7 +176,6 @@ namespace OnePersonCompany
                 worldRenderer.material = surfaceMaterial;
                 surfaceMaterial.SetTexture("_MainTex", densityRead);
             }
-            tickLink = EventKit.Type.Register<TickEvent>(OnTick);
         }
         private RenderTexture CreateRT(int size, string name, FilterMode filtering)
         {
@@ -247,18 +237,14 @@ namespace OnePersonCompany
             }
             return (uv - Vector2.one * 0.5f).sqrMagnitude < BowlRadius * BowlRadius;
         }
-        private void OnTick(TickEvent evt) { receivedGameTick = true; SimulateInput(evt.DeltaTime); }
         private void Update()
         {
             // Read pointer preview and wheel in Update, immediately after the Input System
             // update. LateUpdate is too easy to miss for delta-style scroll values.
             UpdateBrushPointer();
 
-            // User-approved isolated preview exception; never revive a paused game clock.
-            if (!allowUpdateFallback || receivedGameTick) return;
-            gameClockPresent = GameRoot.Instance != null ||
-                Object.FindFirstObjectByType<GameRoot>(FindObjectsInactive.Include) != null;
-            if (!gameClockPresent) SimulateInput(Time.unscaledDeltaTime);
+            // Scaled time: pausing the game (timeScale 0) freezes the simulation.
+            SimulateInput(Time.deltaTime);
         }
         private void UpdateBrushPointer()
         {
@@ -395,7 +381,6 @@ namespace OnePersonCompany
         private static void Swap(ref RenderTexture a, ref RenderTexture b) { RenderTexture t = a; a = b; b = t; }
         private void OnDisable()
         {
-            tickLink?.UnRegister(); tickLink = null;
             if (image != null && surfaceMaterial != null) { image.material = originalMaterial; image.texture = originalTexture; }
             if (worldSurface && worldRenderer != null) worldRenderer.sharedMaterial = originalRendererMaterial;
             Release(ref velocityRead); Release(ref velocityWrite); Release(ref velocityScratch);

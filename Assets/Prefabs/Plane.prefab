@@ -141,7 +141,6 @@ MonoBehaviour:
   velocityDamping: 3
   diffusion: 0.15
   requireLeftButton: 1
-  allowUpdateFallback: 1
   showBrushPreview: 1
   wheelRadiusStep: 0.0025
   inputCamera: {fileID: 0}
