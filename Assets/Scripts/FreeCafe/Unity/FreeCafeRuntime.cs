@@ -203,6 +203,7 @@ namespace Spotlight.FreeCafe
                 var liquid=World.LiquidSnapshot(entity);
                 info+=" · "+liquid.volumeMl.ToString("0")+"/"+liquid.capacityMl.ToString("0")+" ml · "+World.ProductionCaption(entity);
                 foreach(var portion in entity.contents) info+=" · "+World.Spec(portion.specId).label;
+                if(entity.latteArt) info+=" · 拉花 "+(entity.latteArtPattern ?? "unknown")+" "+entity.latteArtScore.ToString("0")+"分";
                 ShowHint(info); return;
             }
             if(spec.Has(Capability.Container))
@@ -491,5 +492,3 @@ namespace Spotlight.FreeCafe
         public void DebugRefreshViews() { SyncViews(); ShowHint("经营视图已刷新"); }
     }
 }
-
-

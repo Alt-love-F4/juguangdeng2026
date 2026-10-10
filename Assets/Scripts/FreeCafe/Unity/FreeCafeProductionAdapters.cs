@@ -14,4 +14,15 @@ namespace Spotlight.FreeCafe
         void Begin(string kind, string cupId, string token, Action<string, bool, float> complete);
         void Cancel(string token);
     }
+    public interface ICafeLatteArtResultPresenter
+    {
+        string LastPatternId { get; }
+    }
+    public interface ILatteArtSurface
+    {
+        int StrokePointCount { get; }
+        void SetInteractionEnabled(bool value);
+        void ResetLatte();
+        LatteArtRecognitionResult Recognize(System.Collections.Generic.IList<LatteArtPatternPreset> presets = null);
+    }
 }

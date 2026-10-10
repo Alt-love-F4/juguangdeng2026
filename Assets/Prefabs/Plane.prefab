@@ -90,7 +90,7 @@ MeshRenderer:
   m_GlobalIlluminationMeshLod: 0
   m_SortingLayerID: 0
   m_SortingLayer: 0
-  m_SortingOrder: 0
+  m_SortingOrder: 1000
   m_MaskInteraction: 0
   m_AdditionalVertexStreams: {fileID: 0}
 --- !u!64 &8116184586119922918
@@ -156,4 +156,4 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: bfa9144905aee0340a44d7103930bb41, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::OnePersonCompany.LatteArtRuntimeControls
-  uiFont: {fileID: 11400000, guid: 4501b3d2064f7ef43aed101cd4afcab3, type: 2}
+

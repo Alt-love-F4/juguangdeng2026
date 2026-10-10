@@ -124,6 +124,7 @@ namespace Spotlight.FreeCafe
         public int unlockReputation; // 解锁所需声望
         public int qualityPriceStep = 50; // 咖啡品质每高一级的加价
         public bool requiresLatteArt;     // 是否必须完成拉花
+        public string preferredLatteArtPattern; // 可选：顾客/餐品偏好的图案 ID
         public Portion[] ingredients;     // 配方原料（份数需与杯子容量匹配）
     }
 
@@ -259,6 +260,8 @@ namespace Spotlight.FreeCafe
         public int stock;      // 作为来源时的剩余库存
         public int quality;    // 品质（0~2）
         public bool latteArt;  // 是否已完成拉花
+        public string latteArtPattern; // 玩家拉出的图案 ID，用于剧情与顾客偏好
+        public float latteArtScore; // 图案匹配分数（0~100）
         public List<Portion> contents = new List<Portion>(); // 容器内容物
         public ProductionEntityState production = new ProductionEntityState();
         public ProcessingTask task; // 设备加工任务（非设备为空）

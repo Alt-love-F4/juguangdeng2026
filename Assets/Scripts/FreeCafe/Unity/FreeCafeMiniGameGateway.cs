@@ -34,7 +34,8 @@ namespace Spotlight.FreeCafe
                     adapter.Begin(session.miniGameKind,session.miniGameCupId,expected,(returned,completed,score)=>
                     {
                         if(this==null || epoch!=generation || token!=expected || returned!=expected) return;
-                        runtime.ShowHint(runtime.World.ResolveProductionMiniGame(returned,completed,score).message);
+                        string pattern = (adapter as ICafeLatteArtResultPresenter)?.LastPatternId;
+                        runtime.ShowHint(runtime.World.ResolveProductionMiniGame(returned, completed, score, pattern).message);
                     });
                 }
             }
@@ -42,3 +43,4 @@ namespace Spotlight.FreeCafe
         }
     }
 }
+
