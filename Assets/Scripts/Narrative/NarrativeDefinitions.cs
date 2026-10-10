@@ -75,6 +75,7 @@ namespace Spotlight.Narrative
     {
         public string eventId;
         public NarrativeEventKind eventKind;
+        public string eventKindRaw;
         public string actorId;
         public string targetId;
         public string titleText;
@@ -198,6 +199,14 @@ namespace Spotlight.Narrative
     {
         void Drain(Action completed);
     }
+
+    public delegate bool NarrativeConversationPlayback(NarrativeEventRequest request, NarrativeConversationPresentationData data, Action completed);
+
+    public delegate bool NarrativeNoticePlayback(NarrativeEventRequest request, NarrativeNoticePresentationData data, Action completed);
+
+    public delegate bool NarrativeReadingPlayback(
+        NarrativeEventRequest request, string title, IReadOnlyList<string> pages, string imageResourcePath,
+        bool dialogue, string speaker, string portraitResourcePath, Action completed);
 
     public interface INarrativePresenter
     {

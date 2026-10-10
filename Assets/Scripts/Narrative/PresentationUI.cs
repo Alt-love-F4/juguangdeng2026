@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using TMPro;
 using UnityEngine;
 using UnityEngine.InputSystem;
+using UnityEngine.EventSystems;
 using UnityEngine.UI;
 
 namespace Spotlight.Narrative
@@ -20,6 +21,7 @@ namespace Spotlight.Narrative
         private RectTransform choicesContent;
         private bool submitted, revealNow;
         private bool visible;
+        private bool choicesVisible;
         private bool suspended;
         private GameObject noticeRoot;
         private TMP_Text noticeText;
@@ -60,7 +62,8 @@ namespace Spotlight.Narrative
             bodyScroll.viewport = bodyViewport.rectTransform; bodyScroll.content = bodyRect;
             bodyViewport.gameObject.AddComponent<Button>().onClick.AddListener(Submit);
             hint = Text("Notice", transform, new Vector2(.05f, .92f), new Vector2(.95f, .98f), 22); hint.alignment = TextAlignmentOptions.Center;
-            choicesPanel = Image("Choices", transform, new Vector2(.18f, .38f), new Vector2(.82f, .72f), new Color(.035f, .035f, .045f, .98f)).gameObject;
+            choicesPanel = Image("Choices", transform, new Vector2(.23f, .38f), new Vector2(.77f, .72f), new Color(.035f, .035f, .045f, .98f)).gameObject;
+            choicesPanel.GetComponent<Image>().raycastTarget = true;
             previousButton = NavigationButton("Previous", new Vector2(.04f, .045f), new Vector2(.14f, .11f), "‹");
             nextButton = NavigationButton("Next", new Vector2(.86f, .045f), new Vector2(.96f, .11f), "›");
             continueButton = NavigationButton("Continue", new Vector2(.43f, .045f), new Vector2(.57f, .11f), "继续");
@@ -123,9 +126,12 @@ namespace Spotlight.Narrative
             fade.color = new Color(0, 0, 0, 0); body.text = string.Empty;
         }
 
-        public void ShowLine(string text)
+        public void ShowLine(string text, string speaker = null)
         {
+            if (speaker != null) title.text = speaker;
             body.text = text ?? string.Empty; body.maxVisibleCharacters = 0; revealNow = false; IsProgressing = true;
+            choicesVisible = false;
+            choicesPanel.SetActive(false);
             body.rectTransform.anchoredPosition = Vector2.zero;
             LayoutRebuilder.ForceRebuildLayoutImmediate(body.rectTransform);
         }
@@ -148,7 +154,7 @@ namespace Spotlight.Narrative
 
         private void Submit()
         {
-            if (!visible || suspended || choicesPanel.activeSelf) return;
+            if (!visible || suspended || choicesVisible) return;
             if (IsProgressing) revealNow = true;
             else if (navigationActive && nextPage != null) nextPage();
             else submitted = true;
@@ -177,7 +183,7 @@ namespace Spotlight.Narrative
 
         public void ShowChoices(IReadOnlyList<NarrativeChoiceDefinition> choices, Func<string, string> resolve, Func<string, bool> unlocked, Func<string, string> requirement, IReadOnlyList<string> selectedIds, Action<string> selected)
         {
-            ClearChoices(); choicesPanel.SetActive(true); ResetSubmit();
+            ClearChoices(); choicesPanel.SetActive(true); choicesVisible = true; ResetSubmit();
             foreach (NarrativeChoiceDefinition choice in choices)
             {
                 Image row = Image("Choice_" + choice.choiceId, choicesContent, Vector2.zero, Vector2.one, new Color(.17f, .19f, .22f));
@@ -186,7 +192,8 @@ namespace Spotlight.Narrative
                 if (selectedIds != null) for (int i = 0; i < selectedIds.Count; i++) if (selectedIds[i] == choice.choiceId) isSelected = true;
                 button.interactable = isUnlocked && !isSelected;
                 ColorBlock buttonColors = button.colors; buttonColors.highlightedColor = new Color(.38f, .5f, .58f); buttonColors.pressedColor = new Color(.1f, .36f, .42f); button.colors = buttonColors;
-                LayoutElement element = row.gameObject.AddComponent<LayoutElement>(); element.preferredHeight = 104; element.minHeight = 104;
+                LayoutElement element = row.gameObject.AddComponent<LayoutElement>(); element.preferredHeight = 88; element.minHeight = 88;
+                row.gameObject.AddComponent<ChoiceMotion>();
                 TMP_Text label = Text("Label", row.transform, new Vector2(.035f, .1f), new Vector2(.965f, .9f), 25); label.alignment = TextAlignmentOptions.MidlineLeft;
                 label.enableAutoSizing = true; label.fontSizeMin = 18; label.fontSizeMax = 25; label.text = resolve(choice.textKey);
                 if (isSelected) label.text = "✓ " + label.text + "  [已选择]";
@@ -214,7 +221,7 @@ namespace Spotlight.Narrative
 
         public void ClearChoices(bool hidePanel = true)
         {
-            if (hidePanel) choicesPanel.SetActive(false);
+            if (hidePanel) { choicesPanel.SetActive(false); choicesVisible = false; }
             for (int i = choicesContent.childCount - 1; i >= 0; i--)
             {
                 GameObject child = choicesContent.GetChild(i).gameObject; child.SetActive(false); Destroy(child);
@@ -256,6 +263,23 @@ namespace Spotlight.Narrative
             if (keyboard.escapeKey.wasPressedThisFrame) Escape?.Invoke();
             if (keyboard.spaceKey.wasPressedThisFrame || keyboard.enterKey.wasPressedThisFrame) Submit();
         }
+        private sealed class ChoiceMotion : MonoBehaviour, IPointerEnterHandler, IPointerExitHandler, IPointerDownHandler, IPointerUpHandler
+        {
+            private RectTransform rect;
+            private float target = 1f;
+            private void Awake() { rect = transform as RectTransform; }
+            private void Update()
+            {
+                if (rect == null) return;
+                float value = Mathf.Lerp(rect.localScale.x, target, Time.unscaledDeltaTime * 14f);
+                rect.localScale = new Vector3(value, value, 1f);
+            }
+            public void OnPointerEnter(PointerEventData eventData) { target = 1.025f; }
+            public void OnPointerExit(PointerEventData eventData) { target = 1f; }
+            public void OnPointerDown(PointerEventData eventData) { target = .965f; }
+            public void OnPointerUp(PointerEventData eventData) { target = 1.025f; }
+        }
+
         public void Dispose()
         {
             if (disposed || !this) return;

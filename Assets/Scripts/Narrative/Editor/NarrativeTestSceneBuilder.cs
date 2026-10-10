@@ -22,7 +22,7 @@ namespace Spotlight.Narrative.Editor
             cameraObject.transform.position = new Vector3(0, 0, -10);
             Camera camera = cameraObject.GetComponent<Camera>(); camera.clearFlags = CameraClearFlags.SolidColor; camera.backgroundColor = new Color(.035f, .045f, .055f); camera.orthographic = true; camera.orthographicSize = 5;
             new GameObject("EventSystem", typeof(EventSystem), typeof(InputSystemUIInputModule));
-            var app = new GameObject("NarrativeTestWorkbench", typeof(NarrativeTestWorkbench));
+            var app = new GameObject("NarrativeTestWorkbench", typeof(NarrativeTestWorkbench), typeof(Spotlight.GameFlow.NarrativeTestPresentationBridge));
             EditorSceneManager.MarkSceneDirty(scene);
             Directory.CreateDirectory("Assets/Scenes");
             if (!EditorSceneManager.SaveScene(scene, ScenePath)) throw new IOException("Unable to save " + ScenePath);

@@ -27,6 +27,12 @@ public partial class Tables
     public TbNcsBar TbNcsBar {get; }
     public TbNcsTrigger TbNcsTrigger {get; }
     public TbNcsEvent TbNcsEvent {get; }
+    public TbNcsPresentationIndex TbNcsPresentationIndex {get; }
+    public TbNcsConversationPage TbNcsConversationPage {get; }
+    public TbNcsConversationLine TbNcsConversationLine {get; }
+    public TbNcsNotice TbNcsNotice {get; }
+    public TbNcsReadingPage TbNcsReadingPage {get; }
+    public TbNcsReadingLine TbNcsReadingLine {get; }
     public TbNcsEventDate TbNcsEventDate {get; }
     public TbNcsResult TbNcsResult {get; }
     public TbNcsCondition TbNcsCondition {get; }
@@ -53,6 +59,12 @@ public partial class Tables
         TbNcsBar = new TbNcsBar(loader("tbncsbar"));
         TbNcsTrigger = new TbNcsTrigger(loader("tbncstrigger"));
         TbNcsEvent = new TbNcsEvent(loader("tbncsevent"));
+        TbNcsPresentationIndex = new TbNcsPresentationIndex(loader("tbncspresentationindex"));
+        TbNcsConversationPage = new TbNcsConversationPage(loader("tbncsconversationpage"));
+        TbNcsConversationLine = new TbNcsConversationLine(loader("tbncsconversationline"));
+        TbNcsNotice = new TbNcsNotice(loader("tbncsnotice"));
+        TbNcsReadingPage = new TbNcsReadingPage(loader("tbncsreadingpage"));
+        TbNcsReadingLine = new TbNcsReadingLine(loader("tbncsreadingline"));
         TbNcsEventDate = new TbNcsEventDate(loader("tbncseventdate"));
         TbNcsResult = new TbNcsResult(loader("tbncsresult"));
         TbNcsCondition = new TbNcsCondition(loader("tbncscondition"));
@@ -80,6 +92,12 @@ public partial class Tables
         TbNcsBar.ResolveRef(this);
         TbNcsTrigger.ResolveRef(this);
         TbNcsEvent.ResolveRef(this);
+        TbNcsPresentationIndex.ResolveRef(this);
+        TbNcsConversationPage.ResolveRef(this);
+        TbNcsConversationLine.ResolveRef(this);
+        TbNcsNotice.ResolveRef(this);
+        TbNcsReadingPage.ResolveRef(this);
+        TbNcsReadingLine.ResolveRef(this);
         TbNcsEventDate.ResolveRef(this);
         TbNcsResult.ResolveRef(this);
         TbNcsCondition.ResolveRef(this);

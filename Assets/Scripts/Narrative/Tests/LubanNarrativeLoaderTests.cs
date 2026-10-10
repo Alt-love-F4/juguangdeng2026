@@ -12,6 +12,9 @@ namespace Spotlight.Narrative.Tests
             return new Dictionary<string, JArray>
             {
                 ["tbncsaction"] = new JArray(), ["tbncsmapposition"] = new JArray(),
+                ["tbncspresentationindex"] = JArray.Parse("[{ 'presentationKey':'talk', 'presentationClass':'Conversation', 'logTag':'' }]"),
+                ["tbncsconversationpage"] = new JArray(), ["tbncsconversationline"] = new JArray(),
+                ["tbncsnotice"] = new JArray(), ["tbncsreadingpage"] = new JArray(), ["tbncsreadingline"] = new JArray(),
                 ["tbopeningline"] = new JArray(), ["tbopeningpresentation"] = new JArray(),
                 ["tbtext"] = JArray.Parse("[{ 'key':'title', 'text':'Localized title', 'comment':'shared table' }]"),
                 ["tbrecipe"] = new JArray(), ["tbingredient"] = new JArray(), ["tbdevice"] = new JArray(),
@@ -60,6 +63,18 @@ namespace Spotlight.Narrative.Tests
                 ["nameText"]="title", ["descText"]="title", ["requirements"]="", ["resultEvents"]="", ["durationDays"]=2,
                 ["progressTarget"]=0, ["nextActionKey"]="" });
             Assert.Throws<FormatException>(() => Adapt(data));
+        }
+
+        [Test]
+        public void IndexedPresentationDoesNotRequireLegacySetup()
+        {
+            var data = Data();
+            data["tbncsevent"][0]["setupKey"] = "";
+            data["tbncsevent"][0]["setupType"] = "";
+            data["tbncsevent"][0]["presentationClass"] = "";
+            var config = Adapt(data);
+            Assert.That(config.events[0].presentationKey, Is.EqualTo("talk"));
+            Assert.That(config.events[0].setupKey, Is.Empty);
         }
 
         [Test]

@@ -625,6 +625,51 @@
     "comment": "第一天开场信件署名"
   },
   {
+    "key": "narrative.test.conversation.title",
+    "text": "对话演出测试",
+    "comment": ""
+  },
+  {
+    "key": "narrative.test.conversation.01",
+    "text": "你好，今天的店里很安静。",
+    "comment": ""
+  },
+  {
+    "key": "narrative.test.conversation.02",
+    "text": "是啊，我正好有件事想和你聊聊。",
+    "comment": ""
+  },
+  {
+    "key": "narrative.test.conversation.03",
+    "text": "对话事件已通过 Narrative 配置进入正式对话演出。",
+    "comment": ""
+  },
+  {
+    "key": "narrative.test.notice.title",
+    "text": "街区消息",
+    "comment": ""
+  },
+  {
+    "key": "narrative.test.notice.body",
+    "text": "通知事件已通过 presentationKey 加载策划表内容，并进入正式通知界面。",
+    "comment": ""
+  },
+  {
+    "key": "narrative.test.reading.title",
+    "text": "测试记录",
+    "comment": ""
+  },
+  {
+    "key": "narrative.test.reading.01",
+    "text": "阅读页与文本行来自独立 Luban 表。",
+    "comment": ""
+  },
+  {
+    "key": "narrative.test.reading.02",
+    "text": "第二页展示 dialogue 行的说话人数据。",
+    "comment": ""
+  },
+  {
     "key": "action.meet_b.name",
     "text": "与B见面",
     "comment": "行动名称"

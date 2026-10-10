@@ -1,0 +1,20 @@
+[
+  {
+    "lineId": "test_read_line_01",
+    "pageId": "test_read_page_01",
+    "seq": 1,
+    "mode": "narration",
+    "speakerKey": "",
+    "textKey": "narrative.test.reading.01",
+    "voiceKey": ""
+  },
+  {
+    "lineId": "test_read_line_02",
+    "pageId": "test_read_page_02",
+    "seq": 1,
+    "mode": "dialogue",
+    "speakerKey": "npc_a",
+    "textKey": "narrative.test.reading.02",
+    "voiceKey": ""
+  }
+]

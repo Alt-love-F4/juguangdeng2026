@@ -29,6 +29,30 @@ namespace Spotlight.Narrative
         public event Action<NarrativeEventRequest> EventFinished;
         public event Action<NarrativeEventRequest> EventQueued;
         public event Action<string, int, int> BarChanged;
+        private NarrativeReadingPlayback readingPlayback;
+        private NarrativeNoticePlayback noticePlayback;
+        private NarrativeConversationPlayback conversationPlayback;
+        private Func<string, string, string, NarrativeCharacterPresentationData> characterResolver;
+        public NarrativeReadingPlayback ReadingPlayback
+        {
+            get => readingPlayback;
+            set { readingPlayback = value; if (runtimePresenter != null) runtimePresenter.ReadingPlayback = value; }
+        }
+        public NarrativeConversationPlayback ConversationPlayback
+        {
+            get => conversationPlayback;
+            set { conversationPlayback = value; if (runtimePresenter != null) runtimePresenter.ConversationPlayback = value; }
+        }
+        public NarrativeNoticePlayback NoticePlayback
+        {
+            get => noticePlayback;
+            set { noticePlayback = value; if (runtimePresenter != null) runtimePresenter.NoticePlayback = value; }
+        }
+        public Func<string, string, string, NarrativeCharacterPresentationData> CharacterResolver
+        {
+            get => characterResolver;
+            set { characterResolver = value; if (runtimePresenter != null) runtimePresenter.CharacterResolver = value; }
+        }
 
         private void Awake()
         {
@@ -55,7 +79,13 @@ namespace Spotlight.Narrative
                 return;
             }
             if (injectedPresenter == null)
+            {
                 runtimePresenter = new NarrativePresenter(configuration, ResolveText);
+                runtimePresenter.ReadingPlayback = ReadingPlayback;
+                runtimePresenter.NoticePlayback = NoticePlayback;
+                runtimePresenter.ConversationPlayback = ConversationPlayback;
+                runtimePresenter.CharacterResolver = CharacterResolver;
+            }
             controller = new NarrativeController(configuration, injectedPresenter ?? runtimePresenter);
             MapInventory = new NarrativeMapInventory();
             actionController = new NarrativeActionController(controller, configuration.actions, 5, MapInventory);

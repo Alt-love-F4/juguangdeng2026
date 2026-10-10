@@ -49,6 +49,7 @@ namespace Spotlight.GameFlow
         private float scrollZoomSensitivity => feelConfig.scrollZoomSensitivity;
         private float panInertiaDamping => feelConfig.panInertiaDamping;
         private Vector2 panVelocity;
+        private Vector2 keyboardPanVelocity;
         private RectTransform mapRoot;
         private RectTransform mapContent;
         private RectTransform mapBackground;
@@ -182,7 +183,8 @@ namespace Spotlight.GameFlow
             RectTransform detailRect = detail.transform as RectTransform;
             detailRect.SetAnchors(new Vector2(1, 1), new Vector2(1, 1), new Vector2(-210, -18), new Vector2(170, 44));
             detailRect.pivot = new Vector2(1, 1);
-            detail.onClick.AddListener(() => flow?.OpenDetails());
+            detail.onClick.AddListener(OpenDetails);
+            SetButtonText(detail, "详情面板 / Tab", 20);
             Image title = CreateSpriteImage("Title", root, cityTitleSprite);
             title.rectTransform.SetAnchors(new Vector2(0, 0), new Vector2(0, 0), new Vector2(42, 42), new Vector2(366, 118));
             title.rectTransform.pivot = new Vector2(0, 0);
@@ -203,9 +205,18 @@ namespace Spotlight.GameFlow
             status.rectTransform.SetAnchors(new Vector2(.5f, 0), new Vector2(.5f, 0), new Vector2(-400, 18), new Vector2(800, 32));
         }
 
+        private void OpenDetails()
+        {
+            if (flow == null) flow = FindFirstObjectByType<GameFlowBootstrap>();
+            if (!ControlsAvailable) return;
+            flow?.OpenDetails();
+        }
+
         private void Update()
         {
             if (!isActiveAndEnabled) return;
+            Keyboard key = Keyboard.current;
+            if (key != null && key.tabKey.wasPressedThisFrame) OpenDetails();
             if (endDayButton != null)
             {
                 bool blocking = NarrativeRuntime.Instance?.Actions?.HasBlockingActions() ?? false;
@@ -216,29 +227,49 @@ namespace Spotlight.GameFlow
             {
                 pointerDragging = dragging = false;
                 panVelocity = Vector2.zero;
+                keyboardPanVelocity = Vector2.zero;
                 return;
             }
             if (mapRoot != null && mapRoot.rect.width <= 1f) Canvas.ForceUpdateCanvases();
-            Keyboard key = Keyboard.current;
             Vector2 move = Vector2.zero;
             if (key != null) { if (key.wKey.isPressed) move.y += 1; if (key.sKey.isPressed) move.y -= 1; if (key.aKey.isPressed) move.x -= 1; if (key.dKey.isPressed) move.x += 1; }
-            if (move.sqrMagnitude > 0)
-            {
-                CancelFocusMovement();
-                panVelocity = Vector2.zero;
-                mapCenter += move.normalized * Mathf.Max(0f, feelConfig.keyboardPanSpeed) * Time.unscaledDeltaTime / Mathf.Max(zoom, .01f);
-            }
+            bool keyboardMoving = UpdateKeyboardPan(move, Time.unscaledDeltaTime);
             if (Mouse.current != null)
             {
                 float wheel = Mouse.current.scroll.ReadValue().y;
                 if (Mathf.Abs(wheel) > .01f && IsMapPointerTarget()) AddScrollZoom(wheel);
                 UpdatePointerPan(Mouse.current);
             }
-            if (move.sqrMagnitude == 0) UpdatePanInertia(Time.unscaledDeltaTime);
+            if (!keyboardMoving) UpdatePanInertia(Time.unscaledDeltaTime);
             UpdateZoom();
             UpdateFocusMovement();
             ApplyMapView();
             if (Mouse.current != null && Mouse.current.rightButton.wasPressedThisFrame && !actionDetails.IsBusy) HideFocus();
+        }
+
+        private bool UpdateKeyboardPan(Vector2 input, float deltaTime)
+        {
+            if (!feelConfig.keyboardPanEnabled || pointerDragging || feelConfig.keyboardPanSpeed <= 0f)
+            {
+                keyboardPanVelocity = Vector2.zero;
+                return false;
+            }
+
+            bool hasInput = input.sqrMagnitude > 0f;
+            Vector2 targetVelocity = hasInput ? input.normalized * Mathf.Max(0f, feelConfig.keyboardPanSpeed) : Vector2.zero;
+            float response = hasInput ? feelConfig.keyboardPanAcceleration : feelConfig.keyboardPanDeceleration;
+            keyboardPanVelocity = response <= 0f ? targetVelocity :
+                Vector2.MoveTowards(keyboardPanVelocity, targetVelocity, response * deltaTime);
+            if (!hasInput && keyboardPanVelocity.sqrMagnitude == 0f) return false;
+
+            CancelFocusMovement();
+            panVelocity = Vector2.zero;
+            float scale = feelConfig.keyboardPanCompensateZoom ? Mathf.Max(zoom, .01f) : 1f;
+            Vector2 requested = mapCenter + keyboardPanVelocity * deltaTime / scale;
+            mapCenter = ClampMapCenter(requested);
+            if (mapCenter.x != requested.x) keyboardPanVelocity.x = 0f;
+            if (mapCenter.y != requested.y) keyboardPanVelocity.y = 0f;
+            return true;
         }
 
         private void UpdatePointerPan(Mouse mouse)
@@ -255,6 +286,7 @@ namespace Spotlight.GameFlow
             if (!pointerDragging)
             {
                 pointerDragging = true;
+                keyboardPanVelocity = Vector2.zero;
                 panVelocity = Vector2.zero;
                 dragging = false;
                 dragStart = pointer;
@@ -297,6 +329,7 @@ namespace Spotlight.GameFlow
 
         private void OnDisable()
         {
+            keyboardPanVelocity = Vector2.zero;
             panVelocity = Vector2.zero;
             pointerDragging = dragging = false;
         }
@@ -359,6 +392,7 @@ namespace Spotlight.GameFlow
 
         private void BeginFocusMovement(Vector2 target, Action onComplete = null)
         {
+            keyboardPanVelocity = Vector2.zero;
             panVelocity = Vector2.zero;
             focusTarget = ClampMapCenter(target);
             targetZoom = Mathf.Clamp(focusZoom, MinimumZoom, MaximumZoom);

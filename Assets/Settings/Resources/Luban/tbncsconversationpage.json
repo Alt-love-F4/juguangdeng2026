@@ -1,0 +1,22 @@
+[
+  {
+    "pageId": "test_conv_page_01",
+    "presentationKey": "TEST_CONVERSATION",
+    "seq": 1,
+    "pageCondKeys": "",
+    "pageBarConds": "",
+    "optionGroupKey": "",
+    "bgOverride": "",
+    "bgmOverride": ""
+  },
+  {
+    "pageId": "test_conv_page_02",
+    "presentationKey": "TEST_CONVERSATION",
+    "seq": 2,
+    "pageCondKeys": "",
+    "pageBarConds": "",
+    "optionGroupKey": "",
+    "bgOverride": "",
+    "bgmOverride": ""
+  }
+]

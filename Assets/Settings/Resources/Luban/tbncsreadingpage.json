@@ -1,0 +1,20 @@
+[
+  {
+    "pageId": "test_read_page_01",
+    "presentationKey": "TEST_READING",
+    "seq": 1,
+    "titleKey": "narrative.test.reading.title",
+    "imageKey": "",
+    "pageCondKeys": "",
+    "pageBarConds": ""
+  },
+  {
+    "pageId": "test_read_page_02",
+    "presentationKey": "TEST_READING",
+    "seq": 2,
+    "titleKey": "narrative.test.reading.title",
+    "imageKey": "",
+    "pageCondKeys": "",
+    "pageBarConds": ""
+  }
+]

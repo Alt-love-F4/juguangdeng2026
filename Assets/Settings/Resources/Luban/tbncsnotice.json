@@ -1,0 +1,11 @@
+[
+  {
+    "presentationKey": "TEST_NOTICE",
+    "titleKey": "narrative.test.notice.title",
+    "timeKey": "",
+    "imageKey": "",
+    "textKey": "narrative.test.notice.body",
+    "barConds": "",
+    "noticeBarConds": ""
+  }
+]

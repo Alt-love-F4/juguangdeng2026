@@ -17,6 +17,10 @@ namespace Spotlight.Narrative
         private Coroutine routine;
         private NarrativeEventRequest request;
         private bool draining, disposed, skipRequested, allowSkip, choosing;
+        private NarrativeReadingPlayback readingPlayback;
+        private NarrativeNoticePlayback noticePlayback;
+        private NarrativeConversationPlayback conversationPlayback;
+        private Func<string, string, string, NarrativeCharacterPresentationData> characterResolver;
         private int pageIndex;
         private bool choicesEverShown, continueEverShown, finishPresentation;
         private readonly List<string> pages = new List<string>();
@@ -26,6 +30,10 @@ namespace Spotlight.Narrative
         public event Action<NarrativeEventRequest> Finished;
         public event Func<string, bool> ChoiceSelected;
         public Func<string, NarrativeConditionContext, bool> ChoiceUnlocked { get; set; }
+        public NarrativeReadingPlayback ReadingPlayback { get => readingPlayback; set => readingPlayback = value; }
+        public NarrativeNoticePlayback NoticePlayback { get => noticePlayback; set => noticePlayback = value; }
+        public NarrativeConversationPlayback ConversationPlayback { get => conversationPlayback; set => conversationPlayback = value; }
+        public Func<string, string, string, NarrativeCharacterPresentationData> CharacterResolver { get => characterResolver; set => characterResolver = value; }
 
         public NarrativePresenter(NarrativeConfiguration configuration = null, Func<string, string> textResolver = null)
         {
@@ -47,7 +55,7 @@ namespace Spotlight.Narrative
 
         private IEnumerator PlayEvent()
         {
-            NarrativeSetupParamsDefinition setup = FindSetup(string.IsNullOrWhiteSpace(request.Event.setupKey) ? request.Event.presentationKey : request.Event.setupKey);
+            NarrativeSetupParamsDefinition setup = FindSetup(request.Event.setupKey);
             yield return Sequence(request.Event, setup);
             Action callback = completion;
             completion = null;
@@ -76,15 +84,82 @@ namespace Spotlight.Narrative
         private IEnumerator Sequence(NarrativeEventDefinition definition, NarrativeSetupParamsDefinition setup)
         {
             string templateName = setup?.tplName ?? definition.setupType;
-            if (!string.IsNullOrWhiteSpace(definition.presentationClass)) templateName = TemplateForPresentationClass(definition.presentationClass, templateName);
+            string presentationClass = definition.presentationClass;
+            NarrativePresentationIndexDefinition presentation = configuration?.presentations?.index?.Find(item => item != null && item.presentationKey == definition.presentationKey);
+            if (presentation != null) presentationClass = presentation.presentationClass;
+            if (!string.IsNullOrWhiteSpace(definition.presentationKey) && presentation == null)
+            {
+                Report("Unknown presentationKey: " + definition.presentationKey);
+                yield break;
+            }
+            if (!string.IsNullOrWhiteSpace(presentationClass)) templateName = TemplateForPresentationClass(presentationClass, templateName);
             NarrativeTemplateDefinition template = configuration?.templates?.Find(item => item != null && item.tplName == templateName);
             Dictionary<string, string> slots = PresentationSlots.Parse(setup);
             PresentationSlots.ApplyEventProperties(slots, definition);
             string Get(string key, string fallback = "") => slots.TryGetValue(key, out string value) ? value : fallback;
             skipRequested = false;
             allowSkip = string.Equals(template?.interruptType, "playback", StringComparison.OrdinalIgnoreCase) && (setup?.skipAble ?? template?.defaultSkip ?? false);
-            ui.Show(resolve(Get("titleKey", definition.titleText)));
+            string resolvedTitle = resolve(Get("titleKey", definition.titleText));
+            ui.Show(resolvedTitle);
             pageIndex = 0; choicesEverShown = false; continueEverShown = false; finishPresentation = false; pages.Clear();
+            bool isReading = string.Equals(presentationClass, "reading", StringComparison.OrdinalIgnoreCase);
+            if (string.Equals(presentationClass, "conversation", StringComparison.OrdinalIgnoreCase))
+            {
+                List<NarrativeConversationPageDefinition> dialoguePages = configuration?.presentations?.conversationPages?.FindAll(item => item != null && item.presentationKey == definition.presentationKey);
+                dialoguePages?.Sort((a, b) => a.seq.CompareTo(b.seq));
+                if (dialoguePages != null && dialoguePages.Count > 0)
+                {
+                    var conversationData = new NarrativeConversationPresentationData { title = resolvedTitle };
+                    foreach (NarrativeConversationPageDefinition page in dialoguePages)
+                    {
+                        List<NarrativeConversationLineDefinition> lines = configuration.presentations.conversationLines.FindAll(item => item != null && item.pageId == page.pageId);
+                        lines.Sort((a, b) => a.seq.CompareTo(b.seq));
+                        foreach (NarrativeConversationLineDefinition line in lines)
+                        {
+                            NarrativeObjectDefinition speakerObject = configuration.objects.Find(item => item != null && item.objId == line.speakerKey);
+                            NarrativeCharacterPresentationData characterData = characterResolver?.Invoke(line.speakerKey, resolve(speakerObject?.nameText), speakerObject?.iconPath);
+                            conversationData.lines.Add(new NarrativeConversationPresentationLine
+                            {
+                                speakerKey = line.speakerKey, speakerName = characterData?.name ?? resolve(speakerObject?.nameText),
+                                portraitPath = characterData?.portraitPath ?? speakerObject?.iconPath, side = line.side,
+                                text = resolve(line.textKey), accentFxKey = line.accentFxKey, accentTargetKey = line.accentTargetKey
+                            });
+                        }
+                    }
+                    if (conversationData.lines.Count > 0 && conversationPlayback != null)
+                    {
+                        bool handled = conversationPlayback(request, conversationData, () => finishPresentation = true);
+                        if (handled)
+                        {
+                            ui.Hide();
+                            while (!finishPresentation && !skipRequested) yield return null;
+                            yield break;
+                        }
+                    }
+                }
+            }
+            if (string.Equals(presentationClass, "notice", StringComparison.OrdinalIgnoreCase))
+            {
+                NarrativeNoticeDefinition notice = configuration?.presentations?.notices?.Find(item => item != null && item.presentationKey == definition.presentationKey);
+                if (notice == null) { Report("Missing notice presentation: " + definition.presentationKey); yield break; }
+                if (noticePlayback == null) { Report("Notice playback is not connected to the formal UI."); yield break; }
+                string title = string.IsNullOrWhiteSpace(notice.titleKey) ? string.Empty : resolve(notice.titleKey);
+                string time = string.IsNullOrWhiteSpace(notice.timeKey) ? string.Empty : resolve(notice.timeKey);
+                string body = resolve(notice.textKey);
+                var data = new NarrativeNoticePresentationData
+                {
+                    presentationKey = notice.presentationKey, titleKey = notice.titleKey, timeKey = notice.timeKey,
+                    imageKey = notice.imageKey, textKey = notice.textKey, barConds = notice.barConds,
+                    title = title, time = time, body = body
+                };
+                bool handled = noticePlayback(request, data, () => finishPresentation = true);
+                if (handled)
+                {
+                    ui.Hide();
+                    while (!finishPresentation && !skipRequested) yield return null;
+                    yield break;
+                }
+            }
             string[] atoms = PresentationSlots.Sequence(template?.atomSeq);
             if (atoms.Length == 0)
             {
@@ -106,8 +181,51 @@ namespace Spotlight.Narrative
                         string lines = Get("lines", Get("textKey"));
                         IList<string> keys = string.IsNullOrWhiteSpace(lines) ? definition.contentKeys : lines.Split('|');
                         pages.Clear();
-                        if (keys != null) foreach (string key in keys) pages.Add(resolve(key.Trim()));
-                        if (pages.Count > 0) yield return DialoguePages(setup?.autoAdvance ?? false);
+                        List<NarrativeReadingPageDefinition> configuredReadingPages = null;
+                        if (isReading)
+                        {
+                            configuredReadingPages = configuration?.presentations?.readingPages?.FindAll(item => item != null && item.presentationKey == definition.presentationKey);
+                            configuredReadingPages?.Sort((a, b) => a.seq.CompareTo(b.seq));
+                            List<NarrativeReadingPageDefinition> configuredPages = configuredReadingPages;
+                            configuredPages?.Sort((a, b) => a.seq.CompareTo(b.seq));
+                            if (configuredPages != null && configuredPages.Count > 0)
+                            {
+                                foreach (NarrativeReadingPageDefinition page in configuredPages)
+                                {
+                                    List<NarrativeReadingLineDefinition> configuredLines = configuration.presentations.readingLines.FindAll(item => item != null && item.pageId == page.pageId);
+                                    configuredLines.Sort((a, b) => a.seq.CompareTo(b.seq));
+                                    pages.Add(configuredLines.Count == 0 ? string.Empty : string.Join("\n", configuredLines.ConvertAll(line => resolve(line.textKey))));
+                                }
+                            }
+                            else if (keys != null) foreach (string key in keys) pages.Add(resolve(key.Trim()));
+                        }
+                        else if (keys != null) foreach (string key in keys) pages.Add(resolve(key.Trim()));
+                        if (pages.Count > 0)
+                        {
+                            if (isReading && readingPlayback != null)
+                            {
+                                List<NarrativeReadingPageDefinition> configuredPages = configuration?.presentations?.readingPages?.FindAll(item => item != null && item.presentationKey == definition.presentationKey);
+                                configuredPages?.Sort((a, b) => a.seq.CompareTo(b.seq));
+                                NarrativeReadingPageDefinition configuredPage = configuredPages != null && pageIndex < configuredPages.Count ? configuredPages[pageIndex] : null;
+                                string imagePath = configuredPage?.imageKey;
+                                string configuredTitle = string.IsNullOrWhiteSpace(configuredPage?.titleKey) ? resolvedTitle : resolve(configuredPage.titleKey);
+                                NarrativeReadingLineDefinition dialogueLine = configuredPage == null ? null : configuration.presentations.readingLines.Find(line => line != null && line.pageId == configuredPage.pageId && line.mode == "dialogue");
+                                NarrativeObjectDefinition readingSpeaker = dialogueLine == null ? null : configuration.objects.Find(item => item != null && item.objId == dialogueLine.speakerKey);
+                                NarrativeCharacterPresentationData speakerPresentation = dialogueLine == null ? null : characterResolver?.Invoke(dialogueLine.speakerKey, resolve(readingSpeaker?.nameText), readingSpeaker?.iconPath);
+                                bool handled = readingPlayback(request, configuredTitle, new[] { pages[pageIndex] }, imagePath,
+                                    dialogueLine != null,
+                                    speakerPresentation?.name ?? resolve(readingSpeaker?.nameText), speakerPresentation?.portraitPath ?? Get("portrait"),
+                                    () => finishPresentation = true);
+                                if (handled)
+                                {
+                                    // The reusable reading panel owns the visible presentation layer.
+                                    ui.Hide();
+                                    while (!finishPresentation && !skipRequested) yield return null;
+                                    break;
+                                }
+                            }
+                            yield return DialoguePages(setup?.autoAdvance ?? false);
+                        }
                         break;
                     case "A_BG": resources.Background(Get("bg")); break;
                     case "A_PORTRAIT":

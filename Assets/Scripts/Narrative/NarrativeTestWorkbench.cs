@@ -67,8 +67,9 @@ namespace Spotlight.Narrative
             if (runtime?.Controller == null) return;
             barKeys.Clear(); barKeys.AddRange(runtime.Controller.State.Bars.Keys.OrderBy(x => x == "npc_a.trust_b" ? 0 : 1).ThenBy(x => x, StringComparer.Ordinal));
             eventIds.Clear();
-            var config = LubanNarrativeLoader.Load();
-            eventIds.AddRange(config.events.Select(x => x.eventId).OrderBy(x => x == "EV_TALK_CAFE" ? 0 : 1).ThenBy(x => x, StringComparer.Ordinal));
+            var config = runtime.Configuration;
+            eventIds.AddRange(config.events.OrderBy(x => x.eventId.StartsWith("EV_TEST_", StringComparison.Ordinal) ? 0 : 1)
+                .ThenBy(x => x.eventId, StringComparer.Ordinal).Select(x => x.eventId));
             Fill(barDropdown, barKeys); Fill(eventDropdown, eventIds);
             RefreshEventDetails(config);
             RefreshBars();
@@ -108,19 +109,31 @@ namespace Spotlight.Narrative
         private void PlayEvent()
         {
             string id = eventDropdown.Selected;
-            SetStatus(runtime.QueueEvent(id) ? $"已排队：{id}" : $"事件未排队：{id}（条件不满足、已发生或当前繁忙）");
+            if (runtime.IsPresenting || runtime.Controller.IsBusy)
+            {
+                SetStatus("请先完成或关闭当前演出，再播放下一次");
+                return;
+            }
+            // Manual preview uses a fresh, isolated configuration; production rules remain intact.
+            var preview = LubanNarrativeLoader.Load();
+            preview.conditions.RemoveAll(condition => condition.ownerType == "event" && condition.ownerId == id);
+            preview.events.Find(item => item.eventId == id).onceOnly = false;
+            runtime.ResetSession(preview);
+            SetStatus(runtime.QueueEvent(id) ? $"已排队：{id}" : $"无法播放：{id}，请检查事件配置");
         }
 
         private void RefreshEventDetails(NarrativeConfiguration config = null)
         {
             if (eventDetails == null) return;
-            config ??= LubanNarrativeLoader.Load();
+            config ??= runtime?.Configuration ?? LubanNarrativeLoader.Load();
             NarrativeEventDefinition definition = config.events.FirstOrDefault(item => item.eventId == eventDropdown?.Selected);
             if (definition == null) { eventDetails.text = ""; return; }
-            NarrativeSetupParamsDefinition setup = config.setups.FirstOrDefault(item => item.setupKey == (string.IsNullOrWhiteSpace(definition.setupKey) ? definition.presentationKey : definition.setupKey));
+            NarrativeSetupParamsDefinition setup = config.setups.FirstOrDefault(item => item.setupKey == definition.setupKey);
             string template = setup?.tplName ?? definition.setupType ?? definition.presentationClass ?? "(未指定)";
-            string lines = string.Join(" | ", definition.contentKeys ?? new List<string>());
-            eventDetails.text = $"{definition.eventId}  [{definition.presentationClass ?? template}]  setup={setup?.setupKey ?? definition.presentationKey ?? definition.setupKey ?? "-"}\\n{definition.titleText}  {lines}";
+            string presentationClass = definition.presentationClass;
+            NarrativePresentationIndexDefinition index = config.presentations.index.FirstOrDefault(x => x.presentationKey == definition.presentationKey);
+            if (index != null) presentationClass = index.presentationClass;
+            eventDetails.text = $"{definition.eventId}  [{presentationClass ?? template}]  key={definition.presentationKey ?? "-"}\\n{definition.titleText}";
         }
 
         private void RefreshBars()
