@@ -155,10 +155,10 @@ namespace Spotlight.FreeCafe.Tests
             world.SelectServingCup("s.cups.small");Load("s.honey",world.ServingCup.id);int cups=world.Find("s.cups.small").stock,honey=world.Find("s.honey").stock;
             world.DiscardProductionCup();Assert.That(world.ServingCup,Is.Null);Assert.That(world.Find("s.cups.small").stock,Is.EqualTo(cups));Assert.That(world.Find("s.honey").stock,Is.EqualTo(honey));
         }
-        [Test] public void MiniGameRequiresIngredientsAndRejectsStaleOrDuplicateCallbacks()
+        [Test] public void MiniGameStartsWithAnyServingCupAndRejectsStaleOrDuplicateCallbacks()
         {
-            world.SelectServingCup("s.cups.large");Assert.That(world.RequestProductionMiniGame().success,Is.False);world.DiscardProductionCup();
-            var cup=PerfectCup("latte");Assert.That(world.RequestProductionMiniGame().success,Is.True);string token=world.State.production.miniGameToken;
+            world.SelectServingCup("s.cups.large");Assert.That(world.RequestProductionMiniGame().success,Is.True);
+            var cup=world.ServingCup;string token=world.State.production.miniGameToken;
             Assert.That(world.RequestProductionMiniGame().success,Is.False);Assert.That(world.ResolveProductionMiniGame("stale",true,100).success,Is.False);
             Assert.That(world.ResolveProductionMiniGame(token,true,100).success,Is.True);Assert.That(cup.latteArt,Is.True);
             Assert.That(world.ResolveProductionMiniGame(token,true,100).success,Is.False);

@@ -29,6 +29,17 @@ namespace Spotlight.GameFlow
         [SerializeField] private TMP_Text hintText;
         [SerializeField] private Button continueButton;
         [SerializeField] private Button cancelButton;
+        [SerializeField] private Sprite optionEnabledSprite;
+        [SerializeField] private Sprite optionDisabledSprite;
+        [SerializeField] private RectTransform artworkRoot;
+        [SerializeField] private GameObject psdBackground;
+        [SerializeField] private Button dialogueBodyButton;
+        [SerializeField] private Button skipButton;
+        [Header("Adaptive dialogue box (UGUI reference pixels)")]
+        [SerializeField] private bool adaptDialogueHeight;
+        [SerializeField, Min(1)] private int maximumDialogueLines = 3;
+        [SerializeField, Min(1f)] private float dialogueMinHeight = 251.72f;
+        [SerializeField, Min(0f)] private float dialoguePaddingHeight = 137f;
         [Header("Playback (unscaled time)")]
         [SerializeField, Min(0f)] private float enterSeconds = .4f;
         [SerializeField, Min(0f)] private float exitSeconds = .2f;
@@ -50,7 +61,6 @@ namespace Spotlight.GameFlow
         private bool threePortraitLayout;
         private Sprite defaultLeft;
         private Sprite defaultRight;
-        private Texture defaultBackground;
         private Vector2 boxPosition;
         private Sequence transition;
         private Action finished;
@@ -78,7 +88,6 @@ namespace Spotlight.GameFlow
                 throw new InvalidOperationException("DialoguePanel has incomplete prefab bindings.");
             defaultLeft = leftPortrait.sprite;
             defaultRight = rightPortrait.sprite;
-            defaultBackground = background.texture;
             boxPosition = dialogueBox.anchoredPosition;
             dialogueText.overflowMode = TextOverflowModes.Page;
             // 台词作为纯文本，避免外部剧本中的 <...> 被当成 TMP 标签。
@@ -94,6 +103,8 @@ namespace Spotlight.GameFlow
             CreateOptionOverlay();
             continueButton.onClick.AddListener(Advance);
             if (cancelButton != null) cancelButton.onClick.AddListener(Cancel);
+            if (dialogueBodyButton != null) dialogueBodyButton.onClick.AddListener(Advance);
+            if (skipButton != null) skipButton.onClick.AddListener(Skip);
         }
 
         protected override void OnOpen(IUIData data = null)
@@ -121,7 +132,9 @@ namespace Spotlight.GameFlow
             left = value.LeftCharacter ?? new DialogueCharacter(defaultLeftName, defaultLeft);
             right = value.RightCharacter ?? new DialogueCharacter(defaultRightName, defaultRight);
             center = value.CenterCharacter;
-            background.texture = value.Background != null ? value.Background : defaultBackground;
+            background.texture = value.Background;
+            background.enabled = value.Background != null;
+            if (psdBackground != null) psdBackground.SetActive(false);
             if (titleText != null) titleText.text = string.IsNullOrEmpty(value.Title) ? "角色对话" : value.Title;
             finished = onFinished;
             cancelled = onCancelled;
@@ -169,9 +182,27 @@ namespace Spotlight.GameFlow
             dialogueText.maxVisibleCharacters = int.MaxValue;
             dialogueText.pageToDisplay = 1;
             Canvas.ForceUpdateCanvases();
+            FitDialogueHeight();
             dialogueText.ForceMeshUpdate();
             ShowPage(1);
             if (ready) AnimateFocus();
+        }
+
+        private void FitDialogueHeight()
+        {
+            if (!adaptDialogueHeight) return;
+            // Measure the whole line, not the typewriter's visible characters, so it never jumps while typing.
+            float width = Mathf.Max(1f, dialogueText.rectTransform.rect.width);
+            float preferred = dialogueText.GetPreferredValues(dialogueText.text, width, Mathf.Infinity).y;
+            string lines = "字";
+            for (int i = 1; i < maximumDialogueLines; i++) lines += "\n字";
+            float maximum = dialogueText.GetPreferredValues(lines, width, Mathf.Infinity).y + 2f;
+            float height = Mathf.Max(dialogueMinHeight, Mathf.Min(preferred + 2f, maximum) + dialoguePaddingHeight);
+            dialogueBox.SetSizeWithCurrentAnchors(RectTransform.Axis.Vertical, height);
+            Vector2 offset = dialogueText.rectTransform.offsetMin;
+            offset.y = Mathf.Max(72f, height - 65f - maximum);
+            dialogueText.rectTransform.offsetMin = offset;
+            Canvas.ForceUpdateCanvases();
         }
 
         // Old prefab variants need not be rebuilt merely to gain the optional third slot.
@@ -213,6 +244,24 @@ namespace Spotlight.GameFlow
 
         private void UpdatePortraitLayout(bool showThird)
         {
+            if (artworkRoot != null)
+            {
+                threePortraitLayout = showThird;
+                if (showThird)
+                {
+                    SetPortraitBounds(leftPortrait, leftPortraitFrame, .035f, .315f);
+                    SetPortraitBounds(centerPortrait, centerPortraitFrame, .36f, .64f);
+                    SetPortraitBounds(rightPortrait, rightPortraitFrame, .685f, .965f);
+                }
+                else
+                {
+                    SetPortraitBounds(leftPortrait, leftPortraitFrame, .10f, .40f);
+                    SetPortraitBounds(rightPortrait, rightPortraitFrame, .60f, .90f);
+                    centerPortraitFrame.enabled = false;
+                }
+                effects?.RefreshPortraitPositions();
+                return;
+            }
             if (threePortraitLayout == showThird) return;
             threePortraitLayout = showThird;
             if (showThird)
@@ -352,6 +401,32 @@ namespace Spotlight.GameFlow
                 : "已选择回应 · 空格 / 回车 / 点击结束";
         }
 
+        /// <summary>Skip linear presentation with the completion callback; never choose an option implicitly.</summary>
+        public void Skip()
+        {
+            if (!IsPlaying || !IsReady || exiting || script == null) return;
+            if (script.Options.Count > 0 && string.IsNullOrEmpty(SelectedOptionId))
+            {
+                if (optionsVisible) return;
+                for (int i = LineIndex + 1; i < activeLines.Count; i++)
+                {
+                    DialogueLine line = activeLines[i];
+                    if (line.ReplaceLeft) left = line.LeftCharacter;
+                    if (line.ReplaceRight) right = line.RightCharacter;
+                    if (line.ReplaceCenter) center = line.CenterCharacter;
+                }
+                ShowLine(activeLines.Count - 1);
+                ShowPage(Mathf.Max(1, dialogueText.textInfo.pageCount));
+                revealed = pageEnd;
+                dialogueText.maxVisibleCharacters = pageEnd;
+                TryShowOptions();
+                return;
+            }
+            Action callback = finished;
+            Stop();
+            callback?.Invoke();
+        }
+
         public void Cancel()
         {
             if (!IsPlaying) return;
@@ -384,7 +459,11 @@ namespace Spotlight.GameFlow
                 canvasGroup.blocksRaycasts = canvasGroup.interactable = false;
             }
             if (continueButton != null) continueButton.interactable = false;
-            if (dialogueBox != null) dialogueBox.anchoredPosition = boxPosition;
+            if (dialogueBox != null)
+            {
+                dialogueBox.anchoredPosition = boxPosition;
+                if (adaptDialogueHeight) dialogueBox.SetSizeWithCurrentAnchors(RectTransform.Axis.Vertical, dialogueMinHeight);
+            }
             if (effects != null) effects.Reset();
         }
 
@@ -396,6 +475,8 @@ namespace Spotlight.GameFlow
             if (effects != null) effects.Dispose();
             if (continueButton != null) continueButton.onClick.RemoveListener(Advance);
             if (cancelButton != null) cancelButton.onClick.RemoveListener(Cancel);
+            if (dialogueBodyButton != null) dialogueBodyButton.onClick.RemoveListener(Advance);
+            if (skipButton != null) skipButton.onClick.RemoveListener(Skip);
             base.OnBeforeDestroy();
         }
         private void OnDisable() => Stop();

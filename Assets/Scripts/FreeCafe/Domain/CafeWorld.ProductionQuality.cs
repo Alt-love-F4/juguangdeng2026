@@ -44,6 +44,8 @@ namespace Spotlight.FreeCafe
             int latestLiquid = 0;
             foreach (var p in cup.contents) if (p.milliliters > 0) latestLiquid = Math.Max(latestLiquid, p.addedSequence);
             float order = 100 - (coffeeOrder > firstLiquid ? 20 : 0) - (firstTopping < latestLiquid ? 15 : 0);
+            if (!string.IsNullOrEmpty(product.preferredLatteArtPattern))
+                order -= string.Equals(cup.latteArtPattern, product.preferredLatteArtPattern, StringComparison.OrdinalIgnoreCase) ? 0 : 25;
             float sweet = Clamp(100 - Math.Abs(sweetness - product.idealSweetness) * 20);
             float ratio = totalMl > 0 ? coffeeMl / totalMl : 0;
             float concentration = Clamp(100 - Math.Abs(ratio - product.idealCoffeeRatio) * 150);
@@ -122,22 +124,24 @@ namespace Spotlight.FreeCafe
         public ActionResult RequestProductionMiniGame(string kind = "latte-art")
         {
             var cup = ServingCup;
-            if (!ProductionEnabled || kind != "latte-art" || cup == null || Locked(cup)
-                || cup.contents.Find(p => p.specId == "coffee" && p.milliliters > 0) == null
-                || cup.contents.Find(p => (p.specId == "milk" || p.specId == "hotmilk") && p.milliliters > 0) == null)
-                return ActionResult.No("拉花需要出餐杯中已有咖啡和牛奶");
+            // 拉花是杯子在出餐点之后的独立玩法：不再要求杯中先有咖啡或牛奶。
+            if (!ProductionEnabled || kind != "latte-art" || cup == null || Locked(cup))
+                return ActionResult.No("请先在出餐点选择一只可用的杯子");
             if (!string.IsNullOrEmpty(State.production.miniGameToken)) return ActionResult.No("已有小游戏进行中");
             State.production.miniGameToken = Allocate("minigame_"); State.production.miniGameCupId = cup.id;
-            State.production.miniGameKind = kind; Notify(); return ActionResult.Yes("已触发拉花入口（本轮为占位）");
+            State.production.miniGameKind = kind; Notify(); return ActionResult.Yes("已进入拉花：拖动鼠标绘制图案，完成后提交");
         }
-        public ActionResult ResolveProductionMiniGame(string token, bool completed, float score)
+        public ActionResult ResolveProductionMiniGame(string token, bool completed, float score) => ResolveProductionMiniGame(token, completed, score, null);
+        public ActionResult ResolveProductionMiniGame(string token, bool completed, float score, string pattern)
         {
             if (!ProductionEnabled || string.IsNullOrEmpty(token) || token != State.production.miniGameToken
                 || !Finite(score) || score < 0 || score > 100) return ActionResult.No("过期或无效的小游戏回调");
             var cup = Find(State.production.miniGameCupId);
             if (cup == null || cup != ServingCup) { CancelProductionMiniGame(); return ActionResult.No("目标杯已变化"); }
             cup.latteArt = completed && score >= 75;
-            CancelProductionMiniGame(); Notify(); return ActionResult.Yes(completed ? "小游戏已结束" : "已取消小游戏，不改变原料");
+            cup.latteArtScore = completed ? score : 0;
+            cup.latteArtPattern = completed ? (string.IsNullOrEmpty(pattern) ? "unknown" : pattern) : null;
+            CancelProductionMiniGame(); Notify(); return ActionResult.Yes(completed ? "拉花已完成 · " + (cup.latteArtPattern ?? "未识别") + " · " + score.ToString("0") + "分" : "已取消拉花，不改变杯中内容");
         }
         public void CancelProductionMiniGame()
         {

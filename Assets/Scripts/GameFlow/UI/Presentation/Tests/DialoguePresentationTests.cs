@@ -51,7 +51,7 @@ namespace Spotlight.GameFlow.Tests
             Assert.That(prefab.GetComponent<Canvas>().sortingOrder, Is.GreaterThan(700));
             Assert.That(FindImage(prefab, "LeftPortrait").sprite, Is.Not.Null);
             Assert.That(FindImage(prefab, "RightPortrait").sprite, Is.Not.Null);
-            Assert.That(prefab.transform.Find("DialogueBox/Dialogue").GetComponent<TMP_Text>().font, Is.Not.Null);
+            Assert.That(FindText(prefab, "Dialogue").font, Is.Not.Null);
             DialogueScript sample = DialoguePreviewDialogue.Create();
             Assert.That(sample.Count, Is.GreaterThan(2));
             Assert.That(sample.LeftCharacter.Portrait, Is.Not.Null);

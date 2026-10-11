@@ -122,7 +122,7 @@ namespace Spotlight.FreeCafe
             orderDescription.text=product==null ? "尚无订单，可先准备原料。" : product.label+"  ·  "+product.description+"\n满意要求 ≥ "+product.minimumScore.ToString("0")+"分"+(request.remakes>0 ? "  ·  正在重做" : "");
             previousOrder.interactable=nextOrder.interactable=!blocked && state.requests.Count>1;
             var cup=world.ServingCup;
-            cupStatus.text=cup==null ? "出餐托盘 · 未选杯" : world.Spec(cup.specId).label+"  "+world.LiquidVolume(cup).ToString("0")+" / "+world.LiquidCapacity(cup).ToString("0")+" ml";
+            cupStatus.text=cup==null ? "出餐托盘 · 未选杯" : world.Spec(cup.specId).label+"  "+world.LiquidVolume(cup).ToString("0")+" / "+world.LiquidCapacity(cup).ToString("0")+" ml"+(cup.latteArt ? "  · 拉花："+(cup.latteArtPattern ?? "已完成")+" "+cup.latteArtScore.ToString("0")+"分" : "");
             bool canChange=!blocked && (cup==null || cup.contents.Count==0);
             smallCup.interactable=largeCup.interactable=canChange;
             deliver.interactable=!blocked && cup!=null && request!=null; discard.interactable=!blocked && cup!=null;

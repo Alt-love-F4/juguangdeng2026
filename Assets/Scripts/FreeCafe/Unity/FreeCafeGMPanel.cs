@@ -28,6 +28,7 @@ namespace Spotlight.FreeCafe
         private float pendingUntil;
         private RectTransform windowRect;
         private RectTransform canvasRect;
+        private Transform sidebarTransform;
 
         public static FreeCafeGMPanel Instance { get; private set; }
         public bool IsVisible => root!=null && root.activeSelf;
@@ -112,6 +113,7 @@ namespace Spotlight.FreeCafe
         {
             if (string.IsNullOrWhiteSpace(name) || build == null) return;
             categories.Add(new Category { Name = name, Build = () => build(this) });
+            if (sidebarTransform != null) AddCategoryButton(categories.Count - 1);
             if (root != null && activeCategory < 0) ShowCategory(categories.Count - 1);
         }
 
@@ -166,23 +168,27 @@ namespace Spotlight.FreeCafe
             status.alignment = TextAlignmentOptions.MidlineLeft;
 
             var sidebar = CreateImage(window.transform, "Sidebar", new Color(.12f, .14f, .17f, 1));
+            sidebarTransform = sidebar.transform;
             SetRect(sidebar.rectTransform, new Vector2(.02f, .12f), new Vector2(.25f, .9f), Vector2.zero);
             var sideLayout = sidebar.gameObject.AddComponent<VerticalLayoutGroup>();
             sideLayout.padding = new RectOffset(14, 14, 14, 14);
             sideLayout.spacing = 10;
             sideLayout.childForceExpandHeight = false;
-            for (int i = 0; i < categories.Count; i++)
-            {
-                var index = i;
-                var button = CreateButton(sidebar.transform, categories[i].Name, 20);
-                button.onClick.AddListener(() => ShowCategory(index));
-                button.GetComponent<LayoutElement>().preferredHeight = 58;
-            }
+            for (int i = 0; i < categories.Count; i++) AddCategoryButton(i);
 
             var content = CreateImage(window.transform, "Content", new Color(.1f, .11f, .13f, 1));
             SetRect(content.rectTransform, new Vector2(.27f, .12f), new Vector2(.98f, .9f), Vector2.zero);
             body = content.gameObject;
             ShowCategory(0);
+        }
+
+        private void AddCategoryButton(int index)
+        {
+            if (sidebarTransform == null || index < 0 || index >= categories.Count) return;
+            var button = CreateButton(sidebarTransform, categories[index].Name, 20);
+            int captured = index;
+            button.onClick.AddListener(() => ShowCategory(captured));
+            button.GetComponent<LayoutElement>().preferredHeight = 58;
         }
 
         private void ShowCategory(int index)
@@ -305,6 +311,25 @@ namespace Spotlight.FreeCafe
 
         private void Report(ActionResult result) { SetStatus(result.message); }
         private void SetStatus(string message) { if (status != null) status.text = message; }
+        public void SetExternalStatus(string message) => SetStatus(message);
+
+        public void AddSlider(string label, float min, float max, Func<float> getter, Action<float> setter, string format = "F2", bool wholeNumbers = false)
+        {
+            if (body == null || getter == null || setter == null) return;
+            var row = new GameObject(label + "Slider", typeof(RectTransform));
+            row.transform.SetParent(body.transform, false);
+            var layout = row.AddComponent<LayoutElement>(); layout.preferredHeight = 72; layout.flexibleWidth = 1;
+            var title = CreateText(row.transform, "Label", label, 17, Color.white);
+            title.rectTransform.anchorMin = new Vector2(0, .52f); title.rectTransform.anchorMax = new Vector2(.72f, 1); title.rectTransform.offsetMin = title.rectTransform.offsetMax = Vector2.zero;
+            var value = CreateText(row.transform, "Value", getter().ToString(format), 16, new Color(.95f,.76f,.38f));
+            value.rectTransform.anchorMin = new Vector2(.72f, .52f); value.rectTransform.anchorMax = new Vector2(1, 1); value.rectTransform.offsetMin = value.rectTransform.offsetMax = Vector2.zero; value.alignment = TextAlignmentOptions.MidlineRight;
+            var track = CreateImage(row.transform, "Track", new Color(.18f,.22f,.26f,.9f)); track.rectTransform.anchorMin = new Vector2(0, 0); track.rectTransform.anchorMax = new Vector2(1, .42f); track.rectTransform.offsetMin = track.rectTransform.offsetMax = Vector2.zero;
+            var slider = track.gameObject.AddComponent<Slider>(); slider.minValue = min; slider.maxValue = max; slider.wholeNumbers = wholeNumbers; slider.navigation = new Navigation { mode = Navigation.Mode.None };
+            var fill = CreateImage(track.transform, "Fill", new Color(.93f,.71f,.39f,1)); fill.rectTransform.anchorMin = Vector2.zero; fill.rectTransform.anchorMax = Vector2.one; fill.rectTransform.offsetMin = fill.rectTransform.offsetMax = Vector2.zero; fill.raycastTarget = false;
+            var handle = CreateImage(track.transform, "Handle", new Color(1f,.9f,.7f,1)); handle.rectTransform.anchorMin = new Vector2(0,0); handle.rectTransform.anchorMax = new Vector2(0,1); handle.rectTransform.sizeDelta = new Vector2(18,0); handle.raycastTarget = false;
+            slider.fillRect = fill.rectTransform; slider.handleRect = handle.rectTransform; slider.targetGraphic = handle; slider.SetValueWithoutNotify(Mathf.Clamp(getter(), min, max));
+            slider.onValueChanged.AddListener(v => { setter(v); value.text = getter().ToString(format); });
+        }
         public void SetVisible(bool visible)
         {
             if (root == null) return;
