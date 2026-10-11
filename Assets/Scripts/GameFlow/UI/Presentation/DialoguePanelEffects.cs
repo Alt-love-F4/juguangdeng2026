@@ -46,18 +46,21 @@ namespace Spotlight.GameFlow
             EffectStage.SetParent(transform, false);
             EffectStage.anchorMin = Vector2.zero; EffectStage.anchorMax = Vector2.one;
             EffectStage.offsetMin = EffectStage.offsetMax = Vector2.zero;
-            for (int i = transform.childCount - 1; i >= 0; i--)
+            // Preserve sibling order, including nested PSD artwork and its modal options overlay.
+            for (int i = 0; i < transform.childCount;)
             {
                 Transform child = transform.GetChild(i);
-                if (child == EffectStage || child.name == "InputBlocker") continue;
+                if (child == EffectStage || child.name == "InputBlocker") { i++; continue; }
                 child.SetParent(EffectStage, false);
             }
-            // Reverse enumeration above reverses sibling order. Re-establish rendering order explicitly.
-            background.transform.SetAsFirstSibling();
-            if (leftPortraitFrame != null) leftPortraitFrame.transform.SetSiblingIndex(1);
-            if (centerPortraitFrame != null) centerPortraitFrame.transform.SetSiblingIndex(2);
-            if (rightPortraitFrame != null) rightPortraitFrame.transform.SetSiblingIndex(3);
-            dialogueBox.SetAsLastSibling();
+            if (artworkRoot == null)
+            {
+                background.transform.SetAsFirstSibling();
+                if (leftPortraitFrame != null) leftPortraitFrame.transform.SetSiblingIndex(1);
+                if (centerPortraitFrame != null) centerPortraitFrame.transform.SetSiblingIndex(2);
+                if (rightPortraitFrame != null) rightPortraitFrame.transform.SetSiblingIndex(3);
+                dialogueBox.SetAsLastSibling();
+            }
             var overlayObject = new GameObject("EffectOverlay", typeof(RectTransform), typeof(CanvasRenderer), typeof(Image));
             overlayObject.transform.SetParent(transform, false);
             EffectOverlay = overlayObject.GetComponent<Image>();
@@ -216,11 +219,14 @@ namespace Spotlight.GameFlow
     public sealed partial class DialoguePanel
     {
         private readonly List<Button> optionButtons = new List<Button>();
-        private GameObject optionRoot;
-        private CanvasGroup optionGroup;
+        [SerializeField] private GameObject optionRoot;
+        [SerializeField] private CanvasGroup optionGroup;
         private TMP_Text optionPrompt;
-        private RectTransform optionContent;
-        private ScrollRect optionScroll;
+        [SerializeField] private RectTransform optionContent;
+        [SerializeField] private ScrollRect optionScroll;
+        [SerializeField] private DialogueOptionView optionTemplate;
+        [SerializeField] private Image optionDimmer;
+        private float optionsBaseHeight;
         private Tween optionFeedback;
         private bool optionsVisible;
         public bool IsChoosing => IsPlaying && optionsVisible;
@@ -228,6 +234,13 @@ namespace Spotlight.GameFlow
 
         private void CreateOptionOverlay()
         {
+            if (optionRoot != null && optionTemplate != null)
+            {
+                optionsBaseHeight = ((RectTransform)optionRoot.transform).rect.height;
+                optionRoot.SetActive(false);
+                optionTemplate.gameObject.SetActive(false);
+                return;
+            }
             // Owned by this panel, like EffectStage. Existing prefabs need no destructive rebuilding.
             optionRoot = OptionObject(transform, "DialogueOptions", typeof(Image), typeof(CanvasGroup));
             var rect = (RectTransform)optionRoot.transform;
@@ -268,18 +281,31 @@ namespace Spotlight.GameFlow
                 || LineIndex != activeLines.Count - 1) return false;
             optionsVisible = true;
             ClearOptionButtons();
-            optionPrompt.text = string.IsNullOrEmpty(script.OptionPrompt) ? "你要怎么回应？" : script.OptionPrompt;
+            if (optionPrompt != null) optionPrompt.text = string.IsNullOrEmpty(script.OptionPrompt) ? "你要怎么回应？" : script.OptionPrompt;
             for (int i = 0; i < script.Options.Count; i++)
             {
                 DialogueOption option = script.Options[i];
+                if (optionTemplate != null)
+                {
+                    DialogueOptionView view = Instantiate(optionTemplate, optionContent, false);
+                    view.name = "Option_" + option.OptionId;
+                    view.Bind(option, optionEnabledSprite, optionDisabledSprite, id => SelectOption(id));
+                    view.gameObject.SetActive(true);
+                    optionButtons.Add(view.Button);
+                    continue;
+                }
                 GameObject row = OptionObject(optionContent, "Option_" + option.OptionId,
                     typeof(Image), typeof(Button), typeof(LayoutElement));
                 LayoutElement size = row.GetComponent<LayoutElement>();
-                size.minHeight = 68f; size.preferredHeight = 76f;
+                size.minHeight = 58f; size.preferredHeight = 76f;
                 Image image = row.GetComponent<Image>();
-                image.color = new Color(.23f, .17f, .105f, 1f);
+                image.sprite = option.Enabled ? optionEnabledSprite : optionDisabledSprite;
+                image.type = option.Enabled && optionEnabledSprite != null || !option.Enabled && optionDisabledSprite != null
+                    ? Image.Type.Sliced : Image.Type.Simple;
+                image.color = Color.white;
                 Button button = row.GetComponent<Button>();
                 button.targetGraphic = image; button.interactable = option.Enabled;
+                button.transition = Selectable.Transition.ColorTint;
                 // Input is an explicit click, never the dialogue's Space/Enter submission.
                 button.navigation = new Navigation { mode = Navigation.Mode.None };
                 ColorBlock colors = button.colors;
@@ -287,13 +313,19 @@ namespace Spotlight.GameFlow
                 colors.pressedColor = new Color(.64f, .80f, .66f);
                 colors.disabledColor = new Color(.48f, .48f, .48f);
                 button.colors = colors;
-                TMP_Text label = OptionText(row.transform, "Label", new Vector2(.035f, .08f), new Vector2(.965f, .92f), 24f);
+                TMP_Text label = OptionText(row.transform, "Label", new Vector2(.035f, .10f), new Vector2(.965f, .90f), 24f);
+                label.textWrappingMode = TextWrappingModes.Normal;
+                label.overflowMode = TextOverflowModes.Overflow;
                 label.text = (i + 1) + ".  " + option.Text;
                 if (!option.Enabled)
                 {
                     label.text += "\n[" + (string.IsNullOrEmpty(option.RequirementHint) ? "条件未满足" : option.RequirementHint) + "]";
-                    label.color = new Color(.6f, .56f, .50f);
+                    label.color = new Color(.40f, .27f, .20f);
                 }
+                Canvas.ForceUpdateCanvases();
+                float availableWidth = Mathf.Max(120f, optionContent.rect.width - 28f);
+                float preferredTextHeight = label.GetPreferredValues(label.text, availableWidth, 0f).y;
+                size.preferredHeight = Mathf.Max(58f, preferredTextHeight + 28f);
                 string id = option.OptionId;
                 button.onClick.AddListener(() => SelectOption(id));
                 optionButtons.Add(button);
@@ -304,6 +336,16 @@ namespace Spotlight.GameFlow
             continueButton.interactable = false;
             Canvas.ForceUpdateCanvases();
             LayoutRebuilder.ForceRebuildLayoutImmediate(optionContent);
+            if (optionTemplate != null)
+            {
+                RectTransform rect = (RectTransform)optionRoot.transform;
+                float available = artworkRoot != null ? artworkRoot.rect.height * .53f : optionsBaseHeight;
+                float height = Mathf.Min(optionContent.rect.height, Mathf.Max(optionsBaseHeight, available));
+                // Fit small lists exactly at the PSD center; keep larger lists bounded and scrollable.
+                rect.SetSizeWithCurrentAnchors(RectTransform.Axis.Vertical, height);
+                LayoutRebuilder.ForceRebuildLayoutImmediate(optionContent);
+            }
+            if (optionDimmer != null) optionDimmer.gameObject.SetActive(true);
             optionScroll.verticalNormalizedPosition = 1f;
             UpdateHint();
             return true;
@@ -322,9 +364,10 @@ namespace Spotlight.GameFlow
             optionGroup.interactable = false;
             for (int i = 0; i < optionButtons.Count; i++) optionButtons[i].interactable = false;
             Button selected = optionButtons[index];
-            selected.GetComponent<Image>().color = new Color(.24f, .40f, .29f);
+            selected.GetComponent<Image>().color = optionTemplate != null
+                ? new Color(1f, .91f, .76f) : new Color(.24f, .40f, .29f);
             selected.GetComponentInChildren<TMP_Text>().text = "[已选择]  " + option.Text;
-            optionPrompt.text = "已选择 · " + option.Text;
+            if (optionPrompt != null) optionPrompt.text = "已选择 · " + option.Text;
             if (hintText != null) hintText.text = "已选择回应";
             // Keep selection feedback briefly; Stop/close/replay explicitly kills this owned callback.
             optionFeedback = DOVirtual.DelayedCall(.45f, () =>
@@ -359,6 +402,7 @@ namespace Spotlight.GameFlow
             if (optionGroup != null) optionGroup.interactable = optionGroup.blocksRaycasts = false;
             if (optionScroll != null) optionScroll.StopMovement();
             if (optionRoot != null) optionRoot.SetActive(false);
+            if (optionDimmer != null) optionDimmer.gameObject.SetActive(false);
             ClearOptionButtons();
         }
 
