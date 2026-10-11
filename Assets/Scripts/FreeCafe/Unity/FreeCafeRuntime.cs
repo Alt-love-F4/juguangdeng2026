@@ -57,8 +57,10 @@ namespace Spotlight.FreeCafe
         private int dragFinishedFrame=-1;
         private float nextVisualRefresh;
         private bool draggingVessel, pouredThisDrag;
+        private bool vesselTiltMode;
+        private Vector2 vesselTiltPointerOrigin;
+        private PointerEventData vesselPointer;
         private string lastPourTarget;
-        private float tiltOriginY;
         private void Awake()
         {
             if(worldCamera==null) worldCamera=Camera.main;
@@ -104,7 +106,7 @@ namespace Spotlight.FreeCafe
             if(World.State.currentArea==AreaId.Cafe)
                 ShowHint("点击大厅的「启动营业」立牌开始接单；点击客人查看订单，或前往制作台备料。");
             else if(World.ProductionEnabled)
-                ShowHint("点击杯具选择出餐杯；原料拖到设备，点击启动。成品壶向下拖动倾倒，抬起停止。");
+                ShowHint("点击杯具选择出餐杯；原料拖到设备，点击启动。左键拖动壶，按住右键并移动鼠标倾倒，松开右键停止。");
             else
                 ShowHint("点击来源取出物品，拖拽到任意位置；拖到容器或设备会尝试组合。Shift 拖拽仅摆放。");
             Debug.Log("[FreeCafe] 自由操作世界已启动：无工作台插槽、无订单步骤门禁。",this);
@@ -120,7 +122,7 @@ namespace Spotlight.FreeCafe
         {
             if(World==null) return;
             World.Tick(Time.deltaTime);
-            if(IsDragging && draggingVessel && !InputBlocked) UpdateVesselPour();
+            if(IsDragging && draggingVessel && !InputBlocked) UpdateVesselInput();
             // GameFlowBootstrap owns the global Escape/pause flow. FreeCafe only
             // cancels an active drag; the shared pause panel handles everything else.
             if(Keyboard.current!=null && Keyboard.current.escapeKey.wasPressedThisFrame && IsDragging)
@@ -309,8 +311,8 @@ namespace Spotlight.FreeCafe
             if(World.ProductionEnabled && spec.Has(Capability.Source) && World.Spec(spec.sourceItemId).Has(Capability.Container))
             { ShowHint("请点击杯具堆选择出餐杯"); return; }
             if(entity==World.ServingCup) { ShowHint("出餐杯固定在托盘；使用出品或丢弃按钮"); return; }
-            if(World.CanPour(entity))
-            { draggingVessel=true; dragItemId=entity.id; draggedView=view; SelectedId=entity.id; tiltOriginY=e.position.y; }
+            if(World.IsProductionVessel(entity))
+            { draggingVessel=true; dragItemId=entity.id; draggedView=view; SelectedId=entity.id; }
             else if(spec.Has(Capability.Source))
             {
                 if(entity.stock<=0) { ShowHint("来源库存不足"); return; }
@@ -369,10 +371,19 @@ namespace Spotlight.FreeCafe
         {
             if(!IsDragging) return;
             if(InputBlocked || !TryToWorld(e.position,out var point)) { CancelDrag(); return; }
-            pointerScreen=e.position; draggedView.transform.position=point+offset;
+            pointerScreen=e.position;
+            if(draggingVessel && Mouse.current!=null && Mouse.current.rightButton.isPressed && !vesselTiltMode)
+                BeginVesselTilt();
+            if(!vesselTiltMode) draggedView.transform.position=point+offset;
             draggedView.body.sortingOrder=2000; FindReceiver(e);
             bool placeOnly=Keyboard.current!=null && (Keyboard.current.leftShiftKey.isPressed || Keyboard.current.rightShiftKey.isPressed);
             var item=DragData(); if(item==null) { CancelDrag(); ShowHint("设备产物已变化，拖拽已取消"); return; } var pos=WorldToArea(World.State.currentArea,draggedView.transform.position);
+            if(!IsDragging) return;
+            if(draggingVessel)
+            {
+                ShowHint("左键上下左右拖动；按住右键移动鼠标倾倒，松开右键停止；松开双键壶归位。");
+                return;
+            }
             var result=receiver!=null && !placeOnly ? World.Preview(item,World.Find(receiver.EntityId)) : World.CanPosition(item.specId,World.State.currentArea,pos.x,pos.y);
             if(receiver!=null && !placeOnly) receiver.SetDropTarget(true,!result.success);
             ShowHint(overUI ? "不能放在界面卡片上；松手取消" : result.message+(placeOnly ? " · 仅摆放" : " · Shift 可仅摆放"));
@@ -381,6 +392,11 @@ namespace Spotlight.FreeCafe
         {
             if(!IsDragging) return;
             if(InputBlocked) { CancelDrag(); return; }
+            if(draggingVessel && (vesselTiltMode || Mouse.current!=null && Mouse.current.rightButton.isPressed))
+            {
+                if(!vesselTiltMode) BeginVesselTilt();
+                return;
+            }
             MoveDrag(e);
             if(!IsDragging) return;
             bool placeOnly=Keyboard.current!=null && (Keyboard.current.leftShiftKey.isPressed || Keyboard.current.rightShiftKey.isPressed);
@@ -413,7 +429,7 @@ namespace Spotlight.FreeCafe
         private void ClearDrag()
         {
             if(draggingVessel) StopVesselPour();
-            draggingVessel=false; pouredThisDrag=false;
+            draggingVessel=false; pouredThisDrag=false; vesselTiltMode=false;
             if(receiver!=null) receiver.SetDropTarget(false,false);
             if(draggedView!=null && dragItemId!=null) draggedView.hitbox.enabled=World.Find(dragItemId)?.area==World.State.currentArea;
             draggedView=null; receiver=null; dragCamera=null; dragSourceId=dragItemId=dragMachineId=dragOutputId=null; dragFinishedFrame=Time.frameCount;
@@ -439,12 +455,48 @@ namespace Spotlight.FreeCafe
             World.SetArea(area); ShowHint("进入 "+World.Area(area).label+"；物品坐标和加工任务保留");
         }
 
+        private void BeginVesselTilt()
+        {
+            vesselTiltMode=true;
+            vesselTiltPointerOrigin=pointerScreen;
+            if(vesselPointer==null) vesselPointer=new PointerEventData(EventSystem.current);
+        }
+        private void UpdateVesselInput()
+        {
+            var mouse=Mouse.current;
+            if(mouse==null) return;
+            pointerScreen=mouse.position.ReadValue();
+            bool rightHeld=mouse.rightButton.isPressed;
+            if(rightHeld && !vesselTiltMode) BeginVesselTilt();
+            if(vesselTiltMode && !rightHeld)
+            {
+                StopVesselPour();
+                vesselTiltMode=false;
+                draggedView.PresentPour(0,false);
+                if(!mouse.leftButton.isPressed)
+                {
+                    ClearDrag(); SyncViews();
+                    ShowHint("壶已归位；按实际倒出量消耗液体");
+                    return;
+                }
+                vesselPointer.position=pointerScreen;
+                MoveDrag(vesselPointer);
+            }
+            if(vesselTiltMode)
+            {
+                // Right owns tilt mode even when left is released.
+                vesselPointer.position=pointerScreen;
+                FindReceiver(vesselPointer);
+                UpdateVesselPour();
+            }
+        }
         private void UpdateVesselPour()
         {
             bool placeOnly=Keyboard.current!=null && (Keyboard.current.leftShiftKey.isPressed || Keyboard.current.rightShiftKey.isPressed);
-            tiltOriginY=Mathf.Max(tiltOriginY,pointerScreen.y); // 先抬壶到同高工位上方，再向下移动也能倾倒
-            float tilt=Mathf.Clamp01((tiltOriginY-pointerScreen.y)/90f);
-            if(draggedView!=null) draggedView.PresentPour(tilt,tilt>=.18f && !placeOnly);
+            Vector2 delta=pointerScreen-vesselTiltPointerOrigin;
+            float tilt=Mathf.Clamp01(delta.magnitude/90f);
+            float signedTilt=delta.x<0 ? -tilt : tilt;
+            if(draggedView!=null) draggedView.PresentPour(signedTilt,tilt>=.18f && !placeOnly);
             if(placeOnly || tilt<.18f || overUI || Time.deltaTime<=0) { StopVesselPour(); return; }
             var source=World.Find(dragItemId);
             if(!World.CanPour(source)) { StopVesselPour(); return; }

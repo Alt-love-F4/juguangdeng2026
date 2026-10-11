@@ -160,13 +160,13 @@ namespace Spotlight.FreeCafe
                     || target.specId == "machine.mixer" && item.specId == "matcha.powder");
                 result = allowed ? ActionResult.Yes("投入 " + input.label + "；点击设备启动")
                     : CanPour(item) && target.specId == "machine.brewer" && target.production.phase == ProductionPhase.Loaded
-                        ? ActionResult.Yes("热水壶向下拖动倾倒，抬起停止")
+                        ? ActionResult.Yes("热水壶向下拖动倾倒，松开停止")
                         : ActionResult.No(empty ? "此设备不接受 " + input.label : "设备已有内容；先完成加工并取出");
                 return true;
             }
             if (receiver.Has(Capability.Container))
             {
-                if (CanPour(item)) { result = ActionResult.Yes("向下拖动壶身倾倒，抬起停止；注意杯容量"); return true; }
+                if (CanPour(item)) { result = ActionResult.Yes("左键拖动壶，按住右键移动鼠标倾倒，松开右键停止，松开停止；注意杯容量"); return true; }
                 if (IsProductionVessel(item)) { result = ActionResult.No("壶未完成加工"); return true; }
                 if (input.Has(Capability.Portion))
                 {
@@ -198,7 +198,7 @@ namespace Spotlight.FreeCafe
                 if (State.automaticMachines && target.specId != "machine.brewer") return OperateProduction(target.id);
                 Notify(); return ActionResult.Yes("已装料；点击设备启动");
             }
-            if (CanPour(item)) return ActionResult.No("请拖动壶身向下倾倒");
+            if (CanPour(item)) return ActionResult.No("请拖动壶身并按住右键倾倒");
             var p = new Portion { specId = item.specId, units = item.units, quality = item.quality,
                 milliliters = IsLiquid(item.specId) ? Prep.portionMl * item.units : 0, productionScore = 100,
                 addedSequence = ++target.production.additionSequence };
@@ -226,7 +226,7 @@ namespace Spotlight.FreeCafe
                 if (data.remaining == 0) FinishProductionMachine(machine);
                 Notify(); return ActionResult.Yes("研磨加速 1 秒");
             }
-            return ActionResult.Yes(CanPour(machine) ? "向下拖动壶身倾倒" : "成品就绪，拖出产物");
+            return ActionResult.Yes(CanPour(machine) ? "左键拖动壶，按住右键移动鼠标倾倒，松开右键停止" : "成品就绪，拖出产物");
         }
         private void FinishProductionMachine(WorldEntity machine)
         {

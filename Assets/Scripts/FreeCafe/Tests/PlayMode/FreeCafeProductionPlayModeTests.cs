@@ -20,9 +20,23 @@ namespace Spotlight.FreeCafe.Tests
             yield return SceneManager.LoadSceneAsync("CoffeeShop",LoadSceneMode.Single);yield return null;yield return null;
             app=Object.FindFirstObjectByType<FreeCafeRuntime>();app.areaManager.panSmoothTime=0;app.World.EnterProduction();yield return null;
         }
-        [UnityTearDown] public IEnumerator Cleanup() { Time.timeScale=1;yield return null; }
+        [UnityTearDown] public IEnumerator Cleanup()
+        {
+            Time.timeScale=1;
+            if(app!=null) app.CancelDrag();
+            if(Mouse.current!=null) MouseAt(Mouse.current.position.ReadValue(),false,false);
+            yield return null;
+        }
         private PointerEventData Pointer(float x,float y) => new PointerEventData(EventSystem.current)
         { position=app.worldCamera.WorldToScreenPoint(app.AreaToWorld(AreaId.Counter,x,y)) };
+        private void MouseAt(Vector2 position,bool left,bool right)
+        {
+            var mouse=Mouse.current ?? InputSystem.AddDevice<Mouse>();
+            var state=new MouseState { position=position };
+            if(left) state=state.WithButton(MouseButton.Left);
+            if(right) state=state.WithButton(MouseButton.Right);
+            InputSystem.QueueStateEvent(mouse,state);
+        }
         [UnityTest] public IEnumerator UsesExistingSceneCanvasAndCupButtonsTargetTheServingTray()
         {
             var hud=app.GetComponent<FreeCafeProductionHud>();Assert.That(hud,Is.Not.Null);Assert.That(hud.productionRoot.activeSelf,Is.True);
@@ -53,8 +67,18 @@ namespace Spotlight.FreeCafe.Tests
             var kettle=app.World.Find("m.heater");var cup=app.World.ServingCup;var view=app.View(kettle.id);Vector3 origin=view.transform.position;
             Physics2D.SyncTransforms();app.BeginDrag(view,Pointer(kettle.x,kettle.y));Assert.That(app.IsDragging,Is.True);
             var pointer=Pointer(cup.x,cup.y+.7f);app.MoveDrag(pointer);
-            yield return null;yield return null;yield return null;app.EndDrag(pointer);yield return null;
+            yield return null;yield return null;
+            Assert.That(app.World.LiquidVolume(cup),Is.Zero,"左键二维拖动不应倾倒");
+            var lifted=view.transform.position;
+            MouseAt(pointer.position,true,true);yield return null;yield return null;
+            MouseAt(pointer.position+Vector2.right*90,true,true);yield return null;yield return null;yield return null;
+            Assert.That(Vector3.Distance(view.transform.position,lifted),Is.LessThan(.001f),"倾倒模式固定壶位置");
             Assert.That(app.World.LiquidVolume(cup),Is.GreaterThan(0));Assert.That(app.World.LiquidVolume(kettle),Is.LessThan(200));
+            MouseAt(pointer.position+Vector2.right*90,true,false);yield return null;yield return null;
+            Assert.That(app.IsDragging,Is.True,"右键松开后左键仍持有壶");
+            Assert.That(Mathf.Abs(Mathf.DeltaAngle(view.body.transform.localEulerAngles.z,0)),Is.LessThan(.001f));
+            app.EndDrag(new PointerEventData(EventSystem.current) { position=pointer.position+Vector2.right*90 });
+            MouseAt(pointer.position,false,false);yield return null;
             Assert.That(app.View(kettle.id),Is.SameAs(view));Assert.That(view.transform.position,Is.EqualTo(origin));
         }
         
@@ -64,9 +88,16 @@ namespace Spotlight.FreeCafe.Tests
             var grounds=app.World.DragOutputPreview("m.grinder");app.World.TakeMachineOutput("m.grinder",grounds.id,"m.brewer",AreaId.Counter,-3.3f,.2f);
             app.World.TakeAndInteract("s.water","m.heater",AreaId.Counter,0,0);app.World.Operate("m.heater");app.World.Tick(4);
             var kettle=app.World.Find("m.heater");var brewer=app.World.Find("m.brewer");Physics2D.SyncTransforms();
-            app.BeginDrag(app.View(kettle.id),Pointer(kettle.x,kettle.y));app.MoveDrag(Pointer(brewer.x,brewer.y+1.3f));yield return null;
-            var pointer=Pointer(brewer.x,brewer.y+.4f);app.MoveDrag(pointer);yield return null;yield return null;yield return null;
-            app.EndDrag(pointer);yield return null;
+            var view=app.View(kettle.id);var origin=view.transform.position;
+            app.BeginDrag(view,Pointer(kettle.x,kettle.y));
+            var pointer=Pointer(brewer.x,brewer.y+.4f);app.MoveDrag(pointer);yield return null;
+            MouseAt(pointer.position,true,true);yield return null;yield return null;
+            MouseAt(pointer.position+Vector2.left*90,true,true);yield return null;yield return null;yield return null;
+            Assert.That(Mathf.DeltaAngle(0,view.body.transform.localEulerAngles.z),Is.GreaterThan(0),"鼠标向左应向左倾斜");
+            app.EndDrag(pointer);MouseAt(pointer.position+Vector2.left*90,false,true);yield return null;
+            Assert.That(app.IsDragging,Is.True,"倾倒期间松开左键不应归位");
+            MouseAt(pointer.position+Vector2.left*90,false,false);yield return null;yield return null;
+            Assert.That(app.IsDragging,Is.False);Assert.That(view.transform.position,Is.EqualTo(origin));
             Assert.That(app.World.LiquidVolume(brewer),Is.GreaterThan(0));Assert.That(brewer.production.brewStarted,Is.True);
             Assert.That(brewer.production.phase,Is.EqualTo(ProductionPhase.Loaded),"不足水量可继续，不丢掉咖啡粉");
         }
