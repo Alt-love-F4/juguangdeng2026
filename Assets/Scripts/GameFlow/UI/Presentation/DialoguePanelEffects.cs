@@ -280,6 +280,8 @@ namespace Spotlight.GameFlow
             if (!IsPlaying || !IsReady || exiting || optionsVisible || !string.IsNullOrEmpty(SelectedOptionId)
                 || script.Options.Count == 0 || IsTyping || page < dialogueText.textInfo.pageCount
                 || LineIndex != activeLines.Count - 1) return false;
+            IsSkipping = false;
+            skipElapsed = 0f;
             optionsVisible = true;
             ClearOptionButtons();
             if (optionPrompt != null) optionPrompt.text = string.IsNullOrEmpty(script.OptionPrompt) ? "你要怎么回应？" : script.OptionPrompt;

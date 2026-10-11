@@ -19,7 +19,13 @@ namespace Spotlight.GameFlow
             return new DialogueScript(new[]
             {
                 new DialogueLine(DialogueSpeaker.Right, "夜色落下来，印刷工把那份名单推到你面前。", gesture: DialogueGesture.Nod),
-                new DialogueLine(DialogueSpeaker.Center, "我也带来了消息。我们三个人得一起想想：你准备怎么处理？", gesture: DialogueGesture.Nod)
+                new DialogueLine(DialogueSpeaker.Center, "我也带来了消息。先把门关好，我们慢慢说。", gesture: DialogueGesture.Nod),
+                new DialogueLine(DialogueSpeaker.Left, "咖啡还热着。名单上的这些人，你们都认识吗？"),
+                new DialogueLine(DialogueSpeaker.Right, "有几个是印刷厂的老工人，剩下的名字我也是第一次见。"),
+                new DialogueLine(DialogueSpeaker.Center, "我下午去过码头，有人正在打听他们的住处。"),
+                new DialogueLine(DialogueSpeaker.Left, "那就不能把这张纸留在桌上。先收起来。"),
+                new DialogueLine(DialogueSpeaker.Right, "我想在天亮之前提醒他们，但需要一个可靠的帮手。"),
+                new DialogueLine(DialogueSpeaker.Center, "我们三个人得一起想想：你准备怎么处理？")
             }, NarrativeCharacterResolver.CreateDialogueCharacter("eugene"),
                 NarrativeCharacterResolver.CreateDialogueCharacter("adele"),
                 centerCharacter: NarrativeCharacterResolver.CreateDialogueCharacter("thibaut"),

@@ -106,7 +106,8 @@ namespace Spotlight.GameFlow.Tests
             Assert.That(panel.RightPortrait.enabled, Is.False);
             Assert.That(panel.CenterPortrait.enabled, Is.False);
             Image skip = panel.transform.Find("EffectStage/Artwork/DialogueBox/Skip").GetComponent<Image>();
-            Assert.That(skip.color.a, Is.Zero);
+            Assert.That(skip.color.a, Is.EqualTo(1f));
+            Assert.That(skip.sprite, Is.EqualTo(AssetDatabase.LoadAssetAtPath<Sprite>("Assets/Art/Gameplay/对话框ui/skip底.png")));
             Assert.That(skip.GetComponent<Button>(), Is.Not.Null);
             panel.Advance();
             yield return new WaitForEndOfFrame(); Capture("output/dialogue-reference-match/single.png");
@@ -248,6 +249,93 @@ namespace Spotlight.GameFlow.Tests
             panel.Stop(); yield return new WaitForSecondsRealtime(.6f);
             Assert.That(done, Is.Zero);
         }
+        [UnityTest]
+        public IEnumerator SkipShowsEveryPageAndStopsAtChoicesWhileTimeIsPaused()
+        {
+            int done = 0;
+            panel.Play(new DialogueScript(new[]
+            {
+                new DialogueLine(DialogueSpeaker.Left, new string('长', 180)),
+                new DialogueLine(DialogueSpeaker.Right, "第二条快速切换的台词。"),
+                new DialogueLine(DialogueSpeaker.Left, "第三条快速切换的台词。"),
+                new DialogueLine(DialogueSpeaker.Right, "请选择你的回应。")
+            }, options: new[] { new DialogueOption("a", "继续交谈",
+                new DialogueLine(DialogueSpeaker.Left, "选择后的回应恢复正常打字。")) }), () => done++);
+            yield return Ready();
+            Time.timeScale = 0f;
+            panel.transform.Find("EffectStage/Artwork/DialogueBox/Skip").GetComponent<Button>().onClick.Invoke();
+            Assert.That(panel.IsSkipping, Is.True);
+            Assert.That(panel.LineIndex, Is.Zero, "Skip must not teleport to the final line.");
+            Assert.That(panel.IsTyping, Is.False);
+            int previousLine = panel.LineIndex;
+            int previousPage = panel.PageNumber;
+            int pagesSeen = 1;
+            float deadline = Time.realtimeSinceStartup + 8f;
+            while (!panel.IsChoosing)
+            {
+                Assert.That(Time.realtimeSinceStartup, Is.LessThan(deadline));
+                yield return null;
+                Assert.That(panel.LineIndex - previousLine, Is.InRange(0, 1));
+                if (panel.LineIndex == previousLine && panel.PageNumber != previousPage)
+                {
+                    Assert.That(panel.PageNumber, Is.EqualTo(previousPage + 1));
+                    pagesSeen++;
+                }
+                previousLine = panel.LineIndex;
+                previousPage = panel.PageNumber;
+            }
+            Assert.That(pagesSeen, Is.GreaterThan(1));
+            Assert.That(panel.LineIndex, Is.EqualTo(3));
+            Assert.That(panel.IsSkipping, Is.False);
+            panel.Skip();
+            yield return new WaitForSecondsRealtime(.3f);
+            Assert.That(panel.IsChoosing, Is.True);
+            Assert.That(panel.SelectedOptionId, Is.Empty);
+            Assert.That(done, Is.Zero);
+            Assert.That(panel.SelectOption("a"), Is.True);
+            yield return new WaitForSecondsRealtime(.5f);
+            Assert.That(panel.IsSkipping, Is.False);
+            Assert.That(panel.IsPlaying, Is.True);
+            Assert.That(panel.IsTyping, Is.True);
+            Assert.That(done, Is.Zero);
+        }
+
+        [UnityTest]
+        public IEnumerator SkipCompletesLinearDialogueOnceAndStopClearsFastForward()
+        {
+            int done = 0;
+            DialogueScript script = new DialogueScript(new[]
+            {
+                new DialogueLine(DialogueSpeaker.Left, "第一句。"),
+                new DialogueLine(DialogueSpeaker.Right, "第二句。"),
+                new DialogueLine(DialogueSpeaker.Left, "最后一句。")
+            });
+            panel.Play(script, () => done++);
+            yield return Ready();
+            panel.Skip(); panel.Skip();
+            Assert.That(done, Is.Zero);
+            float deadline = Time.realtimeSinceStartup + 5f;
+            while (panel.IsPlaying)
+            {
+                Assert.That(Time.realtimeSinceStartup, Is.LessThan(deadline));
+                yield return null;
+            }
+            Assert.That(done, Is.EqualTo(1));
+            Assert.That(panel.IsSkipping, Is.False);
+            panel.Play(script, () => done++);
+            yield return Ready();
+            panel.Skip();
+            panel.Stop();
+            yield return new WaitForSecondsRealtime(.5f);
+            Assert.That(done, Is.EqualTo(1));
+            Assert.That(panel.IsSkipping, Is.False);
+            panel.Play(script);
+            yield return Ready();
+            Assert.That(panel.LineIndex, Is.Zero);
+            Assert.That(panel.IsSkipping, Is.False);
+            Assert.That(panel.IsTyping, Is.True);
+        }
+
         private static void Capture(string path)
         {
             Texture2D image = ScreenCapture.CaptureScreenshotAsTexture();

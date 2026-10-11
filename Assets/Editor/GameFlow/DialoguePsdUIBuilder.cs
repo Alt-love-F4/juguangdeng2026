@@ -105,8 +105,7 @@ namespace Spotlight.GameFlow.Editor
                 Button next = Button(nextImage);
                 Button body = box.gameObject.AddComponent<Button>(); body.targetGraphic = box;
                 body.transition = Selectable.Transition.None; body.navigation = NoNavigation(); box.raycastTarget = true;
-                Image skipImage = Image(box.transform, "Skip", null);
-                skipImage.color = Color.clear;
+                Image skipImage = Image(box.transform, "Skip", Find(layers, "skip底").sprite);
                 PlaceRelative(skipImage.rectTransform, BoundsOf(Find(layers, "skip底")), boxBounds, true);
                 Button skip = Button(skipImage);
                 TMP_Text skipText = Text(skipImage.transform, "Label", "SKIP", 21f, new Color(.88f, .74f, .59f), TextAlignmentOptions.Center);

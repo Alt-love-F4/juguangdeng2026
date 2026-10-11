@@ -45,6 +45,7 @@ namespace Spotlight.GameFlow
         [SerializeField, Min(0f)] private float exitSeconds = .2f;
         [SerializeField, Min(0f)] private float focusSeconds = .18f;
         [SerializeField, Min(0f)] private float charactersPerSecond = 35f;
+        [SerializeField, Min(.02f)] private float skipPageSeconds = .1f;
         [SerializeField] private Color inactiveTint = new Color(.5f, .47f, .43f, .85f);
         [SerializeField] private string defaultLeftName = "咖啡馆店主";
         [SerializeField] private string defaultRightName = "印刷工";
@@ -74,6 +75,9 @@ namespace Spotlight.GameFlow
         private int lastAdvanceFrame = -1;
         private float revealed;
         private float hold;
+        private float skipElapsed;
+
+        public bool IsSkipping { get; private set; }
 
         public static bool IsAnyPlaying => active != null && active.IsPlaying;
         public static bool BlocksEscapeThisFrame => IsAnyPlaying || lastCancelFrame == Time.frameCount;
@@ -317,7 +321,8 @@ namespace Spotlight.GameFlow
                 pageStart = range.firstCharacterIndex;
                 pageEnd = Math.Min(info.characterCount, range.lastCharacterIndex + 1);
             }
-            revealed = charactersPerSecond <= 0f && ready ? pageEnd : pageStart;
+            revealed = IsSkipping || charactersPerSecond <= 0f && ready ? pageEnd : pageStart;
+            skipElapsed = 0f;
             hold = 0f;
             dialogueText.maxVisibleCharacters = (int)revealed;
             if (progressText != null)
@@ -346,6 +351,13 @@ namespace Spotlight.GameFlow
             Keyboard keyboard = Keyboard.current;
             if (keyboard != null && keyboard.escapeKey.wasPressedThisFrame) { Cancel(); return; }
             if (!ready || blockingEffects > 0 || portraitChange != null || optionsVisible) return;
+            if (IsSkipping)
+            {
+                if (TryShowOptions()) return;
+                skipElapsed += Time.unscaledDeltaTime;
+                if (skipElapsed >= Mathf.Max(.02f, skipPageSeconds)) Advance();
+                return;
+            }
             if (IsTyping)
             {
                 revealed += Time.unscaledDeltaTime * charactersPerSecond;
@@ -380,6 +392,7 @@ namespace Spotlight.GameFlow
             if (page < dialogueText.textInfo.pageCount) { ShowPage(page + 1); return; }
             if (LineIndex + 1 < activeLines.Count) { PrepareNextLine(LineIndex + 1); return; }
             if (TryShowOptions()) return;
+            IsSkipping = false;
             exiting = true;
             ready = false;
             continueButton.interactable = false;
@@ -402,6 +415,7 @@ namespace Spotlight.GameFlow
         {
             if (hintText == null) return;
             if (optionsVisible) { hintText.text = "点击选项作答 · 空格 / 回车不会代选"; return; }
+            if (IsSkipping) { hintText.text = "快速播放中 · 遇到选项自动停止"; return; }
             hintText.text = IsTyping || dialogueText.maxVisibleCharacters < pageEnd ? "空格 / 回车 / 点击 · 显示全文"
                 : page < dialogueText.textInfo.pageCount ? "空格 / 回车 / 点击 · 下一页"
                 : LineIndex + 1 < activeLines.Count ? "空格 / 回车 / 点击 · 继续"
@@ -410,30 +424,16 @@ namespace Spotlight.GameFlow
                 : "已选择回应 · 空格 / 回车 / 点击结束";
         }
 
-        /// <summary>Skip linear presentation with the completion callback; never choose an option implicitly.</summary>
+        /// <summary>Reveal each page briefly in unscaled time, stopping at choices without selecting them.</summary>
         public void Skip()
         {
-            if (!IsPlaying || !IsReady || exiting || script == null) return;
-            if (script.Options.Count > 0 && string.IsNullOrEmpty(SelectedOptionId))
-            {
-                if (optionsVisible) return;
-                for (int i = LineIndex + 1; i < activeLines.Count; i++)
-                {
-                    DialogueLine line = activeLines[i];
-                    if (line.ReplaceLeft) left = line.LeftCharacter;
-                    if (line.ReplaceRight) right = line.RightCharacter;
-                    if (line.ReplaceCenter) center = line.CenterCharacter;
-                }
-                ShowLine(activeLines.Count - 1);
-                ShowPage(Mathf.Max(1, dialogueText.textInfo.pageCount));
-                revealed = pageEnd;
-                dialogueText.maxVisibleCharacters = pageEnd;
-                TryShowOptions();
-                return;
-            }
-            Action callback = finished;
-            Stop();
-            callback?.Invoke();
+            if (!IsPlaying || !IsReady || exiting || script == null || optionsVisible || IsSkipping) return;
+            IsSkipping = true;
+            skipElapsed = 0f;
+            revealed = pageEnd;
+            dialogueText.maxVisibleCharacters = pageEnd;
+            UpdateHint();
+            TryShowOptions();
         }
 
         public void Cancel()
@@ -449,6 +449,8 @@ namespace Spotlight.GameFlow
         /// <summary>静默中止，不触发完成/取消回调；关闭、隐藏、销毁均调用此方法。</summary>
         public void Stop()
         {
+            IsSkipping = false;
+            skipElapsed = 0f;
             finished = cancelled = null;
             CancelEffectWork();
             script = null;

@@ -1,0 +1,1922 @@
+{
+  "status": "success",
+  "result": {
+    "success": true,
+    "message": "Code executed successfully.",
+    "data": {
+      "result": [
+        {
+          "frame": 296332,
+          "ms": 111.2416,
+          "threads": [
+            {
+              "name": "Main Thread",
+              "samples": [
+                {
+                  "name": "Main Thread",
+                  "ms": 111.2416
+                },
+                {
+                  "name": "EditorLoop",
+                  "ms": 8.2722
+                },
+                {
+                  "name": "EditorLoop",
+                  "ms": 99.9692
+                }
+              ]
+            },
+            {
+              "name": "Render Thread",
+              "samples": [
+                {
+                  "name": null,
+                  "ms": 111.243507
+                },
+                {
+                  "name": "RenderLoop",
+                  "ms": 8.3145
+                },
+                {
+                  "name": "RenderLoop",
+                  "ms": 100.5665
+                }
+              ]
+            },
+            {
+              "name": "#195592",
+              "samples": [
+                {
+                  "name": null,
+                  "ms": 111.241905
+                }
+              ]
+            },
+            {
+              "name": "#198492",
+              "samples": [
+                {
+                  "name": null,
+                  "ms": 111.241905
+                }
+              ]
+            },
+            {
+              "name": "#198660",
+              "samples": [
+                {
+                  "name": null,
+                  "ms": 111.241905
+                }
+              ]
+            },
+            {
+              "name": "#383264",
+              "samples": [
+                {
+                  "name": null,
+                  "ms": 111.241905
+                }
+              ]
+            },
+            {
+              "name": "#624568",
+              "samples": [
+                {
+                  "name": null,
+                  "ms": 111.241905
+                }
+              ]
+            },
+            {
+              "name": "#626736",
+              "samples": [
+                {
+                  "name": null,
+                  "ms": 111.241905
+                }
+              ]
+            },
+            {
+              "name": "AssetGarbageCollectorHelper",
+              "samples": [
+                {
+                  "name": null,
+                  "ms": 111.241905
+                }
+              ]
+            },
+            {
+              "name": "AssetGarbageCollectorHelper",
+              "samples": [
+                {
+                  "name": null,
+                  "ms": 111.241905
+                }
+              ]
+            },
+            {
+              "name": "AssetGarbageCollectorHelper",
+              "samples": [
+                {
+                  "name": null,
+                  "ms": 111.241905
+                }
+              ]
+            },
+            {
+              "name": "AssetGarbageCollectorHelper",
+              "samples": [
+                {
+                  "name": null,
+                  "ms": 111.241905
+                }
+              ]
+            },
+            {
+              "name": "AssetGarbageCollectorHelper",
+              "samples": [
+                {
+                  "name": null,
+                  "ms": 111.241905
+                }
+              ]
+            },
+            {
+              "name": "AssetGarbageCollectorHelper",
+              "samples": [
+                {
+                  "name": null,
+                  "ms": 111.241905
+                }
+              ]
+            },
+            {
+              "name": "AssetGarbageCollectorHelper",
+              "samples": [
+                {
+                  "name": null,
+                  "ms": 111.241905
+                }
+              ]
+            },
+            {
+              "name": "AssetGarbageCollectorHelper",
+              "samples": [
+                {
+                  "name": null,
+                  "ms": 111.241905
+                }
+              ]
+            },
+            {
+              "name": "AssetGarbageCollectorHelper",
+              "samples": [
+                {
+                  "name": null,
+                  "ms": 111.241905
+                }
+              ]
+            },
+            {
+              "name": "AssetGarbageCollectorHelper",
+              "samples": [
+                {
+                  "name": null,
+                  "ms": 111.241905
+                }
+              ]
+            },
+            {
+              "name": "AssetGarbageCollectorHelper",
+              "samples": [
+                {
+                  "name": null,
+                  "ms": 111.241905
+                }
+              ]
+            },
+            {
+              "name": "AssetGarbageCollectorHelper",
+              "samples": [
+                {
+                  "name": null,
+                  "ms": 111.241905
+                }
+              ]
+            },
+            {
+              "name": "AssetGarbageCollectorHelper",
+              "samples": [
+                {
+                  "name": null,
+                  "ms": 111.241905
+                }
+              ]
+            },
+            {
+              "name": "AssetGarbageCollectorHelper",
+              "samples": [
+                {
+                  "name": null,
+                  "ms": 111.241905
+                }
+              ]
+            },
+            {
+              "name": "AssetGarbageCollectorHelper",
+              "samples": [
+                {
+                  "name": null,
+                  "ms": 111.241905
+                }
+              ]
+            },
+            {
+              "name": "AssetGarbageCollectorHelper",
+              "samples": [
+                {
+                  "name": null,
+                  "ms": 111.241905
+                }
+              ]
+            },
+            {
+              "name": "AssetGarbageCollectorHelper",
+              "samples": [
+                {
+                  "name": null,
+                  "ms": 111.241905
+                }
+              ]
+            },
+            {
+              "name": "AssetGarbageCollectorHelper",
+              "samples": [
+                {
+                  "name": null,
+                  "ms": 111.241905
+                }
+              ]
+            },
+            {
+              "name": "AssetGarbageCollectorHelper",
+              "samples": [
+                {
+                  "name": null,
+                  "ms": 111.241905
+                }
+              ]
+            },
+            {
+              "name": "AssetGarbageCollectorHelper",
+              "samples": [
+                {
+                  "name": null,
+                  "ms": 111.241905
+                }
+              ]
+            },
+            {
+              "name": "AssetGarbageCollectorHelper",
+              "samples": [
+                {
+                  "name": null,
+                  "ms": 111.241905
+                }
+              ]
+            },
+            {
+              "name": "AssetGarbageCollectorHelper",
+              "samples": [
+                {
+                  "name": null,
+                  "ms": 111.241905
+                }
+              ]
+            },
+            {
+              "name": "AssetGarbageCollectorHelper",
+              "samples": [
+                {
+                  "name": null,
+                  "ms": 111.241905
+                }
+              ]
+            },
+            {
+              "name": "AssetGarbageCollectorHelper",
+              "samples": [
+                {
+                  "name": null,
+                  "ms": 111.241905
+                }
+              ]
+            },
+            {
+              "name": "AssetGarbageCollectorHelper",
+              "samples": [
+                {
+                  "name": null,
+                  "ms": 111.241905
+                }
+              ]
+            },
+            {
+              "name": "AssetGarbageCollectorHelper",
+              "samples": [
+                {
+                  "name": null,
+                  "ms": 111.241905
+                }
+              ]
+            },
+            {
+              "name": "AssetGarbageCollectorHelper",
+              "samples": [
+                {
+                  "name": null,
+                  "ms": 111.241905
+                }
+              ]
+            },
+            {
+              "name": "AssetGarbageCollectorHelper",
+              "samples": [
+                {
+                  "name": null,
+                  "ms": 111.241905
+                }
+              ]
+            },
+            {
+              "name": "AssetGarbageCollectorHelper",
+              "samples": [
+                {
+                  "name": null,
+                  "ms": 111.241905
+                }
+              ]
+            },
+            {
+              "name": "AssetGarbageCollectorHelper",
+              "samples": [
+                {
+                  "name": null,
+                  "ms": 111.241905
+                }
+              ]
+            },
+            {
+              "name": "AssetGarbageCollectorHelper",
+              "samples": [
+                {
+                  "name": null,
+                  "ms": 111.241905
+                }
+              ]
+            },
+            {
+              "name": "AsyncRead",
+              "samples": [
+                {
+                  "name": null,
+                  "ms": 111.241905
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "frame": 296333,
+          "ms": 79.3445,
+          "threads": [
+            {
+              "name": "Main Thread",
+              "samples": [
+                {
+                  "name": "Main Thread",
+                  "ms": 79.3445
+                },
+                {
+                  "name": "EditorLoop",
+                  "ms": 8.0118
+                },
+                {
+                  "name": "EditorLoop",
+                  "ms": 66.209
+                }
+              ]
+            },
+            {
+              "name": "Render Thread",
+              "samples": [
+                {
+                  "name": null,
+                  "ms": 79.3474
+                },
+                {
+                  "name": "RenderLoop",
+                  "ms": 8.0543
+                },
+                {
+                  "name": "RenderLoop",
+                  "ms": 66.8921
+                }
+              ]
+            },
+            {
+              "name": "#195592",
+              "samples": [
+                {
+                  "name": null,
+                  "ms": 79.345
+                }
+              ]
+            },
+            {
+              "name": "#198492",
+              "samples": [
+                {
+                  "name": null,
+                  "ms": 79.345
+                }
+              ]
+            },
+            {
+              "name": "#198660",
+              "samples": [
+                {
+                  "name": null,
+                  "ms": 79.345
+                }
+              ]
+            },
+            {
+              "name": "#383264",
+              "samples": [
+                {
+                  "name": null,
+                  "ms": 79.345
+                }
+              ]
+            },
+            {
+              "name": "#624568",
+              "samples": [
+                {
+                  "name": null,
+                  "ms": 79.345
+                }
+              ]
+            },
+            {
+              "name": "#626736",
+              "samples": [
+                {
+                  "name": null,
+                  "ms": 79.345
+                }
+              ]
+            },
+            {
+              "name": "AssetGarbageCollectorHelper",
+              "samples": [
+                {
+                  "name": null,
+                  "ms": 79.345
+                }
+              ]
+            },
+            {
+              "name": "AssetGarbageCollectorHelper",
+              "samples": [
+                {
+                  "name": null,
+                  "ms": 79.345
+                }
+              ]
+            },
+            {
+              "name": "AssetGarbageCollectorHelper",
+              "samples": [
+                {
+                  "name": null,
+                  "ms": 79.345
+                }
+              ]
+            },
+            {
+              "name": "AssetGarbageCollectorHelper",
+              "samples": [
+                {
+                  "name": null,
+                  "ms": 79.345
+                }
+              ]
+            },
+            {
+              "name": "AssetGarbageCollectorHelper",
+              "samples": [
+                {
+                  "name": null,
+                  "ms": 79.345
+                }
+              ]
+            },
+            {
+              "name": "AssetGarbageCollectorHelper",
+              "samples": [
+                {
+                  "name": null,
+                  "ms": 79.345
+                }
+              ]
+            },
+            {
+              "name": "AssetGarbageCollectorHelper",
+              "samples": [
+                {
+                  "name": null,
+                  "ms": 79.345
+                }
+              ]
+            },
+            {
+              "name": "AssetGarbageCollectorHelper",
+              "samples": [
+                {
+                  "name": null,
+                  "ms": 79.345
+                }
+              ]
+            },
+            {
+              "name": "AssetGarbageCollectorHelper",
+              "samples": [
+                {
+                  "name": null,
+                  "ms": 79.345
+                }
+              ]
+            },
+            {
+              "name": "AssetGarbageCollectorHelper",
+              "samples": [
+                {
+                  "name": null,
+                  "ms": 79.345
+                }
+              ]
+            },
+            {
+              "name": "AssetGarbageCollectorHelper",
+              "samples": [
+                {
+                  "name": null,
+                  "ms": 79.345
+                }
+              ]
+            },
+            {
+              "name": "AssetGarbageCollectorHelper",
+              "samples": [
+                {
+                  "name": null,
+                  "ms": 79.345
+                }
+              ]
+            },
+            {
+              "name": "AssetGarbageCollectorHelper",
+              "samples": [
+                {
+                  "name": null,
+                  "ms": 79.345
+                }
+              ]
+            },
+            {
+              "name": "AssetGarbageCollectorHelper",
+              "samples": [
+                {
+                  "name": null,
+                  "ms": 79.345
+                }
+              ]
+            },
+            {
+              "name": "AssetGarbageCollectorHelper",
+              "samples": [
+                {
+                  "name": null,
+                  "ms": 79.345
+                }
+              ]
+            },
+            {
+              "name": "AssetGarbageCollectorHelper",
+              "samples": [
+                {
+                  "name": null,
+                  "ms": 79.345
+                }
+              ]
+            },
+            {
+              "name": "AssetGarbageCollectorHelper",
+              "samples": [
+                {
+                  "name": null,
+                  "ms": 79.345
+                }
+              ]
+            },
+            {
+              "name": "AssetGarbageCollectorHelper",
+              "samples": [
+                {
+                  "name": null,
+                  "ms": 79.345
+                }
+              ]
+            },
+            {
+              "name": "AssetGarbageCollectorHelper",
+              "samples": [
+                {
+                  "name": null,
+                  "ms": 79.345
+                }
+              ]
+            },
+            {
+              "name": "AssetGarbageCollectorHelper",
+              "samples": [
+                {
+                  "name": null,
+                  "ms": 79.345
+                }
+              ]
+            },
+            {
+              "name": "AssetGarbageCollectorHelper",
+              "samples": [
+                {
+                  "name": null,
+                  "ms": 79.345
+                }
+              ]
+            },
+            {
+              "name": "AssetGarbageCollectorHelper",
+              "samples": [
+                {
+                  "name": null,
+                  "ms": 79.345
+                }
+              ]
+            },
+            {
+              "name": "AssetGarbageCollectorHelper",
+              "samples": [
+                {
+                  "name": null,
+                  "ms": 79.345
+                }
+              ]
+            },
+            {
+              "name": "AssetGarbageCollectorHelper",
+              "samples": [
+                {
+                  "name": null,
+                  "ms": 79.345
+                }
+              ]
+            },
+            {
+              "name": "AssetGarbageCollectorHelper",
+              "samples": [
+                {
+                  "name": null,
+                  "ms": 79.345
+                }
+              ]
+            },
+            {
+              "name": "AssetGarbageCollectorHelper",
+              "samples": [
+                {
+                  "name": null,
+                  "ms": 79.345
+                }
+              ]
+            },
+            {
+              "name": "AssetGarbageCollectorHelper",
+              "samples": [
+                {
+                  "name": null,
+                  "ms": 79.345
+                }
+              ]
+            },
+            {
+              "name": "AssetGarbageCollectorHelper",
+              "samples": [
+                {
+                  "name": null,
+                  "ms": 79.345
+                }
+              ]
+            },
+            {
+              "name": "AssetGarbageCollectorHelper",
+              "samples": [
+                {
+                  "name": null,
+                  "ms": 79.345
+                }
+              ]
+            },
+            {
+              "name": "AssetGarbageCollectorHelper",
+              "samples": [
+                {
+                  "name": null,
+                  "ms": 79.345
+                }
+              ]
+            },
+            {
+              "name": "AssetGarbageCollectorHelper",
+              "samples": [
+                {
+                  "name": null,
+                  "ms": 79.345
+                }
+              ]
+            },
+            {
+              "name": "AsyncRead",
+              "samples": [
+                {
+                  "name": null,
+                  "ms": 79.345
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "frame": 296338,
+          "ms": 125.549507,
+          "threads": [
+            {
+              "name": "Main Thread",
+              "samples": [
+                {
+                  "name": "Main Thread",
+                  "ms": 125.549507
+                },
+                {
+                  "name": "EditorLoop",
+                  "ms": 5.4785
+                },
+                {
+                  "name": "EditorLoop",
+                  "ms": 116.9251
+                }
+              ]
+            },
+            {
+              "name": "Render Thread",
+              "samples": [
+                {
+                  "name": null,
+                  "ms": 125.557
+                },
+                {
+                  "name": "RenderLoop",
+                  "ms": 5.5153
+                },
+                {
+                  "name": "RenderLoop",
+                  "ms": 117.6059
+                }
+              ]
+            },
+            {
+              "name": "#195592",
+              "samples": [
+                {
+                  "name": null,
+                  "ms": 125.5502
+                }
+              ]
+            },
+            {
+              "name": "#198492",
+              "samples": [
+                {
+                  "name": null,
+                  "ms": 125.5502
+                }
+              ]
+            },
+            {
+              "name": "#198660",
+              "samples": [
+                {
+                  "name": null,
+                  "ms": 125.5502
+                }
+              ]
+            },
+            {
+              "name": "#383264",
+              "samples": [
+                {
+                  "name": null,
+                  "ms": 125.5502
+                }
+              ]
+            },
+            {
+              "name": "#624568",
+              "samples": [
+                {
+                  "name": null,
+                  "ms": 125.5502
+                }
+              ]
+            },
+            {
+              "name": "#626736",
+              "samples": [
+                {
+                  "name": null,
+                  "ms": 125.5502
+                }
+              ]
+            },
+            {
+              "name": "AssetGarbageCollectorHelper",
+              "samples": [
+                {
+                  "name": null,
+                  "ms": 125.5502
+                }
+              ]
+            },
+            {
+              "name": "AssetGarbageCollectorHelper",
+              "samples": [
+                {
+                  "name": null,
+                  "ms": 125.5502
+                }
+              ]
+            },
+            {
+              "name": "AssetGarbageCollectorHelper",
+              "samples": [
+                {
+                  "name": null,
+                  "ms": 125.5502
+                }
+              ]
+            },
+            {
+              "name": "AssetGarbageCollectorHelper",
+              "samples": [
+                {
+                  "name": null,
+                  "ms": 125.5502
+                }
+              ]
+            },
+            {
+              "name": "AssetGarbageCollectorHelper",
+              "samples": [
+                {
+                  "name": null,
+                  "ms": 125.5502
+                }
+              ]
+            },
+            {
+              "name": "AssetGarbageCollectorHelper",
+              "samples": [
+                {
+                  "name": null,
+                  "ms": 125.5502
+                }
+              ]
+            },
+            {
+              "name": "AssetGarbageCollectorHelper",
+              "samples": [
+                {
+                  "name": null,
+                  "ms": 125.5502
+                }
+              ]
+            },
+            {
+              "name": "AssetGarbageCollectorHelper",
+              "samples": [
+                {
+                  "name": null,
+                  "ms": 125.5502
+                }
+              ]
+            },
+            {
+              "name": "AssetGarbageCollectorHelper",
+              "samples": [
+                {
+                  "name": null,
+                  "ms": 125.5502
+                }
+              ]
+            },
+            {
+              "name": "AssetGarbageCollectorHelper",
+              "samples": [
+                {
+                  "name": null,
+                  "ms": 125.5502
+                }
+              ]
+            },
+            {
+              "name": "AssetGarbageCollectorHelper",
+              "samples": [
+                {
+                  "name": null,
+                  "ms": 125.5502
+                }
+              ]
+            },
+            {
+              "name": "AssetGarbageCollectorHelper",
+              "samples": [
+                {
+                  "name": null,
+                  "ms": 125.5502
+                }
+              ]
+            },
+            {
+              "name": "AssetGarbageCollectorHelper",
+              "samples": [
+                {
+                  "name": null,
+                  "ms": 125.5502
+                }
+              ]
+            },
+            {
+              "name": "AssetGarbageCollectorHelper",
+              "samples": [
+                {
+                  "name": null,
+                  "ms": 125.5502
+                }
+              ]
+            },
+            {
+              "name": "AssetGarbageCollectorHelper",
+              "samples": [
+                {
+                  "name": null,
+                  "ms": 125.5502
+                }
+              ]
+            },
+            {
+              "name": "AssetGarbageCollectorHelper",
+              "samples": [
+                {
+                  "name": null,
+                  "ms": 125.5502
+                }
+              ]
+            },
+            {
+              "name": "AssetGarbageCollectorHelper",
+              "samples": [
+                {
+                  "name": null,
+                  "ms": 125.5502
+                }
+              ]
+            },
+            {
+              "name": "AssetGarbageCollectorHelper",
+              "samples": [
+                {
+                  "name": null,
+                  "ms": 125.5502
+                }
+              ]
+            },
+            {
+              "name": "AssetGarbageCollectorHelper",
+              "samples": [
+                {
+                  "name": null,
+                  "ms": 125.5502
+                }
+              ]
+            },
+            {
+              "name": "AssetGarbageCollectorHelper",
+              "samples": [
+                {
+                  "name": null,
+                  "ms": 125.5502
+                }
+              ]
+            },
+            {
+              "name": "AssetGarbageCollectorHelper",
+              "samples": [
+                {
+                  "name": null,
+                  "ms": 125.5502
+                }
+              ]
+            },
+            {
+              "name": "AssetGarbageCollectorHelper",
+              "samples": [
+                {
+                  "name": null,
+                  "ms": 125.5502
+                }
+              ]
+            },
+            {
+              "name": "AssetGarbageCollectorHelper",
+              "samples": [
+                {
+                  "name": null,
+                  "ms": 125.5502
+                }
+              ]
+            },
+            {
+              "name": "AssetGarbageCollectorHelper",
+              "samples": [
+                {
+                  "name": null,
+                  "ms": 125.5502
+                }
+              ]
+            },
+            {
+              "name": "AssetGarbageCollectorHelper",
+              "samples": [
+                {
+                  "name": null,
+                  "ms": 125.5502
+                }
+              ]
+            },
+            {
+              "name": "AssetGarbageCollectorHelper",
+              "samples": [
+                {
+                  "name": null,
+                  "ms": 125.5502
+                }
+              ]
+            },
+            {
+              "name": "AssetGarbageCollectorHelper",
+              "samples": [
+                {
+                  "name": null,
+                  "ms": 125.5502
+                }
+              ]
+            },
+            {
+              "name": "AssetGarbageCollectorHelper",
+              "samples": [
+                {
+                  "name": null,
+                  "ms": 125.5502
+                }
+              ]
+            },
+            {
+              "name": "AssetGarbageCollectorHelper",
+              "samples": [
+                {
+                  "name": null,
+                  "ms": 125.5502
+                }
+              ]
+            },
+            {
+              "name": "AssetGarbageCollectorHelper",
+              "samples": [
+                {
+                  "name": null,
+                  "ms": 125.5502
+                }
+              ]
+            },
+            {
+              "name": "AssetGarbageCollectorHelper",
+              "samples": [
+                {
+                  "name": null,
+                  "ms": 125.5502
+                }
+              ]
+            },
+            {
+              "name": "AsyncRead",
+              "samples": [
+                {
+                  "name": null,
+                  "ms": 125.5502
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "frame": 296339,
+          "ms": 132.4642,
+          "threads": [
+            {
+              "name": "Main Thread",
+              "samples": [
+                {
+                  "name": "Main Thread",
+                  "ms": 132.4642
+                },
+                {
+                  "name": "EditorLoop",
+                  "ms": 8.7501
+                },
+                {
+                  "name": "EditorLoop",
+                  "ms": 119.7098
+                }
+              ]
+            },
+            {
+              "name": "Render Thread",
+              "samples": [
+                {
+                  "name": null,
+                  "ms": 132.455292
+                },
+                {
+                  "name": "RenderLoop",
+                  "ms": 8.7939
+                },
+                {
+                  "name": "RenderLoop",
+                  "ms": 120.5287
+                }
+              ]
+            },
+            {
+              "name": "#195592",
+              "samples": [
+                {
+                  "name": null,
+                  "ms": 132.4644
+                }
+              ]
+            },
+            {
+              "name": "#198492",
+              "samples": [
+                {
+                  "name": null,
+                  "ms": 132.4644
+                }
+              ]
+            },
+            {
+              "name": "#198660",
+              "samples": [
+                {
+                  "name": null,
+                  "ms": 132.4644
+                }
+              ]
+            },
+            {
+              "name": "#383264",
+              "samples": [
+                {
+                  "name": null,
+                  "ms": 132.4644
+                }
+              ]
+            },
+            {
+              "name": "#624568",
+              "samples": [
+                {
+                  "name": null,
+                  "ms": 132.4644
+                }
+              ]
+            },
+            {
+              "name": "#626736",
+              "samples": [
+                {
+                  "name": null,
+                  "ms": 132.4644
+                }
+              ]
+            },
+            {
+              "name": "AssetGarbageCollectorHelper",
+              "samples": [
+                {
+                  "name": null,
+                  "ms": 132.4644
+                }
+              ]
+            },
+            {
+              "name": "AssetGarbageCollectorHelper",
+              "samples": [
+                {
+                  "name": null,
+                  "ms": 132.4644
+                }
+              ]
+            },
+            {
+              "name": "AssetGarbageCollectorHelper",
+              "samples": [
+                {
+                  "name": null,
+                  "ms": 132.4644
+                }
+              ]
+            },
+            {
+              "name": "AssetGarbageCollectorHelper",
+              "samples": [
+                {
+                  "name": null,
+                  "ms": 132.4644
+                }
+              ]
+            },
+            {
+              "name": "AssetGarbageCollectorHelper",
+              "samples": [
+                {
+                  "name": null,
+                  "ms": 132.4644
+                }
+              ]
+            },
+            {
+              "name": "AssetGarbageCollectorHelper",
+              "samples": [
+                {
+                  "name": null,
+                  "ms": 132.4644
+                }
+              ]
+            },
+            {
+              "name": "AssetGarbageCollectorHelper",
+              "samples": [
+                {
+                  "name": null,
+                  "ms": 132.4644
+                }
+              ]
+            },
+            {
+              "name": "AssetGarbageCollectorHelper",
+              "samples": [
+                {
+                  "name": null,
+                  "ms": 132.4644
+                }
+              ]
+            },
+            {
+              "name": "AssetGarbageCollectorHelper",
+              "samples": [
+                {
+                  "name": null,
+                  "ms": 132.4644
+                }
+              ]
+            },
+            {
+              "name": "AssetGarbageCollectorHelper",
+              "samples": [
+                {
+                  "name": null,
+                  "ms": 132.4644
+                }
+              ]
+            },
+            {
+              "name": "AssetGarbageCollectorHelper",
+              "samples": [
+                {
+                  "name": null,
+                  "ms": 132.4644
+                }
+              ]
+            },
+            {
+              "name": "AssetGarbageCollectorHelper",
+              "samples": [
+                {
+                  "name": null,
+                  "ms": 132.4644
+                }
+              ]
+            },
+            {
+              "name": "AssetGarbageCollectorHelper",
+              "samples": [
+                {
+                  "name": null,
+                  "ms": 132.4644
+                }
+              ]
+            },
+            {
+              "name": "AssetGarbageCollectorHelper",
+              "samples": [
+                {
+                  "name": null,
+                  "ms": 132.4644
+                }
+              ]
+            },
+            {
+              "name": "AssetGarbageCollectorHelper",
+              "samples": [
+                {
+                  "name": null,
+                  "ms": 132.4644
+                }
+              ]
+            },
+            {
+              "name": "AssetGarbageCollectorHelper",
+              "samples": [
+                {
+                  "name": null,
+                  "ms": 132.4644
+                }
+              ]
+            },
+            {
+              "name": "AssetGarbageCollectorHelper",
+              "samples": [
+                {
+                  "name": null,
+                  "ms": 132.4644
+                }
+              ]
+            },
+            {
+              "name": "AssetGarbageCollectorHelper",
+              "samples": [
+                {
+                  "name": null,
+                  "ms": 132.4644
+                }
+              ]
+            },
+            {
+              "name": "AssetGarbageCollectorHelper",
+              "samples": [
+                {
+                  "name": null,
+                  "ms": 132.4644
+                }
+              ]
+            },
+            {
+              "name": "AssetGarbageCollectorHelper",
+              "samples": [
+                {
+                  "name": null,
+                  "ms": 132.4644
+                }
+              ]
+            },
+            {
+              "name": "AssetGarbageCollectorHelper",
+              "samples": [
+                {
+                  "name": null,
+                  "ms": 132.4644
+                }
+              ]
+            },
+            {
+              "name": "AssetGarbageCollectorHelper",
+              "samples": [
+                {
+                  "name": null,
+                  "ms": 132.4644
+                }
+              ]
+            },
+            {
+              "name": "AssetGarbageCollectorHelper",
+              "samples": [
+                {
+                  "name": null,
+                  "ms": 132.4644
+                }
+              ]
+            },
+            {
+              "name": "AssetGarbageCollectorHelper",
+              "samples": [
+                {
+                  "name": null,
+                  "ms": 132.4644
+                }
+              ]
+            },
+            {
+              "name": "AssetGarbageCollectorHelper",
+              "samples": [
+                {
+                  "name": null,
+                  "ms": 132.4644
+                }
+              ]
+            },
+            {
+              "name": "AssetGarbageCollectorHelper",
+              "samples": [
+                {
+                  "name": null,
+                  "ms": 132.4644
+                }
+              ]
+            },
+            {
+              "name": "AssetGarbageCollectorHelper",
+              "samples": [
+                {
+                  "name": null,
+                  "ms": 132.4644
+                }
+              ]
+            },
+            {
+              "name": "AssetGarbageCollectorHelper",
+              "samples": [
+                {
+                  "name": null,
+                  "ms": 132.4644
+                }
+              ]
+            },
+            {
+              "name": "AssetGarbageCollectorHelper",
+              "samples": [
+                {
+                  "name": null,
+                  "ms": 132.4644
+                }
+              ]
+            },
+            {
+              "name": "AssetGarbageCollectorHelper",
+              "samples": [
+                {
+                  "name": null,
+                  "ms": 132.4644
+                }
+              ]
+            },
+            {
+              "name": "AssetGarbageCollectorHelper",
+              "samples": [
+                {
+                  "name": null,
+                  "ms": 132.4644
+                }
+              ]
+            },
+            {
+              "name": "AsyncRead",
+              "samples": [
+                {
+                  "name": null,
+                  "ms": 132.4644
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "frame": 296340,
+          "ms": 60.8378,
+          "threads": [
+            {
+              "name": "Main Thread",
+              "samples": [
+                {
+                  "name": "Main Thread",
+                  "ms": 60.8378
+                },
+                {
+                  "name": "EditorLoop",
+                  "ms": 10.3185
+                },
+                {
+                  "name": "EditorLoop",
+                  "ms": 46.2246
+                }
+              ]
+            },
+            {
+              "name": "Render Thread",
+              "samples": [
+                {
+                  "name": null,
+                  "ms": 60.8417
+                },
+                {
+                  "name": "RenderLoop",
+                  "ms": 10.3539
+                },
+                {
+                  "name": "RenderLoop",
+                  "ms": 47.053
+                }
+              ]
+            },
+            {
+              "name": "#195592",
+              "samples": [
+                {
+                  "name": null,
+                  "ms": 60.8385
+                }
+              ]
+            },
+            {
+              "name": "#198492",
+              "samples": [
+                {
+                  "name": null,
+                  "ms": 60.8385
+                }
+              ]
+            },
+            {
+              "name": "#198660",
+              "samples": [
+                {
+                  "name": null,
+                  "ms": 60.8385
+                }
+              ]
+            },
+            {
+              "name": "#383264",
+              "samples": [
+                {
+                  "name": null,
+                  "ms": 60.8385
+                }
+              ]
+            },
+            {
+              "name": "#624568",
+              "samples": [
+                {
+                  "name": null,
+                  "ms": 60.8385
+                }
+              ]
+            },
+            {
+              "name": "#626736",
+              "samples": [
+                {
+                  "name": null,
+                  "ms": 60.8385
+                }
+              ]
+            },
+            {
+              "name": "AssetGarbageCollectorHelper",
+              "samples": [
+                {
+                  "name": null,
+                  "ms": 60.8385
+                }
+              ]
+            },
+            {
+              "name": "AssetGarbageCollectorHelper",
+              "samples": [
+                {
+                  "name": null,
+                  "ms": 60.8385
+                }
+              ]
+            },
+            {
+              "name": "AssetGarbageCollectorHelper",
+              "samples": [
+                {
+                  "name": null,
+                  "ms": 60.8385
+                }
+              ]
+            },
+            {
+              "name": "AssetGarbageCollectorHelper",
+              "samples": [
+                {
+                  "name": null,
+                  "ms": 60.8385
+                }
+              ]
+            },
+            {
+              "name": "AssetGarbageCollectorHelper",
+              "samples": [
+                {
+                  "name": null,
+                  "ms": 60.8385
+                }
+              ]
+            },
+            {
+              "name": "AssetGarbageCollectorHelper",
+              "samples": [
+                {
+                  "name": null,
+                  "ms": 60.8385
+                }
+              ]
+            },
+            {
+              "name": "AssetGarbageCollectorHelper",
+              "samples": [
+                {
+                  "name": null,
+                  "ms": 60.8385
+                }
+              ]
+            },
+            {
+              "name": "AssetGarbageCollectorHelper",
+              "samples": [
+                {
+                  "name": null,
+                  "ms": 60.8385
+                }
+              ]
+            },
+            {
+              "name": "AssetGarbageCollectorHelper",
+              "samples": [
+                {
+                  "name": null,
+                  "ms": 60.8385
+                }
+              ]
+            },
+            {
+              "name": "AssetGarbageCollectorHelper",
+              "samples": [
+                {
+                  "name": null,
+                  "ms": 60.8385
+                }
+              ]
+            },
+            {
+              "name": "AssetGarbageCollectorHelper",
+              "samples": [
+                {
+                  "name": null,
+                  "ms": 60.8385
+                }
+              ]
+            },
+            {
+              "name": "AssetGarbageCollectorHelper",
+              "samples": [
+                {
+                  "name": null,
+                  "ms": 60.8385
+                }
+              ]
+            },
+            {
+              "name": "AssetGarbageCollectorHelper",
+              "samples": [
+                {
+                  "name": null,
+                  "ms": 60.8385
+                }
+              ]
+            },
+            {
+              "name": "AssetGarbageCollectorHelper",
+              "samples": [
+                {
+                  "name": null,
+                  "ms": 60.8385
+                }
+              ]
+            },
+            {
+              "name": "AssetGarbageCollectorHelper",
+              "samples": [
+                {
+                  "name": null,
+                  "ms": 60.8385
+                }
+              ]
+            },
+            {
+              "name": "AssetGarbageCollectorHelper",
+              "samples": [
+                {
+                  "name": null,
+                  "ms": 60.8385
+                }
+              ]
+            },
+            {
+              "name": "AssetGarbageCollectorHelper",
+              "samples": [
+                {
+                  "name": null,
+                  "ms": 60.8385
+                }
+              ]
+            },
+            {
+              "name": "AssetGarbageCollectorHelper",
+              "samples": [
+                {
+                  "name": null,
+                  "ms": 60.8385
+                }
+              ]
+            },
+            {
+              "name": "AssetGarbageCollectorHelper",
+              "samples": [
+                {
+                  "name": null,
+                  "ms": 60.8385
+                }
+              ]
+            },
+            {
+              "name": "AssetGarbageCollectorHelper",
+              "samples": [
+                {
+                  "name": null,
+                  "ms": 60.8385
+                }
+              ]
+            },
+            {
+              "name": "AssetGarbageCollectorHelper",
+              "samples": [
+                {
+                  "name": null,
+                  "ms": 60.8385
+                }
+              ]
+            },
+            {
+              "name": "AssetGarbageCollectorHelper",
+              "samples": [
+                {
+                  "name": null,
+                  "ms": 60.8385
+                }
+              ]
+            },
+            {
+              "name": "AssetGarbageCollectorHelper",
+              "samples": [
+                {
+                  "name": null,
+                  "ms": 60.8385
+                }
+              ]
+            },
+            {
+              "name": "AssetGarbageCollectorHelper",
+              "samples": [
+                {
+                  "name": null,
+                  "ms": 60.8385
+                }
+              ]
+            },
+            {
+              "name": "AssetGarbageCollectorHelper",
+              "samples": [
+                {
+                  "name": null,
+                  "ms": 60.8385
+                }
+              ]
+            },
+            {
+              "name": "AssetGarbageCollectorHelper",
+              "samples": [
+                {
+                  "name": null,
+                  "ms": 60.8385
+                }
+              ]
+            },
+            {
+              "name": "AssetGarbageCollectorHelper",
+              "samples": [
+                {
+                  "name": null,
+                  "ms": 60.8385
+                }
+              ]
+            },
+            {
+              "name": "AssetGarbageCollectorHelper",
+              "samples": [
+                {
+                  "name": null,
+                  "ms": 60.8385
+                }
+              ]
+            },
+            {
+              "name": "AssetGarbageCollectorHelper",
+              "samples": [
+                {
+                  "name": null,
+                  "ms": 60.8385
+                }
+              ]
+            },
+            {
+              "name": "AssetGarbageCollectorHelper",
+              "samples": [
+                {
+                  "name": null,
+                  "ms": 60.8385
+                }
+              ]
+            },
+            {
+              "name": "AssetGarbageCollectorHelper",
+              "samples": [
+                {
+                  "name": null,
+                  "ms": 60.8385
+                }
+              ]
+            },
+            {
+              "name": "AsyncRead",
+              "samples": [
+                {
+                  "name": null,
+                  "ms": 60.8385
+                }
+              ]
+            }
+          ]
+        }
+      ],
+      "compiler": "codedom"
+    }
+  }
+}

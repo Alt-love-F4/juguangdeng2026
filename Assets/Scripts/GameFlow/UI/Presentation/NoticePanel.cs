@@ -25,7 +25,7 @@ namespace Spotlight.GameFlow
         [SerializeField, Min(0f)] private float enterSeconds = .2f;
         [SerializeField, Min(0f)] private float exitSeconds = .15f;
 
-        private Sequence transition;
+        private DG.Tweening.Sequence transition;
         private Action finished;
         private Action cancelled;
         private bool ready;
@@ -49,6 +49,20 @@ namespace Spotlight.GameFlow
         {
             Canvas canvas = GetComponent<Canvas>();
             if (canvas != null) canvas.overrideSorting = true;
+            // UIKit's generic show animation may leave a reused panel at zero scale.
+            // NoticePanel owns its fade through CanvasGroup, so always restore its UI transform.
+            RectTransform rect = transform as RectTransform;
+            if (rect != null)
+            {
+                rect.localScale = Vector3.one;
+                rect.localPosition = Vector3.zero;
+                rect.localRotation = Quaternion.identity;
+                rect.anchorMin = Vector2.zero;
+                rect.anchorMax = Vector2.one;
+                rect.offsetMin = Vector2.zero;
+                rect.offsetMax = Vector2.zero;
+                rect.sizeDelta = Vector2.zero;
+            }
         }
 
         public void Play(NoticeData value, Action onFinished = null, Action onCancelled = null)

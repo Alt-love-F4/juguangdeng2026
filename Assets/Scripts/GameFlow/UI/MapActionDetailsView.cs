@@ -22,6 +22,8 @@ namespace Spotlight.GameFlow
         public bool IsBusy => busy;
         private float nextRefresh;
         private string signature;
+        private string builtPosition, builtTitle;
+        private float contentHeight;
         private ScrollRect scroll;
         private float revealStarted = float.NegativeInfinity;
         private CanvasGroup revealGroup;
@@ -99,6 +101,7 @@ namespace Spotlight.GameFlow
             var parent = transform.parent as RectTransform;
             if (parent == null) return;
             var rect = (RectTransform)transform;
+            UpdatePanelHeight();
             float scale = Mathf.Min(1, Mathf.Max(.1f, (parent.rect.width - 64) / Width));
             float t = Mathf.Clamp01((Time.unscaledTime - revealStarted) / .26f);
             float pop = 1 + 2.7f * Mathf.Pow(t - 1, 3) + 1.7f * Mathf.Pow(t - 1, 2);
@@ -121,6 +124,30 @@ namespace Spotlight.GameFlow
         }
         private void Rebuild()
         {
+            var actions = NarrativeRuntime.Instance?.Actions;
+            var values = actions?.GetMountedActions(position).ToList() ?? new List<NarrativeActionDefinition>();
+            string nextSignature = string.Join("|", values.Select(a => a.actionKey));
+            if (builtPosition == position && builtTitle == title.text && signature == nextSignature)
+            {
+                foreach (var card in cards) UpdateCard(card);
+                UpdatePanelHeight();
+                return;
+            }
+            // Empty places share the same artwork and controls. Reuse their text geometry
+            // instead of destroying the entire popup when selecting another empty place.
+            bool cafe = position == "cafe" || position == "大堂区";
+            bool builtCafe = builtPosition == "cafe" || builtPosition == "大堂区";
+            if (builtPosition != null && signature == "" && values.Count == 0 && cafe == builtCafe)
+            {
+                var heading = content.Find("LocationOverview/Name")?.GetComponent<TextMeshProUGUI>();
+                if (heading != null)
+                {
+                    heading.text = title.text;
+                    builtPosition = position; builtTitle = title.text;
+                    UpdatePanelHeight();
+                    return;
+                }
+            }
             for (int childIndex = content.childCount - 1; childIndex >= 0; childIndex--)
             {
                 var child = content.GetChild(childIndex).gameObject;
@@ -128,9 +155,8 @@ namespace Spotlight.GameFlow
                 if (Application.isPlaying) Destroy(child); else DestroyImmediate(child);
             }
             cards.Clear();
-            var actions = NarrativeRuntime.Instance?.Actions;
-            var values = actions?.GetMountedActions(position).ToList() ?? new List<NarrativeActionDefinition>();
-            signature = string.Join("|", values.Select(a => a.actionKey));
+            signature = nextSignature;
+            builtPosition = position; builtTitle = title.text;
             float y = 0;
             if (position == "cafe" || position == "大堂区")
             {
@@ -251,10 +277,19 @@ namespace Spotlight.GameFlow
                 caption.color = new Color(.97f, .92f, .75f);
                 y += 438;
             }
+            contentHeight = y;
             content.sizeDelta = new Vector2(0, y);
-            float maximumHeight = Mathf.Min(800, ((RectTransform)transform.parent).rect.height - 250);
-            ((RectTransform)transform).sizeDelta = new Vector2(Width, Mathf.Clamp(y, 230, Mathf.Max(230, maximumHeight)));
-            Canvas.ForceUpdateCanvases();
+            UpdatePanelHeight();
+            // Let the normal Canvas pass build the new graphics once. A global forced
+            // rebuild here also flushed every unrelated HUD/ScrollRect in this frame.
+        }
+        private void UpdatePanelHeight()
+        {
+            if (!(transform.parent is RectTransform parent)) return;
+            float maximumHeight = Mathf.Min(800, parent.rect.height - 250);
+            var size = new Vector2(Width, Mathf.Clamp(contentHeight, 230, Mathf.Max(230, maximumHeight)));
+            var rect = (RectTransform)transform;
+            if (!rect.sizeDelta.Equals(size)) rect.sizeDelta = size;
         }
         private void OnDisable()
         {

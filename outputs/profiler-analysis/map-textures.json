@@ -1,0 +1,298 @@
+{
+  "status": "success",
+  "result": {
+    "success": true,
+    "message": "Code executed successfully.",
+    "data": {
+      "result": {
+        "scene": "Assets/Scenes/Map.unity",
+        "objects": 129,
+        "images": 66,
+        "textureBytes": 77119283,
+        "textures": [
+          {
+            "name": "mapBackgroundSprite",
+            "width": 2048,
+            "height": 1152,
+            "format": "RGBA32",
+            "bytes": 18875264
+          },
+          {
+            "name": "location0",
+            "width": 191,
+            "height": 186,
+            "format": "RGBA32",
+            "bytes": 285104
+          },
+          {
+            "name": "location1",
+            "width": 178,
+            "height": 221,
+            "format": "RGBA32",
+            "bytes": 315600
+          },
+          {
+            "name": "location2",
+            "width": 205,
+            "height": 209,
+            "format": "RGBA32",
+            "bytes": 343656
+          },
+          {
+            "name": "location3",
+            "width": 214,
+            "height": 224,
+            "format": "RGBA32",
+            "bytes": 384384
+          },
+          {
+            "name": "location4",
+            "width": 193,
+            "height": 238,
+            "format": "RGBA32",
+            "bytes": 368368
+          },
+          {
+            "name": "location5",
+            "width": 229,
+            "height": 282,
+            "format": "RGBA32",
+            "bytes": 517520
+          },
+          {
+            "name": "location6",
+            "width": 176,
+            "height": 252,
+            "format": "RGBA32",
+            "bytes": 355712
+          },
+          {
+            "name": "location7",
+            "width": 284,
+            "height": 244,
+            "format": "RGBA32",
+            "bytes": 555264
+          },
+          {
+            "name": "location8",
+            "width": 184,
+            "height": 205,
+            "format": "RGBA32",
+            "bytes": 302656
+          },
+          {
+            "name": "location9",
+            "width": 183,
+            "height": 226,
+            "format": "RGBA32",
+            "bytes": 331760
+          },
+          {
+            "name": "locationSignsSprite",
+            "width": 2047,
+            "height": 855,
+            "format": "RGBA32",
+            "bytes": 14002376
+          },
+          {
+            "name": "locationNamesSprite",
+            "width": 2048,
+            "height": 878,
+            "format": "RGBA32",
+            "bytes": 14386048
+          },
+          {
+            "name": "pinSprite",
+            "width": 248,
+            "height": 312,
+            "format": "RGBA32",
+            "bytes": 619904
+          },
+          {
+            "name": "cityTitleSprite",
+            "width": 664,
+            "height": 238,
+            "format": "RGBA32",
+            "bytes": 1265152
+          },
+          {
+            "name": "compassSprite",
+            "width": 216,
+            "height": 241,
+            "format": "RGBA32",
+            "bytes": 417344
+          },
+          {
+            "name": "pointsBase",
+            "width": 971,
+            "height": 193,
+            "format": "RGBA32",
+            "bytes": 1500120
+          },
+          {
+            "name": "pointsLabel",
+            "width": 203,
+            "height": 58,
+            "format": "RGBA32",
+            "bytes": 95088
+          },
+          {
+            "name": "dateFrame",
+            "width": 462,
+            "height": 229,
+            "format": "RGBA32",
+            "bytes": 847280
+          },
+          {
+            "name": "pointSegment0",
+            "width": 153,
+            "height": 193,
+            "format": "RGBA32",
+            "bytes": 237128
+          },
+          {
+            "name": "pointSegment1",
+            "width": 153,
+            "height": 193,
+            "format": "RGBA32",
+            "bytes": 237128
+          },
+          {
+            "name": "pointSegment2",
+            "width": 153,
+            "height": 193,
+            "format": "RGBA32",
+            "bytes": 237128
+          },
+          {
+            "name": "pointSegment3",
+            "width": 153,
+            "height": 193,
+            "format": "RGBA32",
+            "bytes": 237128
+          },
+          {
+            "name": "pointSegment4",
+            "width": 155,
+            "height": 193,
+            "format": "RGBA32",
+            "bytes": 240216
+          },
+          {
+            "name": "pointsOutline",
+            "width": 972,
+            "height": 193,
+            "format": "RGBA32",
+            "bytes": 1501664
+          },
+          {
+            "name": "details",
+            "width": 176,
+            "height": 161,
+            "format": "RGBA32",
+            "bytes": 227584
+          },
+          {
+            "name": "bag",
+            "width": 179,
+            "height": 161,
+            "format": "RGBA32",
+            "bytes": 231448
+          },
+          {
+            "name": "tasks",
+            "width": 176,
+            "height": 161,
+            "format": "RGBA32",
+            "bytes": 227584
+          },
+          {
+            "name": "shortcuts",
+            "width": 536,
+            "height": 70,
+            "format": "RGBA32",
+            "bytes": 301056
+          },
+          {
+            "name": "zoomBar",
+            "width": 734,
+            "height": 94,
+            "format": "RGBA32",
+            "bytes": 552864
+          },
+          {
+            "name": "zoomHandle",
+            "width": 25,
+            "height": 69,
+            "format": "RGB24",
+            "bytes": 12971
+          },
+          {
+            "name": "panel",
+            "width": 946,
+            "height": 1696,
+            "format": "RGBA32",
+            "bytes": 12836224
+          },
+          {
+            "name": "inventoryTitle",
+            "width": 488,
+            "height": 130,
+            "format": "RGBA32",
+            "bytes": 254656
+          },
+          {
+            "name": "requirement",
+            "width": 121,
+            "height": 110,
+            "format": "RGBA32",
+            "bytes": 107376
+          },
+          {
+            "name": "actionEmblem",
+            "width": 150,
+            "height": 136,
+            "format": "RGB24",
+            "bytes": 143696
+          },
+          {
+            "name": "actionDivider",
+            "width": 830,
+            "height": 16,
+            "format": "RGB24",
+            "bytes": 93856
+          },
+          {
+            "name": "execute",
+            "width": 492,
+            "height": 212,
+            "format": "RGBA32",
+            "bytes": 835328
+          },
+          {
+            "name": "tracking",
+            "width": 783,
+            "height": 53,
+            "format": "RGBA32",
+            "bytes": 332888
+          },
+          {
+            "name": "taskTitle",
+            "width": 586,
+            "height": 144,
+            "format": "RGBA32",
+            "bytes": 338432
+          },
+          {
+            "name": "taskCard",
+            "width": 827,
+            "height": 327,
+            "format": "RGBA32",
+            "bytes": 2164328
+          }
+        ]
+      },
+      "compiler": "codedom"
+    }
+  }
+}
