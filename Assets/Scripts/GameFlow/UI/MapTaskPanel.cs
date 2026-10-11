@@ -29,7 +29,7 @@ namespace Spotlight.GameFlow
         private Button toggle, activeTab, completedTab;
         private TextMeshProUGUI summary;
         private ScrollRect scroll;
-        private bool showCompleted;
+        private bool expanded, showCompleted;
         private string expandedId, trackedId;
         public string TrackedId => trackedId;
         public event Action<string> TrackingChanged;
@@ -114,7 +114,8 @@ namespace Spotlight.GameFlow
         }
         public void SetVisible(bool value)
         {
-            // Initialize and content changes already build the rows; visibility only slides the sidebar.
+            expanded = value;
+            Refresh();
             sidebar.SetVisible(value);
         }
 
