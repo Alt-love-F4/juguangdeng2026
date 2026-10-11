@@ -38,7 +38,8 @@ namespace Spotlight.GameFlow
             rect.pivot = new Vector2(1, .5f);
             rect.anchoredPosition = new Vector2(-32, 0);
             rect.sizeDelta = new Vector2(520, 610);
-            GetComponent<Image>().color = new Color(.035f, .065f, .065f, .97f);
+            MapVisualTheme.Skin(GetComponent<Image>(), MapVisualTheme.Current?.actionCard);
+            rect.anchorMin = rect.anchorMax = new Vector2(.35f, .42f);
             title = Label("Location", rect, "行动详情", 24);
             Top(title.rectTransform, 20, -12, 430, 42);
             var close = Button("Close", rect, "×", () => { if (!busy) gameObject.SetActive(false); });
@@ -90,7 +91,7 @@ namespace Spotlight.GameFlow
             {
                 var card = new Card { action = action };
                 var root = Rect("Action_" + action.actionKey, content);
-                root.gameObject.AddComponent<Image>().color = new Color(.08f, .13f, .13f);
+                MapVisualTheme.Skin(root.gameObject.AddComponent<Image>(), MapVisualTheme.Current?.actionCard);
                 var name = Label("Name", root, Text(action.nameText, string.IsNullOrEmpty(action.nameText) ? action.actionKey : action.nameText), 24);
                 Top(name.rectTransform, 16, -40, 444, 38);
                 card.type = Label("Type", root, "", 16);
@@ -113,7 +114,7 @@ namespace Spotlight.GameFlow
                     {
                         var box = Rect("Requirement_" + i, root);
                         Top(box, 16 + (i % 2) * 226, -ry - (i / 2) * 82, 218, 74);
-                        box.gameObject.AddComponent<Image>().color = new Color(.04f, .08f, .08f);
+                        MapVisualTheme.Skin(box.gameObject.AddComponent<Image>(), MapVisualTheme.Current?.requirement);
                         var label = Label("Label", box, "", 15);
                         Stretch(label.rectTransform, 8);
                         card.requirements.Add(label);
@@ -121,6 +122,7 @@ namespace Spotlight.GameFlow
                     ry += ((requirements.Count + 1) / 2) * 82 + 8;
                 }
                 card.button = Button("Execute", root, "执行行动", () => OnExecute(card));
+                MapVisualTheme.Skin(card.button.GetComponent<Image>(), MapVisualTheme.Current?.disabledExecute);
                 Top((RectTransform)card.button.transform, 16, -ry, 444, 46);
                 float height = ry + 60;
                 Top(root, 8, -y, 480, height); y += height + 14;
@@ -156,6 +158,7 @@ namespace Spotlight.GameFlow
             if (action.IsProgress) type += " · 进度 " + actions.GetProgress(action.actionKey) + " / " + action.progressTarget;
             if (action.mustExecute) type += " · 今日必做";
             card.type.text = type;
+            card.type.color = MapVisualTheme.Accent;
             for (int i = 0; i < card.requirements.Count; i++)
             {
                 bool ok = i < checks.Count && checks[i].satisfied;
@@ -163,12 +166,12 @@ namespace Spotlight.GameFlow
                 string current = i < checks.Count ? checks[i].currentValue : "";
                 card.requirements[i].text = (ok ? "已满足  " : "未满足  ") + RequirementName(requirement) +
                     (string.IsNullOrEmpty(current) ? "" : "\n当前：" + current);
-                card.requirements[i].color = ok ? new Color(.65f, .94f, .76f) : new Color(1, .56f, .48f);
+                card.requirements[i].color = ok ? MapVisualTheme.Ink : new Color(.65f, .23f, .14f);
             }
             string caption = action.endDay && actions.HasBlockingActions() ? "有需要进行的行动" :
                 action.type == NarrativeActionType.Future ? "等待开放" : available ? (action.endDay ? "结束一天" : "执行行动") : "暂不可用 · 查看原因";
             card.button.GetComponentInChildren<TextMeshProUGUI>().text = caption;
-            card.button.GetComponent<Image>().color = available ? new Color(.18f, .4f, .32f) : new Color(.22f, .24f, .24f);
+            card.button.GetComponent<Image>().color = available ? new Color(1f, .63f, .25f) : Color.white;
             card.button.interactable = !busy;
         }
         private string RequirementName(NarrativeActionRequirement r) => r.type switch
@@ -288,12 +291,12 @@ namespace Spotlight.GameFlow
         {
             var label = Rect(name, parent).gameObject.AddComponent<TextMeshProUGUI>();
             label.font = Resources.Load<TMP_FontAsset>("Fonts/CactusClassicalSerif SDF") ?? TMP_Settings.defaultFontAsset;
-            label.text = text; label.fontSize = size; label.color = Color.white; label.raycastTarget = false; return label;
+            label.text = text; label.fontSize = size; MapVisualTheme.Font(label, size >= 24); label.raycastTarget = false; return label;
         }
         internal static Button Button(string name, Transform parent, string text, UnityEngine.Events.UnityAction click)
         {
             var rect = Rect(name, parent); var image = rect.gameObject.AddComponent<Image>();
-            image.color = new Color(.12f, .22f, .2f);
+            MapVisualTheme.Skin(image, MapVisualTheme.Current?.tracking);
             var button = rect.gameObject.AddComponent<Button>(); button.targetGraphic = image;
             var label = Label("Label", rect, text, 20); Stretch(label.rectTransform, 4); label.alignment = TextAlignmentOptions.Center;
             button.onClick.AddListener(click); return button;
@@ -308,20 +311,26 @@ namespace Spotlight.GameFlow
         private readonly Dictionary<string, RectTransform> slots = new Dictionary<string, RectTransform>();
         private string signature = "__uninitialized";
         private float nextRefresh;
-        public RectTransform PointsRect => points.rectTransform;
+        public Image PointsFill;
+        public TextMeshProUGUI DateLabel;
+        public RectTransform PointsRect => PointsFill != null ? PointsFill.rectTransform : points.rectTransform;
+        public void Toggle() => gameObject.SetActive(!gameObject.activeSelf);
         public void Initialize(TextMeshProUGUI pointsLabel)
         {
             points = pointsLabel;
             var rect = (RectTransform)transform;
-            rect.anchorMin = rect.anchorMax = new Vector2(.5f, 0); rect.anchoredPosition = new Vector2(0, 78); rect.sizeDelta = new Vector2(560, 88);
-            GetComponent<Image>().color = new Color(.04f, .07f, .07f, .96f);
-            var viewport = MapActionDetailsView.Rect("Viewport", rect); MapActionDetailsView.Stretch(viewport, 6);
+            rect.anchorMin = rect.anchorMax = new Vector2(1, .5f); rect.pivot = new Vector2(1, .5f);
+            rect.anchoredPosition = new Vector2(-28, -12); rect.sizeDelta = new Vector2(340, 610);
+            MapVisualTheme.Skin(GetComponent<Image>(), MapVisualTheme.Current?.panel);
+            MapVisualTheme.Art("InventoryTitle", rect, MapVisualTheme.Current?.inventoryTitle, new Vector2(0, 252), new Vector2(244, 65));
+            var viewport = MapActionDetailsView.Rect("Viewport", rect); MapActionDetailsView.Stretch(viewport, 16);
+            viewport.offsetMax = new Vector2(-16, -102);
             viewport.gameObject.AddComponent<Image>().color = Color.clear;
             viewport.gameObject.AddComponent<RectMask2D>();
-            scroll = viewport.gameObject.AddComponent<ScrollRect>(); scroll.viewport = viewport; scroll.horizontal = true; scroll.vertical = false;
+            scroll = viewport.gameObject.AddComponent<ScrollRect>(); scroll.viewport = viewport; scroll.horizontal = false; scroll.vertical = true;
             scroll.movementType = ScrollRect.MovementType.Clamped; scroll.scrollSensitivity = 32;
             content = MapActionDetailsView.Rect("Items", viewport);
-            content.anchorMin = content.anchorMax = new Vector2(0, .5f); content.pivot = new Vector2(0, .5f);
+            content.anchorMin = content.anchorMax = new Vector2(0, 1); content.pivot = new Vector2(0, 1);
             scroll.content = content; Refresh();
         }
         private void Update()
@@ -334,6 +343,8 @@ namespace Spotlight.GameFlow
             var runtime = NarrativeRuntime.Instance;
             if (runtime?.Actions == null) return;
             points.text = "行动点 " + runtime.Actions.ActionPoints.Current + " / " + runtime.Actions.ActionPoints.Max + "    |    第 " + runtime.Actions.CurrentDay + " 天";
+            if (PointsFill != null) PointsFill.fillAmount = Mathf.Clamp01(runtime.Actions.ActionPoints.Current / 5f);
+            if (DateLabel != null) DateLabel.text = "10  " + (5 + runtime.Actions.CurrentDay).ToString("00");
             string next = string.Join("|", runtime.MapInventory.Items.Select(p => p.Key + ":" + p.Value));
             if (next == signature) return; signature = next;
             foreach (Transform child in content) { child.gameObject.SetActive(false); Destroy(child.gameObject); }
@@ -341,9 +352,9 @@ namespace Spotlight.GameFlow
             foreach (var item in runtime.MapInventory.Items)
             {
                 var slot = MapActionDetailsView.Rect("Item_" + item.Key, content);
-                slot.anchorMin = slot.anchorMax = new Vector2(0, .5f); slot.pivot = new Vector2(0, .5f);
-                slot.anchoredPosition = new Vector2(index++ * 112, 0); slot.sizeDelta = new Vector2(104, 70);
-                slot.gameObject.AddComponent<Image>().color = new Color(.12f, .2f, .18f);
+                slot.anchorMin = slot.anchorMax = new Vector2(0, 1); slot.pivot = new Vector2(0, 1);
+                slot.anchoredPosition = new Vector2((index % 3) * 102, -(index / 3) * 102); index++; slot.sizeDelta = new Vector2(96, 96);
+                MapVisualTheme.Skin(slot.gameObject.AddComponent<Image>(), MapVisualTheme.Current?.requirement);
                 var label = MapActionDetailsView.Label("NameAndCount", slot, MapActionDetailsView.Text("item." + item.Key + ".name", item.Key) + "\n× " + item.Value, 16);
                 MapActionDetailsView.Stretch(label.rectTransform, 5); label.alignment = TextAlignmentOptions.Center;
                 slots[item.Key] = slot;
@@ -354,7 +365,7 @@ namespace Spotlight.GameFlow
                 empty.rectTransform.sizeDelta = new Vector2(250, 60); empty.rectTransform.anchoredPosition = new Vector2(270, 0);
                 empty.alignment = TextAlignmentOptions.Center;
             }
-            content.sizeDelta = new Vector2(Mathf.Max(548, index * 112), 76);
+            content.sizeDelta = new Vector2(306, Mathf.Max(202, ((index + 2) / 3) * 102));
         }
         public RectTransform FindSlot(string key) => slots.TryGetValue(key, out var slot) ? slot : null;
         public IEnumerator Reveal(string key)
@@ -362,14 +373,14 @@ namespace Spotlight.GameFlow
             Refresh(); Canvas.ForceUpdateCanvases();
             var slot = FindSlot(key); if (slot == null) yield break;
             scroll.StopMovement();
-            float max = Mathf.Max(0, content.rect.width - scroll.viewport.rect.width);
-            float target = max > 0 ? Mathf.Clamp01((slot.anchoredPosition.x - (scroll.viewport.rect.width - slot.rect.width) / 2) / max) : 0;
-            float start = scroll.horizontalNormalizedPosition;
+            float max = Mathf.Max(0, content.rect.height - scroll.viewport.rect.height);
+            float target = max > 0 ? 1f - Mathf.Clamp01((-slot.anchoredPosition.y) / max) : 1;
+            float start = scroll.verticalNormalizedPosition;
             for (float t = 0; t < 1; t += Time.unscaledDeltaTime / .25f)
             {
-                scroll.horizontalNormalizedPosition = Mathf.Lerp(start, target, t); yield return null;
+                scroll.verticalNormalizedPosition = Mathf.Lerp(start, target, t); yield return null;
             }
-            scroll.horizontalNormalizedPosition = target;
+            scroll.verticalNormalizedPosition = target;
         }
     }
 }

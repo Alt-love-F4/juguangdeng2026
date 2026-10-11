@@ -16,7 +16,8 @@ namespace Spotlight.GameFlow
     {
         private const float MapWidth = 2400f;
         private const float MapHeight = 1350f;
-        private const float PsdScale = 1.25f;
+        // The replacement PSD exports use a 2048x1152 full-canvas layout.
+        private const float PsdScale = 2400f / 2048f;
 
         [Header("PSD map layers")]
         [SerializeField] private Sprite mapBackgroundSprite;
@@ -167,9 +168,12 @@ namespace Spotlight.GameFlow
             // Location buildings are rendered as their own interactive button sprites below.
             // Keep the sign/name overlays from the PSD, but omit the full icon layer to avoid
             // drawing a second, non-interactive copy underneath each button.
-            CreateMapLayer("LocationSigns", locationSignsSprite, new Vector2(-1.45f, 9.23f));
-            CreateMapLayer("LocationNames", locationNamesSprite, new Vector2(-1.48f, 9.21f));
-            CreateMapLayer("LocationPins", pinSprite, new Vector2(-2.19f, 4.65f));
+            // Replacement map exports are full-canvas transparent layers, so all layers share
+            // the map center instead of using the offsets from the previous cropped PSD export.
+            CreateMapLayer("LocationIcons", locationIconsSprite, new Vector2(19.15f, 12.62f));
+            CreateMapLayer("LocationSigns", locationSignsSprite, new Vector2(19.03f, 10.89f));
+            CreateMapLayer("LocationNames", locationNamesSprite, new Vector2(19.01f, 10.87f));
+            CreateMapLayer("LocationPins", pinSprite, new Vector2(35.01f, 8.73f));
             BuildConfiguredLocations();
             focusPanel = new GameObject("LocationActionPopup", typeof(RectTransform), typeof(Image), typeof(MapActionDetailsView));
             focusPanel.transform.SetParent(root, false);
@@ -194,6 +198,7 @@ namespace Spotlight.GameFlow
             inventoryObject.transform.SetParent(root, false);
             inventoryView = inventoryObject.GetComponent<MapActionInventoryView>();
             inventoryView.Initialize(header);
+            BuildArtworkHud(root, header, detail);
             actionDetails.Initialize(inventoryView, () => ControlsAvailable, EndDay, StartCafe);
             BuildTaskPanel(root);
             Button endDay = CreateButton("结束当天", root, new Vector2(-110, 46), new Vector2(180, 52));
@@ -203,6 +208,50 @@ namespace Spotlight.GameFlow
                 endDay.gameObject.SetActive(false);
             status = CreateLabel("Status", root, "滚轮缩放，WASD移动；点击地点聚焦，右键退出聚焦", 20, new Color(1,1,1,.8f), TextAlignmentOptions.Center);
             status.rectTransform.SetAnchors(new Vector2(.5f, 0), new Vector2(.5f, 0), new Vector2(-400, 18), new Vector2(800, 32));
+        }
+
+        private void BuildArtworkHud(RectTransform root, TextMeshProUGUI header, Button detail)
+        {
+            var theme = MapVisualTheme.Current;
+            if (theme == null) return;
+            header.gameObject.SetActive(false);
+            var hud = CreateRect("ArtworkHud", root);
+            hud.SetAnchors(new Vector2(.5f, 1), new Vector2(.5f, 1), new Vector2(0, -62), new Vector2(1020, 120));
+            MapVisualTheme.Art("PointsBase", hud, theme.pointsBase, new Vector2(-290, 0), new Vector2(455, 90));
+            var fill = MapVisualTheme.Art("PointsFill", hud, theme.pointsFill, new Vector2(-290, 0), new Vector2(455, 90));
+            fill.type = Image.Type.Filled; fill.fillMethod = Image.FillMethod.Horizontal;
+            inventoryView.PointsFill = fill;
+            MapVisualTheme.Art("PointsOutline", hud, theme.pointsOutline, new Vector2(-290, 0), new Vector2(455, 90));
+            MapVisualTheme.Art("PointsLabel", hud, theme.pointsLabel, new Vector2(-465, 24), new Vector2(95, 27));
+            var date = MapVisualTheme.Art("Date", hud, theme.dateFrame, new Vector2(5, 0), new Vector2(258, 108));
+            var day = CreateLabel("DateText", date.transform, "10  06", 46, MapVisualTheme.Ink, TextAlignmentOptions.Center);
+            Stretch(day.rectTransform); MapVisualTheme.Font(day, true); inventoryView.DateLabel = day;
+            detail.transform.SetParent(hud, false);
+            detailRect(detail, 200); MapVisualTheme.Skin(detail.GetComponent<Image>(), theme.details);
+            detail.transform.Find("Label").gameObject.SetActive(false);
+            var bag = CreateButton("InventoryToggle", hud, new Vector2(300, 0), new Vector2(82, 76));
+            MapVisualTheme.Skin(bag.GetComponent<Image>(), theme.bag); bag.transform.Find("Label").gameObject.SetActive(false);
+            bag.onClick.AddListener(inventoryView.Toggle);
+            var tasks = CreateButton("TasksToggle", hud, new Vector2(400, 0), new Vector2(82, 76));
+            MapVisualTheme.Skin(tasks.GetComponent<Image>(), theme.tasks); tasks.transform.Find("Label").gameObject.SetActive(false);
+            tasks.onClick.AddListener(() => GetComponentInChildren<MapTaskPanel>(true)?.Toggle());
+            MapVisualTheme.Art("Shortcuts", hud, theme.shortcuts, new Vector2(300, -48), new Vector2(252, 33));
+            var zoomControl = CreateRect("ZoomControl", root);
+            zoomControl.SetAnchors(new Vector2(1, 0), new Vector2(1, 0), new Vector2(-205, 40), new Vector2(344, 44));
+            MapVisualTheme.Art("Bar", zoomControl, theme.zoomBar, Vector2.zero, new Vector2(344, 44));
+            var handle = MapVisualTheme.Art("Handle", zoomControl, theme.zoomHandle, Vector2.zero, new Vector2(12, 32));
+            zoomSlider = zoomControl.gameObject.AddComponent<Slider>();
+            zoomSlider.minValue = MinimumZoom; zoomSlider.maxValue = MaximumZoom; zoomSlider.value = zoom;
+            zoomSlider.handleRect = handle.rectTransform;
+            zoomSlider.onValueChanged.AddListener(value => { targetZoom = value; focusZooming = false; });
+        }
+
+        private Slider zoomSlider;
+        private static void detailRect(Button button, float x)
+        {
+            var rect = (RectTransform)button.transform;
+            rect.SetAnchors(new Vector2(.5f, .5f), new Vector2(.5f, .5f), new Vector2(x, 0), new Vector2(82, 76));
+            rect.pivot = new Vector2(.5f, .5f);
         }
 
         private void OpenDetails()
@@ -217,6 +266,9 @@ namespace Spotlight.GameFlow
             if (!isActiveAndEnabled) return;
             Keyboard key = Keyboard.current;
             if (key != null && key.tabKey.wasPressedThisFrame) OpenDetails();
+            if (ControlsAvailable && key != null && key.bKey.wasPressedThisFrame) inventoryView.Toggle();
+            if (ControlsAvailable && key != null && key.tKey.wasPressedThisFrame) GetComponentInChildren<MapTaskPanel>(true)?.Toggle();
+            if (zoomSlider != null) zoomSlider.SetValueWithoutNotify(targetZoom);
             if (endDayButton != null)
             {
                 bool blocking = NarrativeRuntime.Instance?.Actions?.HasBlockingActions() ?? false;
@@ -698,16 +750,16 @@ namespace Spotlight.GameFlow
 
         private void CreateLocation(RectTransform parent, string name, Vector2 position, bool important, Sprite artwork, Action action)
         {
-            Vector2 size = artwork != null ? artwork.rect.size * .625f : (important ? new Vector2(210, 130) : new Vector2(150, 100));
-            size = Vector2.Max(size, new Vector2(64f, 80f));
+            // The replacement full-canvas icon layer already draws the location artwork.
+            // Keep an invisible button at each configured location for interaction only.
+            Vector2 size = important ? new Vector2(210, 130) : new Vector2(150, 100);
             Button button = CreateButton(name, parent, position, size);
             Image image = button.GetComponent<Image>();
-            image.sprite = artwork;
-            image.preserveAspect = true;
-            image.color = Color.white;
+            image.sprite = null;
+            image.color = new Color(1f, 1f, 1f, 0f);
             image.raycastTarget = true;
             TextMeshProUGUI label = button.transform.Find("Label")?.GetComponent<TextMeshProUGUI>();
-            if (label != null) label.enabled = artwork == null;
+            if (label != null) label.enabled = false;
             button.onClick.AddListener(() => { if (!dragging) action?.Invoke(); });
             button.gameObject.AddComponent<MapLocationHover>().Initialize(this);
         }
@@ -719,8 +771,8 @@ namespace Spotlight.GameFlow
             RectTransform rect = image.rectTransform;
             rect.anchorMin = rect.anchorMax = new Vector2(.5f, .5f);
             rect.pivot = new Vector2(.5f, .5f);
-            rect.anchoredPosition = new Vector2(psdPosition.x * 50f * PsdScale, (psdPosition.y - 10.8f) * 50f * PsdScale);
-            rect.sizeDelta = sprite.rect.size * PsdScale;
+            rect.anchoredPosition = (psdPosition - new Vector2(20.48f, 11.52f)) * (MapWidth / 40.96f);
+            rect.sizeDelta = sprite.rect.size / sprite.pixelsPerUnit * (MapWidth / 40.96f);
             image.raycastTarget = false;
         }
 
@@ -739,7 +791,7 @@ namespace Spotlight.GameFlow
         private static RectTransform CreateRect(string name, Transform parent) { GameObject go = new GameObject(name, typeof(RectTransform)); go.transform.SetParent(parent, false); return (RectTransform)go.transform; }
         private static Image CreateImage(string name, Transform parent, Color color) { GameObject go = new GameObject(name, typeof(RectTransform), typeof(Image)); go.transform.SetParent(parent, false); Image image = go.GetComponent<Image>(); image.color = color; return image; }
         private static Image CreateSpriteImage(string name, Transform parent, Sprite sprite) { GameObject go = new GameObject(name, typeof(RectTransform), typeof(Image)); go.transform.SetParent(parent, false); Image image = go.GetComponent<Image>(); image.sprite = sprite; image.preserveAspect = true; image.color = Color.white; return image; }
-        private static TextMeshProUGUI CreateLabel(string name, Transform parent, string text, float size, Color color, TextAlignmentOptions alignment) { GameObject go = new GameObject(name, typeof(RectTransform), typeof(TextMeshProUGUI)); go.transform.SetParent(parent, false); TextMeshProUGUI label = go.GetComponent<TextMeshProUGUI>(); label.text = text; label.fontSize = size; label.color = color; label.alignment = alignment; label.raycastTarget = false; return label; }
+        private static TextMeshProUGUI CreateLabel(string name, Transform parent, string text, float size, Color color, TextAlignmentOptions alignment) { GameObject go = new GameObject(name, typeof(RectTransform), typeof(TextMeshProUGUI)); go.transform.SetParent(parent, false); TextMeshProUGUI label = go.GetComponent<TextMeshProUGUI>(); label.text = text; label.fontSize = size; MapVisualTheme.Font(label, size >= 24); label.alignment = alignment; label.raycastTarget = false; return label; }
         private static Button CreateButton(string text, Transform parent, Vector2 position, Vector2 size) { GameObject go = new GameObject(text, typeof(RectTransform), typeof(Image), typeof(Button)); go.transform.SetParent(parent, false); RectTransform rect = (RectTransform)go.transform; rect.anchorMin = rect.anchorMax = new Vector2(.5f, .5f); rect.anchoredPosition = position; rect.sizeDelta = size; Image image = go.GetComponent<Image>(); image.color = new Color(.08f, .11f, .12f, .92f); Button button = go.GetComponent<Button>(); CreateLabel("Label", go.transform, text, 24, Color.white, TextAlignmentOptions.Center); Stretch((RectTransform)go.transform.GetChild(0)); return button; }
         private static void Stretch(RectTransform rect) { rect.anchorMin = Vector2.zero; rect.anchorMax = Vector2.one; rect.offsetMin = Vector2.zero; rect.offsetMax = Vector2.zero; }
     }
@@ -764,14 +816,14 @@ namespace Spotlight.GameFlow
         {
             hovered = true;
             rect.localScale = baseScale * 1.08f;
-            if (image != null) image.color = Color.white;
+            if (image != null) image.color = new Color(1, 1, 1, 0);
         }
 
         public void OnPointerExit(PointerEventData eventData)
         {
             hovered = false;
             rect.localScale = baseScale;
-            if (image != null) image.color = Color.white;
+            if (image != null) image.color = new Color(1, 1, 1, 0);
         }
 
         public void OnPointerDown(PointerEventData eventData)

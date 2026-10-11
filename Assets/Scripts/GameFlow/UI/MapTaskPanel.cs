@@ -41,7 +41,7 @@ namespace Spotlight.GameFlow
             GetComponent<Image>().color = new Color(.04f, .07f, .07f, .96f);
             summary = Label("TrackedSummary", panel, "", 17);
             Top(summary.rectTransform, 12, -8, Width - 68, 76);
-            toggle = Button("TaskToggle", panel, "展开", () => { expanded = !expanded; Refresh(); });
+            toggle = Button("TaskToggle", panel, "展开", Toggle);
             Top((RectTransform)toggle.transform, Width - 60, -8, 52, 36);
             body = Rect("TaskBody", panel);
             Top(body, 0, -52, Width, 370);
@@ -70,6 +70,12 @@ namespace Spotlight.GameFlow
             content.pivot = new Vector2(.5f, 1);
             content.sizeDelta = Vector2.zero;
             scroll.content = content;
+            Refresh();
+        }
+
+        public void Toggle()
+        {
+            expanded = !expanded;
             Refresh();
         }
 

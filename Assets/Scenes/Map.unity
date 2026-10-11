@@ -164,13 +164,13 @@ MonoBehaviour:
   hideEase: 8
   modal: 0
   canvasGroup: {fileID: 0}
-  mapBackgroundSprite: {fileID: 21300000, guid: 190e10d7db3d8ca489dbeb461d860969, type: 2}
-  locationIconsSprite: {fileID: 21300000, guid: c0f84af3c8d9ebc4bb4f50fa893d24a4, type: 2}
-  locationSignsSprite: {fileID: 21300000, guid: 1efd3ba61ffedd841856b336183078fa, type: 2}
-  locationNamesSprite: {fileID: 21300000, guid: bdc028e0bd0146f4986037e86b0cc5f0, type: 2}
-  pinSprite: {fileID: 21300000, guid: 0ae0a4bf3323c8444a8194283fdd0849, type: 2}
-  cityTitleSprite: {fileID: 21300000, guid: 54260b594d7fa7045843a5602dc40ca4, type: 2}
-  compassSprite: {fileID: 21300000, guid: 503cf0b469622cf47b98a80fee542579, type: 2}
+  mapBackgroundSprite: {fileID: 21300000, guid: 8042f3616abd31f469497c34f5e5c088, type: 3}
+  locationIconsSprite: {fileID: 21300000, guid: 25e0e90074d6adf41a445ce0c25acc16, type: 3}
+  locationSignsSprite: {fileID: 21300000, guid: 5722670aaed79154a81acf61ef0190c0, type: 3}
+  locationNamesSprite: {fileID: 21300000, guid: 836b08c75e8364244ad9c33cad8eb97a, type: 3}
+  pinSprite: {fileID: 21300000, guid: 4082fe0d4ed261644b7b868243a5dc01, type: 3}
+  cityTitleSprite: {fileID: 21300000, guid: 3e675370ea7bba74ba69393f79e26c82, type: 3}
+  compassSprite: {fileID: 21300000, guid: 90d4ee10a122f3b4ea58538265dc6b82, type: 3}
   locationArtwork:
   - positionKey: temporary
     sprite: {fileID: 3917368293744949150, guid: 04bfb774b87bf784a9fb061528992cd2, type: 3}
