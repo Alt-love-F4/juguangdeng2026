@@ -12,6 +12,9 @@ UserSettings/
 .yokiframe/
 策划文件/
 
+# Local Locus workspace layout
+/Locus/workspace-trees/default.json
+
 # IDE and generated solution files
 .vs/
 .idea/
