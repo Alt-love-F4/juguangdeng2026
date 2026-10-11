@@ -23,8 +23,8 @@ namespace Spotlight.GameFlow
             surface.color = Color.white;
             label.text = option.Text;
             label.color = option.Enabled ? enabledInk : disabledInk;
-            requirement.text = string.IsNullOrEmpty(option.RequirementHint) ? "条件未满足" : option.RequirementHint;
-            requirement.gameObject.SetActive(!option.Enabled);
+            requirement.text = option.RequirementHint;
+            requirement.gameObject.SetActive(!option.Enabled && !string.IsNullOrEmpty(option.RequirementHint));
             button.interactable = option.Enabled;
             button.onClick.AddListener(() => select(option.OptionId));
         }

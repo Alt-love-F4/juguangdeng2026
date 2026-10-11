@@ -117,12 +117,12 @@ namespace Spotlight.Narrative
                         foreach (NarrativeConversationLineDefinition line in lines)
                         {
                             NarrativeObjectDefinition speakerObject = configuration.objects.Find(item => item != null && item.objId == line.speakerKey);
-                            NarrativeCharacterPresentationData characterData = characterResolver?.Invoke(line.speakerKey, resolve(speakerObject?.nameText), speakerObject?.iconPath);
+                            NarrativeCharacterPresentationData characterData = characterResolver?.Invoke(line.speakerKey, resolve(speakerObject?.nameText), string.IsNullOrWhiteSpace(speakerObject?.portraitPath) ? speakerObject?.iconPath : speakerObject.portraitPath);
                             conversationData.lines.Add(new NarrativeConversationPresentationLine
                             {
                                 speakerKey = line.speakerKey, speakerName = characterData?.name ?? resolve(speakerObject?.nameText),
                                 portraitPath = characterData?.portraitPath ?? speakerObject?.iconPath, portrait = characterData?.portrait,
-                                side = line.side,
+                                side = line.side, emote = line.emote,
                                 text = resolve(line.textKey), accentFxKey = line.accentFxKey, accentTargetKey = line.accentTargetKey
                             });
                         }
@@ -212,7 +212,7 @@ namespace Spotlight.Narrative
                                 string configuredTitle = string.IsNullOrWhiteSpace(configuredPage?.titleKey) ? resolvedTitle : resolve(configuredPage.titleKey);
                                 NarrativeReadingLineDefinition dialogueLine = configuredPage == null ? null : configuration.presentations.readingLines.Find(line => line != null && line.pageId == configuredPage.pageId && line.mode == "dialogue");
                                 NarrativeObjectDefinition readingSpeaker = dialogueLine == null ? null : configuration.objects.Find(item => item != null && item.objId == dialogueLine.speakerKey);
-                                NarrativeCharacterPresentationData speakerPresentation = dialogueLine == null ? null : characterResolver?.Invoke(dialogueLine.speakerKey, resolve(readingSpeaker?.nameText), readingSpeaker?.iconPath);
+                                NarrativeCharacterPresentationData speakerPresentation = dialogueLine == null ? null : characterResolver?.Invoke(dialogueLine.speakerKey, resolve(readingSpeaker?.nameText), string.IsNullOrWhiteSpace(readingSpeaker?.portraitPath) ? readingSpeaker?.iconPath : readingSpeaker.portraitPath);
                                 bool handled = readingPlayback(request, configuredTitle, new[] { pages[pageIndex] }, imagePath,
                                     dialogueLine != null,
                                     speakerPresentation?.name ?? resolve(readingSpeaker?.nameText), speakerPresentation?.portraitPath ?? Get("portrait"),
@@ -222,6 +222,27 @@ namespace Spotlight.Narrative
                                     // The reusable reading panel owns the visible presentation layer.
                                     ui.Hide();
                                     while (!finishPresentation && !skipRequested) yield return null;
+                                    break;
+                                }
+                            }
+                            if (!isReading && conversationPlayback != null)
+                            {
+                                var data = new NarrativeConversationPresentationData { title = resolvedTitle };
+                                var speaker = configuration?.objects?.Find(o => o.objId == definition.actorId && o.objType != NarrativeObjectType.World);
+                                var character = speaker == null ? null : characterResolver?.Invoke(speaker.objId, resolve(speaker.nameText), speaker.portraitPath);
+                                foreach (var text in pages)
+                                    data.lines.Add(new NarrativeConversationPresentationLine
+                                    {
+                                        speakerKey = speaker?.objId, speakerName = character?.name ?? resolve(speaker?.nameText),
+                                        portraitPath = character?.portraitPath ?? speaker?.portraitPath,
+                                        portrait = character?.portrait, side = "right", text = text
+                                    });
+                                bool dialogueDone = false;
+                                if (conversationPlayback(request, data, () => dialogueDone = true))
+                                {
+                                    ui.Hide();
+                                    while (!dialogueDone) yield return null;
+                                    ui.Show(resolvedTitle); // 后续选项/原子仍由 NCS 执行，不提前结算整个事件。
                                     break;
                                 }
                             }

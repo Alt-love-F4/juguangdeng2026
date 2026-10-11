@@ -56,6 +56,13 @@ namespace Spotlight.GameFlow.Tests
                 new DialogueCharacter("left", "左侧角色", panel.LeftPortrait.sprite),
                 new DialogueCharacter("right", "右侧角色", panel.RightPortrait.sprite));
         }
+
+        private static DialogueScript ReferenceScript(string text, IReadOnlyList<DialogueOption> options = null)
+        {
+            Sprite portrait = AssetDatabase.LoadAssetAtPath<Sprite>("Assets/Art/Gameplay/对话框ui/人物-咖啡馆.png");
+            return new DialogueScript(new[] { new DialogueLine(DialogueSpeaker.Left, text, replaceRight: true) },
+                new DialogueCharacter("adele", "阿黛尔", portrait), options: options);
+        }
         private IEnumerator Ready()
         {
             float deadline = Time.realtimeSinceStartup + 5;
@@ -87,6 +94,69 @@ namespace Spotlight.GameFlow.Tests
         }
 
         [UnityTest]
+        public IEnumerator SinglePortraitMatchesReferenceCenterAndFullAuthoredHeight()
+        {
+            panel.Play(ReferenceScript("你知道的。"));
+            yield return Ready();
+            RectTransform portrait = (RectTransform)panel.LeftPortrait.transform.parent;
+            Assert.That((portrait.anchorMin.x + portrait.anchorMax.x) * .5f, Is.EqualTo(.5f).Within(.001f));
+            Assert.That(portrait.anchorMax.x - portrait.anchorMin.x, Is.EqualTo(860f / 4096f).Within(.001f));
+            Assert.That(portrait.anchorMin.y, Is.Zero.Within(.001f));
+            Assert.That(portrait.anchorMax.y, Is.EqualTo(1945f / 2304f).Within(.001f));
+            Assert.That(panel.RightPortrait.enabled, Is.False);
+            Assert.That(panel.CenterPortrait.enabled, Is.False);
+            Image skip = panel.transform.Find("EffectStage/Artwork/DialogueBox/Skip").GetComponent<Image>();
+            Assert.That(skip.color.a, Is.Zero);
+            Assert.That(skip.GetComponent<Button>(), Is.Not.Null);
+            panel.Advance();
+            yield return new WaitForEndOfFrame(); Capture("output/dialogue-reference-match/single.png");
+        }
+
+        [UnityTest]
+        public IEnumerator ReferenceChoicesKeepOriginalBoundsWithoutInventedRequirementText()
+        {
+            panel.Play(ReferenceScript("你知道的。", new[]
+            {
+                new DialogueOption("locked", "你是说“那件事”吗？", enabled: false),
+                new DialogueOption("reply", "我不知道")
+            }));
+            yield return Ready();
+            panel.Advance();
+            yield return null;
+            Assert.That(panel.IsChoosing, Is.True);
+            DialogueOptionView[] views = panel.GetComponentsInChildren<DialogueOptionView>();
+            Assert.That(views.Length, Is.EqualTo(2));
+            Assert.That(views[0].transform.Find("Requirement").gameObject.activeSelf, Is.False);
+            Assert.That(views[0].Label.color, Is.Not.EqualTo(views[1].Label.color));
+            Vector3[] first = new Vector3[4], second = new Vector3[4];
+            ((RectTransform)views[0].transform).GetWorldCorners(first);
+            ((RectTransform)views[1].transform).GetWorldCorners(second);
+            Assert.That(first[0].x, Is.EqualTo(second[0].x).Within(.1f));
+            Assert.That(first[0].y, Is.GreaterThan(second[1].y));
+            yield return new WaitForEndOfFrame(); Capture("output/dialogue-reference-match/options.png");
+        }
+
+        [UnityTest]
+        public IEnumerator ReplayingThreeThenOnePortraitRestoresAuthoredPose()
+        {
+            DialogueScript pair = TwoCharacterScript("双人预览");
+            panel.Play(new DialogueScript(new[] { new DialogueLine(DialogueSpeaker.Center, "三人预览") },
+                pair.LeftCharacter, pair.RightCharacter, centerCharacter: pair.LeftCharacter));
+            yield return Ready();
+            RectTransform left = (RectTransform)panel.LeftPortrait.transform.parent;
+            RectTransform center = (RectTransform)panel.CenterPortrait.transform.parent;
+            RectTransform right = (RectTransform)panel.RightPortrait.transform.parent;
+            Assert.That(left.anchorMax.x, Is.LessThan(center.anchorMin.x));
+            Assert.That(center.anchorMax.x, Is.LessThan(right.anchorMin.x));
+            yield return new WaitForEndOfFrame(); Capture("output/dialogue-reference-match/three.png");
+            panel.Play(ReferenceScript("重新回到单人居中。"));
+            yield return Ready();
+            Assert.That((left.anchorMin.x + left.anchorMax.x) * .5f, Is.EqualTo(.5f).Within(.001f));
+            Assert.That(left.anchorMin.y, Is.Zero.Within(.001f));
+            Assert.That(panel.CenterPortrait.enabled || panel.RightPortrait.enabled, Is.False);
+        }
+
+        [UnityTest]
         public IEnumerator TwoCharacterLayoutSeparatesPortraitSlotsAndKeepsBackgroundOptional()
         {
             panel.Play(TwoCharacterScript("两位角色应分别位于左右区域。"));
@@ -99,8 +169,11 @@ namespace Spotlight.GameFlow.Tests
             RectTransform left = panel.LeftPortrait.transform.parent as RectTransform;
             RectTransform right = panel.RightPortrait.transform.parent as RectTransform;
             Assert.That(left.anchorMax.x, Is.LessThan(right.anchorMin.x));
-            Assert.That(left.anchorMax.x, Is.EqualTo(.40f).Within(.001f));
-            Assert.That(right.anchorMin.x, Is.EqualTo(.60f).Within(.001f));
+            Assert.That((left.anchorMin.x + left.anchorMax.x) * .5f, Is.EqualTo(.25f).Within(.001f));
+            Assert.That((right.anchorMin.x + right.anchorMax.x) * .5f, Is.EqualTo(.75f).Within(.001f));
+            Assert.That(left.anchorMin.y, Is.Zero.Within(.001f));
+            Assert.That(right.anchorMax.y, Is.EqualTo(1945f / 2304f).Within(.001f));
+            yield return new WaitForEndOfFrame(); Capture("output/dialogue-reference-match/two.png");
         }
         [UnityTest]
         public IEnumerator LongOptionsGrowWithoutFontShrinkingAndManyChoicesScroll()
@@ -157,6 +230,13 @@ namespace Spotlight.GameFlow.Tests
             Assert.That(text.textInfo.pageCount, Is.GreaterThan(1));
             foreach (TMP_PageInfo page in text.textInfo.pageInfo)
                 if (page.lastCharacterIndex > 0) Assert.That(page.lastCharacterIndex - page.firstCharacterIndex, Is.LessThan(100));
+            for (int pageIndex = 0; pageIndex < text.textInfo.pageCount; pageIndex++)
+            {
+                TMP_PageInfo pageInfo = text.textInfo.pageInfo[pageIndex];
+                int firstLine = text.textInfo.characterInfo[pageInfo.firstCharacterIndex].lineNumber;
+                int lastLine = text.textInfo.characterInfo[pageInfo.lastCharacterIndex].lineNumber;
+                Assert.That(lastLine - firstLine + 1, Is.LessThanOrEqualTo(3));
+            }
             panel.Advance(); yield return null;
             yield return new WaitForEndOfFrame(); Capture("output/dialogue-psd-long.png");
             int done = 0;

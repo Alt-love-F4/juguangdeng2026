@@ -63,7 +63,7 @@ namespace Spotlight.GameFlow.Tests
         public IEnumerator EntranceAndCharacterReplacementFinishBeforeTextStarts()
         {
             DialogueScript sample = PresentationEffectsPreview.Create();
-            var replacement = new DialogueCharacter("npc_third", "新访客", sample.LeftCharacter.Portrait);
+            var replacement = NarrativeCharacterResolver.CreateDialogueCharacter("thibaut");
             panel.Play(new DialogueScript(new[]
             {
                 new DialogueLine(DialogueSpeaker.Left, "第一句"),
@@ -86,7 +86,7 @@ namespace Spotlight.GameFlow.Tests
         {
             var sample = PresentationEffectsPreview.Create();
             panel.Play(new DialogueScript(new[] { new DialogueLine(DialogueSpeaker.Left, "由左侧说话，右侧受惊",
-                accentFxKey: PresentationEffectIds.AccentShakeStartle, accentTargetKey: "npc_guest") },
+                accentFxKey: PresentationEffectIds.AccentShakeStartle, accentTargetKey: "adele") },
                 sample.LeftCharacter, sample.RightCharacter));
             yield return Ready();
             RectTransform right = panel.RightPortrait.transform.parent as RectTransform;
@@ -122,7 +122,7 @@ namespace Spotlight.GameFlow.Tests
             RectTransform left = panel.LeftPortrait.transform.parent as RectTransform;
             RectTransform right = panel.RightPortrait.transform.parent as RectTransform;
             Vector2 leftBase = left.anchoredPosition, rightBase = right.anchoredPosition;
-            var accent = panel.PlayEffect(PresentationEffectIds.AccentShakeStartle, "npc_guest");
+            var accent = panel.PlayEffect(PresentationEffectIds.AccentShakeStartle, "adele");
             var shake = panel.PlayEffect(PresentationEffectIds.ShakeHeavy);
             var flash = panel.PlayEffect(PresentationEffectIds.FlashWhite);
             panel.Effects.Tick(.025f);

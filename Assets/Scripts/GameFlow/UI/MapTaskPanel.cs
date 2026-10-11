@@ -14,7 +14,10 @@ namespace Spotlight.GameFlow
         public string name;
         public string description;
         public bool completed;
-        public string currentTask;
+            public string currentTask;
+
+        public int remainingDays;
+        public string location;
         public List<string> previousTasks = new List<string>();
     }
 
@@ -30,32 +33,54 @@ namespace Spotlight.GameFlow
         private string expandedId, trackedId;
         public string TrackedId => trackedId;
         public event Action<string> TrackingChanged;
-        private const float Width = 340f;
+        private const float Width = 550f;
+        private MapSidebarView sidebar;
+        public bool IsVisible => sidebar != null && sidebar.IsVisible;
 
         public void Initialize()
         {
             panel = (RectTransform)transform;
-            panel.anchorMin = panel.anchorMax = new Vector2(0, 1);
-            panel.pivot = new Vector2(0, 1);
-            panel.anchoredPosition = new Vector2(28, -28);
-            GetComponent<Image>().color = new Color(.04f, .07f, .07f, .96f);
+            sidebar = GetComponent<MapSidebarView>();
+            if (sidebar == null) sidebar = gameObject.AddComponent<MapSidebarView>();
+            sidebar.Initialize();
+            if (transform.Find("TaskBody/TaskViewport/TaskContent") is RectTransform existingContent)
+            {
+                content = existingContent;
+                body = (RectTransform)transform.Find("TaskBody");
+                summary = transform.Find("TrackedSummary").GetComponent<TextMeshProUGUI>();
+                toggle = transform.Find("TaskToggle").GetComponent<UnityEngine.UI.Button>();
+                activeTab = body.Find("InProgressTab").GetComponent<UnityEngine.UI.Button>();
+                completedTab = body.Find("CompletedTab").GetComponent<UnityEngine.UI.Button>();
+                scroll = body.Find("TaskViewport").GetComponent<ScrollRect>();
+                ConfigureLayout();
+                toggle.onClick.RemoveAllListeners(); toggle.onClick.AddListener(Toggle);
+                activeTab.onClick.RemoveAllListeners(); activeTab.onClick.AddListener(() => SelectTab(false));
+                completedTab.onClick.RemoveAllListeners(); completedTab.onClick.AddListener(() => SelectTab(true));
+                Refresh();
+                return;
+            }
+            MapVisualTheme.Skin(GetComponent<Image>(), MapVisualTheme.Current?.panel);
+            var heading = MapVisualTheme.Art("TaskTitle", panel, MapVisualTheme.Current?.taskTitle, Vector2.zero, new Vector2(430, 106));
+            heading.rectTransform.anchorMin = heading.rectTransform.anchorMax = new Vector2(.5f, 1);
+            heading.rectTransform.anchoredPosition = new Vector2(0, -78);
             summary = Label("TrackedSummary", panel, "", 17);
             Top(summary.rectTransform, 12, -8, Width - 68, 76);
-            toggle = Button("TaskToggle", panel, "展开", Toggle);
-            Top((RectTransform)toggle.transform, Width - 60, -8, 52, 36);
+            toggle = Button("TaskToggle", panel, "×", Toggle);
+            Top((RectTransform)toggle.transform, Width - 48, -16, 32, 32);
             body = Rect("TaskBody", panel);
-            Top(body, 0, -52, Width, 370);
+            body.anchorMin = Vector2.zero; body.anchorMax = Vector2.one;
+            body.offsetMin = new Vector2(16, 20); body.offsetMax = new Vector2(-16, -104);
             activeTab = Button("InProgressTab", body, "进行中", () => SelectTab(false));
-            Top((RectTransform)activeTab.transform, 8, -8, 158, 34);
+            Top((RectTransform)activeTab.transform, 8, -8, 224, 44);
             completedTab = Button("CompletedTab", body, "已完成", () => SelectTab(true));
-            Top((RectTransform)completedTab.transform, 174, -8, 158, 34);
+            Top((RectTransform)completedTab.transform, 254, -8, 224, 44);
 
             RectTransform viewport = Rect("TaskViewport", body);
             viewport.anchorMin = Vector2.zero;
             viewport.anchorMax = Vector2.one;
             viewport.offsetMin = new Vector2(8, 8);
-            viewport.offsetMax = new Vector2(-8, -52);
-            viewport.gameObject.AddComponent<Image>().color = new Color(.06f, .09f, .09f, 1);
+            viewport.offsetMax = new Vector2(-8, -66);
+            viewport.gameObject.AddComponent<Image>().color = Color.clear;
             viewport.gameObject.AddComponent<RectMask2D>();
             // Attach the scroll receiver only to the list region, leaving the tabs outside it.
             scroll = viewport.gameObject.AddComponent<ScrollRect>();
@@ -66,17 +91,32 @@ namespace Spotlight.GameFlow
             scroll.scrollSensitivity = 30;
             content = Rect("TaskContent", viewport);
             content.anchorMin = new Vector2(0, 1);
-            content.anchorMax = Vector2.one;
+            content.anchorMax = new Vector2(1, 1);
             content.pivot = new Vector2(.5f, 1);
             content.sizeDelta = Vector2.zero;
             scroll.content = content;
-            Refresh();
+            ConfigureLayout(); Refresh();
+        }
+
+        private void ConfigureLayout()
+        {
+            MapVisualTheme.Skin(GetComponent<Image>(), MapVisualTheme.Current?.panel);
+            content.anchorMin = new Vector2(0, 1); content.anchorMax = new Vector2(1, 1);
+            body.anchorMin = Vector2.zero; body.anchorMax = Vector2.one;
+            body.offsetMin = new Vector2(24, 92); body.offsetMax = new Vector2(-24, -156);
+            scroll.viewport.GetComponent<Image>().color = Color.clear;
+            summary.gameObject.SetActive(false);
         }
 
         public void Toggle()
         {
-            expanded = !expanded;
+            SetVisible(!IsVisible);
+        }
+        public void SetVisible(bool value)
+        {
+            expanded = value;
             Refresh();
+            sidebar.SetVisible(value);
         }
 
         public void SetItems(IEnumerable<MapTaskItem> values)
@@ -113,14 +153,12 @@ namespace Spotlight.GameFlow
         {
             if (panel == null) return;
             MapTaskItem tracked = items.Find(item => item.id == trackedId);
-            bool hasSummary = !expanded && tracked != null;
-            panel.sizeDelta = new Vector2(Width, expanded ? 422 : hasSummary ? 92 : 52);
-            body.gameObject.SetActive(expanded);
-            summary.gameObject.SetActive(hasSummary);
+            body.gameObject.SetActive(true);
+            summary.gameObject.SetActive(false);
             summary.text = tracked == null ? "" : tracked.name + "\n" +
                 (tracked.completed ? "已完成" : string.IsNullOrEmpty(tracked.currentTask) ? "暂无当前阶段任务" : tracked.currentTask);
             summary.overflowMode = TextOverflowModes.Ellipsis;
-            toggle.GetComponentInChildren<TextMeshProUGUI>().text = expanded ? "收起" : "展开";
+            toggle.GetComponentInChildren<TextMeshProUGUI>().text = "×";
             SetTab(activeTab, !showCompleted);
             SetTab(completedTab, showCompleted);
             // Deactivate old rows before deferred destruction so stale buttons cannot receive clicks.
@@ -128,7 +166,7 @@ namespace Spotlight.GameFlow
             {
                 GameObject child = content.GetChild(i).gameObject;
                 child.SetActive(false);
-                Destroy(child);
+                if (Application.isPlaying) Destroy(child); else DestroyImmediate(child);
             }
             float y = 0;
             int count = 0;
@@ -137,12 +175,30 @@ namespace Spotlight.GameFlow
                 if (item.completed != showCompleted) continue;
                 count++;
                 Button title = Button("Task_" + item.id, content,
-                    (expandedId == item.id ? "▾ " : "▸ ") + item.name + (trackedId == item.id ? "  · 追踪中" : ""),
+                    item.name + (trackedId == item.id ? "  · 追踪中" : ""),
                     () => { expandedId = expandedId == item.id ? null : item.id; Refresh(); });
-                Top((RectTransform)title.transform, 0, -y, Width - 16, 40);
-                y += 44;
+                float rowWidth = Width - 64;
+                var heading = title.GetComponentInChildren<TextMeshProUGUI>();
+                heading.fontSize = 28; heading.alignment = TextAlignmentOptions.Left;
+                Top(heading.rectTransform, 22, -14, rowWidth - 44, 40);
+                var description = Label("Description", title.transform, string.IsNullOrEmpty(item.description) ? "暂无事项描述" : item.description, 21);
+                float descriptionHeight = Mathf.Max(54, description.GetPreferredValues(description.text, rowWidth - 44, 0).y + 6);
+                Top(description.rectTransform, 22, -62, rowWidth - 44, descriptionHeight);
+                var location = Label("Location", title.transform, string.IsNullOrEmpty(item.location) ? "" : "地点：" + item.location, 20);
+                location.color = MapVisualTheme.Accent;
+                location.alignment = TextAlignmentOptions.Right;
+                Top(location.rectTransform, 22, -70 - descriptionHeight, rowWidth - 44, 26);
+                if (item.remainingDays > 0)
+                {
+                    var timer = MapVisualTheme.Art("Deadline", title.transform, MapVisualTheme.Current?.timer, Vector2.zero, new Vector2(22, 22));
+                    Top(timer.rectTransform, rowWidth - 62, -23, 22, 22);
+                    var remaining = Label("RemainingDays", title.transform, item.remainingDays.ToString(), 18);
+                    Top(remaining.rectTransform, rowWidth - 38, -22, 22, 24);
+                }
+                float height = 108 + descriptionHeight;
+                Top((RectTransform)title.transform, 0, -y, rowWidth, height);
+                y += height + 14;
                 if (expandedId != item.id) continue;
-                y += TextRow("Description", string.IsNullOrEmpty(item.description) ? "暂无事项描述" : item.description, y);
                 if (item.previousTasks != null)
                     foreach (string task in item.previousTasks) y += TextRow("PreviousTask", "已进行：" + task, y);
                 if (!item.completed)
@@ -150,7 +206,7 @@ namespace Spotlight.GameFlow
                 else y += TextRow("CompletedStatus", "事项已完成", y);
                 Button track = Button("Track_" + item.id, content, trackedId == item.id ? "取消追踪" : "追踪此事件",
                     () => SetTracked(trackedId == item.id ? null : item.id));
-                Top((RectTransform)track.transform, 8, -y, Width - 32, 36);
+                Top((RectTransform)track.transform, 8, -y, Width - 64, 36);
                 y += 44;
             }
             if (count == 0) y += TextRow("Empty", showCompleted ? "暂无已完成事项" : "暂无进行中事项", y);
@@ -160,15 +216,15 @@ namespace Spotlight.GameFlow
         private float TextRow(string name, string text, float y)
         {
             TextMeshProUGUI label = Label(name, content, text, 16);
-            float height = Mathf.Max(28, label.GetPreferredValues(text, Width - 40, 0).y + 12);
-            Top(label.rectTransform, 12, -y, Width - 40, height);
+            float height = Mathf.Max(28, label.GetPreferredValues(text, Width - 72, 0).y + 12);
+            Top(label.rectTransform, 12, -y, Width - 72, height);
             return height + 4;
         }
 
         private static void SetTab(Button button, bool selected)
         {
-            button.GetComponent<Image>().color = selected ? new Color(.85f, .9f, .88f) : new Color(.18f, .22f, .23f);
-            button.GetComponentInChildren<TextMeshProUGUI>().color = selected ? Color.black : Color.white;
+            button.GetComponent<Image>().color = selected ? new Color(.88f, .69f, .42f) : new Color(.96f, .90f, .71f);
+            MapVisualTheme.Font(button.GetComponentInChildren<TextMeshProUGUI>(), true);
         }
 
         private static RectTransform Rect(string name, Transform parent)
@@ -192,7 +248,7 @@ namespace Spotlight.GameFlow
             label.font = Resources.Load<TMP_FontAsset>("Fonts/CactusClassicalSerif SDF") ?? TMP_Settings.defaultFontAsset;
             label.text = text;
             label.fontSize = size;
-            label.color = Color.white;
+            MapVisualTheme.Font(label);
             label.alignment = TextAlignmentOptions.Left;
             label.raycastTarget = false;
             return label;
@@ -202,10 +258,11 @@ namespace Spotlight.GameFlow
         {
             RectTransform rect = Rect(name, parent);
             Image image = rect.gameObject.AddComponent<Image>();
-            image.color = new Color(.12f, .18f, .18f, 1);
+            MapVisualTheme.Skin(image, MapVisualTheme.Current?.taskCard);
             Button button = rect.gameObject.AddComponent<Button>();
             button.targetGraphic = image;
             TextMeshProUGUI label = Label("Label", rect, text, 17);
+            MapVisualTheme.Font(label, true);
             label.alignment = TextAlignmentOptions.Center;
             label.rectTransform.anchorMin = Vector2.zero;
             label.rectTransform.anchorMax = Vector2.one;

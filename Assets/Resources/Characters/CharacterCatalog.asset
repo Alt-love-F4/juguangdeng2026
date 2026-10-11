@@ -13,30 +13,373 @@ MonoBehaviour:
   m_Name: CharacterCatalog
   m_EditorClassIdentifier: Spotlight.Narrative::Spotlight.Narrative.CharacterCatalog
   characters:
-  - characterId: eugene
-    displayName: "\u6B27\u4EC1"
-    description: 
-    avatar: {fileID: 21300000, guid: be908ae1625b77d499ad94fd90c30644, type: 3}
-    portrait: {fileID: 21300000, guid: be908ae1625b77d499ad94fd90c30644, type: 3}
+  - characterId: npc_a
+    displayName: "\u827E\u5FB7\u91CC\u5B89"
+    description: "\u5728\u738B\u90FD\u6253\u77ED\u5DE5\u7684\u5E74\u8F7B\u4EBA\uFF0C\u8BFB\u8FC7\u51E0\u672C\u7981\u4E66\u3002"
+    avatar: {fileID: 21300000, guid: 76ba580976e8eb440b9361d75f7a1b91, type: 3}
+    portrait: {fileID: 21300000, guid: 76ba580976e8eb440b9361d75f7a1b91, type: 3}
     portraitHappy: {fileID: 0}
     portraitAngry: {fileID: 0}
-    worldSprite: {fileID: 21300000, guid: be908ae1625b77d499ad94fd90c30644, type: 3}
-    tags: manual,customer
+    worldSprite: {fileID: 21300000, guid: 76ba580976e8eb440b9361d75f7a1b91, type: 3}
+    tags: servant,poor,revolutionary,test_fixture
+    cafeCustomer: 0
+  - characterId: npc_b
+    displayName: "\u585E\u897F\u8389\u4E9A"
+    description: "\u5BB6\u9053\u4E2D\u843D\u7684\u8D35\u65CF\u5C0F\u59D0\uFF0C\u4E0D\u7518\u4E8E\u88AB\u5B89\u6392\u7684\u5A5A\u4E8B\u3002"
+    avatar: {fileID: 21300000, guid: 76ba580976e8eb440b9361d75f7a1b91, type: 3}
+    portrait: {fileID: 21300000, guid: 76ba580976e8eb440b9361d75f7a1b91, type: 3}
+    portraitHappy: {fileID: 0}
+    portraitAngry: {fileID: 0}
+    worldSprite: {fileID: 21300000, guid: 76ba580976e8eb440b9361d75f7a1b91, type: 3}
+    tags: noble,daughter,love,test_fixture
+    cafeCustomer: 0
+  - characterId: npc_c
+    displayName: "\u6731\u5229\u5B89"
+    description: "\u51FA\u8EAB\u4F53\u9762\u7684\u5E74\u8F7B\u8D35\u65CF\uFF0C\u4E00\u5FC3\u60F3\u5A36\u585E\u897F\u8389\u4E9A\u3002"
+    avatar: {fileID: 21300000, guid: 76ba580976e8eb440b9361d75f7a1b91, type: 3}
+    portrait: {fileID: 21300000, guid: 76ba580976e8eb440b9361d75f7a1b91, type: 3}
+    portraitHappy: {fileID: 0}
+    portraitAngry: {fileID: 0}
+    worldSprite: {fileID: 21300000, guid: 76ba580976e8eb440b9361d75f7a1b91, type: 3}
+    tags: noble,suitor,bourgeois,test_fixture
+    cafeCustomer: 0
+  - characterId: npc_d
+    displayName: "\u8001\u4F2F\u7235\u74E6\u5C14\u8499"
+    description: "\u56FA\u6267\u7684\u65E7\u8D35\u65CF\uFF0C\u628A\u5BB6\u65CF\u7684\u4F53\u9762\u770B\u5F97\u6BD4\u5973\u513F\u91CD\u8981\u3002"
+    avatar: {fileID: 21300000, guid: 76ba580976e8eb440b9361d75f7a1b91, type: 3}
+    portrait: {fileID: 21300000, guid: 76ba580976e8eb440b9361d75f7a1b91, type: 3}
+    portraitHappy: {fileID: 0}
+    portraitAngry: {fileID: 0}
+    worldSprite: {fileID: 21300000, guid: 76ba580976e8eb440b9361d75f7a1b91, type: 3}
+    tags: noble,father,authority,test_fixture
+    cafeCustomer: 0
+  - characterId: player
+    displayName: "\u4F60"
+    description: "\u4F60\u5750\u5728\u5496\u5561\u9986\u7684\u89D2\u843D\uFF0C\u770B\u7740\u8FD9\u4E00\u5207\u53D1\u751F\u3002\u4F60\u53EF\u4EE5\u63D2\u624B\uFF0C\u4E5F\u53EF\u4EE5\u53EA\u662F\u770B\u7740\u3002"
+    avatar: {fileID: 21300000, guid: 76ba580976e8eb440b9361d75f7a1b91, type: 3}
+    portrait: {fileID: 0}
+    portraitHappy: {fileID: 0}
+    portraitAngry: {fileID: 0}
+    worldSprite: {fileID: 0}
+    tags: observer
+    cafeCustomer: 0
+  - characterId: laurent
+    displayName: "\u6D1B\u6717\xB7\u8FEA\u8499"
+    description: "\u738B\u5BA4\u5BA1\u8BA1\u9662\u9AD8\u5B98\uFF0C\u4E3B\u5F20\u7A0E\u6536\u6539\u9769\u4E0E\u524A\u51CF\u738B\u5BA4\u5F00\u652F\u7684\u6B63\u76F4\u5B98\u50DA\u3002"
+    avatar: {fileID: 0}
+    portrait: {fileID: 0}
+    portraitHappy: {fileID: 0}
+    portraitAngry: {fileID: 0}
+    worldSprite: {fileID: 0}
+    tags: noble,auditor,crown
+    cafeCustomer: 0
+  - characterId: clovis
+    displayName: "\u514B\u6D1B\u7EF4\xB7\u5EB7\u591A\u5C14"
+    description: "\u5965\u5C14\u72C4\u4E9A\u738B\u56FD\u5EB7\u591A\u5C14\u738B\u671D\u7B2C\u5341\u4E8C\u4EFB\u541B\u4E3B\uFF0C\u4E5F\u662F\u963F\u8389\u8036\u8BFA\u5C14\u7684\u7236\u4EB2\u3002"
+    avatar: {fileID: 0}
+    portrait: {fileID: 0}
+    portraitHappy: {fileID: 0}
+    portraitAngry: {fileID: 0}
+    worldSprite: {fileID: 0}
+    tags: noble,king,crown
+    cafeCustomer: 0
+  - characterId: renaud
+    displayName: "\u96F7\u8BFA\xB7\u5EB7\u591A\u5C14"
+    description: "\u56FD\u738B\u7684\u5F1F\u5F1F\uFF0C\u738B\u5BA4\u8FD1\u536B\u9A91\u5175\u7EDF\u5E05\uFF0C\u5965\u683C\u9686\u516C\u7235\u3002"
+    avatar: {fileID: 0}
+    portrait: {fileID: 0}
+    portraitHappy: {fileID: 0}
+    portraitAngry: {fileID: 0}
+    worldSprite: {fileID: 0}
+    tags: noble,duke,royal_guard
+    cafeCustomer: 0
+  - characterId: elion
+    displayName: "\u57C3\u5229\u6602\xB7\u5EB7\u591A\u5C14"
+    description: "\u56FD\u738B\u7684\u5802\u5F1F\uFF0C\u4EB2\u6C11\u4E14\u652F\u6301\u6539\u9769\u7684\u57C3\u5229\u6602\u516C\u7235\uFF0C\u5496\u5561\u9986\u5E38\u5BA2\u3002"
+    avatar: {fileID: 21300000, guid: 31ac4a73250545e4aa9dec0c6b85a7e9, type: 3}
+    portrait: {fileID: 21300000, guid: 31ac4a73250545e4aa9dec0c6b85a7e9, type: 3}
+    portraitHappy: {fileID: 0}
+    portraitAngry: {fileID: 0}
+    worldSprite: {fileID: 21300000, guid: 31ac4a73250545e4aa9dec0c6b85a7e9, type: 3}
+    tags: noble,duke,crown,cafe_customer
+    cafeCustomer: 1
+  - characterId: alienor
+    displayName: "\u963F\u8389\u8036\u8BFA\u5C14\xB7\u5EB7\u591A\u5C14"
+    description: "\u56FD\u738B\u7684\u5973\u513F\u4E0E\u7EE7\u627F\u4EBA\uFF0C\u77E5\u8BC6\u4E30\u5BCC\uFF0C\u559C\u7231\u5F02\u56FD\u690D\u7269\uFF0C\u6E34\u671B\u4E86\u89E3\u5BAB\u5EF7\u5916\u7684\u4E16\u754C\u3002"
+    avatar: {fileID: 21300000, guid: c0646430da3c7a342830fade34fb46fd, type: 3}
+    portrait: {fileID: 21300000, guid: c0646430da3c7a342830fade34fb46fd, type: 3}
+    portraitHappy: {fileID: 0}
+    portraitAngry: {fileID: 0}
+    worldSprite: {fileID: 21300000, guid: e5b7a96c4b2c3cd4cb71119f8e0e31d9, type: 3}
+    tags: noble,princess,crown
+    cafeCustomer: 0
+  - characterId: queen
+    displayName: "\u738B\u540E"
+    description: "\u6DF1\u5C45\u7B80\u51FA\u7684\u5965\u5C14\u72C4\u4E9A\u738B\u540E\u3002"
+    avatar: {fileID: 0}
+    portrait: {fileID: 0}
+    portraitHappy: {fileID: 0}
+    portraitAngry: {fileID: 0}
+    worldSprite: {fileID: 0}
+    tags: noble,queen,crown
+    cafeCustomer: 0
+  - characterId: bertrand
+    displayName: "\u8D1D\u7279\u6717\xB7\u5EB7\u591A\u5C14"
+    description: "\u56FD\u738B\u7684\u53D4\u7956\u7236\uFF0C\u53CD\u5BF9\u4EE5\u5916\u8C8C\u548C\u8840\u7EDF\u8BC4\u5224\u8EAB\u4EFD\u3002"
+    avatar: {fileID: 21300000, guid: 80fbb0f1d556832458e4256e53c7d571, type: 3}
+    portrait: {fileID: 21300000, guid: 80fbb0f1d556832458e4256e53c7d571, type: 3}
+    portraitHappy: {fileID: 0}
+    portraitAngry: {fileID: 0}
+    worldSprite: {fileID: 21300000, guid: 80fbb0f1d556832458e4256e53c7d571, type: 3}
+    tags: noble
+    cafeCustomer: 0
+  - characterId: sade
+    displayName: "\u8428\u5FB7"
+    description: "\u5357\u5CB8\u6559\u5802\u795E\u7236\u3001\u76D1\u67E5\u53F8\u53F8\u957F\uFF0C\u4E3A\u4EBA\u6E29\u548C\uFF0C\u4F53\u6064\u6C11\u4F17\u3002"
+    avatar: {fileID: 21300000, guid: a82447f7ecde70f41874e7951f34cf69, type: 3}
+    portrait: {fileID: 21300000, guid: a82447f7ecde70f41874e7951f34cf69, type: 3}
+    portraitHappy: {fileID: 0}
+    portraitAngry: {fileID: 0}
+    worldSprite: {fileID: 21300000, guid: a82447f7ecde70f41874e7951f34cf69, type: 3}
+    tags: church,priest,cafe_customer
+    cafeCustomer: 1
+  - characterId: mamion
+    displayName: "\u9A6C\u7C73\u7FC1"
+    description: "\u5723\u8C10\u6559\u4F1A\u5927\u4E3B\u6559\uFF0C\u5173\u5FC3\u6559\u6C11\u3001\u5FC3\u6000\u601C\u60AF\uFF0C\u575A\u5B9A\u7EF4\u62A4\u4F20\u7EDF\u3002"
+    avatar: {fileID: 0}
+    portrait: {fileID: 0}
+    portraitHappy: {fileID: 0}
+    portraitAngry: {fileID: 0}
+    worldSprite: {fileID: 0}
+    tags: church,archbishop
+    cafeCustomer: 0
+  - characterId: lucien
+    displayName: "\u5415\u897F\u5B89"
+    description: "\u7518\u6CC9\u6559\u5802\u795E\u7236\u3001\u6559\u52A1\u53F8\u53F8\u957F\uFF0C\u6E29\u548C\u800C\u6709\u81EA\u5DF1\u7684\u89C1\u89E3\u3002"
+    avatar: {fileID: 0}
+    portrait: {fileID: 0}
+    portraitHappy: {fileID: 0}
+    portraitAngry: {fileID: 0}
+    worldSprite: {fileID: 0}
+    tags: church,priest
+    cafeCustomer: 0
+  - characterId: lesou
+    displayName: "\u52D2\u82CF"
+    description: "\u6D41\u6C11\u9886\u8896\uFF0C\u52A1\u5B9E\u4ED7\u4E49\uFF0C\u5173\u6000\u5E95\u5C42\u6C11\u4F17\uFF0C\u5728\u8D2B\u6C11\u805A\u96C6\u533A\u9887\u6709\u53F7\u53EC\u529B\u3002"
+    avatar: {fileID: 21300000, guid: 16aebbb394bab03408446817c9f1e33c, type: 3}
+    portrait: {fileID: 21300000, guid: 16aebbb394bab03408446817c9f1e33c, type: 3}
+    portraitHappy: {fileID: 0}
+    portraitAngry: {fileID: 0}
+    worldSprite: {fileID: 21300000, guid: 16aebbb394bab03408446817c9f1e33c, type: 3}
+    tags: refugee,revolution,cafe_customer
+    cafeCustomer: 1
+  - characterId: sylvain
+    displayName: "\u897F\u5C14\u4E07\xB7\u74E6\u9686"
+    description: "\u7070\u5899\u5B66\u9662\u8D44\u6DF1\u5386\u53F2\u5B66\u6559\u6388\uFF0C\u4E5F\u662F\u7687\u5973\u7684\u5BAB\u5EF7\u5386\u53F2\u8001\u5E08\uFF0C\u5E7D\u9ED8\u800C\u535A\u5B66\u3002"
+    avatar: {fileID: 0}
+    portrait: {fileID: 0}
+    portraitHappy: {fileID: 0}
+    portraitAngry: {fileID: 0}
+    worldSprite: {fileID: 0}
+    tags: scholar,historian
+    cafeCustomer: 0
+  - characterId: antoine
+    displayName: "\u5B89\u6258\u4E07\xB7\u9A6C\u5C1A"
+    description: "\u7CBE\u4E8E\u7B97\u8BA1\u7684\u5BCC\u5546\uFF0C\u91CD\u89C6\u5546\u4E1A\u81EA\u7531\u4E0E\u91D1\u94B1\u5229\u76CA\u3002"
+    avatar: {fileID: 21300000, guid: 10eb2e2f664b6a149aeaf29f2d13c064, type: 3}
+    portrait: {fileID: 21300000, guid: 10eb2e2f664b6a149aeaf29f2d13c064, type: 3}
+    portraitHappy: {fileID: 0}
+    portraitAngry: {fileID: 0}
+    worldSprite: {fileID: 21300000, guid: 10eb2e2f664b6a149aeaf29f2d13c064, type: 3}
+    tags: merchant,citizen,cafe_customer
+    cafeCustomer: 1
+  - characterId: lefebvre
+    displayName: "\u52D2\u8D39\u5F17\u5C14"
+    description: "\u79E9\u5E8F\u90E8\u5BA1\u67E5\u5B98\uFF0C\u51FA\u8EAB\u5BD2\u95E8\uFF0C\u559C\u7231\u5251\u672F\u4E0E\u9152\u3002"
+    avatar: {fileID: 0}
+    portrait: {fileID: 0}
+    portraitHappy: {fileID: 0}
+    portraitAngry: {fileID: 0}
+    worldSprite: {fileID: 0}
+    tags: official,crown
+    cafeCustomer: 0
+  - characterId: duval
+    displayName: "\u675C\u74E6\u5C14\xB7\u7C73\u5C3C\u8036"
+    description: "\u4E3B\u89D2\u7684\u53D4\u53D4\uFF0C\u6E29\u548C\u6709\u793C\u3001\u4E25\u4E8E\u5F8B\u5DF1\uFF0C\u7559\u4E0B\u4E86\u6CB8\u70B9\u5496\u5561\u9986\u3002"
+    avatar: {fileID: 0}
+    portrait: {fileID: 0}
+    portraitHappy: {fileID: 0}
+    portraitAngry: {fileID: 0}
+    worldSprite: {fileID: 0}
+    tags: citizen,uncle
+    cafeCustomer: 0
   - characterId: adele
-    displayName: "\u963F\u9EDB\u5C14"
-    description: 
+    displayName: "\u963F\u9EDB\u5C14\xB7\u7C73\u5C3C\u8036"
+    description: "\u5496\u5561\u9986\u5E97\u5458\u3001\u675C\u74E6\u5C14\u7684\u517B\u5973\u3002\u5584\u826F\u6D3B\u6CFC\uFF0C\u7CBE\u529B\u5145\u6C9B\uFF0C\u559C\u6B22\u63A2\u7D22\u65B0\u4E8B\u7269\u3002"
     avatar: {fileID: 21300000, guid: 38cb4f464bfc57b4ab5053a676aacdca, type: 3}
     portrait: {fileID: 21300000, guid: 38cb4f464bfc57b4ab5053a676aacdca, type: 3}
     portraitHappy: {fileID: 0}
     portraitAngry: {fileID: 0}
     worldSprite: {fileID: 21300000, guid: 38cb4f464bfc57b4ab5053a676aacdca, type: 3}
-    tags: manual,customer
+    tags: citizen,cafe_staff
+    cafeCustomer: 0
+  - characterId: emmanuel
+    displayName: "\u57C3\u9A6C\u7EBD\u57C3\u5C14\xB7\u7D22\u96F7\u5C14"
+    description: "\u6280\u827A\u5A34\u719F\u7684\u5916\u79D1\u533B\u751F\uFF0C\u6210\u719F\u5065\u8C08\uFF0C\u5DE5\u4F5C\u4E4B\u4F59\u559C\u6B22\u5728\u5496\u5561\u9986\u95F2\u804A\u3002"
+    avatar: {fileID: 0}
+    portrait: {fileID: 0}
+    portraitHappy: {fileID: 0}
+    portraitAngry: {fileID: 0}
+    worldSprite: {fileID: 0}
+    tags: citizen,surgeon
+    cafeCustomer: 0
+  - characterId: sparrow
+    displayName: "\u9EBB\u96C0"
+    description: "\u963F\u9EDB\u5C14\u7684\u670B\u53CB\uFF0C\u548C\u5976\u5976\u76F8\u4F9D\u4E3A\u547D\u7684\u8857\u5934\u5C11\u5E74\uFF0C\u8BB2\u4E49\u6C14\u800C\u597D\u9762\u5B50\u3002"
+    avatar: {fileID: 0}
+    portrait: {fileID: 0}
+    portraitHappy: {fileID: 0}
+    portraitAngry: {fileID: 0}
+    worldSprite: {fileID: 0}
+    tags: citizen,street_youth
+    cafeCustomer: 0
   - characterId: thibaut
     displayName: "\u8482\u535A\xB7\u5361\u9686"
-    description: 
+    description: "\u6B8B\u75BE\u9000\u4F0D\u8001\u5175\u4E0E\u60C5\u62A5\u5546\uFF0C\u6C89\u9ED8\u5BE1\u8A00\uFF0C\u5584\u4E8E\u89C2\u5BDF\uFF0C\u6B27\u4EC1\u7684\u8001\u53CB\u3002"
     avatar: {fileID: 21300000, guid: a2bee1f147e51db4fa2becdde2d9aa9f, type: 3}
     portrait: {fileID: 21300000, guid: a2bee1f147e51db4fa2becdde2d9aa9f, type: 3}
     portraitHappy: {fileID: 0}
     portraitAngry: {fileID: 0}
     worldSprite: {fileID: 21300000, guid: a2bee1f147e51db4fa2becdde2d9aa9f, type: 3}
-    tags: manual,customer
+    tags: veteran,informant,cafe_customer
+    cafeCustomer: 1
+  - characterId: octave
+    displayName: "\u5965\u514B\u5854\u592B\xB7\u97E6\u5C14\u5185"
+    description: "\u56FD\u5BB6\u519B\u961F\u5C06\u519B\uFF0C\u70ED\u60C5\u6B63\u76F4\uFF0C\u5FE0\u4E8E\u56FD\u5BB6\u3002"
+    avatar: {fileID: 0}
+    portrait: {fileID: 0}
+    portraitHappy: {fileID: 0}
+    portraitAngry: {fileID: 0}
+    worldSprite: {fileID: 0}
+    tags: military,general
+    cafeCustomer: 0
+  - characterId: eugene
+    displayName: "\u6B27\u4EC1\xB7\u8FEA\u5E03\u74E6"
+    description: "\u53EF\u96C7\u4F63\u7684\u9000\u4F0D\u8001\u5175\u4E0E\u4FDD\u9556\uFF0C\u53EF\u9760\u800C\u538B\u6291\uFF0C\u6218\u540E\u7761\u7720\u4E0D\u4F73\uFF0C\u4E0E\u8482\u535A\u76F8\u8BC6\u591A\u5E74\u3002"
+    avatar: {fileID: 21300000, guid: f6d5eb1bc6bd50448b114fb67f58c162, type: 3}
+    portrait: {fileID: 21300000, guid: f6d5eb1bc6bd50448b114fb67f58c162, type: 3}
+    portraitHappy: {fileID: 0}
+    portraitAngry: {fileID: 0}
+    worldSprite: {fileID: 21300000, guid: f6d5eb1bc6bd50448b114fb67f58c162, type: 3}
+    tags: veteran,bodyguard,cafe_customer
+    cafeCustomer: 1
+  - characterId: colette
+    displayName: "\u67EF\u83B1\u7279\xB7\u5E03\u5415\u5185"
+    description: "\u53EF\u96C7\u4F63\u5E97\u5458\uFF0C\u66FE\u4EFB\u8D35\u65CF\u5E9C\u4F8D\u5973\uFF0C\u4F36\u4FD0\u5065\u8C08\uFF0C\u5BCC\u6709\u540C\u60C5\u5FC3\u3002"
+    avatar: {fileID: 0}
+    portrait: {fileID: 0}
+    portraitHappy: {fileID: 0}
+    portraitAngry: {fileID: 0}
+    worldSprite: {fileID: 0}
+    tags: citizen,cafe_staff
+    cafeCustomer: 0
+  - characterId: pascal
+    displayName: "\u5E15\u65AF\u5361\u5C14\xB7\u52D2\u9C81"
+    description: "\u7ED3\u5B9E\u80FD\u5E72\u7684\u9752\u5E74\u5370\u5237\u5DE5\uFF0C\u4E5F\u4E3A\u5496\u5561\u9986\u8DD1\u817F\u3002"
+    avatar: {fileID: 0}
+    portrait: {fileID: 0}
+    portraitHappy: {fileID: 0}
+    portraitAngry: {fileID: 0}
+    worldSprite: {fileID: 0}
+    tags: citizen,printer,cafe_staff
+    cafeCustomer: 0
+  - characterId: marie
+    displayName: "\u96C5\u514B\xB7\u9A6C\u5C1A"
+    description: "\u5496\u5561\u9986\u524D\u4EE3\u7406\u5E97\u957F\uFF0C\u4E3E\u6B62\u5229\u843D\uFF0C\u8C28\u614E\u800C\u5584\u4E8E\u5468\u65CB\u3002"
+    avatar: {fileID: 0}
+    portrait: {fileID: 0}
+    portraitHappy: {fileID: 0}
+    portraitAngry: {fileID: 0}
+    worldSprite: {fileID: 0}
+    tags: citizen,former_manager
+    cafeCustomer: 0
+  - characterId: guest_a
+    displayName: "\u5BA2\u4EBAA"
+    description: "\u8857\u533A\u4E2D\u53EF\u9047\u89C1\u7684\u666E\u901A\u5BA2\u4EBAA\u3002"
+    avatar: {fileID: 21300000, guid: 76ba580976e8eb440b9361d75f7a1b91, type: 3}
+    portrait: {fileID: 0}
+    portraitHappy: {fileID: 0}
+    portraitAngry: {fileID: 0}
+    worldSprite: {fileID: 0}
+    tags: refugee,generic
+    cafeCustomer: 0
+  - characterId: guest_b
+    displayName: "\u5BA2\u4EBAB"
+    description: "\u8857\u533A\u4E2D\u53EF\u9047\u89C1\u7684\u666E\u901A\u5BA2\u4EBAB\u3002"
+    avatar: {fileID: 21300000, guid: 76ba580976e8eb440b9361d75f7a1b91, type: 3}
+    portrait: {fileID: 0}
+    portraitHappy: {fileID: 0}
+    portraitAngry: {fileID: 0}
+    worldSprite: {fileID: 0}
+    tags: citizen,generic
+    cafeCustomer: 0
+  - characterId: guest_c
+    displayName: "\u5BA2\u4EBAC"
+    description: "\u8857\u533A\u4E2D\u53EF\u9047\u89C1\u7684\u666E\u901A\u5BA2\u4EBAC\u3002"
+    avatar: {fileID: 21300000, guid: 76ba580976e8eb440b9361d75f7a1b91, type: 3}
+    portrait: {fileID: 0}
+    portraitHappy: {fileID: 0}
+    portraitAngry: {fileID: 0}
+    worldSprite: {fileID: 0}
+    tags: church,generic
+    cafeCustomer: 0
+  - characterId: guest_d
+    displayName: "\u5BA2\u4EBAD"
+    description: "\u8857\u533A\u4E2D\u53EF\u9047\u89C1\u7684\u666E\u901A\u5BA2\u4EBAD\u3002"
+    avatar: {fileID: 21300000, guid: 76ba580976e8eb440b9361d75f7a1b91, type: 3}
+    portrait: {fileID: 0}
+    portraitHappy: {fileID: 0}
+    portraitAngry: {fileID: 0}
+    worldSprite: {fileID: 0}
+    tags: crown,generic
+    cafeCustomer: 0
+  - characterId: soldier_a
+    displayName: "\u519B\u4EBAA"
+    description: "\u8857\u533A\u4E2D\u53EF\u9047\u89C1\u7684\u666E\u901A\u519B\u4EBAA\u3002"
+    avatar: {fileID: 21300000, guid: 76ba580976e8eb440b9361d75f7a1b91, type: 3}
+    portrait: {fileID: 0}
+    portraitHappy: {fileID: 0}
+    portraitAngry: {fileID: 0}
+    worldSprite: {fileID: 0}
+    tags: revolution,generic
+    cafeCustomer: 0
+  - characterId: soldier_b
+    displayName: "\u519B\u4EBAB"
+    description: "\u8857\u533A\u4E2D\u53EF\u9047\u89C1\u7684\u666E\u901A\u519B\u4EBAB\u3002"
+    avatar: {fileID: 21300000, guid: 76ba580976e8eb440b9361d75f7a1b91, type: 3}
+    portrait: {fileID: 0}
+    portraitHappy: {fileID: 0}
+    portraitAngry: {fileID: 0}
+    worldSprite: {fileID: 0}
+    tags: military,generic
+    cafeCustomer: 0
+  - characterId: soldier_c
+    displayName: "\u519B\u4EBAC"
+    description: "\u8857\u533A\u4E2D\u53EF\u9047\u89C1\u7684\u666E\u901A\u519B\u4EBAC\u3002"
+    avatar: {fileID: 21300000, guid: 76ba580976e8eb440b9361d75f7a1b91, type: 3}
+    portrait: {fileID: 0}
+    portraitHappy: {fileID: 0}
+    portraitAngry: {fileID: 0}
+    worldSprite: {fileID: 0}
+    tags: royal_guard,generic
+    cafeCustomer: 0
+  - characterId: soldier_d
+    displayName: "\u519B\u4EBAD"
+    description: "\u8857\u533A\u4E2D\u53EF\u9047\u89C1\u7684\u666E\u901A\u519B\u4EBAD\u3002"
+    avatar: {fileID: 21300000, guid: 76ba580976e8eb440b9361d75f7a1b91, type: 3}
+    portrait: {fileID: 0}
+    portraitHappy: {fileID: 0}
+    portraitAngry: {fileID: 0}
+    worldSprite: {fileID: 0}
+    tags: new_rose,generic
+    cafeCustomer: 0

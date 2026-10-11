@@ -7,11 +7,14 @@ namespace Spotlight.GameFlow
     {
         private static CharacterCatalog catalog;
 
+        [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.SubsystemRegistration)]
+        private static void Reset() => catalog = null;
+
         public static void SetCatalog(CharacterCatalog value) => catalog = value;
 
         public static CharacterProfile Find(string key)
         {
-            if (catalog == null) catalog = Resources.Load<CharacterCatalog>("Characters/CharacterCatalog");
+            if (catalog == null) catalog = CharacterCatalog.LoadFromTables();
             return catalog != null ? catalog.Find(key) : null;
         }
 
@@ -29,7 +32,7 @@ namespace Spotlight.GameFlow
             {
                 key = key,
                 name = profile != null && !string.IsNullOrWhiteSpace(profile.displayName) ? profile.displayName : displayName,
-                portraitPath = profile != null && profile.portrait != null ? null : portraitPath,
+                portraitPath = portraitPath,
                 portrait = profile != null ? profile.portrait : null,
                 avatar = profile != null ? profile.avatar : null
             };

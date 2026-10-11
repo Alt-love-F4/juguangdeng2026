@@ -17,7 +17,7 @@ namespace Spotlight.FreeCafe
         public bool productionMode = true;
         [Tooltip("可选身份适配器，必须实现 ICafeCustomerIdentitySource；不负责启动剧情。") ]
         public MonoBehaviour customerIdentitySource;
-        [Tooltip("手动角色目录；为空时读取 Resources/Characters/CharacterCatalog。显式身份提供者优先。")]
+        [Tooltip("运行时由 Luban Object 表创建；保留旧序列化字段以兼容场景。显式身份提供者优先。")]
         public Spotlight.Narrative.CharacterCatalog characterCatalog;
         public Spotlight.Narrative.CharacterProfile Character(string id) => characterCatalog != null ? characterCatalog.Find(id) : null;
         public TextAsset catalogAsset;
@@ -78,7 +78,7 @@ namespace Spotlight.FreeCafe
             var catalog = JsonUtility.FromJson<CafeCatalog>(catalogAsset.text);
             catalog.layout = FreeCafeSceneLayout.Capture(this, authored);
             FreeCafeSceneLayout.FitAuthoredBounds(this, catalog, authored);
-            if(characterCatalog==null) characterCatalog=Resources.Load<Spotlight.Narrative.CharacterCatalog>("Characters/CharacterCatalog");
+            characterCatalog=Spotlight.Narrative.CharacterCatalog.LoadFromTables();
             var identities = customerIdentitySource as ICafeCustomerIdentitySource;
             if(identities==null && characterCatalog!=null && characterCatalog.Characters.Count>0)
                 identities=new CatalogCustomerIdentitySource(characterCatalog);
@@ -269,7 +269,14 @@ namespace Spotlight.FreeCafe
             }
             else if(spec.Has(Capability.Customer))
             {
-                foreach(var request in World.State.requests) if(request.customerId==entity.id) { World.Focus(request.id); Report(ActionResult.Yes("已选择订单："+World.Product(request.productId).label)); break; }
+                foreach(var request in World.State.requests) if(request.customerId==entity.id)
+                {
+                    World.Focus(request.id);
+                    var result=World.Talk(entity.id);
+                    Report(result);
+                    if(result.success) CafeDialoguePlayback.PlayCustomer(entity.person, result.message);
+                    break;
+                }
             }
             else Select(entity.id);
         }

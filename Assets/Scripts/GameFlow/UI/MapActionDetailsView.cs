@@ -22,47 +22,94 @@ namespace Spotlight.GameFlow
         public bool IsBusy => busy;
         private float nextRefresh;
         private string signature;
+        private ScrollRect scroll;
+        private float revealStarted = float.NegativeInfinity;
+        private CanvasGroup revealGroup;
+        private const float Width = 820;
+        private const float CardWidth = 796;
         private readonly List<Card> cards = new List<Card>();
         private sealed class Card
         {
             public NarrativeActionDefinition action;
             public Button button;
             public TextMeshProUGUI type;
+            public Image progress;
+            public RectTransform repeats;
+            public int repeatCount = -1;
             public readonly List<TextMeshProUGUI> requirements = new List<TextMeshProUGUI>();
         }
         public void Initialize(MapActionInventoryView inventoryView, Func<bool> canControl, Action finishDay, Action cafe)
         {
             inventory = inventoryView; controls = canControl; endDay = finishDay; enterCafe = cafe;
+            if (transform.Find("Viewport/ActionList") is RectTransform existingContent)
+            {
+                content = existingContent;
+                scroll = content.parent.GetComponent<ScrollRect>();
+                title = transform.Find("Location").GetComponent<TextMeshProUGUI>();
+                var existingClose = transform.Find("Close").GetComponent<UnityEngine.UI.Button>();
+                existingClose.onClick.RemoveAllListeners();
+                existingClose.onClick.AddListener(() => { if (!busy) gameObject.SetActive(false); });
+                return;
+            }
             var rect = (RectTransform)transform;
-            rect.anchorMin = rect.anchorMax = new Vector2(1, .5f);
-            rect.pivot = new Vector2(1, .5f);
-            rect.anchoredPosition = new Vector2(-32, 0);
-            rect.sizeDelta = new Vector2(520, 610);
-            MapVisualTheme.Skin(GetComponent<Image>(), MapVisualTheme.Current?.actionCard);
-            rect.anchorMin = rect.anchorMax = new Vector2(.35f, .42f);
+            rect.anchorMin = rect.anchorMax = new Vector2(.5f, .5f);
+            rect.pivot = new Vector2(.5f, .5f);
+            rect.anchoredPosition = new Vector2(-280, -120);
+            rect.sizeDelta = new Vector2(Width, 440);
+            GetComponent<Image>().color = Color.clear;
             title = Label("Location", rect, "行动详情", 24);
-            Top(title.rectTransform, 20, -12, 430, 42);
+            Top(title.rectTransform, 24, -8, Width - 90, 42);
+            title.gameObject.SetActive(false);
             var close = Button("Close", rect, "×", () => { if (!busy) gameObject.SetActive(false); });
-            Top((RectTransform)close.transform, 462, -12, 38, 38);
+            Top((RectTransform)close.transform, Width - 104, -12, 28, 28);
+            close.GetComponent<Image>().color = Color.clear;
+            close.gameObject.SetActive(false);
             var viewport = Rect("Viewport", rect);
-            Top(viewport, 12, -66, 496, 530);
-            viewport.gameObject.AddComponent<Image>().color = new Color(0, 0, 0, .1f);
+            Stretch(viewport, 0);
+            viewport.gameObject.AddComponent<Image>().color = Color.clear;
             viewport.gameObject.AddComponent<RectMask2D>();
-            var scroll = viewport.gameObject.AddComponent<ScrollRect>();
+            scroll = viewport.gameObject.AddComponent<ScrollRect>();
             scroll.viewport = viewport; scroll.horizontal = false; scroll.vertical = true;
             scroll.scrollSensitivity = 35; scroll.movementType = ScrollRect.MovementType.Clamped;
             content = Rect("ActionList", viewport);
             content.anchorMin = new Vector2(0, 1); content.anchorMax = new Vector2(1, 1);
             content.pivot = new Vector2(.5f, 1); content.sizeDelta = Vector2.zero;
             scroll.content = content;
+            close.transform.SetAsLastSibling();
         }
         public void Show(string positionKey, string locationName)
         {
             if (busy) return;
-            position = positionKey; title.text = locationName + " · 行动详情";
+            bool changed = position != positionKey;
+            position = positionKey; title.text = locationName;
+            bool opening = !gameObject.activeSelf || changed;
             gameObject.SetActive(true); Rebuild();
+            if (opening)
+            {
+                revealStarted = Time.unscaledTime;
+                revealGroup = GetComponent<CanvasGroup>();
+                if (revealGroup == null) revealGroup = gameObject.AddComponent<CanvasGroup>();
+                revealGroup.alpha = 0;
+            }
+            if (changed) { scroll.StopMovement(); scroll.verticalNormalizedPosition = 1; }
         }
         public void Refresh() { if (!busy && isActiveAndEnabled) Rebuild(); }
+        private void LateUpdate()
+        {
+            var parent = transform.parent as RectTransform;
+            if (parent == null) return;
+            var rect = (RectTransform)transform;
+            float scale = Mathf.Min(1, Mathf.Max(.1f, (parent.rect.width - 64) / Width));
+            float t = Mathf.Clamp01((Time.unscaledTime - revealStarted) / .26f);
+            float pop = 1 + 2.7f * Mathf.Pow(t - 1, 3) + 1.7f * Mathf.Pow(t - 1, 2);
+            Vector3 targetScale = Vector3.one * scale * Mathf.LerpUnclamped(.82f, 1, pop);
+            if (!rect.localScale.Equals(targetScale)) rect.localScale = targetScale;
+            float alpha = Mathf.Clamp01(t * 2);
+            if (revealGroup != null && revealGroup.alpha != alpha) revealGroup.alpha = alpha;
+            float offset = Mathf.Min(280, Mathf.Max(0, (parent.rect.width - Width) * .5f - 32));
+            var targetPosition = new Vector2(-offset, -120);
+            if (!rect.anchoredPosition.Equals(targetPosition)) rect.anchoredPosition = targetPosition;
+        }
         private void Update()
         {
             if (busy || Time.unscaledTime < nextRefresh) return;
@@ -74,66 +121,140 @@ namespace Spotlight.GameFlow
         }
         private void Rebuild()
         {
-            foreach (Transform child in content) { child.gameObject.SetActive(false); Destroy(child.gameObject); }
+            for (int childIndex = content.childCount - 1; childIndex >= 0; childIndex--)
+            {
+                var child = content.GetChild(childIndex).gameObject;
+                child.SetActive(false);
+                if (Application.isPlaying) Destroy(child); else DestroyImmediate(child);
+            }
             cards.Clear();
             var actions = NarrativeRuntime.Instance?.Actions;
             var values = actions?.GetMountedActions(position).ToList() ?? new List<NarrativeActionDefinition>();
             signature = string.Join("|", values.Select(a => a.actionKey));
             float y = 0;
-            if (position == "cafe")
+            if (position == "cafe" || position == "大堂区")
             {
                 bool inCafe = UnityEngine.SceneManagement.SceneManager.GetActiveScene().name == "CoffeeShop";
                 var button = Button("EnterCafe", content, inCafe ? "当前正处于咖啡馆" : "进入咖啡馆", () => enterCafe?.Invoke());
                 button.interactable = !inCafe;
-                Top((RectTransform)button.transform, 8, -y, 480, 48); y += 60;
+                button.GetComponent<Image>().sprite = null;
+                button.GetComponent<Image>().color = new Color(.95f, .89f, .68f);
+                var cafeLabel = button.GetComponentInChildren<TextMeshProUGUI>();
+                cafeLabel.fontSize = 30;
+                cafeLabel.rectTransform.pivot = new Vector2(.5f, .5f);
+                Top((RectTransform)button.transform, 24, -y, CardWidth - 24, 68); y += 84;
             }
             foreach (var action in values)
             {
                 var card = new Card { action = action };
                 var root = Rect("Action_" + action.actionKey, content);
-                MapVisualTheme.Skin(root.gameObject.AddComponent<Image>(), MapVisualTheme.Current?.actionCard);
-                var name = Label("Name", root, Text(action.nameText, string.IsNullOrEmpty(action.nameText) ? action.actionKey : action.nameText), 24);
-                Top(name.rectTransform, 16, -40, 444, 38);
-                card.type = Label("Type", root, "", 16);
-                card.type.color = new Color(.66f, .85f, .78f);
-                Top(card.type.rectTransform, 16, -10, 444, 26);
-                var desc = Label("Description", root, Text(action.descText, string.IsNullOrEmpty(action.descText) ? "暂无行动描述" : action.descText), 18);
-                float descHeight = Mathf.Max(50, desc.GetPreferredValues(desc.text, 444, 0).y + 8);
-                Top(desc.rectTransform, 16, -82, 444, descHeight);
-                float ry = 90 + descHeight;
-                var requirements = action.parsedRequirements;
-                if (requirements.Count == 0)
+                MapVisualTheme.Skin(root.gameObject.AddComponent<Image>(), MapVisualTheme.Current?.panel);
+                var emblem = MapVisualTheme.Art("Emblem", root, MapVisualTheme.Current?.actionEmblem, Vector2.zero, new Vector2(82, 82));
+                emblem.gameObject.SetActive(true);
+                Top(emblem.rectTransform, 22, -20, 82, 82);
+                var name = Label("Name", root, Text(action.nameText, string.IsNullOrEmpty(action.nameText) ? title.text : action.nameText), 43);
+                MapVisualTheme.Font(name, true);
+                name.fontStyle = FontStyles.Bold;
+                Top(name.rectTransform, 145, -38, CardWidth - 252, 64);
+                name.enableAutoSizing = true; name.fontSizeMin = 30; name.fontSizeMax = 43;
+                name.overflowMode = TextOverflowModes.Ellipsis;
+                if (action.IsTimed)
                 {
-                    var free = Label("Free", root, "无需求 · 免费执行", 16);
-                    free.color = new Color(.65f, .88f, .7f);
-                    Top(free.rectTransform, 16, -ry, 444, 34); ry += 44;
+                    var timer = MapVisualTheme.Art("Timer", root, MapVisualTheme.Current?.timer, Vector2.zero, new Vector2(30, 30));
+                    Top(timer.rectTransform, CardWidth - 116, -51, 30, 30);
                 }
-                else
+                var divider = MapVisualTheme.Art("Divider", root, MapVisualTheme.Current?.actionDivider, Vector2.zero, new Vector2(CardWidth - 56, 6));
+                divider.gameObject.SetActive(true);
+                Top(divider.rectTransform, 28, -105, CardWidth - 56, 6);
+                card.type = Label("Type", root, "", 22);
+                var desc = Label("Description", root, Text(action.descText, string.IsNullOrEmpty(action.descText) ? "暂无行动描述" : action.descText), 24);
+                MapVisualTheme.Font(desc);
+                float descWidth = action.parsedRequirements.Count > 0 ? 500 : 632;
+                float descHeight = Mathf.Max(86, desc.GetPreferredValues(desc.text, descWidth, 0).y + 8);
+                Top(desc.rectTransform, 36, -148, descWidth, descHeight);
+                float requirementHeight = 0;
+                var requirements = action.parsedRequirements;
+                if (requirements.Count > 0)
                 {
+                    var caption = Label("RequirementsTitle", root, "需要", 22);
+                    Top(caption.rectTransform, 551, -88, 120, 30);
+                    caption.alignment = TextAlignmentOptions.Right;
                     for (int i = 0; i < requirements.Count; i++)
                     {
                         var box = Rect("Requirement_" + i, root);
-                        Top(box, 16 + (i % 2) * 226, -ry - (i / 2) * 82, 218, 74);
+                        Top(box, 574, -151 - i * 100, 90, 90);
                         MapVisualTheme.Skin(box.gameObject.AddComponent<Image>(), MapVisualTheme.Current?.requirement);
-                        var label = Label("Label", box, "", 15);
-                        Stretch(label.rectTransform, 8);
+                        var label = Label("Label", box, "", 17);
+                        Stretch(label.rectTransform, 6); label.alignment = TextAlignmentOptions.Center;
                         card.requirements.Add(label);
                     }
-                    ry += ((requirements.Count + 1) / 2) * 82 + 8;
+                    requirementHeight = 28 + requirements.Count * 100;
                 }
-                card.button = Button("Execute", root, "执行行动", () => OnExecute(card));
+                float footer = 168 + Mathf.Max(descHeight, requirementHeight);
+                Top(card.type.rectTransform, 36, -footer, 420, 36);
+                if (action.type == NarrativeActionType.Repeat && !action.IsProgress)
+                {
+                    card.repeats = Rect("RepeatSegments", root);
+                    Top(card.repeats, 36, -footer - 42, 382, 18);
+                    var layout = card.repeats.gameObject.AddComponent<HorizontalLayoutGroup>();
+                    layout.spacing = 8; layout.childControlWidth = true; layout.childControlHeight = true;
+                    layout.childForceExpandWidth = true; layout.childForceExpandHeight = true;
+                    footer += 24;
+                }
+                if (action.IsProgress)
+                {
+                    var track = Rect("ProgressTrack", root);
+                    Top(track, 36, -footer - 42, 382, 18);
+                    track.gameObject.AddComponent<Image>().color = new Color(.74f, .54f, .37f, .35f);
+                    card.progress = Rect("Fill", track).gameObject.AddComponent<Image>();
+                    Stretch(card.progress.rectTransform, 0);
+                    card.progress.sprite = MapVisualTheme.Current?.progress;
+                    card.progress.type = Image.Type.Filled; card.progress.fillMethod = Image.FillMethod.Horizontal;
+                    card.progress.raycastTarget = false; card.progress.color = new Color(.78f, .49f, .20f);
+                    footer += 24;
+                }
+                card.button = Button("Execute", root, "执行", () => OnExecute(card));
                 MapVisualTheme.Skin(card.button.GetComponent<Image>(), MapVisualTheme.Current?.disabledExecute);
-                Top((RectTransform)card.button.transform, 16, -ry, 444, 46);
-                float height = ry + 60;
-                Top(root, 8, -y, 480, height); y += height + 14;
+                float height = Mathf.Max(414, footer + 116);
+                Top((RectTransform)card.button.transform, CardWidth * 575 / 1067, -height * 342 / 554, CardWidth * 492 / 1067, height * 212 / 554);
+                card.button.GetComponent<Image>().preserveAspect = true;
+                var executeLabel = card.button.GetComponentInChildren<TextMeshProUGUI>();
+                ConfigureExecuteLabel(executeLabel);
+                Top(root, 12, -y, CardWidth, height); y += height + 24;
                 cards.Add(card); UpdateCard(card);
             }
             if (values.Count == 0)
             {
-                var empty = Label("Empty", content, "此时此地无事可做", 20);
-                Top(empty.rectTransform, 16, -y, 460, 60); y += 70;
+                var overview = Rect("LocationOverview", content);
+                Top(overview, 12, -y, CardWidth, 414);
+                MapVisualTheme.Skin(overview.gameObject.AddComponent<Image>(), MapVisualTheme.Current?.panel);
+                var emblem = MapVisualTheme.Art("Emblem", overview, MapVisualTheme.Current?.actionEmblem, Vector2.zero, new Vector2(82, 82));
+                Top(emblem.rectTransform, 22, -20, 82, 82);
+                var divider = MapVisualTheme.Art("Divider", overview, MapVisualTheme.Current?.actionDivider, Vector2.zero, new Vector2(CardWidth - 56, 6));
+                Top(divider.rectTransform, 28, -105, CardWidth - 56, 6);
+                var heading = Label("Name", overview, title.text, 43);
+                MapVisualTheme.Font(heading, true);
+                heading.fontStyle = FontStyles.Bold;
+                Top(heading.rectTransform, 145, -38, CardWidth - 252, 64);
+                heading.enableAutoSizing = true; heading.fontSizeMin = 30; heading.fontSizeMax = 43;
+                var empty = Label("Empty", overview, "此时此地无事可做", 24);
+                Top(empty.rectTransform, 36, -148, 600, 94);
+                var captionArea = Rect("ExecuteCaptionArea", overview);
+                Top(captionArea, CardWidth * 575 / 1067, -414f * 342 / 554, CardWidth * 492 / 1067, 414f * 212 / 554);
+                var emptySword = captionArea.gameObject.AddComponent<Image>();
+                MapVisualTheme.Skin(emptySword, MapVisualTheme.Current?.execute);
+                emptySword.preserveAspect = true;
+                emptySword.color = new Color(.46f, .43f, .34f);
+                emptySword.raycastTarget = false;
+                var caption = Label("ExecuteCaption", captionArea, "暂无行动", 34);
+                ConfigureExecuteLabel(caption);
+                caption.color = new Color(.97f, .92f, .75f);
+                y += 438;
             }
             content.sizeDelta = new Vector2(0, y);
+            float maximumHeight = Mathf.Min(800, ((RectTransform)transform.parent).rect.height - 250);
+            ((RectTransform)transform).sizeDelta = new Vector2(Width, Mathf.Clamp(y, 230, Mathf.Max(230, maximumHeight)));
+            Canvas.ForceUpdateCanvases();
         }
         private void OnDisable()
         {
@@ -159,28 +280,84 @@ namespace Spotlight.GameFlow
             if (action.mustExecute) type += " · 今日必做";
             card.type.text = type;
             card.type.color = MapVisualTheme.Accent;
+            if (card.progress != null) card.progress.fillAmount = action.progressTarget > 0
+                ? Mathf.Clamp01((float)actions.GetProgress(action.actionKey) / action.progressTarget) : 0;
+            UpdateRepeatSegments(card, actions);
             for (int i = 0; i < card.requirements.Count; i++)
             {
                 bool ok = i < checks.Count && checks[i].satisfied;
                 var requirement = action.parsedRequirements[i];
-                string current = i < checks.Count ? checks[i].currentValue : "";
-                card.requirements[i].text = (ok ? "已满足  " : "未满足  ") + RequirementName(requirement) +
-                    (string.IsNullOrEmpty(current) ? "" : "\n当前：" + current);
+                card.requirements[i].text = RequirementName(requirement);
                 card.requirements[i].color = ok ? MapVisualTheme.Ink : new Color(.65f, .23f, .14f);
             }
             string caption = action.endDay && actions.HasBlockingActions() ? "有需要进行的行动" :
-                action.type == NarrativeActionType.Future ? "等待开放" : available ? (action.endDay ? "结束一天" : "执行行动") : "暂不可用 · 查看原因";
+                action.type == NarrativeActionType.Future ? "等待开放" : available ? (action.endDay ? "结束一天" : "执行") : "查看需求";
             card.button.GetComponentInChildren<TextMeshProUGUI>().text = caption;
-            card.button.GetComponent<Image>().color = available ? new Color(1f, .63f, .25f) : Color.white;
+                var image = card.button.GetComponent<Image>();
+                image.color = available ? Color.white : new Color(.46f, .43f, .34f);
+            card.button.GetComponentInChildren<TextMeshProUGUI>().color = new Color(.97f, .92f, .75f);
             card.button.interactable = !busy;
         }
+        private static void ConfigureExecuteLabel(TextMeshProUGUI label)
+        {
+            MapVisualTheme.Font(label, true);
+            label.fontSize = 38; label.enableAutoSizing = true;
+            label.fontSizeMin = 24; label.fontSizeMax = 38;
+            label.alignment = TextAlignmentOptions.Center;
+            Stretch(label.rectTransform, 0);
+            // The sword's text body excludes its pointed tip and right-hand hilt.
+            label.rectTransform.offsetMin = new Vector2(24, 24);
+            label.rectTransform.offsetMax = new Vector2(-58, -18);
+        }
+
+        private void UpdateRepeatSegments(Card card, NarrativeActionController actions)
+        {
+            if (card.repeats == null) return;
+            int count = card.action.IsProgress ? Mathf.Max(0, card.action.progressTarget - actions.GetProgress(card.action.actionKey)) : int.MaxValue;
+            foreach (var costs in card.action.parsedRequirements
+                .Where(r => r.type == NarrativeActionRequirementType.Item || r.type == NarrativeActionRequirementType.ActionPoint)
+                .GroupBy(r => (r.type, r.key)))
+            {
+                long cost = costs.Sum(r => (long)Mathf.Max(0, r.value));
+                if (cost == 0) continue;
+                int stock = costs.Key.type == NarrativeActionRequirementType.ActionPoint ? actions.ActionPoints.Current : NarrativeRuntime.Instance.MapInventory.GetCount(costs.Key.key);
+                count = Mathf.Min(count, (int)(stock / cost));
+            }
+            if (count == card.repeatCount) return;
+            card.repeatCount = count;
+            for (int i = card.repeats.childCount - 1; i >= 0; i--)
+            {
+                var child = card.repeats.GetChild(i);
+                child.gameObject.SetActive(false);
+                if (Application.isPlaying) Destroy(child.gameObject); else DestroyImmediate(child.gameObject);
+            }
+            // Unbounded actions have no finite resource-derived partition count.
+            if (count == int.MaxValue)
+            {
+                var label = Label("Unlimited", card.repeats, "不限次数", 18);
+                label.color = MapVisualTheme.Accent;
+                return;
+            }
+            for (int i = 0; i < count; i++)
+            {
+                var segment = Rect("Segment_" + i, card.repeats).gameObject.AddComponent<Image>();
+                segment.color = i == 0 ? new Color(.78f, .49f, .20f) : new Color(.78f, .49f, .20f, .4f);
+                segment.raycastTarget = false;
+            }
+            if (count == 0)
+            {
+                var label = Label("NoExecutions", card.repeats, "剩余可执行 0 次", 18);
+                label.color = MapVisualTheme.Accent;
+            }
+        }
+
         private string RequirementName(NarrativeActionRequirement r) => r.type switch
         {
-            NarrativeActionRequirementType.Item => "物品：" + Text("item." + r.key + ".name", r.key) + " × " + r.value,
-            NarrativeActionRequirementType.Bar => "进度：" + Text("bar." + r.key + ".name", r.key) + " " + r.op + " " + r.value,
+            NarrativeActionRequirementType.Item => Text("item." + r.key + ".name", r.key) + "\n× " + r.value,
+            NarrativeActionRequirementType.Bar => Text("bar." + r.key + ".name", r.key) + "\n" + r.op + " " + r.value,
             NarrativeActionRequirementType.Condition => "拥有条件：" + Text(r.key, r.key),
             NarrativeActionRequirementType.NotCondition => "不能拥有：" + Text(r.key, r.key),
-            _ => "行动点 × " + r.value
+            _ => "行动点\n× " + r.value
         };
         private void OnExecute(Card card)
         {
@@ -250,9 +427,11 @@ namespace Spotlight.GameFlow
         }
         private IEnumerator Shake(RectTransform target)
         {
+            if (target == null) yield break;
             Vector2 origin = target.anchoredPosition;
             for (float t = 0; t < .35f; t += Time.unscaledDeltaTime)
             {
+                if (target == null || !target.gameObject.activeInHierarchy) yield break;
                 target.anchoredPosition = origin + Vector2.right * Mathf.Sin(t * 80) * 8 * (1 - t / .35f);
                 yield return null;
             }
@@ -270,6 +449,7 @@ namespace Spotlight.GameFlow
         }
         internal static string Text(string key, string fallback)
         {
+            if (string.IsNullOrEmpty(key)) return fallback;
             string value = NarrativeRuntime.Instance?.ResolveText(key);
             return string.IsNullOrEmpty(value) || value == key ? fallback : value;
         }
@@ -291,7 +471,7 @@ namespace Spotlight.GameFlow
         {
             var label = Rect(name, parent).gameObject.AddComponent<TextMeshProUGUI>();
             label.font = Resources.Load<TMP_FontAsset>("Fonts/CactusClassicalSerif SDF") ?? TMP_Settings.defaultFontAsset;
-            label.text = text; label.fontSize = size; MapVisualTheme.Font(label, size >= 24); label.raycastTarget = false; return label;
+            label.text = text; label.fontSize = size; MapVisualTheme.Font(label); label.raycastTarget = false; return label;
         }
         internal static Button Button(string name, Transform parent, string text, UnityEngine.Events.UnityAction click)
         {
@@ -303,84 +483,4 @@ namespace Spotlight.GameFlow
         }
     }
 
-    public sealed class MapActionInventoryView : MonoBehaviour
-    {
-        private ScrollRect scroll;
-        private RectTransform content;
-        private TextMeshProUGUI points;
-        private readonly Dictionary<string, RectTransform> slots = new Dictionary<string, RectTransform>();
-        private string signature = "__uninitialized";
-        private float nextRefresh;
-        public Image PointsFill;
-        public TextMeshProUGUI DateLabel;
-        public RectTransform PointsRect => PointsFill != null ? PointsFill.rectTransform : points.rectTransform;
-        public void Toggle() => gameObject.SetActive(!gameObject.activeSelf);
-        public void Initialize(TextMeshProUGUI pointsLabel)
-        {
-            points = pointsLabel;
-            var rect = (RectTransform)transform;
-            rect.anchorMin = rect.anchorMax = new Vector2(1, .5f); rect.pivot = new Vector2(1, .5f);
-            rect.anchoredPosition = new Vector2(-28, -12); rect.sizeDelta = new Vector2(340, 610);
-            MapVisualTheme.Skin(GetComponent<Image>(), MapVisualTheme.Current?.panel);
-            MapVisualTheme.Art("InventoryTitle", rect, MapVisualTheme.Current?.inventoryTitle, new Vector2(0, 252), new Vector2(244, 65));
-            var viewport = MapActionDetailsView.Rect("Viewport", rect); MapActionDetailsView.Stretch(viewport, 16);
-            viewport.offsetMax = new Vector2(-16, -102);
-            viewport.gameObject.AddComponent<Image>().color = Color.clear;
-            viewport.gameObject.AddComponent<RectMask2D>();
-            scroll = viewport.gameObject.AddComponent<ScrollRect>(); scroll.viewport = viewport; scroll.horizontal = false; scroll.vertical = true;
-            scroll.movementType = ScrollRect.MovementType.Clamped; scroll.scrollSensitivity = 32;
-            content = MapActionDetailsView.Rect("Items", viewport);
-            content.anchorMin = content.anchorMax = new Vector2(0, 1); content.pivot = new Vector2(0, 1);
-            scroll.content = content; Refresh();
-        }
-        private void Update()
-        {
-            if (Time.unscaledTime < nextRefresh) return;
-            nextRefresh = Time.unscaledTime + .2f; Refresh();
-        }
-        public void Refresh()
-        {
-            var runtime = NarrativeRuntime.Instance;
-            if (runtime?.Actions == null) return;
-            points.text = "行动点 " + runtime.Actions.ActionPoints.Current + " / " + runtime.Actions.ActionPoints.Max + "    |    第 " + runtime.Actions.CurrentDay + " 天";
-            if (PointsFill != null) PointsFill.fillAmount = Mathf.Clamp01(runtime.Actions.ActionPoints.Current / 5f);
-            if (DateLabel != null) DateLabel.text = "10  " + (5 + runtime.Actions.CurrentDay).ToString("00");
-            string next = string.Join("|", runtime.MapInventory.Items.Select(p => p.Key + ":" + p.Value));
-            if (next == signature) return; signature = next;
-            foreach (Transform child in content) { child.gameObject.SetActive(false); Destroy(child.gameObject); }
-            slots.Clear(); int index = 0;
-            foreach (var item in runtime.MapInventory.Items)
-            {
-                var slot = MapActionDetailsView.Rect("Item_" + item.Key, content);
-                slot.anchorMin = slot.anchorMax = new Vector2(0, 1); slot.pivot = new Vector2(0, 1);
-                slot.anchoredPosition = new Vector2((index % 3) * 102, -(index / 3) * 102); index++; slot.sizeDelta = new Vector2(96, 96);
-                MapVisualTheme.Skin(slot.gameObject.AddComponent<Image>(), MapVisualTheme.Current?.requirement);
-                var label = MapActionDetailsView.Label("NameAndCount", slot, MapActionDetailsView.Text("item." + item.Key + ".name", item.Key) + "\n× " + item.Value, 16);
-                MapActionDetailsView.Stretch(label.rectTransform, 5); label.alignment = TextAlignmentOptions.Center;
-                slots[item.Key] = slot;
-            }
-            if (index == 0)
-            {
-                var empty = MapActionDetailsView.Label("Empty", content, "物品栏为空", 18);
-                empty.rectTransform.sizeDelta = new Vector2(250, 60); empty.rectTransform.anchoredPosition = new Vector2(270, 0);
-                empty.alignment = TextAlignmentOptions.Center;
-            }
-            content.sizeDelta = new Vector2(306, Mathf.Max(202, ((index + 2) / 3) * 102));
-        }
-        public RectTransform FindSlot(string key) => slots.TryGetValue(key, out var slot) ? slot : null;
-        public IEnumerator Reveal(string key)
-        {
-            Refresh(); Canvas.ForceUpdateCanvases();
-            var slot = FindSlot(key); if (slot == null) yield break;
-            scroll.StopMovement();
-            float max = Mathf.Max(0, content.rect.height - scroll.viewport.rect.height);
-            float target = max > 0 ? 1f - Mathf.Clamp01((-slot.anchoredPosition.y) / max) : 1;
-            float start = scroll.verticalNormalizedPosition;
-            for (float t = 0; t < 1; t += Time.unscaledDeltaTime / .25f)
-            {
-                scroll.verticalNormalizedPosition = Mathf.Lerp(start, target, t); yield return null;
-            }
-            scroll.verticalNormalizedPosition = target;
-        }
-    }
 }

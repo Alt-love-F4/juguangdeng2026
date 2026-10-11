@@ -198,7 +198,11 @@ namespace Spotlight.GameFlow
                     case Preview.PreNight: Open<PreNightPanel>().Play(() => Complete(version)); break;
                     case Preview.HomeNight: Open<HomeNightPanel>().Play(() => Complete(version)); break;
                     case Preview.DayEnd: Open<DayEndPanel>().Play(() => Complete(version)); break;
-                    case Preview.Details: Open<DetailsPanel>().Preview(() => Complete(version)); break;
+                    case Preview.Details:
+                    var details = Open<DetailsPanel>();
+                    details.Refresh(DetailsGameDataAdapter.Create());
+                    details.Preview(() => Complete(version));
+                    break;
                     default: throw new ArgumentOutOfRangeException(nameof(preview));
                 }
                 SetStatus("播放中", preview.ToString());
@@ -231,6 +235,7 @@ namespace Spotlight.GameFlow
         private void PlayReadingSample(int version)
         {
             Texture background = Resources.Load<Texture2D>("Art/Gameplay/DayFlow/phase_business_transition");
+            var character = NarrativeCharacterResolver.CreateDialogueCharacter("adele");
             var pages = new[]
             {
                 new ReadingPage("清晨的街道", new[]
@@ -240,8 +245,8 @@ namespace Spotlight.GameFlow
                 }, background, pageId: "debug-reading-01", seq: 1),
                 new ReadingPage("一张便笺", new[]
                 {
-                    new ReadingLine("请在午后之前，去旧城区找我。", "阿黛尔",
-                        portrait: Resources.Load<DialogueVisualsAsset>("Dialogue/DialoguePreview")?.LeftPortrait, kind: ReadingLineKind.Dialogue),
+                    new ReadingLine("请在午后之前，去旧城区找我。", character.DisplayName,
+                        portrait: character.Portrait, kind: ReadingLineKind.Dialogue),
                     new ReadingLine("落款只有一个熟悉的字母。", "旁白")
                 }, pageId: "debug-reading-02", seq: 2)
             };

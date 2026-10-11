@@ -4,23 +4,41 @@ using Spotlight.Narrative;
 namespace Spotlight.FreeCafe
 {
     /// <summary>手动配置适配器；只创建身份快照，不推进叙事或结算事件。</summary>
-    public sealed class CatalogCustomerIdentitySource : ICafeCustomerIdentitySource
+    public sealed class CatalogCustomerIdentitySource : ICafeAvailableCustomerIdentitySource
     {
-        private readonly CharacterCatalog catalog;
+        private readonly CharacterProfile catalogFallback;
+        private readonly System.Collections.Generic.List<CharacterProfile> profiles = new System.Collections.Generic.List<CharacterProfile>();
         public CatalogCustomerIdentitySource(CharacterCatalog catalog)
         {
-            this.catalog = catalog ?? throw new ArgumentNullException(nameof(catalog));
+            if (catalog == null) throw new ArgumentNullException(nameof(catalog));
             catalog.Validate();
+            catalogFallback = catalog.Find("guest_a");
+            foreach (var profile in catalog.Characters)
+                if (profile.cafeCustomer && profile.worldSprite != null) profiles.Add(profile);
         }
         public CafePersonIdentity CreateIdentity(string visitId, int seatIndex)
+            => CreateIdentity(visitId, seatIndex, new System.Collections.Generic.HashSet<string>());
+
+        public CafePersonIdentity CreateIdentity(string visitId, int seatIndex, System.Collections.Generic.ISet<string> occupiedPersonIds)
         {
-            var profiles = catalog.Characters;
             if (profiles.Count == 0) return null;
-            // 座位只选择外观模板；实例身份来自到访 ID，不将座位误用作人物 ID。
-            var profile = profiles[seatIndex % profiles.Count];
+            CharacterProfile profile = null;
+            for (int i = 0; i < profiles.Count; i++)
+            {
+                var candidate = profiles[(seatIndex + i) % profiles.Count];
+                if (!occupiedPersonIds.Contains(candidate.characterId)) { profile = candidate; break; }
+            }
+            if (profile == null)
+            {
+                if (catalogFallback == null) return null;
+                return new CafePersonIdentity { personId = "visitor_" + visitId, characterId = catalogFallback.characterId,
+                    narrativeCharacterId = catalogFallback.characterId, displayName = catalogFallback.displayName,
+                    visualId = catalogFallback.characterId, role = CafePersonRole.Customer };
+            }
             return new CafePersonIdentity
             {
-                personId = "visitor_" + visitId,
+                personId = profile.characterId,
+                narrativeCharacterId = profile.characterId,
                 characterId = profile.characterId,
                 displayName = profile.displayName,
                 visualId = profile.characterId,

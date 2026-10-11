@@ -31,8 +31,12 @@ namespace Spotlight.GameFlow.Tests
             DialogueScript script = new LubanOpeningDialogueSource("test-selected", config).CreateScript();
             Assert.That(script.Count, Is.EqualTo(2));
             Assert.That(script.Title, Is.EqualTo("指定演出"));
-            Assert.That(script.LeftCharacter.DisplayName, Is.EqualTo("左侧"));
-            Assert.That(script.RightCharacter.DisplayName, Is.EqualTo("右侧"));
+            Assert.That(script.LeftCharacter.CharacterKey, Is.EqualTo("player"));
+            Assert.That(script.RightCharacter.CharacterKey, Is.EqualTo("adele"));
+            Assert.That(script.LeftCharacter.DisplayName, Is.EqualTo(NarrativeCharacterResolver.Find("player").displayName));
+            Assert.That(script.RightCharacter.DisplayName, Is.EqualTo(NarrativeCharacterResolver.Find("adele").displayName));
+            Assert.That(script.LeftCharacter.Portrait, Is.SameAs(NarrativeCharacterResolver.Find("player").PortraitFor(null)));
+            Assert.That(script.RightCharacter.Portrait, Is.SameAs(NarrativeCharacterResolver.Find("adele").PortraitFor(null)));
             Assert.That(script[0].Text, Is.EqualTo("第一句"));
             Assert.That(script[0].Gesture, Is.EqualTo(DialogueGesture.Nod));
             Assert.That(script[1].Speaker, Is.EqualTo(DialogueSpeaker.Right));
@@ -50,6 +54,17 @@ namespace Spotlight.GameFlow.Tests
             config.texts.RemoveAll(text => text.key == "opening.line.01");
             Assert.That(NarrativePresentationDataAdapter.TryCreateOpeningDialogue(config, "first_day_cafe", out script, out error), Is.False);
             StringAssert.Contains("opening.line.01", error);
+        }
+
+        [Test]
+        public void OpeningStillValidatesLegacyNameKeysBeforeUsingTableCharacters()
+        {
+            NarrativeConfiguration config = LubanNarrativeLoader.Load();
+            string key = config.openingPresentations.First(item => item.presentationId == "first_day_cafe").leftNameKey;
+            config.texts.RemoveAll(text => text.key == key);
+            Assert.That(NarrativePresentationDataAdapter.TryCreateOpeningDialogue(config, "first_day_cafe", out var script, out var error), Is.False);
+            Assert.That(script, Is.Null);
+            StringAssert.Contains("character name", error);
         }
 
         [Test]

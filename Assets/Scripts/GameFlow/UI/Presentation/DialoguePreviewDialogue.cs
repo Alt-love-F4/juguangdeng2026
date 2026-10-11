@@ -20,9 +20,9 @@ namespace Spotlight.GameFlow
             {
                 new DialogueLine(DialogueSpeaker.Right, "夜色落下来，印刷工把那份名单推到你面前。", gesture: DialogueGesture.Nod),
                 new DialogueLine(DialogueSpeaker.Center, "我也带来了消息。我们三个人得一起想想：你准备怎么处理？", gesture: DialogueGesture.Nod)
-            }, new DialogueCharacter("cafe_owner", "咖啡馆店主", visuals.LeftPortrait),
-                new DialogueCharacter("printer", "印刷工", visuals.RightPortrait),
-                centerCharacter: new DialogueCharacter("debug_contact", "街区线人", visuals.CenterPortrait ?? visuals.LeftPortrait),
+            }, NarrativeCharacterResolver.CreateDialogueCharacter("eugene"),
+                NarrativeCharacterResolver.CreateDialogueCharacter("adele"),
+                centerCharacter: NarrativeCharacterResolver.CreateDialogueCharacter("thibaut"),
                 title: "咖啡馆 · 三人选项演出测试", background: visuals.Background,
                 optionPrompt: "你要如何回应？",
                 options: new[]
@@ -56,8 +56,8 @@ namespace Spotlight.GameFlow
                     "我没有问名单上是谁。他也没有解释。门外又传来一阵脚步声，我们同时看向窗边。\n\n" +
                     "有些故事，从一杯咖啡开始，却不会在咖啡凉下来时结束。"),
                 new DialogueLine(DialogueSpeaker.Left, "那就先喝一口吧。无论外面发生什么，这杯咖啡都还是热的。")
-            }, new DialogueCharacter("咖啡馆店主", visuals.LeftPortrait),
-                new DialogueCharacter("印刷工", visuals.RightPortrait),
+            }, NarrativeCharacterResolver.CreateDialogueCharacter("eugene"),
+                NarrativeCharacterResolver.CreateDialogueCharacter("adele"),
                 title: "咖啡馆 · 不期而至的访客", background: visuals.Background);
         }
     }

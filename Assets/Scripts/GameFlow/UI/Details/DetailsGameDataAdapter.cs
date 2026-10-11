@@ -18,9 +18,7 @@ namespace Spotlight.GameFlow
                 ? runtime.ResolveText(key) : configuration.texts.Find(t => t.key == key)?.content ?? key;
             Sprite Avatar(NarrativeObjectDefinition obj)
             {
-                var entry = display != null ? display.characters.Find(c => c.objectId == obj.objId) : null;
-                if (entry != null && entry.avatar != null) return entry.avatar;
-                return LoadSprite(obj.iconPath);
+                return LoadSprite(string.IsNullOrWhiteSpace(obj.avtarPath) ? obj.iconPath : obj.avtarPath);
             }
             List<DetailsProgressData> Bars(string owner)
             {

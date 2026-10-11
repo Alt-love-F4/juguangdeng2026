@@ -25,6 +25,9 @@ public sealed partial class NcsObjectEntry : Luban.BeanBase
         NameText = (string)_obj.GetValue("nameText");
         NameText_Ref = null;
         IconPath = (string)_obj.GetValue("iconPath");
+        PortraitPath = (string)_obj.GetValue("portraitPath");
+        PortraitIndoorPath = (string)_obj.GetValue("portraitIndoorPath");
+        AvtarPath = (string)_obj.GetValue("avtarPath");
         DescText = (string)_obj.GetValue("descText");
         DescText_Ref = null;
         Tags = (string)_obj.GetValue("tags");
@@ -40,6 +43,9 @@ public sealed partial class NcsObjectEntry : Luban.BeanBase
     public readonly string NameText;
     public TextEntry NameText_Ref;
     public readonly string IconPath;
+    public readonly string PortraitPath;
+    public readonly string PortraitIndoorPath;
+    public readonly string AvtarPath;
     public readonly string DescText;
     public TextEntry DescText_Ref;
     public readonly string Tags;
@@ -61,6 +67,9 @@ public sealed partial class NcsObjectEntry : Luban.BeanBase
         + "objType:" + ObjType + ","
         + "nameText:" + NameText + ","
         + "iconPath:" + IconPath + ","
+        + "portraitPath:" + PortraitPath + ","
+        + "portraitIndoorPath:" + PortraitIndoorPath + ","
+        + "avtarPath:" + AvtarPath + ","
         + "descText:" + DescText + ","
         + "tags:" + Tags + ","
         + "}";

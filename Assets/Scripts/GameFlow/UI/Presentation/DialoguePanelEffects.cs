@@ -182,6 +182,7 @@ namespace Spotlight.GameFlow
             DialogueCharacter original = left; left = right; right = original;
             ApplyPortrait(leftPortrait, leftPortraitFrame, left);
             ApplyPortrait(rightPortrait, rightPortraitFrame, right);
+            UpdatePortraitLayout(centerPortrait.enabled);
             RefreshSpeakerName();
             a = effects.Play(PresentationEffectIds.PortraitFadeIn, 0);
             b = effects.Play(PresentationEffectIds.PortraitFadeIn, 1);

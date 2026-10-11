@@ -120,3 +120,11 @@ Assets/UnityPSDLayoutTool2-main/screenshots/photoshop.png.meta
 Assets/UnityPSDLayoutTool2-main/screenshots/UnityPSDLayoutTool2.png
 Assets/UnityPSDLayoutTool2-main/screenshots/UnityPSDLayoutTool2.png.meta
 Assets/UnityPSDLayoutTool2-main.meta
+Directory.Build.props
+outputs/map-layout/map-action.png
+outputs/map-layout/map-default.png
+outputs/map-layout/map-inventory.png
+outputs/map-layout/map-progress.png
+outputs/map-layout/map-tasks.png
+outputs/map-layout/validation.txt
+outputs/map-layout/validation-edit.txt

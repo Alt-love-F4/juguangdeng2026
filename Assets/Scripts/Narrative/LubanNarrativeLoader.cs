@@ -28,7 +28,9 @@ namespace Spotlight.Narrative
                 config.objects.Add(new NarrativeObjectDefinition
                 {
                     objId = row.ObjId, objType = ObjectType(row.ObjType), nameText = row.NameText,
-                    iconPath = row.IconPath, descText = row.DescText, tags = row.Tags
+                    iconPath = row.IconPath, portraitPath = row.PortraitPath,
+                    portraitIndoorPath = row.PortraitIndoorPath, avtarPath = row.AvtarPath,
+                    descText = row.DescText, tags = row.Tags
                 });
             foreach (var row in tables.TbNcsAction.DataList)
                 config.actions.Add(new NarrativeActionDefinition

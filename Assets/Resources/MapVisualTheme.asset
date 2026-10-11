@@ -1,0 +1,47 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 047b9c49dac5c48488a7778a4bfb2b1f, type: 3}
+  m_Name: MapVisualTheme
+  m_EditorClassIdentifier: Spotlight.GameFlow.UI::Spotlight.GameFlow.MapVisualTheme
+  pointsSegments:
+  - {fileID: 21300000, guid: 5a6daefa4b58e5b478ce1a337eb4b742, type: 3}
+  - {fileID: 21300000, guid: bbd402c287300414d99fc3537973bf2f, type: 3}
+  - {fileID: 21300000, guid: 34e95a0ba68d4714fbcead80b4628bd0, type: 3}
+  - {fileID: 21300000, guid: 23b26d82041dd0e48aa2c9dff43414e3, type: 3}
+  - {fileID: 21300000, guid: 258fbdd06a7d0f343af9193dfd33b0a0, type: 3}
+  locationHighlight: {fileID: 21300000, guid: f5852f26201e4db4d92ea22838b7ae41, type: 3}
+  pointsBase: {fileID: 21300000, guid: 77fed213aa09dab47bb58d0e4910e612, type: 3}
+  pointsFill: {fileID: 0}
+  pointsOutline: {fileID: 21300000, guid: 3c95e75a0ca1ef844864f7f58e1de697, type: 3}
+  pointsLabel: {fileID: 21300000, guid: ff73042cde032f44fb7cb8a8c572e777, type: 3}
+  dateFrame: {fileID: 21300000, guid: e09128e8de4e56f47b3e2ad90923a6fb, type: 3}
+  details: {fileID: 21300000, guid: 57c8077f3ad74a24bade13989ebe2f48, type: 3}
+  bag: {fileID: 21300000, guid: 8048ec9408e26894aa2cceae43045c7e, type: 3}
+  tasks: {fileID: 21300000, guid: da4193317b487944bb89fd09f79a64dd, type: 3}
+  shortcuts: {fileID: 21300000, guid: bd6c9ec3a58229b4db833f83178cbb48, type: 3}
+  panel: {fileID: 21300000, guid: 56bbaf39d5336e14aadb98c2768efd38, type: 3}
+  inventoryTitle: {fileID: 21300000, guid: 66d79c8e0780e0845a9d9e1dafb227e6, type: 3}
+  taskTitle: {fileID: 21300000, guid: 2af0ac50d3a892445aaf584afd161e22, type: 3}
+  actionCard: {fileID: 21300000, guid: 0a527c93e60514547b0d3adbc71f78db, type: 3}
+  actionEmblem: {fileID: 21300000, guid: 7d8f91033ea82cf4d82d9c0205e92454, type: 3}
+  actionDivider: {fileID: 21300000, guid: 3a14d0d787f4ecc4c8822acd0fb3b7ca, type: 3}
+  requirement: {fileID: 21300000, guid: 382c28aeaf12c3746b5560b97d9a5992, type: 3}
+  execute: {fileID: 21300000, guid: 6e708dd6e0f83c746bd1ab415f5e1132, type: 3}
+  disabledExecute: {fileID: 21300000, guid: 6e708dd6e0f83c746bd1ab415f5e1132, type: 3}
+  taskCard: {fileID: 21300000, guid: 881baf4df536a054ab71a1f31391052e, type: 3}
+  tracking: {fileID: 21300000, guid: 7fe97d38a3847dc40a2a5ff7a5e65e00, type: 3}
+  timer: {fileID: 21300000, guid: 65c7fbd850dbe9c4fad4989f6f44cf5e, type: 3}
+  zoomBar: {fileID: 21300000, guid: 996928b14add3c447a3561c8c7dcf024, type: 3}
+  zoomHandle: {fileID: 21300000, guid: ffa1f61f98e10764faae0af0387f66cf, type: 3}
+  progress: {fileID: 21300000, guid: ede5cb18894b481499876f09a5eefe0f, type: 3}
+  headingFont: {fileID: 11400000, guid: b1d144bbba1d46d4db22716d02880eb5, type: 2}
+  bodyFont: {fileID: 11400000, guid: deafa00ea26fb5945ada4150d6615468, type: 2}

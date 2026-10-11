@@ -100,14 +100,15 @@ namespace Spotlight.GameFlow.Tests
             panel.Effects.Tick(0f);
             Assert.That(panel.CenterPortrait.color.r, Is.GreaterThan(panel.LeftPortrait.color.r));
             Assert.That(panel.CenterPortrait.color.r, Is.GreaterThan(panel.RightPortrait.color.r));
-            StringAssert.Contains("街区线人", string.Join(" ",
+            StringAssert.Contains(NarrativeCharacterResolver.Find("thibaut").displayName, string.Join(" ",
                 Array.ConvertAll(panel.GetComponentsInChildren<TMP_Text>(), item => item.text)));
-            Transform options = panel.transform.Find("DialogueOptions");
+            Transform options = panel.GetComponentInChildren<ScrollRect>().transform;
             Assert.That(options.gameObject.activeInHierarchy, Is.True);
             Button[] choices = options.GetComponentsInChildren<Button>();
             Assert.That(choices.Length, Is.EqualTo(3));
             Assert.That(choices[2].interactable, Is.False);
-            StringAssert.Contains("需要更多情报", choices[2].GetComponentInChildren<TMP_Text>().text);
+            StringAssert.Contains("需要更多情报", string.Join(" ",
+                Array.ConvertAll(choices[2].GetComponentsInChildren<TMP_Text>(), item => item.text)));
             panel.Advance();
             Assert.That(panel.IsChoosing, Is.True, "Dialogue submit must not select an option.");
             Assert.That(panel.SelectedOptionId, Is.Empty);
@@ -143,7 +144,7 @@ namespace Spotlight.GameFlow.Tests
             float deadline = Time.realtimeSinceStartup + 6f;
             while (!panel.IsReady) { Assert.That(Time.realtimeSinceStartup, Is.LessThan(deadline)); yield return null; }
             Assert.That(panel.CenterPortrait.enabled, Is.True);
-            var centerFx = panel.PlayEffect(PresentationEffectIds.AccentShakeStartle, "debug_contact");
+            var centerFx = panel.PlayEffect(PresentationEffectIds.AccentShakeStartle, "thibaut");
             var screenFx = panel.PlayEffect(PresentationEffectIds.ShakeLight);
             Assert.That(centerFx.Status, Is.EqualTo(PresentationEffectStatus.Playing));
             Assert.That(screenFx.Status, Is.EqualTo(PresentationEffectStatus.Playing));
@@ -154,7 +155,7 @@ namespace Spotlight.GameFlow.Tests
             CaptureScreenshot("output/presentation-three-portraits.png");
 
             DialogueScript sample = DialoguePreviewDialogue.CreateOptions();
-            var replacement = new DialogueCharacter("debug_new_contact", "新线人", sample.RightCharacter.Portrait);
+            var replacement = NarrativeCharacterResolver.CreateDialogueCharacter("player");
             panel.Play(new DialogueScript(new[]
             {
                 new DialogueLine(DialogueSpeaker.Center, ""),

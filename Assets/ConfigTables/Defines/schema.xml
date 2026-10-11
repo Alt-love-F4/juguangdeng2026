@@ -88,6 +88,9 @@
     <var name="objType" type="string#set=npc,player,world"/>
     <var name="nameText" type="string#ref=TbText?"/>
     <var name="iconPath" type="string"/>
+    <var name="portraitPath" type="string"/>
+    <var name="portraitIndoorPath" type="string"/>
+    <var name="avtarPath" type="string"/>
     <var name="descText" type="string#ref=TbText?"/>
     <var name="tags" type="string"/>
   </bean>

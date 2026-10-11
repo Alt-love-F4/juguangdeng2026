@@ -59,6 +59,7 @@ namespace Spotlight.GameFlow
         private PortraitLayout leftFrameLayout, rightFrameLayout, centerFrameLayout;
         private PortraitLayout leftImageLayout, rightImageLayout, centerImageLayout;
         private bool threePortraitLayout;
+        private int artworkPortraitSlots = -1;
         private Sprite defaultLeft;
         private Sprite defaultRight;
         private Vector2 boxPosition;
@@ -246,19 +247,18 @@ namespace Spotlight.GameFlow
         {
             if (artworkRoot != null)
             {
-                threePortraitLayout = showThird;
-                if (showThird)
-                {
-                    SetPortraitBounds(leftPortrait, leftPortraitFrame, .035f, .315f);
-                    SetPortraitBounds(centerPortrait, centerPortraitFrame, .36f, .64f);
-                    SetPortraitBounds(rightPortrait, rightPortraitFrame, .685f, .965f);
-                }
-                else
-                {
-                    SetPortraitBounds(leftPortrait, leftPortraitFrame, .10f, .40f);
-                    SetPortraitBounds(rightPortrait, rightPortraitFrame, .60f, .90f);
-                    centerPortraitFrame.enabled = false;
-                }
+                int slots = (leftPortrait.enabled ? 1 : 0) | (rightPortrait.enabled ? 2 : 0)
+                    | (centerPortrait.enabled ? 4 : 0);
+                if (artworkPortraitSlots == slots) return;
+                artworkPortraitSlots = slots;
+                leftFrameLayout.Restore(); rightFrameLayout.Restore(); centerFrameLayout.Restore();
+                leftImageLayout.Restore(); rightImageLayout.Restore(); centerImageLayout.Restore();
+                int count = (leftPortrait.enabled ? 1 : 0) + (centerPortrait.enabled ? 1 : 0)
+                    + (rightPortrait.enabled ? 1 : 0);
+                int index = 0;
+                if (leftPortrait.enabled) PlaceArtworkPortrait(leftPortrait, leftPortraitFrame, index++, count);
+                if (centerPortrait.enabled) PlaceArtworkPortrait(centerPortrait, centerPortraitFrame, index++, count);
+                if (rightPortrait.enabled) PlaceArtworkPortrait(rightPortrait, rightPortraitFrame, index, count);
                 effects?.RefreshPortraitPositions();
                 return;
             }
@@ -278,6 +278,15 @@ namespace Spotlight.GameFlow
                 centerFrameLayout.Restore(); centerImageLayout.Restore();
             }
             effects?.RefreshPortraitPositions();
+        }
+
+        private static void PlaceArtworkPortrait(Image image, Image frame, int index, int count)
+        {
+            RectTransform outer = frame != null ? frame.rectTransform : image.rectTransform;
+            float center = count == 1 ? .5f : count == 2 ? .25f + index * .5f : .175f + index * .325f;
+            float shift = center - (outer.anchorMin.x + outer.anchorMax.x) * .5f;
+            outer.anchorMin += new Vector2(shift, 0f);
+            outer.anchorMax += new Vector2(shift, 0f);
         }
 
         private static void SetPortraitBounds(Image image, Image frame, float min, float max)

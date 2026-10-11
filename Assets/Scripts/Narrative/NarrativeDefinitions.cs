@@ -23,6 +23,9 @@ namespace Spotlight.Narrative
         public NarrativeObjectType objType;
         public string nameText;
         public string iconPath;
+        public string portraitPath;
+        public string portraitIndoorPath;
+        public string avtarPath; // 保留策划 Object 字段拼写。
         public string descText;
         public string tags;
     }

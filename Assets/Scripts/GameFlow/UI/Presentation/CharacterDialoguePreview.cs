@@ -6,6 +6,7 @@ namespace Spotlight.GameFlow
     /// <summary>独立于 NCS 的手动角色演出入口，可由按钮或业务协调器调用。</summary>
     public sealed class CharacterDialoguePreview : MonoBehaviour
     {
+        // Retained for serialized scene compatibility; runtime previews use the unified table catalog.
         public CharacterCatalog catalog;
         public string leftCharacterId = "eugene";
         public string rightCharacterId = "adele";
@@ -16,17 +17,15 @@ namespace Spotlight.GameFlow
         public void Play()
         {
             if (!Application.isPlaying) { Debug.LogWarning("请进入 Play Mode 后播放人物预览。", this); return; }
-            var source = catalog != null ? catalog : Resources.Load<CharacterCatalog>("Characters/CharacterCatalog");
-            if (source == null) { Debug.LogError("缺少 CharacterCatalog。", this); return; }
-            var a = source.Find(leftCharacterId);
-            var b = source.Find(rightCharacterId);
+            var a = NarrativeCharacterResolver.Find(leftCharacterId);
+            var b = NarrativeCharacterResolver.Find(rightCharacterId);
             if (a == null || b == null) { Debug.LogError("人物 ID 不在角色目录中。", this); return; }
             DialoguePlayback.Play(new DialogueScript(new[]
             {
                 new DialogueLine(DialogueSpeaker.Left, leftText),
                 new DialogueLine(DialogueSpeaker.Right, rightText)
-            }, new DialogueCharacter(a.characterId, a.displayName, a.portrait),
-               new DialogueCharacter(b.characterId, b.displayName, b.portrait), "角色配置预览"));
+            }, NarrativeCharacterResolver.CreateDialogueCharacter(leftCharacterId),
+               NarrativeCharacterResolver.CreateDialogueCharacter(rightCharacterId), "角色配置预览"));
         }
     }
 }

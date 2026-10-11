@@ -23,6 +23,11 @@ namespace Spotlight.FreeCafe
         CafePersonIdentity CreateIdentity(string visitId, int seatIndex);
     }
 
+    public interface ICafeAvailableCustomerIdentitySource : ICafeCustomerIdentitySource
+    {
+        CafePersonIdentity CreateIdentity(string visitId, int seatIndex, ISet<string> occupiedPersonIds);
+    }
+
     public sealed partial class CafeWorld
     {
         public ActionResult ActivateBusinessControl(string entityId)
@@ -58,7 +63,16 @@ namespace Spotlight.FreeCafe
 
         private CafePersonIdentity CreateCustomerIdentity(string visitId, int seatIndex)
         {
-            var identity = customerIdentities?.CreateIdentity(visitId, seatIndex) ?? AnonymousCustomer(visitId);
+            CafePersonIdentity supplied;
+            if (customerIdentities is ICafeAvailableCustomerIdentitySource available)
+            {
+                var occupied = new HashSet<string>();
+                foreach (var entity in State.entities)
+                    if (entity.person != null) occupied.Add(entity.person.personId);
+                supplied = available.CreateIdentity(visitId, seatIndex, occupied);
+            }
+            else supplied = customerIdentities?.CreateIdentity(visitId, seatIndex);
+            var identity = supplied ?? AnonymousCustomer(visitId);
             if (!ValidCustomerIdentity(identity)) throw new InvalidOperationException("顾客身份适配器返回了无效身份");
             foreach (var existing in State.entities)
                 if (existing.person != null && existing.person.personId == identity.personId)

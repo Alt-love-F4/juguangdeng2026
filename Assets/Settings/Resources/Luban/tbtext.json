@@ -728,5 +728,325 @@
     "key": "map.position.temporary.name",
     "text": "临时事件",
     "comment": "地图地点名称"
+  },
+  {
+    "key": "character.laurent.name",
+    "text": "洛朗·迪蒙",
+    "comment": "人物.xlsx公开设定；秘密不公开"
+  },
+  {
+    "key": "character.laurent.desc",
+    "text": "王室审计院高官，主张税收改革与削减王室开支的正直官僚。",
+    "comment": "人物.xlsx公开设定；秘密不公开"
+  },
+  {
+    "key": "character.clovis.name",
+    "text": "克洛维·康多尔",
+    "comment": "人物.xlsx公开设定；秘密不公开"
+  },
+  {
+    "key": "character.clovis.desc",
+    "text": "奥尔狄亚王国康多尔王朝第十二任君主，也是阿莉耶诺尔的父亲。",
+    "comment": "人物.xlsx公开设定；秘密不公开"
+  },
+  {
+    "key": "character.renaud.name",
+    "text": "雷诺·康多尔",
+    "comment": "人物.xlsx公开设定；秘密不公开"
+  },
+  {
+    "key": "character.renaud.desc",
+    "text": "国王的弟弟，王室近卫骑兵统帅，奥格隆公爵。",
+    "comment": "人物.xlsx公开设定；秘密不公开"
+  },
+  {
+    "key": "character.elion.name",
+    "text": "埃利昂·康多尔",
+    "comment": "人物.xlsx公开设定；秘密不公开"
+  },
+  {
+    "key": "character.elion.desc",
+    "text": "国王的堂弟，亲民且支持改革的埃利昂公爵，咖啡馆常客。",
+    "comment": "人物.xlsx公开设定；秘密不公开"
+  },
+  {
+    "key": "character.alienor.name",
+    "text": "阿莉耶诺尔·康多尔",
+    "comment": "人物.xlsx公开设定；秘密不公开"
+  },
+  {
+    "key": "character.alienor.desc",
+    "text": "国王的女儿与继承人，知识丰富，喜爱异国植物，渴望了解宫廷外的世界。",
+    "comment": "人物.xlsx公开设定；秘密不公开"
+  },
+  {
+    "key": "character.queen.name",
+    "text": "王后",
+    "comment": "人物.xlsx公开设定；秘密不公开"
+  },
+  {
+    "key": "character.queen.desc",
+    "text": "深居简出的奥尔狄亚王后。",
+    "comment": "人物.xlsx公开设定；秘密不公开"
+  },
+  {
+    "key": "character.bertrand.name",
+    "text": "贝特朗·康多尔",
+    "comment": "人物.xlsx公开设定；秘密不公开"
+  },
+  {
+    "key": "character.bertrand.desc",
+    "text": "国王的叔祖父，反对以外貌和血统评判身份。",
+    "comment": "人物.xlsx公开设定；秘密不公开"
+  },
+  {
+    "key": "character.sade.name",
+    "text": "萨德",
+    "comment": "人物.xlsx公开设定；秘密不公开"
+  },
+  {
+    "key": "character.sade.desc",
+    "text": "南岸教堂神父、监查司司长，为人温和，体恤民众。",
+    "comment": "人物.xlsx公开设定；秘密不公开"
+  },
+  {
+    "key": "character.mamion.name",
+    "text": "马米翁",
+    "comment": "人物.xlsx公开设定；秘密不公开"
+  },
+  {
+    "key": "character.mamion.desc",
+    "text": "圣谐教会大主教，关心教民、心怀怜悯，坚定维护传统。",
+    "comment": "人物.xlsx公开设定；秘密不公开"
+  },
+  {
+    "key": "character.lucien.name",
+    "text": "吕西安",
+    "comment": "人物.xlsx公开设定；秘密不公开"
+  },
+  {
+    "key": "character.lucien.desc",
+    "text": "甘泉教堂神父、教务司司长，温和而有自己的见解。",
+    "comment": "人物.xlsx公开设定；秘密不公开"
+  },
+  {
+    "key": "character.lesou.name",
+    "text": "勒苏",
+    "comment": "人物.xlsx公开设定；秘密不公开"
+  },
+  {
+    "key": "character.lesou.desc",
+    "text": "流民领袖，务实仗义，关怀底层民众，在贫民聚集区颇有号召力。",
+    "comment": "人物.xlsx公开设定；秘密不公开"
+  },
+  {
+    "key": "character.sylvain.name",
+    "text": "西尔万·瓦隆",
+    "comment": "人物.xlsx公开设定；秘密不公开"
+  },
+  {
+    "key": "character.sylvain.desc",
+    "text": "灰墙学院资深历史学教授，也是皇女的宫廷历史老师，幽默而博学。",
+    "comment": "人物.xlsx公开设定；秘密不公开"
+  },
+  {
+    "key": "character.antoine.name",
+    "text": "安托万·马尚",
+    "comment": "人物.xlsx公开设定；秘密不公开"
+  },
+  {
+    "key": "character.antoine.desc",
+    "text": "精于算计的富商，重视商业自由与金钱利益。",
+    "comment": "人物.xlsx公开设定；秘密不公开"
+  },
+  {
+    "key": "character.lefebvre.name",
+    "text": "勒费弗尔",
+    "comment": "人物.xlsx公开设定；秘密不公开"
+  },
+  {
+    "key": "character.lefebvre.desc",
+    "text": "秩序部审查官，出身寒门，喜爱剑术与酒。",
+    "comment": "人物.xlsx公开设定；秘密不公开"
+  },
+  {
+    "key": "character.duval.name",
+    "text": "杜瓦尔·米尼耶",
+    "comment": "人物.xlsx公开设定；秘密不公开"
+  },
+  {
+    "key": "character.duval.desc",
+    "text": "主角的叔叔，温和有礼、严于律己，留下了沸点咖啡馆。",
+    "comment": "人物.xlsx公开设定；秘密不公开"
+  },
+  {
+    "key": "character.adele.name",
+    "text": "阿黛尔·米尼耶",
+    "comment": "人物.xlsx公开设定；秘密不公开"
+  },
+  {
+    "key": "character.adele.desc",
+    "text": "咖啡馆店员、杜瓦尔的养女。善良活泼，精力充沛，喜欢探索新事物。",
+    "comment": "人物.xlsx公开设定；秘密不公开"
+  },
+  {
+    "key": "character.emmanuel.name",
+    "text": "埃马纽埃尔·索雷尔",
+    "comment": "人物.xlsx公开设定；秘密不公开"
+  },
+  {
+    "key": "character.emmanuel.desc",
+    "text": "技艺娴熟的外科医生，成熟健谈，工作之余喜欢在咖啡馆闲聊。",
+    "comment": "人物.xlsx公开设定；秘密不公开"
+  },
+  {
+    "key": "character.sparrow.name",
+    "text": "麻雀",
+    "comment": "人物.xlsx公开设定；秘密不公开"
+  },
+  {
+    "key": "character.sparrow.desc",
+    "text": "阿黛尔的朋友，和奶奶相依为命的街头少年，讲义气而好面子。",
+    "comment": "人物.xlsx公开设定；秘密不公开"
+  },
+  {
+    "key": "character.thibaut.name",
+    "text": "蒂博·卡隆",
+    "comment": "人物.xlsx公开设定；秘密不公开"
+  },
+  {
+    "key": "character.thibaut.desc",
+    "text": "残疾退伍老兵与情报商，沉默寡言，善于观察，欧仁的老友。",
+    "comment": "人物.xlsx公开设定；秘密不公开"
+  },
+  {
+    "key": "character.octave.name",
+    "text": "奥克塔夫·韦尔内",
+    "comment": "人物.xlsx公开设定；秘密不公开"
+  },
+  {
+    "key": "character.octave.desc",
+    "text": "国家军队将军，热情正直，忠于国家。",
+    "comment": "人物.xlsx公开设定；秘密不公开"
+  },
+  {
+    "key": "character.eugene.name",
+    "text": "欧仁·迪布瓦",
+    "comment": "人物.xlsx公开设定；秘密不公开"
+  },
+  {
+    "key": "character.eugene.desc",
+    "text": "可雇佣的退伍老兵与保镖，可靠而压抑，战后睡眠不佳，与蒂博相识多年。",
+    "comment": "人物.xlsx公开设定；秘密不公开"
+  },
+  {
+    "key": "character.colette.name",
+    "text": "柯莱特·布吕内",
+    "comment": "人物.xlsx公开设定；秘密不公开"
+  },
+  {
+    "key": "character.colette.desc",
+    "text": "可雇佣店员，曾任贵族府侍女，伶俐健谈，富有同情心。",
+    "comment": "人物.xlsx公开设定；秘密不公开"
+  },
+  {
+    "key": "character.pascal.name",
+    "text": "帕斯卡尔·勒鲁",
+    "comment": "人物.xlsx公开设定；秘密不公开"
+  },
+  {
+    "key": "character.pascal.desc",
+    "text": "结实能干的青年印刷工，也为咖啡馆跑腿。",
+    "comment": "人物.xlsx公开设定；秘密不公开"
+  },
+  {
+    "key": "character.marie.name",
+    "text": "雅克·马尚",
+    "comment": "人物.xlsx公开设定；秘密不公开"
+  },
+  {
+    "key": "character.marie.desc",
+    "text": "咖啡馆前代理店长，举止利落，谨慎而善于周旋。",
+    "comment": "人物.xlsx公开设定；秘密不公开"
+  },
+  {
+    "key": "character.guest_a.name",
+    "text": "客人A",
+    "comment": "人物.xlsx公开设定；秘密不公开"
+  },
+  {
+    "key": "character.guest_a.desc",
+    "text": "街区中可遇见的普通客人A。",
+    "comment": "人物.xlsx公开设定；秘密不公开"
+  },
+  {
+    "key": "character.guest_b.name",
+    "text": "客人B",
+    "comment": "人物.xlsx公开设定；秘密不公开"
+  },
+  {
+    "key": "character.guest_b.desc",
+    "text": "街区中可遇见的普通客人B。",
+    "comment": "人物.xlsx公开设定；秘密不公开"
+  },
+  {
+    "key": "character.guest_c.name",
+    "text": "客人C",
+    "comment": "人物.xlsx公开设定；秘密不公开"
+  },
+  {
+    "key": "character.guest_c.desc",
+    "text": "街区中可遇见的普通客人C。",
+    "comment": "人物.xlsx公开设定；秘密不公开"
+  },
+  {
+    "key": "character.guest_d.name",
+    "text": "客人D",
+    "comment": "人物.xlsx公开设定；秘密不公开"
+  },
+  {
+    "key": "character.guest_d.desc",
+    "text": "街区中可遇见的普通客人D。",
+    "comment": "人物.xlsx公开设定；秘密不公开"
+  },
+  {
+    "key": "character.soldier_a.name",
+    "text": "军人A",
+    "comment": "人物.xlsx公开设定；秘密不公开"
+  },
+  {
+    "key": "character.soldier_a.desc",
+    "text": "街区中可遇见的普通军人A。",
+    "comment": "人物.xlsx公开设定；秘密不公开"
+  },
+  {
+    "key": "character.soldier_b.name",
+    "text": "军人B",
+    "comment": "人物.xlsx公开设定；秘密不公开"
+  },
+  {
+    "key": "character.soldier_b.desc",
+    "text": "街区中可遇见的普通军人B。",
+    "comment": "人物.xlsx公开设定；秘密不公开"
+  },
+  {
+    "key": "character.soldier_c.name",
+    "text": "军人C",
+    "comment": "人物.xlsx公开设定；秘密不公开"
+  },
+  {
+    "key": "character.soldier_c.desc",
+    "text": "街区中可遇见的普通军人C。",
+    "comment": "人物.xlsx公开设定；秘密不公开"
+  },
+  {
+    "key": "character.soldier_d.name",
+    "text": "军人D",
+    "comment": "人物.xlsx公开设定；秘密不公开"
+  },
+  {
+    "key": "character.soldier_d.desc",
+    "text": "街区中可遇见的普通军人D。",
+    "comment": "人物.xlsx公开设定；秘密不公开"
   }
 ]

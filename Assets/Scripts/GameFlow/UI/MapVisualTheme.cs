@@ -7,9 +7,11 @@ namespace Spotlight.GameFlow
     /// <summary>Artwork shared by the runtime map panels.</summary>
     public sealed class MapVisualTheme : ScriptableObject
     {
+        public Sprite[] pointsSegments;
+        public Sprite locationHighlight;
         public Sprite pointsBase, pointsFill, pointsOutline, pointsLabel, dateFrame;
         public Sprite details, bag, tasks, shortcuts, panel, inventoryTitle, taskTitle;
-        public Sprite actionCard, requirement, execute, disabledExecute, taskCard, tracking, timer, zoomBar, zoomHandle, progress;
+        public Sprite actionCard, actionEmblem, actionDivider, requirement, execute, disabledExecute, taskCard, tracking, timer, zoomBar, zoomHandle, progress;
         public TMP_FontAsset headingFont, bodyFont;
         public static MapVisualTheme Current => Resources.Load<MapVisualTheme>("MapVisualTheme");
         public static readonly Color Ink = new Color(.38f, .21f, .08f);
@@ -19,6 +21,8 @@ namespace Spotlight.GameFlow
             image.sprite = sprite;
             image.color = sprite != null ? Color.white : new Color(.95f, .90f, .71f);
             image.preserveAspect = false;
+            image.type = sprite != null && sprite.border.sqrMagnitude > 0 ? Image.Type.Sliced : Image.Type.Simple;
+            image.pixelsPerUnitMultiplier = 2f;
         }
         public static Image Art(string name, Transform parent, Sprite sprite, Vector2 position, Vector2 size)
         {

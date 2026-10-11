@@ -116,9 +116,14 @@ namespace Spotlight.GameFlow
                 error = "Missing NCS title/character name text for opening: " + presentationId;
                 return false;
             }
+            if (NarrativeCharacterResolver.Find("player") == null || NarrativeCharacterResolver.Find("adele") == null)
+            {
+                error = "Missing opening character configuration: player/adele.";
+                return false;
+            }
             script = new DialogueScript(lines,
-                new DialogueCharacter(leftName, visuals.LeftPortrait),
-                new DialogueCharacter(rightName, visuals.RightPortrait), title, visuals.Background);
+                NarrativeCharacterResolver.CreateDialogueCharacter("player"),
+                NarrativeCharacterResolver.CreateDialogueCharacter("adele"), title, visuals.Background);
             return true;
         }
 

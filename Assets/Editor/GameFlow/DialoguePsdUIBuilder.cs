@@ -74,6 +74,8 @@ namespace Spotlight.GameFlow.Editor
                     BoundsOf(Find(layers, "人物-咖啡馆")), canvas);
                 Image right = Portrait(artwork, "RightPortrait", rightSprite,
                     BoundsOf(Find(layers, "人物-咖啡馆")), canvas);
+                right.enabled = false;
+                right.transform.parent.GetComponent<Image>().enabled = false;
                 Image center = Portrait(artwork, "CenterPortrait", null,
                     BoundsOf(Find(layers, "人物-咖啡馆")), canvas);
 
@@ -103,7 +105,8 @@ namespace Spotlight.GameFlow.Editor
                 Button next = Button(nextImage);
                 Button body = box.gameObject.AddComponent<Button>(); body.targetGraphic = box;
                 body.transition = Selectable.Transition.None; body.navigation = NoNavigation(); box.raycastTarget = true;
-                Image skipImage = Image(box.transform, "Skip", Find(layers, "skip底").sprite);
+                Image skipImage = Image(box.transform, "Skip", null);
+                skipImage.color = Color.clear;
                 PlaceRelative(skipImage.rectTransform, BoundsOf(Find(layers, "skip底")), boxBounds, true);
                 Button skip = Button(skipImage);
                 TMP_Text skipText = Text(skipImage.transform, "Label", "SKIP", 21f, new Color(.88f, .74f, .59f), TextAlignmentOptions.Center);

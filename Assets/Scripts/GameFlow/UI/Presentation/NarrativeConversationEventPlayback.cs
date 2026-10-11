@@ -14,8 +14,16 @@ namespace Spotlight.GameFlow
             DialogueCharacter left = null, right = null;
             foreach (NarrativeConversationPresentationLine item in data.lines)
             {
-                Sprite portrait = item.portrait != null ? item.portrait : string.IsNullOrWhiteSpace(item.portraitPath) ? null : Resources.Load<Sprite>(item.portraitPath);
-                var character = new DialogueCharacter(item.speakerKey, item.speakerName, portrait);
+                if (string.IsNullOrWhiteSpace(item.speakerKey))
+                {
+                    lines.Add(new DialogueLine(DialogueSpeaker.Narrator, item.text));
+                    continue;
+                }
+                CharacterProfile profile = NarrativeCharacterResolver.Find(item.speakerKey);
+                Sprite portrait = profile != null ? profile.PortraitFor(item.emote)
+                    : item.portrait != null ? item.portrait : string.IsNullOrWhiteSpace(item.portraitPath) ? null : Resources.Load<Sprite>(item.portraitPath);
+                var character = new DialogueCharacter(item.speakerKey,
+                    profile != null ? profile.displayName : item.speakerName, portrait);
                 bool isLeft = string.Equals(item.side, "left", StringComparison.OrdinalIgnoreCase);
                 if (isLeft) left = character; else right = character;
                 lines.Add(new DialogueLine(isLeft ? DialogueSpeaker.Left : DialogueSpeaker.Right, item.text,
@@ -23,7 +31,9 @@ namespace Spotlight.GameFlow
                     replaceRight: !isLeft, rightCharacter: !isLeft ? character : null,
                     accentFxKey: item.accentFxKey, accentTargetKey: item.accentTargetKey));
             }
-            DialoguePlayback.Play(new DialogueScript(lines, left, right, data.title), completed, completed);
+            // 显式空角色避免纯旁白套用旧 Prefab 的默认人物。
+            DialoguePlayback.Play(new DialogueScript(lines, left ?? new DialogueCharacter("", null),
+                right ?? new DialogueCharacter("", null), data.title), completed, completed);
             return true;
         }
     }

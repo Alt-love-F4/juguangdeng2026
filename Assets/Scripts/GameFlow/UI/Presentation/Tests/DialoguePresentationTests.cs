@@ -59,6 +59,33 @@ namespace Spotlight.GameFlow.Tests
         }
 
         [Test]
+        public void PreviewCharactersAndReplacementEffectsUseUnifiedCatalogIdentity()
+        {
+            DialogueScript preview = DialoguePreviewDialogue.Create();
+            AssertCatalogCharacter(preview.LeftCharacter, "eugene");
+            AssertCatalogCharacter(preview.RightCharacter, "adele");
+            DialogueScript options = DialoguePreviewDialogue.CreateOptions();
+            AssertCatalogCharacter(options.LeftCharacter, "eugene");
+            AssertCatalogCharacter(options.RightCharacter, "adele");
+            AssertCatalogCharacter(options.CenterCharacter, "thibaut");
+            DialogueScript effects = PresentationEffectsPreview.Create();
+            AssertCatalogCharacter(effects.LeftCharacter, "eugene");
+            AssertCatalogCharacter(effects.RightCharacter, "adele");
+            Assert.That(effects[1].AccentTargetKey, Is.EqualTo(effects.RightCharacter.CharacterKey));
+            AssertCatalogCharacter(effects[3].RightCharacter, "thibaut");
+            Assert.That(effects[4].AccentTargetKey, Is.EqualTo(effects[3].RightCharacter.CharacterKey));
+        }
+
+        private static void AssertCatalogCharacter(DialogueCharacter character, string id)
+        {
+            var profile = NarrativeCharacterResolver.Find(id);
+            Assert.That(profile, Is.Not.Null);
+            Assert.That(character.CharacterKey, Is.EqualTo(id));
+            Assert.That(character.DisplayName, Is.EqualTo(profile.displayName));
+            Assert.That(character.Portrait, Is.SameAs(profile.PortraitFor(null)));
+        }
+
+        [Test]
         public void OptionPreviewContainsEnabledDisabledChoicesWithoutNcsResultExecution()
         {
             DialogueScript script = DialoguePreviewDialogue.CreateOptions();
@@ -108,7 +135,7 @@ namespace Spotlight.GameFlow.Tests
             DialoguePanel panel = Open();
             panel.Play(new DialogueScript(new[]
             {
-                new DialogueLine(DialogueSpeaker.Left, new string('长', 80)),
+                new DialogueLine(DialogueSpeaker.Left, "这是一句用于测试补全与继续的短台词。"),
                 new DialogueLine(DialogueSpeaker.Right, "第二句")
             }));
             panel.Advance();
