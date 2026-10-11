@@ -3,7 +3,8 @@
   "rootNamespace": "Spotlight.FreeCafe",
   "references": [
     "Spotlight.FreeCafe.Domain",
-    "Spotlight.FreeCafe.Unity"
+    "Spotlight.FreeCafe.Unity",
+    "Spotlight.Narrative"
   ],
   "autoReferenced": false,
   "includePlatforms": [

@@ -45,11 +45,13 @@ namespace Spotlight.Narrative
     public sealed class NarrativeConversationPresentationLine
     {
         public string speakerKey, speakerName, portraitPath, side, text, accentFxKey, accentTargetKey;
+        public UnityEngine.Sprite portrait;
     }
 
     public sealed class NarrativeCharacterPresentationData
     {
         public string key, name, portraitPath;
+        public UnityEngine.Sprite portrait, avatar;
     }
 
     public sealed class NarrativeNoticePresentationData

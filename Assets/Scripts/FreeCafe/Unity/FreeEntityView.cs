@@ -23,6 +23,7 @@ namespace Spotlight.FreeCafe
         public BoxCollider2D hitbox;
         public string EntityId { get; private set; }
         public FreeCafeRuntime Runtime { get; private set; }
+        private Sprite lastCharacterSprite;
         private string specId,lastState,lastArtId;
         private FreeCafePersonView personView;
         private FreeCafeBusinessSignView businessSignView;
@@ -117,10 +118,12 @@ namespace Spotlight.FreeCafe
             if(Runtime.World.ProductionEnabled && spec.Has(Capability.Processor)) state=entity.production.phase.ToString().ToLowerInvariant();
             string artId=spec.Has(Capability.Customer) && entity.person!=null && !string.IsNullOrEmpty(entity.person.visualId) && Runtime.artLibrary.Find(entity.person.visualId)!=null
                 ? entity.person.visualId : spec.artId;
-            if(specId!=entity.specId || lastState!=state || lastArtId!=artId)
+            var character=entity.person!=null ? Runtime.Character(entity.person.characterId) : null;
+            var characterSprite=character!=null ? character.worldSprite : null;
+            if(specId!=entity.specId || lastState!=state || lastArtId!=artId || lastCharacterSprite!=characterSprite)
             {
-                specId=entity.specId; lastState=state; lastArtId=artId;
-                body.sprite=Runtime.artLibrary.Resolve(artId,state);
+                specId=entity.specId; lastState=state; lastArtId=artId; lastCharacterSprite=characterSprite;
+                body.sprite=characterSprite!=null ? characterSprite : Runtime.artLibrary.Resolve(artId,state);
                 if(body.sprite!=null)
                 {
                     var size=body.sprite.bounds.size;

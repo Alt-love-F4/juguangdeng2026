@@ -17,6 +17,9 @@ namespace Spotlight.FreeCafe
         public bool productionMode = true;
         [Tooltip("可选身份适配器，必须实现 ICafeCustomerIdentitySource；不负责启动剧情。") ]
         public MonoBehaviour customerIdentitySource;
+        [Tooltip("手动角色目录；为空时读取 Resources/Characters/CharacterCatalog。显式身份提供者优先。")]
+        public Spotlight.Narrative.CharacterCatalog characterCatalog;
+        public Spotlight.Narrative.CharacterProfile Character(string id) => characterCatalog != null ? characterCatalog.Find(id) : null;
         public TextAsset catalogAsset;
         public CafeArtLibrary artLibrary;
         public FreeEntityView entityPrefab;
@@ -75,7 +78,11 @@ namespace Spotlight.FreeCafe
             var catalog = JsonUtility.FromJson<CafeCatalog>(catalogAsset.text);
             catalog.layout = FreeCafeSceneLayout.Capture(this, authored);
             FreeCafeSceneLayout.FitAuthoredBounds(this, catalog, authored);
-            World=new CafeWorld(catalog,customerIdentitySource as ICafeCustomerIdentitySource);
+            if(characterCatalog==null) characterCatalog=Resources.Load<Spotlight.Narrative.CharacterCatalog>("Characters/CharacterCatalog");
+            var identities = customerIdentitySource as ICafeCustomerIdentitySource;
+            if(identities==null && characterCatalog!=null && characterCatalog.Characters.Count>0)
+                identities=new CatalogCustomerIdentitySource(characterCatalog);
+            World=new CafeWorld(catalog,identities);
             if(prefabLibrary==null) throw new InvalidOperationException("请配置 EntityPrefabLibrary");
             prefabLibrary.Validate(World.Catalog);
             spawnScale=new FreeCafeSpawnScale(this,authored,catalog);

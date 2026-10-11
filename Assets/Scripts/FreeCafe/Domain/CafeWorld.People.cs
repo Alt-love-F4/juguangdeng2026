@@ -10,6 +10,7 @@ namespace Spotlight.FreeCafe
     public sealed class CafePersonIdentity
     {
         public string personId;
+        public string characterId; // 静态角色配置 ID；旧档为空时仍使用原有外观回退。
         public string displayName;
         public string narrativeCharacterId;
         public string visualId = "customer";
@@ -65,7 +66,7 @@ namespace Spotlight.FreeCafe
             // 不将 Provider 中共享的可变数据直接写入存档。
             return new CafePersonIdentity
             {
-                personId = identity.personId, displayName = identity.displayName, role = identity.role,
+                personId = identity.personId, characterId = identity.characterId, displayName = identity.displayName, role = identity.role,
                 narrativeCharacterId = identity.narrativeCharacterId, visualId = identity.visualId
             };
         }

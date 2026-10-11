@@ -14,7 +14,7 @@ namespace Spotlight.GameFlow
             DialogueCharacter left = null, right = null;
             foreach (NarrativeConversationPresentationLine item in data.lines)
             {
-                Sprite portrait = string.IsNullOrWhiteSpace(item.portraitPath) ? null : Resources.Load<Sprite>(item.portraitPath);
+                Sprite portrait = item.portrait != null ? item.portrait : string.IsNullOrWhiteSpace(item.portraitPath) ? null : Resources.Load<Sprite>(item.portraitPath);
                 var character = new DialogueCharacter(item.speakerKey, item.speakerName, portrait);
                 bool isLeft = string.Equals(item.side, "left", StringComparison.OrdinalIgnoreCase);
                 if (isLeft) left = character; else right = character;

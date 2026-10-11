@@ -3,6 +3,7 @@
   "rootNamespace": "Spotlight.FreeCafe",
   "references": [
     "Spotlight.FreeCafe.Domain",
+    "Spotlight.Narrative",
     "Spotlight.GameFlow.Saving",
     "Spotlight.GameFlow.UI",
     "YokiFrame.UIKit.Unity",

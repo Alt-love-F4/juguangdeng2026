@@ -118,7 +118,8 @@ namespace Spotlight.FreeCafe
             string customerArt=customer==null ? "customer" : world.Spec(customer.specId).artId;
             if(customer!=null && customer.person!=null && !string.IsNullOrEmpty(customer.person.visualId) && runtime.artLibrary.Find(customer.person.visualId)!=null)
                 customerArt=customer.person.visualId;
-            customerAvatar.sprite=runtime.artLibrary.Resolve(customerArt);
+            var character=customer!=null && customer.person!=null ? runtime.Character(customer.person.characterId) : null;
+            customerAvatar.sprite=character!=null && character.avatar!=null ? character.avatar : runtime.artLibrary.Resolve(customerArt);
             orderDescription.text=product==null ? "尚无订单，可先准备原料。" : product.label+"  ·  "+product.description+"\n满意要求 ≥ "+product.minimumScore.ToString("0")+"分"+(request.remakes>0 ? "  ·  正在重做" : "");
             previousOrder.interactable=nextOrder.interactable=!blocked && state.requests.Count>1;
             var cup=world.ServingCup;

@@ -121,7 +121,8 @@ namespace Spotlight.Narrative
                             conversationData.lines.Add(new NarrativeConversationPresentationLine
                             {
                                 speakerKey = line.speakerKey, speakerName = characterData?.name ?? resolve(speakerObject?.nameText),
-                                portraitPath = characterData?.portraitPath ?? speakerObject?.iconPath, side = line.side,
+                                portraitPath = characterData?.portraitPath ?? speakerObject?.iconPath, portrait = characterData?.portrait,
+                                side = line.side,
                                 text = resolve(line.textKey), accentFxKey = line.accentFxKey, accentTargetKey = line.accentTargetKey
                             });
                         }
