@@ -42,6 +42,7 @@ namespace Spotlight.FreeCafe
         public float extractionScore = 100;
         public int additionSequence;
         public float spilledMl;
+        public string heatingVesselId;
     }
 
     [Serializable]
@@ -57,17 +58,31 @@ namespace Spotlight.FreeCafe
     }
 
     /// <summary>展示层只读快照；真实 2D 流体可使用此数据驱动，而不能反写库存。</summary>
+    public readonly struct CafeLiquidComposition
+    {
+        public readonly float coffeeMl, milkMl, waterMl, matchaMl, cocoaMl, otherMl;
+        public float TotalMl => coffeeMl + milkMl + waterMl + matchaMl + cocoaMl + otherMl;
+
+        public CafeLiquidComposition(float coffee, float milk, float water, float matcha, float cocoa, float other)
+        {
+            coffeeMl = coffee; milkMl = milk; waterMl = water;
+            matchaMl = matcha; cocoaMl = cocoa; otherMl = other;
+        }
+    }
+
     public readonly struct CafeLiquidSnapshot
     {
         public readonly float volumeMl, capacityMl, extractionScore;
         public readonly LiquidTemperature temperature;
         public readonly ProductionPhase phase;
         public readonly string primaryIngredient;
+        public readonly CafeLiquidComposition composition;
         public CafeLiquidSnapshot(float volume, float capacity, LiquidTemperature temperature,
-            ProductionPhase phase, string ingredient, float score)
+            ProductionPhase phase, string ingredient, float score, CafeLiquidComposition composition = default)
         {
             volumeMl = volume; capacityMl = capacity; this.temperature = temperature;
             this.phase = phase; primaryIngredient = ingredient; extractionScore = score;
+            this.composition = composition;
         }
     }
 

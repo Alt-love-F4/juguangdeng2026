@@ -180,6 +180,24 @@ namespace Spotlight.GameFlow.Tests
         }
 
         [Test]
+        public void EmptyLocationSwitchAndReopenReuseArtwork()
+        {
+            CreateDetails(null);
+            details.Show("empty-a", "地点甲");
+            var overview = details.transform.Find("Viewport/ActionList/LocationOverview");
+            details.Show("empty-b", "地点乙");
+            Assert.That(details.transform.Find("Viewport/ActionList/LocationOverview"), Is.SameAs(overview));
+            Assert.That(Get<string>(Widget(overview.Find("Name"), "TMPro.TextMeshProUGUI"), "text"), Is.EqualTo("地点乙"));
+            details.gameObject.SetActive(false);
+            details.Show("empty-b", "地点乙");
+            Assert.That(details.transform.Find("Viewport/ActionList/LocationOverview"), Is.SameAs(overview));
+            details.Show("大堂区", "大堂区");
+            Assert.That(details.transform.Find("Viewport/ActionList/EnterCafe"), Is.Not.Null);
+            details.Show("empty-a", "地点甲");
+            Assert.That(details.transform.Find("Viewport/ActionList/EnterCafe"), Is.Null);
+        }
+
+        [Test]
         public void EmptySwordIsGreyAndCardHasNoBakedYellowSword()
         {
             CreateDetails(null);

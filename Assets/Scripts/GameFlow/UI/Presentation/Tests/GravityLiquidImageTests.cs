@@ -167,6 +167,43 @@ namespace Spotlight.GameFlow.Tests
         }
 
         [UnityTest]
+        public IEnumerator MotionSpaceIgnoresParentTranslationButKeepsCupMotion()
+        {
+            Vector3 originalParent = parent.position;
+            try
+            {
+                liquid.MotionSpace = parent;
+                liquid.FillAmount = 0.5f;
+                liquid.ResetMotion();
+                parent.position += new Vector3(80f, 40f, 0f);
+                yield return null;
+                Assert.That(Mathf.Abs(liquid.SurfaceNormal.x), Is.LessThan(0.0001f));
+                Assert.That(cup.GetComponent<Image>().material.GetVector("_Wave").x, Is.LessThan(0.0001f));
+                cup.transform.localPosition += Vector3.right * 80f;
+                yield return null;
+                Assert.That(Mathf.Abs(liquid.SurfaceNormal.x), Is.GreaterThan(0.0001f));
+            }
+            finally
+            {
+                parent.position = originalParent;
+                liquid.MotionSpace = null;
+            }
+        }
+
+        [UnityTest]
+        public IEnumerator UprightPourImpulseCreatesWavesAndSettlesWithoutTiltingTheCup()
+        {
+            liquid.FillAmount = 0.5f;
+            liquid.AddPourImpulse(0f, 0.7f);
+            yield return null;
+            Material material = cup.GetComponent<Image>().material;
+            Assert.That(material.GetVector("_Wave").x, Is.GreaterThan(0.01f));
+            Assert.That(Mathf.Abs(liquid.SurfaceNormal.x), Is.LessThan(0.00001f));
+            yield return new WaitForSecondsRealtime(2f);
+            Assert.That(material.GetVector("_Wave").x, Is.LessThan(0.001f));
+        }
+
+        [UnityTest]
         public IEnumerator CaptureSharedScenePreview()
         {
             liquid.FillAmount = 0.55f;

@@ -126,7 +126,7 @@ namespace Spotlight.GameFlow.Tests
             Assert.That(panel.SelectOption("support"), Is.False, "Only accept one choice.");
             yield return new WaitForSecondsRealtime(.6f);
             Assert.That(panel.IsChoosing, Is.False);
-            Assert.That(panel.LineIndex, Is.EqualTo(2));
+            Assert.That(panel.LineIndex, Is.EqualTo(DialoguePreviewDialogue.CreateOptions().Count));
             controller.ToggleTimePause();
             controller.ReplayLast();
             var replay = controller.CurrentPanel as DialoguePanel;

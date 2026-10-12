@@ -36,7 +36,7 @@ namespace Spotlight.FreeCafe.Editor
             EditorSceneManager.SaveScene(scene);AssetDatabase.SaveAssets();
             Debug.Log("[FreeCafe Entities] "+catalog.entities.Length+" 种独立 Prefab，"+catalog.layout.Length+" 个场景 Prefab 实例；备份 "+backup);
         }
-        public static FreeCafeEntityPrefabLibrary EnsureCatalog(CafeCatalog catalog,CafeArtLibrary art,FreeEntityView template)
+        public static FreeCafeEntityPrefabLibrary EnsureCatalog(CafeCatalog catalog,CafeArtLibrary art,FreeEntityView template,ISet<string> updateSpecIds=null)
         {
             if(catalog==null || art==null || template==null) throw new InvalidOperationException("缺少实体目录、美术库或通用结构模板");
             if(!AssetDatabase.IsValidFolder(PrefabDirectory)) throw new InvalidOperationException("实体 Prefab 目录缺失");
@@ -45,7 +45,7 @@ namespace Spotlight.FreeCafe.Editor
             foreach(var spec in catalog.entities)
             {
                 if(!paths.Add(PathFor(spec.id))) throw new InvalidOperationException("Prefab 文件名冲突："+spec.id);
-                if(art.Resolve(spec.artId)==null) throw new InvalidOperationException("实体初始美术缺失："+spec.id+" / "+spec.artId);
+                if((updateSpecIds==null || updateSpecIds.Contains(spec.id)) && art.Resolve(spec.artId,"empty")==null) throw new InvalidOperationException("实体初始美术缺失："+spec.id+" / "+spec.artId);
             }
             var registry=AssetDatabase.LoadAssetAtPath<FreeCafeEntityPrefabLibrary>(LibraryPath);
             if(registry==null) { registry=ScriptableObject.CreateInstance<FreeCafeEntityPrefabLibrary>();AssetDatabase.CreateAsset(registry,LibraryPath); }
@@ -53,6 +53,8 @@ namespace Spotlight.FreeCafe.Editor
             foreach(var spec in catalog.entities)
             {
                 var prior=registry.Resolve(spec.id);
+                if(updateSpecIds!=null && !updateSpecIds.Contains(spec.id) && prior!=null)
+                { entries.Add(new FreeCafeEntityPrefabEntry { specId=spec.id,prefab=prior }); continue; }
                 string path=prior!=null ? AssetDatabase.GetAssetPath(prior) : PathFor(spec.id);
                 if(prior==null && AssetDatabase.LoadAssetAtPath<GameObject>(path)==null)
                 {
@@ -70,6 +72,7 @@ namespace Spotlight.FreeCafe.Editor
                     view.effectsRoot=Anchor(root.transform,"Effects",view.effectsRoot,Vector3.zero);
                     view.liquidRoot=Anchor(root.transform,"Liquid",view.liquidRoot,Vector3.zero);
                     view.pourOrigin=Anchor(root.transform,"PourOrigin",view.pourOrigin,new Vector3(spec.width*.4f,spec.height*.2f,0));
+                    view.ConfigureGlassCup();
                     StateNode(root.transform,"FillStatus",true,view);
                     StateNode(root.transform,"FillBarBackground",false,view);
                     StateNode(root.transform,"FillBar",false,view);

@@ -161,6 +161,127 @@ namespace Spotlight.GameFlow.Tests
             Assert.That(((RectTransform)content).anchoredPosition, Is.EqualTo(position));
         }
 
+        [UnityTest]
+        public IEnumerator TaskVisibilityPreservesBuiltRowsAndScrollPosition()
+        {
+            var tasks = map.GetComponentInChildren<MapTaskPanel>(true);
+            var content = tasks.transform.Find("TaskBody/TaskViewport/TaskContent");
+            var scroll = tasks.transform.Find("TaskBody/TaskViewport").GetComponent<ScrollRect>();
+            var rows = new Transform[content.childCount];
+            for (int i = 0; i < rows.Length; i++) rows[i] = content.GetChild(i);
+            Assert.That(rows.Length, Is.GreaterThan(0));
+            scroll.StopMovement();
+            ((RectTransform)content).anchoredPosition = new Vector2(0, 37);
+            var position = ((RectTransform)content).anchoredPosition;
+
+            // Include redundant calls, completed slides, Toggle, and reversing an in-flight slide.
+            tasks.SetVisible(false);
+            tasks.SetVisible(true);
+            tasks.SetVisible(true);
+            AssertTaskRowsUnchanged(content, rows);
+            Assert.That(((RectTransform)content).anchoredPosition, Is.EqualTo(position));
+            yield return new WaitForSecondsRealtime(.3f);
+            AssertTaskRowsUnchanged(content, rows);
+            tasks.SetVisible(false);
+            AssertTaskRowsUnchanged(content, rows);
+            yield return new WaitForSecondsRealtime(.3f);
+            Assert.That(tasks.gameObject.activeSelf, Is.False);
+            AssertTaskRowsUnchanged(content, rows);
+            tasks.SetVisible(false);
+            tasks.Toggle();
+            tasks.Toggle();
+            tasks.Toggle();
+            yield return new WaitForSecondsRealtime(.3f);
+            Assert.That(tasks.IsVisible, Is.True);
+            AssertTaskRowsUnchanged(content, rows);
+        }
+
+        [UnityTest]
+        public IEnumerator HiddenTaskChangesRefreshBeforeReopening()
+        {
+            var tasks = map.GetComponentInChildren<MapTaskPanel>(true);
+            var content = tasks.transform.Find("TaskBody/TaskViewport/TaskContent");
+            Assert.That(tasks.IsVisible, Is.False);
+            var item = new MapTaskItem { id = "task_update", name = "Original", description = "Before" };
+            tasks.SetItems(new[] { item });
+            yield return null;
+            var original = content.Find("Task_task_update");
+            Assert.That(original, Is.Not.Null);
+            item.name = "Updated";
+            item.description = "After";
+            tasks.SetItems(new[] { item });
+            yield return null;
+            var updated = content.Find("Task_task_update");
+            Assert.That(original == null, Is.True, "SetItems must still rebuild changed content.");
+            Assert.That(updated.Find("Description").GetComponent<TMP_Text>().text, Is.EqualTo("After"));
+            string changedId = null;
+            tasks.TrackingChanged += id => changedId = id;
+            tasks.SetTracked(item.id);
+            yield return null;
+            var tracked = content.Find("Task_task_update");
+            Assert.That(tasks.TrackedId, Is.EqualTo(item.id));
+            Assert.That(changedId, Is.EqualTo(item.id));
+            Assert.That(tracked.Find("Label").GetComponent<TMP_Text>().text, Does.Contain("Updated").And.Contain("追踪中"));
+            tasks.SetVisible(true);
+            yield return new WaitForSecondsRealtime(.3f);
+            Assert.That(content.Find("Task_task_update"), Is.SameAs(tracked));
+        }
+
+        [UnityTest]
+        public IEnumerator TaskTabsAndExpansionStillRefreshContent()
+        {
+            var tasks = map.GetComponentInChildren<MapTaskPanel>(true);
+            tasks.SetItems(new[]
+            {
+                new MapTaskItem { id = "active", name = "Active", currentTask = "Current", previousTasks = new List<string> { "Previous" } },
+                new MapTaskItem { id = "done", name = "Done", completed = true }
+            });
+            yield return null;
+            tasks.SetVisible(true);
+            var body = tasks.transform.Find("TaskBody");
+            var content = body.Find("TaskViewport/TaskContent");
+            content.Find("Task_active").GetComponent<Button>().onClick.Invoke();
+            yield return null;
+            Assert.That(content.Find("PreviousTask").GetComponent<TMP_Text>().text, Does.Contain("Previous"));
+            Assert.That(content.Find("CurrentTask").GetComponent<TMP_Text>().text, Does.Contain("Current"));
+            Assert.That(content.Find("Track_active"), Is.Not.Null);
+            tasks.SetVisible(false);
+            tasks.SetVisible(true);
+            Assert.That(content.Find("CurrentTask"), Is.Not.Null, "Visibility must preserve expansion.");
+            content.Find("Task_active").GetComponent<Button>().onClick.Invoke();
+            yield return null;
+            Assert.That(content.Find("CurrentTask"), Is.Null);
+            body.Find("CompletedTab").GetComponent<Button>().onClick.Invoke();
+            yield return null;
+            Assert.That(content.Find("Task_active"), Is.Null);
+            Assert.That(content.Find("Task_done"), Is.Not.Null);
+            tasks.SetVisible(false);
+            tasks.SetVisible(true);
+            Assert.That(content.Find("Task_done"), Is.Not.Null, "Visibility must preserve the selected tab.");
+            content.Find("Task_done").GetComponent<Button>().onClick.Invoke();
+            yield return null;
+            Assert.That(content.Find("CompletedStatus"), Is.Not.Null);
+            body.Find("InProgressTab").GetComponent<Button>().onClick.Invoke();
+            yield return null;
+            Assert.That(content.Find("Task_active"), Is.Not.Null);
+            Assert.That(content.Find("Task_done"), Is.Null);
+            Assert.That(content.Find("CurrentTask"), Is.Null, "Switching tabs must reset expansion.");
+            tasks.SetItems(null);
+            yield return null;
+            Assert.That(content.Find("Empty"), Is.Not.Null);
+        }
+
+        private static void AssertTaskRowsUnchanged(Transform content, Transform[] rows)
+        {
+            Assert.That(content.childCount, Is.EqualTo(rows.Length));
+            for (int i = 0; i < rows.Length; i++)
+            {
+                Assert.That(rows[i] != null, Is.True, "Visibility must not destroy a built row.");
+                Assert.That(content.GetChild(i), Is.SameAs(rows[i]));
+                Assert.That(rows[i].gameObject.activeSelf, Is.True);
+            }
+        }
+
         private static IEnumerator Capture(string name)
         {
             yield return new WaitForEndOfFrame();

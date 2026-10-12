@@ -331,7 +331,7 @@ namespace Spotlight.FreeCafe
                 return ActionResult.No("固定设备或来源不能搬动");
             }
 
-            if (ProductionEnabled && item==ServingCup) return ActionResult.No("出餐杯固定在托盘，请出品或丢弃");
+            bool removeFromTray = ProductionEnabled && item==ServingCup;
             if (Locked(item))
             {
                 return ActionResult.No("材料留在设备内；请接取产物或取消加工");
@@ -346,6 +346,7 @@ namespace Spotlight.FreeCafe
             item.area = area;
             item.x = x;
             item.y = y;
+            if(removeFromTray) State.production.activeCupId=null;
             Notify();
             return ActionResult.Yes("已自由放置");
         }

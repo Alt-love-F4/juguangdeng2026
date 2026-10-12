@@ -15,7 +15,7 @@ Assets/Scenes/PresentationDebugScene.unity
 - `Q`：新一天 / `DateChangePanel`
 - `W`：NCS 第一天来信 / `FirstDayLetterPanel`；`Shift+W` 使用面板草稿
 - `E`：NCS 指定开场对话 / `DialoguePanel`；`Shift+E` 使用硬编码长文本示例
-- `C`：三人选项对话测试 / `DialoguePanel`，两句台词后展示两个可选项、一个带条件提示的灰色选项；点击后播放回应。只演示，不结算 NCS。
+- `C`：三人选项对话测试 / `DialoguePanel`，八句台词（SKIP 快速逐条播放，到选项处停止）后展示两个可选项、一个带条件提示的灰色选项；点击后播放回应。只演示，不结算 NCS。
 - `V`：阅读 / `ReadingPanel`，空格或 Enter 补全文字再翻行/页，← 返回
 - `B`：事件通知 / `NoticePanel`，空格或 Enter 确认关闭
 - `N`：视频过场 / `CutScenePanel`，长按 Enter 跳过（默认 1.2 秒，调试占位不代表真实视频）

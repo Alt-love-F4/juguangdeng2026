@@ -1,0 +1,4054 @@
+{
+  "status": "success",
+  "result": {
+    "success": true,
+    "message": "Code executed successfully.",
+    "data": {
+      "result": {
+        "first": 284814,
+        "last": 286813,
+        "frames": [
+          {
+            "frame": 284875,
+            "ms": 123.6232,
+            "samples": [
+              {
+                "index": 0,
+                "name": "Main Thread",
+                "ms": 123.6232,
+                "children": 3
+              },
+              {
+                "index": 1,
+                "name": "EditorLoop",
+                "ms": 122.701,
+                "children": 3
+              },
+              {
+                "index": 2,
+                "name": "Application.Message",
+                "ms": 102.9322,
+                "children": 7
+              },
+              {
+                "index": 10,
+                "name": "Application.Tick",
+                "ms": 11.602,
+                "children": 22
+              },
+              {
+                "index": 16,
+                "name": "Scheduler.Tick",
+                "ms": 0.1159,
+                "children": 1
+              },
+              {
+                "index": 17,
+                "name": "UnityEditor.UIElementsModule.dll!UnityEditor::RetainedMode.UpdateSchedulers() [Invoke]",
+                "ms": 0.1092,
+                "children": 8
+              },
+              {
+                "index": 104,
+                "name": "Application.TickSceneTracker",
+                "ms": 0.5587,
+                "children": 3
+              },
+              {
+                "index": 113,
+                "name": "UnityEditor.CoreModule.dll!UnityEditor::EditorApplication.Internal_CallUpdateFunctions() [Invoke]",
+                "ms": 0.5106,
+                "children": 33
+              },
+              {
+                "index": 120,
+                "name": "EditorApplication.update: DialogueVerificationTemp.Tick",
+                "ms": 0.1176,
+                "children": 12
+              },
+              {
+                "index": 157,
+                "name": "EditorApplication.update: UnityEditor.LevelPlay.LevelPlayInstallMenuItem.UpdateMenuItem",
+                "ms": 0.1291,
+                "children": 48
+              },
+              {
+                "index": 290,
+                "name": "Application.UpdateScene",
+                "ms": 10.7429,
+                "children": 1
+              },
+              {
+                "index": 291,
+                "name": "UpdateSceneIfNeeded",
+                "ms": 10.7422,
+                "children": 2
+              },
+              {
+                "index": 293,
+                "name": "UpdateScene",
+                "ms": 10.7396,
+                "children": 3
+              },
+              {
+                "index": 294,
+                "name": "PlayerLoop",
+                "ms": 0.9624,
+                "children": 1
+              },
+              {
+                "index": 295,
+                "name": "UpdateScene",
+                "ms": 0.9624,
+                "children": 239
+              },
+              {
+                "index": 777,
+                "name": "Update.ScriptRunBehaviourUpdate",
+                "ms": 0.2361,
+                "children": 1
+              },
+              {
+                "index": 778,
+                "name": "BehaviourUpdate",
+                "ms": 0.2355,
+                "children": 12
+              },
+              {
+                "index": 939,
+                "name": "PostLateUpdate.PlayerUpdateCanvases",
+                "ms": 0.1572,
+                "children": 3
+              },
+              {
+                "index": 942,
+                "name": "UIEvents.WillRenderCanvases",
+                "ms": 0.1542,
+                "children": 1
+              },
+              {
+                "index": 943,
+                "name": "UGUI.Rendering.UpdateBatches",
+                "ms": 0.1541,
+                "children": 8
+              },
+              {
+                "index": 945,
+                "name": "UnityEngine.UIModule.dll!UnityEngine::Canvas.SendWillRenderCanvases() [Invoke]",
+                "ms": 0.1347,
+                "children": 2
+              },
+              {
+                "index": 950,
+                "name": "Render",
+                "ms": 0.1136,
+                "children": 3
+              },
+              {
+                "index": 951,
+                "name": "ClipperRegistry.Cull",
+                "ms": 0.1121,
+                "children": 0
+              },
+              {
+                "index": 1025,
+                "name": "GUIView.RepaintAll.PlayerLoopController",
+                "ms": 9.6848,
+                "children": 2
+              },
+              {
+                "index": 1026,
+                "name": "SceneView.Paint",
+                "ms": 4.2014,
+                "children": 2
+              },
+              {
+                "index": 1028,
+                "name": "SceneView.Repaint",
+                "ms": 2.9582,
+                "children": 5
+              },
+              {
+                "index": 1031,
+                "name": "UnityEngine.IMGUIModule.dll!UnityEngine::GUIUtility.ProcessEvent() [Invoke]",
+                "ms": 2.9045,
+                "children": 3
+              },
+              {
+                "index": 1033,
+                "name": "UIElementsUtility.DoDispatch(Repaint Event)",
+                "ms": 2.8606,
+                "children": 2
+              },
+              {
+                "index": 1034,
+                "name": "SceneView.PrepareRepaint",
+                "ms": 0.1428,
+                "children": 10
+              },
+              {
+                "index": 1054,
+                "name": "SceneView.Render",
+                "ms": 2.7086,
+                "children": 1
+              },
+              {
+                "index": 1055,
+                "name": "UIR.DrawChain",
+                "ms": 2.6942,
+                "children": 29
+              },
+              {
+                "index": 1057,
+                "name": "IMGUIContainer",
+                "ms": 0.7846,
+                "children": 8
+              },
+              {
+                "index": 1065,
+                "name": "OnGUI",
+                "ms": 0.1207,
+                "children": 16
+              },
+              {
+                "index": 1091,
+                "name": "OnGUI",
+                "ms": 0.5189,
+                "children": 93
+              },
+              {
+                "index": 1237,
+                "name": "IMGUIContainer",
+                "ms": 1.6797,
+                "children": 8
+              },
+              {
+                "index": 1245,
+                "name": "OnGUI",
+                "ms": 0.2023,
+                "children": 17
+              },
+              {
+                "index": 1272,
+                "name": "OnGUI",
+                "ms": 1.4066,
+                "children": 48
+              },
+              {
+                "index": 1302,
+                "name": "SceneCamera.Render",
+                "ms": 0.9573,
+                "children": 13
+              },
+              {
+                "index": 1312,
+                "name": "UnityEngine.CoreModule.dll!UnityEngine.Rendering::RenderPipelineManager.DoRenderLoop_Internal() [Invoke]",
+                "ms": 0.889,
+                "children": 1
+              },
+              {
+                "index": 1313,
+                "name": "Inl_UniversalRenderTotal",
+                "ms": 0.8563,
+                "children": 10
+              },
+              {
+                "index": 1323,
+                "name": "Inl_UniversalRenderPipeline.RenderSingleCameraInternal: SceneCamera",
+                "ms": 0.6155,
+                "children": 10
+              },
+              {
+                "index": 1327,
+                "name": "CullScriptable",
+                "ms": 0.1377,
+                "children": 11
+              },
+              {
+                "index": 1406,
+                "name": "Inl_RecordRenderGraph",
+                "ms": 0.1399,
+                "children": 2
+              },
+              {
+                "index": 1408,
+                "name": "Inl_On Record Render Graph",
+                "ms": 0.1266,
+                "children": 1
+              },
+              {
+                "index": 1412,
+                "name": "Inl_ExecuteRenderGraph",
+                "ms": 0.1235,
+                "children": 29
+              },
+              {
+                "index": 1446,
+                "name": "Inl_ScriptableRenderContext.Submit",
+                "ms": 0.1326,
+                "children": 6
+              },
+              {
+                "index": 1451,
+                "name": "UniversalRenderPipeline.RenderSingleCameraInternal: SceneCamera",
+                "ms": 0.1157,
+                "children": 3
+              },
+              {
+                "index": 1454,
+                "name": "ExecuteRenderGraph",
+                "ms": 0.1066,
+                "children": 9
+              },
+              {
+                "index": 1658,
+                "name": "GameView.Paint",
+                "ms": 5.475,
+                "children": 3
+              },
+              {
+                "index": 1660,
+                "name": "Semaphore.WaitForSignal",
+                "ms": 0.7063,
+                "children": 0
+              },
+              {
+                "index": 1661,
+                "name": "GameView.Repaint",
+                "ms": 4.0847,
+                "children": 5
+              },
+              {
+                "index": 1664,
+                "name": "UnityEngine.IMGUIModule.dll!UnityEngine::GUIUtility.ProcessEvent() [Invoke]",
+                "ms": 4.0478,
+                "children": 3
+              },
+              {
+                "index": 1666,
+                "name": "UIElementsUtility.DoDispatch(Repaint Event)",
+                "ms": 4.0152,
+                "children": 2
+              },
+              {
+                "index": 1667,
+                "name": "GameView.PrepareRepaint",
+                "ms": 0.1044,
+                "children": 10
+              },
+              {
+                "index": 1687,
+                "name": "GameView.Render",
+                "ms": 3.9024,
+                "children": 1
+              },
+              {
+                "index": 1688,
+                "name": "UIR.DrawChain",
+                "ms": 3.8924,
+                "children": 3
+              },
+              {
+                "index": 1690,
+                "name": "IMGUIContainer",
+                "ms": 3.85629988,
+                "children": 8
+              },
+              {
+                "index": 1698,
+                "name": "OnGUI",
+                "ms": 0.6508,
+                "children": 198
+              },
+              {
+                "index": 1906,
+                "name": "OnGUI",
+                "ms": 3.0219,
+                "children": 466
+              },
+              {
+                "index": 2335,
+                "name": "PlayerLoop",
+                "ms": 0.8923,
+                "children": 1
+              },
+              {
+                "index": 2336,
+                "name": "RenderPlayModeViewCameras",
+                "ms": 0.8921,
+                "children": 11
+              },
+              {
+                "index": 2345,
+                "name": "UnityEngine.CoreModule.dll!UnityEngine.Rendering::RenderPipelineManager.DoRenderLoop_Internal() [Invoke]",
+                "ms": 0.8484,
+                "children": 1
+              },
+              {
+                "index": 2346,
+                "name": "Inl_UniversalRenderTotal",
+                "ms": 0.8137,
+                "children": 4
+              },
+              {
+                "index": 2349,
+                "name": "Inl_RenderCameraStack",
+                "ms": 0.7888,
+                "children": 7
+              },
+              {
+                "index": 2356,
+                "name": "Inl_UniversalRenderPipeline.RenderSingleCameraInternal: Camera",
+                "ms": 0.5287,
+                "children": 10
+              },
+              {
+                "index": 2412,
+                "name": "Inl_RecordRenderGraph",
+                "ms": 0.1598,
+                "children": 2
+              },
+              {
+                "index": 2414,
+                "name": "Inl_On Record Render Graph",
+                "ms": 0.151,
+                "children": 1
+              },
+              {
+                "index": 2418,
+                "name": "Inl_ExecuteRenderGraph",
+                "ms": 0.1313,
+                "children": 29
+              },
+              {
+                "index": 2451,
+                "name": "Inl_ScriptableRenderContext.Submit",
+                "ms": 0.144,
+                "children": 4
+              },
+              {
+                "index": 2454,
+                "name": "UniversalRenderPipeline.RenderSingleCameraInternal: Camera",
+                "ms": 0.1307,
+                "children": 3
+              },
+              {
+                "index": 2457,
+                "name": "ExecuteRenderGraph",
+                "ms": 0.1194,
+                "children": 9
+              },
+              {
+                "index": 2509,
+                "name": "EditorResources.Load",
+                "ms": 0.1065,
+                "children": 2
+              },
+              {
+                "index": 2654,
+                "name": "Profiler.IntegrateSessionData",
+                "ms": 0.107599996,
+                "children": 2
+              },
+              {
+                "index": 2709,
+                "name": "Profiler.FlushCounters",
+                "ms": 0.8454,
+                "children": 4
+              },
+              {
+                "index": 2819,
+                "name": "Profiler.FlushMemoryCounters",
+                "ms": 0.8232,
+                "children": 34
+              }
+            ]
+          },
+          {
+            "frame": 284876,
+            "ms": 136.394,
+            "samples": [
+              {
+                "index": 0,
+                "name": "Main Thread",
+                "ms": 136.394,
+                "children": 3
+              },
+              {
+                "index": 1,
+                "name": "EditorLoop",
+                "ms": 135.5389,
+                "children": 3
+              },
+              {
+                "index": 2,
+                "name": "Application.Message",
+                "ms": 107.5716,
+                "children": 8
+              },
+              {
+                "index": 11,
+                "name": "Application.Tick",
+                "ms": 15.9349,
+                "children": 17
+              },
+              {
+                "index": 21,
+                "name": "Scheduler.Tick",
+                "ms": 0.1074,
+                "children": 1
+              },
+              {
+                "index": 22,
+                "name": "UnityEditor.UIElementsModule.dll!UnityEditor::RetainedMode.UpdateSchedulers() [Invoke]",
+                "ms": 0.1058,
+                "children": 8
+              },
+              {
+                "index": 111,
+                "name": "Application.TickSceneTracker",
+                "ms": 4.1338,
+                "children": 3
+              },
+              {
+                "index": 120,
+                "name": "UnityEditor.CoreModule.dll!UnityEditor::EditorApplication.Internal_CallUpdateFunctions() [Invoke]",
+                "ms": 4.0849,
+                "children": 33
+              },
+              {
+                "index": 127,
+                "name": "EditorApplication.update: DialogueVerificationTemp.Tick",
+                "ms": 0.1241,
+                "children": 12
+              },
+              {
+                "index": 146,
+                "name": "EditorApplication.update: Locus.LocusBridge.PumpMainThreadQueue",
+                "ms": 1.268,
+                "children": 10
+              },
+              {
+                "index": 166,
+                "name": "EditorApplication.update: YokiFrame.YokiFrameEditorFileBridgePump.OnEditorUpdate",
+                "ms": 2.3567,
+                "children": 1072
+              },
+              {
+                "index": 1243,
+                "name": "EditorApplication.update: UnityEditor.LevelPlay.LevelPlayInstallMenuItem.UpdateMenuItem",
+                "ms": 0.131599993,
+                "children": 48
+              },
+              {
+                "index": 1363,
+                "name": "Application.UpdateScene",
+                "ms": 11.5414,
+                "children": 1
+              },
+              {
+                "index": 1364,
+                "name": "UpdateSceneIfNeeded",
+                "ms": 11.5401,
+                "children": 2
+              },
+              {
+                "index": 1366,
+                "name": "UpdateScene",
+                "ms": 11.537,
+                "children": 3
+              },
+              {
+                "index": 1367,
+                "name": "PlayerLoop",
+                "ms": 1.0124,
+                "children": 1
+              },
+              {
+                "index": 1368,
+                "name": "UpdateScene",
+                "ms": 1.0123,
+                "children": 256
+              },
+              {
+                "index": 1904,
+                "name": "Update.ScriptRunBehaviourUpdate",
+                "ms": 0.1863,
+                "children": 1
+              },
+              {
+                "index": 1905,
+                "name": "BehaviourUpdate",
+                "ms": 0.1856,
+                "children": 12
+              },
+              {
+                "index": 2041,
+                "name": "PostLateUpdate.PlayerUpdateCanvases",
+                "ms": 0.144,
+                "children": 3
+              },
+              {
+                "index": 2044,
+                "name": "UIEvents.WillRenderCanvases",
+                "ms": 0.1377,
+                "children": 1
+              },
+              {
+                "index": 2045,
+                "name": "UGUI.Rendering.UpdateBatches",
+                "ms": 0.1376,
+                "children": 8
+              },
+              {
+                "index": 2047,
+                "name": "UnityEngine.UIModule.dll!UnityEngine::Canvas.SendWillRenderCanvases() [Invoke]",
+                "ms": 0.1217,
+                "children": 2
+              },
+              {
+                "index": 2052,
+                "name": "Render",
+                "ms": 0.1014,
+                "children": 3
+              },
+              {
+                "index": 2127,
+                "name": "GUIView.RepaintAll.PlayerLoopController",
+                "ms": 10.4272995,
+                "children": 2
+              },
+              {
+                "index": 2128,
+                "name": "SceneView.Paint",
+                "ms": 5.0584,
+                "children": 2
+              },
+              {
+                "index": 2130,
+                "name": "SceneView.Repaint",
+                "ms": 3.5006,
+                "children": 5
+              },
+              {
+                "index": 2133,
+                "name": "UnityEngine.IMGUIModule.dll!UnityEngine::GUIUtility.ProcessEvent() [Invoke]",
+                "ms": 3.4637,
+                "children": 3
+              },
+              {
+                "index": 2135,
+                "name": "UIElementsUtility.DoDispatch(Repaint Event)",
+                "ms": 3.4319,
+                "children": 2
+              },
+              {
+                "index": 2136,
+                "name": "SceneView.PrepareRepaint",
+                "ms": 0.1162,
+                "children": 10
+              },
+              {
+                "index": 2156,
+                "name": "SceneView.Render",
+                "ms": 3.3078,
+                "children": 1
+              },
+              {
+                "index": 2157,
+                "name": "UIR.DrawChain",
+                "ms": 3.29449987,
+                "children": 29
+              },
+              {
+                "index": 2159,
+                "name": "IMGUIContainer",
+                "ms": 0.8592,
+                "children": 8
+              },
+              {
+                "index": 2167,
+                "name": "OnGUI",
+                "ms": 0.1397,
+                "children": 16
+              },
+              {
+                "index": 2193,
+                "name": "OnGUI",
+                "ms": 0.5697,
+                "children": 93
+              },
+              {
+                "index": 2339,
+                "name": "IMGUIContainer",
+                "ms": 2.1401,
+                "children": 8
+              },
+              {
+                "index": 2347,
+                "name": "OnGUI",
+                "ms": 0.226,
+                "children": 17
+              },
+              {
+                "index": 2374,
+                "name": "OnGUI",
+                "ms": 1.8161,
+                "children": 48
+              },
+              {
+                "index": 2404,
+                "name": "SceneCamera.Render",
+                "ms": 1.1544,
+                "children": 13
+              },
+              {
+                "index": 2414,
+                "name": "UnityEngine.CoreModule.dll!UnityEngine.Rendering::RenderPipelineManager.DoRenderLoop_Internal() [Invoke]",
+                "ms": 1.0631,
+                "children": 1
+              },
+              {
+                "index": 2415,
+                "name": "Inl_UniversalRenderTotal",
+                "ms": 1.025,
+                "children": 10
+              },
+              {
+                "index": 2425,
+                "name": "Inl_UniversalRenderPipeline.RenderSingleCameraInternal: SceneCamera",
+                "ms": 0.7223,
+                "children": 10
+              },
+              {
+                "index": 2429,
+                "name": "CullScriptable",
+                "ms": 0.1468,
+                "children": 11
+              },
+              {
+                "index": 2498,
+                "name": "Inl_RecordRenderGraph",
+                "ms": 0.1534,
+                "children": 2
+              },
+              {
+                "index": 2500,
+                "name": "Inl_On Record Render Graph",
+                "ms": 0.1399,
+                "children": 1
+              },
+              {
+                "index": 2504,
+                "name": "Inl_ExecuteRenderGraph",
+                "ms": 0.15,
+                "children": 29
+              },
+              {
+                "index": 2538,
+                "name": "Inl_ScriptableRenderContext.Submit",
+                "ms": 0.1644,
+                "children": 6
+              },
+              {
+                "index": 2543,
+                "name": "UniversalRenderPipeline.RenderSingleCameraInternal: SceneCamera",
+                "ms": 0.1427,
+                "children": 3
+              },
+              {
+                "index": 2546,
+                "name": "ExecuteRenderGraph",
+                "ms": 0.1325,
+                "children": 9
+              },
+              {
+                "index": 2775,
+                "name": "GameView.Paint",
+                "ms": 5.3597,
+                "children": 3
+              },
+              {
+                "index": 2778,
+                "name": "GameView.Repaint",
+                "ms": 3.5262,
+                "children": 5
+              },
+              {
+                "index": 2781,
+                "name": "UnityEngine.IMGUIModule.dll!UnityEngine::GUIUtility.ProcessEvent() [Invoke]",
+                "ms": 3.4736,
+                "children": 3
+              },
+              {
+                "index": 2783,
+                "name": "UIElementsUtility.DoDispatch(Repaint Event)",
+                "ms": 3.4323,
+                "children": 2
+              },
+              {
+                "index": 2784,
+                "name": "GameView.PrepareRepaint",
+                "ms": 0.1165,
+                "children": 10
+              },
+              {
+                "index": 2804,
+                "name": "GameView.Render",
+                "ms": 3.3076,
+                "children": 1
+              },
+              {
+                "index": 2805,
+                "name": "UIR.DrawChain",
+                "ms": 3.2972,
+                "children": 3
+              },
+              {
+                "index": 2807,
+                "name": "IMGUIContainer",
+                "ms": 3.2632,
+                "children": 8
+              },
+              {
+                "index": 2815,
+                "name": "OnGUI",
+                "ms": 0.5551,
+                "children": 198
+              },
+              {
+                "index": 3023,
+                "name": "OnGUI",
+                "ms": 2.5453,
+                "children": 466
+              },
+              {
+                "index": 3452,
+                "name": "PlayerLoop",
+                "ms": 0.8375,
+                "children": 1
+              },
+              {
+                "index": 3453,
+                "name": "RenderPlayModeViewCameras",
+                "ms": 0.837099969,
+                "children": 11
+              },
+              {
+                "index": 3462,
+                "name": "UnityEngine.CoreModule.dll!UnityEngine.Rendering::RenderPipelineManager.DoRenderLoop_Internal() [Invoke]",
+                "ms": 0.7823,
+                "children": 1
+              },
+              {
+                "index": 3463,
+                "name": "Inl_UniversalRenderTotal",
+                "ms": 0.7484,
+                "children": 4
+              },
+              {
+                "index": 3466,
+                "name": "Inl_RenderCameraStack",
+                "ms": 0.7175,
+                "children": 7
+              },
+              {
+                "index": 3473,
+                "name": "Inl_UniversalRenderPipeline.RenderSingleCameraInternal: Camera",
+                "ms": 0.4619,
+                "children": 10
+              },
+              {
+                "index": 3521,
+                "name": "Inl_RecordRenderGraph",
+                "ms": 0.1374,
+                "children": 2
+              },
+              {
+                "index": 3523,
+                "name": "Inl_On Record Render Graph",
+                "ms": 0.1285,
+                "children": 1
+              },
+              {
+                "index": 3527,
+                "name": "Inl_ExecuteRenderGraph",
+                "ms": 0.1132,
+                "children": 29
+              },
+              {
+                "index": 3560,
+                "name": "Inl_ScriptableRenderContext.Submit",
+                "ms": 0.1417,
+                "children": 4
+              },
+              {
+                "index": 3563,
+                "name": "UniversalRenderPipeline.RenderSingleCameraInternal: Camera",
+                "ms": 0.1284,
+                "children": 3
+              },
+              {
+                "index": 3566,
+                "name": "ExecuteRenderGraph",
+                "ms": 0.1165,
+                "children": 9
+              },
+              {
+                "index": 3761,
+                "name": "Profiler.IntegrateSessionData",
+                "ms": 0.1208,
+                "children": 2
+              },
+              {
+                "index": 3762,
+                "name": "Profiler.AddFrameDataAndTransferOwnership",
+                "ms": 0.11,
+                "children": 4
+              },
+              {
+                "index": 3816,
+                "name": "Profiler.FlushCounters",
+                "ms": 0.7706,
+                "children": 4
+              },
+              {
+                "index": 3926,
+                "name": "Profiler.FlushMemoryCounters",
+                "ms": 0.7479,
+                "children": 34
+              }
+            ]
+          },
+          {
+            "frame": 285004,
+            "ms": 123.317,
+            "samples": [
+              {
+                "index": 0,
+                "name": "Main Thread",
+                "ms": 123.317,
+                "children": 3
+              },
+              {
+                "index": 1,
+                "name": "EditorLoop",
+                "ms": 122.3696,
+                "children": 3
+              },
+              {
+                "index": 2,
+                "name": "Application.Message",
+                "ms": 102.171196,
+                "children": 7
+              },
+              {
+                "index": 10,
+                "name": "Application.Tick",
+                "ms": 12.4671,
+                "children": 20
+              },
+              {
+                "index": 16,
+                "name": "Scheduler.Tick",
+                "ms": 0.1234,
+                "children": 1
+              },
+              {
+                "index": 17,
+                "name": "UnityEditor.UIElementsModule.dll!UnityEditor::RetainedMode.UpdateSchedulers() [Invoke]",
+                "ms": 0.117,
+                "children": 8
+              },
+              {
+                "index": 104,
+                "name": "Application.TickSceneTracker",
+                "ms": 0.6532,
+                "children": 3
+              },
+              {
+                "index": 113,
+                "name": "UnityEditor.CoreModule.dll!UnityEditor::EditorApplication.Internal_CallUpdateFunctions() [Invoke]",
+                "ms": 0.5937,
+                "children": 33
+              },
+              {
+                "index": 120,
+                "name": "EditorApplication.update: DialogueVerificationTemp.Tick",
+                "ms": 0.1299,
+                "children": 12
+              },
+              {
+                "index": 157,
+                "name": "EditorApplication.update: UnityEditor.LevelPlay.LevelPlayInstallMenuItem.UpdateMenuItem",
+                "ms": 0.1384,
+                "children": 48
+              },
+              {
+                "index": 296,
+                "name": "Application.UpdateScene",
+                "ms": 11.4955,
+                "children": 1
+              },
+              {
+                "index": 297,
+                "name": "UpdateSceneIfNeeded",
+                "ms": 11.4945,
+                "children": 2
+              },
+              {
+                "index": 299,
+                "name": "UpdateScene",
+                "ms": 11.4914,
+                "children": 3
+              },
+              {
+                "index": 300,
+                "name": "PlayerLoop",
+                "ms": 0.957,
+                "children": 1
+              },
+              {
+                "index": 301,
+                "name": "UpdateScene",
+                "ms": 0.9569,
+                "children": 239
+              },
+              {
+                "index": 783,
+                "name": "Update.ScriptRunBehaviourUpdate",
+                "ms": 0.1879,
+                "children": 1
+              },
+              {
+                "index": 784,
+                "name": "BehaviourUpdate",
+                "ms": 0.1869,
+                "children": 12
+              },
+              {
+                "index": 920,
+                "name": "PostLateUpdate.PlayerUpdateCanvases",
+                "ms": 0.1566,
+                "children": 3
+              },
+              {
+                "index": 923,
+                "name": "UIEvents.WillRenderCanvases",
+                "ms": 0.1518,
+                "children": 1
+              },
+              {
+                "index": 924,
+                "name": "UGUI.Rendering.UpdateBatches",
+                "ms": 0.1514,
+                "children": 8
+              },
+              {
+                "index": 926,
+                "name": "UnityEngine.UIModule.dll!UnityEngine::Canvas.SendWillRenderCanvases() [Invoke]",
+                "ms": 0.1369,
+                "children": 2
+              },
+              {
+                "index": 931,
+                "name": "Render",
+                "ms": 0.1145,
+                "children": 3
+              },
+              {
+                "index": 932,
+                "name": "ClipperRegistry.Cull",
+                "ms": 0.1131,
+                "children": 0
+              },
+              {
+                "index": 1006,
+                "name": "GUIView.RepaintAll.PlayerLoopController",
+                "ms": 10.3451,
+                "children": 2
+              },
+              {
+                "index": 1007,
+                "name": "SceneView.Paint",
+                "ms": 4.7212,
+                "children": 2
+              },
+              {
+                "index": 1009,
+                "name": "SceneView.Repaint",
+                "ms": 3.5547,
+                "children": 5
+              },
+              {
+                "index": 1012,
+                "name": "UnityEngine.IMGUIModule.dll!UnityEngine::GUIUtility.ProcessEvent() [Invoke]",
+                "ms": 3.5177,
+                "children": 3
+              },
+              {
+                "index": 1014,
+                "name": "UIElementsUtility.DoDispatch(Repaint Event)",
+                "ms": 3.4864,
+                "children": 2
+              },
+              {
+                "index": 1015,
+                "name": "SceneView.PrepareRepaint",
+                "ms": 0.1258,
+                "children": 10
+              },
+              {
+                "index": 1035,
+                "name": "SceneView.Render",
+                "ms": 3.3525,
+                "children": 1
+              },
+              {
+                "index": 1036,
+                "name": "UIR.DrawChain",
+                "ms": 3.3362,
+                "children": 29
+              },
+              {
+                "index": 1038,
+                "name": "IMGUIContainer",
+                "ms": 0.8454,
+                "children": 8
+              },
+              {
+                "index": 1046,
+                "name": "OnGUI",
+                "ms": 0.1407,
+                "children": 16
+              },
+              {
+                "index": 1072,
+                "name": "OnGUI",
+                "ms": 0.5612,
+                "children": 93
+              },
+              {
+                "index": 1218,
+                "name": "IMGUIContainer",
+                "ms": 2.1812,
+                "children": 8
+              },
+              {
+                "index": 1226,
+                "name": "OnGUI",
+                "ms": 0.3279,
+                "children": 17
+              },
+              {
+                "index": 1253,
+                "name": "OnGUI",
+                "ms": 1.7613,
+                "children": 48
+              },
+              {
+                "index": 1283,
+                "name": "SceneCamera.Render",
+                "ms": 1.2123,
+                "children": 13
+              },
+              {
+                "index": 1293,
+                "name": "UnityEngine.CoreModule.dll!UnityEngine.Rendering::RenderPipelineManager.DoRenderLoop_Internal() [Invoke]",
+                "ms": 1.1175,
+                "children": 1
+              },
+              {
+                "index": 1294,
+                "name": "Inl_UniversalRenderTotal",
+                "ms": 1.0752,
+                "children": 10
+              },
+              {
+                "index": 1304,
+                "name": "Inl_UniversalRenderPipeline.RenderSingleCameraInternal: SceneCamera",
+                "ms": 0.7613,
+                "children": 10
+              },
+              {
+                "index": 1308,
+                "name": "CullScriptable",
+                "ms": 0.1407,
+                "children": 11
+              },
+              {
+                "index": 1393,
+                "name": "Inl_RecordRenderGraph",
+                "ms": 0.1853,
+                "children": 2
+              },
+              {
+                "index": 1395,
+                "name": "Inl_On Record Render Graph",
+                "ms": 0.1655,
+                "children": 1
+              },
+              {
+                "index": 1399,
+                "name": "Inl_ExecuteRenderGraph",
+                "ms": 0.141,
+                "children": 29
+              },
+              {
+                "index": 1433,
+                "name": "Inl_ScriptableRenderContext.Submit",
+                "ms": 0.1615,
+                "children": 6
+              },
+              {
+                "index": 1438,
+                "name": "UniversalRenderPipeline.RenderSingleCameraInternal: SceneCamera",
+                "ms": 0.138,
+                "children": 3
+              },
+              {
+                "index": 1441,
+                "name": "ExecuteRenderGraph",
+                "ms": 0.1273,
+                "children": 9
+              },
+              {
+                "index": 1665,
+                "name": "GameView.Paint",
+                "ms": 5.6143,
+                "children": 3
+              },
+              {
+                "index": 1667,
+                "name": "Semaphore.WaitForSignal",
+                "ms": 0.6812,
+                "children": 0
+              },
+              {
+                "index": 1668,
+                "name": "GameView.Repaint",
+                "ms": 3.9688,
+                "children": 5
+              },
+              {
+                "index": 1671,
+                "name": "UnityEngine.IMGUIModule.dll!UnityEngine::GUIUtility.ProcessEvent() [Invoke]",
+                "ms": 3.9328,
+                "children": 3
+              },
+              {
+                "index": 1673,
+                "name": "UIElementsUtility.DoDispatch(Repaint Event)",
+                "ms": 3.9035,
+                "children": 2
+              },
+              {
+                "index": 1674,
+                "name": "GameView.PrepareRepaint",
+                "ms": 0.1007,
+                "children": 10
+              },
+              {
+                "index": 1694,
+                "name": "GameView.Render",
+                "ms": 3.7959,
+                "children": 1
+              },
+              {
+                "index": 1695,
+                "name": "UIR.DrawChain",
+                "ms": 3.7867,
+                "children": 3
+              },
+              {
+                "index": 1697,
+                "name": "IMGUIContainer",
+                "ms": 3.7596,
+                "children": 8
+              },
+              {
+                "index": 1705,
+                "name": "OnGUI",
+                "ms": 0.6227,
+                "children": 198
+              },
+              {
+                "index": 1913,
+                "name": "OnGUI",
+                "ms": 2.9913,
+                "children": 466
+              },
+              {
+                "index": 2342,
+                "name": "PlayerLoop",
+                "ms": 0.9436,
+                "children": 1
+              },
+              {
+                "index": 2343,
+                "name": "RenderPlayModeViewCameras",
+                "ms": 0.9433,
+                "children": 11
+              },
+              {
+                "index": 2352,
+                "name": "UnityEngine.CoreModule.dll!UnityEngine.Rendering::RenderPipelineManager.DoRenderLoop_Internal() [Invoke]",
+                "ms": 0.8896,
+                "children": 1
+              },
+              {
+                "index": 2353,
+                "name": "Inl_UniversalRenderTotal",
+                "ms": 0.8528,
+                "children": 4
+              },
+              {
+                "index": 2356,
+                "name": "Inl_RenderCameraStack",
+                "ms": 0.8234,
+                "children": 7
+              },
+              {
+                "index": 2363,
+                "name": "Inl_UniversalRenderPipeline.RenderSingleCameraInternal: Camera",
+                "ms": 0.5547,
+                "children": 10
+              },
+              {
+                "index": 2367,
+                "name": "CullScriptable",
+                "ms": 0.1012,
+                "children": 11
+              },
+              {
+                "index": 2440,
+                "name": "Inl_RecordRenderGraph",
+                "ms": 0.1615,
+                "children": 2
+              },
+              {
+                "index": 2442,
+                "name": "Inl_On Record Render Graph",
+                "ms": 0.1507,
+                "children": 1
+              },
+              {
+                "index": 2446,
+                "name": "Inl_ExecuteRenderGraph",
+                "ms": 0.1278,
+                "children": 29
+              },
+              {
+                "index": 2479,
+                "name": "Inl_ScriptableRenderContext.Submit",
+                "ms": 0.1434,
+                "children": 4
+              },
+              {
+                "index": 2482,
+                "name": "UniversalRenderPipeline.RenderSingleCameraInternal: Camera",
+                "ms": 0.1318,
+                "children": 3
+              },
+              {
+                "index": 2485,
+                "name": "ExecuteRenderGraph",
+                "ms": 0.121,
+                "children": 9
+              },
+              {
+                "index": 2663,
+                "name": "FlushDirty",
+                "ms": 0.1861,
+                "children": 11
+              },
+              {
+                "index": 2681,
+                "name": "Profiler.IntegrateSessionData",
+                "ms": 0.1064,
+                "children": 2
+              },
+              {
+                "index": 2736,
+                "name": "Profiler.FlushCounters",
+                "ms": 0.8685,
+                "children": 4
+              },
+              {
+                "index": 2846,
+                "name": "Profiler.FlushMemoryCounters",
+                "ms": 0.8493,
+                "children": 34
+              }
+            ]
+          },
+          {
+            "frame": 285005,
+            "ms": 139.9921,
+            "samples": [
+              {
+                "index": 0,
+                "name": "Main Thread",
+                "ms": 139.9921,
+                "children": 3
+              },
+              {
+                "index": 1,
+                "name": "EditorLoop",
+                "ms": 139.1666,
+                "children": 3
+              },
+              {
+                "index": 2,
+                "name": "Application.Message",
+                "ms": 114.3572,
+                "children": 9
+              },
+              {
+                "index": 12,
+                "name": "Application.Tick",
+                "ms": 17.2861,
+                "children": 20
+              },
+              {
+                "index": 22,
+                "name": "Scheduler.Tick",
+                "ms": 0.2025,
+                "children": 1
+              },
+              {
+                "index": 23,
+                "name": "UnityEditor.UIElementsModule.dll!UnityEditor::RetainedMode.UpdateSchedulers() [Invoke]",
+                "ms": 0.2001,
+                "children": 8
+              },
+              {
+                "index": 112,
+                "name": "Application.TickSceneTracker",
+                "ms": 5.1894,
+                "children": 3
+              },
+              {
+                "index": 121,
+                "name": "UnityEditor.CoreModule.dll!UnityEditor::EditorApplication.Internal_CallUpdateFunctions() [Invoke]",
+                "ms": 5.1411,
+                "children": 33
+              },
+              {
+                "index": 128,
+                "name": "EditorApplication.update: DialogueVerificationTemp.Tick",
+                "ms": 0.109,
+                "children": 12
+              },
+              {
+                "index": 147,
+                "name": "EditorApplication.update: Locus.LocusBridge.PumpMainThreadQueue",
+                "ms": 2.1816,
+                "children": 115
+              },
+              {
+                "index": 272,
+                "name": "EditorApplication.update: YokiFrame.YokiFrameEditorFileBridgePump.OnEditorUpdate",
+                "ms": 2.43,
+                "children": 1072
+              },
+              {
+                "index": 1349,
+                "name": "EditorApplication.update: UnityEditor.LevelPlay.LevelPlayInstallMenuItem.UpdateMenuItem",
+                "ms": 0.1084,
+                "children": 48
+              },
+              {
+                "index": 1516,
+                "name": "Application.UpdateScene",
+                "ms": 11.7358,
+                "children": 1
+              },
+              {
+                "index": 1517,
+                "name": "UpdateSceneIfNeeded",
+                "ms": 11.735,
+                "children": 2
+              },
+              {
+                "index": 1519,
+                "name": "UpdateScene",
+                "ms": 11.7322,
+                "children": 3
+              },
+              {
+                "index": 1520,
+                "name": "PlayerLoop",
+                "ms": 0.9574,
+                "children": 1
+              },
+              {
+                "index": 1521,
+                "name": "UpdateScene",
+                "ms": 0.9573,
+                "children": 256
+              },
+              {
+                "index": 2057,
+                "name": "Update.ScriptRunBehaviourUpdate",
+                "ms": 0.2104,
+                "children": 1
+              },
+              {
+                "index": 2058,
+                "name": "BehaviourUpdate",
+                "ms": 0.21,
+                "children": 12
+              },
+              {
+                "index": 2219,
+                "name": "PostLateUpdate.PlayerUpdateCanvases",
+                "ms": 0.144,
+                "children": 3
+              },
+              {
+                "index": 2222,
+                "name": "UIEvents.WillRenderCanvases",
+                "ms": 0.1391,
+                "children": 1
+              },
+              {
+                "index": 2223,
+                "name": "UGUI.Rendering.UpdateBatches",
+                "ms": 0.1388,
+                "children": 8
+              },
+              {
+                "index": 2225,
+                "name": "UnityEngine.UIModule.dll!UnityEngine::Canvas.SendWillRenderCanvases() [Invoke]",
+                "ms": 0.1251,
+                "children": 2
+              },
+              {
+                "index": 2230,
+                "name": "Render",
+                "ms": 0.1047,
+                "children": 3
+              },
+              {
+                "index": 2231,
+                "name": "ClipperRegistry.Cull",
+                "ms": 0.103199996,
+                "children": 0
+              },
+              {
+                "index": 2305,
+                "name": "GUIView.RepaintAll.PlayerLoopController",
+                "ms": 10.6912,
+                "children": 2
+              },
+              {
+                "index": 2306,
+                "name": "SceneView.Paint",
+                "ms": 5.52,
+                "children": 2
+              },
+              {
+                "index": 2308,
+                "name": "SceneView.Repaint",
+                "ms": 3.7217,
+                "children": 5
+              },
+              {
+                "index": 2311,
+                "name": "UnityEngine.IMGUIModule.dll!UnityEngine::GUIUtility.ProcessEvent() [Invoke]",
+                "ms": 3.6805,
+                "children": 3
+              },
+              {
+                "index": 2313,
+                "name": "UIElementsUtility.DoDispatch(Repaint Event)",
+                "ms": 3.6446,
+                "children": 2
+              },
+              {
+                "index": 2314,
+                "name": "SceneView.PrepareRepaint",
+                "ms": 0.1326,
+                "children": 10
+              },
+              {
+                "index": 2334,
+                "name": "SceneView.Render",
+                "ms": 3.5031,
+                "children": 1
+              },
+              {
+                "index": 2335,
+                "name": "UIR.DrawChain",
+                "ms": 3.4869,
+                "children": 29
+              },
+              {
+                "index": 2337,
+                "name": "IMGUIContainer",
+                "ms": 1.0023,
+                "children": 8
+              },
+              {
+                "index": 2342,
+                "name": "EditorResources.Load",
+                "ms": 0.1315,
+                "children": 2
+              },
+              {
+                "index": 2344,
+                "name": "AssetDatabase.GetGUIDFromAssetPathV2",
+                "ms": 0.1008,
+                "children": 0
+              },
+              {
+                "index": 2345,
+                "name": "OnGUI",
+                "ms": 0.1623,
+                "children": 16
+              },
+              {
+                "index": 2371,
+                "name": "OnGUI",
+                "ms": 0.5884,
+                "children": 93
+              },
+              {
+                "index": 2517,
+                "name": "IMGUIContainer",
+                "ms": 2.1896,
+                "children": 8
+              },
+              {
+                "index": 2525,
+                "name": "OnGUI",
+                "ms": 0.2582,
+                "children": 17
+              },
+              {
+                "index": 2552,
+                "name": "OnGUI",
+                "ms": 1.8337,
+                "children": 48
+              },
+              {
+                "index": 2582,
+                "name": "SceneCamera.Render",
+                "ms": 1.259,
+                "children": 13
+              },
+              {
+                "index": 2592,
+                "name": "UnityEngine.CoreModule.dll!UnityEngine.Rendering::RenderPipelineManager.DoRenderLoop_Internal() [Invoke]",
+                "ms": 1.1191,
+                "children": 1
+              },
+              {
+                "index": 2593,
+                "name": "Inl_UniversalRenderTotal",
+                "ms": 1.0776,
+                "children": 10
+              },
+              {
+                "index": 2603,
+                "name": "Inl_UniversalRenderPipeline.RenderSingleCameraInternal: SceneCamera",
+                "ms": 0.7734,
+                "children": 10
+              },
+              {
+                "index": 2607,
+                "name": "CullScriptable",
+                "ms": 0.1434,
+                "children": 11
+              },
+              {
+                "index": 2673,
+                "name": "Inl_RecordRenderGraph",
+                "ms": 0.2072,
+                "children": 2
+              },
+              {
+                "index": 2675,
+                "name": "Inl_On Record Render Graph",
+                "ms": 0.187,
+                "children": 1
+              },
+              {
+                "index": 2679,
+                "name": "Inl_ExecuteRenderGraph",
+                "ms": 0.1318,
+                "children": 29
+              },
+              {
+                "index": 2713,
+                "name": "Inl_ScriptableRenderContext.Submit",
+                "ms": 0.1578,
+                "children": 6
+              },
+              {
+                "index": 2718,
+                "name": "UniversalRenderPipeline.RenderSingleCameraInternal: SceneCamera",
+                "ms": 0.133,
+                "children": 3
+              },
+              {
+                "index": 2721,
+                "name": "ExecuteRenderGraph",
+                "ms": 0.1222,
+                "children": 9
+              },
+              {
+                "index": 2923,
+                "name": "GameView.Paint",
+                "ms": 5.162,
+                "children": 3
+              },
+              {
+                "index": 2925,
+                "name": "Semaphore.WaitForSignal",
+                "ms": 0.2345,
+                "children": 0
+              },
+              {
+                "index": 2926,
+                "name": "GameView.Repaint",
+                "ms": 3.5946,
+                "children": 5
+              },
+              {
+                "index": 2929,
+                "name": "UnityEngine.IMGUIModule.dll!UnityEngine::GUIUtility.ProcessEvent() [Invoke]",
+                "ms": 3.5651,
+                "children": 3
+              },
+              {
+                "index": 2931,
+                "name": "UIElementsUtility.DoDispatch(Repaint Event)",
+                "ms": 3.5377,
+                "children": 2
+              },
+              {
+                "index": 2952,
+                "name": "GameView.Render",
+                "ms": 3.4393,
+                "children": 1
+              },
+              {
+                "index": 2953,
+                "name": "UIR.DrawChain",
+                "ms": 3.4324,
+                "children": 3
+              },
+              {
+                "index": 2955,
+                "name": "IMGUIContainer",
+                "ms": 3.4069,
+                "children": 8
+              },
+              {
+                "index": 2963,
+                "name": "OnGUI",
+                "ms": 0.6614,
+                "children": 198
+              },
+              {
+                "index": 3165,
+                "name": "EditorResources.Load",
+                "ms": 0.111999996,
+                "children": 2
+              },
+              {
+                "index": 3171,
+                "name": "OnGUI",
+                "ms": 2.612,
+                "children": 466
+              },
+              {
+                "index": 3600,
+                "name": "PlayerLoop",
+                "ms": 0.7384,
+                "children": 1
+              },
+              {
+                "index": 3601,
+                "name": "RenderPlayModeViewCameras",
+                "ms": 0.7382,
+                "children": 11
+              },
+              {
+                "index": 3610,
+                "name": "UnityEngine.CoreModule.dll!UnityEngine.Rendering::RenderPipelineManager.DoRenderLoop_Internal() [Invoke]",
+                "ms": 0.6884,
+                "children": 1
+              },
+              {
+                "index": 3611,
+                "name": "Inl_UniversalRenderTotal",
+                "ms": 0.657499969,
+                "children": 4
+              },
+              {
+                "index": 3614,
+                "name": "Inl_RenderCameraStack",
+                "ms": 0.6318,
+                "children": 7
+              },
+              {
+                "index": 3621,
+                "name": "Inl_UniversalRenderPipeline.RenderSingleCameraInternal: Camera",
+                "ms": 0.4076,
+                "children": 10
+              },
+              {
+                "index": 3687,
+                "name": "Inl_RecordRenderGraph",
+                "ms": 0.1201,
+                "children": 2
+              },
+              {
+                "index": 3689,
+                "name": "Inl_On Record Render Graph",
+                "ms": 0.113,
+                "children": 1
+              },
+              {
+                "index": 3726,
+                "name": "Inl_ScriptableRenderContext.Submit",
+                "ms": 0.1204,
+                "children": 4
+              },
+              {
+                "index": 3729,
+                "name": "UniversalRenderPipeline.RenderSingleCameraInternal: Camera",
+                "ms": 0.1111,
+                "children": 3
+              },
+              {
+                "index": 3732,
+                "name": "ExecuteRenderGraph",
+                "ms": 0.1004,
+                "children": 9
+              },
+              {
+                "index": 3929,
+                "name": "Profiler.IntegrateSessionData",
+                "ms": 0.1016,
+                "children": 2
+              },
+              {
+                "index": 3984,
+                "name": "Profiler.FlushCounters",
+                "ms": 0.7411,
+                "children": 4
+              },
+              {
+                "index": 4094,
+                "name": "Profiler.FlushMemoryCounters",
+                "ms": 0.718,
+                "children": 34
+              }
+            ]
+          },
+          {
+            "frame": 285006,
+            "ms": 145.7253,
+            "samples": [
+              {
+                "index": 0,
+                "name": "Main Thread",
+                "ms": 145.7253,
+                "children": 3
+              },
+              {
+                "index": 1,
+                "name": "EditorLoop",
+                "ms": 144.7177,
+                "children": 3
+              },
+              {
+                "index": 2,
+                "name": "Application.Message",
+                "ms": 99.8064957,
+                "children": 5
+              },
+              {
+                "index": 7,
+                "name": "Application.Message.Timer",
+                "ms": 0.1343,
+                "children": 0
+              },
+              {
+                "index": 8,
+                "name": "Application.Tick",
+                "ms": 27.8093,
+                "children": 22
+              },
+              {
+                "index": 14,
+                "name": "Scheduler.Tick",
+                "ms": 0.2167,
+                "children": 1
+              },
+              {
+                "index": 15,
+                "name": "UnityEditor.UIElementsModule.dll!UnityEditor::RetainedMode.UpdateSchedulers() [Invoke]",
+                "ms": 0.2024,
+                "children": 8
+              },
+              {
+                "index": 73,
+                "name": "RepaintAllProfilerWindows",
+                "ms": 6.9978,
+                "children": 1
+              },
+              {
+                "index": 74,
+                "name": "UnityEditor.CoreModule.dll!UnityEditor::ProfilerWindow.RepaintAllProfilerWindows() [Invoke]",
+                "ms": 6.9946,
+                "children": 2
+              },
+              {
+                "index": 85,
+                "name": "Application.TickGlobalCallbacks",
+                "ms": 0.1608,
+                "children": 3
+              },
+              {
+                "index": 86,
+                "name": "tickGIInEditor.Invoke",
+                "ms": 0.1385,
+                "children": 1
+              },
+              {
+                "index": 87,
+                "name": "GI.UpdateScene",
+                "ms": 0.1376,
+                "children": 1
+              },
+              {
+                "index": 88,
+                "name": "GISceneManager.Update",
+                "ms": 0.1363,
+                "children": 8
+              },
+              {
+                "index": 106,
+                "name": "Application.TickSceneTracker",
+                "ms": 5.7618,
+                "children": 3
+              },
+              {
+                "index": 115,
+                "name": "UnityEditor.CoreModule.dll!UnityEditor::EditorApplication.Internal_CallUpdateFunctions() [Invoke]",
+                "ms": 5.6891,
+                "children": 33
+              },
+              {
+                "index": 116,
+                "name": "EditorApplication.update: UnityEditor.PackageManager.UI.Internal.ApplicationProxy.OnUpdate",
+                "ms": 0.1104,
+                "children": 5
+              },
+              {
+                "index": 122,
+                "name": "EditorApplication.update: DialogueVerificationTemp.Tick",
+                "ms": 0.3662,
+                "children": 12
+              },
+              {
+                "index": 159,
+                "name": "EditorApplication.update: UnityEditor.LevelPlay.LevelPlayInstallMenuItem.UpdateMenuItem",
+                "ms": 0.27,
+                "children": 48
+              },
+              {
+                "index": 262,
+                "name": "EditorApplication.update: MCPForUnity.Editor.Services.Transport.Transports.StdioBridgeHost.ProcessCommands",
+                "ms": 4.4262,
+                "children": 139
+              },
+              {
+                "index": 411,
+                "name": "EditorApplication.update: Locus.LocusEditorWindow.SyncOverlay",
+                "ms": 0.1732,
+                "children": 44
+              },
+              {
+                "index": 473,
+                "name": "Application.UpdateScene",
+                "ms": 14.4608,
+                "children": 1
+              },
+              {
+                "index": 474,
+                "name": "UpdateSceneIfNeeded",
+                "ms": 14.4602,
+                "children": 2
+              },
+              {
+                "index": 476,
+                "name": "UpdateScene",
+                "ms": 14.4572,
+                "children": 3
+              },
+              {
+                "index": 477,
+                "name": "PlayerLoop",
+                "ms": 2.5821,
+                "children": 1
+              },
+              {
+                "index": 478,
+                "name": "UpdateScene",
+                "ms": 2.582,
+                "children": 256
+              },
+              {
+                "index": 1014,
+                "name": "Update.ScriptRunBehaviourUpdate",
+                "ms": 0.4784,
+                "children": 1
+              },
+              {
+                "index": 1015,
+                "name": "BehaviourUpdate",
+                "ms": 0.4778,
+                "children": 12
+              },
+              {
+                "index": 1016,
+                "name": "UnityEngine.UI.dll!UnityEngine.EventSystems::EventSystem.Update() [Invoke]",
+                "ms": 0.1677,
+                "children": 0
+              },
+              {
+                "index": 1017,
+                "name": "Spotlight.GameFlow.UI.dll!Spotlight.GameFlow::MapSceneController.Update() [Invoke]",
+                "ms": 0.1223,
+                "children": 6
+              },
+              {
+                "index": 1031,
+                "name": "Spotlight.GameFlow.UI.dll!Spotlight.GameFlow::MapActionPointsView.Update() [Invoke]",
+                "ms": 0.1062,
+                "children": 7
+              },
+              {
+                "index": 1097,
+                "name": "PreLateUpdate.ScriptRunBehaviourLateUpdate",
+                "ms": 0.2958,
+                "children": 1
+              },
+              {
+                "index": 1098,
+                "name": "LateBehaviourUpdate",
+                "ms": 0.2955,
+                "children": 8
+              },
+              {
+                "index": 1106,
+                "name": "Unity.2D.Animation.Runtime.dll!UnityEngine.U2D.Animation::DeformationManagerUpdater.LateUpdate() [Invoke]",
+                "ms": 0.2146,
+                "children": 1
+              },
+              {
+                "index": 1107,
+                "name": "DeformationManager.LateUpdate",
+                "ms": 0.2106,
+                "children": 24
+              },
+              {
+                "index": 1151,
+                "name": "PostLateUpdate.PlayerUpdateCanvases",
+                "ms": 0.9513,
+                "children": 3
+              },
+              {
+                "index": 1154,
+                "name": "UIEvents.WillRenderCanvases",
+                "ms": 0.9476,
+                "children": 1
+              },
+              {
+                "index": 1155,
+                "name": "UGUI.Rendering.UpdateBatches",
+                "ms": 0.9473,
+                "children": 8
+              },
+              {
+                "index": 1157,
+                "name": "UnityEngine.UIModule.dll!UnityEngine::Canvas.SendWillRenderCanvases() [Invoke]",
+                "ms": 0.8942,
+                "children": 2
+              },
+              {
+                "index": 1162,
+                "name": "Render",
+                "ms": 0.8263,
+                "children": 3
+              },
+              {
+                "index": 1163,
+                "name": "ClipperRegistry.Cull",
+                "ms": 0.823,
+                "children": 0
+              },
+              {
+                "index": 1237,
+                "name": "GUIView.RepaintAll.PlayerLoopController",
+                "ms": 11.7718,
+                "children": 2
+              },
+              {
+                "index": 1238,
+                "name": "SceneView.Paint",
+                "ms": 4.3159,
+                "children": 2
+              },
+              {
+                "index": 1240,
+                "name": "SceneView.Repaint",
+                "ms": 3.4176,
+                "children": 5
+              },
+              {
+                "index": 1243,
+                "name": "UnityEngine.IMGUIModule.dll!UnityEngine::GUIUtility.ProcessEvent() [Invoke]",
+                "ms": 3.3802,
+                "children": 3
+              },
+              {
+                "index": 1245,
+                "name": "UIElementsUtility.DoDispatch(Repaint Event)",
+                "ms": 3.3502,
+                "children": 2
+              },
+              {
+                "index": 1246,
+                "name": "SceneView.PrepareRepaint",
+                "ms": 0.1221,
+                "children": 10
+              },
+              {
+                "index": 1266,
+                "name": "SceneView.Render",
+                "ms": 3.2199,
+                "children": 1
+              },
+              {
+                "index": 1267,
+                "name": "UIR.DrawChain",
+                "ms": 3.2045,
+                "children": 29
+              },
+              {
+                "index": 1269,
+                "name": "IMGUIContainer",
+                "ms": 0.8867,
+                "children": 8
+              },
+              {
+                "index": 1277,
+                "name": "OnGUI",
+                "ms": 0.1366,
+                "children": 16
+              },
+              {
+                "index": 1303,
+                "name": "OnGUI",
+                "ms": 0.6118,
+                "children": 93
+              },
+              {
+                "index": 1409,
+                "name": "EditorResources.Load",
+                "ms": 0.1072,
+                "children": 2
+              },
+              {
+                "index": 1449,
+                "name": "IMGUIContainer",
+                "ms": 2.0208,
+                "children": 8
+              },
+              {
+                "index": 1457,
+                "name": "OnGUI",
+                "ms": 0.2386,
+                "children": 17
+              },
+              {
+                "index": 1484,
+                "name": "OnGUI",
+                "ms": 1.6822,
+                "children": 48
+              },
+              {
+                "index": 1514,
+                "name": "SceneCamera.Render",
+                "ms": 1.164,
+                "children": 13
+              },
+              {
+                "index": 1524,
+                "name": "UnityEngine.CoreModule.dll!UnityEngine.Rendering::RenderPipelineManager.DoRenderLoop_Internal() [Invoke]",
+                "ms": 1.08009994,
+                "children": 1
+              },
+              {
+                "index": 1525,
+                "name": "Inl_UniversalRenderTotal",
+                "ms": 1.044,
+                "children": 10
+              },
+              {
+                "index": 1535,
+                "name": "Inl_UniversalRenderPipeline.RenderSingleCameraInternal: SceneCamera",
+                "ms": 0.7581,
+                "children": 10
+              },
+              {
+                "index": 1539,
+                "name": "CullScriptable",
+                "ms": 0.139,
+                "children": 11
+              },
+              {
+                "index": 1621,
+                "name": "Inl_RecordRenderGraph",
+                "ms": 0.1951,
+                "children": 2
+              },
+              {
+                "index": 1623,
+                "name": "Inl_On Record Render Graph",
+                "ms": 0.1758,
+                "children": 1
+              },
+              {
+                "index": 1627,
+                "name": "Inl_ExecuteRenderGraph",
+                "ms": 0.1535,
+                "children": 29
+              },
+              {
+                "index": 1661,
+                "name": "Inl_ScriptableRenderContext.Submit",
+                "ms": 0.149,
+                "children": 6
+              },
+              {
+                "index": 1666,
+                "name": "UniversalRenderPipeline.RenderSingleCameraInternal: SceneCamera",
+                "ms": 0.1308,
+                "children": 3
+              },
+              {
+                "index": 1669,
+                "name": "ExecuteRenderGraph",
+                "ms": 0.1208,
+                "children": 9
+              },
+              {
+                "index": 1898,
+                "name": "GameView.Paint",
+                "ms": 7.4455,
+                "children": 3
+              },
+              {
+                "index": 1900,
+                "name": "Semaphore.WaitForSignal",
+                "ms": 1.0721,
+                "children": 0
+              },
+              {
+                "index": 1901,
+                "name": "GameView.Repaint",
+                "ms": 5.8523,
+                "children": 5
+              },
+              {
+                "index": 1904,
+                "name": "UnityEngine.IMGUIModule.dll!UnityEngine::GUIUtility.ProcessEvent() [Invoke]",
+                "ms": 5.812,
+                "children": 3
+              },
+              {
+                "index": 1906,
+                "name": "UIElementsUtility.DoDispatch(Repaint Event)",
+                "ms": 5.7807,
+                "children": 2
+              },
+              {
+                "index": 1927,
+                "name": "GameView.Render",
+                "ms": 5.679,
+                "children": 1
+              },
+              {
+                "index": 1928,
+                "name": "UIR.DrawChain",
+                "ms": 5.6705,
+                "children": 3
+              },
+              {
+                "index": 1930,
+                "name": "IMGUIContainer",
+                "ms": 5.6371,
+                "children": 8
+              },
+              {
+                "index": 1938,
+                "name": "OnGUI",
+                "ms": 0.6604,
+                "children": 198
+              },
+              {
+                "index": 2146,
+                "name": "OnGUI",
+                "ms": 4.8285,
+                "children": 472
+              },
+              {
+                "index": 2575,
+                "name": "PlayerLoop",
+                "ms": 0.8907,
+                "children": 1
+              },
+              {
+                "index": 2576,
+                "name": "RenderPlayModeViewCameras",
+                "ms": 0.8905,
+                "children": 11
+              },
+              {
+                "index": 2585,
+                "name": "UnityEngine.CoreModule.dll!UnityEngine.Rendering::RenderPipelineManager.DoRenderLoop_Internal() [Invoke]",
+                "ms": 0.8439,
+                "children": 1
+              },
+              {
+                "index": 2586,
+                "name": "Inl_UniversalRenderTotal",
+                "ms": 0.8125,
+                "children": 4
+              },
+              {
+                "index": 2589,
+                "name": "Inl_RenderCameraStack",
+                "ms": 0.7852,
+                "children": 7
+              },
+              {
+                "index": 2596,
+                "name": "Inl_UniversalRenderPipeline.RenderSingleCameraInternal: Camera",
+                "ms": 0.5182,
+                "children": 10
+              },
+              {
+                "index": 2670,
+                "name": "Inl_RecordRenderGraph",
+                "ms": 0.1734,
+                "children": 2
+              },
+              {
+                "index": 2672,
+                "name": "Inl_On Record Render Graph",
+                "ms": 0.1636,
+                "children": 1
+              },
+              {
+                "index": 2676,
+                "name": "Inl_ExecuteRenderGraph",
+                "ms": 0.1364,
+                "children": 29
+              },
+              {
+                "index": 2709,
+                "name": "Inl_ScriptableRenderContext.Submit",
+                "ms": 0.1482,
+                "children": 4
+              },
+              {
+                "index": 2712,
+                "name": "UniversalRenderPipeline.RenderSingleCameraInternal: Camera",
+                "ms": 0.1353,
+                "children": 3
+              },
+              {
+                "index": 2715,
+                "name": "ExecuteRenderGraph",
+                "ms": 0.122,
+                "children": 9
+              },
+              {
+                "index": 2843,
+                "name": "UnityEngine.IMGUIModule.dll!UnityEngine::GUIStyle.GetMeshInfo() [Invoke]",
+                "ms": 0.213,
+                "children": 6
+              },
+              {
+                "index": 2847,
+                "name": "TextGenerator.GenerateText",
+                "ms": 0.1796,
+                "children": 1
+              },
+              {
+                "index": 2886,
+                "name": "UnityEngine.IMGUIModule.dll!UnityEngine::GUIStyle.GetMeshInfo() [Invoke]",
+                "ms": 1.2452,
+                "children": 7
+              },
+              {
+                "index": 2890,
+                "name": "TextGenerator.GenerateText",
+                "ms": 1.1879,
+                "children": 1
+              },
+              {
+                "index": 2891,
+                "name": "TextGenerator.Prepare",
+                "ms": 0.2233,
+                "children": 0
+              },
+              {
+                "index": 2933,
+                "name": "Profiler.IntegrateSessionData",
+                "ms": 0.127199993,
+                "children": 2
+              },
+              {
+                "index": 2934,
+                "name": "Profiler.AddFrameDataAndTransferOwnership",
+                "ms": 0.1144,
+                "children": 4
+              },
+              {
+                "index": 2988,
+                "name": "Profiler.FlushCounters",
+                "ms": 0.9391,
+                "children": 4
+              },
+              {
+                "index": 3098,
+                "name": "Profiler.FlushMemoryCounters",
+                "ms": 0.9177,
+                "children": 34
+              }
+            ]
+          },
+          {
+            "frame": 285007,
+            "ms": 140.9143,
+            "samples": [
+              {
+                "index": 0,
+                "name": "Main Thread",
+                "ms": 140.9143,
+                "children": 3
+              },
+              {
+                "index": 1,
+                "name": "EditorLoop",
+                "ms": 139.9072,
+                "children": 3
+              },
+              {
+                "index": 2,
+                "name": "Application.Message",
+                "ms": 101.1296,
+                "children": 9
+              },
+              {
+                "index": 12,
+                "name": "Application.Tick",
+                "ms": 25.1989,
+                "children": 19
+              },
+              {
+                "index": 22,
+                "name": "Scheduler.Tick",
+                "ms": 0.2279,
+                "children": 1
+              },
+              {
+                "index": 23,
+                "name": "UnityEditor.UIElementsModule.dll!UnityEditor::RetainedMode.UpdateSchedulers() [Invoke]",
+                "ms": 0.226,
+                "children": 8
+              },
+              {
+                "index": 112,
+                "name": "Application.TickSceneTracker",
+                "ms": 9.4661,
+                "children": 3
+              },
+              {
+                "index": 121,
+                "name": "UnityEditor.CoreModule.dll!UnityEditor::EditorApplication.Internal_CallUpdateFunctions() [Invoke]",
+                "ms": 9.3896,
+                "children": 33
+              },
+              {
+                "index": 128,
+                "name": "EditorApplication.update: DialogueVerificationTemp.Tick",
+                "ms": 0.2021,
+                "children": 12
+              },
+              {
+                "index": 147,
+                "name": "EditorApplication.update: Locus.LocusBridge.PumpMainThreadQueue",
+                "ms": 3.0329,
+                "children": 10
+              },
+              {
+                "index": 167,
+                "name": "EditorApplication.update: YokiFrame.YokiFrameEditorFileBridgePump.OnEditorUpdate",
+                "ms": 5.2741,
+                "children": 1072
+              },
+              {
+                "index": 1244,
+                "name": "EditorApplication.update: UnityEditor.LevelPlay.LevelPlayInstallMenuItem.UpdateMenuItem",
+                "ms": 0.5068,
+                "children": 48
+              },
+              {
+                "index": 1293,
+                "name": "EditorApplication.update: UnityEditor.InAppPurchasing.InAppPurchasingInstallMenuItem.UpdateMenuItem",
+                "ms": 0.1551,
+                "children": 48
+              },
+              {
+                "index": 1366,
+                "name": "Application.UpdateScene",
+                "ms": 15.1755,
+                "children": 1
+              },
+              {
+                "index": 1367,
+                "name": "UpdateSceneIfNeeded",
+                "ms": 15.1748,
+                "children": 2
+              },
+              {
+                "index": 1369,
+                "name": "UpdateScene",
+                "ms": 15.1721,
+                "children": 3
+              },
+              {
+                "index": 1370,
+                "name": "PlayerLoop",
+                "ms": 2.4241,
+                "children": 1
+              },
+              {
+                "index": 1371,
+                "name": "UpdateScene",
+                "ms": 2.424,
+                "children": 273
+              },
+              {
+                "index": 1372,
+                "name": "UnityEngine.IMGUIModule.dll!UnityEngine::GUIUtility.SetSkin() [Invoke]",
+                "ms": 0.1797,
+                "children": 1
+              },
+              {
+                "index": 1373,
+                "name": "EditorResources.Load",
+                "ms": 0.1517,
+                "children": 2
+              },
+              {
+                "index": 1374,
+                "name": "AssetDatabase.GetGUIDFromAssetPathV2",
+                "ms": 0.1068,
+                "children": 0
+              },
+              {
+                "index": 1961,
+                "name": "Update.ScriptRunBehaviourUpdate",
+                "ms": 0.5472,
+                "children": 1
+              },
+              {
+                "index": 1962,
+                "name": "BehaviourUpdate",
+                "ms": 0.5465,
+                "children": 12
+              },
+              {
+                "index": 1963,
+                "name": "UnityEngine.UI.dll!UnityEngine.EventSystems::EventSystem.Update() [Invoke]",
+                "ms": 0.1051,
+                "children": 0
+              },
+              {
+                "index": 1964,
+                "name": "Spotlight.GameFlow.UI.dll!Spotlight.GameFlow::MapSceneController.Update() [Invoke]",
+                "ms": 0.149199992,
+                "children": 6
+              },
+              {
+                "index": 1987,
+                "name": "Spotlight.GameFlow.UI.dll!Spotlight.GameFlow::MapActionDetailsView.Update() [Invoke]",
+                "ms": 0.1495,
+                "children": 25
+              },
+              {
+                "index": 2069,
+                "name": "PreLateUpdate.ScriptRunBehaviourLateUpdate",
+                "ms": 0.2712,
+                "children": 1
+              },
+              {
+                "index": 2070,
+                "name": "LateBehaviourUpdate",
+                "ms": 0.271,
+                "children": 8
+              },
+              {
+                "index": 2078,
+                "name": "Unity.2D.Animation.Runtime.dll!UnityEngine.U2D.Animation::DeformationManagerUpdater.LateUpdate() [Invoke]",
+                "ms": 0.1169,
+                "children": 1
+              },
+              {
+                "index": 2079,
+                "name": "DeformationManager.LateUpdate",
+                "ms": 0.1133,
+                "children": 24
+              },
+              {
+                "index": 2123,
+                "name": "PostLateUpdate.PlayerUpdateCanvases",
+                "ms": 0.3678,
+                "children": 3
+              },
+              {
+                "index": 2126,
+                "name": "UIEvents.WillRenderCanvases",
+                "ms": 0.364,
+                "children": 1
+              },
+              {
+                "index": 2127,
+                "name": "UGUI.Rendering.UpdateBatches",
+                "ms": 0.3638,
+                "children": 8
+              },
+              {
+                "index": 2129,
+                "name": "UnityEngine.UIModule.dll!UnityEngine::Canvas.SendWillRenderCanvases() [Invoke]",
+                "ms": 0.3174,
+                "children": 2
+              },
+              {
+                "index": 2134,
+                "name": "Render",
+                "ms": 0.2877,
+                "children": 3
+              },
+              {
+                "index": 2135,
+                "name": "ClipperRegistry.Cull",
+                "ms": 0.2858,
+                "children": 0
+              },
+              {
+                "index": 2209,
+                "name": "GUIView.RepaintAll.PlayerLoopController",
+                "ms": 12.6369,
+                "children": 2
+              },
+              {
+                "index": 2210,
+                "name": "SceneView.Paint",
+                "ms": 4.6964,
+                "children": 2
+              },
+              {
+                "index": 2212,
+                "name": "SceneView.Repaint",
+                "ms": 3.3963,
+                "children": 5
+              },
+              {
+                "index": 2215,
+                "name": "UnityEngine.IMGUIModule.dll!UnityEngine::GUIUtility.ProcessEvent() [Invoke]",
+                "ms": 3.3567,
+                "children": 3
+              },
+              {
+                "index": 2217,
+                "name": "UIElementsUtility.DoDispatch(Repaint Event)",
+                "ms": 3.3265,
+                "children": 2
+              },
+              {
+                "index": 2218,
+                "name": "SceneView.PrepareRepaint",
+                "ms": 0.1277,
+                "children": 10
+              },
+              {
+                "index": 2238,
+                "name": "SceneView.Render",
+                "ms": 3.1909,
+                "children": 1
+              },
+              {
+                "index": 2239,
+                "name": "UIR.DrawChain",
+                "ms": 3.1751,
+                "children": 29
+              },
+              {
+                "index": 2241,
+                "name": "IMGUIContainer",
+                "ms": 0.8283,
+                "children": 8
+              },
+              {
+                "index": 2249,
+                "name": "OnGUI",
+                "ms": 0.1552,
+                "children": 16
+              },
+              {
+                "index": 2275,
+                "name": "OnGUI",
+                "ms": 0.5353,
+                "children": 93
+              },
+              {
+                "index": 2421,
+                "name": "IMGUIContainer",
+                "ms": 2.0604,
+                "children": 8
+              },
+              {
+                "index": 2429,
+                "name": "OnGUI",
+                "ms": 0.233699992,
+                "children": 17
+              },
+              {
+                "index": 2456,
+                "name": "OnGUI",
+                "ms": 1.7438,
+                "children": 48
+              },
+              {
+                "index": 2486,
+                "name": "SceneCamera.Render",
+                "ms": 1.1386,
+                "children": 13
+              },
+              {
+                "index": 2496,
+                "name": "UnityEngine.CoreModule.dll!UnityEngine.Rendering::RenderPipelineManager.DoRenderLoop_Internal() [Invoke]",
+                "ms": 1.0541,
+                "children": 1
+              },
+              {
+                "index": 2497,
+                "name": "Inl_UniversalRenderTotal",
+                "ms": 1.0181,
+                "children": 10
+              },
+              {
+                "index": 2507,
+                "name": "Inl_UniversalRenderPipeline.RenderSingleCameraInternal: SceneCamera",
+                "ms": 0.7334,
+                "children": 10
+              },
+              {
+                "index": 2511,
+                "name": "CullScriptable",
+                "ms": 0.1468,
+                "children": 11
+              },
+              {
+                "index": 2595,
+                "name": "Inl_RecordRenderGraph",
+                "ms": 0.1832,
+                "children": 2
+              },
+              {
+                "index": 2597,
+                "name": "Inl_On Record Render Graph",
+                "ms": 0.1662,
+                "children": 1
+              },
+              {
+                "index": 2601,
+                "name": "Inl_ExecuteRenderGraph",
+                "ms": 0.1447,
+                "children": 29
+              },
+              {
+                "index": 2635,
+                "name": "Inl_ScriptableRenderContext.Submit",
+                "ms": 0.1508,
+                "children": 6
+              },
+              {
+                "index": 2640,
+                "name": "UniversalRenderPipeline.RenderSingleCameraInternal: SceneCamera",
+                "ms": 0.1315,
+                "children": 3
+              },
+              {
+                "index": 2643,
+                "name": "ExecuteRenderGraph",
+                "ms": 0.1202,
+                "children": 9
+              },
+              {
+                "index": 2871,
+                "name": "GameView.Paint",
+                "ms": 7.9314,
+                "children": 3
+              },
+              {
+                "index": 2873,
+                "name": "Semaphore.WaitForSignal",
+                "ms": 0.5969,
+                "children": 0
+              },
+              {
+                "index": 2874,
+                "name": "GameView.Repaint",
+                "ms": 6.5304,
+                "children": 5
+              },
+              {
+                "index": 2877,
+                "name": "UnityEngine.IMGUIModule.dll!UnityEngine::GUIUtility.ProcessEvent() [Invoke]",
+                "ms": 6.4943,
+                "children": 3
+              },
+              {
+                "index": 2879,
+                "name": "UIElementsUtility.DoDispatch(Repaint Event)",
+                "ms": 6.4667,
+                "children": 2
+              },
+              {
+                "index": 2900,
+                "name": "GameView.Render",
+                "ms": 6.3736,
+                "children": 1
+              },
+              {
+                "index": 2901,
+                "name": "UIR.DrawChain",
+                "ms": 6.366,
+                "children": 3
+              },
+              {
+                "index": 2903,
+                "name": "IMGUIContainer",
+                "ms": 6.3374,
+                "children": 8
+              },
+              {
+                "index": 2911,
+                "name": "OnGUI",
+                "ms": 1.9949,
+                "children": 198
+              },
+              {
+                "index": 3110,
+                "name": "UnityEngine.IMGUIModule.dll!UnityEngine::GUIStyle.GetDimensions() [Invoke]",
+                "ms": 1.36169994,
+                "children": 4
+              },
+              {
+                "index": 3114,
+                "name": "TextGenerator.GenerateText",
+                "ms": 1.3309,
+                "children": 1
+              },
+              {
+                "index": 3115,
+                "name": "TextGenerator.Prepare",
+                "ms": 0.2657,
+                "children": 0
+              },
+              {
+                "index": 3124,
+                "name": "OnGUI",
+                "ms": 4.1971,
+                "children": 470
+              },
+              {
+                "index": 3553,
+                "name": "PlayerLoop",
+                "ms": 0.9024,
+                "children": 1
+              },
+              {
+                "index": 3554,
+                "name": "RenderPlayModeViewCameras",
+                "ms": 0.9022,
+                "children": 11
+              },
+              {
+                "index": 3563,
+                "name": "UnityEngine.CoreModule.dll!UnityEngine.Rendering::RenderPipelineManager.DoRenderLoop_Internal() [Invoke]",
+                "ms": 0.8584,
+                "children": 1
+              },
+              {
+                "index": 3564,
+                "name": "Inl_UniversalRenderTotal",
+                "ms": 0.8296,
+                "children": 4
+              },
+              {
+                "index": 3567,
+                "name": "Inl_RenderCameraStack",
+                "ms": 0.8054,
+                "children": 7
+              },
+              {
+                "index": 3574,
+                "name": "Inl_UniversalRenderPipeline.RenderSingleCameraInternal: Camera",
+                "ms": 0.5652,
+                "children": 10
+              },
+              {
+                "index": 3622,
+                "name": "Inl_RecordRenderGraph",
+                "ms": 0.2315,
+                "children": 2
+              },
+              {
+                "index": 3624,
+                "name": "Inl_On Record Render Graph",
+                "ms": 0.1919,
+                "children": 1
+              },
+              {
+                "index": 3628,
+                "name": "Inl_ExecuteRenderGraph",
+                "ms": 0.1336,
+                "children": 29
+              },
+              {
+                "index": 3661,
+                "name": "Inl_ScriptableRenderContext.Submit",
+                "ms": 0.1327,
+                "children": 4
+              },
+              {
+                "index": 3664,
+                "name": "UniversalRenderPipeline.RenderSingleCameraInternal: Camera",
+                "ms": 0.121,
+                "children": 3
+              },
+              {
+                "index": 3667,
+                "name": "ExecuteRenderGraph",
+                "ms": 0.1122,
+                "children": 9
+              },
+              {
+                "index": 3829,
+                "name": "UnityEngine.IMGUIModule.dll!UnityEngine::GUIStyle.GetMeshInfo() [Invoke]",
+                "ms": 1.2008,
+                "children": 7
+              },
+              {
+                "index": 3833,
+                "name": "TextGenerator.GenerateText",
+                "ms": 1.1464,
+                "children": 1
+              },
+              {
+                "index": 3834,
+                "name": "TextGenerator.Prepare",
+                "ms": 0.214,
+                "children": 0
+              },
+              {
+                "index": 3875,
+                "name": "Profiler.IntegrateSessionData",
+                "ms": 0.1231,
+                "children": 2
+              },
+              {
+                "index": 3876,
+                "name": "Profiler.AddFrameDataAndTransferOwnership",
+                "ms": 0.1112,
+                "children": 4
+              },
+              {
+                "index": 3930,
+                "name": "Profiler.FlushCounters",
+                "ms": 0.9356,
+                "children": 4
+              },
+              {
+                "index": 4040,
+                "name": "Profiler.FlushMemoryCounters",
+                "ms": 0.915,
+                "children": 34
+              }
+            ]
+          },
+          {
+            "frame": 285008,
+            "ms": 98.8736,
+            "samples": [
+              {
+                "index": 0,
+                "name": "Main Thread",
+                "ms": 98.8736,
+                "children": 3
+              },
+              {
+                "index": 1,
+                "name": "EditorLoop",
+                "ms": 97.7709961,
+                "children": 3
+              },
+              {
+                "index": 2,
+                "name": "Application.Message",
+                "ms": 85.4061,
+                "children": 11
+              },
+              {
+                "index": 8,
+                "name": "Application.Message.Timer",
+                "ms": 0.116399996,
+                "children": 0
+              },
+              {
+                "index": 14,
+                "name": "Application.Tick",
+                "ms": 12.1749,
+                "children": 22
+              },
+              {
+                "index": 22,
+                "name": "Scheduler.Tick",
+                "ms": 0.1148,
+                "children": 1
+              },
+              {
+                "index": 23,
+                "name": "UnityEditor.UIElementsModule.dll!UnityEditor::RetainedMode.UpdateSchedulers() [Invoke]",
+                "ms": 0.1099,
+                "children": 8
+              },
+              {
+                "index": 110,
+                "name": "Application.TickSceneTracker",
+                "ms": 0.5927,
+                "children": 3
+              },
+              {
+                "index": 119,
+                "name": "UnityEditor.CoreModule.dll!UnityEditor::EditorApplication.Internal_CallUpdateFunctions() [Invoke]",
+                "ms": 0.5428,
+                "children": 33
+              },
+              {
+                "index": 126,
+                "name": "EditorApplication.update: DialogueVerificationTemp.Tick",
+                "ms": 0.1161,
+                "children": 12
+              },
+              {
+                "index": 163,
+                "name": "EditorApplication.update: UnityEditor.LevelPlay.LevelPlayInstallMenuItem.UpdateMenuItem",
+                "ms": 0.137,
+                "children": 48
+              },
+              {
+                "index": 294,
+                "name": "Application.UpdateScene",
+                "ms": 11.2367,
+                "children": 1
+              },
+              {
+                "index": 295,
+                "name": "UpdateSceneIfNeeded",
+                "ms": 11.2362,
+                "children": 2
+              },
+              {
+                "index": 297,
+                "name": "UpdateScene",
+                "ms": 11.2337,
+                "children": 3
+              },
+              {
+                "index": 298,
+                "name": "PlayerLoop",
+                "ms": 1.1538,
+                "children": 1
+              },
+              {
+                "index": 299,
+                "name": "UpdateScene",
+                "ms": 1.1536,
+                "children": 222
+              },
+              {
+                "index": 300,
+                "name": "UnityEngine.IMGUIModule.dll!UnityEngine::GUIUtility.SetSkin() [Invoke]",
+                "ms": 0.1487,
+                "children": 1
+              },
+              {
+                "index": 301,
+                "name": "EditorResources.Load",
+                "ms": 0.1348,
+                "children": 2
+              },
+              {
+                "index": 302,
+                "name": "AssetDatabase.GetGUIDFromAssetPathV2",
+                "ms": 0.1191,
+                "children": 0
+              },
+              {
+                "index": 727,
+                "name": "Update.ScriptRunBehaviourUpdate",
+                "ms": 0.2146,
+                "children": 1
+              },
+              {
+                "index": 728,
+                "name": "BehaviourUpdate",
+                "ms": 0.214,
+                "children": 12
+              },
+              {
+                "index": 810,
+                "name": "PreLateUpdate.ScriptRunBehaviourLateUpdate",
+                "ms": 0.1024,
+                "children": 1
+              },
+              {
+                "index": 811,
+                "name": "LateBehaviourUpdate",
+                "ms": 0.102,
+                "children": 8
+              },
+              {
+                "index": 864,
+                "name": "PostLateUpdate.PlayerUpdateCanvases",
+                "ms": 0.1914,
+                "children": 3
+              },
+              {
+                "index": 867,
+                "name": "UIEvents.WillRenderCanvases",
+                "ms": 0.1859,
+                "children": 1
+              },
+              {
+                "index": 868,
+                "name": "UGUI.Rendering.UpdateBatches",
+                "ms": 0.1857,
+                "children": 8
+              },
+              {
+                "index": 870,
+                "name": "UnityEngine.UIModule.dll!UnityEngine::Canvas.SendWillRenderCanvases() [Invoke]",
+                "ms": 0.1685,
+                "children": 2
+              },
+              {
+                "index": 875,
+                "name": "Render",
+                "ms": 0.1452,
+                "children": 3
+              },
+              {
+                "index": 876,
+                "name": "ClipperRegistry.Cull",
+                "ms": 0.1421,
+                "children": 0
+              },
+              {
+                "index": 950,
+                "name": "GUIView.RepaintAll.PlayerLoopController",
+                "ms": 9.9959,
+                "children": 2
+              },
+              {
+                "index": 951,
+                "name": "SceneView.Paint",
+                "ms": 5.4787,
+                "children": 2
+              },
+              {
+                "index": 953,
+                "name": "SceneView.Repaint",
+                "ms": 5.3636,
+                "children": 5
+              },
+              {
+                "index": 956,
+                "name": "UnityEngine.IMGUIModule.dll!UnityEngine::GUIUtility.ProcessEvent() [Invoke]",
+                "ms": 5.3223,
+                "children": 3
+              },
+              {
+                "index": 958,
+                "name": "UIElementsUtility.DoDispatch(Repaint Event)",
+                "ms": 5.2905,
+                "children": 2
+              },
+              {
+                "index": 959,
+                "name": "SceneView.PrepareRepaint",
+                "ms": 0.153599992,
+                "children": 10
+              },
+              {
+                "index": 979,
+                "name": "SceneView.Render",
+                "ms": 5.1289,
+                "children": 1
+              },
+              {
+                "index": 980,
+                "name": "UIR.DrawChain",
+                "ms": 5.1112,
+                "children": 29
+              },
+              {
+                "index": 982,
+                "name": "IMGUIContainer",
+                "ms": 1.4304,
+                "children": 8
+              },
+              {
+                "index": 990,
+                "name": "OnGUI",
+                "ms": 0.2784,
+                "children": 16
+              },
+              {
+                "index": 1016,
+                "name": "OnGUI",
+                "ms": 0.939,
+                "children": 93
+              },
+              {
+                "index": 1130,
+                "name": "IMGUIContainer",
+                "ms": 0.1393,
+                "children": 8
+              },
+              {
+                "index": 1162,
+                "name": "IMGUIContainer",
+                "ms": 3.2257,
+                "children": 8
+              },
+              {
+                "index": 1170,
+                "name": "OnGUI",
+                "ms": 0.4407,
+                "children": 17
+              },
+              {
+                "index": 1197,
+                "name": "OnGUI",
+                "ms": 2.63789988,
+                "children": 48
+              },
+              {
+                "index": 1227,
+                "name": "SceneCamera.Render",
+                "ms": 1.7073,
+                "children": 13
+              },
+              {
+                "index": 1237,
+                "name": "UnityEngine.CoreModule.dll!UnityEngine.Rendering::RenderPipelineManager.DoRenderLoop_Internal() [Invoke]",
+                "ms": 1.5382,
+                "children": 1
+              },
+              {
+                "index": 1238,
+                "name": "Inl_UniversalRenderTotal",
+                "ms": 1.4928,
+                "children": 10
+              },
+              {
+                "index": 1248,
+                "name": "Inl_UniversalRenderPipeline.RenderSingleCameraInternal: SceneCamera",
+                "ms": 1.1231,
+                "children": 10
+              },
+              {
+                "index": 1252,
+                "name": "CullScriptable",
+                "ms": 0.2257,
+                "children": 11
+              },
+              {
+                "index": 1299,
+                "name": "CullResults.CreateSharedRendererScene",
+                "ms": 0.13,
+                "children": 3
+              },
+              {
+                "index": 1304,
+                "name": "EndRenderQueueExtraction",
+                "ms": 0.1018,
+                "children": 5
+              },
+              {
+                "index": 1319,
+                "name": "Inl_RecordRenderGraph",
+                "ms": 0.344,
+                "children": 2
+              },
+              {
+                "index": 1321,
+                "name": "Inl_On Record Render Graph",
+                "ms": 0.3049,
+                "children": 1
+              },
+              {
+                "index": 1325,
+                "name": "Inl_ExecuteRenderGraph",
+                "ms": 0.1323,
+                "children": 29
+              },
+              {
+                "index": 1359,
+                "name": "Inl_ScriptableRenderContext.Submit",
+                "ms": 0.1493,
+                "children": 6
+              },
+              {
+                "index": 1364,
+                "name": "UniversalRenderPipeline.RenderSingleCameraInternal: SceneCamera",
+                "ms": 0.1317,
+                "children": 3
+              },
+              {
+                "index": 1367,
+                "name": "ExecuteRenderGraph",
+                "ms": 0.1194,
+                "children": 9
+              },
+              {
+                "index": 1466,
+                "name": "SceneCamera.Render",
+                "ms": 0.1147,
+                "children": 9
+              },
+              {
+                "index": 1584,
+                "name": "GameView.Paint",
+                "ms": 4.5073,
+                "children": 3
+              },
+              {
+                "index": 1586,
+                "name": "Semaphore.WaitForSignal",
+                "ms": 0.6046,
+                "children": 0
+              },
+              {
+                "index": 1587,
+                "name": "GameView.Repaint",
+                "ms": 3.873,
+                "children": 5
+              },
+              {
+                "index": 1590,
+                "name": "UnityEngine.IMGUIModule.dll!UnityEngine::GUIUtility.ProcessEvent() [Invoke]",
+                "ms": 3.8232,
+                "children": 3
+              },
+              {
+                "index": 1592,
+                "name": "UIElementsUtility.DoDispatch(Repaint Event)",
+                "ms": 3.79449987,
+                "children": 2
+              },
+              {
+                "index": 1593,
+                "name": "GameView.PrepareRepaint",
+                "ms": 0.1441,
+                "children": 10
+              },
+              {
+                "index": 1613,
+                "name": "GameView.Render",
+                "ms": 3.644,
+                "children": 1
+              },
+              {
+                "index": 1614,
+                "name": "UIR.DrawChain",
+                "ms": 3.6361,
+                "children": 3
+              },
+              {
+                "index": 1616,
+                "name": "IMGUIContainer",
+                "ms": 3.6078,
+                "children": 8
+              },
+              {
+                "index": 1624,
+                "name": "OnGUI",
+                "ms": 0.8658,
+                "children": 198
+              },
+              {
+                "index": 1832,
+                "name": "OnGUI",
+                "ms": 2.6007,
+                "children": 466
+              },
+              {
+                "index": 2261,
+                "name": "PlayerLoop",
+                "ms": 0.7189,
+                "children": 1
+              },
+              {
+                "index": 2262,
+                "name": "RenderPlayModeViewCameras",
+                "ms": 0.7187,
+                "children": 11
+              },
+              {
+                "index": 2271,
+                "name": "UnityEngine.CoreModule.dll!UnityEngine.Rendering::RenderPipelineManager.DoRenderLoop_Internal() [Invoke]",
+                "ms": 0.6794,
+                "children": 1
+              },
+              {
+                "index": 2272,
+                "name": "Inl_UniversalRenderTotal",
+                "ms": 0.6523,
+                "children": 4
+              },
+              {
+                "index": 2275,
+                "name": "Inl_RenderCameraStack",
+                "ms": 0.6316,
+                "children": 7
+              },
+              {
+                "index": 2282,
+                "name": "Inl_UniversalRenderPipeline.RenderSingleCameraInternal: Camera",
+                "ms": 0.4147,
+                "children": 10
+              },
+              {
+                "index": 2356,
+                "name": "Inl_RecordRenderGraph",
+                "ms": 0.1348,
+                "children": 2
+              },
+              {
+                "index": 2358,
+                "name": "Inl_On Record Render Graph",
+                "ms": 0.1281,
+                "children": 1
+              },
+              {
+                "index": 2362,
+                "name": "Inl_ExecuteRenderGraph",
+                "ms": 0.1148,
+                "children": 29
+              },
+              {
+                "index": 2395,
+                "name": "Inl_ScriptableRenderContext.Submit",
+                "ms": 0.1218,
+                "children": 4
+              },
+              {
+                "index": 2398,
+                "name": "UniversalRenderPipeline.RenderSingleCameraInternal: Camera",
+                "ms": 0.1124,
+                "children": 3
+              },
+              {
+                "index": 2401,
+                "name": "ExecuteRenderGraph",
+                "ms": 0.1006,
+                "children": 9
+              },
+              {
+                "index": 2597,
+                "name": "Profiler.IntegrateSessionData",
+                "ms": 0.1014,
+                "children": 2
+              },
+              {
+                "index": 2652,
+                "name": "Profiler.FlushCounters",
+                "ms": 1.0343,
+                "children": 4
+              },
+              {
+                "index": 2762,
+                "name": "Profiler.FlushMemoryCounters",
+                "ms": 1.0166,
+                "children": 34
+              }
+            ]
+          },
+          {
+            "frame": 285090,
+            "ms": 110.236305,
+            "samples": [
+              {
+                "index": 0,
+                "name": "Main Thread",
+                "ms": 110.236305,
+                "children": 3
+              },
+              {
+                "index": 1,
+                "name": "EditorLoop",
+                "ms": 109.2597,
+                "children": 3
+              },
+              {
+                "index": 2,
+                "name": "Application.Message",
+                "ms": 95.244,
+                "children": 13
+              },
+              {
+                "index": 16,
+                "name": "Application.Tick",
+                "ms": 13.8247,
+                "children": 20
+              },
+              {
+                "index": 22,
+                "name": "Scheduler.Tick",
+                "ms": 0.8336,
+                "children": 1
+              },
+              {
+                "index": 23,
+                "name": "UnityEditor.UIElementsModule.dll!UnityEditor::RetainedMode.UpdateSchedulers() [Invoke]",
+                "ms": 0.8271,
+                "children": 8
+              },
+              {
+                "index": 57,
+                "name": "SceneView.TickScheduledActions",
+                "ms": 0.3849,
+                "children": 4
+              },
+              {
+                "index": 60,
+                "name": "UIElements.UpdateRuntimeBindings",
+                "ms": 0.3787,
+                "children": 2
+              },
+              {
+                "index": 62,
+                "name": "Process Data Sources",
+                "ms": 0.3746,
+                "children": 0
+              },
+              {
+                "index": 65,
+                "name": "MCPForUnityEditorWindow.TickScheduledActions",
+                "ms": 0.2848,
+                "children": 4
+              },
+              {
+                "index": 67,
+                "name": "UIElements.UpdateEditorBindings",
+                "ms": 0.2539,
+                "children": 0
+              },
+              {
+                "index": 110,
+                "name": "Application.TickSceneTracker",
+                "ms": 0.809,
+                "children": 3
+              },
+              {
+                "index": 119,
+                "name": "UnityEditor.CoreModule.dll!UnityEditor::EditorApplication.Internal_CallUpdateFunctions() [Invoke]",
+                "ms": 0.761,
+                "children": 33
+              },
+              {
+                "index": 126,
+                "name": "EditorApplication.update: DialogueVerificationTemp.Tick",
+                "ms": 0.1234,
+                "children": 12
+              },
+              {
+                "index": 163,
+                "name": "EditorApplication.update: UnityEditor.LevelPlay.LevelPlayInstallMenuItem.UpdateMenuItem",
+                "ms": 0.1696,
+                "children": 48
+              },
+              {
+                "index": 212,
+                "name": "EditorApplication.update: UnityEditor.InAppPurchasing.InAppPurchasingInstallMenuItem.UpdateMenuItem",
+                "ms": 0.178,
+                "children": 48
+              },
+              {
+                "index": 281,
+                "name": "Inspector.Tick",
+                "ms": 0.1102,
+                "children": 8
+              },
+              {
+                "index": 294,
+                "name": "Application.UpdateScene",
+                "ms": 11.8640995,
+                "children": 1
+              },
+              {
+                "index": 295,
+                "name": "UpdateSceneIfNeeded",
+                "ms": 11.8635,
+                "children": 2
+              },
+              {
+                "index": 297,
+                "name": "UpdateScene",
+                "ms": 11.8605995,
+                "children": 3
+              },
+              {
+                "index": 298,
+                "name": "PlayerLoop",
+                "ms": 1.9089,
+                "children": 1
+              },
+              {
+                "index": 299,
+                "name": "UpdateScene",
+                "ms": 1.9085,
+                "children": 239
+              },
+              {
+                "index": 300,
+                "name": "UnityEngine.IMGUIModule.dll!UnityEngine::GUIUtility.SetSkin() [Invoke]",
+                "ms": 0.1326,
+                "children": 1
+              },
+              {
+                "index": 301,
+                "name": "EditorResources.Load",
+                "ms": 0.1155,
+                "children": 2
+              },
+              {
+                "index": 781,
+                "name": "Update.ScriptRunBehaviourUpdate",
+                "ms": 0.4579,
+                "children": 1
+              },
+              {
+                "index": 782,
+                "name": "BehaviourUpdate",
+                "ms": 0.457,
+                "children": 12
+              },
+              {
+                "index": 783,
+                "name": "UnityEngine.UI.dll!UnityEngine.EventSystems::EventSystem.Update() [Invoke]",
+                "ms": 0.1643,
+                "children": 0
+              },
+              {
+                "index": 784,
+                "name": "Spotlight.GameFlow.UI.dll!Spotlight.GameFlow::MapSceneController.Update() [Invoke]",
+                "ms": 0.122,
+                "children": 6
+              },
+              {
+                "index": 864,
+                "name": "PreLateUpdate.ScriptRunBehaviourLateUpdate",
+                "ms": 0.1762,
+                "children": 1
+              },
+              {
+                "index": 865,
+                "name": "LateBehaviourUpdate",
+                "ms": 0.1759,
+                "children": 8
+              },
+              {
+                "index": 873,
+                "name": "Unity.2D.Animation.Runtime.dll!UnityEngine.U2D.Animation::DeformationManagerUpdater.LateUpdate() [Invoke]",
+                "ms": 0.1087,
+                "children": 1
+              },
+              {
+                "index": 874,
+                "name": "DeformationManager.LateUpdate",
+                "ms": 0.1051,
+                "children": 24
+              },
+              {
+                "index": 918,
+                "name": "PostLateUpdate.PlayerUpdateCanvases",
+                "ms": 0.3296,
+                "children": 3
+              },
+              {
+                "index": 921,
+                "name": "UIEvents.WillRenderCanvases",
+                "ms": 0.326,
+                "children": 1
+              },
+              {
+                "index": 922,
+                "name": "UGUI.Rendering.UpdateBatches",
+                "ms": 0.325699985,
+                "children": 8
+              },
+              {
+                "index": 924,
+                "name": "UnityEngine.UIModule.dll!UnityEngine::Canvas.SendWillRenderCanvases() [Invoke]",
+                "ms": 0.2916,
+                "children": 2
+              },
+              {
+                "index": 929,
+                "name": "Render",
+                "ms": 0.2554,
+                "children": 3
+              },
+              {
+                "index": 930,
+                "name": "ClipperRegistry.Cull",
+                "ms": 0.2396,
+                "children": 0
+              },
+              {
+                "index": 1004,
+                "name": "GUIView.RepaintAll.PlayerLoopController",
+                "ms": 9.8697,
+                "children": 2
+              },
+              {
+                "index": 1005,
+                "name": "SceneView.Paint",
+                "ms": 4.5926,
+                "children": 2
+              },
+              {
+                "index": 1007,
+                "name": "SceneView.Repaint",
+                "ms": 3.6238,
+                "children": 5
+              },
+              {
+                "index": 1010,
+                "name": "UnityEngine.IMGUIModule.dll!UnityEngine::GUIUtility.ProcessEvent() [Invoke]",
+                "ms": 3.5866,
+                "children": 3
+              },
+              {
+                "index": 1012,
+                "name": "UIElementsUtility.DoDispatch(Repaint Event)",
+                "ms": 3.5546,
+                "children": 2
+              },
+              {
+                "index": 1013,
+                "name": "SceneView.PrepareRepaint",
+                "ms": 0.1239,
+                "children": 10
+              },
+              {
+                "index": 1033,
+                "name": "SceneView.Render",
+                "ms": 3.4227,
+                "children": 1
+              },
+              {
+                "index": 1034,
+                "name": "UIR.DrawChain",
+                "ms": 3.4078,
+                "children": 29
+              },
+              {
+                "index": 1036,
+                "name": "IMGUIContainer",
+                "ms": 0.884,
+                "children": 8
+              },
+              {
+                "index": 1044,
+                "name": "OnGUI",
+                "ms": 0.1374,
+                "children": 16
+              },
+              {
+                "index": 1070,
+                "name": "OnGUI",
+                "ms": 0.6089,
+                "children": 93
+              },
+              {
+                "index": 1216,
+                "name": "IMGUIContainer",
+                "ms": 2.1987,
+                "children": 8
+              },
+              {
+                "index": 1224,
+                "name": "OnGUI",
+                "ms": 0.236,
+                "children": 17
+              },
+              {
+                "index": 1251,
+                "name": "OnGUI",
+                "ms": 1.8613,
+                "children": 48
+              },
+              {
+                "index": 1254,
+                "name": "EditorResources.Load",
+                "ms": 0.1083,
+                "children": 2
+              },
+              {
+                "index": 1256,
+                "name": "AssetDatabase.GetGUIDFromAssetPathV2",
+                "ms": 0.1011,
+                "children": 0
+              },
+              {
+                "index": 1281,
+                "name": "SceneCamera.Render",
+                "ms": 1.2066,
+                "children": 13
+              },
+              {
+                "index": 1291,
+                "name": "UnityEngine.CoreModule.dll!UnityEngine.Rendering::RenderPipelineManager.DoRenderLoop_Internal() [Invoke]",
+                "ms": 1.0718,
+                "children": 1
+              },
+              {
+                "index": 1292,
+                "name": "Inl_UniversalRenderTotal",
+                "ms": 1.0347,
+                "children": 10
+              },
+              {
+                "index": 1302,
+                "name": "Inl_UniversalRenderPipeline.RenderSingleCameraInternal: SceneCamera",
+                "ms": 0.7446,
+                "children": 10
+              },
+              {
+                "index": 1306,
+                "name": "CullScriptable",
+                "ms": 0.1367,
+                "children": 11
+              },
+              {
+                "index": 1379,
+                "name": "Inl_RecordRenderGraph",
+                "ms": 0.1879,
+                "children": 2
+              },
+              {
+                "index": 1381,
+                "name": "Inl_On Record Render Graph",
+                "ms": 0.169,
+                "children": 1
+              },
+              {
+                "index": 1385,
+                "name": "Inl_ExecuteRenderGraph",
+                "ms": 0.1502,
+                "children": 29
+              },
+              {
+                "index": 1419,
+                "name": "Inl_ScriptableRenderContext.Submit",
+                "ms": 0.1547,
+                "children": 6
+              },
+              {
+                "index": 1424,
+                "name": "UniversalRenderPipeline.RenderSingleCameraInternal: SceneCamera",
+                "ms": 0.137,
+                "children": 3
+              },
+              {
+                "index": 1427,
+                "name": "ExecuteRenderGraph",
+                "ms": 0.1251,
+                "children": 9
+              },
+              {
+                "index": 1653,
+                "name": "GameView.Paint",
+                "ms": 5.2551,
+                "children": 3
+              },
+              {
+                "index": 1655,
+                "name": "Semaphore.WaitForSignal",
+                "ms": 0.9124,
+                "children": 0
+              },
+              {
+                "index": 1656,
+                "name": "GameView.Repaint",
+                "ms": 3.76,
+                "children": 5
+              },
+              {
+                "index": 1659,
+                "name": "UnityEngine.IMGUIModule.dll!UnityEngine::GUIUtility.ProcessEvent() [Invoke]",
+                "ms": 3.73199987,
+                "children": 3
+              },
+              {
+                "index": 1661,
+                "name": "UIElementsUtility.DoDispatch(Repaint Event)",
+                "ms": 3.7062,
+                "children": 2
+              },
+              {
+                "index": 1682,
+                "name": "GameView.Render",
+                "ms": 3.6145,
+                "children": 1
+              },
+              {
+                "index": 1683,
+                "name": "UIR.DrawChain",
+                "ms": 3.6076,
+                "children": 3
+              },
+              {
+                "index": 1685,
+                "name": "IMGUIContainer",
+                "ms": 3.5787,
+                "children": 8
+              },
+              {
+                "index": 1693,
+                "name": "OnGUI",
+                "ms": 0.6027,
+                "children": 198
+              },
+              {
+                "index": 1901,
+                "name": "OnGUI",
+                "ms": 2.8482,
+                "children": 466
+              },
+              {
+                "index": 2330,
+                "name": "PlayerLoop",
+                "ms": 0.6873,
+                "children": 1
+              },
+              {
+                "index": 2331,
+                "name": "RenderPlayModeViewCameras",
+                "ms": 0.6872,
+                "children": 11
+              },
+              {
+                "index": 2340,
+                "name": "UnityEngine.CoreModule.dll!UnityEngine.Rendering::RenderPipelineManager.DoRenderLoop_Internal() [Invoke]",
+                "ms": 0.6502,
+                "children": 1
+              },
+              {
+                "index": 2341,
+                "name": "Inl_UniversalRenderTotal",
+                "ms": 0.6239,
+                "children": 4
+              },
+              {
+                "index": 2344,
+                "name": "Inl_RenderCameraStack",
+                "ms": 0.603,
+                "children": 7
+              },
+              {
+                "index": 2351,
+                "name": "Inl_UniversalRenderPipeline.RenderSingleCameraInternal: Camera",
+                "ms": 0.4016,
+                "children": 10
+              },
+              {
+                "index": 2419,
+                "name": "Inl_RecordRenderGraph",
+                "ms": 0.1309,
+                "children": 2
+              },
+              {
+                "index": 2421,
+                "name": "Inl_On Record Render Graph",
+                "ms": 0.1236,
+                "children": 1
+              },
+              {
+                "index": 2425,
+                "name": "Inl_ExecuteRenderGraph",
+                "ms": 0.1079,
+                "children": 29
+              },
+              {
+                "index": 2458,
+                "name": "Inl_ScriptableRenderContext.Submit",
+                "ms": 0.1089,
+                "children": 4
+              },
+              {
+                "index": 2461,
+                "name": "UniversalRenderPipeline.RenderSingleCameraInternal: Camera",
+                "ms": 0.1005,
+                "children": 3
+              },
+              {
+                "index": 2715,
+                "name": "Profiler.FlushCounters",
+                "ms": 0.9116,
+                "children": 4
+              },
+              {
+                "index": 2825,
+                "name": "Profiler.FlushMemoryCounters",
+                "ms": 0.8923,
+                "children": 34
+              }
+            ]
+          }
+        ]
+      },
+      "compiler": "codedom"
+    }
+  }
+}

@@ -219,20 +219,20 @@
     },
     {
       "id": "machine.brewer",
-      "label": "滴滤咖啡壶",
-      "artId": "machine.brewer",
-      "capabilities": 16,
+      "label": "咖啡壶",
+      "artId": "equipment.kettle",
+      "capabilities": 25,
       "width": 1.45,
       "height": 1.6,
-      "capacityMl": 250
+      "capacityMl": 400
     },
     {
       "id": "machine.heater",
-      "label": "加热壶",
-      "artId": "machine.heater",
-      "capabilities": 16,
+      "label": "通用加热壶",
+      "artId": "equipment.kettle",
+      "capabilities": 25,
       "width": 1.45,
-      "height": 1.6,
+      "height": 1.65,
       "capacityMl": 400
     },
     {
@@ -330,6 +330,14 @@
       "capabilities": 256,
       "width": 2.8,
       "height": 2.6
+    },
+    {
+      "id": "machine.stove",
+      "label": "火炉",
+      "artId": "machine.stove",
+      "capabilities": 16,
+      "width": 2,
+      "height": 1
     }
   ],
   "operations": [
@@ -666,120 +674,120 @@
       "id": "s.cups.small",
       "specId": "source.cups.small",
       "area": 1,
-      "x": -7.4,
-      "y": 3.0
+      "x": -9.25,
+      "y": -1.85
     },
     {
       "id": "s.cups.large",
       "specId": "source.cups.large",
       "area": 1,
-      "x": -5.5,
-      "y": 3.0
+      "x": -7.8,
+      "y": -1.85
     },
     {
       "id": "s.beans",
       "specId": "source.beans",
       "area": 1,
-      "x": -3.5,
-      "y": 3.0
+      "x": -9.25,
+      "y": 3.75
     },
     {
       "id": "s.milk",
       "specId": "source.milk",
       "area": 1,
-      "x": -1.5,
-      "y": 3.0
+      "x": -7.6,
+      "y": 3.75
     },
     {
       "id": "s.matcha",
       "specId": "source.matcha",
       "area": 1,
-      "x": 2.5,
-      "y": 3.0
+      "x": -4.3,
+      "y": 3.75
     },
     {
       "id": "s.cocoa",
       "specId": "source.cocoa",
       "area": 1,
-      "x": 0.5,
-      "y": 3.0
+      "x": -2.7,
+      "y": 3.75
     },
     {
       "id": "s.honey",
       "specId": "source.honey",
       "area": 1,
-      "x": 4.5,
-      "y": 3.0
+      "x": -7.6,
+      "y": 2.05
     },
     {
       "id": "s.cream",
       "specId": "source.cream",
       "area": 1,
-      "x": 6.5,
-      "y": 3.0
+      "x": -5.95,
+      "y": 2.05
     },
     {
       "id": "m.grinder",
       "specId": "machine.grinder",
       "area": 1,
-      "x": -6.5,
-      "y": 0.2
+      "x": -5.9,
+      "y": -1.85
     },
     {
       "id": "m.brewer",
       "specId": "machine.brewer",
       "area": 1,
-      "x": -3.3,
-      "y": 0.2
+      "x": -2.5,
+      "y": -1.85
     },
     {
       "id": "m.heater",
       "specId": "machine.heater",
       "area": 1,
-      "x": 0,
-      "y": 0.2
+      "x": 2.55,
+      "y": -1.85
     },
     {
       "id": "m.mixer",
       "specId": "machine.mixer",
       "area": 1,
-      "x": 6.6,
-      "y": 0.2
+      "x": 5,
+      "y": -1.85
     },
     {
       "id": "service",
       "specId": "delivery",
       "area": 1,
-      "x": 4.4,
-      "y": -2.1
+      "x": 8.25,
+      "y": 0.35
     },
     {
       "id": "waste",
       "specId": "trash",
       "area": 1,
-      "x": -7.4,
-      "y": -3.2
+      "x": -9.5,
+      "y": -3.5
     },
     {
       "id": "s.water",
       "specId": "source.water",
       "area": 1,
-      "x": -3.7,
-      "y": -2.9
+      "x": -5.95,
+      "y": 3.75
     },
     {
       "id": "s.sugar",
       "specId": "source.sugar",
       "area": 1,
-      "x": -0.9,
-      "y": -2.9
+      "x": -9.25,
+      "y": 2.05
     },
     {
       "id": "tool.latte-art",
       "specId": "tool.latte-art",
       "area": 1,
-      "x": 7.2,
-      "y": -2.8
+      "x": 9.1,
+      "y": -2.35
     },
     {
       "id": "business.start",
@@ -787,6 +795,13 @@
       "area": 0,
       "x": 5.8,
       "y": -2.25
+    },
+    {
+      "id": "m.stove",
+      "specId": "machine.stove",
+      "area": 1,
+      "x": 0,
+      "y": -2.5
     }
   ],
   "areas": [
@@ -801,8 +816,8 @@
       "id": 1,
       "label": "一楼 · 工作台",
       "artId": "area.counter",
-      "halfWidth": 9,
-      "halfHeight": 5
+      "halfWidth": 11.2,
+      "halfHeight": 6.2
     },
     {
       "id": 2,

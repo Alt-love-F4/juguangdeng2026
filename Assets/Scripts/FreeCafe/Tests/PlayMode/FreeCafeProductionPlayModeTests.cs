@@ -13,16 +13,35 @@ namespace Spotlight.FreeCafe.Tests
     public sealed class FreeCafeProductionPlayModeTests
     {
         private FreeCafeRuntime app;
+        private InputSettings.BackgroundBehavior previousInputBehavior;
         [UnitySetUp] public IEnumerator Setup()
         {
+            foreach (var panel in Object.FindObjectsByType<DialoguePanel>(FindObjectsSortMode.None)) panel.Cancel();
+            previousInputBehavior=InputSystem.settings.backgroundBehavior;
+            InputSystem.settings.backgroundBehavior=InputSettings.BackgroundBehavior.IgnoreFocus;
             Time.timeScale=1;GameSaveParticipantRegistry.PendingRestore=null;
             if(FreeCafeGMPanel.Instance!=null) FreeCafeGMPanel.Instance.SetVisible(false);
             yield return SceneManager.LoadSceneAsync("CoffeeShop",LoadSceneMode.Single);yield return null;yield return null;
             app=Object.FindFirstObjectByType<FreeCafeRuntime>();app.areaManager.panSmoothTime=0;app.World.EnterProduction();yield return null;
         }
-        [UnityTearDown] public IEnumerator Cleanup() { Time.timeScale=1;yield return null; }
+        [UnityTearDown] public IEnumerator Cleanup()
+        {
+            Time.timeScale=1;
+            if(app!=null) app.CancelDrag();
+            if(Mouse.current!=null) MouseAt(Mouse.current.position.ReadValue(),false,false);
+            InputSystem.settings.backgroundBehavior=previousInputBehavior;
+            yield return null;
+        }
         private PointerEventData Pointer(float x,float y) => new PointerEventData(EventSystem.current)
         { position=app.worldCamera.WorldToScreenPoint(app.AreaToWorld(AreaId.Counter,x,y)) };
+        private void MouseAt(Vector2 position,bool left,bool right)
+        {
+            var mouse=Mouse.current ?? InputSystem.AddDevice<Mouse>();
+            var state=new MouseState { position=position };
+            if(left) state=state.WithButton(MouseButton.Left);
+            if(right) state=state.WithButton(MouseButton.Right);
+            InputSystem.QueueStateEvent(mouse,state);
+        }
         [UnityTest] public IEnumerator UsesExistingSceneCanvasAndCupButtonsTargetTheServingTray()
         {
             var hud=app.GetComponent<FreeCafeProductionHud>();Assert.That(hud,Is.Not.Null);Assert.That(hud.productionRoot.activeSelf,Is.True);
@@ -53,8 +72,35 @@ namespace Spotlight.FreeCafe.Tests
             var kettle=app.World.Find("m.heater");var cup=app.World.ServingCup;var view=app.View(kettle.id);Vector3 origin=view.transform.position;
             Physics2D.SyncTransforms();app.BeginDrag(view,Pointer(kettle.x,kettle.y));Assert.That(app.IsDragging,Is.True);
             var pointer=Pointer(cup.x,cup.y+.7f);app.MoveDrag(pointer);
-            yield return null;yield return null;yield return null;app.EndDrag(pointer);yield return null;
+            yield return null;yield return null;
+            Assert.That(app.World.LiquidVolume(cup),Is.Zero,"左键二维拖动不应倾倒");
+            var lifted=view.transform.position;
+            MouseAt(pointer.position,true,true);yield return null;yield return null;
+            MouseAt(pointer.position+Vector2.right*90,true,true);yield return null;yield return null;yield return null;
+            Assert.That(Vector3.Distance(view.transform.position,lifted),Is.LessThan(.001f),"倾倒模式固定壶位置");
             Assert.That(app.World.LiquidVolume(cup),Is.GreaterThan(0));Assert.That(app.World.LiquidVolume(kettle),Is.LessThan(200));
+            var cupView=app.View(cup.id);
+            Assert.That(app.LockedPourTargetId,Is.EqualTo(cup.id));
+            Assert.That(cupView.IsDropTarget,Is.True);
+            Assert.That(cupView.IsReceivingPour,Is.True);
+            Assert.That(cupView.body.color.a,Is.EqualTo(.22f).Within(.001f));
+            Assert.That(cupView.liquidPresenter.gameObject.activeSelf,Is.True);
+            float before=app.World.LiquidVolume(cup);
+            MouseAt(new Vector2(Screen.width*.08f,Screen.height*.08f),true,true);
+            yield return null;yield return null;yield return null;
+            Assert.That(app.LockedPourTargetId,Is.EqualTo(cup.id),"鼠标离开杯子仍锁住左键落点");
+            Assert.That(cupView.IsDropTarget,Is.True);
+            Assert.That(app.World.LiquidVolume(cup),Is.GreaterThan(before));
+            MouseAt(pointer.position+Vector2.right*90,true,false);yield return null;yield return null;
+            Assert.That(app.IsDragging,Is.True,"右键松开后左键仍持有壶");
+            Assert.That(cupView.IsReceivingPour,Is.False);
+            Assert.That(cupView.liquidPresenter.gameObject.activeSelf,Is.False,"停止接收后即使杯中有液体也隐藏液面");
+            Assert.That(view.liquidPresenter.gameObject.activeSelf,Is.False,"停止倾倒后隐藏源容器液面");
+            Assert.That(cupView.body.color.a,Is.EqualTo(1f));
+            Assert.That(Vector3.Distance(view.transform.position,origin),Is.GreaterThan(.5f),"右键松开不得把容器送回原地");
+            Assert.That(Mathf.Abs(Mathf.DeltaAngle(view.body.transform.localEulerAngles.z,0)),Is.LessThan(.001f));
+            app.EndDrag(new PointerEventData(EventSystem.current) { position=pointer.position+Vector2.right*90 });
+            MouseAt(pointer.position,false,false);yield return null;
             Assert.That(app.View(kettle.id),Is.SameAs(view));Assert.That(view.transform.position,Is.EqualTo(origin));
         }
         
@@ -64,13 +110,40 @@ namespace Spotlight.FreeCafe.Tests
             var grounds=app.World.DragOutputPreview("m.grinder");app.World.TakeMachineOutput("m.grinder",grounds.id,"m.brewer",AreaId.Counter,-3.3f,.2f);
             app.World.TakeAndInteract("s.water","m.heater",AreaId.Counter,0,0);app.World.Operate("m.heater");app.World.Tick(4);
             var kettle=app.World.Find("m.heater");var brewer=app.World.Find("m.brewer");Physics2D.SyncTransforms();
-            app.BeginDrag(app.View(kettle.id),Pointer(kettle.x,kettle.y));app.MoveDrag(Pointer(brewer.x,brewer.y+1.3f));yield return null;
-            var pointer=Pointer(brewer.x,brewer.y+.4f);app.MoveDrag(pointer);yield return null;yield return null;yield return null;
-            app.EndDrag(pointer);yield return null;
-            Assert.That(app.World.LiquidVolume(brewer),Is.GreaterThan(0));Assert.That(brewer.production.brewStarted,Is.True);
-            Assert.That(brewer.production.phase,Is.EqualTo(ProductionPhase.Loaded),"不足水量可继续，不丢掉咖啡粉");
+            var view=app.View(kettle.id);var origin=view.transform.position;
+            app.BeginDrag(view,Pointer(kettle.x,kettle.y));
+            var pointer=Pointer(brewer.x,brewer.y+.4f);app.MoveDrag(pointer);yield return null;
+            MouseAt(pointer.position,true,true);yield return null;yield return null;
+            MouseAt(pointer.position+Vector2.left*90,true,true);yield return null;yield return null;yield return null;
+            Assert.That(Mathf.DeltaAngle(0,view.body.transform.localEulerAngles.z),Is.GreaterThan(0),"鼠标向左应向左倾斜");
+            app.EndDrag(pointer);MouseAt(pointer.position+Vector2.left*90,false,true);yield return null;
+            Assert.That(app.IsDragging,Is.True,"倾倒期间松开左键不应归位");
+            MouseAt(pointer.position+Vector2.left*90,false,false);yield return null;yield return null;
+            Assert.That(app.IsDragging,Is.False);Assert.That(view.transform.position,Is.EqualTo(origin));
+            Assert.That(app.World.LiquidVolume(brewer),Is.GreaterThan(0));Assert.That(app.World.ContainerDescription(brewer),Does.Contain("咖啡液"));
+            Assert.That(brewer.contents.Exists(portion=>portion.specId=="grounds"),Is.True,"不足水量也可自由制作，不丢掉咖啡粉");
         }
 
+        [UnityTest] public IEnumerator PhysicalTrayAcceptsDraggedCupAndEmptyBellShowsNonModalToast()
+        {
+            var service=app.View("service");
+            Assert.That(service.hitbox.size,Is.EqualTo(new Vector2(3.2f,2.4f)));
+            Assert.That(service.transform.Find("DeliveryFrame"),Is.Not.Null);
+            var bell=service.GetComponentInChildren<FreeCafeDeliveryBell>();Assert.That(bell,Is.Not.Null);
+            bell.OnPointerClick(new PointerEventData(EventSystem.current) {button=PointerEventData.InputButton.Left});yield return null;
+            var toast=Object.FindFirstObjectByType<OperationToastPanel>();Assert.That(toast,Is.Not.Null);
+            Assert.That(toast.Message,Does.Contain("没有杯子"));
+            Assert.That(toast.GetComponent<CanvasGroup>().blocksRaycasts,Is.False);
+            Assert.That(app.InputBlocked,Is.False);
+            app.World.Take("s.cups.small",AreaId.Counter,0,-2,out var cup);yield return null;
+            Physics2D.SyncTransforms();app.BeginDrag(app.View(cup.id),Pointer(cup.x,cup.y));
+            var tray=app.World.Find("service");app.EndDrag(Pointer(tray.x+1.2f,tray.y+.8f));yield return null;
+            Assert.That(app.World.ServingCup,Is.SameAs(cup));
+            Assert.That(cup.x,Is.EqualTo(tray.x));Assert.That(cup.y,Is.EqualTo(tray.y));
+            Assert.That(app.World.Find(cup.id),Is.Not.Null,"拖入交付区不自动提交");
+            yield return new WaitForSecondsRealtime(2.4f);
+            Assert.That(Object.FindFirstObjectByType<OperationToastPanel>(),Is.Null);
+        }
         [UnityTest] public IEnumerator MiniGamePlaceholderTriggersCancelsAndLeavesTheCupUntouched()
         {
             app.World.SelectServingCup("s.cups.large");var cup=app.World.ServingCup;

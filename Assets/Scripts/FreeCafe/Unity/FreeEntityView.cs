@@ -1,6 +1,7 @@
 using UnityEngine;
 using System.Collections;
 using UnityEngine.EventSystems;
+using UnityEngine.UI;
 using TMPro;
 using System.Collections.Generic;
 
@@ -34,10 +35,16 @@ namespace Spotlight.FreeCafe
         private static Sprite onePixelSprite;
         private Coroutine returnAnimation, rejectionAnimation;
         private Vector3 bodyOrigin;
+        private OrthographicGlassCupPresenter glassCup;
+        private Canvas glassCanvas;
+        private bool pourVisual, receivingPour;
+        public bool IsDropTarget => dropTarget;
+        public bool IsReceivingPour => receivingPour;
 
         private void Awake()
         {
             EnsureFillIndicator();
+            EnsureGlassCup();
             if(body!=null) bodyOrigin=body.transform.localPosition;
         }
         private void EnsureFillIndicator()
@@ -78,12 +85,63 @@ namespace Spotlight.FreeCafe
             if(onePixelSprite==null) onePixelSprite=Sprite.Create(Texture2D.whiteTexture,new Rect(0,0,1,1),new Vector2(.5f,.5f),1);
             return onePixelSprite;
         }
+
+        public void ConfigureGlassCup()
+        {
+            EnsureGlassCup();
+        }
+
+        private void EnsureGlassCup()
+        {
+            if (prefabSpecId != "cup.small" && prefabSpecId != "cup.large" && prefabSpecId != "machine.heater" && prefabSpecId != "machine.brewer") return;
+            if (liquidPresenter != null && !(liquidPresenter is OrthographicGlassCupPresenter)) return;
+            if (glassCup == null)
+            {
+                if (liquidRoot == null)
+                {
+                    var anchor = new GameObject("Liquid");
+                    anchor.transform.SetParent(transform, false);
+                    liquidRoot = anchor.transform;
+                }
+                glassCanvas = liquidRoot.GetComponentInChildren<Canvas>(true);
+                glassCup = liquidPresenter as OrthographicGlassCupPresenter;
+                if (glassCup == null) glassCup = liquidRoot.GetComponentInChildren<OrthographicGlassCupPresenter>(true);
+                if (glassCup == null)
+                {
+                    var canvasObject = new GameObject("GlassCupCanvas", typeof(RectTransform), typeof(Canvas));
+                    canvasObject.transform.SetParent(liquidRoot, false);
+                    canvasObject.transform.localPosition = new Vector3(0f, 0f, -0.01f);
+                    glassCanvas = canvasObject.GetComponent<Canvas>();
+                    glassCanvas.renderMode = RenderMode.WorldSpace;
+                    glassCanvas.overrideSorting = true;
+                    glassCanvas.additionalShaderChannels |= AdditionalCanvasShaderChannels.TexCoord1;
+                    var surface = new GameObject("GlassSurface", typeof(RectTransform));
+                    surface.transform.SetParent(canvasObject.transform, false);
+                    glassCup = surface.AddComponent<OrthographicGlassCupPresenter>();
+                }
+                liquidPresenter = glassCup;
+            }
+            glassCup.ConfigureSize(prefabSpecId != "cup.small");
+            glassCup.ConfigureMotionSpace(transform.parent);
+            if (body != null)
+            {
+                body.enabled = true;
+                glassCup.gameObject.SetActive(pourVisual || receivingPour);
+                if (glassCanvas != null)
+                {
+                    glassCanvas.sortingLayerID = body.sortingLayerID;
+                    glassCanvas.sortingOrder = body.sortingOrder;
+                }
+            }
+        }
+
         /// <summary>编辑器和运行时共用同一个 Prefab；这里只设置初始外观，不创建世界或扣库存。</summary>
         public void ConfigureAuthoring(EntitySpec spec,CafeArtLibrary library,string entityId,float x,float y)
         {
             if(spec==null || library==null || body==null || label==null || hitbox==null)
                 throw new System.InvalidOperationException("实体 Prefab 缺少规格或必需组件");
             prefabSpecId=spec.id;authoringEntityId=entityId;
+            EnsureGlassCup();
             transform.localPosition=new Vector3(x,y,0);
             body.sprite=library.Resolve(spec.artId,"empty");
             if(body.sprite!=null)
@@ -99,6 +157,7 @@ namespace Spotlight.FreeCafe
             var labelRenderer=label.GetComponent<MeshRenderer>();if(labelRenderer!=null) labelRenderer.sortingOrder=body.sortingOrder+1;
             if(workspaceCaption!=null) workspaceCaption.GetComponent<MeshRenderer>().sortingOrder=body.sortingOrder+2;
             var sign=GetComponent<FreeCafeBusinessSignView>();if(sign!=null) sign.UpdateSorting(body.sortingOrder);
+            UpdateGlassTransform();
         }
         public void Bind(FreeCafeRuntime runtime,WorldEntity entity,bool isPreview=false)
         {
@@ -112,7 +171,9 @@ namespace Spotlight.FreeCafe
         public void Refresh(WorldEntity entity)
         {
             EnsureFillIndicator();
+            EnsureGlassCup();
             var spec=Runtime.World.Spec(entity.specId);
+            if (Runtime.World.ProductionEnabled && entity.area == AreaId.Counter && !spec.Has(Capability.Customer)) label.fontSize=2.2f;
             int total=Runtime.World.TotalUnits(entity);
             string state=entity.task!=null ? entity.task.phase.ToString().ToLowerInvariant() : spec.Has(Capability.Container) ? (total==0 ? "empty" : total>=Mathf.Max(1,spec.capacity) ? "full" : entity.contents.Count>1 ? "mixed" : entity.contents.Count>0 && entity.contents[0].specId=="coffee" ? "coffee" : "milk") : "default";
             if(Runtime.World.ProductionEnabled && spec.Has(Capability.Processor)) state=entity.production.phase.ToString().ToLowerInvariant();
@@ -130,7 +191,8 @@ namespace Spotlight.FreeCafe
                     float fit=Mathf.Min(spec.width/size.x,spec.height/size.y);
                     body.transform.localScale=new Vector3(fit,fit,1);
                 }
-                hitbox.size=new Vector2(spec.width,spec.height);
+                var deliveryZone = GetComponent<FreeCafeDeliveryZone>();
+                hitbox.size=deliveryZone!=null ? deliveryZone.HitboxSize : new Vector2(spec.width,spec.height);
                 label.transform.localPosition=spec.Has(Capability.BusinessControl) ? new Vector3(0,.3f,-.1f) : new Vector3(0,-spec.height*.5f-.18f,-.1f);
             }
             if(returnAnimation==null) transform.localPosition=new Vector3(entity.x,entity.y,0);
@@ -138,6 +200,7 @@ namespace Spotlight.FreeCafe
             body.sortingOrder=preview ? 2000 : 100+Mathf.RoundToInt(-entity.y*10)+(spec.Has(Capability.Movable) ? 30 : 0);
             label.GetComponent<MeshRenderer>().sortingOrder=body.sortingOrder+1;
             if(workspaceCaption!=null) workspaceCaption.GetComponent<MeshRenderer>().sortingOrder=body.sortingOrder+2;
+            UpdateGlassTransform();
             bool visible=string.IsNullOrEmpty(entity.ownerId);
             gameObject.SetActive(visible);
             hitbox.enabled=!preview && entity.area==Runtime.World.State.currentArea;
@@ -146,7 +209,8 @@ namespace Spotlight.FreeCafe
             if(Runtime.World.ProductionEnabled && (spec.Has(Capability.Container) || WorldVessel(entity)))
             {
                 var snapshot=Runtime.World.LiquidSnapshot(entity);
-                caption+=" · "+Runtime.World.ProductionCaption(entity)+" · "+snapshot.volumeMl.ToString("0")+"/"+snapshot.capacityMl.ToString("0")+"ml";
+                if (glassCup != null) glassCup.gameObject.SetActive(pourVisual || receivingPour);
+                if (hovered) caption+=" · "+Runtime.World.ContainerDescription(entity);
                 UpdateProductionFill(entity,snapshot);
                 if(liquidPresenter is ICafeLiquidPresenter presenter) presenter.Present(snapshot,0,false);
             }
@@ -163,12 +227,13 @@ namespace Spotlight.FreeCafe
                     }
                 }
                 UpdateFillIndicator(entity,spec,total);
+                if(liquidPresenter is ICafeLiquidPresenter presenter) presenter.Present(Runtime.World.LiquidSnapshot(entity),0,false);
             }
             else
             {
                 fillStatus.gameObject.SetActive(false); fillBarBackground.gameObject.SetActive(false); fillBar.gameObject.SetActive(false);
             }
-            if(Runtime.World.ProductionEnabled && spec.Has(Capability.Processor) && !WorldVessel(entity)) caption+=" · "+Runtime.World.ProductionCaption(entity);
+            if(Runtime.World.ProductionEnabled && hovered && spec.Has(Capability.Processor) && !WorldVessel(entity)) caption+=" · "+Runtime.World.ProductionCaption(entity);
             if(entity.task!=null)
             {
                 if(entity.task.phase==MachinePhase.Running) caption+=" · "+entity.task.remaining.ToString("0.0")+"s";
@@ -242,9 +307,32 @@ namespace Spotlight.FreeCafe
         private bool WorldVessel(WorldEntity entity) => Runtime.World.IsProductionVessel(entity);
         public void PresentPour(float tilt,bool pouring)
         {
+            pourVisual = pouring || Mathf.Abs(tilt) > .001f;
+            if (glassCup != null) glassCup.gameObject.SetActive(pourVisual || receivingPour);
+            ApplyVisual();
             body.transform.localRotation=Quaternion.Euler(0,0,-tilt*75);
+            UpdateGlassTransform();
+            RefreshLiquid(tilt,pouring);
+        }
+        public void SetReceivingPour(bool value)
+        {
+            receivingPour=value;
+            if(glassCup!=null) glassCup.gameObject.SetActive(pourVisual || receivingPour);
+            RefreshLiquid();
+            ApplyVisual();
+        }
+        public void RefreshLiquid(float tilt=0f,bool pouring=false)
+        {
+            if(Runtime==null || Runtime.World==null) return;
             if(liquidPresenter is ICafeLiquidPresenter presenter)
                 presenter.Present(Runtime.World.LiquidSnapshot(Runtime.World.Find(EntityId)),tilt,pouring);
+        }
+
+        private void UpdateGlassTransform()
+        {
+            if (glassCup == null || body == null) return;
+            liquidRoot.localRotation = body.transform.localRotation;
+            if (glassCanvas != null) glassCanvas.sortingOrder = body.sortingOrder;
         }
         private void UpdateProductionFill(WorldEntity entity,CafeLiquidSnapshot snapshot)
         {
@@ -255,7 +343,9 @@ namespace Spotlight.FreeCafe
             fillBar.transform.localPosition=new Vector3(-width*.5f+width*fraction*.5f,pos.y,pos.z);
             fillBar.transform.localScale=new Vector3(Mathf.Max(.01f,width*fraction),.10f,1);
             fillBar.color=snapshot.temperature==LiquidTemperature.Boiling ? new Color(.95f,.45f,.18f) : snapshot.temperature==LiquidTemperature.Warm ? new Color(.95f,.74f,.3f) : new Color(.35f,.72f,.82f);
-            fillStatus.text=snapshot.volumeMl.ToString("0")+" ml";
+            fillStatus.fontSize=1.8f;
+            fillStatus.text=snapshot.volumeMl.ToString("0")+"/"+snapshot.capacityMl.ToString("0")+" ml · "+Runtime.World.SolidMass(entity).ToString("0.0")+" g";
+            fillStatus.gameObject.SetActive(hovered); fillBarBackground.gameObject.SetActive(hovered); fillBar.gameObject.SetActive(hovered);
         }
 
         private void UpdateFillIndicator(WorldEntity entity,EntitySpec spec,int total)
@@ -280,6 +370,8 @@ namespace Spotlight.FreeCafe
         public void SetHovered(bool value)
         {
             hovered=value; ApplyVisual();
+            if(Runtime!=null && Runtime.World!=null)
+            { var entity=Runtime.World.Find(EntityId); if(Runtime.World.IsContainer(entity)) UpdateProductionFill(entity,Runtime.World.LiquidSnapshot(entity)); }
         }
         public void SetDropTarget(bool active,bool invalid)
         {
@@ -290,6 +382,8 @@ namespace Spotlight.FreeCafe
             if(body==null) return;
             if(businessSignView!=null && Runtime!=null) businessSignView.Present(hovered);
             body.color=invalidDrop ? new Color(1,.35f,.28f,1) : dropTarget ? new Color(.35f,1,.82f,1) : hovered ? new Color(1,.94f,.55f,1) : selected ? new Color(1,.84f,.4f,1) : preview ? new Color(1,1,1,.65f) : Color.white;
+            if(pourVisual || receivingPour) { var tint=body.color; tint.a=.22f; body.color=tint; }
+            if(glassCup!=null) glassCup.SetTint(Color.white);
         }
         public void OnPointerEnter(PointerEventData e) { if(Runtime!=null && !Runtime.InputBlocked) { SetHovered(true); Runtime.Inspect(EntityId); } }
         public void OnPointerExit(PointerEventData e) { SetHovered(false); }

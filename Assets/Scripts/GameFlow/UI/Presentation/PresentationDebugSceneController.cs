@@ -207,7 +207,7 @@ namespace Spotlight.GameFlow
                 }
                 SetStatus("播放中", preview.ToString());
                 SetHint(preview == Preview.Letter || preview == Preview.HardcodedLetter ? "点击信封 → 阅读 → 点击署名。面板右下角可跳过；Esc 取消。"
-                    : preview == Preview.HardcodedOptions ? "C：选项对话；空格/回车补全文字，台词结束后点击选项。灰色选项不可用；仅演示，不结算 NCS。Esc 取消。"
+                    : preview == Preview.HardcodedOptions ? "C：选项对话（8 句）；点击 SKIP 快速逐条播放，到选项处停止；空格/回车补全文字。灰色选项不可用；仅演示，不结算 NCS。Esc 取消。"
                     : preview == Preview.Dialogue || preview == Preview.HardcodedDialogue || preview == Preview.Introduction || preview == Preview.Effects ? "空格/回车/面板继续按钮：先补全文字，再换页/换句。Esc 取消。"
                     : preview == Preview.Details ? "M：详情面板；点击页签切换，悬停属性/专精查看说明。关闭按钮或窗口外可关闭；全部为占位。"
                     : preview == Preview.Reading ? "V：阅读；空格/回车补全文字 → 下一行/页，← 或上一页返回；Esc 取消。"

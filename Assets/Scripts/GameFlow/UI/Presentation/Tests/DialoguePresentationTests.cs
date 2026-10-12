@@ -113,12 +113,13 @@ namespace Spotlight.GameFlow.Tests
             panel.Play(DialoguePreviewDialogue.CreateOptions());
             yield return Ready(panel);
 
-            panel.Advance();
-            yield return null;
-            panel.Advance();
-            yield return null;
-            panel.Advance();
-            yield return null;
+            float deadline = Time.realtimeSinceStartup + 5f;
+            while (!panel.IsChoosing)
+            {
+                Assert.That(Time.realtimeSinceStartup, Is.LessThan(deadline));
+                panel.Advance();
+                yield return null;
+            }
 
             Assert.That(panel.IsChoosing, Is.True);
             Assert.That(panel.SelectOption("locked"), Is.False);
@@ -126,7 +127,7 @@ namespace Spotlight.GameFlow.Tests
             yield return new WaitForSecondsRealtime(.55f);
             Assert.That(panel.SelectedOptionId, Is.EqualTo("support"));
             Assert.That(panel.IsChoosing, Is.False);
-            Assert.That(panel.LineIndex, Is.EqualTo(2));
+            Assert.That(panel.LineIndex, Is.EqualTo(DialoguePreviewDialogue.CreateOptions().Count));
         }
 
         [UnityTest]

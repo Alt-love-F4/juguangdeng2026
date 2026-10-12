@@ -12,7 +12,7 @@ namespace Spotlight.FreeCafe.Tests
             world.EnableProduction(); world.EnterProduction();
         }
         private void Load(string source,string machine) => Assert.That(world.TakeAndInteract(source,machine,AreaId.Counter,0,0).success,Is.True);
-        private void Heat(string source="s.water",string machine="m.heater") { Load(source,machine);world.OperateProduction(machine);world.Tick(4); }
+        private void Heat(string source="s.water",string machine="m.heater") { Load(source,machine);world.Interact(machine,"m.stove");world.OperateProduction("m.stove");world.Tick(4); }
         private void Grounds()
         {
             Load("s.beans","m.grinder");world.OperateProduction("m.grinder");world.Tick(12);
@@ -20,6 +20,50 @@ namespace Spotlight.FreeCafe.Tests
             Assert.That(world.TakeMachineOutput("m.grinder",preview.id,"m.brewer",AreaId.Counter,-3.3f,.2f).success,Is.True);
         }
         private CafeSnapshot Copy() => JsonUtility.FromJson<CafeSnapshot>(JsonUtility.ToJson(world.State));
+        [Test] public void LiquidSnapshotIncludesActualIngredientVolumesWithoutChangingInventory()
+        {
+            world.SelectServingCup("s.cups.large");
+            var cup = world.ServingCup;
+            cup.contents.Add(new Portion { specId="coffee", milliliters=100, units=1 });
+            cup.contents.Add(new Portion { specId="hotmilk", milliliters=200, units=1 });
+            cup.contents.Add(new Portion { specId="hotwater", milliliters=50, units=1 });
+            cup.contents.Add(new Portion { specId="sugar", units=1 });
+            string before = JsonUtility.ToJson(world.State);
+            var snapshot = world.LiquidSnapshot(cup);
+            Assert.That(snapshot.volumeMl, Is.EqualTo(350));
+            Assert.That(snapshot.capacityMl, Is.EqualTo(400));
+            Assert.That(snapshot.composition.coffeeMl, Is.EqualTo(100));
+            Assert.That(snapshot.composition.milkMl, Is.EqualTo(200));
+            Assert.That(snapshot.composition.waterMl, Is.EqualTo(50));
+            Assert.That(JsonUtility.ToJson(world.State), Is.EqualTo(before));
+        }
+
+        [Test] public void LiquidSnapshotAggregatesMatchaCocoaAndDuplicatePortions()
+        {
+            world.SelectServingCup("s.cups.large");
+            var cup = world.ServingCup;
+            cup.contents.Add(new Portion { specId="matcha.drink", milliliters=60 });
+            cup.contents.Add(new Portion { specId="matcha.drink", milliliters=40 });
+            cup.contents.Add(new Portion { specId="cocoa.drink", milliliters=80 });
+            cup.contents.Add(new Portion { specId="milk", milliliters=120 });
+            var snapshot = world.LiquidSnapshot(cup);
+            Assert.That(snapshot.composition.matchaMl, Is.EqualTo(100));
+            Assert.That(snapshot.composition.cocoaMl, Is.EqualTo(80));
+            Assert.That(snapshot.composition.milkMl, Is.EqualTo(120));
+            Assert.That(snapshot.composition.TotalMl, Is.EqualTo(snapshot.volumeMl));
+            Assert.That(world.LiquidSnapshot(null).volumeMl, Is.Zero);
+        }
+
+        [Test] public void LegacyLiquidSnapshotMapsUnitsToCupCapacityWithoutMigratingSave()
+        {
+            var legacy = new CafeWorld(JsonUtility.FromJson<CafeCatalog>(Resources.Load<TextAsset>("FreeCafe/catalog").text));
+            var cup = new WorldEntity { specId="cup.small" };
+            cup.contents.Add(new Portion { specId="coffee", units=1 });
+            var snapshot = legacy.LiquidSnapshot(cup);
+            Assert.That(snapshot.volumeMl / snapshot.capacityMl, Is.EqualTo(0.5f));
+            Assert.That(snapshot.composition.coffeeMl, Is.EqualTo(120));
+            Assert.That(cup.contents[0].milliliters, Is.Zero);
+        }
         private WorldEntity PerfectCup(string productId)
         {
             var product=world.Product(productId);world.SelectServingCup(product.cupSpecId=="cup.small" ? "s.cups.small" : "s.cups.large");
@@ -63,7 +107,7 @@ namespace Spotlight.FreeCafe.Tests
         {
             Load("s.beans","m.grinder");world.OperateProduction("m.grinder");world.Tick(12);
             var output=world.DragOutputPreview("m.grinder");
-            Assert.That(world.TakeMachineOutput("m.grinder",output.id,"m.heater",AreaId.Counter,0,0).success,Is.False);
+            Assert.That(world.TakeMachineOutput("m.grinder",output.id,"m.mixer",AreaId.Counter,0,0).success,Is.False);
             Assert.That(world.Find("m.grinder").contents[0].specId,Is.EqualTo("grounds"));
         }
         [Test] public void HeaterBoilsFiveSecondsThenWarmsTenThenCanReheat()
@@ -71,38 +115,44 @@ namespace Spotlight.FreeCafe.Tests
             Heat("s.milk");var kettle=world.Find("m.heater");
             Assert.That(kettle.production.phase,Is.EqualTo(ProductionPhase.Boiling));world.Tick(5);
             Assert.That(kettle.production.phase,Is.EqualTo(ProductionPhase.Warm));world.Tick(10);
-            Assert.That(kettle.production.phase,Is.EqualTo(ProductionPhase.Room));Assert.That(world.OperateProduction(kettle.id).success,Is.True);
+            Assert.That(kettle.production.phase,Is.EqualTo(ProductionPhase.Room));Assert.That(world.OperateProduction("m.stove").success,Is.True);
             world.Tick(4);Assert.That(kettle.production.phase,Is.EqualTo(ProductionPhase.Boiling));
         }
         [Test] public void LongTickConsumesAllThermalPhasesWithoutLosingElapsedTime()
         {
-            Load("s.water","m.heater");world.OperateProduction("m.heater");world.Tick(19);
+            Load("s.water","m.heater");world.Interact("m.heater","m.stove");world.OperateProduction("m.stove");world.Tick(19);
             Assert.That(world.Find("m.heater").production.phase,Is.EqualTo(ProductionPhase.Room));
         }
-        [Test] public void ParallelHeatersOwnIndependentContentsAndTimers()
+        [Test] public void ParallelStovesOwnIndependentContentsAndTimers()
         {
-            world.State.staff=2;world.State.money=1000;world.AddMachine("machine.heater");world.AddMachine("machine.heater");
+            world.State.staff=2;world.State.money=1000;world.AddMachine("machine.heater");
             var extra=world.State.entities.Find(e=>e.specId=="machine.heater" && e.id!="m.heater");
-            Load("s.milk","m.heater");Load("s.cocoa",extra.id);world.OperateProduction("m.heater");world.Tick(2);
-            world.OperateProduction(extra.id);world.Tick(2);
+            var stove=new WorldEntity { id="test.stove",specId="machine.stove",area=AreaId.Counter,x=5,y=-2.5f };
+            world.State.entities.Add(stove);
+            Load("s.milk","m.heater");Load("s.water",extra.id);Load("s.cocoa",extra.id);
+            world.Interact("m.heater","m.stove");world.OperateProduction("m.stove");world.Tick(2);
+            world.Interact(extra.id,stove.id);world.OperateProduction(stove.id);world.Tick(2);
             Assert.That(world.Find("m.heater").production.phase,Is.EqualTo(ProductionPhase.Boiling));
-            Assert.That(extra.production.phase,Is.EqualTo(ProductionPhase.Processing));Assert.That(extra.contents[0].specId,Is.EqualTo("cocoa.drink"));
+            Assert.That(extra.production.phase,Is.EqualTo(ProductionPhase.Processing));Assert.That(extra.contents.Exists(portion=>portion.specId=="cocoa.drink"),Is.True);
         }
-        [Test] public void BrewingNeedsGroundsAndHotWater()
+        [Test] public void BrewingAcceptsWaterBeforeGroundsAndDoesNotRequireHeat()
         {
-            Heat();Assert.That(world.PourLiquid("m.heater","m.brewer",20,1).success,Is.False);
-            Grounds();world.Tick(16);Assert.That(world.PourLiquid("m.heater","m.brewer",20,1).success,Is.False);
-            world.OperateProduction("m.heater");world.Tick(4);Assert.That(world.PourLiquid("m.heater","m.brewer",20,1).success,Is.True);
+            Load("s.water","m.heater");
+            Assert.That(world.PourLiquid("m.heater","m.brewer",20,1).success,Is.True);
+            Grounds();
+            Assert.That(world.ContainerDescription(world.Find("m.brewer")),Does.Contain("冷萃"));
+            Assert.That(world.CanPour(world.Find("m.brewer")),Is.True);
         }
-        [Test] public void UnderfilledBrewCanResumeAndCompleteAtIdealTimeAndAmount()
+        [Test] public void UnderfilledBrewCanResumeWithoutTimingOrVolumeGate()
         {
-            Grounds();Heat();world.PourLiquid("m.heater","m.brewer",100,3.75f);world.Tick(3.75f);
-            Assert.That(world.FinishPour("m.brewer").success,Is.False);
-            world.PourLiquid("m.heater","m.brewer",100,3.75f);world.Tick(3.75f);
+            Grounds();Load("s.water","m.heater");world.PourLiquid("m.heater","m.brewer",100,1);
             Assert.That(world.FinishPour("m.brewer").success,Is.True);
-            var brewer=world.Find("m.brewer");Assert.That(brewer.production.phase,Is.EqualTo(ProductionPhase.Ready));
-            Assert.That(brewer.contents.Count,Is.EqualTo(1));Assert.That(brewer.contents[0].specId,Is.EqualTo("coffee"));
-            Assert.That(brewer.production.extractionScore,Is.EqualTo(100).Within(.1));
+            Assert.That(world.LiquidVolume(world.Find("m.brewer")),Is.EqualTo(100));
+            world.PourLiquid("m.heater","m.brewer",100,1);
+            Assert.That(world.FinishPour("m.brewer").success,Is.True);
+            var brewer=world.Find("m.brewer");Assert.That(brewer.production.phase,Is.EqualTo(ProductionPhase.Room));
+            Assert.That(brewer.contents.Exists(portion=>portion.specId=="coffee"),Is.True);
+            Assert.That(brewer.contents.Exists(portion=>portion.specId=="grounds"),Is.True);
             Assert.That(world.LiquidVolume(world.Find("m.heater")),Is.EqualTo(0));
         }
         [Test] public void FluidConservationIncludesOverflowAndGroundSpills()
@@ -130,7 +180,7 @@ namespace Spotlight.FreeCafe.Tests
                 Assert.That(world.EvaluateProduction(world.ServingCup,product).total,Is.EqualTo(0));world.DiscardProductionCup();
             }
         }
-        [Test] public void WrongTemperatureAndWrongAdditionOrderLowerScore()
+        [Test] public void WrongTemperatureLowersScoreWithoutAdditionOrderGate()
         {
             var cup=PerfectCup("latte");var product=world.Product("latte");float score=world.EvaluateProduction(cup,product).total;
             cup.contents[1].temperature=LiquidTemperature.Room;cup.contents[0].addedSequence=3;

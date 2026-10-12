@@ -33,6 +33,7 @@ namespace Spotlight.GameFlow
         [SerializeField] private Vector2 gravity = new Vector2(0f, -9.81f);
         [Tooltip("UI usually moves in pixels: this scales world-space acceleration into gravity units.")]
         [SerializeField, Min(0f)] private float motionInfluence = 0.003f;
+        [SerializeField] private Transform motionSpace;
         [SerializeField, Range(0f, 1f)] private float rotationInfluence = 0.18f;
         [SerializeField, Min(0.1f)] private float springFrequency = 2.2f;
         [SerializeField, Range(0.05f, 2f)] private float dampingRatio = 0.45f;
@@ -72,7 +73,32 @@ namespace Spotlight.GameFlow
             set { fillAmount = Mathf.Clamp01(value); currentFill = lastConfiguredFill = fillAmount; }
         }
         public float CurrentFill => currentFill;
+        public void ConfigureAppearance(Color liquid, Color deep, Color surface, Color wall)
+        {
+            liquidColor = liquid;
+            deepColor = deep;
+            surfaceColor = surface;
+            wallColor = wall;
+            if (isActiveAndEnabled) RefreshVisual();
+        }
+        public void AddPourImpulse(float tilt, float strength = 1f)
+        {
+            strength = Mathf.Clamp01(strength);
+            AddImpulse(Mathf.Clamp(tilt, -1f, 1f) * strength * 4f);
+            waveEnergy = Mathf.Max(waveEnergy, strength);
+        }
         public bool AllowSpilling { get => allowSpilling; set => allowSpilling = value; }
+        public float MotionInfluence { get => motionInfluence; set => motionInfluence = Mathf.Max(0f, value); }
+        public Transform MotionSpace
+        {
+            get => motionSpace;
+            set
+            {
+                if (motionSpace == value) return;
+                motionSpace = value;
+                ResetMotion();
+            }
+        }
         public Vector2 Gravity { get => gravity; set => gravity = value; }
         public Vector2 SurfaceNormal { get; private set; } = Vector2.up;
         public float SurfaceOffset { get; private set; }
@@ -153,11 +179,16 @@ namespace Spotlight.GameFlow
         /// <summary>Reset transform history after teleport/reparent to avoid a spurious acceleration.</summary>
         public void ResetMotion()
         {
-            previousPosition = transform.position;
+            previousPosition = MotionPosition();
             previousVelocity = Vector2.zero;
             previousRotation = transform.eulerAngles.z;
             surfaceAngle = GravityAngle();
             surfaceVelocity = waveEnergy = phase = 0f;
+        }
+
+        private Vector2 MotionPosition()
+        {
+            return motionSpace != null ? transform.position - motionSpace.position : transform.position;
         }
 
         private float GravityAngle()
@@ -181,14 +212,14 @@ namespace Spotlight.GameFlow
 
         private void CaptureMotionBaseline()
         {
-            previousPosition = transform.position;
+            previousPosition = MotionPosition();
             previousVelocity = Vector2.zero;
             previousRotation = transform.eulerAngles.z;
         }
 
         private void Simulate(float dt, float measuredDt)
         {
-            Vector2 position = transform.position;
+            Vector2 position = MotionPosition();
             Vector2 velocity = (position - previousPosition) / Mathf.Max(measuredDt, 0.00001f);
             Vector2 acceleration = (velocity - previousVelocity) / Mathf.Max(measuredDt, 0.00001f);
             previousPosition = position;
