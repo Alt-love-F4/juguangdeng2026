@@ -35,6 +35,8 @@ namespace Spotlight.GameFlow
         {
             var theme = Current;
             var font = theme != null ? (heading ? theme.headingFont : theme.bodyFont) : null;
+            // Called for runtime-created text. Authored Prefab labels should not call
+            // this when their serialized font/color must remain authoritative.
             if (font != null) label.font = font;
             label.color = Ink;
         }

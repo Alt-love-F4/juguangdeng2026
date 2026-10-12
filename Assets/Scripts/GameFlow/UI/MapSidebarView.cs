@@ -64,12 +64,13 @@ namespace Spotlight.GameFlow
 
         private void UpdateLayout()
         {
-            if (rect == null || !(rect.parent is RectTransform parent)) return;
+            if (rect == null || !(rect.parent is RectTransform parent) || parent.rect.width <= 1 || parent.rect.height <= 1) return;
             float width = Mathf.Min(550, Mathf.Max(1, parent.rect.width - EdgeInset * 2));
             float height = Mathf.Min(1000, Mathf.Max(1, parent.rect.height - Mathf.Min(350, parent.rect.height * .3f)));
             var anchor = new Vector2(slideFrom == SlideSide.Right ? 1 : 0, .5f);
             rect.anchorMin = rect.anchorMax = anchor;
             rect.pivot = anchor;
+            // Recompute after the Canvas parent obtains its final screen dimensions.
             rect.sizeDelta = new Vector2(width, height);
             ApplyPose();
         }

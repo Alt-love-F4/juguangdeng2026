@@ -32,9 +32,14 @@ namespace Spotlight.GameFlow
         private bool expanded, showCompleted;
         private string expandedId, trackedId;
         public string TrackedId => trackedId;
+        public int ItemCount => items.Count;
         public event Action<string> TrackingChanged;
         private const float Width = 550f;
         private MapSidebarView sidebar;
+        [SerializeField] private bool showEditorPreview = true;
+        [SerializeField] private RectTransform taskRowTemplate;
+        [SerializeField] private RectTransform detailTextTemplate;
+        [SerializeField] private RectTransform trackButtonTemplate;
         public bool IsVisible => sidebar != null && sidebar.IsVisible;
 
         public void Initialize()
@@ -47,16 +52,19 @@ namespace Spotlight.GameFlow
             {
                 content = existingContent;
                 body = (RectTransform)transform.Find("TaskBody");
-                summary = transform.Find("TrackedSummary").GetComponent<TextMeshProUGUI>();
-                toggle = transform.Find("TaskToggle").GetComponent<UnityEngine.UI.Button>();
+                summary = transform.Find("TrackedSummary")?.GetComponent<TextMeshProUGUI>();
+                toggle = transform.Find("TaskToggle")?.GetComponent<UnityEngine.UI.Button>();
                 activeTab = body.Find("InProgressTab").GetComponent<UnityEngine.UI.Button>();
                 completedTab = body.Find("CompletedTab").GetComponent<UnityEngine.UI.Button>();
                 scroll = body.Find("TaskViewport").GetComponent<ScrollRect>();
-                ConfigureLayout();
-                toggle.onClick.RemoveAllListeners(); toggle.onClick.AddListener(Toggle);
-                activeTab.onClick.RemoveAllListeners(); activeTab.onClick.AddListener(() => SelectTab(false));
-                completedTab.onClick.RemoveAllListeners(); completedTab.onClick.AddListener(() => SelectTab(true));
-                Refresh();
+                // Existing Prefab hierarchies own geometry and artwork; bind behaviour only.
+                if (summary != null) summary.gameObject.SetActive(false);
+                if (toggle != null) { toggle.onClick.RemoveAllListeners(); toggle.onClick.AddListener(Toggle); }
+                if (activeTab != null) { activeTab.onClick.RemoveAllListeners(); activeTab.onClick.AddListener(() => SelectTab(false)); }
+                if (completedTab != null) { completedTab.onClick.RemoveAllListeners(); completedTab.onClick.AddListener(() => SelectTab(true)); }
+                if (content.childCount > 0 && taskRowTemplate == null)
+                    taskRowTemplate = content.GetChild(0) as RectTransform;
+                if (Application.isPlaying || !showEditorPreview) Refresh();
                 return;
             }
             MapVisualTheme.Skin(GetComponent<Image>(), MapVisualTheme.Current?.panel);
@@ -95,7 +103,8 @@ namespace Spotlight.GameFlow
             content.pivot = new Vector2(.5f, 1);
             content.sizeDelta = Vector2.zero;
             scroll.content = content;
-            ConfigureLayout(); Refresh();
+            ConfigureLayout();
+            if (Application.isPlaying || !showEditorPreview) Refresh();
         }
 
         private void ConfigureLayout()
@@ -114,6 +123,8 @@ namespace Spotlight.GameFlow
         }
         public void SetVisible(bool value)
         {
+            // The inventory and task buttons can call this before the panel's first explicit initialization.
+            if (sidebar == null) Initialize();
             expanded = value;
             Refresh();
             sidebar.SetVisible(value);
@@ -154,17 +165,22 @@ namespace Spotlight.GameFlow
             if (panel == null) return;
             MapTaskItem tracked = items.Find(item => item.id == trackedId);
             body.gameObject.SetActive(true);
-            summary.gameObject.SetActive(false);
-            summary.text = tracked == null ? "" : tracked.name + "\n" +
+            if (summary != null) summary.gameObject.SetActive(false);
+            if (summary != null) summary.text = tracked == null ? "" : tracked.name + "\n" +
                 (tracked.completed ? "已完成" : string.IsNullOrEmpty(tracked.currentTask) ? "暂无当前阶段任务" : tracked.currentTask);
-            summary.overflowMode = TextOverflowModes.Ellipsis;
-            toggle.GetComponentInChildren<TextMeshProUGUI>().text = "×";
+            if (summary != null) summary.overflowMode = TextOverflowModes.Ellipsis;
+            var toggleLabel = toggle != null ? toggle.GetComponentInChildren<TextMeshProUGUI>(true) : null;
+            if (toggleLabel != null) toggleLabel.text = "×";
             SetTab(activeTab, !showCompleted);
             SetTab(completedTab, showCompleted);
-            // Deactivate old rows before deferred destruction so stale buttons cannot receive clicks.
+            if (taskRowTemplate == null && content.Find("Task_map_example_active_0") is RectTransform authoredRow) taskRowTemplate = authoredRow;
+            if (detailTextTemplate == null && content.Find("PreviewDetailText") is RectTransform textTemplate) detailTextTemplate = textTemplate;
+            if (trackButtonTemplate == null && content.Find("PreviewTrackButton") is RectTransform buttonTemplate) trackButtonTemplate = buttonTemplate;
+            // Keep the authored preview row intact; runtime rows are clones of this exact Prefab structure.
             for (int i = content.childCount - 1; i >= 0; i--)
             {
-                GameObject child = content.GetChild(i).gameObject;
+                var child = content.GetChild(i).gameObject;
+                if (taskRowTemplate != null && (child == taskRowTemplate.gameObject || child.name == taskRowTemplate.name || child.name == "PreviewDetailText" || child.name == "PreviewTrackButton")) continue;
                 child.SetActive(false);
                 if (Application.isPlaying) Destroy(child); else DestroyImmediate(child);
             }
@@ -174,51 +190,80 @@ namespace Spotlight.GameFlow
             {
                 if (item.completed != showCompleted) continue;
                 count++;
-                Button title = Button("Task_" + item.id, content,
-                    item.name + (trackedId == item.id ? "  · 追踪中" : ""),
-                    () => { expandedId = expandedId == item.id ? null : item.id; Refresh(); });
-                float rowWidth = Width - 64;
-                var heading = title.GetComponentInChildren<TextMeshProUGUI>();
-                heading.fontSize = 28; heading.alignment = TextAlignmentOptions.Left;
-                Top(heading.rectTransform, 22, -14, rowWidth - 44, 40);
-                var description = Label("Description", title.transform, string.IsNullOrEmpty(item.description) ? "暂无事项描述" : item.description, 21);
-                float descriptionHeight = Mathf.Max(54, description.GetPreferredValues(description.text, rowWidth - 44, 0).y + 6);
-                Top(description.rectTransform, 22, -62, rowWidth - 44, descriptionHeight);
-                var location = Label("Location", title.transform, string.IsNullOrEmpty(item.location) ? "" : "地点：" + item.location, 20);
-                location.color = MapVisualTheme.Accent;
-                location.alignment = TextAlignmentOptions.Right;
-                Top(location.rectTransform, 22, -70 - descriptionHeight, rowWidth - 44, 26);
-                if (item.remainingDays > 0)
-                {
-                    var timer = MapVisualTheme.Art("Deadline", title.transform, MapVisualTheme.Current?.timer, Vector2.zero, new Vector2(22, 22));
-                    Top(timer.rectTransform, rowWidth - 62, -23, 22, 22);
-                    var remaining = Label("RemainingDays", title.transform, item.remainingDays.ToString(), 18);
-                    Top(remaining.rectTransform, rowWidth - 38, -22, 22, 24);
-                }
-                float height = 108 + descriptionHeight;
-                Top((RectTransform)title.transform, 0, -y, rowWidth, height);
-                y += height + 14;
+                if (taskRowTemplate == null) { Debug.LogError("MapTaskPanel needs an authored task-row template.", this); break; }
+                RectTransform row = Instantiate(taskRowTemplate, content, false);
+                row.gameObject.SetActive(true); row.name = "Task_" + item.id;
+                var title = row.Find("Label")?.GetComponent<TextMeshProUGUI>();
+                var description = row.Find("Description")?.GetComponent<TextMeshProUGUI>();
+                var location = row.Find("Location")?.GetComponent<TextMeshProUGUI>();
+                if (title != null) title.text = item.name + (trackedId == item.id ? "  · 追踪中" : "");
+                if (description != null) description.text = string.IsNullOrEmpty(item.description) ? "暂无事项描述" : item.description;
+                if (location != null) location.text = string.IsNullOrEmpty(item.location) ? "" : "地点：" + item.location;
+                ConfigureTimerIcons(row, item.remainingDays);
+                var rowButton = row.GetComponent<Button>();
+                if (rowButton != null) { rowButton.onClick.RemoveAllListeners(); rowButton.onClick.AddListener(() => { expandedId = expandedId == item.id ? null : item.id; Refresh(); }); }
+                float height = row.sizeDelta.y;
+                Top(row, 0, -y, Width - 64, height); y += height + 14;
                 if (expandedId != item.id) continue;
                 if (item.previousTasks != null)
-                    foreach (string task in item.previousTasks) y += TextRow("PreviousTask", "已进行：" + task, y);
+                    foreach (string task in item.previousTasks) y += AddDetailText("已进行：" + task, y);
                 if (!item.completed)
-                    y += TextRow("CurrentTask", "当前任务：" + (string.IsNullOrEmpty(item.currentTask) ? "暂无" : item.currentTask), y);
-                else y += TextRow("CompletedStatus", "事项已完成", y);
-                Button track = Button("Track_" + item.id, content, trackedId == item.id ? "取消追踪" : "追踪此事件",
-                    () => SetTracked(trackedId == item.id ? null : item.id));
-                Top((RectTransform)track.transform, 8, -y, Width - 64, 36);
-                y += 44;
+                    y += AddDetailText("当前任务：" + (string.IsNullOrEmpty(item.currentTask) ? "暂无" : item.currentTask), y);
+                else y += AddDetailText("事项已完成", y);
+                if (trackButtonTemplate != null)
+                {
+                    var trackRect = Instantiate(trackButtonTemplate, content, false); trackRect.gameObject.SetActive(true);
+                    var track = trackRect.GetComponent<Button>();
+                    var label = trackRect.GetComponentInChildren<TextMeshProUGUI>(true);
+                    if (label != null) label.text = trackedId == item.id ? "取消追踪" : "追踪此事件";
+                    track.onClick.RemoveAllListeners(); track.onClick.AddListener(() => SetTracked(trackedId == item.id ? null : item.id));
+                    Top(trackRect, 8, -y, Width - 64, trackRect.sizeDelta.y); y += trackRect.sizeDelta.y + 8;
+                }
             }
-            if (count == 0) y += TextRow("Empty", showCompleted ? "暂无已完成事项" : "暂无进行中事项", y);
+            if (count == 0) y += AddDetailText(showCompleted ? "暂无已完成事项" : "暂无进行中事项", y);
+            bool showPreview = !Application.isPlaying && showEditorPreview;
+            if (taskRowTemplate != null) taskRowTemplate.gameObject.SetActive(showPreview);
+            var previewDetail = content.Find("PreviewDetailText"); if (previewDetail != null) previewDetail.gameObject.SetActive(showPreview);
+            var previewTrack = content.Find("PreviewTrackButton"); if (previewTrack != null) previewTrack.gameObject.SetActive(showPreview);
+            if (showPreview)
+                for (int i = 0; i < content.childCount; i++)
+                {
+                    var child = content.GetChild(i) as RectTransform;
+                    if (child != null && child.gameObject.activeSelf) y = Mathf.Max(y, -child.anchoredPosition.y + child.rect.height);
+                }
             content.sizeDelta = new Vector2(0, y);
         }
 
-        private float TextRow(string name, string text, float y)
+        private static void ConfigureTimerIcons(RectTransform row, int days)
         {
-            TextMeshProUGUI label = Label(name, content, text, 16);
-            float height = Mathf.Max(28, label.GetPreferredValues(text, Width - 72, 0).y + 12);
-            Top(label.rectTransform, 12, -y, Width - 72, height);
-            return height + 4;
+            var container = row.Find("TimerIcons") as RectTransform;
+            if (container == null) return;
+            var iconTemplate = container.Find("timer") as RectTransform;
+            if (iconTemplate == null) return;
+
+            int count = Mathf.Max(0, days);
+            iconTemplate.gameObject.SetActive(count > 0);
+            float width = iconTemplate.rect.width;
+            for (int i = container.childCount - 1; i >= 0; i--)
+            {
+                var child = container.GetChild(i);
+                if (child != iconTemplate) Destroy(child.gameObject);
+            }
+            for (int i = 1; i < count; i++)
+            {
+                var icon = Instantiate(iconTemplate, container, false);
+                icon.name = "timer_" + i;
+                icon.gameObject.SetActive(true);
+                icon.anchoredPosition = new Vector2(i * width, 0);
+            }
+        }
+
+        private float AddDetailText(string text, float y)
+        {
+            if (detailTextTemplate == null) return 0;
+            var rect = Instantiate(detailTextTemplate, content, false); rect.gameObject.SetActive(true);
+            var label = rect.GetComponent<TextMeshProUGUI>(); if (label != null) label.text = text;
+            Top(rect, 12, -y, Width - 72, rect.sizeDelta.y); return rect.sizeDelta.y + 4;
         }
 
         private static void SetTab(Button button, bool selected)

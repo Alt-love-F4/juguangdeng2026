@@ -12,7 +12,7 @@ namespace Spotlight.Narrative
     public enum NarrativeCrossType { Cross, Hold }
     public enum NarrativeOnceType { Once, Repeat }
     public enum NarrativeEventKind { Actor, World }
-    public enum NarrativeResultType { BarAdd, BarSet, RelAdd, SetFlag, ClearFlag, SetSwitch, ObjectState, UnlockEvent, LockEvent, AdvanceDay, AwardAchievement, PlaySetup, BarHint, SpawnNpc, DespawnNpc }
+    public enum NarrativeResultType { BarAdd, BarSet, RelAdd, SetFlag, ClearFlag, SetSwitch, ObjectState, UnlockEvent, LockEvent, AdvanceDay, AwardAchievement, PlaySetup, BarHint, SpawnNpc, DespawnNpc, ShowPosition, HidePosition, AddTempPosition, RemoveTempPosition }
     public enum NarrativeTimeSlot { Morning, Noon, Night }
     public enum NarrativeRepeatRule { Once, Daily, Weekly, Yearly }
 

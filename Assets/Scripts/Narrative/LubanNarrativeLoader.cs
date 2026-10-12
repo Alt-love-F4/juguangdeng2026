@@ -352,7 +352,12 @@ namespace Spotlight.Narrative
             "LOCK_EVENT" => NarrativeResultType.LockEvent, "ADVANCE_DAY" => NarrativeResultType.AdvanceDay,
             "AWARD_ACH" => NarrativeResultType.AwardAchievement, "AWARD_ACHIEVEMENT" => NarrativeResultType.AwardAchievement, "PLAY_SETUP" => NarrativeResultType.PlaySetup,
             "BAR_HINT" => NarrativeResultType.BarHint, "SPAWN_NPC" => NarrativeResultType.SpawnNpc,
-            "DESPAWN_NPC" => NarrativeResultType.DespawnNpc, _ => throw Unknown("resultType", value)
+            "DESPAWN_NPC" => NarrativeResultType.DespawnNpc,
+            "SHOWPOSITION" or "SHOW_POSITION" => NarrativeResultType.ShowPosition,
+            "HIDEPOSITION" or "HIDE_POSITION" => NarrativeResultType.HidePosition,
+            "ADDTEMPPOSITION" or "ADD_TEMP_POSITION" => NarrativeResultType.AddTempPosition,
+            "REMOVETEMPPOSITION" or "REMOVE_TEMP_POSITION" => NarrativeResultType.RemoveTempPosition,
+            _ => throw Unknown("resultType", value)
         };
     }
 }

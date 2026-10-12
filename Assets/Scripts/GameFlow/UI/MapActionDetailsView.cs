@@ -14,6 +14,7 @@ namespace Spotlight.GameFlow
     {
         private RectTransform content;
         private TextMeshProUGUI title;
+        private MapSceneController mapController;
         private MapActionInventoryView inventory;
         private string position;
         private Func<bool> controls;
@@ -25,8 +26,33 @@ namespace Spotlight.GameFlow
         private ScrollRect scroll;
         private float revealStarted = float.NegativeInfinity;
         private CanvasGroup revealGroup;
-        private const float Width = 820;
-        private const float CardWidth = 796;
+        [Header("Popup Layout")]
+        [SerializeField] private Vector2 popupSize = new Vector2(820, 440);
+        [SerializeField] private Vector2 popupAnchoredPosition = new Vector2(-280, -120);
+        [SerializeField] private Vector2 popupAnchor = new Vector2(.5f, .5f);
+        [SerializeField] private float cardWidth = 796;
+        [SerializeField] private float cardSpacing = 24;
+        [SerializeField] private float titleFontSize = 24;
+        [SerializeField] private Vector2 emblemPosition = new Vector2(22, -20);
+        [SerializeField] private Vector2 emblemSize = new Vector2(82, 82);
+        [SerializeField] private Vector2 actionNamePosition = new Vector2(145, -38);
+        [SerializeField] private Vector2 actionNameSize = new Vector2(544, 64);
+        [SerializeField] private Vector2 descriptionPosition = new Vector2(36, -148);
+        [SerializeField] private Vector2 executeButtonPosition = new Vector2(428, -255);
+        [SerializeField] private Vector2 executeButtonSize = new Vector2(367, 160);
+        [SerializeField] private bool showEditorPreview = true;
+        [SerializeField] private string editorPreviewLocation = "圣徒街";
+        [SerializeField] private EditorActionPreview[] editorPreviewActions = {
+            new EditorActionPreview { name = "拜访旧城区的住民", description = "沿着街道拜访熟悉的住民，了解近期发生的事情。", requirement = "行动点\\n× 1", available = true },
+            new EditorActionPreview { name = "搜寻街区物资", description = "在附近寻找可用的日常物资。需要消耗部分行动点与物品。", requirement = "咖啡豆\\n× 2", available = false },
+            new EditorActionPreview { name = "帮助街坊完成委托", description = "完成一项阶段性工作，推进当前街区事件。", requirement = "牛奶\\n× 1", available = true }
+        };
+        [Serializable] private struct EditorActionPreview { public string name; [TextArea] public string description; public string requirement; public bool available; }
+        private float Width => popupSize.x;
+        private bool IsAuthoredLayout => transform.Find("Viewport/ActionList") != null;
+        private float CardWidth => cardWidth;
+        private Vector2 initialAnchoredPosition;
+        [SerializeField] private RectTransform actionCardTemplate;
         private readonly List<Card> cards = new List<Card>();
         private sealed class Card
         {
@@ -41,23 +67,42 @@ namespace Spotlight.GameFlow
         public void Initialize(MapActionInventoryView inventoryView, Func<bool> canControl, Action finishDay, Action cafe)
         {
             inventory = inventoryView; controls = canControl; endDay = finishDay; enterCafe = cafe;
+            mapController = GetComponentInParent<MapSceneController>();
+            var rect = (RectTransform)transform;
+            bool authoredLayout = transform.Find("Viewport/ActionList") != null;
+            if (!authoredLayout)
+            {
+                rect.anchorMin = rect.anchorMax = popupAnchor;
+                rect.pivot = popupAnchor;
+                rect.anchoredPosition = popupAnchoredPosition;
+                rect.sizeDelta = popupSize;
+            }
+            initialAnchoredPosition = authoredLayout ? rect.anchoredPosition : popupAnchoredPosition;
+            if (Application.isPlaying) gameObject.SetActive(false);
             if (transform.Find("Viewport/ActionList") is RectTransform existingContent)
             {
                 content = existingContent;
                 scroll = content.parent.GetComponent<ScrollRect>();
                 title = transform.Find("Location").GetComponent<TextMeshProUGUI>();
-                var existingClose = transform.Find("Close").GetComponent<UnityEngine.UI.Button>();
-                existingClose.onClick.RemoveAllListeners();
-                existingClose.onClick.AddListener(() => { if (!busy) gameObject.SetActive(false); });
+                if (!Application.isPlaying && showEditorPreview)
+                {
+                    gameObject.SetActive(true);
+                    transform.Find("Viewport")?.gameObject.SetActive(true);
+                    title.gameObject.SetActive(true);
+                    var closePreview = transform.Find("Close"); if (closePreview != null) closePreview.gameObject.SetActive(true);
+                    if (content.childCount == 0) BuildEditorPreview();
+                }
+                // Authored popups may use the map's right-click/Escape dismissal instead of a close button.
+                var existingClose = transform.Find("Close")?.GetComponent<UnityEngine.UI.Button>();
+                if (existingClose != null)
+                {
+                    existingClose.onClick.RemoveAllListeners();
+                    existingClose.onClick.AddListener(() => { if (!busy) gameObject.SetActive(false); });
+                }
                 return;
             }
-            var rect = (RectTransform)transform;
-            rect.anchorMin = rect.anchorMax = new Vector2(.5f, .5f);
-            rect.pivot = new Vector2(.5f, .5f);
-            rect.anchoredPosition = new Vector2(-280, -120);
-            rect.sizeDelta = new Vector2(Width, 440);
             GetComponent<Image>().color = Color.clear;
-            title = Label("Location", rect, "行动详情", 24);
+            title = Label("Location", rect, "行动详情", titleFontSize);
             Top(title.rectTransform, 24, -8, Width - 90, 42);
             title.gameObject.SetActive(false);
             var close = Button("Close", rect, "×", () => { if (!busy) gameObject.SetActive(false); });
@@ -80,34 +125,38 @@ namespace Spotlight.GameFlow
         public void Show(string positionKey, string locationName)
         {
             if (busy) return;
+            if (!Application.isPlaying && showEditorPreview) { gameObject.SetActive(true); return; }
             bool changed = position != positionKey;
             position = positionKey; title.text = locationName;
             bool opening = !gameObject.activeSelf || changed;
             gameObject.SetActive(true); Rebuild();
+            revealGroup = GetComponent<CanvasGroup>();
+            if (revealGroup == null) revealGroup = gameObject.AddComponent<CanvasGroup>();
+            revealGroup.alpha = 1;
             if (opening)
             {
                 revealStarted = Time.unscaledTime;
-                revealGroup = GetComponent<CanvasGroup>();
-                if (revealGroup == null) revealGroup = gameObject.AddComponent<CanvasGroup>();
                 revealGroup.alpha = 0;
             }
             if (changed) { scroll.StopMovement(); scroll.verticalNormalizedPosition = 1; }
+            mapController?.PositionActionDetailsNearLocation(positionKey);
         }
         public void Refresh() { if (!busy && isActiveAndEnabled) Rebuild(); }
         private void LateUpdate()
         {
             var parent = transform.parent as RectTransform;
             if (parent == null) return;
-            var rect = (RectTransform)transform;
-            float scale = Mathf.Min(1, Mathf.Max(.1f, (parent.rect.width - 64) / Width));
             float t = Mathf.Clamp01((Time.unscaledTime - revealStarted) / .26f);
+            float alpha = Mathf.Clamp01(t * 2);
+            if (revealGroup != null && revealGroup.alpha != alpha) revealGroup.alpha = alpha;
+            if (IsAuthoredLayout) return;
+            var rect = (RectTransform)transform;
+            float scale = Mathf.Min(1, Mathf.Max(.1f, (parent.rect.width - 64) / popupSize.x));
             float pop = 1 + 2.7f * Mathf.Pow(t - 1, 3) + 1.7f * Mathf.Pow(t - 1, 2);
             Vector3 targetScale = Vector3.one * scale * Mathf.LerpUnclamped(.82f, 1, pop);
             if (!rect.localScale.Equals(targetScale)) rect.localScale = targetScale;
-            float alpha = Mathf.Clamp01(t * 2);
-            if (revealGroup != null && revealGroup.alpha != alpha) revealGroup.alpha = alpha;
-            float offset = Mathf.Min(280, Mathf.Max(0, (parent.rect.width - Width) * .5f - 32));
-            var targetPosition = new Vector2(-offset, -120);
+            float offset = Mathf.Min(Mathf.Abs(initialAnchoredPosition.x), Mathf.Max(0, (parent.rect.width - popupSize.x) * .5f - 32));
+            var targetPosition = new Vector2(-offset, initialAnchoredPosition.y);
             if (!rect.anchoredPosition.Equals(targetPosition)) rect.anchoredPosition = targetPosition;
         }
         private void Update()
@@ -121,9 +170,13 @@ namespace Spotlight.GameFlow
         }
         private void Rebuild()
         {
+            if (!Application.isPlaying && showEditorPreview) { BuildEditorPreview(); return; }
+            if (actionCardTemplate == null && content.Find("ActionCardTemplate") is RectTransform authoredTemplate) actionCardTemplate = authoredTemplate;
+            if (actionCardTemplate != null) actionCardTemplate.gameObject.SetActive(false);
             for (int childIndex = content.childCount - 1; childIndex >= 0; childIndex--)
             {
                 var child = content.GetChild(childIndex).gameObject;
+                if (child == actionCardTemplate?.gameObject) continue;
                 child.SetActive(false);
                 if (Application.isPlaying) Destroy(child); else DestroyImmediate(child);
             }
@@ -134,127 +187,89 @@ namespace Spotlight.GameFlow
             float y = 0;
             if (position == "cafe" || position == "大堂区")
             {
-                bool inCafe = UnityEngine.SceneManagement.SceneManager.GetActiveScene().name == "CoffeeShop";
-                var button = Button("EnterCafe", content, inCafe ? "当前正处于咖啡馆" : "进入咖啡馆", () => enterCafe?.Invoke());
-                button.interactable = !inCafe;
-                button.GetComponent<Image>().sprite = null;
-                button.GetComponent<Image>().color = new Color(.95f, .89f, .68f);
-                var cafeLabel = button.GetComponentInChildren<TextMeshProUGUI>();
-                cafeLabel.fontSize = 30;
-                cafeLabel.rectTransform.pivot = new Vector2(.5f, .5f);
-                Top((RectTransform)button.transform, 24, -y, CardWidth - 24, 68); y += 84;
+                Debug.LogWarning("Cafe entry action should be authored as a mounted action card in the ActionCard template list.", this);
             }
             foreach (var action in values)
             {
-                var card = new Card { action = action };
-                var root = Rect("Action_" + action.actionKey, content);
-                MapVisualTheme.Skin(root.gameObject.AddComponent<Image>(), MapVisualTheme.Current?.panel);
-                var emblem = MapVisualTheme.Art("Emblem", root, MapVisualTheme.Current?.actionEmblem, Vector2.zero, new Vector2(82, 82));
-                emblem.gameObject.SetActive(true);
-                Top(emblem.rectTransform, 22, -20, 82, 82);
-                var name = Label("Name", root, Text(action.nameText, string.IsNullOrEmpty(action.nameText) ? title.text : action.nameText), 43);
-                MapVisualTheme.Font(name, true);
-                name.fontStyle = FontStyles.Bold;
-                Top(name.rectTransform, 145, -38, CardWidth - 252, 64);
-                name.enableAutoSizing = true; name.fontSizeMin = 30; name.fontSizeMax = 43;
-                name.overflowMode = TextOverflowModes.Ellipsis;
-                if (action.IsTimed)
-                {
-                    var timer = MapVisualTheme.Art("Timer", root, MapVisualTheme.Current?.timer, Vector2.zero, new Vector2(30, 30));
-                    Top(timer.rectTransform, CardWidth - 116, -51, 30, 30);
-                }
-                var divider = MapVisualTheme.Art("Divider", root, MapVisualTheme.Current?.actionDivider, Vector2.zero, new Vector2(CardWidth - 56, 6));
-                divider.gameObject.SetActive(true);
-                Top(divider.rectTransform, 28, -105, CardWidth - 56, 6);
-                card.type = Label("Type", root, "", 22);
-                var desc = Label("Description", root, Text(action.descText, string.IsNullOrEmpty(action.descText) ? "暂无行动描述" : action.descText), 24);
-                MapVisualTheme.Font(desc);
-                float descWidth = action.parsedRequirements.Count > 0 ? 500 : 632;
-                float descHeight = Mathf.Max(86, desc.GetPreferredValues(desc.text, descWidth, 0).y + 8);
-                Top(desc.rectTransform, 36, -148, descWidth, descHeight);
-                float requirementHeight = 0;
-                var requirements = action.parsedRequirements;
-                if (requirements.Count > 0)
-                {
-                    var caption = Label("RequirementsTitle", root, "需要", 22);
-                    Top(caption.rectTransform, 551, -88, 120, 30);
-                    caption.alignment = TextAlignmentOptions.Right;
-                    for (int i = 0; i < requirements.Count; i++)
-                    {
-                        var box = Rect("Requirement_" + i, root);
-                        Top(box, 574, -151 - i * 100, 90, 90);
-                        MapVisualTheme.Skin(box.gameObject.AddComponent<Image>(), MapVisualTheme.Current?.requirement);
-                        var label = Label("Label", box, "", 17);
-                        Stretch(label.rectTransform, 6); label.alignment = TextAlignmentOptions.Center;
-                        card.requirements.Add(label);
-                    }
-                    requirementHeight = 28 + requirements.Count * 100;
-                }
-                float footer = 168 + Mathf.Max(descHeight, requirementHeight);
-                Top(card.type.rectTransform, 36, -footer, 420, 36);
-                if (action.type == NarrativeActionType.Repeat && !action.IsProgress)
-                {
-                    card.repeats = Rect("RepeatSegments", root);
-                    Top(card.repeats, 36, -footer - 42, 382, 18);
-                    var layout = card.repeats.gameObject.AddComponent<HorizontalLayoutGroup>();
-                    layout.spacing = 8; layout.childControlWidth = true; layout.childControlHeight = true;
-                    layout.childForceExpandWidth = true; layout.childForceExpandHeight = true;
-                    footer += 24;
-                }
-                if (action.IsProgress)
-                {
-                    var track = Rect("ProgressTrack", root);
-                    Top(track, 36, -footer - 42, 382, 18);
-                    track.gameObject.AddComponent<Image>().color = new Color(.74f, .54f, .37f, .35f);
-                    card.progress = Rect("Fill", track).gameObject.AddComponent<Image>();
-                    Stretch(card.progress.rectTransform, 0);
-                    card.progress.sprite = MapVisualTheme.Current?.progress;
-                    card.progress.type = Image.Type.Filled; card.progress.fillMethod = Image.FillMethod.Horizontal;
-                    card.progress.raycastTarget = false; card.progress.color = new Color(.78f, .49f, .20f);
-                    footer += 24;
-                }
-                card.button = Button("Execute", root, "执行", () => OnExecute(card));
-                MapVisualTheme.Skin(card.button.GetComponent<Image>(), MapVisualTheme.Current?.disabledExecute);
-                float height = Mathf.Max(414, footer + 116);
-                Top((RectTransform)card.button.transform, CardWidth * 575 / 1067, -height * 342 / 554, CardWidth * 492 / 1067, height * 212 / 554);
-                card.button.GetComponent<Image>().preserveAspect = true;
-                var executeLabel = card.button.GetComponentInChildren<TextMeshProUGUI>();
-                ConfigureExecuteLabel(executeLabel);
-                Top(root, 12, -y, CardWidth, height); y += height + 24;
+                if (actionCardTemplate == null) { Debug.LogError("MapActionDetailsView needs an authored ActionCard template.", this); break; }
+                var root = Instantiate(actionCardTemplate, content, false);
+                root.gameObject.name = "Action_" + action.actionKey;
+                root.gameObject.SetActive(true);
+                var card = BindActionCard(root, action);
+                float height = Mathf.Max(1, root.rect.height);
+                if (!IsAuthoredLayout) Top(root, 12, -y, CardWidth, height);
+                y += height + cardSpacing;
                 cards.Add(card); UpdateCard(card);
             }
-            if (values.Count == 0)
+            if (values.Count == 0 && actionCardTemplate != null)
             {
-                var overview = Rect("LocationOverview", content);
-                Top(overview, 12, -y, CardWidth, 414);
-                MapVisualTheme.Skin(overview.gameObject.AddComponent<Image>(), MapVisualTheme.Current?.panel);
-                var emblem = MapVisualTheme.Art("Emblem", overview, MapVisualTheme.Current?.actionEmblem, Vector2.zero, new Vector2(82, 82));
-                Top(emblem.rectTransform, 22, -20, 82, 82);
-                var divider = MapVisualTheme.Art("Divider", overview, MapVisualTheme.Current?.actionDivider, Vector2.zero, new Vector2(CardWidth - 56, 6));
-                Top(divider.rectTransform, 28, -105, CardWidth - 56, 6);
-                var heading = Label("Name", overview, title.text, 43);
-                MapVisualTheme.Font(heading, true);
-                heading.fontStyle = FontStyles.Bold;
-                Top(heading.rectTransform, 145, -38, CardWidth - 252, 64);
-                heading.enableAutoSizing = true; heading.fontSizeMin = 30; heading.fontSizeMax = 43;
-                var empty = Label("Empty", overview, "此时此地无事可做", 24);
-                Top(empty.rectTransform, 36, -148, 600, 94);
-                var captionArea = Rect("ExecuteCaptionArea", overview);
-                Top(captionArea, CardWidth * 575 / 1067, -414f * 342 / 554, CardWidth * 492 / 1067, 414f * 212 / 554);
-                var emptySword = captionArea.gameObject.AddComponent<Image>();
-                MapVisualTheme.Skin(emptySword, MapVisualTheme.Current?.execute);
-                emptySword.preserveAspect = true;
-                emptySword.color = new Color(.46f, .43f, .34f);
-                emptySword.raycastTarget = false;
-                var caption = Label("ExecuteCaption", captionArea, "暂无行动", 34);
-                ConfigureExecuteLabel(caption);
-                caption.color = new Color(.97f, .92f, .75f);
-                y += 438;
+                // Never repurpose the authored template as an empty-state card: later actions
+                // must clone the untouched Prefab artwork and serialized child structure.
+                var emptyState = Instantiate(actionCardTemplate, content, false);
+                emptyState.name = "EmptyActionState";
+                emptyState.gameObject.SetActive(true);
+                var name = emptyState.Find("Name")?.GetComponent<TextMeshProUGUI>();
+                if (name != null) name.text = title != null ? title.text : "此时此地无事可做";
+                var description = emptyState.Find("Description")?.GetComponent<TextMeshProUGUI>();
+                if (description != null) description.text = "此时此地无事可做";
+                var buttonLabel = emptyState.Find("Execute/Label")?.GetComponent<TextMeshProUGUI>();
+                if (buttonLabel != null) buttonLabel.text = "暂无行动";
+                if (!IsAuthoredLayout) Top(emptyState, 12, -y, CardWidth, Mathf.Max(1, emptyState.rect.height));
+                var emptyButton = emptyState.GetComponentInChildren<Button>(true);
+                if (emptyButton != null) emptyButton.gameObject.SetActive(false);
+                y += Mathf.Max(414, emptyState.rect.height) + cardSpacing;
             }
-            content.sizeDelta = new Vector2(0, y);
-            float maximumHeight = Mathf.Min(800, ((RectTransform)transform.parent).rect.height - 250);
-            ((RectTransform)transform).sizeDelta = new Vector2(Width, Mathf.Clamp(y, 230, Mathf.Max(230, maximumHeight)));
+            if (actionCardTemplate != null) actionCardTemplate.gameObject.SetActive(!Application.isPlaying && showEditorPreview);
+            if (!IsAuthoredLayout)
+            {
+                content.sizeDelta = new Vector2(0, y);
+                float maximumHeight = Mathf.Min(800, ((RectTransform)transform.parent).rect.height - 250);
+                ((RectTransform)transform).sizeDelta = new Vector2(Width, Mathf.Clamp(y, 230, Mathf.Max(230, maximumHeight)));
+            }
             Canvas.ForceUpdateCanvases();
+        }
+        private Card BindActionCard(RectTransform root, NarrativeActionDefinition action)
+        {
+            var card = new Card { action = action };
+            card.type = root.Find("Type")?.GetComponent<TextMeshProUGUI>();
+            var description = root.Find("Description")?.GetComponent<TextMeshProUGUI>();
+            var sampleRequirement = root.Find("Requirements/Requirement") ?? root.Find("Requirement");
+            var execute = root.Find("Execute")?.GetComponent<Button>()
+                ?? root.Find("ExecutePreview")?.GetComponent<Button>()
+                ?? root.GetComponentInChildren<Button>(true);
+            card.button = execute;
+            if (description != null) description.text = Text(action.descText, string.IsNullOrEmpty(action.descText) ? "暂无行动描述" : action.descText);
+            if (execute != null)
+            {
+                execute.onClick.RemoveAllListeners();
+                execute.onClick.AddListener(() => OnExecute(card));
+            }
+            var requirements = action.parsedRequirements;
+            if (card.type != null) card.type.text = action.type.ToString();
+            if (sampleRequirement != null)
+            {
+                // Use the authored requirement slot. Duplicate or synthesized slot UI is not
+                // allowed: art must author the required number of slots explicitly.
+                if (requirements.Count > 0)
+                {
+                    sampleRequirement.gameObject.SetActive(true);
+                    var label = sampleRequirement.GetComponentInChildren<TextMeshProUGUI>(true);
+                    if (label != null) card.requirements.Add(label);
+                }
+                else sampleRequirement.gameObject.SetActive(false);
+            }
+            var progress = root.Find("ProgressTrack/Fill")?.GetComponent<Image>();
+            card.progress = progress;
+            card.repeats = root.Find("RepeatSegments") as RectTransform;
+            var heading = root.Find("Name")?.GetComponent<TextMeshProUGUI>();
+            if (heading != null) heading.text = Text(action.nameText, action.actionKey);
+            return card;
+        }
+        private void BuildEditorPreview()
+        {
+            if (content == null || content.childCount > 0) return;
+            if (title != null) title.text = editorPreviewLocation;
+            // Missing authored cards are intentionally not synthesized here. Create them in Prefab Mode.
         }
         private void OnDisable()
         {
@@ -278,25 +293,29 @@ namespace Spotlight.GameFlow
             if (action.type == NarrativeActionType.Future) type += " · " + actions.GetRemainingDays(action.actionKey) + " 天后开放";
             if (action.IsProgress) type += " · 进度 " + actions.GetProgress(action.actionKey) + " / " + action.progressTarget;
             if (action.mustExecute) type += " · 今日必做";
-            card.type.text = type;
-            card.type.color = MapVisualTheme.Accent;
+            if (card.type != null)
+            {
+                card.type.text = type;
+                card.type.color = MapVisualTheme.Accent;
+            }
             if (card.progress != null) card.progress.fillAmount = action.progressTarget > 0
                 ? Mathf.Clamp01((float)actions.GetProgress(action.actionKey) / action.progressTarget) : 0;
             UpdateRepeatSegments(card, actions);
-            for (int i = 0; i < card.requirements.Count; i++)
+            if (card.requirements.Count > 0)
             {
-                bool ok = i < checks.Count && checks[i].satisfied;
-                var requirement = action.parsedRequirements[i];
-                card.requirements[i].text = RequirementName(requirement);
-                card.requirements[i].color = ok ? MapVisualTheme.Ink : new Color(.65f, .23f, .14f);
+                card.requirements[0].text = string.Join("\n", action.parsedRequirements.Select(RequirementName));
+                bool allSatisfied = checks.Count >= action.parsedRequirements.Count && checks.All(check => check.satisfied);
+                card.requirements[0].color = allSatisfied ? MapVisualTheme.Ink : new Color(.65f, .23f, .14f);
             }
             string caption = action.endDay && actions.HasBlockingActions() ? "有需要进行的行动" :
                 action.type == NarrativeActionType.Future ? "等待开放" : available ? (action.endDay ? "结束一天" : "执行") : "查看需求";
-            card.button.GetComponentInChildren<TextMeshProUGUI>().text = caption;
-                var image = card.button.GetComponent<Image>();
-                image.color = available ? Color.white : new Color(.46f, .43f, .34f);
-            card.button.GetComponentInChildren<TextMeshProUGUI>().color = new Color(.97f, .92f, .75f);
-            card.button.interactable = !busy;
+            if (card.button != null)
+            {
+                var buttonLabel = card.button.GetComponentInChildren<TextMeshProUGUI>(true);
+                if (buttonLabel != null) buttonLabel.text = caption;
+                // Preserve the authored button artwork and colors; only update interaction state.
+                card.button.interactable = !busy;
+            }
         }
         private static void ConfigureExecuteLabel(TextMeshProUGUI label)
         {
@@ -312,6 +331,7 @@ namespace Spotlight.GameFlow
 
         private void UpdateRepeatSegments(Card card, NarrativeActionController actions)
         {
+            // Repeat artwork is optional; never synthesize UI if the authored card omits it.
             if (card.repeats == null) return;
             int count = card.action.IsProgress ? Mathf.Max(0, card.action.progressTarget - actions.GetProgress(card.action.actionKey)) : int.MaxValue;
             foreach (var costs in card.action.parsedRequirements
@@ -332,23 +352,8 @@ namespace Spotlight.GameFlow
                 if (Application.isPlaying) Destroy(child.gameObject); else DestroyImmediate(child.gameObject);
             }
             // Unbounded actions have no finite resource-derived partition count.
-            if (count == int.MaxValue)
-            {
-                var label = Label("Unlimited", card.repeats, "不限次数", 18);
-                label.color = MapVisualTheme.Accent;
-                return;
-            }
-            for (int i = 0; i < count; i++)
-            {
-                var segment = Rect("Segment_" + i, card.repeats).gameObject.AddComponent<Image>();
-                segment.color = i == 0 ? new Color(.78f, .49f, .20f) : new Color(.78f, .49f, .20f, .4f);
-                segment.raycastTarget = false;
-            }
-            if (count == 0)
-            {
-                var label = Label("NoExecutions", card.repeats, "剩余可执行 0 次", 18);
-                label.color = MapVisualTheme.Accent;
-            }
+            if (count == int.MaxValue) return;
+            // The repeat segments are authored. Runtime no longer constructs replacement art.
         }
 
         private string RequirementName(NarrativeActionRequirement r) => r.type switch
@@ -367,7 +372,8 @@ namespace Spotlight.GameFlow
             if (!actions.IsAvailable(card.action.actionKey, out var checks))
             {
                 Notice(card.action.endDay && actions.HasBlockingActions() ? "有需要进行的行动" : "要求不满足");
-                for (int i = 0; i < checks.Count; i++) if (!checks[i].satisfied) StartCoroutine(Shake((RectTransform)card.requirements[i].transform.parent));
+                if (card.requirements.Count > 0 && checks.Any(check => !check.satisfied))
+                    StartCoroutine(Shake((RectTransform)card.requirements[0].transform.parent));
                 if (checks.All(c => c.satisfied)) StartCoroutine(Shake((RectTransform)card.button.transform));
                 return;
             }
@@ -384,10 +390,12 @@ namespace Spotlight.GameFlow
                 if (requirement.type == NarrativeActionRequirementType.Item)
                 {
                     yield return inventory.Reveal(requirement.key);
-                    yield return Fly(inventory.FindSlot(requirement.key), (RectTransform)card.requirements[i].transform.parent, "×" + requirement.value);
+                    if (card.requirements.Count > 0)
+                        yield return Fly(inventory.FindSlot(requirement.key), (RectTransform)card.requirements[0].transform.parent, "×" + requirement.value);
                 }
                 else if (requirement.type == NarrativeActionRequirementType.ActionPoint)
-                    yield return Fly(inventory.PointsRect, (RectTransform)card.requirements[i].transform.parent, "−" + requirement.value + " 行动点");
+                    if (card.requirements.Count > 0)
+                        yield return Fly(inventory.PointsRect, (RectTransform)card.requirements[0].transform.parent, "−" + requirement.value + " 行动点");
             }
             bool finished = false;
             bool accepted = NarrativeRuntime.Instance.Actions.Execute(card.action.actionKey, success =>

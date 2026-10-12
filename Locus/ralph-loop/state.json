@@ -1,5 +1,5 @@
 {
-  "objective": "> \\*\\*目标：\\*\\*在 `MVP_Prototype_Unity/` 独立 Unity 项目中，按照本策划案实现一个可运行、可重复试玩的最小原型，用来测试“咖啡馆中的人际两难选择及其后果”是否有趣。不得修改主工程或该目录之外的游戏文件。完成策划案中的实现验收项后停止，并报告测试结果；玩法是否有趣留给真人试玩判断。\n",
+  "objective": "\n",
   "sessionId": "e5cd430b-d3d0-4aa5-a533-dec00cf315bf",
   "rootSessionId": "cca5fd49-aa05-4183-a521-53db781c83bf",
   "batchStartedAt": "2026-10-01T10-26-49Z",

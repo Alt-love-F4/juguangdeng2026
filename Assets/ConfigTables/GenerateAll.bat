@@ -5,6 +5,7 @@ set "UNITY_DATA_OUTPUT=%PROJECT_DIR%..\Settings\Resources\Luban"
 set "UNITY_CODE_OUTPUT=%PROJECT_DIR%..\Scripts\Config\Generated"
 
 rem Per-machine installation; an explicit LUBAN_DIR takes precedence.
+if not defined LUBAN_DIR if exist "D:\Luban\src\Luban\bin\Release\net8.0\Luban.dll" set "LUBAN_DIR=D:\Luban\src\Luban\bin\Release\net8.0"
 if not defined LUBAN_DIR set "LUBAN_DIR=%LOCALAPPDATA%\Luban\5.1.0\Luban"
 if exist "%LUBAN_DIR%\Luban.dll" goto find_dotnet
 if exist "%LUBAN_DIR%\Luban.exe" goto tool_ready

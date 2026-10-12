@@ -1048,5 +1048,30 @@
     "key": "character.soldier_d.desc",
     "text": "街区中可遇见的普通军人D。",
     "comment": "人物.xlsx公开设定；秘密不公开"
+  },
+  {
+    "key": "map.position.saint_sylvain.name",
+    "text": "圣西尔万郊区",
+    "comment": "地图重要地点名称"
+  },
+  {
+    "key": "map.position.saint_street.name",
+    "text": "圣徒街",
+    "comment": "地图重要地点名称"
+  },
+  {
+    "key": "map.position.capital_court.name",
+    "text": "首都法院",
+    "comment": "地图重要地点名称"
+  },
+  {
+    "key": "map.position.city_hall.name",
+    "text": "市政厅",
+    "comment": "地图重要地点名称"
+  },
+  {
+    "key": "map.position.garden_district.name",
+    "text": "花园区",
+    "comment": "地图重要地点名称"
   }
 ]

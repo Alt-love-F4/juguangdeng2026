@@ -62,9 +62,9 @@ namespace Spotlight.GameFlow.Tests
         }
 
         [TestCase(8, 0, 0f, 0f, 0f, 0f, 0f)]
-        [TestCase(8, 3, .375f, 1f, .5f, 0f, 0f)]
+        [TestCase(8, 3, .375f, 0f, 0f, .5f, 1f)]
         [TestCase(8, 8, 1f, 1f, 1f, 1f, 1f)]
-        [TestCase(3, 2, 2f / 3f, 1f, 1f, 2f / 3f, 0f)]
+        [TestCase(3, 2, 2f / 3f, 0f, 0f, 2f / 3f, 1f)]
         [TestCase(0, 0, 0f, 0f, 0f, 0f, 0f)]
         public void InitializeUsesActualMaximumForLegacyAndSegmentedFill(
             int maximum, int current, float ratio, float first, float second, float third, float fourth)
@@ -76,6 +76,7 @@ namespace Spotlight.GameFlow.Tests
 
             Assert.That(Fill(fill), Is.EqualTo(ratio).Within(.00001f));
             AssertSegments(first, second, third, fourth);
+            AssertRightToLeftFillOrigin(segments);
             Assert.That(Text(label), Is.EqualTo($"行动点 {current} / {maximum}    |    第 1 天"));
         }
 
@@ -90,7 +91,7 @@ namespace Spotlight.GameFlow.Tests
             view.Refresh();
 
             Assert.That(Fill(fill), Is.EqualTo(.25f).Within(.00001f));
-            AssertSegments(1f, 0f, 0f, 0f);
+            AssertSegments(0f, 0f, 0f, 1f);
             Assert.That(Text(label), Does.Contain("3 / 12"));
         }
 
@@ -102,7 +103,8 @@ namespace Spotlight.GameFlow.Tests
 
             Initialize(null, null, null, segments);
 
-            AssertSegments(1f, .5f, 0f);
+            AssertSegments(0f, .5f, 1f);
+            AssertRightToLeftFillOrigin(segments);
         }
 
         [TestCase(1, "10  06")]
@@ -137,7 +139,7 @@ namespace Spotlight.GameFlow.Tests
             Assert.That(inventoryObject.activeInHierarchy, Is.False);
             Assert.That(view.isActiveAndEnabled, Is.True);
             Assert.That(Fill(fill), Is.EqualTo(.375f).Within(.00001f));
-            AssertSegments(1f, .5f, 0f, 0f);
+            AssertSegments(0f, 0f, .5f, 1f);
             Assert.That(Text(label), Does.Contain("3 / 8"));
 
             actions.BeginDay(27);
@@ -157,9 +159,10 @@ namespace Spotlight.GameFlow.Tests
             segments[1] = null;
 
             Assert.DoesNotThrow(() => Initialize(null, null, null, segments));
-            Assert.That(Fill(segments[0]), Is.EqualTo(1f));
-            Assert.That(Fill(segments[2]), Is.Zero);
-            Assert.That(Fill(segments[3]), Is.Zero);
+            Assert.That(Fill(segments[0]), Is.Zero);
+            Assert.That(Fill(segments[2]), Is.EqualTo(.5f));
+            Assert.That(Fill(segments[3]), Is.EqualTo(1f));
+            AssertRightToLeftFillOrigin(segments);
             Assert.DoesNotThrow(() => Initialize(null, null, null, null));
         }
 
@@ -209,6 +212,12 @@ namespace Spotlight.GameFlow.Tests
 
         private static float Fill(Component image) => (float)image.GetType().GetProperty("fillAmount").GetValue(image);
         private static string Text(Component text) => (string)text.GetType().GetProperty("text").GetValue(text);
+
+        private void AssertRightToLeftFillOrigin(Component[] images)
+        {
+            PropertyInfo fillOrigin = images[0].GetType().GetProperty("fillOrigin");
+            Assert.That((int)fillOrigin.GetValue(images[0]), Is.EqualTo(1));
+        }
 
         private void AssertSegments(params float[] expected)
         {

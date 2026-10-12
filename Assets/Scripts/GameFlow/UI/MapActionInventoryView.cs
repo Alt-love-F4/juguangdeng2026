@@ -19,7 +19,11 @@ namespace Spotlight.GameFlow
         private readonly Dictionary<string, RectTransform> slots = new Dictionary<string, RectTransform>();
         private string signature = "__uninitialized";
         private float nextRefresh;
+        private bool initialized;
         private MapSidebarView sidebar;
+        [SerializeField] private bool showEditorPreview = true;
+        [SerializeField] private RectTransform itemSlotTemplate;
+        [SerializeField] private RectTransform emptySlotTemplate;
         public Image PointsFill;
         public Image[] PointsSegments;
         public TextMeshProUGUI DateLabel;
@@ -28,10 +32,20 @@ namespace Spotlight.GameFlow
             : PointsFill != null ? PointsFill.rectTransform : points.rectTransform;
         public bool IsVisible => sidebar != null && sidebar.IsVisible;
         public void Toggle() => SetVisible(!IsVisible);
-        public void SetVisible(bool value) => sidebar.SetVisible(value);
+        public void SetVisible(bool value)
+        {
+            if (sidebar == null) Initialize(points);
+            sidebar.SetVisible(value);
+        }
         public void Initialize(TextMeshProUGUI pointsLabel)
         {
             points = pointsLabel;
+            // Corrupted/legacy prefab references can point back to this component or its
+            // own panel. Accept only the authored slot objects; never clone the panel itself.
+            if (itemSlotTemplate != null && (itemSlotTemplate == transform || itemSlotTemplate.IsChildOf(transform)))
+                itemSlotTemplate = itemSlotTemplate.name == "ItemSlotTemplate" ? itemSlotTemplate : null;
+            if (emptySlotTemplate != null && (emptySlotTemplate == transform || emptySlotTemplate.IsChildOf(transform)))
+                emptySlotTemplate = emptySlotTemplate.name.StartsWith("EmptySlot_", StringComparison.Ordinal) ? emptySlotTemplate : null;
             sidebar = GetComponent<MapSidebarView>();
             if (sidebar == null) sidebar = gameObject.AddComponent<MapSidebarView>();
             sidebar.Initialize();
@@ -41,7 +55,13 @@ namespace Spotlight.GameFlow
                 scroll = transform.Find("Viewport").GetComponent<ScrollRect>();
                 ConfigureContent();
                 signature = "__uninitialized";
-                Refresh();
+                if (Application.isPlaying || !showEditorPreview) Refresh();
+                else
+                {
+                    signature = "__editor-preview";
+                    if (content.childCount > 0) emptySlotTemplate = content.GetChild(0) as RectTransform;
+                    UpdateGridSize();
+                }
                 return;
             }
             MapVisualTheme.Skin(GetComponent<Image>(), MapVisualTheme.Current?.panel);
@@ -69,20 +89,29 @@ namespace Spotlight.GameFlow
             scroll.vertical = true;
             scroll.movementType = ScrollRect.MovementType.Clamped;
             grid = content.GetComponent<GridLayoutGroup>();
-            if (grid == null) grid = content.gameObject.AddComponent<GridLayoutGroup>();
-            grid.constraint = GridLayoutGroup.Constraint.FixedColumnCount;
-            grid.constraintCount = 3;
-            grid.startCorner = GridLayoutGroup.Corner.UpperLeft;
-            grid.startAxis = GridLayoutGroup.Axis.Horizontal;
-            grid.childAlignment = TextAnchor.UpperLeft;
-            grid.spacing = new Vector2(10, 10);
-            grid.padding = new RectOffset();
+            bool createdGrid = grid == null;
+            if (createdGrid) grid = content.gameObject.AddComponent<GridLayoutGroup>();
+            // Existing Prefab layout is authored data; defaults are for generated UIs only.
+            if (createdGrid)
+            {
+                grid.constraint = GridLayoutGroup.Constraint.FixedColumnCount;
+                grid.constraintCount = 3;
+                grid.startCorner = GridLayoutGroup.Corner.UpperLeft;
+                grid.startAxis = GridLayoutGroup.Axis.Horizontal;
+                grid.childAlignment = TextAnchor.UpperLeft;
+                grid.spacing = new Vector2(10, 10);
+                grid.padding = new RectOffset();
+            }
             var fitter = content.GetComponent<ContentSizeFitter>();
-            if (fitter == null) fitter = content.gameObject.AddComponent<ContentSizeFitter>();
-            fitter.horizontalFit = ContentSizeFitter.FitMode.Unconstrained;
-            fitter.verticalFit = ContentSizeFitter.FitMode.PreferredSize;
-            scroll.viewport.offsetMin = new Vector2(32, 32);
-            scroll.viewport.offsetMax = new Vector2(-32, -154);
+            bool createdFitter = fitter == null;
+            if (createdFitter) fitter = content.gameObject.AddComponent<ContentSizeFitter>();
+            if (createdFitter)
+            {
+                fitter.horizontalFit = ContentSizeFitter.FitMode.Unconstrained;
+                fitter.verticalFit = ContentSizeFitter.FitMode.PreferredSize;
+                scroll.viewport.offsetMin = new Vector2(32, 32);
+                scroll.viewport.offsetMax = new Vector2(-32, -154);
+            }
         }
         private void Update()
         {
@@ -97,10 +126,34 @@ namespace Spotlight.GameFlow
             // The fixed HUD is refreshed by MapActionPointsView even when this panel is hidden.
             var items = runtime?.MapInventory?.Items;
             string next = items != null ? string.Join("|", items.Select(p => p.Key + ":" + p.Value)) : "empty";
-            if (next == signature) return; signature = next;
+            if (itemSlotTemplate == null && content.Find("ItemSlotTemplate") is RectTransform authoredItem) itemSlotTemplate = authoredItem;
+            if (emptySlotTemplate == null && content.Find("EmptySlot_0") is RectTransform authoredEmpty) emptySlotTemplate = authoredEmpty;
+            if (signature == next && initialized) return;
+            signature = next;
+            initialized = true;
             for (int childIndex = content.childCount - 1; childIndex >= 0; childIndex--)
             {
                 var child = content.GetChild(childIndex).gameObject;
+                if (child == itemSlotTemplate?.gameObject) continue;
+                if (child == emptySlotTemplate?.gameObject)
+                {
+                    if (!Application.isPlaying && !showEditorPreview) DestroyImmediate(child);
+                    else child.SetActive(!Application.isPlaying && showEditorPreview);
+                    continue;
+                }
+                if (child.name.StartsWith("EmptySlot_", StringComparison.Ordinal))
+                {
+                    if (Application.isPlaying || !showEditorPreview)
+                    {
+                        child.SetActive(false);
+                        if (child != emptySlotTemplate?.gameObject)
+                        {
+                            if (Application.isPlaying) Destroy(child);
+                            else DestroyImmediate(child);
+                        }
+                    }
+                    continue;
+                }
                 child.SetActive(false);
                 if (Application.isPlaying) Destroy(child); else DestroyImmediate(child);
             }
@@ -108,30 +161,61 @@ namespace Spotlight.GameFlow
             emptyHint = null;
             foreach (var item in items ?? new Dictionary<string, int>())
             {
-                var slot = MapActionDetailsView.Rect("Item_" + item.Key, content);
+                RectTransform slot;
+                if (itemSlotTemplate != null) slot = Instantiate(itemSlotTemplate, content, false);
+                else slot = CreateEditorFallbackSlot();
+                slot.gameObject.SetActive(true); slot.name = "Item_" + item.Key;
+                var label = slot.GetComponentInChildren<TextMeshProUGUI>(true);
+                if (label != null) label.text = MapActionDetailsView.Text("item." + item.Key + ".name", item.Key) + "\n× " + item.Value;
                 index++;
-                MapVisualTheme.Skin(slot.gameObject.AddComponent<Image>(), MapVisualTheme.Current?.requirement);
-                var label = MapActionDetailsView.Label("NameAndCount", slot, MapActionDetailsView.Text("item." + item.Key + ".name", item.Key) + "\n× " + item.Value, 23);
-                MapActionDetailsView.Stretch(label.rectTransform, 5); label.alignment = TextAlignmentOptions.Center;
                 slots[item.Key] = slot;
             }
-            // Only item slots participate in the grid, including the six-slot empty state.
-            for (int emptyIndex = index; emptyIndex < 6; emptyIndex++)
+            // Empty slots use the authored visual and are cloned, never assembled at runtime.
+            int emptySlotCount = Mathf.Max(0, 6 - index);
+            for (int slotIndex = 0; slotIndex < emptySlotCount; slotIndex++)
             {
-                var slot = MapActionDetailsView.Rect("EmptySlot_" + emptyIndex, content);
-                MapVisualTheme.Skin(slot.gameObject.AddComponent<Image>(), MapVisualTheme.Current?.requirement);
+                int emptyIndex = index + slotIndex;
+                RectTransform slot;
+                if (emptySlotTemplate != null) slot = Instantiate(emptySlotTemplate, content, false);
+                else
+                {
+                    slot = MapActionDetailsView.Rect("EmptySlot_" + emptyIndex, content);
+                    slot.sizeDelta = grid.cellSize;
+                    slot.gameObject.AddComponent<Image>().color = new Color(.96f, .90f, .71f);
+                }
+                slot.gameObject.SetActive(true); slot.name = "EmptySlot_" + emptyIndex;
             }
+            bool showPreviewTemplates = !Application.isPlaying && showEditorPreview;
+            if (itemSlotTemplate != null) itemSlotTemplate.gameObject.SetActive(showPreviewTemplates);
+            if (emptySlotTemplate != null) emptySlotTemplate.gameObject.SetActive(showPreviewTemplates);
             grid.padding.bottom = index == 0 ? 84 : 0;
             if (index == 0)
             {
-                emptyHint = MapActionDetailsView.Label("Empty", content, "物品栏为空", 18);
-                emptyHint.gameObject.AddComponent<LayoutElement>().ignoreLayout = true;
+                emptyHint = content.Find("Empty")?.GetComponent<TextMeshProUGUI>();
+                if (emptyHint == null) emptyHint = MapActionDetailsView.Label("Empty", content, "物品栏为空", 18);
+                else emptyHint.text = "物品栏为空";
+                var emptyLayout = emptyHint.GetComponent<LayoutElement>();
+                if (emptyLayout == null) emptyLayout = emptyHint.gameObject.AddComponent<LayoutElement>();
+                emptyLayout.ignoreLayout = true;
                 emptyHint.alignment = TextAlignmentOptions.Center;
                 emptyHint.raycastTarget = false;
+                emptyHint.gameObject.SetActive(!Application.isPlaying && showEditorPreview);
             }
             UpdateGridSize();
             LayoutRebuilder.ForceRebuildLayoutImmediate(content);
         }
+        private RectTransform CreateEditorFallbackSlot()
+        {
+            var slot = MapActionDetailsView.Rect("ItemSlot", content);
+            slot.sizeDelta = grid.cellSize;
+            var image = slot.gameObject.AddComponent<Image>();
+            image.color = new Color(.96f, .90f, .71f);
+            var label = MapActionDetailsView.Label("Label", slot, "物品", 18);
+            MapActionDetailsView.Stretch(label.rectTransform, 8);
+            label.alignment = TextAlignmentOptions.Center;
+            return slot;
+        }
+
         private void UpdateGridSize()
         {
             float width = Mathf.Max(1, scroll.viewport.rect.width);

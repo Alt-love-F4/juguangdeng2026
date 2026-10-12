@@ -51,7 +51,9 @@ namespace Spotlight.GameFlow
             for (int i = 0; i < segments.Length; i++)
             {
                 if (segments[i] == null) continue;
-                segments[i].fillAmount = Mathf.Clamp01(ratio * segments.Length - i);
+                segments[i].fillMethod = Image.FillMethod.Horizontal;
+                segments[i].fillOrigin = (int)Image.OriginHorizontal.Right;
+                segments[i].fillAmount = Mathf.Clamp01(ratio * segments.Length - (segments.Length - 1 - i));
             }
         }
     }

@@ -133,13 +133,13 @@ namespace Spotlight.GameFlow.Editor
                     var segments = new Sprite[5];
                     for (int i = 0; i < segments.Length; i++)
                     {
-                        int[] boundaries = { 204, 357, 510, 663, 816, 971 };
+                        int[] boundaries = { 0, 357, 510, 663, 816, 971 };
                         int left = Mathf.RoundToInt(boundaries[i] * texture.width / 971f);
                         int right = Mathf.RoundToInt(boundaries[i + 1] * texture.width / 971f);
-                        var colors = texture.GetPixels(left, 0, right-left, texture.height);
+                        var colors = texture.GetPixels(left, 0, right - left, texture.height);
                         // Normalize the PSD's prefilled grey/orange demo slots into one reusable fill art.
                         for (int p = 0; p < colors.Length; p++) colors[p] = new Color(.86f, .56f, .23f, colors[p].a);
-                        segments[i] = SavePixels("pointSegment" + i, right-left, texture.height, colors);
+                        segments[i] = SavePixels("pointSegment" + i, right - left, texture.height, colors);
                     }
                     theme.pointsSegments = segments;
                 }

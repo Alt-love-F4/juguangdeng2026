@@ -509,7 +509,9 @@ namespace Spotlight.Narrative
         {
             if (result == null) return;
             string target = StripPrefix(result.target, "bar:", "rel:", "flag:", "switch:", "obj:", "event:", "ach:", "setup:");
-            if (result.resultType != NarrativeResultType.AdvanceDay && string.IsNullOrWhiteSpace(target)) return;
+            bool positionEffect = result.resultType == NarrativeResultType.ShowPosition || result.resultType == NarrativeResultType.HidePosition
+                || result.resultType == NarrativeResultType.AddTempPosition || result.resultType == NarrativeResultType.RemoveTempPosition;
+            if (result.resultType != NarrativeResultType.AdvanceDay && !positionEffect && string.IsNullOrWhiteSpace(target)) return;
             switch (result.resultType)
             {
                 case NarrativeResultType.BarAdd:
@@ -533,6 +535,11 @@ namespace Spotlight.Narrative
                 case NarrativeResultType.LockEvent: state.SetEventLocked(target, true); break;
                 case NarrativeResultType.SpawnNpc: state.SetNpcLocation(target, StripPrefix(result.value, "scene:")); break;
                 case NarrativeResultType.DespawnNpc: state.SetNpcLocation(target, string.Empty); break;
+                case NarrativeResultType.ShowPosition:
+                case NarrativeResultType.HidePosition:
+                case NarrativeResultType.AddTempPosition:
+                case NarrativeResultType.RemoveTempPosition:
+                    break;
                 case NarrativeResultType.AdvanceDay:
                     if (int.TryParse(result.value, out int days) && days > 0) AddBar("world.calendar", days); else return;
                     break;

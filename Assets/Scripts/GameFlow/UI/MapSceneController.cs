@@ -21,24 +21,13 @@ namespace Spotlight.GameFlow
 
         [Header("PSD map layers")]
         [SerializeField] private Sprite mapBackgroundSprite;
-        [SerializeField] private Sprite locationIconsSprite;
-        [SerializeField] private Sprite locationSignsSprite;
-        [SerializeField] private Sprite locationNamesSprite;
         [SerializeField] private Sprite pinSprite;
         [SerializeField] private Sprite cityTitleSprite;
         [SerializeField] private Sprite compassSprite;
-        [Serializable]
-        private sealed class LocationArtwork
-        {
-            public string positionKey;
-            public Sprite sprite;
-            public Vector2 position;
-        }
-        [SerializeField] private List<LocationArtwork> locationArtwork = new List<LocationArtwork>();
-        [SerializeField] private Sprite cafeArtwork;
-        [SerializeField] private Sprite marketArtwork;
-        [SerializeField] private Sprite libraryArtwork;
-        [SerializeField] private Sprite temporaryArtwork;
+        private const string GenericPinResource = "Art/Map/Locations/location_pin";
+        private readonly Dictionary<string, NarrativeMapPositionDefinition> runtimePositions = new Dictionary<string, NarrativeMapPositionDefinition>(StringComparer.Ordinal);
+        private readonly Dictionary<string, Button> locationButtons = new Dictionary<string, Button>(StringComparer.Ordinal);
+        private readonly Dictionary<string, TextMeshProUGUI> locationLabels = new Dictionary<string, TextMeshProUGUI>(StringComparer.Ordinal);
         [Header("Map camera")]
         [SerializeField] private MapFeelConfig feelConfig;
         private float focusSmoothTime => feelConfig.focusSmoothTime;
@@ -87,6 +76,7 @@ namespace Spotlight.GameFlow
         private RectTransform artworkHudRect;
         private TextMeshProUGUI endDayLabel;
         private Image endDayImage;
+        private NarrativeRuntime subscribedNarrativeRuntime;
 
         protected override void Awake()
         {
@@ -114,8 +104,29 @@ namespace Spotlight.GameFlow
                 GameplayPanelHooks.PanelType = typeof(MapSceneController);
                 GameplayPanelHooks.IsScenePanel = true;
             }
-            if (mapRoot != null && mapContent != null && actionDetails != null && inventoryView != null) BindExistingUi();
-            else BuildUi();
+            // Runtime must preserve authored prefab geometry. BuildUi is reserved for the
+            // explicit editor prefab builder; missing authored references are configuration errors.
+            if (mapRoot != null && mapContent != null && hud != null && widgets != null)
+            {
+                if (actionDetails == null) actionDetails = GetComponentInChildren<MapActionDetailsView>(true);
+                if (inventoryView == null) inventoryView = GetComponentInChildren<MapActionInventoryView>(true);
+                if (actionDetails == null || inventoryView == null)
+                {
+                    Debug.LogError("MapPanel prefab is missing its authored action popup or inventory view.", this);
+                    enabled = false;
+                    return;
+                }
+                // Nested widget prefabs may leave the legacy popup reference unassigned.
+                // Dismissal must target the same popup that handles location selection.
+                if (focusPanel == null) focusPanel = actionDetails.gameObject;
+                BindExistingUi();
+            }
+            else
+            {
+                Debug.LogError("MapPanel prefab is missing authored map root/HUD/widgets. Build the prefab in the Editor, not at runtime.", this);
+                enabled = false;
+                return;
+            }
             artworkHudRect = hud != null ? hud.Find("ArtworkHud") as RectTransform : null;
             if (endDayButton != null)
             {
@@ -126,6 +137,8 @@ namespace Spotlight.GameFlow
 
         private void OnDestroy()
         {
+            if (subscribedNarrativeRuntime != null && subscribedNarrativeRuntime.Controller != null)
+                subscribedNarrativeRuntime.Controller.EffectRequested -= OnNarrativeEffect;
             if (GameplayPanelHooks.OpenPanel == OpenPanel)
             {
                 GameplayPanelHooks.OpenPanel = null;
@@ -196,14 +209,17 @@ namespace Spotlight.GameFlow
                     case "详情面板": button.onClick.AddListener(OpenDetails); break;
                     case "InventoryToggle": button.onClick.AddListener(ToggleInventory); break;
                     case "TasksToggle": button.onClick.AddListener(ToggleTasks); break;
-                    case "结束当天": button.onClick.AddListener(EndDay); break;
+                    case "结束当天":
+                        if (endDayButton == null) endDayButton = button;
+                        button.onClick.AddListener(EndDay);
+                        break;
                 }
             }
             ConfigureZoomFill(zoomSlider);
             if (zoomSlider != null) zoomSlider.onValueChanged.AddListener(value => { targetZoom = value; focusZooming = false; });
             if (endDayButton != null && UnityEngine.SceneManagement.SceneManager.GetActiveScene().name == "CoffeeShop") endDayButton.gameObject.SetActive(false);
-            BuildConfiguredLocations();
-            BuildTaskPanel(widgets);
+            BindConfiguredLocations();
+            GetComponentInChildren<MapTaskPanel>(true)?.Initialize();
         }
 
         private void BuildUi()
@@ -245,10 +261,8 @@ namespace Spotlight.GameFlow
             // Replacement map exports are full-canvas transparent layers, so all layers share
             // the map center instead of using the offsets from the previous cropped PSD export.
             // Buildings are independent interactive sprites, not a duplicate full icon layer.
-            CreateMapLayer("LocationSigns", locationSignsSprite, new Vector2(19.03f, 10.89f));
-            CreateMapLayer("LocationNames", locationNamesSprite, new Vector2(19.01f, 10.87f));
-            CreateMapLayer("LocationPins", pinSprite, new Vector2(35.01f, 8.73f));
-            BuildConfiguredLocations();
+            // Location names, building artwork and pins are all built from MapPosition rows.
+            BindConfiguredLocations();
             focusPanel = new GameObject("LocationActionPopup", typeof(RectTransform), typeof(Image), typeof(MapActionDetailsView));
             focusPanel.transform.SetParent(root, false);
             actionDetails = focusPanel.GetComponent<MapActionDetailsView>();
@@ -326,7 +340,7 @@ namespace Spotlight.GameFlow
             if (theme.pointsSegments != null && theme.pointsSegments.Length > 0)
             {
                 fill.gameObject.SetActive(false);
-                float[] edges = { 204f, 357f, 510f, 663f, 816f, 971f };
+                float[] edges = { 0f, 357f, 510f, 663f, 816f, 971f };
                 for (int i = 0; i < theme.pointsSegments.Length; i++)
                 {
                     float left = theme.pointsSegments.Length == 5 ? edges[i] / 971f : (float)i / theme.pointsSegments.Length;
@@ -413,7 +427,7 @@ namespace Spotlight.GameFlow
 
         private void ToggleInventory()
         {
-            if (!ControlsAvailable || actionDetails.IsBusy) return;
+            if (!ControlsAvailable || (actionDetails != null && actionDetails.IsBusy)) return;
             var tasks = GetComponentInChildren<MapTaskPanel>(true);
             if (!inventoryView.IsVisible) tasks?.SetVisible(false);
             inventoryView.Toggle();
@@ -421,7 +435,7 @@ namespace Spotlight.GameFlow
 
         private void ToggleTasks()
         {
-            if (!ControlsAvailable || actionDetails.IsBusy) return;
+            if (!ControlsAvailable || (actionDetails != null && actionDetails.IsBusy)) return;
             var tasks = GetComponentInChildren<MapTaskPanel>(true);
             if (tasks == null) return;
             if (!tasks.IsVisible) inventoryView.SetVisible(false);
@@ -475,20 +489,20 @@ namespace Spotlight.GameFlow
             if (Mouse.current != null)
             {
                 float wheel = Mouse.current.scroll.ReadValue().y;
-                if (Mathf.Abs(wheel) > .01f && IsMapPointerTarget()) AddScrollZoom(wheel);
+                if (Mathf.Abs(wheel) > .01f && IsMapZoomPointerTarget()) AddScrollZoom(wheel);
                 UpdatePointerPan(Mouse.current);
             }
             if (!keyboardMoving) UpdatePanInertia(Time.unscaledDeltaTime);
             UpdateZoom();
             UpdateFocusMovement();
             ApplyMapView();
-            if (key != null && key.escapeKey.wasPressedThisFrame && !actionDetails.IsBusy)
+            if (key != null && key.escapeKey.wasPressedThisFrame && (actionDetails == null || !actionDetails.IsBusy))
             {
                 inventoryView.SetVisible(false);
                 GetComponentInChildren<MapTaskPanel>(true)?.SetVisible(false);
                 HideFocus();
             }
-            if (Mouse.current != null && Mouse.current.rightButton.wasPressedThisFrame && !actionDetails.IsBusy && IsMapPointerTarget()) HideFocus();
+            if (Mouse.current != null && Mouse.current.rightButton.wasPressedThisFrame && (actionDetails == null || !actionDetails.IsBusy) && IsMapPointerTarget()) HideFocus();
         }
 
         private bool UpdateKeyboardPan(Vector2 input, float deltaTime)
@@ -562,6 +576,27 @@ namespace Spotlight.GameFlow
             if (pointerHits.Count == 0) return true;
             Transform hit = pointerHits[0].gameObject.transform;
             return hit == mapRoot || hit.IsChildOf(mapRoot);
+        }
+
+        private bool IsMapZoomPointerTarget()
+        {
+            if (EventSystem.current == null) return true;
+            if (mapPointerEvent == null) mapPointerEvent = new PointerEventData(EventSystem.current);
+            mapPointerEvent.Reset();
+            mapPointerEvent.position = Mouse.current.position.ReadValue();
+            pointerHits.Clear();
+            EventSystem.current.RaycastAll(mapPointerEvent, pointerHits);
+            if (pointerHits.Count == 0) return true;
+
+            // Decorative HUD graphics should not consume wheel zoom. Actual
+            // selectable controls, such as the zoom slider, keep their own input.
+            foreach (RaycastResult hit in pointerHits)
+            {
+                Transform target = hit.gameObject.transform;
+                if (target == mapRoot || target.IsChildOf(mapRoot)) return true;
+                if (target.GetComponentInParent<Selectable>() != null) return false;
+            }
+            return true;
         }
 
         internal void Pan(Vector2 delta)
@@ -675,14 +710,9 @@ namespace Spotlight.GameFlow
             afterFocus = null;
         }
 
-        private void BuildConfiguredLocations()
+        private void BindConfiguredLocations()
         {
-            if (buildingForEditor)
-            {
-                foreach (var artwork in locationArtwork)
-                    if (artwork != null) CreateLocation(entities, "Location:" + artwork.positionKey, artwork.position, false, artwork.sprite, null);
-                return;
-            }
+            if (buildingForEditor) return;
             try
             {
                 narrativeConfiguration = LubanNarrativeLoader.Load();
@@ -694,20 +724,31 @@ namespace Spotlight.GameFlow
                 return;
             }
             if (narrativeConfiguration == null) return;
-            foreach (var artwork in locationArtwork)
-            {
-                if (!narrativeConfiguration.mapPositions.Any(p => p.positionKey == artwork.positionKey))
-                    narrativeConfiguration.mapPositions.Add(new NarrativeMapPositionDefinition { positionKey = artwork.positionKey, nameText = artwork.positionKey, position = artwork.position, enabled = true });
-            }
             foreach (NarrativeMapPositionDefinition position in narrativeConfiguration.mapPositions)
             {
-                if (position == null || !position.enabled) continue;
-                string label = ResolveText(position.nameText, position.positionKey);
-                Vector2 mapPosition = PositionForArtwork(position.positionKey, position.position);
-                var existing = entities.Find("Location:" + position.positionKey)?.GetComponent<Button>();
-                if (existing != null) BindLocation(existing, position);
-                else CreateLocation(entities, "Location:" + position.positionKey, mapPosition, position.isImportant, FindArtwork(position.positionKey), () => OnPositionClicked(position));
+                if (position == null || string.IsNullOrWhiteSpace(position.positionKey)) continue;
+                runtimePositions[position.positionKey] = position;
+                bool visible = position.isImportant || position.enabled;
+                BindAuthoredLocation(position);
+                if (locationButtons.TryGetValue(position.positionKey, out Button authoredButton))
+                    authoredButton.gameObject.SetActive(visible);
             }
+            SubscribePositionEffects();
+        }
+
+        private void BindAuthoredLocation(NarrativeMapPositionDefinition position)
+        {
+            if (entities == null || position == null) return;
+            Button button = entities.Find("Location:" + position.positionKey)?.GetComponent<Button>();
+            if (button == null)
+            {
+                Debug.LogWarning("[Map] No authored location object for " + position.positionKey + "; runtime will not synthesize map artwork.", this);
+                return;
+            }
+            locationButtons[position.positionKey] = button;
+            var label = button.transform.Find("LocationName")?.GetComponent<TextMeshProUGUI>();
+            if (label != null) { label.text = ResolveText(position.nameText, position.positionKey); locationLabels[position.positionKey] = label; }
+            BindLocation(button, position);
         }
 
         private void EnsureNarrativeRuntime()
@@ -718,32 +759,127 @@ namespace Spotlight.GameFlow
                 GameObject root = new GameObject("NarrativeRuntime.MapFallback");
                 runtime = root.AddComponent<NarrativeRuntime>();
             }
-            // 直接运行 Map 场景也必须安装正式演出适配，不能退回 NCS 内建白盒 UI。
             runtime.ConversationPlayback = NarrativeConversationEventPlayback.Play;
             runtime.ReadingPlayback = ReadingEventPlayback.Play;
             runtime.NoticePlayback = NarrativeNoticeEventPlayback.Play;
             runtime.CharacterResolver = NarrativeCharacterResolver.Resolve;
         }
 
-        private Vector2 PositionForArtwork(string key, Vector2 configured)
+        private void SubscribePositionEffects()
         {
-            // Temporary visual alignment for the imported PSD. Runtime data remains
-            // untouched and can replace these anchors when its coordinate schema is finalized.
-            var artwork = locationArtwork.FirstOrDefault(item => item != null && item.positionKey == key);
-            return artwork != null ? artwork.position : configured;
+            NarrativeRuntime runtime = NarrativeRuntime.Instance;
+            if (runtime == null || runtime == subscribedNarrativeRuntime) return;
+            if (subscribedNarrativeRuntime != null) subscribedNarrativeRuntime.Controller.EffectRequested -= OnNarrativeEffect;
+            subscribedNarrativeRuntime = runtime;
+            runtime.Controller.EffectRequested += OnNarrativeEffect;
+        }
+
+        private void OnNarrativeEffect(NarrativeEffectNotification notification)
+        {
+            if (notification?.Result == null) return;
+            NarrativeResultDefinition result = notification.Result;
+            string key = string.IsNullOrWhiteSpace(result.target) ? string.Empty : result.target.Trim();
+            switch (result.resultType)
+            {
+                case NarrativeResultType.ShowPosition:
+                    if (runtimePositions.TryGetValue(key, out var shown) && !shown.isImportant) SetPositionVisible(shown, true);
+                    break;
+                case NarrativeResultType.HidePosition:
+                    if (runtimePositions.TryGetValue(key, out var hidden) && !hidden.isImportant) SetPositionVisible(hidden, false);
+                    break;
+                case NarrativeResultType.AddTempPosition:
+                    AddTemporaryPosition(result);
+                    break;
+                case NarrativeResultType.RemoveTempPosition:
+                    RemoveTemporaryPosition(key);
+                    break;
+            }
+        }
+
+        private void SetPositionVisible(NarrativeMapPositionDefinition position, bool visible)
+        {
+            if (position == null || position.isImportant) return;
+            position.enabled = visible;
+            if (locationButtons.TryGetValue(position.positionKey, out Button existing) && existing != null)
+                existing.gameObject.SetActive(visible);
+            if (!visible)
+            {
+                if (focusedPosition == position) HideFocus();
+                return;
+            }
+            if (!locationButtons.ContainsKey(position.positionKey)) BindAuthoredLocation(position);
+        }
+
+        private void AddTemporaryPosition(NarrativeResultDefinition result)
+        {
+            string[] values = (result.value ?? string.Empty).Split(new[] { '|', ';' }, StringSplitOptions.None);
+            if (values.Length < 8) { Debug.LogWarning("[Map] ADDTEMP_POSITION expects key|nameText|x|y|isImportant|defaultAction|extendedActions|imgPath", this); return; }
+            if (!float.TryParse(values[2], System.Globalization.NumberStyles.Float, System.Globalization.CultureInfo.InvariantCulture, out float x)
+                || !float.TryParse(values[3], System.Globalization.NumberStyles.Float, System.Globalization.CultureInfo.InvariantCulture, out float y)
+                || !bool.TryParse(values[4], out bool important)) { Debug.LogWarning("[Map] Invalid temporary position coordinates/importance: " + result.value, this); return; }
+            string key = values[0].Trim();
+            if (string.IsNullOrEmpty(key) || runtimePositions.ContainsKey(key)) { Debug.LogWarning("[Map] Temporary position key is empty or already in use: " + key, this); return; }
+            if (string.IsNullOrWhiteSpace(values[1])) { Debug.LogWarning("[Map] Temporary position nameText is required: " + key, this); return; }
+            var position = new NarrativeMapPositionDefinition { positionKey = key, nameText = values[1], position = new Vector2(x, y), isImportant = important,
+                defaultAction = values[5].Trim(), extendedActions = SplitActions(values[6]), imgPath = values[7].Trim(),
+                enabled = true, isTemporary = true, dismissOnClick = !important };
+            runtimePositions.Add(key, position);
+            if (!string.IsNullOrEmpty(position.defaultAction)) NarrativeRuntime.Instance?.Actions?.Mount(key, position.defaultAction);
+            foreach (string action in position.extendedActions) if (!string.IsNullOrEmpty(action)) NarrativeRuntime.Instance?.Actions?.Mount(key, action);
+            CreateLocation(position, true);
+        }
+
+        private static List<string> SplitActions(string value) => (value ?? string.Empty).Split(new[] { ',', '+', ';' }, StringSplitOptions.RemoveEmptyEntries).Select(item => item.Trim()).Where(item => item.Length > 0).ToList();
+
+        private void RemoveTemporaryPosition(string key)
+        {
+            if (!runtimePositions.TryGetValue(key, out var position) || !position.isTemporary) return;
+            if (locationButtons.TryGetValue(key, out Button existing)) Destroy(existing.gameObject);
+            locationButtons.Remove(key); locationLabels.Remove(key);
+            if (focusedPosition == position) HideFocus();
+            runtimePositions.Remove(key);
         }
 
         private void OnPositionClicked(NarrativeMapPositionDefinition position)
         {
-            if (!ControlsAvailable || actionDetails.IsBusy) return;
+            if (!ControlsAvailable || (actionDetails != null && actionDetails.IsBusy) || position == null) return;
             FocusPosition(position);
-            BeginFocusMovement(PositionForArtwork(position.positionKey, position.position));
+            BeginFocusMovement(position.position);
+            // Ordinary map locations remain visible while their action details are open.
+            // Only explicitly dismissible temporary markers should disappear on click.
+            if (position.isTemporary && position.dismissOnClick) RemoveTemporaryPosition(position.positionKey);
         }
 
         private void FocusPosition(NarrativeMapPositionDefinition position)
         {
             focusedPosition = position;
-            actionDetails.Show(position.positionKey, ResolveText(position.nameText, position.positionKey));
+            if (actionDetails != null) actionDetails.Show(position.positionKey, ResolveText(position.nameText, position.positionKey));
+        }
+
+        internal void PositionActionDetailsNearLocation(string positionKey)
+        {
+            if (actionDetails == null || widgets == null || string.IsNullOrEmpty(positionKey)) return;
+            if (!locationButtons.TryGetValue(positionKey, out Button button) || button == null) return;
+            RectTransform popup = actionDetails.transform as RectTransform;
+            Canvas.ForceUpdateCanvases();
+            if (popup.rect.width <= 1 || popup.rect.height <= 1) return;
+            Vector3 worldPoint = button.transform is RectTransform locationRect
+                ? locationRect.TransformPoint(locationRect.rect.center)
+                : button.transform.position;
+            Vector2 screenPoint = RectTransformUtility.WorldToScreenPoint(UiCamera, worldPoint);
+            if (!RectTransformUtility.ScreenPointToLocalPointInRectangle(widgets, screenPoint, UiCamera, out Vector2 localPoint)) return;
+            const float gap = 28f;
+            Rect bounds = widgets.rect;
+            float width = popup.rect.width, height = popup.rect.height;
+            Vector2 right = new Vector2(localPoint.x + width * .5f + gap, localPoint.y);
+            Vector2 left = new Vector2(localPoint.x - width * .5f - gap, localPoint.y);
+            Vector2 candidate = right.x + width * .5f <= bounds.xMax ? right : left;
+            candidate.x = Mathf.Clamp(candidate.x, bounds.xMin + width * .5f, bounds.xMax - width * .5f);
+            candidate.y = Mathf.Clamp(candidate.y, bounds.yMin + height * .5f, bounds.yMax - height * .5f);
+            popup.anchorMin = popup.anchorMax = new Vector2(.5f, .5f);
+            popup.pivot = new Vector2(.5f, .5f);
+            popup.anchoredPosition = candidate;
+            actionDetails.transform.SetAsLastSibling();
         }
 
         private void RebuildActionList()
@@ -844,14 +980,7 @@ namespace Spotlight.GameFlow
             MapTaskPanel view = panel.GetComponent<MapTaskPanel>();
             view.Initialize();
             // Existing map examples; replace through SetItems when task progression data is available.
-            var examples = new List<MapTaskItem>();
-            string[] active = { "进入绿道", "完成今日营业", "探索城区的新地点", "寻找可靠的保护", "协助别人的工作", "报告街道状况" };
-            string[] completed = { "修好炉灶温备用", "船队援助", "让新版本机重获自由", "救出莹莹" };
-            for (int i = 0; i < active.Length; i++)
-                examples.Add(new MapTaskItem { id = "map_example_active_" + i, name = active[i], description = "示例事项，尚未接入剧情任务数据。", currentTask = active[i] });
-            for (int i = 0; i < completed.Length; i++)
-                examples.Add(new MapTaskItem { id = "map_example_completed_" + i, name = completed[i], description = "示例已完成事项，尚未接入剧情任务数据。", completed = true, previousTasks = new List<string> { completed[i] } });
-            view.SetItems(examples);
+            // Runtime task contents are supplied by gameplay data, never hard-coded UI examples.
         }
 
         private static void SetButtonText(Button button, string text, float size)
@@ -863,7 +992,7 @@ namespace Spotlight.GameFlow
 
         private void EndDay()
         {
-            if (!ControlsAvailable || actionDetails.IsBusy) return;
+            if (!ControlsAvailable || (actionDetails != null && actionDetails.IsBusy)) return;
             if (NarrativeRuntime.Instance?.Actions?.HasBlockingActions() ?? false)
             {
                 status.text = "有需要进行的行动：请先完成地图上的今日必做行动";
@@ -956,36 +1085,58 @@ namespace Spotlight.GameFlow
             if (status != null) status.text = "滚轮缩放，WASD移动；点击地点聚焦，右键退出聚焦";
         }
 
-        private Sprite FindArtwork(string key)
+        private void CreateLocation(NarrativeMapPositionDefinition position, bool temporary)
         {
-            Sprite configured = locationArtwork.FirstOrDefault(item => item != null && item.positionKey == key)?.sprite;
-            if (configured != null) return configured;
-            return key switch
+            if (position == null || entities == null) return;
+            if (locationButtons.TryGetValue(position.positionKey, out Button old) && old != null) Destroy(old.gameObject);
+            Sprite artwork = LoadMapSprite(position.imgPath);
+            Sprite pin = position.isImportant ? null : LoadMapSprite(GenericPinResource);
+            string displayName = ResolveText(position.nameText, position.positionKey);
+            Button button = CreateButton("Location:" + position.positionKey, entities, position.position, position.isImportant ? new Vector2(210, 130) : new Vector2(88, 112));
+            button.onClick.RemoveAllListeners();
+            RectTransform rect = button.GetComponent<RectTransform>();
+            Image baseImage = button.GetComponent<Image>();
+            if (position.isImportant)
             {
-                "cafe" => cafeArtwork,
-                "market" => marketArtwork,
-                "library" => libraryArtwork,
-                "temporary" => temporaryArtwork,
-                _ => pinSprite
-            };
+                baseImage.sprite = artwork;
+                baseImage.color = artwork != null ? Color.white : new Color(1, 1, 1, 0);
+                baseImage.preserveAspect = true;
+                if (artwork != null) rect.sizeDelta = artwork.rect.size * PsdScale;
+            }
+            else
+            {
+                baseImage.sprite = pin;
+                baseImage.color = pin != null ? Color.white : Color.clear;
+                baseImage.preserveAspect = true;
+                if (artwork != null)
+                {
+                    Image icon = new GameObject("EventIcon", typeof(RectTransform), typeof(Image)).GetComponent<Image>();
+                    icon.transform.SetParent(button.transform, false);
+                    RectTransform iconRect = icon.rectTransform; iconRect.anchorMin = iconRect.anchorMax = new Vector2(.5f, .66f);
+                    iconRect.pivot = new Vector2(.5f, .5f); iconRect.sizeDelta = new Vector2(38, 38);
+                    icon.sprite = artwork; icon.preserveAspect = true; icon.raycastTarget = false;
+                }
+            }
+            baseImage.raycastTarget = true;
+            var label = new GameObject("LocationName", typeof(RectTransform), typeof(TextMeshProUGUI)).GetComponent<TextMeshProUGUI>();
+            label.transform.SetParent(button.transform, false);
+            RectTransform labelRect = label.rectTransform; labelRect.anchorMin = labelRect.anchorMax = new Vector2(.5f, 0);
+            labelRect.pivot = new Vector2(.5f, 1); labelRect.anchoredPosition = new Vector2(0, position.isImportant ? -8 : 0);
+            labelRect.sizeDelta = new Vector2(position.isImportant ? 220 : 160, 34);
+            label.text = displayName; label.fontSize = 22; label.alignment = TextAlignmentOptions.Center; label.raycastTarget = false;
+            MapVisualTheme.Font(label, false);
+            button.onClick.AddListener(() => { if (!dragging) OnPositionClicked(position); });
+            button.gameObject.AddComponent<MapLocationHover>().Initialize(this);
+            locationButtons[position.positionKey] = button;
+            locationLabels[position.positionKey] = label;
         }
 
-        private void CreateLocation(RectTransform parent, string name, Vector2 position, bool important, Sprite artwork, Action action)
+        private static Sprite LoadMapSprite(string resourcePath)
         {
-            // The replacement full-canvas icon layer already draws the location artwork.
-            // Keep an invisible button at each configured location for interaction only.
-            Vector2 size = important ? new Vector2(210, 130) : new Vector2(150, 100);
-            Button button = CreateButton(name, parent, position, size);
-            Image image = button.GetComponent<Image>();
-            image.sprite = artwork;
-            image.preserveAspect = true;
-            image.color = artwork != null ? Color.white : new Color(1f, 1f, 1f, 0f);
-            if (artwork != null) button.GetComponent<RectTransform>().sizeDelta = artwork.rect.size * PsdScale;
-            image.raycastTarget = true;
-            TextMeshProUGUI label = button.transform.Find("Label")?.GetComponent<TextMeshProUGUI>();
-            if (label != null) label.enabled = false;
-            button.onClick.AddListener(() => { if (!dragging) action?.Invoke(); });
-            button.gameObject.AddComponent<MapLocationHover>().Initialize(this);
+            if (string.IsNullOrWhiteSpace(resourcePath)) return null;
+            Sprite sprite = Resources.Load<Sprite>(resourcePath.Trim());
+            if (sprite == null) Debug.LogWarning("[Map] Sprite not found at Resources/" + resourcePath.Trim() + " (without extension).");
+            return sprite;
         }
 
         private void CreateMapLayer(string name, Sprite sprite, Vector2 psdPosition)
