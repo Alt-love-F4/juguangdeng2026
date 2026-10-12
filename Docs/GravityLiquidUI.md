@@ -17,6 +17,8 @@ liquid.Refill();
 liquid.ResetMotion(); // 瞬移、换父级后清除运动历史
 ```
 
+咖啡经营的大、小杯通过 `OrthographicGlassCupPresenter` 消费实际体积与成分比例，复用本效果绘制正交玻璃框；详见 `Docs/FreeCafeGlassCups.md`。`ConfigureAppearance` 设置液体/深部/表面/杯壁颜色，`AddPourImpulse(tilt, strength)` 同时激发角速度与波纹（tilt=0 的直立接液也能产生波纹），`MotionInfluence` 可适配世界单位。展示层关闭自动 spilling，不反写业务库存。
+
 ## 实现与边界
 
 - 一个 Image 同时绘制液体、液面高光、下/左/右三面杯壁；杯口开放，上方透明。
@@ -25,6 +27,7 @@ liquid.ResetMotion(); // 瞬移、换父级后清除运动历史
 - 支持常见的 Screen Space Overlay / Camera Canvas 和正面 World Space Canvas，URP Unlit。**不响应 2D Light**。
 - 兼容 `Mask` stencil、`RectMask2D` 和 softness、CanvasGroup/Image alpha。
 - 重力是世界 XY 方向（默认向下）。Screen Space Overlay 的世界单位通常是 UI 像素；`Motion Influence` 用于把位移加速度缩放到重力单位。World Space Canvas 可按场景尺度调高此值。
+- `MotionSpace` 默认空，保持原来的世界位移采样；指定 Transform 时，采样位移减去该空间的位置，忽略其整体平移。适用于滑入/滑出的经营子场景，仍保持世界方向的重力和杯体自身运动响应；修改空间时会清除运动历史。
 - 重力方向通过局部基向量变换，考虑父级 Z 旋转、非等比缩放和镜像。效果面向 2D XY 平面，不用于透视三维杯体或 X/Y 轴翻转。
 - C# 模拟液面角度与阻尼、倾倒液量；Shader 绘制波浪。**不是 Navier–Stokes 流体模拟**，不模拟液滴、飞溅粒子、真实黏度、泡沫、透明折射或任意杯形碰撞。
 - 静态平面通过矩形截面积求液面高度，维持液量；小振幅波浪为视觉项，不做逐波积分守恒。

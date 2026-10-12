@@ -100,6 +100,8 @@ namespace Spotlight.FreeCafe
         public int units;     // 份数
         public int quality;   // 品质（0~2，仅咖啡豆等有品质的物品使用）
         public float milliliters;
+        public float grams;
+        public bool extracted;
         public LiquidTemperature temperature;
         public float productionScore = 100;
         public int addedSequence;

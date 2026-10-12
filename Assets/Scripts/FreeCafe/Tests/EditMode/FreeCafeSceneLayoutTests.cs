@@ -40,6 +40,7 @@ namespace Spotlight.FreeCafe.Tests
         }
         [Test] public void LayoutOutsideOldWhiteboxBoundsStartsWithoutClampingOrChangingTheAsset()
         {
+            float originalWidth=Array.Find(catalog.areas,area=>area.id==AreaId.Counter).halfWidth;
             var view=Find("s.cups.small");view.transform.position=runtime.areaRoots[1].TransformPoint(new Vector3(-22,9,0));
             view.transform.localScale=Vector3.one*3;
             catalog.layout=FreeCafeSceneLayout.Capture(runtime);
@@ -50,7 +51,7 @@ namespace Spotlight.FreeCafe.Tests
             Assert.That(world.CanPosition("cup.large",AreaId.Counter,-22,9).success,Is.True);
             Assert.That(world.CanPosition("cup.large",AreaId.Counter,1000,1000).success,Is.False);
             var asset=JsonUtility.FromJson<CafeCatalog>(runtime.catalogAsset.text);
-            Assert.That(Array.Find(asset.areas,a=>a.id==AreaId.Counter).halfWidth,Is.EqualTo(9));
+            Assert.That(Array.Find(asset.areas,a=>a.id==AreaId.Counter).halfWidth,Is.EqualTo(originalWidth));
         }
         [Test] public void GroupOffsetsAndReparentingUseAreaCoordinatesNotStalePrefabLocals()
         {

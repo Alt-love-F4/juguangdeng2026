@@ -15,17 +15,17 @@ namespace Spotlight.FreeCafe
                 if (p.specId == "coffee") { coffeeMl += p.milliliters; extractionSum += p.productionScore * p.milliliters; coffeeOrder = Math.Max(coffeeOrder, p.addedSequence); }
                 else if (p.milliliters > 0) firstLiquid = Math.Min(firstLiquid, p.addedSequence);
                 if (p.specId == "honey" || p.specId == "cream") firstTopping = Math.Min(firstTopping, p.addedSequence);
-                if (p.specId == "sugar") sweetness += p.units;
-                if (p.specId == "honey") sweetness += p.units * 2;
+                if (p.specId == "sugar") sweetness += p.grams > 0 ? p.grams / 5 : p.units;
+                if (p.specId == "honey") sweetness += (p.grams > 0 ? p.grams / 12 : p.units) * 2;
             }
             bool needsCoffee = false;
             foreach (var need in product.ingredients)
             {
-                float ml = 0; int units = 0; float temperature = 0;
+                float ml = 0; float units = 0; float temperature = 0;
                 foreach (var p in cup.contents)
                 {
                     if (!SameIngredient(p.specId, need.specId)) continue;
-                    ml += p.milliliters; units += p.units;
+                    ml += p.milliliters; units += p.grams > 0 ? p.grams / (p.specId == "sugar" ? 5 : 12) : p.units;
                     temperature += p.milliliters * (100 - Math.Abs((int)p.temperature - (int)product.requiredTemperature) * 35);
                 }
                 if (IsLiquid(need.specId))
@@ -43,17 +43,22 @@ namespace Spotlight.FreeCafe
             float liquid = liquidCount > 0 ? liquidScore / liquidCount : 100;
             int latestLiquid = 0;
             foreach (var p in cup.contents) if (p.milliliters > 0) latestLiquid = Math.Max(latestLiquid, p.addedSequence);
-            float order = 100 - (coffeeOrder > firstLiquid ? 20 : 0) - (firstTopping < latestLiquid ? 15 : 0);
+            float order = 100;
             if (!string.IsNullOrEmpty(product.preferredLatteArtPattern))
                 order -= string.Equals(cup.latteArtPattern, product.preferredLatteArtPattern, StringComparison.OrdinalIgnoreCase) ? 0 : 25;
             float sweet = Clamp(100 - Math.Abs(sweetness - product.idealSweetness) * 20);
             float ratio = totalMl > 0 ? coffeeMl / totalMl : 0;
-            float concentration = Clamp(100 - Math.Abs(ratio - product.idealCoffeeRatio) * 150);
+            float grounds = 0;
+            foreach (var portion in cup.contents) if (portion.specId == "grounds") grounds += portion.grams;
+            float strength = grounds > 0 && coffeeMl > 0 ? Clamp(100 - Math.Abs(grounds / coffeeMl - .06f) / .06f * 100) : 100;
+            float concentration = Clamp(100 - Math.Abs(ratio - product.idealCoffeeRatio) * 150) * strength / 100;
             // 杯型、配方完整度和多余原料是独立惩罚，空杯/半成品允许出品但不会获得虚假高分。
             float penalty = cup.specId == product.cupSpecId ? 1 : .75f;
             foreach (var p in cup.contents)
             {
-                bool expected = p.specId == "sugar";
+                bool expected = p.specId == "sugar" || p.specId == "grounds" && needsCoffee
+                    || p.specId == "cocoa.powder" && cup.contents.Exists(portion => portion.specId == "cocoa.drink")
+                    || p.specId == "matcha.powder" && cup.contents.Exists(portion => portion.specId == "matcha.drink");
                 foreach (var need in product.ingredients) if (SameIngredient(p.specId, need.specId)) expected = true;
                 if (!expected) penalty *= .8f;
             }
@@ -64,7 +69,15 @@ namespace Spotlight.FreeCafe
             || (actual == "milk" || actual == "hotmilk") && (expected == "milk" || expected == "hotmilk")
             || (actual == "water" || actual == "hotwater") && (expected == "water" || expected == "hotwater");
 
-        public ActionResult DeliverProductionCup() => ServeProduction(ServingCup, Request(State.focusedRequestId));
+        public ActionResult DeliverProductionCup()
+        {
+            var cup=ServingCup;
+            var tray=State.entities.Find(e=>e.area==AreaId.Counter && Spec(e.specId).Has(Capability.Delivery));
+            if(cup==null || tray==null || cup.area!=tray.area || Math.Abs(cup.x-tray.x)>.1f || Math.Abs(cup.y-tray.y)>.1f)
+                return ActionResult.No("交付区没有杯子，请先把杯子拖到方框内再按铃");
+            if(Request(State.focusedRequestId)==null) return ActionResult.No("当前没有可交付的订单");
+            return ServeProduction(cup, Request(State.focusedRequestId));
+        }
         private ActionResult ServeProduction(WorldEntity cup, CustomerRequest request)
         {
             if (!ProductionEnabled || cup == null || request == null || !Spec(cup.specId).Has(Capability.Container))
@@ -109,7 +122,7 @@ namespace Spotlight.FreeCafe
         public ActionResult EmptyProductionMachine(string id)
         {
             var machine = Find(id);
-            if (!IsProductionMachine(machine) || machine.contents.Count == 0) return ActionResult.No("没有可清空的设备内容");
+            if ((!IsProductionMachine(machine) && !IsContainer(machine)) || machine.contents.Count == 0) return ActionResult.No("没有可清空的设备内容");
             machine.contents.Clear(); machine.production = new ProductionEntityState();
             Notify(); return ActionResult.Yes("设备内容已丢弃，资源不返还");
         }

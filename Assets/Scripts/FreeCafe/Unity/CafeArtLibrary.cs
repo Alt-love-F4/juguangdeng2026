@@ -27,6 +27,7 @@ namespace Spotlight.FreeCafe
             {
                 foreach(var variant in entry.variants) if(variant.state==state && variant.sprite!=null) return variant.sprite;
                 foreach(var variant in entry.variants) if(variant.state=="default" && variant.sprite!=null) return variant.sprite;
+                foreach(var variant in entry.variants) if(variant.sprite!=null) return variant.sprite;
             }
             return entry.whitebox;
         }

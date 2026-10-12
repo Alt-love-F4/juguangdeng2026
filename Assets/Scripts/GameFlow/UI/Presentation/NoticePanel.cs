@@ -24,6 +24,13 @@ namespace Spotlight.GameFlow
         [SerializeField] private Button cancelButton;
         [SerializeField, Min(0f)] private float enterSeconds = .2f;
         [SerializeField, Min(0f)] private float exitSeconds = .15f;
+        [SerializeField] private RectTransform newspaperLayout;
+        [SerializeField] private RectTransform articleSurface;
+        [SerializeField] private TMP_Text confirmLabel;
+
+        private int textPage;
+        private int textPageCount;
+        private Vector2 layoutSize;
 
         private DG.Tweening.Sequence transition;
         private Action finished;
@@ -35,6 +42,8 @@ namespace Spotlight.GameFlow
 
         protected override void OnInit(IUIData data = null)
         {
+            SetShowAnimation(null);
+            SetHideAnimation(null);
             if (confirmButton != null) confirmButton.onClick.AddListener(Confirm);
             if (cancelButton != null) cancelButton.onClick.AddListener(Cancel);
         }
@@ -63,6 +72,15 @@ namespace Spotlight.GameFlow
                 rect.offsetMax = Vector2.zero;
                 rect.sizeDelta = Vector2.zero;
             }
+            FitLayout();
+        }
+
+        private void FitLayout()
+        {
+            if (newspaperLayout == null || !(transform is RectTransform root)) return;
+            layoutSize = root.rect.size;
+            float scale = Mathf.Min(layoutSize.x / 1920f, layoutSize.y / 1080f);
+            newspaperLayout.localScale = Vector3.one * Mathf.Max(.01f, scale);
         }
 
         public void Play(NoticeData value, Action onFinished = null, Action onCancelled = null)
@@ -70,7 +88,8 @@ namespace Spotlight.GameFlow
             if (value == null) throw new ArgumentNullException(nameof(value));
             if (canvasGroup == null || confirmButton == null) throw new InvalidOperationException("NoticePanel has incomplete prefab bindings.");
             Stop();
-            if (!value.Visible) { onFinished?.Invoke(); return; }
+            if (!value.Visible) { CloseSelf(); onFinished?.Invoke(); return; }
+            OnShow();
             lastConfirmFrame = Time.frameCount;
             var system = UnityEngine.EventSystems.EventSystem.current;
             if (system != null) system.SetSelectedGameObject(null);
@@ -83,6 +102,8 @@ namespace Spotlight.GameFlow
             {
                 noticeImage.texture = value.Image;
                 noticeImage.gameObject.SetActive(value.Image != null);
+                // Letterbox within the article photograph, never fit against the entire screen.
+                noticeImage.uvRect = new Rect(0f, 0f, 1f, 1f);
                 var fitter = noticeImage.GetComponent<AspectRatioFitter>();
                 if (value.Image != null && fitter != null) fitter.aspectRatio = value.Image.width / (float)Mathf.Max(1, value.Image.height);
             }
@@ -94,13 +115,12 @@ namespace Spotlight.GameFlow
             }
             if (bodyText != null)
             {
+                // Newspaper artwork supplies a default illustration. Copy stays in its own column.
                 bodyText.text = value.Body;
-                // The notice is a single-page card: with an image, text follows the image;
-                // without one, the text expands into the freed image area.
-                RectTransform rect = bodyText.rectTransform;
-                rect.anchorMin = new Vector2(.07f, value.Image == null ? .35f : .18f);
-                rect.anchorMax = new Vector2(.93f, value.Image == null ? .70f : .38f);
-                rect.offsetMin = rect.offsetMax = Vector2.zero;
+                bodyText.overflowMode = TextOverflowModes.Page;
+                bodyText.pageToDisplay = 1;
+                bodyText.maxVisibleCharacters = int.MaxValue;
+                bodyText.gameObject.SetActive(!string.IsNullOrWhiteSpace(value.Body));
             }
             if (progressBar != null)
             {
@@ -114,7 +134,13 @@ namespace Spotlight.GameFlow
                 progressLabel.text = value.ProgressLabel;
                 progressLabel.gameObject.SetActive(value.HasProgress && !string.IsNullOrEmpty(value.ProgressLabel));
             }
-            if (hintText != null) hintText.text = "空格 / 回车 / 点击确认关闭";
+            if (articleSurface != null) articleSurface.gameObject.SetActive(!string.IsNullOrWhiteSpace(value.Body));
+            Canvas.ForceUpdateCanvases();
+            FitLayout();
+            if (bodyText != null && bodyText.gameObject.activeInHierarchy) bodyText.ForceMeshUpdate();
+            textPage = 1;
+            textPageCount = bodyText != null && bodyText.gameObject.activeInHierarchy ? Mathf.Max(1, bodyText.textInfo.pageCount) : 1;
+            UpdatePageHint();
             canvasGroup.alpha = 0f;
             canvasGroup.blocksRaycasts = canvasGroup.interactable = true;
             if (confirmButton != null) confirmButton.interactable = false;
@@ -132,6 +158,12 @@ namespace Spotlight.GameFlow
         {
             if (!IsPlaying || !ready || exiting || lastConfirmFrame == Time.frameCount) return;
             lastConfirmFrame = Time.frameCount;
+            if (textPage < textPageCount)
+            {
+                bodyText.pageToDisplay = ++textPage;
+                UpdatePageHint();
+                return;
+            }
             exiting = true;
             if (confirmButton != null) confirmButton.interactable = false;
             transition?.Kill(false);
@@ -141,6 +173,7 @@ namespace Spotlight.GameFlow
             {
                 Action callback = finished;
                 Stop();
+                CloseSelf();
                 callback?.Invoke();
             });
         }
@@ -160,8 +193,15 @@ namespace Spotlight.GameFlow
             }
         }
 
+        private void UpdatePageHint()
+        {
+            if (hintText != null) hintText.text = (textPageCount > 1 ? $"{textPage} / {textPageCount}  ·  " : string.Empty) + "空格 / 回车：继续   Esc：关闭";
+            if (confirmLabel != null) confirmLabel.text = textPage < textPageCount ? "继续阅读" : "开始一天";
+        }
+
         private void Update()
         {
+            if (newspaperLayout != null && transform is RectTransform root && root.rect.size != layoutSize) FitLayout();
             if (!IsPlaying || exiting) return;
             Keyboard keyboard = Keyboard.current;
             if (keyboard != null && keyboard.escapeKey.wasPressedThisFrame) { Cancel(); return; }

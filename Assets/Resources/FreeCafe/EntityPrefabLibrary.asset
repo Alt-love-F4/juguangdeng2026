@@ -83,3 +83,5 @@ MonoBehaviour:
     prefab: {fileID: 4739513656803240139, guid: 2bdca34e5e8888c46867250ac78f4193, type: 3}
   - specId: business.start
     prefab: {fileID: 2570357490750689856, guid: e64b3c0f638a2f84fbeb9113b61696c7, type: 3}
+  - specId: machine.stove
+    prefab: {fileID: 7785203104757129137, guid: a32d1b9086424264da1bae6c83efdb9a, type: 3}

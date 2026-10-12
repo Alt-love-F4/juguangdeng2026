@@ -151,7 +151,9 @@ namespace Spotlight.FreeCafe
             hint.text=runtime.Hint;
             var selected=runtime.World.Find(runtime.SelectedId);
             string text=selected==null ? "点击顾客查看需求；前往制作台调配饮品。" : "选中："+runtime.World.Spec(selected.specId).label+"";
-            if(selected!=null) foreach(var p in selected.contents) text+=" / "+runtime.World.Spec(p.specId).label+"×"+p.units;
+            if(selected!=null && runtime.World.ProductionEnabled && runtime.World.IsContainer(selected))
+                text+=" / "+runtime.World.ContainerInspection(selected);
+            else if(selected!=null) foreach(var p in selected.contents) text+=" / "+runtime.World.Spec(p.specId).label+"×"+p.units;
             selection.text=text;
             areaName.text=runtime.World.Area(state.currentArea).label;
             for(int i=0;i<areaButtons.Length;i++) if(areaButtons[i]!=null) areaButtons[i].interactable=!runtime.InputBlocked && i!=(int)state.currentArea;

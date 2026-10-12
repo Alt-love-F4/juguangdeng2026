@@ -192,6 +192,7 @@ namespace Spotlight.FreeCafe
             var people = RestorePeopleAndBusinessControls(candidate, ids);
             if (!people.success) return people;
             State = candidate;
+            RestoreContainerDefaults();
             UnlockContent();
             Notify();
             return ActionResult.Yes("世界状态已恢复");

@@ -1,0 +1,4563 @@
+fileFormatVersion: 2
+guid: 2e7d43f744d2fd2458061a88c486e017
+TextureImporter:
+  internalIDToNameTable:
+  - first:
+      213: -5465493683888111994
+    second: "-\u60AC\u505C\u67E5\u770B\u76F8\u5173\u5C5E\u6027-_0"
+  - first:
+      213: 332489286327240932
+    second: "-\u60AC\u505C\u67E5\u770B\u76F8\u5173\u5C5E\u6027-_1"
+  - first:
+      213: -6609044989105054159
+    second: "-\u60AC\u505C\u67E5\u770B\u76F8\u5173\u5C5E\u6027-_2"
+  - first:
+      213: 1143280678187610452
+    second: "-\u60AC\u505C\u67E5\u770B\u76F8\u5173\u5C5E\u6027-_3"
+  - first:
+      213: 1720466602832572046
+    second: "-\u60AC\u505C\u67E5\u770B\u76F8\u5173\u5C5E\u6027-_4"
+  - first:
+      213: 2414496115166578937
+    second: "-\u60AC\u505C\u67E5\u770B\u76F8\u5173\u5C5E\u6027-_5"
+  - first:
+      213: -8300970015482595131
+    second: "-\u60AC\u505C\u67E5\u770B\u76F8\u5173\u5C5E\u6027-_6"
+  - first:
+      213: 5735078063248660218
+    second: "-\u60AC\u505C\u67E5\u770B\u76F8\u5173\u5C5E\u6027-_7"
+  - first:
+      213: -598300351752882172
+    second: "-\u60AC\u505C\u67E5\u770B\u76F8\u5173\u5C5E\u6027-_8"
+  - first:
+      213: 6851140939829443685
+    second: "-\u60AC\u505C\u67E5\u770B\u76F8\u5173\u5C5E\u6027-_9"
+  - first:
+      213: -3780575148510675417
+    second: "-\u60AC\u505C\u67E5\u770B\u76F8\u5173\u5C5E\u6027-_10"
+  - first:
+      213: -2617964476715867153
+    second: "-\u60AC\u505C\u67E5\u770B\u76F8\u5173\u5C5E\u6027-_11"
+  - first:
+      213: -8114977874400077229
+    second: "-\u60AC\u505C\u67E5\u770B\u76F8\u5173\u5C5E\u6027-_12"
+  - first:
+      213: 3222771612579466708
+    second: "-\u60AC\u505C\u67E5\u770B\u76F8\u5173\u5C5E\u6027-_13"
+  - first:
+      213: -4045970089805387313
+    second: "-\u60AC\u505C\u67E5\u770B\u76F8\u5173\u5C5E\u6027-_14"
+  - first:
+      213: 4768192614581047707
+    second: "-\u60AC\u505C\u67E5\u770B\u76F8\u5173\u5C5E\u6027-_15"
+  - first:
+      213: -296858426468933498
+    second: "-\u60AC\u505C\u67E5\u770B\u76F8\u5173\u5C5E\u6027-_16"
+  - first:
+      213: 6142213402343894242
+    second: "-\u60AC\u505C\u67E5\u770B\u76F8\u5173\u5C5E\u6027-_17"
+  - first:
+      213: -7261900346188085059
+    second: "-\u60AC\u505C\u67E5\u770B\u76F8\u5173\u5C5E\u6027-_18"
+  - first:
+      213: -8716636084032438440
+    second: "-\u60AC\u505C\u67E5\u770B\u76F8\u5173\u5C5E\u6027-_19"
+  - first:
+      213: -2286318589118317652
+    second: "-\u60AC\u505C\u67E5\u770B\u76F8\u5173\u5C5E\u6027-_20"
+  - first:
+      213: 9208578958597233975
+    second: "-\u60AC\u505C\u67E5\u770B\u76F8\u5173\u5C5E\u6027-_21"
+  - first:
+      213: 6733097944290370153
+    second: "-\u60AC\u505C\u67E5\u770B\u76F8\u5173\u5C5E\u6027-_22"
+  - first:
+      213: 6370087106978810182
+    second: "-\u60AC\u505C\u67E5\u770B\u76F8\u5173\u5C5E\u6027-_23"
+  - first:
+      213: 3088657930504295245
+    second: "-\u60AC\u505C\u67E5\u770B\u76F8\u5173\u5C5E\u6027-_24"
+  - first:
+      213: -8788041077435914040
+    second: "-\u60AC\u505C\u67E5\u770B\u76F8\u5173\u5C5E\u6027-_25"
+  - first:
+      213: 5068303990123955728
+    second: "-\u60AC\u505C\u67E5\u770B\u76F8\u5173\u5C5E\u6027-_26"
+  - first:
+      213: -5711345192338601288
+    second: "-\u60AC\u505C\u67E5\u770B\u76F8\u5173\u5C5E\u6027-_27"
+  - first:
+      213: 7151846011686141282
+    second: "-\u60AC\u505C\u67E5\u770B\u76F8\u5173\u5C5E\u6027-_28"
+  - first:
+      213: -628138329531441539
+    second: "-\u60AC\u505C\u67E5\u770B\u76F8\u5173\u5C5E\u6027-_29"
+  - first:
+      213: 1539067566042142100
+    second: "-\u60AC\u505C\u67E5\u770B\u76F8\u5173\u5C5E\u6027-_30"
+  - first:
+      213: 330378715882244137
+    second: "-\u60AC\u505C\u67E5\u770B\u76F8\u5173\u5C5E\u6027-_31"
+  - first:
+      213: -8880615143376551022
+    second: "-\u60AC\u505C\u67E5\u770B\u76F8\u5173\u5C5E\u6027-_32"
+  - first:
+      213: 8249259281996198339
+    second: "-\u60AC\u505C\u67E5\u770B\u76F8\u5173\u5C5E\u6027-_33"
+  - first:
+      213: -5110836077847804389
+    second: "-\u60AC\u505C\u67E5\u770B\u76F8\u5173\u5C5E\u6027-_34"
+  - first:
+      213: 7524820931313570824
+    second: "-\u60AC\u505C\u67E5\u770B\u76F8\u5173\u5C5E\u6027-_35"
+  - first:
+      213: 4515172118138413713
+    second: "-\u60AC\u505C\u67E5\u770B\u76F8\u5173\u5C5E\u6027-_36"
+  - first:
+      213: -1761323479238258065
+    second: "-\u60AC\u505C\u67E5\u770B\u76F8\u5173\u5C5E\u6027-_37"
+  - first:
+      213: -1770115173616719381
+    second: "-\u60AC\u505C\u67E5\u770B\u76F8\u5173\u5C5E\u6027-_38"
+  - first:
+      213: 2661406985635730920
+    second: "-\u60AC\u505C\u67E5\u770B\u76F8\u5173\u5C5E\u6027-_39"
+  - first:
+      213: -3226632717652079236
+    second: "-\u60AC\u505C\u67E5\u770B\u76F8\u5173\u5C5E\u6027-_40"
+  - first:
+      213: -3705988448135995699
+    second: "-\u60AC\u505C\u67E5\u770B\u76F8\u5173\u5C5E\u6027-_41"
+  - first:
+      213: -5284675733945390661
+    second: "-\u60AC\u505C\u67E5\u770B\u76F8\u5173\u5C5E\u6027-_42"
+  - first:
+      213: -9028081388509378013
+    second: "-\u60AC\u505C\u67E5\u770B\u76F8\u5173\u5C5E\u6027-_43"
+  - first:
+      213: 3928642997768304826
+    second: "-\u60AC\u505C\u67E5\u770B\u76F8\u5173\u5C5E\u6027-_44"
+  - first:
+      213: -2639950617137922959
+    second: "-\u60AC\u505C\u67E5\u770B\u76F8\u5173\u5C5E\u6027-_45"
+  - first:
+      213: 3735413114258717329
+    second: "-\u60AC\u505C\u67E5\u770B\u76F8\u5173\u5C5E\u6027-_46"
+  - first:
+      213: -143756594256124556
+    second: "-\u60AC\u505C\u67E5\u770B\u76F8\u5173\u5C5E\u6027-_47"
+  - first:
+      213: 868018123051587974
+    second: "-\u60AC\u505C\u67E5\u770B\u76F8\u5173\u5C5E\u6027-_48"
+  - first:
+      213: -2764013581720586167
+    second: "-\u60AC\u505C\u67E5\u770B\u76F8\u5173\u5C5E\u6027-_49"
+  - first:
+      213: -9033294278795492208
+    second: "-\u60AC\u505C\u67E5\u770B\u76F8\u5173\u5C5E\u6027-_50"
+  - first:
+      213: -4519427514602531158
+    second: "-\u60AC\u505C\u67E5\u770B\u76F8\u5173\u5C5E\u6027-_51"
+  - first:
+      213: -88895633622917729
+    second: "-\u60AC\u505C\u67E5\u770B\u76F8\u5173\u5C5E\u6027-_52"
+  - first:
+      213: 5048474977096038084
+    second: "-\u60AC\u505C\u67E5\u770B\u76F8\u5173\u5C5E\u6027-_53"
+  - first:
+      213: -8551103543733387921
+    second: "-\u60AC\u505C\u67E5\u770B\u76F8\u5173\u5C5E\u6027-_54"
+  - first:
+      213: 6380058999565599942
+    second: "-\u60AC\u505C\u67E5\u770B\u76F8\u5173\u5C5E\u6027-_55"
+  - first:
+      213: 5319216188865496876
+    second: "-\u60AC\u505C\u67E5\u770B\u76F8\u5173\u5C5E\u6027-_56"
+  - first:
+      213: 1191754702961674566
+    second: "-\u60AC\u505C\u67E5\u770B\u76F8\u5173\u5C5E\u6027-_57"
+  - first:
+      213: 5627430557265488185
+    second: "-\u60AC\u505C\u67E5\u770B\u76F8\u5173\u5C5E\u6027-_58"
+  - first:
+      213: -7763998586771409466
+    second: "-\u60AC\u505C\u67E5\u770B\u76F8\u5173\u5C5E\u6027-_59"
+  - first:
+      213: 5870529283647542255
+    second: "-\u60AC\u505C\u67E5\u770B\u76F8\u5173\u5C5E\u6027-_60"
+  - first:
+      213: 6808799764362481720
+    second: "-\u60AC\u505C\u67E5\u770B\u76F8\u5173\u5C5E\u6027-_61"
+  - first:
+      213: -2082340995347832323
+    second: "-\u60AC\u505C\u67E5\u770B\u76F8\u5173\u5C5E\u6027-_62"
+  - first:
+      213: 7811680011825501946
+    second: "-\u60AC\u505C\u67E5\u770B\u76F8\u5173\u5C5E\u6027-_63"
+  - first:
+      213: 1550724118847882306
+    second: "-\u60AC\u505C\u67E5\u770B\u76F8\u5173\u5C5E\u6027-_64"
+  - first:
+      213: 6544947714789325932
+    second: "-\u60AC\u505C\u67E5\u770B\u76F8\u5173\u5C5E\u6027-_65"
+  - first:
+      213: -8816910129867004495
+    second: "-\u60AC\u505C\u67E5\u770B\u76F8\u5173\u5C5E\u6027-_66"
+  - first:
+      213: -3920001372880952843
+    second: "-\u60AC\u505C\u67E5\u770B\u76F8\u5173\u5C5E\u6027-_67"
+  - first:
+      213: -3585852468238999896
+    second: "-\u60AC\u505C\u67E5\u770B\u76F8\u5173\u5C5E\u6027-_68"
+  - first:
+      213: -4542626804938676117
+    second: "-\u60AC\u505C\u67E5\u770B\u76F8\u5173\u5C5E\u6027-_69"
+  - first:
+      213: -8425545426593894301
+    second: "-\u60AC\u505C\u67E5\u770B\u76F8\u5173\u5C5E\u6027-_70"
+  - first:
+      213: 7774110574944621176
+    second: "-\u60AC\u505C\u67E5\u770B\u76F8\u5173\u5C5E\u6027-_71"
+  - first:
+      213: 6033079023660920869
+    second: "-\u60AC\u505C\u67E5\u770B\u76F8\u5173\u5C5E\u6027-_72"
+  - first:
+      213: 259206063434765185
+    second: "-\u60AC\u505C\u67E5\u770B\u76F8\u5173\u5C5E\u6027-_73"
+  - first:
+      213: 7154961173669972820
+    second: "-\u60AC\u505C\u67E5\u770B\u76F8\u5173\u5C5E\u6027-_74"
+  - first:
+      213: -6395978887705165175
+    second: "-\u60AC\u505C\u67E5\u770B\u76F8\u5173\u5C5E\u6027-_75"
+  - first:
+      213: 8483452310387978573
+    second: "-\u60AC\u505C\u67E5\u770B\u76F8\u5173\u5C5E\u6027-_76"
+  - first:
+      213: 2206838602040370089
+    second: "-\u60AC\u505C\u67E5\u770B\u76F8\u5173\u5C5E\u6027-_77"
+  - first:
+      213: 1578847734752055132
+    second: "-\u60AC\u505C\u67E5\u770B\u76F8\u5173\u5C5E\u6027-_78"
+  - first:
+      213: 7432725338361523659
+    second: "-\u60AC\u505C\u67E5\u770B\u76F8\u5173\u5C5E\u6027-_79"
+  - first:
+      213: -1997505625059118057
+    second: "-\u60AC\u505C\u67E5\u770B\u76F8\u5173\u5C5E\u6027-_80"
+  - first:
+      213: 8476073775080456565
+    second: "-\u60AC\u505C\u67E5\u770B\u76F8\u5173\u5C5E\u6027-_81"
+  - first:
+      213: -343350499268539507
+    second: "-\u60AC\u505C\u67E5\u770B\u76F8\u5173\u5C5E\u6027-_82"
+  - first:
+      213: 2885121664631932774
+    second: "-\u60AC\u505C\u67E5\u770B\u76F8\u5173\u5C5E\u6027-_83"
+  - first:
+      213: 4772349152338681394
+    second: "-\u60AC\u505C\u67E5\u770B\u76F8\u5173\u5C5E\u6027-_84"
+  - first:
+      213: -9099522138937372873
+    second: "-\u60AC\u505C\u67E5\u770B\u76F8\u5173\u5C5E\u6027-_85"
+  - first:
+      213: -431684673049273869
+    second: "-\u60AC\u505C\u67E5\u770B\u76F8\u5173\u5C5E\u6027-_86"
+  - first:
+      213: -3440246761581465079
+    second: "-\u60AC\u505C\u67E5\u770B\u76F8\u5173\u5C5E\u6027-_87"
+  - first:
+      213: 3097289889337790089
+    second: "-\u60AC\u505C\u67E5\u770B\u76F8\u5173\u5C5E\u6027-_88"
+  - first:
+      213: -3778523230172491075
+    second: "-\u60AC\u505C\u67E5\u770B\u76F8\u5173\u5C5E\u6027-_89"
+  - first:
+      213: 7348786014837776168
+    second: "-\u60AC\u505C\u67E5\u770B\u76F8\u5173\u5C5E\u6027-_90"
+  - first:
+      213: 8218771947587406316
+    second: "-\u60AC\u505C\u67E5\u770B\u76F8\u5173\u5C5E\u6027-_91"
+  - first:
+      213: 8946810873850829598
+    second: "-\u60AC\u505C\u67E5\u770B\u76F8\u5173\u5C5E\u6027-_92"
+  - first:
+      213: 7298573763212654236
+    second: "-\u60AC\u505C\u67E5\u770B\u76F8\u5173\u5C5E\u6027-_93"
+  - first:
+      213: 5521456122885149176
+    second: "-\u60AC\u505C\u67E5\u770B\u76F8\u5173\u5C5E\u6027-_94"
+  - first:
+      213: 712117052987302548
+    second: "-\u60AC\u505C\u67E5\u770B\u76F8\u5173\u5C5E\u6027-_95"
+  - first:
+      213: -394310048282088719
+    second: "-\u60AC\u505C\u67E5\u770B\u76F8\u5173\u5C5E\u6027-_96"
+  - first:
+      213: 8650980939928332683
+    second: "-\u60AC\u505C\u67E5\u770B\u76F8\u5173\u5C5E\u6027-_97"
+  - first:
+      213: -4417257274390760370
+    second: "-\u60AC\u505C\u67E5\u770B\u76F8\u5173\u5C5E\u6027-_98"
+  - first:
+      213: 8981971696200676147
+    second: "-\u60AC\u505C\u67E5\u770B\u76F8\u5173\u5C5E\u6027-_99"
+  - first:
+      213: 6856987551253383290
+    second: "-\u60AC\u505C\u67E5\u770B\u76F8\u5173\u5C5E\u6027-_100"
+  - first:
+      213: -1129418735603907891
+    second: "-\u60AC\u505C\u67E5\u770B\u76F8\u5173\u5C5E\u6027-_101"
+  - first:
+      213: -324281705807855661
+    second: "-\u60AC\u505C\u67E5\u770B\u76F8\u5173\u5C5E\u6027-_102"
+  - first:
+      213: -7411681861052587506
+    second: "-\u60AC\u505C\u67E5\u770B\u76F8\u5173\u5C5E\u6027-_103"
+  - first:
+      213: 5090707391103943904
+    second: "-\u60AC\u505C\u67E5\u770B\u76F8\u5173\u5C5E\u6027-_104"
+  - first:
+      213: -4059311327042506898
+    second: "-\u60AC\u505C\u67E5\u770B\u76F8\u5173\u5C5E\u6027-_105"
+  - first:
+      213: -816453320646192532
+    second: "-\u60AC\u505C\u67E5\u770B\u76F8\u5173\u5C5E\u6027-_106"
+  - first:
+      213: 8758709062291516893
+    second: "-\u60AC\u505C\u67E5\u770B\u76F8\u5173\u5C5E\u6027-_107"
+  - first:
+      213: -5095871992616678838
+    second: "-\u60AC\u505C\u67E5\u770B\u76F8\u5173\u5C5E\u6027-_108"
+  - first:
+      213: -7489266244344095959
+    second: "-\u60AC\u505C\u67E5\u770B\u76F8\u5173\u5C5E\u6027-_109"
+  - first:
+      213: -563681654570095704
+    second: "-\u60AC\u505C\u67E5\u770B\u76F8\u5173\u5C5E\u6027-_110"
+  - first:
+      213: 8044135867184621390
+    second: "-\u60AC\u505C\u67E5\u770B\u76F8\u5173\u5C5E\u6027-_111"
+  - first:
+      213: 266012220341800441
+    second: "-\u60AC\u505C\u67E5\u770B\u76F8\u5173\u5C5E\u6027-_112"
+  - first:
+      213: 5053539597357456315
+    second: "-\u60AC\u505C\u67E5\u770B\u76F8\u5173\u5C5E\u6027-_113"
+  - first:
+      213: -6118315369499721914
+    second: "-\u60AC\u505C\u67E5\u770B\u76F8\u5173\u5C5E\u6027-_114"
+  - first:
+      213: -6536858087596299179
+    second: "-\u60AC\u505C\u67E5\u770B\u76F8\u5173\u5C5E\u6027-_115"
+  - first:
+      213: 9183009633102202908
+    second: "-\u60AC\u505C\u67E5\u770B\u76F8\u5173\u5C5E\u6027-_116"
+  - first:
+      213: -6858721144859781867
+    second: "-\u60AC\u505C\u67E5\u770B\u76F8\u5173\u5C5E\u6027-_117"
+  - first:
+      213: 7181418442702123193
+    second: "-\u60AC\u505C\u67E5\u770B\u76F8\u5173\u5C5E\u6027-_118"
+  - first:
+      213: -1279657413476403849
+    second: "-\u60AC\u505C\u67E5\u770B\u76F8\u5173\u5C5E\u6027-_119"
+  - first:
+      213: -2729222580962833554
+    second: "-\u60AC\u505C\u67E5\u770B\u76F8\u5173\u5C5E\u6027-_120"
+  - first:
+      213: 5788629324479453549
+    second: "-\u60AC\u505C\u67E5\u770B\u76F8\u5173\u5C5E\u6027-_121"
+  - first:
+      213: 9215624725595629740
+    second: "-\u60AC\u505C\u67E5\u770B\u76F8\u5173\u5C5E\u6027-_122"
+  - first:
+      213: -5199803054088595429
+    second: "-\u60AC\u505C\u67E5\u770B\u76F8\u5173\u5C5E\u6027-_123"
+  - first:
+      213: 7787663456829978359
+    second: "-\u60AC\u505C\u67E5\u770B\u76F8\u5173\u5C5E\u6027-_124"
+  - first:
+      213: -1403746547046721183
+    second: "-\u60AC\u505C\u67E5\u770B\u76F8\u5173\u5C5E\u6027-_125"
+  - first:
+      213: 4139970179542378484
+    second: "-\u60AC\u505C\u67E5\u770B\u76F8\u5173\u5C5E\u6027-_126"
+  - first:
+      213: -3877800655540274777
+    second: "-\u60AC\u505C\u67E5\u770B\u76F8\u5173\u5C5E\u6027-_127"
+  - first:
+      213: -131447131540076876
+    second: "-\u60AC\u505C\u67E5\u770B\u76F8\u5173\u5C5E\u6027-_128"
+  - first:
+      213: 1878994238052009529
+    second: "-\u60AC\u505C\u67E5\u770B\u76F8\u5173\u5C5E\u6027-_129"
+  - first:
+      213: 5356099559684239982
+    second: "-\u60AC\u505C\u67E5\u770B\u76F8\u5173\u5C5E\u6027-_130"
+  - first:
+      213: -4383949307919879756
+    second: "-\u60AC\u505C\u67E5\u770B\u76F8\u5173\u5C5E\u6027-_131"
+  - first:
+      213: -4044009888676174871
+    second: "-\u60AC\u505C\u67E5\u770B\u76F8\u5173\u5C5E\u6027-_132"
+  - first:
+      213: -4254893310194897672
+    second: "-\u60AC\u505C\u67E5\u770B\u76F8\u5173\u5C5E\u6027-_133"
+  - first:
+      213: -3910840454632330681
+    second: "-\u60AC\u505C\u67E5\u770B\u76F8\u5173\u5C5E\u6027-_134"
+  - first:
+      213: -6510195720819541385
+    second: "-\u60AC\u505C\u67E5\u770B\u76F8\u5173\u5C5E\u6027-_135"
+  - first:
+      213: 3098633517990894338
+    second: "-\u60AC\u505C\u67E5\u770B\u76F8\u5173\u5C5E\u6027-_136"
+  - first:
+      213: -8745750917596546886
+    second: "-\u60AC\u505C\u67E5\u770B\u76F8\u5173\u5C5E\u6027-_137"
+  - first:
+      213: 4262842211606252074
+    second: "-\u60AC\u505C\u67E5\u770B\u76F8\u5173\u5C5E\u6027-_138"
+  - first:
+      213: -1213004543144343894
+    second: "-\u60AC\u505C\u67E5\u770B\u76F8\u5173\u5C5E\u6027-_139"
+  - first:
+      213: 4840392051068459770
+    second: "-\u60AC\u505C\u67E5\u770B\u76F8\u5173\u5C5E\u6027-_140"
+  - first:
+      213: 8197306936649908026
+    second: "-\u60AC\u505C\u67E5\u770B\u76F8\u5173\u5C5E\u6027-_141"
+  - first:
+      213: -6466704878194820084
+    second: "-\u60AC\u505C\u67E5\u770B\u76F8\u5173\u5C5E\u6027-_142"
+  - first:
+      213: 4873287412113420166
+    second: "-\u60AC\u505C\u67E5\u770B\u76F8\u5173\u5C5E\u6027-_143"
+  - first:
+      213: 8134830343456188482
+    second: "-\u60AC\u505C\u67E5\u770B\u76F8\u5173\u5C5E\u6027-_144"
+  - first:
+      213: 7700904477070713213
+    second: "-\u60AC\u505C\u67E5\u770B\u76F8\u5173\u5C5E\u6027-_145"
+  - first:
+      213: 9166583584676018388
+    second: "-\u60AC\u505C\u67E5\u770B\u76F8\u5173\u5C5E\u6027-_146"
+  - first:
+      213: -4782741621747055964
+    second: "-\u60AC\u505C\u67E5\u770B\u76F8\u5173\u5C5E\u6027-_147"
+  - first:
+      213: -7413813905806447104
+    second: "-\u60AC\u505C\u67E5\u770B\u76F8\u5173\u5C5E\u6027-_148"
+  - first:
+      213: 117176425457817072
+    second: "-\u60AC\u505C\u67E5\u770B\u76F8\u5173\u5C5E\u6027-_149"
+  - first:
+      213: -5238417916528458770
+    second: "-\u60AC\u505C\u67E5\u770B\u76F8\u5173\u5C5E\u6027-_150"
+  - first:
+      213: -5847942711145231404
+    second: "-\u60AC\u505C\u67E5\u770B\u76F8\u5173\u5C5E\u6027-_151"
+  - first:
+      213: -2614163788377972770
+    second: "-\u60AC\u505C\u67E5\u770B\u76F8\u5173\u5C5E\u6027-_152"
+  - first:
+      213: 2027152144714042243
+    second: "-\u60AC\u505C\u67E5\u770B\u76F8\u5173\u5C5E\u6027-_153"
+  - first:
+      213: -71267098420626033
+    second: "-\u60AC\u505C\u67E5\u770B\u76F8\u5173\u5C5E\u6027-_154"
+  - first:
+      213: -3313679572950364240
+    second: "-\u60AC\u505C\u67E5\u770B\u76F8\u5173\u5C5E\u6027-_155"
+  - first:
+      213: -4004987564597648019
+    second: "-\u60AC\u505C\u67E5\u770B\u76F8\u5173\u5C5E\u6027-_156"
+  - first:
+      213: -397825930875861709
+    second: "-\u60AC\u505C\u67E5\u770B\u76F8\u5173\u5C5E\u6027-_157"
+  - first:
+      213: -5602628820092712089
+    second: "-\u60AC\u505C\u67E5\u770B\u76F8\u5173\u5C5E\u6027-_158"
+  - first:
+      213: 5752943942194268494
+    second: "-\u60AC\u505C\u67E5\u770B\u76F8\u5173\u5C5E\u6027-_159"
+  - first:
+      213: -8085054914107334844
+    second: "-\u60AC\u505C\u67E5\u770B\u76F8\u5173\u5C5E\u6027-_160"
+  - first:
+      213: -2857041820742742406
+    second: "-\u60AC\u505C\u67E5\u770B\u76F8\u5173\u5C5E\u6027-_161"
+  - first:
+      213: 8263482610388959877
+    second: "-\u60AC\u505C\u67E5\u770B\u76F8\u5173\u5C5E\u6027-_162"
+  - first:
+      213: 722672504039284919
+    second: "-\u60AC\u505C\u67E5\u770B\u76F8\u5173\u5C5E\u6027-_163"
+  - first:
+      213: 2136974515331545429
+    second: "-\u60AC\u505C\u67E5\u770B\u76F8\u5173\u5C5E\u6027-_164"
+  - first:
+      213: 381031861171827741
+    second: "-\u60AC\u505C\u67E5\u770B\u76F8\u5173\u5C5E\u6027-_165"
+  - first:
+      213: 1973683051193033916
+    second: "-\u60AC\u505C\u67E5\u770B\u76F8\u5173\u5C5E\u6027-_166"
+  - first:
+      213: 4802336659255749121
+    second: "-\u60AC\u505C\u67E5\u770B\u76F8\u5173\u5C5E\u6027-_167"
+  - first:
+      213: 2317028567696608583
+    second: "-\u60AC\u505C\u67E5\u770B\u76F8\u5173\u5C5E\u6027-_168"
+  - first:
+      213: -2155910833176965273
+    second: "-\u60AC\u505C\u67E5\u770B\u76F8\u5173\u5C5E\u6027-_169"
+  - first:
+      213: -2704758093789978308
+    second: "-\u60AC\u505C\u67E5\u770B\u76F8\u5173\u5C5E\u6027-_170"
+  externalObjects: {}
+  serializedVersion: 13
+  mipmaps:
+    mipMapMode: 0
+    enableMipMap: 0
+    sRGBTexture: 1
+    linearTexture: 0
+    fadeOut: 0
+    borderMipMap: 0
+    mipMapsPreserveCoverage: 0
+    alphaTestReferenceValue: 0.5
+    mipMapFadeDistanceStart: 1
+    mipMapFadeDistanceEnd: 3
+  bumpmap:
+    convertToNormalMap: 0
+    externalNormalMap: 0
+    heightScale: 0.25
+    normalMapFilter: 0
+    flipGreenChannel: 0
+  isReadable: 0
+  streamingMipmaps: 0
+  streamingMipmapsPriority: 0
+  vTOnly: 0
+  ignoreMipmapLimit: 0
+  grayScaleToAlpha: 0
+  generateCubemap: 6
+  cubemapConvolution: 0
+  seamlessCubemap: 0
+  textureFormat: 1
+  maxTextureSize: 2048
+  textureSettings:
+    serializedVersion: 2
+    filterMode: 1
+    aniso: 1
+    mipBias: 0
+    wrapU: 1
+    wrapV: 1
+    wrapW: 1
+  nPOTScale: 0
+  lightmap: 0
+  compressionQuality: 50
+  spriteMode: 1
+  spriteExtrude: 1
+  spriteMeshType: 1
+  alignment: 0
+  spritePivot: {x: 0.5, y: 0.5}
+  spritePixelsToUnits: 100
+  spriteBorder: {x: 0, y: 0, z: 0, w: 0}
+  spriteGenerateFallbackPhysicsShape: 1
+  alphaUsage: 1
+  alphaIsTransparency: 1
+  spriteTessellationDetail: -1
+  textureType: 8
+  textureShape: 1
+  singleChannelComponent: 0
+  flipbookRows: 1
+  flipbookColumns: 1
+  maxTextureSizeSet: 0
+  compressionQualitySet: 0
+  textureFormatSet: 0
+  ignorePngGamma: 0
+  applyGammaDecoding: 0
+  swizzle: 50462976
+  cookieLightType: 0
+  platformSettings:
+  - serializedVersion: 4
+    buildTarget: DefaultTexturePlatform
+    maxTextureSize: 2048
+    resizeAlgorithm: 0
+    textureFormat: -1
+    textureCompression: 1
+    compressionQuality: 50
+    crunchedCompression: 0
+    allowsAlphaSplitting: 0
+    overridden: 0
+    ignorePlatformSupport: 0
+    androidETC2FallbackOverride: 0
+    forceMaximumCompressionQuality_BC6H_BC7: 0
+  - serializedVersion: 4
+    buildTarget: Standalone
+    maxTextureSize: 2048
+    resizeAlgorithm: 0
+    textureFormat: -1
+    textureCompression: 1
+    compressionQuality: 50
+    crunchedCompression: 0
+    allowsAlphaSplitting: 0
+    overridden: 0
+    ignorePlatformSupport: 0
+    androidETC2FallbackOverride: 0
+    forceMaximumCompressionQuality_BC6H_BC7: 0
+  spriteSheet:
+    serializedVersion: 2
+    sprites:
+    - serializedVersion: 2
+      name: "-\u60AC\u505C\u67E5\u770B\u76F8\u5173\u5C5E\u6027-_0"
+      rect:
+        serializedVersion: 2
+        x: 0
+        y: 1268
+        width: 62
+        height: 61
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 68e35b1b37aa624b0800000000000000
+      internalID: -5465493683888111994
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: "-\u60AC\u505C\u67E5\u770B\u76F8\u5173\u5C5E\u6027-_1"
+      rect:
+        serializedVersion: 2
+        x: 62
+        y: 1268
+        width: 63
+        height: 62
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 4e8882b8e3d3d9400800000000000000
+      internalID: 332489286327240932
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: "-\u60AC\u505C\u67E5\u770B\u76F8\u5173\u5C5E\u6027-_2"
+      rect:
+        serializedVersion: 2
+        x: 254
+        y: 1269
+        width: 63
+        height: 61
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 13e51df3994f744a0800000000000000
+      internalID: -6609044989105054159
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: "-\u60AC\u505C\u67E5\u770B\u76F8\u5173\u5C5E\u6027-_3"
+      rect:
+        serializedVersion: 2
+        x: 320
+        y: 1269
+        width: 60
+        height: 61
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 451b0fd28bfbddf00800000000000000
+      internalID: 1143280678187610452
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: "-\u60AC\u505C\u67E5\u770B\u76F8\u5173\u5C5E\u6027-_4"
+      rect:
+        serializedVersion: 2
+        x: 506
+        y: 1270
+        width: 62
+        height: 60
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: e8e22c5824350e710800000000000000
+      internalID: 1720466602832572046
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: "-\u60AC\u505C\u67E5\u770B\u76F8\u5173\u5C5E\u6027-_5"
+      rect:
+        serializedVersion: 2
+        x: 569
+        y: 1269
+        width: 61
+        height: 61
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 9f880189c63028120800000000000000
+      internalID: 2414496115166578937
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: "-\u60AC\u505C\u67E5\u770B\u76F8\u5173\u5C5E\u6027-_6"
+      rect:
+        serializedVersion: 2
+        x: 0
+        y: 1189
+        width: 62
+        height: 62
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 5c8bdf750c70dcc80800000000000000
+      internalID: -8300970015482595131
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: "-\u60AC\u505C\u67E5\u770B\u76F8\u5173\u5C5E\u6027-_7"
+      rect:
+        serializedVersion: 2
+        x: 62
+        y: 1188
+        width: 59
+        height: 64
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: af6521fdc17179f40800000000000000
+      internalID: 5735078063248660218
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: "-\u60AC\u505C\u67E5\u770B\u76F8\u5173\u5C5E\u6027-_8"
+      rect:
+        serializedVersion: 2
+        x: 255
+        y: 1191
+        width: 62
+        height: 61
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 40837c0000962b7f0800000000000000
+      internalID: -598300351752882172
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: "-\u60AC\u505C\u67E5\u770B\u76F8\u5173\u5C5E\u6027-_9"
+      rect:
+        serializedVersion: 2
+        x: 328
+        y: 1192
+        width: 50
+        height: 60
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 56c7ba8c264241f50800000000000000
+      internalID: 6851140939829443685
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: "-\u60AC\u505C\u67E5\u770B\u76F8\u5173\u5C5E\u6027-_10"
+      rect:
+        serializedVersion: 2
+        x: 505
+        y: 1220
+        width: 9
+        height: 20
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 72ef95acee2b88bc0800000000000000
+      internalID: -3780575148510675417
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: "-\u60AC\u505C\u67E5\u770B\u76F8\u5173\u5C5E\u6027-_11"
+      rect:
+        serializedVersion: 2
+        x: 514
+        y: 1189
+        width: 18
+        height: 63
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: fe362c2dd2f1babd0800000000000000
+      internalID: -2617964476715867153
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: "-\u60AC\u505C\u67E5\u770B\u76F8\u5173\u5C5E\u6027-_12"
+      rect:
+        serializedVersion: 2
+        x: 526
+        y: 1189
+        width: 42
+        height: 62
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 35a9a344e9ec16f80800000000000000
+      internalID: -8114977874400077229
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: "-\u60AC\u505C\u67E5\u770B\u76F8\u5173\u5C5E\u6027-_13"
+      rect:
+        serializedVersion: 2
+        x: 569
+        y: 1195
+        width: 22
+        height: 45
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 4dd0308e4b599bc20800000000000000
+      internalID: 3222771612579466708
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: "-\u60AC\u505C\u67E5\u770B\u76F8\u5173\u5C5E\u6027-_14"
+      rect:
+        serializedVersion: 2
+        x: 571
+        y: 1233
+        width: 15
+        height: 16
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: fc96b49c3a3d9d7c0800000000000000
+      internalID: -4045970089805387313
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: "-\u60AC\u505C\u67E5\u770B\u76F8\u5173\u5C5E\u6027-_15"
+      rect:
+        serializedVersion: 2
+        x: 581
+        y: 1190
+        width: 50
+        height: 61
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: b919eb48be50c2240800000000000000
+      internalID: 4768192614581047707
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: "-\u60AC\u505C\u67E5\u770B\u76F8\u5173\u5C5E\u6027-_16"
+      rect:
+        serializedVersion: 2
+        x: 928
+        y: 1210
+        width: 41
+        height: 38
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 680ecbd75d851ebf0800000000000000
+      internalID: -296858426468933498
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: "-\u60AC\u505C\u67E5\u770B\u76F8\u5173\u5C5E\u6027-_17"
+      rect:
+        serializedVersion: 2
+        x: 970
+        y: 1208
+        width: 41
+        height: 42
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 2ece95deb868d3550800000000000000
+      internalID: 6142213402343894242
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: "-\u60AC\u505C\u67E5\u770B\u76F8\u5173\u5C5E\u6027-_18"
+      rect:
+        serializedVersion: 2
+        x: 1012
+        y: 1210
+        width: 41
+        height: 40
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: db84c2f3c1c883b90800000000000000
+      internalID: -7261900346188085059
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: "-\u60AC\u505C\u67E5\u770B\u76F8\u5173\u5C5E\u6027-_19"
+      rect:
+        serializedVersion: 2
+        x: 1054
+        y: 1208
+        width: 40
+        height: 41
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 85ff4ee0aa9480780800000000000000
+      internalID: -8716636084032438440
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: "-\u60AC\u505C\u67E5\u770B\u76F8\u5173\u5C5E\u6027-_20"
+      rect:
+        serializedVersion: 2
+        x: 1095
+        y: 1208
+        width: 20
+        height: 42
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: cabfa3c4b5d5540e0800000000000000
+      internalID: -2286318589118317652
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: "-\u60AC\u505C\u67E5\u770B\u76F8\u5173\u5C5E\u6027-_21"
+      rect:
+        serializedVersion: 2
+        x: 1114
+        y: 1209
+        width: 22
+        height: 38
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 73d135116c17bcf70800000000000000
+      internalID: 9208578958597233975
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: "-\u60AC\u505C\u67E5\u770B\u76F8\u5173\u5C5E\u6027-_22"
+      rect:
+        serializedVersion: 2
+        x: 1138
+        y: 1208
+        width: 41
+        height: 42
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 962275728e4c07d50800000000000000
+      internalID: 6733097944290370153
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: "-\u60AC\u505C\u67E5\u770B\u76F8\u5173\u5C5E\u6027-_23"
+      rect:
+        serializedVersion: 2
+        x: 1180
+        y: 1208
+        width: 39
+        height: 40
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 64984cf3978176850800000000000000
+      internalID: 6370087106978810182
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: "-\u60AC\u505C\u67E5\u770B\u76F8\u5173\u5C5E\u6027-_24"
+      rect:
+        serializedVersion: 2
+        x: 1221
+        y: 1208
+        width: 42
+        height: 42
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: d43d66cf50e1dda20800000000000000
+      internalID: 3088657930504295245
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: "-\u60AC\u505C\u67E5\u770B\u76F8\u5173\u5C5E\u6027-_25"
+      rect:
+        serializedVersion: 2
+        x: 914
+        y: 1222
+        width: 13
+        height: 6
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 8c824eb733b9a0680800000000000000
+      internalID: -8788041077435914040
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: "-\u60AC\u505C\u67E5\u770B\u76F8\u5173\u5C5E\u6027-_26"
+      rect:
+        serializedVersion: 2
+        x: 939
+        y: 1209
+        width: 21
+        height: 13
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 016880140ab365640800000000000000
+      internalID: 5068303990123955728
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: "-\u60AC\u505C\u67E5\u770B\u76F8\u5173\u5C5E\u6027-_27"
+      rect:
+        serializedVersion: 2
+        x: 1264
+        y: 1222
+        width: 14
+        height: 6
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 8bac50dbec93db0b0800000000000000
+      internalID: -5711345192338601288
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: "-\u60AC\u505C\u67E5\u770B\u76F8\u5173\u5C5E\u6027-_28"
+      rect:
+        serializedVersion: 2
+        x: 320
+        y: 1194
+        width: 12
+        height: 18
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 26db8d63e06704360800000000000000
+      internalID: 7151846011686141282
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: "-\u60AC\u505C\u67E5\u770B\u76F8\u5173\u5C5E\u6027-_29"
+      rect:
+        serializedVersion: 2
+        x: 351
+        y: 869
+        width: 63
+        height: 49
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: d7e987e64876847f0800000000000000
+      internalID: -628138329531441539
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: "-\u60AC\u505C\u67E5\u770B\u76F8\u5173\u5C5E\u6027-_30"
+      rect:
+        serializedVersion: 2
+        x: 370
+        y: 911
+        width: 20
+        height: 17
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 49554470ccddb5510800000000000000
+      internalID: 1539067566042142100
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: "-\u60AC\u505C\u67E5\u770B\u76F8\u5173\u5C5E\u6027-_31"
+      rect:
+        serializedVersion: 2
+        x: 414
+        y: 865
+        width: 58
+        height: 63
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 928c28111bdb59400800000000000000
+      internalID: 330378715882244137
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: "-\u60AC\u505C\u67E5\u770B\u76F8\u5173\u5C5E\u6027-_32"
+      rect:
+        serializedVersion: 2
+        x: 482
+        y: 913
+        width: 13
+        height: 13
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 29306102497b1c480800000000000000
+      internalID: -8880615143376551022
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: "-\u60AC\u505C\u67E5\u770B\u76F8\u5173\u5C5E\u6027-_33"
+      rect:
+        serializedVersion: 2
+        x: 500
+        y: 871
+        width: 42
+        height: 55
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 3c13a7b4c914b7270800000000000000
+      internalID: 8249259281996198339
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: "-\u60AC\u505C\u67E5\u770B\u76F8\u5173\u5C5E\u6027-_34"
+      rect:
+        serializedVersion: 2
+        x: 477
+        y: 872
+        width: 22
+        height: 38
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: b1681a26aa9a219b0800000000000000
+      internalID: -5110836077847804389
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: "-\u60AC\u505C\u67E5\u770B\u76F8\u5173\u5C5E\u6027-_35"
+      rect:
+        serializedVersion: 2
+        x: 405
+        y: 797
+        width: 20
+        height: 41
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 8049e51d4c88d6860800000000000000
+      internalID: 7524820931313570824
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: "-\u60AC\u505C\u67E5\u770B\u76F8\u5173\u5C5E\u6027-_36"
+      rect:
+        serializedVersion: 2
+        x: 420
+        y: 796
+        width: 27
+        height: 40
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 19263697e1d19ae30800000000000000
+      internalID: 4515172118138413713
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: "-\u60AC\u505C\u67E5\u770B\u76F8\u5173\u5C5E\u6027-_37"
+      rect:
+        serializedVersion: 2
+        x: 448
+        y: 797
+        width: 39
+        height: 41
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: f62d275a0a58e87e0800000000000000
+      internalID: -1761323479238258065
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: "-\u60AC\u505C\u67E5\u770B\u76F8\u5173\u5C5E\u6027-_38"
+      rect:
+        serializedVersion: 2
+        x: 489
+        y: 797
+        width: 41
+        height: 40
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: be9eb09c0a94f67e0800000000000000
+      internalID: -1770115173616719381
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: "-\u60AC\u505C\u67E5\u770B\u76F8\u5173\u5C5E\u6027-_39"
+      rect:
+        serializedVersion: 2
+        x: 505
+        y: 798
+        width: 26
+        height: 30
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 8e59f8d7d873fe420800000000000000
+      internalID: 2661406985635730920
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: "-\u60AC\u505C\u67E5\u770B\u76F8\u5173\u5C5E\u6027-_40"
+      rect:
+        serializedVersion: 2
+        x: 533
+        y: 797
+        width: 38
+        height: 41
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: c7dc1b383a2b833d0800000000000000
+      internalID: -3226632717652079236
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: "-\u60AC\u505C\u67E5\u770B\u76F8\u5173\u5C5E\u6027-_41"
+      rect:
+        serializedVersion: 2
+        x: 573
+        y: 817
+        width: 42
+        height: 21
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: dce172f342fa19cc0800000000000000
+      internalID: -3705988448135995699
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: "-\u60AC\u505C\u67E5\u770B\u76F8\u5173\u5C5E\u6027-_42"
+      rect:
+        serializedVersion: 2
+        x: 615
+        y: 807
+        width: 19
+        height: 31
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: bb9ee0d5b6f09a6b0800000000000000
+      internalID: -5284675733945390661
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: "-\u60AC\u505C\u67E5\u770B\u76F8\u5173\u5C5E\u6027-_43"
+      rect:
+        serializedVersion: 2
+        x: 630
+        y: 815
+        width: 25
+        height: 21
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 32a459a5fcfc5b280800000000000000
+      internalID: -9028081388509378013
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: "-\u60AC\u505C\u67E5\u770B\u76F8\u5173\u5C5E\u6027-_44"
+      rect:
+        serializedVersion: 2
+        x: 663
+        y: 820
+        width: 9
+        height: 9
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: ab83e4bddf7558630800000000000000
+      internalID: 3928642997768304826
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: "-\u60AC\u505C\u67E5\u770B\u76F8\u5173\u5C5E\u6027-_45"
+      rect:
+        serializedVersion: 2
+        x: 700
+        y: 796
+        width: 41
+        height: 41
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 17cbbe896e20d5bd0800000000000000
+      internalID: -2639950617137922959
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: "-\u60AC\u505C\u67E5\u770B\u76F8\u5173\u5C5E\u6027-_46"
+      rect:
+        serializedVersion: 2
+        x: 741
+        y: 798
+        width: 41
+        height: 39
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 19af9b4bf6ad6d330800000000000000
+      internalID: 3735413114258717329
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: "-\u60AC\u505C\u67E5\u770B\u76F8\u5173\u5C5E\u6027-_47"
+      rect:
+        serializedVersion: 2
+        x: 783
+        y: 796
+        width: 41
+        height: 42
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 4756e31a326410ef0800000000000000
+      internalID: -143756594256124556
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: "-\u60AC\u505C\u67E5\u770B\u76F8\u5173\u5C5E\u6027-_48"
+      rect:
+        serializedVersion: 2
+        x: 827
+        y: 803
+        width: 12
+        height: 32
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 689571b42e1db0c00800000000000000
+      internalID: 868018123051587974
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: "-\u60AC\u505C\u67E5\u770B\u76F8\u5173\u5C5E\u6027-_49"
+      rect:
+        serializedVersion: 2
+        x: 834
+        y: 796
+        width: 19
+        height: 41
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 9487033ba4044a9d0800000000000000
+      internalID: -2764013581720586167
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: "-\u60AC\u505C\u67E5\u770B\u76F8\u5173\u5C5E\u6027-_50"
+      rect:
+        serializedVersion: 2
+        x: 852
+        y: 798
+        width: 13
+        height: 35
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 09483d0c6ba43a280800000000000000
+      internalID: -9033294278795492208
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: "-\u60AC\u505C\u67E5\u770B\u76F8\u5173\u5C5E\u6027-_51"
+      rect:
+        serializedVersion: 2
+        x: 869
+        y: 797
+        width: 25
+        height: 40
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: aa65df3de94c741c0800000000000000
+      internalID: -4519427514602531158
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: "-\u60AC\u505C\u67E5\u770B\u76F8\u5173\u5C5E\u6027-_52"
+      rect:
+        serializedVersion: 2
+        x: 895
+        y: 797
+        width: 14
+        height: 41
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: f9d92d764ed24cef0800000000000000
+      internalID: -88895633622917729
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: "-\u60AC\u505C\u67E5\u770B\u76F8\u5173\u5C5E\u6027-_53"
+      rect:
+        serializedVersion: 2
+        x: 909
+        y: 796
+        width: 41
+        height: 42
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 4c6f1436e39cf0640800000000000000
+      internalID: 5048474977096038084
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: "-\u60AC\u505C\u67E5\u770B\u76F8\u5173\u5C5E\u6027-_54"
+      rect:
+        serializedVersion: 2
+        x: 953
+        y: 797
+        width: 38
+        height: 41
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: f6dff26f1a0645980800000000000000
+      internalID: -8551103543733387921
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: "-\u60AC\u505C\u67E5\u770B\u76F8\u5173\u5C5E\u6027-_55"
+      rect:
+        serializedVersion: 2
+        x: 994
+        y: 796
+        width: 37
+        height: 42
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 6c4442b6bd58a8850800000000000000
+      internalID: 6380058999565599942
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: "-\u60AC\u505C\u67E5\u770B\u76F8\u5173\u5C5E\u6027-_56"
+      rect:
+        serializedVersion: 2
+        x: 1036
+        y: 826
+        width: 40
+        height: 12
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: c27c5dcf0f6a1d940800000000000000
+      internalID: 5319216188865496876
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: "-\u60AC\u505C\u67E5\u770B\u76F8\u5173\u5C5E\u6027-_57"
+      rect:
+        serializedVersion: 2
+        x: 1036
+        y: 796
+        width: 41
+        height: 34
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 6498e619696f98010800000000000000
+      internalID: 1191754702961674566
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: "-\u60AC\u505C\u67E5\u770B\u76F8\u5173\u5C5E\u6027-_58"
+      rect:
+        serializedVersion: 2
+        x: 1119
+        y: 798
+        width: 19
+        height: 37
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 939ecf3c646a81e40800000000000000
+      internalID: 5627430557265488185
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: "-\u60AC\u505C\u67E5\u770B\u76F8\u5173\u5C5E\u6027-_59"
+      rect:
+        serializedVersion: 2
+        x: 1133
+        y: 796
+        width: 28
+        height: 33
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 6c5fad6bb6cb04490800000000000000
+      internalID: -7763998586771409466
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: "-\u60AC\u505C\u67E5\u770B\u76F8\u5173\u5C5E\u6027-_60"
+      rect:
+        serializedVersion: 2
+        x: 1137
+        y: 811
+        width: 21
+        height: 25
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: fe31753b74f487150800000000000000
+      internalID: 5870529283647542255
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: "-\u60AC\u505C\u67E5\u770B\u76F8\u5173\u5C5E\u6027-_61"
+      rect:
+        serializedVersion: 2
+        x: 1161
+        y: 796
+        width: 42
+        height: 42
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 830d695af47bd7e50800000000000000
+      internalID: 6808799764362481720
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: "-\u60AC\u505C\u67E5\u770B\u76F8\u5173\u5C5E\u6027-_62"
+      rect:
+        serializedVersion: 2
+        x: 1203
+        y: 796
+        width: 41
+        height: 42
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: df12f0fb5e90a13e0800000000000000
+      internalID: -2082340995347832323
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: "-\u60AC\u505C\u67E5\u770B\u76F8\u5173\u5C5E\u6027-_63"
+      rect:
+        serializedVersion: 2
+        x: 1287
+        y: 802
+        width: 20
+        height: 34
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: af6d0eb2599a86c60800000000000000
+      internalID: 7811680011825501946
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: "-\u60AC\u505C\u67E5\u770B\u76F8\u5173\u5C5E\u6027-_64"
+      rect:
+        serializedVersion: 2
+        x: 1299
+        y: 796
+        width: 29
+        height: 38
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 2440f88be57458510800000000000000
+      internalID: 1550724118847882306
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: "-\u60AC\u505C\u67E5\u770B\u76F8\u5173\u5C5E\u6027-_65"
+      rect:
+        serializedVersion: 2
+        x: 363
+        y: 814
+        width: 42
+        height: 7
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: c6cb58d154354da50800000000000000
+      internalID: 6544947714789325932
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: "-\u60AC\u505C\u67E5\u770B\u76F8\u5173\u5C5E\u6027-_66"
+      rect:
+        serializedVersion: 2
+        x: 450
+        y: 796
+        width: 6
+        height: 25
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 1b5ebbc63fa04a580800000000000000
+      internalID: -8816910129867004495
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: "-\u60AC\u505C\u67E5\u770B\u76F8\u5173\u5C5E\u6027-_67"
+      rect:
+        serializedVersion: 2
+        x: 575
+        y: 796
+        width: 14
+        height: 25
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 5f1236a358b5999c0800000000000000
+      internalID: -3920001372880952843
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: "-\u60AC\u505C\u67E5\u770B\u76F8\u5173\u5C5E\u6027-_68"
+      rect:
+        serializedVersion: 2
+        x: 599
+        y: 796
+        width: 6
+        height: 25
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 8ae18a5cd2e7c3ec0800000000000000
+      internalID: -3585852468238999896
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: "-\u60AC\u505C\u67E5\u770B\u76F8\u5173\u5C5E\u6027-_69"
+      rect:
+        serializedVersion: 2
+        x: 633
+        y: 796
+        width: 22
+        height: 20
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: b6866702df855f0c0800000000000000
+      internalID: -4542626804938676117
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: "-\u60AC\u505C\u67E5\u770B\u76F8\u5173\u5C5E\u6027-_70"
+      rect:
+        serializedVersion: 2
+        x: 1245
+        y: 814
+        width: 42
+        height: 7
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 36034f03313721b80800000000000000
+      internalID: -8425545426593894301
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: "-\u60AC\u505C\u67E5\u770B\u76F8\u5173\u5C5E\u6027-_71"
+      rect:
+        serializedVersion: 2
+        x: 615
+        y: 799
+        width: 19
+        height: 9
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 8729e20016033eb60800000000000000
+      internalID: 7774110574944621176
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: "-\u60AC\u505C\u67E5\u770B\u76F8\u5173\u5C5E\u6027-_72"
+      rect:
+        serializedVersion: 2
+        x: 663
+        y: 799
+        width: 9
+        height: 9
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 5207b2b486dc9b350800000000000000
+      internalID: 6033079023660920869
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: "-\u60AC\u505C\u67E5\u770B\u76F8\u5173\u5C5E\u6027-_73"
+      rect:
+        serializedVersion: 2
+        x: 1081
+        y: 795
+        width: 11
+        height: 17
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 18318a69a82e89300800000000000000
+      internalID: 259206063434765185
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: "-\u60AC\u505C\u67E5\u770B\u76F8\u5173\u5C5E\u6027-_74"
+      rect:
+        serializedVersion: 2
+        x: 362
+        y: 744
+        width: 16
+        height: 41
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 45b8f4267478b4360800000000000000
+      internalID: 7154961173669972820
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: "-\u60AC\u505C\u67E5\u770B\u76F8\u5173\u5C5E\u6027-_75"
+      rect:
+        serializedVersion: 2
+        x: 374
+        y: 744
+        width: 31
+        height: 41
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 9828f67c61bec37a0800000000000000
+      internalID: -6395978887705165175
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: "-\u60AC\u505C\u67E5\u770B\u76F8\u5173\u5C5E\u6027-_76"
+      rect:
+        serializedVersion: 2
+        x: 405
+        y: 744
+        width: 42
+        height: 41
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: d4174a5dde64bb570800000000000000
+      internalID: 8483452310387978573
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: "-\u60AC\u505C\u67E5\u770B\u76F8\u5173\u5C5E\u6027-_77"
+      rect:
+        serializedVersion: 2
+        x: 448
+        y: 744
+        width: 40
+        height: 22
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 9a36c37240440ae10800000000000000
+      internalID: 2206838602040370089
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: "-\u60AC\u505C\u67E5\u770B\u76F8\u5173\u5C5E\u6027-_78"
+      rect:
+        serializedVersion: 2
+        x: 449
+        y: 762
+        width: 38
+        height: 23
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: c5f835056a139e510800000000000000
+      internalID: 1578847734752055132
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: "-\u60AC\u505C\u67E5\u770B\u76F8\u5173\u5C5E\u6027-_79"
+      rect:
+        serializedVersion: 2
+        x: 489
+        y: 750
+        width: 10
+        height: 14
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: bcd6512a058562760800000000000000
+      internalID: 7432725338361523659
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: "-\u60AC\u505C\u67E5\u770B\u76F8\u5173\u5C5E\u6027-_80"
+      rect:
+        serializedVersion: 2
+        x: 490
+        y: 744
+        width: 41
+        height: 41
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 714b18d973f6744e0800000000000000
+      internalID: -1997505625059118057
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: "-\u60AC\u505C\u67E5\u770B\u76F8\u5173\u5C5E\u6027-_81"
+      rect:
+        serializedVersion: 2
+        x: 531
+        y: 750
+        width: 10
+        height: 14
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 571cca5b03011a570800000000000000
+      internalID: 8476073775080456565
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: "-\u60AC\u505C\u67E5\u770B\u76F8\u5173\u5C5E\u6027-_82"
+      rect:
+        serializedVersion: 2
+        x: 532
+        y: 744
+        width: 41
+        height: 41
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: d8b45a14a8c2c3bf0800000000000000
+      internalID: -343350499268539507
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: "-\u60AC\u505C\u67E5\u770B\u76F8\u5173\u5C5E\u6027-_83"
+      rect:
+        serializedVersion: 2
+        x: 575
+        y: 744
+        width: 38
+        height: 41
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 6678b223ed20a0820800000000000000
+      internalID: 2885121664631932774
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: "-\u60AC\u505C\u67E5\u770B\u76F8\u5173\u5C5E\u6027-_84"
+      rect:
+        serializedVersion: 2
+        x: 617
+        y: 750
+        width: 12
+        height: 32
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 23e9841e44aca3240800000000000000
+      internalID: 4772349152338681394
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: "-\u60AC\u505C\u67E5\u770B\u76F8\u5173\u5C5E\u6027-_85"
+      rect:
+        serializedVersion: 2
+        x: 624
+        y: 744
+        width: 19
+        height: 41
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 73fc5d273d008b180800000000000000
+      internalID: -9099522138937372873
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: "-\u60AC\u505C\u67E5\u770B\u76F8\u5173\u5C5E\u6027-_86"
+      rect:
+        serializedVersion: 2
+        x: 642
+        y: 745
+        width: 13
+        height: 35
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 3f9dae7b319520af0800000000000000
+      internalID: -431684673049273869
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: "-\u60AC\u505C\u67E5\u770B\u76F8\u5173\u5C5E\u6027-_87"
+      rect:
+        serializedVersion: 2
+        x: 659
+        y: 744
+        width: 25
+        height: 41
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 902bf3c2cc9c140d0800000000000000
+      internalID: -3440246761581465079
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: "-\u60AC\u505C\u67E5\u770B\u76F8\u5173\u5C5E\u6027-_88"
+      rect:
+        serializedVersion: 2
+        x: 685
+        y: 744
+        width: 14
+        height: 41
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 98e43648eb8cbfa20800000000000000
+      internalID: 3097289889337790089
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: "-\u60AC\u505C\u67E5\u770B\u76F8\u5173\u5C5E\u6027-_89"
+      rect:
+        serializedVersion: 2
+        x: 699
+        y: 744
+        width: 41
+        height: 41
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: db2d102442dff8bc0800000000000000
+      internalID: -3778523230172491075
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: "-\u60AC\u505C\u67E5\u770B\u76F8\u5173\u5C5E\u6027-_90"
+      rect:
+        serializedVersion: 2
+        x: 786
+        y: 750
+        width: 29
+        height: 14
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 82f93c8e1f12cf560800000000000000
+      internalID: 7348786014837776168
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: "-\u60AC\u505C\u67E5\u770B\u76F8\u5173\u5C5E\u6027-_91"
+      rect:
+        serializedVersion: 2
+        x: 787
+        y: 744
+        width: 35
+        height: 38
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: ce984e99a81fe0270800000000000000
+      internalID: 8218771947587406316
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: "-\u60AC\u505C\u67E5\u770B\u76F8\u5173\u5C5E\u6027-_92"
+      rect:
+        serializedVersion: 2
+        x: 825
+        y: 763
+        width: 7
+        height: 14
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: e1b1b786615792c70800000000000000
+      internalID: 8946810873850829598
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: "-\u60AC\u505C\u67E5\u770B\u76F8\u5173\u5C5E\u6027-_93"
+      rect:
+        serializedVersion: 2
+        x: 831
+        y: 744
+        width: 36
+        height: 41
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: c96b64b0b2eb94560800000000000000
+      internalID: 7298573763212654236
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: "-\u60AC\u505C\u67E5\u770B\u76F8\u5173\u5C5E\u6027-_94"
+      rect:
+        serializedVersion: 2
+        x: 870
+        y: 744
+        width: 36
+        height: 38
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 8f1997ff61720ac40800000000000000
+      internalID: 5521456122885149176
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: "-\u60AC\u505C\u67E5\u770B\u76F8\u5173\u5C5E\u6027-_95"
+      rect:
+        serializedVersion: 2
+        x: 908
+        y: 744
+        width: 14
+        height: 41
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 4926ecdcfa2f1e900800000000000000
+      internalID: 712117052987302548
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: "-\u60AC\u505C\u67E5\u770B\u76F8\u5173\u5C5E\u6027-_96"
+      rect:
+        serializedVersion: 2
+        x: 919
+        y: 751
+        width: 12
+        height: 30
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 1fa67c8a911278af0800000000000000
+      internalID: -394310048282088719
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: "-\u60AC\u505C\u67E5\u770B\u76F8\u5173\u5C5E\u6027-_97"
+      rect:
+        serializedVersion: 2
+        x: 927
+        y: 744
+        width: 24
+        height: 27
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: b896a1b74557e0870800000000000000
+      internalID: 8650980939928332683
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: "-\u60AC\u505C\u67E5\u770B\u76F8\u5173\u5C5E\u6027-_98"
+      rect:
+        serializedVersion: 2
+        x: 929
+        y: 753
+        width: 22
+        height: 30
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: e44bd6e99efb2b2c0800000000000000
+      internalID: -4417257274390760370
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: "-\u60AC\u505C\u67E5\u770B\u76F8\u5173\u5C5E\u6027-_99"
+      rect:
+        serializedVersion: 2
+        x: 953
+        y: 751
+        width: 14
+        height: 30
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 33377ae4baf56ac70800000000000000
+      internalID: 8981971696200676147
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: "-\u60AC\u505C\u67E5\u770B\u76F8\u5173\u5C5E\u6027-_100"
+      rect:
+        serializedVersion: 2
+        x: 964
+        y: 744
+        width: 28
+        height: 41
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: a78cbb519d9e82f50800000000000000
+      internalID: 6856987551253383290
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: "-\u60AC\u505C\u67E5\u770B\u76F8\u5173\u5C5E\u6027-_101"
+      rect:
+        serializedVersion: 2
+        x: 745
+        y: 743
+        width: 11
+        height: 17
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: dc288a5d4af7350f0800000000000000
+      internalID: -1129418735603907891
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: "-\u60AC\u505C\u67E5\u770B\u76F8\u5173\u5C5E\u6027-_102"
+      rect:
+        serializedVersion: 2
+        x: 348
+        y: 631
+        width: 63
+        height: 49
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 3df3a26b18bef7bf0800000000000000
+      internalID: -324281705807855661
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: "-\u60AC\u505C\u67E5\u770B\u76F8\u5173\u5C5E\u6027-_103"
+      rect:
+        serializedVersion: 2
+        x: 367
+        y: 673
+        width: 20
+        height: 17
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: e0221cbbd9a642990800000000000000
+      internalID: -7411681861052587506
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: "-\u60AC\u505C\u67E5\u770B\u76F8\u5173\u5C5E\u6027-_104"
+      rect:
+        serializedVersion: 2
+        x: 411
+        y: 627
+        width: 58
+        height: 63
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 0e4c4368663d5a640800000000000000
+      internalID: 5090707391103943904
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: "-\u60AC\u505C\u67E5\u770B\u76F8\u5173\u5C5E\u6027-_105"
+      rect:
+        serializedVersion: 2
+        x: 474
+        y: 627
+        width: 62
+        height: 63
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: e6f69eeeadd6aa7c0800000000000000
+      internalID: -4059311327042506898
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: "-\u60AC\u505C\u67E5\u770B\u76F8\u5173\u5C5E\u6027-_106"
+      rect:
+        serializedVersion: 2
+        x: 536
+        y: 628
+        width: 65
+        height: 62
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: c621237d7006ba4f0800000000000000
+      internalID: -816453320646192532
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: "-\u60AC\u505C\u67E5\u770B\u76F8\u5173\u5C5E\u6027-_107"
+      rect:
+        serializedVersion: 2
+        x: 1884
+        y: 617
+        width: 13
+        height: 6
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: ddd61ec8c7f2d8970800000000000000
+      internalID: 8758709062291516893
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: "-\u60AC\u505C\u67E5\u770B\u76F8\u5173\u5C5E\u6027-_108"
+      rect:
+        serializedVersion: 2
+        x: 1898
+        y: 605
+        width: 41
+        height: 38
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: a4a883bfb63d749b0800000000000000
+      internalID: -5095871992616678838
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: "-\u60AC\u505C\u67E5\u770B\u76F8\u5173\u5C5E\u6027-_109"
+      rect:
+        serializedVersion: 2
+        x: 1909
+        y: 604
+        width: 21
+        height: 13
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 92bdb85d708c01890800000000000000
+      internalID: -7489266244344095959
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: "-\u60AC\u505C\u67E5\u770B\u76F8\u5173\u5C5E\u6027-_110"
+      rect:
+        serializedVersion: 2
+        x: 1940
+        y: 603
+        width: 41
+        height: 42
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 8abe1fc85866d28f0800000000000000
+      internalID: -563681654570095704
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: "-\u60AC\u505C\u67E5\u770B\u76F8\u5173\u5C5E\u6027-_111"
+      rect:
+        serializedVersion: 2
+        x: 1982
+        y: 605
+        width: 41
+        height: 40
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: e47a48893f282af60800000000000000
+      internalID: 8044135867184621390
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: "-\u60AC\u505C\u67E5\u770B\u76F8\u5173\u5C5E\u6027-_112"
+      rect:
+        serializedVersion: 2
+        x: 2024
+        y: 603
+        width: 40
+        height: 41
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 9fdc26b74b011b300800000000000000
+      internalID: 266012220341800441
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: "-\u60AC\u505C\u67E5\u770B\u76F8\u5173\u5C5E\u6027-_113"
+      rect:
+        serializedVersion: 2
+        x: 2065
+        y: 603
+        width: 20
+        height: 42
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: bbb9cde2d77c12640800000000000000
+      internalID: 5053539597357456315
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: "-\u60AC\u505C\u67E5\u770B\u76F8\u5173\u5C5E\u6027-_114"
+      rect:
+        serializedVersion: 2
+        x: 2084
+        y: 604
+        width: 22
+        height: 38
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 64ff7217690671ba0800000000000000
+      internalID: -6118315369499721914
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: "-\u60AC\u505C\u67E5\u770B\u76F8\u5173\u5C5E\u6027-_115"
+      rect:
+        serializedVersion: 2
+        x: 2108
+        y: 603
+        width: 41
+        height: 42
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 55ceeadf33a6845a0800000000000000
+      internalID: -6536858087596299179
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: "-\u60AC\u505C\u67E5\u770B\u76F8\u5173\u5C5E\u6027-_116"
+      rect:
+        serializedVersion: 2
+        x: 2150
+        y: 603
+        width: 39
+        height: 40
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: c180c0e8b9a907f70800000000000000
+      internalID: 9183009633102202908
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: "-\u60AC\u505C\u67E5\u770B\u76F8\u5173\u5C5E\u6027-_117"
+      rect:
+        serializedVersion: 2
+        x: 2191
+        y: 603
+        width: 42
+        height: 42
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 5151c23357de0d0a0800000000000000
+      internalID: -6858721144859781867
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: "-\u60AC\u505C\u67E5\u770B\u76F8\u5173\u5C5E\u6027-_118"
+      rect:
+        serializedVersion: 2
+        x: 2234
+        y: 617
+        width: 13
+        height: 6
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 9b0f2bc560689a360800000000000000
+      internalID: 7181418442702123193
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: "-\u60AC\u505C\u67E5\u770B\u76F8\u5173\u5C5E\u6027-_119"
+      rect:
+        serializedVersion: 2
+        x: 537
+        y: 479
+        width: 68
+        height: 66
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 7753b83cc5ebd3ee0800000000000000
+      internalID: -1279657413476403849
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: "-\u60AC\u505C\u67E5\u770B\u76F8\u5173\u5C5E\u6027-_120"
+      rect:
+        serializedVersion: 2
+        x: 603
+        y: 527
+        width: 66
+        height: 17
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: e6b4cbcc58adf1ad0800000000000000
+      internalID: -2729222580962833554
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: "-\u60AC\u505C\u67E5\u770B\u76F8\u5173\u5C5E\u6027-_121"
+      rect:
+        serializedVersion: 2
+        x: 614
+        y: 517
+        width: 45
+        height: 11
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: d69d10e73b7555050800000000000000
+      internalID: 5788629324479453549
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: "-\u60AC\u505C\u67E5\u770B\u76F8\u5173\u5C5E\u6027-_122"
+      rect:
+        serializedVersion: 2
+        x: 932
+        y: 482
+        width: 63
+        height: 66
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: ca82f688cd974ef70800000000000000
+      internalID: 9215624725595629740
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: "-\u60AC\u505C\u67E5\u770B\u76F8\u5173\u5C5E\u6027-_123"
+      rect:
+        serializedVersion: 2
+        x: 997
+        y: 482
+        width: 68
+        height: 66
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: b18de0b0ca696d7b0800000000000000
+      internalID: -5199803054088595429
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: "-\u60AC\u505C\u67E5\u770B\u76F8\u5173\u5C5E\u6027-_124"
+      rect:
+        serializedVersion: 2
+        x: 1331
+        y: 478
+        width: 66
+        height: 67
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 7f634a637a6531c60800000000000000
+      internalID: 7787663456829978359
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: "-\u60AC\u505C\u67E5\u770B\u76F8\u5173\u5C5E\u6027-_125"
+      rect:
+        serializedVersion: 2
+        x: 1397
+        y: 480
+        width: 64
+        height: 65
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 169599ce3f3e48ce0800000000000000
+      internalID: -1403746547046721183
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: "-\u60AC\u505C\u67E5\u770B\u76F8\u5173\u5C5E\u6027-_126"
+      rect:
+        serializedVersion: 2
+        x: 1727
+        y: 478
+        width: 67
+        height: 66
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 4f7655c91f0247930800000000000000
+      internalID: 4139970179542378484
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: "-\u60AC\u505C\u67E5\u770B\u76F8\u5173\u5C5E\u6027-_127"
+      rect:
+        serializedVersion: 2
+        x: 1793
+        y: 478
+        width: 68
+        height: 67
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 7a9beb869d84f2ac0800000000000000
+      internalID: -3877800655540274777
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: "-\u60AC\u505C\u67E5\u770B\u76F8\u5173\u5C5E\u6027-_128"
+      rect:
+        serializedVersion: 2
+        x: 613
+        y: 478
+        width: 47
+        height: 31
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 4b64fc1c7810d2ef0800000000000000
+      internalID: -131447131540076876
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: "-\u60AC\u505C\u67E5\u770B\u76F8\u5173\u5C5E\u6027-_129"
+      rect:
+        serializedVersion: 2
+        x: 614
+        y: 507
+        width: 46
+        height: 12
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 936881edd47831a10800000000000000
+      internalID: 1878994238052009529
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: "-\u60AC\u505C\u67E5\u770B\u76F8\u5173\u5C5E\u6027-_130"
+      rect:
+        serializedVersion: 2
+        x: 1396
+        y: 480
+        width: 15
+        height: 20
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: e62fa94fb20b45a40800000000000000
+      internalID: 5356099559684239982
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: "-\u60AC\u505C\u67E5\u770B\u76F8\u5173\u5C5E\u6027-_131"
+      rect:
+        serializedVersion: 2
+        x: 485
+        y: 364
+        width: 41
+        height: 60
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 4b1bd14e4551923c0800000000000000
+      internalID: -4383949307919879756
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: "-\u60AC\u505C\u67E5\u770B\u76F8\u5173\u5C5E\u6027-_132"
+      rect:
+        serializedVersion: 2
+        x: 527
+        y: 353
+        width: 31
+        height: 74
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 9e32a4dae6ac0e7c0800000000000000
+      internalID: -4044009888676174871
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: "-\u60AC\u505C\u67E5\u770B\u76F8\u5173\u5C5E\u6027-_133"
+      rect:
+        serializedVersion: 2
+        x: 560
+        y: 365
+        width: 39
+        height: 59
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 8fca5a8e31593f4c0800000000000000
+      internalID: -4254893310194897672
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: "-\u60AC\u505C\u67E5\u770B\u76F8\u5173\u5C5E\u6027-_134"
+      rect:
+        serializedVersion: 2
+        x: 601
+        y: 364
+        width: 41
+        height: 60
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 74aa968b357e9b9c0800000000000000
+      internalID: -3910840454632330681
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: "-\u60AC\u505C\u67E5\u770B\u76F8\u5173\u5C5E\u6027-_135"
+      rect:
+        serializedVersion: 2
+        x: 878
+        y: 362
+        width: 42
+        height: 61
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 77a78420c7327a5a0800000000000000
+      internalID: -6510195720819541385
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: "-\u60AC\u505C\u67E5\u770B\u76F8\u5173\u5C5E\u6027-_136"
+      rect:
+        serializedVersion: 2
+        x: 921
+        y: 351
+        width: 32
+        height: 75
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 20b57f074ce800b20800000000000000
+      internalID: 3098633517990894338
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: "-\u60AC\u505C\u67E5\u770B\u76F8\u5173\u5C5E\u6027-_137"
+      rect:
+        serializedVersion: 2
+        x: 954
+        y: 363
+        width: 41
+        height: 60
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: ab87c9e90e9d0a680800000000000000
+      internalID: -8745750917596546886
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: "-\u60AC\u505C\u67E5\u770B\u76F8\u5173\u5C5E\u6027-_138"
+      rect:
+        serializedVersion: 2
+        x: 998
+        y: 362
+        width: 41
+        height: 61
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: a2ac45ce768a82b30800000000000000
+      internalID: 4262842211606252074
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: "-\u60AC\u505C\u67E5\u770B\u76F8\u5173\u5C5E\u6027-_139"
+      rect:
+        serializedVersion: 2
+        x: 1280
+        y: 362
+        width: 41
+        height: 59
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: aa642f67bca8a2fe0800000000000000
+      internalID: -1213004543144343894
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: "-\u60AC\u505C\u67E5\u770B\u76F8\u5173\u5C5E\u6027-_140"
+      rect:
+        serializedVersion: 2
+        x: 1322
+        y: 350
+        width: 31
+        height: 74
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: afa5f89cce68c2340800000000000000
+      internalID: 4840392051068459770
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: "-\u60AC\u505C\u67E5\u770B\u76F8\u5173\u5C5E\u6027-_141"
+      rect:
+        serializedVersion: 2
+        x: 1355
+        y: 363
+        width: 39
+        height: 58
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: a3ffcd94a3fa2c170800000000000000
+      internalID: 8197306936649908026
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: "-\u60AC\u505C\u67E5\u770B\u76F8\u5173\u5C5E\u6027-_142"
+      rect:
+        serializedVersion: 2
+        x: 1395
+        y: 362
+        width: 41
+        height: 59
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: c0c79e3ec26a146a0800000000000000
+      internalID: -6466704878194820084
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: "-\u60AC\u505C\u67E5\u770B\u76F8\u5173\u5C5E\u6027-_143"
+      rect:
+        serializedVersion: 2
+        x: 1675
+        y: 362
+        width: 40
+        height: 58
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 68f276fd41561a340800000000000000
+      internalID: 4873287412113420166
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: "-\u60AC\u505C\u67E5\u770B\u76F8\u5173\u5C5E\u6027-_144"
+      rect:
+        serializedVersion: 2
+        x: 1716
+        y: 351
+        width: 31
+        height: 73
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 24866c1e819b4e070800000000000000
+      internalID: 8134830343456188482
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: "-\u60AC\u505C\u67E5\u770B\u76F8\u5173\u5C5E\u6027-_145"
+      rect:
+        serializedVersion: 2
+        x: 1748
+        y: 364
+        width: 39
+        height: 56
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: d71e30d12db1fda60800000000000000
+      internalID: 7700904477070713213
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: "-\u60AC\u505C\u67E5\u770B\u76F8\u5173\u5C5E\u6027-_146"
+      rect:
+        serializedVersion: 2
+        x: 1789
+        y: 362
+        width: 41
+        height: 58
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 4d87a80243f363f70800000000000000
+      internalID: 9166583584676018388
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: "-\u60AC\u505C\u67E5\u770B\u76F8\u5173\u5C5E\u6027-_147"
+      rect:
+        serializedVersion: 2
+        x: 346
+        y: 243
+        width: 63
+        height: 49
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 4a28a47c5d940adb0800000000000000
+      internalID: -4782741621747055964
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: "-\u60AC\u505C\u67E5\u770B\u76F8\u5173\u5C5E\u6027-_148"
+      rect:
+        serializedVersion: 2
+        x: 365
+        y: 285
+        width: 20
+        height: 17
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 00e2e816887dc1990800000000000000
+      internalID: -7413813905806447104
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: "-\u60AC\u505C\u67E5\u770B\u76F8\u5173\u5C5E\u6027-_149"
+      rect:
+        serializedVersion: 2
+        x: 409
+        y: 239
+        width: 58
+        height: 63
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 0f5967f865b40a100800000000000000
+      internalID: 117176425457817072
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: "-\u60AC\u505C\u67E5\u770B\u76F8\u5173\u5C5E\u6027-_150"
+      rect:
+        serializedVersion: 2
+        x: 473
+        y: 239
+        width: 61
+        height: 64
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: ee38744c8a66d47b0800000000000000
+      internalID: -5238417916528458770
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: "-\u60AC\u505C\u67E5\u770B\u76F8\u5173\u5C5E\u6027-_151"
+      rect:
+        serializedVersion: 2
+        x: 534
+        y: 240
+        width: 65
+        height: 62
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 4db8a53861fe7dea0800000000000000
+      internalID: -5847942711145231404
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: "-\u60AC\u505C\u67E5\u770B\u76F8\u5173\u5C5E\u6027-_152"
+      rect:
+        serializedVersion: 2
+        x: 1884
+        y: 248
+        width: 13
+        height: 6
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: edf9a0982ef98bbd0800000000000000
+      internalID: -2614163788377972770
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: "-\u60AC\u505C\u67E5\u770B\u76F8\u5173\u5C5E\u6027-_153"
+      rect:
+        serializedVersion: 2
+        x: 1898
+        y: 236
+        width: 41
+        height: 38
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 38b0a53a224e12c10800000000000000
+      internalID: 2027152144714042243
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: "-\u60AC\u505C\u67E5\u770B\u76F8\u5173\u5C5E\u6027-_154"
+      rect:
+        serializedVersion: 2
+        x: 1909
+        y: 235
+        width: 21
+        height: 13
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: f8d377a93fec20ff0800000000000000
+      internalID: -71267098420626033
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: "-\u60AC\u505C\u67E5\u770B\u76F8\u5173\u5C5E\u6027-_155"
+      rect:
+        serializedVersion: 2
+        x: 1940
+        y: 234
+        width: 41
+        height: 42
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 0bf43da2cf17302d0800000000000000
+      internalID: -3313679572950364240
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: "-\u60AC\u505C\u67E5\u770B\u76F8\u5173\u5C5E\u6027-_156"
+      rect:
+        serializedVersion: 2
+        x: 1982
+        y: 236
+        width: 41
+        height: 40
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: d65ec42870d6b68c0800000000000000
+      internalID: -4004987564597648019
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: "-\u60AC\u505C\u67E5\u770B\u76F8\u5173\u5C5E\u6027-_157"
+      rect:
+        serializedVersion: 2
+        x: 2024
+        y: 234
+        width: 40
+        height: 41
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 33584b37c63aa7af0800000000000000
+      internalID: -397825930875861709
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: "-\u60AC\u505C\u67E5\u770B\u76F8\u5173\u5C5E\u6027-_158"
+      rect:
+        serializedVersion: 2
+        x: 2065
+        y: 234
+        width: 20
+        height: 42
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 76b020aa5c67f32b0800000000000000
+      internalID: -5602628820092712089
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: "-\u60AC\u505C\u67E5\u770B\u76F8\u5173\u5C5E\u6027-_159"
+      rect:
+        serializedVersion: 2
+        x: 2084
+        y: 235
+        width: 22
+        height: 38
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: e498937f80096df40800000000000000
+      internalID: 5752943942194268494
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: "-\u60AC\u505C\u67E5\u770B\u76F8\u5173\u5C5E\u6027-_160"
+      rect:
+        serializedVersion: 2
+        x: 2108
+        y: 234
+        width: 41
+        height: 42
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 44f1b1f546d1ccf80800000000000000
+      internalID: -8085054914107334844
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: "-\u60AC\u505C\u67E5\u770B\u76F8\u5173\u5C5E\u6027-_161"
+      rect:
+        serializedVersion: 2
+        x: 2150
+        y: 234
+        width: 39
+        height: 40
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: a7e813ee99fb958d0800000000000000
+      internalID: -2857041820742742406
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: "-\u60AC\u505C\u67E5\u770B\u76F8\u5173\u5C5E\u6027-_162"
+      rect:
+        serializedVersion: 2
+        x: 2191
+        y: 234
+        width: 42
+        height: 42
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 5820adff6a9cda270800000000000000
+      internalID: 8263482610388959877
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: "-\u60AC\u505C\u67E5\u770B\u76F8\u5173\u5C5E\u6027-_163"
+      rect:
+        serializedVersion: 2
+        x: 2234
+        y: 248
+        width: 13
+        height: 6
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 7b0243440d2770a00800000000000000
+      internalID: 722672504039284919
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: "-\u60AC\u505C\u67E5\u770B\u76F8\u5173\u5C5E\u6027-_164"
+      rect:
+        serializedVersion: 2
+        x: 1162
+        y: 22
+        width: 54
+        height: 33
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 5593660effe08ad10800000000000000
+      internalID: 2136974515331545429
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: "-\u60AC\u505C\u67E5\u770B\u76F8\u5173\u5C5E\u6027-_165"
+      rect:
+        serializedVersion: 2
+        x: 1219
+        y: 0
+        width: 56
+        height: 51
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: d14b04d7572b94500800000000000000
+      internalID: 381031861171827741
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: "-\u60AC\u505C\u67E5\u770B\u76F8\u5173\u5C5E\u6027-_166"
+      rect:
+        serializedVersion: 2
+        x: 1278
+        y: 0
+        width: 53
+        height: 55
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: cb4e19d274ee36b10800000000000000
+      internalID: 1973683051193033916
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: "-\u60AC\u505C\u67E5\u770B\u76F8\u5173\u5C5E\u6027-_167"
+      rect:
+        serializedVersion: 2
+        x: 1334
+        y: 0
+        width: 24
+        height: 55
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 10a66ca6fb355a240800000000000000
+      internalID: 4802336659255749121
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: "-\u60AC\u505C\u67E5\u770B\u76F8\u5173\u5C5E\u6027-_168"
+      rect:
+        serializedVersion: 2
+        x: 1356
+        y: 30
+        width: 35
+        height: 25
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 74d0df7c43db72020800000000000000
+      internalID: 2317028567696608583
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: "-\u60AC\u505C\u67E5\u770B\u76F8\u5173\u5C5E\u6027-_169"
+      rect:
+        serializedVersion: 2
+        x: 1169
+        y: 0
+        width: 40
+        height: 23
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 76f021d058aa412e0800000000000000
+      internalID: -2155910833176965273
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: "-\u60AC\u505C\u67E5\u770B\u76F8\u5173\u5C5E\u6027-_170"
+      rect:
+        serializedVersion: 2
+        x: 1359
+        y: 0
+        width: 28
+        height: 29
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: c31294818d4c67ad0800000000000000
+      internalID: -2704758093789978308
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    outline: []
+    customData: 
+    physicsShape: []
+    bones: []
+    spriteID: 5e97eb03825dee720800000000000000
+    internalID: 0
+    vertices: []
+    indices: 
+    edges: []
+    weights: []
+    secondaryTextures: []
+    spriteCustomMetadata:
+      entries: []
+    nameFileIdTable:
+      "-\u60AC\u505C\u67E5\u770B\u76F8\u5173\u5C5E\u6027-_0": -5465493683888111994
+      "-\u60AC\u505C\u67E5\u770B\u76F8\u5173\u5C5E\u6027-_1": 332489286327240932
+      "-\u60AC\u505C\u67E5\u770B\u76F8\u5173\u5C5E\u6027-_10": -3780575148510675417
+      "-\u60AC\u505C\u67E5\u770B\u76F8\u5173\u5C5E\u6027-_100": 6856987551253383290
+      "-\u60AC\u505C\u67E5\u770B\u76F8\u5173\u5C5E\u6027-_101": -1129418735603907891
+      "-\u60AC\u505C\u67E5\u770B\u76F8\u5173\u5C5E\u6027-_102": -324281705807855661
+      "-\u60AC\u505C\u67E5\u770B\u76F8\u5173\u5C5E\u6027-_103": -7411681861052587506
+      "-\u60AC\u505C\u67E5\u770B\u76F8\u5173\u5C5E\u6027-_104": 5090707391103943904
+      "-\u60AC\u505C\u67E5\u770B\u76F8\u5173\u5C5E\u6027-_105": -4059311327042506898
+      "-\u60AC\u505C\u67E5\u770B\u76F8\u5173\u5C5E\u6027-_106": -816453320646192532
+      "-\u60AC\u505C\u67E5\u770B\u76F8\u5173\u5C5E\u6027-_107": 8758709062291516893
+      "-\u60AC\u505C\u67E5\u770B\u76F8\u5173\u5C5E\u6027-_108": -5095871992616678838
+      "-\u60AC\u505C\u67E5\u770B\u76F8\u5173\u5C5E\u6027-_109": -7489266244344095959
+      "-\u60AC\u505C\u67E5\u770B\u76F8\u5173\u5C5E\u6027-_11": -2617964476715867153
+      "-\u60AC\u505C\u67E5\u770B\u76F8\u5173\u5C5E\u6027-_110": -563681654570095704
+      "-\u60AC\u505C\u67E5\u770B\u76F8\u5173\u5C5E\u6027-_111": 8044135867184621390
+      "-\u60AC\u505C\u67E5\u770B\u76F8\u5173\u5C5E\u6027-_112": 266012220341800441
+      "-\u60AC\u505C\u67E5\u770B\u76F8\u5173\u5C5E\u6027-_113": 5053539597357456315
+      "-\u60AC\u505C\u67E5\u770B\u76F8\u5173\u5C5E\u6027-_114": -6118315369499721914
+      "-\u60AC\u505C\u67E5\u770B\u76F8\u5173\u5C5E\u6027-_115": -6536858087596299179
+      "-\u60AC\u505C\u67E5\u770B\u76F8\u5173\u5C5E\u6027-_116": 9183009633102202908
+      "-\u60AC\u505C\u67E5\u770B\u76F8\u5173\u5C5E\u6027-_117": -6858721144859781867
+      "-\u60AC\u505C\u67E5\u770B\u76F8\u5173\u5C5E\u6027-_118": 7181418442702123193
+      "-\u60AC\u505C\u67E5\u770B\u76F8\u5173\u5C5E\u6027-_119": -1279657413476403849
+      "-\u60AC\u505C\u67E5\u770B\u76F8\u5173\u5C5E\u6027-_12": -8114977874400077229
+      "-\u60AC\u505C\u67E5\u770B\u76F8\u5173\u5C5E\u6027-_120": -2729222580962833554
+      "-\u60AC\u505C\u67E5\u770B\u76F8\u5173\u5C5E\u6027-_121": 5788629324479453549
+      "-\u60AC\u505C\u67E5\u770B\u76F8\u5173\u5C5E\u6027-_122": 9215624725595629740
+      "-\u60AC\u505C\u67E5\u770B\u76F8\u5173\u5C5E\u6027-_123": -5199803054088595429
+      "-\u60AC\u505C\u67E5\u770B\u76F8\u5173\u5C5E\u6027-_124": 7787663456829978359
+      "-\u60AC\u505C\u67E5\u770B\u76F8\u5173\u5C5E\u6027-_125": -1403746547046721183
+      "-\u60AC\u505C\u67E5\u770B\u76F8\u5173\u5C5E\u6027-_126": 4139970179542378484
+      "-\u60AC\u505C\u67E5\u770B\u76F8\u5173\u5C5E\u6027-_127": -3877800655540274777
+      "-\u60AC\u505C\u67E5\u770B\u76F8\u5173\u5C5E\u6027-_128": -131447131540076876
+      "-\u60AC\u505C\u67E5\u770B\u76F8\u5173\u5C5E\u6027-_129": 1878994238052009529
+      "-\u60AC\u505C\u67E5\u770B\u76F8\u5173\u5C5E\u6027-_13": 3222771612579466708
+      "-\u60AC\u505C\u67E5\u770B\u76F8\u5173\u5C5E\u6027-_130": 5356099559684239982
+      "-\u60AC\u505C\u67E5\u770B\u76F8\u5173\u5C5E\u6027-_131": -4383949307919879756
+      "-\u60AC\u505C\u67E5\u770B\u76F8\u5173\u5C5E\u6027-_132": -4044009888676174871
+      "-\u60AC\u505C\u67E5\u770B\u76F8\u5173\u5C5E\u6027-_133": -4254893310194897672
+      "-\u60AC\u505C\u67E5\u770B\u76F8\u5173\u5C5E\u6027-_134": -3910840454632330681
+      "-\u60AC\u505C\u67E5\u770B\u76F8\u5173\u5C5E\u6027-_135": -6510195720819541385
+      "-\u60AC\u505C\u67E5\u770B\u76F8\u5173\u5C5E\u6027-_136": 3098633517990894338
+      "-\u60AC\u505C\u67E5\u770B\u76F8\u5173\u5C5E\u6027-_137": -8745750917596546886
+      "-\u60AC\u505C\u67E5\u770B\u76F8\u5173\u5C5E\u6027-_138": 4262842211606252074
+      "-\u60AC\u505C\u67E5\u770B\u76F8\u5173\u5C5E\u6027-_139": -1213004543144343894
+      "-\u60AC\u505C\u67E5\u770B\u76F8\u5173\u5C5E\u6027-_14": -4045970089805387313
+      "-\u60AC\u505C\u67E5\u770B\u76F8\u5173\u5C5E\u6027-_140": 4840392051068459770
+      "-\u60AC\u505C\u67E5\u770B\u76F8\u5173\u5C5E\u6027-_141": 8197306936649908026
+      "-\u60AC\u505C\u67E5\u770B\u76F8\u5173\u5C5E\u6027-_142": -6466704878194820084
+      "-\u60AC\u505C\u67E5\u770B\u76F8\u5173\u5C5E\u6027-_143": 4873287412113420166
+      "-\u60AC\u505C\u67E5\u770B\u76F8\u5173\u5C5E\u6027-_144": 8134830343456188482
+      "-\u60AC\u505C\u67E5\u770B\u76F8\u5173\u5C5E\u6027-_145": 7700904477070713213
+      "-\u60AC\u505C\u67E5\u770B\u76F8\u5173\u5C5E\u6027-_146": 9166583584676018388
+      "-\u60AC\u505C\u67E5\u770B\u76F8\u5173\u5C5E\u6027-_147": -4782741621747055964
+      "-\u60AC\u505C\u67E5\u770B\u76F8\u5173\u5C5E\u6027-_148": -7413813905806447104
+      "-\u60AC\u505C\u67E5\u770B\u76F8\u5173\u5C5E\u6027-_149": 117176425457817072
+      "-\u60AC\u505C\u67E5\u770B\u76F8\u5173\u5C5E\u6027-_15": 4768192614581047707
+      "-\u60AC\u505C\u67E5\u770B\u76F8\u5173\u5C5E\u6027-_150": -5238417916528458770
+      "-\u60AC\u505C\u67E5\u770B\u76F8\u5173\u5C5E\u6027-_151": -5847942711145231404
+      "-\u60AC\u505C\u67E5\u770B\u76F8\u5173\u5C5E\u6027-_152": -2614163788377972770
+      "-\u60AC\u505C\u67E5\u770B\u76F8\u5173\u5C5E\u6027-_153": 2027152144714042243
+      "-\u60AC\u505C\u67E5\u770B\u76F8\u5173\u5C5E\u6027-_154": -71267098420626033
+      "-\u60AC\u505C\u67E5\u770B\u76F8\u5173\u5C5E\u6027-_155": -3313679572950364240
+      "-\u60AC\u505C\u67E5\u770B\u76F8\u5173\u5C5E\u6027-_156": -4004987564597648019
+      "-\u60AC\u505C\u67E5\u770B\u76F8\u5173\u5C5E\u6027-_157": -397825930875861709
+      "-\u60AC\u505C\u67E5\u770B\u76F8\u5173\u5C5E\u6027-_158": -5602628820092712089
+      "-\u60AC\u505C\u67E5\u770B\u76F8\u5173\u5C5E\u6027-_159": 5752943942194268494
+      "-\u60AC\u505C\u67E5\u770B\u76F8\u5173\u5C5E\u6027-_16": -296858426468933498
+      "-\u60AC\u505C\u67E5\u770B\u76F8\u5173\u5C5E\u6027-_160": -8085054914107334844
+      "-\u60AC\u505C\u67E5\u770B\u76F8\u5173\u5C5E\u6027-_161": -2857041820742742406
+      "-\u60AC\u505C\u67E5\u770B\u76F8\u5173\u5C5E\u6027-_162": 8263482610388959877
+      "-\u60AC\u505C\u67E5\u770B\u76F8\u5173\u5C5E\u6027-_163": 722672504039284919
+      "-\u60AC\u505C\u67E5\u770B\u76F8\u5173\u5C5E\u6027-_164": 2136974515331545429
+      "-\u60AC\u505C\u67E5\u770B\u76F8\u5173\u5C5E\u6027-_165": 381031861171827741
+      "-\u60AC\u505C\u67E5\u770B\u76F8\u5173\u5C5E\u6027-_166": 1973683051193033916
+      "-\u60AC\u505C\u67E5\u770B\u76F8\u5173\u5C5E\u6027-_167": 4802336659255749121
+      "-\u60AC\u505C\u67E5\u770B\u76F8\u5173\u5C5E\u6027-_168": 2317028567696608583
+      "-\u60AC\u505C\u67E5\u770B\u76F8\u5173\u5C5E\u6027-_169": -2155910833176965273
+      "-\u60AC\u505C\u67E5\u770B\u76F8\u5173\u5C5E\u6027-_17": 6142213402343894242
+      "-\u60AC\u505C\u67E5\u770B\u76F8\u5173\u5C5E\u6027-_170": -2704758093789978308
+      "-\u60AC\u505C\u67E5\u770B\u76F8\u5173\u5C5E\u6027-_18": -7261900346188085059
+      "-\u60AC\u505C\u67E5\u770B\u76F8\u5173\u5C5E\u6027-_19": -8716636084032438440
+      "-\u60AC\u505C\u67E5\u770B\u76F8\u5173\u5C5E\u6027-_2": -6609044989105054159
+      "-\u60AC\u505C\u67E5\u770B\u76F8\u5173\u5C5E\u6027-_20": -2286318589118317652
+      "-\u60AC\u505C\u67E5\u770B\u76F8\u5173\u5C5E\u6027-_21": 9208578958597233975
+      "-\u60AC\u505C\u67E5\u770B\u76F8\u5173\u5C5E\u6027-_22": 6733097944290370153
+      "-\u60AC\u505C\u67E5\u770B\u76F8\u5173\u5C5E\u6027-_23": 6370087106978810182
+      "-\u60AC\u505C\u67E5\u770B\u76F8\u5173\u5C5E\u6027-_24": 3088657930504295245
+      "-\u60AC\u505C\u67E5\u770B\u76F8\u5173\u5C5E\u6027-_25": -8788041077435914040
+      "-\u60AC\u505C\u67E5\u770B\u76F8\u5173\u5C5E\u6027-_26": 5068303990123955728
+      "-\u60AC\u505C\u67E5\u770B\u76F8\u5173\u5C5E\u6027-_27": -5711345192338601288
+      "-\u60AC\u505C\u67E5\u770B\u76F8\u5173\u5C5E\u6027-_28": 7151846011686141282
+      "-\u60AC\u505C\u67E5\u770B\u76F8\u5173\u5C5E\u6027-_29": -628138329531441539
+      "-\u60AC\u505C\u67E5\u770B\u76F8\u5173\u5C5E\u6027-_3": 1143280678187610452
+      "-\u60AC\u505C\u67E5\u770B\u76F8\u5173\u5C5E\u6027-_30": 1539067566042142100
+      "-\u60AC\u505C\u67E5\u770B\u76F8\u5173\u5C5E\u6027-_31": 330378715882244137
+      "-\u60AC\u505C\u67E5\u770B\u76F8\u5173\u5C5E\u6027-_32": -8880615143376551022
+      "-\u60AC\u505C\u67E5\u770B\u76F8\u5173\u5C5E\u6027-_33": 8249259281996198339
+      "-\u60AC\u505C\u67E5\u770B\u76F8\u5173\u5C5E\u6027-_34": -5110836077847804389
+      "-\u60AC\u505C\u67E5\u770B\u76F8\u5173\u5C5E\u6027-_35": 7524820931313570824
+      "-\u60AC\u505C\u67E5\u770B\u76F8\u5173\u5C5E\u6027-_36": 4515172118138413713
+      "-\u60AC\u505C\u67E5\u770B\u76F8\u5173\u5C5E\u6027-_37": -1761323479238258065
+      "-\u60AC\u505C\u67E5\u770B\u76F8\u5173\u5C5E\u6027-_38": -1770115173616719381
+      "-\u60AC\u505C\u67E5\u770B\u76F8\u5173\u5C5E\u6027-_39": 2661406985635730920
+      "-\u60AC\u505C\u67E5\u770B\u76F8\u5173\u5C5E\u6027-_4": 1720466602832572046
+      "-\u60AC\u505C\u67E5\u770B\u76F8\u5173\u5C5E\u6027-_40": -3226632717652079236
+      "-\u60AC\u505C\u67E5\u770B\u76F8\u5173\u5C5E\u6027-_41": -3705988448135995699
+      "-\u60AC\u505C\u67E5\u770B\u76F8\u5173\u5C5E\u6027-_42": -5284675733945390661
+      "-\u60AC\u505C\u67E5\u770B\u76F8\u5173\u5C5E\u6027-_43": -9028081388509378013
+      "-\u60AC\u505C\u67E5\u770B\u76F8\u5173\u5C5E\u6027-_44": 3928642997768304826
+      "-\u60AC\u505C\u67E5\u770B\u76F8\u5173\u5C5E\u6027-_45": -2639950617137922959
+      "-\u60AC\u505C\u67E5\u770B\u76F8\u5173\u5C5E\u6027-_46": 3735413114258717329
+      "-\u60AC\u505C\u67E5\u770B\u76F8\u5173\u5C5E\u6027-_47": -143756594256124556
+      "-\u60AC\u505C\u67E5\u770B\u76F8\u5173\u5C5E\u6027-_48": 868018123051587974
+      "-\u60AC\u505C\u67E5\u770B\u76F8\u5173\u5C5E\u6027-_49": -2764013581720586167
+      "-\u60AC\u505C\u67E5\u770B\u76F8\u5173\u5C5E\u6027-_5": 2414496115166578937
+      "-\u60AC\u505C\u67E5\u770B\u76F8\u5173\u5C5E\u6027-_50": -9033294278795492208
+      "-\u60AC\u505C\u67E5\u770B\u76F8\u5173\u5C5E\u6027-_51": -4519427514602531158
+      "-\u60AC\u505C\u67E5\u770B\u76F8\u5173\u5C5E\u6027-_52": -88895633622917729
+      "-\u60AC\u505C\u67E5\u770B\u76F8\u5173\u5C5E\u6027-_53": 5048474977096038084
+      "-\u60AC\u505C\u67E5\u770B\u76F8\u5173\u5C5E\u6027-_54": -8551103543733387921
+      "-\u60AC\u505C\u67E5\u770B\u76F8\u5173\u5C5E\u6027-_55": 6380058999565599942
+      "-\u60AC\u505C\u67E5\u770B\u76F8\u5173\u5C5E\u6027-_56": 5319216188865496876
+      "-\u60AC\u505C\u67E5\u770B\u76F8\u5173\u5C5E\u6027-_57": 1191754702961674566
+      "-\u60AC\u505C\u67E5\u770B\u76F8\u5173\u5C5E\u6027-_58": 5627430557265488185
+      "-\u60AC\u505C\u67E5\u770B\u76F8\u5173\u5C5E\u6027-_59": -7763998586771409466
+      "-\u60AC\u505C\u67E5\u770B\u76F8\u5173\u5C5E\u6027-_6": -8300970015482595131
+      "-\u60AC\u505C\u67E5\u770B\u76F8\u5173\u5C5E\u6027-_60": 5870529283647542255
+      "-\u60AC\u505C\u67E5\u770B\u76F8\u5173\u5C5E\u6027-_61": 6808799764362481720
+      "-\u60AC\u505C\u67E5\u770B\u76F8\u5173\u5C5E\u6027-_62": -2082340995347832323
+      "-\u60AC\u505C\u67E5\u770B\u76F8\u5173\u5C5E\u6027-_63": 7811680011825501946
+      "-\u60AC\u505C\u67E5\u770B\u76F8\u5173\u5C5E\u6027-_64": 1550724118847882306
+      "-\u60AC\u505C\u67E5\u770B\u76F8\u5173\u5C5E\u6027-_65": 6544947714789325932
+      "-\u60AC\u505C\u67E5\u770B\u76F8\u5173\u5C5E\u6027-_66": -8816910129867004495
+      "-\u60AC\u505C\u67E5\u770B\u76F8\u5173\u5C5E\u6027-_67": -3920001372880952843
+      "-\u60AC\u505C\u67E5\u770B\u76F8\u5173\u5C5E\u6027-_68": -3585852468238999896
+      "-\u60AC\u505C\u67E5\u770B\u76F8\u5173\u5C5E\u6027-_69": -4542626804938676117
+      "-\u60AC\u505C\u67E5\u770B\u76F8\u5173\u5C5E\u6027-_7": 5735078063248660218
+      "-\u60AC\u505C\u67E5\u770B\u76F8\u5173\u5C5E\u6027-_70": -8425545426593894301
+      "-\u60AC\u505C\u67E5\u770B\u76F8\u5173\u5C5E\u6027-_71": 7774110574944621176
+      "-\u60AC\u505C\u67E5\u770B\u76F8\u5173\u5C5E\u6027-_72": 6033079023660920869
+      "-\u60AC\u505C\u67E5\u770B\u76F8\u5173\u5C5E\u6027-_73": 259206063434765185
+      "-\u60AC\u505C\u67E5\u770B\u76F8\u5173\u5C5E\u6027-_74": 7154961173669972820
+      "-\u60AC\u505C\u67E5\u770B\u76F8\u5173\u5C5E\u6027-_75": -6395978887705165175
+      "-\u60AC\u505C\u67E5\u770B\u76F8\u5173\u5C5E\u6027-_76": 8483452310387978573
+      "-\u60AC\u505C\u67E5\u770B\u76F8\u5173\u5C5E\u6027-_77": 2206838602040370089
+      "-\u60AC\u505C\u67E5\u770B\u76F8\u5173\u5C5E\u6027-_78": 1578847734752055132
+      "-\u60AC\u505C\u67E5\u770B\u76F8\u5173\u5C5E\u6027-_79": 7432725338361523659
+      "-\u60AC\u505C\u67E5\u770B\u76F8\u5173\u5C5E\u6027-_8": -598300351752882172
+      "-\u60AC\u505C\u67E5\u770B\u76F8\u5173\u5C5E\u6027-_80": -1997505625059118057
+      "-\u60AC\u505C\u67E5\u770B\u76F8\u5173\u5C5E\u6027-_81": 8476073775080456565
+      "-\u60AC\u505C\u67E5\u770B\u76F8\u5173\u5C5E\u6027-_82": -343350499268539507
+      "-\u60AC\u505C\u67E5\u770B\u76F8\u5173\u5C5E\u6027-_83": 2885121664631932774
+      "-\u60AC\u505C\u67E5\u770B\u76F8\u5173\u5C5E\u6027-_84": 4772349152338681394
+      "-\u60AC\u505C\u67E5\u770B\u76F8\u5173\u5C5E\u6027-_85": -9099522138937372873
+      "-\u60AC\u505C\u67E5\u770B\u76F8\u5173\u5C5E\u6027-_86": -431684673049273869
+      "-\u60AC\u505C\u67E5\u770B\u76F8\u5173\u5C5E\u6027-_87": -3440246761581465079
+      "-\u60AC\u505C\u67E5\u770B\u76F8\u5173\u5C5E\u6027-_88": 3097289889337790089
+      "-\u60AC\u505C\u67E5\u770B\u76F8\u5173\u5C5E\u6027-_89": -3778523230172491075
+      "-\u60AC\u505C\u67E5\u770B\u76F8\u5173\u5C5E\u6027-_9": 6851140939829443685
+      "-\u60AC\u505C\u67E5\u770B\u76F8\u5173\u5C5E\u6027-_90": 7348786014837776168
+      "-\u60AC\u505C\u67E5\u770B\u76F8\u5173\u5C5E\u6027-_91": 8218771947587406316
+      "-\u60AC\u505C\u67E5\u770B\u76F8\u5173\u5C5E\u6027-_92": 8946810873850829598
+      "-\u60AC\u505C\u67E5\u770B\u76F8\u5173\u5C5E\u6027-_93": 7298573763212654236
+      "-\u60AC\u505C\u67E5\u770B\u76F8\u5173\u5C5E\u6027-_94": 5521456122885149176
+      "-\u60AC\u505C\u67E5\u770B\u76F8\u5173\u5C5E\u6027-_95": 712117052987302548
+      "-\u60AC\u505C\u67E5\u770B\u76F8\u5173\u5C5E\u6027-_96": -394310048282088719
+      "-\u60AC\u505C\u67E5\u770B\u76F8\u5173\u5C5E\u6027-_97": 8650980939928332683
+      "-\u60AC\u505C\u67E5\u770B\u76F8\u5173\u5C5E\u6027-_98": -4417257274390760370
+      "-\u60AC\u505C\u67E5\u770B\u76F8\u5173\u5C5E\u6027-_99": 8981971696200676147
+  mipmapLimitGroupName: 
+  pSDRemoveMatte: 0
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 

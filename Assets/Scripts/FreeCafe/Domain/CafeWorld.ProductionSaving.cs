@@ -45,7 +45,7 @@ namespace Spotlight.FreeCafe
                     || !Finite(d.spilledMl) || d.spilledMl < 0 || d.additionSequence < 0)
                     return ActionResult.No("道具状态无效：" + entity.id);
                 foreach (var p in entity.contents)
-                    if (!Finite(p.milliliters) || p.milliliters < 0 || !Finite(p.productionScore) || p.productionScore < 0 || p.productionScore > 100
+                    if (!Finite(p.grams) || p.grams < 0 || !Finite(p.milliliters) || p.milliliters < 0 || !Finite(p.productionScore) || p.productionScore < 0 || p.productionScore > 100
                         || !Enum.IsDefined(typeof(LiquidTemperature), p.temperature) || p.addedSequence < 0
                         || p.milliliters > 0 && !IsLiquid(p.specId)) return ActionResult.No("液体状态无效：" + entity.id);
                 if (candidate.production.enabled)
@@ -60,20 +60,12 @@ namespace Spotlight.FreeCafe
                     if ((entity.specId == "machine.grinder" || entity.specId == "machine.mixer")
                         && d.phase != ProductionPhase.Empty && d.phase != ProductionPhase.Loaded && d.phase != ProductionPhase.Processing && d.phase != ProductionPhase.Ready)
                         return ActionResult.No("固体加工设备阶段无效");
-                    if (entity.specId == "machine.heater" && (d.phase == ProductionPhase.Ready || entity.contents.Count > 1)) return ActionResult.No("加热壶阶段无效");
-                    if (entity.specId == "machine.heater" && entity.contents.Count == 1
-                        && (entity.contents[0].milliliters <= 0 || entity.contents[0].specId != "water" && entity.contents[0].specId != "hotwater"
-                            && entity.contents[0].specId != "milk" && entity.contents[0].specId != "hotmilk" && entity.contents[0].specId != "cocoa.drink"))
-                        return ActionResult.No("加热壶内容物无效");
                     if (entity.specId == "machine.mixer" && entity.contents.Count > 0 && (entity.contents.Count != 1
                         || entity.contents[0].specId != (d.phase == ProductionPhase.Ready ? "matcha.drink" : "matcha.powder"))) return ActionResult.No("抹茶加工材料无效");
                     if (entity.specId == "machine.grinder" && entity.contents.Count > 0
                         && (entity.contents.Count != 1 || entity.contents[0].specId != (d.phase == ProductionPhase.Ready ? "grounds" : "beans")))
                         return ActionResult.No("研磨器材料无效");
-                    if (entity.specId == "machine.brewer" && entity.contents.Count > 0
-                        && (d.phase == ProductionPhase.Ready ? entity.contents.Find(p => p.specId == "coffee") == null
-                            : d.phase != ProductionPhase.Loaded || entity.contents.Find(p => p.specId == "grounds") == null))
-                        return ActionResult.No("咖啡壶状态无效");
+
                 }
             }
             foreach (var request in candidate.requests)

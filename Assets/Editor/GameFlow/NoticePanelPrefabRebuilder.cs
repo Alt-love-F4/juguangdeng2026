@@ -29,25 +29,26 @@ namespace Spotlight.GameFlow.Editor
             GameObject reference = PrefabUtility.LoadPrefabContents(ReferencePath);
             try
             {
-                TMP_FontAsset font = EnsureFont();
+                TMP_FontAsset font = AssetDatabase.LoadAssetAtPath<TMP_FontAsset>("Assets/Resources/Fonts/乐米曲奇方块体 SDF.asset") ?? EnsureFont();
                 if (font == null) throw new InvalidOperationException("Could not create TMP font asset from " + FontSourcePath);
 
-                if (AssetDatabase.LoadAssetAtPath<GameObject>(PrefabPath) != null)
-                    AssetDatabase.DeleteAsset(PrefabPath);
-
-                var root = new GameObject("NoticePanel", typeof(RectTransform), typeof(CanvasGroup), typeof(Canvas), typeof(GraphicRaycaster));
+                // Load and update in place: keep the GUID and existing component/file IDs.
+                bool exists = AssetDatabase.LoadAssetAtPath<GameObject>(PrefabPath) != null;
+                var root = exists ? PrefabUtility.LoadPrefabContents(PrefabPath)
+                    : new GameObject("NoticePanel", typeof(RectTransform), typeof(CanvasGroup), typeof(Canvas), typeof(GraphicRaycaster));
                 try
                 {
                     var rootRect = root.GetComponent<RectTransform>();
                     root.transform.localScale = Vector3.one;
                     root.transform.localPosition = Vector3.zero;
                     rootRect.localRotation = Quaternion.identity;
+                    rootRect.pivot = new Vector2(.5f, .5f);
                     Stretch(rootRect);
                     var canvas = root.GetComponent<Canvas>();
                     canvas.renderMode = RenderMode.ScreenSpaceOverlay;
                     canvas.overrideSorting = true;
                     canvas.sortingOrder = 700;
-                    var scaler = root.AddComponent<CanvasScaler>();
+                    var scaler = root.GetComponent<CanvasScaler>() ?? root.AddComponent<CanvasScaler>();
                     scaler.uiScaleMode = CanvasScaler.ScaleMode.ScaleWithScreenSize;
                     scaler.referenceResolution = new Vector2(CanvasWidth, CanvasHeight);
                     scaler.screenMatchMode = CanvasScaler.ScreenMatchMode.MatchWidthOrHeight;
@@ -56,8 +57,17 @@ namespace Spotlight.GameFlow.Editor
                     Image blocker = MakeImage(root.transform, "InputBlocker", Vector2.zero, Vector2.one, new Color(.035f, .025f, .02f, .42f));
                     blocker.raycastTarget = true;
 
-                    Transform artwork = new GameObject("NewspaperArtwork", typeof(RectTransform)).transform;
-                    artwork.SetParent(root.transform, false);
+                    Transform layout = Child(root.transform, "NewspaperLayout");
+                    var layoutRect = (RectTransform)layout;
+                    layoutRect.anchorMin = layoutRect.anchorMax = new Vector2(.5f, .5f);
+                    layoutRect.pivot = new Vector2(.5f, .5f);
+                    layoutRect.anchoredPosition = Vector2.zero;
+                    layoutRect.sizeDelta = new Vector2(CanvasWidth, CanvasHeight);
+                    layoutRect.localScale = Vector3.one;
+
+                    Transform artwork = root.transform.Find("NewspaperArtwork") ?? layout.Find("NewspaperArtwork");
+                    if (artwork == null) artwork = Child(layout, "NewspaperArtwork");
+                    artwork.SetParent(layout, false);
                     artwork.localScale = Vector3.one;
                     Stretch(artwork as RectTransform);
                     int order = 0;
@@ -76,34 +86,67 @@ namespace Spotlight.GameFlow.Editor
                         rect.sizeDelta = new Vector2(sr.sprite.rect.width / sr.sprite.pixelsPerUnit * CanvasWidth / WorldWidth * s.x,
                             sr.sprite.rect.height / sr.sprite.pixelsPerUnit * CanvasHeight / WorldHeight * s.y);
                         image.transform.SetSiblingIndex(order++);
+                        image.gameObject.SetActive(sr.gameObject.activeSelf && sr.enabled);
+                        // These source layers are design overlays, not runtime content.
+                        if (sr.name == "图层 2" || sr.name.StartsWith("开始一天") || sr.name.Contains("字色"))
+                            image.gameObject.SetActive(false);
+                        if (sr.name == "图层 1 副本 2") { image.sprite = null; image.color = Paper; }
                     }
 
-                    Transform content = new GameObject("DynamicContent", typeof(RectTransform)).transform;
-                    content.SetParent(root.transform, false);
+                    Transform content = root.transform.Find("DynamicContent") ?? layout.Find("DynamicContent");
+                    if (content == null) content = Child(layout, "DynamicContent");
+                    content.SetParent(layout, false);
                     content.localScale = Vector3.one;
                     Stretch(content as RectTransform);
 
-                    // Central newspaper page is the editable/dynamic page from the reference composition.
-                    TMP_Text title = MakeText(content, "Title", "事件通知", new Vector2(585, 745), new Vector2(750, 82), font, 54, TextAlignmentOptions.Center);
-                    TMP_Text time = MakeText(content, "Time", "星期三，xxxx年x月x日", new Vector2(585, 695), new Vector2(750, 42), font, 25, TextAlignmentOptions.Center);
-                    TMP_Text body = MakeText(content, "Body", "", new Vector2(585, 420), new Vector2(750, 200), font, 34, TextAlignmentOptions.TopLeft);
-                    body.enableWordWrapping = true;
-                    body.overflowMode = TextOverflowModes.Overflow;
-                    TMP_Text progressLabel = MakeText(content, "ProgressLabel", "", new Vector2(585, 175), new Vector2(750, 32), font, 22, TextAlignmentOptions.Center);
-                    TMP_Text hint = MakeText(content, "Hint", "空格 / 回车 / 点击确认关闭", new Vector2(585, 48), new Vector2(750, 32), font, 20, TextAlignmentOptions.Center);
+                    // Match the central page, leaving the masthead and right-hand printed column intact.
+                    Image dateSurface = MakeImage(content, "DateSurface", Vector2.zero, Vector2.zero, Paper);
+                    dateSurface.raycastTarget = false;
+                    Position(dateSurface.rectTransform, new Vector2(1105, 857), new Vector2(650, 44));
+                    dateSurface.transform.SetAsFirstSibling();
+                    TMP_Text title = MakeText(content, "Title", "都来喝拿铁，沸点咖啡馆开始营业了！", new Vector2(995, 740), new Vector2(410, 92), font, 36, TextAlignmentOptions.TopLeft);
+                    title.enableAutoSizing = true; title.fontSizeMin = 26; title.fontSizeMax = 36;
+                    title.overflowMode = TextOverflowModes.Ellipsis;
+                    TMP_Text time = MakeText(content, "Time", "本 日 快 报", new Vector2(1105, 857), new Vector2(650, 40), font, 28, TextAlignmentOptions.Center);
+                    Image articleSurface = MakeImage(content, "ArticleSurface", Vector2.zero, Vector2.zero, Paper);
+                    articleSurface.raycastTarget = false;
+                    Position(articleSurface.rectTransform, new Vector2(995, 249), new Vector2(430, 204));
+                    articleSurface.transform.SetAsFirstSibling();
+                    TMP_Text body = MakeText(content, "Body", "", new Vector2(995, 249), new Vector2(410, 184), font, 30, TextAlignmentOptions.TopLeft);
+                    body.overflowMode = TextOverflowModes.Page;
+                    body.lineSpacing = 6f;
+                    TMP_Text progressLabel = MakeText(content, "ProgressLabel", "", new Vector2(995, 128), new Vector2(410, 32), font, 22, TextAlignmentOptions.Left);
+                    TMP_Text hint = MakeText(content, "Hint", "空格 / 回车：继续   Esc：关闭", new Vector2(995, 60), new Vector2(430, 28), font, 20, TextAlignmentOptions.Left);
 
-                    RawImage noticeImage = MakeRawImage(content, "NoticeImage", new Vector2(720, 455), new Vector2(480, 205));
+                    Transform photo = Child(content, "PhotographSlot");
+                    Position((RectTransform)photo, new Vector2(995, 521), new Vector2(410, 296));
+                    var existingImage = content.Find("NoticeImage");
+                    if (existingImage != null) existingImage.SetParent(photo, false);
+                    RawImage noticeImage = MakeRawImage(photo, "NoticeImage", Vector2.zero, new Vector2(410, 296));
                     noticeImage.color = Color.white;
-                    var fitter = noticeImage.gameObject.AddComponent<AspectRatioFitter>();
+                    var fitter = noticeImage.GetComponent<AspectRatioFitter>() ?? noticeImage.gameObject.AddComponent<AspectRatioFitter>();
                     fitter.aspectMode = AspectRatioFitter.AspectMode.FitInParent;
+                    fitter.aspectRatio = 410f / 296f;
+                    noticeImage.gameObject.SetActive(false);
 
-                    Slider progress = MakeProgress(content, "ProgressBar", new Vector2(755, 135), new Vector2(410, 12));
+                    Slider progress = MakeProgress(content, "ProgressBar", new Vector2(995, 102), new Vector2(410, 8));
                     progress.gameObject.SetActive(false);
-                    Button confirm = MakeButton(content, "Confirm", "确认", new Vector2(850, 78), new Vector2(220, 52), font);
-                    Button cancel = MakeButton(root.transform, "Cancel", "", new Vector2(0, 0), Vector2.zero, font);
+                    Button confirm = MakeButton(content, "Confirm", "开始一天", new Vector2(1355, 70), new Vector2(190, 64), font);
+                    confirm.GetComponent<Image>().color = new Color(1f, 1f, 1f, 0f);
+                    TMP_Text confirmText = confirm.transform.Find("Label").GetComponent<TMP_Text>();
+                    confirmText.color = Ink; confirmText.fontSize = 34;
+                    confirm.targetGraphic = confirmText;
+                    var colors = confirm.colors;
+                    colors.normalColor = Color.white;
+                    colors.highlightedColor = new Color(1.55f, 1.4f, 1.15f);
+                    colors.pressedColor = new Color(.7f, .6f, .5f);
+                    colors.disabledColor = new Color(1f, 1f, 1f, .5f);
+                    confirm.colors = colors;
+                    confirm.navigation = new Navigation { mode = Navigation.Mode.None };
+                    Button cancel = MakeButton(root.transform, "Cancel", "", Vector2.zero, Vector2.zero, font);
                     cancel.gameObject.SetActive(false);
 
-                    var panel = root.AddComponent<NoticePanel>();
+                    var panel = root.GetComponent<NoticePanel>() ?? root.AddComponent<NoticePanel>();
                     var serialized = new SerializedObject(panel);
                     Set(serialized, "canvasGroup", root.GetComponent<CanvasGroup>());
                     Set(serialized, "noticeImage", noticeImage);
@@ -115,7 +158,10 @@ namespace Spotlight.GameFlow.Editor
                     Set(serialized, "hintText", hint);
                     Set(serialized, "confirmButton", confirm);
                     Set(serialized, "cancelButton", cancel);
-                    Set(serialized, "enterSeconds", .2f);
+                    Set(serialized, "newspaperLayout", layoutRect);
+                    Set(serialized, "articleSurface", articleSurface.rectTransform);
+                    Set(serialized, "confirmLabel", confirmText);
+                    Set(serialized, "enterSeconds", .28f);
                     Set(serialized, "exitSeconds", .15f);
                     serialized.ApplyModifiedPropertiesWithoutUndo();
                     root.GetComponent<CanvasGroup>().alpha = 0f;
@@ -124,7 +170,11 @@ namespace Spotlight.GameFlow.Editor
                     PrefabUtility.SaveAsPrefabAsset(root, PrefabPath);
                     Debug.Log("[GameFlow] Rebuilt NoticePanel as newspaper UGUI/TMP layout.");
                 }
-                finally { UnityEngine.Object.DestroyImmediate(root); }
+                finally
+                {
+                    if (exists) PrefabUtility.UnloadPrefabContents(root);
+                    else UnityEngine.Object.DestroyImmediate(root);
+                }
             }
             finally { PrefabUtility.UnloadPrefabContents(reference); }
             AssetDatabase.SaveAssets();
@@ -137,10 +187,7 @@ namespace Spotlight.GameFlow.Editor
             if (existing != null && existing.atlasTextures != null && existing.atlasTextures.Length > 0 && existing.atlasTextures[0] != null)
                 return existing;
             if (existing != null)
-            {
-                AssetDatabase.DeleteAsset(FontPath);
-                AssetDatabase.Refresh();
-            }
+                throw new InvalidOperationException("Existing newspaper font has no atlas; repair it without deleting its GUID: " + FontPath);
             var source = AssetDatabase.LoadAssetAtPath<Font>(FontSourcePath);
             if (source == null) return null;
             var font = TMP_FontAsset.CreateFontAsset(source, 90, 9, GlyphRenderMode.SDFAA, 1024, 1024, AtlasPopulationMode.Dynamic, true);
@@ -158,33 +205,49 @@ namespace Spotlight.GameFlow.Editor
         private static void Set(SerializedObject so, string name, UnityEngine.Object value) { so.FindProperty(name).objectReferenceValue = value; }
         private static void Set(SerializedObject so, string name, float value) { so.FindProperty(name).floatValue = value; }
 
+        private static readonly Color Paper = new Color32(222, 218, 197, 255);
+        private static readonly Color Ink = new Color32(99, 67, 54, 255);
+
+        private static Transform Child(Transform parent, string name)
+        {
+            var child = parent.Find(name);
+            if (child == null) { child = new GameObject(name, typeof(RectTransform)).transform; child.SetParent(parent, false); }
+            return child;
+        }
+
         private static Image MakeImage(Transform parent, string name, Vector2 min, Vector2 max, Color color)
         {
-            var go = new GameObject(name, typeof(RectTransform), typeof(CanvasRenderer), typeof(Image));
-            go.transform.SetParent(parent, false);
-            var image = go.GetComponent<Image>(); image.color = color;
+            var go = Child(parent, name).gameObject;
+            var image = go.GetComponent<Image>() ?? go.AddComponent<Image>(); image.color = color;
             var rect = image.rectTransform; rect.anchorMin = min; rect.anchorMax = max;
             if (min != max) rect.offsetMin = rect.offsetMax = Vector2.zero;
             return image;
         }
         private static RawImage MakeRawImage(Transform parent, string name, Vector2 center, Vector2 size)
         {
-            var go = new GameObject(name, typeof(RectTransform), typeof(CanvasRenderer), typeof(RawImage)); go.transform.SetParent(parent, false);
-            var image = go.GetComponent<RawImage>(); Position(image.rectTransform, center, size); image.raycastTarget = false; return image;
+            var go = Child(parent, name).gameObject;
+            var image = go.GetComponent<RawImage>() ?? go.AddComponent<RawImage>();
+            image.rectTransform.anchorMin = image.rectTransform.anchorMax = new Vector2(.5f, .5f);
+            image.rectTransform.anchoredPosition = center; image.rectTransform.sizeDelta = size;
+            image.raycastTarget = false; return image;
         }
         private static TMP_Text MakeText(Transform parent, string name, string value, Vector2 center, Vector2 size, TMP_FontAsset font, float fontSize, TextAlignmentOptions alignment)
         {
-            var go = new GameObject(name, typeof(RectTransform), typeof(CanvasRenderer), typeof(TextMeshProUGUI)); go.transform.SetParent(parent, false);
-            var text = go.GetComponent<TextMeshProUGUI>(); Position(text.rectTransform, center, size); text.font = font; text.fontSize = fontSize; text.text = value; text.color = new Color(.25f, .12f, .07f, 1f); text.alignment = alignment; text.raycastTarget = false; text.enableWordWrapping = true; return text;
+            var go = Child(parent, name).gameObject;
+            var text = go.GetComponent<TextMeshProUGUI>() ?? go.AddComponent<TextMeshProUGUI>(); Position(text.rectTransform, center, size); text.font = font; text.fontSize = fontSize; text.text = value; text.color = Ink; text.alignment = alignment; text.raycastTarget = false; text.textWrappingMode = TextWrappingModes.Normal; return text;
         }
         private static Slider MakeProgress(Transform parent, string name, Vector2 center, Vector2 size)
         {
-            var go = new GameObject(name, typeof(RectTransform), typeof(Slider)); go.transform.SetParent(parent, false); var s = go.GetComponent<Slider>(); Position(s.transform as RectTransform, center, size); return s;
+            var go = Child(parent, name).gameObject; var s = go.GetComponent<Slider>() ?? go.AddComponent<Slider>(); Position(go.transform as RectTransform, center, size);
+            var track = MakeImage(go.transform, "Track", Vector2.zero, Vector2.one, new Color(.39f, .26f, .21f, .2f)); track.raycastTarget = false;
+            var fill = MakeImage(go.transform, "Fill", Vector2.zero, Vector2.one, Ink); fill.raycastTarget = false;
+            s.fillRect = fill.rectTransform; s.interactable = false;
+            return s;
         }
         private static Button MakeButton(Transform parent, string name, string label, Vector2 center, Vector2 size, TMP_FontAsset font)
         {
-            var image = MakeImage(parent, name, Vector2.zero, Vector2.zero, new Color(.26f, .13f, .08f, .96f)); Position(image.rectTransform, center, size); var b = image.gameObject.AddComponent<Button>(); b.targetGraphic = image;
-            if (!string.IsNullOrEmpty(label)) { var text = MakeText(image.transform, "Label", label, Vector2.zero, size, font, 24, TextAlignmentOptions.Center); text.color = new Color(.95f, .85f, .67f, 1f); }
+            var image = MakeImage(parent, name, Vector2.zero, Vector2.zero, new Color(.26f, .13f, .08f, .96f)); Position(image.rectTransform, center, size); var b = image.GetComponent<Button>() ?? image.gameObject.AddComponent<Button>(); b.targetGraphic = image;
+            if (!string.IsNullOrEmpty(label)) { var text = MakeText(image.transform, "Label", label, Vector2.zero, size, font, 24, TextAlignmentOptions.Center); Stretch(text.rectTransform); text.color = new Color(.95f, .85f, .67f, 1f); }
             return b;
         }
         private static void Position(RectTransform rect, Vector2 center, Vector2 size) { rect.anchorMin = rect.anchorMax = new Vector2(.5f, .5f); rect.pivot = new Vector2(.5f, .5f); rect.anchoredPosition = new Vector2(center.x - CanvasWidth * .5f, center.y - CanvasHeight * .5f); rect.sizeDelta = size; }

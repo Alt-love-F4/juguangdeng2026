@@ -52,7 +52,7 @@ namespace Spotlight.FreeCafe
             previousRecipe.onClick.RemoveListener(PreviousRecipe); nextRecipe.onClick.RemoveListener(NextRecipe);
             miniGameButton.onClick.RemoveListener(OpenMiniGame); cancelMiniGame.onClick.RemoveListener(CancelMiniGame); clearMachine.onClick.RemoveListener(ClearMachine);
         }
-        private void Execute(ActionResult action) => runtime.ShowHint(action.message);
+        private void Execute(ActionResult action) => runtime.Report(action);
         private void PreviousOrder() { if(!runtime.InputBlocked) Execute(runtime.World.PageProductionOrder(-1)); }
         private void NextOrder() { if(!runtime.InputBlocked) Execute(runtime.World.PageProductionOrder(1)); }
         private void SmallCup() { if(!runtime.InputBlocked) Execute(runtime.World.SelectServingCup("s.cups.small")); }
@@ -60,7 +60,7 @@ namespace Spotlight.FreeCafe
         private void Deliver()
         {
             if(runtime.InputBlocked) return;
-            int completed=runtime.World.State.todayServed;Execute(runtime.World.DeliverProductionCup());
+            int completed=runtime.World.State.todayServed;runtime.DeliverCup();
             if(runtime.World.State.todayServed>completed)
             { if(completionFeedback!=null) StopCoroutine(completionFeedback);completionFeedback=StartCoroutine(CompletionFeedback()); }
         }
@@ -94,7 +94,7 @@ namespace Spotlight.FreeCafe
             text.Append("杯型：").Append(world.Spec(product.cupSpecId).label).Append(" / 温度：").Append(product.requiredTemperature==LiquidTemperature.Boiling ? "沸腾" : product.requiredTemperature==LiquidTemperature.Warm ? "温热" : "常温").AppendLine();
             text.AppendLine("参考用量（自由操作，不锁步骤）：");
             foreach(var p in product.ingredients) text.Append("  ").Append(world.Spec(p.specId).label).Append("  ").Append(p.milliliters>0 ? p.milliliters.ToString("0")+" ml" : p.units+" 份").AppendLine();
-            text.AppendLine().Append("先咖啡原液，再其他液体，最后小料；方糖可任意时候加入。\n空杯、半成品也能出品，但顾客会按实际质量评价。");
+            text.AppendLine().Append("任何容器都能自由加料；咖啡粉与水混合是冷萃，放到炉台并点击炉台加热完成萃取。\n空杯、半成品也能出品，但顾客会按实际质量评价。");
             bookBody.text=text.ToString();
         }
         private void Refresh()
@@ -120,16 +120,17 @@ namespace Spotlight.FreeCafe
                 customerArt=customer.person.visualId;
             var character=customer!=null && customer.person!=null ? runtime.Character(customer.person.characterId) : null;
             customerAvatar.sprite=character!=null && character.avatar!=null ? character.avatar : runtime.artLibrary.Resolve(customerArt);
+            customerAvatar.gameObject.SetActive(customerAvatar.sprite!=null);
             orderDescription.text=product==null ? "尚无订单，可先准备原料。" : product.label+"  ·  "+product.description+"\n满意要求 ≥ "+product.minimumScore.ToString("0")+"分"+(request.remakes>0 ? "  ·  正在重做" : "");
             previousOrder.interactable=nextOrder.interactable=!blocked && state.requests.Count>1;
             var cup=world.ServingCup;
             cupStatus.text=cup==null ? "出餐托盘 · 未选杯" : world.Spec(cup.specId).label+"  "+world.LiquidVolume(cup).ToString("0")+" / "+world.LiquidCapacity(cup).ToString("0")+" ml"+(cup.latteArt ? "  · 拉花："+(cup.latteArtPattern ?? "已完成")+" "+cup.latteArtScore.ToString("0")+"分" : "");
             bool canChange=!blocked && (cup==null || cup.contents.Count==0);
             smallCup.interactable=largeCup.interactable=canChange;
-            deliver.interactable=!blocked && cup!=null && request!=null; discard.interactable=!blocked && cup!=null;
+            deliver.interactable=!blocked; discard.interactable=!blocked && cup!=null;
             returnButton.interactable=bookButton.interactable=miniGameButton.interactable=!blocked;
             pauseButton.interactable=string.IsNullOrEmpty(state.production.miniGameToken) && !(FreeCafeGMPanel.Instance!=null && FreeCafeGMPanel.Instance.IsVisible);
-            var selected=world.Find(runtime.SelectedId); clearMachine.interactable=!blocked && selected!=null && world.Spec(selected.specId).Has(Capability.Processor) && selected.contents.Count>0;
+            var selected=world.Find(runtime.SelectedId); clearMachine.interactable=!blocked && selected!=null && (world.IsContainer(selected) || world.Spec(selected.specId).Has(Capability.Processor)) && selected.contents.Count>0;
             instruction.text=runtime.Hint;
             result.text=string.IsNullOrEmpty(state.production.lastDelivery) ? "王国币 "+state.money+"  ·  声望 "+state.reputation+"  ·  可提前备料" : state.production.lastDelivery;
             var brewer=world.Find("m.brewer"); var heater=world.Find("m.heater"); var settings=world.Catalog.production;
@@ -142,7 +143,8 @@ namespace Spotlight.FreeCafe
             SetBand(timeGold,settings.brewIdealSeconds-settings.brewGoldSeconds,settings.brewIdealSeconds+settings.brewGoldSeconds,timeGauge.maxValue);
             SetBand(volumeGreen,settings.brewIdealMl-settings.brewGoldMl-settings.brewGreenMl,settings.brewIdealMl+settings.brewGoldMl+settings.brewGreenMl,volumeGauge.maxValue);
             SetBand(volumeGold,settings.brewIdealMl-settings.brewGoldMl,settings.brewIdealMl+settings.brewGoldMl,volumeGauge.maxValue);
-            machineStatus.text="萃取："+world.ProductionCaption(brewer)+"   |   加热壶："+world.ProductionCaption(heater);
+            var stoveVessel=world.Find(world.Find("m.stove")?.production.heatingVesselId);
+            machineStatus.text="自由调配 · 不限制加料顺序\n咖啡壶："+world.ContainerDescription(brewer)+"\n加热壶："+world.ContainerDescription(heater)+"\n炉台："+(stoveVessel==null ? "放上容器，点击加热" : world.Spec(stoveVessel.specId).label+" · "+world.ProductionCaption(stoveVessel));
             miniGamePanel.SetActive(!string.IsNullOrEmpty(state.production.miniGameToken) && (runtime.GetComponent<FreeCafeMiniGameGateway>()==null || !runtime.GetComponent<FreeCafeMiniGameGateway>().HasPresenter));
             if(bookPanel.activeSelf) RefreshBook();
         }
