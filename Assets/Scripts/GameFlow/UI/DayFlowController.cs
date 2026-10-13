@@ -174,7 +174,8 @@ namespace Spotlight.GameFlow
 
         private void ConfigureFirstDayLetter(FirstDayLetterPanel panel)
         {
-            if (TryResolveFirstDayLetter(out FirstDayLetterContent content)) panel.SetContent(content);
+            // 开场信目前采用硬编码互动文案，不再由 NCS 正文覆盖。
+            panel.SetContent(null);
         }
 
         private bool TryResolveFirstDayLetter(out FirstDayLetterContent content)

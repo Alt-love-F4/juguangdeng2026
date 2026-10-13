@@ -37,14 +37,15 @@ namespace Spotlight.GameFlow.Tests
             controller.PlayLetter();
             var letter = controller.CurrentPanel as FirstDayLetterPanel;
             Assert.That(letter, Is.Not.Null);
-            StringAssert.Contains("欢迎回家", TextField(letter, "letterBody").text);
-            Assert.That(TextField(letter, "signatureText").text, Is.EqualTo("—— 永远惦念你的叔叔"));
-            Assert.That(TextField(letter, "letterBody").richText, Is.False);
+            StringAssert.Contains("杜瓦尔·米尼耶", TextField(letter, "letterBody").text);
+            StringAssert.Contains("<link", TextField(letter, "letterBody").text);
+            StringAssert.Contains("永远惦念你的", TextField(letter, "signatureText").text);
+            Assert.That(TextField(letter, "letterBody").richText, Is.True);
             letter.Play(new FirstDayLetterContent("注入的信件 <不是标签>", "测试落款"), null);
             Assert.That(TextField(letter, "letterBody").text, Is.EqualTo("注入的信件 <不是标签>"));
             Assert.That(TextField(letter, "signatureText").text, Is.EqualTo("测试落款"));
             letter.Play(null);
-            StringAssert.Contains("欢迎回家", TextField(letter, "letterBody").text);
+            StringAssert.Contains("杜瓦尔·米尼耶", TextField(letter, "letterBody").text);
 
             controller.PlayDialogue();
             yield return new WaitForSecondsRealtime(.8f);

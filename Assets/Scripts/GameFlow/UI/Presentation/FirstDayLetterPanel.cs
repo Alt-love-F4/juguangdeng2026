@@ -29,9 +29,17 @@ namespace Spotlight.GameFlow
         [SerializeField] private Button skipButton;
         [SerializeField] private TMP_Text readingHint;
         [SerializeField] private ScrollRect letterScroll;
+        [SerializeField] private CanvasGroup nameEditor;
+        [SerializeField] private TMP_InputField nameInput;
+        [SerializeField] private Button nameConfirmButton;
+        [SerializeField] private Button nameCancelButton;
+        private FirstDayLetterDraft draft;
+        private string hoveredLink;
+        private bool InteractiveLetter => draft != null;
+        public FirstDayLetterDraft Draft => draft;
 
-        [Header("Letter content (editable draft)")]
-        [SerializeField, TextArea(8, 30)] private string letter =
+        [Header("Legacy draft (explicit injected previews only)")]
+        [SerializeField, HideInInspector, TextArea(8, 30)] private string letter =
             "亲爱的孩子：\n\n" +
             "当你读到这封信时，我大概已经不能再亲手给你煮一杯咖啡了。请不要为此责怪自己。" +
             "你走过的路、做过的决定，都值得被好好珍惜。\n\n" +
@@ -73,8 +81,9 @@ namespace Spotlight.GameFlow
             envelopeButton.onClick.AddListener(OpenEnvelope);
             signatureButton.onClick.AddListener(ConfirmSignature);
             skipButton.onClick.AddListener(SkipLetter);
-            letterBody.richText = false;
-            signatureText.richText = false;
+            if (nameConfirmButton != null) nameConfirmButton.onClick.AddListener(ConfirmPlayerName);
+            if (nameCancelButton != null) nameCancelButton.onClick.AddListener(CancelPlayerName);
+            signatureText.richText = true;
         }
 
         protected override void OnOpen(IUIData data = null)
@@ -96,10 +105,10 @@ namespace Spotlight.GameFlow
             pendingContent = content;
         }
 
-        /// <summary>消费待播内容；未注入时使用面板草稿，保留旧的测试和兼容入口。</summary>
+        /// <summary>默认使用硬编码互动信件；显式注入仍可用于独立演出测试。</summary>
         public void Play(Action onFinished)
         {
-            FirstDayLetterContent content = pendingContent ?? new FirstDayLetterContent(letter, signature);
+            FirstDayLetterContent content = pendingContent;
             pendingContent = null;
             Play(content, onFinished);
         }
@@ -111,7 +120,12 @@ namespace Spotlight.GameFlow
             Stop();
             CapturePose();
             RestorePose();
-            FirstDayLetterContent resolved = content ?? new FirstDayLetterContent(letter, signature);
+            draft = content == null ? new FirstDayLetterDraft() : null;
+            hoveredLink = null;
+            CancelPlayerName();
+            FirstDayLetterContent resolved = content ?? new FirstDayLetterContent(draft.BuildBody(), FirstDayLetterDraft.Signature);
+            letterBody.richText = InteractiveLetter;
+            signatureText.richText = InteractiveLetter;
             finished = onFinished;
             IsPlaying = true;
             Stage = LetterStage.Envelope;
@@ -127,7 +141,7 @@ namespace Spotlight.GameFlow
             signatureButton.interactable = false;
             skipButton.gameObject.SetActive(true);
             skipButton.interactable = true;
-            signatureText.text = resolved.Signature;
+            signatureText.text = InteractiveLetter ? "—— 永远惦念你的<size=116.667%>叔叔</size>" : resolved.Signature;
             readingHint.text = "";
             letterBody.text = resolved.Body;
             letterBody.maxVisibleCharacters = 0;
@@ -183,13 +197,19 @@ namespace Spotlight.GameFlow
             Stage = LetterStage.AwaitingSignature;
             signatureButton.gameObject.SetActive(true);
             signatureButton.interactable = true;
-            readingHint.text = NeedsScroll ? "可用滚轮读完信件  ·  点击署名继续" : "读完后，点击署名继续";
+            UpdateReadingHint();
         }
 
         /// <summary>Completion requires a fresh click after all text has appeared.</summary>
         public void ConfirmSignature()
         {
             if (!IsPlaying || Stage != LetterStage.AwaitingSignature) return;
+            if (InteractiveLetter)
+            {
+                if (!draft.IsComplete) { UpdateReadingHint(); return; }
+                PlayerDetailsProfile.Current.ApplyLetter(draft);
+            }
+            CancelPlayerName();
             Stage = LetterStage.Closing;
             signatureButton.interactable = false;
             readingHint.text = "";
@@ -210,7 +230,92 @@ namespace Spotlight.GameFlow
             if (!IsPlaying) return;
             transition?.Kill(false);
             transition = null;
+            CancelPlayerName();
+            // 跳过时保留已选项，其余使用一致的默认建角值。
+            if (InteractiveLetter)
+            {
+                if (string.IsNullOrWhiteSpace(draft.PlayerName)) draft.SetName("咖啡馆馆长");
+                for (int i = 0; i < FirstDayLetterDraft.Labels.Length; i++)
+                    if (draft.Selection(i) < 0) draft.Select(i, i == 0 ? 1 : 0);
+                PlayerDetailsProfile.Current.ApplyLetter(draft);
+            }
             FinishLetter();
+        }
+
+        public void ActivateLetterLink(string link)
+        {
+            if (!IsPlaying || !InteractiveLetter || (Stage != LetterStage.Reading && Stage != LetterStage.AwaitingSignature) || string.IsNullOrEmpty(link)) return;
+            if (link == "name")
+            {
+                if (nameEditor == null || nameInput == null) return;
+                nameEditor.gameObject.SetActive(true);
+                nameInput.text = draft.PlayerName;
+                nameInput.ActivateInputField();
+                return;
+            }
+            string[] parts = link.Split(':');
+            if (parts.Length == 3 && parts[0] == "choice" && int.TryParse(parts[1], out int group) && int.TryParse(parts[2], out int option))
+                SelectLetterOption(group, option);
+        }
+
+        public bool SelectLetterOption(int group, int option)
+        {
+            if (!IsPlaying || !InteractiveLetter || (Stage != LetterStage.Reading && Stage != LetterStage.AwaitingSignature) || !draft.Select(group, option)) return false;
+            RefreshInteractiveBody();
+            return true;
+        }
+
+        public void SetPlayerName(string value)
+        {
+            if (!IsPlaying || !InteractiveLetter) return;
+            draft.SetName(value);
+            RefreshInteractiveBody();
+        }
+
+        public void ConfirmPlayerName()
+        {
+            if (nameInput == null) return;
+            SetPlayerName(nameInput.text);
+            if (draft != null && draft.PlayerName.Length > 0) CancelPlayerName();
+        }
+
+        public void CancelPlayerName()
+        {
+            if (nameEditor != null) nameEditor.gameObject.SetActive(false);
+        }
+
+        public void HoverLetterLink(string link)
+        {
+            if (!IsPlaying || !InteractiveLetter || hoveredLink == link || (Stage != LetterStage.Reading && Stage != LetterStage.AwaitingSignature)) return;
+            hoveredLink = link;
+            RefreshInteractiveBody();
+        }
+
+        private void RefreshInteractiveBody()
+        {
+            float scroll = letterScroll.verticalNormalizedPosition;
+            // 修改选项后保留已读比例；不会重启打字或跳到信件顶部。
+            float progress = characterCount > 0 ? Mathf.Clamp01((float)letterBody.maxVisibleCharacters / characterCount) : 0f;
+            letterBody.text = draft.BuildBody(hoveredLink);
+            letterBody.ForceMeshUpdate();
+            characterCount = letterBody.textInfo.characterCount;
+            if (Stage == LetterStage.AwaitingSignature) letterBody.maxVisibleCharacters = int.MaxValue;
+            else
+            {
+                letterBody.maxVisibleCharacters = Mathf.FloorToInt(progress * characterCount);
+                typeTimer = letterBody.maxVisibleCharacters * characterInterval;
+            }
+            Canvas.ForceUpdateCanvases();
+            letterScroll.verticalNormalizedPosition = scroll;
+            UpdateReadingHint();
+        }
+
+        private void UpdateReadingHint()
+        {
+            if (Stage != LetterStage.AwaitingSignature) return;
+            bool complete = !InteractiveLetter || draft.IsComplete;
+            signatureButton.interactable = complete;
+            readingHint.text = complete ? "> 读完后，点击署名继续" : "> 请填写姓名并完成五组选项，再点击署名继续";
         }
 
         // Commit completion before invoking external code: callbacks may close or reuse the panel.
@@ -242,6 +347,7 @@ namespace Spotlight.GameFlow
             transition?.Kill(false);
             transition = null;
             StopHint();
+            CancelPlayerName();
             typeTimer = 0f;
             if (letterScroll != null) letterScroll.StopMovement();
             if (rootGroup != null) rootGroup.interactable = rootGroup.blocksRaycasts = false;
@@ -291,6 +397,8 @@ namespace Spotlight.GameFlow
             if (envelopeButton != null) envelopeButton.onClick.RemoveListener(OpenEnvelope);
             if (signatureButton != null) signatureButton.onClick.RemoveListener(ConfirmSignature);
             if (skipButton != null) skipButton.onClick.RemoveListener(SkipLetter);
+            if (nameConfirmButton != null) nameConfirmButton.onClick.RemoveListener(ConfirmPlayerName);
+            if (nameCancelButton != null) nameCancelButton.onClick.RemoveListener(CancelPlayerName);
             base.OnBeforeDestroy();
         }
     }

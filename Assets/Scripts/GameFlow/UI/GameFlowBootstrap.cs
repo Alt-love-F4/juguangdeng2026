@@ -23,6 +23,7 @@ namespace Spotlight.GameFlow
         private LoadingTipSequence tips;
         private Coroutine loadingRoutine;
         private LoadingPanel loadingPanel;
+        private ShortLoadingPanel shortLoadingPanel;
         private int rootNavigationVersion;
         private int loadingVersion;
         private bool loadingTransitioning;
@@ -634,13 +635,56 @@ namespace Spotlight.GameFlow
             narrativeIntegration?.SetGameplayVisible(false);
             if (loadingRoutine != null)
                 StopCoroutine(loadingRoutine);
+            if (shortLoadingPanel != null)
+            {
+                UIKit.ClosePanel(shortLoadingPanel);
+                shortLoadingPanel = null;
+            }
             if (loadingPanel != null)
+            {
                 UIKit.ClosePanel(loadingPanel);
+                loadingPanel = null;
+            }
+            if (preserveDayFlow)
+            {
+                shortLoadingPanel = UIKit.OpenPanel<ShortLoadingPanel>(UILevel.AlwayTop, Data(), tag: "game-flow-short-loading", cachePolicy: PanelCachePolicy.Reusable);
+                loadingRoutine = StartCoroutine(ShortLoadRoutine(completed, sceneName, version));
+                return;
+            }
             loadingPanel = UIKit.OpenPanel<LoadingPanel>(UILevel.AlwayTop, Data(), tag: "game-flow-loading", cachePolicy: PanelCachePolicy.Reusable);
             tips.ResetTimer();
-            loadingPanel.SetSplash(false);
+            loadingPanel.BeginLoading();
             loadingPanel.SetTip(tips.CurrentTip);
             loadingRoutine = StartCoroutine(LoadRoutine(completed, sceneName, version));
+        }
+
+        private IEnumerator ShortLoadRoutine(Action completed, string sceneName, int version)
+        {
+            // Do not replace the scene until the diagonal dissolve fully covers it.
+            while (shortLoadingPanel != null && !shortLoadingPanel.IsCovered)
+                yield return null;
+            yield return null;
+            if (version != loadingVersion) yield break;
+            int buildIndex = FindBuildIndex(sceneName);
+            if (buildIndex >= 0 && buildIndex != SceneManager.GetActiveScene().buildIndex)
+                yield return SceneManager.LoadSceneAsync(buildIndex);
+            else if (buildIndex < 0)
+                Debug.LogWarning("Configured scene is not in Build Settings: " + sceneName, this);
+            if (version != loadingVersion) yield break;
+            // Prepare the destination UI while it is still hidden under the opaque cover.
+            completed?.Invoke();
+            yield return null;
+            if (version != loadingVersion) yield break;
+            loadingRoutine = null;
+            ShortLoadingPanel finishedPanel = shortLoadingPanel;
+            Action finishTransition = () =>
+            {
+                if (version != loadingVersion) return;
+                shortLoadingPanel = null;
+                loadingTransitioning = false;
+            };
+            if (finishedPanel != null) finishedPanel.EndLoading(finishTransition);
+            else finishTransition();
         }
 
         private IEnumerator LoadRoutine(Action completed, string sceneName, int version)
@@ -713,7 +757,7 @@ namespace Spotlight.GameFlow
                 completed?.Invoke();
             };
             if (finishedPanel != null)
-                finishedPanel.CloseAnimated(finishTransition);
+                finishedPanel.EndLoading(finishTransition);
             else
                 finishTransition();
         }

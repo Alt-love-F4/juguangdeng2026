@@ -1035,38 +1035,48 @@ namespace Spotlight.GameFlow
         {
             if (standaloneLoading) yield break;
             standaloneLoading = true;
-            var prefab = Resources.Load<GameObject>("Art/UIPrefab/LoadingPanel");
-            if (prefab == null)
+            ShortLoadingPanel panel;
+            try
             {
-                Debug.LogError("Missing LoadingPanel prefab.", this);
+                // Let UIKit resolve the prefab through the existing Root's path prefix.
+                panel = YokiFrame.UIKit.OpenPanel<ShortLoadingPanel>(YokiFrame.UILevel.AlwayTop,
+                    cachePolicy: YokiFrame.PanelCachePolicy.Reusable);
+            }
+            catch (Exception error)
+            {
+                Debug.LogException(error, this);
                 standaloneLoading = false;
                 yield break;
             }
-            GameObject screen = Instantiate(prefab);
-            DontDestroyOnLoad(screen);
-            var canvas = screen.AddComponent<Canvas>();
-            canvas.renderMode = RenderMode.ScreenSpaceOverlay;
-            canvas.sortingOrder = 1000;
-            screen.AddComponent<GraphicRaycaster>();
-            CanvasGroup group = screen.GetComponent<CanvasGroup>();
-            group.alpha = 1f; group.interactable = group.blocksRaycasts = true;
-            LoadingPanel panel = screen.GetComponent<LoadingPanel>();
-            panel.SetTip("正在进入咖啡馆……"); panel.SetProgress(0f);
-            Canvas.ForceUpdateCanvases();
-            yield return null;
-            yield return null;
+            if (panel == null)
+            {
+                Debug.LogError("Could not open ShortLoadingPanel.", this);
+                standaloneLoading = false;
+                yield break;
+            }
+            while (panel != null && !panel.IsCovered) yield return null;
+            if (panel == null)
+            {
+                standaloneLoading = false;
+                yield break;
+            }
             AsyncOperation operation = UnityEngine.SceneManagement.SceneManager.LoadSceneAsync("CoffeeShop");
             operation.allowSceneActivation = false;
             float elapsed = 0f;
             while (operation.progress < .9f || elapsed < .5f)
             {
                 elapsed += Time.unscaledDeltaTime;
-                panel.SetProgress(Mathf.Clamp01(operation.progress / .9f));
                 yield return null;
             }
-            panel.SetProgress(1f);
-            // Cleanup belongs to the persistent loading screen: this map is destroyed on activation.
-            operation.completed += _ => Destroy(screen);
+            // Single activation destroys this map and its coroutine. The persistent UIKit
+            // panel owns the uncover animation; release the guard only after it finishes.
+            operation.completed += _ =>
+            {
+                if (panel != null) panel.EndLoading(() =>
+                {
+                    if (this != null) standaloneLoading = false;
+                });
+            };
             operation.allowSceneActivation = true;
         }
 

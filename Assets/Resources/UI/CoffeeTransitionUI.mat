@@ -1,0 +1,64 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!21 &2100000
+Material:
+  serializedVersion: 8
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_Name: CoffeeTransitionUI
+  m_Shader: {fileID: 4800000, guid: d88e20512ccec6047a62c31ae117957e, type: 3}
+  m_Parent: {fileID: 0}
+  m_ModifiedSerializedProperties: 0
+  m_ValidKeywords: []
+  m_InvalidKeywords: []
+  m_LightmapFlags: 4
+  m_EnableInstancingVariants: 0
+  m_DoubleSidedGI: 0
+  m_CustomRenderQueue: -1
+  stringTagMap: {}
+  disabledShaderPasses: []
+  m_LockedProperties: 
+  m_SavedProperties:
+    serializedVersion: 3
+    m_TexEnvs:
+    - _BackgroundTex:
+        m_Texture: {fileID: 2800000, guid: ca2e3c0dcfc9739468f08e50d28bd07c, type: 3}
+        m_Scale: {x: 1, y: 1}
+        m_Offset: {x: 0, y: 0}
+    - _CupTex:
+        m_Texture: {fileID: 2800000, guid: b85691c154621e34ab55124f9cc28a9d, type: 3}
+        m_Scale: {x: 1, y: 1}
+        m_Offset: {x: 0, y: 0}
+    - _MainTex:
+        m_Texture: {fileID: 0}
+        m_Scale: {x: 1, y: 1}
+        m_Offset: {x: 0, y: 0}
+    m_Ints: []
+    m_Floats:
+    - _ColorMask: 15
+    - _CupScale: 0.46
+    - _Disappearing: 0
+    - _DissolveNoise: 0.055
+    - _DissolveScale: 19
+    - _EdgeSoftness: 0.018
+    - _ShakePhaseSpread: 13.7
+    - _ShakeSpeed: 9
+    - _Stencil: 0
+    - _StencilComp: 8
+    - _StencilOp: 0
+    - _StencilReadMask: 255
+    - _StencilWriteMask: 255
+    - _Transition: 0
+    - _UnscaledTime: 0
+    - _UseUIAlphaClip: 0
+    m_Colors:
+    - _BackgroundTint: {r: 1, g: 1, b: 1, a: 1}
+    - _Color: {r: 1, g: 1, b: 1, a: 1}
+    - _CupGrid: {r: 8, g: 7, b: 0, a: 0}
+    - _CupJitter: {r: 0, g: 0, b: 0, a: 0}
+    - _CupShake: {r: 0.055, g: 0, b: 0, a: 0}
+    - _CupTint: {r: 1, g: 1, b: 1, a: 1}
+  m_BuildTextureStacks: []
+  m_AllowLocking: 1

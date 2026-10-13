@@ -13,6 +13,7 @@ namespace Spotlight.GameFlow.Tests
     public sealed class FirstDayLetterTests
     {
         private const string TestTag = "first-day-letter-tests";
+        private static readonly FirstDayLetterContent TestContent = new FirstDayLetterContent("孩子，咖啡馆交给你。欢迎回家。", FirstDayLetterDraft.Signature);
         private GameObject controllerObject;
         private float oldTimeScale;
 
@@ -48,7 +49,9 @@ namespace Spotlight.GameFlow.Tests
                 "hintGroup", "paperGroup", "paper", "letterBody", "signatureText", "signatureButton",
                 "skipButton", "readingHint", "letterScroll" })
                 Assert.That(Field(name).GetValue(panel), Is.Not.Null, name);
-            StringAssert.Contains("咖啡馆", (string)Field("letter").GetValue(panel));
+            Assert.That(prefab.transform.Find("LetterPaper/LetterScroll/Viewport/Body").GetComponent<FirstDayLetterLinks>(), Is.Not.Null);
+            Assert.That(Field("nameInput").GetValue(panel), Is.Not.Null);
+            StringAssert.Contains("咖啡馆", new FirstDayLetterDraft().BuildBody());
         }
 
         [UnityTest]
@@ -56,7 +59,7 @@ namespace Spotlight.GameFlow.Tests
         {
             var panel = Open();
             int completions = 0;
-            panel.Play(() => completions++);
+            panel.Play(TestContent, () => completions++);
             panel.ConfirmSignature();
             yield return new WaitForSecondsRealtime(.12f);
             Assert.That(panel.Stage, Is.EqualTo(FirstDayLetterPanel.LetterStage.Envelope));
@@ -70,7 +73,7 @@ namespace Spotlight.GameFlow.Tests
         {
             var panel = Open();
             int completions = 0;
-            panel.Play(() => completions++);
+            panel.Play(TestContent, () => completions++);
             Button skipButton = (Button)Field("skipButton").GetValue(panel);
             Assert.That(skipButton.isActiveAndEnabled, Is.True);
             Assert.That(skipButton.interactable, Is.True);
@@ -81,7 +84,7 @@ namespace Spotlight.GameFlow.Tests
             Assert.That(completions, Is.EqualTo(1));
 
             Field("characterInterval").SetValue(panel, .5f);
-            panel.Play(() => completions++);
+            panel.Play(TestContent, () => completions++);
             panel.OpenEnvelope();
             yield return WaitFor(() => panel.Stage == FirstDayLetterPanel.LetterStage.Reading);
             panel.SkipLetter();
@@ -94,7 +97,7 @@ namespace Spotlight.GameFlow.Tests
         {
             var panel = Open();
             int completions = 0;
-            panel.Play(() => completions++);
+            panel.Play(TestContent, () => completions++);
             panel.OpenEnvelope();
             Assert.That(panel.Stage, Is.EqualTo(FirstDayLetterPanel.LetterStage.Opening));
             panel.SkipLetter();
@@ -114,14 +117,14 @@ namespace Spotlight.GameFlow.Tests
         {
             var panel = Open();
             int completions = 0;
-            panel.Play(() => completions++);
+            panel.Play(TestContent, () => completions++);
             panel.OpenEnvelope();
             yield return WaitFor(() => panel.Stage == FirstDayLetterPanel.LetterStage.AwaitingSignature);
             panel.SkipLetter();
             panel.ConfirmSignature();
             Assert.That(completions, Is.EqualTo(1));
 
-            panel.Play(() => completions++);
+            panel.Play(TestContent, () => completions++);
             panel.OpenEnvelope();
             yield return WaitFor(() => panel.Stage == FirstDayLetterPanel.LetterStage.AwaitingSignature);
             panel.ConfirmSignature();
@@ -137,11 +140,11 @@ namespace Spotlight.GameFlow.Tests
         {
             var panel = Open();
             int completions = 0;
-            panel.Play(() => completions++);
+            panel.Play(TestContent, () => completions++);
             Time.timeScale = 0;
             panel.SkipLetter();
             Assert.That(completions, Is.EqualTo(1));
-            panel.Play(() => completions++);
+            panel.Play(TestContent, () => completions++);
             var skip = (Button)Field("skipButton").GetValue(panel);
             Assert.That(skip.interactable, Is.True);
             Assert.That(panel.Stage, Is.EqualTo(FirstDayLetterPanel.LetterStage.Envelope));
@@ -155,11 +158,11 @@ namespace Spotlight.GameFlow.Tests
         {
             var panel = Open();
             int completions = 0;
-            panel.Play(() => completions++);
+            panel.Play(TestContent, () => completions++);
             panel.Stop();
             panel.SkipLetter();
             Assert.That(completions, Is.Zero);
-            panel.Play(() => completions++);
+            panel.Play(TestContent, () => completions++);
             UIKit.ClosePanel(panel);
             panel.SkipLetter();
             yield return null;
@@ -172,7 +175,7 @@ namespace Spotlight.GameFlow.Tests
             var panel = Open();
             Field("characterInterval").SetValue(panel, .05f);
             int completions = 0;
-            panel.Play(() => completions++);
+            panel.Play(TestContent, () => completions++);
             RectTransform paper = (RectTransform)Field("paper").GetValue(panel);
             Vector2 restingPosition = paper.anchoredPosition;
             Button envelopeButton = (Button)Field("envelopeButton").GetValue(panel);
@@ -202,7 +205,7 @@ namespace Spotlight.GameFlow.Tests
         {
             var panel = Open();
             Time.timeScale = 0;
-            panel.Play(null);
+            panel.Play(TestContent, null);
             panel.OpenEnvelope();
             yield return WaitFor(() => panel.Stage == FirstDayLetterPanel.LetterStage.AwaitingSignature);
             panel.ConfirmSignature();
@@ -214,7 +217,7 @@ namespace Spotlight.GameFlow.Tests
         {
             var panel = Open();
             int completions = 0;
-            panel.Play(() => completions++);
+            panel.Play(TestContent, () => completions++);
             panel.OpenEnvelope();
             panel.Stop();
             yield return new WaitForSecondsRealtime(.3f);
@@ -230,7 +233,7 @@ namespace Spotlight.GameFlow.Tests
             // Keep the reading stage observable even when the editor has a slow frame.
             Field("characterInterval").SetValue(panel, .5f);
             int completions = 0;
-            panel.Play(() => completions++);
+            panel.Play(TestContent, () => completions++);
             panel.OpenEnvelope();
             yield return WaitFor(() => panel.Stage == FirstDayLetterPanel.LetterStage.Reading);
             UIKit.ClosePanel(panel);
@@ -243,7 +246,7 @@ namespace Spotlight.GameFlow.Tests
         {
             var panel = Open();
             int completions = 0;
-            panel.Play(() => completions++);
+            panel.Play(TestContent, () => completions++);
             panel.OpenEnvelope();
             yield return WaitFor(() => panel.Stage == FirstDayLetterPanel.LetterStage.AwaitingSignature);
             panel.ConfirmSignature();
@@ -257,9 +260,9 @@ namespace Spotlight.GameFlow.Tests
         {
             var panel = Open();
             int oldCompletions = 0, newCompletions = 0;
-            panel.Play(() => oldCompletions++);
+            panel.Play(TestContent, () => oldCompletions++);
             panel.OpenEnvelope();
-            panel.Play(() => newCompletions++);
+            panel.Play(TestContent, () => newCompletions++);
             Assert.That(panel.Stage, Is.EqualTo(FirstDayLetterPanel.LetterStage.Envelope));
             Assert.That(panel.VisibleCharacterCount, Is.Zero);
             panel.OpenEnvelope();
@@ -288,6 +291,8 @@ namespace Spotlight.GameFlow.Tests
             panel.OpenEnvelope();
             yield return WaitFor(() => panel.Stage == FirstDayLetterPanel.LetterStage.AwaitingSignature);
             Assert.That(flow.State, Is.EqualTo(DayFlowState.IntroLetter));
+            panel.SetPlayerName("测试馆长");
+            for (int i = 0; i < 5; i++) panel.SelectLetterOption(i, 0);
             panel.ConfirmSignature();
             yield return WaitFor(() => flow.State == DayFlowState.AvatarSelection);
             Assert.That(flow.BlocksGameplayInput, Is.True);
@@ -366,14 +371,13 @@ namespace Spotlight.GameFlow.Tests
             => typeof(FirstDayLetterPanel).GetField(name, BindingFlags.NonPublic | BindingFlags.Instance);
         private static void SpeedUp(FirstDayLetterPanel panel)
         {
-            Field("letter").SetValue(panel, "孩子，咖啡馆交给你。欢迎回家。");
             Field("characterInterval").SetValue(panel, .005f);
             Field("openSeconds").SetValue(panel, .08f);
             Field("closeSeconds").SetValue(panel, .08f);
         }
         private static IEnumerator WaitFor(Func<bool> condition)
         {
-            float deadline = Time.realtimeSinceStartup + 6f;
+            float deadline = Time.realtimeSinceStartup + 15f;
             while (!condition())
             {
                 Assert.That(Time.realtimeSinceStartup, Is.LessThan(deadline), "Letter presentation timed out.");

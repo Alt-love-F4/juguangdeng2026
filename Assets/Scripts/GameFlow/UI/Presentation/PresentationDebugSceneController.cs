@@ -15,7 +15,7 @@ namespace Spotlight.GameFlow
         public const string ScenePath = "Assets/Scenes/PresentationDebugScene.unity";
         public const string DefaultHint = "按键/按钮可随时切换演出。Esc 关闭 · Backspace 重播 · H 收起说明 · F9 切换暂停时间。";
 
-        public enum Preview { DateChange, Letter, Dialogue, PreBusiness, CafeOpening, BusinessEnd, CityMap, PreNight, HomeNight, DayEnd, Introduction, Effects, Reading, Notice, CutScene, HardcodedDialogue, HardcodedLetter, HardcodedOptions, Details }
+        public enum Preview { DateChange, Letter, Dialogue, PreBusiness, CafeOpening, BusinessEnd, CityMap, PreNight, HomeNight, DayEnd, Introduction, Effects, Reading, Notice, CutScene, HardcodedDialogue, HardcodedLetter, HardcodedOptions, Details, LongLoading, ShortLoading }
 
         [Header("Scene bindings")]
         [SerializeField] private TMP_Text statusText;
@@ -34,6 +34,7 @@ namespace Spotlight.GameFlow
 
         private UIPanel currentPanel;
         private Coroutine pendingEffectCue;
+        private Coroutine loadingPreviewRoutine;
         private bool alternateBackdrop;
         private int requestVersion;
         private int startedFrame;
@@ -83,6 +84,8 @@ namespace Spotlight.GameFlow
             else if (keyboard.pKey.wasPressedThisFrame) PlayDayEnd();
             else if (keyboard.fKey.wasPressedThisFrame) PlayIntroduction();
             else if (keyboard.gKey.wasPressedThisFrame) PlayEffects();
+            else if (keyboard.lKey.wasPressedThisFrame) PlayLongLoading();
+            else if (keyboard.kKey.wasPressedThisFrame) PlayShortLoading();
             else if (keyboard.mKey.wasPressedThisFrame) PlayDetails();
             else if (keyboard.digit1Key.wasPressedThisFrame) PreviewEnter();
             else if (keyboard.digit2Key.wasPressedThisFrame) PreviewStartle();
@@ -96,6 +99,8 @@ namespace Spotlight.GameFlow
             else if (keyboard.digit0Key.wasPressedThisFrame) PreviewExit();
         }
 
+        public void PlayLongLoading() => PlayPreview(Preview.LongLoading);
+        public void PlayShortLoading() => PlayPreview(Preview.ShortLoading);
         public void PlayDetails() => PlayPreview(Preview.Details);
         public void PlayDateChange() => PlayPreview(Preview.DateChange);
         public void PlayLetter() => PlayPreview(Preview.Letter);
@@ -179,7 +184,7 @@ namespace Spotlight.GameFlow
                         break;
                     case Preview.Letter:
                         var letter = Open<FirstDayLetterPanel>();
-                        TryApplyNcsLetter(letter);
+                        // 与正式开场一致，默认预览硬编码互动信件。
                         letter.Play(() => Complete(version));
                         break;
                     case Preview.Dialogue: PlayDialogueSample(new LubanOpeningDialogueSource(openingPresentationId).CreateScript(), version); break;
@@ -198,6 +203,16 @@ namespace Spotlight.GameFlow
                     case Preview.PreNight: Open<PreNightPanel>().Play(() => Complete(version)); break;
                     case Preview.HomeNight: Open<HomeNightPanel>().Play(() => Complete(version)); break;
                     case Preview.DayEnd: Open<DayEndPanel>().Play(() => Complete(version)); break;
+                    case Preview.LongLoading:
+                        var longLoading = Open<LoadingPanel>();
+                        longLoading.BeginLoading();
+                        longLoading.SetTip("调试加载：咖啡杯、横条和百分比同步变化；不会加载场景。");
+                        loadingPreviewRoutine = StartCoroutine(LongLoadingSample(longLoading, version));
+                        break;
+                    case Preview.ShortLoading:
+                        var shortLoading = Open<ShortLoadingPanel>();
+                        loadingPreviewRoutine = StartCoroutine(ShortLoadingSample(shortLoading, version));
+                        break;
                     case Preview.Details:
                     var details = Open<DetailsPanel>();
                     details.Refresh(DetailsGameDataAdapter.Create());
@@ -213,6 +228,8 @@ namespace Spotlight.GameFlow
                     : preview == Preview.Reading ? "V：阅读；空格/回车补全文字 → 下一行/页，← 或上一页返回；Esc 取消。"
                     : preview == Preview.Notice ? "B：通知演出；空格/回车或确认按钮关闭；Esc 取消。"
                     : preview == Preview.CutScene ? "N：视频过场；当前无视频时显示占位；长按 Enter 跳过。Esc 取消。"
+                    : preview == Preview.LongLoading ? "L：长加载，0% → 100% 后自动结束。空格/回车提前完成；F9 验证暂停；H 收起侧栏；Esc 取消。"
+                    : preview == Preview.ShortLoading ? "K：右上 → 左下覆盖，咖啡抖动 2 秒后同方向消失。空格/回车提前结束；F9 验证暂停；H 收起侧栏；Esc 取消。"
                     : preview == Preview.DateChange ? "日期动效自动完成；F9 可验证 timeScale=0 时仍正常播放。"
                     : "点击实际 Panel 的继续按钮，或空格/回车确认。Esc 取消；其他快捷键切换演出。");
             }
@@ -223,6 +240,42 @@ namespace Spotlight.GameFlow
                 SetHint(error.Message);
                 Debug.LogException(error, this);
             }
+        }
+
+        private IEnumerator LongLoadingSample(LoadingPanel panel, int version)
+        {
+            yield return null;
+            while (version == requestVersion && panel != null && panel.State == PanelState.Opening)
+                yield return null;
+            float elapsed = 0f;
+            // Hold both endpoints so the dark and fully lit cup can be inspected.
+            while (version == requestVersion && panel != null && elapsed < 5.65f)
+            {
+                elapsed += Time.unscaledDeltaTime;
+                panel.SetProgress(Mathf.Clamp01((elapsed - .65f) / 4f));
+                yield return null;
+            }
+            loadingPreviewRoutine = null;
+            if (version == requestVersion && panel != null)
+                panel.EndLoading(() => Complete(version));
+        }
+
+        private IEnumerator ShortLoadingSample(ShortLoadingPanel panel, int version)
+        {
+            yield return null;
+            while (version == requestVersion && panel != null && !panel.IsCovered)
+                yield return null;
+            if (version != requestVersion || panel == null) yield break;
+            SetStatus("已遮挡 / 模拟加载", "ShortLoading");
+            float elapsed = 0f;
+            while (version == requestVersion && panel != null && elapsed < 2f)
+            {
+                elapsed += Time.unscaledDeltaTime;
+                yield return null;
+            }
+            loadingPreviewRoutine = null;
+            if (version == requestVersion && panel != null)
+                panel.EndLoading(() => Complete(version));
         }
 
         private T Open<T>() where T : UIPanel
@@ -320,6 +373,7 @@ namespace Spotlight.GameFlow
         public void StopCurrent()
         {
             requestVersion++;
+            if (loadingPreviewRoutine != null) { StopCoroutine(loadingPreviewRoutine); loadingPreviewRoutine = null; }
             if (pendingEffectCue != null) { StopCoroutine(pendingEffectCue); pendingEffectCue = null; }
             currentPanel = null;
             alternateBackdrop = false;
@@ -337,7 +391,14 @@ namespace Spotlight.GameFlow
         public void ContinueCurrent()
         {
             if (Time.frameCount == startedFrame || currentPanel == null) return;
-            if (currentPanel is DayFlowPresentationPanel day) day.Continue();
+            if (currentPanel is LoadingPanel || currentPanel is ShortLoadingPanel)
+            {
+                if (loadingPreviewRoutine != null) { StopCoroutine(loadingPreviewRoutine); loadingPreviewRoutine = null; }
+                int version = requestVersion;
+                if (currentPanel is LoadingPanel longLoading) longLoading.EndLoading(() => Complete(version));
+                else if (currentPanel is ShortLoadingPanel shortLoading) shortLoading.EndLoading(() => Complete(version));
+            }
+            else if (currentPanel is DayFlowPresentationPanel day) day.Continue();
             else if (currentPanel is FirstDayLetterPanel letter)
             {
                 if (letter.Stage == FirstDayLetterPanel.LetterStage.Envelope) letter.OpenEnvelope();

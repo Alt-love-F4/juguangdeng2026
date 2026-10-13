@@ -1,6 +1,6 @@
 # 第一天前的叔叔来信
 
-本文说明信件演出本身，不包含开场白、属性选择或车窗转场。
+本文说明信件演出及信内建角，不包含开场对话或车窗转场。
 后续已接入第一天咖啡馆中的阿黛尔引入对话，见 `FirstDayIntroductionREADME.md`；信件仍只负责自己的演出，不直接触发对话。
 
 ## 已接入的流程
@@ -18,7 +18,8 @@
 - Prefab：`Assets/Resources/Art/UIPrefab/FirstDayLetterPanel.prefab`
 - 类：`FirstDayLetterPanel : UIPanel, IDayFlowPresentation`
 - UIKit 负责资源加载与面板缓存；面板只负责自己的点击、逐字显示和动效。
-- `Play(Action onFinished)`：复位到信封阶段并等待玩家点击。
+- `Play(Action onFinished)`：复位到信封阶段，使用 `FirstDayLetterDraft` 的硬编码互动信件；正式流程与预览不再注入 NCS 正文。
+- `Play(FirstDayLetterContent, Action)`：保留显式纯文本注入，供独立演出测试或其他内容预览。
 - `Stop()`：取消动效及完成回调，不进入第一天。
 - `SkipLetter()`：跳过信件并触发一次完成回调；停止动画、逐字显示和输入。
 
@@ -28,8 +29,10 @@
 2. 黑底上显示信封、封蜡和闪烁点击提示。
 3. 点击信封，纸张从画面下方升起，同时信封淡出。
 4. 展开结束后正文逐字出现，长信可在正文区域滚动阅读。
-5. 正文全部出现后，才显示可点击的叔叔署名。
-6. 点击署名后信纸淡出，调用一次结束回调，进入第一天日期演出。
+5. 红色文字可点击：输入姓名、选择出身、两段性格、学业及毕业特质。悬停变为 `D18C00`，选中项加粗并带下划线，空白处显示所选描述。
+6. 正文全部出现后显示叔叔署名；姓名和五组选项全部完成后才可确认。
+7. 点击署名时将姓名、出身、背景、属性奖励及学业专精提交到 `PlayerDetailsProfile`，随后淡出并进入头像选择。反复选择或重复提交不会累加奖励，读档沿用原有存档参与者。
+8. 跳过时保留已填项，缺失姓名默认“咖啡馆馆长”，缺失出身默认“平民”，其余缺失项默认第一项，然后进入既有跳过流程。图中没有资金数值，本实现不写入金币。
 
 除显式点击「跳过」外，重复点击不会重启展开、跳过正文或重复进入第一天。返回标题、读档或重新开始时，会取消旧面板的完成回调。
 所有动效和打字使用非缩放时间。
@@ -38,8 +41,9 @@
 
 在 Unity 中打开该预制体，根节点 `FirstDayLetterPanel` 中可修改：
 
-- `Letter`：信件正文（当前是可替换的初版文案）。
-- `Signature`：署名，不预设叔叔姓名。
+- 正文与选项：修改 `FirstDayLetterDraft.cs`，目前硬编码，不读取 Inspector 旧草稿或 NCS 正文。旧 `letter/signature` 字段保留以避免破坏已有序列化数据。
+- 正文黑色 `000000`、选项红色 `B3000F`、悬停黄色 `D18C00`。
+- 沿用“乐米曲奇方块体”，参考稿12pt换算为18个Canvas单位；仅署名中的“叔叔”为21单位，对应14pt。
 - `Character Interval`：逐字间隔。
 - `Open Seconds / Close Seconds`：纸张入场 / 结束淡出时长。
 - `Paper Rise`：从下方进入的距离。
@@ -51,5 +55,8 @@
 
 ## 验证
 
+菜单 `Tools > Game Flow > Apply Interactive First Day Letter` 更新正文排版、字体及姓名输入层，保留现有信封/纸张素材和其他节点。
+
 PlayMode：`FirstDayLetterTests` 检查点击等待、纸张上升、逐字显示、署名确认、取消 / 复用 / 读档和第一天衔接。
+`FirstDayLetterDraftTests` 检查选项属性、姓名清理、重复提交以及存档往返。
 原 `DayFlowPresentationTests` 明确使用 `BeginNewSession(playLetter: false)` 继续独立验证日程链路。

@@ -1,6 +1,8 @@
 using DG.Tweening;
 using TMPro;
 using UnityEngine;
+using UnityEngine.UI;
+using System;
 
 namespace Spotlight.GameFlow
 {
@@ -9,6 +11,8 @@ namespace Spotlight.GameFlow
         [SerializeField] private TMP_Text tipText;
         [SerializeField] private RectTransform logo;
         [SerializeField] private RectTransform progressFill;
+        [SerializeField] private Image coffeeFill;
+        [SerializeField] private TMP_Text percentageText;
         [SerializeField, Min(0.1f)] private float pulseDuration = 1.2f;
         private Tween pulse;
         private Sequence tipTransition;
@@ -18,14 +22,34 @@ namespace Spotlight.GameFlow
             splash = value;
             if (tipText != null) tipText.gameObject.SetActive(!value);
             if (progressFill != null) progressFill.parent.gameObject.SetActive(!value);
+            if (percentageText != null) percentageText.gameObject.SetActive(!value);
         }
 
         public void SetProgress(float progress)
         {
-            if (progressFill == null) return;
-            Vector2 anchorMax = progressFill.anchorMax;
-            anchorMax.x = Mathf.Clamp01(progress);
-            progressFill.anchorMax = anchorMax;
+            progress = float.IsNaN(progress) ? 0f : Mathf.Clamp01(progress);
+            if (progressFill != null)
+            {
+                Vector2 anchorMax = progressFill.anchorMax;
+                anchorMax.x = progress;
+                progressFill.anchorMax = anchorMax;
+            }
+            if (coffeeFill != null) coffeeFill.fillAmount = progress;
+            if (percentageText != null) percentageText.SetText("{0}%", Mathf.FloorToInt(progress * 100f));
+        }
+
+        /// <summary>Reset the long-loading visuals after opening the panel through UIKit.</summary>
+        public void BeginLoading()
+        {
+            SetSplash(false);
+            SetProgress(0f);
+        }
+
+        /// <summary>Show completion and close using the existing animated-close lifecycle.</summary>
+        public void EndLoading(Action finished = null)
+        {
+            SetProgress(1f);
+            CloseAnimated(finished);
         }
 
         public void SetTip(string tip)

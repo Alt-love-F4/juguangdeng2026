@@ -57,6 +57,10 @@ namespace Spotlight.GameFlow
             if (display != null) foreach (var specialization in display.specializations)
                 if (PlayerDetailsProfile.Current.Specializations.Contains(specialization.id) || (state?.IsFlagSet("details.specialization." + specialization.id) ?? false))
                     badges.Add(new DetailsSpecializationData(Text(specialization.displayName), Text(specialization.description), specialization.icon));
+            for (int i = 0; i < FirstDayLetterDraft.SpecializationIds.Length; i++)
+                if (PlayerDetailsProfile.Current.Specializations.Contains(FirstDayLetterDraft.SpecializationIds[i])
+                    && (display == null || !display.specializations.Exists(item => item.id == FirstDayLetterDraft.SpecializationIds[i])))
+                    badges.Add(new DetailsSpecializationData(FirstDayLetterDraft.SpecializationNames[i], "在北港学院研读相关学业，获得的知识专精。", null));
             Sprite avatar = player == null ? null : Avatar(player);
             if (display != null)
             {
@@ -65,7 +69,9 @@ namespace Spotlight.GameFlow
             }
             string background = PlayerDetailsProfile.Current.Background;
             if (string.IsNullOrWhiteSpace(background)) background = player == null ? "尚未记录主角背景。" : Text(player.descText);
-            return new DetailsPanelData(new DetailsProfileData(player == null ? "咖啡馆馆长" : Text(player.nameText), background,
+            string playerName = PlayerDetailsProfile.Current.PlayerName;
+            if (string.IsNullOrWhiteSpace(playerName)) playerName = player == null ? "咖啡馆馆长" : Text(player.nameText);
+            return new DetailsPanelData(new DetailsProfileData(playerName, background,
                 "你接手叔叔留下的咖啡馆，以咖啡与倾听接待来客。", avatar), attributes, badges,
                 new DetailsSectionData("人物关系", "尚未配置人物", ""), new DetailsSectionData("世界情况", "暂无世界进度", ""),
                 characters: characters, worldBars: configuration.objects.Where(o => o.objType == NarrativeObjectType.World).SelectMany(o => Bars(o.objId)));

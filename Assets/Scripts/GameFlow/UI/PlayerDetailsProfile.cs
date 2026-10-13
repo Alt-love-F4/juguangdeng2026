@@ -17,6 +17,35 @@ namespace Spotlight.GameFlow
         [SerializeField] private string background = "";
         [SerializeField] private List<string> specializations = new List<string>();
         [SerializeField] private int[] attributes = new int[4];
+        [SerializeField] private string playerName = "";
+        [SerializeField] private string origin = "";
+        [SerializeField] private int[] letterBonuses = new int[4];
+        public string PlayerName => playerName ?? "";
+        public string Origin => origin ?? "";
+
+        /// <summary>以替换方式提交建角奖励，重复提交或重播不累加。</summary>
+        public void ApplyLetter(FirstDayLetterDraft draft)
+        {
+            if (draft == null || !draft.IsComplete) throw new ArgumentException("Complete the letter choices first.", nameof(draft));
+            Normalize();
+            int[] next = draft.CalculateBonuses();
+            var runtime = Spotlight.Narrative.NarrativeRuntime.Instance;
+            for (int i = 0; i < 4; i++)
+            {
+                string key = "player." + FirstDayLetterDraft.AttributeKeys[i];
+                int current = attributes[i];
+                bool hasBar = runtime != null && runtime.IsReady && runtime.Controller.State.TryGetBar(key, out current);
+                int value = Mathf.Clamp(current - letterBonuses[i] + next[i], 0, 20);
+                attributes[i] = value;
+                if (hasBar) runtime.SetBar(key, value);
+            }
+            letterBonuses = next;
+            playerName = draft.PlayerName;
+            origin = draft.Origin;
+            background = draft.Background;
+            foreach (string id in FirstDayLetterDraft.SpecializationIds) Specializations.RemoveAll(value => value == id);
+            Specializations.Add(draft.Specialization);
+        }
 
         public static PlayerDetailsProfile Current
         {
@@ -89,6 +118,9 @@ namespace Spotlight.GameFlow
 
         private void CopyFrom(PlayerDetailsProfile source)
         {
+            playerName = source.playerName ?? "";
+            origin = source.origin ?? "";
+            letterBonuses = source.letterBonuses == null ? new int[4] : (int[])source.letterBonuses.Clone();
             avatar = source.avatar;
             hasSelectedAvatar = source.hasSelectedAvatar;
             background = source.background;
@@ -104,6 +136,9 @@ namespace Spotlight.GameFlow
                 avatar = AvatarKind.Male;
                 hasSelectedAvatar = false;
             }
+            if (letterBonuses == null || letterBonuses.Length != 4) letterBonuses = new int[4];
+            playerName = playerName ?? "";
+            origin = origin ?? "";
             background = background ?? "";
             if (specializations == null) specializations = new List<string>();
             if (attributes == null || attributes.Length != 4)

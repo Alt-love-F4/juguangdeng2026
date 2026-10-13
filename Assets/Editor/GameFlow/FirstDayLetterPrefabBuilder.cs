@@ -228,6 +228,103 @@ namespace Spotlight.GameFlow.Editor
             TopLeft(paper.Find("ReadingHint") as RectTransform, new Vector2(120, -809), new Vector2(1020, 30));
         }
 
+        [MenuItem("Tools/Game Flow/Apply Interactive First Day Letter")]
+        public static void ApplyInteractiveLetterToPrefab()
+        {
+            if (EditorApplication.isPlayingOrWillChangePlaymode) throw new InvalidOperationException("Exit Play Mode first.");
+            GameObject root = PrefabUtility.LoadPrefabContents(PrefabPath);
+            try
+            {
+                RectTransform paper = root.transform.Find("LetterPaper") as RectTransform;
+                TMP_Text body = paper.Find("LetterScroll/Viewport/Body").GetComponent<TMP_Text>();
+                body.font = Font;
+                body.fontSize = 18f; // 参考稿12pt，按1.5换算为Canvas单位。
+                body.enableAutoSizing = false;
+                body.color = Color.black;
+                body.lineSpacing = 4f;
+                body.paragraphSpacing = 0f;
+                body.richText = true;
+                body.text = new FirstDayLetterDraft().BuildBody();
+                body.raycastTarget = true;
+                if (body.GetComponent<FirstDayLetterLinks>() == null) body.gameObject.AddComponent<FirstDayLetterLinks>();
+                TopLeft(paper.Find("LetterScroll") as RectTransform, new Vector2(106, -207), new Vector2(1060, 470));
+                TMP_Text signature = paper.Find("SignatureButton/Signature").GetComponent<TMP_Text>();
+                signature.font = Font;
+                signature.fontSize = 18f;
+                signature.color = Color.black;
+                signature.richText = true;
+                signature.text = "—— 永远惦念你的<size=116.667%>叔叔</size>";
+                TopLeft(paper.Find("SignatureButton") as RectTransform, new Vector2(106, -688), new Vector2(1060, 38));
+                TMP_Text hint = paper.Find("ReadingHint").GetComponent<TMP_Text>();
+                hint.font = Font;
+                hint.fontSize = 18f;
+                hint.color = new Color32(179, 0, 15, 255);
+                TopLeft(hint.rectTransform, new Vector2(106, -727), new Vector2(1060, 32));
+
+                Transform existing = root.transform.Find("NameEditor");
+                CanvasGroup nameGroup;
+                TMP_InputField input;
+                Button confirm;
+                Button cancel;
+                if (existing == null)
+                {
+                    RectTransform overlay = Stage(root.transform, "NameEditor");
+                    nameGroup = overlay.gameObject.AddComponent<CanvasGroup>();
+                    Image shade = Image(overlay, "Shade", new Color(0, 0, 0, .55f));
+                    Stretch(shade.rectTransform);
+                    shade.raycastTarget = true;
+                    RectTransform window = Box(overlay, "Window", Vector2.zero, new Vector2(580, 240));
+                    Image face = window.gameObject.AddComponent<Image>();
+                    face.color = new Color(.96f, .91f, .79f);
+                    TMP_Text title = Text(window, "Title", "叔叔该如何称呼你？", 25, Color.black);
+                    Center(title.rectTransform, new Vector2(0, 75), new Vector2(540, 45));
+                    RectTransform inputRoot = Box(window, "NameInput", new Vector2(0, 12), new Vector2(500, 55));
+                    Image inputFace = inputRoot.gameObject.AddComponent<Image>();
+                    inputFace.color = new Color(1, 1, 1, .75f);
+                    input = inputRoot.gameObject.AddComponent<TMP_InputField>();
+                    RectTransform area = Child(inputRoot, "TextArea", typeof(RectMask2D)).GetComponent<RectTransform>();
+                    Stretch(area); area.sizeDelta = new Vector2(-24, -8);
+                    TMP_Text value = Text(area, "Text", "", 24, Color.black);
+                    Stretch(value.rectTransform); value.alignment = TextAlignmentOptions.MidlineLeft;
+                    TMP_Text placeholder = Text(area, "Placeholder", "输入姓名（最多16字）", 24, new Color(.5f, .45f, .4f));
+                    Stretch(placeholder.rectTransform); placeholder.alignment = TextAlignmentOptions.MidlineLeft;
+                    input.textViewport = area;
+                    input.textComponent = (TextMeshProUGUI)value;
+                    input.placeholder = placeholder;
+                    input.targetGraphic = inputFace;
+                    input.characterLimit = 16;
+                    input.lineType = TMP_InputField.LineType.SingleLine;
+                    confirm = ClickTarget(window, "Confirm");
+                    Center(confirm.GetComponent<RectTransform>(), new Vector2(135, -72), new Vector2(180, 48));
+                    confirm.transition = Selectable.Transition.ColorTint;
+                    confirm.GetComponent<Image>().color = new Color(.83f, .72f, .52f);
+                    TMP_Text confirmLabel = Text(confirm.transform, "Label", "确认", 24, Color.black);
+                    Stretch(confirmLabel.rectTransform);
+                    cancel = ClickTarget(window, "Cancel");
+                    Center(cancel.GetComponent<RectTransform>(), new Vector2(-135, -72), new Vector2(180, 48));
+                    cancel.GetComponent<Image>().color = new Color(.88f, .82f, .7f);
+                    TMP_Text cancelLabel = Text(cancel.transform, "Label", "取消", 24, Color.black);
+                    Stretch(cancelLabel.rectTransform);
+                }
+                else
+                {
+                    nameGroup = existing.GetComponent<CanvasGroup>();
+                    input = existing.Find("Window/NameInput").GetComponent<TMP_InputField>();
+                    confirm = existing.Find("Window/Confirm").GetComponent<Button>();
+                    cancel = existing.Find("Window/Cancel").GetComponent<Button>();
+                }
+                nameGroup.gameObject.SetActive(false);
+                var serialized = new SerializedObject(root.GetComponent<FirstDayLetterPanel>());
+                Set(serialized, "nameEditor", nameGroup);
+                Set(serialized, "nameInput", input);
+                Set(serialized, "nameConfirmButton", confirm);
+                Set(serialized, "nameCancelButton", cancel);
+                serialized.ApplyModifiedPropertiesWithoutUndo();
+                PrefabUtility.SaveAsPrefabAsset(root, PrefabPath);
+            }
+            finally { PrefabUtility.UnloadPrefabContents(root); }
+        }
+
         private static void Fold(Transform parent, string name, Vector2 position, float angle)
         {
             Image fold = Image(parent, name, new Color(.54f, .4f, .23f, .8f));
