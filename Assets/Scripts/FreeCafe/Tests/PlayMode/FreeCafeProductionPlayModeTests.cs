@@ -32,6 +32,13 @@ namespace Spotlight.FreeCafe.Tests
             InputSystem.settings.backgroundBehavior=previousInputBehavior;
             yield return null;
         }
+        private IEnumerator WaitForReturn(FreeEntityView view,Vector3 origin)
+        {
+            float timeout=Time.unscaledTime+3;
+            while((Vector3.Distance(view.transform.position,origin)>=.001f || Mathf.Abs(Mathf.DeltaAngle(view.body.transform.localEulerAngles.z,0))>=.01f) && Time.unscaledTime<timeout) yield return null;
+            Assert.That(Vector3.Distance(view.transform.position,origin),Is.LessThan(.001f),"Container must smoothly return to its station within three seconds");
+            Assert.That(Mathf.Abs(Mathf.DeltaAngle(view.body.transform.localEulerAngles.z,0)),Is.LessThan(.01f),"Returned container must settle upright within three seconds");
+        }
         private PointerEventData Pointer(float x,float y) => new PointerEventData(EventSystem.current)
         { position=app.worldCamera.WorldToScreenPoint(app.AreaToWorld(AreaId.Counter,x,y)) };
         private void MouseAt(Vector2 position,bool left,bool right)
@@ -74,8 +81,8 @@ namespace Spotlight.FreeCafe.Tests
             var pointer=Pointer(cup.x,cup.y+.7f);app.MoveDrag(pointer);
             yield return null;yield return null;
             Assert.That(app.World.LiquidVolume(cup),Is.Zero,"左键二维拖动不应倾倒");
-            var lifted=view.transform.position;
             MouseAt(pointer.position,true,true);yield return null;yield return null;
+            var lifted=view.transform.position;
             MouseAt(pointer.position+Vector2.right*90,true,true);yield return null;yield return null;yield return null;
             Assert.That(Vector3.Distance(view.transform.position,lifted),Is.LessThan(.001f),"倾倒模式固定壶位置");
             Assert.That(app.World.LiquidVolume(cup),Is.GreaterThan(0));Assert.That(app.World.LiquidVolume(kettle),Is.LessThan(200));
@@ -98,10 +105,13 @@ namespace Spotlight.FreeCafe.Tests
             Assert.That(view.liquidPresenter.gameObject.activeSelf,Is.False,"停止倾倒后隐藏源容器液面");
             Assert.That(cupView.body.color.a,Is.EqualTo(1f));
             Assert.That(Vector3.Distance(view.transform.position,origin),Is.GreaterThan(.5f),"右键松开不得把容器送回原地");
-            Assert.That(Mathf.Abs(Mathf.DeltaAngle(view.body.transform.localEulerAngles.z,0)),Is.LessThan(.001f));
+            Assert.That(Mathf.Abs(Mathf.DeltaAngle(view.body.transform.localEulerAngles.z,0)),Is.LessThanOrEqualTo(view.maxDragLean+.01f),"Resumed left drag may lean, but must leave the pouring tilt");
             app.EndDrag(new PointerEventData(EventSystem.current) { position=pointer.position+Vector2.right*90 });
             MouseAt(pointer.position,false,false);yield return null;
-            Assert.That(app.View(kettle.id),Is.SameAs(view));Assert.That(view.transform.position,Is.EqualTo(origin));
+            Assert.That(app.View(kettle.id),Is.SameAs(view));
+            Assert.That(kettle.x,Is.EqualTo(app.WorldToArea(AreaId.Counter,origin).x).Within(.001f));
+            Assert.That(kettle.y,Is.EqualTo(app.WorldToArea(AreaId.Counter,origin).y).Within(.001f));
+            yield return WaitForReturn(view,origin);
         }
         
         [UnityTest] public IEnumerator KettleCanPourFromAboveABrewerAtTheSameStationHeight()
@@ -119,9 +129,12 @@ namespace Spotlight.FreeCafe.Tests
             app.EndDrag(pointer);MouseAt(pointer.position+Vector2.left*90,false,true);yield return null;
             Assert.That(app.IsDragging,Is.True,"倾倒期间松开左键不应归位");
             MouseAt(pointer.position+Vector2.left*90,false,false);yield return null;yield return null;
-            Assert.That(app.IsDragging,Is.False);Assert.That(view.transform.position,Is.EqualTo(origin));
+            Assert.That(app.IsDragging,Is.False);
+            Assert.That(kettle.x,Is.EqualTo(app.WorldToArea(AreaId.Counter,origin).x).Within(.001f));
+            Assert.That(kettle.y,Is.EqualTo(app.WorldToArea(AreaId.Counter,origin).y).Within(.001f));
             Assert.That(app.World.LiquidVolume(brewer),Is.GreaterThan(0));Assert.That(app.World.ContainerDescription(brewer),Does.Contain("咖啡液"));
             Assert.That(brewer.contents.Exists(portion=>portion.specId=="grounds"),Is.True,"不足水量也可自由制作，不丢掉咖啡粉");
+            yield return WaitForReturn(view,origin);
         }
 
         [UnityTest] public IEnumerator PhysicalTrayAcceptsDraggedCupAndEmptyBellShowsNonModalToast()

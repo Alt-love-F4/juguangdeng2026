@@ -15,8 +15,11 @@ namespace Spotlight.FreeCafe.Tests
 {
     public sealed class FreeCafePlayModeTests
     {
+        private Keyboard placementKeyboard;
+        private InputSettings.BackgroundBehavior previousInputBehavior;
         [UnitySetUp] public IEnumerator Setup()
         {
+            previousInputBehavior=InputSystem.settings.backgroundBehavior;
             Time.timeScale=1;GameSaveParticipantRegistry.PendingRestore=null;
             if(FreeCafeGMPanel.Instance!=null) FreeCafeGMPanel.Instance.SetVisible(false);
             yield return SceneManager.LoadSceneAsync("CoffeeShop",LoadSceneMode.Single);yield return null;yield return null;
@@ -26,7 +29,20 @@ namespace Spotlight.FreeCafe.Tests
             app.areaManager.panSmoothTime=0;
             Assert.That(app.World.Restore(new CafeWorld(app.World.Catalog).State).success,Is.True);yield return null;
         }
-        [UnityTearDown] public IEnumerator Cleanup() { Time.timeScale=1;yield return null; }
+        [UnityTearDown] public IEnumerator Cleanup()
+        {
+            if(placementKeyboard!=null && placementKeyboard.added) InputSystem.RemoveDevice(placementKeyboard);
+            placementKeyboard=null;InputSystem.settings.backgroundBehavior=previousInputBehavior;
+            Time.timeScale=1;yield return null;
+        }
+        private IEnumerator EnablePlacementOnly()
+        {
+            InputSystem.settings.backgroundBehavior=InputSettings.BackgroundBehavior.IgnoreFocus;
+            placementKeyboard=InputSystem.AddDevice<Keyboard>("FreeCafeLegacyPlacementKeyboard");
+            InputSystem.QueueStateEvent(placementKeyboard,new KeyboardState(Key.LeftShift));
+            yield return null;yield return null;
+            Assert.That(Keyboard.current,Is.SameAs(placementKeyboard));Assert.That(placementKeyboard.leftShiftKey.isPressed,Is.True);
+        }
         private PointerEventData Pointer(FreeCafeRuntime app,float x,float y) => new PointerEventData(EventSystem.current) {position=app.worldCamera.WorldToScreenPoint(app.AreaToWorld(app.World.State.currentArea,x,y))};
         [UnityTest] public IEnumerator ThreeFloorLayoutMovesOnlyCameraAndKeepsAllAreasAlive()
         {
@@ -95,10 +111,15 @@ namespace Spotlight.FreeCafe.Tests
             var app=Object.FindFirstObjectByType<FreeCafeRuntime>();app.Enter(AreaId.Basement);yield return null;
             Assert.That(app.World.Take("s.cups.large",AreaId.Counter,1,-1,out var cup).success,Is.True);
             Assert.That(app.World.Move(cup.id,AreaId.Basement,1,-1).success,Is.True);
-            Physics2D.SyncTransforms();var pointer=Pointer(app,cup.x,cup.y);app.BeginDrag(app.View(cup.id),pointer);Assert.That(app.IsDragging,Is.True);
+            var cupView=app.View(cup.id);float timeout=Time.unscaledTime+3;
+            while(Vector3.Distance(cupView.transform.position,app.AreaToWorld(AreaId.Basement,1,-1))>=.001f && Time.unscaledTime<timeout) yield return null;
+            Assert.That(Vector3.Distance(cupView.transform.position,app.AreaToWorld(AreaId.Basement,1,-1)),Is.LessThan(.001f),"Cross-area move must settle before establishing the drag offset");
+            Physics2D.SyncTransforms();var pointer=Pointer(app,cup.x,cup.y);app.BeginDrag(cupView,pointer);Assert.That(app.IsDragging,Is.True);
             app.EndDrag(Pointer(app,3,-2));yield return null;
             Assert.That(cup.x,Is.EqualTo(3).Within(.01));Assert.That(cup.y,Is.EqualTo(-2).Within(.01));
-            Assert.That(Vector3.Distance(app.View(cup.id).transform.position,app.AreaToWorld(AreaId.Basement,3,-2)),Is.LessThan(.01f));
+            timeout=Time.unscaledTime+3;
+            while(Vector3.Distance(cupView.transform.position,app.AreaToWorld(AreaId.Basement,3,-2))>=.01f && Time.unscaledTime<timeout) yield return null;
+            Assert.That(Vector3.Distance(cupView.transform.position,app.AreaToWorld(AreaId.Basement,3,-2)),Is.LessThan(.01f),"Released cup must converge to the committed coordinates");
             string json=app.CaptureJson();app.Enter(AreaId.Cafe);app.RestoreJson(json);yield return null;
             Assert.That(app.World.State.currentArea,Is.EqualTo(AreaId.Basement));Assert.That(app.areaManager.CurrentArea,Is.EqualTo(AreaId.Basement));
             Assert.That(app.worldCamera.transform.position,Is.EqualTo(app.areaManager.Find(AreaId.Basement).cameraAnchor.position+app.areaManager.cameraOffset));
@@ -115,6 +136,7 @@ namespace Spotlight.FreeCafe.Tests
         }
         [UnityTest] public IEnumerator FullScreenCameraSupportsQueuedMouseButtonsAndExistingEntityDrag()
         {
+            yield return EnablePlacementOnly();
             var app=Object.FindFirstObjectByType<FreeCafeRuntime>();var hud=Object.FindFirstObjectByType<FreeCafeHud>();
             Assert.That(hud.recipePanel.activeSelf,Is.False,"Recipe modal must not block entities at startup");
             Assert.That(app.worldCamera.isActiveAndEnabled,Is.True);Assert.That(app.worldCamera.rect,Is.EqualTo(new Rect(0,0,1,1)));
@@ -145,6 +167,7 @@ namespace Spotlight.FreeCafe.Tests
         }
         [UnityTest] public IEnumerator DragUsesPressEventCameraAndRayPlaneInsteadOfHardcodedCameraDepth()
         {
+            yield return EnablePlacementOnly();
             var app=Object.FindFirstObjectByType<FreeCafeRuntime>();app.Enter(AreaId.Counter);yield return null;
             app.World.Take("s.cups.large",AreaId.Counter,0,-1,out var cup);
             var camera=app.worldCamera;var oldPosition=camera.transform.position;var oldRotation=camera.transform.rotation;
@@ -180,6 +203,7 @@ namespace Spotlight.FreeCafe.Tests
         }
         [UnityTest] public IEnumerator ActualSourceDragCanDropAtArbitraryNonSlotCoordinate()
         {
+            yield return EnablePlacementOnly();
             var app=Object.FindFirstObjectByType<FreeCafeRuntime>();Assert.That(app,Is.Not.Null);
             Assert.That(GameObject.Find("CoffeeGameplayController"),Is.Null,"Legacy global recipe controller must not be spawned");
             app.Enter(AreaId.Counter);yield return null;
@@ -285,11 +309,29 @@ namespace Spotlight.FreeCafe.Tests
             for(int i=0;i<3;i++) { Assert.That(app.World.Operate("m.grinder").success,Is.True);if(i<2) app.World.Tick(.5f); }
             return bean;
         }
+        private Vector2 FindUnobstructedCupPosition(FreeCafeRuntime app)
+        {
+            // This test targets a cup receiver, not a fixed machine at an old layout coordinate.
+            Physics2D.SyncTransforms();var bounds=app.World.Area(AreaId.Counter);var results=new List<RaycastResult>();
+            for(float y=-bounds.halfHeight+.5f;y<bounds.halfHeight;y+=.5f)
+                for(float x=-bounds.halfWidth+.5f;x<bounds.halfWidth;x+=.5f)
+                {
+                    if(!app.World.CanPosition("cup.large",AreaId.Counter,x,y).success) continue;
+                    var pointer=Pointer(app,x,y);var screen=pointer.position;
+                    if(screen.x<Screen.width*.1f || screen.x>Screen.width*.9f || screen.y<Screen.height*.1f || screen.y>Screen.height*.9f) continue;
+                    results.Clear();EventSystem.current.RaycastAll(pointer,results);
+                    if(results.Count==0) return new Vector2(x,y);
+                }
+            Assert.Fail("No visible unobstructed cup receiver position in the current authored layout");return default;
+        }
         [UnityTest] public IEnumerator QueuedMouseDragsGroundsFromGrinderThroughEventSystemIntoCup()
         {
             var app=Object.FindFirstObjectByType<FreeCafeRuntime>();app.Enter(AreaId.Counter);yield return null;
             var bean=PrepareGrounds(app);var grinder=app.World.Find("m.grinder");
-            app.World.Take("s.cups.large",AreaId.Counter,2,-2,out var cup);Physics2D.SyncTransforms();
+            var cupPosition=FindUnobstructedCupPosition(app);
+            Assert.That(app.World.Take("s.cups.large",AreaId.Counter,cupPosition.x,cupPosition.y,out var cup).success,Is.True);Physics2D.SyncTransforms();
+            var targetHits=new List<RaycastResult>();EventSystem.current.RaycastAll(Pointer(app,cup.x,cup.y),targetHits);
+            Assert.That(targetHits.Count,Is.GreaterThan(0));Assert.That(targetHits[0].gameObject.GetComponentInParent<FreeEntityView>(),Is.SameAs(app.View(cup.id)),"Queued drop must hit the cup rather than an overlapping machine");
             var original=app.View(grinder.id).transform.position;
             var previousBackground=InputSystem.settings.backgroundBehavior;var mouse=InputSystem.AddDevice<Mouse>("FreeCafeGrinderDragMouse");
             try
