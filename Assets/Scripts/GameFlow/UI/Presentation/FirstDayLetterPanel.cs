@@ -33,6 +33,14 @@ namespace Spotlight.GameFlow
         [SerializeField] private TMP_InputField nameInput;
         [SerializeField] private Button nameConfirmButton;
         [SerializeField] private Button nameCancelButton;
+        private string waitingLink;
+        private string nextInputLink;
+        private int nextInputEnd;
+        public int CurrentChoiceGroup { get; private set; } = -1;
+        public bool IsWaitingForInput => waitingLink != null;
+        private bool EditorOpen => CurrentChoiceGroup >= 0 || (nameEditor != null && nameEditor.gameObject.activeSelf);
+        private int expandedCharacterStart;
+        private int expandedCharacterLength;
         private FirstDayLetterDraft draft;
         private string hoveredLink;
         private bool InteractiveLetter => draft != null;
@@ -122,6 +130,7 @@ namespace Spotlight.GameFlow
             RestorePose();
             draft = content == null ? new FirstDayLetterDraft() : null;
             hoveredLink = null;
+            expandedCharacterStart = expandedCharacterLength = 0;
             CancelPlayerName();
             FirstDayLetterContent resolved = content ?? new FirstDayLetterContent(draft.BuildBody(), FirstDayLetterDraft.Signature);
             letterBody.richText = InteractiveLetter;
@@ -165,6 +174,7 @@ namespace Spotlight.GameFlow
             letterBody.maxVisibleCharacters = int.MaxValue;
             letterBody.ForceMeshUpdate();
             characterCount = letterBody.textInfo.characterCount;
+            CacheNextInput();
             letterBody.maxVisibleCharacters = 0;
             Canvas.ForceUpdateCanvases();
             letterScroll.verticalNormalizedPosition = 1f;
@@ -182,28 +192,68 @@ namespace Spotlight.GameFlow
                 envelopeGroup.gameObject.SetActive(false);
                 Stage = LetterStage.Reading;
                 typeTimer = 0f;
-                readingHint.text = NeedsScroll ? "信中的文字正在慢慢浮现…  ·  可用滚轮阅读" : "信中的文字正在慢慢浮现…";
+                UpdateReadingHint();
             });
         }
 
         private void Update()
         {
-            if (!IsPlaying || Stage != LetterStage.Reading) return;
+            if (!IsPlaying || Stage != LetterStage.Reading || IsWaitingForInput || EditorOpen) return;
+            float interval = Mathf.Max(.005f, characterInterval);
             typeTimer += Time.unscaledDeltaTime;
-            int visible = Mathf.Min(characterCount,
-                Mathf.FloorToInt(typeTimer / Mathf.Max(.005f, characterInterval)));
+            int advance = Mathf.FloorToInt(typeTimer / interval);
+            if (advance == 0) return;
+            typeTimer -= advance * interval;
+            int visible = Mathf.Min(characterCount, letterBody.maxVisibleCharacters + advance);
+            if (InteractiveLetter && nextInputLink != null && visible >= nextInputEnd)
+            {
+                letterBody.maxVisibleCharacters = nextInputEnd;
+                waitingLink = nextInputLink;
+                typeTimer = 0f;
+                ScrollToCharacter(nextInputEnd - 1);
+                ActivateLetterLink(waitingLink);
+                UpdateReadingHint();
+                return;
+            }
             letterBody.maxVisibleCharacters = visible;
             if (visible < characterCount) return;
             Stage = LetterStage.AwaitingSignature;
             signatureButton.gameObject.SetActive(true);
-            signatureButton.interactable = true;
             UpdateReadingHint();
+        }
+
+        private void CacheNextInput()
+        {
+            nextInputLink = null;
+            if (!InteractiveLetter) return;
+            for (int i = 0; i < letterBody.textInfo.linkCount; i++)
+            {
+                TMP_LinkInfo link = letterBody.textInfo.linkInfo[i];
+                string id = link.GetLinkID();
+                bool unfilled = id == "name" ? draft.PlayerName.Length == 0
+                    : id.StartsWith("slot:") && int.TryParse(id.Substring(5), out int group) && draft.Selection(group) < 0;
+                if (!unfilled) continue;
+                nextInputLink = id;
+                nextInputEnd = link.linkTextfirstCharacterIndex + link.linkTextLength;
+                break;
+            }
+        }
+
+        private void ScrollToCharacter(int index)
+        {
+            Canvas.ForceUpdateCanvases();
+            float overflow = letterBody.rectTransform.rect.height - letterScroll.viewport.rect.height;
+            if (overflow <= 0 || index < 0) return;
+            float bottom = -letterBody.textInfo.characterInfo[index].descender;
+            float offset = Mathf.Max(0, bottom - letterScroll.viewport.rect.height + letterBody.fontSize * 2);
+            letterScroll.StopMovement();
+            letterScroll.verticalNormalizedPosition = 1f - Mathf.Clamp01(offset / overflow);
         }
 
         /// <summary>Completion requires a fresh click after all text has appeared.</summary>
         public void ConfirmSignature()
         {
-            if (!IsPlaying || Stage != LetterStage.AwaitingSignature) return;
+            if (!IsPlaying || Stage != LetterStage.AwaitingSignature || EditorOpen) return;
             if (InteractiveLetter)
             {
                 if (!draft.IsComplete) { UpdateReadingHint(); return; }
@@ -244,78 +294,174 @@ namespace Spotlight.GameFlow
 
         public void ActivateLetterLink(string link)
         {
-            if (!IsPlaying || !InteractiveLetter || (Stage != LetterStage.Reading && Stage != LetterStage.AwaitingSignature) || string.IsNullOrEmpty(link)) return;
+            if (!CanEditLetter || string.IsNullOrEmpty(link) || !IsLinkVisible(link)) return;
             if (link == "name")
             {
                 if (nameEditor == null || nameInput == null) return;
+                CancelLetterChoice();
                 nameEditor.gameObject.SetActive(true);
                 nameInput.text = draft.PlayerName;
                 nameInput.ActivateInputField();
+                UpdateReadingHint();
                 return;
             }
             string[] parts = link.Split(':');
-            if (parts.Length == 3 && parts[0] == "choice" && int.TryParse(parts[1], out int group) && int.TryParse(parts[2], out int option))
-                SelectLetterOption(group, option);
+            if (parts.Length == 3 && parts[0] == "choice" && int.TryParse(parts[1], out int choiceGroup)
+                && int.TryParse(parts[2], out int option) && choiceGroup == CurrentChoiceGroup)
+            {
+                SelectLetterOption(choiceGroup, option);
+                return;
+            }
+            if (!link.StartsWith("slot:") || !int.TryParse(link.Substring(5), out int group)
+                || group < 0 || group >= FirstDayLetterDraft.Labels.Length) return;
+            if (CurrentChoiceGroup == group)
+            {
+                CancelLetterChoice();
+                return;
+            }
+            CancelPlayerName();
+            CurrentChoiceGroup = group;
+            RefreshInteractiveBody();
+            ScrollToCharacter(expandedCharacterStart + expandedCharacterLength - 1);
+            UpdateReadingHint();
+        }
+
+        private bool CanEditLetter => IsPlaying && InteractiveLetter
+            && (Stage == LetterStage.Reading || Stage == LetterStage.AwaitingSignature);
+
+        private bool IsLinkVisible(string id)
+        {
+            for (int i = 0; i < letterBody.textInfo.linkCount; i++)
+            {
+                TMP_LinkInfo link = letterBody.textInfo.linkInfo[i];
+                if (link.GetLinkID() == id)
+                    return link.linkTextfirstCharacterIndex + link.linkTextLength <= letterBody.maxVisibleCharacters;
+            }
+            return false;
         }
 
         public bool SelectLetterOption(int group, int option)
         {
-            if (!IsPlaying || !InteractiveLetter || (Stage != LetterStage.Reading && Stage != LetterStage.AwaitingSignature) || !draft.Select(group, option)) return false;
-            RefreshInteractiveBody();
+            string id = $"slot:{group}";
+            if (!CanEditLetter || !IsLinkVisible(id) || !draft.Select(group, option)) return false;
+            CurrentChoiceGroup = -1;
+            hoveredLink = null;
+            RefreshInteractiveBody(id);
+            if (waitingLink == id) waitingLink = null;
+            UpdateReadingHint();
             return true;
+        }
+
+        public void CancelLetterChoice()
+        {
+            bool wasExpanded = CurrentChoiceGroup >= 0;
+            CurrentChoiceGroup = -1;
+            if (wasExpanded && CanEditLetter) RefreshInteractiveBody();
+            UpdateReadingHint();
         }
 
         public void SetPlayerName(string value)
         {
-            if (!IsPlaying || !InteractiveLetter) return;
+            if (!CanEditLetter || !IsLinkVisible("name")) return;
+            string previousName = draft.PlayerName;
             draft.SetName(value);
-            RefreshInteractiveBody();
+            if (draft.PlayerName.Length == 0)
+            {
+                draft.SetName(previousName);
+                return;
+            }
+            RefreshInteractiveBody("name");
+            if (draft.PlayerName.Length > 0)
+            {
+                if (waitingLink == "name") waitingLink = null;
+                CancelPlayerName();
+            }
+            UpdateReadingHint();
         }
 
         public void ConfirmPlayerName()
         {
-            if (nameInput == null) return;
-            SetPlayerName(nameInput.text);
-            if (draft != null && draft.PlayerName.Length > 0) CancelPlayerName();
+            if (nameInput != null) SetPlayerName(nameInput.text);
         }
 
         public void CancelPlayerName()
         {
             if (nameEditor != null) nameEditor.gameObject.SetActive(false);
+            UpdateReadingHint();
         }
 
         public void HoverLetterLink(string link)
         {
-            if (!IsPlaying || !InteractiveLetter || hoveredLink == link || (Stage != LetterStage.Reading && Stage != LetterStage.AwaitingSignature)) return;
+            if (!CanEditLetter || hoveredLink == link) return;
             hoveredLink = link;
             RefreshInteractiveBody();
         }
 
-        private void RefreshInteractiveBody()
+        private void RefreshInteractiveBody(string changedLink = null)
         {
             float scroll = letterScroll.verticalNormalizedPosition;
-            // 修改选项后保留已读比例；不会重启打字或跳到信件顶部。
-            float progress = characterCount > 0 ? Mathf.Clamp01((float)letterBody.maxVisibleCharacters / characterCount) : 0f;
-            letterBody.text = draft.BuildBody(hoveredLink);
+            int visible = letterBody.maxVisibleCharacters;
+            // 先还原到不含临时选项的正文位置，再映射到新展开状态。
+            if (expandedCharacterLength > 0 && visible > expandedCharacterStart)
+                visible -= Mathf.Min(expandedCharacterLength, visible - expandedCharacterStart);
+            int oldStart = 0, oldLength = 0;
+            for (int i = 0; changedLink != null && i < letterBody.textInfo.linkCount; i++)
+            {
+                TMP_LinkInfo link = letterBody.textInfo.linkInfo[i];
+                if (link.GetLinkID() != changedLink) continue;
+                oldStart = link.linkTextfirstCharacterIndex;
+                oldLength = link.linkTextLength;
+                break;
+            }
+            letterBody.text = draft.BuildBody(hoveredLink, CurrentChoiceGroup);
             letterBody.ForceMeshUpdate();
             characterCount = letterBody.textInfo.characterCount;
-            if (Stage == LetterStage.AwaitingSignature) letterBody.maxVisibleCharacters = int.MaxValue;
-            else
+            CacheNextInput();
+            CacheExpandedRange();
+            for (int i = 0; changedLink != null && i < letterBody.textInfo.linkCount; i++)
             {
-                letterBody.maxVisibleCharacters = Mathf.FloorToInt(progress * characterCount);
-                typeTimer = letterBody.maxVisibleCharacters * characterInterval;
+                TMP_LinkInfo link = letterBody.textInfo.linkInfo[i];
+                if (link.GetLinkID() == changedLink && visible >= oldStart + oldLength)
+                {
+                    visible += link.linkTextLength - oldLength;
+                    break;
+                }
             }
+            if (expandedCharacterLength > 0 && visible >= expandedCharacterStart) visible += expandedCharacterLength;
+            letterBody.maxVisibleCharacters = Stage == LetterStage.AwaitingSignature ? characterCount : Mathf.Min(visible, characterCount);
             Canvas.ForceUpdateCanvases();
             letterScroll.verticalNormalizedPosition = scroll;
             UpdateReadingHint();
         }
 
+        private void CacheExpandedRange()
+        {
+            expandedCharacterStart = expandedCharacterLength = 0;
+            if (CurrentChoiceGroup < 0) return;
+            string slot = $"slot:{CurrentChoiceGroup}";
+            string last = $"choice:{CurrentChoiceGroup}:{FirstDayLetterDraft.Labels[CurrentChoiceGroup].Length - 1}";
+            for (int i = 0; i < letterBody.textInfo.linkCount; i++)
+            {
+                TMP_LinkInfo link = letterBody.textInfo.linkInfo[i];
+                if (link.GetLinkID() == slot) expandedCharacterStart = link.linkTextfirstCharacterIndex + link.linkTextLength;
+                if (link.GetLinkID() == last)
+                    expandedCharacterLength = link.linkTextfirstCharacterIndex + link.linkTextLength + 1 - expandedCharacterStart;
+            }
+        }
+
         private void UpdateReadingHint()
         {
+            if (readingHint == null || !IsPlaying) return;
+            if (Stage == LetterStage.Reading)
+            {
+                readingHint.text = IsWaitingForInput ? "> 请点击正文中的选项填写空位"
+                    : EditorOpen ? "> 请点击正文中的选项完成修改" : NeedsScroll ? "信中的文字正在慢慢浮现…  ·  可用滚轮阅读" : "信中的文字正在慢慢浮现…";
+                return;
+            }
             if (Stage != LetterStage.AwaitingSignature) return;
-            bool complete = !InteractiveLetter || draft.IsComplete;
+            bool complete = (!InteractiveLetter || draft.IsComplete) && !EditorOpen;
             signatureButton.interactable = complete;
-            readingHint.text = complete ? "> 读完后，点击署名继续" : "> 请填写姓名并完成五组选项，再点击署名继续";
+            readingHint.text = complete ? "> 点击已填文字可修改；点击署名继续" : "> 请完成填写并收起选项，再点击署名继续";
         }
 
         // Commit completion before invoking external code: callbacks may close or reuse the panel.
@@ -323,6 +469,9 @@ namespace Spotlight.GameFlow
         {
             if (!IsPlaying) return;
             StopHint();
+            waitingLink = null;
+            CancelLetterChoice();
+            CancelPlayerName();
             typeTimer = 0f;
             letterScroll.StopMovement();
             readingHint.text = "";
@@ -342,11 +491,14 @@ namespace Spotlight.GameFlow
         {
             finished = null;
             pendingContent = null;
+            CancelLetterChoice();
             IsPlaying = false;
             Stage = LetterStage.Stopped;
             transition?.Kill(false);
             transition = null;
             StopHint();
+            waitingLink = null;
+            CancelLetterChoice();
             CancelPlayerName();
             typeTimer = 0f;
             if (letterScroll != null) letterScroll.StopMovement();

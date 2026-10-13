@@ -325,6 +325,23 @@ namespace Spotlight.GameFlow.Editor
             finally { PrefabUtility.UnloadPrefabContents(root); }
         }
 
+        [MenuItem("Tools/Game Flow/Apply Sequential First Day Letter Choices")]
+        public static void ApplySequentialChoicesToPrefab()
+        {
+            if (EditorApplication.isPlayingOrWillChangePlaymode) throw new InvalidOperationException("Exit Play Mode first.");
+            GameObject root = PrefabUtility.LoadPrefabContents(PrefabPath);
+            try
+            {
+                TMP_Text body = root.transform.Find("LetterPaper/LetterScroll/Viewport/Body").GetComponent<TMP_Text>();
+                body.text = new FirstDayLetterDraft().BuildBody();
+                // 选项由正文 TMP links 按需展开，不创建独立选项弹窗。
+                Transform obsolete = root.transform.Find("ChoiceEditor");
+                if (obsolete != null) Object.DestroyImmediate(obsolete.gameObject);
+                PrefabUtility.SaveAsPrefabAsset(root, PrefabPath);
+            }
+            finally { PrefabUtility.UnloadPrefabContents(root); }
+        }
+
         private static void Fold(Transform parent, string name, Vector2 position, float angle)
         {
             Image fold = Image(parent, name, new Color(.54f, .4f, .23f, .8f));

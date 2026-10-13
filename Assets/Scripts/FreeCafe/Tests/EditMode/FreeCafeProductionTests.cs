@@ -81,6 +81,140 @@ namespace Spotlight.FreeCafe.Tests
             Load("s.honey",world.ServingCup.id);int large=world.Find("s.cups.large").stock;
             Assert.That(world.SelectServingCup("s.cups.small").success,Is.False);Assert.That(world.Find("s.cups.large").stock,Is.EqualTo(large));
         }
+        [TestCase("s.cups.small")]
+        [TestCase("s.cups.large")]
+        public void ReturningServingCupClearsSelectionAndRestoresStockExactlyOnce(string sourceId)
+        {
+            int stock = world.Find(sourceId).stock;
+            Assert.That(world.SelectServingCup(sourceId).success, Is.True);
+            var cup = world.ServingCup;
+            int notifications = 0;
+            world.Changed += () =>
+            {
+                notifications++;
+                Assert.That(world.ServingCup, Is.Null);
+                Assert.That(world.State.production.activeCupId, Is.Null);
+                Assert.That(world.Find(cup.id), Is.Null);
+                Assert.That(world.Find(sourceId).stock, Is.EqualTo(stock));
+            };
+            string before = JsonUtility.ToJson(world.State);
+            Assert.That(world.Preview(cup.id, sourceId).success, Is.True);
+            Assert.That(JsonUtility.ToJson(world.State), Is.EqualTo(before));
+            Assert.That(world.Interact(cup.id, sourceId).success, Is.True);
+            Assert.That(notifications, Is.EqualTo(1));
+            before = JsonUtility.ToJson(world.State);
+            Assert.That(world.Interact(cup.id, sourceId).success, Is.False);
+            Assert.That(JsonUtility.ToJson(world.State), Is.EqualTo(before));
+            Assert.That(notifications, Is.EqualTo(1));
+        }
+
+        [Test] public void ServingCupRejectedReturnKeepsSelectionContentsAndBothStocks()
+        {
+            world.SelectServingCup("s.cups.large");
+            var cup = world.ServingCup;
+            var source = world.Find("s.cups.large");
+            world.Take("s.cups.small", AreaId.Counter, 0, -2, out _);
+            string before = JsonUtility.ToJson(world.State);
+            Assert.That(world.Interact(cup.id, "s.cups.small").success, Is.False);
+            Assert.That(JsonUtility.ToJson(world.State), Is.EqualTo(before));
+            source.stock = world.Spec(source.specId).initialStock;
+            before = JsonUtility.ToJson(world.State);
+            Assert.That(world.Interact(cup.id, source.id).success, Is.False);
+            Assert.That(JsonUtility.ToJson(world.State), Is.EqualTo(before));
+            source.stock--;
+            Load("s.water", cup.id);
+            before = JsonUtility.ToJson(world.State);
+            Assert.That(world.Interact(cup.id, source.id).success, Is.False);
+            Assert.That(JsonUtility.ToJson(world.State), Is.EqualTo(before));
+            Assert.That(world.ServingCup, Is.SameAs(cup));
+        }
+
+        [Test] public void MiniGameCupReturnAndSwapFailWithoutMutation()
+        {
+            world.SelectServingCup("s.cups.small");
+            var cup = world.ServingCup;
+            Assert.That(world.RequestProductionMiniGame().success, Is.True);
+            string before = JsonUtility.ToJson(world.State);
+            Assert.That(world.Interact(cup.id, "s.cups.small").success, Is.False);
+            Assert.That(world.SelectServingCup("s.cups.large").success, Is.False);
+            Assert.That(JsonUtility.ToJson(world.State), Is.EqualTo(before));
+            Assert.That(world.ServingCup, Is.SameAs(cup));
+        }
+
+        [Test] public void FullOldStackPreventsCupSwapWithoutWithdrawingNewCup()
+        {
+            world.SelectServingCup("s.cups.small");
+            var cup = world.ServingCup;
+            var source = world.Find("s.cups.small");
+            source.stock = world.Spec(source.specId).initialStock;
+            string before = JsonUtility.ToJson(world.State);
+            Assert.That(world.SelectServingCup("s.cups.large").success, Is.False);
+            Assert.That(JsonUtility.ToJson(world.State), Is.EqualTo(before));
+            Assert.That(world.ServingCup, Is.SameAs(cup));
+        }
+
+        [Test] public void ProcessingOldCupPreventsSwapWithoutMutation()
+        {
+            world.SelectServingCup("s.cups.small");
+            var cup = world.ServingCup;
+            cup.production.phase = ProductionPhase.Processing;
+            cup.production.remaining = 2;
+            string before = JsonUtility.ToJson(world.State);
+            Assert.That(world.SelectServingCup("s.cups.large").success, Is.False);
+            Assert.That(JsonUtility.ToJson(world.State), Is.EqualTo(before));
+            Assert.That(world.ServingCup, Is.SameAs(cup));
+        }
+
+        [Test] public void MissingOldStackPreventsCupSwapWithoutDeletingOldCup()
+        {
+            world.SelectServingCup("s.cups.small");
+            var cup = world.ServingCup;
+            world.State.entities.Remove(world.Find("s.cups.small"));
+            string before = JsonUtility.ToJson(world.State);
+            Assert.That(world.SelectServingCup("s.cups.large").success, Is.False);
+            Assert.That(JsonUtility.ToJson(world.State), Is.EqualTo(before));
+            Assert.That(world.ServingCup, Is.SameAs(cup));
+        }
+
+        [Test] public void ReturningLooseCupPreservesDifferentServingCupSelection()
+        {
+            world.SelectServingCup("s.cups.large");
+            var selected = world.ServingCup;
+            int stock = world.Find("s.cups.small").stock;
+            world.Take("s.cups.small", AreaId.Counter, 0, -2, out var cup);
+            Assert.That(world.Interact(cup.id, "s.cups.small").success, Is.True);
+            Assert.That(world.Find(cup.id), Is.Null);
+            Assert.That(world.Find("s.cups.small").stock, Is.EqualTo(stock));
+            Assert.That(world.ServingCup, Is.SameAs(selected));
+            Assert.That(world.State.production.activeCupId, Is.EqualTo(selected.id));
+        }
+
+        [Test] public void EmptyCupReturnClearsStoveDockReference()
+        {
+            world.Take("s.cups.small", AreaId.Counter, 0, -2, out var cup);
+            Assert.That(world.Interact(cup.id, "m.stove").success, Is.True);
+            Assert.That(world.Find("m.stove").production.heatingVesselId, Is.EqualTo(cup.id));
+            Assert.That(world.Interact(cup.id, "s.cups.small").success, Is.True);
+            Assert.That(world.Find("m.stove").production.heatingVesselId, Is.Null);
+            Assert.That(world.OperateProduction("m.stove").success, Is.False);
+        }
+
+        [Test] public void CupCanReturnAfterContentsAreCompletelyPouredOut()
+        {
+            int stock = world.Find("s.cups.small").stock;
+            world.SelectServingCup("s.cups.small");
+            var cup = world.ServingCup;
+            Load("s.water", cup.id);
+            Assert.That(world.PourLiquid(cup.id, "s.cups.small", 200, 1).success, Is.False);
+            Assert.That(world.Interact(cup.id, "s.cups.small").success, Is.False);
+            Assert.That(world.PourLiquid(cup.id, null, 200, 1).success, Is.True);
+            world.FinishPour(null);
+            Assert.That(cup.contents, Is.Empty);
+            Assert.That(world.Interact(cup.id, "s.cups.small").success, Is.True);
+            Assert.That(world.Find("s.cups.small").stock, Is.EqualTo(stock));
+            Assert.That(world.ServingCup, Is.Null);
+        }
+
         [Test] public void FailedSourceDropIsFullyTransactional()
         {
             int stock=world.Find("s.milk").stock,count=world.State.entities.Count;

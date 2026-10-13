@@ -101,7 +101,9 @@ namespace Spotlight.FreeCafe
         {
             if(runtime==null || runtime.World==null || productionRoot==null) return;
             var world=runtime.World; var state=world.State;
-            bool visible=world.ProductionEnabled && state.currentArea==AreaId.Counter;
+            var gateway=runtime.GetComponent<FreeCafeMiniGameGateway>();
+            bool latteOpen=gateway!=null && gateway.HasPresenter && gateway.BlocksInput;
+            bool visible=world.ProductionEnabled && state.currentArea==AreaId.Counter && !latteOpen;
             productionRoot.SetActive(visible);
             // 玩家 HUD 已改为独立纸卡布局；旧黑边不再由制作 HUD 恢复。
             if(!visible) { bookPanel.SetActive(false); miniGamePanel.SetActive(false); return; }

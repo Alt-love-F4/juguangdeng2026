@@ -107,6 +107,125 @@ namespace Spotlight.FreeCafe.Tests
         { var item=Take("s.beans");int stock=world.Find("s.beans").stock;Assert.That(world.Interact(item.id,"waste").success,Is.True);Assert.That(world.Find(item.id),Is.Null);Assert.That(world.Find("s.beans").stock,Is.EqualTo(stock)); }
         [Test] public void SaveRoundtripPreservesMachineJobContentsCoordinatesAndOrders()
         { var bean=Take("s.beans",1.234f,-2.345f);world.Interact(bean.id,"m.grinder");world.Tick(1);world.StartDay();var snapshot=JsonUtility.FromJson<CafeSnapshot>(JsonUtility.ToJson(world.State));Assert.That(world.Restore(snapshot).success,Is.True);Assert.That(world.Find(bean.id).ownerId,Is.EqualTo("m.grinder"));Assert.That(world.Find("m.grinder").task.remaining,Is.EqualTo(3).Within(.001));Assert.That(world.State.requests.Count,Is.EqualTo(3));Grind();Assert.That(world.Find(bean.id).specId,Is.EqualTo("grounds")); }
+        [TestCase(false, "s.cups.small")]
+        [TestCase(false, "s.cups.large")]
+        [TestCase(true, "s.cups.small")]
+        [TestCase(true, "s.cups.large")]
+        public void EmptyCupReturnsToMatchingStackExactlyOnce(bool production, string sourceId)
+        {
+            if (production) world.EnableProduction();
+            var source = world.Find(sourceId);
+            int initialStock = source.stock;
+            var cup = Take(sourceId);
+            int nextId = world.State.nextId;
+            string beforePreview = JsonUtility.ToJson(world.State);
+            Assert.That(world.IsReceiver(source), Is.True);
+            Assert.That(world.IsReceiver(world.Find("s.beans")), Is.False);
+            Assert.That(world.Preview(cup.id, sourceId).success, Is.True);
+            Assert.That(JsonUtility.ToJson(world.State), Is.EqualTo(beforePreview));
+            int notifications = 0;
+            world.Changed += () =>
+            {
+                notifications++;
+                Assert.That(world.Find(cup.id), Is.Null);
+                Assert.That(source.stock, Is.EqualTo(initialStock));
+            };
+            Assert.That(world.Interact(cup.id, sourceId).success, Is.True);
+            Assert.That(notifications, Is.EqualTo(1));
+            Assert.That(world.State.nextId, Is.EqualTo(nextId));
+            beforePreview = JsonUtility.ToJson(world.State);
+            Assert.That(world.Interact(cup.id, sourceId).success, Is.False);
+            Assert.That(JsonUtility.ToJson(world.State), Is.EqualTo(beforePreview));
+            Assert.That(notifications, Is.EqualTo(1));
+        }
+
+        [TestCase(false, "s.cups.small", "s.cups.large")]
+        [TestCase(false, "s.cups.large", "s.cups.small")]
+        [TestCase(true, "s.cups.small", "s.cups.large")]
+        [TestCase(true, "s.cups.large", "s.cups.small")]
+        public void MismatchedCupReturnDoesNotMutateEitherStockOrIdentity(bool production, string sourceId, string wrongSourceId)
+        {
+            if (production) world.EnableProduction();
+            var cup = Take(sourceId);
+            // Leave room in the wrong stack so rejection proves cup-type matching, not capacity.
+            Take(wrongSourceId);
+            string before = JsonUtility.ToJson(world.State);
+            var preview = world.Preview(cup.id, wrongSourceId);
+            var result = world.Interact(cup.id, wrongSourceId);
+            Assert.That(preview.success, Is.False);
+            Assert.That(result.message, Does.Contain("杯型不匹配"));
+            Assert.That(JsonUtility.ToJson(world.State), Is.EqualTo(before));
+            Assert.That(world.Find(cup.id), Is.SameAs(cup));
+        }
+
+        [TestCase(false)]
+        [TestCase(true)]
+        public void FullCupStackRejectsReturnWithoutMutation(bool production)
+        {
+            if (production) world.EnableProduction();
+            var cup = Take("s.cups.small");
+            var source = world.Find("s.cups.small");
+            source.stock = world.Spec(source.specId).initialStock; // Refilled after withdrawal.
+            string before = JsonUtility.ToJson(world.State);
+            Assert.That(world.Preview(cup.id, source.id).success, Is.False);
+            var result = world.Interact(cup.id, source.id);
+            Assert.That(result.success, Is.False);
+            Assert.That(result.message, Does.Contain("杯堆已满"));
+            Assert.That(JsonUtility.ToJson(world.State), Is.EqualTo(before));
+            Assert.That(world.Find(cup.id), Is.SameAs(cup));
+        }
+
+        [TestCase(false, "s.milk")]
+        [TestCase(false, "s.beans")]
+        [TestCase(true, "s.milk")]
+        [TestCase(true, "s.beans")]
+        public void CupWithLiquidOrSolidsCannotReturnAndLoseContents(bool production, string ingredientSource)
+        {
+            if (production) world.EnableProduction();
+            var cup = Take("s.cups.large");
+            Assert.That(world.Interact(Take(ingredientSource).id, cup.id).success, Is.True);
+            var portion = cup.contents[0];
+            string before = JsonUtility.ToJson(world.State);
+            Assert.That(world.Preview(cup.id, "s.cups.large").success, Is.False);
+            var result = world.Interact(cup.id, "s.cups.large");
+            Assert.That(result.success, Is.False);
+            Assert.That(result.message, Does.Contain("杯子还有内容"));
+            Assert.That(JsonUtility.ToJson(world.State), Is.EqualTo(before));
+            Assert.That(cup.contents[0], Is.SameAs(portion));
+        }
+
+        [TestCase(false)]
+        [TestCase(true)]
+        public void OwnedCupAndCrossAreaCupCannotReturn(bool production)
+        {
+            if (production) world.EnableProduction();
+            var cup = Take("s.cups.small");
+            cup.ownerId = "m.grinder";
+            string before = JsonUtility.ToJson(world.State);
+            Assert.That(world.Interact(cup.id, "s.cups.small").success, Is.False);
+            Assert.That(JsonUtility.ToJson(world.State), Is.EqualTo(before));
+            cup.ownerId = null;
+            Assert.That(world.Move(cup.id, AreaId.Cafe, 0, 0).success, Is.True);
+            before = JsonUtility.ToJson(world.State);
+            Assert.That(world.Interact(cup.id, "s.cups.small").success, Is.False);
+            Assert.That(JsonUtility.ToJson(world.State), Is.EqualTo(before));
+        }
+
+        [TestCase(false)]
+        [TestCase(true)]
+        public void ProcessingEmptyCupCannotReturn(bool production)
+        {
+            if (production) world.EnableProduction();
+            var cup = Take("s.cups.small");
+            cup.production.phase = ProductionPhase.Processing;
+            cup.production.remaining = 2;
+            string before = JsonUtility.ToJson(world.State);
+            var result = world.Interact(cup.id, "s.cups.small");
+            Assert.That(result.success, Is.False);
+            Assert.That(result.message, Does.Contain("正在加工"));
+            Assert.That(JsonUtility.ToJson(world.State), Is.EqualTo(before));
+        }
+
         [Test] public void InvalidRestoreDoesNotReplaceLiveWorld()
         { var current=world.State;var candidate=JsonUtility.FromJson<CafeSnapshot>(JsonUtility.ToJson(current));candidate.entities.Add(candidate.entities[0]);Assert.That(world.Restore(candidate).success,Is.False);Assert.That(world.State,Is.SameAs(current)); }
         [Test] public void RestoreRejectsOrphanedOwnedItems()

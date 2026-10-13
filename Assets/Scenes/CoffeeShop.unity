@@ -7333,6 +7333,9 @@ MonoBehaviour:
   m_EditorClassIdentifier: Spotlight.FreeCafe.Unity::Spotlight.FreeCafe.FreeCafeLatteArtBench
   dock: {fileID: 529006846}
   patternPresets: []
+  layoutHeightFraction: 0.9
+  transitionDuration: 0.28
+  recognitionInterval: 0.15
 --- !u!61 &683686750
 BoxCollider2D:
   m_ObjectHideFlags: 0
@@ -23065,6 +23068,42 @@ PrefabInstance:
     - target: {fileID: 2657273492449241557, guid: 102a666b17fa6234e8ed45298456aac4, type: 3}
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 6601333495910390694, guid: 102a666b17fa6234e8ed45298456aac4, type: 3}
+      propertyPath: pourRate
+      value: 5
+      objectReference: {fileID: 0}
+    - target: {fileID: 6601333495910390694, guid: 102a666b17fa6234e8ed45298456aac4, type: 3}
+      propertyPath: diffusion
+      value: 0.1
+      objectReference: {fileID: 0}
+    - target: {fileID: 6601333495910390694, guid: 102a666b17fa6234e8ed45298456aac4, type: 3}
+      propertyPath: viscosity
+      value: 0.00055
+      objectReference: {fileID: 0}
+    - target: {fileID: 6601333495910390694, guid: 102a666b17fa6234e8ed45298456aac4, type: 3}
+      propertyPath: brushRadius
+      value: 0.02
+      objectReference: {fileID: 0}
+    - target: {fileID: 6601333495910390694, guid: 102a666b17fa6234e8ed45298456aac4, type: 3}
+      propertyPath: dragStrength
+      value: 0.38
+      objectReference: {fileID: 0}
+    - target: {fileID: 6601333495910390694, guid: 102a666b17fa6234e8ed45298456aac4, type: 3}
+      propertyPath: pushStrength
+      value: 0.2
+      objectReference: {fileID: 0}
+    - target: {fileID: 6601333495910390694, guid: 102a666b17fa6234e8ed45298456aac4, type: 3}
+      propertyPath: velocityDamping
+      value: 4.2
+      objectReference: {fileID: 0}
+    - target: {fileID: 6601333495910390694, guid: 102a666b17fa6234e8ed45298456aac4, type: 3}
+      propertyPath: vorticityStrength
+      value: 1.2
+      objectReference: {fileID: 0}
+    - target: {fileID: 6601333495910390694, guid: 102a666b17fa6234e8ed45298456aac4, type: 3}
+      propertyPath: viscosityIterations
+      value: 6
       objectReference: {fileID: 0}
     - target: {fileID: 7552098854275263625, guid: 102a666b17fa6234e8ed45298456aac4, type: 3}
       propertyPath: m_Name

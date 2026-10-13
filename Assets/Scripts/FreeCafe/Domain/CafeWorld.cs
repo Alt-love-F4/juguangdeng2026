@@ -382,10 +382,10 @@ namespace Spotlight.FreeCafe
             }
         }
 
-        /// <summary>目标能否接收物品：容器、设备、顾客、出餐口或丢弃区。</summary>
+        /// <summary>目标能否接收物品：杯具来源、容器、设备、顾客、出餐口或丢弃区。</summary>
         public bool IsReceiver(WorldEntity target) => target != null
-            && (Spec(target.specId).capabilities
-                & (Capability.Container | Capability.Processor | Capability.Customer | Capability.Delivery | Capability.Discard)) != 0;
+            && (IsCupSource(Spec(target.specId)) || (Spec(target.specId).capabilities
+                & (Capability.Container | Capability.Processor | Capability.Customer | Capability.Delivery | Capability.Discard)) != 0);
 
         /// <summary>预演一次「把 item 放到 target 上」的结果；只用于提示，不产生任何副作用。</summary>
         public ActionResult Preview(string itemId, string targetId) => Preview(Find(itemId), Find(targetId));
@@ -409,6 +409,7 @@ namespace Spotlight.FreeCafe
                 return ActionResult.No("无效物品");
             }
 
+            if (IsCupSource(receiver)) return PreviewCupReturn(item, target);
             if (PreviewProduction(item, target, out var productionPreview)) return productionPreview;
 
             if (receiver.Has(Capability.Discard))
@@ -479,6 +480,12 @@ namespace Spotlight.FreeCafe
             }
 
             var receiver = Spec(target.specId);
+            if (IsCupSource(receiver))
+            {
+                ReturnCup(item, target);
+                Notify();
+                return preview;
+            }
             if (ProductionEnabled && (IsProductionMachine(target) || receiver.Has(Capability.Container) || receiver.Has(Capability.Delivery)))
                 return InteractProduction(item, target);
             if (receiver.Has(Capability.Processor))

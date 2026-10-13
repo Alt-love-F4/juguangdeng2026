@@ -34,7 +34,7 @@ namespace Spotlight.FreeCafe
         public bool CarrySelection { get; set; }
         public bool ShowAssetIds { get; set; }
         public bool IsDragging => draggedView!=null;
-        public bool GameplayBlocked => (gameFlow != null && gameFlow.IsMapOpen) || (World != null && World.ProductionEnabled && !string.IsNullOrEmpty(World.State.production.miniGameToken)) || Time.timeScale<=0 || DialoguePanel.IsAnyPlaying || (dayFlow != null && dayFlow.BlocksGameplayInput);
+        public bool GameplayBlocked => (miniGameGateway != null && miniGameGateway.BlocksInput) || (gameFlow != null && gameFlow.IsMapOpen) || (World != null && World.ProductionEnabled && !string.IsNullOrEmpty(World.State.production.miniGameToken)) || Time.timeScale<=0 || DialoguePanel.IsAnyPlaying || (dayFlow != null && dayFlow.BlocksGameplayInput);
         private DayFlowController dayFlow;
         private GameFlowBootstrap gameFlow;
         public event Action ViewChanged;
@@ -42,12 +42,14 @@ namespace Spotlight.FreeCafe
         private FreeCafeSpawnScale spawnScale;
         private FreeCafeHud playerHud;
         private FreeCafeProductionHud productionHud;
+        private FreeCafeMiniGameGateway miniGameGateway;
         public bool InputBlocked => GameplayBlocked || (FreeCafeGMPanel.Instance!=null && FreeCafeGMPanel.Instance.IsVisible) ||
             (playerHud!=null && playerHud.IsModalOpen) || (productionHud!=null && productionHud.IsModalOpen);
         public void OpenPlayerMenu() { if(playerHud!=null) playerHud.OpenPlayerMenu(); }
         private readonly List<string> removeIds=new List<string>();
         private readonly List<RaycastResult> hits=new List<RaycastResult>();
-        private FreeEntityView draggedView,receiver;
+        private FreeEntityView draggedView,receiver,dragEventOwner;
+        private int dragPointerId;
         private string dragItemId,dragSourceId,dragMachineId,dragOutputId,confirmCancelId;
         private bool committingDrag;
         private Vector3 origin,offset;
@@ -68,9 +70,19 @@ namespace Spotlight.FreeCafe
         public string LockedPourTargetId => lockedPourTargetId;
         private void Awake()
         {
+            miniGameGateway=GetComponent<FreeCafeMiniGameGateway>();
             if(worldCamera==null) worldCamera=Camera.main;
             if(worldCamera==null || !worldCamera.isActiveAndEnabled || worldCamera.GetComponent<Physics2DRaycaster>()==null)
                 Debug.LogError("[FreeCafe Input] 请为 World Camera 指定启用的游戏摄像机，并在同一对象上添加 Physics2DRaycaster。",this);
+            if (worldCamera != null && worldCamera.TryGetComponent<Physics2DRaycaster>(out var raycaster) &&
+                !(raycaster is FreeCafeEntityRaycaster))
+            {
+                var entityRaycaster = worldCamera.gameObject.AddComponent<FreeCafeEntityRaycaster>();
+                entityRaycaster.eventMask = raycaster.eventMask;
+                entityRaycaster.maxRayIntersections = raycaster.maxRayIntersections;
+                raycaster.enabled = false;
+                Destroy(raycaster);
+            }
             if(areaManager==null) areaManager=GetComponent<FreeCafeAreaManager>();
             if(areaManager==null) throw new InvalidOperationException("Configure FreeCafeAreaManager on FreeCafeApp before playing");
             areaManager.Initialize(worldCamera);
@@ -157,7 +169,7 @@ namespace Spotlight.FreeCafe
         {
             if (committingDrag) return;
             removeIds.Clear();
-            foreach(var pair in views) if(World.Find(pair.Key)==null) { if(pair.Value!=null) Destroy(pair.Value.gameObject); removeIds.Add(pair.Key); }
+            foreach(var pair in views) if(World.Find(pair.Key)==null) { if(pair.Value!=null) { pair.Value.RetireInteraction(); Destroy(pair.Value.gameObject); } removeIds.Add(pair.Key); }
             foreach(var id in removeIds) views.Remove(id);
             foreach(var entity in World.State.entities)
             {
@@ -172,6 +184,7 @@ namespace Spotlight.FreeCafe
                     view.Refresh(entity);
                 }
             }
+            if (draggedView != null && !IsRegisteredView(dragEventOwner)) CancelDrag();
             areaManager.Focus(World.State.currentArea);
             if(SelectedId!=null && World.Find(SelectedId)==null) SelectedId=null;
             ViewChanged?.Invoke();
@@ -197,6 +210,10 @@ namespace Spotlight.FreeCafe
             }
             return false;
         }
+        public bool IsRegisteredView(FreeEntityView view) => World != null && view != null &&
+            view.Runtime == this && !string.IsNullOrEmpty(view.EntityId) &&
+            views.TryGetValue(view.EntityId, out var registered) && registered == view &&
+            World.Find(view.EntityId) is WorldEntity entity && string.IsNullOrEmpty(entity.ownerId);
         public FreeEntityView View(string id) => id!=null && views.TryGetValue(id,out var view) ? view : null;
         public void ShowHint(string message)
         {
@@ -238,7 +255,7 @@ namespace Spotlight.FreeCafe
         public void Select(string id) { SelectedId=id; SyncViews(); Inspect(id); }
         public void Click(FreeEntityView view)
         {
-            if(InputBlocked || IsDragging || dragFinishedFrame==Time.frameCount) return;
+            if(World==null || view==null || !view.CanInteract || InputBlocked || IsDragging || dragFinishedFrame==Time.frameCount) return;
             var entity=World.Find(view.EntityId); if(entity==null || entity.area!=World.State.currentArea) return;
             var spec=World.Spec(entity.specId);
             if(spec.Has(Capability.BusinessControl)) { Report(World.ActivateBusinessControl(entity.id)); return; }
@@ -301,7 +318,7 @@ namespace Spotlight.FreeCafe
         }
         public void CancelProcessing(FreeEntityView view)
         {
-            if(InputBlocked || IsDragging) return;
+            if(World==null || view==null || !view.CanInteract || InputBlocked || IsDragging) return;
             var entity=World.Find(view.EntityId);
             if(entity==null || entity.area!=World.State.currentArea || !World.Spec(entity.specId).Has(Capability.Processor)) return;
             if(World.ProductionEnabled) { Report(World.EmptyProductionMachine(entity.id)); return; }
@@ -320,7 +337,7 @@ namespace Spotlight.FreeCafe
         }
         public void BeginDrag(FreeEntityView view,PointerEventData e)
         {
-            if(InputBlocked || IsDragging || view==null || e==null) return;
+            if(World==null || InputBlocked || IsDragging || view==null || !view.CanInteract || e==null) return;
             var inputCamera=e.pressEventCamera!=null ? e.pressEventCamera : worldCamera;
             if(inputCamera==null || !inputCamera.isActiveAndEnabled) { ShowHint("游戏摄像机未启用，无法拖拽实体"); return; }
             var entity=World.Find(view.EntityId); if(entity==null || entity.area!=World.State.currentArea) return; var spec=World.Spec(entity.specId);
@@ -344,6 +361,7 @@ namespace Spotlight.FreeCafe
             }
             else if(spec.Has(Capability.Movable)) { dragItemId=entity.id; draggedView=view; SelectedId=entity.id; }
             else return;
+            dragEventOwner=view; dragPointerId=e.pointerId;
             dragCamera=inputCamera;origin=draggedView.transform.position;
             dragPlane=new Plane(Vector3.forward,origin);
             // BeginDrag occurs only after the mouse has crossed the drag threshold.
@@ -382,6 +400,18 @@ namespace Spotlight.FreeCafe
                 }
             }
         }
+        public void MoveDragFrom(FreeEntityView owner, PointerEventData e)
+        {
+            if (owner != dragEventOwner || e == null || e.pointerId != dragPointerId ||
+                e.button != PointerEventData.InputButton.Left) return;
+            MoveDrag(e);
+        }
+        public void EndDragFrom(FreeEntityView owner, PointerEventData e)
+        {
+            if (owner != dragEventOwner || e == null || e.pointerId != dragPointerId ||
+                e.button != PointerEventData.InputButton.Left) return;
+            EndDrag(e);
+        }
         public void MoveDrag(PointerEventData e)
         {
             if(!IsDragging) return;
@@ -400,6 +430,13 @@ namespace Spotlight.FreeCafe
                 if(receiver!=null)
                 {
                     var target=World.Find(receiver.EntityId);
+                    bool cupStack = target != null && World.Spec(target.specId).Has(Capability.Source) && World.Spec(World.Spec(target.specId).sourceItemId).Has(Capability.Container);
+                    if (cupStack)
+                    {
+                        var canReturn = World.Preview(item, target);
+                        receiver.SetDropTarget(true, !canReturn.success);
+                        ShowHint(canReturn.message); return;
+                    }
                     bool valid=target!=null && (World.IsContainer(target) || target.specId=="machine.stove" || World.Spec(target.specId).Has(Capability.Delivery) || World.Spec(target.specId).Has(Capability.Discard));
                     receiver.SetDropTarget(true,!valid);
                 }
@@ -460,7 +497,7 @@ namespace Spotlight.FreeCafe
                         (entity.id == outputId || !previousIds.Contains(entity.id))) { placed = entity; break; }
                 if (placed != null)
                 {
-                    if (views.TryGetValue(placed.id, out var oldView) && oldView != ghost) Destroy(oldView.gameObject);
+                    if (views.TryGetValue(placed.id, out var oldView) && oldView != ghost) { oldView.RetireInteraction(); Destroy(oldView.gameObject); }
                     views[placed.id] = ghost; ghost.name = placed.id; ghost.Bind(this, placed);
                 }
                 else ghost.AnimateReturn(dropPosition,rejectedTarget != null ? rejectedTarget.transform.position : origin,true);
@@ -490,7 +527,7 @@ namespace Spotlight.FreeCafe
             if(receiver!=null) receiver.SetDropTarget(false,false);
             if(draggedView!=null) { draggedView.EndPointerMotion(); draggedView.PresentPour(0,false); }
             if(draggedView!=null && dragItemId!=null) draggedView.hitbox.enabled=World.Find(dragItemId)?.area==World.State.currentArea;
-            draggedView=null; receiver=null; dragCamera=null; dragSourceId=dragItemId=dragMachineId=dragOutputId=null; dragFinishedFrame=Time.frameCount;
+            draggedView=null; receiver=null; dragEventOwner=null; dragCamera=null; dragSourceId=dragItemId=dragMachineId=dragOutputId=null; dragFinishedFrame=Time.frameCount;
         }
         public void CancelDrag()
         {

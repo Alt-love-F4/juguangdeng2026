@@ -153,13 +153,17 @@ namespace Spotlight.FreeCafe
             if (tray == null) return ActionResult.No("没有出餐托盘");
             var valid = CanPosition(Spec(source.specId).sourceItemId, AreaId.Counter, tray.x, tray.y);
             if (!valid.success) return valid;
+            WorldEntity oldSource = null;
             if (old != null)
             {
-                // 空杯换型：归还旧杯库存，而非凭空复制杯子。
-                var oldSource = State.entities.Find(e => Spec(e.specId).sourceItemId == old.specId && Spec(e.specId).Has(Capability.Source));
-                if (oldSource != null) oldSource.stock++;
-                State.entities.Remove(old);
+                oldSource = State.entities.Find(e => e.area == old.area && IsCupSource(Spec(e.specId))
+                    && Spec(e.specId).sourceItemId == old.specId && e.stock < Spec(e.specId).initialStock);
+                if (oldSource == null) return ActionResult.No("原杯型杯堆已满或不存在，无法归还旧杯");
+                valid = Preview(old, oldSource);
+                if (!valid.success) return valid;
             }
+            // Empty-cup swaps obey the same safe return policy, before any stock or identity is changed.
+            if (old != null) ReturnCup(old, oldSource);
             var cup = new WorldEntity { id = Allocate("free_"), specId = Spec(source.specId).sourceItemId, area = AreaId.Counter, x = tray.x, y = tray.y };
             source.stock--; State.entities.Add(cup); State.production.activeCupId = cup.id;
             Notify(); return ActionResult.Yes("出餐托盘：" + Spec(cup.specId).label);

@@ -20,6 +20,39 @@ namespace Spotlight.FreeCafe
                     State.entities.Add(new WorldEntity { id = entry.id, specId = entry.specId, area = entry.area, x = entry.x, y = entry.y });
         }
 
+        private bool IsCupSource(EntitySpec spec) => spec != null && spec.Has(Capability.Source)
+            && Spec(spec.sourceItemId) != null && Spec(spec.sourceItemId).Has(Capability.Container);
+
+        private ActionResult PreviewCupReturn(WorldEntity cup, WorldEntity source)
+        {
+            var sourceSpec = Spec(source.specId);
+            if (!Spec(cup.specId).Has(Capability.Movable) || cup.specId != sourceSpec.sourceItemId)
+                return ActionResult.No("杯型不匹配，请归还到对应杯堆");
+            if (cup.task != null || cup.production != null && cup.production.phase == ProductionPhase.Processing)
+                return ActionResult.No("杯子正在加工，请先停止加工再归还");
+            if (ProductionEnabled && !string.IsNullOrEmpty(State.production.miniGameToken)
+                && cup.id == State.production.miniGameCupId)
+                return ActionResult.No("请先结束或取消小游戏，再归还杯子");
+            // A solid-only or legacy portion is still content; never discard a drink or residue on return.
+            if (cup.contents.Count != 0)
+                return ActionResult.No("杯子还有内容，请先倒空或丢弃内容后再归还");
+            if (source.stock >= sourceSpec.initialStock)
+                return ActionResult.No("杯堆已满，请先取出杯子再归还");
+            return ActionResult.Yes("归还空杯：" + Spec(cup.specId).label);
+        }
+
+        // Called only after Preview succeeds; update identity, stock and references before one notification.
+        private void ReturnCup(WorldEntity cup, WorldEntity source)
+        {
+            State.entities.Remove(cup);
+            source.stock++;
+            if (State.production != null && State.production.activeCupId == cup.id)
+                State.production.activeCupId = null;
+            foreach (var entity in State.entities)
+                if (entity.production != null && entity.production.heatingVesselId == cup.id)
+                    entity.production.heatingVesselId = null;
+        }
+
         public float SolidMass(WorldEntity entity)
         {
             float total = 0;

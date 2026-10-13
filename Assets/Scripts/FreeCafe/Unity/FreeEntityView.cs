@@ -28,7 +28,9 @@ namespace Spotlight.FreeCafe
         private string specId,lastState,lastArtId;
         private FreeCafePersonView personView;
         private FreeCafeBusinessSignView businessSignView;
-        private bool preview;
+        private bool preview, retired;
+        public bool CanInteract => !preview && !retired && !destroyOnArrival && isActiveAndEnabled &&
+            Runtime != null && Runtime.IsRegisteredView(this);
         private bool hovered, selected, dropTarget, invalidDrop;
         private TMP_Text fillStatus;
         private SpriteRenderer fillBarBackground, fillBar;
@@ -180,6 +182,7 @@ namespace Spotlight.FreeCafe
         }
         public void Refresh(WorldEntity entity)
         {
+            if (retired) return;
             EnsureFillIndicator();
             EnsureGlassCup();
             var spec=Runtime.World.Spec(entity.specId);
@@ -219,7 +222,7 @@ namespace Spotlight.FreeCafe
             UpdateGlassTransform();
             bool visible=string.IsNullOrEmpty(entity.ownerId);
             gameObject.SetActive(visible);
-            hitbox.enabled=!preview && entity.area==Runtime.World.State.currentArea;
+            hitbox.enabled=CanInteract && !pointerMotion && visible && entity.area==Runtime.World.State.currentArea;
             string caption=spec.label;
             if(spec.Has(Capability.Source)) caption+=" ["+entity.stock+"]";
             if(Runtime.World.ProductionEnabled && (spec.Has(Capability.Container) || WorldVessel(entity)))
@@ -301,13 +304,19 @@ namespace Spotlight.FreeCafe
             motionTarget = transform.localPosition;
             motionVelocity = Vector3.zero;
         }
+        public void RetireInteraction()
+        {
+            retired = true;
+            hovered = selected = dropTarget = invalidDrop = false;
+            if (hitbox != null) hitbox.enabled = false;
+        }
         public void AnimateReturn(Vector3 from,Vector3 to,bool destroyAfter)
         {
             // Never reset to `from`: the current visible pose and velocity are authoritative.
             pointerMotion = false;
             MovePointer(to);
             destroyOnArrival = destroyAfter;
-            if (destroyAfter && hitbox != null) hitbox.enabled = false;
+            if (destroyAfter) RetireInteraction();
         }
         private void LateUpdate()
         {
@@ -442,17 +451,17 @@ namespace Spotlight.FreeCafe
             if(pourVisual || receivingPour) { var tint=body.color; tint.a=.22f; body.color=tint; }
             if(glassCup!=null) glassCup.SetTint(Color.white);
         }
-        public void OnPointerEnter(PointerEventData e) { if(Runtime!=null && !Runtime.InputBlocked) { SetHovered(true); Runtime.Inspect(EntityId); } }
+        public void OnPointerEnter(PointerEventData e) { if(CanInteract && !Runtime.InputBlocked) { SetHovered(true); Runtime.Inspect(EntityId); } }
         public void OnPointerExit(PointerEventData e) { SetHovered(false); }
         public void OnPointerClick(PointerEventData e)
         {
-            if(Runtime==null) return;
+            if(!CanInteract) return;
             if(e.button==PointerEventData.InputButton.Left) Runtime.Click(this);
             else if(e.button==PointerEventData.InputButton.Right) Runtime.CancelProcessing(this);
         }
-        public void OnBeginDrag(PointerEventData e) { if(Runtime!=null && e.button==PointerEventData.InputButton.Left) Runtime.BeginDrag(this,e); }
-        public void OnDrag(PointerEventData e) { if(Runtime!=null) Runtime.MoveDrag(e); }
-        public void OnEndDrag(PointerEventData e) { if(Runtime!=null) Runtime.EndDrag(e); }
+        public void OnBeginDrag(PointerEventData e) { if(CanInteract && e.button==PointerEventData.InputButton.Left) Runtime.BeginDrag(this,e); }
+        public void OnDrag(PointerEventData e) { if(Runtime!=null) Runtime.MoveDragFrom(this,e); }
+        public void OnEndDrag(PointerEventData e) { if(Runtime!=null) Runtime.EndDragFrom(this,e); }
     }
 }
 

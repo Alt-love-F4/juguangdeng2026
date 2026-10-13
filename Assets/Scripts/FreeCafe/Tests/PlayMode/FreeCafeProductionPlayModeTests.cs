@@ -7,18 +7,22 @@ using UnityEngine;
 using UnityEngine.EventSystems;
 using UnityEngine.SceneManagement;
 using UnityEngine.TestTools;
+using UnityEngine.UI;
 
 namespace Spotlight.FreeCafe.Tests
 {
     public sealed class FreeCafeProductionPlayModeTests
     {
         private FreeCafeRuntime app;
+        private Mouse testMouse;
         private InputSettings.BackgroundBehavior previousInputBehavior;
         [UnitySetUp] public IEnumerator Setup()
         {
             foreach (var panel in Object.FindObjectsByType<DialoguePanel>(FindObjectsSortMode.None)) panel.Cancel();
             previousInputBehavior=InputSystem.settings.backgroundBehavior;
             InputSystem.settings.backgroundBehavior=InputSettings.BackgroundBehavior.IgnoreFocus;
+            testMouse=InputSystem.AddDevice<Mouse>("FreeCafeProductionRegressionMouse");
+            MouseAt(Vector2.zero,false,false);
             Time.timeScale=1;GameSaveParticipantRegistry.PendingRestore=null;
             if(FreeCafeGMPanel.Instance!=null) FreeCafeGMPanel.Instance.SetVisible(false);
             yield return SceneManager.LoadSceneAsync("CoffeeShop",LoadSceneMode.Single);yield return null;yield return null;
@@ -28,7 +32,8 @@ namespace Spotlight.FreeCafe.Tests
         {
             Time.timeScale=1;
             if(app!=null) app.CancelDrag();
-            if(Mouse.current!=null) MouseAt(Mouse.current.position.ReadValue(),false,false);
+            if(testMouse!=null && testMouse.added) InputSystem.RemoveDevice(testMouse);
+            testMouse=null;
             InputSystem.settings.backgroundBehavior=previousInputBehavior;
             yield return null;
         }
@@ -39,15 +44,20 @@ namespace Spotlight.FreeCafe.Tests
             Assert.That(Vector3.Distance(view.transform.position,origin),Is.LessThan(.001f),"Container must smoothly return to its station within three seconds");
             Assert.That(Mathf.Abs(Mathf.DeltaAngle(view.body.transform.localEulerAngles.z,0)),Is.LessThan(.01f),"Returned container must settle upright within three seconds");
         }
+        private IEnumerator WaitForLatteTransition(FreeCafeLatteArtBench bench)
+        {
+            float deadline = Time.realtimeSinceStartup + 3f;
+            while (bench.IsTransitioning && Time.realtimeSinceStartup < deadline) yield return null;
+            Assert.That(bench.IsTransitioning, Is.False, "Latte entry/exit must finish within three unscaled seconds");
+        }
         private PointerEventData Pointer(float x,float y) => new PointerEventData(EventSystem.current)
         { position=app.worldCamera.WorldToScreenPoint(app.AreaToWorld(AreaId.Counter,x,y)) };
         private void MouseAt(Vector2 position,bool left,bool right)
         {
-            var mouse=Mouse.current ?? InputSystem.AddDevice<Mouse>();
             var state=new MouseState { position=position };
             if(left) state=state.WithButton(MouseButton.Left);
             if(right) state=state.WithButton(MouseButton.Right);
-            InputSystem.QueueStateEvent(mouse,state);
+            InputSystem.QueueStateEvent(testMouse,state);
         }
         [UnityTest] public IEnumerator UsesExistingSceneCanvasAndCupButtonsTargetTheServingTray()
         {
@@ -77,11 +87,17 @@ namespace Spotlight.FreeCafe.Tests
         {
             app.World.SelectServingCup("s.cups.large");app.World.TakeAndInteract("s.milk","m.heater",AreaId.Counter,0,0);app.World.OperateProduction("m.heater");app.World.Tick(4);
             var kettle=app.World.Find("m.heater");var cup=app.World.ServingCup;var view=app.View(kettle.id);Vector3 origin=view.transform.position;
-            Physics2D.SyncTransforms();app.BeginDrag(view,Pointer(kettle.x,kettle.y));Assert.That(app.IsDragging,Is.True);
+            var start=Pointer(kettle.x,kettle.y);
+            MouseAt(start.position,true,false);yield return null;yield return null;
+            Physics2D.SyncTransforms();app.BeginDrag(view,start);Assert.That(app.IsDragging,Is.True);
             var pointer=Pointer(cup.x,cup.y+.7f);app.MoveDrag(pointer);
+            // Runtime samples the mouse every frame; keep it aligned with the synthetic drag target before right-down locks the receiver.
+            MouseAt(pointer.position,true,false);
             yield return null;yield return null;
+            Assert.That(app.IsDragging,Is.True);
             Assert.That(app.World.LiquidVolume(cup),Is.Zero,"左键二维拖动不应倾倒");
             MouseAt(pointer.position,true,true);yield return null;yield return null;
+            Assert.That(app.LockedPourTargetId,Is.EqualTo(cup.id),"Right-down must lock the intended cup before pouring begins");
             var lifted=view.transform.position;
             MouseAt(pointer.position+Vector2.right*90,true,true);yield return null;yield return null;yield return null;
             Assert.That(Vector3.Distance(view.transform.position,lifted),Is.LessThan(.001f),"倾倒模式固定壶位置");
@@ -119,11 +135,15 @@ namespace Spotlight.FreeCafe.Tests
             app.World.TakeAndInteract("s.beans","m.grinder",AreaId.Counter,0,0);app.World.Operate("m.grinder");app.World.Tick(12);
             var grounds=app.World.DragOutputPreview("m.grinder");app.World.TakeMachineOutput("m.grinder",grounds.id,"m.brewer",AreaId.Counter,-3.3f,.2f);
             app.World.TakeAndInteract("s.water","m.heater",AreaId.Counter,0,0);app.World.Operate("m.heater");app.World.Tick(4);
-            var kettle=app.World.Find("m.heater");var brewer=app.World.Find("m.brewer");Physics2D.SyncTransforms();
+            var kettle=app.World.Find("m.heater");var brewer=app.World.Find("m.brewer");
             var view=app.View(kettle.id);var origin=view.transform.position;
-            app.BeginDrag(view,Pointer(kettle.x,kettle.y));
-            var pointer=Pointer(brewer.x,brewer.y+.4f);app.MoveDrag(pointer);yield return null;
+            var start=Pointer(kettle.x,kettle.y);
+            MouseAt(start.position,true,false);yield return null;yield return null;
+            Physics2D.SyncTransforms();app.BeginDrag(view,start);Assert.That(app.IsDragging,Is.True);
+            var pointer=Pointer(brewer.x,brewer.y+.4f);app.MoveDrag(pointer);
+            MouseAt(pointer.position,true,false);yield return null;yield return null;
             MouseAt(pointer.position,true,true);yield return null;yield return null;
+            Assert.That(app.LockedPourTargetId,Is.EqualTo(brewer.id),"Right-down must lock the intended brewer before pouring begins");
             MouseAt(pointer.position+Vector2.left*90,true,true);yield return null;yield return null;yield return null;
             Assert.That(Mathf.DeltaAngle(0,view.body.transform.localEulerAngles.z),Is.GreaterThan(0),"鼠标向左应向左倾斜");
             app.EndDrag(pointer);MouseAt(pointer.position+Vector2.left*90,false,true);yield return null;
@@ -157,17 +177,81 @@ namespace Spotlight.FreeCafe.Tests
             yield return new WaitForSecondsRealtime(2.4f);
             Assert.That(Object.FindFirstObjectByType<OperationToastPanel>(),Is.Null);
         }
-        [UnityTest] public IEnumerator MiniGamePlaceholderTriggersCancelsAndLeavesTheCupUntouched()
+        [UnityTest] public IEnumerator LatteSurfaceOverlayBeginsAndCancelsWithoutChangingTheCup()
         {
-            app.World.SelectServingCup("s.cups.large");var cup=app.World.ServingCup;
-            cup.contents.Add(new Portion{specId="coffee",units=1,milliliters=100,productionScore=100});
-            cup.contents.Add(new Portion{specId="milk",units=1,milliliters=100,productionScore=100});
-            var hud=app.GetComponent<FreeCafeProductionHud>();hud.miniGameButton.onClick.Invoke();yield return null;
-            Assert.That(hud.miniGamePanel.activeSelf,Is.True);Assert.That(app.InputBlocked,Is.True);
-            string token=app.World.State.production.miniGameToken;hud.cancelMiniGame.onClick.Invoke();yield return null;
-            Assert.That(app.InputBlocked,Is.False);Assert.That(hud.miniGamePanel.activeSelf,Is.False);Assert.That(app.World.LiquidVolume(cup),Is.EqualTo(200));
-            Assert.That(app.World.ResolveProductionMiniGame(token,true,100).success,Is.False);
+            app.World.SelectServingCup("s.cups.large");
+            var cup = app.World.ServingCup;
+            var coffee = new Portion { specId = "coffee", units = 1, milliliters = 100, productionScore = 100 };
+            var milk = new Portion { specId = "milk", units = 1, milliliters = 100, productionScore = 100 };
+            cup.contents.Add(coffee); cup.contents.Add(milk);
+            var hud = app.GetComponent<FreeCafeProductionHud>();
+            var bench = Object.FindFirstObjectByType<FreeCafeLatteArtBench>();
+            Assert.That(bench, Is.Not.Null);
+            hud.miniGameButton.onClick.Invoke();
+            string token = app.World.State.production.miniGameToken;
+            Assert.That(token, Is.Not.Null.And.Not.Empty);
+            Assert.That(bench.IsTransitioning, Is.True);
+            yield return WaitForLatteTransition(bench);
+            yield return null;
+            var overlay = GameObject.Find("LatteArtPresetOverlay");
+            Assert.That(overlay, Is.Not.Null);
+            Assert.That(FindLatteSurface(bench.transform.parent).isActiveAndEnabled, Is.True);
+            Assert.That(overlay.GetComponent<Canvas>().renderMode, Is.EqualTo(RenderMode.ScreenSpaceOverlay));
+            Assert.That(hud.miniGamePanel.activeSelf, Is.False, "The real presenter replaces the obsolete placeholder");
+            Assert.That(hud.productionRoot.activeSelf, Is.False, "Production cards must not cover the latte surface");
+            Assert.That(app.InputBlocked, Is.True);
+            overlay.transform.Find("Content/PresetPanel/Cancel").GetComponent<Button>().onClick.Invoke();
+            Assert.That(bench.IsTransitioning, Is.True);
+            Assert.That(app.InputBlocked, Is.True, "Exit transition must keep gameplay blocked after the token clears");
+            yield return WaitForLatteTransition(bench);
+            yield return null;
+            float deadline = Time.realtimeSinceStartup + 3f;
+            while (!hud.productionRoot.activeSelf && Time.realtimeSinceStartup < deadline) yield return null;
+            Assert.That(app.InputBlocked, Is.False);
+            Assert.That(hud.productionRoot.activeSelf, Is.True);
+            Assert.That(GameObject.Find("LatteArtPresetOverlay"), Is.Null);
+            Assert.That(app.World.ServingCup, Is.SameAs(cup));
+            Assert.That(cup.contents.Count, Is.EqualTo(2));
+            Assert.That(cup.contents[0], Is.SameAs(coffee)); Assert.That(cup.contents[1], Is.SameAs(milk));
+            Assert.That(app.World.LiquidVolume(cup), Is.EqualTo(200));
+            Assert.That(cup.latteArt, Is.False);
+            Assert.That(app.World.ResolveProductionMiniGame(token, true, 100).success, Is.False);
         }
+        [UnityTest] public IEnumerator LatteReferenceSelectionAndResetKeepDrawingSurfaceUnobstructed()
+        {
+            var bench = Object.FindFirstObjectByType<FreeCafeLatteArtBench>();
+            var caption = bench.transform.parent.Find("Caption").GetComponent<TMPro.TMP_Text>();
+            bool captionEnabled = caption.enabled;
+            bench.Begin("latte", "debug-cup", "ui-selection-test", (_, _, _) => { });
+            yield return WaitForLatteTransition(bench);
+            yield return null;
+            var overlay = GameObject.Find("LatteArtPresetOverlay");
+            var panel = overlay.transform.Find("Content/PresetPanel");
+            var list = panel.Find("PresetList");
+            Assert.That(list.childCount, Is.EqualTo(5));
+            Assert.That(list.Find("heartButton/Selected").gameObject.activeSelf, Is.True);
+            Assert.That(caption.enabled, Is.False, "Old placeholder caption must not cover the cup");
+            list.Find("tulipButton").GetComponent<Button>().onClick.Invoke();
+            Assert.That(list.Find("heartButton/Selected").gameObject.activeSelf, Is.False);
+            Assert.That(list.Find("tulipButton/Selected").gameObject.activeSelf, Is.True);
+            Assert.That(list.Find("tulipButton/Preview").GetComponent<RawImage>().raycastTarget, Is.False);
+            Assert.That(overlay.transform.Find("Content/DrawingHint").GetComponent<TMPro.TMP_Text>().raycastTarget, Is.False);
+            Assert.That(panel.Find("Submit").GetComponent<Button>().interactable, Is.False);
+            panel.Find("Reset").GetComponent<Button>().onClick.Invoke();
+            yield return null;
+            Assert.That(list.Find("tulipButton/Selected").gameObject.activeSelf, Is.True, "Reset preserves the selected reference");
+            Assert.That(bench.LastPatternId, Is.Null);
+            Assert.That(panel.Find("Submit").GetComponent<Button>().interactable, Is.False);
+            var statusText = panel.Find("StatusCard/Status").GetComponent<TMPro.TMP_Text>();
+            Assert.That(statusText.color.r, Is.GreaterThan(.8f), "Status must remain readable on a dark card");
+            Assert.That(statusText.text, Does.Contain("按住左键"));
+            bench.Cancel("ui-selection-test");
+            yield return WaitForLatteTransition(bench);
+            yield return null;
+            Assert.That(caption.enabled, Is.EqualTo(captionEnabled));
+            Assert.That(GameObject.Find("LatteArtPresetOverlay"), Is.Null);
+        }
+
         [UnityTest] public IEnumerator LatteBenchDocksIndependentlyAndRestoresTheProductionLayout()
         {
             var bench = Object.FindFirstObjectByType<FreeCafeLatteArtBench>();
@@ -180,13 +264,13 @@ namespace Spotlight.FreeCafe.Tests
             app.World.SelectServingCup("s.cups.small");
             Assert.That(app.World.LiquidVolume(app.World.ServingCup), Is.Zero);
             Assert.That(app.World.RequestProductionMiniGame().success, Is.True);
-            yield return null;
+            yield return WaitForLatteTransition(bench);
             Assert.That(layout.localPosition, Is.EqualTo(bench.dock.dockedLocalPosition));
             Assert.That(app.worldCamera.transform.position, Is.EqualTo(cameraPosition));
             Assert.That(app.worldCamera.orthographicSize, Is.EqualTo(cameraSize));
             string token = app.World.State.production.miniGameToken;
             app.World.ResolveProductionMiniGame(token, false, 0);
-            yield return null;
+            yield return WaitForLatteTransition(bench);
             Assert.That(layout.localPosition, Is.EqualTo(home));
             Assert.That(layout.localScale, Is.EqualTo(scale));
             Assert.That(app.areaRoots[(int)AreaId.Counter].GetComponent<FreeCafeSubSceneDock>().IsDocked, Is.True);
@@ -208,13 +292,25 @@ namespace Spotlight.FreeCafe.Tests
             {
                 app.worldCamera.aspect = 2.5f;
                 bench.Begin("latte", "debug-cup", "cover-test", (_, _, _) => { });
-                yield return null;
+                yield return WaitForLatteTransition(bench);
                 Bounds bounds = background.bounds;
                 float halfHeight = app.worldCamera.orthographicSize;
-                Assert.That(bounds.min.x, Is.LessThanOrEqualTo(cameraPosition.x - halfHeight * 2.5f));
-                Assert.That(bounds.max.x, Is.GreaterThanOrEqualTo(cameraPosition.x + halfHeight * 2.5f));
-                Assert.That(bounds.min.y, Is.LessThanOrEqualTo(cameraPosition.y - halfHeight));
-                Assert.That(bounds.max.y, Is.GreaterThanOrEqualTo(cameraPosition.y + halfHeight));
+                Assert.That(bench.layoutHeightFraction, Is.EqualTo(.9f).Within(.0001f));
+                Assert.That(layout.localScale.x / scale.x, Is.LessThanOrEqualTo(1f + .00001f), "Wide views must not enlarge the authored cup");
+                Assert.That(layout.localScale.y / scale.y, Is.LessThanOrEqualTo(1f + .00001f));
+                Assert.That(bounds.size.y, Is.LessThanOrEqualTo(halfHeight * 2f * .9f + .001f), "Contain the composition within ninety percent of view height");
+                Assert.That(bounds.size.x, Is.LessThanOrEqualTo(halfHeight * 2f * 2.5f + .001f));
+                var matteTransform = layout.Find("LatteBackdrop");
+                Assert.That(matteTransform, Is.Not.Null);
+                var matte = matteTransform.GetComponent<SpriteRenderer>();
+                Assert.That(matte.gameObject.activeInHierarchy, Is.True);
+                Assert.That(matte.color.a, Is.EqualTo(1f));
+                Assert.That(matte.sortingOrder, Is.LessThan(background.sortingOrder));
+                Bounds coverage = matte.bounds;
+                Assert.That(coverage.min.x, Is.LessThanOrEqualTo(cameraPosition.x - halfHeight * 2.5f));
+                Assert.That(coverage.max.x, Is.GreaterThanOrEqualTo(cameraPosition.x + halfHeight * 2.5f));
+                Assert.That(coverage.min.y, Is.LessThanOrEqualTo(cameraPosition.y - halfHeight));
+                Assert.That(coverage.max.y, Is.GreaterThanOrEqualTo(cameraPosition.y + halfHeight));
                 Assert.That(background.sprite, Is.SameAs(originalSprite), "Keep the authored background image");
                 Assert.That(surface.transform.localPosition, Is.EqualTo(planeLocal));
                 Assert.That(layout.localScale.x / scale.x, Is.EqualTo(layout.localScale.y / scale.y).Within(.00001f));
@@ -226,6 +322,10 @@ namespace Spotlight.FreeCafe.Tests
                 bench.Cancel("cover-test");
                 app.worldCamera.aspect = oldAspect;
             }
+            yield return WaitForLatteTransition(bench);
+            Assert.That(layout.localScale, Is.EqualTo(scale));
+            Assert.That(surface.transform.localPosition, Is.EqualTo(planeLocal));
+            Assert.That(layout.Find("LatteBackdrop").gameObject.activeSelf, Is.False);
         }
 
         [UnityTest] public IEnumerator LattePointerAndMilkUseTheSameMeshUVOnBothAxes()
@@ -233,7 +333,7 @@ namespace Spotlight.FreeCafe.Tests
             var bench = Object.FindFirstObjectByType<FreeCafeLatteArtBench>();
             app.World.SelectServingCup("s.cups.small");
             app.World.RequestProductionMiniGame();
-            yield return null;
+            yield return WaitForLatteTransition(bench);
             var surface = FindLatteSurface(bench.transform.parent);
             var map = surface.GetType().GetMethod("TryGetSurfaceUV");
             Assert.That(map, Is.Not.Null);
@@ -285,6 +385,7 @@ namespace Spotlight.FreeCafe.Tests
                 if (addedMouse) InputSystem.RemoveDevice(mouse);
                 app.World.ResolveProductionMiniGame(app.World.State.production.miniGameToken, false, 0);
             }
+            yield return WaitForLatteTransition(bench);
         }
 
         private static MonoBehaviour FindLatteSurface(Transform layout)

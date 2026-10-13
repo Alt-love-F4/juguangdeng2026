@@ -1,8 +1,11 @@
 using System;
 using System.Collections;
 using System.Reflection;
+using System.Text;
 using NUnit.Framework;
+using TMPro;
 using UnityEngine;
+using UnityEngine.EventSystems;
 using UnityEngine.TestTools;
 using UnityEngine.UI;
 using YokiFrame;
@@ -274,7 +277,7 @@ namespace Spotlight.GameFlow.Tests
         }
 
         [UnityTest]
-        public IEnumerator NewSessionWaitsForLetterAndAvatarBeforeFirstDayAndNextDayBypassesThem()
+        public IEnumerator NewSessionWaitsForCompletedLetterBeforeFirstDayAndNextDayBypassesIt()
         {
             controllerObject = new GameObject("FirstDayLetterFlowTest");
             var flow = controllerObject.AddComponent<DayFlowController>();
@@ -289,17 +292,15 @@ namespace Spotlight.GameFlow.Tests
             yield return new WaitForSecondsRealtime(.12f);
             Assert.That(flow.State, Is.EqualTo(DayFlowState.IntroLetter));
             panel.OpenEnvelope();
+            yield return CompleteInteractiveLetter(panel);
             yield return WaitFor(() => panel.Stage == FirstDayLetterPanel.LetterStage.AwaitingSignature);
             Assert.That(flow.State, Is.EqualTo(DayFlowState.IntroLetter));
-            panel.SetPlayerName("测试馆长");
-            for (int i = 0; i < 5; i++) panel.SelectLetterOption(i, 0);
             panel.ConfirmSignature();
-            yield return WaitFor(() => flow.State == DayFlowState.AvatarSelection);
+            yield return WaitFor(() => flow.State == DayFlowState.DateTransition);
             Assert.That(flow.BlocksGameplayInput, Is.True);
-            Assert.That(flow.CurrentPresentation, Is.Null);
-            Assert.That(PlayerDetailsProfile.Current.HasSelectedAvatar, Is.False);
-            flow.CurrentAvatarSelection.Select(AvatarKind.Female);
-            Assert.That(PlayerDetailsProfile.Current.Avatar, Is.EqualTo(AvatarKind.Female));
+            Assert.That(flow.CurrentAvatarSelection, Is.Null);
+            Assert.That(PlayerDetailsProfile.Current.HasSelectedAvatar, Is.True);
+            Assert.That(PlayerDetailsProfile.Current.Avatar, Is.EqualTo(AvatarKind.Male));
             Assert.That(flow.State, Is.EqualTo(DayFlowState.DateTransition));
             Assert.That(flow.CurrentPresentation, Is.TypeOf<DateChangePanel>());
             flow.BeginNewDayFlow();
@@ -354,10 +355,227 @@ namespace Spotlight.GameFlow.Tests
                     Json = "{\"day\":2,\"previousDate\":\"王国纪元 670年10月6日\",\"state\":1}" }
             };
             flow.RestoreSavedDayFlow();
-            Assert.That(flow.CurrentPresentation, Is.TypeOf<PreBusinessPanel>());
+            Assert.That(flow.State, Is.EqualTo(DayFlowState.CityMapLeisure));
+            Assert.That(flow.CurrentPresentation, Is.Null);
             Assert.That(flow.CurrentDate, Is.EqualTo("王国纪元 670年10月7日"));
             flow.HideForMainMenu();
             yield return null;
+        }
+
+        [UnityTest]
+        public IEnumerator InteractiveLetterPausesAtEveryBlankAndUsesInlineChoiceLinks()
+        {
+            var panel = Open();
+            panel.Play(null);
+            panel.OpenEnvelope();
+            yield return WaitFor(() => panel.IsWaitingForInput);
+            Assert.That(panel.CurrentChoiceGroup, Is.EqualTo(-1));
+            Assert.That(((CanvasGroup)Field("nameEditor").GetValue(panel)).gameObject.activeSelf, Is.True);
+            int visible = panel.VisibleCharacterCount;
+            yield return new WaitForSecondsRealtime(.12f);
+            Assert.That(panel.VisibleCharacterCount, Is.EqualTo(visible));
+            Assert.That(panel.SelectLetterOption(0, 0), Is.False, "Future blank cannot be filled early.");
+            panel.ActivateLetterLink("choice:0:0");
+            Assert.That(panel.Draft.Selection(0), Is.EqualTo(-1));
+            panel.SetPlayerName("测试馆长");
+            for (int group = 0; group < FirstDayLetterDraft.Labels.Length; group++)
+            {
+                yield return WaitFor(() => panel.CurrentChoiceGroup == group);
+                var body = Body(panel);
+                AssertInlineChoices(panel, group);
+                Assert.That(((CanvasGroup)Field("nameEditor").GetValue(panel)).gameObject.activeSelf, Is.False);
+                visible = panel.VisibleCharacterCount;
+                string unread = UnreadSuffix(body);
+                yield return new WaitForSecondsRealtime(.08f);
+                Assert.That(panel.VisibleCharacterCount, Is.EqualTo(visible));
+                Assert.That(panel.IsWaitingForInput, Is.True);
+                panel.CancelLetterChoice();
+                Assert.That(panel.CurrentChoiceGroup, Is.EqualTo(-1));
+                AssertNoInlineChoices(body);
+                Assert.That(UnreadSuffix(body), Is.EqualTo(unread), "Collapsing choices must not reveal later text.");
+                visible = panel.VisibleCharacterCount;
+                yield return new WaitForSecondsRealtime(.08f);
+                Assert.That(panel.IsWaitingForInput, Is.True);
+                Assert.That(panel.VisibleCharacterCount, Is.EqualTo(visible));
+                panel.ActivateLetterLink($"choice:{group}:0");
+                Assert.That(panel.Draft.Selection(group), Is.EqualTo(-1), "Collapsed choice links cannot select.");
+                panel.ActivateLetterLink($"slot:{group}");
+                AssertInlineChoices(panel, group);
+                Assert.That(UnreadSuffix(body), Is.EqualTo(unread));
+                panel.ActivateLetterLink($"slot:{group}");
+                Assert.That(panel.CurrentChoiceGroup, Is.EqualTo(-1), "Clicking the same slot again collapses its inline choices.");
+                Assert.That(panel.IsWaitingForInput, Is.True);
+                AssertNoInlineChoices(body);
+                Assert.That(UnreadSuffix(body), Is.EqualTo(unread));
+                panel.ActivateLetterLink($"slot:{group}");
+                AssertInlineChoices(panel, group);
+                ClickChoiceEffect(panel, group, 0);
+                Assert.That(panel.Draft.Selection(group), Is.Zero);
+                Assert.That(panel.CurrentChoiceGroup, Is.EqualTo(-1));
+                Assert.That(panel.IsWaitingForInput, Is.False);
+                AssertNoInlineChoices(body);
+                Assert.That(UnreadSuffix(body), Is.EqualTo(unread), "Selection must resume at the same unread suffix.");
+                StringAssert.DoesNotContain(FirstDayLetterDraft.Effects[group][0], body.text);
+                if (group == 0)
+                {
+                    // Revising to a different-length name preserves the exact unread suffix.
+                    panel.ActivateLetterLink("name");
+                    visible = panel.VisibleCharacterCount;
+                    panel.SetPlayerName("米");
+                    Assert.That(panel.VisibleCharacterCount, Is.EqualTo(visible - 3));
+                    Assert.That(UnreadSuffix(body), Is.EqualTo(unread));
+                }
+            }
+            yield return WaitFor(() => panel.Stage == FirstDayLetterPanel.LetterStage.AwaitingSignature);
+            panel.ActivateLetterLink("slot:3");
+            AssertInlineChoices(panel, 3);
+            Assert.That(((Button)Field("signatureButton").GetValue(panel)).interactable, Is.False);
+            panel.ConfirmSignature();
+            Assert.That(panel.Stage, Is.EqualTo(FirstDayLetterPanel.LetterStage.AwaitingSignature));
+            panel.CancelLetterChoice();
+            AssertNoInlineChoices(Body(panel));
+            Assert.That(((Button)Field("signatureButton").GetValue(panel)).interactable, Is.True);
+            panel.ActivateLetterLink("slot:3");
+            ClickChoiceEffect(panel, 3, 2);
+            Assert.That(panel.Stage, Is.EqualTo(FirstDayLetterPanel.LetterStage.AwaitingSignature));
+            Assert.That(panel.Draft.Selection(3), Is.EqualTo(2));
+            Assert.That(RequireLink(Body(panel), "slot:3").GetLinkText(), Is.EqualTo("数学与物理科学"));
+            StringAssert.DoesNotContain("神学", Body(panel).text);
+            AssertNoInlineChoices(Body(panel));
+            Assert.That(((Button)Field("signatureButton").GetValue(panel)).interactable, Is.True);
+            panel.ActivateLetterLink("slot:3");
+            panel.Stop();
+            Assert.That(panel.CurrentChoiceGroup, Is.EqualTo(-1));
+            AssertNoInlineChoices(Body(panel));
+            Assert.That(panel.IsWaitingForInput, Is.False);
+        }
+
+        [UnityTest]
+        public IEnumerator RevisingEarlierInlineChoicePreservesUnreadLaterText()
+        {
+            var panel = Open();
+            panel.Play(null);
+            panel.OpenEnvelope();
+            yield return WaitFor(() => panel.IsWaitingForInput);
+            panel.SetPlayerName("测试馆长");
+            for (int group = 0; group < FirstDayLetterDraft.Labels.Length; group++)
+            {
+                int current = group;
+                yield return WaitFor(() => panel.CurrentChoiceGroup == current);
+                if (group == FirstDayLetterDraft.Labels.Length - 1)
+                    Field("characterInterval").SetValue(panel, .5f);
+                panel.ActivateLetterLink($"choice:{group}:0");
+                Assert.That(panel.Draft.Selection(group), Is.Zero);
+            }
+            int visible = panel.VisibleCharacterCount;
+            yield return WaitFor(() => panel.VisibleCharacterCount > visible);
+            var body = Body(panel);
+            string unread = UnreadSuffix(body);
+            Assert.That(unread, Is.Not.Empty);
+            Assert.That(panel.Stage, Is.EqualTo(FirstDayLetterPanel.LetterStage.Reading));
+            panel.ActivateLetterLink("slot:3");
+            AssertInlineChoices(panel, 3);
+            Assert.That(UnreadSuffix(body), Is.EqualTo(unread));
+            visible = panel.VisibleCharacterCount;
+            yield return new WaitForSecondsRealtime(.12f);
+            Assert.That(panel.VisibleCharacterCount, Is.EqualTo(visible), "Reading pauses while revising an earlier word.");
+            panel.CancelLetterChoice();
+            Assert.That(panel.IsWaitingForInput, Is.False, "A filled slot must not become an unfilled wait.");
+            AssertNoInlineChoices(body);
+            Assert.That(UnreadSuffix(body), Is.EqualTo(unread));
+            panel.ActivateLetterLink("slot:3");
+            panel.ActivateLetterLink("choice:3:2");
+            Assert.That(panel.Draft.Selection(3), Is.EqualTo(2));
+            Assert.That(panel.CurrentChoiceGroup, Is.EqualTo(-1));
+            AssertNoInlineChoices(body);
+            Assert.That(UnreadSuffix(body), Is.EqualTo(unread), "A longer selected word must not replay or skip later text.");
+            Assert.That(RequireLink(body, "slot:3").GetLinkText(), Is.EqualTo("数学与物理科学"));
+            StringAssert.DoesNotContain("神学", body.text);
+            Assert.That(panel.Stage, Is.EqualTo(FirstDayLetterPanel.LetterStage.Reading));
+            visible = panel.VisibleCharacterCount;
+            yield return WaitFor(() => panel.VisibleCharacterCount > visible);
+        }
+
+        private static TMP_Text Body(FirstDayLetterPanel panel) => (TMP_Text)Field("letterBody").GetValue(panel);
+
+        private static TMP_LinkInfo RequireLink(TMP_Text body, string id)
+        {
+            body.ForceMeshUpdate();
+            for (int i = 0; i < body.textInfo.linkCount; i++)
+                if (body.textInfo.linkInfo[i].GetLinkID() == id) return body.textInfo.linkInfo[i];
+            Assert.Fail($"Missing body TMP link: {id}");
+            return default;
+        }
+
+        private static void AssertInlineChoices(FirstDayLetterPanel panel, int group)
+        {
+            Assert.That(panel.CurrentChoiceGroup, Is.EqualTo(group));
+            var body = Body(panel);
+            int count = 0;
+            body.ForceMeshUpdate();
+            for (int i = 0; i < body.textInfo.linkCount; i++)
+                if (body.textInfo.linkInfo[i].GetLinkID().StartsWith("choice:")) count++;
+            Assert.That(count, Is.EqualTo(FirstDayLetterDraft.Labels[group].Length), "Only the expanded group has choices.");
+            for (int option = 0; option < FirstDayLetterDraft.Labels[group].Length; option++)
+            {
+                TMP_LinkInfo link = RequireLink(body, $"choice:{group}:{option}");
+                Assert.That(link.GetLinkText(), Is.EqualTo(FirstDayLetterDraft.Labels[group][option]
+                    + "【" + FirstDayLetterDraft.Effects[group][option] + "】"));
+                Assert.That(link.linkTextfirstCharacterIndex + link.linkTextLength,
+                    Is.LessThanOrEqualTo(panel.VisibleCharacterCount), "The effect itself must be clickable, not hidden by typewriter progress.");
+            }
+        }
+
+        private static void AssertNoInlineChoices(TMP_Text body)
+        {
+            body.ForceMeshUpdate();
+            for (int i = 0; i < body.textInfo.linkCount; i++)
+                Assert.That(body.textInfo.linkInfo[i].GetLinkID().StartsWith("choice:"), Is.False);
+            foreach (string[] group in FirstDayLetterDraft.Effects)
+                foreach (string effect in group) StringAssert.DoesNotContain(effect, body.text);
+        }
+
+        private static string UnreadSuffix(TMP_Text body)
+        {
+            body.ForceMeshUpdate();
+            var suffix = new StringBuilder();
+            for (int i = Mathf.Min(body.maxVisibleCharacters, body.textInfo.characterCount); i < body.textInfo.characterCount; i++)
+                suffix.Append(body.textInfo.characterInfo[i].character);
+            return suffix.ToString();
+        }
+
+        private static void ClickChoiceEffect(FirstDayLetterPanel panel, int group, int option)
+        {
+            var body = Body(panel);
+            TMP_LinkInfo link = RequireLink(body, $"choice:{group}:{option}");
+            int effectIndex = link.linkTextfirstCharacterIndex + FirstDayLetterDraft.Labels[group][option].Length + 1;
+            TMP_CharacterInfo character = body.textInfo.characterInfo[effectIndex];
+            Assert.That(character.isVisible, Is.True);
+            var raycaster = panel.GetComponent<GraphicRaycaster>();
+            Vector3 world = body.transform.TransformPoint((character.bottomLeft + character.topRight) * .5f);
+            var pointer = new PointerEventData(EventSystem.current)
+            {
+                button = PointerEventData.InputButton.Left,
+                position = RectTransformUtility.WorldToScreenPoint(raycaster.eventCamera, world),
+                pointerPressRaycast = new RaycastResult { module = raycaster }
+            };
+            int hit = TMP_TextUtilities.FindIntersectingLink(body, pointer.position, pointer.pressEventCamera);
+            Assert.That(hit, Is.GreaterThanOrEqualTo(0), "Effect glyph must hit a TMP link.");
+            Assert.That(body.textInfo.linkInfo[hit].GetLinkID(), Is.EqualTo($"choice:{group}:{option}"));
+            body.GetComponent<FirstDayLetterLinks>().OnPointerClick(pointer);
+        }
+
+        private static IEnumerator CompleteInteractiveLetter(FirstDayLetterPanel panel)
+        {
+            yield return WaitFor(() => panel.IsWaitingForInput);
+            panel.SetPlayerName("测试馆长");
+            for (int i = 0; i < 5; i++)
+            {
+                int group = i;
+                yield return WaitFor(() => panel.CurrentChoiceGroup == group);
+                panel.ActivateLetterLink($"choice:{group}:0");
+                Assert.That(panel.Draft.Selection(group), Is.Zero);
+            }
         }
 
         private static FirstDayLetterPanel Open()
