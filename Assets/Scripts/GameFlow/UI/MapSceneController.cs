@@ -870,12 +870,47 @@ namespace Spotlight.GameFlow
             if (!RectTransformUtility.ScreenPointToLocalPointInRectangle(widgets, screenPoint, UiCamera, out Vector2 localPoint)) return;
             const float gap = 28f;
             Rect bounds = widgets.rect;
-            float width = popup.rect.width, height = popup.rect.height;
+            float width = Mathf.Min(popup.rect.width, bounds.width - 32f);
+            float height = Mathf.Min(popup.rect.height, bounds.height - 32f);
+            popup.SetSizeWithCurrentAnchors(RectTransform.Axis.Horizontal, width);
+            popup.SetSizeWithCurrentAnchors(RectTransform.Axis.Vertical, height);
             Vector2 right = new Vector2(localPoint.x + width * .5f + gap, localPoint.y);
             Vector2 left = new Vector2(localPoint.x - width * .5f - gap, localPoint.y);
-            Vector2 candidate = right.x + width * .5f <= bounds.xMax ? right : left;
-            candidate.x = Mathf.Clamp(candidate.x, bounds.xMin + width * .5f, bounds.xMax - width * .5f);
-            candidate.y = Mathf.Clamp(candidate.y, bounds.yMin + height * .5f, bounds.yMax - height * .5f);
+            Vector2 centered = Vector2.zero;
+            Vector2[] candidates = { right, left, centered, new Vector2(0, bounds.yMax - height * .5f - 16f), new Vector2(0, bounds.yMin + height * .5f + 16f) };
+            Vector2 candidate = centered;
+            float bestScore = float.PositiveInfinity;
+            RectTransform hudRoot = transform.Find("HUD") as RectTransform;
+            RectTransform widgetsRoot = widgets;
+            for (int i = 0; i < candidates.Length; i++)
+            {
+                Vector2 point = candidates[i];
+                point.x = Mathf.Clamp(point.x, bounds.xMin + width * .5f + 16f, bounds.xMax - width * .5f - 16f);
+                point.y = Mathf.Clamp(point.y, bounds.yMin + height * .5f + 16f, bounds.yMax - height * .5f - 16f);
+                Rect candidateRect = new Rect(point.x - width * .5f, point.y - height * .5f, width, height);
+                float score = (point - candidates[i]).sqrMagnitude * 100f;
+                RectTransform[] roots = { hudRoot, widgetsRoot };
+                foreach (RectTransform obstacleRoot in roots)
+                {
+                    if (obstacleRoot == null) continue;
+                    foreach (RectTransform hudElement in obstacleRoot.GetComponentsInChildren<RectTransform>())
+                    {
+                        if (hudElement == obstacleRoot || hudElement == popup || popup.IsChildOf(hudElement) || !hudElement.gameObject.activeInHierarchy) continue;
+                        Vector3[] corners = new Vector3[4];
+                        hudElement.GetWorldCorners(corners);
+                        Vector2 min = RectTransformUtility.WorldToScreenPoint(UiCamera, corners[0]);
+                        Vector2 max = RectTransformUtility.WorldToScreenPoint(UiCamera, corners[2]);
+                        if (!RectTransformUtility.ScreenPointToLocalPointInRectangle(widgets, min, UiCamera, out Vector2 localMin) ||
+                            !RectTransformUtility.ScreenPointToLocalPointInRectangle(widgets, max, UiCamera, out Vector2 localMax)) continue;
+                        Rect hudRect = Rect.MinMaxRect(localMin.x, localMin.y, localMax.x, localMax.y);
+                        float overlapWidth = Mathf.Min(candidateRect.xMax, hudRect.xMax) - Mathf.Max(candidateRect.xMin, hudRect.xMin);
+                        float overlapHeight = Mathf.Min(candidateRect.yMax, hudRect.yMax) - Mathf.Max(candidateRect.yMin, hudRect.yMin);
+                        if (overlapWidth > 0 && overlapHeight > 0)
+                            score += overlapWidth * overlapHeight * (hudElement.GetComponent<Graphic>() != null ? 5f : 1f);
+                    }
+                }
+                if (score < bestScore) { bestScore = score; candidate = point; }
+            }
             popup.anchorMin = popup.anchorMax = new Vector2(.5f, .5f);
             popup.pivot = new Vector2(.5f, .5f);
             popup.anchoredPosition = candidate;

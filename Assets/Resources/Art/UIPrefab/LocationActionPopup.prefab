@@ -2680,7 +2680,7 @@ RectTransform:
   m_AnchorMin: {x: 0.5, y: 0.5}
   m_AnchorMax: {x: 0.5, y: 0.5}
   m_AnchoredPosition: {x: -280, y: -120}
-  m_SizeDelta: {x: 820, y: 440}
+  m_SizeDelta: {x: 820, y: 540}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!222 &4008513656953094374
 CanvasRenderer:
@@ -2732,7 +2732,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 0890539801e5edc43a84c3f3ec7ef66b, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Spotlight.GameFlow.UI::Spotlight.GameFlow.MapActionDetailsView
-  popupSize: {x: 820, y: 440}
+  popupSize: {x: 820, y: 540}
   popupAnchoredPosition: {x: -280, y: -120}
   popupAnchor: {x: 0.5, y: 0.5}
   cardWidth: 796

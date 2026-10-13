@@ -24,10 +24,14 @@ namespace Spotlight.GameFlow
         private float nextRefresh;
         private string signature;
         private ScrollRect scroll;
+        private Button previousPageButton;
+        private Button nextPageButton;
+        private TextMeshProUGUI pageLabel;
+        private int currentPage;
         private float revealStarted = float.NegativeInfinity;
         private CanvasGroup revealGroup;
         [Header("Popup Layout")]
-        [SerializeField] private Vector2 popupSize = new Vector2(820, 440);
+        [SerializeField] private Vector2 popupSize = new Vector2(820, 540);
         [SerializeField] private Vector2 popupAnchoredPosition = new Vector2(-280, -120);
         [SerializeField] private Vector2 popupAnchor = new Vector2(.5f, .5f);
         [SerializeField] private float cardWidth = 796;
@@ -56,6 +60,7 @@ namespace Spotlight.GameFlow
         private readonly List<Card> cards = new List<Card>();
         private sealed class Card
         {
+            public RectTransform root;
             public NarrativeActionDefinition action;
             public Button button;
             public TextMeshProUGUI type;
@@ -70,6 +75,8 @@ namespace Spotlight.GameFlow
             mapController = GetComponentInParent<MapSceneController>();
             var rect = (RectTransform)transform;
             bool authoredLayout = transform.Find("Viewport/ActionList") != null;
+            popupSize.y = Mathf.Max(popupSize.y, GetRequiredPopupHeight());
+            if (authoredLayout) rect.sizeDelta = popupSize;
             if (!authoredLayout)
             {
                 rect.anchorMin = rect.anchorMax = popupAnchor;
@@ -83,6 +90,7 @@ namespace Spotlight.GameFlow
             {
                 content = existingContent;
                 scroll = content.parent.GetComponent<ScrollRect>();
+                ConfigurePagingLayout();
                 title = transform.Find("Location").GetComponent<TextMeshProUGUI>();
                 if (!Application.isPlaying && showEditorPreview)
                 {
@@ -114,12 +122,13 @@ namespace Spotlight.GameFlow
             viewport.gameObject.AddComponent<Image>().color = Color.clear;
             viewport.gameObject.AddComponent<RectMask2D>();
             scroll = viewport.gameObject.AddComponent<ScrollRect>();
-            scroll.viewport = viewport; scroll.horizontal = false; scroll.vertical = true;
-            scroll.scrollSensitivity = 35; scroll.movementType = ScrollRect.MovementType.Clamped;
+            scroll.viewport = viewport; scroll.horizontal = false; scroll.vertical = false;
+            scroll.scrollSensitivity = 0; scroll.movementType = ScrollRect.MovementType.Clamped;
             content = Rect("ActionList", viewport);
             content.anchorMin = new Vector2(0, 1); content.anchorMax = new Vector2(1, 1);
             content.pivot = new Vector2(.5f, 1); content.sizeDelta = Vector2.zero;
             scroll.content = content;
+            ConfigurePagingLayout();
             close.transform.SetAsLastSibling();
         }
         public void Show(string positionKey, string locationName)
@@ -138,7 +147,7 @@ namespace Spotlight.GameFlow
                 revealStarted = Time.unscaledTime;
                 revealGroup.alpha = 0;
             }
-            if (changed) { scroll.StopMovement(); scroll.verticalNormalizedPosition = 1; }
+            if (changed) { currentPage = 0; scroll?.StopMovement(); }
             mapController?.PositionActionDetailsNearLocation(positionKey);
         }
         public void Refresh() { if (!busy && isActiveAndEnabled) Rebuild(); }
@@ -185,10 +194,6 @@ namespace Spotlight.GameFlow
             var values = actions?.GetMountedActions(position).ToList() ?? new List<NarrativeActionDefinition>();
             signature = string.Join("|", values.Select(a => a.actionKey));
             float y = 0;
-            if (position == "cafe" || position == "大堂区")
-            {
-                Debug.LogWarning("Cafe entry action should be authored as a mounted action card in the ActionCard template list.", this);
-            }
             foreach (var action in values)
             {
                 if (actionCardTemplate == null) { Debug.LogError("MapActionDetailsView needs an authored ActionCard template.", this); break; }
@@ -219,18 +224,96 @@ namespace Spotlight.GameFlow
                 if (emptyButton != null) emptyButton.gameObject.SetActive(false);
                 y += Mathf.Max(414, emptyState.rect.height) + cardSpacing;
             }
+            currentPage = Mathf.Clamp(currentPage, 0, Mathf.Max(0, cards.Count - 1));
             if (actionCardTemplate != null) actionCardTemplate.gameObject.SetActive(!Application.isPlaying && showEditorPreview);
             if (!IsAuthoredLayout)
             {
                 content.sizeDelta = new Vector2(0, y);
-                float maximumHeight = Mathf.Min(800, ((RectTransform)transform.parent).rect.height - 250);
-                ((RectTransform)transform).sizeDelta = new Vector2(Width, Mathf.Clamp(y, 230, Mathf.Max(230, maximumHeight)));
+                float maximumHeight = Mathf.Min(800, ((RectTransform)transform.parent).rect.height - 180);
+                ((RectTransform)transform).sizeDelta = new Vector2(Width, Mathf.Clamp(popupSize.y, 500, Mathf.Max(500, maximumHeight)));
             }
+            UpdateVisiblePage();
             Canvas.ForceUpdateCanvases();
         }
+        private float GetRequiredPopupHeight()
+        {
+            if (actionCardTemplate == null && content != null && content.Find("ActionCardTemplate") is RectTransform template)
+                actionCardTemplate = template;
+            float cardHeight = actionCardTemplate != null ? actionCardTemplate.rect.height : 414f;
+            return cardHeight + 126f;
+        }
+
+        private void ConfigurePagingLayout()
+        {
+            if (scroll != null)
+            {
+                scroll.horizontal = false;
+                scroll.vertical = false;
+                scroll.inertia = false;
+                scroll.enabled = false;
+                var viewport = scroll.viewport != null ? scroll.viewport : scroll.transform as RectTransform;
+                if (viewport != null)
+                {
+                    viewport.anchorMin = Vector2.zero;
+                    viewport.anchorMax = Vector2.one;
+                    viewport.offsetMin = new Vector2(12, 68);
+                    viewport.offsetMax = new Vector2(-12, -58);
+                }
+            }
+
+            var navigation = transform.Find("PageNavigation") as RectTransform;
+            if (navigation == null)
+            {
+                navigation = Rect("PageNavigation", transform);
+                navigation.anchorMin = new Vector2(.5f, 0);
+                navigation.anchorMax = new Vector2(.5f, 0);
+                navigation.pivot = new Vector2(.5f, 0);
+                navigation.anchoredPosition = new Vector2(0, 12);
+                navigation.sizeDelta = new Vector2(260, 44);
+            }
+            previousPageButton = navigation.Find("Previous")?.GetComponent<Button>();
+            nextPageButton = navigation.Find("Next")?.GetComponent<Button>();
+            pageLabel = navigation.Find("Page")?.GetComponent<TextMeshProUGUI>();
+            if (previousPageButton == null)
+            {
+                previousPageButton = Button("Previous", navigation, "‹", () => ChangePage(-1));
+                Top((RectTransform)previousPageButton.transform, 0, 0, 48, 44);
+            }
+            if (nextPageButton == null)
+            {
+                nextPageButton = Button("Next", navigation, "›", () => ChangePage(1));
+                Top((RectTransform)nextPageButton.transform, 212, 0, 48, 44);
+            }
+            if (pageLabel == null)
+            {
+                pageLabel = Label("Page", navigation, "1 / 1", 20);
+                Top(pageLabel.rectTransform, 56, 0, 148, 44);
+                pageLabel.alignment = TextAlignmentOptions.Center;
+            }
+            UpdateVisiblePage();
+        }
+
+        private void ChangePage(int direction)
+        {
+            int pageCount = Mathf.Max(1, cards.Count);
+            currentPage = (currentPage + direction + pageCount) % pageCount;
+            UpdateVisiblePage();
+        }
+
+        private void UpdateVisiblePage()
+        {
+            int pageCount = Mathf.Max(1, cards.Count);
+            currentPage = Mathf.Clamp(currentPage, 0, pageCount - 1);
+            for (int i = 0; i < cards.Count; i++)
+                if (cards[i].root != null) cards[i].root.gameObject.SetActive(i == currentPage);
+            if (pageLabel != null) pageLabel.text = (currentPage + 1) + " / " + pageCount;
+            if (previousPageButton != null) previousPageButton.interactable = cards.Count > 1;
+            if (nextPageButton != null) nextPageButton.interactable = cards.Count > 1;
+        }
+
         private Card BindActionCard(RectTransform root, NarrativeActionDefinition action)
         {
-            var card = new Card { action = action };
+            var card = new Card { root = root, action = action };
             card.type = root.Find("Type")?.GetComponent<TextMeshProUGUI>();
             var description = root.Find("Description")?.GetComponent<TextMeshProUGUI>();
             var sampleRequirement = root.Find("Requirements/Requirement") ?? root.Find("Requirement");
