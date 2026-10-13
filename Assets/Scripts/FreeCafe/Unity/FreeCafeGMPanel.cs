@@ -205,6 +205,11 @@ namespace Spotlight.FreeCafe
         private void BuildGlobal()
         {
             AddAction("查看场景与时间状态", () => SetStatus("场景：" + UnityEngine.SceneManagement.SceneManager.GetActiveScene().name + " | 时间倍率：" + Time.timeScale.ToString("0.##") + " | 经营系统：" + (runtime != null && runtime.World != null ? "已连接" : "未加载")), "任意场景都可使用", false);
+            AddAction("切换到咖啡馆场景", () =>
+            {
+                SetVisible(false);
+                UnityEngine.SceneManagement.SceneManager.LoadScene("CoffeeShop");
+            }, "调试用：直接加载 CoffeeShop 场景", false);
         }
 
         private void BuildBusiness()
