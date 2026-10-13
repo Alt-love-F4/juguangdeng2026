@@ -1,0 +1,5 @@
+#!/bin/sh
+set -eu
+
+repository_root=$(git rev-parse --show-toplevel)
+exec sh "$repository_root/Tools/Git/check-font-assets.sh"

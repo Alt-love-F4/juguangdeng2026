@@ -1,0 +1,15 @@
+*.asset text=auto eol=lf
+*.prefab text eol=lf
+*.unity text eol=lf
+*.meta text eol=lf
+*.ttf binary
+*.TTF binary
+*.otf binary
+*.OTF binary
+*.ttc binary
+*.TTC binary
+.gitattributes text eol=lf
+.githooks/* text eol=lf
+Tools/Git/*.sh text eol=lf
+Tools/Git/*.ps1 text eol=lf
+Docs/Collaboration/FontAssetGitWorkflow.md text eol=lf
