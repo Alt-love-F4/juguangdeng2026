@@ -1,5 +1,6 @@
 using System;
 using System.Linq;
+using System.IO;
 using TMPro;
 using UnityEditor;
 using UnityEngine;
@@ -27,6 +28,7 @@ namespace Spotlight.GameFlow.Editor
         {
             var prefab = AssetDatabase.LoadAssetAtPath<GameObject>(PrefabPath);
             if (prefab == default || prefab.GetComponent<DetailsPagesView>() == default) Rebuild();
+            else if (prefab.transform.Find("Window/SharedFrame") == default) MergeExistingSharedFrame();
         }
 
         [MenuItem("Tools/Game Flow/Apply Formal Details Art")]
@@ -91,12 +93,157 @@ namespace Spotlight.GameFlow.Editor
                 Set(data, "footerText", HiddenText(window, "Footer"));
                 Set(data, "unknownCharacterAvatar", Sprite("人物信息", "问号"));
                 data.ApplyModifiedPropertiesWithoutUndo();
+                MergeSharedFrame(root);
                 pages[1].gameObject.SetActive(false); pages[2].gameObject.SetActive(false);
                 PrefabUtility.SaveAsPrefabAsset(root, PrefabPath);
                 AssetDatabase.SaveAssets();
                 Debug.Log("DetailsPanel rebuilt from the three PSD prefabs, preserving source layer coordinates and draw order.");
             }
             finally { Object.DestroyImmediate(root); }
+        }
+
+
+        [MenuItem("Tools/Game Flow/Merge Details Shared Frame")]
+        public static void MergeExistingSharedFrame()
+        {
+            if (EditorApplication.isPlayingOrWillChangePlaymode) throw new InvalidOperationException("Exit Play Mode first.");
+            var root = PrefabUtility.LoadPrefabContents(PrefabPath);
+            try
+            {
+                if (root.transform.Find("Window/SharedFrame") != default) return;
+                MergeSharedFrame(root);
+                PrefabUtility.SaveAsPrefabAsset(root, PrefabPath);
+                Debug.Log("DetailsPanel now shares one frame, paper surface, tab bar and close decoration. Page content keeps its PSD coordinates.");
+            }
+            finally { PrefabUtility.UnloadPrefabContents(root); }
+        }
+
+        private static void MergeSharedFrame(GameObject root)
+        {
+            var window = root.transform.Find("Window");
+            var pages = new[] { window.Find("MyInfo"), window.Find("Relationships"), window.Find("World") };
+            var frame = Rect(window, "SharedFrame", 0, 0, 2048, 1152);
+            frame.SetSiblingIndex(1); // Above the click shield, below each page's content.
+            var chrome = Rect(window, "SharedChrome", 0, 0, 2048, 1152);
+            chrome.SetSiblingIndex(window.Find("Tab_0").GetSiblingIndex());
+            var serialized = new SerializedObject(root.GetComponent<DetailsPanel>());
+
+            // Keep exactly one disabled map layer, preserving the user's decision to hide it.
+            Move(pages[0].Find("组 3"), frame, "MapBackground").gameObject.SetActive(false);
+            Object.DestroyImmediate(pages[1].Find("组 3").gameObject);
+            Object.DestroyImmediate(pages[2].Find("其他位置图钉").gameObject);
+            Move(pages[0].Find("图层 3"), frame, "Backplate");
+            Object.DestroyImmediate(pages[1].Find("图层 3 副本").gameObject);
+            Object.DestroyImmediate(pages[2].Find("图层 3 副本 2").gameObject);
+
+            string[] paperNames = { "底图", "咖啡底图 副本", "柱子 副本 2" };
+            var styles = new DetailsPageSurfaceBinding[3];
+            for (int i = 0; i < 3; i++) styles[i] = new DetailsPageSurfaceBinding(pages[i].Find(paperNames[i]).GetComponent<Image>());
+            var paper = Move(pages[0].Find(paperNames[0]), frame, "PaperSurface").GetComponent<Image>();
+            Object.DestroyImmediate(pages[1].Find(paperNames[1]).gameObject);
+            Object.DestroyImmediate(pages[2].Find(paperNames[2]).gameObject);
+            styles[0].Render(paper);
+            Set(serialized, "paperSurface", paper);
+
+            // Serialize value bindings through Unity's serializer, avoiding runtime hierarchy searches.
+            var paperProperty = serialized.FindProperty("paperStyles"); paperProperty.arraySize = 3;
+            string[] selectedNames = { "页签底（选中）", "页签底（选中） 副本", "页签底（选中） 副本 2" };
+            var positions = serialized.FindProperty("selectedTabPositions"); positions.arraySize = 3;
+            Vector2 selectedPosition = ((RectTransform)pages[0].Find(selectedNames[0])).anchoredPosition;
+            int[] tabX = { 653, 528, 777 };
+            for (int i = 0; i < 3; i++)
+            {
+                // Copy the plain serialized fields into the owning panel's inline array.
+                var element = paperProperty.GetArrayElementAtIndex(i);
+                WritePaperStyle(element, styles[i]);
+                positions.GetArrayElementAtIndex(i).vector2Value = selectedPosition + new Vector2(tabX[i] - tabX[0], 0);
+            }
+            var selected = Move(pages[0].Find(selectedNames[0]), chrome, "SelectedTab");
+            Set(serialized, "selectedTabArtwork", selected);
+            Object.DestroyImmediate(pages[1].Find(selectedNames[1]).gameObject);
+            Object.DestroyImmediate(pages[2].Find(selectedNames[2]).gameObject);
+            Object.DestroyImmediate(pages[0].Find("页签（未选中）").gameObject);
+            for (int i = 1; i < 3; i++) Object.DestroyImmediate(pages[i].Find("页签（未选中） 副本").gameObject);
+            var idle = serialized.FindProperty("idleTabArtwork"); idle.arraySize = 3;
+            Sprite idleSprite = EnsureIdleTabSprite();
+            for (int i = 0; i < 3; i++)
+            {
+                var image = Image(chrome, "IdleTab_" + i, tabX[i], 135, 119.5f, 96.5f, idleSprite);
+                idle.GetArrayElementAtIndex(i).objectReferenceValue = image;
+                image.enabled = i != 0;
+            }
+            selected.SetAsLastSibling();
+            string[] labels = { "人物关系_TMP", "我的信息_TMP", "世界情况_TMP" };
+            foreach (string label in labels)
+            {
+                Move(pages[0].Find(label), chrome, label);
+                for (int i = 1; i < 3; i++) Object.DestroyImmediate(pages[i].Find(label).gameObject);
+            }
+            var hints = serialized.FindProperty("pageHints"); hints.arraySize = 3;
+            for (int i = 0; i < 3; i++) hints.GetArrayElementAtIndex(i).stringValue = pages[i].Find("PageHint_TMP").GetComponent<TMP_Text>().text;
+            Set(serialized, "pageHint", Move(pages[0].Find("PageHint_TMP"), chrome, "PageHint").GetComponent<TMP_Text>());
+            for (int i = 1; i < 3; i++) Object.DestroyImmediate(pages[i].Find("PageHint_TMP").gameObject);
+            Move(pages[0].Find("退出按键"), chrome, "CloseArtwork");
+            Object.DestroyImmediate(pages[1].Find("退出按键").gameObject);
+            Object.DestroyImmediate(pages[2].Find("退出按键 副本").gameObject);
+            serialized.ApplyModifiedPropertiesWithoutUndo();
+        }
+
+        private static Transform Move(Transform layer, Transform parent, string name)
+        {
+            // All layer parents use the same composition space; retain local PSD coordinates.
+            layer.SetParent(parent, false);
+            layer.name = name;
+            return layer;
+        }
+
+        private static void WritePaperStyle(SerializedProperty destination, DetailsPageSurfaceBinding style)
+        {
+            var temporary = ScriptableObject.CreateInstance<PaperStyleSerialization>();
+            try
+            {
+                temporary.Style = style;
+                var data = new SerializedObject(temporary);
+                var source = data.FindProperty("Style");
+                foreach (string name in new[] { "sprite", "position", "size", "pivot", "scale", "color", "visible" })
+                {
+                    var from = source.FindPropertyRelative(name);
+                    var to = destination.FindPropertyRelative(name);
+                    switch (from.propertyType)
+                    {
+                        case SerializedPropertyType.ObjectReference: to.objectReferenceValue = from.objectReferenceValue; break;
+                        case SerializedPropertyType.Vector2: to.vector2Value = from.vector2Value; break;
+                        case SerializedPropertyType.Vector3: to.vector3Value = from.vector3Value; break;
+                        case SerializedPropertyType.Color: to.colorValue = from.colorValue; break;
+                        case SerializedPropertyType.Boolean: to.boolValue = from.boolValue; break;
+                    }
+                }
+            }
+            finally { Object.DestroyImmediate(temporary); }
+        }
+        private sealed class PaperStyleSerialization : ScriptableObject
+        {
+            public DetailsPageSurfaceBinding Style;
+        }
+
+        private static Sprite EnsureIdleTabSprite()
+        {
+            const string path = "Assets/Art/Func/UGUI/DetailsIdleTab.png";
+            if (!File.Exists(path))
+            {
+                var source = new Texture2D(2, 2);
+                var cropped = new Texture2D(239, 193);
+                try
+                {
+                    source.LoadImage(File.ReadAllBytes("Assets/Art/Func/我的信息/页签（未选中）.png"));
+                    cropped.SetPixels(source.GetPixels(0, 0, 239, 193)); cropped.Apply();
+                    File.WriteAllBytes(path, cropped.EncodeToPNG());
+                }
+                finally { Object.DestroyImmediate(source); Object.DestroyImmediate(cropped); }
+                AssetDatabase.ImportAsset(path);
+            }
+            ImportDerivedSprite(path);
+            return AssetDatabase.LoadAssetAtPath<Sprite>(path);
         }
 
         private static void BindPagesView(GameObject root)
@@ -173,6 +320,8 @@ namespace Spotlight.GameFlow.Editor
                 bool dynamic = sourceName == "人物信息" && (renderer.name == "问号" || renderer.name == "进度")
                     || sourceName == "世界情况" && (renderer.name == "按键（未选中）" || renderer.name == "选中按键" || renderer.name == "进度条高亮" || renderer.name == "滑动条");
                 image.enabled = renderer.enabled && !text && !dynamic;
+                // Map imagery is supplied by the scene behind this modal, never by a details page.
+                if (renderer.name == "组 3" || renderer.name == "其他位置图钉") image.gameObject.SetActive(false);
             }
         }
 

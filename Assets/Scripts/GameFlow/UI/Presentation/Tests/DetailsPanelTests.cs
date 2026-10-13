@@ -513,6 +513,55 @@ namespace Spotlight.GameFlow.Tests
         }
 
         [UnityTest]
+        public IEnumerator SharedFrameStaysVisibleWhileOnlyContentTransitions()
+        {
+            DetailsPanel panel = (DetailsPanel)controller.CurrentPanel;
+            Transform window = panel.transform.Find("Window");
+            Transform frame = window.Find("SharedFrame");
+            Transform chrome = window.Find("SharedChrome");
+            Assert.That(frame, Is.Not.Null);
+            Assert.That(chrome, Is.Not.Null);
+            Assert.That(frame.Find("MapBackground").gameObject.activeSelf, Is.False);
+            Image paper = frame.Find("PaperSurface").GetComponent<Image>();
+            Image backplate = frame.Find("Backplate").GetComponent<Image>();
+            int paperId = paper.GetInstanceID();
+            int backplateId = backplate.GetInstanceID();
+            Vector2 selectedPosition = ((RectTransform)chrome.Find("SelectedTab")).anchoredPosition;
+            foreach (string pageName in new[] { "MyInfo", "Relationships", "World" })
+            {
+                Transform page = window.Find(pageName);
+                Assert.That(page.Find("PageHint_TMP"), Is.Null);
+                Assert.That(page.Find("我的信息_TMP"), Is.Null);
+                Assert.That(page.Find("组 3"), Is.Null);
+                Assert.That(page.Find("退出按键"), Is.Null);
+            }
+            Time.timeScale = 0;
+            foreach (DetailsPanel.Page page in new[] { DetailsPanel.Page.Relationships, DetailsPanel.Page.World, DetailsPanel.Page.MyInfo })
+            {
+                // Exercise the real tab route, preserving click hitboxes and their serialized listeners.
+                window.Find("Tab_" + (int)page).GetComponent<Button>().onClick.Invoke();
+                Assert.That(panel.CurrentPage, Is.EqualTo(page));
+                Assert.That(frame.gameObject.activeInHierarchy, Is.True);
+                Assert.That(chrome.gameObject.activeInHierarchy, Is.True);
+                Assert.That(paper.enabled, Is.True);
+                Assert.That(paper.GetInstanceID(), Is.EqualTo(paperId));
+                Assert.That(backplate.GetInstanceID(), Is.EqualTo(backplateId));
+                Assert.That(frame.GetComponent<CanvasGroup>(), Is.Null);
+                Assert.That(chrome.GetComponent<CanvasGroup>(), Is.Null);
+                Assert.That(frame.GetComponentInParent<CanvasGroup>().alpha, Is.EqualTo(1).Within(.01f));
+                Assert.That(window.Find(page.ToString()).GetComponent<CanvasGroup>().alpha, Is.EqualTo(0).Within(.01f));
+                Assert.That(((RectTransform)chrome.Find("SelectedTab")).anchoredPosition.y, Is.EqualTo(selectedPosition.y));
+                for (int i = 0; i < 3; i++) Assert.That(chrome.Find("IdleTab_" + i).GetComponent<Image>().enabled, Is.EqualTo(i != (int)page));
+                Assert.That(frame.Find("MapBackground").gameObject.activeInHierarchy, Is.False);
+                yield return new WaitForSecondsRealtime(.16f);
+                Assert.That(window.Find(page.ToString()).GetComponent<CanvasGroup>().alpha, Is.EqualTo(1).Within(.01f));
+                yield return new WaitForEndOfFrame();
+                Capture("details-shared-" + page.ToString().ToLowerInvariant());
+            }
+            Assert.That(FirstHit(ScreenPoint(window.Find("CloseButton"))).name, Is.EqualTo("CloseButton"));
+        }
+
+        [UnityTest]
         public IEnumerator ReferenceCompositionScreenshots()
         {
             DetailsPanel panel = (DetailsPanel)controller.CurrentPanel;

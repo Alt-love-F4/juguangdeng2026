@@ -16,7 +16,7 @@ namespace Spotlight.FreeCafe
                 if (IsContainer(entity)) MergeContainerContents(entity);
             }
             foreach (var entry in Catalog.layout)
-                if (entry.specId == "machine.stove" && Find(entry.id) == null)
+                if ((entry.specId == "machine.stove" || Spec(entry.specId).Has(Capability.HotExtraction)) && Find(entry.id) == null)
                     State.entities.Add(new WorldEntity { id = entry.id, specId = entry.specId, area = entry.area, x = entry.x, y = entry.y });
         }
 
@@ -41,7 +41,7 @@ namespace Spotlight.FreeCafe
                 cocoa |= portion.specId == "cocoa.powder" || portion.specId == "cocoa.drink";
             }
             string description = coffee ? (grounds > 0 && grounds / Math.Max(1, volume) < .04f ? "淡淡" : "浓")
-                + (extracted ? "咖啡液" : "冷萃咖啡液") : volume > 0 ? "混合液" : "空容器";
+                + (extracted ? "精粹咖啡液" : "冷萃咖啡液") : volume > 0 ? "混合液" : "空容器";
             if (milk) description += "+奶";
             if (cocoa) description += "+可可";
             return description;
@@ -125,7 +125,14 @@ namespace Spotlight.FreeCafe
             foreach (var portion in entity.contents)
             {
                 if (portion.specId != "water" && portion.specId != "hotwater") continue;
-                if (grounds) portion.specId = "coffee";
+                if (grounds)
+                {
+                    // 专用萃取容器无需炉台或点击；只有实际热水参与时才标记萃取。
+                    if (Spec(entity.specId).Has(Capability.HotExtraction)
+                        && portion.milliliters > 0 && portion.temperature != LiquidTemperature.Room)
+                        portion.extracted = true;
+                    portion.specId = "coffee";
+                }
                 else if (cocoa) portion.specId = "cocoa.drink";
                 else if (matcha) portion.specId = "matcha.drink";
             }

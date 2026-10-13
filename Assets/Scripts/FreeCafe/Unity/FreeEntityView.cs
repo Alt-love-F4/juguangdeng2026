@@ -93,7 +93,7 @@ namespace Spotlight.FreeCafe
 
         private void EnsureGlassCup()
         {
-            if (prefabSpecId != "cup.small" && prefabSpecId != "cup.large" && prefabSpecId != "machine.heater" && prefabSpecId != "machine.brewer") return;
+            if (prefabSpecId != "cup.small" && prefabSpecId != "cup.large" && prefabSpecId != "machine.heater" && prefabSpecId != "machine.brewer" && prefabSpecId != "container.extractor") return;
             if (liquidPresenter != null && !(liquidPresenter is OrthographicGlassCupPresenter)) return;
             if (glassCup == null)
             {

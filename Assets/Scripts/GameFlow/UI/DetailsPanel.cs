@@ -19,6 +19,14 @@ namespace Spotlight.GameFlow
         [SerializeField] private Button outsideButton;
         [SerializeField] private Button[] tabButtons;
         [SerializeField] private GameObject[] pages;
+        [Header("Shared frame (always visible while switching pages)")]
+        [SerializeField] private Image paperSurface;
+        [SerializeField] private DetailsPageSurfaceBinding[] paperStyles;
+        [SerializeField] private RectTransform selectedTabArtwork;
+        [SerializeField] private Image[] idleTabArtwork;
+        [SerializeField] private Vector2[] selectedTabPositions;
+        [SerializeField] private TMP_Text pageHint;
+        [SerializeField] private string[] pageHints;
         [Header("Profile component references")]
         [SerializeField] private TMP_Text playerNameText;
         [SerializeField] private TMP_Text backgroundText;
@@ -97,10 +105,13 @@ namespace Spotlight.GameFlow
                 || relationshipsBinding == null || worldBinding == null
                 || specializationItems == null || specializationItems.Length == 0
                 || specializationContent == default || specializationViewport == default || specializationGrid == default
-                || specializationScroll == default || emptySpecializationsText == default || specializationsHintText == default)
+                || specializationScroll == default || emptySpecializationsText == default || specializationsHintText == default
+                || paperSurface == default || paperStyles == null || paperStyles.Length != 3
+                || selectedTabArtwork == default || selectedTabPositions == null || selectedTabPositions.Length != 3
+                || idleTabArtwork == null || idleTabArtwork.Length != 3 || pageHint == default || pageHints == null || pageHints.Length != 3)
                 throw new InvalidOperationException("DetailsPanel component bindings are incomplete. Run Tools/Game Flow/Bind Details Panel Components.");
             for (int i = 0; i < 3; i++)
-                if (tabButtons[i] == default || pages[i] == default)
+                if (tabButtons[i] == default || pages[i] == default || idleTabArtwork[i] == default || paperStyles[i] == null)
                     throw new InvalidOperationException("DetailsPanel tab/page binding is missing at index " + i);
             for (int i = 0; i < attributeBindings.Length; i++)
                 if (attributeBindings[i] == null || !attributeBindings[i].IsValid)
@@ -316,13 +327,17 @@ namespace Spotlight.GameFlow
             bool changed = CurrentPage != page;
             StopPageTransition();
             CurrentPage = page;
+            paperStyles[(int)page].Render(paperSurface);
+            selectedTabArtwork.anchoredPosition = selectedTabPositions[(int)page];
+            pageHint.text = pageHints[(int)page];
+            for (int i = 0; i < idleTabArtwork.Length; i++) idleTabArtwork[i].enabled = i != (int)page;
             HideTooltip();
             for (int i = 0; pages != null && i < pages.Length; i++)
                 if (pages[i] != default) pages[i].SetActive(i == (int)page);
             for (int i = 0; tabButtons != null && i < tabButtons.Length; i++)
             {
                 if (tabButtons[i] == default) continue;
-                // Each PSD page includes its own selected-tab artwork at the original coordinates.
+                // Shared artwork owns tab states; page groups contain only their own content.
                 tabButtons[i].transition = Selectable.Transition.None;
             }
             if (changed && pageGroups != null && pageFadeDuration > 0 && isActiveAndEnabled)
