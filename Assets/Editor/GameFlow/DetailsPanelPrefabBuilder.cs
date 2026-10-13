@@ -1,4 +1,5 @@
 using System;
+using System.Linq;
 using TMPro;
 using UnityEditor;
 using UnityEngine;
@@ -7,335 +8,363 @@ using Object = UnityEngine.Object;
 
 namespace Spotlight.GameFlow.Editor
 {
-    /// <summary>Builds only the missing display-only prefab; never overwrites an artist-edited asset.</summary>
+    /// <summary>Converts the artist's 4096x2304 PSD composition into a 2048x1152 UGUI composition.</summary>
     public static class DetailsPanelPrefabBuilder
     {
         public const string PrefabPath = "Assets/Resources/Art/UIPrefab/DetailsPanel.prefab";
-        private static TMP_FontAsset Font => AssetDatabase.LoadAssetAtPath<TMP_FontAsset>("Assets/Resources/Fonts/乐米曲奇方块体 SDF.asset");
-        private static readonly Color Surface = new Color(.12f, .10f, .16f, 1f);
-        private static readonly Color Card = new Color(.18f, .14f, .21f, 1f);
-        private static readonly Color Warm = new Color(1f, .86f, .70f, 1f);
-        private static readonly Color Muted = new Color(.74f, .70f, .77f, 1f);
-        private static readonly Color Pink = new Color(.96f, .66f, .68f, 1f);
+        private static TMP_FontAsset Font => AssetDatabase.LoadAssetAtPath<TMP_FontAsset>("Assets/Resources/Fonts/Map/SourceHanSerifCN-Heavy-4 SDF.asset");
+        private static TMP_FontAsset BodyFont => AssetDatabase.LoadAssetAtPath<TMP_FontAsset>("Assets/Resources/Fonts/Map/SourceHanSansSC-Regular-2 SDF.asset");
+        private static readonly Color Ink = new Color(.35f, .19f, .07f);
 
         [MenuItem("Tools/Game Flow/Create Missing Details Panel")]
         public static void CreateMissing()
         {
+            if (AssetDatabase.LoadAssetAtPath<GameObject>(PrefabPath) == default) Rebuild();
+        }
+
+        [MenuItem("Tools/Game Flow/Bind Details Panel Components")]
+        public static void BindExisting()
+        {
+            var prefab = AssetDatabase.LoadAssetAtPath<GameObject>(PrefabPath);
+            if (prefab == default || prefab.GetComponent<DetailsPagesView>() == default) Rebuild();
+        }
+
+        [MenuItem("Tools/Game Flow/Apply Formal Details Art")]
+        public static void ApplyFormalArtToPrefab() => Rebuild();
+
+        [MenuItem("Tools/Game Flow/Rebuild Details From PSD")]
+        public static void Rebuild()
+        {
             if (EditorApplication.isPlayingOrWillChangePlaymode) throw new InvalidOperationException("Exit Play Mode first.");
-            if (AssetDatabase.LoadAssetAtPath<GameObject>(PrefabPath) != default) return;
-            if (Font == default) throw new InvalidOperationException("Missing SimHei SDF font.");
-            GameObject root = new GameObject("DetailsPanel", typeof(RectTransform), typeof(CanvasGroup), typeof(Canvas), typeof(GraphicRaycaster));
+            ImportDerivedSprite("Assets/Art/Func/UGUI/WorldIdleButton.png");
+            var root = new GameObject("DetailsPanel", typeof(RectTransform), typeof(Canvas), typeof(CanvasGroup), typeof(GraphicRaycaster));
             try
             {
-                Rect(root.GetComponent<RectTransform>(), Vector2.zero, Vector2.one);
-                Canvas canvas = root.GetComponent<Canvas>();
+                Stretch((RectTransform)root.transform);
+                var canvas = root.GetComponent<Canvas>();
                 canvas.overrideSorting = true;
                 canvas.sortingOrder = 800;
-                DetailsPanel panel = root.AddComponent<DetailsPanel>();
-                Button outside = Btn(root.transform, "OutsideClose", string.Empty, Vector2.zero, Vector2.one);
-                outside.GetComponent<Image>().color = new Color(.02f, .015f, .03f, .72f);
-                outside.transition = Selectable.Transition.None;
-                // The window is a sibling above the full-screen button; all interior gaps block outside dismissal.
-                Image frame = Box(root.transform, "Window", new Vector2(.13f, .12f), new Vector2(.87f, .88f), Surface);
-                RectTransform window = frame.rectTransform;
-                Box(window, "TopAccent", new Vector2(0f, .993f), Vector2.one, Pink);
-                Txt(window, "Title", "详情", new Vector2(.035f, .885f), new Vector2(.25f, .975f), 42f, Warm);
-                Txt(window, "Subtitle", "馆长档案 / 展示原型", new Vector2(.28f, .90f), new Vector2(.74f, .955f), 20f, Muted);
-                Button close = Btn(window, "CloseButton", "关闭  ×", new Vector2(.85f, .895f), new Vector2(.965f, .963f));
-                string[] titles = { "我的信息", "人物关系", "世界情况" };
-                var tabs = new Button[3];
-                for (int i = 0; i < 3; i++)
-                {
-                    float left = .035f + i * .31f;
-                    tabs[i] = Btn(window, "Tab_" + i, titles[i], new Vector2(left, .793f), new Vector2(left + .30f, .867f));
-                }
-                Box(window, "TabDivider", new Vector2(.035f, .777f), new Vector2(.965f, .779f), new Color(.35f, .26f, .32f));
-                var pages = new GameObject[3];
-                for (int i = 0; i < 3; i++)
-                {
-                    pages[i] = Child(window, ((DetailsPanel.Page)i).ToString());
-                    Rect(pages[i].GetComponent<RectTransform>(), new Vector2(.035f, .07f), new Vector2(.965f, .755f));
-                }
-                var preview = DetailsPanelData.CreatePlaceholder(AssetDatabase.LoadAssetAtPath<Sprite>("Assets/Resources/Art/UI/Icons/ic_star.png"));
-                BuildMyInfo(pages[0].transform, panel, preview);
-                BuildEmptyPage(pages[1].transform, preview.Relationships);
-                BuildEmptyPage(pages[2].transform, preview.World);
-                Txt(window, "Footer", "全部内容均为占位样例 · 悬停查看说明 · 点击窗口外或按 Esc 关闭", new Vector2(.035f, .015f), new Vector2(.965f, .055f), 18f, Muted);
-
-                Image tip = Box(window, "Tooltip", new Vector2(.5f, .5f), new Vector2(.5f, .5f), new Color(.26f, .18f, .25f, .99f));
-                tip.rectTransform.pivot = Vector2.zero;
-                tip.rectTransform.sizeDelta = new Vector2(380f, 150f);
-                tip.raycastTarget = false;
-                tip.gameObject.AddComponent<CanvasGroup>().blocksRaycasts = false;
-                TMP_Text tipTitle = Txt(tip.transform, "Title", string.Empty, new Vector2(.05f, .66f), new Vector2(.95f, .94f), 25f, Warm);
-                TMP_Text tipBody = Txt(tip.transform, "Body", string.Empty, new Vector2(.05f, .08f), new Vector2(.95f, .62f), 21f, Color.white);
-                tipBody.alignment = TextAlignmentOptions.TopLeft;
-                tip.gameObject.SetActive(false);
-
+                var panel = root.AddComponent<DetailsPanel>();
                 var data = new SerializedObject(panel);
-                Bind(data, "closeButton", close);
-                Bind(data, "outsideButton", outside);
-                Bind(data, "window", window);
-                Bind(data, "tooltip", tip.rectTransform);
-                Bind(data, "tooltipTitle", tipTitle);
-                Bind(data, "tooltipBody", tipBody);
-                SerializedProperty buttons = data.FindProperty("tabButtons");
-                SerializedProperty roots = data.FindProperty("pages");
-                buttons.arraySize = roots.arraySize = 3;
+                var outside = Image(root.transform, "OutsideClose", 0, 0, 2048, 1152, null);
+                outside.color = Color.clear;
+                outside.raycastTarget = true;
+                Stretch(outside.rectTransform);
+                Set(data, "outsideButton", Button(outside));
+                var window = Rect(root.transform, "Window", 0, 0, 2048, 1152);
+                window.anchorMin = window.anchorMax = new Vector2(.5f, .5f);
+                window.anchoredPosition = Vector2.zero;
+                window.gameObject.AddComponent<DetailsCompositionFit>();
+                Set(data, "window", window);
+                var shield = Image(window, "WindowShield", 273, 166, 1549, 828, null);
+                shield.color = Color.clear;
+                shield.raycastTarget = true;
+                var names = new[] { "我的信息", "人物信息", "世界情况" };
+                var pages = new RectTransform[3];
                 for (int i = 0; i < 3; i++)
                 {
-                    buttons.GetArrayElementAtIndex(i).objectReferenceValue = tabs[i];
-                    roots.GetArrayElementAtIndex(i).objectReferenceValue = pages[i];
-                    pages[i].SetActive(i == 0);
+                    pages[i] = Rect(window, ((DetailsPanel.Page)i).ToString(), 0, 0, 2048, 1152);
+                    ConvertPsd(pages[i], names[i]);
+                    TabLabels(pages[i]);
+                    data.FindProperty("pages").arraySize = 3;
+                    data.FindProperty("pages").GetArrayElementAtIndex(i).objectReferenceValue = pages[i].gameObject;
                 }
+                var tabs = data.FindProperty("tabButtons"); tabs.arraySize = 3;
+                // API order remains MyInfo/Relationships/World; visual order follows the PSD.
+                int[] x = { 653, 528, 777 };
+                for (int i = 0; i < 3; i++)
+                {
+                    var hit = Image(window, "Tab_" + i, x[i], 135, 119, 105, null);
+                    hit.color = Color.clear; hit.raycastTarget = true;
+                    tabs.GetArrayElementAtIndex(i).objectReferenceValue = Button(hit);
+                }
+                var close = Image(window, "CloseButton", 1700, 197, 86, 119, null);
+                close.color = Color.clear; close.raycastTarget = true;
+                Set(data, "closeButton", Button(close));
+                BuildMyInfo(pages[0], panel, data);
+                BuildRelationships(pages[1], data);
+                BuildWorld(pages[2], data);
+                BuildTooltip(window, data);
+                BindPagesView(root);
+                // Old informational labels remain bound but do not add text outside the PSD composition.
+                Set(data, "subtitleText", HiddenText(window, "Subtitle"));
+                Set(data, "footerText", HiddenText(window, "Footer"));
+                Set(data, "unknownCharacterAvatar", Sprite("人物信息", "问号"));
                 data.ApplyModifiedPropertiesWithoutUndo();
-                BindContentComponents(panel);
+                pages[1].gameObject.SetActive(false); pages[2].gameObject.SetActive(false);
                 PrefabUtility.SaveAsPrefabAsset(root, PrefabPath);
                 AssetDatabase.SaveAssets();
-                Debug.Log("[DetailsPanel] Display-only placeholder prefab created: " + PrefabPath);
+                Debug.Log("DetailsPanel rebuilt from the three PSD prefabs, preserving source layer coordinates and draw order.");
             }
             finally { Object.DestroyImmediate(root); }
         }
 
-        private static void BuildMyInfo(Transform parent, DetailsPanel panel, DetailsPanelData preview)
+        private static void BindPagesView(GameObject root)
         {
-            Image profile = Box(parent, "ProfileCard", new Vector2(0f, .59f), Vector2.one, Card);
-            Image avatar = Box(profile.transform, "AvatarFrame", new Vector2(.025f, .10f), new Vector2(.185f, .90f), new Color(.29f, .23f, .30f));
-            avatar.gameObject.AddComponent<RectMask2D>();
-            GameObject silhouette = Child(avatar.transform, "AvatarSilhouette", typeof(CanvasRenderer), typeof(DetailsAvatarPlaceholder));
-            Rect(silhouette.GetComponent<RectTransform>(), new Vector2(.1f, .20f), new Vector2(.9f, .95f));
-            DetailsAvatarPlaceholder graphic = silhouette.GetComponent<DetailsAvatarPlaceholder>();
-            graphic.color = new Color(.07f, .055f, .10f);
-            graphic.raycastTarget = false;
-            Txt(avatar.transform, "PlaceholderLabel", "头像占位", new Vector2(.05f, .03f), new Vector2(.95f, .20f), 17f, Muted, TextAlignmentOptions.Center);
-            Txt(profile.transform, "Name", preview.Profile.Name, new Vector2(.215f, .72f), new Vector2(.965f, .93f), 30f, Warm);
-            Txt(profile.transform, "Background", preview.Profile.Background, new Vector2(.215f, .34f), new Vector2(.965f, .70f), 23f, Color.white);
-            Txt(profile.transform, "CafeIntro", preview.Profile.Introduction, new Vector2(.215f, .10f), new Vector2(.965f, .31f), 22f, Muted);
+            var view = root.AddComponent<DetailsPagesView>();
+            var data = new SerializedObject(view);
+            string r = "Window/Relationships/RelationshipsView/";
+            string w = "Window/World/WorldView/";
+            Set(data, "characterGrid", root.transform.Find(r + "CharacterGrid"));
+            Set(data, "portrait", root.transform.Find("Window/Relationships/大头像显示处").GetComponent<Image>());
+            Set(data, "characterName", root.transform.Find(r + "Name").GetComponent<TMP_Text>());
+            Set(data, "introductionContent", root.transform.Find(r + "IntroductionScroll/Content"));
+            Set(data, "specialInformation", root.transform.Find(r + "SpecialInformation").GetComponent<TMP_Text>());
+            Set(data, "familiarityValue", root.transform.Find(r + "FamiliarityValue").GetComponent<TMP_Text>());
+            Set(data, "headingFont", Font);
+            Set(data, "familiarityFill", root.transform.Find(r + "FamiliarityFill").GetComponent<Image>());
+            Set(data, "previous", root.transform.Find(r + "Previous").GetComponent<Button>());
+            Set(data, "next", root.transform.Find(r + "Next").GetComponent<Button>());
+            Set(data, "pageLabel", root.transform.Find(r + "Page").GetComponent<TMP_Text>());
+            Set(data, "selectorContent", root.transform.Find(w + "Selectors/Content"));
+            Set(data, "worldDescription", root.transform.Find(w + "Description").GetComponent<TMP_Text>());
+            Set(data, "worldValue", root.transform.Find(w + "Value").GetComponent<TMP_Text>());
+            Set(data, "lower", root.transform.Find(w + "Lower").GetComponent<TMP_Text>());
+            Set(data, "upper", root.transform.Find(w + "Upper").GetComponent<TMP_Text>());
+            Set(data, "lowerDescription", root.transform.Find(w + "LowerDescription").GetComponent<TMP_Text>());
+            Set(data, "upperDescription", root.transform.Find(w + "UpperDescription").GetComponent<TMP_Text>());
+            Set(data, "worldFill", root.transform.Find(w + "Fill").GetComponent<Image>());
+            Set(data, "characterSilhouette", Sprite("人物信息", "大头像显示处"));
+            Set(data, "worldSelectedButton", Sprite("世界情况", "选中按键"));
+            Set(data, "worldIdleButton", AssetDatabase.LoadAssetAtPath<Sprite>("Assets/Art/Func/UGUI/WorldIdleButton.png"));
+            data.ApplyModifiedPropertiesWithoutUndo();
+            // The introduction sets its own preferred content height from TMP's measured text.
+            Object.DestroyImmediate(root.transform.Find(r + "IntroductionScroll/Content").GetComponent<ContentSizeFitter>());
+        }
 
-            Txt(parent, "AttributesHeading", "主角属性", new Vector2(0f, .505f), new Vector2(.4f, .575f), 27f, Warm);
-            Txt(parent, "AttributesHint", "0—20 · 悬停查看属性作用", new Vector2(.53f, .505f), new Vector2(1f, .575f), 18f, Muted, TextAlignmentOptions.MidlineRight);
-            for (int i = 0; i < preview.Attributes.Count; i++)
-            {
-                DetailsAttributeData attribute = preview.Attributes[i];
-                float left = i * .255f;
-                Image row = Box(parent, "Attribute_" + i, new Vector2(left, .36f), new Vector2(left + .235f, .495f), Card);
-                Txt(row.transform, "Name", attribute.Name, new Vector2(.08f, .36f), new Vector2(.5f, .94f), 25f, Color.white);
-                int value = attribute.Value;
-                Txt(row.transform, "Value", value + " / 20", new Vector2(.52f, .36f), new Vector2(.92f, .94f), 25f, Pink, TextAlignmentOptions.MidlineRight);
-                Image track = Box(row.transform, "Track", new Vector2(.08f, .17f), new Vector2(.92f, .25f), new Color(.08f, .06f, .11f));
-                Box(track.transform, "Fill", Vector2.zero, new Vector2(value / 20f, 1f), Pink).raycastTarget = false;
-                Hover(row.gameObject, panel, attribute.Name, attribute.Description);
-            }
+        private static void ImportDerivedSprite(string path)
+        {
+            var importer = AssetImporter.GetAtPath(path) as TextureImporter;
+            if (importer == default) throw new InvalidOperationException("Missing derived sprite: " + path);
+            if (importer.textureType == TextureImporterType.Sprite) return;
+            importer.textureType = TextureImporterType.Sprite;
+            importer.spriteImportMode = SpriteImportMode.Single;
+            importer.alphaIsTransparency = true;
+            importer.mipmapEnabled = false;
+            importer.SaveAndReimport();
+        }
 
-            Txt(parent, "SpecializationsHeading", "主角专精", new Vector2(0f, .275f), new Vector2(.4f, .345f), 27f, Warm);
-            Txt(parent, "SpecializationsHint", "徽章墙 · 以下专精均为展示样例", new Vector2(.5f, .275f), new Vector2(1f, .345f), 18f, Muted, TextAlignmentOptions.MidlineRight);
-            for (int i = 0; i < preview.Specializations.Count; i++)
+        private static void ConvertPsd(RectTransform page, string sourceName)
+        {
+            var source = AssetDatabase.LoadAssetAtPath<GameObject>("Assets/Art/Func/" + sourceName + ".prefab");
+            if (source == default) throw new InvalidOperationException("Missing PSD prefab: " + sourceName);
+            // Source exports currently have flat layers. Recursively copy groups too, retaining their names.
+            var groups = new System.Collections.Generic.Dictionary<Transform, RectTransform> { [source.transform] = page };
+            foreach (var renderer in source.GetComponentsInChildren<SpriteRenderer>(true).OrderBy(r => r.sortingOrder).ThenByDescending(r => r.transform.position.z))
             {
-                DetailsSpecializationData specialization = preview.Specializations[i];
-                int column = i % 3;
-                int row = i / 3;
-                float left = column * .34f;
-                float bottom = .145f - row * .135f;
-                Image badge = Box(parent, "Specialization_" + i, new Vector2(left, bottom), new Vector2(left + .32f, bottom + .12f), Card);
-                Image emblem = Box(badge.transform, "Icon", new Vector2(.045f, .18f), new Vector2(.18f, .82f), Warm);
-                emblem.sprite = specialization.Icon;
-                emblem.preserveAspect = true;
-                emblem.raycastTarget = false;
-                if (specialization.Icon == default) Txt(emblem.transform, "FallbackIcon", "★", Vector2.zero, Vector2.one, 25f, Warm, TextAlignmentOptions.Center);
-                Txt(badge.transform, "Name", specialization.Name, new Vector2(.23f, .12f), new Vector2(.94f, .9f), 23f, Color.white);
-                Hover(badge.gameObject, panel, specialization.Name, specialization.Description);
+                Transform parent = renderer.transform.parent;
+                EnsureGroup(parent, source.transform, page, groups);
+                Sprite sprite = renderer.sprite;
+                string path = AssetDatabase.GetAssetPath(sprite);
+                var importer = AssetImporter.GetAtPath(path) as TextureImporter;
+                if (sprite == default || importer == default) throw new InvalidOperationException("Missing PSD layer sprite: " + renderer.name);
+                importer.GetSourceTextureWidthAndHeight(out int width, out int height);
+                var image = Image(groups[parent], renderer.name, 0, 0, width * .5f, height * .5f, sprite);
+                Vector3 position = source.transform.InverseTransformPoint(renderer.transform.position);
+                Vector3 scale = renderer.transform.lossyScale;
+                image.rectTransform.pivot = sprite.pivot / sprite.rect.size;
+                image.rectTransform.anchorMin = image.rectTransform.anchorMax = new Vector2(.5f, .5f);
+                image.rectTransform.anchoredPosition = new Vector2(position.x * 50f - 1024f, position.y * 50f - 576f);
+                image.rectTransform.localScale = new Vector3(scale.x / source.transform.lossyScale.x, scale.y / source.transform.lossyScale.y, 1);
+                image.rectTransform.localRotation = renderer.transform.rotation;
+                image.color = renderer.color;
+                // Keep the original layer objects and bounds for inspection; dynamic UGUI replaces their content.
+                bool text = renderer.name == "文本" || renderer.name == "-悬停查看相关属性-" || renderer.name == "文字" || renderer.name == "文字 副本" || renderer.name == "点击查看相关信息";
+                bool dynamic = sourceName == "人物信息" && (renderer.name == "问号" || renderer.name == "进度")
+                    || sourceName == "世界情况" && (renderer.name == "按键（未选中）" || renderer.name == "选中按键" || renderer.name == "进度条高亮" || renderer.name == "滑动条");
+                image.enabled = renderer.enabled && !text && !dynamic;
             }
         }
 
-        private static void BuildEmptyPage(Transform page, DetailsSectionData data)
+        private static void EnsureGroup(Transform parent, Transform sourceRoot, RectTransform page, System.Collections.Generic.Dictionary<Transform, RectTransform> groups)
         {
-            Box(page, "PlaceholderCard", new Vector2(0f, .08f), new Vector2(1f, .94f), Card);
-            Txt(page, "Title", data.Title, new Vector2(.07f, .70f), new Vector2(.93f, .84f), 30f, Warm);
-            Txt(page, "Heading", data.Heading, new Vector2(.07f, .44f), new Vector2(.93f, .66f), 38f, Pink, TextAlignmentOptions.Center);
-            Txt(page, "Description", data.Description, new Vector2(.12f, .23f), new Vector2(.88f, .43f), 25f, Muted, TextAlignmentOptions.Center);
+            if (groups.ContainsKey(parent)) return;
+            EnsureGroup(parent.parent, sourceRoot, page, groups);
+            // A transparent, full-composition group keeps all descendant pixel coordinates unchanged.
+            groups[parent] = Rect(groups[parent.parent], parent.name, 0, 0, 2048, 1152);
         }
 
-        /// <summary>Non-destructive migration: keep existing components/file IDs and add only missing views/bindings.</summary>
-        [MenuItem("Tools/Game Flow/Bind Details Panel Components")]
-        public static void BindExisting()
+        private static void TabLabels(Transform page)
         {
-            if (EditorApplication.isPlayingOrWillChangePlaymode) throw new InvalidOperationException("Exit Play Mode first.");
-            CreateMissing();
-            GameObject root = PrefabUtility.LoadPrefabContents(PrefabPath);
-            try
-            {
-                BindContentComponents(root.GetComponent<DetailsPanel>());
-                PrefabUtility.SaveAsPrefabAsset(root, PrefabPath);
-                AssetDatabase.SaveAssets();
-            }
-            finally { PrefabUtility.UnloadPrefabContents(root); }
+            Text(page, "人物关系_TMP", "人物\n关系", 529, 142, 116, 82, 32, true);
+            Text(page, "我的信息_TMP", "我的\n信息", 653, 142, 116, 82, 32, true);
+            Text(page, "世界情况_TMP", "世界\n情况", 777, 142, 116, 82, 32, true);
+            Text(page, "PageHint_TMP", page.name == "World" ? "点击查看相关信息" : page.name == "Relationships" ? "--点击可以查看结识人物信息--" : "-悬停查看相关属性-", 950, 183, 420, 36, 23, true);
         }
 
-        private static void BindContentComponents(DetailsPanel panel)
+        private static void BuildMyInfo(RectTransform page, DetailsPanel panel, SerializedObject data)
         {
-            Transform window = panel.transform.Find("Window");
-            Transform page = window.Find("MyInfo");
-            Transform profile = page.Find("ProfileCard");
-            Transform avatar = profile.Find("AvatarFrame");
-            Transform avatarView = avatar.Find("AvatarImage");
-            if (avatarView == default)
-            {
-                Image image = Box(avatar, "AvatarImage", new Vector2(.05f, .05f), new Vector2(.95f, .95f), Color.white);
-                image.preserveAspect = true;
-                image.raycastTarget = false;
-                image.gameObject.SetActive(false);
-                avatarView = image.transform;
-            }
-            Transform badgeArea = page.Find("Specializations");
-            if (badgeArea == default)
-            {
-                badgeArea = Child(page, "Specializations", typeof(Image), typeof(RectMask2D), typeof(ScrollRect)).transform;
-                Rect((RectTransform)badgeArea, new Vector2(0f, .01f), new Vector2(1f, .265f));
-                badgeArea.GetComponent<Image>().color = Color.clear;
-                Transform content = Child(badgeArea, "Content", typeof(GridLayoutGroup), typeof(ContentSizeFitter)).transform;
-                RectTransform contentRect = (RectTransform)content;
-                contentRect.anchorMin = new Vector2(0f, 1f);
-                contentRect.anchorMax = Vector2.one;
-                contentRect.pivot = new Vector2(.5f, 1f);
-                contentRect.anchoredPosition = Vector2.zero;
-                contentRect.sizeDelta = Vector2.zero;
-                GridLayoutGroup grid = content.GetComponent<GridLayoutGroup>();
-                grid.constraint = GridLayoutGroup.Constraint.FixedColumnCount;
-                grid.constraintCount = 3;
-                grid.cellSize = new Vector2(400f, 64f);
-                grid.spacing = new Vector2(24f, 10f);
-                content.GetComponent<ContentSizeFitter>().verticalFit = ContentSizeFitter.FitMode.PreferredSize;
-                ScrollRect scroll = badgeArea.GetComponent<ScrollRect>();
-                scroll.content = contentRect;
-                scroll.viewport = (RectTransform)badgeArea;
-                scroll.horizontal = false;
-                scroll.vertical = true;
-                scroll.movementType = ScrollRect.MovementType.Clamped;
-                scroll.scrollSensitivity = 26f;
-                // Existing badge objects and every label/icon/hover component remain the same objects.
-                for (int i = 0; i < 6; i++) page.Find("Specialization_" + i).SetParent(content, false);
-                TMP_Text empty = Txt(badgeArea, "Empty", "暂无专精", new Vector2(.05f, .1f), new Vector2(.95f, .9f), 23f, Muted, TextAlignmentOptions.Center);
-                empty.gameObject.SetActive(false);
-            }
-            Transform badges = badgeArea.Find("Content");
-            var data = new SerializedObject(panel);
-            Bind(data, "playerNameText", profile.Find("Name").GetComponent<TMP_Text>());
-            Bind(data, "backgroundText", profile.Find("Background").GetComponent<TMP_Text>());
-            Bind(data, "introductionText", profile.Find("CafeIntro").GetComponent<TMP_Text>());
-            Bind(data, "avatarImage", avatarView.GetComponent<Image>());
-            Bind(data, "avatarPlaceholder", avatar.Find("AvatarSilhouette").gameObject);
-            Bind(data, "avatarPlaceholderLabel", avatar.Find("PlaceholderLabel").GetComponent<TMP_Text>());
-            Bind(data, "subtitleText", window.Find("Subtitle").GetComponent<TMP_Text>());
-            Bind(data, "footerText", window.Find("Footer").GetComponent<TMP_Text>());
-            Bind(data, "specializationContent", (RectTransform)badges);
-            Bind(data, "specializationViewport", (RectTransform)badgeArea);
-            Bind(data, "specializationGrid", badges.GetComponent<GridLayoutGroup>());
-            Bind(data, "specializationScroll", badgeArea.GetComponent<ScrollRect>());
-            Bind(data, "emptySpecializationsText", badgeArea.Find("Empty").GetComponent<TMP_Text>());
-            Bind(data, "specializationsHintText", page.Find("SpecializationsHint").GetComponent<TMP_Text>());
-            Bind(data, "placeholderSpecializationIcon", badges.Find("Specialization_0/Icon").GetComponent<Image>().sprite);
-            SerializedProperty attributes = data.FindProperty("attributeBindings");
-            attributes.arraySize = 4;
+            Set(data, "playerNameText", Text(page, "PlayerName", "主角id", 728, 345, 928, 43, 34));
+            Set(data, "backgroundText", HiddenText(page, "Background"));
+            Set(data, "introductionText", Text(page, "Introduction", "", 733, 389, 924, 69, 23));
+            var avatar = Image(page, "Avatar", 400, 318, 200, 235, null); avatar.preserveAspect = true;
+            Set(data, "avatarImage", avatar);
+            var placeholder = Rect(page, "AvatarPlaceholder", 400, 318, 200, 235);
+            Set(data, "avatarPlaceholder", placeholder.gameObject);
+            Set(data, "avatarPlaceholderLabel", HiddenText(placeholder, "Label"));
+            var defaultTip = Rect(page, "DefaultTooltip", 465, 625, 210, 298);
+            Text(defaultTip, "Title", "智慧", 18, 52, 174, 43, 29, true);
+            Text(defaultTip, "Body", "影响分析、推理与解决问题", 20, 113, 170, 170, 23);
+            Set(data, "defaultTooltip", defaultTip.gameObject);
+            Text(page, "AttributesTitle", "主角属性", 728, 468, 300, 42, 32);
+            Text(page, "AttributesHint", "-悬停查看相关属性-", 1490, 489, 190, 32, 21, true);
+            var row = Rect(page, "Attributes", 760, 526, 744, 124);
+            var layout = row.gameObject.AddComponent<HorizontalLayoutGroup>();
+            layout.spacing = 40; layout.childControlWidth = layout.childControlHeight = false;
+            layout.childForceExpandWidth = layout.childForceExpandHeight = false;
+            var bindings = data.FindProperty("attributeBindings"); bindings.arraySize = 4;
             for (int i = 0; i < 4; i++)
             {
-                Transform row = page.Find("Attribute_" + i);
-                SerializedProperty binding = attributes.GetArrayElementAtIndex(i);
-                binding.FindPropertyRelative("nameText").objectReferenceValue = row.Find("Name").GetComponent<TMP_Text>();
-                binding.FindPropertyRelative("valueText").objectReferenceValue = row.Find("Value").GetComponent<TMP_Text>();
-                binding.FindPropertyRelative("fill").objectReferenceValue = (RectTransform)row.Find("Track/Fill");
-                binding.FindPropertyRelative("hover").objectReferenceValue = row.GetComponent<DetailsHoverTarget>();
+                var card = Image(row, "Attribute_" + i, 0, 0, 156, 124, null); card.color = Color.clear; card.raycastTarget = true;
+                var name = Text(card.transform, "Name", "", 58, 9, 95, 43, 30, true); name.color = new Color(1, .96f, .83f);
+                var value = Text(card.transform, "Value", "0 / 20", 4, 68, 148, 47, 35, true);
+                var hover = card.gameObject.AddComponent<DetailsHoverTarget>();
+                var binding = bindings.GetArrayElementAtIndex(i);
+                binding.FindPropertyRelative("nameText").objectReferenceValue = name;
+                binding.FindPropertyRelative("valueText").objectReferenceValue = value;
+                binding.FindPropertyRelative("hover").objectReferenceValue = hover;
             }
-            BindSection(data.FindProperty("relationshipsBinding"), window.Find("Relationships"));
-            BindSection(data.FindProperty("worldBinding"), window.Find("World"));
-            SerializedProperty items = data.FindProperty("specializationItems");
-            items.arraySize = 6;
-            for (int i = 0; i < 6; i++)
+            Text(page, "SpecializationsTitle", "主角专精", 728, 663, 300, 42, 32);
+            var hint = Text(page, "SpecializationsHint", "-悬停查看相关属性-", 1490, 678, 190, 28, 21, true);
+            Set(data, "specializationsHintText", hint);
+            var content = Scroll(page, "Specializations", 773, 725, 890, 165, true);
+            var scroll = content.parent.GetComponent<ScrollRect>();
+            var grid = content.gameObject.AddComponent<GridLayoutGroup>();
+            grid.constraint = GridLayoutGroup.Constraint.FixedColumnCount; grid.constraintCount = 3;
+            grid.spacing = new Vector2(12, 12); grid.cellSize = new Vector2(288, 64);
+            var empty = Text(scroll.transform, "Empty", "暂无专精", 0, 0, 890, 165, 28, true);
+            Set(data, "emptySpecializationsText", empty);
+            Set(data, "specializationContent", content); Set(data, "specializationViewport", scroll.viewport);
+            Set(data, "specializationScroll", scroll); Set(data, "specializationGrid", grid);
+            var template = Image(page, "SpecializationTemplate", 0, 0, 288, 64, null);
+            template.color = new Color(.53f, .32f, .12f, .15f); template.raycastTarget = true;
+            var icon = Image(template.transform, "Icon", 10, 9, 46, 46, null); icon.preserveAspect = true;
+            var item = template.gameObject.AddComponent<DetailsSpecializationItem>();
+            var itemData = new SerializedObject(item);
+            Set(itemData, "icon", icon); Set(itemData, "nameText", Text(template.transform, "Name", "", 65, 4, 212, 56, 23));
+            Set(itemData, "fallbackIcon", Text(icon.transform, "FallbackIcon", "★", 0, 0, 46, 46, 26, true));
+            Set(itemData, "hover", template.gameObject.AddComponent<DetailsHoverTarget>());
+            itemData.ApplyModifiedPropertiesWithoutUndo(); template.gameObject.SetActive(false);
+            data.FindProperty("specializationItems").arraySize = 1;
+            data.FindProperty("specializationItems").GetArrayElementAtIndex(0).objectReferenceValue = item;
+        }
+
+        private static void BuildRelationships(RectTransform page, SerializedObject data)
+        {
+            BindSection(data.FindProperty("relationshipsBinding"), page);
+            var view = Rect(page, "RelationshipsView", 0, 0, 2048, 1152);
+
+            Text(view, "Name", "人物姓名", 406, 616, 240, 46, 32, true);
+            Scroll(view, "IntroductionScroll", 410, 673, 238, 229, true);
+            Text(view, "SpecialInformationTitle", "人物特殊信息：", 695, 304, 406, 40, 26);
+            var special = Text(view, "SpecialInformation", "", 695, 344, 406, 55, 20);
+            special.raycastTarget = true; special.gameObject.AddComponent<DetailsHoverTarget>();
+            Text(view, "FamiliarityLabel", "熟\n悉\n度", 357, 925, 23, 60, 18, true);
+            var familiarityValue = Text(view, "FamiliarityValue", "0 / 100", 321, 277, 90, 28, 20, true);
+            familiarityValue.rectTransform.localRotation = Quaternion.Euler(0, 0, -90);
+            var fill = Image(view, "FamiliarityFill", 363, 336, 11, 582, Sprite("人物信息", "进度"));
+            fill.type = UnityEngine.UI.Image.Type.Filled; fill.fillMethod = UnityEngine.UI.Image.FillMethod.Vertical; fill.fillAmount = 0;
+            var grid = Rect(view, "CharacterGrid", 674, 281, 1018, 636).gameObject.AddComponent<GridLayoutGroup>();
+            grid.constraint = GridLayoutGroup.Constraint.FixedColumnCount; grid.constraintCount = 7;
+            grid.cellSize = new Vector2(145.4f, 127.2f); grid.spacing = Vector2.zero;
+            var previous = Image(view, "Previous", 1430, 929, 110, 25, null); previous.color = Color.clear; previous.raycastTarget = true;
+            Button(previous); Text(previous.transform, "Label", "上一页", 0, 0, 110, 30, 20, true);
+            var next = Image(view, "Next", 1580, 874, 110, 43, null); next.color = Color.clear; next.raycastTarget = true;
+            Button(next); Text(next.transform, "Label", "下一页", 0, 0, 110, 43, 27, true);
+            Text(view, "Page", "1 / 1", 1545, 929, 75, 25, 18, true);
+        }
+
+        private static void BuildWorld(RectTransform page, SerializedObject data)
+        {
+            BindSection(data.FindProperty("worldBinding"), page);
+            var view = Rect(page, "WorldView", 0, 0, 2048, 1152);
+            var content = Scroll(view, "Selectors", 369, 349, 255, 512, true);
+            var layout = content.gameObject.AddComponent<VerticalLayoutGroup>();
+            layout.childControlWidth = true; layout.childControlHeight = false;
+            layout.childForceExpandWidth = true; layout.childForceExpandHeight = false; layout.spacing = 29;
+            Text(view, "Description", "", 768, 398, 836, 34, 23);
+            Text(view, "Value", "", 774, 524, 833, 28, 23);
+            var fill = Image(view, "Fill", 744, 547, 876, 16, Sprite("世界情况", "进度条高亮"));
+            fill.type = UnityEngine.UI.Image.Type.Filled; fill.fillMethod = UnityEngine.UI.Image.FillMethod.Horizontal;
+            Text(view, "Lower", "0", 750, 566, 150, 33, 23);
+            Text(view, "Upper", "10", 1457, 566, 150, 33, 23, false, TextAlignmentOptions.MidlineRight);
+            Text(view, "LowerDescription", "", 770, 610, 402, 150, 22);
+            Text(view, "UpperDescription", "", 1200, 610, 405, 150, 22, false, TextAlignmentOptions.TopRight);
+        }
+
+        private static void BindSection(SerializedProperty property, Transform page)
+        {
+            property.FindPropertyRelative("title").objectReferenceValue = HiddenText(page, "Title");
+            property.FindPropertyRelative("heading").objectReferenceValue = HiddenText(page, "Heading");
+            property.FindPropertyRelative("description").objectReferenceValue = HiddenText(page, "Description");
+        }
+
+        private static void BuildTooltip(Transform parent, SerializedObject data)
+        {
+            var tip = Rect(parent, "Tooltip", 465, 625, 210, 298);
+            var image = tip.gameObject.AddComponent<Image>(); image.sprite = Sprite("我的信息", "悬浮显示框"); image.raycastTarget = false;
+            tip.gameObject.AddComponent<CanvasGroup>().blocksRaycasts = false;
+            Set(data, "tooltip", tip);
+            Set(data, "tooltipTitle", Text(tip, "Title", "", 18, 52, 174, 43, 29, true));
+            Set(data, "tooltipBody", Text(tip, "Body", "", 20, 113, 170, 170, 23));
+            tip.gameObject.SetActive(false);
+        }
+
+        private static TMP_Text HiddenText(Transform parent, string name)
+        {
+            var text = Text(parent, name, "", 0, 0, 1, 1, 18); text.gameObject.SetActive(false); return text;
+        }
+        private static void Set(SerializedObject data, string name, Object value) => data.FindProperty(name).objectReferenceValue = value;
+        private static Sprite Sprite(string folder, string name) => AssetDatabase.LoadAssetAtPath<Sprite>("Assets/Art/Func/" + folder + "/" + name + ".png");
+        private static void Stretch(RectTransform rect)
+        {
+            rect.anchorMin = Vector2.zero; rect.anchorMax = Vector2.one; rect.offsetMin = rect.offsetMax = Vector2.zero;
+        }
+        private static RectTransform Rect(Transform parent, string name, float x, float y, float w, float h)
+        {
+            var go = new GameObject(name, typeof(RectTransform)); go.layer = LayerMask.NameToLayer("UI");
+            var rect = (RectTransform)go.transform; rect.SetParent(parent, false);
+            rect.anchorMin = rect.anchorMax = new Vector2(0, 1); rect.pivot = new Vector2(.5f, .5f);
+            rect.sizeDelta = new Vector2(w, h); rect.anchoredPosition = new Vector2(x + w / 2, -y - h / 2); return rect;
+        }
+        private static Image Image(Transform parent, string name, float x, float y, float w, float h, Sprite sprite)
+        {
+            var image = Rect(parent, name, x, y, w, h).gameObject.AddComponent<Image>();
+            image.sprite = sprite; image.raycastTarget = false; return image;
+        }
+        private static TMP_Text Text(Transform parent, string name, string value, float x, float y, float w, float h, float size, bool center = false, TextAlignmentOptions alignment = TextAlignmentOptions.TopLeft)
+        {
+            var text = Rect(parent, name, x, y, w, h).gameObject.AddComponent<TextMeshProUGUI>();
+            if (size >= 26)
             {
-                Transform row = badges.Find("Specialization_" + i);
-                DetailsSpecializationItem item = row.GetComponent<DetailsSpecializationItem>();
-                if (item == default) item = row.gameObject.AddComponent<DetailsSpecializationItem>();
-                var itemData = new SerializedObject(item);
-                Bind(itemData, "icon", row.Find("Icon").GetComponent<Image>());
-                Bind(itemData, "nameText", row.Find("Name").GetComponent<TMP_Text>());
-                Bind(itemData, "hover", row.GetComponent<DetailsHoverTarget>());
-                Transform fallback = row.Find("Icon/FallbackIcon");
-                if (fallback == default) fallback = Txt(row.Find("Icon"), "FallbackIcon", "★", Vector2.zero, Vector2.one, 25f, Warm, TextAlignmentOptions.Center).transform;
-                fallback.gameObject.SetActive(false);
-                Bind(itemData, "fallbackIcon", fallback.GetComponent<TMP_Text>());
-                itemData.ApplyModifiedPropertiesWithoutUndo();
-                items.GetArrayElementAtIndex(i).objectReferenceValue = item;
+                int lines = value.Split('\n').Length;
+                text.rectTransform.SetSizeWithCurrentAnchors(RectTransform.Axis.Vertical, Mathf.Max(h, size * 1.45f * lines));
             }
-            data.ApplyModifiedPropertiesWithoutUndo();
+            text.font = size >= 26 ? Font : BodyFont; text.text = value; text.color = Ink; text.fontSize = size;
+            text.alignment = center ? TextAlignmentOptions.Center : alignment; text.raycastTarget = false;
+            text.enableAutoSizing = true; text.fontSizeMin = size * .7f; text.fontSizeMax = size;
+            text.textWrappingMode = TextWrappingModes.Normal;
+            text.overflowMode = TextOverflowModes.Ellipsis;
+            return text;
         }
-
-        private static void BindSection(SerializedProperty binding, Transform page)
+        private static Button Button(Image image)
         {
-            binding.FindPropertyRelative("title").objectReferenceValue = page.Find("Title").GetComponent<TMP_Text>();
-            binding.FindPropertyRelative("heading").objectReferenceValue = page.Find("Heading").GetComponent<TMP_Text>();
-            binding.FindPropertyRelative("description").objectReferenceValue = page.Find("Description").GetComponent<TMP_Text>();
+            var button = image.gameObject.AddComponent<Button>(); button.targetGraphic = image;
+            button.transition = Selectable.Transition.None; button.navigation = new Navigation { mode = Navigation.Mode.None }; return button;
         }
-
-        private static void Hover(GameObject target, DetailsPanel panel, string title, string description)
+        private static RectTransform Scroll(Transform parent, string name, float x, float y, float w, float h, bool fitter)
         {
-            var data = new SerializedObject(target.AddComponent<DetailsHoverTarget>());
-            Bind(data, "panel", panel);
-            data.FindProperty("title").stringValue = title;
-            data.FindProperty("description").stringValue = description;
-            data.ApplyModifiedPropertiesWithoutUndo();
-        }
-        private static void Bind(SerializedObject data, string name, Object value) => data.FindProperty(name).objectReferenceValue = value;
-        private static GameObject Child(Transform parent, string name, params Type[] types)
-        {
-            var child = new GameObject(name, typeof(RectTransform));
-            child.layer = LayerMask.NameToLayer("UI");
-            child.transform.SetParent(parent, false);
-            foreach (Type type in types) child.AddComponent(type);
-            return child;
-        }
-        private static void Rect(RectTransform rect, Vector2 min, Vector2 max)
-        {
-            rect.anchorMin = min;
-            rect.anchorMax = max;
-            rect.offsetMin = rect.offsetMax = Vector2.zero;
-        }
-        private static Image Box(Transform parent, string name, Vector2 min, Vector2 max, Color color)
-        {
-            Image image = Child(parent, name, typeof(Image)).GetComponent<Image>();
-            Rect(image.rectTransform, min, max);
-            image.color = color;
-            return image;
-        }
-        private static TMP_Text Txt(Transform parent, string name, string text, Vector2 min, Vector2 max, float size, Color color,
-            TextAlignmentOptions alignment = TextAlignmentOptions.MidlineLeft)
-        {
-            var label = Child(parent, name, typeof(TextMeshProUGUI)).GetComponent<TextMeshProUGUI>();
-            Rect(label.rectTransform, min, max);
-            label.font = Font;
-            label.text = text;
-            label.fontSize = size;
-            label.enableAutoSizing = true;
-            label.fontSizeMin = Mathf.Min(16f, size);
-            label.fontSizeMax = size;
-            label.color = color;
-            label.alignment = alignment;
-            label.raycastTarget = false;
-            return label;
-        }
-        private static Button Btn(Transform parent, string name, string text, Vector2 min, Vector2 max)
-        {
-            Image image = Box(parent, name, min, max, Color.white);
-            Button button = image.gameObject.AddComponent<Button>();
-            button.targetGraphic = image;
-            ColorBlock colors = button.colors;
-            colors.normalColor = new Color(.29f, .20f, .28f);
-            colors.highlightedColor = new Color(.42f, .28f, .36f);
-            colors.pressedColor = new Color(.55f, .34f, .38f);
-            colors.selectedColor = colors.normalColor;
-            button.colors = colors;
-            // Disable navigation so a tab click cannot implicitly select an unrelated button.
-            button.navigation = new Navigation { mode = Navigation.Mode.None };
-            if (!string.IsNullOrEmpty(text)) Txt(button.transform, "Label", text, new Vector2(.04f, .05f), new Vector2(.96f, .95f), 26f, Warm, TextAlignmentOptions.Center);
-            return button;
+            var viewport = Rect(parent, name, x, y, w, h);
+            var raycast = viewport.gameObject.AddComponent<Image>(); raycast.color = Color.clear;
+            viewport.gameObject.AddComponent<RectMask2D>();
+            var content = Rect(viewport, "Content", 0, 0, w, h);
+            content.anchorMin = new Vector2(0, 1); content.anchorMax = Vector2.one; content.pivot = new Vector2(.5f, 1);
+            content.sizeDelta = new Vector2(0, 0); content.anchoredPosition = Vector2.zero;
+            if (fitter) content.gameObject.AddComponent<ContentSizeFitter>().verticalFit = ContentSizeFitter.FitMode.PreferredSize;
+            var scroll = viewport.gameObject.AddComponent<ScrollRect>();
+            scroll.viewport = viewport; scroll.content = content; scroll.horizontal = false; scroll.vertical = true;
+            scroll.movementType = ScrollRect.MovementType.Clamped; scroll.scrollSensitivity = 32;
+            return content;
         }
     }
 }

@@ -16,6 +16,9 @@ namespace Spotlight.GameFlow
         [SerializeField] private CanvasGroup rootGroup;
         [SerializeField] private CanvasGroup envelopeGroup;
         [SerializeField] private RectTransform envelope;
+        [SerializeField] private Image envelopeArt;
+        [SerializeField] private Sprite envelopeClosedSprite;
+        [SerializeField] private Sprite envelopeOpenSprite;
         [SerializeField] private Button envelopeButton;
         [SerializeField] private CanvasGroup hintGroup;
         [SerializeField] private CanvasGroup paperGroup;
@@ -112,6 +115,7 @@ namespace Spotlight.GameFlow
             finished = onFinished;
             IsPlaying = true;
             Stage = LetterStage.Envelope;
+            if (envelopeArt != default && envelopeClosedSprite != default) envelopeArt.sprite = envelopeClosedSprite;
             rootGroup.alpha = 1f;
             rootGroup.interactable = rootGroup.blocksRaycasts = true;
             envelopeGroup.gameObject.SetActive(true);
@@ -139,6 +143,7 @@ namespace Spotlight.GameFlow
             if (!IsPlaying || Stage != LetterStage.Envelope) return;
             Stage = LetterStage.Opening;
             envelopeButton.interactable = false;
+            if (envelopeArt != null && envelopeOpenSprite != null) envelopeArt.sprite = envelopeOpenSprite;
             StopHint();
             paperGroup.gameObject.SetActive(true);
             paper.anchoredPosition = paperPosition + Vector2.down * paperRise;

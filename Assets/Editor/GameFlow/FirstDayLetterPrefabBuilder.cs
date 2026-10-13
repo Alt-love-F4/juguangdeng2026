@@ -35,6 +35,8 @@ namespace Spotlight.GameFlow.Editor
                 Image blackout = Image(root.transform, "Blackout", Color.black);
                 Stretch(blackout.rectTransform);
                 blackout.raycastTarget = true;
+                Sprite letterBackground = AssetDatabase.LoadAssetAtPath<Sprite>("Assets/Art/Func/信封/背景.png");
+                if (letterBackground != null) { blackout.sprite = letterBackground; blackout.color = Color.white; }
 
                 RectTransform envelopeStage = Stage(root.transform, "EnvelopeStage");
                 CanvasGroup envelopeGroup = envelopeStage.gameObject.AddComponent<CanvasGroup>();
@@ -43,6 +45,13 @@ namespace Spotlight.GameFlow.Editor
                 TMP_Text place = Text(envelopeStage, "Place", "圣诺特 · 沸点咖啡馆", 19f, new Color(.5f, .49f, .46f));
                 Center(place.rectTransform, new Vector2(0, 260), new Vector2(800, 40));
                 RectTransform envelope = Box(envelopeStage, "Envelope", Vector2.zero, new Vector2(650, 360));
+                Sprite envelopeSprite = AssetDatabase.LoadAssetAtPath<Sprite>("Assets/Art/Func/信封/信封出现.png");
+                Sprite envelopeOpenSprite = AssetDatabase.LoadAssetAtPath<Sprite>("Assets/Art/Func/信封/信封自动打开.png");
+                Image envelopeArt = Image(envelope, "FormalArt", Color.white);
+                Stretch(envelopeArt.rectTransform);
+                envelopeArt.sprite = envelopeSprite;
+                envelopeArt.preserveAspect = true;
+                envelopeArt.raycastTarget = false;
                 Image shadow = Image(envelope, "Shadow", new Color(.16f, .1f, .065f));
                 Stretch(shadow.rectTransform);
                 shadow.rectTransform.anchoredPosition = new Vector2(10, -14);
@@ -62,6 +71,13 @@ namespace Spotlight.GameFlow.Editor
                 Stretch(sealLabel.rectTransform);
                 TMP_Text address = Text(envelope, "Address", "致我最放心不下的孩子", 23f, Ink);
                 Center(address.rectTransform, new Vector2(0, -112), new Vector2(550, 50));
+                envelope.Find("Shadow").gameObject.SetActive(false);
+                envelope.Find("Face").gameObject.SetActive(false);
+                envelope.Find("LeftFold").gameObject.SetActive(false);
+                envelope.Find("RightFold").gameObject.SetActive(false);
+                envelope.Find("Postage").gameObject.SetActive(false);
+                envelope.Find("Seal").gameObject.SetActive(false);
+                envelope.Find("Address").gameObject.SetActive(false);
                 Button envelopeButton = ClickTarget(envelope, "OpenEnvelope");
                 Stretch(envelopeButton.GetComponent<RectTransform>());
                 TMP_Text hint = Text(envelopeStage, "ClickHint", "点击信封，拆开叔叔留给你的信", 25f, Gold);
@@ -74,6 +90,8 @@ namespace Spotlight.GameFlow.Editor
                 Stretch(paperShadow.rectTransform);
                 paperShadow.rectTransform.anchoredPosition = new Vector2(12, -12);
                 Image page = Image(paper, "Page", new Color(.93f, .875f, .745f));
+                Sprite paperSprite = AssetDatabase.LoadAssetAtPath<Sprite>("Assets/Art/Func/信封/底图.png");
+                if (paperSprite != null) { page.sprite = paperSprite; page.color = Color.white; page.preserveAspect = true; }
                 Stretch(page.rectTransform);
                 page.raycastTarget = true;
                 TMP_Text title = Text(paper, "Title", "叔叔的信", 36f, Ink);
@@ -124,6 +142,9 @@ namespace Spotlight.GameFlow.Editor
                 Stretch(skipLabel.rectTransform);
 
                 SerializedObject serialized = new SerializedObject(panel);
+                Set(serialized, "envelopeArt", envelopeArt);
+                Set(serialized, "envelopeClosedSprite", envelopeSprite);
+                Set(serialized, "envelopeOpenSprite", envelopeOpenSprite);
                 Set(serialized, "rootGroup", rootGroup);
                 Set(serialized, "envelopeGroup", envelopeGroup);
                 Set(serialized, "envelope", envelope);
@@ -140,10 +161,71 @@ namespace Spotlight.GameFlow.Editor
                 serialized.ApplyModifiedPropertiesWithoutUndo();
                 paper.gameObject.SetActive(false);
                 signatureButton.gameObject.SetActive(false);
+                ApplyFormalPaperLayout(root);
                 PrefabUtility.SaveAsPrefabAsset(root, PrefabPath);
             }
             finally { Object.DestroyImmediate(root); }
             Debug.Log("[DayFlow] Created FirstDayLetterPanel.prefab. Existing prefabs and scenes were not modified.");
+        }
+
+        [MenuItem("Tools/Game Flow/Apply Formal First Day Letter Art")]
+        public static void ApplyFormalArtToPrefab()
+        {
+            if (EditorApplication.isPlayingOrWillChangePlaymode) throw new InvalidOperationException("Exit Play Mode first.");
+            GameObject root = PrefabUtility.LoadPrefabContents(PrefabPath);
+            try
+            {
+                Sprite background = AssetDatabase.LoadAssetAtPath<Sprite>("Assets/Art/Func/信封/背景.png");
+                Sprite envelopeSprite = AssetDatabase.LoadAssetAtPath<Sprite>("Assets/Art/Func/信封/信封出现.png");
+                Sprite openSprite = AssetDatabase.LoadAssetAtPath<Sprite>("Assets/Art/Func/信封/信封自动打开.png");
+                Sprite paperSprite = AssetDatabase.LoadAssetAtPath<Sprite>("Assets/Art/Func/信封/底图.png");
+                Image blackout = root.transform.Find("Blackout")?.GetComponent<Image>();
+                if (blackout != null && background != null) { blackout.sprite = background; blackout.color = Color.white; }
+                Transform envelope = root.transform.Find("EnvelopeStage/Envelope");
+                if (envelope != null)
+                {
+                    Image art = envelope.Find("FormalArt")?.GetComponent<Image>();
+                    if (art == null)
+                    {
+                        art = Image(envelope, "FormalArt", Color.white);
+                        Stretch(art.rectTransform);
+                        art.raycastTarget = false;
+                    }
+                    art.sprite = envelopeSprite;
+                    art.preserveAspect = true;
+                    string[] oldParts = { "Shadow", "Face", "LeftFold", "RightFold", "Postage", "Seal", "Address" };
+                    for (int i = 0; i < oldParts.Length; i++)
+                    {
+                        Transform oldPart = envelope.Find(oldParts[i]);
+                        if (oldPart != null) oldPart.gameObject.SetActive(false);
+                    }
+                    SerializedObject panel = new SerializedObject(root.GetComponent<FirstDayLetterPanel>());
+                    Set(panel, "envelopeArt", art);
+                    Set(panel, "envelopeClosedSprite", envelopeSprite);
+                    Set(panel, "envelopeOpenSprite", openSprite);
+                    panel.ApplyModifiedPropertiesWithoutUndo();
+                }
+                Image page = root.transform.Find("LetterPaper/Page")?.GetComponent<Image>();
+                if (page != null && paperSprite != null) { page.sprite = paperSprite; page.color = Color.white; page.preserveAspect = true; }
+                ApplyFormalPaperLayout(root);
+                PrefabUtility.SaveAsPrefabAsset(root, PrefabPath);
+                AssetDatabase.SaveAssets();
+            }
+            finally { PrefabUtility.UnloadPrefabContents(root); }
+        }
+        private static void ApplyFormalPaperLayout(GameObject root)
+        {
+            RectTransform paper = root.transform.Find("LetterPaper") as RectTransform;
+            paper.sizeDelta = new Vector2(1260, 1260f * 2169f / 3203f);
+            foreach (string name in new[] { "Shadow", "Title", "Rule" })
+            {
+                Transform old = paper.Find(name);
+                if (old != default) old.gameObject.SetActive(false);
+            }
+            RectTransform scrollRoot = paper.Find("LetterScroll") as RectTransform;
+            TopLeft(scrollRoot, new Vector2(120, -245), new Vector2(1020, 472));
+            TopLeft(paper.Find("SignatureButton") as RectTransform, new Vector2(120, -730), new Vector2(1020, 48));
+            TopLeft(paper.Find("ReadingHint") as RectTransform, new Vector2(120, -809), new Vector2(1020, 30));
         }
 
         private static void Fold(Transform parent, string name, Vector2 position, float angle)

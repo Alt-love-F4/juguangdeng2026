@@ -5,173 +5,277 @@ using UnityEngine.UI;
 
 namespace Spotlight.GameFlow
 {
-    /// <summary>Runtime extension of the prefab's relationships and world page roots.</summary>
+    /// <summary>Data-driven controls inside the original PSD relationship and world regions.</summary>
     public sealed class DetailsPagesView : MonoBehaviour
     {
-        private const int PageSize = 6;
+        private const int PageSize = 31; // Seven columns, five rows; first three cells hold special information and the last holds navigation.
+        [SerializeField] private RectTransform characterGrid;
+        [SerializeField] private Image portrait;
+        [SerializeField] private TMP_Text characterName;
+        [SerializeField] private RectTransform introductionContent;
+        [SerializeField] private TMP_Text specialInformation;
+        [SerializeField] private Image familiarityFill;
+        [SerializeField] private TMP_Text familiarityValue;
+        [SerializeField] private TMP_FontAsset headingFont;
+        [SerializeField] private Button previous;
+        [SerializeField] private Button next;
+        [SerializeField] private TMP_Text pageLabel;
+        [SerializeField] private RectTransform selectorContent;
+        [SerializeField] private TMP_Text worldDescription;
+        [SerializeField] private TMP_Text worldValue;
+        [SerializeField] private TMP_Text lower;
+        [SerializeField] private TMP_Text upper;
+        [SerializeField] private TMP_Text lowerDescription;
+        [SerializeField] private TMP_Text upperDescription;
+        [SerializeField] private Image worldFill;
+        [SerializeField] private Sprite characterSilhouette;
+        [SerializeField] private Sprite worldSelectedButton;
+        [SerializeField] private Sprite worldIdleButton;
         private DetailsPanel panel;
         private TMP_FontAsset font;
         private Sprite unknownAvatar;
-        private RectTransform relationships;
-        private RectTransform world;
         private DetailsPanelData data;
         private string characterId;
+        private string worldKey;
+        private readonly List<Image> selectors = new List<Image>();
+        private readonly List<Button> characterButtons = new List<Button>();
         public int RelationshipPageIndex { get; private set; }
+        public string SelectedWorldProgressKey => worldKey;
+        public string SelectedCharacterId => characterId;
+        public int RelationshipPageCount => PageCount;
+        private int PageCount => data == null ? 1 : Mathf.Max(1, (data.Characters.Count + PageSize - 1) / PageSize);
 
-        public void Initialize(DetailsPanel owner, RectTransform relationshipsPage, RectTransform worldPage,
-            TMP_FontAsset pageFont, Sprite fallback)
+        public void Initialize(DetailsPanel owner, RectTransform relationshipsPage, RectTransform worldPage, TMP_FontAsset pageFont, Sprite fallback)
         {
-            panel = owner;
-            font = pageFont;
-            unknownAvatar = fallback;
-            relationships = Extend(relationshipsPage, "RelationshipsView");
-            world = Extend(worldPage, "WorldView");
+            panel = owner; font = pageFont; unknownAvatar = fallback;
+            previous.onClick.AddListener(PreviousPage); next.onClick.AddListener(NextPage);
         }
-
-        private static RectTransform Extend(RectTransform page, string name)
-        {
-            for (int i = 0; i < page.childCount; i++) page.GetChild(i).gameObject.SetActive(false);
-            return DetailsViewUI.Root(page, name, Vector2.zero, Vector2.one);
-        }
+        private void PreviousPage() => panel.ChangeRelationshipPage(-1);
+        private void NextPage() => panel.ChangeRelationshipPage(1);
 
         public void Refresh(DetailsPanelData snapshot)
         {
+            panel.HidePageTooltip();
             data = snapshot;
             RelationshipPageIndex = Mathf.Clamp(RelationshipPageIndex, 0, PageCount - 1);
-            DetailsCharacterData selected = FindCharacter(characterId);
-            if (selected != null && selected.Unlocked) RenderCharacter(selected);
-            else ReturnToRelationships();
-            RenderWorld();
+            var selected = FindCharacter(characterId);
+            if (selected == null || !selected.Unlocked)
+            {
+                characterId = null;
+                foreach (var character in data.Characters)
+                    if (character.Unlocked) { characterId = character.Id; break; }
+            }
+            RenderRelationships();
+            RenderCharacter(FindCharacter(characterId));
+            RenderWorldSelectors();
         }
-
-        private int PageCount => Mathf.Max(1, (data.Characters.Count + PageSize - 1) / PageSize);
         private DetailsCharacterData FindCharacter(string id)
         {
             if (data == null || id == null) return null;
             foreach (var character in data.Characters) if (character.Id == id) return character;
             return null;
         }
-
         public bool ShowCharacter(string id)
         {
             var character = FindCharacter(id);
             if (character == null || !character.Unlocked) return false;
             characterId = id;
-            panel.SelectPage(DetailsPanel.Page.Relationships);
+            for (int i = 0; i < data.Characters.Count; i++)
+                if (data.Characters[i].Id == id) { RelationshipPageIndex = i / PageSize; break; }
+            RenderRelationships();
             RenderCharacter(character);
+            panel.SelectPage(DetailsPanel.Page.Relationships);
             return true;
         }
-
         public void ReturnToRelationships()
         {
+            panel.HidePageTooltip();
             characterId = null;
-            if (data != null) RenderRelationships();
+            if (data != null) { RenderCharacter(null); UpdateCharacterSelection(); }
         }
-
         public void ChangeRelationshipPage(int delta)
         {
             if (data == null) return;
-            RelationshipPageIndex = (int)System.Math.Max(0L, System.Math.Min(PageCount - 1L, (long)RelationshipPageIndex + delta));
-            ReturnToRelationships();
+            panel.HidePageTooltip();
+            SetRelationshipPage((int)System.Math.Max(0L, System.Math.Min(PageCount - 1L, (long)RelationshipPageIndex + delta)));
         }
-
+        public bool SetRelationshipPage(int index)
+        {
+            if (data == null || index < 0 || index >= PageCount) return false;
+            panel.HidePageTooltip();
+            RelationshipPageIndex = index;
+            RenderRelationships();
+            return true;
+        }
+        public bool ScrollTo(DetailsScrollRegion region, float position)
+        {
+            RectTransform content;
+            switch (region)
+            {
+                case DetailsScrollRegion.CharacterIntroduction: content = introductionContent; break;
+                case DetailsScrollRegion.WorldSelectors: content = selectorContent; break;
+                default: return false;
+            }
+            LayoutRebuilder.ForceRebuildLayoutImmediate(content);
+            var scroll = content.parent.GetComponent<ScrollRect>();
+            scroll.StopMovement();
+            scroll.verticalNormalizedPosition = position;
+            return true;
+        }
         private void RenderRelationships()
         {
-            DetailsViewUI.Clear(relationships);
-            DetailsViewUI.Text(relationships, font, "Title", "人物关系", new Vector2(0, .9f), Vector2.one, 30);
-            if (data.Characters.Count == 0)
-                DetailsViewUI.Text(relationships, font, "Empty", data.Relationships.Heading + "\n" + data.Relationships.Description,
-                    new Vector2(.08f, .2f), new Vector2(.92f, .8f), 25, TextAlignmentOptions.Center);
-            int start = RelationshipPageIndex * PageSize;
-            for (int i = 0; i < PageSize && start + i < data.Characters.Count; i++)
+            DetailsViewUI.Clear(characterGrid);
+            characterButtons.Clear();
+            for (int i = 0; i < 35; i++)
             {
-                var character = data.Characters[start + i];
-                int column = i % 3;
-                int row = i / 3;
-                float left = column / 3f + .012f;
-                float top = .86f - row * .36f;
-                var button = DetailsViewUI.Button(relationships, font, "Character_" + (start + i), "",
-                    new Vector2(left, top - .33f), new Vector2(left + .31f, top));
-                DetailsViewUI.Avatar(button.transform, font, character.Unlocked ? character.Avatar : null, unknownAvatar,
-                    new Vector2(.28f, .31f), new Vector2(.72f, .92f));
-                string label = character.Unlocked ? character.Name : "未知人物";
-                DetailsViewUI.Text(button.transform, font, "Name", label, new Vector2(.05f, .03f), new Vector2(.95f, .27f), 24, TextAlignmentOptions.Center);
+                var cell = DetailsViewUI.Box(characterGrid, "Cell_" + i, Vector2.zero, Vector2.one, Color.clear);
+                // These cells preserve the special-information area in the PSD grid.
+                if (i < 3 || i == 34) { cell.raycastTarget = false; continue; }
+                int index = RelationshipPageIndex * PageSize + i - 3;
+                DetailsCharacterData character = index < data.Characters.Count ? data.Characters[index] : null;
+                cell.name = character == null ? "EmptyCell_" + (i - 3) : "Character_" + character.Id;
+                if (character != null && (character.Avatar != default || !character.Unlocked))
+                {
+                    var image = DetailsViewUI.Box(cell.transform, "Avatar", new Vector2(.13f, .05f), new Vector2(.87f, .98f), Color.white);
+                    image.sprite = character.Unlocked ? character.Avatar : unknownAvatar;
+                    image.preserveAspect = true; image.raycastTarget = false;
+                }
+                if (character == null) { cell.raycastTarget = false; continue; }
+                var button = cell.gameObject.AddComponent<Button>(); button.targetGraphic = cell;
+                button.navigation = new Navigation { mode = Navigation.Mode.None };
                 button.interactable = character.Unlocked;
+                characterButtons.Add(button);
                 string id = character.Id;
                 button.onClick.AddListener(() => panel.ShowCharacter(id));
-                button.gameObject.AddComponent<DetailsHoverTarget>().Bind(panel, label,
-                    character.Unlocked ? character.Introduction : "尚未结识此人物。");
+                if (character.Unlocked) Label(cell.transform, "Name", character.Name, new Vector2(.02f, 0), new Vector2(.98f, .16f), 16, TextAlignmentOptions.Center);
             }
-            var previous = DetailsViewUI.Button(relationships, font, "Previous", "←", new Vector2(.22f, .015f), new Vector2(.34f, .115f));
             previous.interactable = RelationshipPageIndex > 0;
-            previous.onClick.AddListener(() => panel.ChangeRelationshipPage(-1));
-            var next = DetailsViewUI.Button(relationships, font, "Next", "→", new Vector2(.66f, .015f), new Vector2(.78f, .115f));
             next.interactable = RelationshipPageIndex < PageCount - 1;
-            next.onClick.AddListener(() => panel.ChangeRelationshipPage(1));
-            DetailsViewUI.Text(relationships, font, "PageNumber", (RelationshipPageIndex + 1) + " / " + PageCount,
-                new Vector2(.36f, .015f), new Vector2(.64f, .115f), 23, TextAlignmentOptions.Center);
+            pageLabel.text = (RelationshipPageIndex + 1) + " / " + PageCount;
+            UpdateCharacterSelection();
         }
-
+        private void UpdateCharacterSelection()
+        {
+            foreach (var button in characterButtons)
+                ((Image)button.targetGraphic).color = button.name == "Character_" + characterId ? new Color(.59f, .32f, .08f, .13f) : Color.clear;
+        }
         private void RenderCharacter(DetailsCharacterData character)
         {
-            DetailsViewUI.Clear(relationships);
-            var back = DetailsViewUI.Button(relationships, font, "Return", "← 返回", new Vector2(0, .89f), new Vector2(.18f, 1));
-            back.onClick.AddListener(panel.ReturnToRelationships);
-            DetailsViewUI.Text(relationships, font, "Title", "人物信息", new Vector2(.23f, .89f), Vector2.one, 30);
-            DetailsViewUI.Avatar(relationships, font, character.Avatar, unknownAvatar, new Vector2(.02f, .61f), new Vector2(.2f, .85f));
-            DetailsViewUI.Text(relationships, font, "Name", character.Name, new Vector2(.24f, .76f), new Vector2(.98f, .86f), 29);
-            var introduction = DetailsViewUI.Text(relationships, font, "Introduction", character.Introduction,
-                new Vector2(.24f, .6f), new Vector2(.98f, .75f), 22, TextAlignmentOptions.TopLeft);
-            introduction.raycastTarget = true;
-            introduction.gameObject.AddComponent<DetailsHoverTarget>().Bind(panel, character.Name, character.Introduction);
-            var content = DetailsViewUI.Scroll(relationships, "CharacterProgress", new Vector2(0, .01f), new Vector2(1, .55f));
-            RenderBars(content, character.Bars, "暂无人物信息进度");
-        }
+            DetailsViewUI.Clear(introductionContent);
+            portrait.sprite = character != null && character.Avatar != default ? character.Avatar : characterSilhouette;
+            characterName.text = character != null ? character.Name : "人物姓名";
+            string introduction = character != null ? character.Introduction : data.Characters.Count > 0 ? "尚未结识此人物，无法获得相关信息" : data.Relationships.Heading + "\n" + data.Relationships.Description;
+            var text = Label(introductionContent, "Introduction", introduction, Vector2.zero, Vector2.one, 22);
+            text.overflowMode = TextOverflowModes.Overflow;
+            text.rectTransform.pivot = new Vector2(.5f, 1);
+            text.rectTransform.anchorMin = new Vector2(0, 1); text.rectTransform.anchorMax = Vector2.one;
+            text.rectTransform.sizeDelta = new Vector2(0, text.GetPreferredValues(introduction, 241, 0).y + 8);
+            text.rectTransform.anchoredPosition = Vector2.zero;
+            introductionContent.SetSizeWithCurrentAnchors(RectTransform.Axis.Vertical, text.rectTransform.sizeDelta.y);
+            introductionContent.parent.GetComponent<ScrollRect>().verticalNormalizedPosition = 1;
+            familiarityFill.fillAmount = 0; familiarityValue.text = "0 / 100";
+            var info = new System.Text.StringBuilder();
+            if (character != null)
+                for (int i = 0; i < character.Bars.Count; i++)
+                {
+                    var bar = character.Bars[i];
+                    if (i == 0)
+                    {
+                        familiarityFill.fillAmount = Ratio(bar);
+                        familiarityValue.text = bar.Value.ToString("0.##") + " / " + bar.Max.ToString("0.##");
+                    }
+                    if (info.Length > 0) info.Append('\n');
+                    info.Append(bar.Name).Append("：").Append(bar.Value.ToString("0.##"));
+                    if (!string.IsNullOrEmpty(bar.Description)) info.Append("  ").Append(bar.Description);
+                }
+            specialInformation.text = info.Length > 0 ? info.ToString() : character == null ? "尚未结识此人物，无法获得相关信息" : "暂无特殊信息";
+            var hover = specialInformation.GetComponent<DetailsHoverTarget>();
+            if (hover != default) hover.Bind(panel, characterName.text, info.ToString());
 
-        private void RenderWorld()
+        }
+        private void RenderWorldSelectors()
         {
-            DetailsViewUI.Clear(world);
-            DetailsViewUI.Text(world, font, "Title", data.World.Title, new Vector2(0, .89f), Vector2.one, 30);
-            var content = DetailsViewUI.Scroll(world, "WorldProgress", new Vector2(0, .01f), new Vector2(1, .85f));
-            RenderBars(content, data.WorldBars, data.World.Heading + "\n" + data.World.Description);
+            DetailsViewUI.Clear(selectorContent); selectors.Clear();
+            bool valid = false;
+            foreach (var bar in data.WorldBars) if (bar.Key == worldKey) valid = true;
+            if (!valid) worldKey = data.WorldBars.Count > 0 ? data.WorldBars[0].Key : null;
+            for (int i = 0; i < Mathf.Max(4, data.WorldBars.Count); i++)
+            {
+                var bar = i < data.WorldBars.Count ? data.WorldBars[i] : null;
+                var image = DetailsViewUI.Box(selectorContent, bar == null ? "Empty_" + i : "Selector_" + bar.Key, Vector2.zero, Vector2.one, Color.white);
+                image.sprite = worldIdleButton;
+                image.rectTransform.sizeDelta = new Vector2(255, 107);
+                image.gameObject.AddComponent<LayoutElement>().preferredHeight = 107;
+                selectors.Add(image);
+                if (bar == null) { image.raycastTarget = false; continue; }
+                var button = image.gameObject.AddComponent<Button>(); button.targetGraphic = image;
+                button.transition = Selectable.Transition.None; button.navigation = new Navigation { mode = Navigation.Mode.None };
+                string key = bar.Key;
+                button.onClick.AddListener(() => panel.SelectWorldProgress(key));
+                Label(image.transform, "Name", bar.Name, new Vector2(.08f, .08f), new Vector2(.92f, .92f), 31, TextAlignmentOptions.Center);
+            }
+            selectorContent.parent.GetComponent<ScrollRect>().verticalNormalizedPosition = 1;
+            RenderWorldProgress();
         }
-
-        private void RenderBars(RectTransform content, IReadOnlyList<DetailsProgressData> bars, string empty)
+        public bool SelectWorldProgress(string key)
         {
-            if (bars.Count == 0)
-            {
-                var label = DetailsViewUI.Text(content, font, "Empty", empty, Vector2.zero, Vector2.one, 24, TextAlignmentOptions.Center);
-                label.gameObject.AddComponent<LayoutElement>().preferredHeight = 130;
-            }
-            foreach (var bar in bars)
-            {
-                var card = DetailsViewUI.Box(content, "Progress_" + bar.Key, Vector2.zero, Vector2.one, DetailsViewUI.Card);
-                card.gameObject.AddComponent<LayoutElement>().preferredHeight = 112;
-                DetailsViewUI.Text(card.transform, font, "Name", bar.Name, new Vector2(.03f, .59f), new Vector2(.7f, .96f));
-                DetailsViewUI.Text(card.transform, font, "Value", bar.Value.ToString("0.##") + "  [" + bar.Min.ToString("0.##") + "–" + bar.Max.ToString("0.##") + "]",
-                    new Vector2(.7f, .59f), new Vector2(.97f, .96f), 22, TextAlignmentOptions.MidlineRight);
-                var track = DetailsViewUI.Box(card.transform, "Track", new Vector2(.03f, .43f), new Vector2(.97f, .52f), new Color(.08f, .06f, .11f));
-                track.raycastTarget = false;
-                float amount = bar.Max > bar.Min ? Mathf.Clamp01((bar.Value - bar.Min) / (bar.Max - bar.Min)) : 0;
-                DetailsViewUI.Box(track.transform, "Fill", Vector2.zero, new Vector2(amount, 1), DetailsViewUI.Accent).raycastTarget = false;
-                var lower = DetailsViewUI.Text(card.transform, font, "LowerDescription", bar.LowerDescription,
-                    new Vector2(.03f, .04f), new Vector2(.49f, .36f), 18);
-                var upper = DetailsViewUI.Text(card.transform, font, "UpperDescription", bar.UpperDescription,
-                    new Vector2(.51f, .04f), new Vector2(.97f, .36f), 18, TextAlignmentOptions.MidlineRight);
-                lower.raycastTarget = upper.raycastTarget = true;
-                lower.gameObject.AddComponent<DetailsHoverTarget>().Bind(panel, bar.Name, bar.LowerDescription);
-                upper.gameObject.AddComponent<DetailsHoverTarget>().Bind(panel, bar.Name, bar.UpperDescription);
-                card.gameObject.AddComponent<DetailsHoverTarget>().Bind(panel, bar.Name, bar.Description);
-            }
+            if (data == null) return false;
+            foreach (var bar in data.WorldBars)
+                if (bar.Key == key)
+                {
+                    worldKey = key; RenderWorldProgress(); panel.SelectPage(DetailsPanel.Page.World); return true;
+                }
+            return false;
         }
-
+        private void RenderWorldProgress()
+        {
+            DetailsProgressData selected = null;
+            for (int i = 0; i < data.WorldBars.Count; i++)
+            {
+                bool active = data.WorldBars[i].Key == worldKey;
+                selectors[i].sprite = active ? worldSelectedButton : worldIdleButton;
+                if (active) selected = data.WorldBars[i];
+            }
+            worldDescription.text = selected != null ? selected.Description : data.World.Heading;
+            worldValue.text = selected != null ? selected.Name + "：" + selected.Value.ToString("0.##") + " / " + selected.Max.ToString("0.##") : "";
+            worldFill.fillAmount = selected != null ? Ratio(selected) : 0;
+            lower.text = selected != null ? selected.Min.ToString("0.##") : "";
+            upper.text = selected != null ? selected.Max.ToString("0.##") : "";
+            lowerDescription.text = selected != null ? selected.LowerDescription : data.World.Description;
+            upperDescription.text = selected != null ? selected.UpperDescription : "";
+            BindHover(lower, selected, true); BindHover(upper, selected, false);
+        }
+        private void BindHover(TMP_Text label, DetailsProgressData bar, bool isLower)
+        {
+            var hover = label.GetComponent<DetailsHoverTarget>();
+            if (hover == default) hover = label.gameObject.AddComponent<DetailsHoverTarget>();
+            label.raycastTarget = bar != null;
+            hover.Bind(panel, bar != null ? bar.Name : "", bar != null ? (isLower ? bar.LowerDescription : bar.UpperDescription) : "");
+        }
+        private static float Ratio(DetailsProgressData bar) => bar.Max > bar.Min ? Mathf.Clamp01((bar.Value - bar.Min) / (bar.Max - bar.Min)) : 0;
+        private TMP_Text Label(Transform parent, string name, string value, Vector2 min, Vector2 max, float size, TextAlignmentOptions alignment = TextAlignmentOptions.TopLeft)
+        {
+            var label = DetailsViewUI.Text(parent, font, name, value, min, max, size, alignment);
+            if (size >= 29 && headingFont != default) label.font = headingFont;
+            label.textWrappingMode = TextWrappingModes.Normal;
+            label.color = new Color(.35f, .19f, .07f); return label;
+        }
         public void Clear()
         {
-            data = null;
-            characterId = null;
-            RelationshipPageIndex = 0;
-            if (relationships != null) DetailsViewUI.Clear(relationships);
-            if (world != null) DetailsViewUI.Clear(world);
+            data = null; characterId = null; worldKey = null; RelationshipPageIndex = 0;
+            DetailsViewUI.Clear(characterGrid); DetailsViewUI.Clear(selectorContent); DetailsViewUI.Clear(introductionContent);
+            selectors.Clear(); characterButtons.Clear();
+            portrait.sprite = characterSilhouette;
+            characterName.text = "人物姓名";
+            specialInformation.text = string.Empty;
+            familiarityFill.fillAmount = 0; familiarityValue.text = string.Empty;
+            worldFill.fillAmount = 0;
+            worldDescription.text = worldValue.text = lower.text = upper.text = lowerDescription.text = upperDescription.text = string.Empty;
+        }
+        private void OnDestroy()
+        {
+            if (previous != default) previous.onClick.RemoveListener(PreviousPage);
+            if (next != default) next.onClick.RemoveListener(NextPage);
         }
     }
 }

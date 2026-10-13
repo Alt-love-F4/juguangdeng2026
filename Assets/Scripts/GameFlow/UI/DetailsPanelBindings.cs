@@ -14,15 +14,18 @@ namespace Spotlight.GameFlow
         [SerializeField] private RectTransform fill;
         [SerializeField] private DetailsHoverTarget hover;
 
-        public bool IsValid => nameText != default && valueText != default && fill != default && hover != default;
+        public bool IsValid => nameText != default && valueText != default && hover != default;
 
         public void Render(DetailsPanel panel, DetailsAttributeData data)
         {
             nameText.text = data.Name;
             valueText.text = data.Value + " / 20";
-            Vector2 max = fill.anchorMax;
-            max.x = data.Value / 20f;
-            fill.anchorMax = max;
+            if (fill != default)
+            {
+                Vector2 max = fill.anchorMax;
+                max.x = data.Value / 20f;
+                fill.anchorMax = max;
+            }
             hover.Bind(panel, data.Name, data.Description);
         }
     }
