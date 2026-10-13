@@ -91,6 +91,56 @@ namespace Spotlight.FreeCafe.Editor
             Debug.Log("[Workstation] 同一 CoffeeShop 场景：左上配料、中央制作、右侧出品，已保存");
         }
 
+        [MenuItem("Tools/Free Cafe/Apply Extraction Jug Art And Placement")]
+        public static void ApplyExtractionJug()
+        {
+            if (EditorApplication.isPlayingOrWillChangePlaymode || EditorApplication.isCompiling)
+                throw new InvalidOperationException("先退出运行并等待编译");
+            var scene = SceneManager.GetActiveScene();
+            if (scene.isDirty) throw new InvalidOperationException("请先保存场景，不覆盖未保存修改");
+            if (scene.path != FreeCafeProductionSceneBuilder.ScenePath)
+                scene = EditorSceneManager.OpenScene(FreeCafeProductionSceneBuilder.ScenePath);
+            var runtime = UnityEngine.Object.FindFirstObjectByType<FreeCafeRuntime>();
+            if (runtime == null) throw new InvalidOperationException("CoffeeShop 缺少运行时");
+            FreeEntityView extractor = null;
+            foreach (var view in FreeCafeSceneLayout.FindAuthoredEntities(runtime))
+                if (view.AuthoringEntityId == "v.extractor") extractor = view;
+            if (extractor == null) throw new InvalidOperationException("场景缺少 v.extractor");
+            var catalog = JsonUtility.FromJson<CafeCatalog>(runtime.catalogAsset.text);
+            var entry = Array.Find(catalog.layout, item => item.id == "v.extractor");
+            var spec = Array.Find(catalog.entities, item => item.id == entry.specId);
+            Directory.CreateDirectory("output/extractor-art");
+            File.Copy(scene.path, "output/extractor-art/CoffeeShop-before-extractor.unity", true);
+            FreeCafeArtBinder.Bind();
+            runtime.prefabLibrary = FreeCafeEntityPrefabBuilder.EnsureCatalog(catalog, runtime.artLibrary,
+                runtime.entityPrefab, new HashSet<string> { spec.id });
+            var counter = runtime.areaRoots[(int)AreaId.Counter];
+            Undo.RecordObject(extractor.transform, "Place extraction jug on workstation");
+            Undo.RecordObject(extractor, "Apply extraction jug art");
+            var parentScale = extractor.transform.parent.lossyScale;
+            var counterScale = counter.lossyScale;
+            extractor.transform.localScale = new Vector3(counterScale.x / parentScale.x,
+                counterScale.y / parentScale.y, counterScale.z / parentScale.z);
+            extractor.ConfigureAuthoring(spec, runtime.artLibrary, entry.id, entry.x, entry.y);
+            extractor.transform.position = counter.TransformPoint(new Vector3(entry.x, entry.y, 0));
+            extractor.body.enabled = true;
+            extractor.body.color = Color.white;
+            extractor.label.fontSize = 2.2f;
+            extractor.ConfigureGlassCup();
+            foreach (var component in new UnityEngine.Object[] { extractor, extractor.transform, extractor.body,
+                extractor.body.transform, extractor.hitbox, extractor.label, extractor.label.transform })
+            {
+                PrefabUtility.RecordPrefabInstancePropertyModifications(component);
+                EditorUtility.SetDirty(component);
+            }
+            EditorUtility.SetDirty(runtime);
+            EditorSceneManager.MarkSceneDirty(scene);
+            EditorSceneManager.SaveScene(scene);
+            AssetDatabase.SaveAssets();
+            Debug.Log("[Workstation] v.extractor 已使用独立玻璃萃取壶素材，放置于研磨器与咖啡壶之间；碰撞范围 "
+                + extractor.hitbox.size + "，台面坐标 " + new Vector2(entry.x, entry.y));
+        }
+
         private static void SetCard(Transform target, Vector2 anchor, Vector2 position, Vector2 size)
         {
             if (!(target is RectTransform rect)) return;

@@ -25,6 +25,16 @@
       "capacityMl": 400
     },
     {
+      "id": "container.extractor",
+      "label": "咖啡萃取壶",
+      "artId": "container.extractor",
+      "capabilities": 521,
+      "width": 1.45,
+      "height": 1.4,
+      "capacity": 2,
+      "capacityMl": 400
+    },
+    {
       "id": "beans",
       "label": "咖啡豆",
       "artId": "beans",
@@ -732,6 +742,13 @@
       "area": 1,
       "x": -5.9,
       "y": -1.85
+    },
+    {
+      "id": "v.extractor",
+      "specId": "container.extractor",
+      "area": 1,
+      "x": -4.2,
+      "y": -1.95
     },
     {
       "id": "m.brewer",

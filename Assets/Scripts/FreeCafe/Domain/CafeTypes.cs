@@ -16,7 +16,8 @@ namespace Spotlight.FreeCafe
         Customer = 32,   // 顾客，可以接收餐品
         Delivery = 64,   // 出餐口
         Discard = 128,   // 丢弃区
-        BusinessControl = 256 // 固定的开店交互实体
+        BusinessControl = 256, // 固定的开店交互实体
+        HotExtraction = 512 // 容器内的热水与咖啡粉接触时自动萃取
     }
 
     /// <summary>区域编号。</summary>

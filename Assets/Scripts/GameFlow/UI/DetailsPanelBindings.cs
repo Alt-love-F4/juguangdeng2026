@@ -5,6 +5,43 @@ using UnityEngine.UI;
 
 namespace Spotlight.GameFlow
 {
+    /// <summary>The PSD exports bake different page interiors into their paper sprites.
+    /// Keep one persistent paper Image and swap only this artwork; common chrome never fades.</summary>
+    [Serializable]
+    public sealed class DetailsPageSurfaceBinding
+    {
+        [SerializeField] private Sprite sprite;
+        [SerializeField] private Vector2 position;
+        [SerializeField] private Vector2 size;
+        [SerializeField] private Vector2 pivot;
+        [SerializeField] private Vector3 scale;
+        [SerializeField] private Color color = Color.white;
+        [SerializeField] private bool visible = true;
+
+        public DetailsPageSurfaceBinding(Image source)
+        {
+            sprite = source.sprite;
+            position = source.rectTransform.anchoredPosition;
+            size = source.rectTransform.sizeDelta;
+            pivot = source.rectTransform.pivot;
+            scale = source.rectTransform.localScale;
+            color = source.color;
+            visible = source.enabled && source.gameObject.activeSelf;
+        }
+        public void Render(Image target)
+        {
+            target.sprite = sprite;
+            target.color = color;
+            target.enabled = visible;
+            RectTransform rect = target.rectTransform;
+            rect.anchorMin = rect.anchorMax = new Vector2(.5f, .5f);
+            rect.pivot = pivot;
+            rect.anchoredPosition = position;
+            rect.sizeDelta = size;
+            rect.localScale = scale;
+        }
+    }
+
     /// <summary>Serialized component references only; gameplay/display values live in DetailsPanelData.</summary>
     [Serializable]
     public sealed class DetailsAttributeBinding

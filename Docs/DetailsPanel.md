@@ -6,12 +6,12 @@
 ## 布局转换
 
 `DetailsPanelPrefabBuilder` 将 PSD 的 4096×2304 画布统一转换为 2048×1152 逻辑坐标。
-每个 SpriteRenderer 图层保留名称、位置、原始纹理尺寸、枢轴、缩放和绘制顺序，转换为 RectTransform + Image。
+内容 SpriteRenderer 图层保留名称、位置、原始纹理尺寸、枢轴、缩放和绘制顺序，转换为 RectTransform + Image。重复的公共图层在转换后合并。
 原文字图层保留为禁用的 Image，文字由相应位置的 TMP 控件显示，避免旧文字与动态数据重叠。
-原生装饰、地图、纸张、头像框、属性卡底和页签不单独拉伸；`DetailsCompositionFit` 对整幅布局等比适配 UIKit 的父画布。
+地图背景保持隐藏；原生装饰、纸张、头像框、属性卡底和页签不单独拉伸；`DetailsCompositionFit` 对整幅布局等比适配 UIKit 的父画布。
 
 - 页签视觉顺序为人物关系、我的信息、世界情况。接口枚举仍为 MyInfo / Relationships / World。
-- 每页保留自己的选中页签图层。点击热区独立于装饰图片。
+- 共用一个选中页签标记和三个未选中底图，切页只更新标记位置与选中状态。点击热区独立于装饰图片。
 - 我的信息保留左侧照片、左下说明卡、右侧人物简介、横排四项属性和专精区域。
   属性使用 HorizontalLayoutGroup；专精使用三列 GridLayoutGroup + ScrollRect。无专精时显示“暂无专精”。
 - 人物关系保留左侧头像与介绍、左边熟悉程度条、右侧七列五行格子。
@@ -22,7 +22,7 @@
 - 我的信息悬停说明使用 PSD 固定悬挂卡位置；其他页的说明卡跟随指针并限制在窗口内容范围内。
 
 转换菜单：`Tools > Game Flow > Rebuild Details From PSD`。此菜单重新生成工作预制体，会覆盖工作预制体上的手工修改；源 PSD 导出资源不会被覆盖。
-`Create Missing Details Panel` 仅补建缺失资源；`Bind Details Panel Components` 仅在旧版预制体尚未转换时执行迁移。
+`Create Missing Details Panel` 仅补建缺失资源；`Bind Details Panel Components` 补全旧版转换，并将尚未合并的正式预制体原地迁移到公共结构。
 `Apply Formal Details Art` 是显式重新转换入口。
 
 ## 快照与接口
@@ -128,3 +128,21 @@ view.ScrollTo(DetailsScrollRegion.Specializations, 1f);
 view.ShowAttributeDescription(DetailsAttributeKind.Wisdom);
 view.RefreshFromSource();
 ```
+
+## 公共底板与切页
+
+`Window/SharedFrame` 是常驻公共层，包含 `Backplate` 和唯一的 `PaperSurface`。
+原地图层合并为 `MapBackground` 并保持停用；切页不会恢复它。
+`Window/SharedChrome` 共用页签文字、三个未选中底图、一个移动的选中标记、提示文字和关闭装饰。
+三页根节点只保留各自内容和交互，页签淡入仅作用于内容根节点，公共层不跟随淡入，也不切换激活状态。
+
+PSD 纸面素材包含人物网格底纹、世界时钟及各页纸面轮廓差异，无法直接把这几张 PNG 当成同一图片。
+这些差异作为 `DetailsPageSurfaceBinding` 数据，由同一个公共 `PaperSurface` Image 更新，保留原 PSD 坐标和画面；
+共同底板、页签及关闭装饰始终复用同一实例。没有叠放三份完整面板，也没有淡出或淡入整张底图。
+
+已有预制体使用 `Tools > Game Flow > Merge Details Shared Frame` 原地迁移，保留内容控件和绑定；重复执行不会再次拆分。
+`Rebuild Details From PSD` 同样生成公共结构，并默认隐藏地图背景。
+`Assets/Art/Func/UGUI/DetailsIdleTab.png` 是从原未选中页签图层裁出的单个底图，源 PSD 图片不变。
+
+
+公共底板改造后，`DetailsPanelTests` 的 17 个用例全部通过（`output/details-panel/shared-frame-tests.json`），包含公共层常驻、隐藏背景、真实页签点击及暂停切页验证。
