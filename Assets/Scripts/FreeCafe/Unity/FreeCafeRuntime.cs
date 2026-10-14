@@ -36,6 +36,10 @@ namespace Spotlight.FreeCafe
         public bool IsDragging => draggedView!=null;
         public FreeEntityView DraggedView => draggedView;
         public bool GameplayBlocked => (miniGameGateway != null && miniGameGateway.BlocksInput) || (gameFlow != null && gameFlow.IsMapOpen) || (World != null && World.ProductionEnabled && !string.IsNullOrEmpty(World.State.production.miniGameToken)) || Time.timeScale<=0 || DialoguePanel.IsAnyPlaying || (dayFlow != null && dayFlow.BlocksGameplayInput);
+        private CafeVisitBridge cafeVisits;
+        private bool pendingBusinessStart;
+        public Sprite CafeVisitSprite(string customerId) => cafeVisits?.SeatedSprite(customerId);
+        public bool BusinessSimulationPaused => PresentationPauseRegistry.IsPaused || (cafeVisits != null && cafeVisits.HasStageHandoff);
         private DayFlowController dayFlow;
         private GameFlowBootstrap gameFlow;
         public event Action ViewChanged;
@@ -137,7 +141,7 @@ namespace Spotlight.FreeCafe
                 ShowHint("点击来源取出物品，拖拽到任意位置；拖到容器或设备会尝试组合。Shift 拖拽仅摆放。");
             Debug.Log("[FreeCafe] 自由操作世界已启动：无工作台插槽、无订单步骤门禁。",this);
         }
-        private void OnDisable() => CancelDrag();
+        private void OnDisable() { CancelDrag(); cafeVisits?.Dispose(); cafeVisits = null; }
         private void OnDestroy()
         {
             if(World!=null) World.Changed-=SyncViews;
@@ -147,7 +151,15 @@ namespace Spotlight.FreeCafe
         private void Update()
         {
             if(World==null) return;
-            World.Tick(Time.deltaTime);
+            bool sessionReady = gameFlow == null || gameFlow.SessionState == GameSessionState.Playing;
+            if (sessionReady)
+            {
+                if (cafeVisits == null) cafeVisits = new CafeVisitBridge(this);
+                cafeVisits.Pump();
+                if (pendingBusinessStart) TryStartBusiness();
+                if (!BusinessSimulationPaused && (Spotlight.Narrative.NarrativeRuntime.Instance == null || cafeVisits.Ready)) World.Tick(Time.deltaTime);
+                cafeVisits.Pump();
+            }
             if(IsDragging && draggingVessel && !InputBlocked) UpdateVesselInput();
             // GameFlowBootstrap owns the global Escape/pause flow. FreeCafe only
             // cancels an active drag; the shared pause panel handles everything else.
@@ -266,7 +278,7 @@ namespace Spotlight.FreeCafe
             if(World==null || view==null || !view.CanInteract || InputBlocked || IsDragging || dragFinishedFrame==Time.frameCount) return;
             var entity=World.Find(view.EntityId); if(entity==null || entity.area!=World.State.currentArea) return;
             var spec=World.Spec(entity.specId);
-            if(spec.Has(Capability.BusinessControl)) { Report(World.ActivateBusinessControl(entity.id)); return; }
+            if(spec.Has(Capability.BusinessControl)) { StartBusiness(); return; }
             if(World.ProductionEnabled && World.IsMilkPitcher(entity)) { SelectedId=entity.id; Report(World.FrothMilk(entity.id)); return; }
             if(World.ProductionEnabled && spec.Has(Capability.Source) && World.Spec(spec.sourceItemId).Has(Capability.Container))
             { Report(World.SelectServingCup(entity.id)); return; }
@@ -313,6 +325,7 @@ namespace Spotlight.FreeCafe
             }
             else if(spec.Has(Capability.Customer))
             {
+                if (cafeVisits != null && cafeVisits.Click(entity.id)) return;
                 foreach(var request in World.State.requests) if(request.customerId==entity.id)
                 {
                     World.Focus(request.id);
@@ -724,7 +737,17 @@ namespace Spotlight.FreeCafe
             var saves=new GameSaveService();
             Report(saves.TryQuickSave(data,out var slot,out var error) ? ActionResult.Yes("已保存到空槽位 "+slot) : ActionResult.No("保存失败："+error));
         }
-        public void StartBusiness() { if(!InputBlocked) Report(World.StartDay()); }
+        public void StartBusiness() { if(!InputBlocked) RequestBusinessStart(); }
+        public void RequestBusinessStart() { if (!GameplayBlocked) { pendingBusinessStart = true; TryStartBusiness(); } }
+        private void TryStartBusiness()
+        {
+            if (cafeVisits == null) cafeVisits = new CafeVisitBridge(this);
+            var ncs = Spotlight.Narrative.NarrativeRuntime.Instance;
+            if (ncs != null && (!cafeVisits.Pump() || !ncs.Controller.CanCaptureSnapshot || ncs.Controller.IsBusy || cafeVisits.HasStageHandoff)) return;
+            pendingBusinessStart = false;
+            Report(World.StartDay());
+            cafeVisits.Pump();
+        }
         public void EndBusiness() { if(!InputBlocked) Report(World.EndDay()); }
         public void StartDayFlowBusiness() => StartBusiness();
         public void EndDayFlowBusiness() => EndBusiness();
