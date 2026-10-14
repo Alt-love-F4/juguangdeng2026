@@ -65,6 +65,8 @@ namespace Spotlight.GameFlow
         public string Specialization => selections[3] < 0 ? "" : SpecializationIds[selections[3]];
         public string Background => IsComplete ? $"出身{Labels[0][selections[0]]}，曾修习{Labels[3][selections[3]]}；{Labels[1][selections[1]]}、{Labels[2][selections[2]]}，如今已是{Labels[4][selections[4]]}的人。" : "";
 
+        public bool ShowsOptions(int group, int expandedGroup = -1) => selections[group] < 0 || expandedGroup == group;
+
         public string BuildBody(string hoveredLink = null, int expandedGroup = -1)
         {
             string Link(string id, string label, bool selected = false)
@@ -75,7 +77,7 @@ namespace Spotlight.GameFlow
             string Word(int group)
             {
                 string word = Link($"slot:{group}", selections[group] < 0 ? "______" : Labels[group][selections[group]], selections[group] >= 0);
-                if (expandedGroup != group) return word;
+                if (!ShowsOptions(group, expandedGroup)) return word;
                 var options = new StringBuilder("（选项：");
                 for (int i = 0; i < Labels[group].Length; i++)
                 {
@@ -84,7 +86,7 @@ namespace Spotlight.GameFlow
                 }
                 return word + options.Append("）");
             }
-            return "我亲爱的" + Link("name", PlayerName.Length == 0 ? "______" : PlayerName, PlayerName.Length > 0) + "：\n\n" +
+            return "我亲爱的" + Link("name", PlayerName.Length == 0 ? "______（点击输入姓名）" : PlayerName, PlayerName.Length > 0) + "：\n\n" +
                 "我是你的叔叔，杜瓦尔·米尼耶。许久未见，不知你近来可好。\n" +
                 "月寒日暖，冬去春来，我们在北境留下的珍贵的回忆不知你还记得多少，你幼时出身" + Word(0) + "，\n" +
                 "但父母忙碌，你便常常找到我作你的玩伴。662年，我遭逢海难，身患胃疾，那时年幼的你虽不是我的儿女，你" + Word(1) + "的心却驱使着你主动提出照顾我，陪我度过了那段艰难的时光。我永远不会忘记那时你" + Word(2) + "的身影。\n\n" +

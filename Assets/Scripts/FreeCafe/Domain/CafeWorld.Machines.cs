@@ -31,7 +31,9 @@ namespace Spotlight.FreeCafe
             op = OperationFor(machine.specId, item.specId);
             if (op != null && Spec(item.specId).Has(Capability.Portion))
             {
-                return new Portion { specId = item.specId, units = item.units, quality = item.quality };
+                return item.portionPayload != null ? CopyPortion(item.portionPayload)
+                    : new Portion { specId = item.specId, units = item.units, quality = item.quality,
+                        temperatureCelsius = TemperatureCelsius(item), temperature = TemperatureBand(TemperatureCelsius(item)) };
             }
 
             if (Spec(item.specId).Has(Capability.Container))
@@ -92,7 +94,9 @@ namespace Spotlight.FreeCafe
             if (machine.task != null && machine.task.phase == MachinePhase.Ready)
             {
                 var output = Find(machine.task.inputId);
-                AddPortion(item, new Portion { specId = output.specId, units = output.units, quality = output.quality });
+                AddPortion(item, output.portionPayload != null ? CopyPortion(output.portionPayload)
+                    : new Portion { specId = output.specId, units = output.units, quality = output.quality,
+                        temperatureCelsius = TemperatureCelsius(output), temperature = TemperatureBand(TemperatureCelsius(output)) });
                 State.entities.Remove(output);
                 machine.task = null;
                 Notify();
@@ -112,6 +116,11 @@ namespace Spotlight.FreeCafe
                     quality = portion.quality,
                     area = machine.area
                 };
+                var payload = CopyPortion(portion);
+                ScalePortionAmounts(payload, 1f / portion.units);
+                payload.units = 1;
+                input.portionPayload = payload;
+                ScalePortionAmounts(portion, (portion.units - 1f) / portion.units);
                 portion.units--;
                 if (portion.units == 0)
                 {
@@ -257,6 +266,12 @@ namespace Spotlight.FreeCafe
             var task = machine.task;
             var input = Find(task.inputId);
             input.specId = Operation(task.operationId).outputSpecId;
+            if (input.portionPayload != null)
+            {
+                input.portionPayload.specId = input.specId;
+                if (input.specId == "hotwater" || input.specId == "hotmilk")
+                    SetTemperature(input.portionPayload, Prep.boilingTemperatureCelsius);
+            }
             task.remaining = 0;
             task.phase = MachinePhase.Ready;
         }
@@ -288,7 +303,8 @@ namespace Spotlight.FreeCafe
                 x = machine.x,
                 y = machine.y,
                 units = output.units,
-                quality = output.quality
+                quality = output.quality,
+                portionPayload = CopyPortion(output.portionPayload)
             };
         }
 
@@ -382,7 +398,8 @@ namespace Spotlight.FreeCafe
             var cup = Find(cupId);
             if (cup == null || !Spec(cup.specId).Has(Capability.Container) || Locked(cup)
                 || cup.contents.Find(p => p.specId == "coffee") == null
-                || cup.contents.Find(p => p.specId == "hotmilk") == null)
+                || cup.contents.Find(p => SameIngredient(p.specId, "milk")
+                    && TemperatureBand(TemperatureCelsius(p)) != LiquidTemperature.Room) == null)
             {
                 return ActionResult.No("先准备含咖啡和热牛奶的杯子");
             }

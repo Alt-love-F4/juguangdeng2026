@@ -51,15 +51,14 @@ namespace Spotlight.GameFlow.Tests
         {
             var draft = new FirstDayLetterDraft();
             draft.SetName("小米");
-            string collapsed = draft.BuildBody();
-            string body = draft.BuildBody(expandedGroup: group);
-            AssertExpandedGroup(body, group, "______");
-            Assert.That(draft.Selection(group), Is.EqualTo(-1), "Rendering choices must not fill the blank.");
-            Assert.That(draft.BuildBody(), Is.EqualTo(collapsed), "Expanded state belongs to the caller, not the draft.");
-            StringAssert.DoesNotContain("choice:", collapsed);
+            string initial = draft.BuildBody();
+            for (int i = 0; i < FirstDayLetterDraft.Labels.Length; i++)
+                StringAssert.Contains($"<link=\"choice:{i}:0\">", initial);
+            Assert.That(draft.Selection(group), Is.EqualTo(-1));
             for (int i = 0; i < FirstDayLetterDraft.Labels.Length; i++) draft.Select(i, 0);
-            collapsed = draft.BuildBody();
-            body = draft.BuildBody(expandedGroup: group);
+            string collapsed = draft.BuildBody();
+            StringAssert.DoesNotContain("choice:", collapsed);
+            string body = draft.BuildBody(expandedGroup: group);
             AssertExpandedGroup(body, group, FirstDayLetterDraft.Labels[group][0]);
             Assert.That(draft.Selection(group), Is.Zero);
             Assert.That(draft.BuildBody(), Is.EqualTo(collapsed));
@@ -75,6 +74,17 @@ namespace Spotlight.GameFlow.Tests
                 foreach (string effect in effects) StringAssert.DoesNotContain(effect, collapsed);
             for (int i = 0; i < FirstDayLetterDraft.Labels[group].Length; i++)
                 if (i != option) StringAssert.DoesNotContain(FirstDayLetterDraft.Labels[group][i], collapsed);
+        }
+
+        [Test]
+        public void EmptyNameAlwaysIncludesClickableRedPromptUntilFilled()
+        {
+            var draft = new FirstDayLetterDraft();
+            StringAssert.Contains("______（点击输入姓名）", LinkText(draft.BuildBody(), "name"));
+            StringAssert.Contains("<link=\"name\"><color=#B3000F>", draft.BuildBody());
+            draft.SetName("小米");
+            StringAssert.DoesNotContain("点击输入姓名", draft.BuildBody());
+            Assert.That(LinkText(draft.BuildBody(), "name"), Is.EqualTo("小米"));
         }
 
         private static void AssertExpandedGroup(string body, int group, string slotWord)

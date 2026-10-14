@@ -30,7 +30,17 @@
       "artId": "container.extractor",
       "capabilities": 521,
       "width": 1.45,
-      "height": 1.4,
+      "height": 1.2,
+      "capacity": 2,
+      "capacityMl": 400
+    },
+    {
+      "id": "container.extractor.filter",
+      "label": "可拆滤杯",
+      "artId": "container.extractor.filter",
+      "capabilities": 9,
+      "width": 0.98,
+      "height": 0.7,
       "capacity": 2,
       "capacityMl": 400
     },
@@ -61,6 +71,14 @@
     {
       "id": "milk",
       "label": "冷牛奶",
+      "artId": "milk",
+      "capabilities": 5,
+      "width": 0.65,
+      "height": 0.65
+    },
+    {
+      "id": "milkfoam",
+      "label": "奶泡",
       "artId": "milk",
       "capabilities": 5,
       "width": 0.65,
@@ -396,6 +414,30 @@
       "acceptsContainer": true
     },
     {
+      "id": "foam-milk",
+      "label": "打发牛奶成奶泡",
+      "machineSpecId": "machine.mixer",
+      "inputSpecId": "milk",
+      "outputSpecId": "milkfoam",
+      "seconds": 4,
+      "control": 1,
+      "clicks": 3,
+      "clickInterval": 0.5,
+      "acceptsContainer": true
+    },
+    {
+      "id": "foam-hotmilk",
+      "label": "打发热牛奶成奶泡",
+      "machineSpecId": "machine.mixer",
+      "inputSpecId": "hotmilk",
+      "outputSpecId": "milkfoam",
+      "seconds": 4,
+      "control": 1,
+      "clicks": 3,
+      "clickInterval": 0.5,
+      "acceptsContainer": true
+    },
+    {
       "id": "cocoa",
       "label": "调制可可",
       "machineSpecId": "machine.mixer",
@@ -409,27 +451,42 @@
   "products": [
     {
       "id": "espresso",
-      "label": "意式浓缩",
+      "label": "精粹咖啡",
       "cupSpecId": "cup.small",
       "price": 50,
       "ingredients": [
         {
           "specId": "coffee",
           "units": 1,
-          "milliliters": 200
+          "milliliters": 200,
+          "coffeeKind": "essence"
         }
       ],
       "unlockReputation": 0,
       "qualityPriceStep": 50,
       "requiresLatteArt": false,
       "recipeId": "espresso",
-      "description": "浓郁的咖啡原液，突出咖啡本身的风味。",
+      "description": "计时注水完成的精粹咖啡，品质由时间、水量和均匀性决定。",
       "minimumScore": 60,
       "maxRemakes": 1,
       "requiredTemperature": 2,
       "idealCoffeeRatio": 1.0,
       "idealSweetness": 0,
-      "tutorial": "点击杯具选择杯型。咖啡豆拖入研磨器，点击手柄开始12秒研磨；继续点击每次加速1秒。将出粉抽屉拖到咖啡壶。清水拖入加热壶，点击加热4秒后立即拖到咖啡壶上方，向下拖动倾倒；抬起停止，建议约7.5秒注入200ml。再把咖啡下壶拖到出餐杯上方倾倒。按参考用量加入其余液体：牛奶/可可由加热壶加工，沸腾5秒后变温热10秒，再冷却。最后加小料，点击出品。拉花按钮本轮只触发预留入口，不强制要求。"
+      "evaluation": {
+        "amounts": [
+          { "ingredientId": "coffee", "coffeeKind": "essence", "idealMl": 200, "idealGrams": 0, "tolerance": 0.2, "minimumStandard": 70, "classificationMinimumRatio": 0, "classificationMaximumRatio": 1, "classificationMinimumGrams": 0, "classificationMaximumGrams": 0, "minimumTemperature": -1 }
+        ],
+        "amountWeight": 0.65,
+        "standardWeight": 0.35,
+        "extraIngredientPenalty": 0.15,
+        "enforceCup": false,
+        "classify": true,
+        "classificationPriority": 100,
+        "concentrationWeight": 0.2,
+        "idealCoffeeStrength": 0.06,
+        "coffeeStrengthTolerance": 0.2
+      },
+      "tutorial": "参考目标：小杯、精粹咖啡200ml，咖啡水准至少70。研磨咖啡豆后将12g咖啡粉装入精密萃取滤杯，以热水计时注入；参考7.5秒、200ml并保持均匀，停止注水结算后才得到精粹咖啡。加热普通冷萃只能得到黑咖啡，不能代替精粹。倒入杯中交付；评价看最终成分、含量与水准，不检查加料顺序。"
     },
     {
       "id": "latte",
@@ -440,25 +497,48 @@
         {
           "specId": "coffee",
           "units": 1,
-          "milliliters": 180
+          "milliliters": 180,
+          "coffeeKind": "essence"
         },
         {
           "specId": "hotmilk",
           "units": 2,
-          "milliliters": 220
+          "milliliters": 200,
+          "temperature": 2
+        },
+        {
+          "specId": "milkfoam",
+          "units": 1,
+          "milliliters": 20
         }
       ],
       "unlockReputation": 0,
       "qualityPriceStep": 50,
       "requiresLatteArt": true,
       "recipeId": "latte",
-      "description": "咖啡原液与牛奶相融合，口感醇厚顺滑。",
+      "description": "精粹咖啡液、热牛奶与薄奶泡组成拿铁；推荐量与类型识别分开。",
       "minimumScore": 60,
       "maxRemakes": 1,
       "requiredTemperature": 2,
       "idealCoffeeRatio": 0.45,
       "idealSweetness": 0,
-      "tutorial": "点击杯具选择杯型。咖啡豆拖入研磨器，点击手柄开始12秒研磨；继续点击每次加速1秒。将出粉抽屉拖到咖啡壶。清水拖入加热壶，点击加热4秒后立即拖到咖啡壶上方，向下拖动倾倒；抬起停止，建议约7.5秒注入200ml。再把咖啡下壶拖到出餐杯上方倾倒。按参考用量加入其余液体：牛奶/可可由加热壶加工，沸腾5秒后变温热10秒，再冷却。最后加小料，点击出品。拉花按钮本轮只触发预留入口，不强制要求。"
+      "evaluation": {
+        "amounts": [
+          { "ingredientId": "coffee", "coffeeKind": "essence", "idealMl": 180, "idealGrams": 0, "tolerance": 0.2, "minimumStandard": 70, "classificationMinimumRatio": 0, "classificationMaximumRatio": 1, "classificationMinimumGrams": 0, "classificationMaximumGrams": 0, "minimumTemperature": -1 },
+          { "ingredientId": "milk", "coffeeKind": "", "idealMl": 200, "idealGrams": 0, "tolerance": 0.2, "minimumStandard": 60, "classificationMinimumRatio": 0, "classificationMaximumRatio": 1, "classificationMinimumGrams": 0, "classificationMaximumGrams": 0, "minimumTemperature": 1 },
+          { "ingredientId": "milkfoam", "coffeeKind": "", "idealMl": 20, "idealGrams": 0, "tolerance": 0.2, "minimumStandard": 60, "classificationMinimumRatio": 0.03, "classificationMaximumRatio": 0.12, "classificationMinimumGrams": 0, "classificationMaximumGrams": 0, "minimumTemperature": -1 }
+        ],
+        "amountWeight": 0.65,
+        "standardWeight": 0.35,
+        "extraIngredientPenalty": 0.15,
+        "enforceCup": false,
+        "classify": true,
+        "classificationPriority": 100,
+        "concentrationWeight": 0.2,
+        "idealCoffeeStrength": 0.06,
+        "coffeeStrengthTolerance": 0.2
+      },
+      "tutorial": "参考目标：精粹咖啡180ml、温热或沸腾牛奶200ml、奶泡20ml，液体合计400ml。打发牛奶后按实际ml倒入少量奶泡；奶泡必须占总液体3%～12%。三种必需成分完整、来源和奶泡范围正确、无额外原料即可识别拿铁，不要求推荐用量达90分；含量不足/过量独立影响订单评价。加料顺序自由，浓度与水准分开，拉花为可选玩法。"
     },
     {
       "id": "honeylatte",
@@ -469,12 +549,19 @@
         {
           "specId": "coffee",
           "units": 1,
-          "milliliters": 180
+          "milliliters": 180,
+          "coffeeKind": "essence"
         },
         {
           "specId": "hotmilk",
           "units": 2,
-          "milliliters": 220
+          "milliliters": 200,
+          "temperature": 2
+        },
+        {
+          "specId": "milkfoam",
+          "units": 1,
+          "milliliters": 20
         },
         {
           "specId": "honey",
@@ -491,11 +578,28 @@
       "requiredTemperature": 2,
       "idealCoffeeRatio": 0.45,
       "idealSweetness": 2,
-      "tutorial": "点击杯具选择杯型。咖啡豆拖入研磨器，点击手柄开始12秒研磨；继续点击每次加速1秒。将出粉抽屉拖到咖啡壶。清水拖入加热壶，点击加热4秒后立即拖到咖啡壶上方，向下拖动倾倒；抬起停止，建议约7.5秒注入200ml。再把咖啡下壶拖到出餐杯上方倾倒。按参考用量加入其余液体：牛奶/可可由加热壶加工，沸腾5秒后变温热10秒，再冷却。最后加小料，点击出品。拉花按钮本轮只触发预留入口，不强制要求。"
+      "evaluation": {
+        "amounts": [
+          { "ingredientId": "coffee", "coffeeKind": "essence", "idealMl": 180, "idealGrams": 0, "tolerance": 0.2, "minimumStandard": 70, "classificationMinimumRatio": 0, "classificationMaximumRatio": 1, "classificationMinimumGrams": 0, "classificationMaximumGrams": 0, "minimumTemperature": -1 },
+          { "ingredientId": "milk", "coffeeKind": "", "idealMl": 200, "idealGrams": 0, "tolerance": 0.2, "minimumStandard": 60, "classificationMinimumRatio": 0, "classificationMaximumRatio": 1, "classificationMinimumGrams": 0, "classificationMaximumGrams": 0, "minimumTemperature": 1 },
+          { "ingredientId": "milkfoam", "coffeeKind": "", "idealMl": 20, "idealGrams": 0, "tolerance": 0.2, "minimumStandard": 60, "classificationMinimumRatio": 0.03, "classificationMaximumRatio": 0.12, "classificationMinimumGrams": 0, "classificationMaximumGrams": 0, "minimumTemperature": -1 },
+          { "ingredientId": "honey", "coffeeKind": "", "idealMl": 0, "idealGrams": 12, "tolerance": 0.2, "minimumStandard": 60, "classificationMinimumRatio": 0, "classificationMaximumRatio": 1, "classificationMinimumGrams": 0, "classificationMaximumGrams": 0, "minimumTemperature": -1 }
+        ],
+        "amountWeight": 0.65,
+        "standardWeight": 0.35,
+        "extraIngredientPenalty": 0.15,
+        "enforceCup": false,
+        "classify": true,
+        "classificationPriority": 100,
+        "concentrationWeight": 0.2,
+        "idealCoffeeStrength": 0.06,
+        "coffeeStrengthTolerance": 0.2
+      },
+      "tutorial": "参考目标：精粹咖啡180ml、热牛奶200ml、薄奶泡20ml、蜂蜜12g。热牛奶至少温热，奶泡占液体3%～12%；蜂蜜为必需固体。成分完整、无额外原料即属于蜂蜜拿铁，实际用量只影响含量分。自由加料，不按工序先后评分。"
     },
     {
       "id": "matchalatte",
-      "label": "抹茶",
+      "label": "抹茶拿铁",
       "cupSpecId": "cup.large",
       "price": 80,
       "ingredients": [
@@ -520,7 +624,22 @@
       "requiredTemperature": 2,
       "idealCoffeeRatio": 0.0,
       "idealSweetness": 0,
-      "tutorial": "点击杯具选择杯型。可可粉或抹茶粉拖入对应设备并加工。按参考用量加入其余液体：牛奶/可可由加热壶加工，沸腾5秒后变温热10秒，再冷却。最后加小料，点击出品。拉花按钮本轮只触发预留入口，不强制要求。"
+      "evaluation": {
+        "amounts": [
+          { "ingredientId": "matcha.drink", "coffeeKind": "", "idealMl": 200, "idealGrams": 0, "tolerance": 0.2, "minimumStandard": 60, "classificationMinimumRatio": 0, "classificationMaximumRatio": 1, "classificationMinimumGrams": 0, "classificationMaximumGrams": 0, "minimumTemperature": -1 },
+          { "ingredientId": "milk", "coffeeKind": "", "idealMl": 200, "idealGrams": 0, "tolerance": 0.2, "minimumStandard": 60, "classificationMinimumRatio": 0, "classificationMaximumRatio": 1, "classificationMinimumGrams": 0, "classificationMaximumGrams": 0, "minimumTemperature": -1 }
+        ],
+        "amountWeight": 0.65,
+        "standardWeight": 0.35,
+        "extraIngredientPenalty": 0.15,
+        "enforceCup": false,
+        "classify": true,
+        "classificationPriority": 100,
+        "concentrationWeight": 0,
+        "idealCoffeeStrength": 0.06,
+        "coffeeStrengthTolerance": 0.2
+      },
+      "tutorial": "参考目标：抹茶液200ml、牛奶200ml。抹茶粉12g与清水200ml组合，粉末质量保留在液体内部原始成分中，再与牛奶自由混合。两种原料都有正量且无额外原料即可识别抹茶拿铁，不要求目标用量90分；数量独立影响评价。没有牛奶或加入未知原料则为迷之饮品，原始成分仍可查看。"
     },
     {
       "id": "cocoa",
@@ -543,13 +662,28 @@
       "qualityPriceStep": 50,
       "requiresLatteArt": false,
       "recipeId": "cocoa",
-      "description": "沸腾可可与热牛奶，温暖浓香。",
+      "description": "可可液与牛奶的搭配；热是当前温度，不是原料身份。",
       "minimumScore": 60,
       "maxRemakes": 1,
       "requiredTemperature": 2,
       "idealCoffeeRatio": 0.0,
       "idealSweetness": 0,
-      "tutorial": "点击杯具选择杯型。可可粉或抹茶粉拖入对应设备并加工。按参考用量加入其余液体：牛奶/可可由加热壶加工，沸腾5秒后变温热10秒，再冷却。最后加小料，点击出品。拉花按钮本轮只触发预留入口，不强制要求。"
+      "evaluation": {
+        "amounts": [
+          { "ingredientId": "cocoa.drink", "coffeeKind": "", "idealMl": 200, "idealGrams": 0, "tolerance": 0.2, "minimumStandard": 60, "classificationMinimumRatio": 0, "classificationMaximumRatio": 1, "classificationMinimumGrams": 0, "classificationMaximumGrams": 0, "minimumTemperature": -1 },
+          { "ingredientId": "milk", "coffeeKind": "", "idealMl": 200, "idealGrams": 0, "tolerance": 0.2, "minimumStandard": 60, "classificationMinimumRatio": 0, "classificationMaximumRatio": 1, "classificationMinimumGrams": 0, "classificationMaximumGrams": 0, "minimumTemperature": -1 }
+        ],
+        "amountWeight": 0.65,
+        "standardWeight": 0.35,
+        "extraIngredientPenalty": 0.15,
+        "enforceCup": false,
+        "classify": true,
+        "classificationPriority": 100,
+        "concentrationWeight": 0,
+        "idealCoffeeStrength": 0.06,
+        "coffeeStrengthTolerance": 0.2
+      },
+      "tutorial": "参考目标：可可液200ml、牛奶200ml。可可粉12g与清水200ml组合，粉量与水量保留在液体内部原始成分中，再与牛奶自由混合；需要热饮时放上炉台加热。两种原料都有正量且无额外原料即可识别菜单热可可，实际温度单独显示。推荐量独立评分，不要求QTE或加料顺序；不满足产品成分表时为迷之饮品。"
     },
     {
       "id": "macchiato",
@@ -561,10 +695,11 @@
         {
           "specId": "coffee",
           "units": 1,
-          "milliliters": 160
+          "milliliters": 160,
+          "coffeeKind": "essence"
         },
         {
-          "specId": "hotmilk",
+          "specId": "milkfoam",
           "units": 1,
           "milliliters": 80
         }
@@ -572,13 +707,28 @@
       "unlockReputation": 0,
       "qualityPriceStep": 50,
       "requiresLatteArt": false,
-      "description": "小杯咖啡加少量牛奶，浓香中带奶味。",
+      "description": "精粹咖啡加奶泡，不把奶泡当成热牛奶。",
       "minimumScore": 60,
       "maxRemakes": 1,
       "requiredTemperature": 2,
       "idealCoffeeRatio": 0.6666666666666666,
       "idealSweetness": 0,
-      "tutorial": "点击杯具选择杯型。咖啡豆拖入研磨器，点击手柄开始12秒研磨；继续点击每次加速1秒。将出粉抽屉拖到咖啡壶。清水拖入加热壶，点击加热4秒后立即拖到咖啡壶上方，向下拖动倾倒；抬起停止，建议约7.5秒注入200ml。再把咖啡下壶拖到出餐杯上方倾倒。按参考用量加入其余液体：牛奶/可可由加热壶加工，沸腾5秒后变温热10秒，再冷却。最后加小料，点击出品。拉花按钮本轮只触发预留入口，不强制要求。"
+      "evaluation": {
+        "amounts": [
+          { "ingredientId": "coffee", "coffeeKind": "essence", "idealMl": 160, "idealGrams": 0, "tolerance": 0.2, "minimumStandard": 70, "classificationMinimumRatio": 0, "classificationMaximumRatio": 1, "classificationMinimumGrams": 0, "classificationMaximumGrams": 0, "minimumTemperature": -1 },
+          { "ingredientId": "milkfoam", "coffeeKind": "", "idealMl": 80, "idealGrams": 0, "tolerance": 0.2, "minimumStandard": 60, "classificationMinimumRatio": 0, "classificationMaximumRatio": 1, "classificationMinimumGrams": 0, "classificationMaximumGrams": 0, "minimumTemperature": -1 }
+        ],
+        "amountWeight": 0.65,
+        "standardWeight": 0.35,
+        "extraIngredientPenalty": 0.15,
+        "enforceCup": false,
+        "classify": true,
+        "classificationPriority": 100,
+        "concentrationWeight": 0.2,
+        "idealCoffeeStrength": 0.06,
+        "coffeeStrengthTolerance": 0.2
+      },
+      "tutorial": "参考目标：精粹咖啡160ml、奶泡80ml，小杯合计240ml。打发牛奶生成独立奶泡原料，再按实际ml加入；精粹+奶泡两种成分必须都有正量且无额外原料。不同用量仍为玛奇朵，推荐量只影响含量分；加热牛奶本身不能替代奶泡。"
     },
     {
       "id": "mocha",
@@ -590,17 +740,14 @@
         {
           "specId": "coffee",
           "units": 1,
-          "milliliters": 140
+          "milliliters": 320,
+          "coffeeKind": "black",
+          "temperature": 2
         },
         {
-          "specId": "hotmilk",
-          "units": 2,
-          "milliliters": 180
-        },
-        {
-          "specId": "cocoa.drink",
+          "specId": "cocoa.powder",
           "units": 1,
-          "milliliters": 80
+          "grams": 12
         },
         {
           "specId": "cream",
@@ -610,13 +757,29 @@
       "unlockReputation": 0,
       "qualityPriceStep": 50,
       "requiresLatteArt": false,
-      "description": "咖啡、牛奶、可可及奶油的丰富组合。",
+      "description": "黑咖啡、可可粉和奶油组合，不需要牛奶。",
       "minimumScore": 60,
       "maxRemakes": 1,
       "requiredTemperature": 2,
-      "idealCoffeeRatio": 0.35,
+      "idealCoffeeRatio": 1.0,
       "idealSweetness": 0,
-      "tutorial": "点击杯具选择杯型。咖啡豆拖入研磨器，点击手柄开始12秒研磨；继续点击每次加速1秒。将出粉抽屉拖到咖啡壶。清水拖入加热壶，点击加热4秒后立即拖到咖啡壶上方，向下拖动倾倒；抬起停止，建议约7.5秒注入200ml。再把咖啡下壶拖到出餐杯上方倾倒。按参考用量加入其余液体：牛奶/可可由加热壶加工，沸腾5秒后变温热10秒，再冷却。最后加小料，点击出品。拉花按钮本轮只触发预留入口，不强制要求。"
+      "evaluation": {
+        "amounts": [
+          { "ingredientId": "coffee", "coffeeKind": "black", "idealMl": 320, "idealGrams": 0, "tolerance": 0.2, "minimumStandard": 60, "classificationMinimumRatio": 0, "classificationMaximumRatio": 1, "classificationMinimumGrams": 0, "classificationMaximumGrams": 0, "minimumTemperature": -1 },
+          { "ingredientId": "cocoa.powder", "coffeeKind": "", "idealMl": 0, "idealGrams": 12, "tolerance": 0.2, "minimumStandard": 60, "classificationMinimumRatio": 0, "classificationMaximumRatio": 1, "classificationMinimumGrams": 0, "classificationMaximumGrams": 0, "minimumTemperature": -1 },
+          { "ingredientId": "cream", "coffeeKind": "", "idealMl": 0, "idealGrams": 12, "tolerance": 0.2, "minimumStandard": 60, "classificationMinimumRatio": 0, "classificationMaximumRatio": 1, "classificationMinimumGrams": 0, "classificationMaximumGrams": 0, "minimumTemperature": -1 }
+        ],
+        "amountWeight": 0.65,
+        "standardWeight": 0.35,
+        "extraIngredientPenalty": 0.15,
+        "enforceCup": false,
+        "classify": true,
+        "classificationPriority": 100,
+        "concentrationWeight": 0.2,
+        "idealCoffeeStrength": 0.06,
+        "coffeeStrengthTolerance": 0.2
+      },
+      "tutorial": "参考目标：黑咖啡320ml、可可粉12g、奶油12g。直接向黑咖啡中加入可可粉和奶油；没有自由清水时可可粉作为固体真实保留。三种必需成分都有正量、咖啡来源为black且无额外原料即可识别摩卡；缺咖啡、缺奶油或加牛奶都不是此产品。数量只影响独立订单评分。"
     },
     {
       "id": "blackcoffee",
@@ -627,20 +790,31 @@
         {
           "specId": "coffee",
           "units": 1,
-          "milliliters": 150
-        },
-        {
-          "specId": "water",
-          "units": 1,
-          "milliliters": 90
+          "milliliters": 240,
+          "coffeeKind": "black",
+          "temperature": 2
         }
       ],
       "unlockReputation": 0,
       "qualityPriceStep": 50,
       "requiresLatteArt": false,
-      "description": "咖啡原液加清水，微苦清爽，可加方糖。",
-      "tutorial": "先用沸腾热水制作咖啡原液，选择小杯。向杯中倒入150ml咖啡，再加90ml清水。方糖可随时添加；默认不加糖。",
-      "idealCoffeeRatio": 0.625,
+      "description": "加热后的黑咖啡，微苦清爽；不靠精粹咖啡兑水命名。",
+      "tutorial": "参考目标：黑咖啡240ml，咖啡水准至少60。普通咖啡粉与清水组合生成冷萃；加热至温热/沸腾转为黑咖啡，冷却至常温再转回冷萃，但原始粉水含量不丢失。热水不生成精粹。只含正量黑咖啡即可识别本产品，少量或过量仍属同类但订单含量分不同；加糖等额外原料使分类回退迷之饮品，且独立参与评分。",
+      "evaluation": {
+        "amounts": [
+          { "ingredientId": "coffee", "coffeeKind": "black", "idealMl": 240, "idealGrams": 0, "tolerance": 0.2, "minimumStandard": 60, "classificationMinimumRatio": 0, "classificationMaximumRatio": 1, "classificationMinimumGrams": 0, "classificationMaximumGrams": 0, "minimumTemperature": -1 }
+        ],
+        "amountWeight": 0.65,
+        "standardWeight": 0.35,
+        "extraIngredientPenalty": 0.15,
+        "enforceCup": false,
+        "classify": true,
+        "classificationPriority": 100,
+        "concentrationWeight": 0.2,
+        "idealCoffeeStrength": 0.06,
+        "coffeeStrengthTolerance": 0.2
+      },
+      "idealCoffeeRatio": 1.0,
       "idealSweetness": 0,
       "requiredTemperature": 2,
       "minimumScore": 60,
@@ -648,19 +822,16 @@
     },
     {
       "id": "creamcoffee",
-      "label": "奶油咖啡",
+      "label": "奶油黑咖啡",
       "cupSpecId": "cup.large",
       "price": 100,
       "ingredients": [
         {
           "specId": "coffee",
           "units": 1,
-          "milliliters": 200
-        },
-        {
-          "specId": "hotmilk",
-          "units": 1,
-          "milliliters": 150
+          "milliliters": 240,
+          "coffeeKind": "black",
+          "temperature": 2
         },
         {
           "specId": "cream",
@@ -670,13 +841,57 @@
       "unlockReputation": 0,
       "qualityPriceStep": 50,
       "requiresLatteArt": false,
-      "description": "咖啡与热牛奶配奶油顶，口感绵密。",
-      "tutorial": "选择大杯，先倒入200ml咖啡原液，再加入150ml热牛奶，最后拖入一份奶油顶后出品。",
-      "idealCoffeeRatio": 0.5714285714285714,
+      "description": "黑咖啡配奶油顶，不含牛奶或奶泡。",
+      "tutorial": "参考目标：黑咖啡240ml、奶油12g。两种必需成分都有正量且没有额外原料即可识别奶油黑咖啡；咖啡仍需来源black。加料顺序自由，推荐量独立影响订单含量分。",
+      "evaluation": {
+        "amounts": [
+          { "ingredientId": "coffee", "coffeeKind": "black", "idealMl": 240, "idealGrams": 0, "tolerance": 0.2, "minimumStandard": 60, "classificationMinimumRatio": 0, "classificationMaximumRatio": 1, "classificationMinimumGrams": 0, "classificationMaximumGrams": 0, "minimumTemperature": -1 },
+          { "ingredientId": "cream", "coffeeKind": "", "idealMl": 0, "idealGrams": 12, "tolerance": 0.2, "minimumStandard": 60, "classificationMinimumRatio": 0, "classificationMaximumRatio": 1, "classificationMinimumGrams": 0, "classificationMaximumGrams": 0, "minimumTemperature": -1 }
+        ],
+        "amountWeight": 0.65,
+        "standardWeight": 0.35,
+        "extraIngredientPenalty": 0.15,
+        "enforceCup": false,
+        "classify": true,
+        "classificationPriority": 100,
+        "concentrationWeight": 0.2,
+        "idealCoffeeStrength": 0.06,
+        "coffeeStrengthTolerance": 0.2
+      },
+      "idealCoffeeRatio": 1.0,
       "idealSweetness": 0,
       "requiredTemperature": 2,
       "minimumScore": 60,
       "maxRemakes": 1
+    },
+    {
+      "id": "cold_brew", "label": "冷萃咖啡", "cupSpecId": "cup.small", "price": 50,
+      "unlockReputation": 0, "qualityPriceStep": 50, "requiresLatteArt": false,
+      "description": "常温普通粉水咖啡；含量多少不改变类型。",
+      "tutorial": "参考目标：冷萃咖啡240ml。普通咖啡粉与清水组合，粉量与水量进入咖啡内部原始成分账本；未研磨豆子不反应。单一cold_brew来源咖啡正量即可识别，目标含量与浓度独立评分。",
+      "ingredients": [{ "specId": "coffee", "units": 1, "milliliters": 240, "coffeeKind": "cold_brew" }],
+      "requiredTemperature": 0, "minimumScore": 60, "maxRemakes": 1, "idealCoffeeRatio": 1, "idealSweetness": 0,
+      "evaluation": {
+        "amounts": [{ "ingredientId": "coffee", "coffeeKind": "cold_brew", "idealMl": 240, "idealGrams": 0, "tolerance": 0.2, "minimumStandard": 60, "classificationMinimumRatio": 0, "classificationMaximumRatio": 1, "classificationMinimumGrams": 0, "classificationMaximumGrams": 0, "minimumTemperature": -1 }],
+        "amountWeight": 0.65, "standardWeight": 0.35, "extraIngredientPenalty": 0.15, "enforceCup": false,
+        "classify": true, "classificationPriority": 100, "concentrationWeight": 0.2, "idealCoffeeStrength": 0.06, "coffeeStrengthTolerance": 0.2
+      }
+    },
+    {
+      "id": "milkcoffee", "label": "奶咖啡", "cupSpecId": "cup.large", "price": 80,
+      "unlockReputation": 0, "qualityPriceStep": 50, "requiresLatteArt": false,
+      "description": "黑咖啡与热牛奶组合，不需要奶泡。",
+      "tutorial": "参考目标：黑咖啡200ml、热牛奶200ml。牛奶必须至少温热；黑咖啡来源black、两种原料都有正量、无额外原料即可识别奶咖啡。不同用量仍为同类，含量和咖啡浓度参与订单评分。",
+      "ingredients": [{ "specId": "coffee", "units": 1, "milliliters": 200, "coffeeKind": "black", "temperature": 2 }, { "specId": "hotmilk", "units": 1, "milliliters": 200, "temperature": 2 }],
+      "requiredTemperature": 2, "minimumScore": 60, "maxRemakes": 1, "idealCoffeeRatio": 0.5, "idealSweetness": 0,
+      "evaluation": {
+        "amounts": [
+          { "ingredientId": "coffee", "coffeeKind": "black", "idealMl": 200, "idealGrams": 0, "tolerance": 0.2, "minimumStandard": 60, "classificationMinimumRatio": 0, "classificationMaximumRatio": 1, "classificationMinimumGrams": 0, "classificationMaximumGrams": 0, "minimumTemperature": -1 },
+          { "ingredientId": "milk", "coffeeKind": "", "idealMl": 200, "idealGrams": 0, "tolerance": 0.2, "minimumStandard": 60, "classificationMinimumRatio": 0, "classificationMaximumRatio": 1, "classificationMinimumGrams": 0, "classificationMaximumGrams": 0, "minimumTemperature": 1 }
+        ],
+        "amountWeight": 0.65, "standardWeight": 0.35, "extraIngredientPenalty": 0.15, "enforceCup": false,
+        "classify": true, "classificationPriority": 100, "concentrationWeight": 0.2, "idealCoffeeStrength": 0.06, "coffeeStrengthTolerance": 0.2
+      }
     }
   ],
   "layout": [
@@ -748,7 +963,14 @@
       "specId": "container.extractor",
       "area": 1,
       "x": -4.2,
-      "y": -1.95
+      "y": -2.05
+    },
+    {
+      "id": "v.extractor.filter",
+      "specId": "container.extractor.filter",
+      "area": 1,
+      "x": -4.42,
+      "y": -1.14
     },
     {
       "id": "m.brewer",
@@ -898,7 +1120,7 @@
     {
       "id": "espresso",
       "productId": "espresso",
-      "label": "意式浓缩",
+      "label": "精粹咖啡",
       "steps": [
         {
           "id": "1",
@@ -915,7 +1137,7 @@
         {
           "id": "3",
           "kind": "operate",
-          "label": "研磨咖啡豆（点击3次）",
+          "label": "研磨咖啡豆（旧版点击工序）",
           "operationId": "grind"
         },
         {
@@ -957,7 +1179,7 @@
         {
           "id": "3",
           "kind": "operate",
-          "label": "研磨咖啡豆（点击3次）",
+          "label": "研磨咖啡豆（旧版点击工序）",
           "operationId": "grind"
         },
         {
@@ -1011,7 +1233,7 @@
         {
           "id": "3",
           "kind": "operate",
-          "label": "研磨咖啡豆（点击3次）",
+          "label": "研磨咖啡豆（旧版点击工序）",
           "operationId": "grind"
         },
         {
@@ -1053,7 +1275,7 @@
     {
       "id": "matchalatte",
       "productId": "matchalatte",
-      "label": "抹茶",
+      "label": "抹茶拿铁",
       "steps": [
         {
           "id": "1",
@@ -1070,7 +1292,7 @@
         {
           "id": "3",
           "kind": "operate",
-          "label": "研磨抹茶粉（点击3次）",
+          "label": "调制抹茶（旧版设备工序）",
           "operationId": "matcha"
         },
         {
@@ -1112,7 +1334,7 @@
         {
           "id": "3",
           "kind": "operate",
-          "label": "研磨咖啡豆（点击3次）",
+          "label": "研磨咖啡豆（旧版点击工序）",
           "operationId": "grind"
         },
         {
@@ -1214,7 +1436,7 @@
         {
           "id": "3",
           "kind": "operate",
-          "label": "研磨咖啡豆（点击3次）",
+          "label": "研磨咖啡豆（旧版点击工序）",
           "operationId": "grind"
         },
         {
@@ -1267,12 +1489,51 @@
       ]
     }
   ],
+  "ingredientRules": [
+    { "id": "water", "label": "清水", "liquid": true, "soluble": true, "gramsPerUnit": 0, "millilitersPerUnit": 200, "coffeeKind": "" },
+    { "id": "hotwater", "label": "热水", "liquid": true, "soluble": true, "gramsPerUnit": 0, "millilitersPerUnit": 200, "coffeeKind": "" },
+    { "id": "milk", "label": "牛奶", "liquid": true, "soluble": true, "gramsPerUnit": 0, "millilitersPerUnit": 200, "coffeeKind": "" },
+    { "id": "hotmilk", "label": "热牛奶", "liquid": true, "soluble": true, "gramsPerUnit": 0, "millilitersPerUnit": 200, "coffeeKind": "" },
+    { "id": "milkfoam", "label": "奶泡", "liquid": true, "soluble": true, "gramsPerUnit": 0, "millilitersPerUnit": 20, "coffeeKind": "" },
+    { "id": "coffee", "label": "咖啡液", "liquid": true, "soluble": true, "gramsPerUnit": 0, "millilitersPerUnit": 200, "coffeeKind": "cold_brew" },
+    { "id": "cocoa.drink", "label": "可可液", "liquid": true, "soluble": true, "gramsPerUnit": 0, "millilitersPerUnit": 200, "coffeeKind": "" },
+    { "id": "matcha.drink", "label": "抹茶液", "liquid": true, "soluble": true, "gramsPerUnit": 0, "millilitersPerUnit": 200, "coffeeKind": "" },
+    { "id": "cream", "label": "奶油", "liquid": false, "soluble": true, "gramsPerUnit": 12, "millilitersPerUnit": 0, "coffeeKind": "" },
+    { "id": "honey", "label": "蜂蜜", "liquid": false, "soluble": true, "gramsPerUnit": 12, "millilitersPerUnit": 0, "coffeeKind": "" },
+    { "id": "sugar", "label": "糖", "liquid": false, "soluble": true, "gramsPerUnit": 5, "millilitersPerUnit": 0, "coffeeKind": "" },
+    { "id": "cocoa.powder", "label": "可可粉", "liquid": false, "soluble": true, "gramsPerUnit": 12, "millilitersPerUnit": 0, "coffeeKind": "" },
+    { "id": "matcha.powder", "label": "抹茶粉", "liquid": false, "soluble": true, "gramsPerUnit": 12, "millilitersPerUnit": 0, "coffeeKind": "" },
+    { "id": "grounds", "label": "咖啡粉", "liquid": false, "soluble": false, "gramsPerUnit": 12, "millilitersPerUnit": 0, "coffeeKind": "" },
+    { "id": "beans", "label": "咖啡豆", "liquid": false, "soluble": false, "gramsPerUnit": 12, "millilitersPerUnit": 0, "coffeeKind": "" }
+  ],
+  "compositionRules": [
+    { "id": "grounds-water", "label": "咖啡粉与清水生成冷萃", "catalystId": "grounds", "inputId": "water", "inputCoffeeKind": "", "outputId": "coffee", "outputCoffeeKind": "cold_brew", "minimumTemperature": 0, "maximumTemperature": 2, "precisionOnly": false, "consumeCatalyst": true },
+    { "id": "grounds-hotwater", "label": "咖啡粉与热水先生成冷萃", "catalystId": "grounds", "inputId": "hotwater", "inputCoffeeKind": "", "outputId": "coffee", "outputCoffeeKind": "cold_brew", "minimumTemperature": 0, "maximumTemperature": 2, "precisionOnly": false, "consumeCatalyst": true },
+    { "id": "cold-brew-heated", "label": "温热冷萃变为黑咖啡", "catalystId": "", "inputId": "coffee", "inputCoffeeKind": "cold_brew", "outputId": "coffee", "outputCoffeeKind": "black", "minimumTemperature": 1, "maximumTemperature": 2, "precisionOnly": false, "consumeCatalyst": false },
+    { "id": "black-coffee-cooled", "label": "常温黑咖啡变为冷萃", "catalystId": "", "inputId": "coffee", "inputCoffeeKind": "black", "outputId": "coffee", "outputCoffeeKind": "cold_brew", "minimumTemperature": 0, "maximumTemperature": 0, "precisionOnly": false, "consumeCatalyst": false },
+    { "id": "cocoa-water", "label": "可可粉与清水生成可可液", "catalystId": "cocoa.powder", "inputId": "water", "inputCoffeeKind": "", "outputId": "cocoa.drink", "outputCoffeeKind": "", "minimumTemperature": 0, "maximumTemperature": 2, "precisionOnly": false, "consumeCatalyst": true },
+    { "id": "cocoa-hotwater", "label": "可可粉与热水生成可可液", "catalystId": "cocoa.powder", "inputId": "hotwater", "inputCoffeeKind": "", "outputId": "cocoa.drink", "outputCoffeeKind": "", "minimumTemperature": 0, "maximumTemperature": 2, "precisionOnly": false, "consumeCatalyst": true },
+    { "id": "matcha-water", "label": "抹茶粉与清水生成抹茶液", "catalystId": "matcha.powder", "inputId": "water", "inputCoffeeKind": "", "outputId": "matcha.drink", "outputCoffeeKind": "", "minimumTemperature": 0, "maximumTemperature": 2, "precisionOnly": false, "consumeCatalyst": true },
+    { "id": "matcha-hotwater", "label": "抹茶粉与热水生成抹茶液", "catalystId": "matcha.powder", "inputId": "hotwater", "inputCoffeeKind": "", "outputId": "matcha.drink", "outputCoffeeKind": "", "minimumTemperature": 0, "maximumTemperature": 2, "precisionOnly": false, "consumeCatalyst": true }
+  ],
+  "drinkNameRules": [],
+  "compositionSettings": {
+    "defaultCoffeeStrength": 0.06,
+    "strongCoffeeStrength": 0.075,
+    "mediumCoffeeStrength": 0.045
+  },
   "production": {
     "requireLatteArt": false,
     "grindSeconds": 12,
     "grindClickAdvance": 1,
     "grindClickCooldown": 0.12,
     "heatSeconds": 4,
+    "ambientTemperatureCelsius": 20,
+    "warmTemperatureCelsius": 60,
+    "boilingTemperatureCelsius": 100,
+    "hotThresholdCelsius": 50,
+    "boilingThresholdCelsius": 95,
+    "heatingTargetCelsius": 100,
     "boilingSeconds": 5,
     "warmSeconds": 10,
     "portionMl": 200,

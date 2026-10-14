@@ -98,6 +98,7 @@ namespace Spotlight.FreeCafe
                 specs.Add(spec.id, spec);
             }
 
+            ValidateCompositionCatalog();
             // 来源类实体必须能对应到一个可取出的物品规格
             foreach (var spec in Catalog.entities)
             {
@@ -343,9 +344,11 @@ namespace Spotlight.FreeCafe
                 return valid;
             }
 
+            if (ProductionEnabled) DetachExtractionFilter(item);
             item.area = area;
             item.x = x;
             item.y = y;
+            if (ProductionEnabled && IsPrecisionExtractor(item)) PositionExtractionFilter(item);
             if(removeFromTray) State.production.activeCupId=null;
             Notify();
             return ActionResult.Yes("已自由放置");
@@ -496,6 +499,17 @@ namespace Spotlight.FreeCafe
             if (receiver.Has(Capability.Discard))
             {
                 if (ProductionEnabled && item==ServingCup) return DiscardProductionCup();
+                if (ProductionEnabled && IsExtractionFilter(item))
+                {
+                    Charge(Catalog.economy.wastePenalty);
+                    item.contents.Clear(); item.production.filterSpent = false; item.production.filterDrainHold = 0;
+                    Notify(); return ActionResult.Yes("滤杯已清空，可继续组合使用");
+                }
+                if (ProductionEnabled && (IsProductionVessel(item) || IsPrecisionExtractor(item)))
+                {
+                    Charge(Catalog.economy.wastePenalty); ConsumeDeliveredContainer(item); Notify();
+                    return ActionResult.Yes("壶中内容已丢弃，空壶已归位");
+                }
                 Charge(Catalog.economy.wastePenalty);
                 State.entities.Remove(item);
                 Notify();
@@ -507,7 +521,9 @@ namespace Spotlight.FreeCafe
                 if (Spec(item.specId).Has(Capability.Portion))
                 {
                     // 单份原料：直接并入目标容器，原物品消失
-                    AddPortion(target, new Portion { specId = item.specId, units = item.units, quality = item.quality });
+                    AddPortion(target, item.portionPayload != null ? CopyPortion(item.portionPayload)
+                        : new Portion { specId = item.specId, units = item.units, quality = item.quality,
+                            temperatureCelsius = TemperatureCelsius(item), temperature = TemperatureBand(TemperatureCelsius(item)) });
                     State.entities.Remove(item);
                 }
                 else
@@ -563,11 +579,17 @@ namespace Spotlight.FreeCafe
             var existing = container.contents.Find(p => p.specId == portion.specId && p.quality == portion.quality);
             if (existing == null)
             {
-                container.contents.Add(new Portion { specId = portion.specId, units = portion.units, quality = portion.quality });
+                container.contents.Add(CopyPortion(portion));
             }
             else
             {
+                float priorWeight = GetThermalWeight(existing), addedWeight = GetThermalWeight(portion);
+                if (priorWeight + addedWeight <= 0) { priorWeight = existing.units; addedWeight = portion.units; }
+                float temperature = (TemperatureCelsius(existing) * priorWeight + TemperatureCelsius(portion) * addedWeight) / (priorWeight + addedWeight);
                 existing.units += portion.units;
+                existing.milliliters += portion.milliliters; existing.grams += portion.grams;
+                MergeComposition(existing, portion);
+                SetTemperature(existing, temperature);
             }
 
             // 加了新原料后，之前的拉花图案作废

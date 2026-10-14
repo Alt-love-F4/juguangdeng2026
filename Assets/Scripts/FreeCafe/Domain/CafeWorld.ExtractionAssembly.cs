@@ -1,0 +1,205 @@
+using System;
+
+namespace Spotlight.FreeCafe
+{
+    public sealed partial class CafeWorld
+    {
+        public bool IsExtractionFilter(WorldEntity entity) => entity != null && entity.specId == "container.extractor.filter";
+        public WorldEntity ExtractionJug(WorldEntity entity) => IsExtractionFilter(entity)
+            ? Find(entity.production.extractionJugId) : IsPrecisionExtractor(entity) ? entity : null;
+        public WorldEntity ExtractionFilter(WorldEntity jug) => IsPrecisionExtractor(jug)
+            ? Find(jug.production.extractionFilterId) : null;
+
+        private void InitializeExtractionAssemblies()
+        {
+            if (Spec("container.extractor.filter") == null) return;
+            var jugs = State.entities.FindAll(IsPrecisionExtractor);
+            foreach (var jug in jugs)
+            {
+                if (jug.production.extractionAssemblyInitialized) continue;
+                var filter = Find(jug.id + ".filter");
+                if (filter == null)
+                {
+                    filter = new WorldEntity { id = jug.id + ".filter", specId = "container.extractor.filter",
+                        area = jug.area, x = jug.x + .9f, y = jug.y - .8f };
+                    State.entities.Add(filter);
+                }
+                jug.production.extractionAssemblyInitialized = true;
+                if (jug.production.brewCompleted) continue;
+                jug.production.extractionFilterId = filter.id;
+                filter.production.extractionJugId = jug.id;
+                PositionExtractionFilter(jug);
+                for (int index = jug.contents.Count - 1; index >= 0; index--)
+                    if (jug.contents[index].specId == "grounds")
+                    { filter.contents.Add(jug.contents[index]); jug.contents.RemoveAt(index); }
+            }
+        }
+
+        private void PositionExtractionFilter(WorldEntity jug)
+        {
+            var filter = ExtractionFilter(jug);
+            if (filter == null) return;
+            filter.area = jug.area; filter.x = jug.x - .22f; filter.y = jug.y + .91f;
+        }
+
+        public ActionResult AttachExtractionFilter(string filterId, string jugId)
+        {
+            var filter = Find(filterId); var jug = Find(jugId);
+            var valid = PreviewExtractionAssembly(filter, jug);
+            if (!valid.success) return valid;
+            DetachExtractionFilter(filter);
+            jug.production.extractionFilterId = filter.id;
+            jug.production.extractionAssemblyInitialized = true;
+            filter.production.extractionJugId = jug.id;
+            ResetExtraction(jug); PositionExtractionFilter(jug);
+            Notify(); return ActionResult.Yes("滤杯已组合；咖啡粉放入上层，再从上方均匀注入热水");
+        }
+
+        private ActionResult PreviewExtractionAssembly(WorldEntity filter, WorldEntity jug)
+        {
+            if (!IsExtractionFilter(filter) || !IsPrecisionExtractor(jug) || filter.area != jug.area)
+                return ActionResult.No("滤杯需要与咖啡萃取下壶组合");
+            if (ExtractionFilter(jug) != null && ExtractionFilter(jug) != filter)
+                return ActionResult.No("下壶已有滤杯，请先拆下上层");
+            if (filter.production.filterSpent && filter.contents.Count > 0)
+                return ActionResult.No("滤杯里是用过的咖啡粉，请先清空再装入新粉");
+            if (LiquidVolume(jug) > .001f || jug.production.brewStarted && !jug.production.brewCompleted)
+                return ActionResult.No("请先倒空下壶，再组合滤杯开始下一轮萃取");
+            return ActionResult.Yes("把上层滤杯装到下壶上");
+        }
+
+        private void DetachExtractionFilter(WorldEntity filter)
+        {
+            if (!IsExtractionFilter(filter)) return;
+            var jug = ExtractionJug(filter);
+            if (jug != null)
+            {
+                if (jug.production.brewStarted && !jug.production.brewCompleted) CompleteExtraction(jug);
+                jug.production.extractionFilterId = null;
+            }
+            filter.production.extractionJugId = null;
+        }
+
+        private WorldEntity ExtractionInputTarget(WorldEntity target, string ingredient)
+        {
+            var filter = ExtractionFilter(target);
+            return filter != null && (ingredient == "grounds" || IsLiquid(ingredient)) ? filter : target;
+        }
+
+        private float ExtractionReceivingSpace(WorldEntity target)
+        {
+            float space = Math.Max(0, LiquidCapacity(target) - LiquidVolume(target));
+            var jug = ExtractionJug(target);
+            if (IsExtractionFilter(target) && jug != null)
+                space = Math.Min(space, Math.Max(0, LiquidCapacity(jug) - LiquidVolume(jug) - LiquidVolume(target)));
+            return space;
+        }
+
+        private Portion DrainedLiquid(Portion source, float ml)
+        {
+            EnsureCoffeeProvenance(source);
+            var liquid = new Portion { specId = source.specId, units = source.units, milliliters = ml,
+                grams = source.grams * ml / source.milliliters,
+                quality = source.quality, temperature = source.temperature, extracted = source.extracted,
+                coffeeKind = CoffeeKind(source), productionScore = source.productionScore };
+            SetTemperature(liquid, TemperatureCelsius(source));
+            CopyComposition(source, liquid, ml / source.milliliters);
+            return liquid;
+        }
+
+        // Only water THROUGH the filter spends powder, never injected volume or milk flow.
+        private float ConsumeFilterGrounds(WorldEntity filter, float waterMl, out float usedGrams)
+        {
+            usedGrams = 0;
+            var d = filter.production;
+            float remaining = 0;
+            foreach (var p in filter.contents)
+                if (p.specId == "grounds") remaining += p.grams > 0 ? p.grams : p.units * DoseGrams("grounds");
+            if (d.filterSpent || remaining <= 0) return 0;
+            if (d.filterReferenceGroundsGrams <= 0)
+                d.filterReferenceGroundsGrams = remaining;
+            double idealMl = (double)Prep.brewIdealMl * d.filterReferenceGroundsGrams / Prep.brewReferenceGroundsGrams;
+            double passedBefore = Math.Min(d.filterWaterPassedMl, idealMl);
+            double coffeeMl = Math.Min(waterMl, Math.Max(0, idealMl - passedBefore));
+            if (coffeeMl <= 0) return 0;
+            usedGrams = (float)Math.Min(remaining, d.filterReferenceGroundsGrams * coffeeMl / idealMl);
+            // Use the remaining powder at the boundary to remove accumulated float residue exactly.
+            if (passedBefore + coffeeMl >= idealMl - .00001) usedGrams = remaining;
+            float fraction = usedGrams / remaining;
+            foreach (var p in filter.contents)
+                if (p.specId == "grounds")
+                {
+                    if (p.grams <= 0) p.grams = p.units * DoseGrams("grounds");
+                    ScalePortionAmounts(p, Math.Max(0, 1 - fraction));
+                }
+            filter.contents.RemoveAll(p => p.specId == "grounds" && p.grams <= .000001f);
+            if (!filter.contents.Exists(p => p.specId == "grounds")) d.filterSpent = true;
+            d.filterWaterPassedMl = (float)Math.Min(float.MaxValue, (double)d.filterWaterPassedMl + waterMl);
+            return (float)coffeeMl;
+        }
+
+        private bool TickExtractionDrain(float seconds)
+        {
+            bool changed = false;
+            foreach (var filter in State.entities)
+            {
+                if (!IsExtractionFilter(filter)) continue;
+                var jug = ExtractionJug(filter);
+                if (jug == null) continue;
+                PositionExtractionFilter(jug);
+                float volume = LiquidVolume(filter);
+                float hold = Math.Min(seconds, filter.production.filterDrainHold);
+                filter.production.filterDrainHold -= hold;
+                float elapsed = seconds - hold;
+                float amount = Math.Min(volume, Math.Min(Prep.filterDrainMlPerSecond * elapsed,
+                    Math.Max(0, LiquidCapacity(jug) - LiquidVolume(jug))));
+                if (amount > 0 && volume > 0)
+                {
+                    float fraction = amount / volume;
+                    float filterTemperature = TemperatureCelsius(filter);
+                    SetContainerTemperature(filter, filterTemperature);
+                    double priorWeight = 0, drainedWeight = 0;
+                    foreach (var portion in jug.contents) priorWeight += GetThermalWeight(portion);
+                    foreach (var portion in filter.contents)
+                        if (portion.milliliters > 0) drainedWeight += GetThermalWeight(portion) * fraction;
+                    float mixedTemperature = (float)((TemperatureCelsius(jug) * priorWeight + filterTemperature * drainedWeight) / (priorWeight + drainedWeight));
+                    foreach (var portion in filter.contents.ToArray())
+                    {
+                        if (portion.milliliters <= 0) continue;
+                        float drainedMl = portion.milliliters * fraction;
+                        bool water = portion.specId == "water" || portion.specId == "hotwater";
+                        float usedGrams = 0;
+                        float coffeeMl = water ? ConsumeFilterGrounds(filter, drainedMl, out usedGrams) : 0;
+                        if (coffeeMl > 0)
+                        {
+                            var coffee = DrainedLiquid(portion, coffeeMl);
+                            if (coffee.composition.Count == 0) AddConstituent(coffee, "water", 0, coffeeMl);
+                            AddConstituent(coffee, "grounds", usedGrams, 0);
+                            coffee.specId = "coffee";
+                            coffee.extracted = jug.production.brewCompleted;
+                            coffee.coffeeKind = jug.production.brewCompleted ? "essence" : TemperatureBand(TemperatureCelsius(portion)) == LiquidTemperature.Room ? "cold_brew" : "black";
+                            coffee.productionScore = jug.production.brewCompleted ? jug.production.extractionScore : 100;
+                            ReceiveContainerPortion(jug, coffee, 1);
+                        }
+                        if (drainedMl > coffeeMl)
+                            ReceiveContainerPortion(jug, DrainedLiquid(portion, drainedMl - coffeeMl), 1);
+                        ScalePortionAmounts(portion, 1 - fraction);
+                    }
+                    filter.contents.RemoveAll(portion => portion.milliliters <= .00001f && portion.grams <= .00001f);
+                    filter.production.filterDrainedMl += amount;
+                    SetContainerTemperature(jug, mixedTemperature);
+                    MixContainer(jug); RefreshContainerTemperature(jug, mixedTemperature); RefreshContainerTemperature(filter, filterTemperature);
+                    changed = true;
+                }
+                if (jug.production.brewCompleted && filter.production.filterSpent && LiquidVolume(filter) <= .001f)
+                {
+                    filter.production.filterSpent = true;
+                    DetachExtractionFilter(filter);
+                    filter.x = jug.x + .9f; filter.y = jug.y - .75f;
+                    changed = true;
+                }
+            }
+            return changed;
+        }
+    }
+}

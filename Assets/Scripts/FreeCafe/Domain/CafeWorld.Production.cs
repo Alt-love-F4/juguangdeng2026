@@ -13,9 +13,12 @@ namespace Spotlight.FreeCafe
         private bool IsProductionMachine(WorldEntity entity) => IsProductionVessel(entity)
             || (ProductionEnabled && entity != null && (entity.specId == "machine.grinder" || entity.specId == "machine.mixer" || entity.specId == "machine.stove"));
         public bool IsContainer(WorldEntity entity) => entity != null && (Spec(entity.specId).Has(Capability.Container) || IsProductionVessel(entity));
-        public bool CanPour(WorldEntity entity) => ProductionEnabled && IsContainer(entity) && LiquidVolume(entity) > 0;
-        private bool IsLiquid(string id) => id == "water" || id == "hotwater" || id == "milk" || id == "hotmilk"
-            || id == "coffee" || id == "cocoa.drink" || id == "matcha.drink";
+        public bool CanPour(WorldEntity entity) => ProductionEnabled && IsContainer(entity) && LiquidVolume(entity) > 0
+            && (!IsExtractionFilter(entity) || ExtractionJug(entity) == null)
+            && (!IsPrecisionExtractor(entity) || ExtractionFilter(entity) == null || !entity.production.brewStarted);
+        private bool IsLiquid(string id) => IngredientDefinition(id)?.liquid ??
+            (id == "water" || id == "hotwater" || id == "milk" || id == "hotmilk"
+            || id == "coffee" || id == "milkfoam" || id == "cocoa.drink" || id == "matcha.drink");
         private static float Clamp(float value, float min = 0, float max = 100) => Math.Max(min, Math.Min(max, value));
 
         public void EnableProduction()
@@ -83,7 +86,8 @@ namespace Spotlight.FreeCafe
         {
             if (entity == null) return 0;
             var spec = Spec(entity.specId);
-            return spec.capacityMl > 0 ? spec.capacityMl : IsProductionVessel(entity) ? Prep.kettleCapacityMl : spec.capacity * Prep.portionMl;
+            return spec.capacityMl > 0 ? spec.capacityMl : IsProductionVessel(entity) || ProductionEnabled && entity.specId == "machine.mixer"
+                ? Prep.kettleCapacityMl : spec.capacity * Prep.portionMl;
         }
         
         public string ProductionCaption(WorldEntity entity)
@@ -111,7 +115,7 @@ namespace Spotlight.FreeCafe
             float coffee = 0, milk = 0, water = 0, matcha = 0, cocoa = 0, other = 0;
             float capacity = LiquidCapacity(entity);
             Portion primary = null;
-            float thermal = 0, thermalVolume = 0;
+            float temperature = TemperatureCelsius(entity);
             if (entity != null)
             {
                 float legacyPortionMl = capacity / Math.Max(1, Spec(entity.specId).capacity);
@@ -122,11 +126,10 @@ namespace Spotlight.FreeCafe
                         volume = Math.Max(0, portion.units) * legacyPortionMl;
                     if (volume <= 0) continue;
                     if (primary == null) primary = portion;
-                    thermal += volume * (int)portion.temperature; thermalVolume += volume;
                     switch (portion.specId)
                     {
                         case "coffee": coffee += volume; break;
-                        case "milk": case "hotmilk": case "cream": milk += volume; break;
+                        case "milk": case "hotmilk": case "milkfoam": case "cream": milk += volume; break;
                         case "water": case "hotwater": water += volume; break;
                         case "matcha.drink": matcha += volume; break;
                         case "cocoa.drink": cocoa += volume; break;
@@ -135,9 +138,9 @@ namespace Spotlight.FreeCafe
                 }
             }
             var composition = new CafeLiquidComposition(coffee, milk, water, matcha, cocoa, other);
-            return new CafeLiquidSnapshot(composition.TotalMl, capacity, thermalVolume <= 0 ? LiquidTemperature.Room : (LiquidTemperature)(int)Math.Round(thermal / thermalVolume),
+            return new CafeLiquidSnapshot(composition.TotalMl, capacity, TemperatureBand(temperature),
                 entity == null ? ProductionPhase.Empty : entity.production.phase, primary?.specId,
-                entity == null ? 100 : entity.production.extractionScore, composition);
+                entity == null ? 100 : entity.production.extractionScore, composition, temperature);
         }
 
         public ActionResult SelectServingCup(string sourceId)
@@ -176,6 +179,8 @@ namespace Spotlight.FreeCafe
             var input = Spec(item.specId); var receiver = Spec(target.specId);
             if (!string.IsNullOrEmpty(State.production.miniGameToken) && (target.id == State.production.miniGameCupId || item.id == State.production.miniGameCupId))
             { result = ActionResult.No("请先结束或取消小游戏"); return true; }
+            if (IsExtractionFilter(item) && IsPrecisionExtractor(target))
+            { result = PreviewExtractionAssembly(item, target); return true; }
             if (target.specId == "machine.stove")
             { result = IsContainer(item) ? ActionResult.Yes("放到炉台，点击炉台加热") : ActionResult.No("炉台需要容器"); return true; }
             if (IsContainer(target)) { result = PreviewContainer(item, target); return true; }
@@ -192,7 +197,8 @@ namespace Spotlight.FreeCafe
             {
                 bool empty = target.contents.Count == 0 && target.production.phase == ProductionPhase.Empty;
                 bool allowed = input.Has(Capability.Portion) && empty &&
-                    (target.specId == "machine.grinder" && item.specId == "beans" || target.specId == "machine.mixer" && item.specId == "matcha.powder");
+                    (target.specId == "machine.grinder" && item.specId == "beans" || target.specId == "machine.mixer"
+                    && (item.specId == "matcha.powder" || item.specId == "milk" || item.specId == "hotmilk"));
                 result = allowed ? ActionResult.Yes("投入 " + input.label + "；点击加工") : ActionResult.No("此加工设备需要对应原料；通用配料请放入杯或壶");
                 return true;
             }
@@ -209,10 +215,10 @@ namespace Spotlight.FreeCafe
                 State.production.activeCupId=item.id;
                 Notify(); return ActionResult.Yes("杯子已放到交付区；按铃交付当前订单");
             }
+            if (IsExtractionFilter(item) && IsPrecisionExtractor(target)) return AttachExtractionFilter(item.id, target.id);
             if (target.specId == "machine.stove") return DockOnStove(item, target);
             if (IsContainer(target)) return AddToContainer(item, target);
-            target.contents.Add(new Portion { specId = item.specId, units = item.units, quality = item.quality,
-                grams = item.units * 12, productionScore = 100 });
+            target.contents.Add(IngredientPortion(item));
             target.production.phase = ProductionPhase.Loaded;
             State.entities.Remove(item);
             if (State.automaticMachines) return OperateProduction(target.id);
@@ -247,17 +253,45 @@ namespace Spotlight.FreeCafe
             var data = machine.production;
             if (machine.specId == "machine.grinder") { machine.contents[0].specId = "grounds"; data.phase = ProductionPhase.Ready; }
             else if (machine.specId == "machine.mixer")
-            { machine.contents[0].specId = "matcha.drink"; machine.contents[0].milliliters = Prep.portionMl; data.phase = ProductionPhase.Ready; }
+            {
+                var input = machine.contents[0];
+                bool milk = input.specId == "milk" || input.specId == "hotmilk";
+                if (input.composition == null || input.composition.Count == 0)
+                    AddConstituent(input, input.specId, input.grams, input.milliliters);
+                input.specId = milk ? "milkfoam" : "matcha.drink";
+                if (!milk && input.milliliters <= 0)
+                {
+                    input.milliliters = Prep.portionMl;
+                    AddConstituent(input, "water", 0, input.milliliters);
+                }
+                input.grams = 0;
+                data.phase = ProductionPhase.Ready;
+            }
             else
             {
-                data.phase = ProductionPhase.Boiling; data.remaining = Prep.boilingSeconds;
+                data.phase = ProductionPhase.Room;
+                SetContainerTemperature(machine, Math.Max(TemperatureCelsius(machine), Prep.heatingTargetCelsius));
                 MixContainer(machine);
-                foreach (var p in machine.contents) { p.temperature = LiquidTemperature.Boiling; if (p.specId == "coffee") p.extracted = true; }
+                RefreshContainerTemperature(machine);
             }
         }
         private bool TickProduction(float seconds)
         {
             bool changed = false;
+            // Account for this interval before drain can exhaust the filter. The next
+            // tick sees the exhausted state and cannot leave a clock running forever.
+            foreach(var jug in State.entities)
+            {
+                if(!IsPrecisionExtractor(jug))continue;
+                var d=jug.production;var filter=ExtractionFilter(jug);
+                if(d.brewStarted && !d.brewCompleted && !d.brewPourPaused && filter!=null &&
+                    (!filter.production.filterSpent || LiquidVolume(filter)>.001f))
+                {
+                    d.brewElapsed=(float)Math.Min(float.MaxValue,(double)d.brewElapsed+seconds);
+                    changed=true;
+                }
+            }
+            changed |= TickExtractionDrain(seconds);
             foreach (var entity in State.entities)
             {
                 if (!IsProductionMachine(entity) && !IsContainer(entity)) continue;
@@ -266,22 +300,25 @@ namespace Spotlight.FreeCafe
                 {
                     var stove = State.entities.Find(candidate => candidate.specId == "machine.stove" && candidate.production.heatingVesselId == entity.id);
                     if (stove == null || stove.area != entity.area || Math.Abs(entity.x - stove.x) > .8f || Math.Abs(entity.y - StoveDockHeight(entity, stove)) > .7f)
-                    { entity.production.phase = ProductionPhase.Room; entity.production.remaining = 0; changed = true; continue; }
+                    { entity.production.phase = ProductionPhase.Room; RefreshContainerTemperature(entity); changed = true; continue; }
                 }
                 var d = entity.production; d.clickCooldown = Math.Max(0, d.clickCooldown - seconds);
-                float elapsed = seconds;
-                // 跨阶段消费同一帧剩余时间，长 Tick 不会丢失冷却时间。
-                for (int transitions = 0; transitions < 3 && elapsed > 0; transitions++)
+                // Only active processing consumes time. Warm/Boiling never cool automatically.
+                if (d.phase != ProductionPhase.Processing) continue;
+                float previousRemaining = d.remaining;
+                float used = Math.Min(seconds, previousRemaining);
+                if (IsContainer(entity))
                 {
-                    if (d.phase != ProductionPhase.Processing && d.phase != ProductionPhase.Boiling && d.phase != ProductionPhase.Warm) break;
-                    float used = Math.Min(elapsed, d.remaining); d.remaining -= used; elapsed -= used;
-                    if (d.remaining > .0001f) break;
-                    if (d.phase == ProductionPhase.Processing) FinishProductionMachine(entity);
-                    else if (d.phase == ProductionPhase.Boiling)
-                    { d.phase = ProductionPhase.Warm; d.remaining = Prep.warmSeconds; foreach (var p in entity.contents) p.temperature = LiquidTemperature.Warm; }
-                    else { d.phase = ProductionPhase.Room; d.remaining = 0; foreach (var p in entity.contents) p.temperature = LiquidTemperature.Room; }
-                    changed = true;
+                    float current = TemperatureCelsius(entity);
+                    float target = Math.Max(current, Prep.heatingTargetCelsius);
+                    float fraction = previousRemaining > 0 ? used / previousRemaining : 1;
+                    SetContainerTemperature(entity, current + (target - current) * fraction);
+                    ApplyCompositionRules(entity);
+                    MergeContainerContents(entity);
                 }
+                d.remaining = Math.Max(0, previousRemaining - used);
+                if (d.remaining <= .0001f) FinishProductionMachine(entity);
+                changed = true;
             }
             return changed;
         }
@@ -291,7 +328,8 @@ namespace Spotlight.FreeCafe
             if (machine == null || machine.production.phase != ProductionPhase.Ready || machine.contents.Count == 0
                 || (machine.specId != "machine.grinder" && machine.specId != "machine.mixer")) return null;
             var p = machine.contents[0];
-            return new WorldEntity { id = machine.id + ":output", specId = p.specId, units = p.units, quality = p.quality, area = machine.area, x = machine.x, y = machine.y };
+            return new WorldEntity { id = machine.id + ":output", specId = p.specId, units = p.units, quality = p.quality,
+                portionPayload = CopyPortion(p), area = machine.area, x = machine.x, y = machine.y };
         }
         private ActionResult TakeProductionOutput(string machineId, string expectedId, string targetId, AreaId area, float x, float y)
         {
@@ -309,6 +347,7 @@ namespace Spotlight.FreeCafe
         public ActionResult PourLiquid(string sourceId, string targetId, float requestedMl, float seconds)
         {
             var source = Find(sourceId); var target = Find(targetId);
+            if (target != null && ExtractionFilter(target) != null) target = ExtractionFilter(target);
             if (!CanPour(source) || !Finite(requestedMl) || requestedMl <= 0 || !Finite(seconds) || seconds <= 0)
                 return ActionResult.No("当前不能倾倒");
             if (source == target || target != null && (source.area != target.area || !IsContainer(target))) return ActionResult.No("目标无效");
@@ -316,32 +355,52 @@ namespace Spotlight.FreeCafe
                 return ActionResult.No("小游戏期间不能改变内容");
             float total = LiquidVolume(source);
             float amount = Math.Min(requestedMl, total);
-            float accepted = target == null ? 0 : Math.Min(amount, Math.Max(0, LiquidCapacity(target) - LiquidVolume(target)));
+            if (target != null && ExtractionJug(target) == source) return ActionResult.No("不能把下壶倒回自己的滤杯");
+            float accepted = target == null ? 0 : Math.Min(amount, ExtractionReceivingSpace(target));
             float takeFraction = amount / total, receiveFraction = accepted / total;
-            // Compute before merging, so ingredient-level rounding cannot change the existing mixing rule.
-            float thermal = 0, thermalVolume = 0;
-            if (target != null && accepted > 0)
-            {
-                foreach (var portion in target.contents) { thermal += portion.milliliters * (int)portion.temperature; thermalVolume += portion.milliliters; }
-                foreach (var portion in source.contents) { thermal += portion.milliliters * receiveFraction * (int)portion.temperature; thermalVolume += portion.milliliters * receiveFraction; }
-            }
-            var mixedTemperature = thermalVolume > 0 ? (LiquidTemperature)(int)Math.Round(thermal / thermalVolume) : LiquidTemperature.Room;
+            // Compute accepted actual ml/free grams BEFORE reactions or ingredient compaction.
+            var mixedTemperature = MixedTemperature(target, source, receiveFraction);
+            SetContainerTemperature(source, TemperatureCelsius(source));
+            float acceptedHotWater = 0;
+            foreach (var portion in source.contents)
+                if ((portion.specId == "water" || portion.specId == "hotwater") && TemperatureBand(TemperatureCelsius(portion)) != LiquidTemperature.Room)
+                    acceptedHotWater += portion.milliliters * receiveFraction;
+            // A clipped/depleted final frame contributes only the duration of its accepted stream.
+            float acceptedSeconds = seconds * (accepted / requestedMl);
+            if (target != null && acceptedHotWater > 0) AcceptExtractionWater(target, acceptedHotWater, acceptedSeconds);
             foreach (var portion in source.contents)
             {
+                EnsureCoffeeProvenance(portion);
                 if (target != null && accepted > 0) ReceiveContainerPortion(target, portion, receiveFraction);
-                portion.milliliters *= 1 - takeFraction;
-                portion.grams *= 1 - takeFraction;
+                ScalePortionAmounts(portion, 1 - takeFraction);
             }
             source.contents.RemoveAll(portion => portion.milliliters <= 0 && portion.grams <= 0);
             source.production.spilledMl += amount - accepted;
-            if (target != null && accepted > 0) { MixContainer(target); RefreshContainerTemperature(target, mixedTemperature); }
-            if (source.contents.Count == 0) source.production = new ProductionEntityState { spilledMl = source.production.spilledMl };
+            if (target != null && accepted > 0)
+            {
+                if (IsExtractionFilter(target) && LiquidVolume(target) <= accepted + .001f)
+                    target.production.filterDrainHold = Prep.filterResidenceSeconds;
+                SetContainerTemperature(target, mixedTemperature);
+                MixContainer(target); RefreshContainerTemperature(target, mixedTemperature);
+                var jug = ExtractionJug(target);
+                if (jug != null && jug.production.brewStarted && !jug.production.brewCompleted
+                    && jug.production.brewInjectedHotWaterMl > ExtractionSnapshot(jug).greenMlMax) CompleteExtraction(jug);
+            }
+            if (source.contents.Count == 0 && !IsPrecisionExtractor(source) && !IsExtractionFilter(source))
+                source.production = new ProductionEntityState { spilledMl = source.production.spilledMl };
+            else if(source.contents.Count==0 && IsContainer(source))source.production.phase=ProductionPhase.Empty;
             return ActionResult.Yes(accepted > 0 ? "已注入 " + accepted.ToString("0") + " ml" : "液体洒出（不返还）");
         }
         public ActionResult FinishPour(string targetId)
         {
+            var target = ExtractionJug(Find(targetId));
+            if(IsPrecisionExtractor(target) && target.production.brewStarted)target.production.brewPourPaused=true;
+            if (IsPrecisionExtractor(target) && target.production.brewStarted && !target.production.brewCompleted
+                && target.production.brewInjectedHotWaterMl >= ExtractionSnapshot(target).greenMlMin - .0001f)
+                CompleteExtraction(target);
+            TickExtractionDrain(0);
             Notify();
-            return ActionResult.Yes("停止倾倒 · 按实际成分与温度出品");
+            return ActionResult.Yes(IsPrecisionExtractor(target) ? ExtractionSnapshot(target).qualityLabel : "停止倾倒 · 按实际成分与温度出品");
         }
     }
 }

@@ -19,6 +19,8 @@ MonoBehaviour:
     prefab: {fileID: 6565322091112726965, guid: b50824651adfbad4ca90ab83be90d197, type: 3}
   - specId: container.extractor
     prefab: {fileID: 1078954591625605241, guid: 71a651ca59446264b8628b3e757530a3, type: 3}
+  - specId: container.extractor.filter
+    prefab: {fileID: 4991575393350997607, guid: 6da9d1d0dc966dd41af627c01e7f5815, type: 3}
   - specId: beans
     prefab: {fileID: 1118843499487462069, guid: 2bebbc40d51c01f47837db8282c3555a, type: 3}
   - specId: grounds
@@ -87,3 +89,5 @@ MonoBehaviour:
     prefab: {fileID: 2570357490750689856, guid: e64b3c0f638a2f84fbeb9113b61696c7, type: 3}
   - specId: machine.stove
     prefab: {fileID: 7785203104757129137, guid: a32d1b9086424264da1bae6c83efdb9a, type: 3}
+  - specId: milkfoam
+    prefab: {fileID: 4058037159139386510, guid: dee54a245566d0046be4598f67ecaa5f, type: 3}

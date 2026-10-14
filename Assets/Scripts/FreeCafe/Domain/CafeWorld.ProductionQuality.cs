@@ -7,6 +7,11 @@ namespace Spotlight.FreeCafe
         public ProductionQuality EvaluateProduction(WorldEntity cup, ProductSpec product)
         {
             if (cup == null || product == null || cup.contents.Count == 0) return new ProductionQuality(0, 0, 0, 0, 0);
+            if(product.evaluation!=null)
+            {
+                var evaluated=EvaluateProductComposition(cup,product);
+                return new ProductionQuality(evaluated.total,evaluated.total,evaluated.total,evaluated.total,evaluated.total);
+            }
             float totalMl = LiquidVolume(cup), coffeeMl = 0, extractionSum = 0, liquidScore = 0, coverage = 0;
             int liquidCount = 0, coffeeOrder = 0, firstLiquid = int.MaxValue, firstTopping = int.MaxValue;
             float sweetness = 0;
@@ -26,7 +31,7 @@ namespace Spotlight.FreeCafe
                 {
                     if (!SameIngredient(p.specId, need.specId)) continue;
                     ml += p.milliliters; units += p.grams > 0 ? p.grams / (p.specId == "sugar" ? 5 : 12) : p.units;
-                    temperature += p.milliliters * (100 - Math.Abs((int)p.temperature - (int)product.requiredTemperature) * 35);
+                    temperature += p.milliliters * (100 - Math.Abs((int)TemperatureBand(TemperatureCelsius(p)) - (int)product.requiredTemperature) * 35);
                 }
                 if (IsLiquid(need.specId))
                 {
@@ -84,14 +89,16 @@ namespace Spotlight.FreeCafe
                 return ActionResult.No("需要出餐杯和当前显示的订单");
             if (!string.IsNullOrEmpty(State.production.miniGameToken)) return ActionResult.No("请先结束或取消小游戏");
             var product = Product(request.productId); var score = EvaluateProduction(cup, product);
-            bool satisfied = score.total >= product.minimumScore
+            var classification=ClassifyCoffee(cup);
+            bool correctType=product.evaluation==null || classification.known && classification.productId==product.id;
+            bool satisfied = correctType && score.total >= product.minimumScore
                 && (!Prep.requireLatteArt || !product.requiresLatteArt || cup.latteArt || State.automaticLatteArt);
             request.lastProductionScore = score.total;
-            string detail = score.grade + " " + score.total.ToString("0.0") + "分 · 萃取 " + score.extraction.ToString("0")
+            string detail = "种类："+classification.label+" · "+(product.evaluation!=null ? EvaluateProductComposition(cup,product).description : score.grade + " " + score.total.ToString("0.0") + "分 · 萃取 " + score.extraction.ToString("0")
                 + " / 液体 " + score.liquid.ToString("0") + " / 顺序 " + score.order.ToString("0")
-                + " / 甜度 " + score.sweetness.ToString("0") + " / 浓度 " + score.concentration.ToString("0");
-            State.entities.Remove(cup);
-            if (State.production.activeCupId == cup.id) State.production.activeCupId = null;
+                + " / 甜度 " + score.sweetness.ToString("0") + " / 浓度 " + score.concentration.ToString("0"));
+            int price = satisfied ? SalePrice(cup, product) : 0;
+            ConsumeDeliveredContainer(cup);
             if (!satisfied && request.remakes < product.maxRemakes)
             {
                 request.remakes++; State.production.lastDelivery = "顾客要求重做（" + request.remakes + "/" + product.maxRemakes + "）· " + detail;
@@ -100,7 +107,7 @@ namespace Spotlight.FreeCafe
             State.served++;
             if (satisfied)
             {
-                int price = SalePrice(cup, product); State.money += price; State.todayRevenue += price;
+                State.money += price; State.todayRevenue += price;
                 State.todayServed++; State.reputation += 2;
                 State.production.lastDelivery = "订单完成 +" + price + " 金币 · " + detail;
             }
@@ -113,17 +120,45 @@ namespace Spotlight.FreeCafe
             State.spokenCustomers.Remove(request.customerId); UpdateFocusedRequest(); Notify();
             return ActionResult.Yes(State.production.lastDelivery);
         }
+        private void ConsumeDeliveredContainer(WorldEntity container)
+        {
+            if (State.production.activeCupId == container.id) State.production.activeCupId = null;
+            foreach (var entity in State.entities)
+                if (entity.production != null && entity.production.heatingVesselId == container.id)
+                    entity.production.heatingVesselId = null;
+            var home = Array.Find(Catalog.layout, entry => entry.id == container.id && entry.specId == container.specId);
+            bool reusable = home != null && IsContainer(container) &&
+                (Spec(container.specId).Has(Capability.Processor) || Spec(container.specId).Has(Capability.HotExtraction));
+            if (!reusable) { State.entities.Remove(container); return; }
+            var filter = ExtractionFilter(container);
+            if (filter != null)
+            {
+                DetachExtractionFilter(filter); filter.x = container.x + .9f; filter.y = container.y - .75f;
+            }
+            container.contents.Clear(); container.production = new ProductionEntityState { extractionAssemblyInitialized = IsPrecisionExtractor(container) }; container.task = null;
+            container.ownerId = null; container.latteArt = false; container.latteArtScore = 0; container.latteArtPattern = null;
+            container.area = home.area; container.x = home.x; container.y = home.y; container.rotation = 0;
+        }
         public ActionResult DiscardProductionCup()
         {
             var cup = ServingCup; if (cup == null) return ActionResult.No("托盘为空");
-            CancelProductionMiniGame(); State.entities.Remove(cup); State.production.activeCupId = null;
+            CancelProductionMiniGame(); ConsumeDeliveredContainer(cup);
             Notify(); return ActionResult.Yes("出餐杯已丢弃，消耗的资源不返还");
         }
         public ActionResult EmptyProductionMachine(string id)
         {
             var machine = Find(id);
-            if ((!IsProductionMachine(machine) && !IsContainer(machine)) || machine.contents.Count == 0) return ActionResult.No("没有可清空的设备内容");
-            machine.contents.Clear(); machine.production = new ProductionEntityState();
+            var filter = ExtractionFilter(machine);
+            if ((!IsProductionMachine(machine) && !IsContainer(machine)) || machine.contents.Count == 0 && (filter == null || filter.contents.Count == 0))
+                return ActionResult.No("没有可清空的设备内容");
+            machine.contents.Clear();
+            if (filter != null)
+            {
+                filter.contents.Clear(); filter.production.filterSpent = false; filter.production.filterDrainHold = 0;
+                filter.production.filterReferenceGroundsGrams=0;filter.production.filterWaterPassedMl=0;filter.production.filterDrainedMl=0;
+            }
+            machine.production = new ProductionEntityState { extractionFilterId = filter?.id,
+                extractionJugId = machine.production.extractionJugId, extractionAssemblyInitialized = IsPrecisionExtractor(machine) };
             Notify(); return ActionResult.Yes("设备内容已丢弃，资源不返还");
         }
         public ActionResult PageProductionOrder(int direction)

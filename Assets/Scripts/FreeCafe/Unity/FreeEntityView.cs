@@ -32,6 +32,9 @@ namespace Spotlight.FreeCafe
         public bool CanInteract => !preview && !retired && !destroyOnArrival && isActiveAndEnabled &&
             Runtime != null && Runtime.IsRegisteredView(this);
         private bool hovered, selected, dropTarget, invalidDrop;
+        private bool extractionFilling;
+        public bool IsReceivingPour => receivingPour;
+        public bool IsHovered => hovered;
         private TMP_Text fillStatus;
         private SpriteRenderer fillBarBackground, fillBar;
         private static Sprite onePixelSprite;
@@ -44,6 +47,7 @@ namespace Spotlight.FreeCafe
         private Vector3 motionTarget, motionVelocity;
         private float dragLean, leanVelocity, baseRotation, pourRotation;
         private bool motionInitialized, pointerMotion, motionFrozen, destroyOnArrival;
+        private float retireElapsed;
         public Vector3 DragPosition => transform.parent != null ? transform.parent.TransformPoint(motionTarget) : motionTarget;
         private Coroutine rejectionAnimation;
         private Vector3 bodyOrigin;
@@ -51,7 +55,7 @@ namespace Spotlight.FreeCafe
         private Canvas glassCanvas;
         private bool pourVisual, receivingPour;
         public bool IsDropTarget => dropTarget;
-        public bool IsReceivingPour => receivingPour;
+
 
         private void Awake()
         {
@@ -134,11 +138,16 @@ namespace Spotlight.FreeCafe
                 liquidPresenter = glassCup;
             }
             glassCup.ConfigureSize(prefabSpecId != "cup.small");
+            if (prefabSpecId == "container.extractor")
+            {
+                glassCup.ConfigureSize(new Vector2(.84f, .89f));
+                glassCanvas.transform.localPosition = new Vector3(-.17f, -.04f, -.01f);
+            }
             glassCup.ConfigureMotionSpace(transform.parent);
             if (body != null)
             {
                 body.enabled = true;
-                glassCup.gameObject.SetActive(pourVisual || receivingPour);
+                glassCup.gameObject.SetActive(pourVisual || receivingPour || extractionFilling);
                 if (glassCanvas != null)
                 {
                     glassCanvas.sortingLayerID = body.sortingLayerID;
@@ -177,6 +186,8 @@ namespace Spotlight.FreeCafe
             if(!string.IsNullOrEmpty(prefabSpecId) && prefabSpecId!=entity.specId)
                 throw new System.InvalidOperationException("Prefab 规格不匹配："+prefabSpecId+" / "+entity.specId);
             Runtime=runtime; EntityId=entity.id; preview=isPreview;
+            if((Runtime.World.IsPrecisionExtractor(entity) || Runtime.World.IsExtractionFilter(entity)) && GetComponent<FreeCafeExtractorVisual>()==null)
+                gameObject.AddComponent<FreeCafeExtractorVisual>();
             personView=GetComponent<FreeCafePersonView>();businessSignView=GetComponent<FreeCafeBusinessSignView>();
             Refresh(entity);
         }
@@ -228,8 +239,8 @@ namespace Spotlight.FreeCafe
             if(Runtime.World.ProductionEnabled && (spec.Has(Capability.Container) || WorldVessel(entity)))
             {
                 var snapshot=Runtime.World.LiquidSnapshot(entity);
-                if (glassCup != null) glassCup.gameObject.SetActive(pourVisual || receivingPour);
-                if (hovered) caption+=" · "+Runtime.World.ContainerDescription(entity);
+                if (glassCup != null) glassCup.gameObject.SetActive(pourVisual || receivingPour || extractionFilling);
+                // Ingredients live in the secondary card, never in the entity's caption.
                 UpdateProductionFill(entity,snapshot);
                 if(liquidPresenter is ICafeLiquidPresenter presenter) presenter.Present(snapshot,0,false);
             }
@@ -312,22 +323,30 @@ namespace Spotlight.FreeCafe
         }
         public void AnimateReturn(Vector3 from,Vector3 to,bool destroyAfter)
         {
-            // Never reset to `from`: the current visible pose and velocity are authoritative.
+            motionInitialized = true;
             pointerMotion = false;
             MovePointer(to);
             destroyOnArrival = destroyAfter;
+            retireElapsed = 0;
+            motionVelocity = Vector3.zero;
             if (destroyAfter) RetireInteraction();
         }
         private void LateUpdate()
         {
             if (!motionInitialized) return;
             float dt = Mathf.Min(Time.unscaledDeltaTime, .05f);
-            float smoothTime = pointerMotion ? dragSmoothTime : releaseSmoothTime;
+            float smoothTime = pointerMotion ? Mathf.Min(dragSmoothTime, .035f) : Mathf.Min(releaseSmoothTime, .07f);
+            if (destroyOnArrival)
+            {
+                retireElapsed += Time.unscaledDeltaTime;
+                var tint = body.color; tint.a = Mathf.Clamp01(1 - retireElapsed / .12f); body.color = tint;
+                if (retireElapsed >= .12f) { Destroy(gameObject); return; }
+            }
             if (!motionFrozen)
                 transform.localPosition = Vector3.SmoothDamp(transform.localPosition, motionTarget, ref motionVelocity,
                     Mathf.Max(.01f, smoothTime), Mathf.Infinity, dt);
             float targetLean = pointerMotion && !pourVisual
-                ? Mathf.Clamp(motionVelocity.x * leanPerSpeed, -maxDragLean, maxDragLean) : 0f;
+                ? Mathf.Clamp(motionVelocity.x * Mathf.Min(leanPerSpeed, .7f), -Mathf.Min(maxDragLean, 6), Mathf.Min(maxDragLean, 6)) : 0f;
             dragLean = Mathf.SmoothDampAngle(dragLean, targetLean, ref leanVelocity,
                 Mathf.Max(.01f, leanSmoothTime), Mathf.Infinity, dt);
             float machineShake = 0f;
@@ -373,17 +392,24 @@ namespace Spotlight.FreeCafe
         public void PresentPour(float tilt,bool pouring)
         {
             pourVisual = pouring || Mathf.Abs(tilt) > .001f;
-            if (glassCup != null) glassCup.gameObject.SetActive(pourVisual || receivingPour);
+            if (glassCup != null) glassCup.gameObject.SetActive(pourVisual || receivingPour || extractionFilling);
             ApplyVisual();
-            pourRotation = -tilt*75;
+            pourRotation = -tilt * (Runtime != null ? Runtime.maxPourAngle : 105f);
             body.transform.localRotation=Quaternion.Euler(0,0,pourVisual ? pourRotation : baseRotation + dragLean);
             UpdateGlassTransform();
             RefreshLiquid(tilt,pouring);
         }
+        public void SetExtractionFilling(bool value)
+        {
+            if (extractionFilling == value) return;
+            extractionFilling = value;
+            if (glassCup != null) glassCup.gameObject.SetActive(pourVisual || receivingPour || extractionFilling);
+            ApplyVisual();
+        }
         public void SetReceivingPour(bool value)
         {
             receivingPour=value;
-            if(glassCup!=null) glassCup.gameObject.SetActive(pourVisual || receivingPour);
+            if(glassCup!=null) glassCup.gameObject.SetActive(pourVisual || receivingPour || extractionFilling);
             RefreshLiquid();
             ApplyVisual();
         }
@@ -411,7 +437,7 @@ namespace Spotlight.FreeCafe
             fillBar.color=snapshot.temperature==LiquidTemperature.Boiling ? new Color(.95f,.45f,.18f) : snapshot.temperature==LiquidTemperature.Warm ? new Color(.95f,.74f,.3f) : new Color(.35f,.72f,.82f);
             fillStatus.fontSize=1.8f;
             fillStatus.text=snapshot.volumeMl.ToString("0")+"/"+snapshot.capacityMl.ToString("0")+" ml · "+Runtime.World.SolidMass(entity).ToString("0.0")+" g";
-            fillStatus.gameObject.SetActive(hovered); fillBarBackground.gameObject.SetActive(hovered); fillBar.gameObject.SetActive(hovered);
+            fillStatus.gameObject.SetActive(false); fillBarBackground.gameObject.SetActive(false); fillBar.gameObject.SetActive(false);
         }
 
         private void UpdateFillIndicator(WorldEntity entity,EntitySpec spec,int total)
@@ -437,7 +463,14 @@ namespace Spotlight.FreeCafe
         {
             hovered=value; ApplyVisual();
             if(Runtime!=null && Runtime.World!=null)
-            { var entity=Runtime.World.Find(EntityId); if(Runtime.World.IsContainer(entity)) UpdateProductionFill(entity,Runtime.World.LiquidSnapshot(entity)); }
+            {
+                var entity=Runtime.World.Find(EntityId);
+                if(Runtime.World.IsContainer(entity))
+                {
+                    if(value) Runtime.ContainerPanels?.Inspect(EntityId);
+                    else Runtime.ContainerPanels?.ClearInspection(EntityId);
+                }
+            }
         }
         public void SetDropTarget(bool active,bool invalid)
         {
@@ -448,7 +481,7 @@ namespace Spotlight.FreeCafe
             if(body==null) return;
             if(businessSignView!=null && Runtime!=null) businessSignView.Present(hovered);
             body.color=invalidDrop ? new Color(1,.35f,.28f,1) : dropTarget ? new Color(.35f,1,.82f,1) : hovered ? new Color(1,.94f,.55f,1) : selected ? new Color(1,.84f,.4f,1) : preview ? new Color(1,1,1,.65f) : Color.white;
-            if(pourVisual || receivingPour) { var tint=body.color; tint.a=.22f; body.color=tint; }
+            if(pourVisual || receivingPour || extractionFilling) { var tint=body.color; tint.a=.22f; body.color=tint; }
             if(glassCup!=null) glassCup.SetTint(Color.white);
         }
         public void OnPointerEnter(PointerEventData e) { if(CanInteract && !Runtime.InputBlocked) { SetHovered(true); Runtime.Inspect(EntityId); } }

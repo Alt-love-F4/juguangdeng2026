@@ -90,6 +90,13 @@ namespace Spotlight.FreeCafe
             liquid.RefreshVisual();
         }
 
+        public void ConfigureSize(Vector2 size)
+        {
+            Ensure();
+            rect.sizeDelta = size;
+            liquid.RefreshVisual();
+        }
+
         public void SetTint(Color tint)
         {
             Ensure();

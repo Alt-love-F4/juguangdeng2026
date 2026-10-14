@@ -126,7 +126,7 @@ namespace Spotlight.FreeCafe
             orderDescription.text=product==null ? "尚无订单，可先准备原料。" : product.label+"  ·  "+product.description+"\n满意要求 ≥ "+product.minimumScore.ToString("0")+"分"+(request.remakes>0 ? "  ·  正在重做" : "");
             previousOrder.interactable=nextOrder.interactable=!blocked && state.requests.Count>1;
             var cup=world.ServingCup;
-            cupStatus.text=cup==null ? "出餐托盘 · 未选杯" : world.Spec(cup.specId).label+"  "+world.LiquidVolume(cup).ToString("0")+" / "+world.LiquidCapacity(cup).ToString("0")+" ml"+(cup.latteArt ? "  · 拉花："+(cup.latteArtPattern ?? "已完成")+" "+cup.latteArtScore.ToString("0")+"分" : "");
+            cupStatus.text=cup==null ? "出餐托盘 · 未选杯" : world.Spec(cup.specId).label+" · "+world.ClassifyCoffee(cup).label+"  "+world.LiquidVolume(cup).ToString("0")+" / "+world.LiquidCapacity(cup).ToString("0")+" ml"+(cup.latteArt ? "  · 拉花："+(cup.latteArtPattern ?? "已完成")+" "+cup.latteArtScore.ToString("0")+"分" : "");
             bool canChange=!blocked && (cup==null || cup.contents.Count==0);
             smallCup.interactable=largeCup.interactable=canChange;
             deliver.interactable=!blocked; discard.interactable=!blocked && cup!=null;
@@ -135,24 +135,16 @@ namespace Spotlight.FreeCafe
             var selected=world.Find(runtime.SelectedId); clearMachine.interactable=!blocked && selected!=null && (world.IsContainer(selected) || world.Spec(selected.specId).Has(Capability.Processor)) && selected.contents.Count>0;
             instruction.text=runtime.Hint;
             result.text=string.IsNullOrEmpty(state.production.lastDelivery) ? "王国币 "+state.money+"  ·  声望 "+state.reputation+"  ·  可提前备料" : state.production.lastDelivery;
-            var brewer=world.Find("m.brewer"); var heater=world.Find("m.heater"); var settings=world.Catalog.production;
-            if(timeCaption!=null) timeCaption.text="萃取 "+brewer.production.brewElapsed.ToString("0.0")+" s  /  理想 "+settings.brewIdealSeconds.ToString("0.#")+" s";
-            if(volumeCaption!=null) volumeCaption.text="注水 "+world.LiquidVolume(brewer).ToString("0")+" ml  /  理想 "+settings.brewIdealMl.ToString("0")+" ml";
-            timeGauge.maxValue=settings.brewIdealSeconds+settings.brewGoldSeconds+settings.brewGreenSeconds+2;
-            volumeGauge.maxValue=settings.brewIdealMl+settings.brewGoldMl+settings.brewGreenMl+50;
-            timeGauge.value=brewer.production.brewElapsed; volumeGauge.value=world.LiquidVolume(brewer);
-            SetBand(timeGreen,settings.brewIdealSeconds-settings.brewGoldSeconds-settings.brewGreenSeconds,settings.brewIdealSeconds+settings.brewGoldSeconds+settings.brewGreenSeconds,timeGauge.maxValue);
-            SetBand(timeGold,settings.brewIdealSeconds-settings.brewGoldSeconds,settings.brewIdealSeconds+settings.brewGoldSeconds,timeGauge.maxValue);
-            SetBand(volumeGreen,settings.brewIdealMl-settings.brewGoldMl-settings.brewGreenMl,settings.brewIdealMl+settings.brewGoldMl+settings.brewGreenMl,volumeGauge.maxValue);
-            SetBand(volumeGold,settings.brewIdealMl-settings.brewGoldMl,settings.brewIdealMl+settings.brewGoldMl,volumeGauge.maxValue);
-            var stoveVessel=world.Find(world.Find("m.stove")?.production.heatingVesselId);
-            machineStatus.text="自由调配 · 不限制加料顺序\n咖啡壶："+world.ContainerDescription(brewer)+"\n加热壶："+world.ContainerDescription(heater)+"\n炉台："+(stoveVessel==null ? "放上容器，点击加热" : world.Spec(stoveVessel.specId).label+" · "+world.ProductionCaption(stoveVessel));
+            // Container-anchored cards own heating/extraction presentation. Keep the
+            // old serialized references for scene compatibility, but never show the
+            // fixed brewer gauges (the brewer is not the precision extractor).
+            if(timeCaption!=null) timeCaption.gameObject.SetActive(false);
+            if(volumeCaption!=null) volumeCaption.gameObject.SetActive(false);
+            if(timeGauge!=null) timeGauge.gameObject.SetActive(false);
+            if(volumeGauge!=null) volumeGauge.gameObject.SetActive(false);
+            if(machineStatus!=null) machineStatus.text="自由调配 · 悬停容器查看成分 · 加热与萃取进度显示在容器旁";
             miniGamePanel.SetActive(!string.IsNullOrEmpty(state.production.miniGameToken) && (runtime.GetComponent<FreeCafeMiniGameGateway>()==null || !runtime.GetComponent<FreeCafeMiniGameGateway>().HasPresenter));
             if(bookPanel.activeSelf) RefreshBook();
-        }
-        private static void SetBand(Image image,float minimum,float maximum,float limit)
-        {
-            var rect=image.rectTransform; rect.anchorMin=new Vector2(Mathf.Clamp01(minimum/limit),0); rect.anchorMax=new Vector2(Mathf.Clamp01(maximum/limit),1); rect.offsetMin=rect.offsetMax=Vector2.zero;
         }
     }
 }

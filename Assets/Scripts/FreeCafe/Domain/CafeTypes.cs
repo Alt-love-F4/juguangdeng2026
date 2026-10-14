@@ -93,6 +93,15 @@ namespace Spotlight.FreeCafe
         public bool acceptsContainer = true; // 是否接受从容器内容物中取一份投入
     }
 
+    /// <summary>Internal source amounts carried by a portion, not separate free ingredients.</summary>
+    [Serializable]
+    public sealed class ConstituentAmount
+    {
+        public string ingredientId;
+        public float grams;
+        public float milliliters;
+    }
+
     /// <summary>容器里的一份原料（同规格同品质会合并份数）。</summary>
     [Serializable]
     public sealed class Portion
@@ -103,9 +112,12 @@ namespace Spotlight.FreeCafe
         public float milliliters;
         public float grams;
         public bool extracted;
-        public LiquidTemperature temperature;
+        public LiquidTemperature temperature; // Serialized legacy API; numeric temperature is authoritative.
+        public float temperatureCelsius = -1; // -1 migrates old Room/Warm/Boiling data using production defaults.
         public float productionScore = 100;
+        public string coffeeKind; // cold_brew / black / essence；不改变物理原料ID，兼容旧存档
         public int addedSequence;
+        public List<ConstituentAmount> composition = new List<ConstituentAmount>();
     }
 
     /// <summary>餐品规格：配方、价格与解锁条件。</summary>
@@ -128,6 +140,7 @@ namespace Spotlight.FreeCafe
         public int qualityPriceStep = 50; // 咖啡品质每高一级的加价
         public bool requiresLatteArt;     // 是否必须完成拉花
         public string preferredLatteArtPattern; // 可选：顾客/餐品偏好的图案 ID
+        public ProductEvaluationSpec evaluation; // 可选：按含量与出品水准评价；不限制操作顺序
         public Portion[] ingredients;     // 配方原料（份数需与杯子容量匹配）
     }
 
@@ -230,6 +243,10 @@ namespace Spotlight.FreeCafe
         public InitialEntity[] layout;       // 初始布局
         public AreaSpec[] areas;             // 区域配置
         public NpcSpec[] npcs;               // NPC 配置（可选）
+        public IngredientRuleSpec[] ingredientRules;
+        public CompositionRuleSpec[] compositionRules;
+        public DrinkNameRuleSpec[] drinkNameRules;
+        public CoffeeCompositionSettings compositionSettings = new CoffeeCompositionSettings();
         public ProductionSettings production = new ProductionSettings();
         public EconomySpec economy = new EconomySpec(); // 经济参数
     }
@@ -265,6 +282,7 @@ namespace Spotlight.FreeCafe
         public bool latteArt;  // 是否已完成拉花
         public string latteArtPattern; // 玩家拉出的图案 ID，用于剧情与顾客偏好
         public float latteArtScore; // 图案匹配分数（0~100）
+        public Portion portionPayload; // Exact production output amounts/provenance; null for catalog-sized doses.
         public List<Portion> contents = new List<Portion>(); // 容器内容物
         public ProductionEntityState production = new ProductionEntityState();
         public ProcessingTask task; // 设备加工任务（非设备为空）

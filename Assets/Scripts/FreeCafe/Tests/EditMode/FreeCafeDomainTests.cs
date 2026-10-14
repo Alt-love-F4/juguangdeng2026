@@ -94,7 +94,14 @@ namespace Spotlight.FreeCafe.Tests
         [Test] public void CapacityFailureDoesNotConsumeThirdPortion()
         { var cup=Take("s.cups.small");world.Interact(Take("s.milk").id,cup.id);world.Interact(Take("s.honey").id,cup.id);var extra=Take("s.beans");Assert.That(world.Interact(extra.id,cup.id).success,Is.False);Assert.That(world.Find(extra.id),Is.SameAs(extra));Assert.That(world.TotalUnits(cup),Is.EqualTo(2)); }
         [Test] public void ProductEvaluationUsesCompositionNotOrderOfOperations()
-        { var cup=Take("s.cups.large");cup.contents.Add(new Portion{specId="hotmilk",units=2});cup.contents.Add(new Portion{specId="coffee",units=1});Assert.That(world.Evaluate(cup,world.Product("latte")),Is.EqualTo(1));cup.contents.Reverse();Assert.That(world.Evaluate(cup,world.Product("latte")),Is.EqualTo(1)); }
+        {
+            var cup=Take("s.cups.large");var product=world.Product("latte");
+            Assert.That(product.ingredients,Is.Not.Empty);
+            foreach(var need in product.ingredients) cup.contents.Add(new Portion{specId=need.specId,units=need.units,
+                milliliters=need.milliliters,grams=need.grams,coffeeKind=need.coffeeKind,temperature=need.temperature,productionScore=100});
+            Assert.That(world.Evaluate(cup,product),Is.EqualTo(1));cup.contents.Reverse();
+            Assert.That(world.Evaluate(cup,product),Is.EqualTo(1));
+        }
         [Test] public void WrongDrinkCanBeDeliveredWithConsequences()
         { world.StartDay();var cup=Take("s.cups.small");world.Interact(Take("s.milk").id,cup.id);Assert.That(world.Move(cup.id,AreaId.Cafe,0,-1).success,Is.True);int rep=world.State.reputation;Assert.That(world.Interact(cup.id,"customer_0").success,Is.True);Assert.That(world.Find(cup.id),Is.Null);Assert.That(world.State.served,Is.EqualTo(1));Assert.That(world.State.reputation,Is.EqualTo(rep-1)); }
         [Test] public void CoffeeMadeBeforeOpeningCanFulfilNewCustomer()

@@ -18,6 +18,7 @@ namespace Spotlight.FreeCafe.Tests
         private FreeCafeRuntime app;
         private FreeCafeLatteArtBench bench;
         private Mouse mouse;
+        private InputSettings.EditorInputBehaviorInPlayMode previousEditorInputBehavior;
         private InputSettings.BackgroundBehavior previousInputBehavior;
 
         [UnitySetUp] public IEnumerator Setup()
@@ -25,6 +26,8 @@ namespace Spotlight.FreeCafe.Tests
             foreach (var panel in Object.FindObjectsByType<DialoguePanel>(FindObjectsSortMode.None)) panel.Cancel();
             Time.timeScale = 1;
             GameSaveParticipantRegistry.PendingRestore = null;
+            previousEditorInputBehavior = InputSystem.settings.editorInputBehaviorInPlayMode;
+            InputSystem.settings.editorInputBehaviorInPlayMode = InputSettings.EditorInputBehaviorInPlayMode.AllDeviceInputAlwaysGoesToGameView;
             previousInputBehavior = InputSystem.settings.backgroundBehavior;
             InputSystem.settings.backgroundBehavior = InputSettings.BackgroundBehavior.IgnoreFocus;
             mouse = InputSystem.AddDevice<Mouse>("FreeCafeInteractionPolishMouse");
@@ -51,6 +54,7 @@ namespace Spotlight.FreeCafe.Tests
             }
             if (bench != null) yield return WaitForTransition();
             if (mouse != null && mouse.added) InputSystem.RemoveDevice(mouse);
+            InputSystem.settings.editorInputBehaviorInPlayMode = previousEditorInputBehavior;
             InputSystem.settings.backgroundBehavior = previousInputBehavior;
             yield return null;
         }

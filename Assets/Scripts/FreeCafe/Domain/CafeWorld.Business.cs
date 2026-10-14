@@ -8,7 +8,7 @@ namespace Spotlight.FreeCafe
     {
         /// <summary>判断杯子是否符合餐品配方：杯型、配比、拉花要求都满足才算匹配。</summary>
         public bool Matches(WorldEntity cup, ProductSpec product) => ProductionEnabled
-            ? cup != null && product != null && cup == ServingCup && EvaluateProduction(cup, product).total >= product.minimumScore
+            ? cup != null && product != null && cup == ServingCup && (product.evaluation==null || ClassifyCoffee(cup).productId==product.id) && EvaluateProduction(cup, product).total >= product.minimumScore
                 && (!Prep.requireLatteArt || !product.requiresLatteArt || cup.latteArt || State.automaticLatteArt)
             : cup != null && product != null
             && cup.specId == product.cupSpecId && Evaluate(cup, product) >= .999f

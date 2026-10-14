@@ -34,6 +34,7 @@ namespace Spotlight.FreeCafe
         public bool CarrySelection { get; set; }
         public bool ShowAssetIds { get; set; }
         public bool IsDragging => draggedView!=null;
+        public FreeEntityView DraggedView => draggedView;
         public bool GameplayBlocked => (miniGameGateway != null && miniGameGateway.BlocksInput) || (gameFlow != null && gameFlow.IsMapOpen) || (World != null && World.ProductionEnabled && !string.IsNullOrEmpty(World.State.production.miniGameToken)) || Time.timeScale<=0 || DialoguePanel.IsAnyPlaying || (dayFlow != null && dayFlow.BlocksGameplayInput);
         private DayFlowController dayFlow;
         private GameFlowBootstrap gameFlow;
@@ -42,6 +43,9 @@ namespace Spotlight.FreeCafe
         private FreeCafeSpawnScale spawnScale;
         private FreeCafeHud playerHud;
         private FreeCafeProductionHud productionHud;
+        public float maxPourAngle = 105f;
+        public float pourRateMultiplier = 2f;
+        public FreeCafeContainerPanels ContainerPanels { get; private set; }
         private FreeCafeMiniGameGateway miniGameGateway;
         public bool InputBlocked => GameplayBlocked || (FreeCafeGMPanel.Instance!=null && FreeCafeGMPanel.Instance.IsVisible) ||
             (playerHud!=null && playerHud.IsModalOpen) || (productionHud!=null && productionHud.IsModalOpen);
@@ -70,6 +74,9 @@ namespace Spotlight.FreeCafe
         public string LockedPourTargetId => lockedPourTargetId;
         private void Awake()
         {
+            ContainerPanels=GetComponent<FreeCafeContainerPanels>();
+            if(ContainerPanels==null) ContainerPanels=gameObject.AddComponent<FreeCafeContainerPanels>();
+            ContainerPanels.Initialize(this);
             miniGameGateway=GetComponent<FreeCafeMiniGameGateway>();
             if(worldCamera==null) worldCamera=Camera.main;
             if(worldCamera==null || !worldCamera.isActiveAndEnabled || worldCamera.GetComponent<Physics2DRaycaster>()==null)
@@ -95,6 +102,8 @@ namespace Spotlight.FreeCafe
                 throw new InvalidOperationException("Customer identity source 必须实现 ICafeCustomerIdentitySource");
             var authored = FreeCafeSceneLayout.FindAuthoredEntities(this);
             var catalog = JsonUtility.FromJson<CafeCatalog>(catalogAsset.text);
+            var extractionConfig=GetComponent<FreeCafeExtractionConfig>();
+            if(extractionConfig!=null) extractionConfig.Apply(catalog.production);
             catalog.layout = FreeCafeSceneLayout.Capture(this, authored);
             FreeCafeSceneLayout.FitAuthoredBounds(this, catalog, authored);
             characterCatalog=Spotlight.Narrative.CharacterCatalog.LoadFromTables();
@@ -240,9 +249,8 @@ namespace Spotlight.FreeCafe
             if(World.ProductionEnabled && (World.IsProductionVessel(entity) || spec.Has(Capability.Container)))
             {
                 var liquid=World.LiquidSnapshot(entity);
-                info+=" · "+World.ContainerInspection(entity);
-                if(entity.latteArt) info+=" · 拉花 "+(entity.latteArtPattern ?? "unknown")+" "+entity.latteArtScore.ToString("0")+"分";
-                ShowHint(info); return;
+                ContainerPanels?.Inspect(id);
+                return;
             }
             if(spec.Has(Capability.Container))
             {
@@ -358,6 +366,17 @@ namespace Spotlight.FreeCafe
                 dragMachineId=entity.id;dragOutputId=output.id;
                 draggedView=CreateEntityView(output.specId,World.State.currentArea);draggedView.name="UncommittedMachineOutput";
                 draggedView.Bind(this,output,true);
+                if (entity.specId == "machine.grinder")
+                {
+                    var drawer = artLibrary.Resolve("equipment.grinder.drawer", "default");
+                    if (drawer != null)
+                    {
+                        draggedView.body.sprite = drawer;
+                        var size = drawer.bounds.size;
+                        float fit = Mathf.Min(.85f / size.x, .65f / size.y);
+                        draggedView.body.transform.localScale = new Vector3(fit, fit, 1);
+                    }
+                }
             }
             else if(spec.Has(Capability.Movable)) { dragItemId=entity.id; draggedView=view; SelectedId=entity.id; }
             else return;
@@ -604,8 +623,8 @@ namespace Spotlight.FreeCafe
         {
             bool placeOnly=Keyboard.current!=null && (Keyboard.current.leftShiftKey.isPressed || Keyboard.current.rightShiftKey.isPressed);
             Vector2 delta=pointerScreen-vesselTiltPointerOrigin;
-            float tilt=Mathf.Clamp01(delta.magnitude/90f);
-            float signedTilt=delta.x<0 ? -tilt : tilt;
+            float tilt=Mathf.Clamp01(-delta.y/90f);
+            float signedTilt=-tilt;
             if(draggedView!=null) draggedView.PresentPour(signedTilt,tilt>=.18f && !placeOnly);
             if(placeOnly || tilt<.18f || overUI || Time.deltaTime<=0) { StopVesselPour(); return; }
             var source=World.Find(dragItemId);
@@ -614,7 +633,7 @@ namespace Spotlight.FreeCafe
             if(target==null && receiver!=null) target=World.Find(receiver.EntityId);
             string targetId=target==null ? null : target.id;
             if(pouredThisDrag && lastPourTarget!=targetId) StopVesselPour();
-            var result=World.PourLiquid(dragItemId,targetId,World.Catalog.production.pourRateMl*tilt*Time.deltaTime,Time.deltaTime);
+            var result=World.PourLiquid(dragItemId,targetId,World.Catalog.production.pourRateMl*Mathf.Max(.1f,pourRateMultiplier)*tilt*Time.deltaTime,Time.deltaTime);
             if(result.success)
             {
                 pouredThisDrag=true; lastPourTarget=targetId;
@@ -629,6 +648,7 @@ namespace Spotlight.FreeCafe
                     targetView.SetReceivingPour(true);
                     targetView.RefreshLiquid();
                 }
+                if (World.LiquidVolume(World.Find(dragItemId)) <= .001f) StopVesselPour();
             }
             else
             {

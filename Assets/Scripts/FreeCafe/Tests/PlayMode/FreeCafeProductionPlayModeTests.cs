@@ -15,10 +15,13 @@ namespace Spotlight.FreeCafe.Tests
     {
         private FreeCafeRuntime app;
         private Mouse testMouse;
+        private InputSettings.EditorInputBehaviorInPlayMode previousEditorInputBehavior;
         private InputSettings.BackgroundBehavior previousInputBehavior;
         [UnitySetUp] public IEnumerator Setup()
         {
             foreach (var panel in Object.FindObjectsByType<DialoguePanel>(FindObjectsSortMode.None)) panel.Cancel();
+            previousEditorInputBehavior=InputSystem.settings.editorInputBehaviorInPlayMode;
+            InputSystem.settings.editorInputBehaviorInPlayMode=InputSettings.EditorInputBehaviorInPlayMode.AllDeviceInputAlwaysGoesToGameView;
             previousInputBehavior=InputSystem.settings.backgroundBehavior;
             InputSystem.settings.backgroundBehavior=InputSettings.BackgroundBehavior.IgnoreFocus;
             testMouse=InputSystem.AddDevice<Mouse>("FreeCafeProductionRegressionMouse");
@@ -34,6 +37,7 @@ namespace Spotlight.FreeCafe.Tests
             if(app!=null) app.CancelDrag();
             if(testMouse!=null && testMouse.added) InputSystem.RemoveDevice(testMouse);
             testMouse=null;
+            InputSystem.settings.editorInputBehaviorInPlayMode=previousEditorInputBehavior;
             InputSystem.settings.backgroundBehavior=previousInputBehavior;
             yield return null;
         }
@@ -99,7 +103,7 @@ namespace Spotlight.FreeCafe.Tests
             MouseAt(pointer.position,true,true);yield return null;yield return null;
             Assert.That(app.LockedPourTargetId,Is.EqualTo(cup.id),"Right-down must lock the intended cup before pouring begins");
             var lifted=view.transform.position;
-            MouseAt(pointer.position+Vector2.right*90,true,true);yield return null;yield return null;yield return null;
+            MouseAt(pointer.position+Vector2.down*90,true,true);yield return null;yield return null;yield return null;
             Assert.That(Vector3.Distance(view.transform.position,lifted),Is.LessThan(.001f),"倾倒模式固定壶位置");
             Assert.That(app.World.LiquidVolume(cup),Is.GreaterThan(0));Assert.That(app.World.LiquidVolume(kettle),Is.LessThan(200));
             var cupView=app.View(cup.id);
@@ -114,7 +118,7 @@ namespace Spotlight.FreeCafe.Tests
             Assert.That(app.LockedPourTargetId,Is.EqualTo(cup.id),"鼠标离开杯子仍锁住左键落点");
             Assert.That(cupView.IsDropTarget,Is.True);
             Assert.That(app.World.LiquidVolume(cup),Is.GreaterThan(before));
-            MouseAt(pointer.position+Vector2.right*90,true,false);yield return null;yield return null;
+            MouseAt(pointer.position+Vector2.down*90,true,false);yield return null;yield return null;
             Assert.That(app.IsDragging,Is.True,"右键松开后左键仍持有壶");
             Assert.That(cupView.IsReceivingPour,Is.False);
             Assert.That(cupView.liquidPresenter.gameObject.activeSelf,Is.False,"停止接收后即使杯中有液体也隐藏液面");
@@ -122,7 +126,7 @@ namespace Spotlight.FreeCafe.Tests
             Assert.That(cupView.body.color.a,Is.EqualTo(1f));
             Assert.That(Vector3.Distance(view.transform.position,origin),Is.GreaterThan(.5f),"右键松开不得把容器送回原地");
             Assert.That(Mathf.Abs(Mathf.DeltaAngle(view.body.transform.localEulerAngles.z,0)),Is.LessThanOrEqualTo(view.maxDragLean+.01f),"Resumed left drag may lean, but must leave the pouring tilt");
-            app.EndDrag(new PointerEventData(EventSystem.current) { position=pointer.position+Vector2.right*90 });
+            app.EndDrag(new PointerEventData(EventSystem.current) { position=pointer.position+Vector2.down*90 });
             MouseAt(pointer.position,false,false);yield return null;
             Assert.That(app.View(kettle.id),Is.SameAs(view));
             Assert.That(kettle.x,Is.EqualTo(app.WorldToArea(AreaId.Counter,origin).x).Within(.001f));
@@ -144,16 +148,18 @@ namespace Spotlight.FreeCafe.Tests
             MouseAt(pointer.position,true,false);yield return null;yield return null;
             MouseAt(pointer.position,true,true);yield return null;yield return null;
             Assert.That(app.LockedPourTargetId,Is.EqualTo(brewer.id),"Right-down must lock the intended brewer before pouring begins");
-            MouseAt(pointer.position+Vector2.left*90,true,true);yield return null;yield return null;yield return null;
-            Assert.That(Mathf.DeltaAngle(0,view.body.transform.localEulerAngles.z),Is.GreaterThan(0),"鼠标向左应向左倾斜");
-            app.EndDrag(pointer);MouseAt(pointer.position+Vector2.left*90,false,true);yield return null;
+            MouseAt(pointer.position+Vector2.down*90,true,true);yield return null;yield return null;yield return null;
+            Assert.That(Mathf.DeltaAngle(0,view.body.transform.localEulerAngles.z),Is.GreaterThan(0),"鼠标向下应倾斜注水");
+            app.EndDrag(pointer);MouseAt(pointer.position+Vector2.down*90,false,true);yield return null;
             Assert.That(app.IsDragging,Is.True,"倾倒期间松开左键不应归位");
-            MouseAt(pointer.position+Vector2.left*90,false,false);yield return null;yield return null;
+            MouseAt(pointer.position+Vector2.down*90,false,false);yield return null;yield return null;
             Assert.That(app.IsDragging,Is.False);
             Assert.That(kettle.x,Is.EqualTo(app.WorldToArea(AreaId.Counter,origin).x).Within(.001f));
             Assert.That(kettle.y,Is.EqualTo(app.WorldToArea(AreaId.Counter,origin).y).Within(.001f));
-            Assert.That(app.World.LiquidVolume(brewer),Is.GreaterThan(0));Assert.That(app.World.ContainerDescription(brewer),Does.Contain("咖啡液"));
-            Assert.That(brewer.contents.Exists(portion=>portion.specId=="grounds"),Is.True,"不足水量也可自由制作，不丢掉咖啡粉");
+            Assert.That(app.World.LiquidVolume(brewer),Is.GreaterThan(0));Assert.That(app.World.ContainerDescription(brewer),Does.Contain("咖啡"));
+            float retainedGrounds=0;foreach(var portion in brewer.contents)retainedGrounds+=app.World.CoffeeGroundsGrams(portion);
+            Assert.That(retainedGrounds,Is.GreaterThan(0),"合成后咖啡粉转入液体溯源，不能丢失");
+            Assert.That(brewer.contents.Exists(portion=>portion.specId=="grounds"),Is.False);
             yield return WaitForReturn(view,origin);
         }
 

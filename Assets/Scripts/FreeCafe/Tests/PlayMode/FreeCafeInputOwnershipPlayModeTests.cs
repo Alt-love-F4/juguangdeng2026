@@ -17,11 +17,14 @@ namespace Spotlight.FreeCafe.Tests
         private FreeCafeRuntime app;
         private Mouse mouse;
         private Keyboard keyboard;
+        private InputSettings.EditorInputBehaviorInPlayMode oldEditorBehavior;
         private InputSettings.BackgroundBehavior oldBehavior;
         [UnitySetUp] public IEnumerator Setup()
         {
             foreach(var panel in Object.FindObjectsByType<DialoguePanel>(FindObjectsSortMode.None)) panel.Cancel();
             Time.timeScale=1; GameSaveParticipantRegistry.PendingRestore=null;
+            oldEditorBehavior=InputSystem.settings.editorInputBehaviorInPlayMode;
+            InputSystem.settings.editorInputBehaviorInPlayMode=InputSettings.EditorInputBehaviorInPlayMode.AllDeviceInputAlwaysGoesToGameView;
             oldBehavior=InputSystem.settings.backgroundBehavior;
             InputSystem.settings.backgroundBehavior=InputSettings.BackgroundBehavior.IgnoreFocus;
             mouse=InputSystem.AddDevice<Mouse>("OwnershipMouse");
@@ -38,6 +41,7 @@ namespace Spotlight.FreeCafe.Tests
             if(app!=null) app.CancelDrag();
             if(mouse!=null && mouse.added) InputSystem.RemoveDevice(mouse);
             if(keyboard!=null && keyboard.added) InputSystem.RemoveDevice(keyboard);
+            InputSystem.settings.editorInputBehaviorInPlayMode=oldEditorBehavior;
             InputSystem.settings.backgroundBehavior=oldBehavior; Time.timeScale=1; yield return null;
         }
         private WorldEntity Cup()

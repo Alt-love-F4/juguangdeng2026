@@ -17,6 +17,7 @@ namespace Spotlight.FreeCafe.Tests
         private FreeCafeRuntime app;
         private Mouse mouse;
         private Keyboard placementKeyboard;
+        private InputSettings.EditorInputBehaviorInPlayMode previousEditorInputBehavior;
         private InputSettings.BackgroundBehavior previousInputBehavior;
 
         [UnitySetUp] public IEnumerator Setup()
@@ -24,6 +25,8 @@ namespace Spotlight.FreeCafe.Tests
             foreach (var panel in Object.FindObjectsByType<DialoguePanel>(FindObjectsSortMode.None)) panel.Cancel();
             Time.timeScale = 1;
             GameSaveParticipantRegistry.PendingRestore = null;
+            previousEditorInputBehavior = InputSystem.settings.editorInputBehaviorInPlayMode;
+            InputSystem.settings.editorInputBehaviorInPlayMode = InputSettings.EditorInputBehaviorInPlayMode.AllDeviceInputAlwaysGoesToGameView;
             previousInputBehavior = InputSystem.settings.backgroundBehavior;
             InputSystem.settings.backgroundBehavior = InputSettings.BackgroundBehavior.IgnoreFocus;
             mouse = InputSystem.AddDevice<Mouse>("FreeCafeMotionRegressionMouse");
@@ -46,6 +49,7 @@ namespace Spotlight.FreeCafe.Tests
             if (mouse != null && mouse.added) InputSystem.RemoveDevice(mouse);
             if (placementKeyboard != null && placementKeyboard.added) InputSystem.RemoveDevice(placementKeyboard);
             placementKeyboard = null;
+            InputSystem.settings.editorInputBehaviorInPlayMode = previousEditorInputBehavior;
             InputSystem.settings.backgroundBehavior = previousInputBehavior;
             Time.timeScale = 1;
             yield return null;

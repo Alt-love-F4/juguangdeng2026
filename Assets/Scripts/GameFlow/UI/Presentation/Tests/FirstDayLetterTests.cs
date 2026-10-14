@@ -363,70 +363,46 @@ namespace Spotlight.GameFlow.Tests
         }
 
         [UnityTest]
-        public IEnumerator InteractiveLetterPausesAtEveryBlankAndUsesInlineChoiceLinks()
+        public IEnumerator InteractiveLetterContinuesWithoutNameOrChoicesAndUsesInlineChoiceLinks()
         {
             var panel = Open();
             panel.Play(null);
             panel.OpenEnvelope();
-            yield return WaitFor(() => panel.IsWaitingForInput);
+            yield return WaitFor(() => LinkIsVisible(panel, "name"));
             Assert.That(panel.CurrentChoiceGroup, Is.EqualTo(-1));
-            Assert.That(((CanvasGroup)Field("nameEditor").GetValue(panel)).gameObject.activeSelf, Is.True);
+            Assert.That(((CanvasGroup)Field("nameEditor").GetValue(panel)).gameObject.activeSelf, Is.False, "Name input opens only when clicked.");
             int visible = panel.VisibleCharacterCount;
             yield return new WaitForSecondsRealtime(.12f);
-            Assert.That(panel.VisibleCharacterCount, Is.EqualTo(visible));
-            Assert.That(panel.SelectLetterOption(0, 0), Is.False, "Future blank cannot be filled early.");
-            panel.ActivateLetterLink("choice:0:0");
-            Assert.That(panel.Draft.Selection(0), Is.EqualTo(-1));
+            Assert.That(panel.VisibleCharacterCount, Is.GreaterThan(visible));
+            Assert.That(panel.IsWaitingForInput, Is.False);
+            yield return WaitFor(() => panel.Stage == FirstDayLetterPanel.LetterStage.AwaitingSignature);
+            Assert.That(panel.Draft.PlayerName, Is.Empty);
+            StringAssert.Contains("点击输入姓名", Body(panel).text);
+            for (int group = 0; group < FirstDayLetterDraft.Labels.Length; group++)
+            {
+                Assert.That(panel.Draft.Selection(group), Is.EqualTo(-1));
+                AssertChoiceGroup(panel, group);
+            }
+            Assert.That(((Button)Field("signatureButton").GetValue(panel)).interactable, Is.False);
+            panel.ConfirmSignature();
+            Assert.That(panel.Stage, Is.EqualTo(FirstDayLetterPanel.LetterStage.AwaitingSignature));
+
+            panel.ActivateLetterLink("name");
+            Assert.That(((CanvasGroup)Field("nameEditor").GetValue(panel)).gameObject.activeSelf, Is.True);
             panel.SetPlayerName("测试馆长");
             for (int group = 0; group < FirstDayLetterDraft.Labels.Length; group++)
             {
-                yield return WaitFor(() => panel.CurrentChoiceGroup == group);
                 var body = Body(panel);
-                AssertInlineChoices(panel, group);
-                Assert.That(((CanvasGroup)Field("nameEditor").GetValue(panel)).gameObject.activeSelf, Is.False);
-                visible = panel.VisibleCharacterCount;
-                string unread = UnreadSuffix(body);
-                yield return new WaitForSecondsRealtime(.08f);
-                Assert.That(panel.VisibleCharacterCount, Is.EqualTo(visible));
-                Assert.That(panel.IsWaitingForInput, Is.True);
+                AssertChoiceGroup(panel, group);
+                panel.ActivateLetterLink($"slot:{group}");
                 panel.CancelLetterChoice();
-                Assert.That(panel.CurrentChoiceGroup, Is.EqualTo(-1));
-                AssertNoInlineChoices(body);
-                Assert.That(UnreadSuffix(body), Is.EqualTo(unread), "Collapsing choices must not reveal later text.");
-                visible = panel.VisibleCharacterCount;
-                yield return new WaitForSecondsRealtime(.08f);
-                Assert.That(panel.IsWaitingForInput, Is.True);
-                Assert.That(panel.VisibleCharacterCount, Is.EqualTo(visible));
-                panel.ActivateLetterLink($"choice:{group}:0");
-                Assert.That(panel.Draft.Selection(group), Is.EqualTo(-1), "Collapsed choice links cannot select.");
-                panel.ActivateLetterLink($"slot:{group}");
-                AssertInlineChoices(panel, group);
-                Assert.That(UnreadSuffix(body), Is.EqualTo(unread));
-                panel.ActivateLetterLink($"slot:{group}");
-                Assert.That(panel.CurrentChoiceGroup, Is.EqualTo(-1), "Clicking the same slot again collapses its inline choices.");
-                Assert.That(panel.IsWaitingForInput, Is.True);
-                AssertNoInlineChoices(body);
-                Assert.That(UnreadSuffix(body), Is.EqualTo(unread));
-                panel.ActivateLetterLink($"slot:{group}");
-                AssertInlineChoices(panel, group);
+                AssertChoiceGroup(panel, group); // 未选提示不能被收起。
                 ClickChoiceEffect(panel, group, 0);
                 Assert.That(panel.Draft.Selection(group), Is.Zero);
                 Assert.That(panel.CurrentChoiceGroup, Is.EqualTo(-1));
                 Assert.That(panel.IsWaitingForInput, Is.False);
-                AssertNoInlineChoices(body);
-                Assert.That(UnreadSuffix(body), Is.EqualTo(unread), "Selection must resume at the same unread suffix.");
-                StringAssert.DoesNotContain(FirstDayLetterDraft.Effects[group][0], body.text);
-                if (group == 0)
-                {
-                    // Revising to a different-length name preserves the exact unread suffix.
-                    panel.ActivateLetterLink("name");
-                    visible = panel.VisibleCharacterCount;
-                    panel.SetPlayerName("米");
-                    Assert.That(panel.VisibleCharacterCount, Is.EqualTo(visible - 3));
-                    Assert.That(UnreadSuffix(body), Is.EqualTo(unread));
-                }
+                AssertNoChoiceGroup(body, group);
             }
-            yield return WaitFor(() => panel.Stage == FirstDayLetterPanel.LetterStage.AwaitingSignature);
             panel.ActivateLetterLink("slot:3");
             AssertInlineChoices(panel, 3);
             Assert.That(((Button)Field("signatureButton").GetValue(panel)).interactable, Is.False);
@@ -437,7 +413,6 @@ namespace Spotlight.GameFlow.Tests
             Assert.That(((Button)Field("signatureButton").GetValue(panel)).interactable, Is.True);
             panel.ActivateLetterLink("slot:3");
             ClickChoiceEffect(panel, 3, 2);
-            Assert.That(panel.Stage, Is.EqualTo(FirstDayLetterPanel.LetterStage.AwaitingSignature));
             Assert.That(panel.Draft.Selection(3), Is.EqualTo(2));
             Assert.That(RequireLink(Body(panel), "slot:3").GetLinkText(), Is.EqualTo("数学与物理科学"));
             StringAssert.DoesNotContain("神学", Body(panel).text);
@@ -451,49 +426,51 @@ namespace Spotlight.GameFlow.Tests
         }
 
         [UnityTest]
-        public IEnumerator RevisingEarlierInlineChoicePreservesUnreadLaterText()
+        public IEnumerator EditingInlineChoicesAndNameKeepsReadingWithoutSkippingUnreadText()
         {
             var panel = Open();
             panel.Play(null);
             panel.OpenEnvelope();
-            yield return WaitFor(() => panel.IsWaitingForInput);
-            panel.SetPlayerName("测试馆长");
-            for (int group = 0; group < FirstDayLetterDraft.Labels.Length; group++)
-            {
-                int current = group;
-                yield return WaitFor(() => panel.CurrentChoiceGroup == current);
-                if (group == FirstDayLetterDraft.Labels.Length - 1)
-                    Field("characterInterval").SetValue(panel, .5f);
-                panel.ActivateLetterLink($"choice:{group}:0");
-                Assert.That(panel.Draft.Selection(group), Is.Zero);
-            }
-            int visible = panel.VisibleCharacterCount;
-            yield return WaitFor(() => panel.VisibleCharacterCount > visible);
+            yield return WaitFor(() => LinkIsVisible(panel, "choice:3:3"));
+            Field("characterInterval").SetValue(panel, .02f);
             var body = Body(panel);
+            AssertChoiceGroup(panel, 3);
+            int visible = panel.VisibleCharacterCount;
+            yield return new WaitForSecondsRealtime(.12f);
+            Assert.That(panel.VisibleCharacterCount, Is.GreaterThan(visible), "Reading continues with unselected options visible.");
             string unread = UnreadSuffix(body);
             Assert.That(unread, Is.Not.Empty);
-            Assert.That(panel.Stage, Is.EqualTo(FirstDayLetterPanel.LetterStage.Reading));
+            panel.ActivateLetterLink("choice:3:2");
+            Assert.That(panel.Draft.Selection(3), Is.EqualTo(2));
+            AssertNoChoiceGroup(body, 3);
+            Assert.That(UnreadSuffix(body), Is.EqualTo(unread), "Selecting must preserve later unread text.");
             panel.ActivateLetterLink("slot:3");
-            AssertInlineChoices(panel, 3);
+            AssertChoiceGroup(panel, 3);
             Assert.That(UnreadSuffix(body), Is.EqualTo(unread));
             visible = panel.VisibleCharacterCount;
             yield return new WaitForSecondsRealtime(.12f);
-            Assert.That(panel.VisibleCharacterCount, Is.EqualTo(visible), "Reading pauses while revising an earlier word.");
+            Assert.That(panel.VisibleCharacterCount, Is.GreaterThan(visible), "Reading continues while revising a choice.");
+            unread = UnreadSuffix(body);
             panel.CancelLetterChoice();
-            Assert.That(panel.IsWaitingForInput, Is.False, "A filled slot must not become an unfilled wait.");
-            AssertNoInlineChoices(body);
+            AssertNoChoiceGroup(body, 3);
+            Assert.That(UnreadSuffix(body), Is.EqualTo(unread));
+            Assert.That(RequireLink(body, "slot:3").GetLinkText(), Is.EqualTo("数学与物理科学"));
+            panel.ActivateLetterLink("name");
+            Assert.That(((CanvasGroup)Field("nameEditor").GetValue(panel)).gameObject.activeSelf, Is.True);
+            visible = panel.VisibleCharacterCount;
+            yield return new WaitForSecondsRealtime(.12f);
+            Assert.That(panel.VisibleCharacterCount, Is.GreaterThan(visible), "Reading continues with the name editor open.");
+            panel.CancelPlayerName();
+            visible = panel.VisibleCharacterCount;
+            yield return new WaitForSecondsRealtime(.12f);
+            Assert.That(panel.VisibleCharacterCount, Is.GreaterThan(visible), "Canceling without a name must not pause reading.");
+            unread = UnreadSuffix(body);
+            panel.SetPlayerName("米");
             Assert.That(UnreadSuffix(body), Is.EqualTo(unread));
             panel.ActivateLetterLink("slot:3");
-            panel.ActivateLetterLink("choice:3:2");
-            Assert.That(panel.Draft.Selection(3), Is.EqualTo(2));
-            Assert.That(panel.CurrentChoiceGroup, Is.EqualTo(-1));
-            AssertNoInlineChoices(body);
-            Assert.That(UnreadSuffix(body), Is.EqualTo(unread), "A longer selected word must not replay or skip later text.");
-            Assert.That(RequireLink(body, "slot:3").GetLinkText(), Is.EqualTo("数学与物理科学"));
-            StringAssert.DoesNotContain("神学", body.text);
-            Assert.That(panel.Stage, Is.EqualTo(FirstDayLetterPanel.LetterStage.Reading));
-            visible = panel.VisibleCharacterCount;
-            yield return WaitFor(() => panel.VisibleCharacterCount > visible);
+            yield return WaitFor(() => panel.Stage == FirstDayLetterPanel.LetterStage.AwaitingSignature);
+            Assert.That(panel.CurrentChoiceGroup, Is.EqualTo(3), "Reading can finish while options remain expanded.");
+            Assert.That(((Button)Field("signatureButton").GetValue(panel)).interactable, Is.False);
         }
 
         private static TMP_Text Body(FirstDayLetterPanel panel) => (TMP_Text)Field("letterBody").GetValue(panel);
@@ -505,6 +482,24 @@ namespace Spotlight.GameFlow.Tests
                 if (body.textInfo.linkInfo[i].GetLinkID() == id) return body.textInfo.linkInfo[i];
             Assert.Fail($"Missing body TMP link: {id}");
             return default;
+        }
+
+        private static void AssertChoiceGroup(FirstDayLetterPanel panel, int group)
+        {
+            for (int option = 0; option < FirstDayLetterDraft.Labels[group].Length; option++)
+            {
+                TMP_LinkInfo link = RequireLink(Body(panel), $"choice:{group}:{option}");
+                Assert.That(link.GetLinkText(), Is.EqualTo(FirstDayLetterDraft.Labels[group][option]
+                    + "【" + FirstDayLetterDraft.Effects[group][option] + "】"));
+                Assert.That(link.linkTextfirstCharacterIndex + link.linkTextLength, Is.LessThanOrEqualTo(panel.VisibleCharacterCount));
+            }
+        }
+
+        private static void AssertNoChoiceGroup(TMP_Text body, int group)
+        {
+            body.ForceMeshUpdate();
+            for (int i = 0; i < body.textInfo.linkCount; i++)
+                Assert.That(body.textInfo.linkInfo[i].GetLinkID().StartsWith($"choice:{group}:"), Is.False);
         }
 
         private static void AssertInlineChoices(FirstDayLetterPanel panel, int group)
@@ -565,14 +560,21 @@ namespace Spotlight.GameFlow.Tests
             body.GetComponent<FirstDayLetterLinks>().OnPointerClick(pointer);
         }
 
+        private static bool LinkIsVisible(FirstDayLetterPanel panel, string id)
+        {
+            if (panel.Stage != FirstDayLetterPanel.LetterStage.Reading && panel.Stage != FirstDayLetterPanel.LetterStage.AwaitingSignature) return false;
+            TMP_LinkInfo link = RequireLink(Body(panel), id);
+            return link.linkTextfirstCharacterIndex + link.linkTextLength <= panel.VisibleCharacterCount;
+        }
+
         private static IEnumerator CompleteInteractiveLetter(FirstDayLetterPanel panel)
         {
-            yield return WaitFor(() => panel.IsWaitingForInput);
+            yield return WaitFor(() => LinkIsVisible(panel, "name"));
             panel.SetPlayerName("测试馆长");
             for (int i = 0; i < 5; i++)
             {
                 int group = i;
-                yield return WaitFor(() => panel.CurrentChoiceGroup == group);
+                yield return WaitFor(() => LinkIsVisible(panel, $"choice:{group}:0"));
                 panel.ActivateLetterLink($"choice:{group}:0");
                 Assert.That(panel.Draft.Selection(group), Is.Zero);
             }
