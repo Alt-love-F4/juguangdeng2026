@@ -416,5 +416,16 @@
     "avtarPath": "Art/UI/Avatars/Unknown",
     "descText": "character.soldier_d.desc",
     "tags": "new_rose,generic"
+  },
+  {
+    "objId": "cafe",
+    "objType": "world",
+    "nameText": "player.external.money",
+    "iconPath": "",
+    "portraitPath": "",
+    "portraitIndoorPath": "",
+    "avtarPath": "",
+    "descText": "",
+    "tags": "cafe"
   }
 ]
