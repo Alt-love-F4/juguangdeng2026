@@ -1,0 +1,16 @@
+[
+  {
+    "milestoneId": "act_test_delivery_cumulative.two",
+    "actionKey": "act_test_delivery_cumulative",
+    "atProgress": 2,
+    "eventId": "EV_TEST_DELIVERY_CUMULATIVE_MILESTONE",
+    "seq": 1
+  },
+  {
+    "milestoneId": "act_test_delivery_consecutive.two",
+    "actionKey": "act_test_delivery_consecutive",
+    "atProgress": 2,
+    "eventId": "EV_TEST_DELIVERY_CONSECUTIVE_MILESTONE",
+    "seq": 1
+  }
+]

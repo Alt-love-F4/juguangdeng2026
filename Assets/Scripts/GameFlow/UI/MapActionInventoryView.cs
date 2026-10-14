@@ -134,11 +134,10 @@ namespace Spotlight.GameFlow
             for (int childIndex = content.childCount - 1; childIndex >= 0; childIndex--)
             {
                 var child = content.GetChild(childIndex).gameObject;
-                if (child == itemSlotTemplate?.gameObject) continue;
-                if (child == emptySlotTemplate?.gameObject)
+                if (itemSlotTemplate != null && child == itemSlotTemplate.gameObject) continue;
+                if (emptySlotTemplate != null && child == emptySlotTemplate.gameObject)
                 {
-                    if (!Application.isPlaying && !showEditorPreview) DestroyImmediate(child);
-                    else child.SetActive(!Application.isPlaying && showEditorPreview);
+                    child.SetActive(!Application.isPlaying && showEditorPreview);
                     continue;
                 }
                 if (child.name.StartsWith("EmptySlot_", StringComparison.Ordinal))
@@ -146,7 +145,7 @@ namespace Spotlight.GameFlow
                     if (Application.isPlaying || !showEditorPreview)
                     {
                         child.SetActive(false);
-                        if (child != emptySlotTemplate?.gameObject)
+                        if (emptySlotTemplate == null || child != emptySlotTemplate.gameObject)
                         {
                             if (Application.isPlaying) Destroy(child);
                             else DestroyImmediate(child);

@@ -6,6 +6,7 @@
     "Spotlight.Narrative",
     "Spotlight.GameFlow.Saving",
     "Spotlight.GameFlow.UI",
+    "Spotlight.GameFlow.Settings",
     "YokiFrame.UIKit.Unity",
     "Unity.TextMeshPro",
     "Unity.ugui",

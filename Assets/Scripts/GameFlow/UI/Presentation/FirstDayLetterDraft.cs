@@ -1,9 +1,11 @@
 using System;
 using System.Text;
+using System.Linq;
+using System.Collections.Generic;
 
 namespace Spotlight.GameFlow
 {
-    /// <summary>开场信的硬编码文案与建角选项；编辑中的选择不直接修改存档。</summary>
+    /// <summary>Configuration-backed draft. Stable option IDs survive sorting and save/restore.</summary>
     public sealed class FirstDayLetterDraft
     {
         public const string Signature = "—— 永远惦念你的叔叔";
@@ -13,26 +15,47 @@ namespace Spotlight.GameFlow
         public static readonly string[] AttributeKeys = { "language", "courage", "wisdom", "perception" };
         public static readonly string[] SpecializationIds = { "letter.religion", "letter.literature", "letter.science", "letter.politics" };
         public static readonly string[] SpecializationNames = { "宗教知识专精", "文学知识专精", "科学知识专精", "政治知识专精" };
-        public static readonly string[][] Labels =
+        private readonly PlayerCreationCatalog catalog;
+        private readonly Dictionary<string, string> selected = new Dictionary<string, string>();
+        private readonly List<string> invalidIds = new List<string>();
+        public IReadOnlyList<string> InvalidOptionIds => invalidIds.AsReadOnly();
+        public IReadOnlyList<string> OptionIds => selected.Values.Concat(invalidIds).ToArray();
+        public static string[][] Labels
         {
-            new[] { "贫寒", "平民", "富贵" },
-            new[] { "善良", "赤诚" },
-            new[] { "勇敢", "明睿" },
-            new[] { "神学", "文学", "数学与物理科学", "历史与官房学" },
-            new[] { "能言善辩", "坚定无畏", "聪颖睿智", "敏锐细腻" }
-        };
-        public static readonly string[][] Effects =
-        {
-            new[] { "初始资金最少，初始身份“流浪儿”", "初始资金一般，初始身份“平民”", "初始资金最多，初始身份“贵族”" },
-            new[] { "语言+2", "知觉+2" },
-            new[] { "勇气+2", "智慧+2" },
-            new[] { "获得宗教知识专精，知觉+2，语言+1", "获得文学知识专精，语言+2，勇气+1", "获得科学知识专精，智慧+2，知觉+1", "获得政治知识专精，勇气+2，智慧+1" },
-            new[] { "语言+2", "勇气+2", "智慧+2", "知觉+2" }
-        };
+            get
+            {
+                var source = PlayerCreationCatalog.Load();
+                return source.Groups.Select(g => source.ForGroup(g.GroupId).Select(o => source.Text(o.LabelText)).ToArray()).ToArray();
+            }
+        }
         public string PlayerName { get; private set; } = "";
-        private readonly int[] selections = { -1, -1, -1, -1, -1 };
-        public bool IsComplete => PlayerName.Length > 0 && Array.TrueForAll(selections, value => value >= 0);
-        public int Selection(int group) => selections[group];
+        private string[][] labels => catalog.Groups.Select(g => catalog.ForGroup(g.GroupId).Select(o => catalog.Text(o.LabelText)).ToArray()).ToArray();
+        private int[] selections => catalog.Groups.Select((g, i) => Selection(i)).ToArray();
+        public bool IsComplete => PlayerName.Length > 0 && invalidIds.Count == 0 && catalog.Groups.Where(g => g.Required).All(g => selected.ContainsKey(g.GroupId));
+        public FirstDayLetterDraft() : this(PlayerCreationCatalog.Load()) { }
+        public FirstDayLetterDraft(PlayerCreationCatalog catalog, string name = "", IEnumerable<string> optionIds = null)
+        {
+            this.catalog = catalog ?? throw new ArgumentNullException(nameof(catalog));
+            SetName(name);
+            foreach (string id in optionIds ?? Array.Empty<string>())
+            {
+                var option = catalog.Options.Find(o => o.OptionId == id);
+                if (option == null) invalidIds.Add(id);
+                else if (!selected.TryAdd(option.GroupId, id)) throw new ArgumentException("Multiple choices for " + option.GroupId);
+            }
+        }
+        public int Selection(int group)
+        {
+            var options = catalog.ForGroup(catalog.Groups[group].GroupId);
+            return selected.TryGetValue(catalog.Groups[group].GroupId, out string id) ? options.FindIndex(o => o.OptionId == id) : -1;
+        }
+        public bool Select(string groupId, string optionId)
+        {
+            if (!catalog.Options.Any(o => o.GroupId == groupId && o.OptionId == optionId)) return false;
+            selected[groupId] = optionId;
+            invalidIds.RemoveAll(id => id.StartsWith(groupId + ".", StringComparison.Ordinal));
+            return true;
+        }
         public void SetName(string value)
         {
             var result = new StringBuilder();
@@ -42,56 +65,46 @@ namespace Spotlight.GameFlow
         }
         public bool Select(int group, int option)
         {
-            if (group < 0 || group >= Labels.Length || option < 0 || option >= Labels[group].Length) return false;
-            selections[group] = option;
-            return true;
+            if (group < 0 || group >= catalog.Groups.Count) return false;
+            var options = catalog.ForGroup(catalog.Groups[group].GroupId);
+            return option >= 0 && option < options.Count && Select(catalog.Groups[group].GroupId, options[option].OptionId);
         }
         public int[] CalculateBonuses()
         {
             var values = new int[4];
-            if (selections[1] >= 0) values[selections[1] == 0 ? 0 : 3] += 2;
-            if (selections[2] >= 0) values[selections[2] == 0 ? 1 : 2] += 2;
-            switch (selections[3])
-            {
-                case 0: values[3] += 2; values[0]++; break;
-                case 1: values[0] += 2; values[1]++; break;
-                case 2: values[2] += 2; values[3]++; break;
-                case 3: values[1] += 2; values[2]++; break;
-            }
-            if (selections[4] >= 0) values[selections[4]] += 2;
+            foreach (var bonus in catalog.Bonuses.Where(b => selected.Values.Contains(b.OptionId)))
+                values[Array.IndexOf(AttributeKeys, bonus.AttributeId)] = checked(values[Array.IndexOf(AttributeKeys, bonus.AttributeId)] + bonus.Delta);
             return values;
         }
-        public string Origin => selections[0] < 0 ? "" : new[] { "流浪儿", "平民", "贵族" }[selections[0]];
-        public string Specialization => selections[3] < 0 ? "" : SpecializationIds[selections[3]];
-        public string Background => IsComplete ? $"出身{Labels[0][selections[0]]}，曾修习{Labels[3][selections[3]]}；{Labels[1][selections[1]]}、{Labels[2][selections[2]]}，如今已是{Labels[4][selections[4]]}的人。" : "";
+        public string Origin => selected.TryGetValue("origin", out string id) ? catalog.Text("player.origin." + catalog.Options.Single(o => o.OptionId == id).OriginId) : "";
+        public string Specialization => selected.TryGetValue("education", out string id) ? catalog.Options.Single(o => o.OptionId == id).SpecializationConditionKey.Replace("specialization.player.", "") : "";
+        public string Background => IsComplete ? catalog.Background(OptionIds) : "";
 
-        public bool ShowsOptions(int group, int expandedGroup = -1) => selections[group] < 0 || expandedGroup == group;
-
-        public string BuildBody(string hoveredLink = null, int expandedGroup = -1)
+        public string BuildBody(string hoveredLink = null)
         {
             string Link(string id, string label, bool selected = false)
             {
                 string text = selected ? "<b><u>" + label + "</u></b>" : label;
                 return $"<link=\"{id}\"><color=#{(hoveredLink == id ? HoverInk : ChoiceInk)}>{text}</color></link>";
             }
-            string Word(int group)
+            string Word(int group) => selections[group] < 0 ? "______" : $"<u>{labels[group][selections[group]]}</u>";
+            string Options(int group)
             {
-                string word = Link($"slot:{group}", selections[group] < 0 ? "______" : Labels[group][selections[group]], selections[group] >= 0);
-                if (!ShowsOptions(group, expandedGroup)) return word;
-                var options = new StringBuilder("（选项：");
-                for (int i = 0; i < Labels[group].Length; i++)
+                var result = new StringBuilder("（选项：");
+                var options = catalog.ForGroup(catalog.Groups[group].GroupId);
+                for (int i = 0; i < options.Count; i++)
                 {
-                    if (i > 0) options.Append("；");
-                    options.Append(Link($"choice:{group}:{i}", Labels[group][i] + "【" + Effects[group][i] + "】", selections[group] == i));
+                    if (i > 0) result.Append("；");
+                    result.Append(Link($"choice:{catalog.Groups[group].GroupId}:{options[i].OptionId}", catalog.Text(options[i].LabelText) + "【" + catalog.Effect(options[i]) + "】", selections[group] == i));
                 }
-                return word + options.Append("）");
+                return result.Append("）").ToString();
             }
-            return "我亲爱的" + Link("name", PlayerName.Length == 0 ? "______（点击输入姓名）" : PlayerName, PlayerName.Length > 0) + "：\n\n" +
+            return "我亲爱的" + Link("name", PlayerName.Length == 0 ? "______（点击输入姓名）" : PlayerName) + "：\n\n" +
                 "我是你的叔叔，杜瓦尔·米尼耶。许久未见，不知你近来可好。\n" +
-                "月寒日暖，冬去春来，我们在北境留下的珍贵的回忆不知你还记得多少，你幼时出身" + Word(0) + "，\n" +
-                "但父母忙碌，你便常常找到我作你的玩伴。662年，我遭逢海难，身患胃疾，那时年幼的你虽不是我的儿女，你" + Word(1) + "的心却驱使着你主动提出照顾我，陪我度过了那段艰难的时光。我永远不会忘记那时你" + Word(2) + "的身影。\n\n" +
-                "从你父母来信中得知，你已长大成人，在北港的学院里研读了" + Word(3) + "，\n" +
-                "并顺利毕业，成为了一个" + Word(4) + "的人。\n\n" +
+                "月寒日暖，冬去春来，我们在北境留下的珍贵的回忆不知你还记得多少，你幼时出身" + Word(0) + Options(0) + "，\n" +
+                "但父母忙碌，你便常常找到我作你的玩伴。662年，我遭逢海难，身患胃疾，那时年幼的你虽不是我的儿女，你" + Word(1) + Options(1) + "的心却驱使着你主动提出照顾我，陪我度过了那段艰难的时光。我永远不会忘记那时你" + Word(2) + Options(2) + "的身影。\n\n" +
+                "从你父母来信中得知，你已长大成人，在北港的学院里研读了" + Word(3) + Options(3) + "，\n" +
+                "并顺利毕业，成为了一个" + Word(4) + Options(4) + "的人。\n\n" +
                 "然而我却又听闻，由于时运不济，你离开学院后只能在家乡暂时做些市井活计谋生，叔叔我闻此不由得伤心落泪。我相信，今日的你已经成长得可以在王都生活下去。我在王都圣诺特有一个咖啡馆，但由于我已离开王都多年，只能委托他人代为打理，生意平平。如果你不嫌弃，我愿意将那间咖啡馆交付给你，由你担任店长。可惜我自己身体抱恙，时日无多，不能亲到王都亲自见你。那间咖啡馆也是我年轻时打拼过的地方，希望你能振兴那间咖啡馆，在王都过上安定的生活。\n" +
                 "咖啡馆位于圣穆街217号，我的女儿阿黛尔已经前往咖啡馆，她会和你一起经营，帮助你早日上手咖啡馆的各项事务。\n\n" +
                 "吾主庇佑，荣光永存。";

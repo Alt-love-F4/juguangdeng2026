@@ -35,7 +35,7 @@ namespace Spotlight.GameFlow.Tests
         }
 
         [TestCase(0)]
-        [TestCase(2)]
+        [TestCase(3)]
         public void UnsupportedEnvelopeVersionBlocksLoad(int version)
         {
             GameSaveData data = WithPayload(JsonUtility.ToJson(new NarrativeSaveBridge.Envelope { Version = version, Snapshot = new NarrativeSnapshot() }));
@@ -51,6 +51,20 @@ namespace Spotlight.GameFlow.Tests
         {
             Assert.That(NarrativeSaveBridge.TryRead(WithPayload(json), out _, out string error), Is.False);
             Assert.That(error, Is.Not.Empty);
+        }
+
+        [Test]
+        public void V1SignalsMigrationWhileV2RetainsExplicitFalseAndEnding()
+        {
+            Assert.That(NarrativeSaveBridge.TryRead(WithPayload("{\"Version\":1,\"Snapshot\":{\"flags\":[{\"key\":\"met\",\"value\":true}]}}"), out var legacy, out var error), Is.True, error);
+            Assert.That(legacy.conditionValues, Is.Null);
+            Assert.That(legacy.flags[0].value, Is.True);
+            var source = new NarrativeSnapshot { selectedEndingId = "ending.test", conditionValues = new System.Collections.Generic.List<NarrativeBoolValue> { new NarrativeBoolValue { key = "met", value = false } } };
+            var data = new GameSaveData();
+            Assert.That(NarrativeSaveBridge.TryCapture(data, () => source, out error), Is.True, error);
+            Assert.That(NarrativeSaveBridge.TryRead(data, out var restored, out error), Is.True, error);
+            Assert.That(restored.conditionValues[0].value, Is.False);
+            Assert.That(restored.selectedEndingId, Is.EqualTo("ending.test"));
         }
 
         [Test]

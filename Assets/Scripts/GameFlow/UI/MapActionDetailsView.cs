@@ -12,6 +12,15 @@ namespace Spotlight.GameFlow
     /// <summary>Scrollable action cards. Unavailable buttons remain clickable to explain rejected requirements.</summary>
     public sealed class MapActionDetailsView : MonoBehaviour
     {
+        /// <summary>Only these locations expose the cafe navigation card instead of an NCS action card.</summary>
+        internal const string CafePositionKey = "cafe";
+        private const string CafeLobbyPositionKey = "大堂区";
+        private const string CafeEntryNodeName = "EnterCafe";
+        private const string CafeEntryLabel = "进入咖啡馆";
+        private const string CafeEntryDescription = "推门进入咖啡馆，开始今天的经营。";
+        /// <summary>The cafe (and its authored lobby alias) navigates to the cafe scene instead of running an NCS action.</summary>
+        internal static bool IsCafeEntryPosition(string positionKey)
+            => positionKey == CafePositionKey || positionKey == CafeLobbyPositionKey;
         private RectTransform content;
         private TextMeshProUGUI title;
         private MapSceneController mapController;
@@ -206,7 +215,43 @@ namespace Spotlight.GameFlow
                 y += height + cardSpacing;
                 cards.Add(card); UpdateCard(card);
             }
-            if (values.Count == 0 && actionCardTemplate != null)
+            if (IsCafeEntryPosition(position) && actionCardTemplate != null
+                && UnityEngine.SceneManagement.SceneManager.GetActiveScene().name != "CoffeeShop")
+            {
+                // Entering the cafe is scene navigation, not an NCS action: it never checks or
+                // spends action points, items or action results. Reuse the authored card artwork.
+                var entry = Instantiate(actionCardTemplate, content, false);
+                entry.gameObject.name = CafeEntryNodeName;
+                entry.gameObject.SetActive(true);
+                var heading = entry.Find("Name")?.GetComponent<TextMeshProUGUI>();
+                if (heading != null) heading.text = title != null ? title.text : CafeEntryLabel;
+                var description = entry.Find("Description")?.GetComponent<TextMeshProUGUI>();
+                if (description != null) description.text = CafeEntryDescription;
+                // Navigation costs nothing, so the authored requirement slot must stay hidden.
+                var requirement = entry.Find("Requirements/Requirement") ?? entry.Find("Requirement");
+                if (requirement != null) requirement.gameObject.SetActive(false);
+                var execute = entry.Find("Execute")?.GetComponent<Button>()
+                    ?? entry.Find("ExecutePreview")?.GetComponent<Button>()
+                    ?? entry.GetComponentInChildren<Button>(true);
+                if (execute == null)
+                {
+                    Debug.LogError("MapActionDetailsView action card template needs an authored execute button.", this);
+                    if (Application.isPlaying) Destroy(entry.gameObject); else DestroyImmediate(entry.gameObject);
+                }
+                else
+                {
+                    execute.gameObject.SetActive(true);
+                    execute.onClick.RemoveAllListeners();
+                    execute.onClick.AddListener(OnEnterCafe);
+                    var label = execute.GetComponentInChildren<TextMeshProUGUI>(true);
+                    if (label != null) label.text = CafeEntryLabel;
+                    var card = new Card { root = entry, button = execute };
+                    if (!IsAuthoredLayout) Top(entry, 12, -y, CardWidth, Mathf.Max(1, entry.rect.height));
+                    y += Mathf.Max(414, entry.rect.height) + cardSpacing;
+                    cards.Add(card);
+                }
+            }
+            else if (values.Count == 0 && actionCardTemplate != null)
             {
                 // Never repurpose the authored template as an empty-state card: later actions
                 // must clone the untouched Prefab artwork and serialized child structure.
@@ -364,6 +409,8 @@ namespace Spotlight.GameFlow
         {
             var actions = NarrativeRuntime.Instance?.Actions;
             if (actions == null) return;
+            // The cafe navigation card carries no NCS action and needs no per-frame refresh.
+            if (card.action == null) return;
             var action = card.action;
             bool available = actions.IsAvailable(action.actionKey, out var checks);
             string type = action.type switch
@@ -372,9 +419,11 @@ namespace Spotlight.GameFlow
                 NarrativeActionType.Future => "未来行动", NarrativeActionType.Progress => "进度型行动",
                 NarrativeActionType.Timed => "时限行动", _ => "可重复行动"
             };
+            if (action.IsDelivery) type = (action.deliveryMode == NarrativeDeliveryMode.Consecutive ? "连续交付" : "累计交付") + " · 每天固定一份";
             if (action.IsTimed) type += " · 剩余 " + actions.GetRemainingDays(action.actionKey) + " 天";
             if (action.type == NarrativeActionType.Future) type += " · " + actions.GetRemainingDays(action.actionKey) + " 天后开放";
             if (action.IsProgress) type += " · 进度 " + actions.GetProgress(action.actionKey) + " / " + action.progressTarget;
+            if (action.IsDelivery) type += actions.IsCompleted(action.actionKey) ? " · 已完成" : actions.HasSubmittedToday(action.actionKey) ? " · 今日已交付" : " · 今日未交付";
             if (action.mustExecute) type += " · 今日必做";
             if (card.type != null)
             {
@@ -386,11 +435,12 @@ namespace Spotlight.GameFlow
             UpdateRepeatSegments(card, actions);
             if (card.requirements.Count > 0)
             {
-                card.requirements[0].text = string.Join("\n", action.parsedRequirements.Select(RequirementName));
+                card.requirements[0].text = (action.IsDelivery ? "每次交付\n" : string.Empty) + string.Join("\n", action.parsedRequirements.Select(RequirementName));
                 bool allSatisfied = checks.Count >= action.parsedRequirements.Count && checks.All(check => check.satisfied);
                 card.requirements[0].color = allSatisfied ? MapVisualTheme.Ink : new Color(.65f, .23f, .14f);
             }
-            string caption = action.endDay && actions.HasBlockingActions() ? "有需要进行的行动" :
+            string caption = action.IsDelivery && actions.IsCompleted(action.actionKey) ? "已完成" :
+                action.IsDelivery && actions.HasSubmittedToday(action.actionKey) ? "今日已交付" : action.endDay && actions.HasBlockingActions() ? "有需要进行的行动" :
                 action.type == NarrativeActionType.Future ? "等待开放" : available ? (action.endDay ? "结束一天" : "执行") : "查看需求";
             if (card.button != null)
             {
@@ -416,7 +466,7 @@ namespace Spotlight.GameFlow
         {
             // Repeat artwork is optional; never synthesize UI if the authored card omits it.
             if (card.repeats == null) return;
-            int count = card.action.IsProgress ? Mathf.Max(0, card.action.progressTarget - actions.GetProgress(card.action.actionKey)) : int.MaxValue;
+            int count = card.action.IsDelivery ? (actions.IsAvailable(card.action.actionKey, out _) ? 1 : 0) : card.action.IsProgress ? Mathf.Max(0, card.action.progressTarget - actions.GetProgress(card.action.actionKey)) : int.MaxValue;
             foreach (var costs in card.action.parsedRequirements
                 .Where(r => r.type == NarrativeActionRequirementType.Item || r.type == NarrativeActionRequirementType.ActionPoint)
                 .GroupBy(r => (r.type, r.key)))
@@ -447,6 +497,13 @@ namespace Spotlight.GameFlow
             NarrativeActionRequirementType.NotCondition => "不能拥有：" + Text(r.key, r.key),
             _ => "行动点\n× " + r.value
         };
+        private void OnEnterCafe()
+        {
+            if (busy || !(controls?.Invoke() ?? true)) return;
+            // Reuse the map's existing cafe scene entry; no NCS action is executed here.
+            enterCafe?.Invoke();
+        }
+
         private void OnExecute(Card card)
         {
             if (busy || !(controls?.Invoke() ?? true)) return;
@@ -454,7 +511,10 @@ namespace Spotlight.GameFlow
             if (actions == null) return;
             if (!actions.IsAvailable(card.action.actionKey, out var checks))
             {
-                Notice(card.action.endDay && actions.HasBlockingActions() ? "有需要进行的行动" : "要求不满足");
+                Notice(card.action.IsDelivery && actions.IsCompleted(card.action.actionKey) ? "交付已完成" :
+                    card.action.IsDelivery && actions.HasSubmittedToday(card.action.actionKey) ? "今日已交付，每天只能提交一份" :
+                    card.action.endDay && actions.HasBlockingActions() ? "有需要进行的行动" :
+                    checks.Any(c => c.messageKey == "action.condition.missing") ? "行动前置条件不满足" : "所需物品或行动点不足");
                 if (card.requirements.Count > 0 && checks.Any(check => !check.satisfied))
                     StartCoroutine(Shake((RectTransform)card.requirements[0].transform.parent));
                 if (checks.All(c => c.satisfied)) StartCoroutine(Shake((RectTransform)card.button.transform));
@@ -480,11 +540,12 @@ namespace Spotlight.GameFlow
                     if (card.requirements.Count > 0)
                         yield return Fly(inventory.PointsRect, (RectTransform)card.requirements[0].transform.parent, "−" + requirement.value + " 行动点");
             }
+            if (!(controls?.Invoke() ?? true)) { busy = false; yield break; }
             bool finished = false;
             bool accepted = NarrativeRuntime.Instance.Actions.Execute(card.action.actionKey, success =>
             {
                 finished = true;
-                if (success && card.action.endDay) { busy = false; endDay?.Invoke(); }
+                if (success && (controls?.Invoke() ?? true) && card.action.endDay) { busy = false; endDay?.Invoke(); }
                 if (!success) Notice("行动事件未能执行");
             });
             if (!accepted) { Notice("要求不满足"); finished = true; }

@@ -106,6 +106,7 @@
     <var name="durationDays" type="int"/>
     <var name="progressTarget" type="int"/>
     <var name="nextActionKey" type="string"/>
+    <var name="deliveryMode" type="string#set=None,Cumulative,Consecutive"/>
   </bean>
   <table name="TbNcsAction" value="NcsActionEntry" mode="map" index="actionKey" input="Action@Narrative/Narrative.xlsx"/>
   <bean name="NcsMapPositionEntry">
@@ -136,6 +137,9 @@
     <var name="derivedSources" type="string"/>
     <var name="derivedWeights" type="string"/>
     <var name="autoStep" type="int"/>
+    <var name="sourceMode" type="string"/>
+    <var name="providerId" type="string"/>
+    <var name="sourceKey" type="string"/>
   </bean>
   <table name="TbNcsBar" value="NcsBarEntry" mode="list" index="ownerId+barId" input="Bar@Narrative/Narrative.xlsx"/>
   <bean name="NcsTriggerEntry">
@@ -169,6 +173,25 @@
     <var name="logTag" type="string"/>
   </bean>
   <table name="TbNcsEvent" value="NcsEventEntry" mode="map" index="eventId" input="Event@Narrative/Narrative.xlsx"/>
+
+  <bean name="NcsCafeVisitEntry">
+    <var name="visitKey" type="string"/>
+    <var name="characterId" type="string#ref=TbNcsObject"/>
+    <var name="preferredSeatId" type="string"/>
+    <var name="seatedVisualPath" type="string"/>
+    <var name="arrivalDelaySeconds" type="string"/>
+    <var name="patienceSeconds" type="string"/>
+    <var name="leaveAfterServed" type="string"/>
+  </bean>
+  <table name="TbNcsCafeVisit" value="NcsCafeVisitEntry" mode="map" index="visitKey" input="CafeVisit@Narrative/Narrative.xlsx"/>
+  <bean name="NcsCafeVisitHookEntry">
+    <var name="visitKey" type="string#ref=TbNcsCafeVisit"/>
+    <var name="stage" type="string#set=reserved,waiting,arrived,before_served,served,leaving,ended"/>
+    <var name="trigger" type="string#set=auto,click"/>
+    <var name="seq" type="int"/>
+    <var name="eventId" type="string"/>
+  </bean>
+  <table name="TbNcsCafeVisitHook" value="NcsCafeVisitHookEntry" mode="list" input="CafeVisitHook@Narrative/Narrative.xlsx"/>
 
   <bean name="NcsPresentationIndexEntry">
     <var name="presentationKey" type="string"/>
@@ -235,7 +258,7 @@
     <var name="resultId" type="string"/>
     <var name="eventId" type="string"/>
     <var name="seq" type="int"/>
-    <var name="resultType" type="string#set=BAR_ADD,BAR_SET,REL_ADD,SET_FLAG,CLEAR_FLAG,SET_SWITCH,OBJ_STATE,OBJECT_STATE,UNLOCK_EVENT,LOCK_EVENT,ADVANCE_DAY,AWARD_ACH,AWARD_ACHIEVEMENT,PLAY_SETUP,BAR_HINT,SPAWN_NPC,DESPAWN_NPC"/>
+    <var name="resultType" type="string#set=BAR_ADD,BAR_SET,REL_ADD,SET_FLAG,CLEAR_FLAG,SET_SWITCH,OBJ_STATE,OBJECT_STATE,UNLOCK_EVENT,LOCK_EVENT,ADVANCE_DAY,AWARD_ACH,AWARD_ACHIEVEMENT,PLAY_SETUP,BAR_HINT,SPAWN_NPC,DESPAWN_NPC,RESERVE_CAFE_VISIT,ITEM_ADD,ITEM_REMOVE,MONEY_ADD,MONEY_REMOVE"/>
     <var name="target" type="string"/>
     <var name="value" type="string"/>
     <var name="note" type="string"/>
@@ -243,16 +266,37 @@
   <table name="TbNcsResult" value="NcsResultEntry" mode="map" index="resultId" input="Result@Narrative/Narrative.xlsx"/>
   <bean name="NcsConditionEntry">
     <var name="conditionId" type="string"/>
-    <var name="ownerType" type="string#set=event,choice"/>
+    <var name="ownerType" type="string#set=event,choice,action,ending"/>
     <var name="ownerId" type="string"/>
     <var name="groupIndex" type="int"/>
-    <var name="condType" type="string#set=BAR_GTE,BAR_LTE,BAR_BETWEEN,REL_GTE,FLAG_SET,FLAG_CLEAR,SWITCH_ON,EVENT_HAPPENED,EVENT_NOT_HAPPENED,ACTOR_IS,TARGET_IS,LOCATION_EQ,TIMESLOT_EQ,REACH_COUNT_EQ,CHANCE_PCT"/>
+    <var name="condType" type="string#set=BOOL_EQ,ITEM_GTE,ACTION_PROGRESS_GTE,ACTION_COMPLETED,BAR_GTE,BAR_LTE,BAR_BETWEEN,REL_GTE,EVENT_HAPPENED,EVENT_NOT_HAPPENED"/>
     <var name="target" type="string"/>
-    <var name="op" type="string"/>
     <var name="value" type="string"/>
-    <var name="notFlag" type="bool"/>
   </bean>
   <table name="TbNcsCondition" value="NcsConditionEntry" mode="map" index="conditionId" input="Condition@Narrative/Narrative.xlsx"/>
+  <bean name="NcsConditionKeyEntry">
+    <var name="key" type="string"/>
+    <var name="nameText" type="string#ref=TbText"/>
+    <var name="initialValue" type="bool"/>
+    <var name="onlySetTrue" type="bool"/>
+  </bean>
+  <table name="TbNcsConditionKey" value="NcsConditionKeyEntry" mode="map" index="key" input="ConditionKey@Narrative/Narrative.xlsx"/>
+  <bean name="NcsEndingEntry">
+    <var name="endingId" type="string"/>
+    <var name="enabled" type="bool"/>
+    <var name="priority" type="int"/>
+    <var name="titleText" type="string#ref=TbText"/>
+    <var name="messageText" type="string#ref=TbText"/>
+  </bean>
+  <table name="TbNcsEnding" value="NcsEndingEntry" mode="map" index="endingId" input="Ending@Narrative/Narrative.xlsx"/>
+  <bean name="NcsActionMilestoneEntry">
+    <var name="milestoneId" type="string"/>
+    <var name="actionKey" type="string#ref=TbNcsAction"/>
+    <var name="atProgress" type="int"/>
+    <var name="eventId" type="string#ref=TbNcsEvent"/>
+    <var name="seq" type="int"/>
+  </bean>
+  <table name="TbNcsActionMilestone" value="NcsActionMilestoneEntry" mode="map" index="milestoneId" input="ActionMilestone@Narrative/Narrative.xlsx"/>
   <bean name="NcsTemplateEntry">
     <var name="tplName" type="string"/>
     <var name="descText" type="string"/>
@@ -266,6 +310,7 @@
     <var name="setupKey" type="string"/>
     <var name="tplName" type="string#ref=TbNcsTemplate"/>
     <var name="slotValues" type="string"/>
+    <var name="checkId" type="string#ref=TbNcsAbilityCheck?"/>
     <var name="skipAble" type="bool"/>
     <var name="autoAdvance" type="bool"/>
   </bean>
@@ -276,8 +321,26 @@
     <var name="textKey" type="string#ref=TbText"/>
     <var name="resultOwnerId" type="string"/>
     <var name="seq" type="int"/>
+    <var name="checkId" type="string#ref=TbNcsAbilityCheck?"/>
   </bean>
   <table name="TbNcsChoice" value="NcsChoiceEntry" mode="map" index="choiceId" input="Choice@Narrative/Narrative.xlsx"/>
+  <bean name="NcsAbilityCheckEntry">
+    <var name="checkId" type="string"/>
+    <var name="successEventId" type="string#ref=TbNcsEvent"/>
+    <var name="failureEventId" type="string#ref=TbNcsEvent"/>
+    <var name="successResultOwnerId" type="string"/>
+    <var name="failureResultOwnerId" type="string"/>
+  </bean>
+  <table name="TbNcsAbilityCheck" value="NcsAbilityCheckEntry" mode="map" index="checkId" input="AbilityCheck@Narrative/Narrative.xlsx"/>
+  <bean name="NcsAbilityCheckConditionEntry">
+    <var name="conditionId" type="string"/>
+    <var name="checkId" type="string#ref=TbNcsAbilityCheck"/>
+    <var name="attributeId" type="string#ref=TbPlayerAttribute"/>
+    <var name="threshold" type="int"/>
+    <var name="groupIndex" type="int"/>
+    <var name="seq" type="int"/>
+  </bean>
+  <table name="TbNcsAbilityCheckCondition" value="NcsAbilityCheckConditionEntry" mode="list" index="conditionId" input="AbilityCheckCondition@Narrative/Narrative.xlsx"/>
 
   <bean name="OpeningPresentationEntry">
     <var name="presentationId" type="string"/>
@@ -298,4 +361,43 @@
     <var name="autoAdvanceSeconds" type="float"/>
   </bean>
   <table name="TbOpeningLine" value="OpeningLineEntry" mode="list" input="OpeningLine@Narrative/Narrative.xlsx"/>
+  <bean name="PlayerConfigEntry">
+    <var name="playerId" type="string#ref=TbNcsObject"/>
+    <var name="defaultAvatar" type="string#set=Male,Female"/>
+    <var name="defaultOriginId" type="string"/>
+    <var name="baseStartingMoney" type="int"/>
+    <var name="actionPointMax" type="int"/>
+  </bean>
+  <table name="TbPlayerConfig" value="PlayerConfigEntry" mode="map" index="playerId" input="PlayerConfig@Player/Player.xlsx"/>
+  <bean name="PlayerAttributeEntry">
+    <var name="attributeId" type="string"/>
+    <var name="barKey" type="string"/>
+    <var name="nameText" type="string#ref=TbText"/>
+    <var name="descriptionText" type="string#ref=TbText"/>
+    <var name="seq" type="int"/>
+  </bean>
+  <table name="TbPlayerAttribute" value="PlayerAttributeEntry" mode="map" index="attributeId" input="PlayerAttribute@Player/Player.xlsx"/>
+  <bean name="CreationGroupEntry">
+    <var name="groupId" type="string"/>
+    <var name="seq" type="int"/>
+    <var name="required" type="bool"/>
+  </bean>
+  <table name="TbCreationGroup" value="CreationGroupEntry" mode="map" index="groupId" input="CreationGroup@Player/Player.xlsx"/>
+  <bean name="CreationOptionEntry">
+    <var name="optionId" type="string"/>
+    <var name="groupId" type="string#ref=TbCreationGroup"/>
+    <var name="seq" type="int"/>
+    <var name="labelText" type="string#ref=TbText"/>
+    <var name="descriptionText" type="string#ref=TbText"/>
+    <var name="originId" type="string"/>
+    <var name="startingMoney" type="int"/>
+    <var name="specializationConditionKey" type="string#ref=TbNcsConditionKey?"/>
+  </bean>
+  <table name="TbCreationOption" value="CreationOptionEntry" mode="map" index="optionId" input="CreationOption@Player/Player.xlsx"/>
+  <bean name="CreationBonusEntry">
+    <var name="optionId" type="string#ref=TbCreationOption"/>
+    <var name="attributeId" type="string#ref=TbPlayerAttribute"/>
+    <var name="delta" type="int"/>
+  </bean>
+  <table name="TbCreationBonus" value="CreationBonusEntry" mode="list" index="optionId+attributeId" input="CreationBonus@Player/Player.xlsx"/>
 </module>

@@ -27,6 +27,8 @@ public partial class Tables
     public TbNcsBar TbNcsBar {get; }
     public TbNcsTrigger TbNcsTrigger {get; }
     public TbNcsEvent TbNcsEvent {get; }
+    public TbNcsCafeVisit TbNcsCafeVisit {get; }
+    public TbNcsCafeVisitHook TbNcsCafeVisitHook {get; }
     public TbNcsPresentationIndex TbNcsPresentationIndex {get; }
     public TbNcsConversationPage TbNcsConversationPage {get; }
     public TbNcsConversationLine TbNcsConversationLine {get; }
@@ -36,11 +38,21 @@ public partial class Tables
     public TbNcsEventDate TbNcsEventDate {get; }
     public TbNcsResult TbNcsResult {get; }
     public TbNcsCondition TbNcsCondition {get; }
+    public TbNcsConditionKey TbNcsConditionKey {get; }
+    public TbNcsEnding TbNcsEnding {get; }
+    public TbNcsActionMilestone TbNcsActionMilestone {get; }
     public TbNcsTemplate TbNcsTemplate {get; }
     public TbNcsSetupParams TbNcsSetupParams {get; }
     public TbNcsChoice TbNcsChoice {get; }
+    public TbNcsAbilityCheck TbNcsAbilityCheck {get; }
+    public TbNcsAbilityCheckCondition TbNcsAbilityCheckCondition {get; }
     public TbOpeningPresentation TbOpeningPresentation {get; }
     public TbOpeningLine TbOpeningLine {get; }
+    public TbPlayerConfig TbPlayerConfig {get; }
+    public TbPlayerAttribute TbPlayerAttribute {get; }
+    public TbCreationGroup TbCreationGroup {get; }
+    public TbCreationOption TbCreationOption {get; }
+    public TbCreationBonus TbCreationBonus {get; }
 
 
       public Tables(System.Func<string, JArray> loader)
@@ -59,6 +71,8 @@ public partial class Tables
         TbNcsBar = new TbNcsBar(loader("tbncsbar"));
         TbNcsTrigger = new TbNcsTrigger(loader("tbncstrigger"));
         TbNcsEvent = new TbNcsEvent(loader("tbncsevent"));
+        TbNcsCafeVisit = new TbNcsCafeVisit(loader("tbncscafevisit"));
+        TbNcsCafeVisitHook = new TbNcsCafeVisitHook(loader("tbncscafevisithook"));
         TbNcsPresentationIndex = new TbNcsPresentationIndex(loader("tbncspresentationindex"));
         TbNcsConversationPage = new TbNcsConversationPage(loader("tbncsconversationpage"));
         TbNcsConversationLine = new TbNcsConversationLine(loader("tbncsconversationline"));
@@ -68,11 +82,21 @@ public partial class Tables
         TbNcsEventDate = new TbNcsEventDate(loader("tbncseventdate"));
         TbNcsResult = new TbNcsResult(loader("tbncsresult"));
         TbNcsCondition = new TbNcsCondition(loader("tbncscondition"));
+        TbNcsConditionKey = new TbNcsConditionKey(loader("tbncsconditionkey"));
+        TbNcsEnding = new TbNcsEnding(loader("tbncsending"));
+        TbNcsActionMilestone = new TbNcsActionMilestone(loader("tbncsactionmilestone"));
         TbNcsTemplate = new TbNcsTemplate(loader("tbncstemplate"));
         TbNcsSetupParams = new TbNcsSetupParams(loader("tbncssetupparams"));
         TbNcsChoice = new TbNcsChoice(loader("tbncschoice"));
+        TbNcsAbilityCheck = new TbNcsAbilityCheck(loader("tbncsabilitycheck"));
+        TbNcsAbilityCheckCondition = new TbNcsAbilityCheckCondition(loader("tbncsabilitycheckcondition"));
         TbOpeningPresentation = new TbOpeningPresentation(loader("tbopeningpresentation"));
         TbOpeningLine = new TbOpeningLine(loader("tbopeningline"));
+        TbPlayerConfig = new TbPlayerConfig(loader("tbplayerconfig"));
+        TbPlayerAttribute = new TbPlayerAttribute(loader("tbplayerattribute"));
+        TbCreationGroup = new TbCreationGroup(loader("tbcreationgroup"));
+        TbCreationOption = new TbCreationOption(loader("tbcreationoption"));
+        TbCreationBonus = new TbCreationBonus(loader("tbcreationbonus"));
         ResolveRef();
     }
     
@@ -92,6 +116,8 @@ public partial class Tables
         TbNcsBar.ResolveRef(this);
         TbNcsTrigger.ResolveRef(this);
         TbNcsEvent.ResolveRef(this);
+        TbNcsCafeVisit.ResolveRef(this);
+        TbNcsCafeVisitHook.ResolveRef(this);
         TbNcsPresentationIndex.ResolveRef(this);
         TbNcsConversationPage.ResolveRef(this);
         TbNcsConversationLine.ResolveRef(this);
@@ -101,11 +127,21 @@ public partial class Tables
         TbNcsEventDate.ResolveRef(this);
         TbNcsResult.ResolveRef(this);
         TbNcsCondition.ResolveRef(this);
+        TbNcsConditionKey.ResolveRef(this);
+        TbNcsEnding.ResolveRef(this);
+        TbNcsActionMilestone.ResolveRef(this);
         TbNcsTemplate.ResolveRef(this);
         TbNcsSetupParams.ResolveRef(this);
         TbNcsChoice.ResolveRef(this);
+        TbNcsAbilityCheck.ResolveRef(this);
+        TbNcsAbilityCheckCondition.ResolveRef(this);
         TbOpeningPresentation.ResolveRef(this);
         TbOpeningLine.ResolveRef(this);
+        TbPlayerConfig.ResolveRef(this);
+        TbPlayerAttribute.ResolveRef(this);
+        TbCreationGroup.ResolveRef(this);
+        TbCreationOption.ResolveRef(this);
+        TbCreationBonus.ResolveRef(this);
     }
 }
 

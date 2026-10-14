@@ -27,6 +27,8 @@ namespace Spotlight.GameFlow
         [SerializeField, Min(0f)] private float enterSeconds = .22f;
         [SerializeField, Min(0f)] private float exitSeconds = .16f;
 
+        private IDisposable pauseOwner;
+        public event Action PlaybackStopped;
         private ReadingScript script;
         private Action finished;
         private Action cancelled;
@@ -69,6 +71,9 @@ namespace Spotlight.GameFlow
             if (canvasGroup == null || continueButton == null || readingText == null)
                 throw new InvalidOperationException("ReadingPanel has incomplete prefab bindings.");
             Stop();
+            pauseOwner = PresentationPauseRegistry.Acquire(nameof(ReadingPanel));
+            try
+            {
             script = value;
             finished = onFinished;
             cancelled = onCancelled;
@@ -82,6 +87,8 @@ namespace Spotlight.GameFlow
             transition = DOTween.Sequence().SetUpdate(true).SetLink(gameObject, LinkBehaviour.KillOnDestroy);
             transition.Append(DOTween.To(() => canvasGroup.alpha, v => canvasGroup.alpha = v, 1f, enterSeconds));
             transition.OnComplete(() => { transition = null; ready = true; UpdateButtons(); });
+            }
+            catch { Stop(); throw; }
         }
 
         public void Advance()
@@ -225,12 +232,17 @@ namespace Spotlight.GameFlow
         /// <summary>Silent interruption; cancellation notification belongs to Cancel, not hide/destroy.</summary>
         public void Stop()
         {
+            pauseOwner?.Dispose();
+            pauseOwner = null;
+            Action stopped = PlaybackStopped;
+            PlaybackStopped = null;
             finished = cancelled = null;
             IsPlaying = ready = exiting = false;
             transition?.Kill(false);
             transition = null;
             script = null;
             if (canvasGroup != null) { canvasGroup.alpha = 0f; canvasGroup.blocksRaycasts = canvasGroup.interactable = false; }
+            stopped?.Invoke();
         }
 
         private static void ClearSelection()

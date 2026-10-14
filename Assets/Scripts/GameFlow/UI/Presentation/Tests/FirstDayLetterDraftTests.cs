@@ -1,5 +1,6 @@
-using System.Text.RegularExpressions;
 using NUnit.Framework;
+using Spotlight.Narrative;
+using UnityEngine;
 
 namespace Spotlight.GameFlow.Tests
 {
@@ -17,133 +18,88 @@ namespace Spotlight.GameFlow.Tests
             Assert.That(draft.Origin, Is.EqualTo("流浪儿"));
             Assert.That(draft.CalculateBonuses(), Is.EqualTo(new[] { 5, 2, 0, 2 }));
             Assert.That(draft.Specialization, Is.EqualTo("letter.religion"));
-            StringAssert.Contains("<color=#D18C00>", draft.BuildBody("slot:3"));
+            StringAssert.Contains("<color=#D18C00>", draft.BuildBody("choice:education:education.religion"));
             Assert.That(draft.Select(3, 2), Is.True);
             Assert.That(draft.CalculateBonuses(), Is.EqualTo(new[] { 4, 2, 2, 1 }));
             Assert.That(draft.Select(9, 0), Is.False);
         }
 
         [Test]
-        public void BodyContainsOnlyClickableFilledWordsWithoutOptionDescriptions()
+        public void CreationCommitsOnlyOnceEvenAfterRestoreAndChangedDraft()
         {
-            var draft = new FirstDayLetterDraft();
+            var catalog = PlayerCreationCatalog.Load();
+            var player = new PlayerRuntime(catalog);
+            var draft = new FirstDayLetterDraft(catalog);
             draft.SetName("小米");
             for (int i = 0; i < 5; i++) draft.Select(i, 0);
-            string body = draft.BuildBody();
-            StringAssert.Contains("<link=\"slot:0\"><color=#B3000F><b><u>贫寒</u></b></color></link>", body);
-            StringAssert.DoesNotContain("富贵", body);
-            StringAssert.DoesNotContain("选项", body);
-            StringAssert.DoesNotContain("choice:", body);
-            StringAssert.DoesNotContain("______", body);
-            foreach (string[] group in FirstDayLetterDraft.Effects)
-                foreach (string effect in group) StringAssert.DoesNotContain(effect, body);
-            draft.Select(0, 2);
-            StringAssert.Contains("富贵", draft.BuildBody());
-            StringAssert.DoesNotContain("贫寒", draft.BuildBody());
-        }
-
-        [TestCase(0)]
-        [TestCase(1)]
-        [TestCase(2)]
-        [TestCase(3)]
-        [TestCase(4)]
-        public void ExpandedGroupInsertsClickableLabelsAndEffectsImmediatelyAfterItsSlot(int group)
-        {
-            var draft = new FirstDayLetterDraft();
-            draft.SetName("小米");
-            string initial = draft.BuildBody();
-            for (int i = 0; i < FirstDayLetterDraft.Labels.Length; i++)
-                StringAssert.Contains($"<link=\"choice:{i}:0\">", initial);
-            Assert.That(draft.Selection(group), Is.EqualTo(-1));
-            for (int i = 0; i < FirstDayLetterDraft.Labels.Length; i++) draft.Select(i, 0);
-            string collapsed = draft.BuildBody();
-            StringAssert.DoesNotContain("choice:", collapsed);
-            string body = draft.BuildBody(expandedGroup: group);
-            AssertExpandedGroup(body, group, FirstDayLetterDraft.Labels[group][0]);
-            Assert.That(draft.Selection(group), Is.Zero);
-            Assert.That(draft.BuildBody(), Is.EqualTo(collapsed));
-            int option = FirstDayLetterDraft.Labels[group].Length - 1;
-            string choiceId = $"choice:{group}:{option}";
-            string hovered = draft.BuildBody(choiceId, group);
-            StringAssert.Contains($"<link=\"{choiceId}\"><color=#{FirstDayLetterDraft.HoverInk}>", hovered);
-            Assert.That(draft.Select(group, option), Is.True);
-            collapsed = draft.BuildBody();
-            Assert.That(LinkText(collapsed, $"slot:{group}"), Is.EqualTo(FirstDayLetterDraft.Labels[group][option]));
-            StringAssert.DoesNotContain("choice:", collapsed);
-            foreach (string[] effects in FirstDayLetterDraft.Effects)
-                foreach (string effect in effects) StringAssert.DoesNotContain(effect, collapsed);
-            for (int i = 0; i < FirstDayLetterDraft.Labels[group].Length; i++)
-                if (i != option) StringAssert.DoesNotContain(FirstDayLetterDraft.Labels[group][i], collapsed);
+            int commits = 0;
+            var plan = player.PrepareCreation(draft);
+            Assert.That(plan.StartingMoney, Is.EqualTo(250));
+            Assert.That(player.CommitCreation(plan, p => commits++), Is.True);
+            draft.Select(4, 3);
+            Assert.That(player.CommitCreation(player.PrepareCreation(draft), p => commits++), Is.False);
+            var restored = new PlayerRuntime(catalog, player.CaptureState());
+            Assert.That(restored.CommitCreation(plan, p => commits++), Is.False);
+            Assert.That(commits, Is.EqualTo(1));
+            Assert.That(restored.PlayerName, Is.EqualTo("小米"));
         }
 
         [Test]
-        public void EmptyNameAlwaysIncludesClickableRedPromptUntilFilled()
+        public void FailedOwnerInitializationLeavesCreationRetryableAndDraftPersistsIds()
         {
-            var draft = new FirstDayLetterDraft();
-            StringAssert.Contains("______（点击输入姓名）", LinkText(draft.BuildBody(), "name"));
-            StringAssert.Contains("<link=\"name\"><color=#B3000F>", draft.BuildBody());
+            var catalog = PlayerCreationCatalog.Load();
+            var player = new PlayerRuntime(catalog);
+            var draft = new FirstDayLetterDraft(catalog);
             draft.SetName("小米");
-            StringAssert.DoesNotContain("点击输入姓名", draft.BuildBody());
-            Assert.That(LinkText(draft.BuildBody(), "name"), Is.EqualTo("小米"));
-        }
-
-        private static void AssertExpandedGroup(string body, int group, string slotWord)
-        {
-            Assert.That(LinkText(body, $"slot:{group}"), Is.EqualTo(slotWord));
-            Match slot = Regex.Match(body, $"<link=\"slot:{group}\">.*?</link>", RegexOptions.Singleline);
-            MatchCollection choices = Regex.Matches(body, "<link=\"choice:[0-9]+:[0-9]+\">.*?</link>", RegexOptions.Singleline);
-            Assert.That(choices.Count, Is.EqualTo(FirstDayLetterDraft.Labels[group].Length));
-            int previousEnd = slot.Index + slot.Length;
-            for (int option = 0; option < choices.Count; option++)
-            {
-                Match choice = choices[option];
-                Assert.That(LinkText(choice.Value, $"choice:{group}:{option}"),
-                    Is.EqualTo(FirstDayLetterDraft.Labels[group][option] + "【" + FirstDayLetterDraft.Effects[group][option] + "】"));
-                Assert.That(choice.Index, Is.GreaterThanOrEqualTo(previousEnd));
-                string between = Regex.Replace(body.Substring(previousEnd, choice.Index - previousEnd), "<[^>]+>", "");
-                between = between.Replace("选项", "");
-                Assert.That(Regex.Replace(between, @"[\s（）()；;：:]", ""), Is.Empty,
-                    "Choices must follow the slot without later letter prose between them.");
-                previousEnd = choice.Index + choice.Length;
-            }
-            if (group + 1 < FirstDayLetterDraft.Labels.Length)
-                Assert.That(body.IndexOf($"<link=\"slot:{group + 1}\">", System.StringComparison.Ordinal), Is.GreaterThanOrEqualTo(previousEnd));
-        }
-
-        private static string LinkText(string body, string id)
-        {
-            Match link = Regex.Match(body, $"<link=\"{Regex.Escape(id)}\">(?<text>.*?)</link>", RegexOptions.Singleline);
-            Assert.That(link.Success, Is.True, $"Missing link {id}");
-            return Regex.Replace(link.Groups["text"].Value, "<[^>]+>", "");
+            draft.Select("education", "education.science");
+            player.SaveDraft(draft);
+            var restored = new PlayerRuntime(catalog, player.CaptureState());
+            Assert.That(restored.RestoreDraft().OptionIds, Does.Contain("education.science"));
+            Assert.Throws<System.InvalidOperationException>(() => player.CommitCreation(player.PrepareDefaultCreation(), p => throw new System.InvalidOperationException("Owner not ready")));
+            Assert.That(player.CreationSubmitted, Is.False);
+            Assert.That(player.CommitCreation(player.PrepareDefaultCreation(), p => { }), Is.True);
         }
 
         [Test]
-        public void ApplyingLetterIsIdempotentAndRoundTripsThroughExistingSave()
+        public void CatalogRejectsInvalidOwnerAndAmbiguousRewardsBeforeSessionStarts()
         {
-            string previous = PlayerDetailsProfile.CaptureJson();
-            try
+            cfg.Tables Tables(System.Action<string, Newtonsoft.Json.Linq.JArray> mutate) => new cfg.Tables(name =>
             {
-                PlayerDetailsProfile.ResetForNewSession();
-                var draft = new FirstDayLetterDraft();
-                draft.SetName("小米");
-                for (int i = 0; i < 5; i++) draft.Select(i, 0);
-                PlayerDetailsProfile.Current.ApplyLetter(draft);
-                PlayerDetailsProfile.Current.ApplyLetter(draft);
-                Assert.That(PlayerDetailsProfile.Current.Attributes, Is.EqualTo(new[] { 5, 2, 0, 2 }));
-                draft.Select(4, 3);
-                PlayerDetailsProfile.Current.ApplyLetter(draft);
-                Assert.That(PlayerDetailsProfile.Current.Attributes, Is.EqualTo(new[] { 3, 2, 0, 4 }));
-                string save = PlayerDetailsProfile.CaptureJson();
-                PlayerDetailsProfile.ResetForNewSession();
-                PlayerDetailsProfile.RestoreJson(save);
-                Assert.That(PlayerDetailsProfile.Current.PlayerName, Is.EqualTo("小米"));
-                Assert.That(PlayerDetailsProfile.Current.Origin, Is.EqualTo("流浪儿"));
-                Assert.That(PlayerDetailsProfile.Current.Specializations, Is.EquivalentTo(new[] { "letter.religion" }));
-                Assert.That(PlayerDetailsProfile.Current.Attributes, Is.EqualTo(new[] { 3, 2, 0, 4 }));
-                PlayerDetailsProfile.Current.ApplyLetter(draft);
-                Assert.That(PlayerDetailsProfile.Current.Attributes, Is.EqualTo(new[] { 3, 2, 0, 4 }));
-            }
-            finally { PlayerDetailsProfile.RestoreJson(previous); }
+                var json = Newtonsoft.Json.Linq.JArray.Parse(Resources.Load<TextAsset>("Luban/" + name).text);
+                mutate(name, json);
+                return json;
+            });
+            Assert.Throws<System.InvalidOperationException>(() => new PlayerCreationCatalog(Tables((name, rows) =>
+            {
+                if (name == "tbplayerattribute") rows[0]["barKey"] = "cafe.money";
+            })));
+            Assert.Throws<System.InvalidOperationException>(() => new PlayerCreationCatalog(Tables((name, rows) =>
+            {
+                if (name == "tbcreationoption")
+                    foreach (var row in rows)
+                        if ((string)row["groupId"] == "trait") row["startingMoney"] = 99;
+            })));
+            Assert.Throws<System.InvalidOperationException>(() => new PlayerCreationCatalog(Tables((name, rows) =>
+            {
+                if (name == "tbplayerconfig") rows[0]["actionPointMax"] = -1;
+            })));
+        }
+
+        [Test]
+        public void DeletedOptionRequiresReselectionAndUnavailableDiffersFromZero()
+        {
+            var catalog = PlayerCreationCatalog.Load();
+            var draft = new FirstDayLetterDraft(catalog, "小米", new[] { "education.deleted" });
+            for (int i = 0; i < 5; i++) if (i != 3) draft.Select(i, 0);
+            Assert.That(draft.IsComplete, Is.False);
+            draft.Select("education", "education.science");
+            Assert.That(draft.IsComplete, Is.True);
+            var player = new PlayerRuntime(catalog);
+            Assert.That(player.TryReadMoney(out _), Is.EqualTo(PlayerReadStatus.NotReady));
+            Assert.That(player.TryReadAttribute("missing", out _), Is.EqualTo(PlayerReadStatus.UnknownId));
+            player.BindQueries((string key, out int value) => { value = 0; return PlayerReadStatus.Success; }, null, null);
+            Assert.That(player.TryReadMoney(out int money), Is.EqualTo(PlayerReadStatus.Success));
+            Assert.That(money, Is.Zero);
         }
     }
 }

@@ -27,6 +27,7 @@ namespace Spotlight.GameFlow
         [SerializeField, Min(0f)] private float exitSeconds = .15f;
         [SerializeField, Min(1f)] private float prepareTimeoutSeconds = 15f;
 
+        private IDisposable pauseOwner;
         private Sequence transition;
         private Action finished;
         private Action cancelled;
@@ -77,6 +78,9 @@ namespace Spotlight.GameFlow
             if (!value.PreviewOnly && value.Clip == null && string.IsNullOrWhiteSpace(value.videoPath))
                 throw new ArgumentException("A videoPath or VideoClip is required. PreviewOnly is for debug placeholders.", nameof(value));
             Stop();
+            pauseOwner = PresentationPauseRegistry.Acquire(nameof(CutScenePanel));
+            try
+            {
             data = value;
             finished = onFinished;
             cancelled = onCancelled;
@@ -102,6 +106,8 @@ namespace Spotlight.GameFlow
                 ready = true;
                 if (data != null && !data.PreviewOnly) PrepareVideo();
             });
+            }
+            catch { Stop(); throw; }
         }
 
         private void PrepareVideo()
@@ -212,6 +218,8 @@ namespace Spotlight.GameFlow
 
         public void Stop()
         {
+            pauseOwner?.Dispose();
+            pauseOwner = null;
             finished = cancelled = null;
             IsPlaying = ready = exiting = waitingForVideo = false;
             transition?.Kill(false);

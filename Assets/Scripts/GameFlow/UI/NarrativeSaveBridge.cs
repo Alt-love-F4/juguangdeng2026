@@ -9,7 +9,7 @@ namespace Spotlight.GameFlow
     public static class NarrativeSaveBridge
     {
         public const string ParticipantId = "spotlight.narrative";
-        public const int CurrentVersion = 1;
+        public const int CurrentVersion = 2;
 
         [Serializable]
         public sealed class Envelope
@@ -54,7 +54,7 @@ namespace Spotlight.GameFlow
             {
                 JObject payload = JObject.Parse(found.Json);
                 JToken version = payload["Version"];
-                if (version == null || version.Type != JTokenType.Integer || version.Value<long>() != CurrentVersion)
+                if (version == null || version.Type != JTokenType.Integer || (version.Value<long>() != 1 && version.Value<long>() != CurrentVersion))
                 {
                     error = "Unsupported NCS save envelope version.";
                     return false;
@@ -66,13 +66,16 @@ namespace Spotlight.GameFlow
                     return false;
                 }
                 Envelope envelope = JsonUtility.FromJson<Envelope>(found.Json);
-                if (envelope == null || envelope.Version != CurrentVersion)
+                if (envelope == null || (envelope.Version != 1 && envelope.Version != CurrentVersion))
                 {
                     error = "Unsupported NCS save envelope version: " + (envelope == null ? "missing" : envelope.Version.ToString());
                     return false;
                 }
                 if (envelope.Snapshot == null) { error = "NCS save snapshot is missing."; return false; }
                 snapshot = envelope.Snapshot;
+                // JsonUtility may initialize absent lists: preserve the explicit v1 migration signal.
+                if (envelope.Version == 1 && snapshotToken["conditionValues"] == null)
+                    snapshot.conditionValues = null;
                 return true;
             }
             catch (Exception exception) { error = "NCS save payload is invalid: " + exception.Message; return false; }

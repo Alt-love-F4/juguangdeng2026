@@ -36,8 +36,8 @@ namespace Spotlight.Narrative
         {
             SceneManager.sceneLoaded -= OnSceneLoaded;
             if (Instance != this) return;
-            hud?.gameObject.SetActive(false);
-            runtime?.gameObject.SetActive(false);
+            if (hud != null) hud.gameObject.SetActive(false);
+            if (runtime != null) runtime.gameObject.SetActive(false);
             Instance = null;
         }
 
@@ -85,8 +85,8 @@ namespace Spotlight.Narrative
         public void SetGameplayVisible(bool visible)
         {
             EnsureRuntime();
-            if (hud == null) hud = NarrativeGameplayHUD.Create(runtime);
-            hud.SetVisible(visible);
+            // Formal gameplay uses its existing map/business panels, never the demo HUD.
+            if (hud != null) hud.SetVisible(false);
         }
 
         public void SetGameplayScene(string sceneName) => gameplaySceneName = sceneName;

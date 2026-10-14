@@ -1,0 +1,30 @@
+[
+  {
+    "attributeId": "language",
+    "barKey": "player.language",
+    "nameText": "player.attribute.language",
+    "descriptionText": "player.attribute.language.desc",
+    "seq": 0
+  },
+  {
+    "attributeId": "courage",
+    "barKey": "player.courage",
+    "nameText": "player.attribute.courage",
+    "descriptionText": "player.attribute.courage.desc",
+    "seq": 1
+  },
+  {
+    "attributeId": "wisdom",
+    "barKey": "player.wisdom",
+    "nameText": "player.attribute.wisdom",
+    "descriptionText": "player.attribute.wisdom.desc",
+    "seq": 2
+  },
+  {
+    "attributeId": "perception",
+    "barKey": "player.perception",
+    "nameText": "player.attribute.perception",
+    "descriptionText": "player.attribute.perception.desc",
+    "seq": 3
+  }
+]

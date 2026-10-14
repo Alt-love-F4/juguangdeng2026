@@ -7,12 +7,13 @@ namespace Spotlight.Narrative
     public enum NarrativeObjectType { Npc, Player, World }
     public enum NarrativeBarType { Stat, Relation, World }
     public enum NarrativeDirection { HighIsGood, LowIsGood }
+    public enum NarrativeSourceMode { Ncs, External }
     public enum NarrativeAdvanceMode { Monotonic, EventDriven, Derived }
     public enum NarrativeTriggerDirection { Up, Down, Both }
     public enum NarrativeCrossType { Cross, Hold }
     public enum NarrativeOnceType { Once, Repeat }
     public enum NarrativeEventKind { Actor, World }
-    public enum NarrativeResultType { BarAdd, BarSet, RelAdd, SetFlag, ClearFlag, SetSwitch, ObjectState, UnlockEvent, LockEvent, AdvanceDay, AwardAchievement, PlaySetup, BarHint, SpawnNpc, DespawnNpc, ShowPosition, HidePosition, AddTempPosition, RemoveTempPosition }
+    public enum NarrativeResultType { BarAdd, BarSet, RelAdd, SetFlag, ClearFlag, SetSwitch, ObjectState, UnlockEvent, LockEvent, AdvanceDay, AwardAchievement, PlaySetup, BarHint, SpawnNpc, DespawnNpc, ShowPosition, HidePosition, AddTempPosition, RemoveTempPosition, ItemAdd, ItemRemove, MoneyAdd, MoneyRemove, ReserveCafeVisit }
     public enum NarrativeTimeSlot { Morning, Noon, Night }
     public enum NarrativeRepeatRule { Once, Daily, Weekly, Yearly }
 
@@ -41,6 +42,9 @@ namespace Spotlight.Narrative
         public int max;
         public NarrativeDirection direction;
         public NarrativeAdvanceMode advanceMode = NarrativeAdvanceMode.EventDriven;
+        public NarrativeSourceMode sourceMode = NarrativeSourceMode.Ncs;
+        public string providerId;
+        public string sourceKey;
         public int initValue;
         public int reverseInitValue;
         public string nameText;
@@ -108,6 +112,21 @@ namespace Spotlight.Narrative
     }
 
     [Serializable]
+    public sealed class NarrativeConditionKeyDefinition
+    {
+        public string key, nameText;
+        public bool initialValue, onlySetTrue;
+    }
+
+    [Serializable]
+    public sealed class NarrativeEndingDefinition
+    {
+        public string endingId, titleText, messageText;
+        public bool enabled;
+        public int priority;
+    }
+
+    [Serializable]
     public sealed class NarrativeConditionDefinition
     {
         public string conditionId;
@@ -128,7 +147,7 @@ namespace Spotlight.Narrative
     }
     [Serializable] public sealed class NarrativeSetupParamsDefinition
     {
-        public string setupKey, tplName, slotValues;
+        public string setupKey, tplName, slotValues, checkId;
         public bool skipAble, autoAdvance;
         public List<NarrativeAtomParameter> parameters = new List<NarrativeAtomParameter>();
     }
@@ -136,7 +155,7 @@ namespace Spotlight.Narrative
     [Serializable] public sealed class NarrativeEventProperty { public string property, value; }
     [Serializable] public sealed class NarrativeChoiceDefinition
     {
-        public string choiceId, groupKey, textKey, resultOwnerId;
+        public string choiceId, groupKey, textKey, resultOwnerId, checkId;
         public int seq;
     }
     [Serializable] public sealed class NarrativeTextDefinition { public string key, content; }
@@ -157,6 +176,15 @@ namespace Spotlight.Narrative
     [Serializable]
     public sealed class NarrativeSnapshot
     {
+        public long cafeVisitVersion, cafeVisitSequence;
+        public List<NarrativeCafeVisitSave> cafeVisits = new List<NarrativeCafeVisitSave>();
+        public List<NarrativeCafeFeedbackSave> cafeFeedback = new List<NarrativeCafeFeedbackSave>();
+        public List<NarrativeStringValue> cafeLocationOwners = new List<NarrativeStringValue>();
+        // Null identifies a legacy snapshot; an empty list is an authoritative new bool pool.
+        public List<NarrativeBoolValue> conditionValues;
+        public string selectedEndingId;
+        public int officialDayVersion;
+        public int officialDayProcessed;
         public List<NarrativeBarValue> bars = new List<NarrativeBarValue>();
         public List<NarrativeCounterValue> counters = new List<NarrativeCounterValue>();
         public List<string> firedTriggers = new List<string>();
@@ -171,6 +199,8 @@ namespace Spotlight.Narrative
         public List<string> turnEvents = new List<string>();
         public List<NarrativePendingValue> pending = new List<NarrativePendingValue>();
         public NarrativePendingValue active;
+        public NarrativeAbilityCheckSnapshot activeAbilityCheck;
+        public string activeAbilityCheckId;
         public List<NarrativeBarChange> changes = new List<NarrativeBarChange>();
         public List<NarrativeStringValue> npcLocations = new List<NarrativeStringValue>();
         public List<NarrativeResultDefinition> pendingEffects = new List<NarrativeResultDefinition>();
@@ -197,6 +227,12 @@ namespace Spotlight.Narrative
     [Serializable] public sealed class NarrativePendingValue { public string eventId, triggerId, requestId, location; public int depth; public NarrativeTimeSlot timeSlot; public List<string> selectedChoices = new List<string>(); }
     [Serializable] public sealed class NarrativeBarChange { public string key; public int oldValue, newValue, depth; }
     public sealed class NarrativeEffectNotification { public NarrativeResultDefinition Result; public string Target, Value; }
+
+    /// <summary>Cancellation is not successful completion. Terminal reasons: disposed, host_unavailable.</summary>
+    public interface INarrativePresentationCancellation
+    {
+        event Action<string> Cancelled;
+    }
 
     public interface INarrativePresentationDrain
     {

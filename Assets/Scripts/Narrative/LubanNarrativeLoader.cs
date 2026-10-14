@@ -38,7 +38,7 @@ namespace Spotlight.Narrative
                     actionKey = row.ActionKey, type = ActionType(row.Type), mustExecute = row.MustExecute,
                     nameText = row.NameText, descText = row.DescText, requirements = row.Requirements,
                     resultEvents = Strings(row.ResultEvents), durationDays = row.DurationDays,
-                    progressTarget = row.ProgressTarget, nextActionKey = row.NextActionKey,
+                    progressTarget = row.ProgressTarget, nextActionKey = row.NextActionKey, deliveryMode = DeliveryMode(row.DeliveryMode),
                     endDay = row.Type.Split(new[] { '|', '+', ',', ';' }, StringSplitOptions.RemoveEmptyEntries).Any(p => p.Trim().Equals("EndDay", StringComparison.OrdinalIgnoreCase))
                 });
             foreach (var row in tables.TbNcsAction.DataList)
@@ -49,6 +49,19 @@ namespace Spotlight.Narrative
                 if (parts.Any(p => p.Equals("Progress", StringComparison.OrdinalIgnoreCase)) && row.ProgressTarget <= 0)
                     throw new FormatException("Progress requires positive progressTarget: " + row.ActionKey);
             }
+            foreach (var row in tables.TbNcsActionMilestone.DataList)
+            {
+                var action = config.actions.Find(x => x.actionKey == row.ActionKey);
+                if (action == null) throw new FormatException("ActionMilestone " + row.MilestoneId + ": unknown action " + row.ActionKey);
+                action.milestones.Add(new NarrativeActionMilestoneDefinition
+                {
+                    milestoneId = row.MilestoneId, actionKey = row.ActionKey, atProgress = row.AtProgress, eventId = row.EventId, seq = row.Seq
+                });
+            }
+            foreach (var row in tables.TbNcsConditionKey.DataList)
+                config.conditionKeys.Add(new NarrativeConditionKeyDefinition { key = row.Key, nameText = row.NameText, initialValue = row.InitialValue, onlySetTrue = row.OnlySetTrue });
+            foreach (var row in tables.TbNcsEnding.DataList)
+                config.endings.Add(new NarrativeEndingDefinition { endingId = row.EndingId, enabled = row.Enabled, priority = row.Priority, titleText = row.TitleText, messageText = row.MessageText });
             foreach (var row in tables.TbNcsMapPosition.DataList)
                 config.mapPositions.Add(new NarrativeMapPositionDefinition
                 {
@@ -57,6 +70,20 @@ namespace Spotlight.Narrative
                     defaultAction = row.DefaultAction, extendedActions = Strings(row.ExtendedActions),
                     imgPath = row.ImgPath, enabled = row.Enabled
                 });
+            foreach (var row in tables.TbNcsCafeVisit.DataList)
+                config.cafeVisits.Add(new NarrativeCafeVisitDefinition
+                {
+                    visitKey = row.VisitKey, characterId = row.CharacterId,
+                    preferredSeatId = row.PreferredSeatId, seatedVisualPath = row.SeatedVisualPath,
+                    arrivalDelaySeconds = CafeSeconds(row.ArrivalDelaySeconds, row.VisitKey, "arrivalDelaySeconds", false) ?? 0f,
+                    patienceSeconds = CafeSeconds(row.PatienceSeconds, row.VisitKey, "patienceSeconds", true),
+                    leaveAfterServed = CafeLeaveAfterServed(row.LeaveAfterServed, row.VisitKey)
+                });
+            foreach (var row in tables.TbNcsCafeVisitHook.DataList)
+                config.cafeVisitHooks.Add(new NarrativeCafeVisitHookDefinition
+                { visitKey = row.VisitKey, stage = row.Stage, trigger = row.Trigger, seq = row.Seq, eventId = row.EventId });
+            if (config.cafeVisits.Count == 0) UnityEngine.Debug.LogWarning("[CafeVisit/default] 特殊来访配置为空；有效角色到场使用默认行为。");
+            if (config.cafeVisitHooks.Count == 0) UnityEngine.Debug.LogWarning("[CafeVisit/no_content] 阶段剧情未配置；演出功能未验证。");
             var barKeys = new HashSet<string>(StringComparer.Ordinal);
             foreach (var row in tables.TbNcsBar.DataList)
             {
@@ -67,6 +94,7 @@ namespace Spotlight.Narrative
                 {
                     barKey = key, ownerId = row.OwnerId, targetId = row.TargetId, barType = BarType(row.BarType),
                     min = row.Min, max = row.Max, direction = Direction(row.Direction), advanceMode = AdvanceMode(row.AdvanceMode),
+                    sourceMode = SourceMode(row.SourceMode), providerId = row.ProviderId, sourceKey = row.SourceKey,
                     initValue = row.InitValue, reverseInitValue = row.ReverseInitValue, nameText = row.NameText, derivedFormula = row.DerivedFormula,
                     derivedSources = Strings(row.DerivedSources), derivedWeights = Weights(row.DerivedWeights), autoStep = row.AutoStep
                 });
@@ -103,7 +131,7 @@ namespace Spotlight.Narrative
                 {
                     conditionId = row.ConditionId, ownerType = string.IsNullOrWhiteSpace(row.OwnerType) ? "event" : row.OwnerType,
                     ownerId = row.OwnerId, groupIndex = row.GroupIndex, condType = row.CondType, target = row.Target,
-                    op = row.Op, value = row.Value, notFlag = row.NotFlag
+                    value = row.Value
                 });
             foreach (var row in tables.TbNcsResult.DataList)
                 config.results.Add(new NarrativeResultDefinition
@@ -121,7 +149,7 @@ namespace Spotlight.Narrative
             {
                 var setup = new NarrativeSetupParamsDefinition
                 {
-                    setupKey = row.SetupKey, tplName = row.TplName, slotValues = row.SlotValues,
+                    setupKey = row.SetupKey, tplName = row.TplName, slotValues = row.SlotValues, checkId = row.CheckId,
                     skipAble = row.SkipAble, autoAdvance = row.AutoAdvance
                 };
                 foreach (var slot in PresentationSlots.Parse(setup))
@@ -132,7 +160,19 @@ namespace Spotlight.Narrative
                 config.choices.Add(new NarrativeChoiceDefinition
                 {
                     choiceId = row.ChoiceId, groupKey = row.GroupKey, textKey = row.TextKey,
-                    resultOwnerId = row.ResultOwnerId, seq = row.Seq
+                    resultOwnerId = row.ResultOwnerId, seq = row.Seq, checkId = row.CheckId
+                });
+            foreach (var row in tables.TbNcsAbilityCheck.DataList)
+                config.abilityChecks.Add(new NarrativeAbilityCheckDefinition
+                {
+                    checkId = row.CheckId, successEventId = row.SuccessEventId, failureEventId = row.FailureEventId,
+                    successResultOwnerId = row.SuccessResultOwnerId, failureResultOwnerId = row.FailureResultOwnerId
+                });
+            foreach (var row in tables.TbNcsAbilityCheckCondition.DataList)
+                config.abilityCheckConditions.Add(new NarrativeAbilityCheckConditionDefinition
+                {
+                    conditionId = row.ConditionId, checkId = row.CheckId, attributeId = row.AttributeId,
+                    threshold = row.Threshold, groupIndex = row.GroupIndex, seq = row.Seq
                 });
             foreach (var row in tables.TbText.DataList)
                 config.texts.Add(new NarrativeTextDefinition { key = row.Key, content = row.Text });
@@ -153,11 +193,230 @@ namespace Spotlight.Narrative
             foreach (var row in tables.TbNcsReadingLine.DataList)
                 config.presentations.readingLines.Add(new NarrativeReadingLineDefinition { lineId = row.LineId, pageId = row.PageId, seq = row.Seq, mode = row.Mode, speakerKey = row.SpeakerKey, textKey = row.TextKey, voiceKey = row.VoiceKey });
             ValidateLinks(config);
+            List<string> errors = ValidateConditionConfiguration(config);
+            errors.AddRange(ValidateAbilityCheckConfiguration(config, tables));
+            if (errors.Count > 0) throw new FormatException(string.Join("\n", errors));
             return config;
+        }
+
+        public static List<string> ValidateAbilityCheckConfiguration(NarrativeConfiguration c, cfg.Tables tables)
+        {
+            var errors = new List<string>();
+            var checks = new Dictionary<string, NarrativeAbilityCheckDefinition>(StringComparer.Ordinal);
+            foreach (var check in c.abilityChecks)
+            {
+                if (check == null || string.IsNullOrWhiteSpace(check.checkId) || !checks.TryAdd(check.checkId, check)) { errors.Add("AbilityCheck: missing or duplicate checkId " + check?.checkId); continue; }
+                if (!c.events.Any(e => e != null && e.eventId == check.successEventId)) errors.Add("AbilityCheck " + check.checkId + ": unknown successEventId " + check.successEventId);
+                if (!c.events.Any(e => e != null && e.eventId == check.failureEventId)) errors.Add("AbilityCheck " + check.checkId + ": unknown failureEventId " + check.failureEventId);
+            }
+            var conditionIds = new HashSet<string>(StringComparer.Ordinal);
+            foreach (var condition in c.abilityCheckConditions)
+            {
+                if (condition == null || string.IsNullOrWhiteSpace(condition.conditionId) || !conditionIds.Add(condition.conditionId)) { errors.Add("AbilityCheckCondition: missing or duplicate conditionId " + condition?.conditionId); continue; }
+                if (!checks.ContainsKey(condition.checkId)) errors.Add("AbilityCheckCondition " + condition.conditionId + ": unknown checkId " + condition.checkId);
+                var attribute = tables.TbPlayerAttribute.GetOrDefault(condition.attributeId);
+                if (attribute == null) errors.Add("AbilityCheckCondition " + condition.conditionId + ": unknown attributeId " + condition.attributeId);
+                if (condition.groupIndex < 1) errors.Add("AbilityCheckCondition " + condition.conditionId + ": groupIndex must be positive.");
+                if (attribute != null)
+                {
+                    NarrativeBarDefinition bar = c.bars.Find(b => b != null && b.barKey == attribute.BarKey);
+                    if (bar == null) errors.Add("AbilityCheckCondition " + condition.conditionId + ": attribute Bar is missing " + attribute.BarKey);
+                    else if (condition.threshold < bar.min || condition.threshold > bar.max) errors.Add("AbilityCheckCondition " + condition.conditionId + ": threshold outside attribute range.");
+                }
+            }
+            foreach (var check in checks.Values)
+            {
+                if (!c.abilityCheckConditions.Any(x => x != null && x.checkId == check.checkId)) errors.Add("AbilityCheck " + check.checkId + ": requires conditions.");
+                foreach (string owner in new[] { check.successResultOwnerId, check.failureResultOwnerId })
+                    if (!string.IsNullOrWhiteSpace(owner) && !c.events.Any(e => e != null && e.eventId == owner) && !c.choices.Any(x => x != null && x.choiceId == owner)) errors.Add("AbilityCheck " + check.checkId + ": unknown result owner " + owner);
+            }
+            foreach (var choice in c.choices) if (!string.IsNullOrWhiteSpace(choice.checkId) && !checks.ContainsKey(choice.checkId)) errors.Add("Choice " + choice.choiceId + ": unknown checkId " + choice.checkId);
+            foreach (var setup in c.setups) if (!string.IsNullOrWhiteSpace(setup.checkId) && !checks.ContainsKey(setup.checkId)) errors.Add("SetupParams " + setup.setupKey + ": unknown checkId " + setup.checkId);
+            return errors;
+        }
+
+        /// <summary>Shared fail-closed validation for authoring tools and the runtime table loader.</summary>
+        public static List<string> ValidateConditionConfiguration(NarrativeConfiguration c)
+        {
+            if (c == null) throw new ArgumentNullException(nameof(c));
+            var errors = new List<string>();
+            var keys = new Dictionary<string, NarrativeConditionKeyDefinition>(StringComparer.Ordinal);
+            var texts = new HashSet<string>(c.texts.Select(x => x.key), StringComparer.Ordinal);
+            foreach (var key in c.conditionKeys)
+            {
+                if (string.IsNullOrWhiteSpace(key.key) || keys.ContainsKey(key.key)) errors.Add("ConditionKey: missing or duplicate key " + key.key);
+                else keys.Add(key.key, key);
+                if (IsInternalKey(key.key)) errors.Add("ConditionKey: reserved internal key " + key.key);
+                if (!texts.Contains(key.nameText)) errors.Add("ConditionKey " + key.key + ": unknown nameText " + key.nameText);
+            }
+            var endingIds = new HashSet<string>(StringComparer.Ordinal);
+            foreach (var ending in c.endings)
+            {
+                if (string.IsNullOrWhiteSpace(ending.endingId) || !endingIds.Add(ending.endingId)) errors.Add("Ending: missing or duplicate ID " + ending.endingId);
+                if (!texts.Contains(ending.titleText) || !texts.Contains(ending.messageText)) errors.Add("Ending " + ending.endingId + ": unknown title/message text.");
+                if (!c.conditions.Any(x => string.Equals(x.ownerType, "ending", StringComparison.OrdinalIgnoreCase) && x.ownerId == ending.endingId)) errors.Add("Ending " + ending.endingId + ": requires condition rows, including when disabled.");
+            }
+            foreach (var row in c.conditions)
+            {
+                string label = "Condition " + row.conditionId + ": ";
+                string owner = (row.ownerType ?? "").ToLowerInvariant();
+                bool knownOwner = owner switch
+                {
+                    "event" => c.events.Any(x => (string.IsNullOrWhiteSpace(x.conditionOwnerId) ? x.eventId : x.conditionOwnerId) == row.ownerId),
+                    "choice" => c.choices.Any(x => x.choiceId == row.ownerId),
+                    "action" => c.actions.Any(x => x.actionKey == row.ownerId),
+                    "ending" => endingIds.Contains(row.ownerId),
+                    _ => false
+                };
+                if (!knownOwner || string.IsNullOrWhiteSpace(row.ownerId)) errors.Add(label + "unknown " + owner + " owner " + row.ownerId);
+                if (row.groupIndex < 1) errors.Add(label + "groupIndex must be positive.");
+                if (row.notFlag || !string.IsNullOrWhiteSpace(row.op)) errors.Add(label + "op/notFlag are obsolete; encode the comparison in condType/value.");
+                string type = (row.condType ?? "").ToUpperInvariant();
+                string target = row.target ?? "";
+                string key = target.Contains(":") ? target.Substring(target.IndexOf(':') + 1) : target;
+                switch (type)
+                {
+                    case "BOOL_EQ":
+                        if (!keys.ContainsKey(target)) errors.Add(label + "unknown bool key " + target);
+                        if (!bool.TryParse(row.value, out _)) errors.Add(label + "expected true or false.");
+                        break;
+                    case "ITEM_GTE":
+                    case "ACTION_PROGRESS_GTE":
+                        if (string.IsNullOrWhiteSpace(key)) errors.Add(label + "missing target.");
+                        if (!int.TryParse(row.value, NumberStyles.Integer, CultureInfo.InvariantCulture, out int quantity) || quantity < 0) errors.Add(label + "quantity must be a non-negative integer.");
+                        if (type == "ACTION_PROGRESS_GTE" && !c.actions.Any(x => x.actionKey == key)) errors.Add(label + "unknown action " + target);
+                        break;
+                    case "ACTION_COMPLETED":
+                        if (!c.actions.Any(x => x.actionKey == key)) errors.Add(label + "unknown action " + target);
+                        if (!string.IsNullOrWhiteSpace(row.value)) errors.Add(label + "ACTION_COMPLETED requires empty value.");
+                        break;
+                    case "BAR_GTE": case "BAR_LTE": case "BAR_BETWEEN": case "REL_GTE":
+                        bool found = c.bars.Any(x => x.barKey == key && (type != "REL_GTE" || x.barType == NarrativeBarType.Relation));
+                        if (!found && type == "REL_GTE" && key.Contains(">"))
+                        {
+                            var pair = key.Split('>');
+                            found = pair.Length == 2 && c.bars.Count(x => x.barType == NarrativeBarType.Relation && (x.ownerId == pair[0] && x.targetId == pair[1] || x.ownerId == pair[1] && x.targetId == pair[0])) == 1;
+                        }
+                        if (!found) errors.Add(label + "unknown bar " + target);
+                        if (type == "BAR_BETWEEN")
+                        {
+                            var range = (row.value ?? "").Split(new[] { '.', ',', ' ' }, StringSplitOptions.RemoveEmptyEntries);
+                            if (range.Length != 2 || !int.TryParse(range[0], out int low) || !int.TryParse(range[1], out int high) || low > high) errors.Add(label + "expected inclusive min..max.");
+                        }
+                        else if (!int.TryParse(row.value, out _)) errors.Add(label + "integer value required.");
+                        break;
+                    case "EVENT_HAPPENED": case "EVENT_NOT_HAPPENED":
+                        if (!c.events.Any(x => x.eventId == key)) errors.Add(label + "unknown event " + target);
+                        break;
+                    default: errors.Add(label + "unsupported condType " + row.condType); break;
+                }
+            }
+            foreach (var result in c.results)
+            {
+                string label = "Result " + result.resultId + ": ";
+                if (!Enum.IsDefined(typeof(NarrativeResultType), result.resultType)) errors.Add(label + "unsupported resultType.");
+                if (result.resultType == NarrativeResultType.SetFlag || result.resultType == NarrativeResultType.ClearFlag)
+                {
+                    string target = result.target ?? "";
+                    if (target.StartsWith("flag:", StringComparison.OrdinalIgnoreCase)) target = target.Substring(5);
+                    if (!keys.TryGetValue(target, out var key)) errors.Add(label + "unknown bool key " + result.target);
+                    bool valid = bool.TryParse(result.value, out bool value);
+                    if (result.resultType == NarrativeResultType.ClearFlag && string.IsNullOrWhiteSpace(result.value)) valid = true;
+                    if (!valid || result.resultType == NarrativeResultType.ClearFlag && value) errors.Add(label + "expected true/false; CLEAR_FLAG requires empty or false.");
+                    if (key != null && key.onlySetTrue && (result.resultType == NarrativeResultType.ClearFlag || valid && !value)) errors.Add(label + "cannot clear onlySetTrue/death condition " + result.target);
+                }
+                if (result.resultType == NarrativeResultType.ItemAdd || result.resultType == NarrativeResultType.ItemRemove)
+                {
+                    if (string.IsNullOrWhiteSpace(result.target)) errors.Add(label + "missing item key.");
+                    if (!int.TryParse(result.value, NumberStyles.Integer, CultureInfo.InvariantCulture, out int quantity) || quantity <= 0) errors.Add(label + "item quantity must be a positive integer.");
+                }
+            }
+            var actionIds = new HashSet<string>(StringComparer.Ordinal);
+            var milestoneIds = new HashSet<string>(StringComparer.Ordinal);
+            foreach (var action in c.actions)
+            {
+                string label = "Action " + action.actionKey + ": ";
+                if (string.IsNullOrWhiteSpace(action.actionKey) || !actionIds.Add(action.actionKey)) errors.Add(label + "missing or duplicate ID.");
+                if (!Enum.IsDefined(typeof(NarrativeDeliveryMode), action.deliveryMode)) errors.Add(label + "unknown deliveryMode.");
+                if (action.deliveryMode != NarrativeDeliveryMode.None && (action.progressTarget <= 0 || action.type == NarrativeActionType.Future || action.endDay)) errors.Add(label + "delivery requires positive progressTarget and cannot be Future/EndDay.");
+                try
+                {
+                    var requirements = NarrativeActionRequirementParser.Parse(action.requirements);
+                    if (requirements.Any(x => x.type != NarrativeActionRequirementType.Item && x.type != NarrativeActionRequirementType.ActionPoint)) errors.Add(label + "read-only requirements must migrate to Condition rows.");
+                }
+                catch (FormatException ex) { errors.Add(label + ex.Message); }
+                foreach (string eventId in action.resultEvents)
+                    if (!c.events.Any(x => x.eventId == eventId)) errors.Add(label + "unknown result event " + eventId);
+                if (!string.IsNullOrWhiteSpace(action.nextActionKey) && !c.actions.Any(x => x.actionKey == action.nextActionKey)) errors.Add(label + "unknown next action " + action.nextActionKey);
+                foreach (var milestone in action.milestones)
+                {
+                    string ml = "ActionMilestone " + milestone.milestoneId + ": ";
+                    if (string.IsNullOrWhiteSpace(milestone.milestoneId) || !milestoneIds.Add(milestone.milestoneId)) errors.Add(ml + "missing or duplicate ID.");
+                    if (milestone.actionKey != action.actionKey) errors.Add(ml + "unknown/mismatched action " + milestone.actionKey);
+                    if (action.deliveryMode == NarrativeDeliveryMode.None || milestone.atProgress < 1 || milestone.atProgress >= action.progressTarget) errors.Add(ml + "requires delivery and 1 <= atProgress < progressTarget.");
+                    if (!c.events.Any(x => x.eventId == milestone.eventId)) errors.Add(ml + "unknown event " + milestone.eventId);
+                }
+            }
+            return errors;
+        }
+
+        private static bool IsInternalKey(string key) => key != null && (key.StartsWith("event.locked.", StringComparison.Ordinal) || key.StartsWith("trigger.once.", StringComparison.Ordinal) || key.StartsWith("date.once.", StringComparison.Ordinal) || key.StartsWith("event.once.", StringComparison.Ordinal) || key.StartsWith("achievement.", StringComparison.Ordinal));
+
+        public static bool IsResultOnlyEvent(NarrativeConfiguration config, NarrativeEventDefinition definition)
+        {
+            if (definition == null || NarrativePresenter.RequiresPresentation(definition, null) || !string.IsNullOrWhiteSpace(definition.presentationClass)) return false;
+            return config.results.Exists(result => result != null && result.eventId == definition.eventId);
+        }
+
+        public static List<string> ValidateValueConfiguration(NarrativeConfiguration config)
+        {
+            var errors = new List<string>();
+            var facts = new HashSet<string>(StringComparer.Ordinal);
+            var bars = new Dictionary<string, NarrativeBarDefinition>(StringComparer.Ordinal);
+            foreach (var bar in config.bars)
+            {
+                if (bar == null || string.IsNullOrWhiteSpace(bar.barKey)) continue;
+                bars[bar.barKey] = bar;
+                if (bar.sourceMode == NarrativeSourceMode.External)
+                {
+                    if (string.IsNullOrWhiteSpace(bar.providerId) || string.IsNullOrWhiteSpace(bar.sourceKey) || bar.advanceMode != NarrativeAdvanceMode.EventDriven)
+                        errors.Add($"Bar {bar.barKey}: external requires providerId/sourceKey and event_driven mode.");
+                    if (!facts.Add(bar.providerId + ":" + bar.sourceKey)) errors.Add($"Bar {bar.barKey}: duplicate external business fact.");
+                    if (bar.barType == NarrativeBarType.Relation) errors.Add($"Bar {bar.barKey}: external relation requires directional provider support, not supported in this version.");
+                }
+                else if (!string.IsNullOrEmpty(bar.providerId) || !string.IsNullOrEmpty(bar.sourceKey)) errors.Add($"Bar {bar.barKey}: ncs source must not specify external fields.");
+            }
+            foreach (var bar in bars.Values)
+                ValidateDerived(bar.barKey, bars, new HashSet<string>(StringComparer.Ordinal), errors);
+            foreach (var result in config.results)
+            {
+                if (result.resultType == NarrativeResultType.MoneyAdd || result.resultType == NarrativeResultType.MoneyRemove)
+                {
+                    if (result.target != "cafe" || !int.TryParse(result.value, out int amount) || amount <= 0)
+                        errors.Add($"Result {result.resultId}: money requires target cafe and positive integer value.");
+                }
+                if (result.resultType != NarrativeResultType.BarAdd && result.resultType != NarrativeResultType.BarSet) continue;
+                string key = (result.target ?? string.Empty).Replace("bar:", "");
+                if (!bars.TryGetValue(key, out var target) || target.sourceMode == NarrativeSourceMode.External || target.advanceMode == NarrativeAdvanceMode.Derived)
+                    errors.Add($"Result {result.resultId}: bar {key} is external, derived or unknown; cannot write.");
+            }
+            return errors;
+        }
+
+        private static void ValidateDerived(string key, Dictionary<string, NarrativeBarDefinition> bars, HashSet<string> visiting, List<string> errors)
+        {
+            if (!bars.TryGetValue(key, out var bar)) { errors.Add("Unknown derived source: " + key); return; }
+            if (bar.advanceMode != NarrativeAdvanceMode.Derived) return;
+            if (!visiting.Add(key)) { errors.Add("Derived source cycle: " + key); return; }
+            if (bar.derivedSources.Count == 0) errors.Add("Derived bar requires sources: " + key);
+            foreach (string source in bar.derivedSources) ValidateDerived(source, bars, visiting, errors);
+            visiting.Remove(key);
         }
 
         private static void ValidateLinks(NarrativeConfiguration config)
         {
+            var valueErrors = ValidateValueConfiguration(config);
+            if (valueErrors.Count > 0) throw new FormatException(string.Join("\n", valueErrors));
             var objects = new HashSet<string>(StringComparer.Ordinal);
             foreach (var item in config.objects) AddId(objects, item.objId, "object");
             var bars = new HashSet<string>(StringComparer.Ordinal);
@@ -193,7 +452,7 @@ namespace Spotlight.Narrative
                     if (presentation == null) throw new FormatException("Missing narrative presentation index: " + item.presentationKey);
                     resolvedPresentationClass = presentation.presentationClass;
                 }
-                if (string.IsNullOrWhiteSpace(item.setupType) && string.IsNullOrWhiteSpace(resolvedPresentationClass))
+                if (string.IsNullOrWhiteSpace(item.setupType) && string.IsNullOrWhiteSpace(resolvedPresentationClass) && !IsResultOnlyEvent(config, item))
                     throw new FormatException("Narrative event has no presentation type: " + item.eventId);
             }
             foreach (var item in config.triggers)
@@ -288,6 +547,11 @@ namespace Spotlight.Narrative
             "highIsGood" => NarrativeDirection.HighIsGood, "lowIsGood" => NarrativeDirection.LowIsGood,
             _ => throw Unknown("direction", value)
         };
+        private static NarrativeSourceMode SourceMode(string value) => value switch
+        {
+            null => NarrativeSourceMode.Ncs, "" => NarrativeSourceMode.Ncs, "ncs" => NarrativeSourceMode.Ncs,
+            "external" => NarrativeSourceMode.External, _ => throw Unknown("sourceMode", value)
+        };
         private static NarrativeAdvanceMode AdvanceMode(string value) => value switch
         {
             "monotonic" => NarrativeAdvanceMode.Monotonic, "event_driven" => NarrativeAdvanceMode.EventDriven,
@@ -329,6 +593,11 @@ namespace Spotlight.Narrative
                 _ => throw Unknown("action type", value)
             };
         }
+        private static NarrativeDeliveryMode DeliveryMode(string value) => value switch
+        {
+            "None" => NarrativeDeliveryMode.None, "Cumulative" => NarrativeDeliveryMode.Cumulative,
+            "Consecutive" => NarrativeDeliveryMode.Consecutive, _ => throw Unknown("deliveryMode", value)
+        };
         private static NarrativeEventKind EventKind(string value) => value switch
         {
             "actor" => NarrativeEventKind.Actor, "world" => NarrativeEventKind.World, _ => throw Unknown("eventKind", value)
@@ -343,8 +612,25 @@ namespace Spotlight.Narrative
             "once" => NarrativeRepeatRule.Once, "daily" => NarrativeRepeatRule.Daily, "weekly" => NarrativeRepeatRule.Weekly,
             "yearly" => NarrativeRepeatRule.Yearly, _ => throw Unknown("repeatRule", value)
         };
+        private static float? CafeSeconds(string text, string key, string field, bool patience)
+        {
+            if (string.IsNullOrWhiteSpace(text)) return patience ? (float?)null : 0f;
+            if (float.TryParse(text, System.Globalization.NumberStyles.Float, System.Globalization.CultureInfo.InvariantCulture, out float value)
+                && !float.IsNaN(value) && !float.IsInfinity(value) && (patience ? value > 0f : value >= 0f)) return value;
+            UnityEngine.Debug.LogWarning($"[CafeVisit/configuration_error] {key}.{field}={text} 非法，回退{(patience ? "普通默认耐心" : "0 秒")}。");
+            return patience ? (float?)null : 0f;
+        }
+        private static bool CafeLeaveAfterServed(string text, string key)
+        {
+            if (string.IsNullOrWhiteSpace(text)) return true;
+            if (bool.TryParse(text, out bool value)) return value;
+            UnityEngine.Debug.LogWarning($"[CafeVisit/configuration_error] {key}.leaveAfterServed={text} 非法，回退 true。");
+            return true;
+        }
         private static NarrativeResultType ResultType(string value) => value switch
         {
+            "MONEY_ADD" => NarrativeResultType.MoneyAdd, "MONEY_REMOVE" => NarrativeResultType.MoneyRemove,
+                "ITEM_ADD" => NarrativeResultType.ItemAdd, "ITEM_REMOVE" => NarrativeResultType.ItemRemove,
             "BAR_ADD" => NarrativeResultType.BarAdd, "BAR_SET" => NarrativeResultType.BarSet,
             "REL_ADD" => NarrativeResultType.RelAdd, "SET_FLAG" => NarrativeResultType.SetFlag,
             "CLEAR_FLAG" => NarrativeResultType.ClearFlag, "SET_SWITCH" => NarrativeResultType.SetSwitch,
@@ -353,6 +639,7 @@ namespace Spotlight.Narrative
             "AWARD_ACH" => NarrativeResultType.AwardAchievement, "AWARD_ACHIEVEMENT" => NarrativeResultType.AwardAchievement, "PLAY_SETUP" => NarrativeResultType.PlaySetup,
             "BAR_HINT" => NarrativeResultType.BarHint, "SPAWN_NPC" => NarrativeResultType.SpawnNpc,
             "DESPAWN_NPC" => NarrativeResultType.DespawnNpc,
+            "RESERVE_CAFE_VISIT" => NarrativeResultType.ReserveCafeVisit,
             "SHOWPOSITION" or "SHOW_POSITION" => NarrativeResultType.ShowPosition,
             "HIDEPOSITION" or "HIDE_POSITION" => NarrativeResultType.HidePosition,
             "ADDTEMPPOSITION" or "ADD_TEMP_POSITION" => NarrativeResultType.AddTempPosition,

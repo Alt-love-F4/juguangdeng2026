@@ -27,9 +27,12 @@ namespace Spotlight.GameFlow
             }
             try
             {
+                bool notified = false;
+                void Complete() { if (notified) return; notified = true; completed?.Invoke(); }
                 panel.Play(new ReadingScript(readingPages, title),
-                    () => { UIKit.ClosePanel(panel); completed?.Invoke(); },
-                    () => { UIKit.ClosePanel(panel); completed?.Invoke(); });
+                    () => { UIKit.ClosePanel(panel); Complete(); },
+                    () => { UIKit.ClosePanel(panel); Complete(); });
+                panel.PlaybackStopped += Complete;
                 return true;
             }
             catch

@@ -24,7 +24,7 @@ namespace Spotlight.Narrative.Editor
                 if (!ids.Contains(b.ownerId)) e.Add($"Bar {b.barKey}: unknown owner {b.ownerId}.");
                 if (b.barType == NarrativeBarType.Relation && !ids.Contains(b.targetId)) e.Add($"Bar {b.barKey}: relation target {b.targetId} is unknown.");
                 bool calendar = b.barKey == "world.calendar";
-                bool allowed = calendar || (b.min == 0 && b.max == 20) || (b.min == 0 && b.max == 10) || (b.min == -2 && b.max == 5);
+                bool allowed = b.sourceMode == NarrativeSourceMode.External || calendar || (b.min == 0 && b.max == 20) || (b.min == 0 && b.max == 10) || (b.min == -2 && b.max == 5);
                 if (!allowed) e.Add($"Bar {b.barKey}: range must be 0..20, 0..10, -2..5; only world.calendar is exempt.");
                 if (b.min >= b.max) e.Add($"Bar {b.barKey}: min must be less than max.");
                 if (b.initValue < b.min || b.initValue > b.max) e.Add($"Bar {b.barKey}: initValue is outside its range.");
@@ -46,27 +46,23 @@ namespace Spotlight.Narrative.Editor
                 if (!c.events.Any(v => v.eventId == x.eventId) && !c.choices.Any(v => (string.IsNullOrWhiteSpace(v.resultOwnerId) ? v.choiceId : v.resultOwnerId) == x.eventId)) e.Add($"Result {x.resultId}: unknown event/choice result owner {x.eventId}.");
                 if ((x.resultType == NarrativeResultType.BarAdd || x.resultType == NarrativeResultType.BarSet || x.resultType == NarrativeResultType.RelAdd) && !int.TryParse(x.value, out _)) e.Add($"Result {x.resultId}: numeric value required.");
             }
-            foreach (var x in c.conditions)
+            e.AddRange(LubanNarrativeLoader.ValidateConditionConfiguration(c));
+            e.AddRange(LubanNarrativeLoader.ValidateValueConfiguration(c));
+            var checkIds = new HashSet<string>(StringComparer.Ordinal);
+            foreach (var check in c.abilityChecks)
             {
-                if (string.Equals(x.ownerType, "event", StringComparison.OrdinalIgnoreCase)) { if (!c.events.Any(v => (string.IsNullOrWhiteSpace(v.conditionOwnerId) ? v.eventId : v.conditionOwnerId) == x.ownerId)) e.Add($"Condition {x.conditionId}: unknown event owner {x.ownerId}."); }
-                else if (string.Equals(x.ownerType, "choice", StringComparison.OrdinalIgnoreCase)) { if (!c.choices.Any(v => v.choiceId == x.ownerId)) e.Add($"Condition {x.conditionId}: unknown choice owner {x.ownerId}."); }
-                else e.Add($"Condition {x.conditionId}: ownerType must be event or choice.");
-                string type = (x.condType ?? "").ToUpperInvariant();
-                string target = x.target ?? "";
-                string key = target.Contains(":") ? target.Substring(target.IndexOf(':') + 1) : target;
-                var types = new[] { "BAR_GTE", "BAR_LTE", "BAR_BETWEEN", "REL_GTE", "FLAG_SET", "FLAG_CLEAR", "SWITCH_ON", "EVENT_HAPPENED", "EVENT_NOT_HAPPENED", "ACTOR_IS", "TARGET_IS", "LOCATION_EQ", "TIMESLOT_EQ", "REACH_COUNT_EQ", "CHANCE_PCT" };
-                if (!types.Contains(type)) e.Add($"Condition {x.conditionId}: unsupported condType {x.condType}.");
-                if (type.StartsWith("BAR_") && !bars.ContainsKey(key)) e.Add($"Condition {x.conditionId}: unknown bar {target}.");
-                if ((type == "BAR_GTE" || type == "BAR_LTE" || type == "REL_GTE" || type == "REACH_COUNT_EQ") && !int.TryParse(x.value, out _)) e.Add($"Condition {x.conditionId}: integer value required.");
-                if (type == "BAR_BETWEEN")
-                {
-                    var range = (x.value ?? "").Split(new[] { '.', ',', ' ' }, StringSplitOptions.RemoveEmptyEntries);
-                    if (range.Length != 2 || !int.TryParse(range[0], out int low) || !int.TryParse(range[1], out int high) || low > high) e.Add($"Condition {x.conditionId}: expected inclusive min..max.");
-                }
-                if (type == "CHANCE_PCT" && (!double.TryParse(x.value, System.Globalization.NumberStyles.Float, System.Globalization.CultureInfo.InvariantCulture, out double chance) || double.IsNaN(chance) || chance < 0 || chance > 1)) e.Add($"Condition {x.conditionId}: probability must be 0..1.");
-                if (type == "TIMESLOT_EQ" && !Enum.TryParse<NarrativeTimeSlot>(x.value, true, out _)) e.Add($"Condition {x.conditionId}: unsupported timeslot.");
-                if ((type == "EVENT_HAPPENED" || type == "EVENT_NOT_HAPPENED") && !c.events.Any(ev => ev.eventId == key)) e.Add($"Condition {x.conditionId}: unknown event {target}.");
+                if (check == null || string.IsNullOrWhiteSpace(check.checkId) || !checkIds.Add(check.checkId)) e.Add("AbilityCheck: missing or duplicate checkId " + check?.checkId);
+                else if (!c.events.Any(v => v.eventId == check.successEventId) || !c.events.Any(v => v.eventId == check.failureEventId)) e.Add($"AbilityCheck {check.checkId}: success/failure events must exist.");
+                if (check != null && !c.abilityCheckConditions.Any(v => v.checkId == check.checkId)) e.Add($"AbilityCheck {check.checkId}: requires conditions.");
             }
+            foreach (var condition in c.abilityCheckConditions)
+            {
+                if (!checkIds.Contains(condition.checkId)) e.Add($"AbilityCheckCondition {condition.conditionId}: unknown check {condition.checkId}.");
+                if (!c.objects.Any(o => o.objId == "player") || !c.bars.Any(b => b.barKey == "player." + condition.attributeId)) e.Add($"AbilityCheckCondition {condition.conditionId}: unknown player attribute {condition.attributeId}.");
+                if (condition.groupIndex < 1 || condition.threshold < 0) e.Add($"AbilityCheckCondition {condition.conditionId}: invalid group or threshold.");
+            }
+            foreach (var choice in c.choices) if (!string.IsNullOrWhiteSpace(choice.checkId) && !checkIds.Contains(choice.checkId)) e.Add($"Choice {choice.choiceId}: unknown check {choice.checkId}.");
+            foreach (var setup in c.setups) if (!string.IsNullOrWhiteSpace(setup.checkId) && !checkIds.Contains(setup.checkId)) e.Add($"SetupParams {setup.setupKey}: unknown check {setup.checkId}.");
             foreach (var x in c.events)
             {
                 if (x.eventKind == NarrativeEventKind.Actor && !ids.Contains(x.actorId)) e.Add($"Event {x.eventId}: actorId must reference an Object.");
@@ -104,7 +100,7 @@ namespace Spotlight.Narrative.Editor
                 bool hasPresentation = !string.IsNullOrWhiteSpace(x.presentationClass)
                     || (!string.IsNullOrWhiteSpace(x.presentationKey)
                         && c.presentations.index.Any(index => index.presentationKey == x.presentationKey));
-                if (string.IsNullOrWhiteSpace(x.setupType) && !hasPresentation) e.Add($"Event {x.eventId}: missing presentation type.");
+                if (string.IsNullOrWhiteSpace(x.setupType) && !hasPresentation && !LubanNarrativeLoader.IsResultOnlyEvent(c, x)) e.Add($"Event {x.eventId}: missing presentation type.");
                 if (!string.IsNullOrWhiteSpace(x.presentationClass) && !new[] { "Conversation", "Reading", "Notice", "CutScene" }.Contains(x.presentationClass, StringComparer.OrdinalIgnoreCase)) e.Add($"Event {x.eventId}: unsupported presentationClass {x.presentationClass}.");
             }
             foreach (var x in c.choices)
@@ -142,6 +138,29 @@ namespace Spotlight.Narrative.Editor
             }
             return e;
         }
+        public static List<string> Warnings(NarrativeConfiguration c)
+        {
+            var warnings = new List<string>();
+            if (c.cafeVisits.Count == 0) warnings.Add("CafeVisit: 特殊来访配置为空，使用默认来访行为。");
+            if (c.cafeVisitHooks.Count == 0) warnings.Add("CafeVisitHook: 阶段剧情未配置，演出未验证。");
+            foreach (var hook in c.cafeVisitHooks)
+            {
+                if (!c.events.Any(x => x.eventId == hook.eventId)) warnings.Add($"CafeVisitHook {hook.visitKey}/{hook.stage}: missing event {hook.eventId}; runtime skips.");
+                if (hook.stage == "before_served" && hook.trigger == "auto" || hook.trigger == "click" && hook.stage != "before_served" && hook.stage != "served")
+                    warnings.Add($"CafeVisitHook {hook.visitKey}/{hook.stage}/{hook.trigger}: unsupported stage trigger; use arrived auto or before_served/served click.");
+            }
+            foreach (var action in c.actions.Where(x => x.deliveryMode != NarrativeDeliveryMode.None))
+            {
+                List<NarrativeActionRequirement> costs;
+                try { costs = NarrativeActionRequirementParser.Parse(action.requirements); }
+                catch (FormatException) { continue; }
+                foreach (var result in c.results.Where(x => x.resultType == NarrativeResultType.ItemRemove && action.resultEvents.Contains(x.eventId)))
+                    if (costs.Any(x => x.type == NarrativeActionRequirementType.Item && x.key == result.target))
+                        warnings.Add($"Action {action.actionKey}, Result {result.resultId}: completion removes delivery cost item {result.target} again.");
+            }
+            return warnings;
+        }
+
         static bool IsOptionalSlot(string slot) => string.Equals(slot, "opts", StringComparison.OrdinalIgnoreCase) || string.Equals(slot, "optionList", StringComparison.OrdinalIgnoreCase) || string.Equals(slot, "bg", StringComparison.OrdinalIgnoreCase) || string.Equals(slot, "a", StringComparison.OrdinalIgnoreCase) || string.Equals(slot, "b", StringComparison.OrdinalIgnoreCase) || string.Equals(slot, "portrait", StringComparison.OrdinalIgnoreCase);
         static IEnumerable<string> Split(string text) => (text ?? string.Empty).Split(new[] { ',', ';', '\n' }, StringSplitOptions.RemoveEmptyEntries).Select(s => s.Trim());
         static bool HasCycle(string key, Dictionary<string, NarrativeBarDefinition> bars, HashSet<string> visiting)

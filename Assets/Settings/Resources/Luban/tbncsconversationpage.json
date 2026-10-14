@@ -18,5 +18,35 @@
     "optionGroupKey": "",
     "bgOverride": "",
     "bgmOverride": ""
+  },
+  {
+    "pageId": "DEMO_CAFE_BEFORE_PAGE",
+    "presentationKey": "DEMO_CAFE_BEFORE",
+    "seq": 1,
+    "pageCondKeys": "",
+    "pageBarConds": "",
+    "optionGroupKey": "",
+    "bgOverride": "",
+    "bgmOverride": ""
+  },
+  {
+    "pageId": "DEMO_CAFE_SERVED_PAGE",
+    "presentationKey": "DEMO_CAFE_SERVED",
+    "seq": 1,
+    "pageCondKeys": "",
+    "pageBarConds": "",
+    "optionGroupKey": "",
+    "bgOverride": "",
+    "bgmOverride": ""
+  },
+  {
+    "pageId": "DEMO_CAFE_CHAT_PAGE",
+    "presentationKey": "DEMO_CAFE_CHAT",
+    "seq": 1,
+    "pageCondKeys": "",
+    "pageBarConds": "",
+    "optionGroupKey": "",
+    "bgOverride": "",
+    "bgmOverride": ""
   }
 ]

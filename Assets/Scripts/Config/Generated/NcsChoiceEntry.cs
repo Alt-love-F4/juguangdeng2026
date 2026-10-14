@@ -26,6 +26,8 @@ public sealed partial class NcsChoiceEntry : Luban.BeanBase
         TextKey_Ref = null;
         ResultOwnerId = (string)_obj.GetValue("resultOwnerId");
         Seq = (int)_obj.GetValue("seq");
+        CheckId = (string)_obj.GetValue("checkId");
+        CheckId_Ref = null;
     }
 
     public static NcsChoiceEntry DeserializeNcsChoiceEntry(JToken _buf)
@@ -39,6 +41,8 @@ public sealed partial class NcsChoiceEntry : Luban.BeanBase
     public TextEntry TextKey_Ref;
     public readonly string ResultOwnerId;
     public readonly int Seq;
+    public readonly string CheckId;
+    public NcsAbilityCheckEntry CheckId_Ref;
 
 
     public const int __ID__ = -1020855501;
@@ -47,6 +51,7 @@ public sealed partial class NcsChoiceEntry : Luban.BeanBase
     public  void ResolveRef(Tables tables)
     {
         TextKey_Ref = tables.TbText.GetOrDefault(TextKey);
+        CheckId_Ref = tables.TbNcsAbilityCheck.GetOrDefault(CheckId);
     }
 
     public override string ToString()
@@ -57,6 +62,7 @@ public sealed partial class NcsChoiceEntry : Luban.BeanBase
         + "textKey:" + TextKey + ","
         + "resultOwnerId:" + ResultOwnerId + ","
         + "seq:" + Seq + ","
+        + "checkId:" + CheckId + ","
         + "}";
     }
 }

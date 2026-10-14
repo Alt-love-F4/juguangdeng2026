@@ -39,7 +39,8 @@ namespace Spotlight.GameFlow
         public void Select(AvatarKind kind)
         {
             if (!IsPlaying) return;
-            PlayerDetailsProfile.Current.SelectAvatar(kind);
+            if (PlayerRuntime.Current == null) throw new InvalidOperationException("Player session is not ready.");
+            PlayerRuntime.Current.SelectAvatar(kind);
             Action callback = finished;
             Stop();
             callback?.Invoke();

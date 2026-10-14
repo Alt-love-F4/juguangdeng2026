@@ -114,8 +114,8 @@ namespace Spotlight.FreeCafe
                 State.todayFailed++; State.reputation--; Charge(Catalog.economy.wrongOrderPenalty);
                 State.production.lastDelivery = "顾客不满意离开 · " + detail;
             }
-            State.entities.Remove(Find(request.customerId)); State.requests.Remove(request);
-            State.spokenCustomers.Remove(request.customerId); UpdateFocusedRequest(); Notify();
+            CompleteCustomerOrder(request, satisfied);
+            UpdateFocusedRequest(); Notify();
             return ActionResult.Yes(State.production.lastDelivery);
         }
         private void ConsumeDeliveredContainer(WorldEntity container)

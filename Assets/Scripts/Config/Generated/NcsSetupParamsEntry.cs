@@ -24,6 +24,8 @@ public sealed partial class NcsSetupParamsEntry : Luban.BeanBase
         TplName = (string)_obj.GetValue("tplName");
         TplName_Ref = null;
         SlotValues = (string)_obj.GetValue("slotValues");
+        CheckId = (string)_obj.GetValue("checkId");
+        CheckId_Ref = null;
         SkipAble = (bool)_obj.GetValue("skipAble");
         AutoAdvance = (bool)_obj.GetValue("autoAdvance");
     }
@@ -37,6 +39,8 @@ public sealed partial class NcsSetupParamsEntry : Luban.BeanBase
     public readonly string TplName;
     public NcsTemplateEntry TplName_Ref;
     public readonly string SlotValues;
+    public readonly string CheckId;
+    public NcsAbilityCheckEntry CheckId_Ref;
     public readonly bool SkipAble;
     public readonly bool AutoAdvance;
 
@@ -47,6 +51,7 @@ public sealed partial class NcsSetupParamsEntry : Luban.BeanBase
     public  void ResolveRef(Tables tables)
     {
         TplName_Ref = tables.TbNcsTemplate.GetOrDefault(TplName);
+        CheckId_Ref = tables.TbNcsAbilityCheck.GetOrDefault(CheckId);
     }
 
     public override string ToString()
@@ -55,6 +60,7 @@ public sealed partial class NcsSetupParamsEntry : Luban.BeanBase
         + "setupKey:" + SetupKey + ","
         + "tplName:" + TplName + ","
         + "slotValues:" + SlotValues + ","
+        + "checkId:" + CheckId + ","
         + "skipAble:" + SkipAble + ","
         + "autoAdvance:" + AutoAdvance + ","
         + "}";

@@ -50,6 +50,13 @@ goto run_luban
 echo [1/2] Using saved Narrative.xlsx and Shared/Text.xlsx directly.
 
 :run_luban
+if not defined PYTHON_EXE for /f "delims=" %%I in ('where python.exe 2^>nul') do if not defined PYTHON_EXE set "PYTHON_EXE=%%I"
+if not defined PYTHON_EXE (
+  echo ERROR: Python with openpyxl is required for Player semantic validation.
+  exit /b 1
+)
+"%PYTHON_EXE%" "%PROJECT_DIR%validate_player.py"
+if errorlevel 1 exit /b 1
 echo [2/2] Generating with "%LUBAN_DIR%"...
 pushd "%PROJECT_DIR%"
 if errorlevel 1 exit /b 1

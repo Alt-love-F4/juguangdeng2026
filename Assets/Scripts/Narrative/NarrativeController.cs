@@ -5,7 +5,7 @@ using UnityEngine;
 
 namespace Spotlight.Narrative
 {
-    public sealed class NarrativeController
+    public sealed partial class NarrativeController
     {
         private readonly NarrativeConfiguration configuration;
         private readonly NarrativeState state;
@@ -17,6 +17,7 @@ namespace Spotlight.Narrative
         private readonly HashSet<string> pendingEvents = new HashSet<string>(StringComparer.Ordinal);
         private readonly INarrativePresenter presenter;
         private bool processing;
+        private bool presenterUnavailable;
         private bool activePresentation;
         private int transactionDepth;
         private bool turnOpen, turnEnding, pumping, settling, resumeBoundary;
@@ -26,13 +27,165 @@ namespace Spotlight.Narrative
         private NarrativeEventRequest activeRequest;
         private readonly List<NarrativeBarChange> changes = new List<NarrativeBarChange>();
         private readonly List<string> selectedChoices = new List<string>();
+        private NarrativeAbilityCheckSnapshot activeAbilityCheck;
+        private string activeAbilityCheckId;
+        private bool resumeActiveAbilityCheck;
         private readonly Dictionary<NarrativeTriggerDefinition, int> triggerRows = new Dictionary<NarrativeTriggerDefinition, int>();
         private uint randomSeed = 0x6D2B79F5;
         public string Location { get; set; } = string.Empty;
         public NarrativeTimeSlot TimeSlot { get; set; }
         public IReadOnlyList<string> SelectedChoices => selectedChoices;
+        public NarrativeAbilityCheckSnapshot ActiveAbilityCheck => activeAbilityCheck;
+        public Func<string, (bool ready, int value)> AbilityReader { get; set; }
+        public Func<string, string> TextResolver { get; set; }
+        public Func<string, string> AbilityNameResolver { get; set; }
+        public event Action<NarrativeAbilityCheckSnapshot> AbilityCheckEvaluated;
         public event Action<NarrativeEffectNotification> EffectRequested;
         public event Action TurnCompleted;
+
+        private NarrativeMapInventory inventory;
+        private int operationDepth;
+        private readonly Queue<Action> safeCallbacks = new Queue<Action>();
+        private bool dispatchingSafeCallbacks;
+        public bool IsSafeBoundary => !valueRestore && valueBaselineReady && settledValueChanges.Count == 0 && operationDepth == 0 && !settling && !activePresentation && !draining && !pumping && queue.Count == 0 && pendingEffects.Count == 0;
+        public void RunAtSafeBoundary(Action callback)
+        {
+            if (callback == null) return;
+            if (IsEnded) { callback(); return; }
+            safeCallbacks.Enqueue(callback);
+            CheckEndingsAtSafeBoundary();
+        }
+        private void DispatchSafeCallbacks()
+        {
+            PumpCafeBoundary();
+            if (dispatchingSafeCallbacks) return;
+            dispatchingSafeCallbacks = true;
+            try
+            {
+                while (IsSafeBoundary && safeCallbacks.Count > 0)
+                {
+                    var callback = safeCallbacks.Dequeue();
+                    callback();
+                }
+            }
+            finally { dispatchingSafeCallbacks = false; }
+        }
+        private bool endingChecksEnabled, endingDirty = true, officialDayManaged;
+        private int officialDayProcessed;
+        private bool migrateOfficialDay;
+        public string SelectedEndingId { get; private set; }
+        public bool IsEnded => !string.IsNullOrEmpty(SelectedEndingId);
+        public bool CanCaptureSnapshot => !settling && (operationDepth == 0 || activePresentation) && !valueRestore && valueBaselineReady && settledValueChanges.Count == 0;
+        public Func<string, int?> ActionProgressReader { get; set; }
+        public Func<string, bool?> ActionCompletedReader { get; set; }
+        public event Action<NarrativeEndingDefinition> EndingSelected;
+        public event Action<string, string> EventFailed;
+        public NarrativeMapInventory Inventory
+        {
+            get => inventory;
+            set
+            {
+                if (inventory == value) return;
+                if (inventory != null) inventory.Changed -= OnStoreChanged;
+                inventory = value;
+                if (inventory != null) inventory.Changed += OnStoreChanged;
+                NotifyConditionsChanged();
+            }
+        }
+        public void NotifyConditionsChanged() => endingDirty = true;
+        private void OnStoreChanged()
+        {
+            NotifyConditionsChanged();
+            if (endingChecksEnabled) CheckEndingsAtSafeBoundary();
+        }
+        public void BeginOperation()
+        {
+            if (IsEnded) throw new InvalidOperationException("Session has ended.");
+            if (operationDepth == 0 && !valueRestore)
+            {
+                operationValues = ReadAllValues();
+                if (observedValues != null) foreach (var bar in configuration.bars)
+                    if ((bar.sourceMode == NarrativeSourceMode.External || bar.advanceMode == NarrativeAdvanceMode.Derived) && observedValues.TryGetValue(bar.barKey, out int baseline))
+                        operationValues[bar.barKey] = baseline;
+            }
+            operationDepth++;
+        }
+        public void EndOperation()
+        {
+            if (operationDepth <= 0) throw new InvalidOperationException("Unbalanced narrative operation.");
+            operationDepth--;
+            if (operationDepth == 0 && !valueRestore) { CommitValueComparison(operationValues); operationValues = null; FlushValueChanges(); }
+            CheckEndingsAtSafeBoundary();
+        }
+        public void SetEndingChecksEnabled(bool enabled)
+        {
+            endingChecksEnabled = enabled;
+            if (enabled) { endingDirty = true; CheckEndingsAtSafeBoundary(); }
+        }
+        public NarrativeEndingDefinition CheckEndingsAtSafeBoundary()
+        {
+            if (IsEnded)
+            {
+                DispatchSafeCallbacks();
+                return configuration.endings.Find(e => e != null && e.endingId == SelectedEndingId);
+            }
+            if (valueRestore || !valueBaselineReady || !IsSafeBoundary) return null;
+            if (!endingChecksEnabled || !endingDirty) { DispatchSafeCallbacks(); return null; }
+            endingDirty = false;
+            var ending = configuration.endings.Where(e => e != null && e.enabled)
+                .OrderByDescending(e => e.priority).ThenBy(e => e.endingId, StringComparer.Ordinal)
+                .FirstOrDefault(e => EvaluateConditions("ending", e.endingId));
+            if (ending == null) { DispatchSafeCallbacks(); return null; }
+            SelectedEndingId = ending.endingId;
+            presentationEpoch++;
+            turnOpen = turnEnding = processing = false;
+            changes.Clear();
+            try { EndingSelected?.Invoke(ending); }
+            finally { DispatchSafeCallbacks(); }
+            return ending;
+        }
+        public void ResumePendingEvents() { if (!IsEnded) ProcessQueue(); }
+        public void SetOfficialDay(int day)
+        {
+            if (day < 1) throw new ArgumentOutOfRangeException(nameof(day));
+            officialDayManaged = true;
+            if (migrateOfficialDay)
+            {
+                officialDayProcessed = day;
+                migrateOfficialDay = false;
+            }
+            if (IsEnded) return;
+            var derived = ReadDerived();
+            if (state.SynchronizeCalendar(day, out int oldValue, out int newValue))
+            {
+                OnBarChanged("world.calendar", oldValue, newValue);
+                RecordDerived(derived);
+            }
+        }
+
+        /// <summary>Schedules the synchronized formal day once, without advancing the calendar.</summary>
+        public bool ProcessOfficialDay(int day)
+        {
+            if (day < 1) throw new ArgumentOutOfRangeException(nameof(day));
+            if (IsEnded || day <= officialDayProcessed) return false;
+            if (!officialDayManaged || !state.TryGetBar("world.calendar", out int current) || current != day)
+                throw new InvalidOperationException("Synchronize the official day before scheduling it.");
+            if (!IsSafeBoundary || IsBusy) throw new InvalidOperationException("Schedule the official day after pending narrative operations finish.");
+            // A formal day is a fresh scheduling boundary. Existing queued requests have drained.
+            pendingEvents.Clear();
+            turnOpen = true;
+            turnEnding = resumeBoundary = false;
+            transactionDepth = 0;
+            settling = true;
+            try
+            {
+                officialDayProcessed = day;
+                EvaluateBoundary(0, true);
+            }
+            finally { settling = false; }
+            ProcessQueue();
+            return true;
+        }
 
         public NarrativeState State => state;
         public bool IsBusy => processing || activePresentation || draining || queue.Count > 0 || turnEnding;
@@ -43,15 +196,18 @@ namespace Spotlight.Narrative
         public NarrativeController(NarrativeConfiguration configuration, INarrativePresenter presenter = null)
         {
             this.configuration = configuration ?? throw new ArgumentNullException(nameof(configuration));
-            state = new NarrativeState(configuration.bars);
+            state = new NarrativeState(configuration.bars, configuration.conditionKeys);
+            state.ConditionsChanged += OnStoreChanged;
             this.presenter = presenter ?? new ImmediateNarrativePresenter();
+            if (this.presenter is INarrativePresentationCancellation cancellation) cancellation.Cancelled += OnPresentationCancelled;
             BuildIndexes();
+            valueBaselineReady = !configuration.bars.Any(b => b.sourceMode == NarrativeSourceMode.External);
         }
 
         public bool QueueEvent(string eventId)
         {
-            if (string.IsNullOrWhiteSpace(eventId) || !events.TryGetValue(eventId, out NarrativeEventDefinition definition)) return false;
-            if (activePresentation || draining || pendingEvents.Contains(eventId) || state.IsEventLocked(eventId) || state.IsFlagSet("event.once." + eventId) || definition.onceOnly && state.HasHappenedEvent(eventId)) return false;
+            if (presenterUnavailable || valueRestore || !valueBaselineReady || IsEnded || string.IsNullOrWhiteSpace(eventId) || !events.TryGetValue(eventId, out NarrativeEventDefinition definition)) return false;
+            if (activePresentation || draining || queue.Any(request => request.Event.eventId == eventId) || state.IsEventLocked(eventId) || state.IsFlagSet("event.once." + eventId) || definition.onceOnly && state.HasHappenedEvent(eventId)) return false;
             if (!EvaluateConditions("event", string.IsNullOrWhiteSpace(definition.conditionOwnerId) ? eventId : definition.conditionOwnerId, Context(definition))) return false;
             if (!turnOpen) BeginTurn();
             pendingEvents.Add(eventId);
@@ -66,7 +222,7 @@ namespace Spotlight.Narrative
 
         public void BeginTurn()
         {
-            if (turnOpen || IsBusy) return;
+            if (IsEnded || turnOpen || IsBusy) return;
             turnOpen = true;
             transactionDepth = 0;
             pendingEvents.Clear();
@@ -74,7 +230,7 @@ namespace Spotlight.Narrative
 
         public void EndTurn()
         {
-            if (turnEnding) return;
+            if (valueRestore || !valueBaselineReady || IsEnded || turnEnding) return;
             if (!turnOpen) BeginTurn();
             if (!turnOpen) return;
             turnEnding = true;
@@ -85,21 +241,25 @@ namespace Spotlight.Narrative
 
         public bool AddBar(string barKey, int delta)
         {
-            if ((activePresentation || draining) && !settling) return false;
+            if (IsEnded || (activePresentation || draining) && !settling) return false;
             var derived = ReadDerived();
             if (!state.TryAddBar(barKey, delta, out int oldValue, out int newValue)) return false;
             OnBarChanged(barKey, oldValue, newValue);
             RecordDerived(derived);
+            if (!valueRestore && operationDepth == 0 && observedValues != null) observedValues = ReadAllValues();
+            CheckEndingsAtSafeBoundary();
             return true;
         }
 
         public bool SetBar(string barKey, int value)
         {
-            if ((activePresentation || draining) && !settling) return false;
+            if (IsEnded || (activePresentation || draining) && !settling) return false;
             var derived = ReadDerived();
             if (!state.TrySetBar(barKey, value, out int oldValue, out int newValue)) return false;
             OnBarChanged(barKey, oldValue, newValue);
             RecordDerived(derived);
+            if (!valueRestore && operationDepth == 0 && observedValues != null) observedValues = ReadAllValues();
+            CheckEndingsAtSafeBoundary();
             return true;
         }
 
@@ -120,60 +280,52 @@ namespace Spotlight.Narrative
 
         public bool EvaluateCondition(NarrativeConditionDefinition condition, NarrativeConditionContext context)
         {
-            if (condition == null) return false;
+            if (condition == null) throw new ArgumentException("Null condition row.");
             string type = condition.condType?.Trim().ToUpperInvariant();
-            string target = StripPrefix(condition.target, "bar:", "flag:", "switch:", "event:", "obj:", "scene:", "reach:");
-            bool value;
-            string[] supportedTypes = { "BAR_GTE", "REL_GTE", "BAR_LTE", "BAR_BETWEEN", "FLAG_SET", "FLAG_CLEAR", "SWITCH_ON", "EVENT_HAPPENED", "EVENT_NOT_HAPPENED", "ACTOR_IS", "TARGET_IS", "LOCATION_EQ", "TIMESLOT_EQ", "REACH_COUNT_EQ", "CHANCE_PCT" };
-            if (!supportedTypes.Contains(type)) { Debug.LogWarning("[NCS] Unknown condition: " + type); return false; }
-            if (type != "CHANCE_PCT" && type != "ACTOR_IS" && type != "TARGET_IS" && type != "LOCATION_EQ" && type != "TIMESLOT_EQ" && string.IsNullOrWhiteSpace(target)) return false;
+            string target = StripPrefix(condition.target, "bar:", "rel:", "event:", "item:", "action:");
+            InvalidOperationException Invalid() => new InvalidOperationException($"Invalid condition {condition.conditionId} ({type}, target={condition.target}).");
+            if (condition.notFlag || !string.IsNullOrWhiteSpace(condition.op) || string.IsNullOrWhiteSpace(target)) throw Invalid();
             switch (type)
             {
+                case "BOOL_EQ":
+                    if (!state.TryGetCondition(condition.target, out bool fact) || !bool.TryParse(condition.value, out bool expected)) throw Invalid();
+                    return fact == expected;
+                case "ITEM_GTE":
+                    if (inventory == null || !int.TryParse(condition.value, out int count) || count < 0) throw Invalid();
+                    return inventory.GetCount(target) >= count;
+                case "ACTION_PROGRESS_GTE":
+                    int? progress = ActionProgressReader?.Invoke(target);
+                    if (!progress.HasValue || !int.TryParse(condition.value, out int threshold) || threshold < 0) throw Invalid();
+                    return progress.Value >= threshold;
+                case "ACTION_COMPLETED":
+                    bool? completed = ActionCompletedReader?.Invoke(target);
+                    if (!completed.HasValue || !string.IsNullOrWhiteSpace(condition.value)) throw Invalid();
+                    return completed.Value;
                 case "BAR_GTE":
-                    if (!state.TryGetBar(target, out _) || !int.TryParse(condition.value, out _)) return false;
-                    value = CompareBar(target, condition.value, 1); break;
                 case "REL_GTE":
-                    string relationTarget = StripPrefix(condition.target, "rel:", "bar:");
-                    if (state.ResolveRelation(relationTarget) == null || !int.TryParse(condition.value, out _)) return false;
-                    value = CompareBar(relationTarget, condition.value, 1); break;
                 case "BAR_LTE":
-                    if (!state.TryGetBar(target, out _) || !int.TryParse(condition.value, out _)) return false;
-                    value = CompareBar(target, condition.value, -1); break;
+                    if (!state.TryGetBar(target, out int bar) || !int.TryParse(condition.value, out int bound)
+                        || type == "REL_GTE" && state.ResolveRelation(target) == null) throw Invalid();
+                    return type == "BAR_LTE" ? bar <= bound : bar >= bound;
                 case "BAR_BETWEEN":
                     string[] range = (condition.value ?? string.Empty).Split(new[] { '.', ',', ' ' }, StringSplitOptions.RemoveEmptyEntries);
-                    if (!state.TryGetBar(target, out int current) || range.Length != 2 || !int.TryParse(range[0], out int min) || !int.TryParse(range[1], out int max) || min > max) return false;
-                    value = current >= min && current <= max;
-                    break;
-                case "FLAG_SET": value = state.IsFlagSet(target); break;
-                case "FLAG_CLEAR": value = !state.IsFlagSet(target); break;
-                case "SWITCH_ON": value = state.IsSwitchOn(target); break;
-                case "EVENT_HAPPENED": value = state.HasHappenedEvent(target); break;
-                case "EVENT_NOT_HAPPENED": value = !state.HasHappenedEvent(target); break;
-                case "ACTOR_IS": value = context != null && context.ActorId == StripPrefix(string.IsNullOrWhiteSpace(condition.value) ? target : condition.value, "obj:"); break;
-                case "TARGET_IS": value = context != null && context.TargetId == StripPrefix(string.IsNullOrWhiteSpace(condition.value) ? target : condition.value, "obj:"); break;
-                case "LOCATION_EQ": value = (context?.Location ?? Location) == StripPrefix(string.IsNullOrWhiteSpace(condition.value) ? target : condition.value, "scene:"); break;
-                case "TIMESLOT_EQ": value = string.Equals((context?.TimeSlot ?? TimeSlot).ToString(), string.IsNullOrWhiteSpace(condition.value) ? target : condition.value, StringComparison.OrdinalIgnoreCase); break;
-                case "REACH_COUNT_EQ":
-                    int count = state.GetCounter(target);
-                    if (target.Split('@').Length == 2)
-                    {
-                        var keys = configuration.triggers.Where(t => t != null && (t.barKey + "@" + t.threshold) == target).Select(CounterKey).Distinct().ToList();
-                        if (keys.Count != 1) return false;
-                        count = state.GetCounter(keys[0]);
-                    }
-                    value = int.TryParse(condition.value, out int expected) && count == expected; break;
-                case "CHANCE_PCT":
-                    if (!double.TryParse(condition.value, System.Globalization.NumberStyles.Float, System.Globalization.CultureInfo.InvariantCulture, out double probability) || probability < 0 || probability > 1) return false;
-                    randomSeed ^= randomSeed << 13; randomSeed ^= randomSeed >> 17; randomSeed ^= randomSeed << 5;
-                    value = randomSeed / ((double)uint.MaxValue + 1) < probability; break;
-                default: Debug.LogWarning("[NCS] Unknown condition: " + type); return false;
+                    if (!state.TryGetBar(target, out int current) || range.Length != 2 || !int.TryParse(range[0], out int min) || !int.TryParse(range[1], out int max) || min > max) throw Invalid();
+                    return current >= min && current <= max;
+                case "EVENT_HAPPENED":
+                case "EVENT_NOT_HAPPENED":
+                    if (!events.ContainsKey(target)) throw Invalid();
+                    return state.HasHappenedEvent(target) == (type == "EVENT_HAPPENED");
+                default: throw Invalid();
             }
-            return condition.notFlag ? !value : value;
         }
 
         public bool EvaluateConditions(string ownerType, string ownerId, NarrativeConditionContext context = null)
         {
-            if (!conditionsByOwner.TryGetValue(OwnerKey(ownerType, ownerId), out List<NarrativeConditionDefinition> conditions)) return true;
+            if (!conditionsByOwner.TryGetValue(OwnerKey(ownerType, ownerId), out List<NarrativeConditionDefinition> conditions))
+            {
+                if (string.Equals(ownerType, "ending", StringComparison.OrdinalIgnoreCase)) throw new InvalidOperationException("Ending has no conditions: " + ownerId);
+                return true;
+            }
             var groups = new Dictionary<int, bool>();
             foreach (NarrativeConditionDefinition condition in conditions)
             {
@@ -192,6 +344,18 @@ namespace Spotlight.Narrative
             if (selectedChoices.Any(id => configuration.choices.Exists(c => c != null && c.choiceId == id && c.groupKey == choice.groupKey))) return false;
             if (!EvaluateConditions("choice", choiceId, activeRequest.Context ?? Context(activeRequest.Event))) return false;
             selectedChoices.Add(choiceId);
+            if (!string.IsNullOrWhiteSpace(choice.checkId))
+            {
+                if (activeAbilityCheck != null)
+                {
+                    if (activeAbilityCheckId == choice.checkId) return true;
+                    throw new InvalidOperationException("Only one active ability check is supported per event presentation.");
+                }
+                activeAbilityCheckId = choice.checkId;
+                activeAbilityCheck = EvaluateAbilityCheck(choice.checkId);
+                AbilityCheckEvaluated?.Invoke(activeAbilityCheck);
+                QueueAbilityBranch(choice.checkId, activeAbilityCheck);
+            }
             return true;
         }
 
@@ -218,17 +382,79 @@ namespace Spotlight.Narrative
             return !hasOptions;
         }
 
-        public NarrativeSnapshot CaptureSnapshot()
+        public NarrativeAbilityCheckSnapshot EvaluateAbilityCheckForPresentation(string checkId)
         {
-            if (settling) throw new InvalidOperationException("NCS snapshots cannot be captured during an atomic result transaction; save after EventCompleted.");
+            if (!activePresentation) throw new InvalidOperationException("Ability checks require an active narrative presentation.");
+            if (activeAbilityCheck != null)
+            {
+                if (activeAbilityCheckId != checkId) throw new InvalidOperationException("A different ability check is already active.");
+                return CloneAbilityCheck(activeAbilityCheck);
+            }
+            activeAbilityCheckId = checkId;
+            activeAbilityCheck = EvaluateAbilityCheck(checkId);
+            AbilityCheckEvaluated?.Invoke(activeAbilityCheck);
+            QueueAbilityBranch(checkId, activeAbilityCheck);
+            return CloneAbilityCheck(activeAbilityCheck);
+        }
+
+        private NarrativeAbilityCheckSnapshot EvaluateAbilityCheck(string checkId)
+        {
+            var definition = configuration.abilityChecks.Find(x => x != null && x.checkId == checkId);
+            if (definition == null) throw new InvalidOperationException("Unknown ability check: " + checkId);
+            var rows = configuration.abilityCheckConditions.FindAll(x => x != null && x.checkId == checkId);
+            return NarrativeAbilityCheckEvaluator.Evaluate(definition, rows, AbilityReader,
+                attributeId => AbilityNameResolver?.Invoke(attributeId) ?? attributeId);
+        }
+
+        private void QueueAbilityBranch(string checkId, NarrativeAbilityCheckSnapshot result)
+        {
+            var definition = configuration.abilityChecks.Find(x => x != null && x.checkId == checkId);
+            string eventId = result.passed ? definition.successEventId : definition.failureEventId;
+            if (string.IsNullOrWhiteSpace(eventId) || !events.TryGetValue(eventId, out var branch))
+                throw new InvalidOperationException("Ability check branch event is missing: " + eventId);
+            if (pendingEvents.Contains(eventId) || activeRequest.Event.eventId == eventId)
+                throw new InvalidOperationException("Ability check branch cannot re-enter its active event: " + eventId);
+            pendingEvents.Add(eventId);
+            queue.Enqueue(new NarrativeEventRequest(branch, null, activeRequest.Depth + 1, null, Context(branch)));
+            result.branchQueued = true;
+        }
+
+        private static NarrativeAbilityCheckSnapshot CloneAbilityCheck(NarrativeAbilityCheckSnapshot source)
+        {
+            if (source == null) return null;
+            var clone = new NarrativeAbilityCheckSnapshot { checkId = source.checkId, passed = source.passed, branchQueued = source.branchQueued, resultApplied = source.resultApplied };
+            if (source.values != null) foreach (var item in source.values)
+                if (item != null) clone.values.Add(new NarrativeAbilityCheckValue { attributeId = item.attributeId, displayName = item.displayName, currentValue = item.currentValue, threshold = item.threshold, groupIndex = item.groupIndex, passed = item.passed });
+            return clone;
+        }
+
+        public NarrativeSnapshot CaptureSnapshot(bool allowInitialization = false)
+        {
+            bool safeDraft = allowInitialization && valueRestore && operationDepth == 0 && !settling && !IsBusy && settledValueChanges.Count == 0;
+            if (!CanCaptureSnapshot && !safeDraft) throw new InvalidOperationException("NCS snapshots cannot be captured during an atomic result transaction; save after EventCompleted.");
             NarrativeSnapshot snapshot = state.Capture();
+            CaptureCafeVisits(snapshot);
+            snapshot.selectedEndingId = SelectedEndingId;
+            snapshot.officialDayVersion = migrateOfficialDay ? 0 : 1;
+            snapshot.officialDayProcessed = officialDayProcessed;
             snapshot.location = Location; snapshot.timeSlot = TimeSlot; snapshot.randomSeed = randomSeed;
             snapshot.turnOpen = turnOpen; snapshot.turnEnding = turnEnding;
             snapshot.turnEvents.AddRange(pendingEvents);
             foreach (NarrativeResultDefinition effect in pendingEffects) snapshot.pendingEffects.Add(CloneEffect(effect));
             foreach (NarrativeEventRequest request in queue) snapshot.pending.Add(ToSaved(request));
             if (activePresentation) { snapshot.active = ToSaved(activeRequest); snapshot.active.selectedChoices.Clear(); snapshot.active.selectedChoices.AddRange(selectedChoices); }
+            snapshot.activeAbilityCheck = CloneAbilityCheck(activeAbilityCheck);
+            snapshot.activeAbilityCheckId = activeAbilityCheckId;
             foreach (NarrativeBarChange change in changes) snapshot.changes.Add(new NarrativeBarChange { key = change.key, oldValue = change.oldValue, newValue = change.newValue, depth = change.depth });
+            if (operationDepth > 0 && operationValues != null)
+            {
+                var current = ReadAllValues();
+                foreach (var pair in operationValues)
+                    if (current.TryGetValue(pair.Key, out int next) && next != pair.Value)
+                        snapshot.changes.Add(new NarrativeBarChange { key = pair.Key, oldValue = pair.Value, newValue = next, depth = transactionDepth });
+                foreach (var change in operationDirectionalChanges.Values)
+                    if (change.oldValue != change.newValue) snapshot.changes.Add(new NarrativeBarChange { key = change.key, oldValue = change.oldValue, newValue = change.newValue, depth = change.depth });
+            }
             return snapshot;
         }
 
@@ -236,18 +462,29 @@ namespace Spotlight.Narrative
         {
             if (snapshot == null) return;
             if (settling) throw new InvalidOperationException("Restore cannot interrupt an NCS result transaction.");
+            endingChecksEnabled = false;
+            endingDirty = true;
+            operationDepth = 0;
+            SelectedEndingId = snapshot.selectedEndingId;
+            migrateOfficialDay = snapshot.officialDayVersion == 0;
+            officialDayProcessed = Math.Max(0, snapshot.officialDayProcessed);
             presentationEpoch++;
-            queue.Clear(); pendingEvents.Clear(); changes.Clear(); selectedChoices.Clear(); pendingEffects.Clear(); draining = false;
+            queue.Clear(); pendingEvents.Clear(); changes.Clear(); selectedChoices.Clear(); pendingEffects.Clear(); safeCallbacks.Clear(); draining = false;
+            activeAbilityCheck = CloneAbilityCheck(snapshot.activeAbilityCheck);
+            activeAbilityCheckId = snapshot.activeAbilityCheckId ?? activeAbilityCheck?.checkId;
+            resumeActiveAbilityCheck = snapshot.active != null && activeAbilityCheck != null;
             processing = false; activePresentation = false; pumping = false; transactionDepth = 0;
             resumeBoundary = snapshot.turnEnding;
             state.Restore(snapshot);
+            RestoreCafeVisits(snapshot);
+            restoredValueChanges = true;
             Location = snapshot.location ?? string.Empty; TimeSlot = snapshot.timeSlot;
             randomSeed = snapshot.randomSeed == 0 ? 0x6D2B79F5 : snapshot.randomSeed;
             turnOpen = snapshot.turnOpen; turnEnding = snapshot.turnEnding;
             if (snapshot.turnEvents != null) foreach (string id in snapshot.turnEvents) if (!string.IsNullOrEmpty(id)) pendingEvents.Add(id);
             if (snapshot.active != null) RestoreRequest(snapshot.active, true);
             if (snapshot.pending != null) foreach (NarrativePendingValue saved in snapshot.pending) RestoreRequest(saved, false);
-            if (snapshot.changes != null) foreach (NarrativeBarChange change in snapshot.changes) if (change != null && state.GetDefinition(change.key) != null) changes.Add(change);
+            if (snapshot.changes != null) foreach (NarrativeBarChange change in snapshot.changes) if (change != null && state.GetDefinition(state.ResolveRelation(change.key) ?? change.key) != null) changes.Add(change);
             if (snapshot.pendingEffects != null) foreach (NarrativeResultDefinition effect in snapshot.pendingEffects)
                 if (effect != null && effect.resultType == NarrativeResultType.PlaySetup) { pendingEffects.Add(CloneEffect(effect)); NotifyEffect(effect); }
             // Resume only after the caller explicitly pumps EndTurn; old presenter callbacks are invalidated.
@@ -285,11 +522,18 @@ namespace Spotlight.Narrative
             }
             foreach (NarrativeConditionDefinition condition in configuration.conditions)
             {
-                if (condition == null || string.IsNullOrWhiteSpace(condition.ownerId)) continue;
+                if (condition == null || string.IsNullOrWhiteSpace(condition.ownerId)) throw new ArgumentException("Condition row requires an owner ID: " + condition?.conditionId);
                 string ownerKey = OwnerKey(condition.ownerType, condition.ownerId);
                 if (!conditionsByOwner.TryGetValue(ownerKey, out List<NarrativeConditionDefinition> list))
                     conditionsByOwner[ownerKey] = list = new List<NarrativeConditionDefinition>();
                 list.Add(condition);
+            }
+            var endingIds = new HashSet<string>(StringComparer.Ordinal);
+            foreach (var ending in configuration.endings)
+            {
+                if (ending == null || string.IsNullOrWhiteSpace(ending.endingId) || !endingIds.Add(ending.endingId)
+                    || !conditionsByOwner.ContainsKey(OwnerKey("ending", ending.endingId)))
+                    throw new ArgumentException("Invalid ending or missing conditions: " + ending?.endingId);
             }
             foreach (NarrativeResultDefinition result in configuration.results)
             {
@@ -304,6 +548,18 @@ namespace Spotlight.Narrative
 
         private void OnBarChanged(string barKey, int oldValue, int newValue)
         {
+            NotifyConditionsChanged();
+            if (valueRestore) return;
+            if (operationDepth > 0)
+            {
+                if (barKey.Contains(">"))
+                {
+                    if (!operationDirectionalChanges.TryGetValue(barKey, out var directionChange))
+                        operationDirectionalChanges[barKey] = directionChange = new NarrativeBarChange { key = barKey, oldValue = oldValue, depth = transactionDepth };
+                    directionChange.newValue = newValue;
+                }
+                return;
+            }
             if (!turnOpen) BeginTurn();
             changes.Add(new NarrativeBarChange { key = barKey, oldValue = oldValue, newValue = newValue, depth = transactionDepth });
             Debug.Log($"[NCS][Bar] key={barKey} old={oldValue} new={newValue} depth={transactionDepth}");
@@ -323,6 +579,7 @@ namespace Spotlight.Narrative
 
         private void EvaluateBoundary(int depth, bool includeHoldAndDates)
         {
+            if (valueRestore || !valueBaselineReady || operationDepth > 0) return;
             var hits = new List<Hit>();
             var boundaryChanges = changes.ToArray();
             changes.Clear();
@@ -407,9 +664,46 @@ namespace Spotlight.Narrative
             }
         }
 
+        private void OnPresentationCancelled(string reason)
+        {
+            bool terminal = reason == "disposed" || reason == "host_unavailable";
+            if (!activePresentation && !draining && pendingEffects.Count == 0 && !terminal) return;
+            string failedEvent = activeRequest.Event?.eventId;
+            presentationEpoch++;
+            activePresentation = draining = processing = false;
+            activeRequest = default;
+            activeAbilityCheck = null;
+            activeAbilityCheckId = null;
+            selectedChoices.Clear(); pendingEffects.Clear();
+            if (terminal) presenterUnavailable = true;
+            if (!string.IsNullOrEmpty(failedEvent))
+            {
+                pendingEvents.Remove(failedEvent);
+                CompleteCafeHook(failedEvent);
+                try { EventFailed?.Invoke(failedEvent, "presentation_cancelled: " + reason); }
+                catch (Exception error) { Debug.LogException(error); }
+            }
+            if (terminal)
+            {
+                presenterUnavailable = true;
+                queue.Clear(); pendingEvents.Clear();
+                turnOpen = turnEnding = resumeBoundary = false;
+                if (presenter is INarrativePresentationCancellation cancellation) cancellation.Cancelled -= OnPresentationCancelled;
+            }
+            // During Play's synchronous callback the outer pump owns continuation.
+            if (!pumping && !settling) ProcessQueue();
+        }
+
         private void ProcessQueue()
         {
-            if (pumping || draining) return;
+            if (presenterUnavailable)
+            {
+                queue.Clear(); pendingEffects.Clear(); processing = activePresentation = draining = false;
+                CheckEndingsAtSafeBoundary();
+                return;
+            }
+            if (valueRestore || !valueBaselineReady || IsEnded || pumping || draining) return;
+            DrainSettledValueChanges();
             if (pendingEffects.Count > 0 && presenter is INarrativePresentationDrain drain)
             {
                 draining = true;
@@ -433,10 +727,16 @@ namespace Spotlight.Narrative
             processing = true;
             try
             {
-                while (!activePresentation && queue.Count > 0 && pendingEffects.Count == 0)
+                while (!presenterUnavailable && !activePresentation && queue.Count > 0 && pendingEffects.Count == 0)
                 {
                     activeRequest = queue.Dequeue();
                     selectedChoices.Clear();
+                    if (!resumeActiveAbilityCheck && (activeRequest.SelectedChoices == null || activeRequest.SelectedChoices.Count == 0))
+                    {
+                        activeAbilityCheck = null;
+                        activeAbilityCheckId = null;
+                    }
+                    resumeActiveAbilityCheck = false;
                     if (activeRequest.SelectedChoices != null) selectedChoices.AddRange(activeRequest.SelectedChoices);
                     activePresentation = true;
                     long epoch = ++presentationEpoch;
@@ -453,35 +753,123 @@ namespace Spotlight.Narrative
             }
             finally { pumping = false; }
             if (!activePresentation && pendingEffects.Count > 0) ProcessQueue();
+            CheckEndingsAtSafeBoundary();
         }
 
         private void CompleteEvent(NarrativeEventRequest request)
         {
             presentationEpoch++;
             settling = true;
+            int entryOperationDepth = operationDepth;
             transactionDepth = request.Depth + 1;
-            // Retain active until the synchronous transaction has finished; stale callbacks cannot settle twice.
-            ApplyResults(request.Event.eventId);
+            var batch = new List<NarrativeResultDefinition>();
+            if (resultsByEvent.TryGetValue(request.Event.eventId, out var eventResults)) batch.AddRange(eventResults);
             foreach (string id in selectedChoices)
             {
                 NarrativeChoiceDefinition choice = configuration.choices.Find(c => c != null && c.choiceId == id);
-                if (choice != null) ApplyResults(string.IsNullOrWhiteSpace(choice.resultOwnerId) ? choice.choiceId : choice.resultOwnerId);
+                string owner = choice == null ? null : string.IsNullOrWhiteSpace(choice.resultOwnerId) ? choice.choiceId : choice.resultOwnerId;
+                if (owner != null && resultsByEvent.TryGetValue(owner, out var choiceResults)) batch.AddRange(choiceResults);
             }
-            state.MarkEventHappened(request.Event.eventId);
-            activePresentation = false;
-            selectedChoices.Clear();
-            EvaluateBoundary(transactionDepth, false);
-            transactionDepth = 0;
-            settling = false;
+            if (activeAbilityCheck != null)
+            {
+                NarrativeAbilityCheckDefinition check = configuration.abilityChecks.Find(x => x != null && x.checkId == activeAbilityCheckId);
+                string owner = check == null ? null : activeAbilityCheck.passed ? check.successResultOwnerId : check.failureResultOwnerId;
+                string branchEventId = check == null ? null : activeAbilityCheck.passed ? check.successEventId : check.failureEventId;
+                if (!string.IsNullOrWhiteSpace(owner) && owner != branchEventId
+                    && resultsByEvent.TryGetValue(owner, out var checkResults)) batch.AddRange(checkResults);
+            }
+            try
+            {
+                PreflightResults(batch, out var boolValues, out var itemCounts, out int? moneyBefore, out int? moneyAfter);
+                BeginOperation();
+                if (moneyBefore.HasValue && !MoneyAccount.TryCommit(moneyBefore.Value, moneyAfter.Value, out string moneyError))
+                    throw new InvalidOperationException("Money batch rejected: " + moneyError);
+                // Both stores expose only the completed bool/item batch to change listeners.
+                using (inventory?.DeferNotifications())
+                {
+                    if (itemCounts.Count > 0 && !inventory.TryApplyCounts(itemCounts)) throw new InvalidOperationException("Inventory rejected validated result batch.");
+                    state.CommitConditions(boolValues);
+                }
+                foreach (var result in batch) ApplyResult(result);
+                state.MarkEventHappened(request.Event.eventId);
+                activePresentation = false;
+                activeAbilityCheck = null;
+                activeAbilityCheckId = null;
+                selectedChoices.Clear();
+                EndOperation();
+                DrainSettledValueChanges();
+                EvaluateBoundary(transactionDepth, false);
+            }
+            catch (Exception error)
+            {
+                Debug.LogError($"[NCS] Event {request.Event.eventId} result transaction failed: {error.Message}");
+                try { EventFailed?.Invoke(request.Event.eventId, error.Message); }
+                catch (Exception listenerError) { Debug.LogException(listenerError); }
+                return;
+            }
+            finally
+            {
+                if (operationDepth > entryOperationDepth)
+                {
+                    operationDepth = entryOperationDepth;
+                    if (operationDepth == 0 && operationValues != null) { CommitValueComparison(operationValues); operationValues = null; }
+                }
+                transactionDepth = 0; settling = false;
+            }
+            CompleteCafeHook(request.Event.eventId);
             try { EventCompleted?.Invoke(request.Event.eventId); }
             catch (Exception error) { Debug.LogException(error); }
             ProcessQueue();
         }
 
-        private void ApplyResults(string ownerId)
+        private void PreflightResults(List<NarrativeResultDefinition> results, out Dictionary<string, bool> boolValues, out Dictionary<string, int> itemCounts, out int? moneyBefore, out int? moneyAfter)
         {
-            if (resultsByEvent.TryGetValue(ownerId, out List<NarrativeResultDefinition> results))
-                foreach (NarrativeResultDefinition result in results) ApplyResult(result);
+            moneyBefore = moneyAfter = null;
+            boolValues = new Dictionary<string, bool>(StringComparer.Ordinal);
+            itemCounts = new Dictionary<string, int>(StringComparer.Ordinal);
+            foreach (var result in results)
+            {
+                string target = StripPrefix(result.target, "flag:", "item:");
+                try
+                {
+                    if (result.resultType == NarrativeResultType.BarAdd || result.resultType == NarrativeResultType.BarSet)
+                    {
+                        string barKey = StripPrefix(result.target, "bar:");
+                        if (!state.IsWritableBar(barKey)) throw new InvalidOperationException("Bar is external, derived or unknown: " + barKey);
+                    }
+                    else if (result.resultType == NarrativeResultType.MoneyAdd || result.resultType == NarrativeResultType.MoneyRemove)
+                    {
+                        if (target != "cafe" || MoneyAccount == null || !int.TryParse(result.value, out int amount) || amount <= 0)
+                            throw new InvalidOperationException("Expected ready cafe money account and positive amount.");
+                        if (!moneyBefore.HasValue)
+                        {
+                            if (!MoneyAccount.TryRead(out int balance)) throw new InvalidOperationException("Money account is not ready.");
+                            moneyBefore = moneyAfter = balance;
+                        }
+                        long next = (long)moneyAfter.Value + (result.resultType == NarrativeResultType.MoneyAdd ? amount : -amount);
+                        if (next < 0 || next > int.MaxValue) throw new InvalidOperationException("Insufficient money or balance overflow.");
+                        moneyAfter = (int)next;
+                    }
+                    else if (result.resultType == NarrativeResultType.SetFlag || result.resultType == NarrativeResultType.ClearFlag)
+                    {
+                        bool value = false;
+                        if (result.resultType == NarrativeResultType.SetFlag && !bool.TryParse(result.value, out value)) throw new InvalidOperationException("Expected true/false.");
+                        if (result.resultType == NarrativeResultType.ClearFlag && !string.IsNullOrWhiteSpace(result.value)
+                            && (!bool.TryParse(result.value, out bool clearValue) || clearValue)) throw new InvalidOperationException("CLEAR_FLAG requires false or empty value.");
+                        state.ValidateConditionWrite(target, value);
+                        boolValues[target] = value;
+                    }
+                    else if (result.resultType == NarrativeResultType.ItemAdd || result.resultType == NarrativeResultType.ItemRemove)
+                    {
+                        if (inventory == null || string.IsNullOrWhiteSpace(target) || !int.TryParse(result.value, out int count) || count <= 0) throw new InvalidOperationException("Expected inventory, item key and positive quantity.");
+                        int current = itemCounts.TryGetValue(target, out int previous) ? previous : inventory.GetCount(target);
+                        long next = (long)current + (result.resultType == NarrativeResultType.ItemAdd ? count : -count);
+                        if (next < 0 || next > int.MaxValue) throw new InvalidOperationException("Insufficient items or quantity overflow: " + target);
+                        itemCounts[target] = (int)next;
+                    }
+                }
+                catch (Exception error) { throw new InvalidOperationException($"Result {result.resultId} (owner={result.eventId}): {error.Message}", error); }
+            }
         }
 
         private void FinishTurn()
@@ -490,10 +878,11 @@ namespace Spotlight.Narrative
             var derived = ReadDerived();
             foreach (NarrativeBarDefinition bar in configuration.bars)
             {
-                if (bar == null || bar.advanceMode != NarrativeAdvanceMode.Monotonic && bar.barKey != "world.calendar") continue;
+                if (bar == null || officialDayManaged && bar.barKey == "world.calendar" || bar.advanceMode != NarrativeAdvanceMode.Monotonic && bar.barKey != "world.calendar") continue;
                 int delta = bar.barKey == "world.calendar" ? 1 : Math.Max(0, bar.autoStep);
                 if (state.TryAddBar(bar.barKey, delta, out int oldValue, out int newValue))
                 {
+                    NotifyConditionsChanged();
                     changes.Add(new NarrativeBarChange { key = bar.barKey, oldValue = oldValue, newValue = newValue });
                     try { BarChanged?.Invoke(bar.barKey, oldValue, newValue); }
                     catch (Exception error) { Debug.LogException(error); }
@@ -508,7 +897,7 @@ namespace Spotlight.Narrative
         private void ApplyResult(NarrativeResultDefinition result)
         {
             if (result == null) return;
-            string target = StripPrefix(result.target, "bar:", "rel:", "flag:", "switch:", "obj:", "event:", "ach:", "setup:");
+            string target = StripPrefix(result.target, "bar:", "rel:", "flag:", "switch:", "obj:", "event:", "ach:", "setup:", "item:");
             bool positionEffect = result.resultType == NarrativeResultType.ShowPosition || result.resultType == NarrativeResultType.HidePosition
                 || result.resultType == NarrativeResultType.AddTempPosition || result.resultType == NarrativeResultType.RemoveTempPosition;
             if (result.resultType != NarrativeResultType.AdvanceDay && !positionEffect && string.IsNullOrWhiteSpace(target)) return;
@@ -523,18 +912,23 @@ namespace Spotlight.Narrative
                 case NarrativeResultType.BarSet:
                     if (int.TryParse(result.value, out int value)) SetBar(target, value); else return;
                     break;
+                // Bool/item writes were preflighted and committed together before other effects.
                 case NarrativeResultType.SetFlag:
-                    if (!bool.TryParse(result.value, out bool flag)) return;
-                    state.SetFlag(target, flag); break;
-                case NarrativeResultType.ClearFlag: state.SetFlag(target, false); break;
+                case NarrativeResultType.ClearFlag:
+                case NarrativeResultType.ItemAdd:
+                case NarrativeResultType.ItemRemove:
+                case NarrativeResultType.MoneyAdd:
+                case NarrativeResultType.MoneyRemove:
+                    break;
                 case NarrativeResultType.SetSwitch:
                     if (!bool.TryParse(result.value, out bool on)) return;
                     state.SetSwitch(target, on); break;
                 case NarrativeResultType.ObjectState: state.SetObjectState(target, result.value); break;
                 case NarrativeResultType.UnlockEvent: state.SetEventLocked(target, false); break;
                 case NarrativeResultType.LockEvent: state.SetEventLocked(target, true); break;
-                case NarrativeResultType.SpawnNpc: state.SetNpcLocation(target, StripPrefix(result.value, "scene:")); break;
-                case NarrativeResultType.DespawnNpc: state.SetNpcLocation(target, string.Empty); break;
+                case NarrativeResultType.ReserveCafeVisit: ReserveCafeVisit(target, StripPrefix(result.value, "visit:")); break;
+                case NarrativeResultType.SpawnNpc: MoveCafeNpc(target, StripPrefix(result.value, "scene:")); break;
+                case NarrativeResultType.DespawnNpc: MoveCafeNpc(target, string.Empty); break;
                 case NarrativeResultType.ShowPosition:
                 case NarrativeResultType.HidePosition:
                 case NarrativeResultType.AddTempPosition:
@@ -556,15 +950,11 @@ namespace Spotlight.Narrative
         private static NarrativeResultDefinition CloneEffect(NarrativeResultDefinition result) => new NarrativeResultDefinition { resultId = result.resultId, eventId = result.eventId, seq = result.seq, resultType = result.resultType, target = result.target, value = result.value, note = result.note };
         private void NotifyEffect(NarrativeResultDefinition result)
         {
-            string target = StripPrefix(result.target, "bar:", "rel:", "flag:", "switch:", "obj:", "event:", "ach:", "setup:");
+            string target = StripPrefix(result.target, "bar:", "rel:", "flag:", "switch:", "obj:", "event:", "ach:", "setup:", "item:");
             try { EffectRequested?.Invoke(new NarrativeEffectNotification { Result = result, Target = target, Value = result.value }); }
             catch (Exception error) { Debug.LogException(error); }
         }
 
-        private bool CompareBar(string key, string expected, int direction)
-        {
-            return state.TryGetBar(key, out int current) && int.TryParse(expected, out int value) && (direction > 0 ? current >= value : current <= value);
-        }
         private static bool IsInside(NarrativeTriggerDefinition trigger, int value) => trigger.direction == NarrativeTriggerDirection.Down ? value <= trigger.threshold : trigger.direction == NarrativeTriggerDirection.Up ? value >= trigger.threshold : value == trigger.threshold;
         private static bool Crossed(NarrativeTriggerDefinition trigger, int oldValue, int newValue) => (trigger.direction == NarrativeTriggerDirection.Up || trigger.direction == NarrativeTriggerDirection.Both) && oldValue < trigger.threshold && newValue >= trigger.threshold || (trigger.direction == NarrativeTriggerDirection.Down || trigger.direction == NarrativeTriggerDirection.Both) && oldValue > trigger.threshold && newValue <= trigger.threshold;
         private static string CounterKey(NarrativeTriggerDefinition trigger) => trigger.barKey + "@" + trigger.threshold + "@" + trigger.direction;

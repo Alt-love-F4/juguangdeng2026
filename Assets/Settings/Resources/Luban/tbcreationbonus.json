@@ -1,0 +1,82 @@
+[
+  {
+    "optionId": "temperament.kind",
+    "attributeId": "language",
+    "delta": 2
+  },
+  {
+    "optionId": "temperament.sincere",
+    "attributeId": "perception",
+    "delta": 2
+  },
+  {
+    "optionId": "memory.brave",
+    "attributeId": "courage",
+    "delta": 2
+  },
+  {
+    "optionId": "memory.insightful",
+    "attributeId": "wisdom",
+    "delta": 2
+  },
+  {
+    "optionId": "education.religion",
+    "attributeId": "perception",
+    "delta": 2
+  },
+  {
+    "optionId": "education.religion",
+    "attributeId": "language",
+    "delta": 1
+  },
+  {
+    "optionId": "education.literature",
+    "attributeId": "language",
+    "delta": 2
+  },
+  {
+    "optionId": "education.literature",
+    "attributeId": "courage",
+    "delta": 1
+  },
+  {
+    "optionId": "education.science",
+    "attributeId": "wisdom",
+    "delta": 2
+  },
+  {
+    "optionId": "education.science",
+    "attributeId": "perception",
+    "delta": 1
+  },
+  {
+    "optionId": "education.politics",
+    "attributeId": "courage",
+    "delta": 2
+  },
+  {
+    "optionId": "education.politics",
+    "attributeId": "wisdom",
+    "delta": 1
+  },
+  {
+    "optionId": "trait.language",
+    "attributeId": "language",
+    "delta": 2
+  },
+  {
+    "optionId": "trait.courage",
+    "attributeId": "courage",
+    "delta": 2
+  },
+  {
+    "optionId": "trait.wisdom",
+    "attributeId": "wisdom",
+    "delta": 2
+  },
+  {
+    "optionId": "trait.perception",
+    "attributeId": "perception",
+    "delta": 2
+  }
+]

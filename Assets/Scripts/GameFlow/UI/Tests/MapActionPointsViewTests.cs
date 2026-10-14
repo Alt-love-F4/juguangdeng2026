@@ -64,7 +64,7 @@ namespace Spotlight.GameFlow.Tests
         [TestCase(8, 0, 0f, 0f, 0f, 0f, 0f)]
         [TestCase(8, 3, .375f, 0f, 0f, .5f, 1f)]
         [TestCase(8, 8, 1f, 1f, 1f, 1f, 1f)]
-        [TestCase(3, 2, 2f / 3f, 0f, 0f, 2f / 3f, 1f)]
+        [TestCase(3, 2, 2f / 3f, 0f, 2f / 3f, 1f, 1f)]
         [TestCase(0, 0, 0f, 0f, 0f, 0f, 0f)]
         public void InitializeUsesActualMaximumForLegacyAndSegmentedFill(
             int maximum, int current, float ratio, float first, float second, float third, float fourth)

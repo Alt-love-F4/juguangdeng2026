@@ -26,9 +26,7 @@ public sealed partial class NcsConditionEntry : Luban.BeanBase
         GroupIndex = (int)_obj.GetValue("groupIndex");
         CondType = (string)_obj.GetValue("condType");
         Target = (string)_obj.GetValue("target");
-        Op = (string)_obj.GetValue("op");
         Value = (string)_obj.GetValue("value");
-        NotFlag = (bool)_obj.GetValue("notFlag");
     }
 
     public static NcsConditionEntry DeserializeNcsConditionEntry(JToken _buf)
@@ -42,9 +40,7 @@ public sealed partial class NcsConditionEntry : Luban.BeanBase
     public readonly int GroupIndex;
     public readonly string CondType;
     public readonly string Target;
-    public readonly string Op;
     public readonly string Value;
-    public readonly bool NotFlag;
 
 
     public const int __ID__ = -666395403;
@@ -63,9 +59,7 @@ public sealed partial class NcsConditionEntry : Luban.BeanBase
         + "groupIndex:" + GroupIndex + ","
         + "condType:" + CondType + ","
         + "target:" + Target + ","
-        + "op:" + Op + ","
         + "value:" + Value + ","
-        + "notFlag:" + NotFlag + ","
         + "}";
     }
 }

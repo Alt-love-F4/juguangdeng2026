@@ -37,5 +37,44 @@
     "sfxKey": "",
     "accentFxKey": "",
     "accentTargetKey": ""
+  },
+  {
+    "lineId": "DEMO_CAFE_BEFORE_LINE",
+    "pageId": "DEMO_CAFE_BEFORE_PAGE",
+    "seq": 1,
+    "speakerKey": "adele",
+    "side": "right",
+    "textKey": "demo.cafe.before",
+    "voiceKey": "",
+    "emote": "",
+    "sfxKey": "",
+    "accentFxKey": "",
+    "accentTargetKey": ""
+  },
+  {
+    "lineId": "DEMO_CAFE_SERVED_LINE",
+    "pageId": "DEMO_CAFE_SERVED_PAGE",
+    "seq": 1,
+    "speakerKey": "adele",
+    "side": "right",
+    "textKey": "demo.cafe.served",
+    "voiceKey": "",
+    "emote": "",
+    "sfxKey": "",
+    "accentFxKey": "",
+    "accentTargetKey": ""
+  },
+  {
+    "lineId": "DEMO_CAFE_CHAT_LINE",
+    "pageId": "DEMO_CAFE_CHAT_PAGE",
+    "seq": 1,
+    "speakerKey": "adele",
+    "side": "right",
+    "textKey": "demo.cafe.chat",
+    "voiceKey": "",
+    "emote": "",
+    "sfxKey": "",
+    "accentFxKey": "",
+    "accentTargetKey": ""
   }
 ]

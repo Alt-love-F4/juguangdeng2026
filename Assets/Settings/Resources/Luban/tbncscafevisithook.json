@@ -1,0 +1,37 @@
+[
+  {
+    "visitKey": "demo_cafe_visit",
+    "stage": "before_served",
+    "trigger": "click",
+    "seq": 1,
+    "eventId": "EV_DEMO_CAFE_BEFORE"
+  },
+  {
+    "visitKey": "demo_cafe_visit",
+    "stage": "served",
+    "trigger": "auto",
+    "seq": 1,
+    "eventId": "EV_DEMO_CAFE_SERVED"
+  },
+  {
+    "visitKey": "demo_cafe_visit",
+    "stage": "served",
+    "trigger": "click",
+    "seq": 1,
+    "eventId": "EV_DEMO_CAFE_CHAT"
+  },
+  {
+    "visitKey": "demo_cafe_visit",
+    "stage": "leaving",
+    "trigger": "auto",
+    "seq": 1,
+    "eventId": "EV_DEMO_CAFE_LEAVING"
+  },
+  {
+    "visitKey": "demo_cafe_visit",
+    "stage": "ended",
+    "trigger": "auto",
+    "seq": 1,
+    "eventId": "EV_DEMO_CAFE_ENDED"
+  }
+]

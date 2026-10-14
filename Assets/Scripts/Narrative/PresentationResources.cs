@@ -156,7 +156,11 @@ namespace Spotlight.Narrative
         {
             if (npcs.TryGetValue(id, out GameObject previous)) { if (previous != null) UnityEngine.Object.Destroy(previous); npcs.Remove(id); }
             if (!spawn || string.IsNullOrWhiteSpace(location)) return;
-            if (!string.Equals(location.Replace("scene:", ""), SceneManager.GetActiveScene().name, StringComparison.OrdinalIgnoreCase)) return;
+            string destination = location.Trim();
+            if (destination.StartsWith("scene:", StringComparison.OrdinalIgnoreCase)) destination = destination.Substring(6);
+            // Cafe owns seats, orders and visitor entities from committed NCS visit snapshots.
+            if (string.Equals(destination, "cafe", StringComparison.OrdinalIgnoreCase)) return;
+            if (!string.Equals(destination, SceneManager.GetActiveScene().name, StringComparison.OrdinalIgnoreCase)) return;
             GameObject prefab = Load<GameObject>(id, "NPC");
             if (prefab == null) return;
             GameObject instance = UnityEngine.Object.Instantiate(prefab); instance.name = "NCS_NPC_" + id;

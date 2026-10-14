@@ -1,0 +1,27 @@
+[
+  {
+    "groupId": "origin",
+    "seq": 0,
+    "required": true
+  },
+  {
+    "groupId": "temperament",
+    "seq": 1,
+    "required": true
+  },
+  {
+    "groupId": "memory",
+    "seq": 2,
+    "required": true
+  },
+  {
+    "groupId": "education",
+    "seq": 3,
+    "required": true
+  },
+  {
+    "groupId": "trait",
+    "seq": 4,
+    "required": true
+  }
+]

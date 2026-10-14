@@ -205,7 +205,7 @@ namespace Spotlight.FreeCafe
             string artId=spec.Has(Capability.Customer) && entity.person!=null && !string.IsNullOrEmpty(entity.person.visualId) && Runtime.artLibrary.Find(entity.person.visualId)!=null
                 ? entity.person.visualId : spec.artId;
             var character=entity.person!=null ? Runtime.Character(entity.person.characterId) : null;
-            var characterSprite=character!=null ? character.worldSprite : null;
+            var characterSprite=Runtime.CafeVisitSprite(entity.id) ?? (character!=null ? character.worldSprite : null);
             if(specId!=entity.specId || lastState!=state || lastArtId!=artId || lastCharacterSprite!=characterSprite)
             {
                 specId=entity.specId; lastState=state; lastArtId=artId; lastCharacterSprite=characterSprite;
