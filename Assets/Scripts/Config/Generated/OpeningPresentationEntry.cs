@@ -28,6 +28,8 @@ public sealed partial class OpeningPresentationEntry : Luban.BeanBase
         RightNameKey = (string)_obj.GetValue("rightNameKey");
         RightNameKey_Ref = null;
         VisualsResource = (string)_obj.GetValue("visualsResource");
+        CenterNameKey = (string)_obj.GetValue("centerNameKey");
+        CenterNameKey_Ref = null;
     }
 
     public static OpeningPresentationEntry DeserializeOpeningPresentationEntry(JToken _buf)
@@ -43,6 +45,8 @@ public sealed partial class OpeningPresentationEntry : Luban.BeanBase
     public readonly string RightNameKey;
     public TextEntry RightNameKey_Ref;
     public readonly string VisualsResource;
+    public readonly string CenterNameKey;
+    public TextEntry CenterNameKey_Ref;
 
 
     public const int __ID__ = -1450056928;
@@ -53,6 +57,7 @@ public sealed partial class OpeningPresentationEntry : Luban.BeanBase
         TitleKey_Ref = tables.TbText.GetOrDefault(TitleKey);
         LeftNameKey_Ref = tables.TbText.GetOrDefault(LeftNameKey);
         RightNameKey_Ref = tables.TbText.GetOrDefault(RightNameKey);
+        CenterNameKey_Ref = tables.TbText.GetOrDefault(CenterNameKey);
     }
 
     public override string ToString()
@@ -63,6 +68,7 @@ public sealed partial class OpeningPresentationEntry : Luban.BeanBase
         + "leftNameKey:" + LeftNameKey + ","
         + "rightNameKey:" + RightNameKey + ","
         + "visualsResource:" + VisualsResource + ","
+        + "centerNameKey:" + CenterNameKey + ","
         + "}";
     }
 }

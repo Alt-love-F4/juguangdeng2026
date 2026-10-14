@@ -342,12 +342,23 @@
   </bean>
   <table name="TbNcsAbilityCheckCondition" value="NcsAbilityCheckConditionEntry" mode="list" index="conditionId" input="AbilityCheckCondition@Narrative/Narrative.xlsx"/>
 
+  <bean name="CafeTutorialStepEntry">
+    <var name="stepId" type="string"/>
+    <var name="tutorialId" type="string"/>
+    <var name="presentationId" type="string#ref=TbOpeningPresentation"/>
+    <var name="focusTargetKey" type="string"/>
+    <var name="completionSignalId" type="string"/>
+    <var name="nextStepId" type="string"/>
+    <var name="optionalDemo" type="bool"/>
+  </bean>
+  <table name="TbCafeTutorialStep" value="CafeTutorialStepEntry" mode="map" index="stepId" input="CafeTutorialStep@Narrative/Narrative.xlsx"/>
   <bean name="OpeningPresentationEntry">
     <var name="presentationId" type="string"/>
     <var name="titleKey" type="string#ref=TbText"/>
     <var name="leftNameKey" type="string#ref=TbText"/>
     <var name="rightNameKey" type="string#ref=TbText"/>
     <var name="visualsResource" type="string"/>
+    <var name="centerNameKey" type="string#ref=TbText?"/>
   </bean>
   <table name="TbOpeningPresentation" value="OpeningPresentationEntry" mode="map" index="presentationId" input="OpeningPresentation@Narrative/Narrative.xlsx"/>
 
@@ -355,7 +366,7 @@
     <var name="lineId" type="string"/>
     <var name="presentationId" type="string#ref=TbOpeningPresentation"/>
     <var name="seq" type="int"/>
-    <var name="speaker" type="string#set=narrator,left,right"/>
+    <var name="speaker" type="string#set=narrator,left,right,center"/>
     <var name="textKey" type="string#ref=TbText"/>
     <var name="gesture" type="string#set=none,nod,shake"/>
     <var name="autoAdvanceSeconds" type="float"/>

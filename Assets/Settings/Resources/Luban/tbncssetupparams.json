@@ -186,7 +186,7 @@
   {
     "setupKey": "first_day_perception_success",
     "tplName": "Tpl_Narration",
-    "slotValues": "titleKey=first.day.perception.success.title,lines=first.day.perception.success",
+    "slotValues": "",
     "checkId": "",
     "skipAble": false,
     "autoAdvance": false
@@ -194,7 +194,7 @@
   {
     "setupKey": "first_day_perception_failure",
     "tplName": "Tpl_Narration",
-    "slotValues": "titleKey=first.day.perception.failure.title,lines=first.day.perception.failure",
+    "slotValues": "",
     "checkId": "",
     "skipAble": false,
     "autoAdvance": false

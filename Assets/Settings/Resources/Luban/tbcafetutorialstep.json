@@ -1,0 +1,227 @@
+[
+  {
+    "stepId": "introduction",
+    "tutorialId": "first_cafe_tutorial",
+    "presentationId": "first_day_cafe",
+    "focusTargetKey": "",
+    "completionSignalId": "",
+    "nextStepId": "customer_arrives",
+    "optionalDemo": false
+  },
+  {
+    "stepId": "customer_arrives",
+    "tutorialId": "first_cafe_tutorial",
+    "presentationId": "cafe_tutorial.customer_arrives",
+    "focusTargetKey": "",
+    "completionSignalId": "",
+    "nextStepId": "perception_check",
+    "optionalDemo": false
+  },
+  {
+    "stepId": "perception_success",
+    "tutorialId": "first_cafe_tutorial",
+    "presentationId": "cafe_tutorial.perception_success",
+    "focusTargetKey": "",
+    "completionSignalId": "",
+    "nextStepId": "order_confirmed",
+    "optionalDemo": false
+  },
+  {
+    "stepId": "perception_failure",
+    "tutorialId": "first_cafe_tutorial",
+    "presentationId": "cafe_tutorial.perception_failure",
+    "focusTargetKey": "",
+    "completionSignalId": "",
+    "nextStepId": "order_confirmed",
+    "optionalDemo": false
+  },
+  {
+    "stepId": "order_confirmed",
+    "tutorialId": "first_cafe_tutorial",
+    "presentationId": "cafe_tutorial.order_confirmed",
+    "focusTargetKey": "",
+    "completionSignalId": "",
+    "nextStepId": "workstation_open",
+    "optionalDemo": false
+  },
+  {
+    "stepId": "workstation_open",
+    "tutorialId": "first_cafe_tutorial",
+    "presentationId": "cafe_tutorial.workstation_open",
+    "focusTargetKey": "cafe.workstation",
+    "completionSignalId": "workstation_opened",
+    "nextStepId": "make_coffee_base",
+    "optionalDemo": false
+  },
+  {
+    "stepId": "make_coffee_base",
+    "tutorialId": "first_cafe_tutorial",
+    "presentationId": "cafe_tutorial.make_coffee_base",
+    "focusTargetKey": "cafe.coffee_base",
+    "completionSignalId": "",
+    "nextStepId": "pour_into_cup",
+    "optionalDemo": false
+  },
+  {
+    "stepId": "pour_into_cup",
+    "tutorialId": "first_cafe_tutorial",
+    "presentationId": "cafe_tutorial.pour_into_cup",
+    "focusTargetKey": "cafe.cup",
+    "completionSignalId": "",
+    "nextStepId": "adjust_strength",
+    "optionalDemo": false
+  },
+  {
+    "stepId": "adjust_strength",
+    "tutorialId": "first_cafe_tutorial",
+    "presentationId": "cafe_tutorial.adjust_strength",
+    "focusTargetKey": "cafe.strength",
+    "completionSignalId": "",
+    "nextStepId": "adjust_sweetness",
+    "optionalDemo": false
+  },
+  {
+    "stepId": "adjust_sweetness",
+    "tutorialId": "first_cafe_tutorial",
+    "presentationId": "cafe_tutorial.adjust_sweetness",
+    "focusTargetKey": "cafe.sweetness",
+    "completionSignalId": "",
+    "nextStepId": "serve_customer",
+    "optionalDemo": false
+  },
+  {
+    "stepId": "demo_grind",
+    "tutorialId": "first_cafe_tutorial",
+    "presentationId": "cafe_tutorial.demo_grind",
+    "focusTargetKey": "",
+    "completionSignalId": "",
+    "nextStepId": "",
+    "optionalDemo": true
+  },
+  {
+    "stepId": "demo_boil",
+    "tutorialId": "first_cafe_tutorial",
+    "presentationId": "cafe_tutorial.demo_boil",
+    "focusTargetKey": "",
+    "completionSignalId": "",
+    "nextStepId": "",
+    "optionalDemo": true
+  },
+  {
+    "stepId": "demo_brew",
+    "tutorialId": "first_cafe_tutorial",
+    "presentationId": "cafe_tutorial.demo_brew",
+    "focusTargetKey": "",
+    "completionSignalId": "",
+    "nextStepId": "",
+    "optionalDemo": true
+  },
+  {
+    "stepId": "demo_cup",
+    "tutorialId": "first_cafe_tutorial",
+    "presentationId": "cafe_tutorial.demo_cup",
+    "focusTargetKey": "",
+    "completionSignalId": "",
+    "nextStepId": "",
+    "optionalDemo": true
+  },
+  {
+    "stepId": "demo_base",
+    "tutorialId": "first_cafe_tutorial",
+    "presentationId": "cafe_tutorial.demo_base",
+    "focusTargetKey": "",
+    "completionSignalId": "",
+    "nextStepId": "",
+    "optionalDemo": true
+  },
+  {
+    "stepId": "demo_strength",
+    "tutorialId": "first_cafe_tutorial",
+    "presentationId": "cafe_tutorial.demo_strength",
+    "focusTargetKey": "",
+    "completionSignalId": "",
+    "nextStepId": "",
+    "optionalDemo": true
+  },
+  {
+    "stepId": "demo_sweetness",
+    "tutorialId": "first_cafe_tutorial",
+    "presentationId": "cafe_tutorial.demo_sweetness",
+    "focusTargetKey": "",
+    "completionSignalId": "",
+    "nextStepId": "",
+    "optionalDemo": true
+  },
+  {
+    "stepId": "demo_serve",
+    "tutorialId": "first_cafe_tutorial",
+    "presentationId": "cafe_tutorial.demo_serve",
+    "focusTargetKey": "",
+    "completionSignalId": "",
+    "nextStepId": "",
+    "optionalDemo": true
+  },
+  {
+    "stepId": "serve_customer",
+    "tutorialId": "first_cafe_tutorial",
+    "presentationId": "cafe_tutorial.serve_customer",
+    "focusTargetKey": "cafe.delivery",
+    "completionSignalId": "",
+    "nextStepId": "result",
+    "optionalDemo": false
+  },
+  {
+    "stepId": "result_excellent",
+    "tutorialId": "first_cafe_tutorial",
+    "presentationId": "cafe_tutorial.result_excellent",
+    "focusTargetKey": "",
+    "completionSignalId": "",
+    "nextStepId": "ending",
+    "optionalDemo": false
+  },
+  {
+    "stepId": "result_good",
+    "tutorialId": "first_cafe_tutorial",
+    "presentationId": "cafe_tutorial.result_good",
+    "focusTargetKey": "",
+    "completionSignalId": "",
+    "nextStepId": "ending",
+    "optionalDemo": false
+  },
+  {
+    "stepId": "result_average",
+    "tutorialId": "first_cafe_tutorial",
+    "presentationId": "cafe_tutorial.result_average",
+    "focusTargetKey": "",
+    "completionSignalId": "",
+    "nextStepId": "ending",
+    "optionalDemo": false
+  },
+  {
+    "stepId": "result_bad",
+    "tutorialId": "first_cafe_tutorial",
+    "presentationId": "cafe_tutorial.result_bad",
+    "focusTargetKey": "",
+    "completionSignalId": "",
+    "nextStepId": "ending",
+    "optionalDemo": false
+  },
+  {
+    "stepId": "result_refund",
+    "tutorialId": "first_cafe_tutorial",
+    "presentationId": "cafe_tutorial.result_refund",
+    "focusTargetKey": "",
+    "completionSignalId": "",
+    "nextStepId": "make_coffee_base",
+    "optionalDemo": false
+  },
+  {
+    "stepId": "ending",
+    "tutorialId": "first_cafe_tutorial",
+    "presentationId": "cafe_tutorial.ending",
+    "focusTargetKey": "",
+    "completionSignalId": "",
+    "nextStepId": "",
+    "optionalDemo": false
+  }
+]

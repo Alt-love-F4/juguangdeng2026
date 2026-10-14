@@ -46,6 +46,7 @@ public partial class Tables
     public TbNcsChoice TbNcsChoice {get; }
     public TbNcsAbilityCheck TbNcsAbilityCheck {get; }
     public TbNcsAbilityCheckCondition TbNcsAbilityCheckCondition {get; }
+    public TbCafeTutorialStep TbCafeTutorialStep {get; }
     public TbOpeningPresentation TbOpeningPresentation {get; }
     public TbOpeningLine TbOpeningLine {get; }
     public TbPlayerConfig TbPlayerConfig {get; }
@@ -90,6 +91,7 @@ public partial class Tables
         TbNcsChoice = new TbNcsChoice(loader("tbncschoice"));
         TbNcsAbilityCheck = new TbNcsAbilityCheck(loader("tbncsabilitycheck"));
         TbNcsAbilityCheckCondition = new TbNcsAbilityCheckCondition(loader("tbncsabilitycheckcondition"));
+        TbCafeTutorialStep = new TbCafeTutorialStep(loader("tbcafetutorialstep"));
         TbOpeningPresentation = new TbOpeningPresentation(loader("tbopeningpresentation"));
         TbOpeningLine = new TbOpeningLine(loader("tbopeningline"));
         TbPlayerConfig = new TbPlayerConfig(loader("tbplayerconfig"));
@@ -135,6 +137,7 @@ public partial class Tables
         TbNcsChoice.ResolveRef(this);
         TbNcsAbilityCheck.ResolveRef(this);
         TbNcsAbilityCheckCondition.ResolveRef(this);
+        TbCafeTutorialStep.ResolveRef(this);
         TbOpeningPresentation.ResolveRef(this);
         TbOpeningLine.ResolveRef(this);
         TbPlayerConfig.ResolveRef(this);

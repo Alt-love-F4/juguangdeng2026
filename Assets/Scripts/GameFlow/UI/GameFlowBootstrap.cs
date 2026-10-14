@@ -248,7 +248,7 @@ namespace Spotlight.GameFlow
             }
             if (narrativeIntegration?.GameplayHUD != null)
                 narrativeIntegration.GameplayHUD.CanInteract = CanUseGameplayControls;
-            narrativeIntegration?.Runtime?.Presenter?.SetSuspended(!CanUseGameplayControls());
+            narrativeIntegration?.Runtime?.Presenter?.SetSuspended(!CanUseNarrativePresentation());
             if (loadingPanel != null && keyboard != null)
             {
                 if (keyboard.rightArrowKey.wasPressedThisFrame || keyboard.dKey.wasPressedThisFrame)
@@ -624,6 +624,14 @@ namespace Spotlight.GameFlow
                 && (dayFlow == null || !dayFlow.BlocksGameplayInput)
                 && (GameplayPanelHooks.PanelType != null && GameplayPanelHooks.PanelType.IsInstanceOfType(UIKit.PeekPanel(MainStack))
                     || GameplayPanelHooks.IsScenePanel && UIKit.PeekPanel(MainStack) == null);
+
+        private bool CanUseNarrativePresentation()
+        {
+            if (CanUseGameplayControls()) return true;
+            return gameplay && !paused && !loadingTransitioning && !IsMapOpen && detailsPanel == null
+                && !DialoguePanel.IsAnyPlaying && dayFlow != null && dayFlow.IsCafeTutorialActive
+                && dayFlow.State == DayFlowState.FirstDayIntroduction;
+        }
 
         private void HandleEscape()
         {

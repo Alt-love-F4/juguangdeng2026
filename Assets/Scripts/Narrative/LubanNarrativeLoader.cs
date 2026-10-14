@@ -176,8 +176,12 @@ namespace Spotlight.Narrative
                 });
             foreach (var row in tables.TbText.DataList)
                 config.texts.Add(new NarrativeTextDefinition { key = row.Key, content = row.Text });
+            foreach (var row in tables.TbCafeTutorialStep.DataList)
+                config.cafeTutorialSteps.Add(new CafeTutorialStepDefinition { tutorialId = row.TutorialId, stepId = row.StepId,
+                    presentationId = row.PresentationId, focusTargetKey = row.FocusTargetKey,
+                    completionSignalId = row.CompletionSignalId, nextStepId = row.NextStepId, optionalDemo = row.OptionalDemo });
             foreach (var row in tables.TbOpeningPresentation.DataList)
-                config.openingPresentations.Add(new NarrativeOpeningPresentationDefinition { presentationId = row.PresentationId, titleKey = row.TitleKey, leftNameKey = row.LeftNameKey, rightNameKey = row.RightNameKey, visualsResource = row.VisualsResource });
+                config.openingPresentations.Add(new NarrativeOpeningPresentationDefinition { presentationId = row.PresentationId, titleKey = row.TitleKey, leftNameKey = row.LeftNameKey, rightNameKey = row.RightNameKey, visualsResource = row.VisualsResource, centerNameKey = row.CenterNameKey });
             foreach (var row in tables.TbOpeningLine.DataList)
                 config.openingLines.Add(new NarrativeOpeningLineDefinition { lineId = row.LineId, presentationId = row.PresentationId, seq = row.Seq, speaker = row.Speaker, textKey = row.TextKey, gesture = row.Gesture, autoAdvanceSeconds = row.AutoAdvanceSeconds });
             foreach (var row in tables.TbNcsPresentationIndex.DataList)
@@ -482,7 +486,7 @@ namespace Spotlight.Narrative
                 Require(texts, item.textKey, "opening line text");
                 if (item.seq < 1 || !float.IsFinite(item.autoAdvanceSeconds) || item.autoAdvanceSeconds < 0)
                     throw new FormatException("Invalid opening line sequence or auto advance: " + item.lineId);
-                if (item.speaker != "narrator" && item.speaker != "left" && item.speaker != "right") throw Unknown("opening speaker", item.speaker);
+                if (item.speaker != "narrator" && item.speaker != "left" && item.speaker != "right" && item.speaker != "center") throw Unknown("opening speaker", item.speaker);
                 if (item.gesture != "none" && item.gesture != "nod" && item.gesture != "shake") throw Unknown("opening gesture", item.gesture);
             }
             foreach (string presentationId in presentations)

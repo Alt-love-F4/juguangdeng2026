@@ -4,6 +4,199 @@
     "titleKey": "opening.title",
     "leftNameKey": "opening.player.name",
     "rightNameKey": "opening.adele.name",
-    "visualsResource": "Dialogue/FirstDayIntroductionVisuals"
+    "visualsResource": "Dialogue/FirstDayIntroductionVisuals",
+    "centerNameKey": "cafe.tutorial.customer.name"
+  },
+  {
+    "presentationId": "cafe_tutorial.customer_arrives",
+    "titleKey": "cafe.tutorial.customer_arrives.title",
+    "leftNameKey": "opening.player.name",
+    "rightNameKey": "opening.adele.name",
+    "visualsResource": "Dialogue/FirstDayIntroductionVisuals",
+    "centerNameKey": "cafe.tutorial.customer.name"
+  },
+  {
+    "presentationId": "cafe_tutorial.perception_success",
+    "titleKey": "cafe.tutorial.perception_success.title",
+    "leftNameKey": "opening.player.name",
+    "rightNameKey": "opening.adele.name",
+    "visualsResource": "Dialogue/FirstDayIntroductionVisuals",
+    "centerNameKey": "cafe.tutorial.customer.name"
+  },
+  {
+    "presentationId": "cafe_tutorial.perception_failure",
+    "titleKey": "cafe.tutorial.perception_failure.title",
+    "leftNameKey": "opening.player.name",
+    "rightNameKey": "opening.adele.name",
+    "visualsResource": "Dialogue/FirstDayIntroductionVisuals",
+    "centerNameKey": "cafe.tutorial.customer.name"
+  },
+  {
+    "presentationId": "cafe_tutorial.order_confirmed",
+    "titleKey": "cafe.tutorial.order_confirmed.title",
+    "leftNameKey": "opening.player.name",
+    "rightNameKey": "opening.adele.name",
+    "visualsResource": "Dialogue/FirstDayIntroductionVisuals",
+    "centerNameKey": "cafe.tutorial.customer.name"
+  },
+  {
+    "presentationId": "cafe_tutorial.workstation_open",
+    "titleKey": "cafe.tutorial.workstation_open.title",
+    "leftNameKey": "opening.player.name",
+    "rightNameKey": "opening.adele.name",
+    "visualsResource": "Dialogue/FirstDayIntroductionVisuals",
+    "centerNameKey": "cafe.tutorial.customer.name"
+  },
+  {
+    "presentationId": "cafe_tutorial.make_coffee_base",
+    "titleKey": "cafe.tutorial.make_coffee_base.title",
+    "leftNameKey": "opening.player.name",
+    "rightNameKey": "opening.adele.name",
+    "visualsResource": "Dialogue/FirstDayIntroductionVisuals",
+    "centerNameKey": "cafe.tutorial.customer.name"
+  },
+  {
+    "presentationId": "cafe_tutorial.pour_into_cup",
+    "titleKey": "cafe.tutorial.pour_into_cup.title",
+    "leftNameKey": "opening.player.name",
+    "rightNameKey": "opening.adele.name",
+    "visualsResource": "Dialogue/FirstDayIntroductionVisuals",
+    "centerNameKey": "cafe.tutorial.customer.name"
+  },
+  {
+    "presentationId": "cafe_tutorial.adjust_strength",
+    "titleKey": "cafe.tutorial.adjust_strength.title",
+    "leftNameKey": "opening.player.name",
+    "rightNameKey": "opening.adele.name",
+    "visualsResource": "Dialogue/FirstDayIntroductionVisuals",
+    "centerNameKey": "cafe.tutorial.customer.name"
+  },
+  {
+    "presentationId": "cafe_tutorial.adjust_sweetness",
+    "titleKey": "cafe.tutorial.adjust_sweetness.title",
+    "leftNameKey": "opening.player.name",
+    "rightNameKey": "opening.adele.name",
+    "visualsResource": "Dialogue/FirstDayIntroductionVisuals",
+    "centerNameKey": "cafe.tutorial.customer.name"
+  },
+  {
+    "presentationId": "cafe_tutorial.demo_grind",
+    "titleKey": "cafe.tutorial.demo_grind.title",
+    "leftNameKey": "opening.player.name",
+    "rightNameKey": "opening.adele.name",
+    "visualsResource": "Dialogue/FirstDayIntroductionVisuals",
+    "centerNameKey": "cafe.tutorial.customer.name"
+  },
+  {
+    "presentationId": "cafe_tutorial.demo_boil",
+    "titleKey": "cafe.tutorial.demo_boil.title",
+    "leftNameKey": "opening.player.name",
+    "rightNameKey": "opening.adele.name",
+    "visualsResource": "Dialogue/FirstDayIntroductionVisuals",
+    "centerNameKey": "cafe.tutorial.customer.name"
+  },
+  {
+    "presentationId": "cafe_tutorial.demo_brew",
+    "titleKey": "cafe.tutorial.demo_brew.title",
+    "leftNameKey": "opening.player.name",
+    "rightNameKey": "opening.adele.name",
+    "visualsResource": "Dialogue/FirstDayIntroductionVisuals",
+    "centerNameKey": "cafe.tutorial.customer.name"
+  },
+  {
+    "presentationId": "cafe_tutorial.demo_cup",
+    "titleKey": "cafe.tutorial.demo_cup.title",
+    "leftNameKey": "opening.player.name",
+    "rightNameKey": "opening.adele.name",
+    "visualsResource": "Dialogue/FirstDayIntroductionVisuals",
+    "centerNameKey": "cafe.tutorial.customer.name"
+  },
+  {
+    "presentationId": "cafe_tutorial.demo_base",
+    "titleKey": "cafe.tutorial.demo_base.title",
+    "leftNameKey": "opening.player.name",
+    "rightNameKey": "opening.adele.name",
+    "visualsResource": "Dialogue/FirstDayIntroductionVisuals",
+    "centerNameKey": "cafe.tutorial.customer.name"
+  },
+  {
+    "presentationId": "cafe_tutorial.demo_strength",
+    "titleKey": "cafe.tutorial.demo_strength.title",
+    "leftNameKey": "opening.player.name",
+    "rightNameKey": "opening.adele.name",
+    "visualsResource": "Dialogue/FirstDayIntroductionVisuals",
+    "centerNameKey": "cafe.tutorial.customer.name"
+  },
+  {
+    "presentationId": "cafe_tutorial.demo_sweetness",
+    "titleKey": "cafe.tutorial.demo_sweetness.title",
+    "leftNameKey": "opening.player.name",
+    "rightNameKey": "opening.adele.name",
+    "visualsResource": "Dialogue/FirstDayIntroductionVisuals",
+    "centerNameKey": "cafe.tutorial.customer.name"
+  },
+  {
+    "presentationId": "cafe_tutorial.demo_serve",
+    "titleKey": "cafe.tutorial.demo_serve.title",
+    "leftNameKey": "opening.player.name",
+    "rightNameKey": "opening.adele.name",
+    "visualsResource": "Dialogue/FirstDayIntroductionVisuals",
+    "centerNameKey": "cafe.tutorial.customer.name"
+  },
+  {
+    "presentationId": "cafe_tutorial.serve_customer",
+    "titleKey": "cafe.tutorial.serve_customer.title",
+    "leftNameKey": "opening.player.name",
+    "rightNameKey": "opening.adele.name",
+    "visualsResource": "Dialogue/FirstDayIntroductionVisuals",
+    "centerNameKey": "cafe.tutorial.customer.name"
+  },
+  {
+    "presentationId": "cafe_tutorial.result_excellent",
+    "titleKey": "cafe.tutorial.result_excellent.title",
+    "leftNameKey": "opening.player.name",
+    "rightNameKey": "opening.adele.name",
+    "visualsResource": "Dialogue/FirstDayIntroductionVisuals",
+    "centerNameKey": "cafe.tutorial.customer.name"
+  },
+  {
+    "presentationId": "cafe_tutorial.result_good",
+    "titleKey": "cafe.tutorial.result_good.title",
+    "leftNameKey": "opening.player.name",
+    "rightNameKey": "opening.adele.name",
+    "visualsResource": "Dialogue/FirstDayIntroductionVisuals",
+    "centerNameKey": "cafe.tutorial.customer.name"
+  },
+  {
+    "presentationId": "cafe_tutorial.result_average",
+    "titleKey": "cafe.tutorial.result_average.title",
+    "leftNameKey": "opening.player.name",
+    "rightNameKey": "opening.adele.name",
+    "visualsResource": "Dialogue/FirstDayIntroductionVisuals",
+    "centerNameKey": "cafe.tutorial.customer.name"
+  },
+  {
+    "presentationId": "cafe_tutorial.result_bad",
+    "titleKey": "cafe.tutorial.result_bad.title",
+    "leftNameKey": "opening.player.name",
+    "rightNameKey": "opening.adele.name",
+    "visualsResource": "Dialogue/FirstDayIntroductionVisuals",
+    "centerNameKey": "cafe.tutorial.customer.name"
+  },
+  {
+    "presentationId": "cafe_tutorial.result_refund",
+    "titleKey": "cafe.tutorial.result_refund.title",
+    "leftNameKey": "opening.player.name",
+    "rightNameKey": "opening.adele.name",
+    "visualsResource": "Dialogue/FirstDayIntroductionVisuals",
+    "centerNameKey": "cafe.tutorial.customer.name"
+  },
+  {
+    "presentationId": "cafe_tutorial.ending",
+    "titleKey": "cafe.tutorial.ending.title",
+    "leftNameKey": "opening.player.name",
+    "rightNameKey": "opening.adele.name",
+    "visualsResource": "Dialogue/FirstDayIntroductionVisuals",
+    "centerNameKey": "cafe.tutorial.customer.name"
   }
 ]

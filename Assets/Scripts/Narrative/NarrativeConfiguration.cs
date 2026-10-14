@@ -4,6 +4,13 @@ namespace Spotlight.Narrative
 {
     public sealed class NarrativeConfiguration
     {
+        public List<CafeTutorialStepDefinition> cafeTutorialSteps = new List<CafeTutorialStepDefinition>();
+        public bool TryGetCafeTutorialStep(string tutorialId, string stepId, out CafeTutorialStepDefinition definition)
+        {
+            definition = cafeTutorialSteps.Find(step => step.tutorialId == tutorialId && step.stepId == stepId);
+            return definition != null;
+        }
+
         public List<NarrativeCafeVisitDefinition> cafeVisits = new List<NarrativeCafeVisitDefinition>();
         public List<NarrativeCafeVisitHookDefinition> cafeVisitHooks = new List<NarrativeCafeVisitHookDefinition>();
         public List<NarrativeTemplateDefinition> templates = new List<NarrativeTemplateDefinition>();

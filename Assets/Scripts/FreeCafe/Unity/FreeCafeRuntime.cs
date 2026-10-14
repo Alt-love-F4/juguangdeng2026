@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using Spotlight.GameFlow;
+using Spotlight.Narrative;
 using UnityEngine;
 using UnityEngine.EventSystems;
 using UnityEngine.InputSystem;
@@ -35,7 +36,11 @@ namespace Spotlight.FreeCafe
         public bool ShowAssetIds { get; set; }
         public bool IsDragging => draggedView!=null;
         public FreeEntityView DraggedView => draggedView;
-        public bool GameplayBlocked => (miniGameGateway != null && miniGameGateway.BlocksInput) || (gameFlow != null && gameFlow.IsMapOpen) || (World != null && World.ProductionEnabled && !string.IsNullOrEmpty(World.State.production.miniGameToken)) || Time.timeScale<=0 || DialoguePanel.IsAnyPlaying || (dayFlow != null && dayFlow.BlocksGameplayInput);
+        private CafeTutorialSession cafeTutorial;
+        public event System.Action<string, string> CafeTutorialStepCompleted;
+        private NarrativeConfiguration tutorialConfiguration;
+        public bool CafeTutorialActive => dayFlow != null && dayFlow.IsCafeTutorialActive;
+        public bool GameplayBlocked => (cafeTutorial != null && cafeTutorial.WaitingForWorkstation) || (miniGameGateway != null && miniGameGateway.BlocksInput) || (gameFlow != null && gameFlow.IsMapOpen) || (World != null && World.ProductionEnabled && !string.IsNullOrEmpty(World.State.production.miniGameToken)) || Time.timeScale<=0 || DialoguePanel.IsAnyPlaying || (dayFlow != null && dayFlow.BlocksGameplayInput);
         private CafeVisitBridge cafeVisits;
         private bool pendingBusinessStart;
         public Sprite CafeVisitSprite(string customerId) => cafeVisits?.SeatedSprite(customerId);
@@ -115,6 +120,7 @@ namespace Spotlight.FreeCafe
             if(identities==null && characterCatalog!=null && characterCatalog.Characters.Count>0)
                 identities=new CatalogCustomerIdentitySource(characterCatalog);
             World=new CafeWorld(catalog,identities);
+            PlayerCafeOwner.Bind(World);
             if(prefabLibrary==null) throw new InvalidOperationException("请配置 EntityPrefabLibrary");
             prefabLibrary.Validate(World.Catalog);
             spawnScale=new FreeCafeSpawnScale(this,authored,catalog);
@@ -127,6 +133,7 @@ namespace Spotlight.FreeCafe
         }
         private void Start()
         {
+            tutorialConfiguration = LubanNarrativeLoader.Load();
             dayFlow = FindFirstObjectByType<DayFlowController>();
             gameFlow = FindFirstObjectByType<GameFlowBootstrap>();
             playerHud=FindFirstObjectByType<FreeCafeHud>(); productionHud=GetComponent<FreeCafeProductionHud>();
@@ -284,6 +291,7 @@ namespace Spotlight.FreeCafe
         {
             if(World==null || view==null || !view.CanInteract || InputBlocked || IsDragging || dragFinishedFrame==Time.frameCount) return;
             var entity=World.Find(view.EntityId); if(entity==null || entity.area!=World.State.currentArea) return;
+            if (cafeTutorial != null && cafeTutorial.WaitingForWorkstation) return;
             var spec=World.Spec(entity.specId);
             if(spec.Has(Capability.BusinessControl)) { StartBusiness(); return; }
             if(World.ProductionEnabled && entity.specId=="tool.latte-art") { Report(World.RequestProductionMiniGame()); return; }
@@ -594,6 +602,18 @@ namespace Spotlight.FreeCafe
         }
         public void Enter(AreaId area)
         {
+            if (cafeTutorial != null && cafeTutorial.WaitingForWorkstation)
+            {
+                if (area != AreaId.Counter || World.Area(area) == null || areaManager.Find(area) == null) return;
+                CancelDrag();
+                bool opened = areaManager.Focus(area);
+                if (opened)
+                {
+                    World.SetArea(area);
+                    NotifyTutorialStepCompleted(CafeTutorialSession.TutorialId, CafeTutorialSession.WorkstationSignal);
+                }
+                return;
+            }
             if(InputBlocked) return;
             if(World.Area(area)==null || areaManager.Find(area)==null) { ShowHint("未配置的小场景："+area);return; }
             CancelDrag();
@@ -745,7 +765,23 @@ namespace Spotlight.FreeCafe
             var saves=new GameSaveService();
             Report(saves.TryQuickSave(data,out var slot,out var error) ? ActionResult.Yes("已保存到空槽位 "+slot) : ActionResult.No("保存失败："+error));
         }
-        public void StartBusiness() { if(!InputBlocked) RequestBusinessStart(); }
+        public bool TryGetCafeTutorialStep(string tutorialId, string stepId, out CafeTutorialStepDefinition definition)
+        {
+            definition = null;
+            if (string.IsNullOrEmpty(tutorialId) || string.IsNullOrEmpty(stepId)) return false;
+            if (tutorialConfiguration == null) tutorialConfiguration = LubanNarrativeLoader.Load();
+            return tutorialConfiguration.TryGetCafeTutorialStep(tutorialId, stepId, out definition);
+        }
+
+        public void NotifyTutorialStepCompleted(string tutorialId, string stepId)
+        {
+            if (cafeTutorial == null || !cafeTutorial.WaitingForWorkstation
+                || tutorialId != CafeTutorialSession.TutorialId || stepId != CafeTutorialSession.WorkstationSignal) return;
+            cafeTutorial.NotifyTutorialStepCompleted(tutorialId, stepId);
+            CafeTutorialStepCompleted?.Invoke(tutorialId, stepId);
+        }
+
+        public void StartBusiness() { if(!InputBlocked && !CafeTutorialActive) RequestBusinessStart(); }
         public void RequestBusinessStart() { if (!GameplayBlocked) { pendingBusinessStart = true; TryStartBusiness(); } }
         private void TryStartBusiness()
         {
@@ -757,7 +793,16 @@ namespace Spotlight.FreeCafe
             cafeVisits.Pump();
         }
         public void EndBusiness() { if(!InputBlocked) Report(World.EndDay()); }
-        public void StartDayFlowBusiness() => StartBusiness();
+        public void StartDayFlowBusiness()
+        {
+            if (CafeTutorialActive)
+            {
+                cafeTutorial ??= new CafeTutorialSession();
+                cafeTutorial.Begin();
+                return;
+            }
+            StartBusiness();
+        }
         public void EndDayFlowBusiness() => EndBusiness();
         public void RefillSources() { if(!InputBlocked) Report(World.Refill()); }
         public void RotateSelected() { if(!InputBlocked) World.Rotate(SelectedId); }

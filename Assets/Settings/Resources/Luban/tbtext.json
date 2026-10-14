@@ -536,8 +536,8 @@
   },
   {
     "key": "opening.title",
-    "text": "初来乍到 · 沸点咖啡馆",
-    "comment": "第一天咖啡馆引入演出"
+    "text": "重新启航",
+    "comment": "文案-新手教程.docx；原文保留"
   },
   {
     "key": "opening.player.name",
@@ -547,71 +547,6 @@
   {
     "key": "opening.adele.name",
     "text": "阿黛尔",
-    "comment": "第一天咖啡馆引入演出"
-  },
-  {
-    "key": "opening.line.01",
-    "text": "你AAAAAAAAAAA测试推开沸点咖啡馆的门。吧台后的年轻女子放下抹布，先看了看你的行李，又看向你手里的信。",
-    "comment": "第一天咖啡馆引入演出"
-  },
-  {
-    "key": "opening.line.02",
-    "text": "你就是他一直惦记的那个孩子吧？我是阿黛尔，这里的店员。欢迎来到圣诺特。",
-    "comment": "第一天咖啡馆引入演出"
-  },
-  {
-    "key": "opening.line.03",
-    "text": "我是来接手咖啡馆的。他在信里说，这里会是我的新起点。",
-    "comment": "第一天咖啡馆引入演出"
-  },
-  {
-    "key": "opening.line.04",
-    "text": "嗯，沸点咖啡馆。名字听起来很厉害，实际上连热水壶都比我们脾气大。别怕，我会陪你把它打理好。",
-    "comment": "第一天咖啡馆引入演出"
-  },
-  {
-    "key": "opening.line.05",
-    "text": "你叔叔总说，一杯咖啡不只用来提神。有些人进门，是想找个能喘口气的地方。",
-    "comment": "第一天咖啡馆引入演出"
-  },
-  {
-    "key": "opening.line.06",
-    "text": "他还说过什么？",
-    "comment": "第一天咖啡馆引入演出"
-  },
-  {
-    "key": "opening.line.07",
-    "text": "他说，等你来了，就把靠窗的位置留给你……他一直盼着亲口听你讲这些年的事。",
-    "comment": "第一天咖啡馆引入演出"
-  },
-  {
-    "key": "opening.line.08",
-    "text": "阿黛尔低头理了理围裙，停了一会儿，再抬起头时已经重新露出笑容。",
-    "comment": "第一天咖啡馆引入演出"
-  },
-  {
-    "key": "opening.line.09",
-    "text": "好啦，伤心的事我们慢慢说。今天先从第一杯咖啡开始，我可不会让新店主第一天就手忙脚乱。",
-    "comment": "第一天咖啡馆引入演出"
-  },
-  {
-    "key": "opening.line.10",
-    "text": "客人来了，先看清他们的订单，再按配方准备原料、使用设备。做好的饮品记得交给对应的客人。",
-    "comment": "第一天咖啡馆引入演出"
-  },
-  {
-    "key": "opening.line.11",
-    "text": "不确定的时候就查看订单和配方，别急着乱试。先把一位客人照顾好，再接下一位。",
-    "comment": "第一天咖啡馆引入演出"
-  },
-  {
-    "key": "opening.line.12",
-    "text": "那就拜托你了，阿黛尔。",
-    "comment": "第一天咖啡馆引入演出"
-  },
-  {
-    "key": "opening.line.13",
-    "text": "当然。不过店主也要记得照顾好自己——这是你叔叔留给我们的规矩。准备好了？我们开门吧。",
     "comment": "第一天咖啡馆引入演出"
   },
   {
@@ -1518,5 +1453,760 @@
     "key": "first.day.perception.failure",
     "text": "不知怎么，总觉得她身上的气息突然变了。\n我没心思琢磨这位古怪老太太爱琢磨些什么，还好她把视线收了回去。\n\n可能是看出老太太想点餐，阿黛尔递来一张自己无聊时手绘的餐单。\n顾客B：“小杯黑咖啡，无糖，就这样。”\n\nB太太是新沸点咖啡的第一位客人。就让我们以此为契机，开始享受手冲咖啡带来的乐趣吧！",
     "comment": "首日咖啡馆知觉检定分支"
+  },
+  {
+    "key": "cafe.tutorial.customer.name",
+    "text": "顾客B",
+    "comment": "文案-新手教程.docx；原文保留"
+  },
+  {
+    "key": "opening.line.01",
+    "text": "哼哼，现在就由我来给店长介绍一下咖啡馆吧！",
+    "comment": "原稿段落 9"
+  },
+  {
+    "key": "opening.line.02",
+    "text": "这是大堂，顾客会在吧台下单取餐。",
+    "comment": "原稿段落 9"
+  },
+  {
+    "key": "opening.line.03",
+    "text": "操作间就在吧台旁边！不过要等一会才可以进去。",
+    "comment": "原稿段落 9"
+  },
+  {
+    "key": "opening.line.04",
+    "text": "这个楼梯通往二层，但我还没整理，等我们赚够钱，就可以进行扩充升级……",
+    "comment": "原稿段落 9"
+  },
+  {
+    "key": "opening.line.05",
+    "text": "我们在一楼经过的地方都一尘不染，宽敞明亮，萦绕着淡淡咖啡香",
+    "comment": "原稿段落 10"
+  },
+  {
+    "key": "opening.line.06",
+    "text": "和杂乱无章的二楼对比，一下能就看出阿黛尔花了多少心思",
+    "comment": "原稿段落 11"
+  },
+  {
+    "key": "opening.line.07",
+    "text": "你也是够不容易的",
+    "comment": "原稿段落 12"
+  },
+  {
+    "key": "opening.line.08",
+    "text": "你是指清理吗……确实挺累的，但看着一家乱糟糟的店因为变成这样，就觉得，觉得——",
+    "comment": "原稿段落 13"
+  },
+  {
+    "key": "cafe.tutorial.customer_arrives.title",
+    "text": "customer_arrives",
+    "comment": "文案-新手教程.docx；原文保留"
+  },
+  {
+    "key": "cafe.tutorial.customer_arrives.01",
+    "text": "进来的是一个衣着普通的老太太，记不住脸",
+    "comment": "原稿段落 15"
+  },
+  {
+    "key": "cafe.tutorial.customer_arrives.02",
+    "text": "你们是新店家？我路过了，就进来看看……怎么还叫沸点咖啡？不换个名字？",
+    "comment": "原稿段落 16"
+  },
+  {
+    "key": "cafe.tutorial.customer_arrives.03",
+    "text": "嗯？为什么要换名字？",
+    "comment": "原稿段落 17"
+  },
+  {
+    "key": "cafe.tutorial.customer_arrives.04",
+    "text": "哎呀，自从最开始那个店主说不回王都了，这家店就乱套咯……",
+    "comment": "原稿段落 18"
+  },
+  {
+    "key": "cafe.tutorial.customer_arrives.05",
+    "text": "您说的是我叔叔杜尔瓦吧。",
+    "comment": "原稿段落 19"
+  },
+  {
+    "key": "cafe.tutorial.customer_arrives.06",
+    "text": "她看了我一眼，我回以微笑。",
+    "comment": "原稿段落 20"
+  },
+  {
+    "key": "cafe.tutorial.perception_success.title",
+    "text": "perception_success",
+    "comment": "文案-新手教程.docx；原文保留"
+  },
+  {
+    "key": "cafe.tutorial.perception_success.01",
+    "text": "落魄",
+    "comment": "原稿段落 22"
+  },
+  {
+    "key": "cafe.tutorial.perception_success.02",
+    "text": "老客人",
+    "comment": "原稿段落 23"
+  },
+  {
+    "key": "cafe.tutorial.perception_success.03",
+    "text": "我听过许多他朋友的故事，结果无一例外。没想到还有活着的人",
+    "comment": "原稿段落 25"
+  },
+  {
+    "key": "cafe.tutorial.perception_success.04",
+    "text": "这位小姑娘是叔叔的女儿阿黛尔。",
+    "comment": "原稿段落 26"
+  },
+  {
+    "key": "cafe.tutorial.perception_success.05",
+    "text": "这家店现在是我们主管，和过去同根同源，所以平时会更长修剪下树的枝蔓，提升美观。",
+    "comment": "原稿段落 26"
+  },
+  {
+    "key": "cafe.tutorial.perception_success.06",
+    "text": "阿黛尔，你和这位太太说说这两天你做了什么",
+    "comment": "原稿段落 26"
+  },
+  {
+    "key": "cafe.tutorial.perception_success.07",
+    "text": "换了好喝的新豆子，在采购新的基底，还买了新杯子……还来了个新咖啡师！",
+    "comment": "原稿段落 27"
+  },
+  {
+    "key": "cafe.tutorial.perception_success.08",
+    "text": "咖啡师也换了？",
+    "comment": "原稿段落 28"
+  },
+  {
+    "key": "cafe.tutorial.perception_success.09",
+    "text": "就是我们{playername}店长可会做咖啡啦，您要不尝尝啊，不可能比以前差！",
+    "comment": "原稿段落 29"
+  },
+  {
+    "key": "cafe.tutorial.perception_failure.title",
+    "text": "perception_failure",
+    "comment": "文案-新手教程.docx；原文保留"
+  },
+  {
+    "key": "cafe.tutorial.perception_failure.01",
+    "text": "不知怎么，总感觉她身上的气息突然变了",
+    "comment": "原稿段落 31"
+  },
+  {
+    "key": "cafe.tutorial.perception_failure.02",
+    "text": "我没心思琢磨古怪的老太太爱琢磨些什么",
+    "comment": "原稿段落 32"
+  },
+  {
+    "key": "cafe.tutorial.perception_failure.03",
+    "text": "还好她把视线收了回去",
+    "comment": "原稿段落 33"
+  },
+  {
+    "key": "cafe.tutorial.order_confirmed.title",
+    "text": "order_confirmed",
+    "comment": "文案-新手教程.docx；原文保留"
+  },
+  {
+    "key": "cafe.tutorial.order_confirmed.01",
+    "text": "可能是看出老太太想点餐，阿黛尔塞去一张自己无聊手绘的餐单",
+    "comment": "原稿段落 35"
+  },
+  {
+    "key": "cafe.tutorial.order_confirmed.02",
+    "text": "小杯装黑咖啡 ，无糖，就这样",
+    "comment": "原稿段落 36"
+  },
+  {
+    "key": "cafe.tutorial.order_confirmed.03",
+    "text": "B太太——新沸点咖啡的第一位客人",
+    "comment": "原稿段落 37"
+  },
+  {
+    "key": "cafe.tutorial.order_confirmed.04",
+    "text": "就让我们以此为契机，开始享受手冲咖啡带来的乐趣吧！",
+    "comment": "原稿段落 38"
+  },
+  {
+    "key": "cafe.tutorial.workstation_open.title",
+    "text": "workstation_open",
+    "comment": "文案-新手教程.docx；原文保留"
+  },
+  {
+    "key": "cafe.tutorial.workstation_open.01",
+    "text": "[演出说明：背景：大堂-吧台；UI正式开放，点击吧台的桌面可立刻转换至操作台视角，]",
+    "comment": "原稿段落 40"
+  },
+  {
+    "key": "cafe.tutorial.make_coffee_base.title",
+    "text": "make_coffee_base",
+    "comment": "文案-新手教程.docx；原文保留"
+  },
+  {
+    "key": "cafe.tutorial.make_coffee_base.01",
+    "text": "哎呀呀，还没正式营业，就有了一笔生意进账。但是店长，你都不说话。看着有点紧张？哦，因为是第一次！我会全程提醒你的！首先，要确认客户订单上的需求！",
+    "comment": "原稿段落 45"
+  },
+  {
+    "key": "cafe.tutorial.make_coffee_base.02",
+    "text": "顾客姓名：B顾客要求：无糖黑咖，其他随便配料表:咖啡原液（咖啡粉+开水）根据浓度/甜度要求，加入适量清水/方糖顾客姓名：B顾客要求：无糖黑咖，其他随便配料表:咖啡原液（咖啡粉+开水）根据浓度/甜度要求，加入适量清水/方糖",
+    "comment": "原稿段落 46"
+  },
+  {
+    "key": "cafe.tutorial.make_coffee_base.03",
+    "text": "按照要求，首先我们要配置咖啡原液；然后将其注杯——",
+    "comment": "原稿段落 51"
+  },
+  {
+    "key": "cafe.tutorial.pour_into_cup.title",
+    "text": "pour_into_cup",
+    "comment": "文案-新手教程.docx；原文保留"
+  },
+  {
+    "key": "cafe.tutorial.pour_into_cup.01",
+    "text": "按照要求，首先我们要配置咖啡原液；然后将其注杯——",
+    "comment": "原稿段落 51"
+  },
+  {
+    "key": "cafe.tutorial.adjust_strength.title",
+    "text": "adjust_strength",
+    "comment": "文案-新手教程.docx；原文保留"
+  },
+  {
+    "key": "cafe.tutorial.adjust_strength.01",
+    "text": "其后，查看浓度与甜度要求，判断是否添入清水与方糖；今天顾客似乎只要求了无糖；",
+    "comment": "原稿段落 52"
+  },
+  {
+    "key": "cafe.tutorial.adjust_sweetness.title",
+    "text": "adjust_sweetness",
+    "comment": "文案-新手教程.docx；原文保留"
+  },
+  {
+    "key": "cafe.tutorial.adjust_sweetness.01",
+    "text": "其后，查看浓度与甜度要求，判断是否添入清水与方糖；今天顾客似乎只要求了无糖；",
+    "comment": "原稿段落 52"
+  },
+  {
+    "key": "cafe.tutorial.adjust_sweetness.02",
+    "text": "制作配方不止一种，探索是无止境的，欢迎你放飞天马般的想象力，解锁多元趣味组合！",
+    "comment": "原稿段落 53"
+  },
+  {
+    "key": "cafe.tutorial.demo_grind.title",
+    "text": "研磨",
+    "comment": "文案-新手教程.docx；原文保留"
+  },
+  {
+    "key": "cafe.tutorial.demo_grind.01",
+    "text": "研磨",
+    "comment": "原稿枚举展开；未添加玩法"
+  },
+  {
+    "key": "cafe.tutorial.demo_boil.title",
+    "text": "烧水",
+    "comment": "文案-新手教程.docx；原文保留"
+  },
+  {
+    "key": "cafe.tutorial.demo_boil.01",
+    "text": "烧水",
+    "comment": "原稿枚举展开；未添加玩法"
+  },
+  {
+    "key": "cafe.tutorial.demo_brew.title",
+    "text": "冲泡",
+    "comment": "文案-新手教程.docx；原文保留"
+  },
+  {
+    "key": "cafe.tutorial.demo_brew.01",
+    "text": "冲泡",
+    "comment": "原稿枚举展开；未添加玩法"
+  },
+  {
+    "key": "cafe.tutorial.demo_cup.title",
+    "text": "装杯",
+    "comment": "文案-新手教程.docx；原文保留"
+  },
+  {
+    "key": "cafe.tutorial.demo_cup.01",
+    "text": "装杯",
+    "comment": "原稿枚举展开；未添加玩法"
+  },
+  {
+    "key": "cafe.tutorial.demo_base.title",
+    "text": "基底",
+    "comment": "文案-新手教程.docx；原文保留"
+  },
+  {
+    "key": "cafe.tutorial.demo_base.01",
+    "text": "基底",
+    "comment": "原稿枚举展开；未添加玩法"
+  },
+  {
+    "key": "cafe.tutorial.demo_strength.title",
+    "text": "调浓度",
+    "comment": "文案-新手教程.docx；原文保留"
+  },
+  {
+    "key": "cafe.tutorial.demo_strength.01",
+    "text": "调浓度",
+    "comment": "原稿枚举展开；未添加玩法"
+  },
+  {
+    "key": "cafe.tutorial.demo_sweetness.title",
+    "text": "甜度",
+    "comment": "文案-新手教程.docx；原文保留"
+  },
+  {
+    "key": "cafe.tutorial.demo_sweetness.01",
+    "text": "甜度",
+    "comment": "原稿枚举展开；未添加玩法"
+  },
+  {
+    "key": "cafe.tutorial.demo_serve.title",
+    "text": "出餐",
+    "comment": "文案-新手教程.docx；原文保留"
+  },
+  {
+    "key": "cafe.tutorial.demo_serve.01",
+    "text": "出餐",
+    "comment": "原稿枚举展开；未添加玩法"
+  },
+  {
+    "key": "cafe.tutorial.serve_customer.title",
+    "text": "serve_customer",
+    "comment": "文案-新手教程.docx；原文保留"
+  },
+  {
+    "key": "cafe.tutorial.serve_customer.01",
+    "text": "怎么样？！好紧张啊！",
+    "comment": "原稿段落 67"
+  },
+  {
+    "key": "cafe.tutorial.result_excellent.title",
+    "text": "独一无二",
+    "comment": "文案-新手教程.docx；原文保留"
+  },
+  {
+    "key": "cafe.tutorial.result_excellent.01",
+    "text": "这个咖啡嘛……简直就是独一无二！",
+    "comment": "原稿枚举展开；未添加玩法"
+  },
+  {
+    "key": "cafe.tutorial.result_excellent.02",
+    "text": "金钱+200",
+    "comment": "原稿枚举展开；未添加玩法"
+  },
+  {
+    "key": "cafe.tutorial.result_good.title",
+    "text": "滴滴香浓",
+    "comment": "文案-新手教程.docx；原文保留"
+  },
+  {
+    "key": "cafe.tutorial.result_good.01",
+    "text": "这个咖啡嘛……简直就是滴滴香浓！",
+    "comment": "原稿枚举展开；未添加玩法"
+  },
+  {
+    "key": "cafe.tutorial.result_good.02",
+    "text": "金钱+150",
+    "comment": "原稿枚举展开；未添加玩法"
+  },
+  {
+    "key": "cafe.tutorial.result_average.title",
+    "text": "中庸之道",
+    "comment": "文案-新手教程.docx；原文保留"
+  },
+  {
+    "key": "cafe.tutorial.result_average.01",
+    "text": "这个咖啡嘛……简直就是中庸之道！",
+    "comment": "原稿枚举展开；未添加玩法"
+  },
+  {
+    "key": "cafe.tutorial.result_average.02",
+    "text": "金钱+50",
+    "comment": "原稿枚举展开；未添加玩法"
+  },
+  {
+    "key": "cafe.tutorial.result_bad.title",
+    "text": "食不知味",
+    "comment": "文案-新手教程.docx；原文保留"
+  },
+  {
+    "key": "cafe.tutorial.result_bad.01",
+    "text": "这个咖啡嘛……简直就是食不知味！",
+    "comment": "原稿枚举展开；未添加玩法"
+  },
+  {
+    "key": "cafe.tutorial.result_bad.02",
+    "text": "金钱+10",
+    "comment": "原稿枚举展开；未添加玩法"
+  },
+  {
+    "key": "cafe.tutorial.result_refund.title",
+    "text": "好想退钱",
+    "comment": "文案-新手教程.docx；原文保留"
+  },
+  {
+    "key": "cafe.tutorial.result_refund.01",
+    "text": "这个咖啡嘛……简直就是好想退钱！",
+    "comment": "原稿枚举展开；未添加玩法"
+  },
+  {
+    "key": "cafe.tutorial.result_refund.02",
+    "text": "金钱-200，打回重做",
+    "comment": "原稿枚举展开；未添加玩法"
+  },
+  {
+    "key": "cafe.tutorial.ending.title",
+    "text": "ending",
+    "comment": "文案-新手教程.docx；原文保留"
+  },
+  {
+    "key": "cafe.tutorial.ending.01",
+    "text": "",
+    "comment": "原稿段落 70"
+  },
+  {
+    "key": "cafe.tutorial.ending.02",
+    "text": "还真是不知道怎么说的一天呢，不过也算真的开始重回正轨了。",
+    "comment": "原稿段落 71"
+  },
+  {
+    "key": "cafe.tutorial.ending.03",
+    "text": "阿黛尔去休息了。我望着空旷的大厅，许久都没有动身",
+    "comment": "原稿段落 73"
+  },
+  {
+    "key": "cafe.tutorial.ending.04",
+    "text": "今天实在太辗转奔波，希望明天生活能开始进入正轨",
+    "comment": "原稿段落 74"
+  },
+  {
+    "key": "cafe.tutorial.ending.05",
+    "text": "愿神保佑沸点咖啡店",
+    "comment": "原稿段落 75"
+  },
+  {
+    "key": "cafe.tutorial.ending.06",
+    "text": "",
+    "comment": "原稿段落 76"
+  },
+  {
+    "key": "cafe.tutorial.source.p000",
+    "text": "文案 - 教程关：第一杯咖啡",
+    "comment": "原稿完整归档（含舞台说明）；不自动播放"
+  },
+  {
+    "key": "cafe.tutorial.source.p002",
+    "text": "（接开幕文案）",
+    "comment": "原稿完整归档（含舞台说明）；不自动播放"
+  },
+  {
+    "key": "cafe.tutorial.source.p003",
+    "text": "（切大地图，聚焦咖啡馆，其余地点锁定）",
+    "comment": "原稿完整归档（含舞台说明）；不自动播放"
+  },
+  {
+    "key": "cafe.tutorial.source.p004",
+    "text": "（click 跳转一楼大堂）",
+    "comment": "原稿完整归档（含舞台说明）；不自动播放"
+  },
+  {
+    "key": "cafe.tutorial.source.p006",
+    "text": "重新启航（已对齐，可执行）",
+    "comment": "原稿完整归档（含舞台说明）；不自动播放"
+  },
+  {
+    "key": "cafe.tutorial.source.p007",
+    "text": "[背景图：一楼大堂，开门风铃/铃铛声响]",
+    "comment": "原稿完整归档（含舞台说明）；不自动播放"
+  },
+  {
+    "key": "cafe.tutorial.source.p008",
+    "text": "[演出说明：对应背景图：切大堂、操作间、二楼（杂乱）、三楼]",
+    "comment": "原稿完整归档（含舞台说明）；不自动播放"
+  },
+  {
+    "key": "cafe.tutorial.source.p009",
+    "text": "阿黛尔·米尼耶：「哼哼，现在就由我来给店长介绍一下咖啡馆吧！」「这是大堂，顾客会在吧台下单取餐。」「操作间就在吧台旁边！不过要等一会才可以进去。」「这个楼梯通往二层，但我还没整理，等我们赚够钱，就可以进行扩充升级……」",
+    "comment": "原稿完整归档（含舞台说明）；不自动播放"
+  },
+  {
+    "key": "cafe.tutorial.source.p010",
+    "text": "我们在一楼经过的地方都一尘不染，宽敞明亮，萦绕着淡淡咖啡香",
+    "comment": "原稿完整归档（含舞台说明）；不自动播放"
+  },
+  {
+    "key": "cafe.tutorial.source.p011",
+    "text": "和杂乱无章的二楼对比，一下能就看出阿黛尔花了多少心思",
+    "comment": "原稿完整归档（含舞台说明）；不自动播放"
+  },
+  {
+    "key": "cafe.tutorial.source.p012",
+    "text": "{playername}：你也是够不容易的",
+    "comment": "原稿完整归档（含舞台说明）；不自动播放"
+  },
+  {
+    "key": "cafe.tutorial.source.p013",
+    "text": "阿黛尔·米尼耶：（#思索）「你是指清理吗……确实挺累的，但看着一家乱糟糟的店因为变成这样，就觉得，觉得——」",
+    "comment": "原稿完整归档（含舞台说明）；不自动播放"
+  },
+  {
+    "key": "cafe.tutorial.source.p014",
+    "text": "[开门风铃/铃铛声（同前），黑色剪影立绘出] ",
+    "comment": "原稿完整归档（含舞台说明）；不自动播放"
+  },
+  {
+    "key": "cafe.tutorial.source.p015",
+    "text": "进来的是一个衣着普通的老太太，记不住脸",
+    "comment": "原稿完整归档（含舞台说明）；不自动播放"
+  },
+  {
+    "key": "cafe.tutorial.source.p016",
+    "text": "顾客B：「你们是新店家？我路过了，就进来看看……怎么还叫沸点咖啡？不换个名字？」",
+    "comment": "原稿完整归档（含舞台说明）；不自动播放"
+  },
+  {
+    "key": "cafe.tutorial.source.p017",
+    "text": "阿黛尔·米尼耶：（#迷惑）「嗯？为什么要换名字？」",
+    "comment": "原稿完整归档（含舞台说明）；不自动播放"
+  },
+  {
+    "key": "cafe.tutorial.source.p018",
+    "text": "顾客B：「哎呀，自从最开始那个店主说不回王都了，这家店就乱套咯……」",
+    "comment": "原稿完整归档（含舞台说明）；不自动播放"
+  },
+  {
+    "key": "cafe.tutorial.source.p019",
+    "text": "{playername}：「您说的是我叔叔杜尔瓦吧。」",
+    "comment": "原稿完整归档（含舞台说明）；不自动播放"
+  },
+  {
+    "key": "cafe.tutorial.source.p020",
+    "text": "她看了我一眼，我回以微笑。",
+    "comment": "原稿完整归档（含舞台说明）；不自动播放"
+  },
+  {
+    "key": "cafe.tutorial.source.p021",
+    "text": "开启知觉鉴定，知觉≥3触发 ",
+    "comment": "原稿完整归档（含舞台说明）；不自动播放"
+  },
+  {
+    "key": "cafe.tutorial.source.p022",
+    "text": "老太太说这家店是乱套，而不用「落魄」做形容",
+    "comment": "原稿完整归档（含舞台说明）；不自动播放"
+  },
+  {
+    "key": "cafe.tutorial.source.p023",
+    "text": "我想她可能是叔叔的「老客人」，或者说他为数不多的朋友",
+    "comment": "原稿完整归档（含舞台说明）；不自动播放"
+  },
+  {
+    "key": "cafe.tutorial.source.p024",
+    "text": "（程序附文本插入：知觉判定成功，触发隐藏剧情）",
+    "comment": "原稿完整归档（含舞台说明）；不自动播放"
+  },
+  {
+    "key": "cafe.tutorial.source.p025",
+    "text": "我听过许多他朋友的故事，结果无一例外。没想到还有活着的人",
+    "comment": "原稿完整归档（含舞台说明）；不自动播放"
+  },
+  {
+    "key": "cafe.tutorial.source.p026",
+    "text": "{playername}：「这位小姑娘是叔叔的女儿阿黛尔。」「这家店现在是我们主管，和过去同根同源，所以平时会更长修剪下树的枝蔓，提升美观。」「阿黛尔，你和这位太太说说这两天你做了什么」",
+    "comment": "原稿完整归档（含舞台说明）；不自动播放"
+  },
+  {
+    "key": "cafe.tutorial.source.p027",
+    "text": "阿黛尔·米尼耶：「换了好喝的新豆子，在采购新的基底，还买了新杯子……还来了个新咖啡师！」",
+    "comment": "原稿完整归档（含舞台说明）；不自动播放"
+  },
+  {
+    "key": "cafe.tutorial.source.p028",
+    "text": "顾客B：「咖啡师也换了？」",
+    "comment": "原稿完整归档（含舞台说明）；不自动播放"
+  },
+  {
+    "key": "cafe.tutorial.source.p029",
+    "text": "阿黛尔·米尼耶：（#开心）「就是我们{playername}店长可会做咖啡啦，您要不尝尝啊，不可能比以前差！」",
+    "comment": "原稿完整归档（含舞台说明）；不自动播放"
+  },
+  {
+    "key": "cafe.tutorial.source.p030",
+    "text": "(知觉鉴定失败，知觉＜3，触发以下剧情)",
+    "comment": "原稿完整归档（含舞台说明）；不自动播放"
+  },
+  {
+    "key": "cafe.tutorial.source.p031",
+    "text": "不知怎么，总感觉她身上的气息突然变了",
+    "comment": "原稿完整归档（含舞台说明）；不自动播放"
+  },
+  {
+    "key": "cafe.tutorial.source.p032",
+    "text": "我没心思琢磨古怪的老太太爱琢磨些什么",
+    "comment": "原稿完整归档（含舞台说明）；不自动播放"
+  },
+  {
+    "key": "cafe.tutorial.source.p033",
+    "text": "还好她把视线收了回去",
+    "comment": "原稿完整归档（含舞台说明）；不自动播放"
+  },
+  {
+    "key": "cafe.tutorial.source.p034",
+    "text": "(无论知觉检定是否达标，都强制进入）",
+    "comment": "原稿完整归档（含舞台说明）；不自动播放"
+  },
+  {
+    "key": "cafe.tutorial.source.p035",
+    "text": "可能是看出老太太想点餐，阿黛尔塞去一张自己无聊手绘的餐单",
+    "comment": "原稿完整归档（含舞台说明）；不自动播放"
+  },
+  {
+    "key": "cafe.tutorial.source.p036",
+    "text": "顾客B：（思索）「小杯装黑咖啡 ，无糖，就这样」",
+    "comment": "原稿完整归档（含舞台说明）；不自动播放"
+  },
+  {
+    "key": "cafe.tutorial.source.p037",
+    "text": "B太太——新沸点咖啡的第一位客人",
+    "comment": "原稿完整归档（含舞台说明）；不自动播放"
+  },
+  {
+    "key": "cafe.tutorial.source.p038",
+    "text": "就让我们以此为契机，开始享受手冲咖啡带来的乐趣吧！",
+    "comment": "原稿完整归档（含舞台说明）；不自动播放"
+  },
+  {
+    "key": "cafe.tutorial.source.p040",
+    "text": "[演出说明：背景：大堂-吧台；UI正式开放，点击吧台的桌面可立刻转换至操作台视角，]",
+    "comment": "原稿完整归档（含舞台说明）；不自动播放"
+  },
+  {
+    "key": "cafe.tutorial.source.p042",
+    "text": "咖啡怎么出餐",
+    "comment": "原稿完整归档（含舞台说明）；不自动播放"
+  },
+  {
+    "key": "cafe.tutorial.source.p043",
+    "text": "[演出说明：UI正式开放，点击吧台的桌面可立刻转换至操作台视角，弹窗显示具体说明，譬如如何操作等界面，具体逻辑参见玩法。当阿黛尔讲解功能时对应区域播放操作动画。]",
+    "comment": "原稿完整归档（含舞台说明）；不自动播放"
+  },
+  {
+    "key": "cafe.tutorial.source.p044",
+    "text": "[操作台]",
+    "comment": "原稿完整归档（含舞台说明）；不自动播放"
+  },
+  {
+    "key": "cafe.tutorial.source.p045",
+    "text": "阿黛尔·米尼耶：（#开心）哎呀呀，还没正式营业，就有了一笔生意进账。但是店长，你都不说话。看着有点紧张？哦，因为是第一次！我会全程提醒你的！首先，要确认客户订单上的需求！",
+    "comment": "原稿完整归档（含舞台说明）；不自动播放"
+  },
+  {
+    "key": "cafe.tutorial.source.p046",
+    "text": "顾客姓名：B顾客要求：无糖黑咖，其他随便配料表:咖啡原液（咖啡粉+开水）根据浓度/甜度要求，加入适量清水/方糖顾客姓名：B顾客要求：无糖黑咖，其他随便配料表:咖啡原液（咖啡粉+开水）根据浓度/甜度要求，加入适量清水/方糖",
+    "comment": "原稿完整归档（含舞台说明）；不自动播放"
+  },
+  {
+    "key": "cafe.tutorial.source.p050",
+    "text": "（操作步骤动画说明，需要Highlight强调）",
+    "comment": "原稿完整归档（含舞台说明）；不自动播放"
+  },
+  {
+    "key": "cafe.tutorial.source.p051",
+    "text": "阿黛尔·米尼耶：按照要求，首先我们要配置咖啡原液；然后将其注杯——",
+    "comment": "原稿完整归档（含舞台说明）；不自动播放"
+  },
+  {
+    "key": "cafe.tutorial.source.p052",
+    "text": "其后，查看浓度与甜度要求，判断是否添入清水与方糖；今天顾客似乎只要求了无糖；",
+    "comment": "原稿完整归档（含舞台说明）；不自动播放"
+  },
+  {
+    "key": "cafe.tutorial.source.p053",
+    "text": "制作配方不止一种，探索是无止境的，欢迎你放飞天马般的想象力，解锁多元趣味组合！",
+    "comment": "原稿完整归档（含舞台说明）；不自动播放"
+  },
+  {
+    "key": "cafe.tutorial.source.p054",
+    "text": "[演出说明：弹出说明对话框，玩家可以选择性查看操作动画演示，研磨、烧水、冲泡、装杯、基底、调浓度、甜度，出餐多流程；之后玩家自由发挥。]（参考牧场物语）",
+    "comment": "原稿完整归档（含舞台说明）；不自动播放"
+  },
+  {
+    "key": "cafe.tutorial.source.p055",
+    "text": "（玩家自由调配过程）",
+    "comment": "原稿完整归档（含舞台说明）；不自动播放"
+  },
+  {
+    "key": "cafe.tutorial.source.p057",
+    "text": "（出餐按钮 Buttuon 按钮，切吧台）",
+    "comment": "原稿完整归档（含舞台说明）；不自动播放"
+  },
+  {
+    "key": "cafe.tutorial.source.p065",
+    "text": "我的第一次如何？",
+    "comment": "原稿完整归档（含舞台说明）；不自动播放"
+  },
+  {
+    "key": "cafe.tutorial.source.p066",
+    "text": "[演出说明-背景：大堂-吧台，顾客立绘，送餐动画，（通用NPC：可以不用喝咖啡动作，有交互角色需要]",
+    "comment": "原稿完整归档（含舞台说明）；不自动播放"
+  },
+  {
+    "key": "cafe.tutorial.source.p067",
+    "text": "阿黛尔·米尼耶：（#焦虑）「怎么样？！好紧张啊！」",
+    "comment": "原稿完整归档（含舞台说明）；不自动播放"
+  },
+  {
+    "key": "cafe.tutorial.source.p068",
+    "text": "顾客B：「这个咖啡嘛……简直就是    （按数值判定显示：独一无二[金钱+200]；滴滴香浓[金钱+150] 中庸之道[金钱+50];食不知味[金钱+10]；好想退钱[金钱-200，打回重做]）！」",
+    "comment": "原稿完整归档（含舞台说明）；不自动播放"
+  },
+  {
+    "key": "cafe.tutorial.source.p069",
+    "text": "[演出说明，背景-同上，金钱效果UI，结算动画：独一无二+滴滴香浓：烟花效果+喝彩声，中庸之道：无动画，食不知味、好想退钱丑化emoji铺满屏幕，维持五秒。] ",
+    "comment": "原稿完整归档（含舞台说明）；不自动播放"
+  },
+  {
+    "key": "cafe.tutorial.source.p070",
+    "text": "（顾客离开）",
+    "comment": "原稿完整归档（含舞台说明）；不自动播放"
+  },
+  {
+    "key": "cafe.tutorial.source.p071",
+    "text": "阿黛尔·米尼耶：（#平静）「还真是不知道怎么说的一天呢，不过也算真的开始重回正轨了。」",
+    "comment": "原稿完整归档（含舞台说明）；不自动播放"
+  },
+  {
+    "key": "cafe.tutorial.source.p072",
+    "text": "（过场动画：阿黛尔立绘闪出）",
+    "comment": "原稿完整归档（含舞台说明）；不自动播放"
+  },
+  {
+    "key": "cafe.tutorial.source.p073",
+    "text": "阿黛尔去休息了。我望着空旷的大厅，许久都没有动身",
+    "comment": "原稿完整归档（含舞台说明）；不自动播放"
+  },
+  {
+    "key": "cafe.tutorial.source.p074",
+    "text": "今天实在太辗转奔波，希望明天生活能开始进入正轨",
+    "comment": "原稿完整归档（含舞台说明）；不自动播放"
+  },
+  {
+    "key": "cafe.tutorial.source.p075",
+    "text": "愿神保佑沸点咖啡店",
+    "comment": "原稿完整归档（含舞台说明）；不自动播放"
+  },
+  {
+    "key": "cafe.tutorial.source.p076",
+    "text": "（切黑场）",
+    "comment": "原稿完整归档（含舞台说明）；不自动播放"
+  },
+  {
+    "key": "cafe.tutorial.source.p077",
+    "text": "（过场动画）",
+    "comment": "原稿完整归档（含舞台说明）；不自动播放"
   }
 ]

@@ -1,33 +1,33 @@
 [
   {
-    "lineId": "opening_01",
+    "lineId": "opening_001",
     "presentationId": "first_day_cafe",
     "seq": 1,
-    "speaker": "narrator",
+    "speaker": "right",
     "textKey": "opening.line.01",
     "gesture": "none",
     "autoAdvanceSeconds": 0
   },
   {
-    "lineId": "opening_02",
+    "lineId": "opening_002",
     "presentationId": "first_day_cafe",
     "seq": 2,
     "speaker": "right",
     "textKey": "opening.line.02",
-    "gesture": "nod",
+    "gesture": "none",
     "autoAdvanceSeconds": 0
   },
   {
-    "lineId": "opening_03",
+    "lineId": "opening_003",
     "presentationId": "first_day_cafe",
     "seq": 3,
-    "speaker": "left",
+    "speaker": "right",
     "textKey": "opening.line.03",
     "gesture": "none",
     "autoAdvanceSeconds": 0
   },
   {
-    "lineId": "opening_04",
+    "lineId": "opening_004",
     "presentationId": "first_day_cafe",
     "seq": 4,
     "speaker": "right",
@@ -36,84 +36,534 @@
     "autoAdvanceSeconds": 0
   },
   {
-    "lineId": "opening_05",
+    "lineId": "opening_005",
     "presentationId": "first_day_cafe",
     "seq": 5,
-    "speaker": "right",
+    "speaker": "narrator",
     "textKey": "opening.line.05",
     "gesture": "none",
     "autoAdvanceSeconds": 0
   },
   {
-    "lineId": "opening_06",
+    "lineId": "opening_006",
     "presentationId": "first_day_cafe",
     "seq": 6,
-    "speaker": "left",
+    "speaker": "narrator",
     "textKey": "opening.line.06",
     "gesture": "none",
     "autoAdvanceSeconds": 0
   },
   {
-    "lineId": "opening_07",
+    "lineId": "opening_007",
     "presentationId": "first_day_cafe",
     "seq": 7,
-    "speaker": "right",
+    "speaker": "left",
     "textKey": "opening.line.07",
     "gesture": "none",
     "autoAdvanceSeconds": 0
   },
   {
-    "lineId": "opening_08",
+    "lineId": "opening_008",
     "presentationId": "first_day_cafe",
     "seq": 8,
-    "speaker": "narrator",
+    "speaker": "right",
     "textKey": "opening.line.08",
     "gesture": "none",
     "autoAdvanceSeconds": 0
   },
   {
-    "lineId": "opening_09",
-    "presentationId": "first_day_cafe",
+    "lineId": "cafe_tutorial_001",
+    "presentationId": "cafe_tutorial.customer_arrives",
+    "seq": 1,
+    "speaker": "narrator",
+    "textKey": "cafe.tutorial.customer_arrives.01",
+    "gesture": "none",
+    "autoAdvanceSeconds": 0
+  },
+  {
+    "lineId": "cafe_tutorial_002",
+    "presentationId": "cafe_tutorial.customer_arrives",
+    "seq": 2,
+    "speaker": "center",
+    "textKey": "cafe.tutorial.customer_arrives.02",
+    "gesture": "none",
+    "autoAdvanceSeconds": 0
+  },
+  {
+    "lineId": "cafe_tutorial_003",
+    "presentationId": "cafe_tutorial.customer_arrives",
+    "seq": 3,
+    "speaker": "right",
+    "textKey": "cafe.tutorial.customer_arrives.03",
+    "gesture": "none",
+    "autoAdvanceSeconds": 0
+  },
+  {
+    "lineId": "cafe_tutorial_004",
+    "presentationId": "cafe_tutorial.customer_arrives",
+    "seq": 4,
+    "speaker": "center",
+    "textKey": "cafe.tutorial.customer_arrives.04",
+    "gesture": "none",
+    "autoAdvanceSeconds": 0
+  },
+  {
+    "lineId": "cafe_tutorial_005",
+    "presentationId": "cafe_tutorial.customer_arrives",
+    "seq": 5,
+    "speaker": "left",
+    "textKey": "cafe.tutorial.customer_arrives.05",
+    "gesture": "none",
+    "autoAdvanceSeconds": 0
+  },
+  {
+    "lineId": "cafe_tutorial_006",
+    "presentationId": "cafe_tutorial.customer_arrives",
+    "seq": 6,
+    "speaker": "narrator",
+    "textKey": "cafe.tutorial.customer_arrives.06",
+    "gesture": "none",
+    "autoAdvanceSeconds": 0
+  },
+  {
+    "lineId": "cafe_tutorial_007",
+    "presentationId": "cafe_tutorial.perception_success",
+    "seq": 1,
+    "speaker": "narrator",
+    "textKey": "cafe.tutorial.perception_success.01",
+    "gesture": "none",
+    "autoAdvanceSeconds": 0
+  },
+  {
+    "lineId": "cafe_tutorial_008",
+    "presentationId": "cafe_tutorial.perception_success",
+    "seq": 2,
+    "speaker": "narrator",
+    "textKey": "cafe.tutorial.perception_success.02",
+    "gesture": "none",
+    "autoAdvanceSeconds": 0
+  },
+  {
+    "lineId": "cafe_tutorial_009",
+    "presentationId": "cafe_tutorial.perception_success",
+    "seq": 3,
+    "speaker": "narrator",
+    "textKey": "cafe.tutorial.perception_success.03",
+    "gesture": "none",
+    "autoAdvanceSeconds": 0
+  },
+  {
+    "lineId": "cafe_tutorial_010",
+    "presentationId": "cafe_tutorial.perception_success",
+    "seq": 4,
+    "speaker": "left",
+    "textKey": "cafe.tutorial.perception_success.04",
+    "gesture": "none",
+    "autoAdvanceSeconds": 0
+  },
+  {
+    "lineId": "cafe_tutorial_011",
+    "presentationId": "cafe_tutorial.perception_success",
+    "seq": 5,
+    "speaker": "left",
+    "textKey": "cafe.tutorial.perception_success.05",
+    "gesture": "none",
+    "autoAdvanceSeconds": 0
+  },
+  {
+    "lineId": "cafe_tutorial_012",
+    "presentationId": "cafe_tutorial.perception_success",
+    "seq": 6,
+    "speaker": "left",
+    "textKey": "cafe.tutorial.perception_success.06",
+    "gesture": "none",
+    "autoAdvanceSeconds": 0
+  },
+  {
+    "lineId": "cafe_tutorial_013",
+    "presentationId": "cafe_tutorial.perception_success",
+    "seq": 7,
+    "speaker": "right",
+    "textKey": "cafe.tutorial.perception_success.07",
+    "gesture": "none",
+    "autoAdvanceSeconds": 0
+  },
+  {
+    "lineId": "cafe_tutorial_014",
+    "presentationId": "cafe_tutorial.perception_success",
+    "seq": 8,
+    "speaker": "center",
+    "textKey": "cafe.tutorial.perception_success.08",
+    "gesture": "none",
+    "autoAdvanceSeconds": 0
+  },
+  {
+    "lineId": "cafe_tutorial_015",
+    "presentationId": "cafe_tutorial.perception_success",
     "seq": 9,
     "speaker": "right",
-    "textKey": "opening.line.09",
-    "gesture": "nod",
-    "autoAdvanceSeconds": 0
-  },
-  {
-    "lineId": "opening_10",
-    "presentationId": "first_day_cafe",
-    "seq": 10,
-    "speaker": "right",
-    "textKey": "opening.line.10",
+    "textKey": "cafe.tutorial.perception_success.09",
     "gesture": "none",
     "autoAdvanceSeconds": 0
   },
   {
-    "lineId": "opening_11",
-    "presentationId": "first_day_cafe",
-    "seq": 11,
-    "speaker": "right",
-    "textKey": "opening.line.11",
+    "lineId": "cafe_tutorial_016",
+    "presentationId": "cafe_tutorial.perception_failure",
+    "seq": 1,
+    "speaker": "narrator",
+    "textKey": "cafe.tutorial.perception_failure.01",
     "gesture": "none",
     "autoAdvanceSeconds": 0
   },
   {
-    "lineId": "opening_12",
-    "presentationId": "first_day_cafe",
-    "seq": 12,
-    "speaker": "left",
-    "textKey": "opening.line.12",
+    "lineId": "cafe_tutorial_017",
+    "presentationId": "cafe_tutorial.perception_failure",
+    "seq": 2,
+    "speaker": "narrator",
+    "textKey": "cafe.tutorial.perception_failure.02",
     "gesture": "none",
     "autoAdvanceSeconds": 0
   },
   {
-    "lineId": "opening_13",
-    "presentationId": "first_day_cafe",
-    "seq": 13,
+    "lineId": "cafe_tutorial_018",
+    "presentationId": "cafe_tutorial.perception_failure",
+    "seq": 3,
+    "speaker": "narrator",
+    "textKey": "cafe.tutorial.perception_failure.03",
+    "gesture": "none",
+    "autoAdvanceSeconds": 0
+  },
+  {
+    "lineId": "cafe_tutorial_019",
+    "presentationId": "cafe_tutorial.order_confirmed",
+    "seq": 1,
+    "speaker": "narrator",
+    "textKey": "cafe.tutorial.order_confirmed.01",
+    "gesture": "none",
+    "autoAdvanceSeconds": 0
+  },
+  {
+    "lineId": "cafe_tutorial_020",
+    "presentationId": "cafe_tutorial.order_confirmed",
+    "seq": 2,
+    "speaker": "center",
+    "textKey": "cafe.tutorial.order_confirmed.02",
+    "gesture": "none",
+    "autoAdvanceSeconds": 0
+  },
+  {
+    "lineId": "cafe_tutorial_021",
+    "presentationId": "cafe_tutorial.order_confirmed",
+    "seq": 3,
+    "speaker": "narrator",
+    "textKey": "cafe.tutorial.order_confirmed.03",
+    "gesture": "none",
+    "autoAdvanceSeconds": 0
+  },
+  {
+    "lineId": "cafe_tutorial_022",
+    "presentationId": "cafe_tutorial.order_confirmed",
+    "seq": 4,
+    "speaker": "narrator",
+    "textKey": "cafe.tutorial.order_confirmed.04",
+    "gesture": "none",
+    "autoAdvanceSeconds": 0
+  },
+  {
+    "lineId": "cafe_tutorial_023",
+    "presentationId": "cafe_tutorial.workstation_open",
+    "seq": 1,
+    "speaker": "narrator",
+    "textKey": "cafe.tutorial.workstation_open.01",
+    "gesture": "none",
+    "autoAdvanceSeconds": 0
+  },
+  {
+    "lineId": "cafe_tutorial_024",
+    "presentationId": "cafe_tutorial.make_coffee_base",
+    "seq": 1,
     "speaker": "right",
-    "textKey": "opening.line.13",
-    "gesture": "nod",
+    "textKey": "cafe.tutorial.make_coffee_base.01",
+    "gesture": "none",
+    "autoAdvanceSeconds": 0
+  },
+  {
+    "lineId": "cafe_tutorial_025",
+    "presentationId": "cafe_tutorial.make_coffee_base",
+    "seq": 2,
+    "speaker": "narrator",
+    "textKey": "cafe.tutorial.make_coffee_base.02",
+    "gesture": "none",
+    "autoAdvanceSeconds": 0
+  },
+  {
+    "lineId": "cafe_tutorial_026",
+    "presentationId": "cafe_tutorial.make_coffee_base",
+    "seq": 3,
+    "speaker": "right",
+    "textKey": "cafe.tutorial.make_coffee_base.03",
+    "gesture": "none",
+    "autoAdvanceSeconds": 0
+  },
+  {
+    "lineId": "cafe_tutorial_027",
+    "presentationId": "cafe_tutorial.pour_into_cup",
+    "seq": 1,
+    "speaker": "right",
+    "textKey": "cafe.tutorial.pour_into_cup.01",
+    "gesture": "none",
+    "autoAdvanceSeconds": 0
+  },
+  {
+    "lineId": "cafe_tutorial_028",
+    "presentationId": "cafe_tutorial.adjust_strength",
+    "seq": 1,
+    "speaker": "narrator",
+    "textKey": "cafe.tutorial.adjust_strength.01",
+    "gesture": "none",
+    "autoAdvanceSeconds": 0
+  },
+  {
+    "lineId": "cafe_tutorial_029",
+    "presentationId": "cafe_tutorial.adjust_sweetness",
+    "seq": 1,
+    "speaker": "narrator",
+    "textKey": "cafe.tutorial.adjust_sweetness.01",
+    "gesture": "none",
+    "autoAdvanceSeconds": 0
+  },
+  {
+    "lineId": "cafe_tutorial_030",
+    "presentationId": "cafe_tutorial.adjust_sweetness",
+    "seq": 2,
+    "speaker": "narrator",
+    "textKey": "cafe.tutorial.adjust_sweetness.02",
+    "gesture": "none",
+    "autoAdvanceSeconds": 0
+  },
+  {
+    "lineId": "cafe_tutorial_031",
+    "presentationId": "cafe_tutorial.demo_grind",
+    "seq": 1,
+    "speaker": "narrator",
+    "textKey": "cafe.tutorial.demo_grind.01",
+    "gesture": "none",
+    "autoAdvanceSeconds": 0
+  },
+  {
+    "lineId": "cafe_tutorial_032",
+    "presentationId": "cafe_tutorial.demo_boil",
+    "seq": 1,
+    "speaker": "narrator",
+    "textKey": "cafe.tutorial.demo_boil.01",
+    "gesture": "none",
+    "autoAdvanceSeconds": 0
+  },
+  {
+    "lineId": "cafe_tutorial_033",
+    "presentationId": "cafe_tutorial.demo_brew",
+    "seq": 1,
+    "speaker": "narrator",
+    "textKey": "cafe.tutorial.demo_brew.01",
+    "gesture": "none",
+    "autoAdvanceSeconds": 0
+  },
+  {
+    "lineId": "cafe_tutorial_034",
+    "presentationId": "cafe_tutorial.demo_cup",
+    "seq": 1,
+    "speaker": "narrator",
+    "textKey": "cafe.tutorial.demo_cup.01",
+    "gesture": "none",
+    "autoAdvanceSeconds": 0
+  },
+  {
+    "lineId": "cafe_tutorial_035",
+    "presentationId": "cafe_tutorial.demo_base",
+    "seq": 1,
+    "speaker": "narrator",
+    "textKey": "cafe.tutorial.demo_base.01",
+    "gesture": "none",
+    "autoAdvanceSeconds": 0
+  },
+  {
+    "lineId": "cafe_tutorial_036",
+    "presentationId": "cafe_tutorial.demo_strength",
+    "seq": 1,
+    "speaker": "narrator",
+    "textKey": "cafe.tutorial.demo_strength.01",
+    "gesture": "none",
+    "autoAdvanceSeconds": 0
+  },
+  {
+    "lineId": "cafe_tutorial_037",
+    "presentationId": "cafe_tutorial.demo_sweetness",
+    "seq": 1,
+    "speaker": "narrator",
+    "textKey": "cafe.tutorial.demo_sweetness.01",
+    "gesture": "none",
+    "autoAdvanceSeconds": 0
+  },
+  {
+    "lineId": "cafe_tutorial_038",
+    "presentationId": "cafe_tutorial.demo_serve",
+    "seq": 1,
+    "speaker": "narrator",
+    "textKey": "cafe.tutorial.demo_serve.01",
+    "gesture": "none",
+    "autoAdvanceSeconds": 0
+  },
+  {
+    "lineId": "cafe_tutorial_039",
+    "presentationId": "cafe_tutorial.serve_customer",
+    "seq": 1,
+    "speaker": "right",
+    "textKey": "cafe.tutorial.serve_customer.01",
+    "gesture": "none",
+    "autoAdvanceSeconds": 0
+  },
+  {
+    "lineId": "cafe_tutorial_040",
+    "presentationId": "cafe_tutorial.result_excellent",
+    "seq": 1,
+    "speaker": "center",
+    "textKey": "cafe.tutorial.result_excellent.01",
+    "gesture": "none",
+    "autoAdvanceSeconds": 0
+  },
+  {
+    "lineId": "cafe_tutorial_041",
+    "presentationId": "cafe_tutorial.result_excellent",
+    "seq": 2,
+    "speaker": "narrator",
+    "textKey": "cafe.tutorial.result_excellent.02",
+    "gesture": "none",
+    "autoAdvanceSeconds": 0
+  },
+  {
+    "lineId": "cafe_tutorial_042",
+    "presentationId": "cafe_tutorial.result_good",
+    "seq": 1,
+    "speaker": "center",
+    "textKey": "cafe.tutorial.result_good.01",
+    "gesture": "none",
+    "autoAdvanceSeconds": 0
+  },
+  {
+    "lineId": "cafe_tutorial_043",
+    "presentationId": "cafe_tutorial.result_good",
+    "seq": 2,
+    "speaker": "narrator",
+    "textKey": "cafe.tutorial.result_good.02",
+    "gesture": "none",
+    "autoAdvanceSeconds": 0
+  },
+  {
+    "lineId": "cafe_tutorial_044",
+    "presentationId": "cafe_tutorial.result_average",
+    "seq": 1,
+    "speaker": "center",
+    "textKey": "cafe.tutorial.result_average.01",
+    "gesture": "none",
+    "autoAdvanceSeconds": 0
+  },
+  {
+    "lineId": "cafe_tutorial_045",
+    "presentationId": "cafe_tutorial.result_average",
+    "seq": 2,
+    "speaker": "narrator",
+    "textKey": "cafe.tutorial.result_average.02",
+    "gesture": "none",
+    "autoAdvanceSeconds": 0
+  },
+  {
+    "lineId": "cafe_tutorial_046",
+    "presentationId": "cafe_tutorial.result_bad",
+    "seq": 1,
+    "speaker": "center",
+    "textKey": "cafe.tutorial.result_bad.01",
+    "gesture": "none",
+    "autoAdvanceSeconds": 0
+  },
+  {
+    "lineId": "cafe_tutorial_047",
+    "presentationId": "cafe_tutorial.result_bad",
+    "seq": 2,
+    "speaker": "narrator",
+    "textKey": "cafe.tutorial.result_bad.02",
+    "gesture": "none",
+    "autoAdvanceSeconds": 0
+  },
+  {
+    "lineId": "cafe_tutorial_048",
+    "presentationId": "cafe_tutorial.result_refund",
+    "seq": 1,
+    "speaker": "center",
+    "textKey": "cafe.tutorial.result_refund.01",
+    "gesture": "none",
+    "autoAdvanceSeconds": 0
+  },
+  {
+    "lineId": "cafe_tutorial_049",
+    "presentationId": "cafe_tutorial.result_refund",
+    "seq": 2,
+    "speaker": "narrator",
+    "textKey": "cafe.tutorial.result_refund.02",
+    "gesture": "none",
+    "autoAdvanceSeconds": 0
+  },
+  {
+    "lineId": "cafe_tutorial_050",
+    "presentationId": "cafe_tutorial.ending",
+    "seq": 1,
+    "speaker": "narrator",
+    "textKey": "cafe.tutorial.ending.01",
+    "gesture": "none",
+    "autoAdvanceSeconds": 0
+  },
+  {
+    "lineId": "cafe_tutorial_051",
+    "presentationId": "cafe_tutorial.ending",
+    "seq": 2,
+    "speaker": "right",
+    "textKey": "cafe.tutorial.ending.02",
+    "gesture": "none",
+    "autoAdvanceSeconds": 0
+  },
+  {
+    "lineId": "cafe_tutorial_052",
+    "presentationId": "cafe_tutorial.ending",
+    "seq": 3,
+    "speaker": "narrator",
+    "textKey": "cafe.tutorial.ending.03",
+    "gesture": "none",
+    "autoAdvanceSeconds": 0
+  },
+  {
+    "lineId": "cafe_tutorial_053",
+    "presentationId": "cafe_tutorial.ending",
+    "seq": 4,
+    "speaker": "narrator",
+    "textKey": "cafe.tutorial.ending.04",
+    "gesture": "none",
+    "autoAdvanceSeconds": 0
+  },
+  {
+    "lineId": "cafe_tutorial_054",
+    "presentationId": "cafe_tutorial.ending",
+    "seq": 5,
+    "speaker": "narrator",
+    "textKey": "cafe.tutorial.ending.05",
+    "gesture": "none",
+    "autoAdvanceSeconds": 0
+  },
+  {
+    "lineId": "cafe_tutorial_055",
+    "presentationId": "cafe_tutorial.ending",
+    "seq": 6,
+    "speaker": "narrator",
+    "textKey": "cafe.tutorial.ending.06",
+    "gesture": "none",
     "autoAdvanceSeconds": 0
   }
 ]

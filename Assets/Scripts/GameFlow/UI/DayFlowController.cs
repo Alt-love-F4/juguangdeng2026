@@ -284,7 +284,7 @@ namespace Spotlight.GameFlow
                     firstDayIntroductionCompleted = true;
                     if (day == 1 && firstDayCafeTutorialStarted)
                     {
-                        QueueFirstDayPerceptionCheck(version);
+                        PlayCafeTutorialContent("customer_arrives", version, () => QueueFirstDayPerceptionCheck(version));
                         return;
                     }
                     StartFreeCafeBusiness();
@@ -308,13 +308,32 @@ namespace Spotlight.GameFlow
             }
         }
 
+        private void PlayCafeTutorialContent(string stepId, int version, Action completed)
+        {
+            if (!SessionAllowsPlay || !running || version != presentationVersion) return;
+            try
+            {
+                introductionPanel = DialoguePlayback.PlayNcsOpening("cafe_tutorial." + stepId, () =>
+                {
+                    if (!SessionAllowsPlay || !running || version != presentationVersion) return;
+                    introductionPanel = null;
+                    completed();
+                });
+                if (introductionPanel != null) introductionPanel.AllowCancel = false;
+            }
+            catch (Exception error)
+            {
+                Debug.LogException(error, this);
+                // Missing tutorial content must not unlock free production.
+            }
+        }
+
         private void QueueFirstDayPerceptionCheck(int version)
         {
             NarrativeRuntime runtime = NarrativeRuntime.Instance;
             if (runtime == null || !runtime.IsReady)
             {
-                Debug.LogWarning("[DayFlow] NCS unavailable; continuing without first-day perception check.", this);
-                StartFreeCafeBusiness();
+                Debug.LogError("[DayFlow] NCS unavailable; cafe tutorial remains locked.", this);
                 return;
             }
 
@@ -328,15 +347,19 @@ namespace Spotlight.GameFlow
                 if (!SessionAllowsPlay || !running || version != presentationVersion
                     || !waitingForFirstDayPerceptionBranch) return;
                 if (runtime.QueueEvent(FirstDayPerceptionCheckEventId)) return;
-                Debug.LogWarning("[DayFlow] Could not queue first-day perception check; continuing to cafe business.", this);
-                FinishFirstDayPerceptionFlow(version);
+                Debug.LogError("[DayFlow] Could not queue first-day perception check; cafe tutorial remains locked.", this);
+                UnsubscribeFirstDayPerceptionEvents();
             });
         }
 
         private void OnFirstDayPerceptionEventCompleted(string eventId)
         {
             if (eventId != FirstDayPerceptionSuccessEventId && eventId != FirstDayPerceptionFailureEventId) return;
-            FinishFirstDayPerceptionFlow(presentationVersion);
+            int version = presentationVersion;
+            if (!waitingForFirstDayPerceptionBranch) return;
+            UnsubscribeFirstDayPerceptionEvents();
+            PlayCafeTutorialContent(eventId == FirstDayPerceptionSuccessEventId ? "perception_success" : "perception_failure",
+                version, () => PlayCafeTutorialContent("order_confirmed", version, StartFreeCafeBusiness));
         }
 
         private void OnFirstDayPerceptionEventFailed(string eventId, string reason)
@@ -344,7 +367,7 @@ namespace Spotlight.GameFlow
             if (eventId != FirstDayPerceptionCheckEventId
                 && eventId != FirstDayPerceptionSuccessEventId && eventId != FirstDayPerceptionFailureEventId) return;
             Debug.LogWarning("[DayFlow] First-day perception event failed (" + eventId + "): " + reason, this);
-            FinishFirstDayPerceptionFlow(presentationVersion);
+            UnsubscribeFirstDayPerceptionEvents();
         }
 
         private void FinishFirstDayPerceptionFlow(int version)
@@ -352,7 +375,7 @@ namespace Spotlight.GameFlow
             if (!waitingForFirstDayPerceptionBranch || !SessionAllowsPlay || !running
                 || version != presentationVersion || day != 1 || !firstDayCafeTutorialStarted) return;
             UnsubscribeFirstDayPerceptionEvents();
-            StartFreeCafeBusiness();
+            PlayCafeTutorialContent("order_confirmed", version, StartFreeCafeBusiness);
         }
 
         private void UnsubscribeFirstDayPerceptionEvents()
@@ -380,7 +403,7 @@ namespace Spotlight.GameFlow
             SetState(DayFlowState.FreeCafeBusiness);
             ShowGameplayPanel();
             endpoint.StartDayFlowBusiness();
-            ShowBusinessControls();
+            if (!IsCafeTutorialActive) ShowBusinessControls();
         }
 
         public void FinishBusiness()

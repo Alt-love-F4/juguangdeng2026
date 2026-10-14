@@ -121,9 +121,19 @@ namespace Spotlight.GameFlow
                 error = "Missing opening character configuration: player/adele.";
                 return false;
             }
+            DialogueCharacter center = null;
+            if (!string.IsNullOrEmpty(presentation.centerNameKey))
+            {
+                if (!TryResolveText(configuration, resolver, presentation.centerNameKey, out string centerName))
+                {
+                    error = "Missing NCS center name: " + presentation.centerNameKey;
+                    return false;
+                }
+                center = new DialogueCharacter(centerName, visuals.CenterPortrait);
+            }
             script = new DialogueScript(lines,
                 NarrativeCharacterResolver.CreateDialogueCharacter("player"),
-                NarrativeCharacterResolver.CreateDialogueCharacter("adele"), title, visuals.Background);
+                NarrativeCharacterResolver.CreateDialogueCharacter("adele"), title, visuals.Background, centerCharacter: center);
             return true;
         }
 
