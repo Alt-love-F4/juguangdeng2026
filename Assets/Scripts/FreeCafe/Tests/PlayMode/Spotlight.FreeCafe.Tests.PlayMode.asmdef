@@ -4,6 +4,8 @@
   "references": [
     "Spotlight.FreeCafe.Domain",
     "Spotlight.FreeCafe.Unity",
+    "Spotlight.Narrative",
+    "Spotlight.GameFlow.Settings",
     "Spotlight.GameFlow.Saving",
     "Spotlight.GameFlow.UI",
     "YokiFrame.UIKit.Unity",

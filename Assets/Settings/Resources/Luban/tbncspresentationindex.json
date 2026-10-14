@@ -13,5 +13,20 @@
     "presentationKey": "TEST_NOTICE",
     "presentationClass": "Notice",
     "logTag": "TEST_NOTICE"
+  },
+  {
+    "presentationKey": "DEMO_CAFE_BEFORE",
+    "presentationClass": "Conversation",
+    "logTag": "CAFE_VISIT_DEMO"
+  },
+  {
+    "presentationKey": "DEMO_CAFE_SERVED",
+    "presentationClass": "Conversation",
+    "logTag": "CAFE_VISIT_DEMO"
+  },
+  {
+    "presentationKey": "DEMO_CAFE_CHAT",
+    "presentationClass": "Conversation",
+    "logTag": "CAFE_VISIT_DEMO"
   }
 ]

@@ -1073,5 +1073,450 @@
     "key": "map.position.garden_district.name",
     "text": "花园区",
     "comment": "地图重要地点名称"
+  },
+  {
+    "key": "condition.a_educated",
+    "text": "a_educated",
+    "comment": "条件系统配置迁移 / 测试样例"
+  },
+  {
+    "key": "condition.ab_swear",
+    "text": "ab_swear",
+    "comment": "条件系统配置迁移 / 测试样例"
+  },
+  {
+    "key": "condition.accepted_tea",
+    "text": "accepted_tea",
+    "comment": "条件系统配置迁移 / 测试样例"
+  },
+  {
+    "key": "condition.b_arrested",
+    "text": "b_arrested",
+    "comment": "条件系统配置迁移 / 测试样例"
+  },
+  {
+    "key": "condition.bc_swear",
+    "text": "bc_swear",
+    "comment": "条件系统配置迁移 / 测试样例"
+  },
+  {
+    "key": "condition.comrade",
+    "text": "comrade",
+    "comment": "条件系统配置迁移 / 测试样例"
+  },
+  {
+    "key": "condition.eloped",
+    "text": "eloped",
+    "comment": "条件系统配置迁移 / 测试样例"
+  },
+  {
+    "key": "condition.fled",
+    "text": "fled",
+    "comment": "条件系统配置迁移 / 测试样例"
+  },
+  {
+    "key": "condition.met_in_secret",
+    "text": "met_in_secret",
+    "comment": "条件系统配置迁移 / 测试样例"
+  },
+  {
+    "key": "condition.musician_end",
+    "text": "musician_end",
+    "comment": "条件系统配置迁移 / 测试样例"
+  },
+  {
+    "key": "condition.npc.npc_b.dead",
+    "text": "npc.npc_b.dead",
+    "comment": "条件系统配置迁移 / 测试样例"
+  },
+  {
+    "key": "condition.player_influence",
+    "text": "player_influence",
+    "comment": "条件系统配置迁移 / 测试样例"
+  },
+  {
+    "key": "condition.revolution",
+    "text": "revolution",
+    "comment": "条件系统配置迁移 / 测试样例"
+  },
+  {
+    "key": "condition.specialization.player.letter.literature",
+    "text": "文学知识专精",
+    "comment": "条件系统配置迁移 / 测试样例"
+  },
+  {
+    "key": "condition.specialization.player.letter.politics",
+    "text": "政治知识专精",
+    "comment": "条件系统配置迁移 / 测试样例"
+  },
+  {
+    "key": "condition.specialization.player.letter.religion",
+    "text": "宗教知识专精",
+    "comment": "条件系统配置迁移 / 测试样例"
+  },
+  {
+    "key": "condition.specialization.player.letter.science",
+    "text": "科学知识专精",
+    "comment": "条件系统配置迁移 / 测试样例"
+  },
+  {
+    "key": "condition.standoff_done",
+    "text": "standoff_done",
+    "comment": "条件系统配置迁移 / 测试样例"
+  },
+  {
+    "key": "condition.test.delivery.enabled",
+    "text": "test.delivery.enabled",
+    "comment": "条件系统配置迁移 / 测试样例"
+  },
+  {
+    "key": "act_test_delivery_cumulative.name",
+    "text": "累计交付测试",
+    "comment": "条件系统配置迁移 / 测试样例"
+  },
+  {
+    "key": "act_test_delivery_cumulative.desc",
+    "text": "每天交药品2份、食物1份，消耗1行动点；成功5次完成。",
+    "comment": "条件系统配置迁移 / 测试样例"
+  },
+  {
+    "key": "EV_TEST_DELIVERY_CUMULATIVE.title",
+    "text": "累计交付完成",
+    "comment": "条件系统配置迁移 / 测试样例"
+  },
+  {
+    "key": "EV_TEST_DELIVERY_CUMULATIVE.body",
+    "text": "已完成五天交付，获得收据。",
+    "comment": "条件系统配置迁移 / 测试样例"
+  },
+  {
+    "key": "EV_TEST_DELIVERY_CUMULATIVE_MILESTONE.title",
+    "text": "累计交付进展",
+    "comment": "条件系统配置迁移 / 测试样例"
+  },
+  {
+    "key": "EV_TEST_DELIVERY_CUMULATIVE_MILESTONE.body",
+    "text": "已成功交付两次；此提示不会因连续中断而重复。",
+    "comment": "条件系统配置迁移 / 测试样例"
+  },
+  {
+    "key": "ending_test_cumulative.title",
+    "text": "累计交付测试结局",
+    "comment": "条件系统配置迁移 / 测试样例"
+  },
+  {
+    "key": "ending_test_cumulative.message",
+    "text": "测试交付已经完成。",
+    "comment": "条件系统配置迁移 / 测试样例"
+  },
+  {
+    "key": "act_test_delivery_consecutive.name",
+    "text": "连续交付测试",
+    "comment": "条件系统配置迁移 / 测试样例"
+  },
+  {
+    "key": "act_test_delivery_consecutive.desc",
+    "text": "每天交药品2份、食物1份，消耗1行动点；成功5次完成。",
+    "comment": "条件系统配置迁移 / 测试样例"
+  },
+  {
+    "key": "EV_TEST_DELIVERY_CONSECUTIVE.title",
+    "text": "连续交付完成",
+    "comment": "条件系统配置迁移 / 测试样例"
+  },
+  {
+    "key": "EV_TEST_DELIVERY_CONSECUTIVE.body",
+    "text": "已完成五天交付，获得收据。",
+    "comment": "条件系统配置迁移 / 测试样例"
+  },
+  {
+    "key": "EV_TEST_DELIVERY_CONSECUTIVE_MILESTONE.title",
+    "text": "连续交付进展",
+    "comment": "条件系统配置迁移 / 测试样例"
+  },
+  {
+    "key": "EV_TEST_DELIVERY_CONSECUTIVE_MILESTONE.body",
+    "text": "已成功交付两次；此提示不会因连续中断而重复。",
+    "comment": "条件系统配置迁移 / 测试样例"
+  },
+  {
+    "key": "ending_test_consecutive.title",
+    "text": "连续交付测试结局",
+    "comment": "条件系统配置迁移 / 测试样例"
+  },
+  {
+    "key": "ending_test_consecutive.message",
+    "text": "测试交付已经完成。",
+    "comment": "条件系统配置迁移 / 测试样例"
+  },
+  {
+    "key": "player.attribute.language",
+    "text": "语言",
+    "comment": "Player runtime"
+  },
+  {
+    "key": "player.attribute.language.desc",
+    "text": "影响表达、说服与沟通。",
+    "comment": "Player runtime"
+  },
+  {
+    "key": "player.attribute.courage",
+    "text": "勇气",
+    "comment": "Player runtime"
+  },
+  {
+    "key": "player.attribute.courage.desc",
+    "text": "影响面对风险与压力时的行动。",
+    "comment": "Player runtime"
+  },
+  {
+    "key": "player.attribute.wisdom",
+    "text": "智慧",
+    "comment": "Player runtime"
+  },
+  {
+    "key": "player.attribute.wisdom.desc",
+    "text": "影响分析、推理与解决问题。",
+    "comment": "Player runtime"
+  },
+  {
+    "key": "player.attribute.perception",
+    "text": "知觉",
+    "comment": "Player runtime"
+  },
+  {
+    "key": "player.attribute.perception.desc",
+    "text": "影响观察环境、察觉细节与情绪。",
+    "comment": "Player runtime"
+  },
+  {
+    "key": "creation.origin.waif.label",
+    "text": "贫寒",
+    "comment": "Player runtime"
+  },
+  {
+    "key": "creation.origin.waif.desc",
+    "text": "贫寒",
+    "comment": "Player runtime"
+  },
+  {
+    "key": "creation.origin.commoner.label",
+    "text": "平民",
+    "comment": "Player runtime"
+  },
+  {
+    "key": "creation.origin.commoner.desc",
+    "text": "平民",
+    "comment": "Player runtime"
+  },
+  {
+    "key": "creation.origin.noble.label",
+    "text": "富贵",
+    "comment": "Player runtime"
+  },
+  {
+    "key": "creation.origin.noble.desc",
+    "text": "富贵",
+    "comment": "Player runtime"
+  },
+  {
+    "key": "creation.temperament.kind.label",
+    "text": "善良",
+    "comment": "Player runtime"
+  },
+  {
+    "key": "creation.temperament.kind.desc",
+    "text": "善良",
+    "comment": "Player runtime"
+  },
+  {
+    "key": "creation.temperament.sincere.label",
+    "text": "赤诚",
+    "comment": "Player runtime"
+  },
+  {
+    "key": "creation.temperament.sincere.desc",
+    "text": "赤诚",
+    "comment": "Player runtime"
+  },
+  {
+    "key": "creation.memory.brave.label",
+    "text": "勇敢",
+    "comment": "Player runtime"
+  },
+  {
+    "key": "creation.memory.brave.desc",
+    "text": "勇敢",
+    "comment": "Player runtime"
+  },
+  {
+    "key": "creation.memory.insightful.label",
+    "text": "明睿",
+    "comment": "Player runtime"
+  },
+  {
+    "key": "creation.memory.insightful.desc",
+    "text": "明睿",
+    "comment": "Player runtime"
+  },
+  {
+    "key": "creation.education.religion.label",
+    "text": "神学",
+    "comment": "Player runtime"
+  },
+  {
+    "key": "creation.education.religion.desc",
+    "text": "神学",
+    "comment": "Player runtime"
+  },
+  {
+    "key": "creation.education.literature.label",
+    "text": "文学",
+    "comment": "Player runtime"
+  },
+  {
+    "key": "creation.education.literature.desc",
+    "text": "文学",
+    "comment": "Player runtime"
+  },
+  {
+    "key": "creation.education.science.label",
+    "text": "数学与物理科学",
+    "comment": "Player runtime"
+  },
+  {
+    "key": "creation.education.science.desc",
+    "text": "数学与物理科学",
+    "comment": "Player runtime"
+  },
+  {
+    "key": "creation.education.politics.label",
+    "text": "历史与官房学",
+    "comment": "Player runtime"
+  },
+  {
+    "key": "creation.education.politics.desc",
+    "text": "历史与官房学",
+    "comment": "Player runtime"
+  },
+  {
+    "key": "creation.trait.language.label",
+    "text": "能言善辩",
+    "comment": "Player runtime"
+  },
+  {
+    "key": "creation.trait.language.desc",
+    "text": "能言善辩",
+    "comment": "Player runtime"
+  },
+  {
+    "key": "creation.trait.courage.label",
+    "text": "坚定无畏",
+    "comment": "Player runtime"
+  },
+  {
+    "key": "creation.trait.courage.desc",
+    "text": "坚定无畏",
+    "comment": "Player runtime"
+  },
+  {
+    "key": "creation.trait.wisdom.label",
+    "text": "聪颖睿智",
+    "comment": "Player runtime"
+  },
+  {
+    "key": "creation.trait.wisdom.desc",
+    "text": "聪颖睿智",
+    "comment": "Player runtime"
+  },
+  {
+    "key": "creation.trait.perception.label",
+    "text": "敏锐细腻",
+    "comment": "Player runtime"
+  },
+  {
+    "key": "creation.trait.perception.desc",
+    "text": "敏锐细腻",
+    "comment": "Player runtime"
+  },
+  {
+    "key": "player.background.template",
+    "text": "出身{0}，曾修习{3}；{1}、{2}，如今已是{4}的人。",
+    "comment": "Player runtime"
+  },
+  {
+    "key": "player.origin.waif",
+    "text": "流浪儿",
+    "comment": "Player runtime"
+  },
+  {
+    "key": "player.origin.commoner",
+    "text": "平民",
+    "comment": "Player runtime"
+  },
+  {
+    "key": "player.origin.noble",
+    "text": "贵族",
+    "comment": "Player runtime"
+  },
+  {
+    "key": "player.external.money",
+    "text": "共用资金",
+    "comment": "Player runtime"
+  },
+  {
+    "key": "player.external.action_points",
+    "text": "行动点",
+    "comment": "Player runtime"
+  },
+  {
+    "key": "player.external.action_points_max",
+    "text": "行动点上限",
+    "comment": "Player runtime"
+  },
+  {
+    "key": "demo.cafe.before",
+    "text": "【特殊来访示例】我想先点一杯咖啡，等餐的时候聊聊吧。",
+    "comment": "特殊来访示例"
+  },
+  {
+    "key": "demo.cafe.served",
+    "text": "【特殊来访示例】谢谢，咖啡收到了。我会继续留在座位上。",
+    "comment": "特殊来访示例"
+  },
+  {
+    "key": "demo.cafe.chat",
+    "text": "【特殊来访示例】喝完咖啡后，我们还能继续聊天。",
+    "comment": "特殊来访示例"
+  },
+  {
+    "key": "demo.cafe.leaving",
+    "text": "示例来访进入离店阶段",
+    "comment": "特殊来访反馈示例"
+  },
+  {
+    "key": "demo.cafe.ended",
+    "text": "示例来访已结束",
+    "comment": "特殊来访反馈示例"
+  },
+  {
+    "key": "first.day.perception.success.title",
+    "text": "察觉旧友",
+    "comment": "首日咖啡馆知觉检定分支"
+  },
+  {
+    "key": "first.day.perception.success",
+    "text": "老太太说这家店“乱套”，而不是“落魄”。我想，她或许是叔叔为数不多的老客人，或者说是他的朋友。\n我听过许多他朋友的故事，结果无一例外。没想到还有活着的人。\n\n可能是看出老太太想点餐，阿黛尔递来一张自己无聊时手绘的餐单。\n顾客B：“小杯黑咖啡，无糖，就这样。”\n\nB太太是新沸点咖啡的第一位客人。就让我们以此为契机，开始享受手冲咖啡带来的乐趣吧！",
+    "comment": "首日咖啡馆知觉检定分支"
+  },
+  {
+    "key": "first.day.perception.failure.title",
+    "text": "古怪的来客",
+    "comment": "首日咖啡馆知觉检定分支"
+  },
+  {
+    "key": "first.day.perception.failure",
+    "text": "不知怎么，总觉得她身上的气息突然变了。\n我没心思琢磨这位古怪老太太爱琢磨些什么，还好她把视线收了回去。\n\n可能是看出老太太想点餐，阿黛尔递来一张自己无聊时手绘的餐单。\n顾客B：“小杯黑咖啡，无糖，就这样。”\n\nB太太是新沸点咖啡的第一位客人。就让我们以此为契机，开始享受手冲咖啡带来的乐趣吧！",
+    "comment": "首日咖啡馆知觉检定分支"
   }
 ]

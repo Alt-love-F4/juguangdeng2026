@@ -1,0 +1,10 @@
+[
+  {
+    "conditionId": "first_day_perception_001",
+    "checkId": "first_day_perception",
+    "attributeId": "perception",
+    "threshold": 3,
+    "groupIndex": 1,
+    "seq": 1
+  }
+]

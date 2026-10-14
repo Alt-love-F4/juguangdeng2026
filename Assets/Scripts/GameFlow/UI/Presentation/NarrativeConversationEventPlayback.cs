@@ -32,8 +32,11 @@ namespace Spotlight.GameFlow
                     accentFxKey: item.accentFxKey, accentTargetKey: item.accentTargetKey));
             }
             // 显式空角色避免纯旁白套用旧 Prefab 的默认人物。
-            DialoguePlayback.Play(new DialogueScript(lines, left ?? new DialogueCharacter("", null),
-                right ?? new DialogueCharacter("", null), data.title), completed, completed);
+            bool notified = false;
+            void Complete() { if (notified) return; notified = true; completed?.Invoke(); }
+            DialoguePanel panel = DialoguePlayback.Play(new DialogueScript(lines, left ?? new DialogueCharacter("", null),
+                right ?? new DialogueCharacter("", null), data.title), Complete, Complete);
+            panel.PlaybackStopped += Complete;
             return true;
         }
     }

@@ -76,9 +76,16 @@ namespace Spotlight.FreeCafe
             float volume = incoming.milliliters * fraction, mass = incoming.grams * fraction;
             float priorWeight = IsLiquid(target.specId) ? target.milliliters : target.grams;
             float addedWeight = IsLiquid(incoming.specId) ? volume : mass;
-            float weight = priorWeight + addedWeight;
+            double weight = (double)priorWeight + addedWeight;
             if (weight > 0)
-                target.productionScore = (target.productionScore * priorWeight + incoming.productionScore * addedWeight) / weight;
+            {
+                double score = ((double)target.productionScore * priorWeight + (double)incoming.productionScore * addedWeight) / weight;
+                // A weighted average of valid scores remains within 0..100. Do not conceal invalid inputs.
+                if (target.productionScore >= 0 && target.productionScore <= 100
+                    && incoming.productionScore >= 0 && incoming.productionScore <= 100)
+                    score = Math.Max(0d, Math.Min(100d, score));
+                target.productionScore = (float)score;
+            }
             if (target.milliliters + volume > 0)
                 target.temperature = (LiquidTemperature)(int)Math.Round(((int)target.temperature * target.milliliters + (int)incoming.temperature * volume) / (target.milliliters + volume));
             target.quality = Math.Min(target.quality, incoming.quality); // SalePrice uses the lowest ingredient quality.

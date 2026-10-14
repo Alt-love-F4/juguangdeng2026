@@ -9,6 +9,22 @@ namespace Spotlight.GameFlow.Tests
 {
     public sealed class NcsOpeningDataTests
     {
+        private CharacterCatalog catalog;
+
+        [SetUp]
+        public void LoadFreshTableCharacters()
+        {
+            catalog = CharacterCatalog.LoadFromTables();
+            NarrativeCharacterResolver.SetCatalog(catalog);
+        }
+
+        [TearDown]
+        public void ReleaseTableCharacters()
+        {
+            NarrativeCharacterResolver.SetCatalog(null);
+            if (catalog != null) Object.DestroyImmediate(catalog);
+        }
+
         [Test]
         public void SelectedOpeningIsSortedAndPreservesSpeakerGestureAndTiming()
         {
@@ -117,8 +133,17 @@ namespace Spotlight.GameFlow.Tests
             Assert.That(NarrativePresentationDataAdapter.TryResolveFirstDayLetter(config, null, null, null, out var content, out var error), Is.True);
             StringAssert.Contains("欢迎回家", content.Body);
             StringAssert.Contains("叔叔", content.Signature);
-            Assert.That(new LubanOpeningDialogueSource(configuration: config).CreateScript().Count, Is.EqualTo(13));
-            Assert.That(DialoguePreviewDialogue.Create().Count, Is.EqualTo(7));
+            Assert.That(config.objects.Any(item => item.objId == "adele"), Is.True,
+                "The formal opening requires Adele in the generated Object table.");
+            DialogueScript script = new LubanOpeningDialogueSource(configuration: config).CreateScript();
+            Assert.That(script.Count, Is.EqualTo(13));
+            Assert.That(script.LeftCharacter.CharacterKey, Is.EqualTo("player"));
+            Assert.That(script.RightCharacter.CharacterKey, Is.EqualTo("adele"));
+            Assert.That(script.RightCharacter.DisplayName, Is.EqualTo("阿黛尔·米尼耶"));
+            Assert.That(script.RightCharacter.Portrait, Is.Not.Null,
+                "The formal opening must load Adele's existing portrait from the Object table.");
+            Assert.That(script.RightCharacter.Portrait,
+                Is.SameAs(Resources.Load<Sprite>("Characters/adele/neutral")));
         }
 
         private sealed class NoopPresenter : INarrativePresenter

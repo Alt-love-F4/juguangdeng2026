@@ -15,7 +15,7 @@ namespace Spotlight.GameFlow
         public const string ScenePath = "Assets/Scenes/PresentationDebugScene.unity";
         public const string DefaultHint = "按键/按钮可随时切换演出。Esc 关闭 · Backspace 重播 · H 收起说明 · F9 切换暂停时间。";
 
-        public enum Preview { DateChange, Letter, Dialogue, PreBusiness, CafeOpening, BusinessEnd, CityMap, PreNight, HomeNight, DayEnd, Introduction, Effects, Reading, Notice, CutScene, HardcodedDialogue, HardcodedLetter, HardcodedOptions, Details, LongLoading, ShortLoading }
+        public enum Preview { DateChange, Letter, Dialogue, PreBusiness, CafeOpening, BusinessEnd, CityMap, PreNight, HomeNight, DayEnd, Introduction, Effects, Reading, Notice, CutScene, HardcodedDialogue, HardcodedLetter, HardcodedOptions, Details, LongLoading, ShortLoading, GameOver }
 
         [Header("Scene bindings")]
         [SerializeField] private TMP_Text statusText;
@@ -99,6 +99,7 @@ namespace Spotlight.GameFlow
             else if (keyboard.digit0Key.wasPressedThisFrame) PreviewExit();
         }
 
+        public void PlayGameOver() => PlayPreview(Preview.GameOver);
         public void PlayLongLoading() => PlayPreview(Preview.LongLoading);
         public void PlayShortLoading() => PlayPreview(Preview.ShortLoading);
         public void PlayDetails() => PlayPreview(Preview.Details);
@@ -175,8 +176,15 @@ namespace Spotlight.GameFlow
             startedFrame = Time.frameCount;
             try
             {
+                if ((preview == Preview.Letter || preview == Preview.HardcodedLetter) && NarrativeRuntime.Instance == null)
+                    new GameObject("NarrativeRuntime.DebugPreview").AddComponent<NarrativeRuntime>();
                 switch (preview)
                 {
+                    case Preview.GameOver:
+                        currentPanel = UIKit.OpenPanel<ResultPanel>(UILevel.Pop,
+                            new ResultPanelData(null, "游戏结束", "每日交付已完成。你的选择让这段旅程迎来了结局。", () => Complete(version), "返回主菜单"),
+                            tag: DebugTag, cachePolicy: PanelCachePolicy.Transient);
+                        break;
                     case Preview.DateChange:
                         var date = Open<DateChangePanel>();
                         date.SetDates(previousDate, currentDate);
@@ -215,7 +223,7 @@ namespace Spotlight.GameFlow
                         break;
                     case Preview.Details:
                     var details = Open<DetailsPanel>();
-                    details.Refresh(DetailsGameDataAdapter.Create());
+                    details.Refresh(DetailsPanelData.CreatePlaceholder());
                     details.Preview(() => Complete(version));
                     break;
                     default: throw new ArgumentOutOfRangeException(nameof(preview));

@@ -12,6 +12,8 @@ using Spotlight.Narrative;
 
 namespace Spotlight.GameFlow
 {
+    public enum GameSessionState { Menu, Loading, Playing, GameOver }
+
     public sealed class GameFlowBootstrap : MonoBehaviour
     {
         private const string MainStack = "game-flow-main";
@@ -27,7 +29,35 @@ namespace Spotlight.GameFlow
         private int rootNavigationVersion;
         private int loadingVersion;
         private bool loadingTransitioning;
-        private bool gameplay;
+        private FSM<GameSessionState> session;
+        private int sessionVersion;
+        private NarrativeController boundController;
+        private NarrativeEndingDefinition selectedEnding;
+        public GameSessionState SessionState => session?.CurEnum ?? GameSessionState.Menu;
+        public bool CanSaveCurrentSession => dayFlow == null || dayFlow.CanSave;
+        private bool gameplay => SessionState == GameSessionState.Playing;
+
+        private sealed class SessionPhase : AbstractState<GameSessionState, GameFlowBootstrap>
+        {
+            private readonly GameSessionState phase;
+            public SessionPhase(FSM<GameSessionState> fsm, GameFlowBootstrap owner, GameSessionState phase) : base(fsm, owner) { this.phase = phase; }
+            protected override void OnEnter()
+            {
+                if (phase == GameSessionState.GameOver) mBlack.EnterGameOver();
+            }
+        }
+
+        private void SetSessionState(GameSessionState value)
+        {
+            if (session == null)
+            {
+                session = new FSM<GameSessionState>("Spotlight Session");
+                foreach (GameSessionState state in Enum.GetValues(typeof(GameSessionState)))
+                    session.Add(state, new SessionPhase(session, this, state));
+                session.Start(value);
+            }
+            else if (session.CurEnum != value) session.Change(value);
+        }
         private bool paused;
         private float playtime;
         private float previousTimeScale = 1f;
@@ -38,14 +68,18 @@ namespace Spotlight.GameFlow
         private bool awaitingResolutionConfirmation;
         private NarrativeGameFlowIntegration narrativeIntegration;
         private NarrativeSnapshot pendingNarrativeRestore;
+        private PlayerState pendingPlayerRestore;
+        private readonly PlayerSessionCoordinator playerSession = new PlayerSessionCoordinator();
         private bool loadingSavedSession;
+        private bool pendingDefaultCreation;
         private DayFlowController dayFlow;
         private DetailsPanel detailsPanel;
         private MapSceneController mapOverlay;
         private bool openingMap;
         public bool IsMapOpen => mapOverlay != null || openingMap;
         internal bool MapControlsAvailable => gameplay && !paused && !loadingTransitioning && detailsPanel == null
-            && !DialoguePanel.IsAnyPlaying && (dayFlow == null || !dayFlow.BlocksGameplayInput);
+            && !DialoguePanel.IsAnyPlaying && (dayFlow == null || !dayFlow.BlocksGameplayInput)
+            && (PlayerRuntime.Current?.CreationSubmitted == true || dayFlow != null && dayFlow.State == DayFlowState.CityMapLeisure);
         private int detailsClosedFrame = -1;
         private NarrativeRuntime detailsRuntime;
         private EventSystem persistentEventSystem;
@@ -57,7 +91,7 @@ namespace Spotlight.GameFlow
 
         public GameSettings CurrentSettings => settings.Current;
         internal bool GameplayControlsAvailable => CanUseGameplayControls();
-        internal bool CanPreviewDialogue => !paused && !loadingTransitioning
+        internal bool CanPreviewDialogue => SessionState != GameSessionState.GameOver && !paused && !loadingTransitioning
             && !(narrativeIntegration?.Runtime?.BlocksGameplayInput ?? false)
             && (!gameplay || CanUseGameplayControls());
         public IReadOnlyList<ResolutionOption> ResolutionOptions => settings.ResolutionOptions;
@@ -71,6 +105,7 @@ namespace Spotlight.GameFlow
 
         private void Awake()
         {
+            SetSessionState(GameSessionState.Menu);
             DontDestroyOnLoad(transform.root.gameObject);
             persistentEventSystem = EventSystem.current;
             if (persistentEventSystem == null)
@@ -93,7 +128,8 @@ namespace Spotlight.GameFlow
             settings.Apply();
             saves = saveAdapter.Service;
             tips = new LoadingTipSequence(config.LoadingTips);
-            if (enableNarrative)
+            // The formal session always owns the sole narrative/condition runtime.
+            enableNarrative = true;
             {
                 narrativeIntegration = NarrativeGameFlowIntegration.Instance;
                 if (narrativeIntegration == null)
@@ -141,8 +177,13 @@ namespace Spotlight.GameFlow
 
         private void OnDestroy()
         {
+            playerSession.Dispose();
+            PlayerRuntime.Current = null;
+            PlayerCafeOwner.EndSession();
             if (gameplayThumbnail != null) Destroy(gameplayThumbnail);
             SceneManager.sceneLoaded -= OnSceneLoaded;
+            if (boundController != null) boundController.EndingSelected -= OnEndingSelected;
+            session?.Dispose();
             DialoguePlayback.Stop();
         }
 
@@ -181,6 +222,7 @@ namespace Spotlight.GameFlow
             }
             if (gameplay && !paused && !loadingTransitioning)
             {
+                narrativeIntegration?.Runtime?.Controller?.FlushValueChanges();
                 float deltaTime = Time.unscaledDeltaTime;
                 playtime += deltaTime;
                 if (!loadingSavedSession)
@@ -218,6 +260,7 @@ namespace Spotlight.GameFlow
 
         public void OpenMap()
         {
+            if (dayFlow != null && dayFlow.IsFirstSessionGuideActive) return;
             if (!CanUseGameplayControls() || SceneManager.GetActiveScene().name != "CoffeeShop") return;
             openingMap = true;
             StartCoroutine(OpenMapRoutine());
@@ -225,10 +268,12 @@ namespace Spotlight.GameFlow
 
         private IEnumerator OpenMapRoutine()
         {
+            int version = sessionVersion;
             Scene scene = SceneManager.GetSceneByName("Map");
             if (!scene.isLoaded)
                 yield return SceneManager.LoadSceneAsync("Map", LoadSceneMode.Additive);
             scene = SceneManager.GetSceneByName("Map");
+            if (!gameplay || version != sessionVersion) { openingMap = false; yield break; }
             foreach (GameObject root in scene.GetRootGameObjects())
             {
                 foreach (Camera camera in root.GetComponentsInChildren<Camera>(true))
@@ -249,45 +294,82 @@ namespace Spotlight.GameFlow
 
         public void TransitionToGameplayScene(string sceneName, Action completed)
         {
+            if (!gameplay) return;
+            GameSaveParticipantRegistry.PendingRestore = GameSaveParticipantRegistry.CaptureAll();
             if (string.IsNullOrWhiteSpace(sceneName) || sceneName == SceneManager.GetActiveScene().name)
             {
+                CompletePendingPlayerCreation();
                 completed?.Invoke();
                 return;
             }
-            LoadThen(completed, sceneName, true);
+            LoadThen(() =>
+            {
+                CompletePendingPlayerCreation();
+                completed?.Invoke();
+            }, sceneName, true);
+        }
+
+        private void CompletePendingPlayerCreation()
+        {
+            if (PlayerRuntime.Current?.CreationSubmitted == true) return;
+            if (!TrySubmitPlayerCreation(pendingDefaultCreation ? null : PlayerRuntime.Current?.RestoreDraft()))
+                throw new InvalidOperationException("无法完成角色创建，请检查玩家与咖啡馆运行时初始化状态。");
         }
 
         public void StartGame()
         {
+            ++sessionVersion;
+            selectedEnding = null;
+            GameSaveParticipantRegistry.PendingRestore = null;
             DialoguePlayback.Stop();
             playtime = 0f;
             autoSaveTimer = 0f;
             pendingNarrativeRestore = null;
+            pendingDefaultCreation = false;
             loadingSavedSession = false;
+            playerSession.Dispose();
+            PlayerCafeOwner.EndSession();
+            PlayerRuntime.Current = new PlayerRuntime(PlayerCreationCatalog.Load());
+            PlayerSaveBridge.Register(() => PlayerRuntime.Current);
             narrativeIntegration?.ResetSession();
-            gameplay = true;
+            BindNarrativeSession();
+            SetSessionState(GameSessionState.Loading);
             paused = false;
             // 场景切换开关：留空则留在当前场景，直接打开玩法面板
             if (string.IsNullOrWhiteSpace(config.GameplayScene))
             {
-                OpenGameplayPlaceholder();
-                dayFlow?.BeginNewSession();
+                InitializeNewGameplay();
             }
             else
             {
                 LoadThen(() =>
                 {
-                    OpenGameplayPlaceholder();
-                    dayFlow?.BeginNewSession();
-                }, config.GameplayScene);
+                    InitializeNewGameplay();
+                }, config.GameplayScene, forceReload: true);
+            }
+        }
+
+        private void InitializeNewGameplay()
+        {
+            try
+            {
+                OpenGameplayPlaceholder();
+                dayFlow?.BeginNewSession();
+                CompleteNarrativeRestore(false);
+            }
+            catch (Exception exception)
+            {
+                OpenMainMenu();
+                ShowResult("初始化失败", exception.Message, () => { });
             }
         }
 
         public void OpenPause()
         {
-            if (DialoguePanel.IsAnyPlaying || !gameplay || paused || loadingTransitioning
-                || (dayFlow != null && dayFlow.BlocksGameplayInput)
-                || (narrativeIntegration?.Runtime?.BlocksGameplayInput ?? false)) return;
+            bool tutorialPause = dayFlow != null && dayFlow.IsFirstSessionGuideActive;
+            if ((!tutorialPause && DialoguePanel.IsAnyPlaying) || !gameplay || paused || loadingTransitioning
+                || (!tutorialPause && dayFlow != null && dayFlow.BlocksGameplayInput)
+                || (!tutorialPause && (narrativeIntegration?.Runtime?.BlocksGameplayInput ?? false))) return;
             if (openingPause) return;
             openingPause = true;
             StartCoroutine(OpenPauseAfterRender());
@@ -295,10 +377,15 @@ namespace Spotlight.GameFlow
 
         private IEnumerator OpenPauseAfterRender()
         {
+            int version = sessionVersion;
             yield return new WaitForEndOfFrame();
-            CaptureGameplayThumbnail();
             openingPause = false;
+            if (!gameplay || version != sessionVersion) yield break;
+            bool tutorialPause = dayFlow != null && dayFlow.IsFirstSessionGuideActive;
+            CaptureGameplayThumbnail();
             paused = true;
+            if (tutorialPause && dayFlow.CurrentDialogue != null)
+                dayFlow.CurrentDialogue.InputSuspended = true;
             previousTimeScale = Time.timeScale;
             Time.timeScale = 0f;
             PauseMenuPanel panel = UIKit.OpenPanel<PauseMenuPanel>(UILevel.Pop, Data(true), cachePolicy: PanelCachePolicy.Reusable);
@@ -307,18 +394,26 @@ namespace Spotlight.GameFlow
 
         public void ResumeGame()
         {
-            if (!paused || UIKit.PeekPanel(MainStack) is not PauseMenuPanel panel) return;
+            if (!gameplay || !paused || UIKit.PeekPanel(MainStack) is not PauseMenuPanel panel) return;
             panel.CloseAnimated(FinishResume);
         }
 
         private void FinishResume()
         {
+            if (!gameplay) return;
             paused = false;
+            if (dayFlow != null && dayFlow.CurrentDialogue != null)
+                dayFlow.CurrentDialogue.InputSuspended = false;
             Time.timeScale = previousTimeScale;
         }
 
         public void OpenSaves(bool fromGameplay)
         {
+            if (fromGameplay && !CanSaveCurrentSession)
+            {
+                ShowResult("暂不可存档", "首日咖啡馆教学进行中，完成教学前不能存档。", () => { });
+                return;
+            }
             SaveManagementPanel panel = UIKit.OpenPanel<SaveManagementPanel>(UILevel.Pop, Data(fromGameplay), cachePolicy: PanelCachePolicy.Reusable);
             StartCoroutine(PushPanelWhenReady(panel, true));
         }
@@ -351,23 +446,45 @@ namespace Spotlight.GameFlow
                     ShowResult("读取失败", error, () => { });
                     return;
                 }
-                if (!NarrativeSaveBridge.TryRead(data, out NarrativeSnapshot snapshot, out error))
+                if (!PlayerSaveBridge.TryPrepareRestore(data, out PlayerState playerState, out NarrativeSnapshot snapshot, out error))
                 {
                     ShowResult("读取失败", error, () => { });
                     return;
                 }
+                if (data.Participants == null || !data.Participants.Any(item => item != null && item.Id == PlayerCafeOwner.SaveId))
+                {
+                    ShowResult("读取失败", "该旧档缺少经营资金与世界快照，无法安全恢复共用余额。原档已保留，请使用其他完整存档或开始新游戏。", () => { });
+                    return;
+                }
+                ++sessionVersion;
+                selectedEnding = null;
                 playtime = (float)data.ElapsedPlaytimeSeconds;
                 autoSaveTimer = 0f;
                 loadingSavedSession = true;
                 pendingNarrativeRestore = snapshot;
-                gameplay = true;
+                pendingPlayerRestore = playerState;
+                playerSession.Dispose();
+                PlayerCafeOwner.EndSession();
+                narrativeIntegration?.Runtime?.Controller?.BeginValueRestore();
+                SetSessionState(GameSessionState.Loading);
                 GameSaveParticipantRegistry.PendingRestore = data.Participants;
-                LoadThen(OpenGameplayPlaceholder, data.SceneName == "SampleScene" ? config.GameplayScene : data.SceneName);
+                LoadThen(() =>
+                {
+                    try { OpenGameplayPlaceholder(); }
+                    catch (Exception exception)
+                    {
+                        loadingSavedSession = false;
+                        GameSaveParticipantRegistry.PendingRestore = null;
+                        OpenMainMenu();
+                        ShowResult("读取失败", exception.Message, () => { });
+                    }
+                }, "CoffeeShop", forceReload: true);
             }, "取消", () => { });
         }
 
         public void ConfirmSave(int index)
         {
+            if (!CanSaveCurrentSession) return;
             GameSaveSlotInfo slot = saves.GetSlot(index);
             if (slot.IsOccupied)
             {
@@ -391,11 +508,19 @@ namespace Spotlight.GameFlow
             }, "取消", () => { });
         }
 
-        public void QuickSave() => BeginQuickSave(null);
+        public void QuickSave()
+        {
+            if (!CanSaveCurrentSession)
+            {
+                ShowResult("暂不可存档", "首日咖啡馆教学进行中，完成教学前不能存档。", () => { });
+                return;
+            }
+            BeginQuickSave(null);
+        }
 
         private void BeginQuickSave(Action completed)
         {
-            if (saving) return;
+            if (!gameplay || saving || !CanSaveCurrentSession) return;
             int slot = saves.FindFirstEmptyManualSlot();
             if (slot < GameSaveService.FirstManualSlot)
             {
@@ -408,6 +533,13 @@ namespace Spotlight.GameFlow
 
         public void ConfirmReturnToTitle()
         {
+            if (SessionState == GameSessionState.GameOver) { ReturnFromGameOver(); return; }
+            if (!CanSaveCurrentSession)
+            {
+                ShowConfirmation("退出主菜单", "教学尚未完成，当前进度不会保存。要返回主菜单吗？", "返回主菜单",
+                    () => LoadThen(OpenMainMenu, config.MainMenuScene), "继续教学", () => { });
+                return;
+            }
             ShowConfirmation("退出主菜单", "是否保存当前游戏进度？不保存退出将丢失当前未保存的进度。", "保存游戏并退出",
                 () => SaveAndReturnToTitle(), "不保存游戏并退出",
                 () => LoadThen(OpenMainMenu, config.MainMenuScene));
@@ -415,6 +547,12 @@ namespace Spotlight.GameFlow
 
         public void ConfirmExit()
         {
+            if (!CanSaveCurrentSession)
+            {
+                ShowConfirmation("退出游戏", "教学尚未完成，当前进度不会保存。要退出游戏吗？", "退出游戏",
+                    QuitGame, "继续教学", () => { });
+                return;
+            }
             ShowConfirmation("退出游戏", "是否保存游戏并退出？", "保存并退出", () =>
             {
                 if (!TryCaptureSaveData(out GameSaveData data, out string error))
@@ -489,14 +627,20 @@ namespace Spotlight.GameFlow
 
         private void HandleEscape()
         {
-            if (saving || openingPause) return;
-            if (detailsPanel != null || detailsClosedFrame == Time.frameCount || DialoguePanel.BlocksEscapeThisFrame) return;
+            if (SessionState == GameSessionState.GameOver || saving || openingPause) return;
+            bool tutorialPause = dayFlow != null && dayFlow.IsFirstSessionGuideActive;
+            if (detailsPanel != null || detailsClosedFrame == Time.frameCount || DialoguePanel.BlocksEscapeThisFrame && !tutorialPause) return;
             // The map is an additive gameplay overlay. Escape should open the pause stack over it;
             // closing the map here leaves the player without map controls after the first press.
             if (IsMapOpen && !paused) { OpenPause(); return; }
+            if (tutorialPause && gameplay && !paused)
+            {
+                OpenPause();
+                return;
+            }
             if (CanUseGameplayControls() && (narrativeIntegration?.Runtime?.BlocksGameplayInput ?? false))
                 return;
-            if (loadingTransitioning || (dayFlow != null && dayFlow.BlocksGameplayInput))
+            if (loadingTransitioning || (dayFlow != null && dayFlow.BlocksGameplayInput && !tutorialPause))
                 return;
             Type topType = UIKit.PeekPanel(MainStack)?.GetType();
             if (topType == typeof(ConfirmationPanel))
@@ -515,21 +659,52 @@ namespace Spotlight.GameFlow
 
         public void OpenDetails()
         {
+            if (dayFlow != null && dayFlow.IsFirstSessionGuideActive) return;
             if (!(IsMapOpen ? MapControlsAvailable : CanUseGameplayControls())) return;
             detailsPanel = UIKit.OpenPanel<DetailsPanel>(UILevel.Pop, DetailsGameDataAdapter.Create(), cachePolicy: PanelCachePolicy.Reusable);
             DetailsPanel opened = detailsPanel;
             detailsRuntime = NarrativeRuntime.Instance;
             if (detailsRuntime != null) detailsRuntime.TurnCompleted += RefreshDetails;
+            if (PlayerRuntime.Current != null) PlayerRuntime.Current.Changed += RefreshDetails;
             opened.Preview(() =>
             {
                 if (detailsPanel != opened) return;
                 if (detailsRuntime != null) detailsRuntime.TurnCompleted -= RefreshDetails;
+                if (PlayerRuntime.Current != null) PlayerRuntime.Current.Changed -= RefreshDetails;
                 detailsRuntime = null;
                 detailsPanel = null;
                 detailsClosedFrame = Time.frameCount;
             });
             StartCoroutine(PushPanelWhenReady(opened, false));
         }
+
+        public bool TrySubmitPlayerCreation(FirstDayLetterDraft draft)
+        {
+            PlayerRuntime player = PlayerRuntime.Current;
+            if (player?.CreationSubmitted == true) return true;
+            if (player == null) return false;
+            if (PlayerCafeOwner.Current == null)
+            {
+                pendingDefaultCreation = draft == null;
+                if (draft != null) player.SaveDraft(draft);
+                return true;
+            }
+            try
+            {
+                if (!playerSession.IsBound)
+                    playerSession.Bind(narrativeIntegration?.Runtime, PlayerCafeOwner.Current, dayFlow);
+                if (!playerSession.Submit(draft)) return false;
+                CompleteNarrativeRestore(false);
+                return true;
+            }
+            catch (Exception exception)
+            {
+                Debug.LogError("Player creation failed: " + exception.Message, this);
+                return false;
+            }
+        }
+
+        internal void NotifyPlayerDayChanged() => playerSession.NotifyDayChanged();
 
         public void RefreshDetails()
         {
@@ -538,6 +713,7 @@ namespace Spotlight.GameFlow
 
         private void CloseDetails()
         {
+            if (PlayerRuntime.Current != null) PlayerRuntime.Current.Changed -= RefreshDetails;
             if (detailsRuntime != null) detailsRuntime.TurnCompleted -= RefreshDetails;
             detailsRuntime = null;
             if (detailsPanel != null) UIKit.ClosePanel(detailsPanel);
@@ -547,6 +723,11 @@ namespace Spotlight.GameFlow
 
         private void OpenMainMenu()
         {
+            ++sessionVersion;
+            boundController?.SetEndingChecksEnabled(false);
+            playerSession.Dispose();
+            PlayerRuntime.Current = null;
+            PlayerCafeOwner.EndSession();
             pendingSaveCompletion = null;
             CloseDetails();
             CloseMap();
@@ -554,7 +735,8 @@ namespace Spotlight.GameFlow
             narrativeIntegration?.SetGameplayVisible(false);
             narrativeIntegration?.Runtime?.Presenter?.SetSuspended(true);
             Time.timeScale = 1f;
-            paused = gameplay = false;
+            paused = false;
+            SetSessionState(GameSessionState.Menu);
             dayFlow?.HideForMainMenu();
             UIKit.ClearStack(MainStack, true);
             if (GameplayPanelHooks.IsScenePanel && GameplayPanelHooks.OpenPanel != null)
@@ -569,20 +751,40 @@ namespace Spotlight.GameFlow
 
         private void OpenGameplayPlaceholder()
         {
+            if (!string.IsNullOrEmpty(PlayerCafeOwner.RestoreError))
+                throw new InvalidOperationException("经营存档恢复失败：" + PlayerCafeOwner.RestoreError);
             bool restoreDayFlow = loadingSavedSession;
+            bool importLegacyProfile = pendingNarrativeRestore?.conditionValues == null;
             if (loadingSavedSession)
             {
                 if (pendingNarrativeRestore != null && narrativeIntegration?.Runtime != null) narrativeIntegration.Runtime.RestoreSnapshot(pendingNarrativeRestore);
                 else narrativeIntegration?.ResetSession();
                 pendingNarrativeRestore = null;
+                PlayerRuntime.Current = new PlayerRuntime(PlayerCreationCatalog.Load(), pendingPlayerRestore);
+                pendingPlayerRestore = null;
+                PlayerSaveBridge.Register(() => PlayerRuntime.Current);
                 loadingSavedSession = false;
+                dayFlow?.RestoreSavedData();
+                // When loading into the already active scene, its Start() does not run again.
+                foreach (var entry in GameSaveParticipantRegistry.Restorers.ToArray())
+                {
+                    if (entry.Key == DayFlowController.SaveId || entry.Key == PlayerSaveBridge.LegacyParticipantId || entry.Key == PlayerRuntime.SaveId) continue;
+                    string json = GameSaveParticipantRegistry.TakePending(entry.Key);
+                    if (!string.IsNullOrEmpty(json)) entry.Value(json);
+                }
+                BindNarrativeSession();
+            }
+            if (restoreDayFlow)
+            {
+                CompleteNarrativeRestore(importLegacyProfile);
+                if (SessionState == GameSessionState.GameOver) return;
             }
             narrativeIntegration?.SetGameplayVisible(true);
             narrativeIntegration?.Runtime?.Presenter?.SetSuspended(false);
             Time.timeScale = 1f;
             previousTimeScale = 1f;
             paused = false;
-            gameplay = true;
+            SetSessionState(GameSessionState.Playing);
             UIKit.ClearStack(MainStack, true);
             GameFlowPanel panel;
             if (GameplayPanelHooks.OpenPanel != null)
@@ -595,7 +797,76 @@ namespace Spotlight.GameFlow
                 return;
             }
             StartCoroutine(PushPanelWhenReady(panel, false, ++rootNavigationVersion));
-            if (restoreDayFlow && dayFlow != null) dayFlow.RestoreSavedDayFlow();
+            if (restoreDayFlow && gameplay) dayFlow?.ResumeSavedPhase();
+        }
+
+        private void BindNarrativeSession()
+        {
+            if (boundController != null) boundController.EndingSelected -= OnEndingSelected;
+            boundController = narrativeIntegration?.Runtime?.Controller;
+            if (boundController != null)
+            {
+                boundController.SetEndingChecksEnabled(false);
+                boundController.BeginValueRestore();
+                boundController.EndingSelected += OnEndingSelected;
+            }
+        }
+
+        private void CompleteNarrativeRestore(bool importLegacyProfile)
+        {
+            NarrativeRuntime runtime = narrativeIntegration?.Runtime;
+            if (runtime?.Controller == null) throw new InvalidOperationException("Narrative session failed to initialize.");
+            if (PlayerRuntime.Current?.CreationSubmitted != true) return;
+            if (PlayerCafeOwner.Current == null) return;
+            if (!playerSession.IsBound) playerSession.Bind(runtime, PlayerCafeOwner.Current, dayFlow);
+            runtime.Actions.RefreshForDay(dayFlow?.CurrentDay ?? 1);
+            runtime.Controller.SetOfficialDay(dayFlow?.CurrentDay ?? 1);
+            if (runtime.Controller.IsEnded)
+            {
+                var ending = runtime.Configuration.endings.Find(item => item.endingId == runtime.Controller.SelectedEndingId);
+                OnEndingSelected(ending ?? new NarrativeEndingDefinition { endingId = runtime.Controller.SelectedEndingId, titleText = "游戏结束", messageText = runtime.Controller.SelectedEndingId });
+                return;
+            }
+            runtime.Controller.CompleteValueRestore();
+            runtime.Controller.SetEndingChecksEnabled(true);
+            if (!runtime.Controller.IsEnded) runtime.ResumeRestoredSession();
+        }
+
+        private void OnEndingSelected(NarrativeEndingDefinition ending)
+        {
+            if (SessionState == GameSessionState.GameOver) return;
+            selectedEnding = ending;
+            SetSessionState(GameSessionState.GameOver);
+        }
+
+        private void EnterGameOver()
+        {
+            ++sessionVersion;
+            ++loadingVersion;
+            ++rootNavigationVersion;
+            autoSaveTimer = 0f;
+            pendingSaveCompletion = null;
+            openingPause = false;
+            paused = false;
+            dayFlow?.StopForGameOver();
+            CloseDetails();
+            CloseMap();
+            DialoguePlayback.Stop();
+            narrativeIntegration?.Runtime?.StopForGameOver();
+            UIKit.ClearStack(MainStack, true);
+            Time.timeScale = 0f;
+            NarrativeRuntime runtime = narrativeIntegration?.Runtime;
+            var data = new ResultPanelData(this, runtime?.ResolveText(selectedEnding?.titleText) ?? "游戏结束",
+                runtime?.ResolveText(selectedEnding?.messageText) ?? "", ReturnFromGameOver, "返回主菜单");
+            ResultPanel panel = UIKit.OpenPanel<ResultPanel>(UILevel.Pop, data, cachePolicy: PanelCachePolicy.Reusable);
+            StartCoroutine(PushPanelWhenReady(panel, true, rootNavigationVersion));
+        }
+
+        private void ReturnFromGameOver()
+        {
+            if (SessionState != GameSessionState.GameOver) return;
+            Time.timeScale = 1f;
+            LoadThen(OpenMainMenu, config.MainMenuScene);
         }
 
         private IEnumerator PushPanelWhenReady(GameFlowPanel panel, bool hidePrevious, int navigationVersion = -1)
@@ -625,8 +896,9 @@ namespace Spotlight.GameFlow
             StartCoroutine(PushPanelWhenReady(panel, true));
         }
 
-        private void LoadThen(Action completed, string sceneName, bool preserveDayFlow = false)
+        private void LoadThen(Action completed, string sceneName, bool preserveDayFlow = false, bool forceReload = false)
         {
+            SetSessionState(GameSessionState.Loading);
             CloseDetails();
             CloseMap();
             if (!preserveDayFlow && dayFlow != null) dayFlow.HideForMainMenu();
@@ -655,7 +927,7 @@ namespace Spotlight.GameFlow
             tips.ResetTimer();
             loadingPanel.BeginLoading();
             loadingPanel.SetTip(tips.CurrentTip);
-            loadingRoutine = StartCoroutine(LoadRoutine(completed, sceneName, version));
+            loadingRoutine = StartCoroutine(LoadRoutine(completed, sceneName, version, forceReload));
         }
 
         private IEnumerator ShortLoadRoutine(Action completed, string sceneName, int version)
@@ -672,6 +944,7 @@ namespace Spotlight.GameFlow
                 Debug.LogWarning("Configured scene is not in Build Settings: " + sceneName, this);
             if (version != loadingVersion) yield break;
             // Prepare the destination UI while it is still hidden under the opaque cover.
+            SetSessionState(GameSessionState.Playing);
             completed?.Invoke();
             yield return null;
             if (version != loadingVersion) yield break;
@@ -687,7 +960,7 @@ namespace Spotlight.GameFlow
             else finishTransition();
         }
 
-        private IEnumerator LoadRoutine(Action completed, string sceneName, int version)
+        private IEnumerator LoadRoutine(Action completed, string sceneName, int version, bool forceReload = false)
         {
             // Let the panel open and render before scene loading can stall the main thread.
             while (loadingPanel != null && loadingPanel.State == PanelState.Opening)
@@ -699,7 +972,7 @@ namespace Spotlight.GameFlow
             int buildIndex = FindBuildIndex(sceneName);
             AsyncOperation operation = null;
             ResourceRequest resourceOperation = null;
-            if (buildIndex >= 0 && buildIndex != SceneManager.GetActiveScene().buildIndex)
+            if (buildIndex >= 0 && (forceReload || buildIndex != SceneManager.GetActiveScene().buildIndex))
             {
                 operation = SceneManager.LoadSceneAsync(buildIndex);
                 operation.allowSceneActivation = false;
@@ -764,15 +1037,19 @@ namespace Spotlight.GameFlow
 
         private void SaveManual(int index)
         {
+            if (!CanSaveCurrentSession) return;
             if (!saving) StartCoroutine(SaveRoutine(index, pendingSaveCompletion));
         }
 
         private IEnumerator SaveRoutine(int index, Action completed)
         {
+            int version = sessionVersion;
+            if (!gameplay) yield break;
             saving = true;
             PauseMenuPanel pause = UIKit.GetPanel<PauseMenuPanel>();
             pause?.SetSaveStatus("保存中");
             yield return null;
+            if (!gameplay || version != sessionVersion) { saving = false; yield break; }
             bool success = TryCaptureSaveData(out GameSaveData data, out string error)
                 && saves.TrySaveManual(index, data, out error);
             saving = false;
@@ -783,7 +1060,7 @@ namespace Spotlight.GameFlow
             if (completed != null)
             {
                 yield return new WaitForSecondsRealtime(.25f);
-                completed();
+                if (gameplay && version == sessionVersion) completed();
             }
             else ShowResult("保存成功", "已保存到槽 " + (index + 1), RefreshSavePanel);
         }
@@ -818,6 +1095,11 @@ namespace Spotlight.GameFlow
 
         public bool TryCaptureSaveData(out GameSaveData data, out string error)
         {
+            data = null;
+            if (!CanSaveCurrentSession)
+            { error = "首日咖啡馆教学进行中，完成教学前不能存档。"; return false; }
+            if (!gameplay || loadingSavedSession || loadingTransitioning)
+            { error = "当前会话状态不允许保存。"; return false; }
             data = new GameSaveData
             {
                 SceneName = SceneManager.GetActiveScene().name,
@@ -826,21 +1108,22 @@ namespace Spotlight.GameFlow
                 State = gameplay ? "gameplay" : "menu",
                 ThumbnailPng = gameplayThumbnail != null ? Convert.ToBase64String(gameplayThumbnail.EncodeToPNG()) : null
             };
-            data.Participants.AddRange(GameSaveParticipantRegistry.CaptureAll());
+            try
+            {
+                if (dayFlow?.CurrentPresentation is FirstDayLetterPanel letter && PlayerRuntime.Current != null)
+                    PlayerRuntime.Current.SaveDraft(letter.Draft);
+                data.Participants.AddRange(GameSaveParticipantRegistry.CaptureAll());
+            }
+            catch (Exception exception) { data = null; error = "保存未完成：" + exception.Message; return false; }
 
             NarrativeRuntime runtime = narrativeIntegration?.Runtime;
-            if (!enableNarrative)
-            {
-                error = null;
-                return true;
-            }
-            if (runtime == null || !runtime.IsReady)
+                        if (runtime == null || !runtime.IsReady)
             {
                 data = null;
                 error = "NCS runtime is not ready; save was not written.";
                 return false;
             }
-            if (NarrativeSaveBridge.TryCapture(data, runtime.CaptureSnapshot, out error)) return true;
+            if (NarrativeSaveBridge.TryCapture(data, () => runtime.CaptureSnapshot(PlayerRuntime.Current?.CreationSubmitted == false), out error)) return true;
             data = null;
             return false;
         }
@@ -853,6 +1136,7 @@ namespace Spotlight.GameFlow
         public bool TryAutoSave(out string error)
         {
             error = null;
+            if (!CanSaveCurrentSession) return false;
             if (!gameplay || saving) return false;
             StartCoroutine(AutoSaveAfterRender());
             return true;
@@ -860,8 +1144,9 @@ namespace Spotlight.GameFlow
 
         private IEnumerator AutoSaveAfterRender()
         {
+            int version = sessionVersion;
             yield return new WaitForEndOfFrame();
-            if (!gameplay || paused || loadingTransitioning) yield break;
+            if (!gameplay || version != sessionVersion || paused || loadingTransitioning) yield break;
             CaptureGameplayThumbnail();
             if (!TryCaptureSaveData(out GameSaveData data, out string error) || !saves.TryAutoSave(data, out error))
                 Debug.LogWarning("自动存档失败：" + error, this);

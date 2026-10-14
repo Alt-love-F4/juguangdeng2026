@@ -6,9 +6,7 @@
     "groupIndex": 1,
     "condType": "EVENT_NOT_HAPPENED",
     "target": "event:EV_BC_SWEAR",
-    "op": "",
-    "value": "true",
-    "notFlag": false
+    "value": "true"
   },
   {
     "conditionId": "C_BC_SWEAR_NAB",
@@ -17,9 +15,7 @@
     "groupIndex": 1,
     "condType": "EVENT_NOT_HAPPENED",
     "target": "event:EV_AB_SWEAR",
-    "op": "",
-    "value": "true",
-    "notFlag": false
+    "value": "true"
   },
   {
     "conditionId": "C_PRISON_1",
@@ -28,9 +24,7 @@
     "groupIndex": 1,
     "condType": "BAR_GTE",
     "target": "bar:npc_c.wealth",
-    "op": ">=",
-    "value": "8",
-    "notFlag": false
+    "value": "8"
   },
   {
     "conditionId": "C_PRISON_2",
@@ -39,9 +33,7 @@
     "groupIndex": 1,
     "condType": "BAR_LTE",
     "target": "bar:npc_a.respect_c",
-    "op": "<=",
-    "value": "-1",
-    "notFlag": false
+    "value": "-1"
   },
   {
     "conditionId": "C_PRISON_3",
@@ -50,9 +42,7 @@
     "groupIndex": 1,
     "condType": "BAR_LTE",
     "target": "bar:npc_a.thought",
-    "op": "<=",
-    "value": "8",
-    "notFlag": false
+    "value": "8"
   },
   {
     "conditionId": "C_COMRADE_1",
@@ -61,9 +51,7 @@
     "groupIndex": 1,
     "condType": "BAR_GTE",
     "target": "bar:npc_a.thought",
-    "op": ">=",
-    "value": "9",
-    "notFlag": false
+    "value": "9"
   },
   {
     "conditionId": "C_ELOPE_1",
@@ -72,9 +60,7 @@
     "groupIndex": 1,
     "condType": "EVENT_NOT_HAPPENED",
     "target": "event:EV_BC_SWEAR",
-    "op": "",
-    "value": "true",
-    "notFlag": false
+    "value": "true"
   },
   {
     "conditionId": "C_ELOPE_2",
@@ -83,9 +69,7 @@
     "groupIndex": 1,
     "condType": "BAR_GTE",
     "target": "bar:npc_b.rebel",
-    "op": ">=",
-    "value": "5",
-    "notFlag": false
+    "value": "5"
   },
   {
     "conditionId": "C_ELOPE_3",
@@ -94,9 +78,7 @@
     "groupIndex": 1,
     "condType": "BAR_LTE",
     "target": "bar:npc_b.trust_d",
-    "op": "<=",
-    "value": "2",
-    "notFlag": false
+    "value": "2"
   },
   {
     "conditionId": "C_ELOPE_4",
@@ -105,9 +87,7 @@
     "groupIndex": 1,
     "condType": "EVENT_HAPPENED",
     "target": "event:EV_AB_SWEAR",
-    "op": "",
-    "value": "true",
-    "notFlag": false
+    "value": "true"
   },
   {
     "conditionId": "C_FLEE_1",
@@ -116,9 +96,7 @@
     "groupIndex": 2,
     "condType": "EVENT_NOT_HAPPENED",
     "target": "event:EV_BC_SWEAR",
-    "op": "",
-    "value": "true",
-    "notFlag": false
+    "value": "true"
   },
   {
     "conditionId": "C_FLEE_2",
@@ -127,9 +105,7 @@
     "groupIndex": 2,
     "condType": "EVENT_NOT_HAPPENED",
     "target": "event:EV_AB_SWEAR",
-    "op": "",
-    "value": "true",
-    "notFlag": false
+    "value": "true"
   },
   {
     "conditionId": "C_FLEE_3",
@@ -138,20 +114,16 @@
     "groupIndex": 1,
     "condType": "BAR_GTE",
     "target": "bar:npc_b.trust_d",
-    "op": ">=",
-    "value": "5",
-    "notFlag": false
+    "value": "5"
   },
   {
     "conditionId": "C_RESCUE_1",
     "ownerType": "event",
     "ownerId": "EV_RESCUE",
     "groupIndex": 1,
-    "condType": "FLAG_SET",
-    "target": "flag:player_influence",
-    "op": "",
-    "value": "true",
-    "notFlag": false
+    "condType": "BOOL_EQ",
+    "target": "player_influence",
+    "value": "true"
   },
   {
     "conditionId": "C_MUSICIAN_1",
@@ -160,9 +132,7 @@
     "groupIndex": 1,
     "condType": "EVENT_NOT_HAPPENED",
     "target": "event:EV_AB_SWEAR",
-    "op": "",
-    "value": "true",
-    "notFlag": false
+    "value": "true"
   },
   {
     "conditionId": "C_MUSICIAN_2",
@@ -171,19 +141,51 @@
     "groupIndex": 1,
     "condType": "EVENT_NOT_HAPPENED",
     "target": "event:EV_BC_SWEAR",
-    "op": "",
-    "value": "true",
-    "notFlag": false
+    "value": "true"
   },
   {
     "conditionId": "C_CHOICE_1",
     "ownerType": "choice",
     "ownerId": "choice.talk.cafe.c",
     "groupIndex": 1,
-    "condType": "FLAG_SET",
-    "target": "flag:a_educated",
-    "op": "",
-    "value": "true",
-    "notFlag": false
+    "condType": "BOOL_EQ",
+    "target": "a_educated",
+    "value": "true"
+  },
+  {
+    "conditionId": "C_act_test_delivery_cumulative",
+    "ownerType": "action",
+    "ownerId": "act_test_delivery_cumulative",
+    "groupIndex": 1,
+    "condType": "BOOL_EQ",
+    "target": "test.delivery.enabled",
+    "value": "true"
+  },
+  {
+    "conditionId": "C_ending_test_cumulative",
+    "ownerType": "ending",
+    "ownerId": "ending_test_cumulative",
+    "groupIndex": 1,
+    "condType": "ACTION_COMPLETED",
+    "target": "act_test_delivery_cumulative",
+    "value": ""
+  },
+  {
+    "conditionId": "C_act_test_delivery_consecutive",
+    "ownerType": "action",
+    "ownerId": "act_test_delivery_consecutive",
+    "groupIndex": 1,
+    "condType": "BOOL_EQ",
+    "target": "test.delivery.enabled",
+    "value": "true"
+  },
+  {
+    "conditionId": "C_ending_test_consecutive",
+    "ownerType": "ending",
+    "ownerId": "ending_test_consecutive",
+    "groupIndex": 1,
+    "condType": "ACTION_COMPLETED",
+    "target": "act_test_delivery_consecutive",
+    "value": ""
   }
 ]

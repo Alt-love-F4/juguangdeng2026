@@ -1,4 +1,5 @@
 using UnityEngine.UI;
+using YokiFrame;
 
 namespace Spotlight.GameFlow
 {
@@ -13,6 +14,15 @@ namespace Spotlight.GameFlow
 
         [UnityEngine.SerializeField] private TMPro.TMP_Text saveStatus;
         public void SetSaveStatus(string message) { if (saveStatus != null) saveStatus.text = message; }
+
+        protected override void OnOpen(IUIData data = null)
+        {
+            base.OnOpen(data);
+            bool canSave = !(data is GameFlowPanelData panelData) || panelData.CanSave;
+            if (saveButton != null) saveButton.interactable = canSave;
+            if (savesButton != null) savesButton.interactable = canSave;
+            SetSaveStatus(canSave ? string.Empty : "教学期间不可存档");
+        }
 
         protected override void Awake()
         {

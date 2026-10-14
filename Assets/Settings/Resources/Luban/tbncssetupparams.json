@@ -3,6 +3,7 @@
     "setupKey": "act_meet",
     "tplName": "Tpl_WorldBroadcast",
     "slotValues": "titleKey=ev.act.meet.title,lines=ev.act.meet.p1|ev.act.meet.p2",
+    "checkId": "",
     "skipAble": false,
     "autoAdvance": true
   },
@@ -10,6 +11,7 @@
     "setupKey": "act_cwithb",
     "tplName": "Tpl_WorldBroadcast",
     "slotValues": "titleKey=ev.act.cwithb.title,lines=ev.act.cwithb.p1|ev.act.cwithb.p2",
+    "checkId": "",
     "skipAble": false,
     "autoAdvance": true
   },
@@ -17,6 +19,7 @@
     "setupKey": "act_salon",
     "tplName": "Tpl_WorldBroadcast",
     "slotValues": "titleKey=ev.act.salon.title,lines=ev.act.salon.p1|ev.act.salon.p2",
+    "checkId": "",
     "skipAble": false,
     "autoAdvance": true
   },
@@ -24,6 +27,7 @@
     "setupKey": "act_peer",
     "tplName": "Tpl_WorldBroadcast",
     "slotValues": "titleKey=ev.act.peer.title,lines=ev.act.peer.p1|ev.act.peer.p2",
+    "checkId": "",
     "skipAble": false,
     "autoAdvance": true
   },
@@ -31,6 +35,7 @@
     "setupKey": "talk_cafe",
     "tplName": "Tpl_TwoPersonTalk",
     "slotValues": "lines=ev.talk.cafe.p1,opts=talk.cafe.response",
+    "checkId": "",
     "skipAble": false,
     "autoAdvance": false
   },
@@ -38,6 +43,7 @@
     "setupKey": "ab_swear",
     "tplName": "Tpl_TwoPersonTalk",
     "slotValues": "lines=ev.ab.swear.p1|ev.ab.swear.p2|ev.ab.swear.p3,opts=",
+    "checkId": "",
     "skipAble": false,
     "autoAdvance": false
   },
@@ -45,6 +51,7 @@
     "setupKey": "bc_swear",
     "tplName": "Tpl_TwoPersonTalk",
     "slotValues": "lines=ev.bc.swear.p1|ev.bc.swear.p2|ev.bc.swear.p3,opts=",
+    "checkId": "",
     "skipAble": false,
     "autoAdvance": false
   },
@@ -52,6 +59,7 @@
     "setupKey": "standoff",
     "tplName": "Tpl_TwoPersonTalk",
     "slotValues": "lines=ev.standoff.p1|ev.standoff.p2|ev.standoff.p3,opts=",
+    "checkId": "",
     "skipAble": false,
     "autoAdvance": false
   },
@@ -59,6 +67,7 @@
     "setupKey": "comrade",
     "tplName": "Tpl_TwoPersonTalk",
     "slotValues": "lines=ev.comrade.p1|ev.comrade.p2,opts=",
+    "checkId": "",
     "skipAble": false,
     "autoAdvance": false
   },
@@ -66,6 +75,7 @@
     "setupKey": "prison",
     "tplName": "Tpl_WorldBroadcast",
     "slotValues": "titleKey=ev.prison.title,lines=ev.prison.p1|ev.prison.p2",
+    "checkId": "",
     "skipAble": false,
     "autoAdvance": false
   },
@@ -73,6 +83,7 @@
     "setupKey": "rescue",
     "tplName": "Tpl_TwoPersonTalk",
     "slotValues": "lines=ev.rescue.p1|ev.rescue.p2,opts=",
+    "checkId": "",
     "skipAble": false,
     "autoAdvance": false
   },
@@ -80,6 +91,7 @@
     "setupKey": "dq1",
     "tplName": "Tpl_TwoPersonTalk",
     "slotValues": "lines=ev.dq1.p1|ev.dq1.p2,opts=",
+    "checkId": "",
     "skipAble": false,
     "autoAdvance": false
   },
@@ -87,6 +99,7 @@
     "setupKey": "dq2",
     "tplName": "Tpl_TwoPersonTalk",
     "slotValues": "lines=ev.dq2.p1|ev.dq2.p2,opts=",
+    "checkId": "",
     "skipAble": false,
     "autoAdvance": false
   },
@@ -94,6 +107,7 @@
     "setupKey": "dqn",
     "tplName": "Tpl_MonoTalk",
     "slotValues": "lines=ev.dqn.p1",
+    "checkId": "",
     "skipAble": false,
     "autoAdvance": false
   },
@@ -101,6 +115,7 @@
     "setupKey": "elope",
     "tplName": "Tpl_TwoPersonTalk",
     "slotValues": "lines=ev.elope.p1|ev.elope.p2,opts=",
+    "checkId": "",
     "skipAble": false,
     "autoAdvance": false
   },
@@ -108,6 +123,7 @@
     "setupKey": "flee",
     "tplName": "Tpl_WorldBroadcast",
     "slotValues": "titleKey=ev.flee.title,lines=ev.flee.p1|ev.flee.p2",
+    "checkId": "",
     "skipAble": false,
     "autoAdvance": false
   },
@@ -115,6 +131,7 @@
     "setupKey": "revolution",
     "tplName": "Tpl_CutScene",
     "slotValues": "zoom=1.2,shake=0.3,duration=3.0,lines=ev.rev.p1|ev.rev.p2|ev.rev.p3",
+    "checkId": "",
     "skipAble": true,
     "autoAdvance": true
   },
@@ -122,6 +139,63 @@
     "setupKey": "musician",
     "tplName": "Tpl_WorldBroadcast",
     "slotValues": "titleKey=ev.musician.title,lines=ev.musician.p1|ev.musician.p2",
+    "checkId": "",
+    "skipAble": false,
+    "autoAdvance": false
+  },
+  {
+    "setupKey": "EV_TEST_DELIVERY_CUMULATIVE",
+    "tplName": "Tpl_WorldBroadcast",
+    "slotValues": "titleKey=EV_TEST_DELIVERY_CUMULATIVE.title,lines=EV_TEST_DELIVERY_CUMULATIVE.body",
+    "checkId": "",
+    "skipAble": true,
+    "autoAdvance": true
+  },
+  {
+    "setupKey": "EV_TEST_DELIVERY_CUMULATIVE_MILESTONE",
+    "tplName": "Tpl_WorldBroadcast",
+    "slotValues": "titleKey=EV_TEST_DELIVERY_CUMULATIVE_MILESTONE.title,lines=EV_TEST_DELIVERY_CUMULATIVE_MILESTONE.body",
+    "checkId": "",
+    "skipAble": true,
+    "autoAdvance": true
+  },
+  {
+    "setupKey": "EV_TEST_DELIVERY_CONSECUTIVE",
+    "tplName": "Tpl_WorldBroadcast",
+    "slotValues": "titleKey=EV_TEST_DELIVERY_CONSECUTIVE.title,lines=EV_TEST_DELIVERY_CONSECUTIVE.body",
+    "checkId": "",
+    "skipAble": true,
+    "autoAdvance": true
+  },
+  {
+    "setupKey": "EV_TEST_DELIVERY_CONSECUTIVE_MILESTONE",
+    "tplName": "Tpl_WorldBroadcast",
+    "slotValues": "titleKey=EV_TEST_DELIVERY_CONSECUTIVE_MILESTONE.title,lines=EV_TEST_DELIVERY_CONSECUTIVE_MILESTONE.body",
+    "checkId": "",
+    "skipAble": true,
+    "autoAdvance": true
+  },
+  {
+    "setupKey": "first_day_perception_check",
+    "tplName": "Tpl_Narration",
+    "slotValues": "",
+    "checkId": "first_day_perception",
+    "skipAble": false,
+    "autoAdvance": false
+  },
+  {
+    "setupKey": "first_day_perception_success",
+    "tplName": "Tpl_Narration",
+    "slotValues": "titleKey=first.day.perception.success.title,lines=first.day.perception.success",
+    "checkId": "",
+    "skipAble": false,
+    "autoAdvance": false
+  },
+  {
+    "setupKey": "first_day_perception_failure",
+    "tplName": "Tpl_Narration",
+    "slotValues": "titleKey=first.day.perception.failure.title,lines=first.day.perception.failure",
+    "checkId": "",
     "skipAble": false,
     "autoAdvance": false
   }

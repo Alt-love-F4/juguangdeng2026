@@ -287,6 +287,11 @@ namespace Spotlight.FreeCafe
     [Serializable]
     public sealed class CafeSnapshot
     {
+        public List<CafeVisitInstance> cafeVisits = new List<CafeVisitInstance>();
+        public List<CafeVisitFeedback> cafeVisitFeedback = new List<CafeVisitFeedback>();
+        public long cafeVisitFeedbackSequence;
+        public float businessElapsed;
+        public int cafeVisitBudgetMinimum;
         public ProductionSession production = new ProductionSession();
         public int version = 2; // 存档版本（v1 在 Restore 时显式迁移）
         public int nextId = 1;  // 自增 id 分配器

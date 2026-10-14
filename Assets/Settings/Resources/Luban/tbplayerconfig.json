@@ -1,0 +1,9 @@
+[
+  {
+    "playerId": "player",
+    "defaultAvatar": "Male",
+    "defaultOriginId": "commoner",
+    "baseStartingMoney": 500,
+    "actionPointMax": 5
+  }
+]

@@ -38,10 +38,10 @@ namespace Spotlight.Narrative.Editor.Tests
             Assert.That(c.texts.Exists(x => x.key == "ev.chen.tea.p1"), Is.True);
             Assert.That(c.setups[0].parameters.Count, Is.GreaterThan(0));
             Assert.That(c.templates.Count, Is.EqualTo(9));
-            Assert.That(c.eventDates[0].eventId, Is.EqualTo("EV_WORLD_DAY3"));
+            Assert.That(c.eventDates[0].eventId, Is.EqualTo("EV_TALK_CAFE"));
             Assert.That(c.eventDates[0].day, Is.EqualTo(3));
-            Assert.That(c.triggers.Exists(x => x.eventId == "EV_WORLD_DAY3"), Is.False);
-            Assert.That(NarrativeEventByBarWindow.IsAnchor(c, c.events.Find(x => x.eventId == "EV_WORLD_DAY3")), Is.True);
+            Assert.That(c.triggers.Exists(x => x.eventId == "EV_TALK_CAFE"), Is.False);
+            Assert.That(NarrativeEventByBarWindow.IsAnchor(c, c.events.Find(x => x.eventId == "EV_TALK_CAFE")), Is.True);
         }
         [Test] public void SharedCounterRequiresConsistentResetOnExit()
         {
@@ -73,6 +73,55 @@ namespace Spotlight.Narrative.Editor.Tests
             Assert.That(errors.Exists(x => x.Contains("unknown bar target")), Is.True);
             Assert.That(errors.Exists(x => x.Contains("numeric value required")), Is.True);
         }
+        [Test] public void RejectsUnknownBoolKeyDeathClearAndEmptyDisabledEnding()
+        {
+            var c = new NarrativeConfiguration();
+            c.texts.Add(new NarrativeTextDefinition { key = "title", content = "Title" });
+            c.events.Add(new NarrativeEventDefinition { eventId = "E", presentationClass = "Notice", eventKind = NarrativeEventKind.World });
+            c.conditionKeys.Add(new NarrativeConditionKeyDefinition { key = "npc.dead", nameText = "title", onlySetTrue = true });
+            c.conditions.Add(new NarrativeConditionDefinition { conditionId = "C", ownerType = "event", ownerId = "E", groupIndex = 1, condType = "BOOL_EQ", target = "typo", value = "false" });
+            c.results.Add(new NarrativeResultDefinition { resultId = "R", eventId = "E", resultType = NarrativeResultType.ClearFlag, target = "npc.dead", value = "false" });
+            c.endings.Add(new NarrativeEndingDefinition { endingId = "end", enabled = false, titleText = "title", messageText = "title" });
+            var errors = NarrativeConfigurationValidator.Validate(c);
+            Assert.That(errors.Exists(x => x.Contains("Condition C:") && x.Contains("unknown bool key typo")), Is.True);
+            Assert.That(errors.Exists(x => x.Contains("Result R:") && x.Contains("cannot clear")), Is.True);
+            Assert.That(errors.Exists(x => x.Contains("Ending end:") && x.Contains("requires condition rows")), Is.True);
+        }
+
+        [TestCase("FLAG_SET", "true")]
+        [TestCase("CHANCE_PCT", "0.5")]
+        [TestCase("ITEM_GTE", "-1")]
+        [TestCase("ITEM_GTE", "1.5")]
+        [TestCase("ACTION_COMPLETED", "true")]
+        public void RejectsUnsupportedOrMalformedCondition(string type, string value)
+        {
+            var c = new NarrativeConfiguration();
+            c.actions.Add(new NarrativeActionDefinition { actionKey = "a" });
+            c.conditions.Add(new NarrativeConditionDefinition { conditionId = "C", ownerType = "action", ownerId = "a", groupIndex = 1, condType = type, target = "a", value = value });
+            Assert.That(NarrativeConfigurationValidator.Validate(c).Exists(x => x.StartsWith("Condition C:")), Is.True);
+        }
+
+        [TestCase("0")]
+        [TestCase("-2")]
+        [TestCase("1.5")]
+        [TestCase("2147483648")]
+        public void RejectsInvalidItemResultQuantity(string quantity)
+        {
+            var c = new NarrativeConfiguration();
+            c.results.Add(new NarrativeResultDefinition { resultId = "R", resultType = NarrativeResultType.ItemAdd, target = "medicine", value = quantity });
+            Assert.That(NarrativeConfigurationValidator.Validate(c).Exists(x => x.Contains("Result R:") && x.Contains("positive integer")), Is.True);
+        }
+
+        [Test] public void RejectsLegacyModifiersAndWarnsAboutDuplicateDeliveryCost()
+        {
+            var c = new NarrativeConfiguration();
+            c.actions.Add(new NarrativeActionDefinition { actionKey = "a", deliveryMode = NarrativeDeliveryMode.Cumulative, progressTarget = 5, requirements = "Item(medicine,2)", resultEvents = new System.Collections.Generic.List<string> { "E" } });
+            c.conditions.Add(new NarrativeConditionDefinition { conditionId = "C", ownerType = "action", ownerId = "a", groupIndex = 1, condType = "ITEM_GTE", target = "medicine", value = "1", op = ">=", notFlag = true });
+            c.results.Add(new NarrativeResultDefinition { resultId = "R", eventId = "E", resultType = NarrativeResultType.ItemRemove, target = "medicine", value = "2" });
+            Assert.That(NarrativeConfigurationValidator.Validate(c).Exists(x => x.Contains("op/notFlag are obsolete")), Is.True);
+            Assert.That(NarrativeConfigurationValidator.Warnings(c), Has.Count.EqualTo(1));
+        }
+
         [Test] public void ReverseSuggestionsAreLubanRowsAndDoNotMutateConfiguration()
         {
             var c = new NarrativeConfiguration();

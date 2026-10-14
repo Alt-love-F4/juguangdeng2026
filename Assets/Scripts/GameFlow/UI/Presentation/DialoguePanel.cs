@@ -65,6 +65,8 @@ namespace Spotlight.GameFlow
         private Sprite defaultRight;
         private Vector2 boxPosition;
         private Sequence transition;
+        private IDisposable pauseOwner;
+        public event Action PlaybackStopped;
         private Action finished;
         private Action cancelled;
         private bool ready;
@@ -78,10 +80,21 @@ namespace Spotlight.GameFlow
         private float skipElapsed;
 
         public bool IsSkipping { get; private set; }
+        private bool allowCancel = true;
+        public bool AllowCancel
+        {
+            get => allowCancel;
+            set
+            {
+                allowCancel = value;
+                if (cancelButton != null) cancelButton.interactable = value;
+            }
+        }
 
         public static bool IsAnyPlaying => active != null && active.IsPlaying;
         public static bool BlocksEscapeThisFrame => IsAnyPlaying || lastCancelFrame == Time.frameCount;
         public bool IsPlaying { get; private set; }
+        public bool InputSuspended { get; set; }
         public bool IsTyping => IsPlaying && ready && dialogueText.maxVisibleCharacters < pageEnd;
         public int LineIndex { get; private set; } = -1;
         public int PageNumber => page;
@@ -130,6 +143,9 @@ namespace Spotlight.GameFlow
             for (int i = 0; i < value.Count; i++)
                 if (!string.IsNullOrWhiteSpace(value[i].AccentFxKey)) effectLibrary.Find(value[i].AccentFxKey);
             Stop();
+            pauseOwner = PresentationPauseRegistry.Acquire(nameof(DialoguePanel));
+            try
+            {
             script = value;
             activeLines.Clear();
             for (int i = 0; i < value.Count; i++) activeLines.Add(value[i]);
@@ -143,6 +159,7 @@ namespace Spotlight.GameFlow
             if (titleText != null) titleText.text = string.IsNullOrEmpty(value.Title) ? "角色对话" : value.Title;
             finished = onFinished;
             cancelled = onCancelled;
+            if (cancelButton != null) cancelButton.interactable = AllowCancel;
             active = this;
             IsPlaying = true;
             lastAdvanceFrame = Time.frameCount;
@@ -164,6 +181,8 @@ namespace Spotlight.GameFlow
                 transition = null;
                 entranceComplete = true;
             });
+            }
+            catch { Stop(); throw; }
         }
 
         private Sequence Sequence() => DOTween.Sequence().SetUpdate(true).SetLink(gameObject, LinkBehaviour.KillOnDestroy);
@@ -340,7 +359,7 @@ namespace Spotlight.GameFlow
         private void Update()
         {
             if (effects != null) effects.Tick(Time.unscaledDeltaTime);
-            if (!IsPlaying || exiting) return;
+            if (!IsPlaying || exiting || InputSuspended) return;
             if (!ready && entranceComplete && !effects.IsPortraitTransitioning && portraitChange == null && blockingEffects == 0)
             {
                 ready = true;
@@ -349,7 +368,7 @@ namespace Spotlight.GameFlow
             }
             if (script == null || !IsPlaying) return;
             Keyboard keyboard = Keyboard.current;
-            if (keyboard != null && keyboard.escapeKey.wasPressedThisFrame) { Cancel(); return; }
+            if (keyboard != null && keyboard.escapeKey.wasPressedThisFrame && AllowCancel) { Cancel(); return; }
             if (!ready || blockingEffects > 0 || portraitChange != null || optionsVisible) return;
             if (IsSkipping)
             {
@@ -438,7 +457,7 @@ namespace Spotlight.GameFlow
 
         public void Cancel()
         {
-            if (!IsPlaying) return;
+            if (!IsPlaying || !AllowCancel) return;
             lastCancelFrame = Time.frameCount;
             Action callback = cancelled;
             Stop();
@@ -449,9 +468,15 @@ namespace Spotlight.GameFlow
         /// <summary>静默中止，不触发完成/取消回调；关闭、隐藏、销毁均调用此方法。</summary>
         public void Stop()
         {
+            pauseOwner?.Dispose();
+            pauseOwner = null;
+            Action stopped = PlaybackStopped;
+            PlaybackStopped = null;
             IsSkipping = false;
             skipElapsed = 0f;
             finished = cancelled = null;
+            AllowCancel = true;
+            InputSuspended = false;
             CancelEffectWork();
             script = null;
             activeLines.Clear();
@@ -476,6 +501,7 @@ namespace Spotlight.GameFlow
                 if (adaptDialogueHeight) dialogueBox.SetSizeWithCurrentAnchors(RectTransform.Axis.Vertical, dialogueMinHeight);
             }
             if (effects != null) effects.Reset();
+            stopped?.Invoke();
         }
 
         protected override void OnClose() => Stop();

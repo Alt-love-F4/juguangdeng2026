@@ -1,0 +1,20 @@
+[
+  {
+    "visitKey": "demo_cafe_visit",
+    "characterId": "adele",
+    "preferredSeatId": "customer_0",
+    "seatedVisualPath": "",
+    "arrivalDelaySeconds": "",
+    "patienceSeconds": "180",
+    "leaveAfterServed": "false"
+  },
+  {
+    "visitKey": "demo_cafe_delayed_visit",
+    "characterId": "adele",
+    "preferredSeatId": "customer_0",
+    "seatedVisualPath": "",
+    "arrivalDelaySeconds": "30",
+    "patienceSeconds": "180",
+    "leaveAfterServed": "true"
+  }
+]

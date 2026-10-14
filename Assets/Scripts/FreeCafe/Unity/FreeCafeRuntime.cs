@@ -34,7 +34,11 @@ namespace Spotlight.FreeCafe
         public bool CarrySelection { get; set; }
         public bool ShowAssetIds { get; set; }
         public bool IsDragging => draggedView!=null;
-        public bool GameplayBlocked => (gameFlow != null && gameFlow.IsMapOpen) || (World != null && World.ProductionEnabled && !string.IsNullOrEmpty(World.State.production.miniGameToken)) || Time.timeScale<=0 || DialoguePanel.IsAnyPlaying || (dayFlow != null && dayFlow.BlocksGameplayInput);
+        public bool GameplayBlocked => (gameFlow != null && (gameFlow.SessionState != GameSessionState.Playing || gameFlow.IsMapOpen)) || (World != null && World.ProductionEnabled && !string.IsNullOrEmpty(World.State.production.miniGameToken)) || Time.timeScale<=0 || DialoguePanel.IsAnyPlaying || (dayFlow != null && dayFlow.BlocksGameplayInput);
+        private CafeVisitBridge cafeVisits;
+        private bool pendingBusinessStart;
+        public Sprite CafeVisitSprite(string customerId) => cafeVisits?.SeatedSprite(customerId);
+        public bool BusinessSimulationPaused => PresentationPauseRegistry.IsPaused || (cafeVisits != null && cafeVisits.HasStageHandoff);
         private DayFlowController dayFlow;
         private GameFlowBootstrap gameFlow;
         public event Action ViewChanged;
@@ -88,16 +92,15 @@ namespace Spotlight.FreeCafe
             var identities = customerIdentitySource as ICafeCustomerIdentitySource;
             if(identities==null && characterCatalog!=null && characterCatalog.Characters.Count>0)
                 identities=new CatalogCustomerIdentitySource(characterCatalog);
-            World=new CafeWorld(catalog,identities);
+            World=PlayerCafeOwner.Current ?? new CafeWorld(catalog,identities);
+            PlayerCafeOwner.Bind(World);
             if(prefabLibrary==null) throw new InvalidOperationException("请配置 EntityPrefabLibrary");
             prefabLibrary.Validate(World.Catalog);
             spawnScale=new FreeCafeSpawnScale(this,authored,catalog);
             if(productionMode) World.EnableProduction();
             AdoptAuthoredEntities(authored);
             World.Changed+=SyncViews;
-            if(GameSaveParticipantRegistry.Capturers.ContainsKey(SaveId)) throw new InvalidOperationException("Duplicate FreeCafe world in loaded scenes");
-            GameSaveParticipantRegistry.Capturers[SaveId]=CaptureJson;
-            GameSaveParticipantRegistry.Restorers[SaveId]=RestoreJson;
+            // The domain world and its save participant live for the game session.
         }
         private void Start()
         {
@@ -105,7 +108,17 @@ namespace Spotlight.FreeCafe
             gameFlow = FindFirstObjectByType<GameFlowBootstrap>();
             playerHud=FindFirstObjectByType<FreeCafeHud>(); productionHud=GetComponent<FreeCafeProductionHud>();
             string pending=GameSaveParticipantRegistry.TakePending(SaveId);
-            if(!string.IsNullOrEmpty(pending)) RestoreJson(pending); else SyncViews();
+            if(!string.IsNullOrEmpty(pending))
+            {
+                try { RestoreJson(pending); }
+                catch (Exception exception)
+                {
+                    PlayerCafeOwner.ReportRestoreFailure(exception.Message);
+                    Debug.LogError("Cafe save restoration failed: " + exception.Message, this);
+                    return;
+                }
+            }
+            else SyncViews();
             if (FreeCafeGMPanel.Instance != null) FreeCafeGMPanel.Instance.Initialize(this);
             if(World.State.currentArea==AreaId.Cafe)
                 ShowHint("点击大厅的「启动营业」立牌开始接单；点击客人查看订单，或前往制作台备料。");
@@ -115,9 +128,10 @@ namespace Spotlight.FreeCafe
                 ShowHint("点击来源取出物品，拖拽到任意位置；拖到容器或设备会尝试组合。Shift 拖拽仅摆放。");
             Debug.Log("[FreeCafe] 自由操作世界已启动：无工作台插槽、无订单步骤门禁。",this);
         }
-        private void OnDisable() => CancelDrag();
+        private void OnDisable() { CancelDrag(); cafeVisits?.Dispose(); cafeVisits = null; }
         private void OnDestroy()
         {
+            PlayerCafeOwner.Unbind(World);
             if(World!=null) World.Changed-=SyncViews;
             if(GameSaveParticipantRegistry.Capturers.TryGetValue(SaveId,out var capture) && capture==CaptureJson)
             { GameSaveParticipantRegistry.Capturers.Remove(SaveId); GameSaveParticipantRegistry.Restorers.Remove(SaveId); }
@@ -125,7 +139,15 @@ namespace Spotlight.FreeCafe
         private void Update()
         {
             if(World==null) return;
-            World.Tick(Time.deltaTime);
+            bool sessionReady = gameFlow == null || gameFlow.SessionState == GameSessionState.Playing;
+            if (sessionReady)
+            {
+                if (cafeVisits == null) cafeVisits = new CafeVisitBridge(this);
+                cafeVisits.Pump();
+                if (pendingBusinessStart) TryStartBusiness();
+                if (!BusinessSimulationPaused && (Spotlight.Narrative.NarrativeRuntime.Instance == null || cafeVisits.Ready)) World.Tick(Time.deltaTime);
+                cafeVisits.Pump();
+            }
             if(IsDragging && draggingVessel && !InputBlocked) UpdateVesselInput();
             // GameFlowBootstrap owns the global Escape/pause flow. FreeCafe only
             // cancels an active drag; the shared pause panel handles everything else.
@@ -146,7 +168,7 @@ namespace Spotlight.FreeCafe
             foreach(var view in authored)
             {
                 var entity=World.Find(view.AuthoringEntityId);
-                if(entity==null) throw new InvalidOperationException("场景实体未写入初始布局："+view.name);
+                if(entity==null) { Destroy(view.gameObject); continue; } // Sold/removed entities remain removed on scene return.
                 view.transform.SetParent(areaRoots[(int)entity.area],true);
                 views.Add(entity.id,view);view.Bind(this,entity);
             }
@@ -239,7 +261,7 @@ namespace Spotlight.FreeCafe
             if(InputBlocked || IsDragging || dragFinishedFrame==Time.frameCount) return;
             var entity=World.Find(view.EntityId); if(entity==null || entity.area!=World.State.currentArea) return;
             var spec=World.Spec(entity.specId);
-            if(spec.Has(Capability.BusinessControl)) { Report(World.ActivateBusinessControl(entity.id)); return; }
+            if(spec.Has(Capability.BusinessControl)) { StartBusiness(); return; }
             if(World.ProductionEnabled && entity.specId=="tool.latte-art") { Report(World.RequestProductionMiniGame()); return; }
             if(World.ProductionEnabled && spec.Has(Capability.Source) && World.Spec(spec.sourceItemId).Has(Capability.Container))
             { Report(World.SelectServingCup(entity.id)); return; }
@@ -281,6 +303,7 @@ namespace Spotlight.FreeCafe
             }
             else if(spec.Has(Capability.Customer))
             {
+                if (cafeVisits != null && cafeVisits.Click(entity.id)) return;
                 foreach(var request in World.State.requests) if(request.customerId==entity.id)
                 {
                     World.Focus(request.id);
@@ -594,18 +617,30 @@ namespace Spotlight.FreeCafe
         {
             CancelDrag();
             var gateway=GetComponent<FreeCafeMiniGameGateway>(); if(gateway!=null) gateway.Abort();
-            var result=World.Restore(JsonUtility.FromJson<CafeSnapshot>(json));
+            var result=World.Restore(CafeSaveMigration.Prepare(JsonUtility.FromJson<CafeSnapshot>(json)));
             if(!result.success) throw new FormatException(result.message); SelectedId=null; if(productionMode && !World.ProductionEnabled) World.EnableProduction(); SyncViews();
             // 读档后镜头瞬间就位，不做区域切换的平滑平移
             areaManager.SnapNow();
         }
         public void Save()
         {
-            CancelDrag(); var data=new GameSaveData { SceneName="CoffeeShop",CheckpointId="freecafe",Participants=GameSaveParticipantRegistry.CaptureAll() };
+            CancelDrag();
+            if (gameFlow == null) { Report(ActionResult.No("请从正式游戏会话保存，确保 NCS 与咖啡馆在同一边界。")); return; }
+            if (!gameFlow.TryCaptureSaveData(out var data, out var captureError)) { Report(ActionResult.No(captureError)); return; }
             var saves=new GameSaveService();
             Report(saves.TryQuickSave(data,out var slot,out var error) ? ActionResult.Yes("已保存到空槽位 "+slot) : ActionResult.No("保存失败："+error));
         }
-        public void StartBusiness() { if(!InputBlocked) Report(World.StartDay()); }
+        public void StartBusiness() { if(!InputBlocked) RequestBusinessStart(); }
+        public void RequestBusinessStart() { if (!GameplayBlocked) { pendingBusinessStart = true; TryStartBusiness(); } }
+        private void TryStartBusiness()
+        {
+            if (cafeVisits == null) cafeVisits = new CafeVisitBridge(this);
+            var ncs = Spotlight.Narrative.NarrativeRuntime.Instance;
+            if (ncs != null && (!cafeVisits.Pump() || !ncs.Controller.CanCaptureSnapshot || ncs.Controller.IsBusy || cafeVisits.HasStageHandoff)) return;
+            pendingBusinessStart = false;
+            Report(World.StartDay());
+            cafeVisits.Pump();
+        }
         public void EndBusiness() { if(!InputBlocked) Report(World.EndDay()); }
         public void StartDayFlowBusiness() => StartBusiness();
         public void EndDayFlowBusiness() => EndBusiness();

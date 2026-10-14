@@ -10,6 +10,7 @@ namespace Spotlight.GameFlow
     {
         public static DetailsPanelData Create()
         {
+            var playerRuntime = PlayerRuntime.Current ?? throw new InvalidOperationException("Player session is not ready.");
             var runtime = NarrativeRuntime.Instance;
             var configuration = runtime != null && runtime.IsReady ? runtime.Configuration : LubanNarrativeLoader.Load();
             var state = runtime != null && runtime.IsReady ? runtime.Controller.State : null;
@@ -28,7 +29,8 @@ namespace Spotlight.GameFlow
                     var extra = display != null ? display.progress.Find(p => p.barKey == bar.barKey) : null;
                     string visibility = state?.GetObjectState("details.bar." + bar.barKey);
                     if (visibility == "hidden" || (visibility != "visible" && extra != null && !extra.initiallyVisible)) continue;
-                    int value = state != null && state.TryGetBar(bar.barKey, out int current) ? current : bar.initValue;
+                    if (state == null || !state.TryGetBar(bar.barKey, out int value))
+                        throw new InvalidOperationException("Details value unavailable: " + bar.barKey);
                     list.Add(new DetailsProgressData(bar.barKey, Text(bar.nameText), value, bar.min, bar.max,
                         bar.min + " · " + (string.IsNullOrWhiteSpace(extra?.lowerDescription) ? "下限" : Text(extra.lowerDescription)),
                         bar.max + " · " + (string.IsNullOrWhiteSpace(extra?.upperDescription) ? "上限" : Text(extra.upperDescription)),
@@ -46,30 +48,36 @@ namespace Spotlight.GameFlow
                 characters.Add(new DetailsCharacterData(obj.objId, Text(obj.nameText), Text(obj.descText), Avatar(obj), unlocked, Bars(obj.objId)));
             }
             var attributes = new List<DetailsAttributeData>();
-            string[] keys = { "language", "courage", "wisdom", "perception" };
-            string[] descriptions = { "影响表达、说服与沟通。", "影响面对风险与压力时的行动。", "影响分析、推理与解决问题。", "影响观察环境、察觉细节与情绪。" };
-            for (int i = 0; i < 4; i++)
+            foreach (var attribute in playerRuntime.Catalog.Attributes)
             {
-                int value = state != null && state.TryGetBar("player." + keys[i], out int current) ? current : PlayerDetailsProfile.Current.Attributes[i];
-                attributes.Add(new DetailsAttributeData((DetailsAttributeKind)i, value, descriptions[i]));
+                if (playerRuntime.TryReadAttribute(attribute.AttributeId, out int value) != PlayerReadStatus.Success)
+                    throw new InvalidOperationException("Player attribute unavailable: " + attribute.AttributeId);
+                int kind = Array.IndexOf(FirstDayLetterDraft.AttributeKeys, attribute.AttributeId);
+                attributes.Add(new DetailsAttributeData((DetailsAttributeKind)kind, value, playerRuntime.Catalog.Text(attribute.DescriptionText)));
+            }
+            bool HasSpecialization(string id)
+            {
+                var status = playerRuntime.TryReadSpecialization(id, out bool value);
+                if (status != PlayerReadStatus.Success) throw new InvalidOperationException("Specialization unavailable: " + id);
+                return value;
             }
             var badges = new List<DetailsSpecializationData>();
             if (display != null) foreach (var specialization in display.specializations)
-                if (PlayerDetailsProfile.Current.Specializations.Contains(specialization.id) || (state?.IsFlagSet("details.specialization." + specialization.id) ?? false))
+                if (HasSpecialization(specialization.id))
                     badges.Add(new DetailsSpecializationData(Text(specialization.displayName), Text(specialization.description), specialization.icon));
             for (int i = 0; i < FirstDayLetterDraft.SpecializationIds.Length; i++)
-                if (PlayerDetailsProfile.Current.Specializations.Contains(FirstDayLetterDraft.SpecializationIds[i])
+                if (HasSpecialization(FirstDayLetterDraft.SpecializationIds[i])
                     && (display == null || !display.specializations.Exists(item => item.id == FirstDayLetterDraft.SpecializationIds[i])))
                     badges.Add(new DetailsSpecializationData(FirstDayLetterDraft.SpecializationNames[i], "在北港学院研读相关学业，获得的知识专精。", null));
             Sprite avatar = player == null ? null : Avatar(player);
             if (display != null)
             {
-                Sprite selected = PlayerDetailsProfile.Current.Avatar == AvatarKind.Female ? display.femaleAvatar : display.maleAvatar;
+                Sprite selected = playerRuntime.Avatar == AvatarKind.Female ? display.femaleAvatar : display.maleAvatar;
                 if (selected != null) avatar = selected;
             }
-            string background = PlayerDetailsProfile.Current.Background;
+            string background = playerRuntime.Background;
             if (string.IsNullOrWhiteSpace(background)) background = player == null ? "尚未记录主角背景。" : Text(player.descText);
-            string playerName = PlayerDetailsProfile.Current.PlayerName;
+            string playerName = playerRuntime.PlayerName;
             if (string.IsNullOrWhiteSpace(playerName)) playerName = player == null ? "咖啡馆馆长" : Text(player.nameText);
             return new DetailsPanelData(new DetailsProfileData(playerName, background,
                 "你接手叔叔留下的咖啡馆，以咖啡与倾听接待来客。", avatar), attributes, badges,

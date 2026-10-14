@@ -24,6 +24,8 @@ namespace Spotlight.GameFlow
             current = data as ResultPanelData;
             if (titleText != null) titleText.text = current?.Title ?? string.Empty;
             if (messageText != null) messageText.text = current?.Message ?? string.Empty;
+            var label = closeButton != null ? closeButton.GetComponentInChildren<TMP_Text>(true) : null;
+            if (label != null) label.text = current?.CloseLabel ?? "关闭";
         }
 
         protected override void OnClose()
@@ -39,7 +41,8 @@ namespace Spotlight.GameFlow
             ResultPanelData result = current;
             current = null;
             if (result == null) return;
-            result.Flow?.CloseModalPanel(this, () => result.Closed?.Invoke());
+            if (result.Flow != null) result.Flow.CloseModalPanel(this, () => result.Closed?.Invoke());
+            else CloseAnimated(() => result.Closed?.Invoke());
         }
     }
 }

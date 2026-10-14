@@ -1,0 +1,9 @@
+[
+  {
+    "checkId": "first_day_perception",
+    "successEventId": "EV_FIRST_DAY_PERCEPTION_SUCCESS",
+    "failureEventId": "EV_FIRST_DAY_PERCEPTION_FAILURE",
+    "successResultOwnerId": "",
+    "failureResultOwnerId": ""
+  }
+]

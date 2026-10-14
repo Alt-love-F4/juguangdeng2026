@@ -2,6 +2,7 @@ using System;
 using System.Collections;
 using System.Reflection;
 using NUnit.Framework;
+using Spotlight.Narrative;
 using UnityEngine;
 using UnityEngine.TestTools;
 using UnityEngine.UI;
@@ -16,6 +17,7 @@ namespace Spotlight.GameFlow.Tests
         private static readonly FirstDayLetterContent TestContent = new FirstDayLetterContent("孩子，咖啡馆交给你。欢迎回家。", FirstDayLetterDraft.Signature);
         private GameObject controllerObject;
         private float oldTimeScale;
+        private PlayerPresentationTestSession session;
 
         [SetUp]
         public void Setup()
@@ -23,6 +25,7 @@ namespace Spotlight.GameFlow.Tests
             oldTimeScale = Time.timeScale;
             Time.timeScale = 1;
             GameSaveParticipantRegistry.PendingRestore = null;
+            session = new PlayerPresentationTestSession();
         }
 
         [UnityTearDown]
@@ -32,7 +35,9 @@ namespace Spotlight.GameFlow.Tests
             UIKit.ClosePanelsByTag(TestTag);
             GameSaveParticipantRegistry.PendingRestore = null;
             Time.timeScale = oldTimeScale;
-            yield return null;
+            yield return null; // Let panel/controller destruction cancel all callbacks before releasing the test session.
+            session.Dispose();
+            session = null;
         }
 
         [Test]
@@ -274,13 +279,15 @@ namespace Spotlight.GameFlow.Tests
         }
 
         [UnityTest]
-        public IEnumerator NewSessionWaitsForLetterAndAvatarBeforeFirstDayAndNextDayBypassesThem()
+        public IEnumerator NewSessionWaitsForLetterThenSelectsMaleAvatarAndEntersMap()
         {
             controllerObject = new GameObject("FirstDayLetterFlowTest");
             var flow = controllerObject.AddComponent<DayFlowController>();
             flow.Initialize(null);
+            session.Bind(flow);
             flow.BeginNewSession();
             var panel = flow.CurrentPresentation as FirstDayLetterPanel;
+            session.BindLetter(panel);
             Assert.That(panel, Is.Not.Null);
             SpeedUp(panel);
             Assert.That(flow.State, Is.EqualTo(DayFlowState.IntroLetter));
@@ -294,16 +301,27 @@ namespace Spotlight.GameFlow.Tests
             panel.SetPlayerName("测试馆长");
             for (int i = 0; i < 5; i++) panel.SelectLetterOption(i, 0);
             panel.ConfirmSignature();
-            yield return WaitFor(() => flow.State == DayFlowState.AvatarSelection);
+            yield return WaitFor(() => flow.State == DayFlowState.DateTransition);
             Assert.That(flow.BlocksGameplayInput, Is.True);
+            Assert.That(PlayerRuntime.Current.HasSelectedAvatar, Is.True);
+            Assert.That(flow.CurrentAvatarSelection, Is.Null);
+            Assert.That(PlayerRuntime.Current.Avatar, Is.EqualTo(AvatarKind.Male));
+            Assert.That(PlayerRuntime.Current.PlayerName, Is.EqualTo("测试馆长"));
+            Assert.That(PlayerRuntime.Current.TryReadSpecialization("letter.religion", out bool specialized), Is.EqualTo(PlayerReadStatus.Success));
+            Assert.That(specialized, Is.True);
+            Assert.That(session.World.State.money, Is.EqualTo(250));
+            Assert.That(PlayerRuntime.Current.CreationSubmitted, Is.True);
+            Assert.That(PlayerRuntime.Current.TryReadAttribute("language", out int language), Is.EqualTo(PlayerReadStatus.Success));
+            Assert.That(language, Is.EqualTo(5));
+            Assert.That(session.Submit(panel.Draft), Is.True, "Replay is acknowledged without granting rewards again.");
+            Assert.That(session.World.State.money, Is.EqualTo(250));
+            PlayerRuntime.Current.TryReadAttribute("language", out language);
+            Assert.That(language, Is.EqualTo(5));
+            Assert.That(flow.CurrentPresentation, Is.TypeOf<DateChangePanel>());
+            yield return WaitFor(() => flow.State == DayFlowState.CityMapLeisure);
             Assert.That(flow.CurrentPresentation, Is.Null);
-            Assert.That(PlayerDetailsProfile.Current.HasSelectedAvatar, Is.False);
-            flow.CurrentAvatarSelection.Select(AvatarKind.Female);
-            Assert.That(PlayerDetailsProfile.Current.Avatar, Is.EqualTo(AvatarKind.Female));
-            Assert.That(flow.State, Is.EqualTo(DayFlowState.DateTransition));
-            Assert.That(flow.CurrentPresentation, Is.TypeOf<DateChangePanel>());
-            flow.BeginNewDayFlow();
-            Assert.That(flow.CurrentPresentation, Is.TypeOf<DateChangePanel>());
+            Assert.That(flow.CurrentAvatarSelection, Is.Null);
+            Assert.That(flow.BlocksGameplayInput, Is.False);
             flow.HideForMainMenu();
         }
 
@@ -313,14 +331,22 @@ namespace Spotlight.GameFlow.Tests
             controllerObject = new GameObject("FirstDayLetterSkipFlowTest");
             var flow = controllerObject.AddComponent<DayFlowController>();
             flow.Initialize(null);
+            session.Bind(flow);
             flow.BeginNewSession();
             var panel = flow.CurrentPresentation as FirstDayLetterPanel;
+            session.BindLetter(panel);
             Assert.That(panel, Is.Not.Null);
             ((Button)Field("skipButton").GetValue(panel)).onClick.Invoke();
             panel.SkipLetter();
             Assert.That(flow.CurrentAvatarSelection, Is.Null);
-            Assert.That(PlayerDetailsProfile.Current.Avatar, Is.EqualTo(AvatarKind.Male));
-            Assert.That(PlayerDetailsProfile.Current.HasSelectedAvatar, Is.True);
+            Assert.That(session.World.State.money, Is.EqualTo(500));
+            Assert.That(PlayerRuntime.Current.CreationSubmitted, Is.True);
+            Assert.That(PlayerRuntime.Current.TryReadAttribute("language", out int language), Is.EqualTo(PlayerReadStatus.Success));
+            Assert.That(language, Is.Zero);
+            PlayerRuntime.Current.TryReadSpecialization("letter.religion", out bool specialized);
+            Assert.That(specialized, Is.False);
+            Assert.That(PlayerRuntime.Current.Avatar, Is.EqualTo(AvatarKind.Male));
+            Assert.That(PlayerRuntime.Current.HasSelectedAvatar, Is.True);
             Assert.That(flow.State, Is.EqualTo(DayFlowState.DateTransition));
             Assert.That(flow.CurrentPresentation, Is.TypeOf<DateChangePanel>());
             Assert.That(flow.CurrentDate, Is.EqualTo("王国纪元 670年10月6日"));
@@ -354,7 +380,9 @@ namespace Spotlight.GameFlow.Tests
                     Json = "{\"day\":2,\"previousDate\":\"王国纪元 670年10月6日\",\"state\":1}" }
             };
             flow.RestoreSavedDayFlow();
-            Assert.That(flow.CurrentPresentation, Is.TypeOf<PreBusinessPanel>());
+            Assert.That(flow.State, Is.EqualTo(DayFlowState.CityMapLeisure));
+            Assert.That(flow.CurrentPresentation, Is.Null);
+            Assert.That(flow.BlocksGameplayInput, Is.False);
             Assert.That(flow.CurrentDate, Is.EqualTo("王国纪元 670年10月7日"));
             flow.HideForMainMenu();
             yield return null;

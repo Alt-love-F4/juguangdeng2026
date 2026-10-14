@@ -49,7 +49,7 @@
     "eventId": "EV_ACT_MEET",
     "seq": 6,
     "resultType": "SET_FLAG",
-    "target": "flag:met_in_secret",
+    "target": "met_in_secret",
     "value": "true",
     "note": "记录私会"
   },
@@ -112,7 +112,7 @@
     "eventId": "EV_ACT_SALON",
     "seq": 2,
     "resultType": "SET_FLAG",
-    "target": "flag:a_educated",
+    "target": "a_educated",
     "value": "true",
     "note": "A已开蒙"
   },
@@ -130,7 +130,7 @@
     "eventId": "EV_AB_SWEAR",
     "seq": 1,
     "resultType": "SET_FLAG",
-    "target": "flag:ab_swear",
+    "target": "ab_swear",
     "value": "true",
     "note": "A与B私定终生"
   },
@@ -166,7 +166,7 @@
     "eventId": "EV_BC_SWEAR",
     "seq": 1,
     "resultType": "SET_FLAG",
-    "target": "flag:bc_swear",
+    "target": "bc_swear",
     "value": "true",
     "note": "B与C私定终生"
   },
@@ -202,7 +202,7 @@
     "eventId": "EV_STANDOFF",
     "seq": 1,
     "resultType": "SET_FLAG",
-    "target": "flag:standoff_done",
+    "target": "standoff_done",
     "value": "true",
     "note": "对峙已发生"
   },
@@ -220,7 +220,7 @@
     "eventId": "EV_COMRADE",
     "seq": 1,
     "resultType": "SET_FLAG",
-    "target": "flag:comrade",
+    "target": "comrade",
     "value": "true",
     "note": "C被说服"
   },
@@ -238,7 +238,7 @@
     "eventId": "EV_PRISON",
     "seq": 1,
     "resultType": "SET_FLAG",
-    "target": "flag:b_arrested",
+    "target": "b_arrested",
     "value": "true",
     "note": "B入狱"
   },
@@ -265,7 +265,7 @@
     "eventId": "EV_RESCUE",
     "seq": 1,
     "resultType": "CLEAR_FLAG",
-    "target": "flag:b_arrested",
+    "target": "b_arrested",
     "value": "false",
     "note": "B出狱"
   },
@@ -328,7 +328,7 @@
     "eventId": "EV_ELOPE",
     "seq": 1,
     "resultType": "SET_FLAG",
-    "target": "flag:eloped",
+    "target": "eloped",
     "value": "true",
     "note": "B与A私奔"
   },
@@ -346,7 +346,7 @@
     "eventId": "EV_FLEE",
     "seq": 1,
     "resultType": "SET_FLAG",
-    "target": "flag:fled",
+    "target": "fled",
     "value": "true",
     "note": "家族出逃"
   },
@@ -364,7 +364,7 @@
     "eventId": "EV_REVOLUTION",
     "seq": 1,
     "resultType": "SET_FLAG",
-    "target": "flag:revolution",
+    "target": "revolution",
     "value": "true",
     "note": "投身革命"
   },
@@ -382,7 +382,7 @@
     "eventId": "EV_MUSICIAN",
     "seq": 1,
     "resultType": "SET_FLAG",
-    "target": "flag:musician_end",
+    "target": "musician_end",
     "value": "true",
     "note": "B成为音乐家"
   },
@@ -418,8 +418,80 @@
     "eventId": "choice.chen.tea.result",
     "seq": 1,
     "resultType": "SET_FLAG",
-    "target": "flag:accepted_tea",
+    "target": "accepted_tea",
     "value": "true",
     "note": "接受茶杯"
+  },
+  {
+    "resultId": "R_EV_TEST_DELIVERY_CUMULATIVE",
+    "eventId": "EV_TEST_DELIVERY_CUMULATIVE",
+    "seq": 1,
+    "resultType": "ITEM_ADD",
+    "target": "delivery_receipt",
+    "value": "1",
+    "note": "只奖励收据，不重复扣交付成本"
+  },
+  {
+    "resultId": "R_EV_TEST_DELIVERY_CONSECUTIVE",
+    "eventId": "EV_TEST_DELIVERY_CONSECUTIVE",
+    "seq": 1,
+    "resultType": "ITEM_ADD",
+    "target": "delivery_receipt",
+    "value": "1",
+    "note": "只奖励收据，不重复扣交付成本"
+  },
+  {
+    "resultId": "R_DEMO_CAFE_RESERVE",
+    "eventId": "EV_DEMO_CAFE_RESERVE",
+    "seq": 1,
+    "resultType": "RESERVE_CAFE_VISIT",
+    "target": "obj:adele",
+    "value": "visit:demo_cafe_visit",
+    "note": "特殊来访测试入口；不自动挂入正式日历"
+  },
+  {
+    "resultId": "R_DEMO_CAFE_DELAYED_RESERVE",
+    "eventId": "EV_DEMO_CAFE_DELAYED_RESERVE",
+    "seq": 1,
+    "resultType": "RESERVE_CAFE_VISIT",
+    "target": "obj:adele",
+    "value": "visit:demo_cafe_delayed_visit",
+    "note": "特殊来访测试入口；不自动挂入正式日历"
+  },
+  {
+    "resultId": "R_DEMO_CAFE_ARRIVE",
+    "eventId": "EV_DEMO_CAFE_ARRIVE",
+    "seq": 1,
+    "resultType": "SPAWN_NPC",
+    "target": "obj:adele",
+    "value": "scene:cafe",
+    "note": "特殊来访测试入口；不自动挂入正式日历"
+  },
+  {
+    "resultId": "R_DEMO_CAFE_CANCEL",
+    "eventId": "EV_DEMO_CAFE_CANCEL",
+    "seq": 1,
+    "resultType": "DESPAWN_NPC",
+    "target": "obj:adele",
+    "value": "",
+    "note": "特殊来访测试入口；不自动挂入正式日历"
+  },
+  {
+    "resultId": "R_DEMO_CAFE_LEAVING",
+    "eventId": "EV_DEMO_CAFE_LEAVING",
+    "seq": 1,
+    "resultType": "SET_FLAG",
+    "target": "demo.cafe.leaving",
+    "value": "true",
+    "note": "示例阶段反馈可查看条件"
+  },
+  {
+    "resultId": "R_DEMO_CAFE_ENDED",
+    "eventId": "EV_DEMO_CAFE_ENDED",
+    "seq": 1,
+    "resultType": "SET_FLAG",
+    "target": "demo.cafe.ended",
+    "value": "true",
+    "note": "示例阶段反馈可查看条件"
   }
 ]

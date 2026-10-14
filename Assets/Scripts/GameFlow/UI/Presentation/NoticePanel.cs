@@ -35,6 +35,8 @@ namespace Spotlight.GameFlow
         private DG.Tweening.Sequence transition;
         private Action finished;
         private Action cancelled;
+        private IDisposable pauseOwner;
+        public event Action PlaybackStopped;
         private bool ready;
         private bool exiting;
         private int lastConfirmFrame;
@@ -89,6 +91,9 @@ namespace Spotlight.GameFlow
             if (canvasGroup == null || confirmButton == null) throw new InvalidOperationException("NoticePanel has incomplete prefab bindings.");
             Stop();
             if (!value.Visible) { CloseSelf(); onFinished?.Invoke(); return; }
+            pauseOwner = PresentationPauseRegistry.Acquire(nameof(NoticePanel));
+            try
+            {
             OnShow();
             lastConfirmFrame = Time.frameCount;
             var system = UnityEngine.EventSystems.EventSystem.current;
@@ -152,6 +157,8 @@ namespace Spotlight.GameFlow
                 ready = true;
                 if (confirmButton != null) confirmButton.interactable = true;
             });
+            }
+            catch { Stop(); throw; }
         }
 
         public void Confirm()
@@ -180,6 +187,10 @@ namespace Spotlight.GameFlow
 
         public void Stop()
         {
+            pauseOwner?.Dispose();
+            pauseOwner = null;
+            Action stopped = PlaybackStopped;
+            PlaybackStopped = null;
             transition?.Kill(false);
             transition = null;
             finished = null;
@@ -191,6 +202,7 @@ namespace Spotlight.GameFlow
                 canvasGroup.alpha = 0f;
                 canvasGroup.blocksRaycasts = canvasGroup.interactable = false;
             }
+            stopped?.Invoke();
         }
 
         private void UpdatePageHint()

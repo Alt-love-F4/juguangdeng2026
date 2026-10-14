@@ -16,6 +16,7 @@ namespace Spotlight.GameFlow.Tests
         private GameObject controllerObject;
         private GameObject endpointObject;
         private float oldTimeScale;
+        private PlayerPresentationTestSession session;
 
         [SetUp]
         public void SetUp()
@@ -23,6 +24,7 @@ namespace Spotlight.GameFlow.Tests
             oldTimeScale = Time.timeScale;
             Time.timeScale = 1f;
             GameSaveParticipantRegistry.PendingRestore = null;
+            session = new PlayerPresentationTestSession();
         }
 
         [UnityTearDown]
@@ -34,6 +36,8 @@ namespace Spotlight.GameFlow.Tests
             GameSaveParticipantRegistry.PendingRestore = null;
             Time.timeScale = oldTimeScale;
             yield return null;
+            session.Dispose();
+            session = null;
         }
 
         [TestCase(typeof(DateChangePanel))]
@@ -122,30 +126,34 @@ namespace Spotlight.GameFlow.Tests
         }
 
         [UnityTest]
-        public IEnumerator AllDayPhasesUseTheirOwnPanelsAndAdvanceOnlyOnCompletion()
+        public IEnumerator FormalDayStartsOnMapAndPresentationsAdvanceOnlyOnCompletion()
         {
             controllerObject = new GameObject("DayFlowTest");
             var flow = controllerObject.AddComponent<DayFlowController>();
             flow.Initialize(null);
+            session.Bind(flow);
             endpointObject = new GameObject("DayFlowEndpointTest");
             var endpoint = endpointObject.AddComponent<DayFlowTestEndpoint>();
             // An already-open endpoint must not bypass the date presentation.
             endpoint.active = true;
+            Assert.That(session.Submit(null), Is.True);
             flow.BeginNewSession(playLetter: false, playIntroduction: false);
-            Assert.That(flow.State, Is.EqualTo(DayFlowState.AvatarSelection));
-            Assert.That(flow.BlocksGameplayInput, Is.True);
-            Assert.That(PlayerDetailsProfile.Current.HasSelectedAvatar, Is.False);
-            Assert.That(flow.CurrentAvatarSelection, Is.Not.Null);
-            flow.CurrentAvatarSelection.Select(AvatarKind.Male);
-            Assert.That(PlayerDetailsProfile.Current.HasSelectedAvatar, Is.True);
+            Assert.That(flow.State, Is.EqualTo(DayFlowState.CityMapLeisure));
+            Assert.That(flow.IsFirstDayMapGuideActive, Is.True);
+            Assert.That(flow.BlocksGameplayInput, Is.False);
+            Assert.That(PlayerRuntime.Current.HasSelectedAvatar, Is.True);
+            Assert.That(PlayerRuntime.Current.Avatar, Is.EqualTo(AvatarKind.Male));
             Assert.That(flow.CurrentAvatarSelection, Is.Null);
             yield return null;
-            Assert.That(flow.State, Is.EqualTo(DayFlowState.DateTransition));
-            Assert.That(flow.BlocksGameplayInput, Is.True);
-            yield return WaitFor(() => flow.State == DayFlowState.PreBusiness);
-            Assert.That(flow.CurrentPresentation, Is.TypeOf<PreBusinessPanel>());
-            yield return Submit((DayFlowPresentationPanel)flow.CurrentPresentation);
-            yield return WaitFor(() => flow.State == DayFlowState.BusinessTransition);
+            Assert.That(flow.State, Is.EqualTo(DayFlowState.CityMapLeisure));
+            Assert.That(flow.IsFirstDayMapGuideActive, Is.True);
+            Assert.That(flow.BlocksGameplayInput, Is.False);
+            yield return WaitFor(() => flow.State == DayFlowState.CityMapLeisure);
+            Assert.That(flow.CurrentPresentation, Is.Null, "The formal map replaces the old CityMap/PreBusiness presentation.");
+            Assert.That(flow.BlocksGameplayInput, Is.False);
+            Assert.That(endpoint.starts, Is.Zero, "Reaching the map must not automatically start business.");
+            flow.StartCafeFromMap();
+            Assert.That(flow.State, Is.EqualTo(DayFlowState.BusinessTransition));
             Assert.That(flow.CurrentPresentation, Is.TypeOf<CafeOpeningPanel>());
             Assert.That(endpoint.starts, Is.Zero);
             yield return Submit((DayFlowPresentationPanel)flow.CurrentPresentation);
@@ -157,9 +165,10 @@ namespace Spotlight.GameFlow.Tests
             Assert.That(flow.CurrentPresentation, Is.TypeOf<BusinessEndPanel>());
             yield return Submit((DayFlowPresentationPanel)flow.CurrentPresentation);
             yield return WaitFor(() => flow.State == DayFlowState.CityMapLeisure);
-            Assert.That(flow.CurrentPresentation, Is.TypeOf<CityMapPanel>());
-            yield return Submit((DayFlowPresentationPanel)flow.CurrentPresentation);
-            yield return WaitFor(() => flow.State == DayFlowState.PreNight);
+            Assert.That(flow.CurrentPresentation, Is.Null);
+            Assert.That(flow.BlocksGameplayInput, Is.False);
+            flow.EndDayFromMap();
+            Assert.That(flow.State, Is.EqualTo(DayFlowState.PreNight));
             Assert.That(flow.CurrentPresentation, Is.TypeOf<PreNightPanel>());
             yield return Submit((DayFlowPresentationPanel)flow.CurrentPresentation);
             yield return WaitFor(() => flow.State == DayFlowState.HomeNight);
@@ -181,6 +190,7 @@ namespace Spotlight.GameFlow.Tests
             controllerObject = new GameObject("DayFlowRestoreTest");
             var flow = controllerObject.AddComponent<DayFlowController>();
             flow.Initialize(null);
+            session.Bind(flow);
             GameSaveParticipantRegistry.PendingRestore = new List<GameSaveParticipantData>
             {
                 new GameSaveParticipantData { Id = DayFlowController.SaveId,
@@ -191,13 +201,13 @@ namespace Spotlight.GameFlow.Tests
             Assert.That(flow.CurrentPresentation, Is.TypeOf<PreNightPanel>());
             StringAssert.Contains("10月10日", flow.CurrentDate);
             Assert.That(GameSaveParticipantRegistry.TakePending(DayFlowController.SaveId), Is.Null);
+            Assert.That(session.Submit(null), Is.True);
             flow.BeginNewSession(playLetter: false, playIntroduction: false);
-            Assert.That(flow.State, Is.EqualTo(DayFlowState.AvatarSelection));
-            Assert.That(flow.BlocksGameplayInput, Is.True);
-            Assert.That(PlayerDetailsProfile.Current.HasSelectedAvatar, Is.False);
-            Assert.That(flow.CurrentAvatarSelection, Is.Not.Null);
-            flow.CurrentAvatarSelection.Select(AvatarKind.Male);
-            Assert.That(PlayerDetailsProfile.Current.HasSelectedAvatar, Is.True);
+            Assert.That(flow.State, Is.EqualTo(DayFlowState.CityMapLeisure));
+            Assert.That(flow.IsFirstDayMapGuideActive, Is.True);
+            Assert.That(flow.BlocksGameplayInput, Is.False);
+            Assert.That(PlayerRuntime.Current.HasSelectedAvatar, Is.True);
+            Assert.That(PlayerRuntime.Current.Avatar, Is.EqualTo(AvatarKind.Male));
             Assert.That(flow.CurrentAvatarSelection, Is.Null);
             Assert.That(flow.State, Is.EqualTo(DayFlowState.DateTransition));
             StringAssert.Contains("10月6日", flow.CurrentDate);

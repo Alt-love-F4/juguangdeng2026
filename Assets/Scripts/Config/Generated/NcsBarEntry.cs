@@ -38,6 +38,9 @@ public sealed partial class NcsBarEntry : Luban.BeanBase
         DerivedSources = (string)_obj.GetValue("derivedSources");
         DerivedWeights = (string)_obj.GetValue("derivedWeights");
         AutoStep = (int)_obj.GetValue("autoStep");
+        SourceMode = (string)_obj.GetValue("sourceMode");
+        ProviderId = (string)_obj.GetValue("providerId");
+        SourceKey = (string)_obj.GetValue("sourceKey");
     }
 
     public static NcsBarEntry DeserializeNcsBarEntry(JToken _buf)
@@ -63,6 +66,9 @@ public sealed partial class NcsBarEntry : Luban.BeanBase
     public readonly string DerivedSources;
     public readonly string DerivedWeights;
     public readonly int AutoStep;
+    public readonly string SourceMode;
+    public readonly string ProviderId;
+    public readonly string SourceKey;
 
 
     public const int __ID__ = 178628477;
@@ -93,6 +99,9 @@ public sealed partial class NcsBarEntry : Luban.BeanBase
         + "derivedSources:" + DerivedSources + ","
         + "derivedWeights:" + DerivedWeights + ","
         + "autoStep:" + AutoStep + ","
+        + "sourceMode:" + SourceMode + ","
+        + "providerId:" + ProviderId + ","
+        + "sourceKey:" + SourceKey + ","
         + "}";
     }
 }

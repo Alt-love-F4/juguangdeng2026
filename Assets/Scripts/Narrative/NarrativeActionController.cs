@@ -19,6 +19,9 @@ namespace Spotlight.Narrative
         private readonly List<NarrativeActionMountValue> mounts = new List<NarrativeActionMountValue>();
         private readonly HashSet<string> retired = new HashSet<string>(StringComparer.Ordinal);
         private readonly Queue<string> dueActions = new Queue<string>();
+        private readonly Dictionary<string, NarrativeActionDeliveryValue> deliveries = new Dictionary<string, NarrativeActionDeliveryValue>(StringComparer.Ordinal);
+        private bool committing;
+        private bool operationOpen;
         private bool executing;
         private string executingAction;
         private Queue<string> pendingEvents;
@@ -28,6 +31,7 @@ namespace Spotlight.Narrative
         public NarrativeActionPoints ActionPoints { get; }
         public int CurrentDay { get; private set; } = 1;
         public bool IsExecuting => executing;
+        public bool CanCaptureSnapshot => !committing;
         public event Action StateChanged;
         public event Action<NarrativeActionDefinition> ActionStarted;
         public event Action<NarrativeActionDefinition, bool> ActionFinished;
@@ -43,33 +47,47 @@ namespace Spotlight.Narrative
                 if (!definitions.TryAdd(action.actionKey, action)) throw new FormatException("Duplicate action key: " + action.actionKey);
                 if (action.parsedRequirements == null || action.parsedRequirements.Count == 0)
                     action.parsedRequirements = NarrativeActionRequirementParser.Parse(action.requirements);
+                foreach (var cost in action.parsedRequirements)
+                    if (cost == null || (cost.type != NarrativeActionRequirementType.Item && cost.type != NarrativeActionRequirementType.ActionPoint)
+                        || cost.value <= 0 || (cost.type == NarrativeActionRequirementType.Item && string.IsNullOrWhiteSpace(cost.key)))
+                        throw new FormatException("Action requires positive Item/ActionPoint costs; move read-only checks to Condition: " + action.actionKey);
+                if (action.IsDelivery) deliveries.Add(action.actionKey, new NarrativeActionDeliveryValue { actionKey = action.actionKey });
             }
             foreach (var action in definitions.Values)
                 if (action.type == NarrativeActionType.Future && (string.IsNullOrEmpty(action.nextActionKey) || Get(action.nextActionKey) == null || action.nextActionKey == action.actionKey))
                     throw new FormatException("Future action requires a different configured nextActionKey: " + action.actionKey);
             ActionPoints = new NarrativeActionPoints(actionPointMax);
-            ActionPoints.Changed += (_, __) => StateChanged?.Invoke();
-            this.inventory = inventory ?? new EmptyNarrativeActionInventory();
+            ActionPoints.Changed += (_, __) => { if (!committing) StateChanged?.Invoke(); };
+            SetInventory(inventory);
+            narrative.ActionProgressReader = key => Get(key) == null ? (int?)null : GetProgress(key);
+            narrative.ActionCompletedReader = key => Get(key) == null ? (bool?)null : IsCompleted(key);
             narrative.EventCompleted += OnEventCompleted;
+            narrative.EventFailed += (eventId, error) => { if (executing && currentEventId == eventId) ReportFailure(); };
         }
 
-        public void SetInventory(INarrativeActionInventory value) => inventory = value ?? new EmptyNarrativeActionInventory();
+        public void SetInventory(INarrativeActionInventory value)
+        {
+            inventory = value ?? new EmptyNarrativeActionInventory();
+            if (inventory is NarrativeMapInventory mapInventory) narrative.Inventory = mapInventory;
+        }
         public IEnumerable<NarrativeActionDefinition> Actions => definitions.Values;
         public NarrativeActionDefinition Get(string actionKey) => actionKey != null && definitions.TryGetValue(actionKey, out var action) ? action : null;
 
         public void BeginDay(int day, int actionPointMax = -1)
         {
+            if (narrative.IsEnded) return;
             if (executing) throw new InvalidOperationException("Cannot begin a day while an action is executing.");
             if (day < CurrentDay) throw new ArgumentOutOfRangeException(nameof(day), "Day cannot move backwards.");
             if (day == CurrentDay) return;
             bool advanced = day > CurrentDay;
-            CurrentDay = day;
+            narrative.BeginOperation();
+            RefreshForDay(day);
             if (actionPointMax >= 0) ActionPoints.ResetForDay(actionPointMax);
             else ActionPoints.ResetForDay(ActionPoints.Max);
             if (advanced)
             {
                 foreach (var action in definitions.Values)
-                    if (IsVisible(action.actionKey) && expiryDays.TryGetValue(action.actionKey, out int deadline) && CurrentDay >= deadline)
+                    if (IsVisible(action.actionKey) && !IsCompleted(action.actionKey) && expiryDays.TryGetValue(action.actionKey, out int deadline) && CurrentDay >= deadline)
                     {
                         retired.Add(action.actionKey);
                         if (action.type == NarrativeActionType.Future && !string.IsNullOrEmpty(action.nextActionKey))
@@ -80,6 +98,28 @@ namespace Spotlight.Narrative
             }
             StateChanged?.Invoke();
             PlayDueAction();
+            narrative.EndOperation();
+        }
+
+        /// <summary>Refreshes effective delivery progress after the formal day has been restored; never refills points.</summary>
+        public void RefreshForDay(int day)
+        {
+            if (day < 1) throw new ArgumentOutOfRangeException(nameof(day));
+            CurrentDay = day;
+            bool changed = false;
+            foreach (var pair in deliveries)
+            {
+                var value = pair.Value;
+                if (Get(pair.Key).deliveryMode == NarrativeDeliveryMode.Consecutive && !value.completed
+                    && value.progress > 0 && (long)day - value.lastSubmissionDay > 1)
+                {
+                    value.progress = 0;
+                    changed = true;
+                }
+            }
+            if (!changed) return;
+            narrative.NotifyConditionsChanged();
+            StateChanged?.Invoke();
         }
 
         public void Mount(string position, string key)
@@ -97,17 +137,25 @@ namespace Spotlight.Narrative
         public bool IsVisible(string key)
         {
             var action = Get(key);
-            return action != null && !retired.Contains(key) && !(action.type == NarrativeActionType.Once && !action.IsProgress && GetProgress(key) > 0)
-                && !(action.IsProgress && GetProgress(key) >= action.progressTarget);
+            return action != null && !retired.Contains(key) && (action.IsDelivery || !IsCompleted(key));
         }
         public int GetRemainingDays(string key) => expiryDays.TryGetValue(key, out int deadline) ? Math.Max(0, deadline - CurrentDay) : 0;
-        public int GetProgress(string key) => counters.TryGetValue(key, out int value) ? value : 0;
+        public int GetProgress(string key) => key != null && deliveries.TryGetValue(key, out var delivery) ? delivery.progress
+            : key != null && counters.TryGetValue(key, out int value) ? value : 0;
+        public bool IsCompleted(string key)
+        {
+            if (key != null && deliveries.TryGetValue(key, out var delivery)) return delivery.completed;
+            var action = Get(key);
+            return action != null && (action.IsProgress ? GetProgress(key) >= action.progressTarget
+                : action.type == NarrativeActionType.Once && GetProgress(key) > 0);
+        }
+        public bool HasSubmittedToday(string key) => key != null && deliveries.TryGetValue(key, out var value) && value.lastSubmissionDay == CurrentDay;
         public bool HasBlockingActions()
         {
             foreach (var mount in mounts)
             {
                 var action = Get(mount.action);
-                if (action != null && action.mustExecute && IsVisible(action.actionKey) && action.type != NarrativeActionType.Future
+                if (action != null && action.mustExecute && IsVisible(action.actionKey) && !IsCompleted(action.actionKey) && action.type != NarrativeActionType.Future
                     && (!dailyExecution.TryGetValue(action.actionKey, out int day) || day != CurrentDay)) return true;
             }
             return false;
@@ -118,7 +166,8 @@ namespace Spotlight.Narrative
             checks = new List<NarrativeActionCheck>();
             NarrativeActionDefinition action = Get(actionKey);
             if (action == null) return false;
-            bool eligible = !executing && !narrative.IsBusy && IsVisible(actionKey) && action.type != NarrativeActionType.Future;
+            bool eligible = !executing && !narrative.IsEnded && !narrative.IsBusy && IsVisible(actionKey) && !IsCompleted(actionKey) && action.type != NarrativeActionType.Future;
+            if (action.IsDelivery && HasSubmittedToday(actionKey)) eligible = false;
             if (action.endDay && HasBlockingActions()) eligible = false;
             if (action.type == NarrativeActionType.Daily && dailyExecution.TryGetValue(actionKey, out int day) && day == CurrentDay) eligible = false;
             foreach (NarrativeActionRequirement requirement in action.parsedRequirements ?? NarrativeActionRequirementParser.Parse(action.requirements))
@@ -134,21 +183,51 @@ namespace Spotlight.Narrative
             if (action.parsedRequirements.Where(r => r.type == NarrativeActionRequirementType.ActionPoint).Sum(r => (long)r.value) > ActionPoints.Current)
                 for (int i = 0; i < action.parsedRequirements.Count; i++)
                     if (action.parsedRequirements[i].type == NarrativeActionRequirementType.ActionPoint) checks[i].satisfied = false;
-            return eligible && checks.All(check => check.satisfied);
+            bool conditionsMet = narrative.EvaluateConditions("action", actionKey);
+            if (!conditionsMet) checks.Add(new NarrativeActionCheck { satisfied = false, requirement = "Condition(action," + actionKey + ")", messageKey = "action.condition.missing" });
+            return eligible && conditionsMet && checks.All(check => check.satisfied);
         }
 
         public bool Execute(string actionKey, Action<bool> completed = null)
         {
             if (!IsAvailable(actionKey, out _)) return false;
             NarrativeActionDefinition action = definitions[actionKey];
-            if (!ConsumeRequirements(action)) return false;
             executing = true;
+            committing = true;
             executingAction = actionKey;
-            pendingCompletion = completed;
-            pendingEvents = new Queue<string>(action.IsProgress && GetProgress(actionKey) + 1 < action.progressTarget
-                ? new List<string>() : action.resultEvents ?? new List<string>());
+            OpenOperation();
+            try
+            {
+                using ((inventory as NarrativeMapInventory)?.DeferNotifications())
+                {
+                    if (!ConsumeRequirements(action))
+                    {
+                        executing = false; executingAction = null;
+                        CloseOperation();
+                        return false;
+                    }
+                    pendingCompletion = completed;
+                    pendingEvents = new Queue<string>();
+                    RecordExecution(action);
+                    if (action.IsDelivery)
+                    {
+                        var delivery = deliveries[actionKey];
+                        foreach (var milestone in (action.milestones ?? new List<NarrativeActionMilestoneDefinition>())
+                            .OrderBy(m => m.seq).ThenBy(m => m.milestoneId, StringComparer.Ordinal))
+                        {
+                            if (milestone.atProgress != delivery.progress || delivery.triggeredMilestones.Contains(milestone.milestoneId)) continue;
+                            delivery.triggeredMilestones.Add(milestone.milestoneId);
+                            pendingEvents.Enqueue(milestone.eventId);
+                        }
+                    }
+                    if (!action.IsProgress || IsCompleted(actionKey))
+                        foreach (string eventId in action.resultEvents ?? new List<string>()) pendingEvents.Enqueue(eventId);
+                }
+            }
+            finally { committing = false; }
+            narrative.NotifyConditionsChanged();
+            StateChanged?.Invoke();
             ActionStarted?.Invoke(action);
-            RecordExecution(action);
             PlayNextEvent();
             return true;
         }
@@ -156,6 +235,9 @@ namespace Spotlight.Narrative
         public void CaptureInto(NarrativeActionStateSnapshot snapshot)
         {
             if (snapshot == null) return;
+            if (committing) throw new InvalidOperationException("Cannot save during action commit.");
+            snapshot.deliveryVersion = 1;
+            snapshot.deliveries = deliveries.Values.Select(CloneDelivery).ToList();
             snapshot.day = CurrentDay;
             snapshot.actionPoints = ActionPoints.Current;
             snapshot.actionPointMax = ActionPoints.Max;
@@ -175,16 +257,31 @@ namespace Spotlight.Narrative
         {
             if (snapshot == null) return;
             if (executing) throw new InvalidOperationException("Cannot restore action state during action execution.");
+            if (snapshot.deliveryVersion < 0 || snapshot.deliveryVersion > 1) throw new FormatException("Unsupported action delivery snapshot version: " + snapshot.deliveryVersion);
             CurrentDay = Mathf.Max(1, snapshot.day);
             ActionPoints.ResetForDay(Mathf.Max(0, snapshot.actionPointMax));
             ActionPoints.Set(snapshot.actionPoints);
             counters.Clear(); dailyExecution.Clear(); expiryDays.Clear();
+            foreach (var key in deliveries.Keys.ToArray()) deliveries[key] = new NarrativeActionDeliveryValue { actionKey = key };
+            if (snapshot.deliveryVersion == 1 && snapshot.deliveries != null)
+                foreach (var value in snapshot.deliveries)
+                    if (value != null && value.actionKey != null && deliveries.ContainsKey(value.actionKey))
+                    {
+                        var restored = CloneDelivery(value);
+                        restored.progress = Mathf.Clamp(restored.progress, 0, Get(value.actionKey).progressTarget);
+                        deliveries[value.actionKey] = restored;
+                    }
             if (snapshot.counters != null) foreach (var item in snapshot.counters) if (item != null && !string.IsNullOrEmpty(item.key)) counters[item.key] = Mathf.Max(0, item.value);
             if (snapshot.daily != null) foreach (var item in snapshot.daily) if (item != null && !string.IsNullOrEmpty(item.key)) dailyExecution[item.key] = item.day;
+            // Legacy free-repeat counters are not evidence of a dated daily delivery.
+            foreach (var key in deliveries.Keys) { counters.Remove(key); dailyExecution.Remove(key); }
+            foreach (var value in deliveries.Values)
+                if (value.lastSubmissionDay > 0) dailyExecution[value.actionKey] = value.lastSubmissionDay;
             if (snapshot.expiry != null) foreach (var item in snapshot.expiry) if (item != null && !string.IsNullOrEmpty(item.key)) expiryDays[item.key] = item.day;
-            if (snapshot.mounts != null && snapshot.mounts.Count > 0) { mounts.Clear(); mounts.AddRange(snapshot.mounts.Where(m => m != null && Get(m.action) != null)); }
+            if (snapshot.mounts != null) { mounts.Clear(); mounts.AddRange(snapshot.mounts.Where(m => m != null && Get(m.action) != null)); }
             retired.Clear();
-            if (snapshot.retired != null) foreach (string key in snapshot.retired) retired.Add(key);
+            if (snapshot.retired != null) foreach (string key in snapshot.retired)
+                if (snapshot.deliveryVersion > 0 || !deliveries.ContainsKey(key)) retired.Add(key);
             foreach (var mount in mounts)
             {
                 var action = Get(mount.action);
@@ -194,12 +291,26 @@ namespace Spotlight.Narrative
             if (inventory is NarrativeMapInventory mapInventory) mapInventory.Restore(snapshot.items);
             dueActions.Clear();
             if (snapshot.dueActions != null) foreach (string key in snapshot.dueActions) if (Get(key) != null) dueActions.Enqueue(key);
-            if (!string.IsNullOrEmpty(snapshot.executingAction) && Get(snapshot.executingAction) != null)
+            if (!narrative.IsEnded && !string.IsNullOrEmpty(snapshot.executingAction) && Get(snapshot.executingAction) != null)
             {
                 executing = true; executingAction = snapshot.executingAction; currentEventId = snapshot.currentEvent;
                 pendingEvents = new Queue<string>(snapshot.pendingEvents ?? new List<string>());
+                OpenOperation();
             }
+            narrative.NotifyConditionsChanged();
             StateChanged?.Invoke();
+        }
+
+        private static NarrativeActionDeliveryValue CloneDelivery(NarrativeActionDeliveryValue value)
+            => new NarrativeActionDeliveryValue { actionKey = value.actionKey, progress = value.progress,
+                lastSubmissionDay = value.lastSubmissionDay, completed = value.completed,
+                triggeredMilestones = new List<string>(value.triggeredMilestones ?? new List<string>()) };
+
+        public void ResumePendingExecution()
+        {
+            if (narrative.IsEnded) return;
+            if (executing && string.IsNullOrEmpty(currentEventId)) PlayNextEvent();
+            narrative.ResumePendingEvents();
         }
 
         public string CaptureJson()
@@ -219,60 +330,76 @@ namespace Spotlight.Narrative
             {
                 case NarrativeActionRequirementType.Item:
                     int count = inventory.GetCount(requirement.key); satisfied = count >= requirement.value; current = count.ToString(); break;
-                case NarrativeActionRequirementType.Bar:
-                    satisfied = narrative.State.TryGetBar(requirement.key, out int bar) && Compare(bar, requirement.op, requirement.value); current = bar.ToString(); break;
-                case NarrativeActionRequirementType.Condition:
-                    satisfied = narrative.State.IsFlagSet(requirement.key); break;
-                case NarrativeActionRequirementType.NotCondition:
-                    satisfied = !narrative.State.IsFlagSet(requirement.key); break;
-                default:
+                case NarrativeActionRequirementType.ActionPoint:
                     satisfied = ActionPoints.Current >= requirement.value; current = ActionPoints.Current.ToString(); break;
+                default: throw new FormatException("Read-only action requirements must use Condition rows: " + requirement);
             }
             return new NarrativeActionCheck { satisfied = satisfied, requirement = requirement.ToString(), currentValue = current, requiredValue = required, messageKey = satisfied ? "action.requirement.ok" : "action.requirement.missing" };
         }
 
         private bool ConsumeRequirements(NarrativeActionDefinition action)
         {
-            var consumedItems = new List<NarrativeActionRequirement>();
-            foreach (NarrativeActionRequirement requirement in action.parsedRequirements)
+            long pointTotal = action.parsedRequirements.Where(r => r.type == NarrativeActionRequirementType.ActionPoint).Sum(r => (long)r.value);
+            if (pointTotal > ActionPoints.Current) return false;
+            var costs = new Dictionary<string, int>(StringComparer.Ordinal);
+            foreach (var group in action.parsedRequirements.Where(r => r.type == NarrativeActionRequirementType.Item).GroupBy(r => r.key))
             {
-                if (requirement.type != NarrativeActionRequirementType.Item) continue;
-                if (!inventory.TryConsume(requirement.key, requirement.value))
+                long total = group.Sum(r => (long)r.value);
+                if (total > inventory.GetCount(group.Key)) return false;
+                costs.Add(group.Key, (int)total);
+            }
+            if (inventory is NarrativeMapInventory map)
+            {
+                if (!map.TryConsume(costs)) return false;
+            }
+            else
+            {
+                var consumed = new Dictionary<string, int>(StringComparer.Ordinal);
+                foreach (var cost in costs)
                 {
-                    foreach (NarrativeActionRequirement consumed in consumedItems) inventory.TryAdd(consumed.key, consumed.value);
-                    return false;
+                    if (!inventory.TryConsume(cost.Key, cost.Value))
+                    {
+                        foreach (var prior in consumed)
+                            if (!inventory.TryAdd(prior.Key, prior.Value)) throw new InvalidOperationException("Cannot restore rejected action cost: " + prior.Key);
+                        return false;
+                    }
+                    consumed.Add(cost.Key, cost.Value);
                 }
-                consumedItems.Add(requirement);
             }
-            int pointCost = (int)action.parsedRequirements.Where(r => r.type == NarrativeActionRequirementType.ActionPoint).Sum(r => (long)r.value);
-            if (!ActionPoints.TryConsume(pointCost))
-            {
-                foreach (var consumed in consumedItems) inventory.TryAdd(consumed.key, consumed.value);
-                return false;
-            }
-            return true;
+            return ActionPoints.TryConsume((int)pointTotal);
         }
 
         private void RecordExecution(NarrativeActionDefinition action)
         {
-            if (action.type == NarrativeActionType.Once && !action.IsProgress) counters[action.actionKey] = 1;
-            if (action.IsProgress) counters[action.actionKey] = Math.Min(action.progressTarget, GetProgress(action.actionKey) + 1);
+            if (action.IsDelivery)
+            {
+                var value = deliveries[action.actionKey];
+                value.progress = Math.Min(action.progressTarget, value.progress + 1);
+                value.lastSubmissionDay = CurrentDay;
+                value.completed = value.progress >= action.progressTarget;
+            }
+            else
+            {
+                if (action.type == NarrativeActionType.Once && !action.IsProgress) counters[action.actionKey] = 1;
+                if (action.IsProgress) counters[action.actionKey] = Math.Min(action.progressTarget, GetProgress(action.actionKey) + 1);
+            }
             dailyExecution[action.actionKey] = CurrentDay;
-            StateChanged?.Invoke();
         }
 
         private void PlayDueAction()
         {
-            if (executing || dueActions.Count == 0) return;
+            if (executing || narrative.IsEnded || dueActions.Count == 0) return;
             var action = Get(dueActions.Dequeue());
             executing = true;
             executingAction = action.actionKey;
+            OpenOperation();
             pendingEvents = new Queue<string>(action.resultEvents ?? new List<string>());
             PlayNextEvent();
         }
 
         private void PlayNextEvent()
         {
+            if (narrative.IsEnded) return;
             if (pendingEvents.Count == 0)
             {
                 Finish(true); return;
@@ -281,8 +408,20 @@ namespace Spotlight.Narrative
             currentEventId = eventId;
             if (!narrative.QueueEvent(eventId))
             {
-                Finish(false); return;
+                // Retain the committed action and refused event for recovery; never declare it completed.
+                pendingEvents = new Queue<string>(new[] { eventId }.Concat(pendingEvents));
+                currentEventId = null;
+                Debug.LogError("[NCS][Action] Cannot queue event " + eventId + " for action " + executingAction);
+                ReportFailure();
             }
+        }
+
+        private void ReportFailure()
+        {
+            var callback = pendingCompletion; pendingCompletion = null;
+            ActionFinished?.Invoke(Get(executingAction), false);
+            StateChanged?.Invoke();
+            callback?.Invoke(false);
         }
 
         private void OnEventCompleted(string eventId)
@@ -295,18 +434,31 @@ namespace Spotlight.Narrative
         private void Finish(bool success)
         {
             NarrativeActionDefinition action = Get(executingAction);
-            executing = false; executingAction = null; pendingEvents = null; currentEventId = null;
-            Action<bool> callback = pendingCompletion; pendingCompletion = null;
-            ActionFinished?.Invoke(action, success);
-            StateChanged?.Invoke();
-            callback?.Invoke(success);
-            PlayDueAction();
+            narrative.NotifyConditionsChanged();
+            CloseOperation();
+            narrative.RunAtSafeBoundary(() =>
+            {
+                executing = false; executingAction = null; pendingEvents = null; currentEventId = null;
+                Action<bool> callback = pendingCompletion; pendingCompletion = null;
+                ActionFinished?.Invoke(action, success && !narrative.IsEnded);
+                StateChanged?.Invoke();
+                callback?.Invoke(success && !narrative.IsEnded);
+                PlayDueAction();
+            });
         }
 
-        private static bool Compare(int current, string op, int expected) => op switch
+        private void OpenOperation()
         {
-            ">" => current > expected, ">=" => current >= expected, "<" => current < expected, "<=" => current <= expected, _ => current == expected
-        };
+            if (operationOpen) return;
+            operationOpen = true;
+            narrative.BeginOperation();
+        }
+        private void CloseOperation()
+        {
+            if (!operationOpen) return;
+            operationOpen = false;
+            narrative.EndOperation();
+        }
 
         private static void Validate(NarrativeActionDefinition action)
         {
@@ -318,6 +470,15 @@ namespace Spotlight.Narrative
             if (action.endDay && action.type != NarrativeActionType.Daily) throw new FormatException("EndDay must be Daily: " + action.actionKey);
             if (action.type == NarrativeActionType.Progress && action.progressTarget <= 0) throw new FormatException("Progress action requires a positive target: " + action.actionKey);
             if (action.type == NarrativeActionType.Timed && action.durationDays <= 0) throw new FormatException("Timed action requires positive duration: " + action.actionKey);
+            if (!Enum.IsDefined(typeof(NarrativeDeliveryMode), action.deliveryMode)) throw new FormatException("Invalid delivery mode: " + action.actionKey);
+            if (action.IsDelivery && (action.progressTarget <= 0 || action.type == NarrativeActionType.Future || action.endDay))
+                throw new FormatException("Delivery requires a positive target and cannot be Future/EndDay: " + action.actionKey);
+            var milestoneIds = new HashSet<string>(StringComparer.Ordinal);
+            foreach (var milestone in action.milestones ?? new List<NarrativeActionMilestoneDefinition>())
+                if (milestone == null || !action.IsDelivery || string.IsNullOrWhiteSpace(milestone.milestoneId)
+                    || !milestoneIds.Add(milestone.milestoneId) || string.IsNullOrWhiteSpace(milestone.eventId)
+                    || milestone.actionKey != action.actionKey || milestone.atProgress < 1 || milestone.atProgress >= action.progressTarget)
+                    throw new FormatException("Invalid or duplicate delivery milestone: " + action.actionKey);
         }
     }
 }

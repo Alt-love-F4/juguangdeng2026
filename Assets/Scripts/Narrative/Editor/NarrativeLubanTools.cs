@@ -47,6 +47,7 @@ namespace Spotlight.Narrative.Editor
                 var config = LubanNarrativeLoader.Load();
                 var errors = NarrativeConfigurationValidator.Validate(config);
                 if (errors.Count > 0) { Debug.LogError("[NCS] Luban validation failed:\n" + string.Join("\n", errors)); return; }
+                foreach (string warning in NarrativeConfigurationValidator.Warnings(config)) Debug.LogWarning("[NCS] " + warning);
                 int count = config.events.Count;
                 int anchors = config.events.Count(ev => NarrativeEventByBarWindow.IsAnchor(config, ev));
                 float ratio = count == 0 ? 0 : (float)anchors / count;

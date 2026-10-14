@@ -1,0 +1,16 @@
+[
+  {
+    "endingId": "ending_test_cumulative",
+    "enabled": false,
+    "priority": 0,
+    "titleText": "ending_test_cumulative.title",
+    "messageText": "ending_test_cumulative.message"
+  },
+  {
+    "endingId": "ending_test_consecutive",
+    "enabled": false,
+    "priority": 0,
+    "titleText": "ending_test_consecutive.title",
+    "messageText": "ending_test_consecutive.message"
+  }
+]

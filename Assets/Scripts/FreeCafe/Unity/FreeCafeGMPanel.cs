@@ -117,6 +117,33 @@ namespace Spotlight.FreeCafe
             if (root != null && activeCategory < 0) ShowCategory(categories.Count - 1);
         }
 
+        private void BuildCafeVisits()
+        {
+            foreach (string suffix in new[] { "RESERVE", "DELAYED_RESERVE", "ARRIVE", "CANCEL" })
+            {
+                string id = "EV_DEMO_CAFE_" + suffix;
+                AddAction(id, () =>
+                {
+                    var ncs = Spotlight.Narrative.NarrativeRuntime.Instance;
+                    SetStatus(ncs != null && ncs.IsReady ? (ncs.Controller.QueueEvent(id) ? "示例事件已请求：" : "事件被拒绝：") + id : "NCS 尚未就绪；请进入正式游戏会话。");
+                }, "先预约，再到场授权，最后开店；延迟示例单独运行。", false);
+            }
+            AddAction("查看来访状态", () =>
+            {
+                if (runtime == null) { SetStatus("请进入 CoffeeShop。"); return; }
+                var text = new System.Text.StringBuilder();
+                foreach (var v in runtime.World.State.cafeVisits)
+                {
+                    text.AppendLine($"{v.visitInstanceId} / {v.characterId} default={v.usesDefaultConfiguration} {v.status}");
+                    text.AppendLine($"seat={v.preferredSeatId} actual={v.seatId} budget={v.budgetReserved} delay={Mathf.Max(0,v.arrivalDelaySeconds-runtime.World.State.businessElapsed):F1} patience={v.patienceRemaining:F1} reason={v.endReason}");
+                    text.AppendLine("diagnostics=" + string.Join(",", v.diagnostics));
+                }
+                foreach (var f in runtime.World.State.cafeVisitFeedback) text.AppendLine($"pending #{f.sequence} {f.visitInstanceId} {f.stage} click={f.isClick}");
+                text.AppendLine("NCS active=" + (Spotlight.Narrative.NarrativeRuntime.Instance?.Controller?.IsBusy ?? false));
+                SetStatus(text.Length > 0 ? text.ToString() : "无特殊来访；阶段演出尚未验证。");
+            }, "实例、预留、耐心、结束原因与待提交反馈。", true);
+        }
+
         private void BuildCategories()
         {
             categories.Add(new Category { Name = "全局调试", Build = BuildGlobal });
@@ -124,6 +151,7 @@ namespace Spotlight.FreeCafe
             categories.Add(new Category { Name = "资源数值", Build = BuildResources });
             categories.Add(new Category { Name = "时间与顾客", Build = BuildTimeAndCustomers });
             categories.Add(new Category { Name = "状态诊断", Build = BuildDiagnostics });
+            categories.Add(new Category { Name = "特殊来访", Build = BuildCafeVisits });
             categories.Add(new Category { Name = "界面与场景", Build = BuildNavigation });
         }
 
@@ -214,7 +242,7 @@ namespace Spotlight.FreeCafe
 
         private void BuildBusiness()
         {
-            AddAction("开始营业", () => Report(runtime.GameplayBlocked ? ActionResult.No("当前流程或小游戏禁止开始营业") : runtime.World.StartDay()), "会按正常规则生成当天客流");
+            AddAction("开始营业", () => runtime.RequestBusinessStart(), "先对齐特殊来访预约，再按正常规则生成当天客流");
             AddAction("结束营业", () => ConfirmDanger("end", () => Report(runtime.GameplayBlocked ? ActionResult.No("当前流程或小游戏禁止结束营业") : runtime.World.EndDay()), "再次点击确认结束营业"), "会结算当前订单，需二次确认");
             AddAction("免费补满库存", () => Report(runtime.World.DebugRefillFree()), "不扣金币");
             AddAction("保存当前存档", () => runtime.Save(), "写入现有快速存档槽");

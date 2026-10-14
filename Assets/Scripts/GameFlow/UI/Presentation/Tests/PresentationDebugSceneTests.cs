@@ -2,6 +2,7 @@
 using System;
 using System.Collections;
 using System.IO;
+using Spotlight.Narrative;
 using NUnit.Framework;
 using TMPro;
 using UnityEditor.SceneManagement;
@@ -47,6 +48,65 @@ namespace Spotlight.GameFlow.Tests
             if (debugScene.IsValid() && debugScene.isLoaded) yield return SceneManager.UnloadSceneAsync(debugScene);
             foreach (EventSystem system in previousSystems) if (system != null) system.enabled = true;
             Time.timeScale = oldTime;
+        }
+
+        [UnityTest]
+        public IEnumerator CafeDemoConversationsPauseUntilAdvancedAndClosed()
+        {
+            controller.StopCurrent();
+            Assert.That(PresentationPauseRegistry.IsPaused, Is.False, "Fixture must start without another presentation owner.");
+            float scale = Time.timeScale;
+            var configuration = Spotlight.Narrative.LubanNarrativeLoader.Load();
+            foreach (string key in new[] { "DEMO_CAFE_BEFORE", "DEMO_CAFE_SERVED", "DEMO_CAFE_CHAT" })
+            {
+                var data = new NarrativeConversationPresentationData();
+                var pages = configuration.presentations.conversationPages.FindAll(page => page.presentationKey == key);
+                pages.Sort((a, b) => a.seq.CompareTo(b.seq));
+                foreach (var page in pages)
+                {
+                    var lines = configuration.presentations.conversationLines.FindAll(line => line.pageId == page.pageId);
+                    lines.Sort((a, b) => a.seq.CompareTo(b.seq));
+                    foreach (var line in lines)
+                    {
+                        var text = configuration.texts.Find(item => item.key == line.textKey);
+                        Assert.That(text, Is.Not.Null, key + ": missing text " + line.textKey);
+                        Assert.That(text.content, Is.Not.Empty, key);
+                        data.lines.Add(new NarrativeConversationPresentationLine
+                        {
+                            speakerKey = line.speakerKey, side = line.side, emote = line.emote,
+                            text = text.content, accentFxKey = line.accentFxKey, accentTargetKey = line.accentTargetKey
+                        });
+                    }
+                }
+                Assert.That(data.lines.Count, Is.GreaterThan(0), key + " must contain real configured dialogue.");
+                bool completed = false;
+                DialoguePanel panel = null;
+                try
+                {
+                    Assert.That(NarrativeConversationEventPlayback.Play(default, data, () => completed = true), Is.True, key);
+                    panel = UIKit.GetPanel<DialoguePanel>();
+                    Assert.That(panel, Is.Not.Null, key);
+                    Assert.That(panel.IsPlaying, Is.True, key);
+                    Assert.That(PresentationPauseRegistry.IsPaused, Is.True, key);
+                    float deadline = Time.realtimeSinceStartup + 12f;
+                    while (!completed)
+                    {
+                        Assert.That(Time.realtimeSinceStartup, Is.LessThan(deadline), key + " failed to advance and close.");
+                        Assert.That(Time.timeScale, Is.EqualTo(scale), key + " must not change timeScale.");
+                        Assert.That(PresentationPauseRegistry.IsPaused, Is.True, key + " released before completion.");
+                        if (panel.IsReady) panel.Advance();
+                        yield return null;
+                    }
+                    Assert.That(panel.IsPlaying, Is.False, key);
+                    Assert.That(PresentationPauseRegistry.IsPaused, Is.False, key + " leaked a pause owner.");
+                    Assert.That(Time.timeScale, Is.EqualTo(scale));
+                }
+                finally
+                {
+                    if (panel != null) { panel.Stop(); UIKit.ClosePanel(panel); }
+                }
+                yield return null;
+            }
         }
 
         [UnityTest]

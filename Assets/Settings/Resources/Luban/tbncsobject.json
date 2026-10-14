@@ -64,5 +64,27 @@
     "avtarPath": "",
     "descText": "world.desc",
     "tags": "world,ordia"
+  },
+  {
+    "objId": "adele",
+    "objType": "npc",
+    "nameText": "character.adele.name",
+    "iconPath": "Characters/adele/neutral",
+    "portraitPath": "Characters/adele/neutral",
+    "portraitIndoorPath": "Characters/adele/neutral",
+    "avtarPath": "Characters/adele/neutral",
+    "descText": "character.adele.desc",
+    "tags": "citizen,cafe_staff"
+  },
+  {
+    "objId": "cafe",
+    "objType": "world",
+    "nameText": "player.external.money",
+    "iconPath": "",
+    "portraitPath": "",
+    "portraitIndoorPath": "",
+    "avtarPath": "",
+    "descText": "",
+    "tags": "cafe"
   }
 ]

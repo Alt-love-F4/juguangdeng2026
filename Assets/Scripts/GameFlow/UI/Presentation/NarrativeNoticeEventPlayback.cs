@@ -16,7 +16,10 @@ namespace Spotlight.GameFlow
                 var notice = new NoticeData(data.body, data.title, data.time, LoadImage(data.imageKey),
                     noticeId: data.presentationKey, titleKey: data.titleKey, timeKey: data.timeKey,
                     imageKey: data.imageKey, textKey: data.textKey, barConds: data.barConds);
-                panel.Play(notice, completed, completed);
+                bool notified = false;
+                void Complete() { if (notified) return; notified = true; completed?.Invoke(); }
+                panel.Play(notice, Complete, Complete);
+                panel.PlaybackStopped += Complete;
                 return true;
             }
             catch

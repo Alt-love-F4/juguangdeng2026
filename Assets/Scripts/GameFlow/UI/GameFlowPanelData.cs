@@ -18,6 +18,7 @@ namespace Spotlight.GameFlow
 
         public GameFlowBootstrap Flow { get; }
         public bool FromGameplay { get; }
+        public bool CanSave => Flow == null || Flow.CanSaveCurrentSession;
     }
 
     public sealed class ConfirmationPanelData : IGameFlowPanelData
@@ -45,17 +46,19 @@ namespace Spotlight.GameFlow
 
     public sealed class ResultPanelData : IGameFlowPanelData
     {
-        public ResultPanelData(GameFlowBootstrap flow, string title, string message, Action closed)
+        public ResultPanelData(GameFlowBootstrap flow, string title, string message, Action closed, string closeLabel = "关闭")
         {
             Flow = flow;
             Title = title;
             Message = message;
             Closed = closed;
+            CloseLabel = closeLabel;
         }
 
         public GameFlowBootstrap Flow { get; }
         public string Title { get; }
         public string Message { get; }
         public Action Closed { get; }
+        public string CloseLabel { get; }
     }
 }

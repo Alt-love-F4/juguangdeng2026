@@ -9,7 +9,8 @@
     "resultEvents": "EV_ACT_MEET",
     "durationDays": 0,
     "progressTarget": 0,
-    "nextActionKey": ""
+    "nextActionKey": "",
+    "deliveryMode": "None"
   },
   {
     "actionKey": "act_c_with_b",
@@ -21,7 +22,8 @@
     "resultEvents": "EV_ACT_C_WITH_B",
     "durationDays": 0,
     "progressTarget": 0,
-    "nextActionKey": ""
+    "nextActionKey": "",
+    "deliveryMode": "None"
   },
   {
     "actionKey": "act_salon",
@@ -33,7 +35,8 @@
     "resultEvents": "EV_ACT_SALON",
     "durationDays": 0,
     "progressTarget": 0,
-    "nextActionKey": ""
+    "nextActionKey": "",
+    "deliveryMode": "None"
   },
   {
     "actionKey": "act_peer",
@@ -45,6 +48,33 @@
     "resultEvents": "EV_ACT_C_PEER",
     "durationDays": 0,
     "progressTarget": 0,
-    "nextActionKey": ""
+    "nextActionKey": "",
+    "deliveryMode": "None"
+  },
+  {
+    "actionKey": "act_test_delivery_cumulative",
+    "type": "PROGRESS",
+    "mustExecute": false,
+    "nameText": "act_test_delivery_cumulative.name",
+    "descText": "act_test_delivery_cumulative.desc",
+    "requirements": "Item(medicine,2);Item(food,1);ActionPoint(1)",
+    "resultEvents": "EV_TEST_DELIVERY_CUMULATIVE",
+    "durationDays": 0,
+    "progressTarget": 5,
+    "nextActionKey": "",
+    "deliveryMode": "Cumulative"
+  },
+  {
+    "actionKey": "act_test_delivery_consecutive",
+    "type": "PROGRESS",
+    "mustExecute": false,
+    "nameText": "act_test_delivery_consecutive.name",
+    "descText": "act_test_delivery_consecutive.desc",
+    "requirements": "Item(medicine,2);Item(food,1);ActionPoint(1)",
+    "resultEvents": "EV_TEST_DELIVERY_CONSECUTIVE",
+    "durationDays": 0,
+    "progressTarget": 5,
+    "nextActionKey": "",
+    "deliveryMode": "Consecutive"
   }
 ]

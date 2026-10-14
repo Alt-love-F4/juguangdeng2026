@@ -100,11 +100,8 @@ namespace Spotlight.FreeCafe
                 State.reputation--;
             }
 
-            var customer = Find(request.customerId);
-            State.entities.Remove(customer);
-            State.requests.Remove(request);
+            CompleteCustomerOrder(request, correct);
             State.entities.Remove(cup);
-            State.spokenCustomers.Remove(request.customerId);
             UpdateFocusedRequest();
             Notify();
             return ActionResult.Yes(correct
@@ -179,7 +176,8 @@ namespace Spotlight.FreeCafe
 
             UnlockContent();
 
-            // 开场先把能坐的座位直接坐满
+            StartVisitDay();
+            // 特殊来访先入座，再补普通顾客。
             int arrivals = Math.Min(State.seats, State.todayCustomerBudget);
             for (int i = 0; i < arrivals; i++)
             {
@@ -198,7 +196,10 @@ namespace Spotlight.FreeCafe
                 return ActionResult.No("当前没有营业");
             }
 
-            // 还在店里的顾客全部算未完成
+            foreach (var visit in State.cafeVisits)
+                if (visit.status != CafeVisitStatus.Ended) BeginVisitLeaving(visit, "business_closed");
+
+            // 尚未完成的普通订单计失败；特殊订单已由离店入口结算。
             State.todayFailed += State.requests.Count;
             foreach (var r in State.requests)
             {
@@ -237,31 +238,15 @@ namespace Spotlight.FreeCafe
         /// <summary>生成一位顾客：占用一个空卡座、挑一道已解锁餐品下单，并决定 NPC 是否出场。</summary>
         private void SpawnCustomer()
         {
-            if (State.todayArrivals >= State.todayCustomerBudget)
+            ProcessVisitArrivals();
+            if (State.todayArrivals + ReservedVisitBudget() >= State.todayCustomerBudget)
             {
                 return;
             }
 
+            int slot = AvailableSeat();
+            if (slot < 0) return;
             State.todayArrivals++;
-
-            // 找第一个空座位；没有空位就扣声望并记一次失败
-            int slot = -1;
-            for (int i = 0; i < State.seats; i++)
-            {
-                string id = "customer_" + i;
-                if (Find(id) == null)
-                {
-                    slot = i;
-                    break;
-                }
-            }
-
-            if (slot < 0)
-            {
-                State.reputation--;
-                State.todayFailed++;
-                return;
-            }
 
             // 从已解锁餐品里按订单序号轮换，保证品类分布均匀
             var eligible = new List<ProductSpec>();
@@ -349,6 +334,7 @@ namespace Spotlight.FreeCafe
             if (State.open)
             {
                 State.timeRemaining = Math.Max(0, State.timeRemaining - seconds);
+                State.businessElapsed += seconds;
 
                 // 倒序遍历订单，方便边遍历边删除
                 for (int i = State.requests.Count - 1; i >= 0; i--)
@@ -367,9 +353,7 @@ namespace Spotlight.FreeCafe
                             State.todayRevenue += p.price;
                             State.todayServed++;
                             State.served++;
-                            State.entities.Remove(Find(r.customerId));
-                            State.requests.RemoveAt(i);
-                            State.spokenCustomers.Remove(r.customerId);
+                            CompleteCustomerOrder(r, true);
                             changed = true;
                             continue;
                         }
@@ -378,13 +362,23 @@ namespace Spotlight.FreeCafe
                     // 耐心耗尽：顾客离开，记一次失败
                     if (r.patience <= 0)
                     {
-                        State.entities.Remove(Find(r.customerId));
-                        State.requests.RemoveAt(i);
-                        State.spokenCustomers.Remove(r.customerId);
-                        State.todayFailed++;
+                        var visit = VisitForCustomer(r.customerId);
+                        if (visit != null) BeginVisitLeaving(visit, "patience_expired");
+                        else
+                        {
+                            State.entities.Remove(Find(r.customerId));
+                            State.requests.RemoveAt(i);
+                            State.spokenCustomers.Remove(r.customerId);
+                            State.todayFailed++;
+                        }
                         changed = true;
                     }
                 }
+
+                changed |= TickVisits(seconds);
+                int arrivalsBeforeVisits = State.todayArrivals;
+                ProcessVisitArrivals();
+                changed |= State.todayArrivals != arrivalsBeforeVisits;
 
                 // 到店节奏：一帧内可能补多位顾客，但始终受当日客流上限约束
                 State.arrivalRemaining -= seconds;

@@ -77,6 +77,7 @@ namespace Spotlight.GameFlow
         private TextMeshProUGUI endDayLabel;
         private Image endDayImage;
         private NarrativeRuntime subscribedNarrativeRuntime;
+        private bool firstDayGuideApplied;
 
         protected override void Awake()
         {
@@ -148,6 +149,7 @@ namespace Spotlight.GameFlow
         }
 
         internal bool ControlsAvailable => !standaloneLoading && (flow == null || flow.MapControlsAvailable);
+        private bool GuideLocked => flow != null && flow.GetComponent<DayFlowController>()?.IsFirstSessionGuideActive == true;
 
         internal void OpenOverlay(GameFlowBootstrap owner)
         {
@@ -421,13 +423,13 @@ namespace Spotlight.GameFlow
         private void OpenDetails()
         {
             if (flow == null) flow = FindFirstObjectByType<GameFlowBootstrap>();
-            if (!ControlsAvailable) return;
+            if (!ControlsAvailable || GuideLocked) return;
             flow?.OpenDetails();
         }
 
         private void ToggleInventory()
         {
-            if (!ControlsAvailable || (actionDetails != null && actionDetails.IsBusy)) return;
+            if (!ControlsAvailable || GuideLocked || (actionDetails != null && actionDetails.IsBusy)) return;
             var tasks = GetComponentInChildren<MapTaskPanel>(true);
             if (!inventoryView.IsVisible) tasks?.SetVisible(false);
             inventoryView.Toggle();
@@ -435,7 +437,7 @@ namespace Spotlight.GameFlow
 
         private void ToggleTasks()
         {
-            if (!ControlsAvailable || (actionDetails != null && actionDetails.IsBusy)) return;
+            if (!ControlsAvailable || GuideLocked || (actionDetails != null && actionDetails.IsBusy)) return;
             var tasks = GetComponentInChildren<MapTaskPanel>(true);
             if (tasks == null) return;
             if (!tasks.IsVisible) inventoryView.SetVisible(false);
@@ -446,9 +448,12 @@ namespace Spotlight.GameFlow
         {
             if (!isActiveAndEnabled) return;
             Keyboard key = Keyboard.current;
-            if (key != null && key.tabKey.wasPressedThisFrame) OpenDetails();
-            if (key != null && key.bKey.wasPressedThisFrame) ToggleInventory();
-            if (key != null && key.tKey.wasPressedThisFrame) ToggleTasks();
+            if (ControlsAvailable)
+            {
+                if (key != null && key.tabKey.wasPressedThisFrame) OpenDetails();
+                if (key != null && key.bKey.wasPressedThisFrame) ToggleInventory();
+                if (key != null && key.tKey.wasPressedThisFrame) ToggleTasks();
+            }
             if (artworkHudRect != null)
             {
                 Vector3 hudScale = Vector3.one * Mathf.Min(1, Mathf.Max(0.1f, (hud.rect.width - 64) / 1380));
@@ -475,6 +480,15 @@ namespace Spotlight.GameFlow
                 Color endDayColor = blocking ? new Color(.75f, .67f, .55f) : Color.white;
                 if (endDayImage != null && !endDayImage.color.Equals(endDayColor)) endDayImage.color = endDayColor;
             }
+            ApplyFirstDayGuide();
+            if (zoomSlider != null) zoomSlider.interactable = ControlsAvailable && !GuideLocked;
+            if (GuideLocked && ControlsAvailable)
+            {
+                UpdateZoom();
+                UpdateFocusMovement();
+                ApplyMapView();
+                return;
+            }
             if (!ControlsAvailable)
             {
                 pointerDragging = dragging = false;
@@ -496,13 +510,16 @@ namespace Spotlight.GameFlow
             UpdateZoom();
             UpdateFocusMovement();
             ApplyMapView();
-            if (key != null && key.escapeKey.wasPressedThisFrame && (actionDetails == null || !actionDetails.IsBusy))
+            bool firstDayGuideActive = flow != null && flow.GetComponent<DayFlowController>()?.IsFirstDayMapGuideActive == true;
+            bool creationPending = PlayerRuntime.Current?.CreationSubmitted != true;
+            if (!firstDayGuideActive && !creationPending && key != null && key.escapeKey.wasPressedThisFrame && (actionDetails == null || !actionDetails.IsBusy))
             {
                 inventoryView.SetVisible(false);
                 GetComponentInChildren<MapTaskPanel>(true)?.SetVisible(false);
                 HideFocus();
             }
-            if (Mouse.current != null && Mouse.current.rightButton.wasPressedThisFrame && (actionDetails == null || !actionDetails.IsBusy) && IsMapPointerTarget()) HideFocus();
+            if (!firstDayGuideActive && !creationPending && Mouse.current != null && Mouse.current.rightButton.wasPressedThisFrame
+                && (actionDetails == null || !actionDetails.IsBusy) && IsMapPointerTarget()) HideFocus();
         }
 
         private bool UpdateKeyboardPan(Vector2 input, float deltaTime)
@@ -729,9 +746,13 @@ namespace Spotlight.GameFlow
                 if (position == null || string.IsNullOrWhiteSpace(position.positionKey)) continue;
                 runtimePositions[position.positionKey] = position;
                 bool visible = position.isImportant || position.enabled;
+                bool cafeGuide = flow != null && flow.GetComponent<DayFlowController>()?.IsFirstDayMapGuideActive == true;
                 BindAuthoredLocation(position);
                 if (locationButtons.TryGetValue(position.positionKey, out Button authoredButton))
+                {
                     authoredButton.gameObject.SetActive(visible);
+                    authoredButton.interactable = !cafeGuide || position.positionKey == "cafe";
+                }
             }
             SubscribePositionEffects();
         }
@@ -843,11 +864,54 @@ namespace Spotlight.GameFlow
         private void OnPositionClicked(NarrativeMapPositionDefinition position)
         {
             if (!ControlsAvailable || (actionDetails != null && actionDetails.IsBusy) || position == null) return;
-            FocusPosition(position);
+            DayFlowController dayFlow = flow != null ? flow.GetComponent<DayFlowController>() : null;
+            if (dayFlow != null && dayFlow.IsFirstDayMapGuideActive && !MapActionDetailsView.IsCafeEntryPosition(position.positionKey)) return;
+            if (MapActionDetailsView.IsCafeEntryPosition(position.positionKey))
+            {
+                FocusPosition(position);
+            }
+            else
+            {
+                // Locations without an enabled feature still move the camera, but they must not
+                // open the action popup or run their configured NCS actions yet.
+                focusedPosition = position;
+                if (focusPanel != null) focusPanel.SetActive(false);
+            }
             BeginFocusMovement(position.position);
             // Ordinary map locations remain visible while their action details are open.
             // Only explicitly dismissible temporary markers should disappear on click.
             if (position.isTemporary && position.dismissOnClick) RemoveTemporaryPosition(position.positionKey);
+        }
+
+        private void ApplyFirstDayGuide()
+        {
+            DayFlowController dayFlow = flow != null ? flow.GetComponent<DayFlowController>() : null;
+            bool active = dayFlow != null && dayFlow.IsFirstDayMapGuideActive;
+            if (active)
+            {
+                foreach (var pair in locationButtons)
+                    if (pair.Value != null) pair.Value.interactable = pair.Key == "cafe";
+                if (endDayButton != null) endDayButton.interactable = false;
+                if (!firstDayGuideApplied && runtimePositions.TryGetValue("cafe", out var cafe))
+                {
+                    firstDayGuideApplied = true;
+                    FocusPosition(cafe);
+                    BeginFocusMovement(cafe.position);
+                }
+                if (status != null)
+                {
+                    status.gameObject.SetActive(true);
+                    status.text = "第一天：点击咖啡馆开始经营教程";
+                }
+            }
+            else
+            {
+                firstDayGuideApplied = false;
+                foreach (var pair in locationButtons)
+                    if (pair.Value != null) pair.Value.interactable = true;
+                if (endDayButton != null) endDayButton.interactable = true;
+                if (status != null && status.text == "第一天：点击咖啡馆开始经营教程") status.gameObject.SetActive(false);
+            }
         }
 
         private void FocusPosition(NarrativeMapPositionDefinition position)
@@ -1027,7 +1091,7 @@ namespace Spotlight.GameFlow
 
         private void EndDay()
         {
-            if (!ControlsAvailable || (actionDetails != null && actionDetails.IsBusy)) return;
+            if (!ControlsAvailable || GuideLocked || (actionDetails != null && actionDetails.IsBusy)) return;
             if (NarrativeRuntime.Instance?.Actions?.HasBlockingActions() ?? false)
             {
                 status.text = "有需要进行的行动：请先完成地图上的今日必做行动";

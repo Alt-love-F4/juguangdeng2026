@@ -11,7 +11,11 @@ namespace Spotlight.Narrative.Tests
         {
             return new Dictionary<string, JArray>
             {
+                ["tbncscafevisit"] = new JArray(), ["tbncscafevisithook"] = new JArray(),
+                ["tbplayerconfig"] = new JArray(), ["tbplayerattribute"] = new JArray(),
+                ["tbcreationgroup"] = new JArray(), ["tbcreationoption"] = new JArray(), ["tbcreationbonus"] = new JArray(),
                 ["tbncsaction"] = new JArray(), ["tbncsmapposition"] = new JArray(),
+                ["tbncsconditionkey"] = new JArray(), ["tbncsending"] = new JArray(), ["tbncsactionmilestone"] = new JArray(),
                 ["tbncspresentationindex"] = JArray.Parse("[{ 'presentationKey':'talk', 'presentationClass':'Conversation', 'logTag':'' }]"),
                 ["tbncsconversationpage"] = new JArray(), ["tbncsconversationline"] = new JArray(),
                 ["tbncsnotice"] = new JArray(), ["tbncsreadingpage"] = new JArray(), ["tbncsreadingline"] = new JArray(),
@@ -20,19 +24,26 @@ namespace Spotlight.Narrative.Tests
                 ["tbrecipe"] = new JArray(), ["tbingredient"] = new JArray(), ["tbdevice"] = new JArray(),
                 ["tbgameparam"] = new JArray(), ["tbworldobject"] = new JArray(), ["tbrecipestep"] = new JArray(), ["tbnpc"] = new JArray(),
                 ["tbncsobject"] = JArray.Parse("[{ 'objId':'world', 'objType':'world', 'nameText':'title', 'iconPath':'icon', 'descText':'title', 'tags':'test' }, { 'objId':'npc', 'objType':'npc', 'nameText':'title', 'iconPath':'', 'descText':'', 'tags':'' }]"),
-                ["tbncsbar"] = new JArray(Bar("world", "calendar"), Bar("npc", "calendar")),
+                ["tbncsbar"] = new JArray(Bar("world", "calendar"), BaseBar()),
                 ["tbncstrigger"] = JArray.Parse("[{ 'triggerId':'trigger', 'barKey':'world.calendar', 'threshold':3, 'direction':'both', 'crossType':'hold', 'onceType':'repeat', 'reachCount':'all', 'resetOnExit':true, 'eventId':'event', 'priority':9, 'enabled':true }]"),
                 ["tbncsevent"] = JArray.Parse("[{ 'eventId':'event', 'eventKind':'world', 'presentationClass':'Conversation', 'presentationKey':'talk', 'presentationLogTag':'presentation', 'eventProperty':'bg=night|fade=0.5', 'actorId':'world', 'targetId':'npc', 'titleText':'title', 'contentKey':'title| second ', 'setupType':'template', 'setupKey':'setup', 'onceOnly':true, 'logTag':'log' }]"),
                 ["tbncseventdate"] = JArray.Parse("[{ 'eventId':'event', 'day':0, 'timeSlot':'night', 'repeatRule':'weekly', 'priority':8 }, { 'eventId':'event', 'day':5, 'timeSlot':'morning', 'repeatRule':'once', 'priority':2 }]"),
                 ["tbncsresult"] = JArray.Parse("[{ 'resultId':'result', 'eventId':'event', 'seq':2, 'resultType':'REL_ADD', 'target':'rel:npc>world', 'value':'4', 'note':'note' }]"),
-                ["tbncscondition"] = JArray.Parse("[{ 'conditionId':'condition', 'ownerType':'', 'ownerId':'event', 'groupIndex':2, 'condType':'BAR_GTE', 'target':'bar:world.calendar', 'op':'>=', 'value':'3', 'notFlag':true }]"),
+                ["tbncscondition"] = JArray.Parse("[{ 'conditionId':'condition', 'ownerType':'', 'ownerId':'event', 'groupIndex':2, 'condType':'BAR_GTE', 'target':'bar:world.calendar', 'value':'3' }]"),
                 ["tbncstemplate"] = JArray.Parse("[{ 'tplName':'template', 'descText':'title', 'interruptType':'none', 'atomSeq':'Dialogue', 'slotDef':'text', 'defaultSkip':true }]"),
                 ["tbncssetupparams"] = JArray.Parse("[{ 'setupKey':'setup', 'tplName':'template', 'slotValues':'text=title,duration=1.5', 'skipAble':true, 'autoAdvance':true }]"),
                 ["tbncschoice"] = JArray.Parse("[{ 'choiceId':'choice', 'groupKey':'group', 'textKey':'title', 'resultOwnerId':'event', 'seq':7 }]")
             };
         }
 
-        private static JObject Bar(string owner, string id) => JObject.Parse("{ 'barId':'" + id + "', 'ownerId':'" + owner + "', 'targetId':'npc', 'barType':'world', 'min':0, 'max':9999, 'direction':'lowIsGood', 'advanceMode':'derived', 'initValue':1, 'reverseInitValue':0, 'nameText':'title', 'derivedFormula':'weighted_sum', 'derivedSources':'world.calendar|npc.calendar', 'derivedWeights':'0.25|0.75', 'autoStep':2 }");
+        private static JObject Bar(string owner, string id) => JObject.Parse("{ 'barId':'" + id + "', 'ownerId':'" + owner + "', 'targetId':'npc', 'barType':'world', 'min':0, 'max':9999, 'direction':'lowIsGood', 'sourceMode':'ncs', 'providerId':'', 'sourceKey':'', 'advanceMode':'derived', 'initValue':1, 'reverseInitValue':0, 'nameText':'title', 'derivedFormula':'weighted_sum', 'derivedSources':'npc.calendar|npc.calendar', 'derivedWeights':'0.25|0.75', 'autoStep':2 }");
+        private static JObject BaseBar()
+        {
+            var bar = Bar("npc", "calendar");
+            bar["advanceMode"] = "event_driven";
+            bar["derivedSources"] = ""; bar["derivedWeights"] = ""; bar["derivedFormula"] = "";
+            return bar;
+        }
         private static NarrativeConfiguration Adapt(Dictionary<string, JArray> data) => LubanNarrativeLoader.FromTables(new cfg.Tables(name => data[name]));
 
         [TestCase("Once|Timer|Progress", NarrativeActionType.Daily)]
@@ -46,7 +57,7 @@ namespace Spotlight.Narrative.Tests
             var data = Data();
             data["tbncsaction"].Add(new JObject { ["actionKey"]="action", ["type"]=type, ["mustExecute"]=false,
                 ["nameText"]="title", ["descText"]="title", ["requirements"]="", ["resultEvents"]="", ["durationDays"]=2,
-                ["progressTarget"]=type.Contains("Progress") ? 2 : 0, ["nextActionKey"]="" });
+                ["progressTarget"]=type.Contains("Progress") ? 2 : 0, ["nextActionKey"]="", ["deliveryMode"]="None" });
             var action = Adapt(data).actions[0];
             Assert.That(action.type, Is.EqualTo(expected));
             Assert.That(action.endDay, Is.EqualTo(type == "EndDay"));
@@ -61,7 +72,18 @@ namespace Spotlight.Narrative.Tests
             var data = Data();
             data["tbncsaction"].Add(new JObject { ["actionKey"]="action", ["type"]=type, ["mustExecute"]=false,
                 ["nameText"]="title", ["descText"]="title", ["requirements"]="", ["resultEvents"]="", ["durationDays"]=2,
-                ["progressTarget"]=0, ["nextActionKey"]="" });
+                ["progressTarget"]=0, ["nextActionKey"]="", ["deliveryMode"]="None" });
+            Assert.Throws<FormatException>(() => Adapt(data));
+        }
+
+        [Test]
+        public void ResultOnlyEventRequiresResultsAndNoPresentationPayload()
+        {
+            var data = Data();
+            var ev = data["tbncsevent"][0];
+            ev["setupType"] = ev["setupKey"] = ev["presentationClass"] = ev["presentationKey"] = ev["contentKey"] = ev["eventProperty"] = "";
+            Assert.That(Adapt(data).events[0].eventId, Is.EqualTo("event"));
+            data["tbncsresult"].Clear();
             Assert.Throws<FormatException>(() => Adapt(data));
         }
 
@@ -96,7 +118,7 @@ namespace Spotlight.Narrative.Tests
             Assert.That(bar.direction, Is.EqualTo(NarrativeDirection.LowIsGood));
             Assert.That(bar.advanceMode, Is.EqualTo(NarrativeAdvanceMode.Derived));
             Assert.That(bar.derivedFormula, Is.EqualTo("weighted_sum"));
-            Assert.That(bar.derivedSources, Is.EqualTo(new[] { "world.calendar", "npc.calendar" }));
+            Assert.That(bar.derivedSources, Is.EqualTo(new[] { "npc.calendar", "npc.calendar" }));
             Assert.That(bar.derivedWeights, Is.EqualTo(new[] { 0.25f, 0.75f }));
             Assert.That(bar.autoStep, Is.EqualTo(2));
             NarrativeTriggerDefinition trigger = config.triggers[0];
@@ -130,8 +152,8 @@ Assert.That(slots["bg"], Is.EqualTo("night")); Assert.That(slots["fade"], Is.Equ
             NarrativeConditionDefinition condition = config.conditions[0];
             Assert.That(condition.ownerType, Is.EqualTo("event")); Assert.That(condition.ownerId, Is.EqualTo("event"));
             Assert.That(condition.groupIndex, Is.EqualTo(2)); Assert.That(condition.condType, Is.EqualTo("BAR_GTE"));
-            Assert.That(condition.target, Is.EqualTo("bar:world.calendar")); Assert.That(condition.op, Is.EqualTo(">="));
-            Assert.That(condition.value, Is.EqualTo("3")); Assert.That(condition.notFlag, Is.True);
+            Assert.That(condition.target, Is.EqualTo("bar:world.calendar")); Assert.That(condition.op, Is.Null.Or.Empty);
+            Assert.That(condition.value, Is.EqualTo("3")); Assert.That(condition.notFlag, Is.False);
             Assert.That(config.templates[0].tplName, Is.EqualTo("template")); Assert.That(config.templates[0].defaultSkip, Is.True);
             Assert.That(config.templates[0].interruptType, Is.EqualTo("none")); Assert.That(config.templates[0].atomSeq, Is.EqualTo("Dialogue"));
             Assert.That(config.templates[0].slotDef, Is.EqualTo("text"));
@@ -190,6 +212,56 @@ Assert.That(slots["bg"], Is.EqualTo("night")); Assert.That(slots["fade"], Is.Equ
         {
             var data = Data(); data[table][0][field] = "missing";
             Assert.Throws<FormatException>(() => Adapt(data));
+        }
+
+        [TestCase("FLAG_SET")]
+        [TestCase("CHANCE_PCT")]
+        [TestCase("ACTOR_IS")]
+        public void RejectsRemovedConditionTypes(string type)
+        {
+            var data = Data(); data["tbncscondition"][0]["condType"] = type;
+            Assert.Throws<FormatException>(() => Adapt(data));
+        }
+
+        [Test]
+        public void UnknownBoolRequiringFalseCannotPassLoading()
+        {
+            var data = Data(); data["tbncscondition"][0]["condType"] = "BOOL_EQ";
+            data["tbncscondition"][0]["target"] = "typo"; data["tbncscondition"][0]["value"] = "false";
+            var error = Assert.Throws<FormatException>(() => Adapt(data));
+            Assert.That(error.Message, Does.Contain("condition").And.Contain("unknown bool key typo"));
+        }
+
+        [TestCase("ITEM_ADD", NarrativeResultType.ItemAdd)]
+        [TestCase("ITEM_REMOVE", NarrativeResultType.ItemRemove)]
+        public void MapsItemResultsAndRejectsNonPositiveQuantity(string type, NarrativeResultType expected)
+        {
+            var data = Data(); data["tbncsresult"][0]["resultType"] = type;
+            data["tbncsresult"][0]["target"] = "medicine";
+            Assert.That(Adapt(data).results[0].resultType, Is.EqualTo(expected));
+            data["tbncsresult"][0]["value"] = "0";
+            Assert.Throws<FormatException>(() => Adapt(data));
+        }
+
+        [Test]
+        public void GeneratedConfigurationIncludesGatedDeliverySamplesAndDisabledEndings()
+        {
+            var c = LubanNarrativeLoader.Load();
+            Assert.That(c.conditionKeys.Exists(x => x.key == "specialization.player.letter.science"), Is.True);
+            Assert.That(c.conditions.Exists(x => x.condType == "FLAG_SET" || x.notFlag || !string.IsNullOrEmpty(x.op)), Is.False);
+            foreach (var mode in new[] { NarrativeDeliveryMode.Cumulative, NarrativeDeliveryMode.Consecutive })
+            {
+                var action = c.actions.Find(x => x.deliveryMode == mode);
+                Assert.That(action, Is.Not.Null);
+                Assert.That(action.progressTarget, Is.EqualTo(5));
+                Assert.That(action.milestones, Has.Count.EqualTo(1));
+                Assert.That(action.milestones[0].atProgress, Is.EqualTo(2));
+                Assert.That(c.conditions.Exists(x => x.ownerType == "action" && x.ownerId == action.actionKey && x.target == "test.delivery.enabled"), Is.True);
+                Assert.That(c.mapPositions.Exists(x => x.defaultAction == action.actionKey || x.extendedActions.Contains(action.actionKey)), Is.False);
+            }
+            Assert.That(c.endings, Has.Count.EqualTo(2));
+            Assert.That(c.endings.TrueForAll(x => !x.enabled), Is.True);
+            Assert.That(c.conditionKeys.Find(x => x.key == "test.delivery.enabled").initialValue, Is.False);
         }
 
         [Test]

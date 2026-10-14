@@ -8,6 +8,8 @@
         "Spotlight.GameFlow.Loading",
         "Spotlight.GameFlow.Architecture",
         "Spotlight.Narrative",
+        "Spotlight.Config",
+        "Spotlight.FreeCafe.Domain",
         "Unity.Newtonsoft.Json",
         "Unity.TextMeshPro",
         "Unity.ugui",

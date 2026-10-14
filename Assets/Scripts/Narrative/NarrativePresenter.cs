@@ -5,7 +5,7 @@ using UnityEngine;
 
 namespace Spotlight.Narrative
 {
-    public sealed class NarrativePresenter : INarrativePresenter, INarrativePresentationDrain, IDisposable
+    public sealed class NarrativePresenter : INarrativePresenter, INarrativePresentationDrain, INarrativePresentationCancellation, IDisposable
     {
         private readonly NarrativeConfiguration configuration;
         private readonly Func<string, string> resolve;
@@ -15,6 +15,9 @@ namespace Spotlight.Narrative
         private Action completion;
         private Action drainCompleted;
         private Coroutine routine;
+        private IDisposable pauseOwner;
+        private int ownerSceneHandle;
+        private long sessionVersion;
         private NarrativeEventRequest request;
         private bool draining, disposed, skipRequested, allowSkip, choosing;
         private NarrativeReadingPlayback readingPlayback;
@@ -28,8 +31,10 @@ namespace Spotlight.Narrative
         public bool IsPresenting => completion != null || draining || effects.Count > 0;
         public event Action<NarrativeEventRequest> Started;
         public event Action<NarrativeEventRequest> Finished;
+        public event Action<string> Cancelled;
         public event Func<string, bool> ChoiceSelected;
         public Func<string, NarrativeConditionContext, bool> ChoiceUnlocked { get; set; }
+        public Func<string, NarrativeAbilityCheckSnapshot> AbilityCheck { get; set; }
         public NarrativeReadingPlayback ReadingPlayback { get => readingPlayback; set => readingPlayback = value; }
         public NarrativeNoticePlayback NoticePlayback { get => noticePlayback; set => noticePlayback = value; }
         public NarrativeConversationPlayback ConversationPlayback { get => conversationPlayback; set => conversationPlayback = value; }
@@ -42,6 +47,12 @@ namespace Spotlight.Narrative
             ui = NarrativePresentationUI.Create();
             resources = new PresentationResources(ui);
             ui.Escape += OnEscape;
+            ui.gameObject.AddComponent<Spotlight.GameFlow.PresentationPauseLifetime>().Interrupted = () =>
+            {
+                ui.StopAllCoroutines();
+                AbortPresentation("host_unavailable");
+            };
+            UnityEngine.SceneManagement.SceneManager.sceneUnloaded += OnSceneUnloaded;
         }
 
         public void Play(NarrativeEventRequest incoming, Action completed)
@@ -49,8 +60,22 @@ namespace Spotlight.Narrative
             if (disposed || IsPresenting) throw new InvalidOperationException("NCS presenter requires a single live session.");
             request = incoming;
             completion = completed ?? throw new ArgumentNullException(nameof(completed));
-            Started?.Invoke(incoming);
-            routine = ui.StartCoroutine(PlayEvent());
+            long version = ++sessionVersion;
+            try
+            {
+                Started?.Invoke(incoming);
+                if (!RequiresPresentation(incoming.Event, FindSetup(incoming.Event.setupKey)))
+                {
+                    Action callback = completion;
+                    completion = null;
+                    Finished?.Invoke(incoming);
+                    callback();
+                    return;
+                }
+                BeginPause();
+                routine = ui.StartCoroutine(Guarded(PlayEvent()));
+            }
+            catch (Exception error) { if (sessionVersion == version) AbortPresentation(error.Message); throw; }
         }
 
         private IEnumerator PlayEvent()
@@ -64,6 +89,77 @@ namespace Spotlight.Narrative
             ui.Hide();
             Finished?.Invoke(request);
             callback?.Invoke();
+        }
+
+        /// <summary>Empty result transactions settle synchronously without opening a window.</summary>
+        public static bool RequiresPresentation(NarrativeEventDefinition definition, NarrativeSetupParamsDefinition setup)
+        {
+            if (definition == null) return false;
+            if (!string.IsNullOrWhiteSpace(definition.presentationKey) || setup != null ||
+                !string.IsNullOrWhiteSpace(definition.setupKey) || !string.IsNullOrWhiteSpace(definition.setupType)) return true;
+            if (definition.contentKeys != null)
+                foreach (string key in definition.contentKeys) if (!string.IsNullOrWhiteSpace(key)) return true;
+            if (definition.eventProperties != null)
+                foreach (NarrativeEventProperty property in definition.eventProperties)
+                    if (property != null && !string.IsNullOrWhiteSpace(property.value)) return true;
+            return false;
+        }
+
+        private void BeginPause()
+        {
+            ownerSceneHandle = UnityEngine.SceneManagement.SceneManager.GetActiveScene().handle;
+            pauseOwner = Spotlight.GameFlow.PresentationPauseRegistry.Acquire("NarrativePresenter");
+        }
+
+        // Drive nested enumerators ourselves: Unity does not propagate a child coroutine's
+        // exception into the parent iterator's finally block.
+        private IEnumerator Guarded(IEnumerator root)
+        {
+            IDisposable lease = pauseOwner;
+            long version = sessionVersion;
+            var stack = new Stack<IEnumerator>();
+            stack.Push(root);
+            try
+            {
+                while (stack.Count > 0)
+                {
+                    IEnumerator current = stack.Peek();
+                    bool moved;
+                    object yielded = null;
+                    try { moved = current.MoveNext(); if (moved) yielded = current.Current; }
+                    catch (Exception error) { if (sessionVersion == version) AbortPresentation(error.Message); throw; }
+                    if (!moved) { (stack.Pop() as IDisposable)?.Dispose(); continue; }
+                    if (yielded is IEnumerator nested) stack.Push(nested);
+                    else yield return yielded;
+                }
+            }
+            finally
+            {
+                while (stack.Count > 0) (stack.Pop() as IDisposable)?.Dispose();
+                lease?.Dispose();
+                if (ReferenceEquals(pauseOwner, lease)) pauseOwner = null;
+            }
+        }
+
+        private void AbortPresentation(string reason)
+        {
+            bool wasActive = completion != null || draining;
+            sessionVersion++;
+            pauseOwner?.Dispose();
+            pauseOwner = null;
+            completion = drainCompleted = null;
+            draining = choosing = false;
+            effects.Clear();
+            resources.RestoreCamera();
+            if (ui != null) ui.Hide();
+            if (wasActive) Cancelled?.Invoke(reason);
+        }
+
+        private void OnSceneUnloaded(UnityEngine.SceneManagement.Scene scene)
+        {
+            if (pauseOwner == null || scene.handle != ownerSceneHandle) return;
+            if (ui != null) ui.StopAllCoroutines();
+            AbortPresentation("host_unavailable");
         }
 
         private NarrativeSetupParamsDefinition FindSetup(string key)
@@ -101,7 +197,9 @@ namespace Spotlight.Narrative
             allowSkip = string.Equals(template?.interruptType, "playback", StringComparison.OrdinalIgnoreCase) && (setup?.skipAble ?? template?.defaultSkip ?? false);
             string resolvedTitle = resolve(Get("titleKey", definition.titleText));
             ui.Show(resolvedTitle);
+            finishPresentation = false;
             pageIndex = 0; choicesEverShown = false; continueEverShown = false; finishPresentation = false; pages.Clear();
+            if (!string.IsNullOrWhiteSpace(setup?.checkId)) yield return AbilityCheckPresentation(setup.checkId);
             bool isReading = string.Equals(presentationClass, "reading", StringComparison.OrdinalIgnoreCase);
             if (string.Equals(presentationClass, "conversation", StringComparison.OrdinalIgnoreCase))
             {
@@ -350,21 +448,74 @@ namespace Spotlight.Narrative
             bool selected = false;
             foreach (NarrativeChoiceDefinition choice in choices)
                 if (request.SelectedChoices != null && Contains(request.SelectedChoices, choice.choiceId)) selected = true;
+            if (selected && AbilityCheck != null)
+            {
+                NarrativeChoiceDefinition restoredChoice = choices.Find(choice => request.SelectedChoices != null && Contains(request.SelectedChoices, choice.choiceId));
+                if (!string.IsNullOrWhiteSpace(restoredChoice?.checkId))
+                {
+                    NarrativeAbilityCheckSnapshot restoredResult = AbilityCheck(restoredChoice.checkId);
+                    ui.ShowLine(FormatAbilityCheck(restoredResult));
+                    ui.ResetSubmit();
+                    yield return ui.Reveal(() => skipRequested);
+                    while (!skipRequested && !ui.ConsumeSubmit()) yield return null;
+                }
+            }
             pageIndex = pages.Count;
             choicesEverShown = true;
+            string selectedId = null;
             ui.ShowChoices(choices, resolve, id => ChoiceUnlocked?.Invoke(id, request.Context) ?? false, ChoiceRequirement,
-                request.SelectedChoices, id =>
+                request.SelectedChoices, id => { if (!selected) selectedId = id; });
+            if (!selected) while (selectedId == null) yield return null;
+            if (selectedId != null && ChoiceSelected != null && ChoiceSelected.Invoke(selectedId))
             {
-                if (selected || ChoiceSelected == null || !ChoiceSelected.Invoke(id)) return;
+                NarrativeChoiceDefinition selectedChoice = choices.Find(x => x.choiceId == selectedId);
+                if (!string.IsNullOrWhiteSpace(selectedChoice?.checkId))
+                {
+                    NarrativeAbilityCheckSnapshot result = AbilityCheck?.Invoke(selectedChoice.checkId);
+                    if (result == null) { Report("Ability check service is unavailable: " + selectedChoice.checkId); while (choosing) yield return null; }
+                    ui.ShowLine(FormatAbilityCheck(result));
+                    ui.ResetSubmit();
+                    yield return ui.Reveal(() => skipRequested);
+                    while (!skipRequested && !ui.ConsumeSubmit()) yield return null;
+                }
                 selected = true;
-            });
-            if (!selected) while (!selected) yield return null;
+            }
             choicesEverShown = true;
             continueEverShown = true;
             choosing = false;
             ui.ResetSubmit();
             ui.SetNavigation(false, false, true, null, null,
                 () => finishPresentation = true);
+        }
+
+        private IEnumerator AbilityCheckPresentation(string checkId)
+        {
+            NarrativeAbilityCheckSnapshot result = AbilityCheck?.Invoke(checkId);
+            if (result == null) { Report("Ability check service is unavailable: " + checkId); while (true) yield return null; }
+            ui.ShowLine(FormatAbilityCheck(result));
+            ui.ResetSubmit();
+            yield return ui.Reveal(() => skipRequested);
+            while (!skipRequested && !ui.ConsumeSubmit()) yield return null;
+        }
+
+        private IEnumerator WaitForCheckAcknowledgement()
+        {
+            ui.ResetSubmit();
+            while (!skipRequested && !ui.ConsumeSubmit()) yield return null;
+        }
+
+        private static string FormatAbilityCheck(NarrativeAbilityCheckSnapshot result)
+        {
+            var lines = new List<string>();
+            int lastGroup = -1;
+            foreach (var value in result.values)
+            {
+                if (lastGroup > 0 && value.groupIndex != lastGroup) lines.Add("或");
+                lines.Add("组 " + value.groupIndex + "：" + value.displayName + " " + value.currentValue + (value.passed ? " >= " : " < ") + value.threshold);
+                lastGroup = value.groupIndex;
+            }
+            lines.Add(result.passed ? "检定成功" : "检定失败");
+            return string.Join("\n", lines);
         }
 
         private static bool Contains(IReadOnlyList<string> values, string value)
@@ -425,11 +576,13 @@ namespace Spotlight.Narrative
 
         public void Drain(Action completed)
         {
-            if (completion != null || draining) throw new InvalidOperationException("NCS drain cannot overlap a presentation.");
+            if (disposed || completion != null || draining) throw new InvalidOperationException("NCS drain cannot overlap a presentation.");
             if (effects.Count == 0) { completed?.Invoke(); return; }
             draining = true;
             drainCompleted = completed;
-            routine = ui.StartCoroutine(DrainEffects());
+            long version = ++sessionVersion;
+            try { BeginPause(); routine = ui.StartCoroutine(Guarded(DrainEffects())); }
+            catch (Exception error) { if (sessionVersion == version) AbortPresentation(error.Message); throw; }
         }
 
         private IEnumerator DrainEffects()
@@ -458,7 +611,9 @@ namespace Spotlight.Narrative
         {
             if (disposed) return;
             disposed = true;
+            UnityEngine.SceneManagement.SceneManager.sceneUnloaded -= OnSceneUnloaded;
             if (ui != null) ui.StopAllCoroutines();
+            AbortPresentation("disposed");
             completion = drainCompleted = null;
             effects.Clear();
             resources.Dispose();

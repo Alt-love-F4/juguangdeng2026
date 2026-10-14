@@ -24,6 +24,11 @@ namespace Spotlight.Narrative
         public bool IsReady => controller != null;
         public bool IsPresenting => runtimePresenter != null && runtimePresenter.IsPresenting;
         public bool BlocksGameplayInput => IsPresenting || (controller != null && controller.IsBusy);
+        private bool restoringCafeSession;
+        public event Action<NarrativeCafeVisitSnapshot> CafeVisitsCommitted;
+        public NarrativeCafeVisitSnapshot GetCommittedCafeVisits() => controller?.GetCommittedCafeVisits();
+        public bool SubmitCafeVisitFeedback(NarrativeCafeVisitFeedback fact, Action completed = null) => controller != null && controller.SubmitCafeVisitFeedback(fact, completed);
+        public bool IsCafeVisitFeedbackComplete(NarrativeCafeVisitFeedback fact) => controller != null && controller.IsCafeVisitFeedbackComplete(fact);
         public event Action TurnCompleted;
         public event Action<NarrativeEventRequest> EventPresented;
         public event Action<NarrativeEventRequest> EventFinished;
@@ -33,6 +38,16 @@ namespace Spotlight.Narrative
         private NarrativeNoticePlayback noticePlayback;
         private NarrativeConversationPlayback conversationPlayback;
         private Func<string, string, string, NarrativeCharacterPresentationData> characterResolver;
+        private Func<string, (bool ready, int value)> abilityReader;
+        public Func<string, (bool ready, int value)> AbilityReader
+        {
+            get => abilityReader;
+            set
+            {
+                abilityReader = value;
+                if (controller != null) controller.AbilityReader = value;
+            }
+        }
         public NarrativeReadingPlayback ReadingPlayback
         {
             get => readingPlayback;
@@ -87,6 +102,9 @@ namespace Spotlight.Narrative
                 runtimePresenter.CharacterResolver = CharacterResolver;
             }
             controller = new NarrativeController(configuration, injectedPresenter ?? runtimePresenter);
+            controller.CafeVisitsCommitted += snapshot => CafeVisitsCommitted?.Invoke(snapshot);
+            controller.AbilityReader = AbilityReader;
+            controller.TextResolver = ResolveText;
             MapInventory = new NarrativeMapInventory();
             actionController = new NarrativeActionController(controller, configuration.actions, 5, MapInventory);
             foreach (var position in configuration.mapPositions)
@@ -107,12 +125,14 @@ namespace Spotlight.Narrative
             {
                 runtimePresenter.ChoiceSelected += choiceId => controller.SelectChoice(choiceId);
                 runtimePresenter.ChoiceUnlocked = (id, context) => controller.EvaluateConditions("choice", id, context);
+                runtimePresenter.AbilityCheck = controller.EvaluateAbilityCheckForPresentation;
             }
             controller.BarChanged += (key, oldValue, newValue) =>
             {
                 if (logBarChanges) Debug.Log($"[NCS][State] {key}: {oldValue} -> {newValue}", this);
                 BarChanged?.Invoke(key, oldValue, newValue);
             };
+            if (!restoringCafeSession) CafeVisitsCommitted?.Invoke(controller.GetCommittedCafeVisits());
         }
 
         public void ResetSession(NarrativeConfiguration overrideConfiguration = null)
@@ -120,6 +140,7 @@ namespace Spotlight.Narrative
             runtimePresenter?.Dispose();
             runtimePresenter = null;
             injectedPresenter = null;
+            controller?.UnbindValueProviders();
             controller = null;
             actionController = null;
             if (overrideConfiguration != null) configuration = overrideConfiguration;
@@ -132,6 +153,7 @@ namespace Spotlight.Narrative
             if (presenter == null) throw new ArgumentNullException(nameof(presenter));
             runtimePresenter?.Dispose();
             runtimePresenter = null;
+            controller?.UnbindValueProviders();
             controller = null;
             actionController = null;
             configuration = source;
@@ -164,6 +186,7 @@ namespace Spotlight.Narrative
         private void OnDestroy()
         {
             if (Instance == this) Instance = null;
+            controller?.UnbindValueProviders();
             runtimePresenter?.Dispose();
         }
 
@@ -173,10 +196,12 @@ namespace Spotlight.Narrative
         public bool AddBar(string barKey, int delta) => controller != null && controller.AddBar(barKey, delta);
         public bool SetBar(string barKey, int value) => controller != null && controller.SetBar(barKey, value);
         public bool SelectChoice(string choiceId) => controller != null && controller.SelectChoice(choiceId);
+        public NarrativeAbilityCheckSnapshot EvaluateAbilityCheck(string checkId) => controller == null ? throw new InvalidOperationException("Narrative runtime is not ready.") : controller.EvaluateAbilityCheckForPresentation(checkId);
         public bool EvaluateConditions(string ownerType, string ownerId, NarrativeConditionContext context = null) => controller != null && controller.EvaluateConditions(ownerType, ownerId, context);
-        public NarrativeSnapshot CaptureSnapshot()
+        public NarrativeSnapshot CaptureSnapshot(bool allowInitialization = false)
         {
-            NarrativeSnapshot snapshot = controller?.CaptureSnapshot();
+            if (actionController != null && !actionController.CanCaptureSnapshot) throw new InvalidOperationException("Cannot save while narrative results are settling.");
+            NarrativeSnapshot snapshot = controller?.CaptureSnapshot(allowInitialization);
             if (snapshot != null && actionController != null)
             {
                 snapshot.actionState = new NarrativeActionStateSnapshot();
@@ -184,16 +209,32 @@ namespace Spotlight.Narrative
             }
             return snapshot;
         }
+        public void ResumeRestoredSession()
+        {
+            if (controller == null || controller.IsEnded) return;
+            actionController?.ResumePendingExecution();
+            controller.ResumePendingEvents();
+            controller.CheckEndingsAtSafeBoundary();
+        }
+
+        public void StopForGameOver()
+        {
+            runtimePresenter?.Dispose();
+            runtimePresenter = null;
+        }
+
         public void RestoreSnapshot(NarrativeSnapshot snapshot)
         {
             if (snapshot == null) return;
-            ResetSession(configuration);
+            restoringCafeSession = true;
+            try { ResetSession(configuration); }
+            finally { restoringCafeSession = false; }
             if (controller == null) throw new InvalidOperationException("Narrative runtime is not initialized.");
+            controller.BeginValueRestore();
             controller.RestoreSnapshot(snapshot);
             actionController?.RestoreFrom(snapshot.actionState);
             runtimePresenter?.SyncNpcLocations(snapshot.npcLocations);
-            if (snapshot.turnEnding || snapshot.active != null || (snapshot.pending != null && snapshot.pending.Count > 0) || (snapshot.pendingEffects != null && snapshot.pendingEffects.Count > 0))
-                controller.EndTurn();
+            // Formal GameFlow resumes only after day, profile, inventory and actions are restored.
         }
     }
 }

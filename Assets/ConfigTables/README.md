@@ -94,6 +94,14 @@ D:\Luban\src\Luban\bin\Release\net8.0\Luban.exe --conf luban.conf -t client -c c
 
 工具路径可用 `LUBAN_DIR` 环境变量覆盖，指向含 Luban.exe 的目录。工具本体不复制到 Unity 包体。
 
+## 玩家配置
+
+`Data/Player/Player.xlsx` 包含 PlayerConfig、PlayerAttribute、CreationGroup、CreationOption、CreationBonus。建角存档使用稳定 optionId；调整排序不改变身份，删除选项后未提交草稿须重新选择。属性初始值和上下限只在 Narrative/Bar 定义。
+
+Bar 新增 sourceMode/providerId/sourceKey：空或 ncs 为内部值，external 从真实所有者读取。正式映射为 cafe.money → cafe/money、player.action_points → actions/current、player.action_points_max → actions/max、world.calendar → dayflow/day；external 使用 event_driven，autoStep=0。MONEY_ADD/MONEY_REMOVE 目标为 cafe。
+
+完整 GenerateAll 在 Luban strict 前执行 `validate_player.py`，需要 Python 和 openpyxl；验证分组、金额、属性所有者和重复奖励等跨行约束。运行 `python Assets/ConfigTables/test_player_validation.py` 可检查真实配置和非法配置拒绝案例，测试副本位于 Library/Locus/tmp。
+
 ## 表与生成 API
 
 生成代码在 `Assets/Scripts/Config/Generated/`，程序集 `Spotlight.Config` 引用 `Unity.Newtonsoft.Json`。`cfg.Tables` 构造参数为 `Func<string, Newtonsoft.Json.Linq.JArray>`；所有表都有 `DataList`。Excel 原 camelCase 字段生成 PascalCase readonly 字段，JSON 仍保留原字段名。不要手改 generated C# 或 JSON。
@@ -108,6 +116,9 @@ D:\Luban\src\Luban\bin\Release\net8.0\Luban.exe --conf luban.conf -t client -c c
 | EventDate | TbNcsEventDate / NcsEventDateEntry | list / 无 ID，按行顺序 | Luban/tbncseventdate |
 | Result | TbNcsResult / NcsResultEntry | map / resultId | Luban/tbncsresult |
 | Condition | TbNcsCondition / NcsConditionEntry | map / conditionId | Luban/tbncscondition |
+| ConditionKey | TbNcsConditionKey / NcsConditionKeyEntry | map / key | Luban/tbncsconditionkey |
+| Ending | TbNcsEnding / NcsEndingEntry | map / endingId | Luban/tbncsending |
+| ActionMilestone | TbNcsActionMilestone / NcsActionMilestoneEntry | map / milestoneId | Luban/tbncsactionmilestone |
 | Template | TbNcsTemplate / NcsTemplateEntry | map / tplName | Luban/tbncstemplate |
 | SetupParams | TbNcsSetupParams / NcsSetupParamsEntry | map / setupKey | Luban/tbncssetupparams |
 | Choice | TbNcsChoice / NcsChoiceEntry | map / choiceId | Luban/tbncschoice |
@@ -122,9 +133,24 @@ JSON 文件位于 `Assets/Settings/Resources/Luban/`，上表 Resources 路径�
 - Object：`npc/player/world`。Bar：`stat/relation/world`，`highIsGood/lowIsGood`，`monotonic/event_driven/derived`。
 - Trigger：`up/down/both`，`cross/hold`，`once/repeat`。Event：`actor/world`。EventDate：`morning/noon/night`，`once/daily/weekly/yearly`。
 - Result 使用原全大写标签。设计标准 `OBJ_STATE`、`AWARD_ACH` 和兼容旧名 `OBJECT_STATE`、`AWARD_ACHIEVEMENT` 均允许，adapter 映射到同一 DTO 值。
-- Condition 的 `ownerType` 只允许 `event/choice`，`condType` 按 schema 中的 15 种条件标签校验。Template 的 `interruptType` 只允许 `progressive/playback`。
+- Condition 的 `ownerType` 允许 `event/choice/action/ending`；同组 AND、组间 OR。`BOOL_EQ` 引用 ConditionKey 并填写 true/false；`ITEM_GTE` / `ACTION_PROGRESS_GTE` 填非负整数；`ACTION_COMPLETED` 的 value 留空。保留 Bar/关系/事件记录查询，删除 FLAG、NOT、op、上下文与概率判断。Template 的 `interruptType` 只允许 `progressive/playback`。
+- ConditionKey 定义公开 bool：key、nameText、initialValue、onlySetTrue。死亡条件只允许置 true。SET_FLAG/CLEAR_FLAG 指向原始 key，SET_FLAG 只接受 true/false，CLEAR_FLAG 填 false；ITEM_ADD/ITEM_REMOVE 指向地图物品 key，数量必须是正整数。
+- Action.requirements 仅配置 Item / ActionPoint 消耗；只读要求配置为 Condition 的 ownerType=action。deliveryMode 为 None / Cumulative / Consecutive；后两者复用 progressTarget。ActionMilestone 定义 milestoneId、actionKey、atProgress、eventId、seq，必须 1 <= atProgress < progressTarget。
+- Ending 定义 endingId、enabled、priority、titleText、messageText，条件为 ownerType=ending；禁用结局同样必须有合法条件。Loader 与 Editor Validator 共享条件语义校验。
 - Luban strict 拒绝 map 重复主键、Bar 重复 ownerId+barId、非法枚举及 schema 标注的坏引用。可选空对象/文本引用用 `ref=表名?`，非空仍必须存在。
 - 多 key 字符串、条件多态 owner、Result 的事件或 choice-result owner 等动态引用仍需运行时/Editor adapter 的语义校验，不能由简单单表 `ref` 替代。
+
+## 咖啡馆特殊来访
+
+`Narrative.xlsx` 新增 CafeVisit / CafeVisitHook。RESERVE_CAFE_VISIT（obj:角色 → visit:预设）只预留，SPAWN_NPC（obj:角色 → scene:cafe）授权到场；到场还需满足经营延迟。可选时间、耐心、leaveAfterServed 使用 string 列保留空值，由适配器诊断与默认处理：延迟 0、普通耐心、送餐后离店 true。Hook 的缺失 eventId 由运行时明确跳过，不阻塞交接。
+
+实际示例与入口、验证记录见 `Docs/superpowers/specs/2026-10-13-ncs-cafe-visitors-implementation.md`。GM 的“特殊来访”分类提供预约、延迟预约、到场、取消和状态检查。`python Assets/ConfigTables/create_cafe_visit_fixtures.py` 只在 Library/Locus/tmp 创建空表与非法配置副本。
+
+## 条件系统测试样例
+
+源 Narrative.xlsx 配置 `act_test_delivery_cumulative` 和 `act_test_delivery_consecutive`：每次 medicine ×2、food ×1、行动点 ×1，目标 5 次，第 2 次触发一次节点剧情，完成奖励 delivery_receipt ×1。样例未默认挂载地图，且要求初始 false 的 `test.delivery.enabled`，通过现有调试入口设置此条件、准备物品并挂载行动后测试。样例完成结果不重复扣费。
+
+`ending_test_cumulative` / `ending_test_consecutive` 默认 disabled，条件为对应行动完成。验证结局时临时在源表启用后走完整生成流程，不手写另一份 JSON。正式配置保留 disabled。
 
 ## 最小运行库与验证
 

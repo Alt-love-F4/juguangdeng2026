@@ -37,6 +37,11 @@ namespace Spotlight.GameFlow
         private string hoveredLink;
         private bool InteractiveLetter => draft != null;
         public FirstDayLetterDraft Draft => draft;
+        private FirstDayLetterDraft pendingDraft;
+        public Func<FirstDayLetterDraft, bool> SubmitDraft { get; set; }
+        public Func<bool> SubmitDefault { get; set; }
+        public Action<FirstDayLetterDraft> DraftChanged { get; set; }
+        public void SetDraft(FirstDayLetterDraft value) => pendingDraft = value;
 
         [Header("Legacy draft (explicit injected previews only)")]
         [SerializeField, HideInInspector, TextArea(8, 30)] private string letter =
@@ -120,7 +125,8 @@ namespace Spotlight.GameFlow
             Stop();
             CapturePose();
             RestorePose();
-            draft = content == null ? new FirstDayLetterDraft() : null;
+            draft = content == null ? pendingDraft ?? new FirstDayLetterDraft() : null;
+            pendingDraft = null;
             hoveredLink = null;
             CancelPlayerName();
             FirstDayLetterContent resolved = content ?? new FirstDayLetterContent(draft.BuildBody(), FirstDayLetterDraft.Signature);
@@ -207,7 +213,7 @@ namespace Spotlight.GameFlow
             if (InteractiveLetter)
             {
                 if (!draft.IsComplete) { UpdateReadingHint(); return; }
-                PlayerDetailsProfile.Current.ApplyLetter(draft);
+                if (SubmitDraft != null && !SubmitDraft(draft)) return;
             }
             CancelPlayerName();
             Stage = LetterStage.Closing;
@@ -228,17 +234,10 @@ namespace Spotlight.GameFlow
         public void SkipLetter()
         {
             if (!IsPlaying) return;
+            if (InteractiveLetter && SubmitDefault != null && !SubmitDefault()) return;
             transition?.Kill(false);
             transition = null;
             CancelPlayerName();
-            // 跳过时保留已选项，其余使用一致的默认建角值。
-            if (InteractiveLetter)
-            {
-                if (string.IsNullOrWhiteSpace(draft.PlayerName)) draft.SetName("咖啡馆馆长");
-                for (int i = 0; i < FirstDayLetterDraft.Labels.Length; i++)
-                    if (draft.Selection(i) < 0) draft.Select(i, i == 0 ? 1 : 0);
-                PlayerDetailsProfile.Current.ApplyLetter(draft);
-            }
             FinishLetter();
         }
 
@@ -254,8 +253,8 @@ namespace Spotlight.GameFlow
                 return;
             }
             string[] parts = link.Split(':');
-            if (parts.Length == 3 && parts[0] == "choice" && int.TryParse(parts[1], out int group) && int.TryParse(parts[2], out int option))
-                SelectLetterOption(group, option);
+            if (parts.Length == 3 && parts[0] == "choice" && draft.Select(parts[1], parts[2]))
+                RefreshInteractiveBody();
         }
 
         public bool SelectLetterOption(int group, int option)
@@ -293,6 +292,7 @@ namespace Spotlight.GameFlow
 
         private void RefreshInteractiveBody()
         {
+            DraftChanged?.Invoke(draft);
             float scroll = letterScroll.verticalNormalizedPosition;
             // 修改选项后保留已读比例；不会重启打字或跳到信件顶部。
             float progress = characterCount > 0 ? Mathf.Clamp01((float)letterBody.maxVisibleCharacters / characterCount) : 0f;

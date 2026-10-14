@@ -1,0 +1,152 @@
+[
+  {
+    "optionId": "origin.waif",
+    "groupId": "origin",
+    "seq": 0,
+    "labelText": "creation.origin.waif.label",
+    "descriptionText": "creation.origin.waif.desc",
+    "originId": "waif",
+    "startingMoney": 250,
+    "specializationConditionKey": ""
+  },
+  {
+    "optionId": "origin.commoner",
+    "groupId": "origin",
+    "seq": 1,
+    "labelText": "creation.origin.commoner.label",
+    "descriptionText": "creation.origin.commoner.desc",
+    "originId": "commoner",
+    "startingMoney": 500,
+    "specializationConditionKey": ""
+  },
+  {
+    "optionId": "origin.noble",
+    "groupId": "origin",
+    "seq": 2,
+    "labelText": "creation.origin.noble.label",
+    "descriptionText": "creation.origin.noble.desc",
+    "originId": "noble",
+    "startingMoney": 1000,
+    "specializationConditionKey": ""
+  },
+  {
+    "optionId": "temperament.kind",
+    "groupId": "temperament",
+    "seq": 0,
+    "labelText": "creation.temperament.kind.label",
+    "descriptionText": "creation.temperament.kind.desc",
+    "originId": "",
+    "startingMoney": -1,
+    "specializationConditionKey": ""
+  },
+  {
+    "optionId": "temperament.sincere",
+    "groupId": "temperament",
+    "seq": 1,
+    "labelText": "creation.temperament.sincere.label",
+    "descriptionText": "creation.temperament.sincere.desc",
+    "originId": "",
+    "startingMoney": -1,
+    "specializationConditionKey": ""
+  },
+  {
+    "optionId": "memory.brave",
+    "groupId": "memory",
+    "seq": 0,
+    "labelText": "creation.memory.brave.label",
+    "descriptionText": "creation.memory.brave.desc",
+    "originId": "",
+    "startingMoney": -1,
+    "specializationConditionKey": ""
+  },
+  {
+    "optionId": "memory.insightful",
+    "groupId": "memory",
+    "seq": 1,
+    "labelText": "creation.memory.insightful.label",
+    "descriptionText": "creation.memory.insightful.desc",
+    "originId": "",
+    "startingMoney": -1,
+    "specializationConditionKey": ""
+  },
+  {
+    "optionId": "education.religion",
+    "groupId": "education",
+    "seq": 0,
+    "labelText": "creation.education.religion.label",
+    "descriptionText": "creation.education.religion.desc",
+    "originId": "",
+    "startingMoney": -1,
+    "specializationConditionKey": "specialization.player.letter.religion"
+  },
+  {
+    "optionId": "education.literature",
+    "groupId": "education",
+    "seq": 1,
+    "labelText": "creation.education.literature.label",
+    "descriptionText": "creation.education.literature.desc",
+    "originId": "",
+    "startingMoney": -1,
+    "specializationConditionKey": "specialization.player.letter.literature"
+  },
+  {
+    "optionId": "education.science",
+    "groupId": "education",
+    "seq": 2,
+    "labelText": "creation.education.science.label",
+    "descriptionText": "creation.education.science.desc",
+    "originId": "",
+    "startingMoney": -1,
+    "specializationConditionKey": "specialization.player.letter.science"
+  },
+  {
+    "optionId": "education.politics",
+    "groupId": "education",
+    "seq": 3,
+    "labelText": "creation.education.politics.label",
+    "descriptionText": "creation.education.politics.desc",
+    "originId": "",
+    "startingMoney": -1,
+    "specializationConditionKey": "specialization.player.letter.politics"
+  },
+  {
+    "optionId": "trait.language",
+    "groupId": "trait",
+    "seq": 0,
+    "labelText": "creation.trait.language.label",
+    "descriptionText": "creation.trait.language.desc",
+    "originId": "",
+    "startingMoney": -1,
+    "specializationConditionKey": ""
+  },
+  {
+    "optionId": "trait.courage",
+    "groupId": "trait",
+    "seq": 1,
+    "labelText": "creation.trait.courage.label",
+    "descriptionText": "creation.trait.courage.desc",
+    "originId": "",
+    "startingMoney": -1,
+    "specializationConditionKey": ""
+  },
+  {
+    "optionId": "trait.wisdom",
+    "groupId": "trait",
+    "seq": 2,
+    "labelText": "creation.trait.wisdom.label",
+    "descriptionText": "creation.trait.wisdom.desc",
+    "originId": "",
+    "startingMoney": -1,
+    "specializationConditionKey": ""
+  },
+  {
+    "optionId": "trait.perception",
+    "groupId": "trait",
+    "seq": 3,
+    "labelText": "creation.trait.perception.label",
+    "descriptionText": "creation.trait.perception.desc",
+    "originId": "",
+    "startingMoney": -1,
+    "specializationConditionKey": ""
+  }
+]

@@ -18,6 +18,7 @@ namespace Spotlight.GameFlow.Tests
         private DayFlowController flow;
         private DayFlowTestEndpoint endpoint;
         private float oldTimeScale;
+        private PlayerPresentationTestSession session;
 
         [SetUp]
         public void Setup()
@@ -25,6 +26,7 @@ namespace Spotlight.GameFlow.Tests
             oldTimeScale = Time.timeScale;
             Time.timeScale = 1f;
             GameSaveParticipantRegistry.PendingRestore = null;
+            session = new PlayerPresentationTestSession();
         }
 
         [UnityTearDown]
@@ -37,6 +39,8 @@ namespace Spotlight.GameFlow.Tests
             Time.timeScale = oldTimeScale;
             GameSaveParticipantRegistry.PendingRestore = null;
             yield return null;
+            session.Dispose();
+            session = null;
         }
 
         [Test]
@@ -78,14 +82,17 @@ namespace Spotlight.GameFlow.Tests
             CreateFlow();
             flow.BeginNewSession();
             var letter = (FirstDayLetterPanel)flow.CurrentPresentation;
+            session.BindLetter(letter);
             SetField(letter, "characterInterval", .005f);
             SetField(letter, "openSeconds", .01f);
             SetField(letter, "closeSeconds", .01f);
             letter.OpenEnvelope();
             yield return Until(() => letter.Stage == FirstDayLetterPanel.LetterStage.AwaitingSignature);
+            letter.SetPlayerName("测试馆长");
+            for (int group = 0; group < 5; group++) letter.SelectLetterOption(group, 0);
             letter.ConfirmSignature();
-            yield return Until(() => flow.State == DayFlowState.AvatarSelection);
-            SelectAvatar();
+            yield return Until(() => flow.State == DayFlowState.DateTransition);
+            AssertDefaultAvatar();
             Assert.That(flow.State, Is.EqualTo(DayFlowState.DateTransition));
             yield return ReachIntroduction();
             Assert.That(flow.CurrentDate, Is.EqualTo("王国纪元 670年10月6日"));
@@ -107,28 +114,47 @@ namespace Spotlight.GameFlow.Tests
             CreateFlow();
             var source = new ShortSource();
             flow.SetFirstDayIntroductionSource(source);
+            Assert.That(session.Submit(null), Is.True);
             flow.BeginNewSession(playLetter: false);
-            SelectAvatar();
+            AssertDefaultAvatar();
             yield return ReachIntroduction();
             Assert.That(source.Reads, Is.EqualTo(1));
-            Assert.That(flow.CurrentDialogue.EffectStage.Find("DialogueBox/Dialogue").GetComponent<TMPro.TMP_Text>().text, Is.EqualTo("测试数据源台词"));
+            Assert.That(DialogueBinding<TMPro.TMP_Text>(flow.CurrentDialogue, "dialogueText").text, Is.EqualTo("测试数据源台词"));
             yield return FinishDialogue();
             Assert.That(endpoint.starts, Is.EqualTo(1));
         }
 
         [UnityTest]
-        public IEnumerator CancelReturnsToPreparationAndRetryStillRequiresDialogue()
+        public IEnumerator FirstDayCafeTutorialCannotBeCancelledAndBlocksSavingUntilCompleted()
         {
             CreateFlow(new ShortSource());
+            Assert.That(session.Submit(null), Is.True);
             flow.BeginNewSession(playLetter: false);
-            SelectAvatar();
-            yield return ReachIntroduction();
-            flow.CurrentDialogue.Cancel();
-            Assert.That(flow.State, Is.EqualTo(DayFlowState.PreBusiness));
-            Assert.That(endpoint.starts, Is.Zero);
-            StringAssert.Contains("\"firstDayIntroductionCompleted\":false", flow.CaptureJson());
-            yield return ReachIntroduction();
+            Assert.That(PlayerRuntime.Current.HasSelectedAvatar, Is.True);
+            Assert.That(PlayerRuntime.Current.Avatar, Is.EqualTo(PlayerRuntime.Current.Catalog.DefaultAvatar));
+            Assert.That(flow.State, Is.EqualTo(DayFlowState.CityMapLeisure));
+            Assert.That(flow.IsFirstDayMapGuideActive, Is.True);
+            Assert.That(flow.CanSave, Is.True);
+
+            flow.StartCafeFromMap();
+            Assert.That(flow.IsFirstDayMapGuideActive, Is.False);
+            Assert.That(flow.IsCafeTutorialActive, Is.True);
+            Assert.That(flow.CanSave, Is.False);
+            yield return SubmitPage();
+            yield return Until(() => flow.State == DayFlowState.FirstDayIntroduction);
+
+            DialoguePanel dialogue = flow.CurrentDialogue;
+            Assert.That(dialogue.AllowCancel, Is.False);
+            dialogue.Cancel();
+            Assert.That(dialogue.IsPlaying, Is.True);
+            Assert.That(flow.IsCafeTutorialActive, Is.True);
+
             yield return FinishDialogue();
+            Assert.That(flow.IsCafeTutorialActive, Is.True);
+            Assert.That(flow.CanSave, Is.False);
+            flow.CompleteFirstDayCafeTutorial();
+            Assert.That(flow.IsCafeTutorialActive, Is.False);
+            Assert.That(flow.CanSave, Is.True);
             Assert.That(endpoint.starts, Is.EqualTo(1));
         }
 
@@ -136,8 +162,9 @@ namespace Spotlight.GameFlow.Tests
         public IEnumerator ReturningToTitleSilencesPendingDialogueCallbacks()
         {
             CreateFlow(new ShortSource());
+            Assert.That(session.Submit(null), Is.True);
             flow.BeginNewSession(playLetter: false);
-            SelectAvatar();
+            AssertDefaultAvatar();
             yield return ReachIntroduction();
             flow.HideForMainMenu();
             yield return new WaitForSecondsRealtime(.6f);
@@ -150,8 +177,9 @@ namespace Spotlight.GameFlow.Tests
         public IEnumerator IntroSaveReplaysButCompletedSaveAndSecondDayDoNot()
         {
             CreateFlow(new ShortSource());
+            Assert.That(session.Submit(null), Is.True);
             flow.BeginNewSession(playLetter: false);
-            SelectAvatar();
+            AssertDefaultAvatar();
             yield return ReachIntroduction();
             string save = flow.CaptureJson();
             flow.HideForMainMenu();
@@ -186,6 +214,7 @@ namespace Spotlight.GameFlow.Tests
         public IEnumerator MissingLegacyDayFlowDataIsNotANewGame()
         {
             CreateFlow(new ShortSource());
+            Assert.That(session.Submit(null), Is.True);
             flow.RestoreSavedDayFlow();
             yield return ReachBusinessWithoutIntroduction();
             Assert.That(flow.CurrentDialogue, Is.Null);
@@ -195,11 +224,10 @@ namespace Spotlight.GameFlow.Tests
         public IEnumerator FailingInjectedSourceCanRetryUsingDefaultHardcodedScript()
         {
             CreateFlow(new ThrowingSource());
+            Assert.That(session.Submit(null), Is.True);
             flow.BeginNewSession(playLetter: false);
-            SelectAvatar();
-            yield return Until(() => flow.State == DayFlowState.PreBusiness);
-            yield return SubmitPage();
-            yield return Until(() => flow.State == DayFlowState.BusinessTransition);
+            AssertDefaultAvatar();
+            yield return EnterCafeTransition();
             LogAssert.Expect(LogType.Exception, new System.Text.RegularExpressions.Regex("InvalidOperationException: Test source failure"));
             yield return SubmitPage();
             yield return Until(() => flow.State == DayFlowState.PreBusiness);
@@ -210,12 +238,13 @@ namespace Spotlight.GameFlow.Tests
             Assert.That(endpoint.starts, Is.EqualTo(1));
         }
 
-        private void SelectAvatar()
+        private void AssertDefaultAvatar()
         {
-            Assert.That(flow.State, Is.EqualTo(DayFlowState.AvatarSelection));
+            Assert.That(flow.State, Is.EqualTo(DayFlowState.DateTransition));
             Assert.That(flow.BlocksGameplayInput, Is.True);
-            Assert.That(flow.CurrentAvatarSelection, Is.Not.Null);
-            flow.CurrentAvatarSelection.Select(AvatarKind.Male);
+            Assert.That(flow.CurrentAvatarSelection, Is.Null);
+            Assert.That(PlayerRuntime.Current.HasSelectedAvatar, Is.True);
+            Assert.That(PlayerRuntime.Current.Avatar, Is.EqualTo(PlayerRuntime.Current.Catalog.DefaultAvatar));
         }
 
         private void CreateFlow(IDialogueScriptSource source = null)
@@ -223,6 +252,7 @@ namespace Spotlight.GameFlow.Tests
             controllerObject = new GameObject("FirstDayIntroductionFlowTest");
             flow = controllerObject.AddComponent<DayFlowController>();
             flow.Initialize(null);
+            session.Bind(flow);
             flow.SetFirstDayIntroductionSource(source);
             endpointObject = new GameObject("FirstDayIntroductionEndpoint");
             endpoint = endpointObject.AddComponent<DayFlowTestEndpoint>();
@@ -244,25 +274,31 @@ namespace Spotlight.GameFlow.Tests
             => instance.GetType().GetField(name, BindingFlags.NonPublic | BindingFlags.Instance).SetValue(instance, value);
         private void Restore(string json)
         {
+            // Establish isolated owners; production save migration is verified separately.
+            if (!PlayerRuntime.Current.CreationSubmitted) Assert.That(session.Submit(null), Is.True);
             GameSaveParticipantRegistry.PendingRestore = new List<GameSaveParticipantData>
             { new GameSaveParticipantData { Id = DayFlowController.SaveId, Json = json } };
             flow.RestoreSavedDayFlow();
         }
         private IEnumerator ReachIntroduction()
         {
-            yield return Until(() => flow.State == DayFlowState.PreBusiness);
-            yield return SubmitPage();
-            yield return Until(() => flow.State == DayFlowState.BusinessTransition);
+            yield return EnterCafeTransition();
             yield return SubmitPage();
             yield return Until(() => flow.State == DayFlowState.FirstDayIntroduction);
         }
         private IEnumerator ReachBusinessWithoutIntroduction()
         {
-            yield return Until(() => flow.State == DayFlowState.PreBusiness);
-            yield return SubmitPage();
-            yield return Until(() => flow.State == DayFlowState.BusinessTransition);
+            yield return EnterCafeTransition();
             yield return SubmitPage();
             yield return Until(() => flow.State == DayFlowState.FreeCafeBusiness);
+        }
+        private IEnumerator EnterCafeTransition()
+        {
+            yield return Until(() => flow.State == DayFlowState.CityMapLeisure || flow.State == DayFlowState.PreBusiness);
+            if (flow.State == DayFlowState.CityMapLeisure) flow.StartCafeFromMap();
+            else yield return SubmitPage(); // The explicit error-retry page remains supported.
+            yield return Until(() => flow.State == DayFlowState.BusinessTransition);
+            Assert.That(flow.CurrentPresentation, Is.TypeOf<CafeOpeningPanel>());
         }
         private IEnumerator SubmitPage()
         {
@@ -275,7 +311,7 @@ namespace Spotlight.GameFlow.Tests
             DialoguePanel panel = flow.CurrentDialogue;
             SetField(panel, "charactersPerSecond", 100000f);
             float deadline = Time.realtimeSinceStartup + 8f;
-            var button = panel.EffectStage.Find("DialogueBox/Continue").GetComponent<Button>();
+            var button = DialogueBinding<Button>(panel, "continueButton");
             while (panel.IsPlaying)
             {
                 Assert.That(Time.realtimeSinceStartup, Is.LessThan(deadline), "Dialogue did not finish.");
@@ -283,6 +319,13 @@ namespace Spotlight.GameFlow.Tests
                 yield return null;
             }
             yield return Until(() => flow.State == DayFlowState.FreeCafeBusiness);
+        }
+        private static T DialogueBinding<T>(DialoguePanel panel, string field) where T : UnityEngine.Object
+        {
+            Assert.That(panel, Is.Not.Null);
+            var binding = (T)typeof(DialoguePanel).GetField(field, BindingFlags.NonPublic | BindingFlags.Instance).GetValue(panel);
+            Assert.That(binding, Is.Not.Null, "Missing serialized dialogue binding: " + field);
+            return binding;
         }
         private static IEnumerator Until(Func<bool> condition)
         {

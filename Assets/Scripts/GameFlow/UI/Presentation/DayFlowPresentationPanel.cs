@@ -25,6 +25,7 @@ namespace Spotlight.GameFlow
         [SerializeField, Min(0f)] private float exitSeconds = .18f;
         [SerializeField, Min(0f)] private float automaticHoldSeconds = 1.2f;
 
+        private IDisposable pauseOwner;
         private Sequence animation;
         private Action finished;
         private bool exiting;
@@ -69,6 +70,9 @@ namespace Spotlight.GameFlow
             if (canvasGroup == null || content == null || continueButton == null)
                 throw new InvalidOperationException(GetType().Name + " has incomplete prefab bindings.");
             Stop();
+            pauseOwner = PresentationPauseRegistry.Acquire(GetType().Name);
+            try
+            {
             CapturePose();
             RestorePose();
             finished = onFinished;
@@ -93,6 +97,8 @@ namespace Spotlight.GameFlow
                         continueButton.interactable = true;
                 });
             }
+            }
+            catch { Stop(); throw; }
         }
 
         /// <summary>Called by the button after entrance, or by an automatic panel after its animation.</summary>
@@ -113,12 +119,16 @@ namespace Spotlight.GameFlow
                 exiting = false;
                 Action callback = finished;
                 finished = null;
+                pauseOwner?.Dispose();
+                pauseOwner = null;
                 callback?.Invoke();
             });
         }
 
         public void Stop()
         {
+            pauseOwner?.Dispose();
+            pauseOwner = null;
             finished = null;
             IsPlaying = exiting = false;
             animation?.Kill(false);

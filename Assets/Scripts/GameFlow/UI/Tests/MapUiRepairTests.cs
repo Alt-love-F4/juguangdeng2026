@@ -96,7 +96,7 @@ namespace Spotlight.GameFlow.Tests
             runtime.MapInventory.TryAdd("beans", 7);
             inventory.Refresh();
             var content = inventory.transform.Find("Viewport/Items");
-            Assert.That(content.childCount, Is.EqualTo(6));
+            Assert.That(content.Cast<Transform>().Count(child => child.gameObject.activeSelf), Is.EqualTo(6));
             Assert.That(content.Find("Empty"), Is.Null);
             var slot = inventory.FindSlot("beans");
             inventory.Refresh();
@@ -105,7 +105,9 @@ namespace Spotlight.GameFlow.Tests
             inventory.Refresh();
             Assert.That(inventory.FindSlot("beans"), Is.Null);
             Assert.That(content.Find("Item_beans"), Is.Null);
-            Assert.That(content.childCount, Is.EqualTo(7), "Six slots plus a layout-excluded hint.");
+            Assert.That(content.Cast<Transform>().Count(child => child.gameObject.activeSelf), Is.EqualTo(6), "Six visible slots; editor-only hint and authored template stay hidden.");
+            Assert.That(content.Find("Empty"), Is.Not.Null);
+            Assert.That(content.Find("Empty").gameObject.activeSelf, Is.False);
         }
 
         [TestCase(550f)]
@@ -127,20 +129,64 @@ namespace Spotlight.GameFlow.Tests
 
         [TestCase("大堂区")]
         [TestCase("cafe")]
-        public void CafeLocationsExposeEnterCafeAndInvokeSuppliedCallback(string position)
+        public void CafeLocationsExposeEnterCafeAndInvokeSuppliedNavigation(string position)
         {
             int calls = 0;
             CreateDetails(() => calls++);
             details.Show(position, "大堂区");
-            var enter = details.transform.Find("Viewport/ActionList/EnterCafe");
-            Assert.That(enter, Is.Not.Null);
-            var button = Widget(enter, "UnityEngine.UI.Button");
+            var content = details.transform.Find("Viewport/ActionList");
+            var enter = content.Find("EnterCafe");
+            Assert.That(enter, Is.Not.Null, "The cafe detail must offer the scene entry.");
+            Assert.That(content.Find("EmptyActionState"), Is.Null, "The cafe card replaces the empty action state.");
+            Assert.That(Get<string>(Widget(enter.Find("Name"), "TMPro.TextMeshProUGUI"), "text"), Is.EqualTo("大堂区"));
+            Assert.That(Get<string>(Widget(enter.Find("Execute/Label"), "TMPro.TextMeshProUGUI"), "text"), Is.EqualTo("进入咖啡馆"));
+            Assert.That(enter.Find("Execute").gameObject.activeSelf, Is.True);
+            var requirement = enter.Find("Requirements/Requirement") ?? enter.Find("Requirement");
+            Assert.That(requirement == null || !requirement.gameObject.activeSelf, Is.True,
+                "Scene navigation must not present NCS requirements.");
+            var button = Widget(enter.Find("Execute"), "UnityEngine.UI.Button");
+            Get<object>(button, "onClick").GetType().GetMethod("Invoke").Invoke(Get<object>(button, "onClick"), null);
+            Assert.That(calls, Is.EqualTo(1));
+        }
+
+        [Test]
+        public void CafeEntryConsumesNoActionPointsItemsOrNarrativeActions()
+        {
+            var beans = new NarrativeActionDefinition { actionKey = "cafe_beans", nameText = "咖啡豆特饮", requirements = "Item(beans,2);ActionPoint(1)" };
+            var config = new NarrativeConfiguration(); config.actions.Add(beans);
+            runtime.Initialize(config, new ImmediatePresenter());
+            runtime.MapInventory.TryAdd("beans", 5);
+            runtime.Actions.ActionPoints.Set(3);
+            runtime.Actions.Mount("cafe", beans.actionKey);
+            int settled = 0;
+            runtime.Actions.ActionFinished += (action, success) => settled++;
+            int navigations = 0;
+            CreateDetails(() => navigations++);
+            details.Show("cafe", "咖啡馆");
+            var entry = details.transform.Find("Viewport/ActionList/EnterCafe");
+            Assert.That(entry, Is.Not.Null);
+            var button = Widget(entry.Find("Execute"), "UnityEngine.UI.Button");
             var click = Get<object>(button, "onClick");
             click.GetType().GetMethod("Invoke").Invoke(click, null);
-            Assert.That(calls, Is.EqualTo(1));
-            // Interactability depends on the current scene; the test never changes it.
-            Assert.That(Get<bool>(button, "interactable"),
-                Is.EqualTo(UnityEngine.SceneManagement.SceneManager.GetActiveScene().name != "CoffeeShop"));
+            Assert.That(navigations, Is.EqualTo(1));
+            Assert.That(settled, Is.Zero, "Entering the cafe must not settle an NCS action.");
+            Assert.That(runtime.Actions.ActionPoints.Current, Is.EqualTo(3), "Entering the cafe must not spend action points.");
+            Assert.That(runtime.MapInventory.GetCount("beans"), Is.EqualTo(5), "Entering the cafe must not consume items.");
+        }
+
+        [Test]
+        public void CafeDetailKeepsConfiguredActionsAlongsideTheEntry()
+        {
+            var action = new NarrativeActionDefinition { actionKey = "act_meet_b", nameText = "市场行动", requirements = "ActionPoint(1)" };
+            var config = new NarrativeConfiguration(); config.actions.Add(action);
+            runtime.Initialize(config, new ImmediatePresenter());
+            runtime.Actions.ActionPoints.Set(2);
+            runtime.Actions.Mount("cafe", action.actionKey);
+            CreateDetails(null);
+            details.Show("cafe", "咖啡馆");
+            var content = details.transform.Find("Viewport/ActionList");
+            Assert.That(content.Find("EnterCafe"), Is.Not.Null);
+            Assert.That(content.Find("Action_act_meet_b"), Is.Not.Null, "Existing cafe actions stay visible.");
         }
 
         [Test]
@@ -149,65 +195,50 @@ namespace Spotlight.GameFlow.Tests
             CreateDetails(null);
             details.Show("library", "图书馆");
             Assert.That(details.transform.Find("Viewport/ActionList/EnterCafe"), Is.Null);
+            Assert.That(details.transform.Find("Viewport/ActionList/EmptyActionState"), Is.Not.Null);
         }
 
         [Test]
-        public void EmptyExecuteCaptionUsesSwordBodyCoordinatesAndSharedLabelAlignment()
+        public void EmptyCardUsesAuthoredLabelAndCannotExecute()
         {
             CreateDetails(null);
             details.Show("empty-test-location", "测试地点");
-            var area = (RectTransform)details.transform.Find("Viewport/ActionList/LocationOverview/ExecuteCaptionArea");
-            Assert.That(area, Is.Not.Null);
-            AssertVector(area.anchoredPosition, new Vector2(796f * 575 / 1067, -414f * 342 / 554));
-            AssertVector(area.sizeDelta, new Vector2(796f * 492 / 1067, 414f * 212 / 554));
-            var caption = Widget(area.Find("ExecuteCaption"), "TMPro.TextMeshProUGUI");
-            Assert.That(Get<string>(caption, "text"), Is.EqualTo("暂无行动"));
-            var executeLabel = Create("ExecuteLabel", root.transform).AddComponent(caption.GetType());
-            typeof(MapActionDetailsView).GetMethod("ConfigureExecuteLabel", BindingFlags.Static | BindingFlags.NonPublic)
-                .Invoke(null, new object[] { executeLabel });
-            foreach (var label in new[] { caption, executeLabel })
-            {
-                var rect = (RectTransform)label.transform;
-                AssertVector(rect.anchorMin, Vector2.zero);
-                AssertVector(rect.anchorMax, Vector2.one);
-                AssertVector(rect.offsetMin, new Vector2(24, 24));
-                AssertVector(rect.offsetMax, new Vector2(-58, -18));
-                Assert.That(Get<object>(label, "alignment").ToString(), Is.EqualTo("Center"));
-                Assert.That(Get<bool>(label, "enableAutoSizing"), Is.True);
-                Assert.That(Get<float>(label, "fontSizeMin"), Is.EqualTo(24));
-                Assert.That(Get<float>(label, "fontSizeMax"), Is.EqualTo(38));
-            }
+            var content = details.transform.Find("Viewport/ActionList");
+            var empty = content.Find("EmptyActionState");
+            Assert.That(empty, Is.Not.Null);
+            Assert.That(Get<string>(Widget(empty.Find("Execute/Label"), "TMPro.TextMeshProUGUI"), "text"), Is.EqualTo("暂无行动"));
+            Assert.That(empty.Find("Execute").gameObject.activeSelf, Is.False);
+            Assert.That(Get<string>(Widget(content.Find("ActionCardTemplate/Execute/Label"), "TMPro.TextMeshProUGUI"), "text"), Is.EqualTo("Authored execute"));
+            Assert.That(content.Find("LocationOverview"), Is.Null);
         }
 
         [Test]
-        public void EmptyLocationSwitchAndReopenReuseArtwork()
+        public void EmptyLocationSwitchAndReopenPreserveTemplateAndReplaceOnlyClone()
         {
             CreateDetails(null);
+            var content = details.transform.Find("Viewport/ActionList");
+            var template = content.Find("ActionCardTemplate");
             details.Show("empty-a", "地点甲");
-            var overview = details.transform.Find("Viewport/ActionList/LocationOverview");
             details.Show("empty-b", "地点乙");
-            Assert.That(details.transform.Find("Viewport/ActionList/LocationOverview"), Is.SameAs(overview));
-            Assert.That(Get<string>(Widget(overview.Find("Name"), "TMPro.TextMeshProUGUI"), "text"), Is.EqualTo("地点乙"));
+            Assert.That(Get<string>(Widget(content.Find("EmptyActionState/Name"), "TMPro.TextMeshProUGUI"), "text"), Is.EqualTo("地点乙"));
             details.gameObject.SetActive(false);
             details.Show("empty-b", "地点乙");
-            Assert.That(details.transform.Find("Viewport/ActionList/LocationOverview"), Is.SameAs(overview));
-            details.Show("大堂区", "大堂区");
-            Assert.That(details.transform.Find("Viewport/ActionList/EnterCafe"), Is.Not.Null);
-            details.Show("empty-a", "地点甲");
-            Assert.That(details.transform.Find("Viewport/ActionList/EnterCafe"), Is.Null);
+            Assert.That(content.Find("ActionCardTemplate"), Is.SameAs(template));
+            Assert.That(content.Cast<Transform>().Count(t => t.name == "EmptyActionState"), Is.EqualTo(1));
+            Assert.That(Get<string>(Widget(template.Find("Name"), "TMPro.TextMeshProUGUI"), "text"), Is.EqualTo("Authored name"));
+            Assert.That(template.Find("Execute").gameObject.activeSelf, Is.True);
         }
 
         [Test]
-        public void EmptySwordIsGreyAndCardHasNoBakedYellowSword()
+        public void EmptyCardPreservesAuthoredArtworkColor()
         {
             CreateDetails(null);
             details.Show("empty-test", "测试地点");
-            var overview = details.transform.Find("Viewport/ActionList/LocationOverview");
-            var theme = Resources.Load<MapVisualTheme>("MapVisualTheme");
-            Assert.That(Get<Sprite>(Widget(overview, "UnityEngine.UI.Image"), "sprite"), Is.EqualTo(theme.panel));
-            var image = Widget(overview.Find("ExecuteCaptionArea"), "UnityEngine.UI.Image");
-            Assert.That(Get<Color>(image, "color"), Is.EqualTo(new Color(.46f, .43f, .34f)));
-            Assert.That(Get<bool>(image, "raycastTarget"), Is.False);
+            var content = details.transform.Find("Viewport/ActionList");
+            var template = Widget(content.Find("ActionCardTemplate"), "UnityEngine.UI.Image");
+            var clone = Widget(content.Find("EmptyActionState"), "UnityEngine.UI.Image");
+            Assert.That(Get<Color>(clone, "color"), Is.EqualTo(Get<Color>(template, "color")));
+            Assert.That(Get<Color>(clone, "color"), Is.EqualTo(new Color(.12f, .34f, .56f)));
         }
 
         [Test]
@@ -236,15 +267,29 @@ namespace Spotlight.GameFlow.Tests
             var card = CreateRepeatCard(action, out var segments);
             Invoke(details, "UpdateRepeatSegments", card, runtime.Actions);
             Assert.That((int)CardField("repeatCount").GetValue(card), Is.EqualTo(expected));
-            Assert.That(segments.Cast<Transform>().Count(t => t.name.StartsWith("Segment_", StringComparison.Ordinal)), Is.EqualTo(expected));
-            Assert.That(segments.Find("NoExecutions") != null, Is.EqualTo(expected == 0));
-            var first = segments.GetChild(0);
+            Assert.That(segments.childCount, Is.Zero, "Missing authored repeat art must not be synthesized.");
             Invoke(details, "UpdateRepeatSegments", card, runtime.Actions);
-            Assert.That(segments.GetChild(0), Is.SameAs(first), "Identical counts must not recreate children.");
+            Assert.That((int)CardField("repeatCount").GetValue(card), Is.EqualTo(expected));
             runtime.Actions.ActionPoints.Set(0);
             Invoke(details, "UpdateRepeatSegments", card, runtime.Actions);
-            Assert.That(segments.childCount, Is.EqualTo(1));
-            Assert.That(segments.Find("NoExecutions"), Is.Not.Null);
+            Assert.That((int)CardField("repeatCount").GetValue(card), Is.Zero);
+            Assert.That(segments.childCount, Is.Zero);
+        }
+
+        [Test]
+        public void DeliveryRepeatCountNeverPromisesMoreThanOneSubmissionToday()
+        {
+            var action = new NarrativeActionDefinition { actionKey = "delivery", deliveryMode = NarrativeDeliveryMode.Cumulative, progressTarget = 5, requirements = "Item(beans,2)" };
+            var config = new NarrativeConfiguration(); config.actions.Add(action);
+            runtime.Initialize(config, new ImmediatePresenter());
+            runtime.MapInventory.TryAdd("beans", 100);
+            var card = CreateRepeatCard(action, out var segments);
+            Invoke(details, "UpdateRepeatSegments", card, runtime.Actions);
+            Assert.That((int)CardField("repeatCount").GetValue(card), Is.EqualTo(1));
+            Assert.That(runtime.Actions.Execute("delivery"), Is.True);
+            Invoke(details, "UpdateRepeatSegments", card, runtime.Actions);
+            Assert.That((int)CardField("repeatCount").GetValue(card), Is.Zero);
+            Assert.That(segments.childCount, Is.Zero);
         }
 
         [TestCase(false)]
@@ -261,8 +306,7 @@ namespace Spotlight.GameFlow.Tests
             var card = CreateRepeatCard(action, out var segments);
             Invoke(details, "UpdateRepeatSegments", card, runtime.Actions);
             Assert.That((int)CardField("repeatCount").GetValue(card), Is.EqualTo(int.MaxValue));
-            Assert.That(segments.childCount, Is.EqualTo(1));
-            Assert.That(Get<string>(Widget(segments.Find("Unlimited"), "TMPro.TextMeshProUGUI"), "text"), Is.EqualTo("不限次数"));
+            Assert.That(segments.childCount, Is.Zero, "Unbounded counts do not synthesize replacement artwork.");
         }
 
         [TestCase(1600f, 1200f, 550f, 850f)]
@@ -289,6 +333,7 @@ namespace Spotlight.GameFlow.Tests
             var go = Create("Inventory", root.transform);
             go.AddComponent(UiType("UnityEngine.UI.Image"));
             var view = go.AddComponent<MapActionInventoryView>();
+            typeof(MapActionInventoryView).GetField("showEditorPreview", PrivateInstance).SetValue(view, false);
             typeof(MapActionInventoryView).GetMethod("Initialize").Invoke(view, new object[] { null });
             return view;
         }
@@ -298,7 +343,23 @@ namespace Spotlight.GameFlow.Tests
             var go = Create("Details", root.transform);
             go.AddComponent(UiType("UnityEngine.UI.Image"));
             details = go.AddComponent<MapActionDetailsView>();
+            typeof(MapActionDetailsView).GetField("showEditorPreview", PrivateInstance).SetValue(details, false);
             details.Initialize(null, () => true, null, cafe);
+            var content = details.transform.Find("Viewport/ActionList");
+            var template = Create("ActionCardTemplate", content);
+            ((RectTransform)template.transform).sizeDelta = new Vector2(796, 414);
+            var image = template.AddComponent(UiType("UnityEngine.UI.Image"));
+            image.GetType().GetProperty("color").SetValue(image, new Color(.12f, .34f, .56f));
+            AddText("Name", template.transform, "Authored name");
+            AddText("Description", template.transform, "Authored description");
+            var execute = Create("Execute", template.transform);
+            execute.AddComponent(UiType("UnityEngine.UI.Image"));
+            execute.AddComponent(UiType("UnityEngine.UI.Button"));
+            AddText("Label", execute.transform, "Authored execute");
+            var requirement = Create("Requirement", template.transform);
+            requirement.AddComponent(UiType("UnityEngine.UI.Image"));
+            AddText("Label", requirement.transform, "行动点\n× 1");
+            template.SetActive(false);
         }
 
         private object CreateRepeatCard(NarrativeActionDefinition action, out RectTransform segments)
@@ -310,6 +371,12 @@ namespace Spotlight.GameFlow.Tests
             CardField("action").SetValue(card, action);
             CardField("repeats").SetValue(card, segments);
             return card;
+        }
+
+        private static void AddText(string name, Transform parent, string text)
+        {
+            var component = Create(name, parent).AddComponent(UiType("TMPro.TextMeshProUGUI"));
+            component.GetType().GetProperty("text").SetValue(component, text);
         }
 
         private static NarrativeActionRequirement Cost(NarrativeActionRequirementType type, string key, int value)

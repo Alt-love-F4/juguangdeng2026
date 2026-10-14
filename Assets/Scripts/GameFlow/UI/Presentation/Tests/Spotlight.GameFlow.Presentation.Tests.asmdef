@@ -4,7 +4,11 @@
     "references": [
         "Spotlight.GameFlow.UI",
         "Spotlight.GameFlow.Saving",
+        "Spotlight.GameFlow.Settings",
         "Spotlight.Narrative",
+        "Spotlight.FreeCafe.Domain",
+        "Spotlight.Config",
+        "Unity.Newtonsoft.Json",
         "YokiFrame",
         "YokiFrame.SaveKit",
         "YokiFrame.UIKit.Unity",
@@ -12,6 +16,8 @@
         "Unity.ugui",
         "Unity.InputSystem"
     ],
+    "overrideReferences": true,
+    "precompiledReferences": ["Newtonsoft.Json.dll"],
     "autoReferenced": false,
     "optionalUnityReferences": [
         "TestAssemblies"

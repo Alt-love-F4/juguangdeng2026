@@ -14,7 +14,10 @@
     "derivedFormula": "",
     "derivedSources": "",
     "derivedWeights": "",
-    "autoStep": 1
+    "autoStep": 1,
+    "sourceMode": "ncs",
+    "providerId": "",
+    "sourceKey": ""
   },
   {
     "barId": "trust_b",
@@ -31,7 +34,10 @@
     "derivedFormula": "",
     "derivedSources": "",
     "derivedWeights": "",
-    "autoStep": 1
+    "autoStep": 1,
+    "sourceMode": "ncs",
+    "providerId": "",
+    "sourceKey": ""
   },
   {
     "barId": "respect_c",
@@ -48,7 +54,10 @@
     "derivedFormula": "",
     "derivedSources": "",
     "derivedWeights": "",
-    "autoStep": 1
+    "autoStep": 1,
+    "sourceMode": "ncs",
+    "providerId": "",
+    "sourceKey": ""
   },
   {
     "barId": "trust_a",
@@ -65,7 +74,10 @@
     "derivedFormula": "",
     "derivedSources": "",
     "derivedWeights": "",
-    "autoStep": 1
+    "autoStep": 1,
+    "sourceMode": "ncs",
+    "providerId": "",
+    "sourceKey": ""
   },
   {
     "barId": "trust_c",
@@ -82,7 +94,10 @@
     "derivedFormula": "",
     "derivedSources": "",
     "derivedWeights": "",
-    "autoStep": 1
+    "autoStep": 1,
+    "sourceMode": "ncs",
+    "providerId": "",
+    "sourceKey": ""
   },
   {
     "barId": "trust_d",
@@ -99,7 +114,10 @@
     "derivedFormula": "",
     "derivedSources": "",
     "derivedWeights": "",
-    "autoStep": 1
+    "autoStep": 1,
+    "sourceMode": "ncs",
+    "providerId": "",
+    "sourceKey": ""
   },
   {
     "barId": "rebel",
@@ -116,7 +134,10 @@
     "derivedFormula": "",
     "derivedSources": "",
     "derivedWeights": "",
-    "autoStep": 1
+    "autoStep": 1,
+    "sourceMode": "ncs",
+    "providerId": "",
+    "sourceKey": ""
   },
   {
     "barId": "wealth",
@@ -133,7 +154,10 @@
     "derivedFormula": "",
     "derivedSources": "",
     "derivedWeights": "",
-    "autoStep": 1
+    "autoStep": 1,
+    "sourceMode": "ncs",
+    "providerId": "",
+    "sourceKey": ""
   },
   {
     "barId": "trust_b",
@@ -150,7 +174,10 @@
     "derivedFormula": "",
     "derivedSources": "",
     "derivedWeights": "",
-    "autoStep": 1
+    "autoStep": 1,
+    "sourceMode": "ncs",
+    "providerId": "",
+    "sourceKey": ""
   },
   {
     "barId": "stability",
@@ -167,7 +194,10 @@
     "derivedFormula": "",
     "derivedSources": "",
     "derivedWeights": "",
-    "autoStep": 1
+    "autoStep": 1,
+    "sourceMode": "ncs",
+    "providerId": "",
+    "sourceKey": ""
   },
   {
     "barId": "calendar",
@@ -177,13 +207,156 @@
     "min": 1,
     "max": 9999,
     "direction": "highIsGood",
-    "advanceMode": "monotonic",
+    "advanceMode": "event_driven",
     "initValue": 1,
     "reverseInitValue": 0,
     "nameText": "bar.calendar.name",
     "derivedFormula": "",
     "derivedSources": "",
     "derivedWeights": "",
-    "autoStep": 1
+    "autoStep": 0,
+    "sourceMode": "external",
+    "providerId": "dayflow",
+    "sourceKey": "day"
+  },
+  {
+    "barId": "money",
+    "ownerId": "cafe",
+    "targetId": "",
+    "barType": "world",
+    "min": 0,
+    "max": 2147483647,
+    "direction": "highIsGood",
+    "advanceMode": "event_driven",
+    "initValue": 0,
+    "reverseInitValue": 0,
+    "nameText": "player.external.money",
+    "derivedFormula": "",
+    "derivedSources": "",
+    "derivedWeights": "",
+    "autoStep": 0,
+    "sourceMode": "external",
+    "providerId": "cafe",
+    "sourceKey": "money"
+  },
+  {
+    "barId": "action_points",
+    "ownerId": "player",
+    "targetId": "",
+    "barType": "stat",
+    "min": 0,
+    "max": 2147483647,
+    "direction": "highIsGood",
+    "advanceMode": "event_driven",
+    "initValue": 0,
+    "reverseInitValue": 0,
+    "nameText": "player.external.action_points",
+    "derivedFormula": "",
+    "derivedSources": "",
+    "derivedWeights": "",
+    "autoStep": 0,
+    "sourceMode": "external",
+    "providerId": "actions",
+    "sourceKey": "current"
+  },
+  {
+    "barId": "action_points_max",
+    "ownerId": "player",
+    "targetId": "",
+    "barType": "stat",
+    "min": 0,
+    "max": 2147483647,
+    "direction": "highIsGood",
+    "advanceMode": "event_driven",
+    "initValue": 0,
+    "reverseInitValue": 0,
+    "nameText": "player.external.action_points_max",
+    "derivedFormula": "",
+    "derivedSources": "",
+    "derivedWeights": "",
+    "autoStep": 0,
+    "sourceMode": "external",
+    "providerId": "actions",
+    "sourceKey": "max"
+  },
+  {
+    "barId": "language",
+    "ownerId": "player",
+    "targetId": "",
+    "barType": "stat",
+    "min": 0,
+    "max": 20,
+    "direction": "highIsGood",
+    "advanceMode": "event_driven",
+    "initValue": 0,
+    "reverseInitValue": 0,
+    "nameText": "player.attribute.language",
+    "derivedFormula": "",
+    "derivedSources": "",
+    "derivedWeights": "",
+    "autoStep": 0,
+    "sourceMode": "ncs",
+    "providerId": "",
+    "sourceKey": ""
+  },
+  {
+    "barId": "courage",
+    "ownerId": "player",
+    "targetId": "",
+    "barType": "stat",
+    "min": 0,
+    "max": 20,
+    "direction": "highIsGood",
+    "advanceMode": "event_driven",
+    "initValue": 0,
+    "reverseInitValue": 0,
+    "nameText": "player.attribute.courage",
+    "derivedFormula": "",
+    "derivedSources": "",
+    "derivedWeights": "",
+    "autoStep": 0,
+    "sourceMode": "ncs",
+    "providerId": "",
+    "sourceKey": ""
+  },
+  {
+    "barId": "wisdom",
+    "ownerId": "player",
+    "targetId": "",
+    "barType": "stat",
+    "min": 0,
+    "max": 20,
+    "direction": "highIsGood",
+    "advanceMode": "event_driven",
+    "initValue": 0,
+    "reverseInitValue": 0,
+    "nameText": "player.attribute.wisdom",
+    "derivedFormula": "",
+    "derivedSources": "",
+    "derivedWeights": "",
+    "autoStep": 0,
+    "sourceMode": "ncs",
+    "providerId": "",
+    "sourceKey": ""
+  },
+  {
+    "barId": "perception",
+    "ownerId": "player",
+    "targetId": "",
+    "barType": "stat",
+    "min": 0,
+    "max": 20,
+    "direction": "highIsGood",
+    "advanceMode": "event_driven",
+    "initValue": 0,
+    "reverseInitValue": 0,
+    "nameText": "player.attribute.perception",
+    "derivedFormula": "",
+    "derivedSources": "",
+    "derivedWeights": "",
+    "autoStep": 0,
+    "sourceMode": "ncs",
+    "providerId": "",
+    "sourceKey": ""
   }
 ]
