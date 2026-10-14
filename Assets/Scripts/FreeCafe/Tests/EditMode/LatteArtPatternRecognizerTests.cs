@@ -132,6 +132,31 @@ namespace Spotlight.FreeCafe.Tests
             Assert.That(LatteArtPatternRecognizer.Recognize(heart, null, new[] { heart.Count }).HasPattern, Is.False);
         }
 
+        [Test]
+        public void LiveFitsReportEveryPresetAndKeepRecognitionThresholdIndependent()
+        {
+            var presets = new[]
+            {
+                new LatteArtPatternPreset { id = "heart", template = LatteArtTemplateKind.Heart },
+                new LatteArtPatternPreset { id = "x", template = LatteArtTemplateKind.X },
+                new LatteArtPatternPreset { id = "a", template = LatteArtTemplateKind.A },
+                new LatteArtPatternPreset { id = "tulip", template = LatteArtTemplateKind.Tulip },
+                new LatteArtPatternPreset { id = "rosetta", template = LatteArtTemplateKind.Rosetta }
+            };
+            var results = new List<LatteArtRecognitionResult>();
+            LatteArtPatternRecognizer.GetPatternFits(null, presets, null, results);
+            Assert.That(results.Count, Is.EqualTo(presets.Length));
+            foreach (var fit in results) Assert.That(fit.confidence, Is.Zero);
+            LatteArtPatternRecognizer.GetPatternFits(Densify(LatteArtPatternRecognizer.PreviewPath(LatteArtTemplateKind.Heart)), presets, null, results);
+            Assert.That(results.Count, Is.EqualTo(presets.Length));
+            Assert.That(results[0].confidence, Is.GreaterThan(.85f));
+            for (int i = 1; i < results.Count; i++)
+            {
+                Assert.That(results[i].patternId, Is.EqualTo(presets[i].id));
+                Assert.That(results[i].confidence, Is.InRange(0f, results[0].confidence));
+            }
+        }
+
         private static List<Vector2> Densify(IList<Vector2> vertices)
         {
             var result = new List<Vector2>();

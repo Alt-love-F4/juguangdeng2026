@@ -107,9 +107,7 @@ namespace Spotlight.GameFlow.Editor
             material.SetTexture("_CupTex", AssetDatabase.LoadAssetAtPath<Texture2D>(Art + "咖啡logo-大.png"));
             material.SetVector("_CupGrid", new Vector4(8f, 7f, 0f, 0f));
             material.SetFloat("_CupScale", .46f);
-            material.SetVector("_CupShake", new Vector4(.055f, 0f, 0f, 0f));
             material.SetVector("_CupJitter", Vector4.zero);
-            material.SetFloat("_ShakeSpeed", 9f);
             material.SetFloat("_Transition", 0f);
             material.SetFloat("_Disappearing", 0f);
             EditorUtility.SetDirty(material);
@@ -133,6 +131,8 @@ namespace Spotlight.GameFlow.Editor
                 so.FindProperty("modal").boolValue = true;
                 so.FindProperty("coverDuration").floatValue = .65f;
                 so.FindProperty("disappearDuration").floatValue = .65f;
+                so.FindProperty("movementSpeed").floatValue = .08f;
+                so.FindProperty("movementDirection").vector2Value = Vector2.one;
                 so.ApplyModifiedPropertiesWithoutUndo();
                 PrefabUtility.SaveAsPrefabAsset(root, path);
             }

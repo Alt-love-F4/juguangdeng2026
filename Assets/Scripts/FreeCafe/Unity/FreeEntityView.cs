@@ -109,7 +109,7 @@ namespace Spotlight.FreeCafe
 
         private void EnsureGlassCup()
         {
-            if (prefabSpecId != "cup.small" && prefabSpecId != "cup.large" && prefabSpecId != "machine.heater" && prefabSpecId != "machine.brewer" && prefabSpecId != "container.extractor") return;
+            if (prefabSpecId != "cup.small" && prefabSpecId != "cup.large" && prefabSpecId != "machine.heater" && prefabSpecId != "machine.brewer" && prefabSpecId != "container.extractor" && prefabSpecId != "container.milk-pitcher") return;
             if (liquidPresenter != null && !(liquidPresenter is OrthographicGlassCupPresenter)) return;
             if (glassCup == null)
             {
@@ -138,6 +138,7 @@ namespace Spotlight.FreeCafe
                 liquidPresenter = glassCup;
             }
             glassCup.ConfigureSize(prefabSpecId != "cup.small");
+            if(prefabSpecId=="container.milk-pitcher")glassCup.ConfigureSize(new Vector2(.82f,1.02f));
             if (prefabSpecId == "container.extractor")
             {
                 glassCup.ConfigureSize(new Vector2(.84f, .89f));
@@ -281,7 +282,7 @@ namespace Spotlight.FreeCafe
             }
             if(spec.Has(Capability.Customer))
             {
-                foreach(var request in Runtime.World.State.requests) if(request.customerId==entity.id) { caption=Runtime.World.Product(request.productId).label+" · "+request.patience.ToString("0")+"s"; break; }
+                foreach(var request in Runtime.World.State.requests) if(request.customerId==entity.id) { caption=FreeCafeProductionText.Recipe(Runtime.World.Product(request.productId).label)+" · "+request.patience.ToString("0")+"s"; break; }
             }
             if(Runtime.ShowAssetIds) caption+="\n["+spec.artId+"]";
             if(label.text!=caption) label.text=caption;

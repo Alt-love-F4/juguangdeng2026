@@ -11,15 +11,12 @@ Shader "Spotlight/UI/Coffee Transition"
         _CupGrid ("Cup Grid (Columns Rows)", Vector) = (8,7,0,0)
         _CupScale ("Cup Scale", Range(0.1,2)) = 0.92
         _CupJitter ("Cup Jitter (X Y)", Vector) = (0.025,0.018,0,0)
-        _CupShake ("Cup Shake (X Y)", Vector) = (0.012,0.008,0,0)
-        _ShakeSpeed ("Cup Shake Speed", Float) = 2.2
-        _ShakePhaseSpread ("Cup Shake Phase Spread", Float) = 13.7
+        [HideInInspector] _CupScrollOffset ("Cup Scroll Offset (X Y)", Vector) = (0,0,0,0)
         _DissolveNoise ("Dissolve Roughness", Range(0,0.25)) = 0.055
         _DissolveScale ("Dissolve Noise Scale", Float) = 19
         _EdgeSoftness ("Transition Edge Softness", Range(0.001,0.2)) = 0.018
         _Transition ("Transition", Range(0,1)) = 0
         _Disappearing ("Disappearing", Range(0,1)) = 0
-        _UnscaledTime ("Unscaled Time", Float) = 0
         _StencilComp ("Stencil Comparison", Float) = 8
         _Stencil ("Stencil ID", Float) = 0
         _StencilOp ("Stencil Operation", Float) = 0
@@ -97,15 +94,12 @@ Shader "Spotlight/UI/Coffee Transition"
                 float4 _CupGrid;
                 float _CupScale;
                 float4 _CupJitter;
-                float4 _CupShake;
-                float _ShakeSpeed;
-                float _ShakePhaseSpread;
+                float4 _CupScrollOffset;
                 float _DissolveNoise;
                 float _DissolveScale;
                 float _EdgeSoftness;
                 float _Transition;
                 float _Disappearing;
-                float _UnscaledTime;
             CBUFFER_END
 
             float4 _TextureSampleAdd;
@@ -157,20 +151,20 @@ Shader "Spotlight/UI/Coffee Transition"
                 background.rgb *= _BackgroundTint.rgb;
 
                 float2 grid = max(_CupGrid.xy, float2(1, 1));
-                float2 cell = uv * grid;
+                // Move the entire infinite field together, including the staggered rows.
+                // Sampling beyond the screen generates incoming cups without a reset or gap.
+                float2 cell = (uv - _CupScrollOffset.xy) * grid;
                 float row = floor(cell.y);
-                // Every other row is offset by half a cell, producing a staggered coffee-cup field.
-                float stagger = fmod(row, 2.0) * 0.5;
+                // frac keeps the stagger consistent for negative rows as the field scrolls.
+                float stagger = frac(row * 0.5);
                 float2 cupUv = frac(float2(cell.x + stagger, cell.y));
                 float2 cupId = floor(float2(cell.x + stagger, cell.y));
-                float phase = Hash21(cupId + float2(17.13, 3.71)) * _ShakePhaseSpread;
 
                 float2 centered = cupUv - 0.5;
                 centered /= max(_CupScale, 0.001);
                 cupUv = centered + 0.5;
                 float2 jitter = (Hash21(cupId + 8.4) - 0.5) * 2.0 * _CupJitter.xy;
-                float shake = sin(_UnscaledTime * _ShakeSpeed + phase);
-                cupUv += jitter + float2(shake * _CupShake.x, sin(shake + phase) * _CupShake.y);
+                cupUv += jitter;
 
                 half4 cup = 0;
                 if (all(cupUv >= 0.0) && all(cupUv <= 1.0))

@@ -9,6 +9,10 @@ namespace Spotlight.FreeCafe
         private void RestoreContainerDefaults()
         {
             if (!ProductionEnabled) return;
+            State.entities.RemoveAll(entity => entity.specId == "tool.latte-art");
+            foreach (var entry in Catalog.layout)
+                if (entry.specId == "container.milk-pitcher" && Find(entry.id) == null)
+                    State.entities.Add(new WorldEntity { id = entry.id, specId = entry.specId, area = entry.area, x = entry.x, y = entry.y });
             foreach (var entity in State.entities)
             {
                 foreach (var portion in entity.contents)
@@ -147,16 +151,18 @@ namespace Spotlight.FreeCafe
             target.grams += mass;
         }
 
-        private void ReceiveContainerPortion(WorldEntity entity, Portion incoming, float fraction)
+        private void ReceiveContainerPortion(WorldEntity entity, Portion incoming, float fraction, string latteArtSessionToken = null)
         {
             if (incoming.milliliters * fraction <= 0 && incoming.grams * fraction <= 0) return;
-            var same = entity.contents.Find(portion => SamePortionKind(portion, incoming));
+            var same = entity.contents.Find(portion => SameIngredient(portion.specId, incoming.specId)
+                && CoffeeKind(portion) == CoffeeKind(incoming)
+                && (portion.latteArtSessionToken ?? "") == (latteArtSessionToken ?? ""));
             if (same != null) { MergePortionAmounts(same, incoming, fraction); return; }
             EnsureCoffeeProvenance(incoming);
             var received = new Portion { specId = incoming.specId, units = Math.Max(1, incoming.units), quality = incoming.quality,
                 milliliters = incoming.milliliters * fraction, grams = incoming.grams * fraction,
                 temperature = incoming.temperature, extracted = incoming.extracted, productionScore = incoming.productionScore, coffeeKind = CoffeeKind(incoming),
-                addedSequence = ++entity.production.additionSequence };
+                addedSequence = ++entity.production.additionSequence, latteArtSessionToken = latteArtSessionToken };
             SetTemperature(received, TemperatureCelsius(incoming));
             CopyComposition(incoming, received, fraction);
             entity.contents.Add(received);
@@ -233,6 +239,8 @@ namespace Spotlight.FreeCafe
 
         private ActionResult PreviewContainer(WorldEntity item, WorldEntity target)
         {
+            if (IsMilkPitcher(item) && MilkFoamVolume(item) > 0 && IsLatteArtCup(target))
+                return PreviewMilkPitcherLatteArt(item, target);
             target = ExtractionInputTarget(target, item.specId);
             if (IsContainer(item)) return ActionResult.Yes("左键拿起，按住右键倾倒；松开右键继续拿着");
             if (!Spec(item.specId).Has(Capability.Portion)) return ActionResult.No("请加入原料或从其他容器倾倒");
@@ -250,6 +258,8 @@ namespace Spotlight.FreeCafe
 
         private ActionResult AddToContainer(WorldEntity item, WorldEntity target)
         {
+            if (IsMilkPitcher(item) && MilkFoamVolume(item) > 0 && IsLatteArtCup(target))
+                return RequestMilkPitcherLatteArt(item.id, target.id);
             target = ExtractionInputTarget(target, item.specId);
             if (IsContainer(item)) return ActionResult.No("请按住右键倾倒，而不是松手整杯转移");
             if (IsPrecisionExtractor(target) && item.specId == "grounds" && target.production.brewCompleted)
@@ -314,7 +324,7 @@ namespace Spotlight.FreeCafe
             var vessel = Find(stove.production.heatingVesselId);
             if (!IsContainer(vessel) || vessel.area != stove.area || Math.Abs(vessel.x - stove.x) > .8f || Math.Abs(vessel.y - StoveDockHeight(vessel, stove)) > .7f)
                 return ActionResult.No("请先把杯子或壶放到炉台上");
-            if (!string.IsNullOrEmpty(State.production.miniGameToken) && vessel.id == State.production.miniGameCupId) return ActionResult.No("请先结束小游戏");
+            if (MiniGameUses(vessel)) return ActionResult.No("请先结束小游戏");
             if (vessel.contents.Count == 0) return ActionResult.No("空容器没有内容可加热");
             if (vessel.production.phase == ProductionPhase.Processing) return ActionResult.Yes("正在加热");
             vessel.production.phase = ProductionPhase.Processing;

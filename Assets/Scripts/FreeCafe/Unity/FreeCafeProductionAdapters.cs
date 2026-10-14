@@ -25,4 +25,31 @@ namespace Spotlight.FreeCafe
         void ResetLatte();
         LatteArtRecognitionResult Recognize(System.Collections.Generic.IList<LatteArtPatternPreset> presets = null);
     }
+    /// <summary>Display-only terminology; never rename physical foam inventory or its consumption hints.</summary>
+    public static class FreeCafeProductionText
+    {
+        public static string Recipe(string text) => text?.Replace("奶泡", "拉花").Replace("奶沫", "拉花");
+
+        public static string Pattern(string id)
+        {
+            switch (id)
+            {
+                case "heart": return "爱心";
+                case "rosetta": return "树叶";
+                case "tulip": return "郁金香";
+                case "x": return "X 形";
+                case "a": return "A 形";
+                case null: case "": case "unknown": return "未识别";
+                default: return id;
+            }
+        }
+
+        public static string LatteArtContents(float milliliters, string patternId)
+            => "拉花" + milliliters.ToString("0.#") + "ML·图案" + Pattern(patternId);
+    }
+
+    public interface ILatteArtFoamSurface
+    {
+        void SetFoamConsumer(Func<float, float> consumer, float millilitersPerSecond);
+    }
 }

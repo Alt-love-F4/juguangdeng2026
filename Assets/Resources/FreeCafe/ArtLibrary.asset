@@ -1048,3 +1048,24 @@ MonoBehaviour:
     variants:
     - state: default
       sprite: {fileID: 21300000, guid: a8abadfc3e798a843b0f2e8484ed4ec9, type: 3}
+  - brief:
+      id: container.milk-pitcher
+      label: "\u6253\u5976\u58F6"
+      category: entity
+      pivot: center (0.5,0.5)
+      outputFolder: Assets/Art/FreeCafe/Entities/container.milk-pitcher
+      prompt: Warm hand-drawn stainless steel milk frothing pitcher, left spout, right handle, isolated sprite.
+      negativePrompt: No text, no logo, no background.
+      width: 1024
+      height: 1024
+      transparent: 1
+      worldWidth: 1.2
+      worldHeight: 1.4
+      states:
+      - empty
+      - milk
+      - full
+    whitebox: {fileID: 21300000, guid: 1c05d98b959b1044f8526c2e1a1f188c, type: 3}
+    variants:
+    - state: default
+      sprite: {fileID: 21300000, guid: 1c05d98b959b1044f8526c2e1a1f188c, type: 3}

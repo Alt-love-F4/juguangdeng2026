@@ -82,6 +82,8 @@ namespace Spotlight.FreeCafe
         public string miniGameToken;
         public string miniGameCupId;
         public string miniGameKind;
+        public string miniGamePitcherId;
+        public float miniGameFoamUsedMl;
         public string lastDelivery;
     }
 

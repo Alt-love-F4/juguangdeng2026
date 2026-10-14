@@ -72,7 +72,9 @@ namespace Spotlight.FreeCafe.Tests
             foreach(var need in product.evaluation.amounts) cup.contents.Add(new Portion { specId=need.ingredientId,units=1,
                 milliliters=need.idealMl,grams=need.idealGrams,coffeeKind=need.coffeeKind,
                 productionScore=100,temperature=product.requiredTemperature,addedSequence=++seq });
-            cup.production.additionSequence=seq; return cup;
+            cup.production.additionSequence=seq;
+            cup.latteArt=System.Array.Exists(product.evaluation.amounts, need=>need.ingredientId=="milkfoam");
+            return cup;
         }
         [Test] public void CupSwapReturnsOnlyEmptyCupAndRefusesNonemptyCup()
         {
@@ -381,7 +383,7 @@ namespace Spotlight.FreeCafe.Tests
         }
         [Test] public void MiniGameCancellationPreservesContentsAndDiscardInvalidatesToken()
         {
-            var cup=PerfectCup("latte");int count=cup.contents.Count;string contents=JsonUtility.ToJson(cup);world.RequestProductionMiniGame();var token=world.State.production.miniGameToken;
+            var cup=PerfectCup("latte");cup.latteArt=false;int count=cup.contents.Count;string contents=JsonUtility.ToJson(cup);world.RequestProductionMiniGame();var token=world.State.production.miniGameToken;
             world.ResolveProductionMiniGame(token,false,0);Assert.That(cup.contents.Count,Is.EqualTo(count));Assert.That(cup.latteArt,Is.False);
             Assert.That(JsonUtility.ToJson(cup),Is.EqualTo(contents));
             world.RequestProductionMiniGame();token=world.State.production.miniGameToken;world.DiscardProductionCup();

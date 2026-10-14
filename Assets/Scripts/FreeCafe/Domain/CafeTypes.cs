@@ -117,6 +117,7 @@ namespace Spotlight.FreeCafe
         public float productionScore = 100;
         public string coffeeKind; // cold_brew / black / essence；不改变物理原料ID，兼容旧存档
         public int addedSequence;
+        public string latteArtSessionToken; // Only the active session's transferred foam; not a second inventory.
         public List<ConstituentAmount> composition = new List<ConstituentAmount>();
     }
 

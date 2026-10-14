@@ -32,7 +32,7 @@ namespace Spotlight.FreeCafe
                 int count = 0;
                 foreach (var p in cup.contents)
                 {
-                    if (p.specId == need.specId)
+                    if (RecipeIngredientMatches(cup, p, need.specId))
                     {
                         count += p.units;
                     }

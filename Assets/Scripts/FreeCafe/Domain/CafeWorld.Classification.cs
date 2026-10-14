@@ -41,7 +41,7 @@ namespace Spotlight.FreeCafe
                 if (!ProductPortionPresent(portion)) continue;
                 bool matched = false;
                 foreach (var need in evaluation.amounts)
-                    if (ProductPortionMatches(portion, need)
+                    if (ProductPortionMatches(entity, portion, need)
                         && ClassificationPortionAmount(portion, need.idealMl > 0) > 0)
                     { matched = true; break; }
                 // Only actual listed components are allowed; raw powder/beans/sugar are not hidden.
@@ -52,7 +52,7 @@ namespace Spotlight.FreeCafe
             {
                 double amount = 0;
                 foreach (var portion in entity.contents)
-                    if (ProductPortionMatches(portion, need))
+                    if (ProductPortionMatches(entity, portion, need))
                         amount += ClassificationPortionAmount(portion, need.idealMl > 0);
                 // Category depends only on ingredient presence, never ml/g targets or ratios.
                 if (amount <= 0) return false;
@@ -72,9 +72,15 @@ namespace Spotlight.FreeCafe
             return Finite(amount) && amount > 0 ? amount : 0;
         }
 
-        private bool ProductPortionMatches(Portion portion, ProductAmountSpec need)
+        private bool RecipeIngredientMatches(WorldEntity cup, Portion portion, string ingredientId) => portion != null
+            && SameIngredient(portion.specId, ingredientId)
+            // Milkfoam is a stable physical ID; in a recipe it means completed latte art, not raw foam.
+            && (ingredientId != "milkfoam" || cup != null && cup.latteArt
+                && Finite(portion.milliliters) && portion.milliliters > 0);
+
+        private bool ProductPortionMatches(WorldEntity entity, Portion portion, ProductAmountSpec need)
         {
-            return portion != null && need != null && SameIngredient(portion.specId, need.ingredientId)
+            return need != null && RecipeIngredientMatches(entity, portion, need.ingredientId)
                 && (string.IsNullOrEmpty(need.coffeeKind) || CoffeeKind(portion) == need.coffeeKind)
                 && (need.minimumTemperature < 0 || (int)TemperatureBand(TemperatureCelsius(portion)) >= need.minimumTemperature);
         }

@@ -33,7 +33,8 @@ namespace Spotlight.FreeCafe
         }
         public string IngredientIdentity(Portion portion) => CanonicalIngredient(portion.specId)+":"+(CoffeeKind(portion)??"");
         private static string CanonicalIngredient(string id) => id=="hotwater" ? "water" : id=="hotmilk" ? "milk" : id;
-        private bool SamePortionKind(Portion a,Portion b) => SameIngredient(a.specId,b.specId) && CoffeeKind(a)==CoffeeKind(b);
+        private bool SamePortionKind(Portion a,Portion b) => SameIngredient(a.specId,b.specId) && CoffeeKind(a)==CoffeeKind(b)
+            && (a.latteArtSessionToken ?? "") == (b.latteArtSessionToken ?? "");
         private float DoseGrams(string id) => IngredientDefinition(id)?.gramsPerUnit ?? (id=="sugar" ? 5 : 12);
         private float DoseMl(string id) => IngredientDefinition(id)?.millilitersPerUnit ?? Prep.portionMl;
         private void ApplyCompositionRules(WorldEntity entity)

@@ -28,6 +28,13 @@ namespace Spotlight.FreeCafe
         public Texture2D preview;
     }
 
+    public interface ILatteArtFeedbackSurface
+    {
+        void GetPatternFits(IList<LatteArtPatternPreset> presets, IList<LatteArtRecognitionResult> results);
+        void SetLiquidColor(Color color);
+        void SetResetHandler(Action handler);
+    }
+
     /// <summary>Stroke-aware, bounded geometric fitting. Recognition never changes cafe inventory.</summary>
     public static class LatteArtPatternRecognizer
     {
@@ -77,6 +84,24 @@ namespace Spotlight.FreeCafe
             // Being the nearest template is not enough: arbitrary marks must remain unrecognized.
             float confidence = Mathf.Clamp01(1f - best / .22f);
             return best <= MaximumFitError ? new LatteArtRecognitionResult(bestId, confidence, count) : empty;
+        }
+
+        /// <summary>All template fits, including below-threshold candidates, for live feedback. Does not force recognition.</summary>
+        public static void GetPatternFits(IList<Vector2> points, IList<LatteArtPatternPreset> presets,
+            IList<int> strokeStarts, IList<LatteArtRecognitionResult> results)
+        {
+            results.Clear();
+            if (presets == null) return;
+            int count = points == null ? 0 : points.Count;
+            Shape path = null;
+            bool valid = count >= 5 && TryBuildShape(points, strokeStarts, out path);
+            foreach (var preset in presets)
+            {
+                float confidence = 0;
+                if (valid && preset != null && Shapes.TryGetValue(preset.template, out Shape template))
+                    confidence = Mathf.Clamp01(1f - Fit(path, template) / .22f);
+                results.Add(new LatteArtRecognitionResult(preset != null ? preset.id : "", confidence, count));
+            }
         }
 
         /// <summary>Safe copy in normalized preview coordinates. NaN/NaN denotes pen-up.</summary>

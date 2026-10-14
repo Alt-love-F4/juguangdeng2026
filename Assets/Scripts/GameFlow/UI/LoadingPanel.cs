@@ -17,12 +17,26 @@ namespace Spotlight.GameFlow
         private Tween pulse;
         private Sequence tipTransition;
         private bool splash;
+        private Vector3 logoBaseScale;
+        private bool tipInitiallyActive;
+        private bool progressInitiallyActive;
+        private bool percentageInitiallyActive;
+
+        protected override void Awake()
+        {
+            base.Awake();
+            if (logo != null) logoBaseScale = logo.localScale;
+            tipInitiallyActive = tipText != null && tipText.gameObject.activeSelf;
+            progressInitiallyActive = progressFill != null && progressFill.parent.gameObject.activeSelf;
+            percentageInitiallyActive = percentageText != null && percentageText.gameObject.activeSelf;
+        }
+
         public void SetSplash(bool value)
         {
             splash = value;
-            if (tipText != null) tipText.gameObject.SetActive(!value);
-            if (progressFill != null) progressFill.parent.gameObject.SetActive(!value);
-            if (percentageText != null) percentageText.gameObject.SetActive(!value);
+            if (tipText != null) tipText.gameObject.SetActive(!value && tipInitiallyActive);
+            if (progressFill != null) progressFill.parent.gameObject.SetActive(!value && progressInitiallyActive);
+            if (percentageText != null) percentageText.gameObject.SetActive(!value && percentageInitiallyActive);
         }
 
         public void SetProgress(float progress)
@@ -73,8 +87,8 @@ namespace Spotlight.GameFlow
             base.OnShow();
             if (logo == null) return;
             pulse?.Kill(false);
-            logo.localScale = Vector3.one;
-            pulse = logo.DOScale(1.035f, pulseDuration).SetEase(Ease.InOutSine)
+            logo.localScale = logoBaseScale;
+            pulse = logo.DOScale(logoBaseScale * 1.035f, pulseDuration).SetEase(Ease.InOutSine)
                 .SetLoops(-1, LoopType.Yoyo).SetUpdate(true)
                 .SetLink(gameObject, LinkBehaviour.KillOnDestroy);
         }
@@ -101,7 +115,7 @@ namespace Spotlight.GameFlow
             pulse?.Kill(false);
             tipTransition?.Kill();
             pulse = null;
-            if (logo != null) logo.localScale = Vector3.one;
+            if (logo != null) logo.localScale = logoBaseScale;
         }
     }
 }

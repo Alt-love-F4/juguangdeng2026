@@ -114,6 +114,7 @@ namespace Spotlight.FreeCafe.Editor
             Move(hud.miniGameButton,serving,new Vector2(190,0),new Vector2(156,50));
             Move(hud.clearMachine,serving,new Vector2(418,0),new Vector2(252,50));
             hud.miniGameButton.GetComponentInChildren<TMP_Text>().text="拉花";
+            hud.miniGameButton.gameObject.SetActive(false);
             var status=Card(bottom,"ProductionNote",new Vector2(.5f,0),new Vector2(0,157),new Vector2(1420,48),false);
             Move(hud.instruction,status,new Vector2(-155,0),new Vector2(1030,32),16);
             Move(hud.result,status,new Vector2(510,0),new Vector2(350,32),14);

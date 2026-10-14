@@ -19,6 +19,10 @@ namespace Spotlight.FreeCafe
         [Range(.65f, 1f)] public float layoutHeightFraction = .9f;
         [Min(.05f)] public float transitionDuration = .28f;
         [Min(.05f)] public float recognitionInterval = .15f;
+        [Tooltip("标准线宽与流量下每秒消耗的奶泡ml；实际消耗随线宽平方及流量倍率变化。")]
+        [Min(.1f)] public float foamMlPerSecond = 6;
+        [Tooltip("拉花界面液面底色亮度，不影响杯子颜色或奶泡白色；越小越深。")]
+        [Range(.2f, 1f)] public float liquidColorBrightness = .65f;
         public bool IsTransitioning => transition != null;
         private Coroutine transition;
         private CanvasGroup contentGroup;
@@ -27,6 +31,9 @@ namespace Spotlight.FreeCafe
         private Sprite backdropSprite;
         private readonly List<Texture2D> generatedPreviews = new List<Texture2D>();
         private readonly List<Image> presetButtons = new List<Image>();
+        private readonly List<TMP_Text> fitLabels = new List<TMP_Text>();
+        private readonly List<LatteArtRecognitionResult> patternFits = new List<LatteArtRecognitionResult>();
+        private string bestFitId;
         private string selectedPreset;
         private float nextRecognition;
         private int lastPointCount = -1;
@@ -42,6 +49,8 @@ namespace Spotlight.FreeCafe
         private Canvas overlay;
         private GameObject overlayRoot;
         private TMP_Text status;
+        private TMP_Text foamUsage;
+        private FreeCafeRuntime runtime;
         private readonly List<LatteArtPatternPreset> activePresets = new List<LatteArtPatternPreset>();
         private bool finishing;
         private bool dockWasDocked, layoutDockWasDocked;
@@ -73,6 +82,11 @@ namespace Spotlight.FreeCafe
             activeToken = token; completion = complete; LastPatternId = null; finishing = false;
             lastPointCount = -1; nextRecognition = 0; latestRecognition = default;
             effect = FindSurface();
+            var gateway = FindFirstObjectByType<FreeCafeMiniGameGateway>();
+            runtime = gateway != null ? gateway.runtime : null;
+            if (effect is ILatteArtFoamSurface foamSurface) foamSurface.SetFoamConsumer(ConsumeFoam, foamMlPerSecond);
+            if (effect is ILatteArtFeedbackSurface feedback) feedback.SetResetHandler(ResetDrawing);
+            RefreshLiquidColor(cupId);
             dockWasDocked = dock != null && dock.IsDocked;
             layoutDockWasDocked = layoutDock != null && layoutDock.IsDocked;
             if (authoredCaption != null) { captionWasEnabled = authoredCaption.enabled; authoredCaption.enabled = false; }
@@ -85,6 +99,8 @@ namespace Spotlight.FreeCafe
         {
             if (!string.IsNullOrEmpty(activeToken) && token != activeToken) return;
             activeToken = null; completion = null; finishing = false;
+            if (effect is ILatteArtFoamSurface foamSurface) foamSurface.SetFoamConsumer(null, foamMlPerSecond);
+            if (effect is ILatteArtFeedbackSurface feedback) feedback.SetResetHandler(null);
             if (effect != null) effect.SetInteractionEnabled(false);
             if (transition != null) { StopCoroutine(transition); transition = null; }
             if (isActiveAndEnabled && overlayRoot != null) transition = StartCoroutine(TransitionRoutine(false));
@@ -93,7 +109,12 @@ namespace Spotlight.FreeCafe
 
         private void OnDisable()
         {
-            if (!string.IsNullOrEmpty(activeToken)) Cancel(activeToken);
+            var cancel = completion; var token = activeToken;
+            if (!string.IsNullOrEmpty(token))
+            {
+                if(cancel!=null)cancel(token,false,0);
+                if(activeToken==token)Cancel(token);
+            }
             if (transition != null) { StopCoroutine(transition); transition = null; }
             RestoreLayout(); DestroyOverlay();
         }
@@ -123,6 +144,7 @@ namespace Spotlight.FreeCafe
 
         private void Update()
         {
+            UpdateFoamUsage();
             if (string.IsNullOrEmpty(activeToken) || effect == null || status == null || IsTransitioning) return;
             if (Time.unscaledTime < nextRecognition) return;
             nextRecognition = Time.unscaledTime + recognitionInterval;
@@ -130,6 +152,7 @@ namespace Spotlight.FreeCafe
             {
                 lastPointCount = effect.StrokePointCount;
                 latestRecognition = effect.Recognize(activePresets);
+                UpdatePatternFits();
             }
             var recognition = latestRecognition;
             string display = "自由绘制";
@@ -137,6 +160,71 @@ namespace Spotlight.FreeCafe
             status.text = recognition.HasPattern ? "最像「" + display + "」\n相似度 " + (recognition.confidence * 100f).ToString("0") + "%" : effect.StrokePointCount >= 5 ? "自由创作中 · 尚未匹配参考\n可以继续绘制，也可以直接提交" : "按住左键，慢慢画出图案\n松手可分笔继续";
             LastPatternId = recognition.HasPattern ? recognition.patternId : null;
             if (submitButton != null) submitButton.interactable = effect.StrokePointCount >= 5;
+        }
+
+        private float ConsumeFoam(float requested)
+        {
+            if (runtime == null || runtime.World == null || finishing || IsTransitioning) return 0;
+            float accepted = runtime.World.ConsumeLatteArtFoam(activeToken, requested);
+            if (accepted > 0) RefreshLiquidColor(runtime.World.State.production.miniGameCupId);
+            return accepted;
+        }
+
+        private void ResetDrawing()
+        {
+            if (finishing || IsTransitioning || string.IsNullOrEmpty(activeToken)) return;
+            var session = runtime != null && runtime.World != null ? runtime.World.State.production : null;
+            if (session != null && session.miniGameToken == activeToken && !string.IsNullOrEmpty(session.miniGamePitcherId)
+                && !runtime.World.ResetLatteArtFoam(activeToken)) return;
+            effect?.ResetLatte();
+            LastPatternId = null; lastPointCount = -1; nextRecognition = 0; latestRecognition = default;
+            if (submitButton != null) submitButton.interactable = false;
+            UpdatePatternFits();
+            if (session != null) RefreshLiquidColor(session.miniGameCupId);
+            UpdateFoamUsage();
+        }
+
+        private void RefreshLiquidColor(string cupId)
+        {
+            if (!(effect is ILatteArtFeedbackSurface feedback) || runtime == null || runtime.World == null) return;
+            var cup = runtime.World.Find(cupId);
+            var view = runtime.View(cupId);
+            var liquid = view != null ? view.GetComponentInChildren<OrthographicGlassCupPresenter>(true) : null;
+            if (cup == null || liquid == null) return;
+            liquid.Present(runtime.World.LiquidSnapshot(cup), 0, false);
+            Color color = liquid.LiquidSurfaceColor;
+            color.r *= liquidColorBrightness;
+            color.g *= liquidColorBrightness;
+            color.b *= liquidColorBrightness;
+            feedback.SetLiquidColor(color);
+        }
+
+        private void UpdatePatternFits()
+        {
+            patternFits.Clear();
+            if (effect is ILatteArtFeedbackSurface feedback) feedback.GetPatternFits(activePresets, patternFits);
+            bestFitId = null;
+            float best = 0;
+            for (int i = 0; i < fitLabels.Count; i++)
+            {
+                float score = i < patternFits.Count ? patternFits[i].confidence : 0;
+                fitLabels[i].text = "拟合 " + (score * 100f).ToString("0") + "%";
+                if (score > best) { best = score; bestFitId = activePresets[i].id; }
+            }
+            RefreshPresetHighlights();
+        }
+
+        private void UpdateFoamUsage()
+        {
+            if (foamUsage == null || runtime == null || runtime.World == null) return;
+            var world = runtime.World; var session = world.State.production;
+            if (session == null || session.miniGameToken != activeToken) return;
+            if (string.IsNullOrEmpty(session.miniGamePitcherId)) { foamUsage.text = "GM 调试模式 · 不消耗奶泡"; return; }
+            var pitcher = world.Find(session.miniGamePitcherId); var cup = world.Find(session.miniGameCupId);
+            float remaining = world.MilkFoamVolume(pitcher);
+            float space = Mathf.Max(0, world.LiquidCapacity(cup) - world.LiquidVolume(cup));
+            foamUsage.text = "已用奶泡 " + session.miniGameFoamUsedMl.ToString("0.0") + " ml  ·  壶内剩余 " + remaining.ToString("0.0") + " ml"
+                + (remaining <= .001f ? "\n奶泡已用完，请提交或返回" : space <= .001f ? "\n杯子已满，已停止加奶泡" : "\n重绘会清空本次杯内奶泡，不退回壶；返回保留当前用量");
         }
 
         private ILatteArtSurface FindSurface()
@@ -237,7 +325,7 @@ namespace Spotlight.FreeCafe
 
         private void BuildOverlay()
         {
-            DestroyOverlay(); presetButtons.Clear(); selectedPreset = null;
+            DestroyOverlay(); presetButtons.Clear(); fitLabels.Clear(); patternFits.Clear(); selectedPreset = bestFitId = null;
             overlayRoot = new GameObject("LatteArtPresetOverlay", typeof(RectTransform));
             overlay = overlayRoot.AddComponent<Canvas>(); overlay.renderMode = RenderMode.ScreenSpaceOverlay; overlay.sortingOrder = 900;
             var scaler = overlayRoot.AddComponent<CanvasScaler>(); scaler.uiScaleMode = CanvasScaler.ScaleMode.ScaleWithScreenSize;
@@ -255,6 +343,9 @@ namespace Spotlight.FreeCafe
             SetRect(title.rectTransform, new Vector2(.09f, .855f), new Vector2(.91f, .93f)); title.alignment = TextAlignmentOptions.Left;
             var subtitle = MakeText(panel.transform, "Subtitle", "选参考 · 慢慢画 · 完成后提交", 15, new Color(.78f, .69f, .62f));
             SetRect(subtitle.rectTransform, new Vector2(.09f, .815f), new Vector2(.91f, .855f)); subtitle.alignment = TextAlignmentOptions.Left;
+            foamUsage = MakeText(content.transform, "FoamUsage", "已用奶泡 0.0 ml", 20, Cream);
+            SetRect(foamUsage.rectTransform, new Vector2(.32f, .10f), new Vector2(.94f, .18f)); foamUsage.alignment = TextAlignmentOptions.Center;
+            UpdateFoamUsage();
             var referenceLabel = MakeText(panel.transform, "ReferenceLabel", "选择参考图案", 14, new Color(.82f, .63f, .43f));
             SetRect(referenceLabel.rectTransform, new Vector2(.09f, .765f), new Vector2(.91f, .805f)); referenceLabel.alignment = TextAlignmentOptions.Left;
             var listObject = new GameObject("PresetList", typeof(RectTransform)); listObject.transform.SetParent(panel.transform, false);
@@ -269,9 +360,15 @@ namespace Spotlight.FreeCafe
                 var button = buttonImage.gameObject.AddComponent<Button>();
                 ConfigureButton(button);
                 var label = MakeText(buttonImage.transform, "Label", preset.displayName, 19, Cream);
-                SetRect(label.rectTransform, new Vector2(.32f, 0), new Vector2(.77f, 1)); label.alignment = TextAlignmentOptions.Left;
+                SetRect(label.rectTransform, new Vector2(.32f, .42f), new Vector2(.76f, .94f)); label.alignment = TextAlignmentOptions.Left;
+                var fit = MakeText(buttonImage.transform, "Fit", "拟合 0%", 14, new Color(.82f, .73f, .65f));
+                SetRect(fit.rectTransform, new Vector2(.32f, .06f), new Vector2(.76f, .45f)); fit.alignment = TextAlignmentOptions.Left;
+                fitLabels.Add(fit);
+                var bestLabel = MakeText(buttonImage.transform, "Best", "最佳", 14, new Color(1f, .86f, .40f));
+                SetRect(bestLabel.rectTransform, new Vector2(.77f, .40f), new Vector2(.95f, .90f)); bestLabel.alignment = TextAlignmentOptions.Right;
+                bestLabel.gameObject.SetActive(false);
                 var selectedLabel = MakeText(buttonImage.transform, "Selected", "参考", 13, Cream);
-                SetRect(selectedLabel.rectTransform, new Vector2(.77f, 0), new Vector2(.95f, 1)); selectedLabel.alignment = TextAlignmentOptions.Right;
+                SetRect(selectedLabel.rectTransform, new Vector2(.77f, .05f), new Vector2(.95f, .43f)); selectedLabel.alignment = TextAlignmentOptions.Right;
                 selectedLabel.gameObject.SetActive(false);
                 var preview = new GameObject("Preview", typeof(RectTransform), typeof(RawImage)); preview.transform.SetParent(buttonImage.transform, false);
                 var raw = preview.GetComponent<RawImage>(); raw.texture = preset.preview != null ? preset.preview : CreatePreview(preset.template);
@@ -287,8 +384,7 @@ namespace Spotlight.FreeCafe
             Stretch(status.rectTransform); status.rectTransform.offsetMin = new Vector2(16, 10); status.rectTransform.offsetMax = new Vector2(-16, -10); status.alignment = TextAlignmentOptions.Center;
             submitButton = MakeButton(panel.transform, "Submit", "完成拉花  ·  提交作品", new Vector2(.09f, .105f), new Vector2(.91f, .185f), Finish, true);
             submitButton.interactable = false;
-            MakeButton(panel.transform, "Reset", "重新绘制", new Vector2(.09f, .035f), new Vector2(.48f, .085f), () =>
-            { effect?.ResetLatte(); LastPatternId = null; lastPointCount = -1; nextRecognition = 0; submitButton.interactable = false; }, false);
+            MakeButton(panel.transform, "Reset", "重新绘制", new Vector2(.09f, .035f), new Vector2(.48f, .085f), ResetDrawing, false);
             MakeButton(panel.transform, "Cancel", "返回吧台", new Vector2(.52f, .035f), new Vector2(.91f, .085f), () => completion?.Invoke(activeToken, false, 0), false);
             var help = MakeText(content.transform, "DrawingHint", "按住左键绘制   ·   松手可分笔   ·   滚轮调整线宽", 18, new Color(.96f, .89f, .80f));
             SetRect(help.rectTransform, new Vector2(.32f, .035f), new Vector2(.94f, .09f)); help.alignment = TextAlignmentOptions.Center;
@@ -310,10 +406,18 @@ namespace Spotlight.FreeCafe
         private void SelectReference(string id)
         {
             selectedPreset = id;
+            RefreshPresetHighlights();
+        }
+        private void RefreshPresetHighlights()
+        {
             for (int i = 0; i < presetButtons.Count; i++)
             {
-                presetButtons[i].color = activePresets[i].id == selectedPreset ? new Color(.56f, .32f, .19f) : new Color(.24f, .16f, .13f);
-                presetButtons[i].transform.Find("Selected").gameObject.SetActive(activePresets[i].id == selectedPreset);
+                bool best = activePresets[i].id == bestFitId;
+                bool selected = activePresets[i].id == selectedPreset;
+                presetButtons[i].color = best ? new Color(.50f, .39f, .15f) : selected ? new Color(.40f, .25f, .17f) : new Color(.24f, .16f, .13f);
+                presetButtons[i].transform.Find("Best").gameObject.SetActive(best);
+                presetButtons[i].transform.Find("Selected").gameObject.SetActive(selected);
+                fitLabels[i].color = best ? new Color(1f, .88f, .43f) : new Color(.82f, .73f, .65f);
             }
         }
         private static void ConfigureButton(Button button)
@@ -369,8 +473,8 @@ namespace Spotlight.FreeCafe
         {
             if (overlayRoot != null) { overlayRoot.SetActive(false); Destroy(overlayRoot); }
             foreach (var texture in generatedPreviews) if (texture != null) Destroy(texture);
-            generatedPreviews.Clear(); presetButtons.Clear();
-            overlayRoot = null; overlay = null; status = null; contentGroup = null; curtain = null; submitButton = null;
+            generatedPreviews.Clear(); presetButtons.Clear(); fitLabels.Clear(); patternFits.Clear();
+            overlayRoot = null; overlay = null; status = null; foamUsage = null; contentGroup = null; curtain = null; submitButton = null;
         }
         public void OnPointerClick(PointerEventData eventData) { /* 背景点击不再取消，玩家可自由在 Plane 上绘制。 */ }
         private static Image MakeImage(Transform parent, string name, Color color) { var go = new GameObject(name, typeof(RectTransform), typeof(Image)); go.transform.SetParent(parent, false); var image = go.GetComponent<Image>(); image.color = color; return image; }

@@ -193,7 +193,8 @@ namespace Spotlight.FreeCafe.Tests
             var hud = app.GetComponent<FreeCafeProductionHud>();
             var bench = Object.FindFirstObjectByType<FreeCafeLatteArtBench>();
             Assert.That(bench, Is.Not.Null);
-            hud.miniGameButton.onClick.Invoke();
+            Assert.That(hud.miniGameButton.gameObject.activeSelf, Is.False);
+            Assert.That(app.World.RequestProductionMiniGame().success, Is.True);
             string token = app.World.State.production.miniGameToken;
             Assert.That(token, Is.Not.Null.And.Not.Empty);
             Assert.That(bench.IsTransitioning, Is.True);
@@ -391,6 +392,156 @@ namespace Spotlight.FreeCafe.Tests
                 if (addedMouse) InputSystem.RemoveDevice(mouse);
                 app.World.ResolveProductionMiniGame(app.World.State.production.miniGameToken, false, 0);
             }
+            yield return WaitForLatteTransition(bench);
+        }
+
+        [UnityTest] public IEnumerator MilkPitcherDropUsesRealDrawingAndDiscardsCurrentFoamOnResetWithoutRefundingOnCancel()
+        {
+            var world = app.World;
+            var pitcher = world.Find("tool.milk-pitcher");
+            Assert.That(pitcher, Is.Not.Null);
+            Assert.That(app.View(pitcher.id), Is.Not.Null);
+            Assert.That(app.View("tool.latte-art"), Is.Null);
+            Assert.That(world.TakeAndInteract("s.milk", pitcher.id, AreaId.Counter, 0, 0).success, Is.True);
+            app.Click(app.View(pitcher.id));
+            Assert.That(world.MilkFoamVolume(pitcher), Is.GreaterThan(0));
+            Assert.That(world.CanPour(pitcher), Is.False);
+            Assert.That(world.Take("s.cups.large", AreaId.Counter, 0, -2, out var cup).success, Is.True);
+            cup.contents.Add(new Portion { specId = "coffee", units = 1, milliliters = 10f });
+            yield return null;
+            Physics2D.SyncTransforms();
+            app.BeginDrag(app.View(pitcher.id), Pointer(pitcher.x, pitcher.y));
+            Assert.That(app.IsDragging, Is.True);
+            app.EndDrag(Pointer(cup.x, cup.y));
+            Assert.That(app.IsDragging, Is.False);
+            Assert.That(world.State.production.miniGamePitcherId, Is.EqualTo(pitcher.id));
+            Assert.That(world.State.production.miniGameCupId, Is.EqualTo(cup.id));
+            Assert.That(world.ServingCup, Is.Null);
+            var bench = Object.FindFirstObjectByType<FreeCafeLatteArtBench>();
+            yield return WaitForLatteTransition(bench);
+            var overlay = GameObject.Find("LatteArtPresetOverlay");
+            Assert.That(overlay, Is.Not.Null);
+            var counter = overlay.transform.Find("Content/FoamUsage").GetComponent<TMPro.TMP_Text>();
+            Assert.That(counter.text, Does.Contain("已用奶泡 0.0 ml"));
+            var surface = FindLatteSurface(bench.transform.parent);
+            Vector2 center = app.worldCamera.WorldToScreenPoint(surface.transform.TransformPoint(Vector3.zero));
+            float initialFoam = world.MilkFoamVolume(pitcher);
+            for (int sample = 0; sample < 8; sample++)
+            {
+                MouseAt(center + new Vector2((sample - 4) * 8, 0), true, false);
+                yield return null;
+            }
+            MouseAt(center, false, false); yield return null; yield return null;
+            float used = world.State.production.miniGameFoamUsedMl;
+            Assert.That(used, Is.GreaterThan(0));
+            Assert.That(world.MilkFoamVolume(cup), Is.EqualTo(used).Within(.01f));
+            Assert.That(world.LiquidVolume(cup), Is.EqualTo(10f + used).Within(.01f));
+            Assert.That(world.MilkFoamVolume(pitcher) + used, Is.EqualTo(initialFoam).Within(.01f));
+            Assert.That(counter.text, Does.Contain("已用奶泡 " + used.ToString("0.0") + " ml"));
+            Assert.That(((ILatteArtSurface)surface).StrokePointCount, Is.GreaterThanOrEqualTo(5));
+            string captureDirectory = System.IO.Path.GetFullPath(System.IO.Path.Combine(Application.dataPath, "../output/milk-pitcher"));
+            System.IO.Directory.CreateDirectory(captureDirectory);
+            ScreenCapture.CaptureScreenshot(System.IO.Path.Combine(captureDirectory, "latte-ui.png"));
+            yield return null;
+            overlay.transform.Find("Content/PresetPanel/Reset").GetComponent<Button>().onClick.Invoke();
+            yield return null;
+            Assert.That(((ILatteArtSurface)surface).StrokePointCount, Is.Zero);
+            Assert.That(world.State.production.miniGameFoamUsedMl, Is.Zero);
+            Assert.That(world.MilkFoamVolume(cup), Is.Zero);
+            Assert.That(world.LiquidVolume(cup), Is.EqualTo(10f).Within(.01f));
+            Assert.That(world.MilkFoamVolume(pitcher), Is.EqualTo(initialFoam - used).Within(.01f));
+            overlay.transform.Find("Content/PresetPanel/Cancel").GetComponent<Button>().onClick.Invoke();
+            yield return WaitForLatteTransition(bench); yield return null;
+            Assert.That(app.InputBlocked, Is.False);
+            Assert.That(world.MilkFoamVolume(cup), Is.Zero);
+            Assert.That(world.LiquidVolume(cup), Is.EqualTo(10f).Within(.01f));
+            Assert.That(world.MilkFoamVolume(pitcher), Is.EqualTo(initialFoam - used).Within(.01f));
+        }
+
+        [UnityTest] public IEnumerator MilkPitcherFullCupStopsActualDrawingWithoutConsumingExtraFoam()
+        {
+            var world = app.World;
+            var pitcher = world.Find("tool.milk-pitcher");
+            Assert.That(world.Take("s.cups.large", AreaId.Counter, 0, -2, out var cup).success, Is.True);
+            cup.contents.Add(new Portion { specId = "coffee", units = 1, milliliters = 399.5f });
+            Assert.That(world.TakeAndInteract("s.milk", pitcher.id, AreaId.Counter, 0, 0).success, Is.True);
+            Assert.That(world.FrothMilk(pitcher.id).success, Is.True);
+            float initialFoam = world.MilkFoamVolume(pitcher);
+            Assert.That(world.Interact(pitcher.id, cup.id).success, Is.True);
+            var bench = Object.FindFirstObjectByType<FreeCafeLatteArtBench>();
+            yield return WaitForLatteTransition(bench);
+            var surface = FindLatteSurface(bench.transform.parent);
+            Vector2 center = app.worldCamera.WorldToScreenPoint(surface.transform.TransformPoint(Vector3.zero));
+            MouseAt(center, true, false);
+            yield return new WaitForSecondsRealtime(.4f);
+            Assert.That(world.LiquidVolume(cup), Is.EqualTo(400).Within(.001f));
+            Assert.That(world.State.production.miniGameFoamUsedMl, Is.EqualTo(.5f).Within(.001f));
+            Assert.That(world.MilkFoamVolume(pitcher), Is.EqualTo(initialFoam - .5f).Within(.001f));
+            int pointCount = ((ILatteArtSurface)surface).StrokePointCount;
+            MouseAt(center + Vector2.right * 20, true, false);
+            yield return new WaitForSecondsRealtime(.2f);
+            Assert.That(((ILatteArtSurface)surface).StrokePointCount, Is.EqualTo(pointCount));
+            var overlay = GameObject.Find("LatteArtPresetOverlay");
+            Assert.That(overlay.transform.Find("Content/FoamUsage").GetComponent<TMPro.TMP_Text>().text, Does.Contain("杯子已满"));
+            MouseAt(center, false, false); yield return null;
+            overlay.transform.Find("Content/PresetPanel/Cancel").GetComponent<Button>().onClick.Invoke();
+            yield return WaitForLatteTransition(bench);
+        }
+
+        [UnityTest] public IEnumerator MilkPitcherExhaustionStopsDrawingAndKeepsUsageAfterReturn()
+        {
+            var world = app.World;
+            var pitcher = world.Find("tool.milk-pitcher");
+            pitcher.contents.Add(new Portion { specId = "milkfoam", units = 1, milliliters = .5f });
+            Assert.That(world.Take("s.cups.large", AreaId.Counter, 0, -2, out var cup).success, Is.True);
+            cup.contents.Add(new Portion { specId = "coffee", units = 1, milliliters = 10f });
+            Assert.That(world.Interact(pitcher.id, cup.id).success, Is.True);
+            var bench = Object.FindFirstObjectByType<FreeCafeLatteArtBench>();
+            yield return WaitForLatteTransition(bench);
+            var surface = FindLatteSurface(bench.transform.parent);
+            Vector2 center = app.worldCamera.WorldToScreenPoint(surface.transform.TransformPoint(Vector3.zero));
+            MouseAt(center, true, false); yield return new WaitForSecondsRealtime(.4f);
+            Assert.That(world.State.production.miniGameFoamUsedMl, Is.EqualTo(.5f).Within(.001f));
+            Assert.That(world.MilkFoamVolume(pitcher), Is.Zero);
+            Assert.That(world.MilkFoamVolume(cup), Is.EqualTo(.5f).Within(.001f));
+            Assert.That(world.LiquidVolume(cup), Is.EqualTo(10.5f).Within(.001f));
+            int pointCount = ((ILatteArtSurface)surface).StrokePointCount;
+            MouseAt(center + Vector2.right * 20, true, false); yield return new WaitForSecondsRealtime(.2f);
+            Assert.That(((ILatteArtSurface)surface).StrokePointCount, Is.EqualTo(pointCount));
+            var overlay = GameObject.Find("LatteArtPresetOverlay");
+            Assert.That(overlay.transform.Find("Content/FoamUsage").GetComponent<TMPro.TMP_Text>().text, Does.Contain("奶泡已用完"));
+            MouseAt(center, false, false); yield return null;
+            overlay.transform.Find("Content/PresetPanel/Cancel").GetComponent<Button>().onClick.Invoke();
+            yield return WaitForLatteTransition(bench);
+            Assert.That(world.MilkFoamVolume(cup), Is.EqualTo(.5f).Within(.001f));
+        }
+
+        [UnityTest] public IEnumerator LatteShortcutExistsOnlyInGMAndLabelsItsUnlimitedDebugMode()
+        {
+            var hud = app.GetComponent<FreeCafeProductionHud>();
+            Assert.That(hud.miniGameButton.gameObject.activeSelf, Is.False);
+            Assert.That(app.View("tool.latte-art"), Is.Null);
+            app.World.SelectServingCup("s.cups.large");
+            var gm = FreeCafeGMPanel.Instance;
+            gm.SetVisible(true);
+            Assert.That(gm.SelectCategory("状态诊断"), Is.True);
+            yield return null;
+            Button shortcut = null;
+            foreach (var button in gm.GetComponentsInChildren<Button>())
+            {
+                var label = button.GetComponentInChildren<TMPro.TMP_Text>();
+                if (label != null && label.text.StartsWith("拉花快捷入口（GM）")) { shortcut = button; break; }
+            }
+            Assert.That(shortcut, Is.Not.Null);
+            shortcut.onClick.Invoke();
+            Assert.That(gm.IsVisible, Is.False);
+            Assert.That(app.World.State.production.miniGameToken, Is.Not.Null.And.Not.Empty);
+            Assert.That(app.World.State.production.miniGamePitcherId, Is.Null);
+            var bench = Object.FindFirstObjectByType<FreeCafeLatteArtBench>();
+            yield return WaitForLatteTransition(bench);
+            var overlay = GameObject.Find("LatteArtPresetOverlay");
+            Assert.That(overlay.transform.Find("Content/FoamUsage").GetComponent<TMPro.TMP_Text>().text, Does.Contain("GM 调试模式"));
+            overlay.transform.Find("Content/PresetPanel/Cancel").GetComponent<Button>().onClick.Invoke();
             yield return WaitForLatteTransition(bench);
         }
 

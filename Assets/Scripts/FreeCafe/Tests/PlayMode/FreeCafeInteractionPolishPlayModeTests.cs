@@ -2,6 +2,7 @@ using System;
 using System.Collections;
 using NUnit.Framework;
 using Spotlight.GameFlow;
+using TMPro;
 using UnityEngine;
 using UnityEngine.EventSystems;
 using UnityEngine.InputSystem;
@@ -212,6 +213,8 @@ namespace Spotlight.FreeCafe.Tests
                 Assert.That(preview.texture.width, Is.GreaterThan(1));
                 Assert.That(preview.texture.height, Is.GreaterThan(1));
                 Assert.That(preview.raycastTarget, Is.False);
+                Assert.That(preset.Find("Fit").GetComponent<TMP_Text>().text, Does.StartWith("拟合 "));
+                Assert.That(preset.Find("Best").gameObject.activeSelf, Is.False);
             }
             var surface = FindSurface();
             var effect = (ILatteArtSurface)surface;
@@ -240,7 +243,7 @@ namespace Spotlight.FreeCafe.Tests
             Assert.That(app.World.ServingCup, Is.SameAs(cup));
             Assert.That(cup.latteArtPattern, Is.Not.Null.And.Not.Empty);
             Assert.That(cup.latteArtScore, Is.InRange(0f, 100f));
-            Assert.That(cup.latteArt, Is.EqualTo(cup.latteArtScore >= 75f), "Completion uses the actual recognition score, not automatic success");
+            Assert.That(cup.latteArt, Is.True, "Completing a drawing counts as latte art regardless of recognition score or pattern");
             Assert.That(app.World.LiquidVolume(cup), Is.Zero, "Practice drawing must not add milk to authoritative cup contents");
         }
 

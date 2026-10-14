@@ -14,6 +14,7 @@ namespace Spotlight.FreeCafe.Tests
         }
         [TestCase("m.brewer")]
         [TestCase("m.heater")]
+        [TestCase("tool.milk-pitcher")]
         public void RepeatedDeliveryRetainsEmptyVesselAndCapturedHome(string id)
         {
             var vessel=world.Find(id);var home=Array.Find(world.Catalog.layout,e=>e.id==id);
@@ -36,6 +37,7 @@ namespace Spotlight.FreeCafe.Tests
         }
         [TestCase("m.brewer",true)]
         [TestCase("m.heater",false)]
+        [TestCase("tool.milk-pitcher",false)]
         public void DiscardClearsContentsRatherThanDeletingReusableEquipment(string id,bool onTray)
         {
             var vessel=world.Find(id);

@@ -45,6 +45,7 @@ namespace Spotlight.FreeCafe.Tests
                 }
                 cup.contents.Add(portion);
             }
+            cup.latteArt = Array.Exists(product.evaluation.amounts, need => need.ingredientId == "milkfoam");
             return cup;
         }
 
@@ -57,6 +58,38 @@ namespace Spotlight.FreeCafe.Tests
             Assert.That(result.standardScore, Is.Zero);
             Assert.That(result.concentrationScore, Is.Zero);
             Assert.That(result.total, Is.Zero);
+        }
+
+        [TestCase("latte")] [TestCase("honeylatte")] [TestCase("macchiato")]
+        public void RawFoamDoesNotSatisfyLatteArtButCompletionAllowsAnyPatternOrScore(string id)
+        {
+            var product = world.Product(id);
+            var cup = RecommendedCup(product); cup.latteArt = false;
+            AssertUnknown(world.ClassifyCoffee(cup));
+            var raw = world.EvaluateProductComposition(cup, product);
+            float remaining = 100f * (product.evaluation.amounts.Length - 1) / product.evaluation.amounts.Length;
+            Assert.That(raw.amountScore, Is.EqualTo(remaining).Within(.001f));
+            Assert.That(raw.standardScore, Is.EqualTo(remaining).Within(.001f));
+            Assert.That(world.LatteArtFoamVolume(cup), Is.Zero);
+            cup.latteArt = true; cup.latteArtScore = 0; cup.latteArtPattern = "unknown";
+            product.preferredLatteArtPattern = "heart";
+            Assert.That(world.ClassifyCoffee(cup).productId, Is.EqualTo(id));
+            Assert.That(world.EvaluateProductComposition(cup, product).total, Is.EqualTo(100).Within(.001f));
+            Assert.That(world.EvaluateProduction(cup, product).total, Is.EqualTo(100).Within(.001f));
+            Assert.That(world.LatteArtFoamVolume(cup), Is.GreaterThan(0));
+            cup.latteArtPattern = "custom";
+            Assert.That(world.ClassifyCoffee(cup).productId, Is.EqualTo(id));
+        }
+
+        [Test] public void FinishedFlagCannotInventFoamFromZeroVolumeOrUnits()
+        {
+            var product = world.Product("macchiato");
+            var cup = RecommendedCup(product);
+            var foam = cup.contents.Find(p => p.specId == "milkfoam");
+            foam.milliliters = 0; foam.units = 100;
+            Assert.That(world.LatteArtFoamVolume(cup), Is.Zero);
+            Assert.That(world.ClassifyCoffee(cup).productId, Is.Not.EqualTo("macchiato"));
+            Assert.That(world.EvaluateProductComposition(cup, product).amountScore, Is.EqualTo(50).Within(.001f));
         }
 
         [Test]

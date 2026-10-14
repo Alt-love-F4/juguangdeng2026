@@ -86,7 +86,7 @@ namespace Spotlight.FreeCafe
             var copy = new Portion { specId = source.specId, units = source.units, quality = source.quality,
                 milliliters = source.milliliters, grams = source.grams, extracted = source.extracted,
                 temperature = source.temperature, productionScore = source.productionScore,
-                coffeeKind = source.coffeeKind, addedSequence = source.addedSequence };
+                coffeeKind = source.coffeeKind, addedSequence = source.addedSequence, latteArtSessionToken = source.latteArtSessionToken };
             SetTemperature(copy, TemperatureCelsius(source));
             CopyComposition(source, copy);
             return copy;

@@ -35,7 +35,8 @@ namespace Spotlight.FreeCafe
             deliver.onClick.AddListener(Deliver); discard.onClick.AddListener(Discard);
             returnButton.onClick.AddListener(runtime.ReturnFromProduction); bookButton.onClick.AddListener(OpenBook);
             closeBook.onClick.AddListener(CloseBook); previousRecipe.onClick.AddListener(PreviousRecipe); nextRecipe.onClick.AddListener(NextRecipe);
-            miniGameButton.onClick.AddListener(OpenMiniGame); cancelMiniGame.onClick.AddListener(CancelMiniGame);
+            if (miniGameButton != null) miniGameButton.gameObject.SetActive(false);
+            cancelMiniGame.onClick.AddListener(CancelMiniGame);
             pauseButton.onClick.AddListener(runtime.OpenPlayerMenu);
             clearMachine.onClick.AddListener(ClearMachine);
         }
@@ -50,7 +51,7 @@ namespace Spotlight.FreeCafe
             if(runtime!=null) { returnButton.onClick.RemoveListener(runtime.ReturnFromProduction); pauseButton.onClick.RemoveListener(runtime.OpenPlayerMenu); }
             bookButton.onClick.RemoveListener(OpenBook); closeBook.onClick.RemoveListener(CloseBook);
             previousRecipe.onClick.RemoveListener(PreviousRecipe); nextRecipe.onClick.RemoveListener(NextRecipe);
-            miniGameButton.onClick.RemoveListener(OpenMiniGame); cancelMiniGame.onClick.RemoveListener(CancelMiniGame); clearMachine.onClick.RemoveListener(ClearMachine);
+            cancelMiniGame.onClick.RemoveListener(CancelMiniGame); clearMachine.onClick.RemoveListener(ClearMachine);
         }
         private void Execute(ActionResult action) => runtime.Report(action);
         private void PreviousOrder() { if(!runtime.InputBlocked) Execute(runtime.World.PageProductionOrder(-1)); }
@@ -72,7 +73,6 @@ namespace Spotlight.FreeCafe
         }
         private void Discard() { if(!runtime.InputBlocked) Execute(runtime.World.DiscardProductionCup()); }
         private void ClearMachine() { if(!runtime.InputBlocked) Execute(runtime.World.EmptyProductionMachine(runtime.SelectedId)); }
-        private void OpenMiniGame() { if(!runtime.InputBlocked) Execute(runtime.World.RequestProductionMiniGame()); }
         private void CancelMiniGame()
         {
             var session=runtime.World.State.production;
@@ -88,12 +88,12 @@ namespace Spotlight.FreeCafe
             if(learned.Count==0) { bookTitle.text="尚未学会咖啡"; bookBody.text="经营并解锁后，这里会显示制作说明。"; return; }
             recipeIndex=(recipeIndex%learned.Count+learned.Count)%learned.Count;
             var product=world.Product(learned[recipeIndex]);
-            bookTitle.text="咖啡谱  "+(recipeIndex+1)+" / "+learned.Count+"  ·  "+product.label;
+            bookTitle.text="咖啡谱  "+(recipeIndex+1)+" / "+learned.Count+"  ·  "+FreeCafeProductionText.Recipe(product.label);
             bookIcon.sprite=runtime.artLibrary.Resolve(world.Spec(product.cupSpecId).artId);
-            var text=new StringBuilder(); text.AppendLine(product.description).AppendLine().AppendLine(product.tutorial).AppendLine();
+            var text=new StringBuilder(); text.AppendLine(FreeCafeProductionText.Recipe(product.description)).AppendLine().AppendLine(FreeCafeProductionText.Recipe(product.tutorial)).AppendLine();
             text.Append("杯型：").Append(world.Spec(product.cupSpecId).label).Append(" / 温度：").Append(product.requiredTemperature==LiquidTemperature.Boiling ? "沸腾" : product.requiredTemperature==LiquidTemperature.Warm ? "温热" : "常温").AppendLine();
             text.AppendLine("参考用量（自由操作，不锁步骤）：");
-            foreach(var p in product.ingredients) text.Append("  ").Append(world.Spec(p.specId).label).Append("  ").Append(p.milliliters>0 ? p.milliliters.ToString("0")+" ml" : p.units+" 份").AppendLine();
+            foreach(var p in product.ingredients) text.Append("  ").Append(FreeCafeProductionText.Recipe(world.Spec(p.specId).label)).Append("  ").Append(p.milliliters>0 ? p.milliliters.ToString("0")+" ml" : p.units+" 份").AppendLine();
             text.AppendLine().Append("任何容器都能自由加料；咖啡粉与水混合是冷萃，放到炉台并点击炉台加热完成萃取。\n空杯、半成品也能出品，但顾客会按实际质量评价。");
             bookBody.text=text.ToString();
         }
@@ -123,14 +123,14 @@ namespace Spotlight.FreeCafe
             var character=customer!=null && customer.person!=null ? runtime.Character(customer.person.characterId) : null;
             customerAvatar.sprite=character!=null && character.avatar!=null ? character.avatar : runtime.artLibrary.Resolve(customerArt);
             customerAvatar.gameObject.SetActive(customerAvatar.sprite!=null);
-            orderDescription.text=product==null ? "尚无订单，可先准备原料。" : product.label+"  ·  "+product.description+"\n满意要求 ≥ "+product.minimumScore.ToString("0")+"分"+(request.remakes>0 ? "  ·  正在重做" : "");
+            orderDescription.text=product==null ? "尚无订单，可先准备原料。" : FreeCafeProductionText.Recipe(product.label)+"  ·  "+FreeCafeProductionText.Recipe(product.description)+"\n满意要求 ≥ "+product.minimumScore.ToString("0")+"分"+(request.remakes>0 ? "  ·  正在重做" : "");
             previousOrder.interactable=nextOrder.interactable=!blocked && state.requests.Count>1;
             var cup=world.ServingCup;
-            cupStatus.text=cup==null ? "出餐托盘 · 未选杯" : world.Spec(cup.specId).label+" · "+world.ClassifyCoffee(cup).label+"  "+world.LiquidVolume(cup).ToString("0")+" / "+world.LiquidCapacity(cup).ToString("0")+" ml"+(cup.latteArt ? "  · 拉花："+(cup.latteArtPattern ?? "已完成")+" "+cup.latteArtScore.ToString("0")+"分" : "");
+            cupStatus.text=cup==null ? "出餐托盘 · 未选杯" : world.Spec(cup.specId).label+" · "+FreeCafeProductionText.Recipe(world.ClassifyCoffee(cup).label)+"  "+world.LiquidVolume(cup).ToString("0")+" / "+world.LiquidCapacity(cup).ToString("0")+" ml"+(cup.latteArt ? "  · "+FreeCafeProductionText.LatteArtContents(world.LatteArtFoamVolume(cup),cup.latteArtPattern)+" "+cup.latteArtScore.ToString("0")+"分" : "");
             bool canChange=!blocked && (cup==null || cup.contents.Count==0);
             smallCup.interactable=largeCup.interactable=canChange;
             deliver.interactable=!blocked; discard.interactable=!blocked && cup!=null;
-            returnButton.interactable=bookButton.interactable=miniGameButton.interactable=!blocked;
+            returnButton.interactable=bookButton.interactable=!blocked;
             pauseButton.interactable=string.IsNullOrEmpty(state.production.miniGameToken) && !(FreeCafeGMPanel.Instance!=null && FreeCafeGMPanel.Instance.IsVisible);
             var selected=world.Find(runtime.SelectedId); clearMachine.interactable=!blocked && selected!=null && (world.IsContainer(selected) || world.Spec(selected.specId).Has(Capability.Processor)) && selected.contents.Count>0;
             instruction.text=runtime.Hint;

@@ -345,11 +345,21 @@
     },
     {
       "id": "tool.latte-art",
-      "label": "拉花杯 / 小游戏入口",
+      "label": "旧版拉花入口（兼容存档）",
       "artId": "tool.latte-art",
       "capabilities": 0,
       "width": 1,
       "height": 1.2
+    },
+    {
+      "id": "container.milk-pitcher",
+      "label": "拉花杯",
+      "artId": "container.milk-pitcher",
+      "capabilities": 9,
+      "width": 1.2,
+      "height": 1.4,
+      "capacity": 6,
+      "capacityMl": 600
     },
     {
       "id": "business.start",
@@ -516,7 +526,7 @@
       "qualityPriceStep": 50,
       "requiresLatteArt": true,
       "recipeId": "latte",
-      "description": "精粹咖啡液、热牛奶与薄奶泡组成拿铁；推荐量与类型识别分开。",
+      "description": "精粹咖啡液、热牛奶与拉花组成拿铁；拉花按已完成且有奶泡判断，不限制图案，推荐量与类型识别分开。",
       "minimumScore": 60,
       "maxRemakes": 1,
       "requiredTemperature": 2,
@@ -538,7 +548,7 @@
         "idealCoffeeStrength": 0.06,
         "coffeeStrengthTolerance": 0.2
       },
-      "tutorial": "参考目标：精粹咖啡180ml、温热或沸腾牛奶200ml、奶泡20ml，液体合计400ml。打发牛奶后按实际ml倒入少量奶泡；奶泡必须占总液体3%～12%。三种必需成分完整、来源和奶泡范围正确、无额外原料即可识别拿铁，不要求推荐用量达90分；含量不足/过量独立影响订单评价。加料顺序自由，浓度与水准分开，拉花为可选玩法。"
+      "tutorial": "参考目标：精粹咖啡180ml、温热或沸腾牛奶200ml、拉花用奶泡20ml，液体合计400ml。牛奶加入拉花杯后打成奶泡，拖壶到杯子上进入拉花，实际使用量从壶中扣除并加入杯内。提交完成拉花后，杯内正量奶泡才作为配方的拉花成分；任何图案及识别分数均可，不限制奶泡比例。三种必需成分完整、咖啡来源正确且无额外原料即可识别拿铁；推荐量独立影响含量分。重绘只丢弃本次会话已倒入的奶泡，不返还壶，不删除杯内原有液体或奶泡；取消保留已倒入的奶泡但不算完成拉花。"
     },
     {
       "id": "honeylatte",
@@ -572,7 +582,7 @@
       "qualityPriceStep": 50,
       "requiresLatteArt": false,
       "recipeId": "honeylatte",
-      "description": "加入蜂蜜的拿铁，甜润柔和。",
+      "description": "加入蜂蜜的拿铁；拉花是已完成且有奶泡的配方种类，不限制图案。",
       "minimumScore": 60,
       "maxRemakes": 1,
       "requiredTemperature": 2,
@@ -595,7 +605,7 @@
         "idealCoffeeStrength": 0.06,
         "coffeeStrengthTolerance": 0.2
       },
-      "tutorial": "参考目标：精粹咖啡180ml、热牛奶200ml、薄奶泡20ml、蜂蜜12g。热牛奶至少温热，奶泡占液体3%～12%；蜂蜜为必需固体。成分完整、无额外原料即属于蜂蜜拿铁，实际用量只影响含量分。自由加料，不按工序先后评分。"
+      "tutorial": "参考目标：精粹咖啡180ml、热牛奶200ml、拉花用奶泡20ml、蜂蜜12g。热牛奶至少温热；蜂蜜为必需固体。将拉花杯拖到杯子上完成拉花后，杯内正量奶泡作为拉花成分，不限制图案、识别分数或奶泡比例。成分完整、无额外原料即属于蜂蜜拿铁，实际用量只影响含量分。自由加料，不按工序先后评分。"
     },
     {
       "id": "matchalatte",
@@ -707,7 +717,7 @@
       "unlockReputation": 0,
       "qualityPriceStep": 50,
       "requiresLatteArt": false,
-      "description": "精粹咖啡加奶泡，不把奶泡当成热牛奶。",
+      "description": "精粹咖啡加拉花；完成后的奶泡满足拉花种类，不限制图案，也不能用热牛奶替代。",
       "minimumScore": 60,
       "maxRemakes": 1,
       "requiredTemperature": 2,
@@ -728,7 +738,7 @@
         "idealCoffeeStrength": 0.06,
         "coffeeStrengthTolerance": 0.2
       },
-      "tutorial": "参考目标：精粹咖啡160ml、奶泡80ml，小杯合计240ml。打发牛奶生成独立奶泡原料，再按实际ml加入；精粹+奶泡两种成分必须都有正量且无额外原料。不同用量仍为玛奇朵，推荐量只影响含量分；加热牛奶本身不能替代奶泡。"
+      "tutorial": "参考目标：精粹咖啡160ml、拉花用奶泡80ml，小杯合计240ml。向拉花杯加入牛奶并打奶，拖壶到杯子上进入拉花并提交完成；杯内正量奶泡才作为拉花成分，不限制图案或识别分数。精粹与拉花两种成分必须都有正量且无额外原料。不同用量仍为玛奇朵，推荐量只影响含量分；未完成的奶泡和热牛奶本身不能替代拉花。"
     },
     {
       "id": "mocha",
@@ -1022,8 +1032,8 @@
       "y": 2.05
     },
     {
-      "id": "tool.latte-art",
-      "specId": "tool.latte-art",
+      "id": "tool.milk-pitcher",
+      "specId": "container.milk-pitcher",
       "area": 1,
       "x": 9.1,
       "y": -2.35
@@ -1208,6 +1218,11 @@
         },
         {
           "id": "8",
+          "kind": "latte_art",
+          "label": "将牛奶加入拉花杯并打奶，拖壶到杯上完成拉花（不限图案）"
+        },
+        {
+          "id": "9",
           "kind": "confirm_serve",
           "label": "确认上餐"
         }
@@ -1263,7 +1278,7 @@
         {
           "id": "8",
           "kind": "latte_art",
-          "label": "拖动完成拉花"
+          "label": "将拉花杯拖到杯子上，提交完成拉花（不限图案）"
         },
         {
           "id": "9",
@@ -1369,6 +1384,11 @@
         },
         {
           "id": "9",
+          "kind": "latte_art",
+          "label": "将牛奶加入拉花杯并打奶，拖壶到杯上完成拉花（不限图案）"
+        },
+        {
+          "id": "10",
           "kind": "confirm_serve",
           "label": "确认上餐"
         }

@@ -99,6 +99,7 @@ namespace Spotlight.FreeCafe.Tests
             Assert.That(product.ingredients,Is.Not.Empty);
             foreach(var need in product.ingredients) cup.contents.Add(new Portion{specId=need.specId,units=need.units,
                 milliliters=need.milliliters,grams=need.grams,coffeeKind=need.coffeeKind,temperature=need.temperature,productionScore=100});
+            cup.latteArt=true;
             Assert.That(world.Evaluate(cup,product),Is.EqualTo(1));cup.contents.Reverse();
             Assert.That(world.Evaluate(cup,product),Is.EqualTo(1));
         }
