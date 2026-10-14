@@ -7,6 +7,7 @@ namespace Spotlight.FreeCafe
         public FreeCafeRuntime runtime;
         public MonoBehaviour presenter;
         public bool HasPresenter => presenter!=null && presenter is ICafeMiniGamePresenter;
+        public bool BlocksInput => !string.IsNullOrEmpty(token) || (presenter is FreeCafeLatteArtBench bench && bench.IsTransitioning);
         private string token;
         private int generation;
         private void OnEnable() { if(runtime!=null) runtime.ViewChanged+=Refresh; }

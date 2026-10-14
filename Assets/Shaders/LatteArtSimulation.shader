@@ -41,7 +41,7 @@ Shader "LatteArt/NavierStokes"
    float4 _CoffeeColor, _CremaColor, _MilkColor;
    float2 _PourUV, _PreviousPourUV, _PointerVelocity;
    float _BowlRadius, _FoamContrast, _NormalStrength, _SurfaceZTest, _WorldSurface;
-   float _DeltaTime, _Pouring, _BrushRadius, _PourRate;
+   float _DeltaTime, _DepositTime, _Pouring, _BrushRadius, _PourRate;
    float _PushStrength, _DragStrength, _DragResponse;
    float _VelocityDamping, _Viscosity, _Diffusion;
    float _Vorticity, _MaxVelocity, _FluidResolution;
@@ -192,7 +192,7 @@ Shader "LatteArt/NavierStokes"
    milk=clamp(milk,min(min(a,b),min(c,d)),max(max(a,b),max(c,d)));
    float2 neighbours=Original(InBowl(uv+x,h)).rg+Original(InBowl(uv-x,h)).rg+Original(InBowl(uv+y,h)).rg+Original(InBowl(uv-y,h)).rg;
    milk=lerp(milk,neighbours*0.25,saturate(_Diffusion*_DeltaTime));
-   float deposit=_PourRate*Brush(uv)*_DeltaTime;
+   float deposit=_PourRate*Brush(uv)*_DepositTime;
    milk.r=1-(1-saturate(milk.r))*exp(-deposit);
    milk.g=1-(1-saturate(milk.g)*exp(-0.018*_DeltaTime))*exp(-deposit*0.65);
    // Density B/A: damped wave equation (height / vertical velocity).

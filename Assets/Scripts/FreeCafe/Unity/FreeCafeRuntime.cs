@@ -34,11 +34,8 @@ namespace Spotlight.FreeCafe
         public bool CarrySelection { get; set; }
         public bool ShowAssetIds { get; set; }
         public bool IsDragging => draggedView!=null;
-        public bool GameplayBlocked => (gameFlow != null && (gameFlow.SessionState != GameSessionState.Playing || gameFlow.IsMapOpen)) || (World != null && World.ProductionEnabled && !string.IsNullOrEmpty(World.State.production.miniGameToken)) || Time.timeScale<=0 || DialoguePanel.IsAnyPlaying || (dayFlow != null && dayFlow.BlocksGameplayInput);
-        private CafeVisitBridge cafeVisits;
-        private bool pendingBusinessStart;
-        public Sprite CafeVisitSprite(string customerId) => cafeVisits?.SeatedSprite(customerId);
-        public bool BusinessSimulationPaused => PresentationPauseRegistry.IsPaused || (cafeVisits != null && cafeVisits.HasStageHandoff);
+        public FreeEntityView DraggedView => draggedView;
+        public bool GameplayBlocked => (miniGameGateway != null && miniGameGateway.BlocksInput) || (gameFlow != null && gameFlow.IsMapOpen) || (World != null && World.ProductionEnabled && !string.IsNullOrEmpty(World.State.production.miniGameToken)) || Time.timeScale<=0 || DialoguePanel.IsAnyPlaying || (dayFlow != null && dayFlow.BlocksGameplayInput);
         private DayFlowController dayFlow;
         private GameFlowBootstrap gameFlow;
         public event Action ViewChanged;
@@ -46,13 +43,19 @@ namespace Spotlight.FreeCafe
         private FreeCafeSpawnScale spawnScale;
         private FreeCafeHud playerHud;
         private FreeCafeProductionHud productionHud;
+        public float maxPourAngle = 105f;
+        public float pourRateMultiplier = 2f;
+        public FreeCafeContainerPanels ContainerPanels { get; private set; }
+        private FreeCafeMiniGameGateway miniGameGateway;
         public bool InputBlocked => GameplayBlocked || (FreeCafeGMPanel.Instance!=null && FreeCafeGMPanel.Instance.IsVisible) ||
             (playerHud!=null && playerHud.IsModalOpen) || (productionHud!=null && productionHud.IsModalOpen);
         public void OpenPlayerMenu() { if(playerHud!=null) playerHud.OpenPlayerMenu(); }
         private readonly List<string> removeIds=new List<string>();
         private readonly List<RaycastResult> hits=new List<RaycastResult>();
-        private FreeEntityView draggedView,receiver;
+        private FreeEntityView draggedView,receiver,dragEventOwner;
+        private int dragPointerId;
         private string dragItemId,dragSourceId,dragMachineId,dragOutputId,confirmCancelId;
+        private bool committingDrag;
         private Vector3 origin,offset;
         private Camera dragCamera;
         private Plane dragPlane;
@@ -71,9 +74,22 @@ namespace Spotlight.FreeCafe
         public string LockedPourTargetId => lockedPourTargetId;
         private void Awake()
         {
+            ContainerPanels=GetComponent<FreeCafeContainerPanels>();
+            if(ContainerPanels==null) ContainerPanels=gameObject.AddComponent<FreeCafeContainerPanels>();
+            ContainerPanels.Initialize(this);
+            miniGameGateway=GetComponent<FreeCafeMiniGameGateway>();
             if(worldCamera==null) worldCamera=Camera.main;
             if(worldCamera==null || !worldCamera.isActiveAndEnabled || worldCamera.GetComponent<Physics2DRaycaster>()==null)
                 Debug.LogError("[FreeCafe Input] 请为 World Camera 指定启用的游戏摄像机，并在同一对象上添加 Physics2DRaycaster。",this);
+            if (worldCamera != null && worldCamera.TryGetComponent<Physics2DRaycaster>(out var raycaster) &&
+                !(raycaster is FreeCafeEntityRaycaster))
+            {
+                var entityRaycaster = worldCamera.gameObject.AddComponent<FreeCafeEntityRaycaster>();
+                entityRaycaster.eventMask = raycaster.eventMask;
+                entityRaycaster.maxRayIntersections = raycaster.maxRayIntersections;
+                raycaster.enabled = false;
+                Destroy(raycaster);
+            }
             if(areaManager==null) areaManager=GetComponent<FreeCafeAreaManager>();
             if(areaManager==null) throw new InvalidOperationException("Configure FreeCafeAreaManager on FreeCafeApp before playing");
             areaManager.Initialize(worldCamera);
@@ -86,21 +102,24 @@ namespace Spotlight.FreeCafe
                 throw new InvalidOperationException("Customer identity source 必须实现 ICafeCustomerIdentitySource");
             var authored = FreeCafeSceneLayout.FindAuthoredEntities(this);
             var catalog = JsonUtility.FromJson<CafeCatalog>(catalogAsset.text);
+            var extractionConfig=GetComponent<FreeCafeExtractionConfig>();
+            if(extractionConfig!=null) extractionConfig.Apply(catalog.production);
             catalog.layout = FreeCafeSceneLayout.Capture(this, authored);
             FreeCafeSceneLayout.FitAuthoredBounds(this, catalog, authored);
             characterCatalog=Spotlight.Narrative.CharacterCatalog.LoadFromTables();
             var identities = customerIdentitySource as ICafeCustomerIdentitySource;
             if(identities==null && characterCatalog!=null && characterCatalog.Characters.Count>0)
                 identities=new CatalogCustomerIdentitySource(characterCatalog);
-            World=PlayerCafeOwner.Current ?? new CafeWorld(catalog,identities);
-            PlayerCafeOwner.Bind(World);
+            World=new CafeWorld(catalog,identities);
             if(prefabLibrary==null) throw new InvalidOperationException("请配置 EntityPrefabLibrary");
             prefabLibrary.Validate(World.Catalog);
             spawnScale=new FreeCafeSpawnScale(this,authored,catalog);
             if(productionMode) World.EnableProduction();
             AdoptAuthoredEntities(authored);
             World.Changed+=SyncViews;
-            // The domain world and its save participant live for the game session.
+            if(GameSaveParticipantRegistry.Capturers.ContainsKey(SaveId)) throw new InvalidOperationException("Duplicate FreeCafe world in loaded scenes");
+            GameSaveParticipantRegistry.Capturers[SaveId]=CaptureJson;
+            GameSaveParticipantRegistry.Restorers[SaveId]=RestoreJson;
         }
         private void Start()
         {
@@ -108,17 +127,7 @@ namespace Spotlight.FreeCafe
             gameFlow = FindFirstObjectByType<GameFlowBootstrap>();
             playerHud=FindFirstObjectByType<FreeCafeHud>(); productionHud=GetComponent<FreeCafeProductionHud>();
             string pending=GameSaveParticipantRegistry.TakePending(SaveId);
-            if(!string.IsNullOrEmpty(pending))
-            {
-                try { RestoreJson(pending); }
-                catch (Exception exception)
-                {
-                    PlayerCafeOwner.ReportRestoreFailure(exception.Message);
-                    Debug.LogError("Cafe save restoration failed: " + exception.Message, this);
-                    return;
-                }
-            }
-            else SyncViews();
+            if(!string.IsNullOrEmpty(pending)) RestoreJson(pending); else SyncViews();
             if (FreeCafeGMPanel.Instance != null) FreeCafeGMPanel.Instance.Initialize(this);
             if(World.State.currentArea==AreaId.Cafe)
                 ShowHint("点击大厅的「启动营业」立牌开始接单；点击客人查看订单，或前往制作台备料。");
@@ -128,10 +137,9 @@ namespace Spotlight.FreeCafe
                 ShowHint("点击来源取出物品，拖拽到任意位置；拖到容器或设备会尝试组合。Shift 拖拽仅摆放。");
             Debug.Log("[FreeCafe] 自由操作世界已启动：无工作台插槽、无订单步骤门禁。",this);
         }
-        private void OnDisable() { CancelDrag(); cafeVisits?.Dispose(); cafeVisits = null; }
+        private void OnDisable() => CancelDrag();
         private void OnDestroy()
         {
-            PlayerCafeOwner.Unbind(World);
             if(World!=null) World.Changed-=SyncViews;
             if(GameSaveParticipantRegistry.Capturers.TryGetValue(SaveId,out var capture) && capture==CaptureJson)
             { GameSaveParticipantRegistry.Capturers.Remove(SaveId); GameSaveParticipantRegistry.Restorers.Remove(SaveId); }
@@ -139,15 +147,7 @@ namespace Spotlight.FreeCafe
         private void Update()
         {
             if(World==null) return;
-            bool sessionReady = gameFlow == null || gameFlow.SessionState == GameSessionState.Playing;
-            if (sessionReady)
-            {
-                if (cafeVisits == null) cafeVisits = new CafeVisitBridge(this);
-                cafeVisits.Pump();
-                if (pendingBusinessStart) TryStartBusiness();
-                if (!BusinessSimulationPaused && (Spotlight.Narrative.NarrativeRuntime.Instance == null || cafeVisits.Ready)) World.Tick(Time.deltaTime);
-                cafeVisits.Pump();
-            }
+            World.Tick(Time.deltaTime);
             if(IsDragging && draggingVessel && !InputBlocked) UpdateVesselInput();
             // GameFlowBootstrap owns the global Escape/pause flow. FreeCafe only
             // cancels an active drag; the shared pause panel handles everything else.
@@ -168,7 +168,7 @@ namespace Spotlight.FreeCafe
             foreach(var view in authored)
             {
                 var entity=World.Find(view.AuthoringEntityId);
-                if(entity==null) { Destroy(view.gameObject); continue; } // Sold/removed entities remain removed on scene return.
+                if(entity==null) throw new InvalidOperationException("场景实体未写入初始布局："+view.name);
                 view.transform.SetParent(areaRoots[(int)entity.area],true);
                 views.Add(entity.id,view);view.Bind(this,entity);
             }
@@ -176,8 +176,9 @@ namespace Spotlight.FreeCafe
         }
         private void SyncViews()
         {
+            if (committingDrag) return;
             removeIds.Clear();
-            foreach(var pair in views) if(World.Find(pair.Key)==null) { if(pair.Value!=null) Destroy(pair.Value.gameObject); removeIds.Add(pair.Key); }
+            foreach(var pair in views) if(World.Find(pair.Key)==null) { if(pair.Value!=null) { pair.Value.RetireInteraction(); Destroy(pair.Value.gameObject); } removeIds.Add(pair.Key); }
             foreach(var id in removeIds) views.Remove(id);
             foreach(var entity in World.State.entities)
             {
@@ -188,10 +189,11 @@ namespace Spotlight.FreeCafe
                 }
                 if(view!=draggedView)
                 {
-                    if(view.transform.parent!=areaRoots[(int)entity.area]) view.transform.SetParent(areaRoots[(int)entity.area],false);
+                    if(view.transform.parent!=areaRoots[(int)entity.area]) view.transform.SetParent(areaRoots[(int)entity.area],true);
                     view.Refresh(entity);
                 }
             }
+            if (draggedView != null && !IsRegisteredView(dragEventOwner)) CancelDrag();
             areaManager.Focus(World.State.currentArea);
             if(SelectedId!=null && World.Find(SelectedId)==null) SelectedId=null;
             ViewChanged?.Invoke();
@@ -217,6 +219,10 @@ namespace Spotlight.FreeCafe
             }
             return false;
         }
+        public bool IsRegisteredView(FreeEntityView view) => World != null && view != null &&
+            view.Runtime == this && !string.IsNullOrEmpty(view.EntityId) &&
+            views.TryGetValue(view.EntityId, out var registered) && registered == view &&
+            World.Find(view.EntityId) is WorldEntity entity && string.IsNullOrEmpty(entity.ownerId);
         public FreeEntityView View(string id) => id!=null && views.TryGetValue(id,out var view) ? view : null;
         public void ShowHint(string message)
         {
@@ -243,9 +249,8 @@ namespace Spotlight.FreeCafe
             if(World.ProductionEnabled && (World.IsProductionVessel(entity) || spec.Has(Capability.Container)))
             {
                 var liquid=World.LiquidSnapshot(entity);
-                info+=" · "+World.ContainerInspection(entity);
-                if(entity.latteArt) info+=" · 拉花 "+(entity.latteArtPattern ?? "unknown")+" "+entity.latteArtScore.ToString("0")+"分";
-                ShowHint(info); return;
+                ContainerPanels?.Inspect(id);
+                return;
             }
             if(spec.Has(Capability.Container))
             {
@@ -258,10 +263,10 @@ namespace Spotlight.FreeCafe
         public void Select(string id) { SelectedId=id; SyncViews(); Inspect(id); }
         public void Click(FreeEntityView view)
         {
-            if(InputBlocked || IsDragging || dragFinishedFrame==Time.frameCount) return;
+            if(World==null || view==null || !view.CanInteract || InputBlocked || IsDragging || dragFinishedFrame==Time.frameCount) return;
             var entity=World.Find(view.EntityId); if(entity==null || entity.area!=World.State.currentArea) return;
             var spec=World.Spec(entity.specId);
-            if(spec.Has(Capability.BusinessControl)) { StartBusiness(); return; }
+            if(spec.Has(Capability.BusinessControl)) { Report(World.ActivateBusinessControl(entity.id)); return; }
             if(World.ProductionEnabled && entity.specId=="tool.latte-art") { Report(World.RequestProductionMiniGame()); return; }
             if(World.ProductionEnabled && spec.Has(Capability.Source) && World.Spec(spec.sourceItemId).Has(Capability.Container))
             { Report(World.SelectServingCup(entity.id)); return; }
@@ -270,7 +275,12 @@ namespace Spotlight.FreeCafe
             if(spec.Has(Capability.Source))
             {
                 var result=World.Take(entity.id,entity.area,entity.x,entity.y-1.4f,out var item);
-                if(result.success) Select(item.id); Report(result);
+                if(result.success)
+                {
+                    View(item.id)?.StartMotionFrom(view.transform.position);
+                    Select(item.id);
+                }
+                Report(result);
             }
             else if(spec.Has(Capability.Processor))
             {
@@ -303,7 +313,6 @@ namespace Spotlight.FreeCafe
             }
             else if(spec.Has(Capability.Customer))
             {
-                if (cafeVisits != null && cafeVisits.Click(entity.id)) return;
                 foreach(var request in World.State.requests) if(request.customerId==entity.id)
                 {
                     World.Focus(request.id);
@@ -317,7 +326,7 @@ namespace Spotlight.FreeCafe
         }
         public void CancelProcessing(FreeEntityView view)
         {
-            if(InputBlocked || IsDragging) return;
+            if(World==null || view==null || !view.CanInteract || InputBlocked || IsDragging) return;
             var entity=World.Find(view.EntityId);
             if(entity==null || entity.area!=World.State.currentArea || !World.Spec(entity.specId).Has(Capability.Processor)) return;
             if(World.ProductionEnabled) { Report(World.EmptyProductionMachine(entity.id)); return; }
@@ -336,7 +345,7 @@ namespace Spotlight.FreeCafe
         }
         public void BeginDrag(FreeEntityView view,PointerEventData e)
         {
-            if(InputBlocked || IsDragging || view==null || e==null) return;
+            if(World==null || InputBlocked || IsDragging || view==null || !view.CanInteract || e==null) return;
             var inputCamera=e.pressEventCamera!=null ? e.pressEventCamera : worldCamera;
             if(inputCamera==null || !inputCamera.isActiveAndEnabled) { ShowHint("游戏摄像机未启用，无法拖拽实体"); return; }
             var entity=World.Find(view.EntityId); if(entity==null || entity.area!=World.State.currentArea) return; var spec=World.Spec(entity.specId);
@@ -357,9 +366,21 @@ namespace Spotlight.FreeCafe
                 dragMachineId=entity.id;dragOutputId=output.id;
                 draggedView=CreateEntityView(output.specId,World.State.currentArea);draggedView.name="UncommittedMachineOutput";
                 draggedView.Bind(this,output,true);
+                if (entity.specId == "machine.grinder")
+                {
+                    var drawer = artLibrary.Resolve("equipment.grinder.drawer", "default");
+                    if (drawer != null)
+                    {
+                        draggedView.body.sprite = drawer;
+                        var size = drawer.bounds.size;
+                        float fit = Mathf.Min(.85f / size.x, .65f / size.y);
+                        draggedView.body.transform.localScale = new Vector3(fit, fit, 1);
+                    }
+                }
             }
             else if(spec.Has(Capability.Movable)) { dragItemId=entity.id; draggedView=view; SelectedId=entity.id; }
             else return;
+            dragEventOwner=view; dragPointerId=e.pointerId;
             dragCamera=inputCamera;origin=draggedView.transform.position;
             dragPlane=new Plane(Vector3.forward,origin);
             // BeginDrag occurs only after the mouse has crossed the drag threshold.
@@ -367,6 +388,7 @@ namespace Spotlight.FreeCafe
             var pressPosition=e.pointerPressRaycast.module!=null ? e.pressPosition : e.position;
             if(!TryToWorld(pressPosition,out var point)) { CancelDrag();ShowHint("鼠标射线无法命中实体所在平面");return; }
             offset=origin-point;
+            draggedView.BeginPointerMotion();
             draggedView.hitbox.enabled=false; MoveDrag(e);
         }
         private WorldEntity DragData()
@@ -397,6 +419,18 @@ namespace Spotlight.FreeCafe
                 }
             }
         }
+        public void MoveDragFrom(FreeEntityView owner, PointerEventData e)
+        {
+            if (owner != dragEventOwner || e == null || e.pointerId != dragPointerId ||
+                e.button != PointerEventData.InputButton.Left) return;
+            MoveDrag(e);
+        }
+        public void EndDragFrom(FreeEntityView owner, PointerEventData e)
+        {
+            if (owner != dragEventOwner || e == null || e.pointerId != dragPointerId ||
+                e.button != PointerEventData.InputButton.Left) return;
+            EndDrag(e);
+        }
         public void MoveDrag(PointerEventData e)
         {
             if(!IsDragging) return;
@@ -405,16 +439,23 @@ namespace Spotlight.FreeCafe
                 BeginVesselTilt();
             pointerScreen=e.position;
             // 左键落点冻结；右键移动只控制倾斜，不重新寻找接收物。
-            if(!vesselTiltMode) { draggedView.transform.position=point+offset; FindReceiver(e); }
+            if(!vesselTiltMode) { draggedView.MovePointer(point+offset); FindReceiver(e); }
             draggedView.body.sortingOrder=2000;
             bool placeOnly=Keyboard.current!=null && (Keyboard.current.leftShiftKey.isPressed || Keyboard.current.rightShiftKey.isPressed);
-            var item=DragData(); if(item==null) { CancelDrag(); ShowHint("设备产物已变化，拖拽已取消"); return; } var pos=WorldToArea(World.State.currentArea,draggedView.transform.position);
+            var item=DragData(); if(item==null) { CancelDrag(); ShowHint("设备产物已变化，拖拽已取消"); return; } var pos=WorldToArea(World.State.currentArea,draggedView.DragPosition);
             if(!IsDragging) return;
             if(draggingVessel)
             {
                 if(receiver!=null)
                 {
                     var target=World.Find(receiver.EntityId);
+                    bool cupStack = target != null && World.Spec(target.specId).Has(Capability.Source) && World.Spec(World.Spec(target.specId).sourceItemId).Has(Capability.Container);
+                    if (cupStack)
+                    {
+                        var canReturn = World.Preview(item, target);
+                        receiver.SetDropTarget(true, !canReturn.success);
+                        ShowHint(canReturn.message); return;
+                    }
                     bool valid=target!=null && (World.IsContainer(target) || target.specId=="machine.stove" || World.Spec(target.specId).Has(Capability.Delivery) || World.Spec(target.specId).Has(Capability.Discard));
                     receiver.SetDropTarget(true,!valid);
                 }
@@ -439,24 +480,56 @@ namespace Spotlight.FreeCafe
             bool placeOnly=Keyboard.current!=null && (Keyboard.current.leftShiftKey.isPressed || Keyboard.current.rightShiftKey.isPressed);
             string itemId=dragItemId,sourceId=dragSourceId,targetId=receiver==null ? null : receiver.EntityId;
             string machineId=dragMachineId,outputId=dragOutputId;
-            var rejectedTarget=receiver; var ghost=draggedView; Vector3 dropPosition=ghost.transform.position; var position=WorldToArea(World.State.currentArea,ghost.transform.position);
+            var rejectedTarget=receiver; var ghost=draggedView; Vector3 dropPosition=ghost.transform.position; var position=WorldToArea(World.State.currentArea,ghost.DragPosition);
             bool validScreen=dragCamera!=null && dragCamera.pixelRect.Contains(e.position) && !overUI;
-            // Release pointer ownership before the model synchronizes/consumes any view.
-            bool wasVessel=draggingVessel; bool wasTilted=vesselWasTilted; ClearDrag(); ActionResult result;
-            if(!validScreen) result=ActionResult.No("已取消，库存与物品位置未改变");
-            else if(machineId!=null)
-                result=World.TakeMachineOutput(machineId,outputId,placeOnly ? null : targetId,World.State.currentArea,position.x,position.y);
-            else if(sourceId!=null)
+            HashSet<string> previousIds = null;
+            if (sourceId != null || machineId != null)
             {
-                if(targetId!=null && !placeOnly) result=World.TakeAndInteract(sourceId,targetId,World.State.currentArea,position.x,position.y);
-                else result=World.Take(sourceId,World.State.currentArea,position.x,position.y,out var item);
+                previousIds = new HashSet<string>();
+                foreach (var entity in World.State.entities) previousIds.Add(entity.id);
             }
-            else if(wasVessel && !wasTilted && targetId!=null && World.Find(targetId)?.specId=="machine.stove") result=World.Interact(itemId,targetId);
-            else if(wasVessel && targetId!=null && World.Spec(World.Find(targetId).specId).Has(Capability.Delivery) && World.Spec(World.Find(itemId).specId).Has(Capability.Container)) result=World.Interact(itemId,targetId);
-            else if(wasVessel && wasTilted) result=ActionResult.Yes("容器已归位；按实际倒出量消耗液体");
-            else if(targetId!=null && !placeOnly) result=World.Interact(itemId,targetId);
-            else result=World.Move(itemId,World.State.currentArea,position.x,position.y);
-            if(sourceId!=null || machineId!=null) { if(result.success) { if(rejectedTarget!=null) ghost.AnimateReturn(dropPosition,rejectedTarget.transform.position,true); else Destroy(ghost.gameObject); } }
+            // Defer synchronization until the transaction can hand off the visible drag object.
+            bool wasVessel=draggingVessel; bool wasTilted=vesselWasTilted; ClearDrag(); ActionResult result;
+            committingDrag = true;
+            try
+            {
+                if(!validScreen) result=ActionResult.No("已取消，库存与物品位置未改变");
+                else if(machineId!=null)
+                    result=World.TakeMachineOutput(machineId,outputId,placeOnly ? null : targetId,World.State.currentArea,position.x,position.y);
+                else if(sourceId!=null)
+                {
+                    if(targetId!=null && !placeOnly) result=World.TakeAndInteract(sourceId,targetId,World.State.currentArea,position.x,position.y);
+                    else result=World.Take(sourceId,World.State.currentArea,position.x,position.y,out var item);
+                }
+                else if(wasVessel && !wasTilted && targetId!=null && World.Find(targetId)?.specId=="machine.stove") result=World.Interact(itemId,targetId);
+                else if(wasVessel && targetId!=null && World.Spec(World.Find(targetId).specId).Has(Capability.Delivery) && World.Spec(World.Find(itemId).specId).Has(Capability.Container)) result=World.Interact(itemId,targetId);
+                else if(wasVessel && wasTilted) result=ActionResult.Yes("容器已归位；按实际倒出量消耗液体");
+                else if(targetId!=null && !placeOnly) result=World.Interact(itemId,targetId);
+                else result=World.Move(itemId,World.State.currentArea,position.x,position.y);
+            }
+            finally { committingDrag = false; }
+            if (result.success && (sourceId != null || machineId != null))
+            {
+                WorldEntity placed = null;
+                foreach (var entity in World.State.entities)
+                    if (string.IsNullOrEmpty(entity.ownerId) && entity.specId == ghost.PrefabSpecId &&
+                        (entity.id == outputId || !previousIds.Contains(entity.id))) { placed = entity; break; }
+                if (placed != null)
+                {
+                    if (views.TryGetValue(placed.id, out var oldView) && oldView != ghost) { oldView.RetireInteraction(); Destroy(oldView.gameObject); }
+                    views[placed.id] = ghost; ghost.name = placed.id; ghost.Bind(this, placed);
+                }
+                else ghost.AnimateReturn(dropPosition,rejectedTarget != null ? rejectedTarget.transform.position : origin,true);
+            }
+            else if (result.success && itemId != null)
+            {
+                var item = World.Find(itemId);
+                if (item == null || !string.IsNullOrEmpty(item.ownerId))
+                {
+                    views.Remove(itemId);
+                    ghost.AnimateReturn(dropPosition,rejectedTarget != null ? rejectedTarget.transform.position : origin,true);
+                }
+            }
             SyncViews();
             if(!result.success)
             {
@@ -471,15 +544,15 @@ namespace Spotlight.FreeCafe
             ReleasePourTarget();
             draggingVessel=false; pouredThisDrag=false; vesselTiltMode=false; vesselWasTilted=false;
             if(receiver!=null) receiver.SetDropTarget(false,false);
-            if(draggedView!=null) draggedView.PresentPour(0,false);
+            if(draggedView!=null) { draggedView.EndPointerMotion(); draggedView.PresentPour(0,false); }
             if(draggedView!=null && dragItemId!=null) draggedView.hitbox.enabled=World.Find(dragItemId)?.area==World.State.currentArea;
-            draggedView=null; receiver=null; dragCamera=null; dragSourceId=dragItemId=dragMachineId=dragOutputId=null; dragFinishedFrame=Time.frameCount;
+            draggedView=null; receiver=null; dragEventOwner=null; dragCamera=null; dragSourceId=dragItemId=dragMachineId=dragOutputId=null; dragFinishedFrame=Time.frameCount;
         }
         public void CancelDrag()
         {
             if(!IsDragging) return;
             var view=draggedView; bool provisional=dragSourceId!=null || dragMachineId!=null; ClearDrag();
-            if(provisional) Destroy(view.gameObject); else view.transform.position=origin;
+            view.AnimateReturn(view.transform.position,origin,provisional);
             SyncViews(); ShowHint("拖拽取消，库存不变");
         }
         public void Enter(AreaId area)
@@ -506,6 +579,7 @@ namespace Spotlight.FreeCafe
             vesselWasTilted=true;
             vesselTiltPointerOrigin=pointerScreen;
             var target=ResolvePourTarget();
+            draggedView.FreezePointerMotion();
             lockedPourTargetId=target?.id;
             lastPourError=null;
             receivingView=target==null ? null : View(target.id);
@@ -519,7 +593,11 @@ namespace Spotlight.FreeCafe
             if(rightHeld && !vesselTiltMode) BeginVesselTilt();
             pointerScreen=mouse.position.ReadValue();
             if(!rightHeld && !vesselTiltMode && mouse.leftButton.wasReleasedThisFrame)
-            { ClearDrag(); SyncViews(); ShowHint("容器已归位"); return; }
+            {
+                if(vesselPointer==null) vesselPointer=new PointerEventData(EventSystem.current);
+                vesselPointer.position=pointerScreen;
+                EndDrag(vesselPointer); return;
+            }
             if(vesselTiltMode && !rightHeld)
             {
                 StopVesselPour();
@@ -545,8 +623,8 @@ namespace Spotlight.FreeCafe
         {
             bool placeOnly=Keyboard.current!=null && (Keyboard.current.leftShiftKey.isPressed || Keyboard.current.rightShiftKey.isPressed);
             Vector2 delta=pointerScreen-vesselTiltPointerOrigin;
-            float tilt=Mathf.Clamp01(delta.magnitude/90f);
-            float signedTilt=delta.x<0 ? -tilt : tilt;
+            float tilt=Mathf.Clamp01(-delta.y/90f);
+            float signedTilt=-tilt;
             if(draggedView!=null) draggedView.PresentPour(signedTilt,tilt>=.18f && !placeOnly);
             if(placeOnly || tilt<.18f || overUI || Time.deltaTime<=0) { StopVesselPour(); return; }
             var source=World.Find(dragItemId);
@@ -555,7 +633,7 @@ namespace Spotlight.FreeCafe
             if(target==null && receiver!=null) target=World.Find(receiver.EntityId);
             string targetId=target==null ? null : target.id;
             if(pouredThisDrag && lastPourTarget!=targetId) StopVesselPour();
-            var result=World.PourLiquid(dragItemId,targetId,World.Catalog.production.pourRateMl*tilt*Time.deltaTime,Time.deltaTime);
+            var result=World.PourLiquid(dragItemId,targetId,World.Catalog.production.pourRateMl*Mathf.Max(.1f,pourRateMultiplier)*tilt*Time.deltaTime,Time.deltaTime);
             if(result.success)
             {
                 pouredThisDrag=true; lastPourTarget=targetId;
@@ -570,6 +648,7 @@ namespace Spotlight.FreeCafe
                     targetView.SetReceivingPour(true);
                     targetView.RefreshLiquid();
                 }
+                if (World.LiquidVolume(World.Find(dragItemId)) <= .001f) StopVesselPour();
             }
             else
             {
@@ -584,7 +663,7 @@ namespace Spotlight.FreeCafe
             if(target!=null) return target;
             // 杯子上方也允许倒入，但只在进入倾倒时判断。
             var source=World.Find(dragItemId);
-            var point=WorldToArea(World.State.currentArea,draggedView.transform.position);
+            var point=WorldToArea(World.State.currentArea,draggedView.DragPosition);
             float closest=float.MaxValue;
             foreach(var entity in World.State.entities)
             {
@@ -617,30 +696,18 @@ namespace Spotlight.FreeCafe
         {
             CancelDrag();
             var gateway=GetComponent<FreeCafeMiniGameGateway>(); if(gateway!=null) gateway.Abort();
-            var result=World.Restore(CafeSaveMigration.Prepare(JsonUtility.FromJson<CafeSnapshot>(json)));
+            var result=World.Restore(JsonUtility.FromJson<CafeSnapshot>(json));
             if(!result.success) throw new FormatException(result.message); SelectedId=null; if(productionMode && !World.ProductionEnabled) World.EnableProduction(); SyncViews();
             // 读档后镜头瞬间就位，不做区域切换的平滑平移
             areaManager.SnapNow();
         }
         public void Save()
         {
-            CancelDrag();
-            if (gameFlow == null) { Report(ActionResult.No("请从正式游戏会话保存，确保 NCS 与咖啡馆在同一边界。")); return; }
-            if (!gameFlow.TryCaptureSaveData(out var data, out var captureError)) { Report(ActionResult.No(captureError)); return; }
+            CancelDrag(); var data=new GameSaveData { SceneName="CoffeeShop",CheckpointId="freecafe",Participants=GameSaveParticipantRegistry.CaptureAll() };
             var saves=new GameSaveService();
             Report(saves.TryQuickSave(data,out var slot,out var error) ? ActionResult.Yes("已保存到空槽位 "+slot) : ActionResult.No("保存失败："+error));
         }
-        public void StartBusiness() { if(!InputBlocked) RequestBusinessStart(); }
-        public void RequestBusinessStart() { if (!GameplayBlocked) { pendingBusinessStart = true; TryStartBusiness(); } }
-        private void TryStartBusiness()
-        {
-            if (cafeVisits == null) cafeVisits = new CafeVisitBridge(this);
-            var ncs = Spotlight.Narrative.NarrativeRuntime.Instance;
-            if (ncs != null && (!cafeVisits.Pump() || !ncs.Controller.CanCaptureSnapshot || ncs.Controller.IsBusy || cafeVisits.HasStageHandoff)) return;
-            pendingBusinessStart = false;
-            Report(World.StartDay());
-            cafeVisits.Pump();
-        }
+        public void StartBusiness() { if(!InputBlocked) Report(World.StartDay()); }
         public void EndBusiness() { if(!InputBlocked) Report(World.EndDay()); }
         public void StartDayFlowBusiness() => StartBusiness();
         public void EndDayFlowBusiness() => EndBusiness();

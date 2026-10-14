@@ -28,18 +28,34 @@ namespace Spotlight.FreeCafe
         private string specId,lastState,lastArtId;
         private FreeCafePersonView personView;
         private FreeCafeBusinessSignView businessSignView;
-        private bool preview;
+        private bool preview, retired;
+        public bool CanInteract => !preview && !retired && !destroyOnArrival && isActiveAndEnabled &&
+            Runtime != null && Runtime.IsRegisteredView(this);
         private bool hovered, selected, dropTarget, invalidDrop;
+        private bool extractionFilling;
+        public bool IsReceivingPour => receivingPour;
+        public bool IsHovered => hovered;
         private TMP_Text fillStatus;
         private SpriteRenderer fillBarBackground, fillBar;
         private static Sprite onePixelSprite;
-        private Coroutine returnAnimation, rejectionAnimation;
+        [Header("Interaction feel")]
+        [Min(.01f)] public float dragSmoothTime = .055f;
+        [Min(.01f)] public float releaseSmoothTime = .18f;
+        [Range(0f, 30f)] public float maxDragLean = 14f;
+        [Min(0f)] public float leanPerSpeed = 1.6f;
+        [Min(.01f)] public float leanSmoothTime = .09f;
+        private Vector3 motionTarget, motionVelocity;
+        private float dragLean, leanVelocity, baseRotation, pourRotation;
+        private bool motionInitialized, pointerMotion, motionFrozen, destroyOnArrival;
+        private float retireElapsed;
+        public Vector3 DragPosition => transform.parent != null ? transform.parent.TransformPoint(motionTarget) : motionTarget;
+        private Coroutine rejectionAnimation;
         private Vector3 bodyOrigin;
         private OrthographicGlassCupPresenter glassCup;
         private Canvas glassCanvas;
         private bool pourVisual, receivingPour;
         public bool IsDropTarget => dropTarget;
-        public bool IsReceivingPour => receivingPour;
+
 
         private void Awake()
         {
@@ -122,11 +138,16 @@ namespace Spotlight.FreeCafe
                 liquidPresenter = glassCup;
             }
             glassCup.ConfigureSize(prefabSpecId != "cup.small");
+            if (prefabSpecId == "container.extractor")
+            {
+                glassCup.ConfigureSize(new Vector2(.84f, .89f));
+                glassCanvas.transform.localPosition = new Vector3(-.17f, -.04f, -.01f);
+            }
             glassCup.ConfigureMotionSpace(transform.parent);
             if (body != null)
             {
                 body.enabled = true;
-                glassCup.gameObject.SetActive(pourVisual || receivingPour);
+                glassCup.gameObject.SetActive(pourVisual || receivingPour || extractionFilling);
                 if (glassCanvas != null)
                 {
                     glassCanvas.sortingLayerID = body.sortingLayerID;
@@ -165,11 +186,14 @@ namespace Spotlight.FreeCafe
             if(!string.IsNullOrEmpty(prefabSpecId) && prefabSpecId!=entity.specId)
                 throw new System.InvalidOperationException("Prefab 规格不匹配："+prefabSpecId+" / "+entity.specId);
             Runtime=runtime; EntityId=entity.id; preview=isPreview;
+            if((Runtime.World.IsPrecisionExtractor(entity) || Runtime.World.IsExtractionFilter(entity)) && GetComponent<FreeCafeExtractorVisual>()==null)
+                gameObject.AddComponent<FreeCafeExtractorVisual>();
             personView=GetComponent<FreeCafePersonView>();businessSignView=GetComponent<FreeCafeBusinessSignView>();
             Refresh(entity);
         }
         public void Refresh(WorldEntity entity)
         {
+            if (retired) return;
             EnsureFillIndicator();
             EnsureGlassCup();
             var spec=Runtime.World.Spec(entity.specId);
@@ -195,22 +219,28 @@ namespace Spotlight.FreeCafe
                 hitbox.size=deliveryZone!=null ? deliveryZone.HitboxSize : new Vector2(spec.width,spec.height);
                 label.transform.localPosition=spec.Has(Capability.BusinessControl) ? new Vector3(0,.3f,-.1f) : new Vector3(0,-spec.height*.5f-.18f,-.1f);
             }
-            if(returnAnimation==null) transform.localPosition=new Vector3(entity.x,entity.y,0);
-            body.transform.localRotation=Quaternion.Euler(0,0,entity.rotation);
+            if (!motionInitialized)
+            {
+                transform.localPosition = new Vector3(entity.x, entity.y, 0);
+                motionTarget = transform.localPosition;
+                motionInitialized = true;
+            }
+            else if (!pointerMotion && !destroyOnArrival) motionTarget = new Vector3(entity.x, entity.y, 0);
+            baseRotation = entity.rotation;
             body.sortingOrder=preview ? 2000 : 100+Mathf.RoundToInt(-entity.y*10)+(spec.Has(Capability.Movable) ? 30 : 0);
             label.GetComponent<MeshRenderer>().sortingOrder=body.sortingOrder+1;
             if(workspaceCaption!=null) workspaceCaption.GetComponent<MeshRenderer>().sortingOrder=body.sortingOrder+2;
             UpdateGlassTransform();
             bool visible=string.IsNullOrEmpty(entity.ownerId);
             gameObject.SetActive(visible);
-            hitbox.enabled=!preview && entity.area==Runtime.World.State.currentArea;
+            hitbox.enabled=CanInteract && !pointerMotion && visible && entity.area==Runtime.World.State.currentArea;
             string caption=spec.label;
             if(spec.Has(Capability.Source)) caption+=" ["+entity.stock+"]";
             if(Runtime.World.ProductionEnabled && (spec.Has(Capability.Container) || WorldVessel(entity)))
             {
                 var snapshot=Runtime.World.LiquidSnapshot(entity);
-                if (glassCup != null) glassCup.gameObject.SetActive(pourVisual || receivingPour);
-                if (hovered) caption+=" · "+Runtime.World.ContainerDescription(entity);
+                if (glassCup != null) glassCup.gameObject.SetActive(pourVisual || receivingPour || extractionFilling);
+                // Ingredients live in the secondary card, never in the entity's caption.
                 UpdateProductionFill(entity,snapshot);
                 if(liquidPresenter is ICafeLiquidPresenter presenter) presenter.Present(snapshot,0,false);
             }
@@ -261,21 +291,80 @@ namespace Spotlight.FreeCafe
         }
 
 
+        public void StartMotionFrom(Vector3 worldPosition)
+        {
+            transform.position = worldPosition;
+            motionVelocity = Vector3.zero;
+        }
+        public void BeginPointerMotion()
+        {
+            pointerMotion = true;
+            motionFrozen = false;
+            destroyOnArrival = false;
+            motionTarget = transform.localPosition;
+        }
+        public void MovePointer(Vector3 worldPosition)
+        {
+            motionFrozen = false;
+            motionTarget = transform.parent != null ? transform.parent.InverseTransformPoint(worldPosition) : worldPosition;
+        }
+        public void EndPointerMotion() { pointerMotion = false; motionFrozen = false; }
+        public void FreezePointerMotion()
+        {
+            motionFrozen = true;
+            motionTarget = transform.localPosition;
+            motionVelocity = Vector3.zero;
+        }
+        public void RetireInteraction()
+        {
+            retired = true;
+            hovered = selected = dropTarget = invalidDrop = false;
+            if (hitbox != null) hitbox.enabled = false;
+        }
         public void AnimateReturn(Vector3 from,Vector3 to,bool destroyAfter)
         {
-            if(returnAnimation!=null) StopCoroutine(returnAnimation);
-            returnAnimation=StartCoroutine(ReturnRoutine(from,to,destroyAfter));
+            motionInitialized = true;
+            pointerMotion = false;
+            MovePointer(to);
+            destroyOnArrival = destroyAfter;
+            retireElapsed = 0;
+            motionVelocity = Vector3.zero;
+            if (destroyAfter) RetireInteraction();
         }
-        private IEnumerator ReturnRoutine(Vector3 from,Vector3 to,bool destroyAfter)
+        private void LateUpdate()
         {
-            float elapsed=0;
-            while(elapsed<.24f)
+            if (!motionInitialized) return;
+            float dt = Mathf.Min(Time.unscaledDeltaTime, .05f);
+            float smoothTime = pointerMotion ? Mathf.Min(dragSmoothTime, .035f) : Mathf.Min(releaseSmoothTime, .07f);
+            if (destroyOnArrival)
             {
-                elapsed+=Time.unscaledDeltaTime;float t=Mathf.Clamp01(elapsed/.24f);t=t*t*(3-2*t);
-                transform.position=Vector3.LerpUnclamped(from,to,t)+Vector3.up*(Mathf.Sin(t*Mathf.PI)*.25f);
-                yield return null;
+                retireElapsed += Time.unscaledDeltaTime;
+                var tint = body.color; tint.a = Mathf.Clamp01(1 - retireElapsed / .12f); body.color = tint;
+                if (retireElapsed >= .12f) { Destroy(gameObject); return; }
             }
-            transform.position=to;returnAnimation=null;if(destroyAfter) Destroy(gameObject);
+            if (!motionFrozen)
+                transform.localPosition = Vector3.SmoothDamp(transform.localPosition, motionTarget, ref motionVelocity,
+                    Mathf.Max(.01f, smoothTime), Mathf.Infinity, dt);
+            float targetLean = pointerMotion && !pourVisual
+                ? Mathf.Clamp(motionVelocity.x * Mathf.Min(leanPerSpeed, .7f), -Mathf.Min(maxDragLean, 6), Mathf.Min(maxDragLean, 6)) : 0f;
+            dragLean = Mathf.SmoothDampAngle(dragLean, targetLean, ref leanVelocity,
+                Mathf.Max(.01f, leanSmoothTime), Mathf.Infinity, dt);
+            float machineShake = 0f;
+            if (Runtime != null && Runtime.World != null && !preview && !pointerMotion && specId == "machine.grinder")
+            {
+                var entity = Runtime.World.Find(EntityId);
+                if (entity != null && entity.specId == "machine.grinder" && entity.production.phase == ProductionPhase.Processing)
+                    machineShake = Mathf.Sin(Time.time * (entity.production.clickCooldown > 0 ? 38 : 14)) * 4;
+            }
+            if (body != null) body.transform.localRotation = Quaternion.Euler(0, 0,
+                pourVisual ? pourRotation : baseRotation + dragLean + machineShake);
+            UpdateGlassTransform();
+            if ((transform.localPosition - motionTarget).sqrMagnitude < .000001f && motionVelocity.sqrMagnitude < .0001f)
+            {
+                transform.localPosition = motionTarget;
+                motionVelocity = Vector3.zero;
+                if (destroyOnArrival) Destroy(gameObject);
+            }
         }
         public void RejectDrop()
         {
@@ -288,18 +377,13 @@ namespace Spotlight.FreeCafe
         }
         private void OnDisable()
         {
-            if(returnAnimation!=null) StopCoroutine(returnAnimation);if(rejectionAnimation!=null) StopCoroutine(rejectionAnimation);
-            returnAnimation=rejectionAnimation=null;invalidDrop=false;
+            if(rejectionAnimation!=null) StopCoroutine(rejectionAnimation);
+            rejectionAnimation=null;invalidDrop=false;
         }
         private void Update()
         {
             if(Runtime==null || Runtime.World==null || !Runtime.World.ProductionEnabled || preview || body==null) return;
             var entity=Runtime.World.Find(EntityId);if(entity==null) return;
-            if(entity.specId=="machine.grinder" && entity.production.phase==ProductionPhase.Processing)
-            {
-                float speed=entity.production.clickCooldown>0 ? 38 : 14;
-                body.transform.localRotation=Quaternion.Euler(0,0,Mathf.Sin(Time.time*speed)*4);
-            }
             if(entity.specId=="machine.heater")
                 body.transform.localPosition=bodyOrigin+Vector3.up*(entity.production.phase==ProductionPhase.Boiling ? Mathf.Sin(Time.time*20)*.025f : 0);
         }
@@ -308,16 +392,24 @@ namespace Spotlight.FreeCafe
         public void PresentPour(float tilt,bool pouring)
         {
             pourVisual = pouring || Mathf.Abs(tilt) > .001f;
-            if (glassCup != null) glassCup.gameObject.SetActive(pourVisual || receivingPour);
+            if (glassCup != null) glassCup.gameObject.SetActive(pourVisual || receivingPour || extractionFilling);
             ApplyVisual();
-            body.transform.localRotation=Quaternion.Euler(0,0,-tilt*75);
+            pourRotation = -tilt * (Runtime != null ? Runtime.maxPourAngle : 105f);
+            body.transform.localRotation=Quaternion.Euler(0,0,pourVisual ? pourRotation : baseRotation + dragLean);
             UpdateGlassTransform();
             RefreshLiquid(tilt,pouring);
+        }
+        public void SetExtractionFilling(bool value)
+        {
+            if (extractionFilling == value) return;
+            extractionFilling = value;
+            if (glassCup != null) glassCup.gameObject.SetActive(pourVisual || receivingPour || extractionFilling);
+            ApplyVisual();
         }
         public void SetReceivingPour(bool value)
         {
             receivingPour=value;
-            if(glassCup!=null) glassCup.gameObject.SetActive(pourVisual || receivingPour);
+            if(glassCup!=null) glassCup.gameObject.SetActive(pourVisual || receivingPour || extractionFilling);
             RefreshLiquid();
             ApplyVisual();
         }
@@ -345,7 +437,7 @@ namespace Spotlight.FreeCafe
             fillBar.color=snapshot.temperature==LiquidTemperature.Boiling ? new Color(.95f,.45f,.18f) : snapshot.temperature==LiquidTemperature.Warm ? new Color(.95f,.74f,.3f) : new Color(.35f,.72f,.82f);
             fillStatus.fontSize=1.8f;
             fillStatus.text=snapshot.volumeMl.ToString("0")+"/"+snapshot.capacityMl.ToString("0")+" ml · "+Runtime.World.SolidMass(entity).ToString("0.0")+" g";
-            fillStatus.gameObject.SetActive(hovered); fillBarBackground.gameObject.SetActive(hovered); fillBar.gameObject.SetActive(hovered);
+            fillStatus.gameObject.SetActive(false); fillBarBackground.gameObject.SetActive(false); fillBar.gameObject.SetActive(false);
         }
 
         private void UpdateFillIndicator(WorldEntity entity,EntitySpec spec,int total)
@@ -371,7 +463,14 @@ namespace Spotlight.FreeCafe
         {
             hovered=value; ApplyVisual();
             if(Runtime!=null && Runtime.World!=null)
-            { var entity=Runtime.World.Find(EntityId); if(Runtime.World.IsContainer(entity)) UpdateProductionFill(entity,Runtime.World.LiquidSnapshot(entity)); }
+            {
+                var entity=Runtime.World.Find(EntityId);
+                if(Runtime.World.IsContainer(entity))
+                {
+                    if(value) Runtime.ContainerPanels?.Inspect(EntityId);
+                    else Runtime.ContainerPanels?.ClearInspection(EntityId);
+                }
+            }
         }
         public void SetDropTarget(bool active,bool invalid)
         {
@@ -382,20 +481,20 @@ namespace Spotlight.FreeCafe
             if(body==null) return;
             if(businessSignView!=null && Runtime!=null) businessSignView.Present(hovered);
             body.color=invalidDrop ? new Color(1,.35f,.28f,1) : dropTarget ? new Color(.35f,1,.82f,1) : hovered ? new Color(1,.94f,.55f,1) : selected ? new Color(1,.84f,.4f,1) : preview ? new Color(1,1,1,.65f) : Color.white;
-            if(pourVisual || receivingPour) { var tint=body.color; tint.a=.22f; body.color=tint; }
+            if(pourVisual || receivingPour || extractionFilling) { var tint=body.color; tint.a=.22f; body.color=tint; }
             if(glassCup!=null) glassCup.SetTint(Color.white);
         }
-        public void OnPointerEnter(PointerEventData e) { if(Runtime!=null && !Runtime.InputBlocked) { SetHovered(true); Runtime.Inspect(EntityId); } }
+        public void OnPointerEnter(PointerEventData e) { if(CanInteract && !Runtime.InputBlocked) { SetHovered(true); Runtime.Inspect(EntityId); } }
         public void OnPointerExit(PointerEventData e) { SetHovered(false); }
         public void OnPointerClick(PointerEventData e)
         {
-            if(Runtime==null) return;
+            if(!CanInteract) return;
             if(e.button==PointerEventData.InputButton.Left) Runtime.Click(this);
             else if(e.button==PointerEventData.InputButton.Right) Runtime.CancelProcessing(this);
         }
-        public void OnBeginDrag(PointerEventData e) { if(Runtime!=null && e.button==PointerEventData.InputButton.Left) Runtime.BeginDrag(this,e); }
-        public void OnDrag(PointerEventData e) { if(Runtime!=null) Runtime.MoveDrag(e); }
-        public void OnEndDrag(PointerEventData e) { if(Runtime!=null) Runtime.EndDrag(e); }
+        public void OnBeginDrag(PointerEventData e) { if(CanInteract && e.button==PointerEventData.InputButton.Left) Runtime.BeginDrag(this,e); }
+        public void OnDrag(PointerEventData e) { if(Runtime!=null) Runtime.MoveDragFrom(this,e); }
+        public void OnEndDrag(PointerEventData e) { if(Runtime!=null) Runtime.EndDragFrom(this,e); }
     }
 }
 

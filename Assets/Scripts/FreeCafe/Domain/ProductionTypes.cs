@@ -13,6 +13,13 @@ namespace Spotlight.FreeCafe
         public float grindClickAdvance = 1;
         public float grindClickCooldown = .12f;
         public float heatSeconds = 4;
+        public float ambientTemperatureCelsius = 20;
+        public float warmTemperatureCelsius = 60;
+        public float boilingTemperatureCelsius = 100;
+        public float hotThresholdCelsius = 50;
+        public float boilingThresholdCelsius = 95;
+        public float heatingTargetCelsius = 100;
+        // Obsolete cooling durations remain serialized for legacy catalog compatibility; no natural cooling.
         public float boilingSeconds = 5;
         public float warmSeconds = 10;
         public float portionMl = 200;
@@ -23,6 +30,14 @@ namespace Spotlight.FreeCafe
         public float brewIdealMl = 200;
         public float brewGoldMl = 15;
         public float brewGreenMl = 35;
+        public float filterDrainMlPerSecond = 220;
+        public float filterResidenceSeconds = .12f;
+        public float brewReferenceGroundsGrams = 12;
+        // Independent extensions outside the gold band; legacy symmetric fields stay serialized.
+        public float brewGreenLeftSeconds = 3;
+        public float brewGreenRightSeconds = 3;
+        public float brewGreenLeftMl = 35;
+        public float brewGreenRightMl = 35;
         public float kettleCapacityMl = 400;
     }
 
@@ -34,6 +49,11 @@ namespace Spotlight.FreeCafe
         public float remaining;
         public float clickCooldown;
         public bool brewStarted;
+        public bool brewPourPaused; // 松手/取消后冻结本批计时，下一滴有效热水恢复。
+        public bool brewCompleted;
+        public float brewGroundsGrams;
+        public float brewInjectedHotWaterMl;
+        public float brewRateSquareIntegral;
         public float brewElapsed;
         public float brewPourSeconds;
         public float flowSum;
@@ -43,6 +63,14 @@ namespace Spotlight.FreeCafe
         public int additionSequence;
         public float spilledMl;
         public string heatingVesselId;
+        public string extractionFilterId;
+        public string extractionJugId;
+        public bool extractionAssemblyInitialized;
+        public bool filterSpent;
+        public float filterDrainHold;
+        public float filterDrainedMl;
+        public float filterReferenceGroundsGrams;
+        public float filterWaterPassedMl;
     }
 
     [Serializable]
@@ -72,17 +100,47 @@ namespace Spotlight.FreeCafe
 
     public readonly struct CafeLiquidSnapshot
     {
-        public readonly float volumeMl, capacityMl, extractionScore;
+        public readonly float volumeMl, capacityMl, extractionScore, temperatureCelsius;
         public readonly LiquidTemperature temperature;
         public readonly ProductionPhase phase;
         public readonly string primaryIngredient;
         public readonly CafeLiquidComposition composition;
         public CafeLiquidSnapshot(float volume, float capacity, LiquidTemperature temperature,
-            ProductionPhase phase, string ingredient, float score, CafeLiquidComposition composition = default)
+            ProductionPhase phase, string ingredient, float score, CafeLiquidComposition composition = default,
+            float temperatureCelsius = -1)
         {
             volumeMl = volume; capacityMl = capacity; this.temperature = temperature;
             this.phase = phase; primaryIngredient = ingredient; extractionScore = score;
             this.composition = composition;
+            this.temperatureCelsius = temperatureCelsius == -1
+                ? temperature == LiquidTemperature.Boiling ? 100 : temperature == LiquidTemperature.Warm ? 60 : 20
+                : temperatureCelsius;
+        }
+    }
+
+    /// <summary>Authoritative, grounds-scaled precision extraction ranges for UI (seconds and ml).</summary>
+    public readonly struct CafeExtractionSnapshot
+    {
+        public readonly bool available, inProgress, completed;
+        public readonly float groundsGrams, idealSeconds, idealMl;
+        public readonly float goldTimeMin, goldTimeMax, greenTimeMin, greenTimeMax;
+        public readonly float goldMlMin, goldMlMax, greenMlMin, greenMlMax;
+        public readonly float elapsedSeconds, injectedHotWaterMl, uniformityScore, qualityScore;
+        public readonly string qualityLabel;
+
+        public CafeExtractionSnapshot(bool available, bool inProgress, bool completed, float grounds,
+            float idealTime, float idealVolume, float goldTimeRadius, float greenTimeLeft, float greenTimeRight,
+            float goldVolumeRadius, float greenVolumeLeft, float greenVolumeRight,
+            float elapsed, float injected, float uniformity, float score, string label)
+        {
+            this.available = available; this.inProgress = inProgress; this.completed = completed;
+            groundsGrams = grounds; idealSeconds = idealTime; idealMl = idealVolume;
+            goldTimeMin = idealTime - goldTimeRadius; goldTimeMax = idealTime + goldTimeRadius;
+            greenTimeMin = goldTimeMin - greenTimeLeft; greenTimeMax = goldTimeMax + greenTimeRight;
+            goldMlMin = idealVolume - goldVolumeRadius; goldMlMax = idealVolume + goldVolumeRadius;
+            greenMlMin = goldMlMin - greenVolumeLeft; greenMlMax = goldMlMax + greenVolumeRight;
+            elapsedSeconds = elapsed; injectedHotWaterMl = injected; uniformityScore = uniformity;
+            qualityScore = score; qualityLabel = label;
         }
     }
 

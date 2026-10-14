@@ -19,15 +19,17 @@ namespace OnePersonCompany
         [SerializeField, Range(128, 1024)] private int resolution = 512;
         [SerializeField, Range(64, 512)] private int fluidResolution = 192;
         [SerializeField, Range(12, 100)] private int pressureIterations = 40;
-        [SerializeField, Range(0, 12)] private int viscosityIterations = 4;
-        [SerializeField, Range(0f, 0.001f)] private float viscosity = 0.0004f;
-        [SerializeField, Range(0f, 12f)] private float vorticityStrength = 4f;
-        [SerializeField, Range(0.005f, 0.08f)] private float brushRadius = 0.018f;
-        [SerializeField, Range(0.1f, 15f)] private float pourRate = 4f;
-        [SerializeField, Min(0f)] private float pushStrength = 0.35f;
-        [SerializeField, Range(0f, 3f)] private float dragStrength = 0.9f;
-        [SerializeField, Range(0f, 8f)] private float velocityDamping = 3f;
-        [SerializeField, Range(0f, 5f)] private float diffusion = 0.15f;
+        [SerializeField, Range(0, 12)] private int viscosityIterations = 6;
+        [SerializeField, Range(0f, 0.001f)] private float viscosity = 0.00055f;
+        [SerializeField, Range(0f, 12f)] private float vorticityStrength = 1.2f;
+        [SerializeField, Range(0.005f, 0.08f)] private float brushRadius = 0.02f;
+        [SerializeField, Range(0.1f, 15f)] private float pourRate = 5f;
+        [SerializeField, Min(0f)] private float pushStrength = 0.2f;
+        [SerializeField, Range(0f, 3f)] private float dragStrength = 0.38f;
+        [SerializeField, Range(0f, 8f)] private float velocityDamping = 4.2f;
+        [SerializeField, Range(0f, 5f)] private float diffusion = 0.1f;
+        [Tooltip("快速划动的补奶强度；过高会像不透明画笔。")]
+        [SerializeField, Range(0f, .08f)] private float strokeDepositAssist = .03f;
         [Header("Mouse")]
         [SerializeField] private bool requireLeftButton = true;
         [SerializeField] private bool showBrushPreview = true;
@@ -35,6 +37,7 @@ namespace OnePersonCompany
         [SerializeField] private Camera inputCamera;
 
         private const float BowlRadius = 0.46f, MaxStep = 1f / 60f, ReferenceBrushRadius = 0.018f;
+        private const int MaxFrameSteps = 8, MaxStrokePoints = 8192;
         private RawImage image; private Renderer worldRenderer; private Collider worldCollider; private bool worldSurface;
         private Material originalRendererMaterial, simulationMaterial, surfaceMaterial, originalMaterial;
         private Texture originalTexture; private Vector2 previousUV; private bool wasPouring;
@@ -45,6 +48,7 @@ namespace OnePersonCompany
         private PointerEventData uiPointer; private UIEventSystem cachedUIEventSystem;
         private readonly List<RaycastResult> uiHits = new List<RaycastResult>();
         private readonly List<Vector2> strokePoints = new List<Vector2>();
+        private readonly List<int> strokeStarts = new List<int>();
         private int advectVelocityPass, copyPass, diffusePass, curlPass, confinePass, divergencePass, pressurePass, projectPass, advectMilkPass, correctMilkPass;
         private bool interactionEnabled = true;
         private bool strokeActive;
@@ -66,7 +70,7 @@ namespace OnePersonCompany
         public float FoamRelief { get => surfaceMaterial != null ? surfaceMaterial.GetFloat("_NormalStrength") : 5f; set { if (surfaceMaterial != null) surfaceMaterial.SetFloat("_NormalStrength", Mathf.Clamp(value, 0f, 20f)); } }
         public string Solver => "2D MAC-grid NS + limited MacCormack milk + damped surface waves";
         public int StrokePointCount => strokePoints.Count;
-        public LatteArtRecognitionResult Recognize(IList<LatteArtPatternPreset> presets = null) => LatteArtPatternRecognizer.Recognize(strokePoints, presets);
+        public LatteArtRecognitionResult Recognize(IList<LatteArtPatternPreset> presets = null) => LatteArtPatternRecognizer.Recognize(strokePoints, presets, strokeStarts);
         public void SetInteractionEnabled(bool value) { interactionEnabled = value; if (!value) { strokeActive = false; wasPouring = false; } }
 
         private RenderTexture velocityRead, velocityWrite, velocityScratch, pressureRead, pressureWrite, divergence, densityRead, densityWrite, densityForward;
@@ -113,7 +117,7 @@ namespace OnePersonCompany
         public void ResetLatte()
         {
             ClearRT(velocityRead); ClearRT(velocityWrite); ClearRT(velocityScratch); ClearRT(pressureRead); ClearRT(pressureWrite); ClearRT(divergence); ClearRT(densityRead); ClearRT(densityWrite); ClearRT(densityForward);
-            strokePoints.Clear(); strokeActive = false; wasPouring = false; simulationTime = 0; simulationFrameCount = 0; ApplySurface();
+            strokePoints.Clear(); strokeStarts.Clear(); strokeActive = false; wasPouring = false; simulationTime = 0; simulationFrameCount = 0; ApplySurface();
         }
         private static void ClearRT(RenderTexture rt) { if (rt == null) return; var old = RenderTexture.active; RenderTexture.active = rt; GL.Clear(false, true, Color.clear); RenderTexture.active = old; }
         private bool TryGetPointerUV(out Vector2 uv)
@@ -195,13 +199,19 @@ namespace OnePersonCompany
         {
             if (Keyboard.current != null && Keyboard.current.rKey.wasPressedThisFrame) ResetLatte();
             bool inside = TryGetPointerUV(out Vector2 uv); bool pouring = inside && !IsPointerOverUI() && (!requireLeftButton || Mouse.current != null && Mouse.current.leftButton.isPressed);
-            if (pouring && !strokeActive) { strokePoints.Clear(); strokeActive = true; }
-            if (pouring)
+            if (pouring && !strokeActive && strokePoints.Count < MaxStrokePoints)
+            {
+                strokeStarts.Add(strokePoints.Count);
+                strokeActive = true;
+            }
+            if (pouring && strokeActive && strokePoints.Count < MaxStrokePoints)
             {
                 // Uniform screen units preserve the player's visible shape even when mesh UVs
                 // are mirrored/rotated; render/deposition continue to use the mesh UV above.
                 Vector2 point = Mouse.current != null ? Mouse.current.position.ReadValue() / Mathf.Max(1, Screen.height) : uv;
-                if (strokePoints.Count == 0 || Vector2.Distance(strokePoints[strokePoints.Count - 1], point) > .003f) strokePoints.Add(point);
+                int startIndex = strokeStarts[strokeStarts.Count - 1];
+                if (strokePoints.Count == startIndex || (strokePoints[strokePoints.Count - 1] - point).sqrMagnitude > .00000225f)
+                    strokePoints.Add(point);
             }
             if (!pouring) strokeActive = false;
             AdvanceFrame(dt, uv, pouring);
@@ -223,9 +233,24 @@ namespace OnePersonCompany
         }
         private void AdvanceFrame(float dt, Vector2 currentUV, bool pouring)
         {
-            if (surfaceMaterial == null) return; float waveSpeed = 0.05f; float maxStep = Mathf.Min(MaxStep, 0.55f / (densityRead.width * waveSpeed)); float step = Mathf.Min(Mathf.Max(dt, 0), maxStep); if (step <= 0) return;
-            Vector2 start = wasPouring ? previousUV : currentUV; Vector2 pointerVelocity = (currentUV - start) / Mathf.Max(step, .0001f); int steps = Mathf.Clamp(Mathf.CeilToInt(step / MaxStep), 1, 4); float stepDt = step / steps; var m = simulationMaterial;
+            if (surfaceMaterial == null || dt <= 0 || float.IsNaN(dt) || float.IsInfinity(dt)) return;
+            const float waveSpeed = 0.05f;
+            // Respect the explicit wave CFL limit, but consume real elapsed time with bounded
+            // substeps. Only exceptional stalls are truncated (never replay a huge catch-up).
+            float maxStep = Mathf.Min(MaxStep, 0.55f / (densityRead.width * waveSpeed));
+            float elapsed = Mathf.Min(dt, maxStep * MaxFrameSteps);
+            int steps = Mathf.Clamp(Mathf.CeilToInt(elapsed / maxStep), 1, MaxFrameSteps);
+            float stepDt = elapsed / steps;
+            Vector2 start = wasPouring && pouring ? previousUV : currentUV;
+            // Pointer velocity uses actual wall time, not the CFL-clipped solver timestep.
+            Vector2 pointerVelocity = Vector2.ClampMagnitude((currentUV - start) / Mathf.Max(dt, .0001f), .75f);
+            var m = simulationMaterial;
             m.SetInt("_FluidResolution", velocityRead.width); m.SetFloat("_BowlRadius", BowlRadius); m.SetFloat("_BrushRadius", brushRadius); m.SetFloat("_PourRate", pourRate); m.SetFloat("_PushStrength", PushStrength); m.SetFloat("_DragStrength", dragStrength); m.SetFloat("_DragResponse", 18f); m.SetFloat("_VelocityDamping", velocityDamping); m.SetFloat("_Viscosity", viscosity); m.SetFloat("_Diffusion", diffusion); m.SetFloat("_Vorticity", vorticityStrength); m.SetFloat("_MaxVelocity", .75f); m.SetFloat("_Pouring", pouring ? 1 : 0); m.SetFloat("_DeltaTime", stepDt); m.SetFloat("_WaveSpeed", waveSpeed); m.SetFloat("_WaveDamping", 2.8f); m.SetVector("_PointerVelocity", new Vector4(pointerVelocity.x, pointerVelocity.y, 0, 0));
+            // A swept capsule alone gets almost transparent during a fast cursor move.
+            // Maintain a minimum local dwell/deposit along it without increasing fluid force.
+            float distancePerStep = Vector2.Distance(start, currentUV) / steps;
+            float depositTime = stepDt + Mathf.Min(distancePerStep / Mathf.Max(2f * brushRadius, .001f) * strokeDepositAssist, .08f / steps);
+            m.SetFloat("_DepositTime", depositTime);
             var oldActive = RenderTexture.active; bool oldSRGB = GL.sRGBWrite; try { GL.sRGBWrite = false; for (int s = 0; s < steps; s++) { Vector2 from = Vector2.Lerp(start, currentUV, s / (float)steps), to = Vector2.Lerp(start, currentUV, (s + 1f) / steps); m.SetVector("_PreviousPourUV", new Vector4(from.x, from.y, 0, 0)); m.SetVector("_PourUV", new Vector4(to.x, to.y, 0, 0)); SolveStep(); simulationTime += stepDt; simulationFrameCount++; } } finally { GL.sRGBWrite = oldSRGB; RenderTexture.active = oldActive; }
             if (image != null) image.texture = densityRead; if (worldSurface) surfaceMaterial.SetTexture("_MainTex", densityRead); surfaceMaterial.SetFloat("_SimulationTime", simulationTime); previousUV = currentUV; wasPouring = pouring;
         }
@@ -240,7 +265,7 @@ namespace OnePersonCompany
             Release(ref velocityRead); Release(ref velocityWrite); Release(ref velocityScratch); Release(ref pressureRead); Release(ref pressureWrite); Release(ref divergence); Release(ref densityRead); Release(ref densityWrite); Release(ref densityForward); if (simulationMaterial != null) Destroy(simulationMaterial); if (surfaceMaterial != null) Destroy(surfaceMaterial); simulationMaterial = null; surfaceMaterial = null;
         }
         private static void Release(ref RenderTexture rt) { if (rt == null) return; rt.Release(); Destroy(rt); rt = null; }
-        public void RestoreAppearanceDefaults() { brushRadius = ReferenceBrushRadius; pourRate = 4f; pushStrength = .35f; dragStrength = .9f; velocityDamping = 3f; viscosity = .0004f; diffusion = .15f; vorticityStrength = 4f; pressureIterations = 40; FoamRelief = 5f; }
+        public void RestoreAppearanceDefaults() { brushRadius = .02f; pourRate = 5f; pushStrength = .2f; dragStrength = .38f; velocityDamping = 4.2f; viscosity = .00055f; viscosityIterations = 6; diffusion = .1f; vorticityStrength = 1.2f; strokeDepositAssist = .03f; pressureIterations = 40; FoamRelief = 5f; }
     }
 }
 

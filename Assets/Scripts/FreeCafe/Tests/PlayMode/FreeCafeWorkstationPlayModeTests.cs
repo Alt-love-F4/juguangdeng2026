@@ -36,6 +36,7 @@ namespace Spotlight.FreeCafe.Tests
             Physics2D.SyncTransforms(); app.BeginDrag(app.View(kettle.id), Pointer(kettle)); app.EndDrag(Pointer(stove));
             Assert.That(stove.production.heatingVesselId, Is.EqualTo(kettle.id));
             Assert.That(kettle.x, Is.EqualTo(stove.x));
+            yield return null; // 松手帧抑制点击，下一帧才是独立的炉台操作。
             app.Click(app.View(stove.id)); Assert.That(kettle.production.phase, Is.EqualTo(ProductionPhase.Processing));
             app.World.Tick(4); yield return null;
             Assert.That(kettle.contents[0].temperature, Is.EqualTo(LiquidTemperature.Boiling));

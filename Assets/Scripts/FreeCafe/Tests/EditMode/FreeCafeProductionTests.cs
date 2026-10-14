@@ -68,8 +68,10 @@ namespace Spotlight.FreeCafe.Tests
         {
             var product=world.Product(productId);world.SelectServingCup(product.cupSpecId=="cup.small" ? "s.cups.small" : "s.cups.large");
             var cup=world.ServingCup;int seq=0;
-            foreach(var need in product.ingredients) cup.contents.Add(new Portion { specId=need.specId,units=need.units,
-                milliliters=need.milliliters,productionScore=100,temperature=product.requiredTemperature,addedSequence=++seq });
+            Assert.That(product.evaluation, Is.Not.Null, productId);
+            foreach(var need in product.evaluation.amounts) cup.contents.Add(new Portion { specId=need.ingredientId,units=1,
+                milliliters=need.idealMl,grams=need.idealGrams,coffeeKind=need.coffeeKind,
+                productionScore=100,temperature=product.requiredTemperature,addedSequence=++seq });
             cup.production.additionSequence=seq; return cup;
         }
         [Test] public void CupSwapReturnsOnlyEmptyCupAndRefusesNonemptyCup()
@@ -81,6 +83,140 @@ namespace Spotlight.FreeCafe.Tests
             Load("s.honey",world.ServingCup.id);int large=world.Find("s.cups.large").stock;
             Assert.That(world.SelectServingCup("s.cups.small").success,Is.False);Assert.That(world.Find("s.cups.large").stock,Is.EqualTo(large));
         }
+        [TestCase("s.cups.small")]
+        [TestCase("s.cups.large")]
+        public void ReturningServingCupClearsSelectionAndRestoresStockExactlyOnce(string sourceId)
+        {
+            int stock = world.Find(sourceId).stock;
+            Assert.That(world.SelectServingCup(sourceId).success, Is.True);
+            var cup = world.ServingCup;
+            int notifications = 0;
+            world.Changed += () =>
+            {
+                notifications++;
+                Assert.That(world.ServingCup, Is.Null);
+                Assert.That(world.State.production.activeCupId, Is.Null);
+                Assert.That(world.Find(cup.id), Is.Null);
+                Assert.That(world.Find(sourceId).stock, Is.EqualTo(stock));
+            };
+            string before = JsonUtility.ToJson(world.State);
+            Assert.That(world.Preview(cup.id, sourceId).success, Is.True);
+            Assert.That(JsonUtility.ToJson(world.State), Is.EqualTo(before));
+            Assert.That(world.Interact(cup.id, sourceId).success, Is.True);
+            Assert.That(notifications, Is.EqualTo(1));
+            before = JsonUtility.ToJson(world.State);
+            Assert.That(world.Interact(cup.id, sourceId).success, Is.False);
+            Assert.That(JsonUtility.ToJson(world.State), Is.EqualTo(before));
+            Assert.That(notifications, Is.EqualTo(1));
+        }
+
+        [Test] public void ServingCupRejectedReturnKeepsSelectionContentsAndBothStocks()
+        {
+            world.SelectServingCup("s.cups.large");
+            var cup = world.ServingCup;
+            var source = world.Find("s.cups.large");
+            world.Take("s.cups.small", AreaId.Counter, 0, -2, out _);
+            string before = JsonUtility.ToJson(world.State);
+            Assert.That(world.Interact(cup.id, "s.cups.small").success, Is.False);
+            Assert.That(JsonUtility.ToJson(world.State), Is.EqualTo(before));
+            source.stock = world.Spec(source.specId).initialStock;
+            before = JsonUtility.ToJson(world.State);
+            Assert.That(world.Interact(cup.id, source.id).success, Is.False);
+            Assert.That(JsonUtility.ToJson(world.State), Is.EqualTo(before));
+            source.stock--;
+            Load("s.water", cup.id);
+            before = JsonUtility.ToJson(world.State);
+            Assert.That(world.Interact(cup.id, source.id).success, Is.False);
+            Assert.That(JsonUtility.ToJson(world.State), Is.EqualTo(before));
+            Assert.That(world.ServingCup, Is.SameAs(cup));
+        }
+
+        [Test] public void MiniGameCupReturnAndSwapFailWithoutMutation()
+        {
+            world.SelectServingCup("s.cups.small");
+            var cup = world.ServingCup;
+            Assert.That(world.RequestProductionMiniGame().success, Is.True);
+            string before = JsonUtility.ToJson(world.State);
+            Assert.That(world.Interact(cup.id, "s.cups.small").success, Is.False);
+            Assert.That(world.SelectServingCup("s.cups.large").success, Is.False);
+            Assert.That(JsonUtility.ToJson(world.State), Is.EqualTo(before));
+            Assert.That(world.ServingCup, Is.SameAs(cup));
+        }
+
+        [Test] public void FullOldStackPreventsCupSwapWithoutWithdrawingNewCup()
+        {
+            world.SelectServingCup("s.cups.small");
+            var cup = world.ServingCup;
+            var source = world.Find("s.cups.small");
+            source.stock = world.Spec(source.specId).initialStock;
+            string before = JsonUtility.ToJson(world.State);
+            Assert.That(world.SelectServingCup("s.cups.large").success, Is.False);
+            Assert.That(JsonUtility.ToJson(world.State), Is.EqualTo(before));
+            Assert.That(world.ServingCup, Is.SameAs(cup));
+        }
+
+        [Test] public void ProcessingOldCupPreventsSwapWithoutMutation()
+        {
+            world.SelectServingCup("s.cups.small");
+            var cup = world.ServingCup;
+            cup.production.phase = ProductionPhase.Processing;
+            cup.production.remaining = 2;
+            string before = JsonUtility.ToJson(world.State);
+            Assert.That(world.SelectServingCup("s.cups.large").success, Is.False);
+            Assert.That(JsonUtility.ToJson(world.State), Is.EqualTo(before));
+            Assert.That(world.ServingCup, Is.SameAs(cup));
+        }
+
+        [Test] public void MissingOldStackPreventsCupSwapWithoutDeletingOldCup()
+        {
+            world.SelectServingCup("s.cups.small");
+            var cup = world.ServingCup;
+            world.State.entities.Remove(world.Find("s.cups.small"));
+            string before = JsonUtility.ToJson(world.State);
+            Assert.That(world.SelectServingCup("s.cups.large").success, Is.False);
+            Assert.That(JsonUtility.ToJson(world.State), Is.EqualTo(before));
+            Assert.That(world.ServingCup, Is.SameAs(cup));
+        }
+
+        [Test] public void ReturningLooseCupPreservesDifferentServingCupSelection()
+        {
+            world.SelectServingCup("s.cups.large");
+            var selected = world.ServingCup;
+            int stock = world.Find("s.cups.small").stock;
+            world.Take("s.cups.small", AreaId.Counter, 0, -2, out var cup);
+            Assert.That(world.Interact(cup.id, "s.cups.small").success, Is.True);
+            Assert.That(world.Find(cup.id), Is.Null);
+            Assert.That(world.Find("s.cups.small").stock, Is.EqualTo(stock));
+            Assert.That(world.ServingCup, Is.SameAs(selected));
+            Assert.That(world.State.production.activeCupId, Is.EqualTo(selected.id));
+        }
+
+        [Test] public void EmptyCupReturnClearsStoveDockReference()
+        {
+            world.Take("s.cups.small", AreaId.Counter, 0, -2, out var cup);
+            Assert.That(world.Interact(cup.id, "m.stove").success, Is.True);
+            Assert.That(world.Find("m.stove").production.heatingVesselId, Is.EqualTo(cup.id));
+            Assert.That(world.Interact(cup.id, "s.cups.small").success, Is.True);
+            Assert.That(world.Find("m.stove").production.heatingVesselId, Is.Null);
+            Assert.That(world.OperateProduction("m.stove").success, Is.False);
+        }
+
+        [Test] public void CupCanReturnAfterContentsAreCompletelyPouredOut()
+        {
+            int stock = world.Find("s.cups.small").stock;
+            world.SelectServingCup("s.cups.small");
+            var cup = world.ServingCup;
+            Load("s.water", cup.id);
+            Assert.That(world.PourLiquid(cup.id, "s.cups.small", 200, 1).success, Is.False);
+            Assert.That(world.Interact(cup.id, "s.cups.small").success, Is.False);
+            Assert.That(world.PourLiquid(cup.id, null, 200, 1).success, Is.True);
+            world.FinishPour(null);
+            Assert.That(cup.contents, Is.Empty);
+            Assert.That(world.Interact(cup.id, "s.cups.small").success, Is.True);
+            Assert.That(world.Find("s.cups.small").stock, Is.EqualTo(stock));
+            Assert.That(world.ServingCup, Is.Null);
+        }
+
         [Test] public void FailedSourceDropIsFullyTransactional()
         {
             int stock=world.Find("s.milk").stock,count=world.State.entities.Count;
@@ -110,18 +246,29 @@ namespace Spotlight.FreeCafe.Tests
             Assert.That(world.TakeMachineOutput("m.grinder",output.id,"m.mixer",AreaId.Counter,0,0).success,Is.False);
             Assert.That(world.Find("m.grinder").contents[0].specId,Is.EqualTo("grounds"));
         }
-        [Test] public void HeaterBoilsFiveSecondsThenWarmsTenThenCanReheat()
+        [Test] public void HeatedMilkKeepsTemperatureAcrossLongTicksAndCanReheat()
         {
             Heat("s.milk");var kettle=world.Find("m.heater");
-            Assert.That(kettle.production.phase,Is.EqualTo(ProductionPhase.Boiling));world.Tick(5);
-            Assert.That(kettle.production.phase,Is.EqualTo(ProductionPhase.Warm));world.Tick(10);
-            Assert.That(kettle.production.phase,Is.EqualTo(ProductionPhase.Room));Assert.That(world.OperateProduction("m.stove").success,Is.True);
-            world.Tick(4);Assert.That(kettle.production.phase,Is.EqualTo(ProductionPhase.Boiling));
+            Assert.That(kettle.production.phase,Is.EqualTo(ProductionPhase.Boiling));
+            Assert.That(world.TemperatureCelsius(kettle),Is.EqualTo(100).Within(.001f));
+            world.Tick(100);
+            Assert.That(kettle.production.phase,Is.EqualTo(ProductionPhase.Boiling));
+            Assert.That(world.TemperatureCelsius(kettle),Is.EqualTo(100).Within(.001f));
+            Assert.That(kettle.production.remaining,Is.Zero);
+            Assert.That(world.OperateProduction("m.stove").success,Is.True);
+            world.Tick(world.Catalog.production.heatSeconds);
+            Assert.That(kettle.production.phase,Is.EqualTo(ProductionPhase.Boiling));
+            Assert.That(world.TemperatureCelsius(kettle),Is.EqualTo(100).Within(.001f));
+            Assert.That(world.LiquidVolume(kettle),Is.EqualTo(200));
         }
-        [Test] public void LongTickConsumesAllThermalPhasesWithoutLosingElapsedTime()
+        [Test] public void LongTickCompletesHeatingWithoutCoolingOrLosingLiquid()
         {
-            Load("s.water","m.heater");world.Interact("m.heater","m.stove");world.OperateProduction("m.stove");world.Tick(19);
-            Assert.That(world.Find("m.heater").production.phase,Is.EqualTo(ProductionPhase.Room));
+            Load("s.water","m.heater");world.Interact("m.heater","m.stove");world.OperateProduction("m.stove");world.Tick(100);
+            var kettle=world.Find("m.heater");
+            Assert.That(kettle.production.phase,Is.EqualTo(ProductionPhase.Boiling));
+            Assert.That(world.TemperatureCelsius(kettle),Is.EqualTo(100).Within(.001f));
+            Assert.That(kettle.production.remaining,Is.Zero);
+            Assert.That(world.LiquidVolume(kettle),Is.EqualTo(200));
         }
         [Test] public void ParallelStovesOwnIndependentContentsAndTimers()
         {
@@ -152,7 +299,8 @@ namespace Spotlight.FreeCafe.Tests
             Assert.That(world.FinishPour("m.brewer").success,Is.True);
             var brewer=world.Find("m.brewer");Assert.That(brewer.production.phase,Is.EqualTo(ProductionPhase.Room));
             Assert.That(brewer.contents.Exists(portion=>portion.specId=="coffee"),Is.True);
-            Assert.That(brewer.contents.Exists(portion=>portion.specId=="grounds"),Is.True);
+            Assert.That(brewer.contents.Exists(portion=>portion.specId=="grounds"),Is.False);
+            Assert.That(world.SolidMass(brewer)+world.CoffeeGroundsGrams(brewer.contents.Find(portion=>portion.specId=="coffee")),Is.EqualTo(12));
             Assert.That(world.LiquidVolume(world.Find("m.heater")),Is.EqualTo(0));
         }
         [Test] public void FluidConservationIncludesOverflowAndGroundSpills()
@@ -175,16 +323,34 @@ namespace Spotlight.FreeCafe.Tests
             foreach(var product in world.Catalog.products)
             {
                 var cup=PerfectCup(product.id);var score=world.EvaluateProduction(cup,product);
+                var composition=world.EvaluateProductComposition(cup,product);
+                Assert.That(composition.amountScore,Is.EqualTo(100).Within(.1),product.id);
+                Assert.That(composition.standardScore,Is.EqualTo(100).Within(.1),product.id);
+                Assert.That(composition.total,Is.EqualTo(100).Within(.1),product.id);
+                Assert.That(composition.description,Does.StartWith("精品"),product.id);
                 Assert.That(score.total,Is.EqualTo(100).Within(.1),product.id);Assert.That(score.grade,Is.EqualTo("匠心佳作"));
                 world.DiscardProductionCup();world.SelectServingCup(product.cupSpecId=="cup.small"?"s.cups.small":"s.cups.large");
                 Assert.That(world.EvaluateProduction(world.ServingCup,product).total,Is.EqualTo(0));world.DiscardProductionCup();
             }
         }
-        [Test] public void WrongTemperatureLowersScoreWithoutAdditionOrderGate()
+        [Test] public void ConfiguredCoffeeKindMismatchLowersScoreWithoutAdditionOrderGate()
         {
-            var cup=PerfectCup("latte");var product=world.Product("latte");float score=world.EvaluateProduction(cup,product).total;
-            cup.contents[1].temperature=LiquidTemperature.Room;cup.contents[0].addedSequence=3;
-            Assert.That(world.EvaluateProduction(cup,product).total,Is.LessThan(score));
+            var cup=PerfectCup("latte");var product=world.Product("latte");
+            Assert.That(product.evaluation.amounts[0].coffeeKind,Is.EqualTo("essence"));
+            float score=world.EvaluateProduction(cup,product).total;
+            cup.contents[0].addedSequence=3;cup.contents[1].addedSequence=1;
+            cup.contents.Reverse();
+            foreach(var portion in cup.contents) portion.temperature=LiquidTemperature.Warm;
+            Assert.That(world.EvaluateProduction(cup,product).total,Is.EqualTo(score));
+            var coffee=cup.contents.Find(p=>p.specId=="coffee");
+            coffee.coffeeKind="cold_brew";coffee.temperature=LiquidTemperature.Room;
+            var composition=world.EvaluateProductComposition(cup,product);
+            float remainingIngredientScore=100f*(product.evaluation.amounts.Length-1)/product.evaluation.amounts.Length;
+            Assert.That(composition.amountScore,Is.EqualTo(remainingIngredientScore).Within(.001f));
+            Assert.That(composition.standardScore,Is.EqualTo(remainingIngredientScore).Within(.001f));
+            Assert.That(composition.total,Is.EqualTo(remainingIngredientScore).Within(.001f));
+            Assert.That(world.EvaluateProduction(cup,product).total,Is.EqualTo(composition.total).Within(.001f));
+            Assert.That(composition.total,Is.LessThan(score));
         }
         [Test] public void EmptyCupCanBeDeliveredForRemakeWithoutRefundOrRemovingOrder()
         {
@@ -215,17 +381,25 @@ namespace Spotlight.FreeCafe.Tests
         }
         [Test] public void MiniGameCancellationPreservesContentsAndDiscardInvalidatesToken()
         {
-            var cup=PerfectCup("latte");world.RequestProductionMiniGame();var token=world.State.production.miniGameToken;
-            world.ResolveProductionMiniGame(token,false,0);Assert.That(cup.contents.Count,Is.EqualTo(2));Assert.That(cup.latteArt,Is.False);
+            var cup=PerfectCup("latte");int count=cup.contents.Count;string contents=JsonUtility.ToJson(cup);world.RequestProductionMiniGame();var token=world.State.production.miniGameToken;
+            world.ResolveProductionMiniGame(token,false,0);Assert.That(cup.contents.Count,Is.EqualTo(count));Assert.That(cup.latteArt,Is.False);
+            Assert.That(JsonUtility.ToJson(cup),Is.EqualTo(contents));
             world.RequestProductionMiniGame();token=world.State.production.miniGameToken;world.DiscardProductionCup();
             Assert.That(world.ResolveProductionMiniGame(token,true,100).success,Is.False);
         }
-        [Test] public void VersionThreeRoundTripRestoresLiquidsThermalTimersAndCupIdentity()
+        [Test] public void VersionThreeRoundTripRestoresCelsiusAndCupIdentityWithoutCoolingTimers()
         {
             Heat("s.milk");world.Tick(2);world.SelectServingCup("s.cups.large");world.PourLiquid("m.heater",world.ServingCup.id,40,1);
             var state=Copy();var restored=new CafeWorld(world.Catalog);
             Assert.That(restored.Restore(state).success,Is.True);Assert.That(restored.ProductionEnabled,Is.True);
-            Assert.That(restored.LiquidVolume(restored.ServingCup),Is.EqualTo(40));Assert.That(restored.Find("m.heater").production.remaining,Is.EqualTo(3));
+            Assert.That(restored.LiquidVolume(restored.ServingCup),Is.EqualTo(40));
+            Assert.That(restored.ServingCup.id,Is.EqualTo(world.ServingCup.id));
+            Assert.That(restored.TemperatureCelsius(restored.ServingCup),Is.EqualTo(100).Within(.001f));
+            Assert.That(restored.TemperatureCelsius(restored.Find("m.heater")),Is.EqualTo(100).Within(.001f));
+            Assert.That(restored.Find("m.heater").production.remaining,Is.Zero);
+            restored.Tick(100);
+            Assert.That(restored.TemperatureCelsius(restored.ServingCup),Is.EqualTo(100).Within(.001f));
+            Assert.That(restored.TemperatureCelsius(restored.Find("m.heater")),Is.EqualTo(100).Within(.001f));
         }
         [Test] public void CorruptFluidSnapshotIsRejectedAtomically()
         {

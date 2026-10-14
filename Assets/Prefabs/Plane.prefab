@@ -131,15 +131,16 @@ MonoBehaviour:
   resolution: 512
   fluidResolution: 192
   pressureIterations: 40
-  viscosityIterations: 4
-  viscosity: 0.0004
-  vorticityStrength: 4
-  brushRadius: 0.018
-  pourRate: 4
-  pushStrength: 0.35
-  dragStrength: 0.9
-  velocityDamping: 3
-  diffusion: 0.15
+  viscosityIterations: 6
+  viscosity: 0.00055
+  vorticityStrength: 1.2
+  brushRadius: 0.02
+  pourRate: 5
+  pushStrength: 0.2
+  dragStrength: 0.38
+  velocityDamping: 4.2
+  diffusion: 0.1
+  strokeDepositAssist: 0.03
   requireLeftButton: 1
   showBrushPreview: 1
   wheelRadiusStep: 0.0025
@@ -156,4 +157,3 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: bfa9144905aee0340a44d7103930bb41, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::OnePersonCompany.LatteArtRuntimeControls
-

@@ -37,8 +37,10 @@ namespace Spotlight.FreeCafe.Tests
             entity.x=startX+.5f;string json=app.CaptureJson();entity.x=startX-.5f;app.DebugRefreshViews();
             app.RestoreJson(json);yield return null;
             Assert.That(app.World.Find("m.grinder").x,Is.EqualTo(startX+.5f).Within(.001));
+            float timeout=Time.unscaledTime+3;
+            while(Mathf.Abs(app.areaRoots[1].InverseTransformPoint(view.transform.position).x-(startX+.5f))>=.001f && Time.unscaledTime<timeout) yield return null;
             var local=app.areaRoots[1].InverseTransformPoint(view.transform.position);
-            Assert.That(local.x,Is.EqualTo(startX+.5f).Within(.001));Assert.That(app.View("m.grinder"),Is.SameAs(view));
+            Assert.That(local.x,Is.EqualTo(startX+.5f).Within(.001),"Restored view must converge without replacing the authored instance");Assert.That(app.View("m.grinder"),Is.SameAs(view));
             Assert.That(view.workspaceCaption.transform.parent,Is.SameAs(view.transform));
         }
     }

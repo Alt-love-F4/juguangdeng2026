@@ -63,6 +63,11 @@ MonoBehaviour:
   label: {fileID: 2795929121865913912}
   workspaceCaption: {fileID: 0}
   hitbox: {fileID: 6020012907979864903}
+  dragSmoothTime: 0.055
+  releaseSmoothTime: 0.18
+  maxDragLean: 14
+  leanPerSpeed: 1.6
+  leanSmoothTime: 0.09
 --- !u!61 &6020012907979864903
 BoxCollider2D:
   m_ObjectHideFlags: 0
@@ -107,7 +112,7 @@ BoxCollider2D:
     drawMode: 0
     adaptiveTiling: 0
   m_AutoTiling: 0
-  m_Size: {x: 1.45, y: 1.4}
+  m_Size: {x: 1.45, y: 1.2}
   m_EdgeRadius: 0
 --- !u!1 &1385294124603112700
 GameObject:
@@ -143,7 +148,7 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0.5, y: 0.5}
   m_AnchorMax: {x: 0.5, y: 0.5}
-  m_AnchoredPosition: {x: 0, y: -0.88}
+  m_AnchoredPosition: {x: 0, y: -0.78000003}
   m_SizeDelta: {x: 3.3, y: 0.7}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!23 &3441028619157501140
@@ -935,7 +940,7 @@ Transform:
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
   m_LocalPosition: {x: 0, y: 0, z: 0}
-  m_LocalScale: {x: 0.16347238, y: 0.16347238, z: 1}
+  m_LocalScale: {x: 0.22304833, y: 0.22304833, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 1200539902617797754}

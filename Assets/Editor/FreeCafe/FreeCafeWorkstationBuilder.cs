@@ -102,43 +102,43 @@ namespace Spotlight.FreeCafe.Editor
                 scene = EditorSceneManager.OpenScene(FreeCafeProductionSceneBuilder.ScenePath);
             var runtime = UnityEngine.Object.FindFirstObjectByType<FreeCafeRuntime>();
             if (runtime == null) throw new InvalidOperationException("CoffeeShop 缺少运行时");
-            FreeEntityView extractor = null;
-            foreach (var view in FreeCafeSceneLayout.FindAuthoredEntities(runtime))
-                if (view.AuthoringEntityId == "v.extractor") extractor = view;
-            if (extractor == null) throw new InvalidOperationException("场景缺少 v.extractor");
             var catalog = JsonUtility.FromJson<CafeCatalog>(runtime.catalogAsset.text);
-            var entry = Array.Find(catalog.layout, item => item.id == "v.extractor");
-            var spec = Array.Find(catalog.entities, item => item.id == entry.specId);
-            Directory.CreateDirectory("output/extractor-art");
-            File.Copy(scene.path, "output/extractor-art/CoffeeShop-before-extractor.unity", true);
+            Directory.CreateDirectory("output/split-extractor");
+            File.Copy(scene.path, "output/split-extractor/CoffeeShop-before-split.unity", true);
             FreeCafeArtBinder.Bind();
             runtime.prefabLibrary = FreeCafeEntityPrefabBuilder.EnsureCatalog(catalog, runtime.artLibrary,
-                runtime.entityPrefab, new HashSet<string> { spec.id });
+                runtime.entityPrefab, new HashSet<string> { "container.extractor", "container.extractor.filter" });
+            FreeCafeEntityPrefabBuilder.RebuildAuthoredLayout(runtime, catalog);
             var counter = runtime.areaRoots[(int)AreaId.Counter];
-            Undo.RecordObject(extractor.transform, "Place extraction jug on workstation");
-            Undo.RecordObject(extractor, "Apply extraction jug art");
-            var parentScale = extractor.transform.parent.lossyScale;
-            var counterScale = counter.lossyScale;
-            extractor.transform.localScale = new Vector3(counterScale.x / parentScale.x,
-                counterScale.y / parentScale.y, counterScale.z / parentScale.z);
-            extractor.ConfigureAuthoring(spec, runtime.artLibrary, entry.id, entry.x, entry.y);
-            extractor.transform.position = counter.TransformPoint(new Vector3(entry.x, entry.y, 0));
-            extractor.body.enabled = true;
-            extractor.body.color = Color.white;
-            extractor.label.fontSize = 2.2f;
-            extractor.ConfigureGlassCup();
-            foreach (var component in new UnityEngine.Object[] { extractor, extractor.transform, extractor.body,
-                extractor.body.transform, extractor.hitbox, extractor.label, extractor.label.transform })
+            foreach (var view in FreeCafeSceneLayout.FindAuthoredEntities(runtime))
             {
-                PrefabUtility.RecordPrefabInstancePropertyModifications(component);
-                EditorUtility.SetDirty(component);
+                if (view.PrefabSpecId != "container.extractor" && view.PrefabSpecId != "container.extractor.filter") continue;
+                var entry = Array.Find(catalog.layout, item => item.id == view.AuthoringEntityId);
+                if (entry == null) continue;
+                var spec = Array.Find(catalog.entities, item => item.id == entry.specId);
+                Undo.RecordObject(view.transform, "Place detachable extraction assembly");
+                Undo.RecordObject(view, "Apply extraction assembly art");
+                var parentScale = view.transform.parent.lossyScale;
+                var counterScale = counter.lossyScale;
+                view.transform.localScale = new Vector3(counterScale.x / parentScale.x,
+                    counterScale.y / parentScale.y, counterScale.z / parentScale.z);
+                view.ConfigureAuthoring(spec, runtime.artLibrary, entry.id, entry.x, entry.y);
+                view.transform.position = counter.TransformPoint(new Vector3(entry.x, entry.y, 0));
+                view.body.enabled = true; view.body.color = Color.white; view.label.fontSize = 2.2f;
+                if (spec.id == "container.extractor.filter") view.label.gameObject.SetActive(false);
+                view.ConfigureGlassCup();
+                foreach (var component in new UnityEngine.Object[] { view, view.transform, view.body,
+                    view.body.transform, view.hitbox, view.label, view.label.transform, view.label.gameObject })
+                {
+                    PrefabUtility.RecordPrefabInstancePropertyModifications(component);
+                    EditorUtility.SetDirty(component);
+                }
             }
             EditorUtility.SetDirty(runtime);
             EditorSceneManager.MarkSceneDirty(scene);
-            EditorSceneManager.SaveScene(scene);
             AssetDatabase.SaveAssets();
-            Debug.Log("[Workstation] v.extractor 已使用独立玻璃萃取壶素材，放置于研磨器与咖啡壶之间；碰撞范围 "
-                + extractor.hitbox.size + "，台面坐标 " + new Vector2(entry.x, entry.y));
+            EditorSceneManager.SaveScene(scene);
+            Debug.Log("[Workstation] 可拆滤杯与下壶已组合摆放，独立素材和碰撞体已保存");
         }
 
         private static void SetCard(Transform target, Vector2 anchor, Vector2 position, Vector2 size)
