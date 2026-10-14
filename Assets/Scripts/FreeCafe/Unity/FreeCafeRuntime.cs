@@ -30,7 +30,7 @@ namespace Spotlight.FreeCafe
         public GameObject[] authoringPreviews;
         public CafeWorld World { get; private set; }
         public string SelectedId { get; private set; }
-        public string Hint { get; private set; }="拖出物品，可放在画面内任意位置；Shift 仅摆放，不触发组合。";
+        public string Hint { get; private set; }="杯子可自由摆放；其他器皿松开左右键后归位。Shift 仅摆放，不触发组合。";
         public bool CarrySelection { get; set; }
         public bool ShowAssetIds { get; set; }
         public bool IsDragging => draggedView!=null;
@@ -56,7 +56,8 @@ namespace Spotlight.FreeCafe
         public void OpenPlayerMenu() { if(playerHud!=null) playerHud.OpenPlayerMenu(); }
         private readonly List<string> removeIds=new List<string>();
         private readonly List<RaycastResult> hits=new List<RaycastResult>();
-        private FreeEntityView draggedView,receiver,dragEventOwner;
+        private FreeEntityView draggedView,receiver,dragEventOwner,dragCompanion;
+        private FreeCafeCupStackVisual reservedCupStack;
         private int dragPointerId;
         private string dragItemId,dragSourceId,dragMachineId,dragOutputId,confirmCancelId;
         private bool committingDrag;
@@ -104,7 +105,7 @@ namespace Spotlight.FreeCafe
             }
             if(customerIdentitySource!=null && !(customerIdentitySource is ICafeCustomerIdentitySource))
                 throw new InvalidOperationException("Customer identity source 必须实现 ICafeCustomerIdentitySource");
-            var authored = FreeCafeSceneLayout.FindAuthoredEntities(this);
+            var authored = FreeCafeSceneLayout.FindAuthoredEntities(this, includeInactive: false);
             var catalog = JsonUtility.FromJson<CafeCatalog>(catalogAsset.text);
             var extractionConfig=GetComponent<FreeCafeExtractionConfig>();
             if(extractionConfig!=null) extractionConfig.Apply(catalog.production);
@@ -206,7 +207,7 @@ namespace Spotlight.FreeCafe
                     view=CreateEntityView(entity.specId,entity.area); view.name=entity.id; views[entity.id]=view;
                     view.Bind(this,entity);
                 }
-                if(view!=draggedView)
+                if(view!=draggedView && view!=dragCompanion)
                 {
                     if(view.transform.parent!=areaRoots[(int)entity.area]) view.transform.SetParent(areaRoots[(int)entity.area],true);
                     view.Refresh(entity);
@@ -289,15 +290,25 @@ namespace Spotlight.FreeCafe
             if(World.ProductionEnabled && entity.specId=="tool.latte-art") { Report(World.RequestProductionMiniGame()); return; }
             if(World.ProductionEnabled && World.IsMilkPitcher(entity)) { SelectedId=entity.id; Report(World.FrothMilk(entity.id)); return; }
             if(World.ProductionEnabled && spec.Has(Capability.Source) && World.Spec(spec.sourceItemId).Has(Capability.Container))
-            { Report(World.SelectServingCup(entity.id)); return; }
+            {
+                var stack = view.GetComponent<FreeCafeCupStackVisual>();
+                var start = stack != null ? stack.TopPosition : view.transform.position;
+                var previous = World.ServingCup;
+                var result = World.SelectServingCup(entity.id);
+                if (result.success && World.ServingCup != null && World.ServingCup != previous)
+                    View(World.ServingCup.id)?.StartMotionFrom(start);
+                Report(result); return;
+            }
             if(World.ProductionEnabled && spec.Has(Capability.Processor))
             { SelectedId=entity.id; Report(World.OperateProduction(entity.id)); return; }
             if(spec.Has(Capability.Source))
             {
+                var stack = view.GetComponent<FreeCafeCupStackVisual>();
+                var pickupPosition = stack != null ? stack.TopPosition : view.transform.position;
                 var result=World.Take(entity.id,entity.area,entity.x,entity.y-1.4f,out var item);
                 if(result.success)
                 {
-                    View(item.id)?.StartMotionFrom(view.transform.position);
+                    View(item.id)?.StartMotionFrom(pickupPosition);
                     Select(item.id);
                 }
                 Report(result);
@@ -375,6 +386,7 @@ namespace Spotlight.FreeCafe
                 ShowHint("请先向拉花杯加入牛奶，点击拉花杯制成奶泡后，再拖到杯子上拉花");
                 return;
             }
+            if(World.CupAbove(entity)!=null) { ShowHint("请先取走最上面的杯子"); return; }
             if(World.Locked(entity)) { ShowHint("正在加工，点击设备可中止"); return; }
             if(World.ProductionEnabled && World.IsContainer(entity))
             { World.SuspendContainerHeating(entity.id); draggingVessel=true; dragItemId=entity.id; draggedView=view; SelectedId=entity.id; }
@@ -406,6 +418,16 @@ namespace Spotlight.FreeCafe
             }
             else if(spec.Has(Capability.Movable)) { dragItemId=entity.id; draggedView=view; SelectedId=entity.id; }
             else return;
+            if (dragSourceId != null)
+            {
+                reservedCupStack = view.GetComponent<FreeCafeCupStackVisual>();
+                if (reservedCupStack != null) draggedView.transform.position = reservedCupStack.TopPosition;
+            }
+            else if (dragItemId != null && !string.IsNullOrEmpty(entity.cupStackBelowId))
+            {
+                var belowView = View(entity.cupStackBelowId);
+                if (belowView != null) reservedCupStack = belowView.GetComponent<FreeCafeCupStackVisual>();
+            }
             dragEventOwner=view; dragPointerId=e.pointerId;
             dragCamera=inputCamera;origin=draggedView.transform.position;
             dragPlane=new Plane(Vector3.forward,origin);
@@ -414,6 +436,19 @@ namespace Spotlight.FreeCafe
             var pressPosition=e.pointerPressRaycast.module!=null ? e.pressPosition : e.position;
             if(!TryToWorld(pressPosition,out var point)) { CancelDrag();ShowHint("鼠标射线无法命中实体所在平面");return; }
             offset=origin-point;
+            if (dragItemId != null && World.ProductionEnabled && (World.IsPrecisionExtractor(entity) || World.IsExtractionFilter(entity)))
+            {
+                var prepared = World.PrepareExtractionDrag(entity.id);
+                if (!prepared.success) { CancelDrag(); ShowHint(prepared.message); return; }
+                var jug = World.IsExtractionFilter(entity) ? World.ExtractionJug(entity) : null;
+                if (jug != null)
+                {
+                    World.SuspendContainerHeating(jug.id);
+                    dragCompanion = View(jug.id);
+                    if (dragCompanion != null) dragCompanion.hitbox.enabled = false;
+                }
+            }
+            if (reservedCupStack != null) reservedCupStack.ReserveTopCup(true);
             draggedView.BeginPointerMotion();
             draggedView.hitbox.enabled=false; MoveDrag(e);
         }
@@ -437,7 +472,7 @@ namespace Spotlight.FreeCafe
             {
                 if(hit.gameObject.GetComponentInParent<Canvas>()!=null) { overUI=true; return; }
                 var view=hit.gameObject.GetComponentInParent<FreeEntityView>();
-                if(view!=null && view!=draggedView)
+                if(view!=null && view!=draggedView && view!=dragCompanion)
                 {
                     var entity=World.Find(view.EntityId);
                     if(entity!=null && entity.area==World.State.currentArea && World.IsReceiver(entity)) receiver=view;
@@ -526,6 +561,9 @@ namespace Spotlight.FreeCafe
                 foreach (var entity in World.State.entities) previousIds.Add(entity.id);
             }
             // Defer synchronization until the transaction can hand off the visible drag object.
+            bool cupPickup = sourceId != null && reservedCupStack != null;
+            bool returnedCup = World.IsCup(World.Find(itemId)) && receiver != null
+                && World.Spec(World.Find(receiver.EntityId).specId).sourceItemId == ghost.PrefabSpecId;
             bool wasVessel=draggingVessel; bool wasTilted=vesselWasTilted; ClearDrag(); ActionResult result;
             committingDrag = true;
             try
@@ -540,9 +578,15 @@ namespace Spotlight.FreeCafe
                 }
                 else if(wasVessel && !wasTilted && targetId!=null && World.Find(targetId)?.specId=="machine.stove") result=World.Interact(itemId,targetId);
                 else if(wasVessel && targetId!=null && World.Spec(World.Find(targetId).specId).Has(Capability.Delivery) && World.Spec(World.Find(itemId).specId).Has(Capability.Container)) result=World.Interact(itemId,targetId);
-                else if(wasVessel && wasTilted) result=ActionResult.Yes("容器已归位；按实际倒出量消耗液体");
+                else if(wasVessel && World.ShouldReturnVessel(World.Find(itemId)) && (wasTilted || placeOnly || targetId==null)) result=ActionResult.Yes("器皿松手归位");
+                else if(wasVessel && wasTilted) result=World.Move(itemId,World.State.currentArea,position.x,position.y);
                 else if(targetId!=null && !placeOnly) result=World.Interact(itemId,targetId);
                 else result=World.Move(itemId,World.State.currentArea,position.x,position.y);
+                var released=World.Find(itemId);
+                if(World.ShouldReturnVessel(released))
+                {
+                    World.ReturnVesselHome(itemId);
+                }
             }
             finally { committingDrag = false; }
             if (result.success && (sourceId != null || machineId != null))
@@ -556,6 +600,7 @@ namespace Spotlight.FreeCafe
                     if (views.TryGetValue(placed.id, out var oldView) && oldView != ghost) { oldView.RetireInteraction(); Destroy(oldView.gameObject); }
                     views[placed.id] = ghost; ghost.name = placed.id; ghost.Bind(this, placed);
                 }
+                else if (cupPickup) RetireDragPreview(ghost);
                 else ghost.AnimateReturn(dropPosition,rejectedTarget != null ? rejectedTarget.transform.position : origin,true);
             }
             else if (result.success && itemId != null)
@@ -564,21 +609,39 @@ namespace Spotlight.FreeCafe
                 if (item == null || !string.IsNullOrEmpty(item.ownerId))
                 {
                     views.Remove(itemId);
-                    ghost.AnimateReturn(dropPosition,rejectedTarget != null ? rejectedTarget.transform.position : origin,true);
+                    if (returnedCup) RetireDragPreview(ghost);
+                    else ghost.AnimateReturn(dropPosition,rejectedTarget != null ? rejectedTarget.transform.position : origin,true);
                 }
             }
             SyncViews();
             if(!result.success)
             {
                 if(rejectedTarget!=null) rejectedTarget.RejectDrop();
-                if(ghost!=null) ghost.AnimateReturn(dropPosition,origin,sourceId!=null || machineId!=null);
+                if (cupPickup) RetireDragPreview(ghost);
+                else if(ghost!=null)
+                {
+                    var released=World.Find(itemId);
+                    var home=World.ShouldReturnVessel(released) ? AreaToWorld(released.area,released.x,released.y) : origin;
+                    ghost.AnimateReturn(dropPosition,home,sourceId!=null || machineId!=null);
+                }
             }
             Report(result);
+        }
+        private void RetireDragPreview(FreeEntityView preview)
+        {
+            preview.RetireInteraction(); preview.gameObject.SetActive(false); Destroy(preview.gameObject);
         }
         private void ClearDrag()
         {
             if(draggingVessel) StopVesselPour();
             ReleasePourTarget();
+            if (reservedCupStack != null) reservedCupStack.ReserveTopCup(false);
+            reservedCupStack = null;
+            if (dragCompanion != null)
+            {
+                dragCompanion.hitbox.enabled = World.Find(dragCompanion.EntityId)?.area == World.State.currentArea;
+                dragCompanion = null;
+            }
             draggingVessel=false; pouredThisDrag=false; vesselTiltMode=false; vesselWasTilted=false;
             if(receiver!=null) receiver.SetDropTarget(false,false);
             if(draggedView!=null) { draggedView.EndPointerMotion(); draggedView.PresentPour(0,false); }
@@ -588,8 +651,14 @@ namespace Spotlight.FreeCafe
         public void CancelDrag()
         {
             if(!IsDragging) return;
-            var view=draggedView; bool provisional=dragSourceId!=null || dragMachineId!=null; ClearDrag();
-            view.AnimateReturn(view.transform.position,origin,provisional);
+            bool cupPickup = dragSourceId != null && reservedCupStack != null;
+            var view=draggedView; string id=dragItemId; bool provisional=dragSourceId!=null || dragMachineId!=null; ClearDrag();
+            var released=World.Find(id);
+            var returnPosition=origin;
+            if(World.ShouldReturnVessel(released))
+            { World.ReturnVesselHome(id); returnPosition=AreaToWorld(released.area,released.x,released.y); }
+            if (cupPickup) RetireDragPreview(view);
+            else view.AnimateReturn(view.transform.position,returnPosition,provisional);
             SyncViews(); ShowHint("拖拽取消，库存不变");
         }
         public void Enter(AreaId area)
@@ -630,7 +699,7 @@ namespace Spotlight.FreeCafe
             bool rightHeld=mouse.rightButton.isPressed && !World.IsMilkPitcher(World.Find(dragItemId));
             if(rightHeld && !vesselTiltMode) BeginVesselTilt();
             pointerScreen=mouse.position.ReadValue();
-            if(!rightHeld && !vesselTiltMode && mouse.leftButton.wasReleasedThisFrame)
+            if(!rightHeld && !vesselTiltMode && !mouse.leftButton.isPressed)
             {
                 if(vesselPointer==null) vesselPointer=new PointerEventData(EventSystem.current);
                 vesselPointer.position=pointerScreen;
@@ -644,8 +713,13 @@ namespace Spotlight.FreeCafe
                 draggedView.PresentPour(0,false);
                 if(!mouse.leftButton.isPressed)
                 {
-                    ClearDrag(); SyncViews();
-                    ShowHint("壶已归位；按实际倒出量消耗液体");
+                    var releasedId=dragItemId;
+                    var releasedPosition=WorldToArea(World.State.currentArea,draggedView.DragPosition);
+                    ClearDrag();
+                    if(World.ShouldReturnVessel(World.Find(releasedId))) World.ReturnVesselHome(releasedId);
+                    else if(World.IsCup(World.Find(releasedId))) World.Move(releasedId,World.State.currentArea,releasedPosition.x,releasedPosition.y);
+                    SyncViews();
+                    ShowHint(World.IsCup(World.Find(releasedId)) ? "杯子留在当前位置；按实际倒出量消耗液体" : "壶已归位；按实际倒出量消耗液体");
                     return;
                 }
                 vesselPointer.position=pointerScreen;

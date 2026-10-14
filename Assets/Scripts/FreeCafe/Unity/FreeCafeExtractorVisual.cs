@@ -2,9 +2,12 @@ using UnityEngine;
 
 namespace Spotlight.FreeCafe
 {
+    [DefaultExecutionOrder(100)]
     [RequireComponent(typeof(FreeEntityView))]
     public sealed class FreeCafeExtractorVisual : MonoBehaviour
     {
+        [Tooltip("Use the supplied split PSD artwork without the legacy placeholder animations.")]
+        public bool staticArtwork;
         private FreeEntityView view;
         private Transform assembly;
         private SpriteRenderer lid, grounds;
@@ -29,6 +32,20 @@ namespace Spotlight.FreeCafe
             var entity = world.Find(view.EntityId);
             if (entity == null) return;
             bool filter = world.IsExtractionFilter(entity);
+            var upper = world.ExtractionFilter(entity);
+            var upperView = upper != null ? view.Runtime.View(upper.id) : null;
+            if (upperView != null && view.Runtime.DraggedView == upperView)
+            {
+                var offset = new Vector3(world.Catalog.production.extractionFilterOffsetX, world.Catalog.production.extractionFilterOffsetY, 0);
+                transform.position = upperView.transform.position - transform.parent.TransformVector(offset);
+                view.body.sortingOrder = upperView.body.sortingOrder - 1;
+            }
+            if (staticArtwork)
+            {
+                UpperWaterMl = world.LiquidVolume(entity);
+                if (assembly != null) assembly.gameObject.SetActive(false);
+                return;
+            }
             if (!filter && !world.IsPrecisionExtractor(entity)) return;
             if (assembly == null) Build(filter);
             var jug = world.ExtractionJug(entity);
@@ -83,8 +100,6 @@ namespace Spotlight.FreeCafe
                 drops.SetPosition(0, Vector3.Lerp(start, end, fall));
                 drops.SetPosition(1, Vector3.Lerp(start, end, Mathf.Min(1, fall + .17f)));
             }
-            if (jug != null && view.Runtime.DraggedView == view.Runtime.View(jug.id))
-                transform.position = view.Runtime.View(jug.id).transform.position + new Vector3(-.22f, .91f, 0);
             lid.sortingOrder = view.body.sortingOrder + 4;
             grounds.sortingOrder = view.body.sortingOrder + 1;
             liquidRenderer.sortingOrder = view.body.sortingOrder + 2;

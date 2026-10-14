@@ -10,10 +10,11 @@ namespace Spotlight.FreeCafe
         {
             Catalog.production = Catalog.production ?? new ProductionSettings();
             var p = Catalog.production;
+            if (!Finite(p.extractionFilterOffsetX)) throw new ArgumentException("精粹壶横向偏移必须是有限数");
             foreach (float value in new[] { p.grindSeconds, p.grindClickAdvance, p.grindClickCooldown, p.heatSeconds, p.boilingSeconds,
                 p.warmSeconds, p.portionMl, p.pourRateMl, p.brewIdealSeconds, p.brewGoldSeconds, p.brewGreenSeconds,
                 p.brewIdealMl, p.brewGoldMl, p.brewGreenMl, p.kettleCapacityMl, p.brewReferenceGroundsGrams,
-                p.filterDrainMlPerSecond, p.filterResidenceSeconds })
+                p.filterDrainMlPerSecond, p.filterResidenceSeconds, p.extractionFilterOffsetY })
                 if (!Finite(value) || value <= 0) throw new ArgumentException("制作参数必须为有限正数");
             foreach (float value in new[] { p.ambientTemperatureCelsius, p.warmTemperatureCelsius, p.boilingTemperatureCelsius,
                 p.hotThresholdCelsius, p.boilingThresholdCelsius, p.heatingTargetCelsius })
@@ -86,6 +87,8 @@ namespace Spotlight.FreeCafe
                 }
                 entity.production = entity.production ?? new ProductionEntityState();
                 var d = entity.production;
+                if (d.selfHeating && (entity.specId != "machine.heater" || d.phase != ProductionPhase.Processing))
+                    return ActionResult.No("自加热状态无效：" + entity.id);
                 if (!Enum.IsDefined(typeof(ProductionPhase), d.phase) || !Finite(d.remaining) || d.remaining < 0
                     || !Finite(d.clickCooldown) || d.clickCooldown < 0 || !Finite(d.brewElapsed) || d.brewElapsed < 0
                     || !Finite(d.brewPourSeconds) || d.brewPourSeconds < 0

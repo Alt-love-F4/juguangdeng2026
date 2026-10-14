@@ -270,6 +270,7 @@ namespace Spotlight.FreeCafe
     {
         public string id;     // 实体 id（free_ / order_ 前缀由分配器生成）
         public string specId; // 规格 id
+        public string cupStackBelowId; // Empty cups nest without merging their identities/contents.
         public string ownerId; // 若材料被锁在设备内，这里是设备 id
         public string npcId;  // 旧版 NPC 数据兼容；不等同于 NCS 角色标识
         public CafePersonIdentity person; // 人物身份，与座位 / 订单 / GameObject 生命周期分离

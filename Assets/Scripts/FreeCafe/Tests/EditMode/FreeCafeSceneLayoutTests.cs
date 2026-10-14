@@ -70,6 +70,33 @@ namespace Spotlight.FreeCafe.Tests
             catalog.layout=FreeCafeSceneLayout.Capture(runtime);FreeCafeSceneLayout.FitAuthoredBounds(runtime,catalog,FreeCafeSceneLayout.FindAuthoredEntities(runtime));var world=new CafeWorld(catalog);
             Assert.That(world.Find("s.honey"),Is.Null);
         }
+        [Test] public void DisabledEntityIsExcludedFromStartupButStillDiscoverableForEditorTools()
+        {
+            var view=Find("s.honey");view.gameObject.SetActive(false);
+            Assert.That(FreeCafeSceneLayout.FindAuthoredEntities(runtime).Contains(view),Is.True);
+            var authored=FreeCafeSceneLayout.FindAuthoredEntities(runtime,includeInactive:false);
+            Assert.That(authored.Contains(view),Is.False);
+            catalog.layout=FreeCafeSceneLayout.Capture(runtime,authored);
+            FreeCafeSceneLayout.FitAuthoredBounds(runtime,catalog,authored);
+            Assert.That(new CafeWorld(catalog).Find("s.honey"),Is.Null);
+        }
+        [Test] public void DisabledParentGroupExcludesItsEntitiesFromStartup()
+        {
+            var view=Find("s.honey");var group=new GameObject("DisabledLayoutGroup").transform;
+            SceneManager.MoveGameObjectToScene(group.gameObject,preview);
+            group.SetParent(view.transform.parent,false);view.transform.SetParent(group,true);
+            group.gameObject.SetActive(false);
+            Assert.That(view.gameObject.activeSelf,Is.True);
+            Assert.That(FreeCafeSceneLayout.FindAuthoredEntities(runtime,includeInactive:false).Contains(view),Is.False);
+        }
+        [Test] public void AreaInitializationPreservesDisabledRootAndExcludesItsEntities()
+        {
+            var view=Find("s.honey");var root=FreeCafeSceneLayout.NearestAreaRoot(runtime,view.transform);
+            root.gameObject.SetActive(false);
+            runtime.areaManager.Initialize(runtime.worldCamera);
+            Assert.That(root.gameObject.activeSelf,Is.False);
+            Assert.That(FreeCafeSceneLayout.FindAuthoredEntities(runtime,includeInactive:false).Contains(view),Is.False);
+        }
         [Test] public void ManualRepairDoesNotResetEditedPositionParentScaleOrCreateDuplicates()
         {
             var view=Find("m.grinder");var group=new GameObject("UserGrouping").transform;

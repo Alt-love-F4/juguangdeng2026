@@ -66,7 +66,7 @@ namespace Spotlight.FreeCafe.Tests
             Assert.That(world.ExtractionFilter(jug),Is.SameAs(filter));
             Assert.That(app.View(filter.id).CanInteract,Is.True);
             Assert.That(world.SolidMass(filter),Is.EqualTo(3).Within(.001));
-            Assert.That(app.View(jug.id).transform.Find("ExtractionAssembly/LowerJugLid").GetComponent<SpriteRenderer>().enabled,Is.False);
+            Assert.That(app.View(jug.id).transform.Find("ExtractionAssembly"),Is.Null);
             app.View(filter.id).SetReceivingPour(true);yield return new WaitForSecondsRealtime(.2f);
             Assert.That(app.ContainerPanels.GetComponentsInChildren<TMP_Text>().Length,Is.GreaterThan(0));
             Assert.That(world.PourLiquid("m.heater",filter.id,50,1.875f).success,Is.True);world.Tick(1.875f);world.FinishPour(filter.id);
@@ -102,15 +102,15 @@ namespace Spotlight.FreeCafe.Tests
             world.PourLiquid("m.heater", "v.extractor", 10, .375f); yield return null;
             Assert.That(visual.UpperWaterMl, Is.EqualTo(10));
             world.Tick(.375f); yield return null;
-            Assert.That(visual.UpperWaterMl, Is.Zero.Within(.001f)); Assert.That(visual.Dripping, Is.True);
+            Assert.That(visual.UpperWaterMl, Is.Zero.Within(.001f)); Assert.That(visual.Dripping, Is.False, "Supplied PSD art has no new animation in this pass");
             for (int index = 0; index < 19; index++) { world.PourLiquid("m.heater", "v.extractor", 10, .375f); world.Tick(.375f); }
             world.FinishPour("v.extractor"); world.Tick(.2f); yield return new WaitForSecondsRealtime(.2f);
             Assert.That(world.ExtractionFilter(world.Find("v.extractor")), Is.Null);
-            Assert.That(app.View("v.extractor").transform.Find("ExtractionAssembly/LowerJugLid").GetComponent<SpriteRenderer>().enabled, Is.True);
+            Assert.That(app.View("v.extractor").transform.Find("ExtractionAssembly"), Is.Null);
             Assert.That(world.CanPour(world.Find("v.extractor")), Is.True);
         }
 
-        [UnityTest] public IEnumerator AHotKettleNearbyOpensFilterLidAndConsumedViewsDisappearPromptly()
+        [UnityTest] public IEnumerator SuppliedFilterRemainsStaticAndConsumedViewsDisappearPromptly()
         {
             Water(); var entity = app.World.Find("m.heater"); var heater = app.View(entity.id);
             var pointer = new PointerEventData(EventSystem.current)
@@ -119,7 +119,7 @@ namespace Spotlight.FreeCafe.Tests
             heater.transform.position = app.View("v.extractor.filter").transform.position + Vector3.up * .5f;
             heater.FreezePointerMotion();
             yield return new WaitForSecondsRealtime(.15f);
-            Assert.That(app.View("v.extractor.filter").GetComponent<FreeCafeExtractorVisual>().LidOpen, Is.True);
+            Assert.That(app.View("v.extractor.filter").GetComponent<FreeCafeExtractorVisual>().LidOpen, Is.False);
             app.CancelDrag(); yield return new WaitForSecondsRealtime(.15f);
             Assert.That(app.View("v.extractor.filter").GetComponent<FreeCafeExtractorVisual>().LidOpen, Is.False);
             var ghost = Object.Instantiate(app.entityPrefab);
@@ -128,17 +128,34 @@ namespace Spotlight.FreeCafe.Tests
             Assert.That(ghost == null, Is.True);
         }
 
+        private void CaptureCamera(string path)
+        {
+            var camera = app.worldCamera; var prior = camera.targetTexture; var active = RenderTexture.active; float aspect = camera.aspect;
+            var rt = new RenderTexture(1920, 1080, 24); var texture = new Texture2D(1920, 1080, TextureFormat.RGB24, false);
+            try
+            {
+                camera.targetTexture = rt; camera.aspect = 16f / 9; camera.Render(); RenderTexture.active = rt;
+                texture.ReadPixels(new Rect(0, 0, 1920, 1080), 0, 0); texture.Apply();
+                File.WriteAllBytes(path, texture.EncodeToPNG());
+            }
+            finally
+            {
+                camera.targetTexture = prior; camera.aspect = aspect; RenderTexture.active = active;
+                Object.Destroy(rt); Object.Destroy(texture);
+            }
+        }
+
         [UnityTest] public IEnumerator CaptureSplitExtractionStages()
         {
             string folder = Path.GetFullPath("output/split-extractor"); Directory.CreateDirectory(folder);
             yield return new WaitForSecondsRealtime(.3f);
-            ScreenCapture.CaptureScreenshot(Path.Combine(folder, "assembled.png"));
+            CaptureCamera(Path.Combine(folder, "assembled.png"));
             yield return new WaitForSecondsRealtime(.3f);
             Grounds(); Water();
             app.World.PourLiquid("m.heater", "v.extractor", 15, .5625f);
             app.View("v.extractor.filter").SetReceivingPour(true); app.View("v.extractor").SetHovered(true);
             yield return new WaitForSecondsRealtime(.3f);
-            ScreenCapture.CaptureScreenshot(Path.Combine(folder, "pouring.png"));
+            CaptureCamera(Path.Combine(folder, "pouring.png"));
             yield return new WaitForSecondsRealtime(.3f);
             app.World.Tick(.5625f);
             for (int index = 0; index < 13; index++)
@@ -146,7 +163,7 @@ namespace Spotlight.FreeCafe.Tests
             app.World.FinishPour("v.extractor"); app.World.Tick(.2f);
             app.View("v.extractor.filter").SetReceivingPour(false);
             yield return new WaitForSecondsRealtime(.3f);
-            ScreenCapture.CaptureScreenshot(Path.Combine(folder, "completed.png"));
+            CaptureCamera(Path.Combine(folder, "completed.png"));
             yield return new WaitForSecondsRealtime(.3f);
             Assert.That(File.Exists(Path.Combine(folder, "completed.png")), Is.True);
         }

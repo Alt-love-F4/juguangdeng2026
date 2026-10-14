@@ -94,7 +94,7 @@ namespace Spotlight.FreeCafe
         public string ProductionCaption(WorldEntity entity)
         {
             if (entity == null) return "空";
-            if (IsContainer(entity)) return entity.production.phase == ProductionPhase.Processing ? "加热中 " + entity.production.remaining.ToString("0.0") + " s" : ContainerDescription(entity);
+            if (IsContainer(entity)) return entity.production.phase == ProductionPhase.Processing ? (entity.production.selfHeating ? "自加热中 " : "加热中 ") + entity.production.remaining.ToString("0.0") + " s" : ContainerDescription(entity) + (entity.specId == "machine.heater" ? " · 点击自加热" : "");
             if (entity.specId == "machine.stove") return "放置容器 · 点击加热";
             var d = entity.production;
             if (entity.specId == "machine.brewer" && d.phase == ProductionPhase.Loaded)
@@ -161,8 +161,8 @@ namespace Spotlight.FreeCafe
             if (old != null)
             {
                 oldSource = State.entities.Find(e => e.area == old.area && IsCupSource(Spec(e.specId))
-                    && Spec(e.specId).sourceItemId == old.specId && e.stock < Spec(e.specId).initialStock);
-                if (oldSource == null) return ActionResult.No("原杯型杯堆已满或不存在，无法归还旧杯");
+                    && Spec(e.specId).sourceItemId == old.specId);
+                if (oldSource == null) return ActionResult.No("找不到原杯型杯堆，无法归还旧杯");
                 valid = Preview(old, oldSource);
                 if (!valid.success) return valid;
             }
@@ -232,6 +232,7 @@ namespace Spotlight.FreeCafe
             if (!IsProductionMachine(machine)) return ActionResult.No("无效设备");
             var data = machine.production;
             if (machine.specId == "machine.stove") return StartStove(machine);
+            if (machine.specId == "machine.heater") return StartSelfHeating(machine.id);
             if (IsProductionVessel(machine)) return ActionResult.Yes("把壶放到炉台上，点击炉台加热");
             if (data.phase == ProductionPhase.Empty) return ActionResult.No("先拖入一份原料");
             if (data.phase == ProductionPhase.Loaded)
@@ -271,6 +272,7 @@ namespace Spotlight.FreeCafe
             else
             {
                 data.phase = ProductionPhase.Room;
+                data.selfHeating = false;
                 SetContainerTemperature(machine, Math.Max(TemperatureCelsius(machine), Prep.heatingTargetCelsius));
                 MixContainer(machine);
                 RefreshContainerTemperature(machine);
@@ -297,11 +299,11 @@ namespace Spotlight.FreeCafe
             {
                 if (!IsProductionMachine(entity) && !IsContainer(entity)) continue;
                 if (entity.specId == "machine.stove") continue;
-                if (IsContainer(entity) && entity.production.phase == ProductionPhase.Processing)
+                if (IsContainer(entity) && !(entity.specId == "machine.heater" && entity.production.selfHeating) && entity.production.phase == ProductionPhase.Processing)
                 {
                     var stove = State.entities.Find(candidate => candidate.specId == "machine.stove" && candidate.production.heatingVesselId == entity.id);
                     if (stove == null || stove.area != entity.area || Math.Abs(entity.x - stove.x) > .8f || Math.Abs(entity.y - StoveDockHeight(entity, stove)) > .7f)
-                    { entity.production.phase = ProductionPhase.Room; RefreshContainerTemperature(entity); changed = true; continue; }
+                    { entity.production.phase = ProductionPhase.Room; entity.production.selfHeating = false; RefreshContainerTemperature(entity); changed = true; continue; }
                 }
                 var d = entity.production; d.clickCooldown = Math.Max(0, d.clickCooldown - seconds);
                 // Only active processing consumes time. Warm/Boiling never cool automatically.
@@ -351,6 +353,7 @@ namespace Spotlight.FreeCafe
             if (target != null && ExtractionFilter(target) != null) target = ExtractionFilter(target);
             if (!CanPour(source) || !Finite(requestedMl) || requestedMl <= 0 || !Finite(seconds) || seconds <= 0)
                 return ActionResult.No("当前不能倾倒");
+            if (IsCup(target) && (CupAbove(target) != null || !string.IsNullOrEmpty(target.cupStackBelowId))) return ActionResult.No("请先从杯堆取出杯子再倾倒");
             if (source == target || target != null && (source.area != target.area || !IsContainer(target))) return ActionResult.No("目标无效");
             if (MiniGameUses(source) || MiniGameUses(target))
                 return ActionResult.No("小游戏期间不能改变内容");

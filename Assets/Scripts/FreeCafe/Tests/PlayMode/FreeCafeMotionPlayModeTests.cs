@@ -242,11 +242,12 @@ namespace Spotlight.FreeCafe.Tests
             InputSystem.QueueStateEvent(mouse, state);
         }
 
-        [UnityTest] public IEnumerator QueuedLeftMouseDragsKettleOntoStoveWithoutEnteringTiltMode()
+        [UnityTest] public IEnumerator QueuedLeftMouseReturnsKettleHomeAfterStoveDropWithoutEnteringTiltMode()
         {
             Assert.That(app.World.EnterProduction().success, Is.True);
             Assert.That(app.World.TakeAndInteract("s.water", "m.heater", AreaId.Counter, 0, 0).success, Is.True);
             var kettle = app.World.Find("m.heater"); var stove = app.World.Find("m.stove"); var view = app.View(kettle.id);
+            float homeX = kettle.x, homeY = kettle.y;
             Physics2D.SyncTransforms();
             Vector2 start = app.worldCamera.WorldToScreenPoint(view.transform.position);
             Vector2 end = app.worldCamera.WorldToScreenPoint(app.AreaToWorld(AreaId.Counter, stove.x, stove.y));
@@ -259,33 +260,34 @@ namespace Spotlight.FreeCafe.Tests
             Assert.That(app.World.LiquidVolume(kettle), Is.EqualTo(200), "Plain left dragging must not pour");
             QueueMouse(end, false); yield return null; yield return null;
             Assert.That(app.IsDragging, Is.False, "Left release must end the drag through UpdateVesselInput");
-            Assert.That(stove.production.heatingVesselId, Is.EqualTo(kettle.id), "Real input release must commit the stove receiver");
-            Assert.That(kettle.x, Is.EqualTo(stove.x));
-            float dockHeight = stove.y + app.World.Spec(stove.specId).height * .45f + app.World.Spec(kettle.specId).height * .5f;
-            Assert.That(kettle.y, Is.EqualTo(dockHeight).Within(.001f));
+            // Supplied silver kettle now heats itself; non-cups cannot remain on a dropped location.
+            Assert.That(stove.production.heatingVesselId, Is.Null);
+            Assert.That(kettle.x, Is.EqualTo(homeX));
+            Assert.That(kettle.y, Is.EqualTo(homeY).Within(.001f));
             Assert.That(app.World.LiquidVolume(kettle), Is.EqualTo(200));
             Assert.That(app.View(kettle.id), Is.SameAs(view));
             yield return WaitForPosition(view, kettle.x, kettle.y);
         }
 
-        [UnityTest] public IEnumerator KettleStoveDockCommitsImmediatelyAndMovesTheSameViewSmoothly()
+        [UnityTest] public IEnumerator ReusableKettleReturnsHomeOnReleaseAndClickSelfHeatsTheSameView()
         {
             Assert.That(app.World.EnterProduction().success, Is.True);
             Assert.That(app.World.TakeAndInteract("s.water", "m.heater", AreaId.Counter, 0, 0).success, Is.True);
             var kettle = app.World.Find("m.heater"); var stove = app.World.Find("m.stove"); var view = app.View(kettle.id);
+            float homeX = kettle.x, homeY = kettle.y;
             Vector3 visible = view.transform.position;
             Assert.That(Vector3.Distance(visible, app.AreaToWorld(AreaId.Counter, stove.x, stove.y)), Is.GreaterThan(.1f));
             Physics2D.SyncTransforms(); app.BeginDrag(view, Pointer(kettle.x, kettle.y));
             Assert.That(app.IsDragging, Is.True); app.EndDrag(Pointer(stove.x, stove.y));
             Assert.That(app.IsDragging, Is.False);
-            Assert.That(stove.production.heatingVesselId, Is.EqualTo(kettle.id));
-            Assert.That(kettle.x, Is.EqualTo(stove.x));
-            float dockHeight = stove.y + app.World.Spec(stove.specId).height * .45f + app.World.Spec(kettle.specId).height * .5f;
-            Assert.That(kettle.y, Is.EqualTo(dockHeight).Within(.001f));
-            Assert.That(app.View(kettle.id), Is.SameAs(view)); Assert.That(view.transform.position, Is.EqualTo(visible), "Stove docking must not teleport");
+            // Supplied silver kettle now heats itself; non-cups cannot remain on a dropped location.
+            Assert.That(stove.production.heatingVesselId, Is.Null);
+            Assert.That(kettle.x, Is.EqualTo(homeX));
+            Assert.That(kettle.y, Is.EqualTo(homeY).Within(.001f));
+            Assert.That(app.View(kettle.id), Is.SameAs(view)); Assert.That(view.transform.position, Is.EqualTo(visible), "Home return must preserve the existing view");
             app.DebugRefreshViews(); Assert.That(view.transform.position, Is.EqualTo(visible));
             yield return WaitForPosition(view, kettle.x, kettle.y);
-            app.Click(app.View(stove.id));
+            app.Click(app.View(kettle.id));
             Assert.That(kettle.production.phase, Is.EqualTo(ProductionPhase.Processing));
             app.World.Tick(4); yield return null;
             Assert.That(kettle.contents[0].temperature, Is.EqualTo(LiquidTemperature.Boiling));

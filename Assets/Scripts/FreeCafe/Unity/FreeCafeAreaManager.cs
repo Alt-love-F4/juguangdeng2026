@@ -48,8 +48,7 @@ namespace Spotlight.FreeCafe
                 var entry=areas[i];
                 if(entry==null || entry.contentRoot==null || entry.cameraAnchor==null) throw new InvalidOperationException("Area anchor is incomplete");
                 for(int j=0;j<i;j++) if(areas[j].area==entry.area) throw new InvalidOperationException("Duplicate area anchor: "+entry.area);
-                // Areas stay alive: changing the camera never resets devices, NPCs or animations.
-                entry.contentRoot.gameObject.SetActive(true);
+                // 切换区域只移动镜头；保留场景作者设置的启用状态，不重新启用禁用区域。
             }
             hasFocus=false;
         }

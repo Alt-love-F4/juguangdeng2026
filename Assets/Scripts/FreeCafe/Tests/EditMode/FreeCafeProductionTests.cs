@@ -122,10 +122,6 @@ namespace Spotlight.FreeCafe.Tests
             Assert.That(world.Interact(cup.id, "s.cups.small").success, Is.False);
             Assert.That(JsonUtility.ToJson(world.State), Is.EqualTo(before));
             source.stock = world.Spec(source.specId).initialStock;
-            before = JsonUtility.ToJson(world.State);
-            Assert.That(world.Interact(cup.id, source.id).success, Is.False);
-            Assert.That(JsonUtility.ToJson(world.State), Is.EqualTo(before));
-            source.stock--;
             Load("s.water", cup.id);
             before = JsonUtility.ToJson(world.State);
             Assert.That(world.Interact(cup.id, source.id).success, Is.False);
@@ -145,16 +141,14 @@ namespace Spotlight.FreeCafe.Tests
             Assert.That(world.ServingCup, Is.SameAs(cup));
         }
 
-        [Test] public void FullOldStackPreventsCupSwapWithoutWithdrawingNewCup()
+        [Test] public void FullOldStackAllowsCupSwapAndPreservesAllEmptyCups()
         {
-            world.SelectServingCup("s.cups.small");
-            var cup = world.ServingCup;
-            var source = world.Find("s.cups.small");
-            source.stock = world.Spec(source.specId).initialStock;
-            string before = JsonUtility.ToJson(world.State);
-            Assert.That(world.SelectServingCup("s.cups.large").success, Is.False);
-            Assert.That(JsonUtility.ToJson(world.State), Is.EqualTo(before));
-            Assert.That(world.ServingCup, Is.SameAs(cup));
+            world.SelectServingCup("s.cups.small"); var cup = world.ServingCup;
+            var source = world.Find("s.cups.small"); source.stock = world.Spec(source.specId).initialStock;
+            Assert.That(world.SelectServingCup("s.cups.large").success, Is.True);
+            Assert.That(source.stock, Is.EqualTo(world.Spec(source.specId).initialStock + 1));
+            Assert.That(world.Find(cup.id), Is.Null);
+            Assert.That(world.ServingCup.specId, Is.EqualTo("cup.large"));
         }
 
         [Test] public void ProcessingOldCupPreventsSwapWithoutMutation()

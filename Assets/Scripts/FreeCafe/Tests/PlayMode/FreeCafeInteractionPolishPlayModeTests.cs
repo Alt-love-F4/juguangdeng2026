@@ -146,9 +146,14 @@ namespace Spotlight.FreeCafe.Tests
             yield return CheckRejectedReturn("s.cups.small", true, false);
         }
 
-        [UnityTest] public IEnumerator FullStackRejectsTheCupWithAnInvalidHighlightAndNoStockChange()
+        [UnityTest] public IEnumerator FullStackAcceptsAnAdditionalEmptyCup()
         {
-            yield return CheckRejectedReturn("s.cups.small", false, true);
+            var source=app.World.Find("s.cups.small");
+            app.World.Take(source.id,AreaId.Counter,0,-2,out var cup);
+            source.stock=app.World.Spec(source.specId).initialStock;
+            Assert.That(app.World.Interact(cup.id,source.id).success,Is.True);
+            Assert.That(source.stock,Is.EqualTo(app.World.Spec(source.specId).initialStock+1));
+            yield return null;
         }
 
         private IEnumerator CheckRejectedReturn(string targetId, bool filled, bool fullStack)

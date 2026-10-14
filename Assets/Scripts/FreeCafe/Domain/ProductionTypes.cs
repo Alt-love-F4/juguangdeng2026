@@ -39,6 +39,8 @@ namespace Spotlight.FreeCafe
         public float brewGreenLeftMl = 35;
         public float brewGreenRightMl = 35;
         public float kettleCapacityMl = 400;
+        public float extractionFilterOffsetX = -.22f;
+        public float extractionFilterOffsetY = .91f;
     }
 
     /// <summary>道具实例状态。所有液体仍在 WorldEntity.contents，不建立第二份液体库存。</summary>
@@ -48,6 +50,7 @@ namespace Spotlight.FreeCafe
         public ProductionPhase phase;
         public float remaining;
         public float clickCooldown;
+        public bool selfHeating; // Only the silver kettle can heat independently of a stove.
         public bool brewStarted;
         public bool brewPourPaused; // 松手/取消后冻结本批计时，下一滴有效热水恢复。
         public bool brewCompleted;

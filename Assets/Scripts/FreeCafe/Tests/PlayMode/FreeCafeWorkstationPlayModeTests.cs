@@ -29,15 +29,16 @@ namespace Spotlight.FreeCafe.Tests
         private PointerEventData Pointer(WorldEntity entity) => new PointerEventData(EventSystem.current)
         { position = app.worldCamera.WorldToScreenPoint(app.AreaToWorld(entity.area, entity.x, entity.y)) };
 
-        [UnityTest] public IEnumerator ActualKettleDropDocksOnTheStoveAndClickHeatsItsContents()
+        [UnityTest] public IEnumerator ActualKettleDropReturnsHomeAndClickHeatsItsContents()
         {
             Assert.That(app.World.TakeAndInteract("s.water", "m.heater", AreaId.Counter, 0, 0).success, Is.True);
             var kettle = app.World.Find("m.heater"); var stove = app.World.Find("m.stove");
+            float homeX = kettle.x, homeY = kettle.y;
             Physics2D.SyncTransforms(); app.BeginDrag(app.View(kettle.id), Pointer(kettle)); app.EndDrag(Pointer(stove));
-            Assert.That(stove.production.heatingVesselId, Is.EqualTo(kettle.id));
-            Assert.That(kettle.x, Is.EqualTo(stove.x));
+            Assert.That(stove.production.heatingVesselId, Is.Null);
+            Assert.That(kettle.x, Is.EqualTo(homeX)); Assert.That(kettle.y, Is.EqualTo(homeY));
             yield return null; // 松手帧抑制点击，下一帧才是独立的炉台操作。
-            app.Click(app.View(stove.id)); Assert.That(kettle.production.phase, Is.EqualTo(ProductionPhase.Processing));
+            app.Click(app.View(kettle.id)); Assert.That(kettle.production.phase, Is.EqualTo(ProductionPhase.Processing));
             app.World.Tick(4); yield return null;
             Assert.That(kettle.contents[0].temperature, Is.EqualTo(LiquidTemperature.Boiling));
         }
@@ -56,12 +57,14 @@ namespace Spotlight.FreeCafe.Tests
             view.SetHovered(false);
             Assert.That(view.transform.Find("FillStatus").gameObject.activeSelf, Is.False);
         }
-        [UnityTest] public IEnumerator AuthoredSourcesFitLeftShelvesAndStoveHasAnIllustratedSprite()
+        [UnityTest] public IEnumerator AuthoredCounterSourcesMatchPsdLayoutAndMissingStoveArtIsPreserved()
         {
             foreach (string entityId in new[] { "s.beans", "s.water", "s.milk", "s.sugar", "s.cocoa", "s.matcha", "s.honey", "s.cream" })
             {
                 var entity = app.World.Find(entityId); var view = app.View(entityId);
-                Assert.That(entity.x, Is.LessThan(-2)); Assert.That(entity.y, Is.GreaterThan(1));
+                var entry = System.Array.Find(app.World.Catalog.layout, e => e.id == entityId);
+                Assert.That(entity.x, Is.EqualTo(entry.x).Within(.001f)); Assert.That(entity.y, Is.EqualTo(entry.y).Within(.001f));
+                Assert.That(view.body.sprite, Is.Not.Null);
                 Assert.That(view.transform.lossyScale.x / app.areaRoots[1].lossyScale.x, Is.EqualTo(1).Within(.001f));
             }
             Assert.That(app.View("m.stove").body.sprite.name, Is.EqualTo("default"));

@@ -270,7 +270,7 @@ Transform:
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
   m_LocalPosition: {x: 0, y: 0, z: 0}
-  m_LocalScale: {x: 0.10869565, y: 0.10869565, z: 1}
+  m_LocalScale: {x: 0.5381938, y: 0.5381938, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 5800783064124311136}
@@ -324,7 +324,7 @@ SpriteRenderer:
   m_SortingLayer: 0
   m_SortingOrder: 100
   m_MaskInteraction: 0
-  m_Sprite: {fileID: 21300000, guid: 7027ea50e1c36d44cbe20315cb12cff6, type: 3}
+  m_Sprite: {fileID: 21300000, guid: 8acaa70a0feb32648a52da2dfefc2bfb, type: 3}
   m_Color: {r: 1, g: 1, b: 1, a: 1}
   m_FlipX: 0
   m_FlipY: 0
@@ -459,7 +459,7 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0.5, y: 0.5}
   m_AnchorMax: {x: 0.5, y: 0.5}
-  m_AnchoredPosition: {x: 0, y: -0.98}
+  m_AnchoredPosition: {x: 0, y: -2.14441}
   m_SizeDelta: {x: 3.3, y: 0.7}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!23 &4335946684317614250
@@ -973,6 +973,11 @@ MonoBehaviour:
   label: {fileID: 2829167915388120585}
   workspaceCaption: {fileID: 709596148657605079}
   hitbox: {fileID: 5791657553720401398}
+  dragSmoothTime: 0.055
+  releaseSmoothTime: 0.18
+  maxDragLean: 14
+  leanPerSpeed: 1.6
+  leanSmoothTime: 0.09
 --- !u!61 &5791657553720401398
 BoxCollider2D:
   m_ObjectHideFlags: 0
@@ -1017,5 +1022,5 @@ BoxCollider2D:
     drawMode: 0
     adaptiveTiling: 0
   m_AutoTiling: 0
-  m_Size: {x: 1.45, y: 1.6}
+  m_Size: {x: 2.61024, y: 3.92882}
   m_EdgeRadius: 0

@@ -224,7 +224,12 @@ namespace Spotlight.FreeCafe
         }
 
         /// <summary>按 id 查找世界中的实体（设备、杯子、原料、顾客等）。</summary>
-        public WorldEntity Find(string id) => id == null ? null : State.entities.Find(e => e.id == id);
+        public WorldEntity Find(string id)
+        {
+            if (id == null) return null;
+            foreach (var entity in State.entities) if (entity.id == id) return entity;
+            return null;
+        }
 
         /// <summary>按 id 查找订单。</summary>
         public CustomerRequest Request(string id) => id == null ? null : State.requests.Find(r => r.id == id);
@@ -332,6 +337,7 @@ namespace Spotlight.FreeCafe
                 return ActionResult.No("固定设备或来源不能搬动");
             }
 
+            if (CupAbove(item) != null) return ActionResult.No("请先取走最上面的杯子");
             bool removeFromTray = ProductionEnabled && item==ServingCup;
             if (Locked(item))
             {
@@ -344,11 +350,30 @@ namespace Spotlight.FreeCafe
                 return valid;
             }
 
-            if (ProductionEnabled) DetachExtractionFilter(item);
+            var assemblyJug = ProductionEnabled && IsExtractionFilter(item) ? ExtractionJug(item) : null;
+            if (assemblyJug != null)
+            {
+                if (Locked(assemblyJug) || MiniGameUses(assemblyJug)) return ActionResult.No("下壶正在使用");
+                var companionPosition = CanPosition(assemblyJug.specId, area, x - Prep.extractionFilterOffsetX, y - Prep.extractionFilterOffsetY);
+                if (!companionPosition.success) return companionPosition;
+            }
+            var upper = ProductionEnabled ? ExtractionFilter(item) : null;
+            if (upper != null && (Locked(upper) || MiniGameUses(upper))) return ActionResult.No("上层过滤器正在使用");
+            item.cupStackBelowId = null;
+            if (ProductionEnabled)
+            {
+                SuspendContainerHeating(item.id);
+                if (upper != null) DetachExtractionFilter(upper);
+            }
             item.area = area;
             item.x = x;
             item.y = y;
-            if (ProductionEnabled && IsPrecisionExtractor(item)) PositionExtractionFilter(item);
+            if (assemblyJug != null)
+            {
+                SuspendContainerHeating(assemblyJug.id);
+                assemblyJug.area = area; assemblyJug.x = x - Prep.extractionFilterOffsetX; assemblyJug.y = y - Prep.extractionFilterOffsetY;
+                PositionExtractionFilter(assemblyJug);
+            }
             if(removeFromTray) State.production.activeCupId=null;
             Notify();
             return ActionResult.Yes("已自由放置");
@@ -412,7 +437,10 @@ namespace Spotlight.FreeCafe
                 return ActionResult.No("无效物品");
             }
 
+            if (CupAbove(item) != null) return ActionResult.No("请先取走最上面的杯子");
             if (IsCupSource(receiver)) return PreviewCupReturn(item, target);
+            if (IsCup(item) && IsCup(target) && item.contents.Count == 0 && target.contents.Count == 0)
+                return PreviewCupStack(item, target);
             if (PreviewProduction(item, target, out var productionPreview)) return productionPreview;
 
             if (receiver.Has(Capability.Discard))
@@ -483,6 +511,9 @@ namespace Spotlight.FreeCafe
             }
 
             var receiver = Spec(target.specId);
+            if (IsCup(item) && IsCup(target) && item.contents.Count == 0 && target.contents.Count == 0)
+                return StackCups(item, target);
+            item.cupStackBelowId = null;
             if (IsCupSource(receiver))
             {
                 ReturnCup(item, target);
@@ -621,6 +652,6 @@ namespace Spotlight.FreeCafe
         private static bool Finite(float value) => !float.IsNaN(value) && !float.IsInfinity(value);
 
         /// <summary>通知视图刷新。</summary>
-        private void Notify() => Changed?.Invoke();
+        private void Notify() { RefreshCupStacks(); Changed?.Invoke(); }
     }
 }

@@ -9,8 +9,8 @@
       "label": "小杯",
       "artId": "cup.small",
       "capabilities": 9,
-      "width": 0.8,
-      "height": 1,
+      "width": 1.97517,
+      "height": 1.38316,
       "capacity": 2,
       "capacityMl": 240
     },
@@ -19,8 +19,8 @@
       "label": "大杯",
       "artId": "cup.large",
       "capabilities": 9,
-      "width": 1,
-      "height": 1.2,
+      "width": 2.36267,
+      "height": 2.17431,
       "capacity": 6,
       "capacityMl": 400
     },
@@ -29,8 +29,8 @@
       "label": "咖啡萃取壶",
       "artId": "container.extractor",
       "capabilities": 521,
-      "width": 1.45,
-      "height": 1.2,
+      "width": 3.49826,
+      "height": 2.31424,
       "capacity": 2,
       "capacityMl": 400
     },
@@ -39,8 +39,8 @@
       "label": "可拆滤杯",
       "artId": "container.extractor.filter",
       "capabilities": 9,
-      "width": 0.98,
-      "height": 0.7,
+      "width": 1.36701,
+      "height": 2.82552,
       "capacity": 2,
       "capacityMl": 400
     },
@@ -145,10 +145,10 @@
       "label": "小杯堆",
       "artId": "source.cups.small",
       "capabilities": 2,
-      "width": 1,
-      "height": 1.15,
+      "width": 1.97517,
+      "height": 3.16744,
       "sourceItemId": "cup.small",
-      "initialStock": 30,
+      "initialStock": 4,
       "refillCost": 0,
       "unitCost": 8
     },
@@ -157,10 +157,10 @@
       "label": "大杯堆",
       "artId": "source.cups.large",
       "capabilities": 2,
-      "width": 1,
-      "height": 1.15,
+      "width": 2.36267,
+      "height": 5.17486,
       "sourceItemId": "cup.large",
-      "initialStock": 30,
+      "initialStock": 5,
       "refillCost": 0,
       "unitCost": 8
     },
@@ -169,8 +169,8 @@
       "label": "咖啡豆袋",
       "artId": "source.beans",
       "capabilities": 2,
-      "width": 1,
-      "height": 1.15,
+      "width": 2.57257,
+      "height": 3.41753,
       "sourceItemId": "beans",
       "initialStock": 5,
       "refillCost": 0,
@@ -181,8 +181,8 @@
       "label": "牛奶瓶",
       "artId": "source.milk",
       "capabilities": 2,
-      "width": 1,
-      "height": 1.15,
+      "width": 1.99132,
+      "height": 2.34115,
       "sourceItemId": "milk",
       "initialStock": 8,
       "refillCost": 0,
@@ -193,8 +193,8 @@
       "label": "抹茶罐",
       "artId": "source.matcha",
       "capabilities": 2,
-      "width": 1,
-      "height": 1.15,
+      "width": 1.27552,
+      "height": 2.27656,
       "sourceItemId": "matcha.powder",
       "initialStock": 8,
       "refillCost": 0,
@@ -205,8 +205,8 @@
       "label": "可可罐",
       "artId": "source.cocoa",
       "capabilities": 2,
-      "width": 1,
-      "height": 1.15,
+      "width": 2.55642,
+      "height": 1.61458,
       "sourceItemId": "cocoa.powder",
       "initialStock": 8,
       "refillCost": 0,
@@ -215,10 +215,10 @@
     {
       "id": "source.cream",
       "label": "奶油",
-      "artId": "source.honey",
+      "artId": "source.cream",
       "capabilities": 2,
-      "width": 1,
-      "height": 1.15,
+      "width": 2.29809,
+      "height": 1.39392,
       "sourceItemId": "cream",
       "initialStock": 8,
       "refillCost": 0,
@@ -229,8 +229,8 @@
       "label": "蜂蜜罐",
       "artId": "source.honey",
       "capabilities": 2,
-      "width": 1,
-      "height": 1.15,
+      "width": 2.02361,
+      "height": 2.09358,
       "sourceItemId": "honey",
       "initialStock": 8,
       "refillCost": 0,
@@ -242,8 +242,8 @@
       "label": "研磨器",
       "artId": "machine.grinder",
       "capabilities": 16,
-      "width": 1.45,
-      "height": 1.6
+      "width": 2.61024,
+      "height": 3.92882
     },
     {
       "id": "machine.brewer",
@@ -257,10 +257,10 @@
     {
       "id": "machine.heater",
       "label": "通用加热壶",
-      "artId": "equipment.kettle",
+      "artId": "machine.heater",
       "capabilities": 25,
-      "width": 1.45,
-      "height": 1.65,
+      "width": 2.51337,
+      "height": 4.17639,
       "capacityMl": 400
     },
     {
@@ -334,11 +334,11 @@
     {
       "id": "source.sugar",
       "label": "方糖罐",
-      "artId": "sugar",
+      "artId": "source.sugar",
       "sourceItemId": "sugar",
       "capabilities": 2,
-      "width": 1,
-      "height": 1.1,
+      "width": 2.15278,
+      "height": 1.24861,
       "initialStock": 30,
       "refillCost": 0,
       "unitCost": 1
@@ -484,7 +484,19 @@
       "idealSweetness": 0,
       "evaluation": {
         "amounts": [
-          { "ingredientId": "coffee", "coffeeKind": "essence", "idealMl": 200, "idealGrams": 0, "tolerance": 0.2, "minimumStandard": 70, "classificationMinimumRatio": 0, "classificationMaximumRatio": 1, "classificationMinimumGrams": 0, "classificationMaximumGrams": 0, "minimumTemperature": -1 }
+          {
+            "ingredientId": "coffee",
+            "coffeeKind": "essence",
+            "idealMl": 200,
+            "idealGrams": 0,
+            "tolerance": 0.2,
+            "minimumStandard": 70,
+            "classificationMinimumRatio": 0,
+            "classificationMaximumRatio": 1,
+            "classificationMinimumGrams": 0,
+            "classificationMaximumGrams": 0,
+            "minimumTemperature": -1
+          }
         ],
         "amountWeight": 0.65,
         "standardWeight": 0.35,
@@ -534,9 +546,45 @@
       "idealSweetness": 0,
       "evaluation": {
         "amounts": [
-          { "ingredientId": "coffee", "coffeeKind": "essence", "idealMl": 180, "idealGrams": 0, "tolerance": 0.2, "minimumStandard": 70, "classificationMinimumRatio": 0, "classificationMaximumRatio": 1, "classificationMinimumGrams": 0, "classificationMaximumGrams": 0, "minimumTemperature": -1 },
-          { "ingredientId": "milk", "coffeeKind": "", "idealMl": 200, "idealGrams": 0, "tolerance": 0.2, "minimumStandard": 60, "classificationMinimumRatio": 0, "classificationMaximumRatio": 1, "classificationMinimumGrams": 0, "classificationMaximumGrams": 0, "minimumTemperature": 1 },
-          { "ingredientId": "milkfoam", "coffeeKind": "", "idealMl": 20, "idealGrams": 0, "tolerance": 0.2, "minimumStandard": 60, "classificationMinimumRatio": 0.03, "classificationMaximumRatio": 0.12, "classificationMinimumGrams": 0, "classificationMaximumGrams": 0, "minimumTemperature": -1 }
+          {
+            "ingredientId": "coffee",
+            "coffeeKind": "essence",
+            "idealMl": 180,
+            "idealGrams": 0,
+            "tolerance": 0.2,
+            "minimumStandard": 70,
+            "classificationMinimumRatio": 0,
+            "classificationMaximumRatio": 1,
+            "classificationMinimumGrams": 0,
+            "classificationMaximumGrams": 0,
+            "minimumTemperature": -1
+          },
+          {
+            "ingredientId": "milk",
+            "coffeeKind": "",
+            "idealMl": 200,
+            "idealGrams": 0,
+            "tolerance": 0.2,
+            "minimumStandard": 60,
+            "classificationMinimumRatio": 0,
+            "classificationMaximumRatio": 1,
+            "classificationMinimumGrams": 0,
+            "classificationMaximumGrams": 0,
+            "minimumTemperature": 1
+          },
+          {
+            "ingredientId": "milkfoam",
+            "coffeeKind": "",
+            "idealMl": 20,
+            "idealGrams": 0,
+            "tolerance": 0.2,
+            "minimumStandard": 60,
+            "classificationMinimumRatio": 0.03,
+            "classificationMaximumRatio": 0.12,
+            "classificationMinimumGrams": 0,
+            "classificationMaximumGrams": 0,
+            "minimumTemperature": -1
+          }
         ],
         "amountWeight": 0.65,
         "standardWeight": 0.35,
@@ -590,10 +638,58 @@
       "idealSweetness": 2,
       "evaluation": {
         "amounts": [
-          { "ingredientId": "coffee", "coffeeKind": "essence", "idealMl": 180, "idealGrams": 0, "tolerance": 0.2, "minimumStandard": 70, "classificationMinimumRatio": 0, "classificationMaximumRatio": 1, "classificationMinimumGrams": 0, "classificationMaximumGrams": 0, "minimumTemperature": -1 },
-          { "ingredientId": "milk", "coffeeKind": "", "idealMl": 200, "idealGrams": 0, "tolerance": 0.2, "minimumStandard": 60, "classificationMinimumRatio": 0, "classificationMaximumRatio": 1, "classificationMinimumGrams": 0, "classificationMaximumGrams": 0, "minimumTemperature": 1 },
-          { "ingredientId": "milkfoam", "coffeeKind": "", "idealMl": 20, "idealGrams": 0, "tolerance": 0.2, "minimumStandard": 60, "classificationMinimumRatio": 0.03, "classificationMaximumRatio": 0.12, "classificationMinimumGrams": 0, "classificationMaximumGrams": 0, "minimumTemperature": -1 },
-          { "ingredientId": "honey", "coffeeKind": "", "idealMl": 0, "idealGrams": 12, "tolerance": 0.2, "minimumStandard": 60, "classificationMinimumRatio": 0, "classificationMaximumRatio": 1, "classificationMinimumGrams": 0, "classificationMaximumGrams": 0, "minimumTemperature": -1 }
+          {
+            "ingredientId": "coffee",
+            "coffeeKind": "essence",
+            "idealMl": 180,
+            "idealGrams": 0,
+            "tolerance": 0.2,
+            "minimumStandard": 70,
+            "classificationMinimumRatio": 0,
+            "classificationMaximumRatio": 1,
+            "classificationMinimumGrams": 0,
+            "classificationMaximumGrams": 0,
+            "minimumTemperature": -1
+          },
+          {
+            "ingredientId": "milk",
+            "coffeeKind": "",
+            "idealMl": 200,
+            "idealGrams": 0,
+            "tolerance": 0.2,
+            "minimumStandard": 60,
+            "classificationMinimumRatio": 0,
+            "classificationMaximumRatio": 1,
+            "classificationMinimumGrams": 0,
+            "classificationMaximumGrams": 0,
+            "minimumTemperature": 1
+          },
+          {
+            "ingredientId": "milkfoam",
+            "coffeeKind": "",
+            "idealMl": 20,
+            "idealGrams": 0,
+            "tolerance": 0.2,
+            "minimumStandard": 60,
+            "classificationMinimumRatio": 0.03,
+            "classificationMaximumRatio": 0.12,
+            "classificationMinimumGrams": 0,
+            "classificationMaximumGrams": 0,
+            "minimumTemperature": -1
+          },
+          {
+            "ingredientId": "honey",
+            "coffeeKind": "",
+            "idealMl": 0,
+            "idealGrams": 12,
+            "tolerance": 0.2,
+            "minimumStandard": 60,
+            "classificationMinimumRatio": 0,
+            "classificationMaximumRatio": 1,
+            "classificationMinimumGrams": 0,
+            "classificationMaximumGrams": 0,
+            "minimumTemperature": -1
+          }
         ],
         "amountWeight": 0.65,
         "standardWeight": 0.35,
@@ -636,8 +732,32 @@
       "idealSweetness": 0,
       "evaluation": {
         "amounts": [
-          { "ingredientId": "matcha.drink", "coffeeKind": "", "idealMl": 200, "idealGrams": 0, "tolerance": 0.2, "minimumStandard": 60, "classificationMinimumRatio": 0, "classificationMaximumRatio": 1, "classificationMinimumGrams": 0, "classificationMaximumGrams": 0, "minimumTemperature": -1 },
-          { "ingredientId": "milk", "coffeeKind": "", "idealMl": 200, "idealGrams": 0, "tolerance": 0.2, "minimumStandard": 60, "classificationMinimumRatio": 0, "classificationMaximumRatio": 1, "classificationMinimumGrams": 0, "classificationMaximumGrams": 0, "minimumTemperature": -1 }
+          {
+            "ingredientId": "matcha.drink",
+            "coffeeKind": "",
+            "idealMl": 200,
+            "idealGrams": 0,
+            "tolerance": 0.2,
+            "minimumStandard": 60,
+            "classificationMinimumRatio": 0,
+            "classificationMaximumRatio": 1,
+            "classificationMinimumGrams": 0,
+            "classificationMaximumGrams": 0,
+            "minimumTemperature": -1
+          },
+          {
+            "ingredientId": "milk",
+            "coffeeKind": "",
+            "idealMl": 200,
+            "idealGrams": 0,
+            "tolerance": 0.2,
+            "minimumStandard": 60,
+            "classificationMinimumRatio": 0,
+            "classificationMaximumRatio": 1,
+            "classificationMinimumGrams": 0,
+            "classificationMaximumGrams": 0,
+            "minimumTemperature": -1
+          }
         ],
         "amountWeight": 0.65,
         "standardWeight": 0.35,
@@ -680,8 +800,32 @@
       "idealSweetness": 0,
       "evaluation": {
         "amounts": [
-          { "ingredientId": "cocoa.drink", "coffeeKind": "", "idealMl": 200, "idealGrams": 0, "tolerance": 0.2, "minimumStandard": 60, "classificationMinimumRatio": 0, "classificationMaximumRatio": 1, "classificationMinimumGrams": 0, "classificationMaximumGrams": 0, "minimumTemperature": -1 },
-          { "ingredientId": "milk", "coffeeKind": "", "idealMl": 200, "idealGrams": 0, "tolerance": 0.2, "minimumStandard": 60, "classificationMinimumRatio": 0, "classificationMaximumRatio": 1, "classificationMinimumGrams": 0, "classificationMaximumGrams": 0, "minimumTemperature": -1 }
+          {
+            "ingredientId": "cocoa.drink",
+            "coffeeKind": "",
+            "idealMl": 200,
+            "idealGrams": 0,
+            "tolerance": 0.2,
+            "minimumStandard": 60,
+            "classificationMinimumRatio": 0,
+            "classificationMaximumRatio": 1,
+            "classificationMinimumGrams": 0,
+            "classificationMaximumGrams": 0,
+            "minimumTemperature": -1
+          },
+          {
+            "ingredientId": "milk",
+            "coffeeKind": "",
+            "idealMl": 200,
+            "idealGrams": 0,
+            "tolerance": 0.2,
+            "minimumStandard": 60,
+            "classificationMinimumRatio": 0,
+            "classificationMaximumRatio": 1,
+            "classificationMinimumGrams": 0,
+            "classificationMaximumGrams": 0,
+            "minimumTemperature": -1
+          }
         ],
         "amountWeight": 0.65,
         "standardWeight": 0.35,
@@ -725,8 +869,32 @@
       "idealSweetness": 0,
       "evaluation": {
         "amounts": [
-          { "ingredientId": "coffee", "coffeeKind": "essence", "idealMl": 160, "idealGrams": 0, "tolerance": 0.2, "minimumStandard": 70, "classificationMinimumRatio": 0, "classificationMaximumRatio": 1, "classificationMinimumGrams": 0, "classificationMaximumGrams": 0, "minimumTemperature": -1 },
-          { "ingredientId": "milkfoam", "coffeeKind": "", "idealMl": 80, "idealGrams": 0, "tolerance": 0.2, "minimumStandard": 60, "classificationMinimumRatio": 0, "classificationMaximumRatio": 1, "classificationMinimumGrams": 0, "classificationMaximumGrams": 0, "minimumTemperature": -1 }
+          {
+            "ingredientId": "coffee",
+            "coffeeKind": "essence",
+            "idealMl": 160,
+            "idealGrams": 0,
+            "tolerance": 0.2,
+            "minimumStandard": 70,
+            "classificationMinimumRatio": 0,
+            "classificationMaximumRatio": 1,
+            "classificationMinimumGrams": 0,
+            "classificationMaximumGrams": 0,
+            "minimumTemperature": -1
+          },
+          {
+            "ingredientId": "milkfoam",
+            "coffeeKind": "",
+            "idealMl": 80,
+            "idealGrams": 0,
+            "tolerance": 0.2,
+            "minimumStandard": 60,
+            "classificationMinimumRatio": 0,
+            "classificationMaximumRatio": 1,
+            "classificationMinimumGrams": 0,
+            "classificationMaximumGrams": 0,
+            "minimumTemperature": -1
+          }
         ],
         "amountWeight": 0.65,
         "standardWeight": 0.35,
@@ -775,9 +943,45 @@
       "idealSweetness": 0,
       "evaluation": {
         "amounts": [
-          { "ingredientId": "coffee", "coffeeKind": "black", "idealMl": 320, "idealGrams": 0, "tolerance": 0.2, "minimumStandard": 60, "classificationMinimumRatio": 0, "classificationMaximumRatio": 1, "classificationMinimumGrams": 0, "classificationMaximumGrams": 0, "minimumTemperature": -1 },
-          { "ingredientId": "cocoa.powder", "coffeeKind": "", "idealMl": 0, "idealGrams": 12, "tolerance": 0.2, "minimumStandard": 60, "classificationMinimumRatio": 0, "classificationMaximumRatio": 1, "classificationMinimumGrams": 0, "classificationMaximumGrams": 0, "minimumTemperature": -1 },
-          { "ingredientId": "cream", "coffeeKind": "", "idealMl": 0, "idealGrams": 12, "tolerance": 0.2, "minimumStandard": 60, "classificationMinimumRatio": 0, "classificationMaximumRatio": 1, "classificationMinimumGrams": 0, "classificationMaximumGrams": 0, "minimumTemperature": -1 }
+          {
+            "ingredientId": "coffee",
+            "coffeeKind": "black",
+            "idealMl": 320,
+            "idealGrams": 0,
+            "tolerance": 0.2,
+            "minimumStandard": 60,
+            "classificationMinimumRatio": 0,
+            "classificationMaximumRatio": 1,
+            "classificationMinimumGrams": 0,
+            "classificationMaximumGrams": 0,
+            "minimumTemperature": -1
+          },
+          {
+            "ingredientId": "cocoa.powder",
+            "coffeeKind": "",
+            "idealMl": 0,
+            "idealGrams": 12,
+            "tolerance": 0.2,
+            "minimumStandard": 60,
+            "classificationMinimumRatio": 0,
+            "classificationMaximumRatio": 1,
+            "classificationMinimumGrams": 0,
+            "classificationMaximumGrams": 0,
+            "minimumTemperature": -1
+          },
+          {
+            "ingredientId": "cream",
+            "coffeeKind": "",
+            "idealMl": 0,
+            "idealGrams": 12,
+            "tolerance": 0.2,
+            "minimumStandard": 60,
+            "classificationMinimumRatio": 0,
+            "classificationMaximumRatio": 1,
+            "classificationMinimumGrams": 0,
+            "classificationMaximumGrams": 0,
+            "minimumTemperature": -1
+          }
         ],
         "amountWeight": 0.65,
         "standardWeight": 0.35,
@@ -812,7 +1016,19 @@
       "tutorial": "参考目标：黑咖啡240ml，咖啡水准至少60。普通咖啡粉与清水组合生成冷萃；加热至温热/沸腾转为黑咖啡，冷却至常温再转回冷萃，但原始粉水含量不丢失。热水不生成精粹。只含正量黑咖啡即可识别本产品，少量或过量仍属同类但订单含量分不同；加糖等额外原料使分类回退迷之饮品，且独立参与评分。",
       "evaluation": {
         "amounts": [
-          { "ingredientId": "coffee", "coffeeKind": "black", "idealMl": 240, "idealGrams": 0, "tolerance": 0.2, "minimumStandard": 60, "classificationMinimumRatio": 0, "classificationMaximumRatio": 1, "classificationMinimumGrams": 0, "classificationMaximumGrams": 0, "minimumTemperature": -1 }
+          {
+            "ingredientId": "coffee",
+            "coffeeKind": "black",
+            "idealMl": 240,
+            "idealGrams": 0,
+            "tolerance": 0.2,
+            "minimumStandard": 60,
+            "classificationMinimumRatio": 0,
+            "classificationMaximumRatio": 1,
+            "classificationMinimumGrams": 0,
+            "classificationMaximumGrams": 0,
+            "minimumTemperature": -1
+          }
         ],
         "amountWeight": 0.65,
         "standardWeight": 0.35,
@@ -855,8 +1071,32 @@
       "tutorial": "参考目标：黑咖啡240ml、奶油12g。两种必需成分都有正量且没有额外原料即可识别奶油黑咖啡；咖啡仍需来源black。加料顺序自由，推荐量独立影响订单含量分。",
       "evaluation": {
         "amounts": [
-          { "ingredientId": "coffee", "coffeeKind": "black", "idealMl": 240, "idealGrams": 0, "tolerance": 0.2, "minimumStandard": 60, "classificationMinimumRatio": 0, "classificationMaximumRatio": 1, "classificationMinimumGrams": 0, "classificationMaximumGrams": 0, "minimumTemperature": -1 },
-          { "ingredientId": "cream", "coffeeKind": "", "idealMl": 0, "idealGrams": 12, "tolerance": 0.2, "minimumStandard": 60, "classificationMinimumRatio": 0, "classificationMaximumRatio": 1, "classificationMinimumGrams": 0, "classificationMaximumGrams": 0, "minimumTemperature": -1 }
+          {
+            "ingredientId": "coffee",
+            "coffeeKind": "black",
+            "idealMl": 240,
+            "idealGrams": 0,
+            "tolerance": 0.2,
+            "minimumStandard": 60,
+            "classificationMinimumRatio": 0,
+            "classificationMaximumRatio": 1,
+            "classificationMinimumGrams": 0,
+            "classificationMaximumGrams": 0,
+            "minimumTemperature": -1
+          },
+          {
+            "ingredientId": "cream",
+            "coffeeKind": "",
+            "idealMl": 0,
+            "idealGrams": 12,
+            "tolerance": 0.2,
+            "minimumStandard": 60,
+            "classificationMinimumRatio": 0,
+            "classificationMaximumRatio": 1,
+            "classificationMinimumGrams": 0,
+            "classificationMaximumGrams": 0,
+            "minimumTemperature": -1
+          }
         ],
         "amountWeight": 0.65,
         "standardWeight": 0.35,
@@ -875,32 +1115,123 @@
       "maxRemakes": 1
     },
     {
-      "id": "cold_brew", "label": "冷萃咖啡", "cupSpecId": "cup.small", "price": 50,
-      "unlockReputation": 0, "qualityPriceStep": 50, "requiresLatteArt": false,
+      "id": "cold_brew",
+      "label": "冷萃咖啡",
+      "cupSpecId": "cup.small",
+      "price": 50,
+      "unlockReputation": 0,
+      "qualityPriceStep": 50,
+      "requiresLatteArt": false,
       "description": "常温普通粉水咖啡；含量多少不改变类型。",
       "tutorial": "参考目标：冷萃咖啡240ml。普通咖啡粉与清水组合，粉量与水量进入咖啡内部原始成分账本；未研磨豆子不反应。单一cold_brew来源咖啡正量即可识别，目标含量与浓度独立评分。",
-      "ingredients": [{ "specId": "coffee", "units": 1, "milliliters": 240, "coffeeKind": "cold_brew" }],
-      "requiredTemperature": 0, "minimumScore": 60, "maxRemakes": 1, "idealCoffeeRatio": 1, "idealSweetness": 0,
+      "ingredients": [
+        {
+          "specId": "coffee",
+          "units": 1,
+          "milliliters": 240,
+          "coffeeKind": "cold_brew"
+        }
+      ],
+      "requiredTemperature": 0,
+      "minimumScore": 60,
+      "maxRemakes": 1,
+      "idealCoffeeRatio": 1,
+      "idealSweetness": 0,
       "evaluation": {
-        "amounts": [{ "ingredientId": "coffee", "coffeeKind": "cold_brew", "idealMl": 240, "idealGrams": 0, "tolerance": 0.2, "minimumStandard": 60, "classificationMinimumRatio": 0, "classificationMaximumRatio": 1, "classificationMinimumGrams": 0, "classificationMaximumGrams": 0, "minimumTemperature": -1 }],
-        "amountWeight": 0.65, "standardWeight": 0.35, "extraIngredientPenalty": 0.15, "enforceCup": false,
-        "classify": true, "classificationPriority": 100, "concentrationWeight": 0.2, "idealCoffeeStrength": 0.06, "coffeeStrengthTolerance": 0.2
+        "amounts": [
+          {
+            "ingredientId": "coffee",
+            "coffeeKind": "cold_brew",
+            "idealMl": 240,
+            "idealGrams": 0,
+            "tolerance": 0.2,
+            "minimumStandard": 60,
+            "classificationMinimumRatio": 0,
+            "classificationMaximumRatio": 1,
+            "classificationMinimumGrams": 0,
+            "classificationMaximumGrams": 0,
+            "minimumTemperature": -1
+          }
+        ],
+        "amountWeight": 0.65,
+        "standardWeight": 0.35,
+        "extraIngredientPenalty": 0.15,
+        "enforceCup": false,
+        "classify": true,
+        "classificationPriority": 100,
+        "concentrationWeight": 0.2,
+        "idealCoffeeStrength": 0.06,
+        "coffeeStrengthTolerance": 0.2
       }
     },
     {
-      "id": "milkcoffee", "label": "奶咖啡", "cupSpecId": "cup.large", "price": 80,
-      "unlockReputation": 0, "qualityPriceStep": 50, "requiresLatteArt": false,
+      "id": "milkcoffee",
+      "label": "奶咖啡",
+      "cupSpecId": "cup.large",
+      "price": 80,
+      "unlockReputation": 0,
+      "qualityPriceStep": 50,
+      "requiresLatteArt": false,
       "description": "黑咖啡与热牛奶组合，不需要奶泡。",
       "tutorial": "参考目标：黑咖啡200ml、热牛奶200ml。牛奶必须至少温热；黑咖啡来源black、两种原料都有正量、无额外原料即可识别奶咖啡。不同用量仍为同类，含量和咖啡浓度参与订单评分。",
-      "ingredients": [{ "specId": "coffee", "units": 1, "milliliters": 200, "coffeeKind": "black", "temperature": 2 }, { "specId": "hotmilk", "units": 1, "milliliters": 200, "temperature": 2 }],
-      "requiredTemperature": 2, "minimumScore": 60, "maxRemakes": 1, "idealCoffeeRatio": 0.5, "idealSweetness": 0,
+      "ingredients": [
+        {
+          "specId": "coffee",
+          "units": 1,
+          "milliliters": 200,
+          "coffeeKind": "black",
+          "temperature": 2
+        },
+        {
+          "specId": "hotmilk",
+          "units": 1,
+          "milliliters": 200,
+          "temperature": 2
+        }
+      ],
+      "requiredTemperature": 2,
+      "minimumScore": 60,
+      "maxRemakes": 1,
+      "idealCoffeeRatio": 0.5,
+      "idealSweetness": 0,
       "evaluation": {
         "amounts": [
-          { "ingredientId": "coffee", "coffeeKind": "black", "idealMl": 200, "idealGrams": 0, "tolerance": 0.2, "minimumStandard": 60, "classificationMinimumRatio": 0, "classificationMaximumRatio": 1, "classificationMinimumGrams": 0, "classificationMaximumGrams": 0, "minimumTemperature": -1 },
-          { "ingredientId": "milk", "coffeeKind": "", "idealMl": 200, "idealGrams": 0, "tolerance": 0.2, "minimumStandard": 60, "classificationMinimumRatio": 0, "classificationMaximumRatio": 1, "classificationMinimumGrams": 0, "classificationMaximumGrams": 0, "minimumTemperature": 1 }
+          {
+            "ingredientId": "coffee",
+            "coffeeKind": "black",
+            "idealMl": 200,
+            "idealGrams": 0,
+            "tolerance": 0.2,
+            "minimumStandard": 60,
+            "classificationMinimumRatio": 0,
+            "classificationMaximumRatio": 1,
+            "classificationMinimumGrams": 0,
+            "classificationMaximumGrams": 0,
+            "minimumTemperature": -1
+          },
+          {
+            "ingredientId": "milk",
+            "coffeeKind": "",
+            "idealMl": 200,
+            "idealGrams": 0,
+            "tolerance": 0.2,
+            "minimumStandard": 60,
+            "classificationMinimumRatio": 0,
+            "classificationMaximumRatio": 1,
+            "classificationMinimumGrams": 0,
+            "classificationMaximumGrams": 0,
+            "minimumTemperature": 1
+          }
         ],
-        "amountWeight": 0.65, "standardWeight": 0.35, "extraIngredientPenalty": 0.15, "enforceCup": false,
-        "classify": true, "classificationPriority": 100, "concentrationWeight": 0.2, "idealCoffeeStrength": 0.06, "coffeeStrengthTolerance": 0.2
+        "amountWeight": 0.65,
+        "standardWeight": 0.35,
+        "extraIngredientPenalty": 0.15,
+        "enforceCup": false,
+        "classify": true,
+        "classificationPriority": 100,
+        "concentrationWeight": 0.2,
+        "idealCoffeeStrength": 0.06,
+        "coffeeStrengthTolerance": 0.2
       }
     }
   ],
@@ -909,134 +1240,134 @@
       "id": "s.cups.small",
       "specId": "source.cups.small",
       "area": 1,
-      "x": -9.25,
-      "y": -1.85
+      "x": -6.61172,
+      "y": -3.91822
     },
     {
       "id": "s.cups.large",
       "specId": "source.cups.large",
       "area": 1,
-      "x": -7.8,
-      "y": -1.85
+      "x": -8.8829,
+      "y": -4.32451
     },
     {
       "id": "s.beans",
       "specId": "source.beans",
       "area": 1,
-      "x": -9.25,
-      "y": 3.75
+      "x": -9.10087,
+      "y": 3.03811
     },
     {
       "id": "s.milk",
       "specId": "source.milk",
       "area": 1,
-      "x": -7.6,
-      "y": 3.75
+      "x": -2.98698,
+      "y": 2.68828
     },
     {
       "id": "s.matcha",
       "specId": "source.matcha",
       "area": 1,
-      "x": -4.3,
-      "y": 3.75
+      "x": -4.60964,
+      "y": 2.70981
     },
     {
       "id": "s.cocoa",
       "specId": "source.cocoa",
       "area": 1,
-      "x": -2.7,
-      "y": 3.75
+      "x": -6.52561,
+      "y": 2.21736
     },
     {
       "id": "s.honey",
       "specId": "source.honey",
       "area": 1,
-      "x": -7.6,
-      "y": 2.05
+      "x": 6.3184,
+      "y": -1.1921
     },
     {
       "id": "s.cream",
       "specId": "source.cream",
       "area": 1,
-      "x": -5.95,
-      "y": 2.05
+      "x": 7.96259,
+      "y": -1.54193
     },
     {
       "id": "m.grinder",
       "specId": "machine.grinder",
       "area": 1,
-      "x": -5.9,
-      "y": -1.85
+      "x": 0.76693,
+      "y": 2.62101
     },
     {
       "id": "v.extractor",
       "specId": "container.extractor",
       "area": 1,
-      "x": -4.2,
-      "y": -2.05
+      "x": 4.37552,
+      "y": 1.92674
     },
     {
       "id": "v.extractor.filter",
       "specId": "container.extractor.filter",
       "area": 1,
-      "x": -4.42,
-      "y": -1.14
+      "x": 4.10642,
+      "y": 4.09297
     },
     {
       "id": "m.brewer",
       "specId": "machine.brewer",
       "area": 1,
       "x": -2.5,
-      "y": -1.85
+      "y": -1.25
     },
     {
       "id": "m.heater",
       "specId": "machine.heater",
       "area": 1,
-      "x": 2.55,
-      "y": -1.85
+      "x": 8.02179,
+      "y": 2.9816
     },
     {
       "id": "m.mixer",
       "specId": "machine.mixer",
       "area": 1,
-      "x": 5,
-      "y": -1.85
+      "x": 2.4,
+      "y": -1.25
     },
     {
       "id": "service",
       "specId": "delivery",
       "area": 1,
-      "x": 8.25,
-      "y": 0.35
+      "x": 9.4,
+      "y": -3.2
     },
     {
       "id": "waste",
       "specId": "trash",
       "area": 1,
-      "x": -9.5,
-      "y": -3.5
+      "x": -4.6,
+      "y": -4.8
     },
     {
       "id": "s.water",
       "specId": "source.water",
       "area": 1,
-      "x": -5.95,
-      "y": 3.75
+      "x": -2.5,
+      "y": -3.15
     },
     {
       "id": "s.sugar",
       "specId": "source.sugar",
       "area": 1,
-      "x": -9.25,
-      "y": 2.05
+      "x": 6.98576,
+      "y": -3.00851
     },
     {
       "id": "tool.milk-pitcher",
       "specId": "container.milk-pitcher",
       "area": 1,
-      "x": 9.1,
-      "y": -2.35
+      "x": 3.8,
+      "y": -3.2
     },
     {
       "id": "business.start",
@@ -1050,7 +1381,7 @@
       "specId": "machine.stove",
       "area": 1,
       "x": 0,
-      "y": -2.5
+      "y": -2.65
     }
   ],
   "areas": [
@@ -1065,8 +1396,8 @@
       "id": 1,
       "label": "一楼 · 工作台",
       "artId": "area.counter",
-      "halfWidth": 11.2,
-      "halfHeight": 6.2
+      "halfWidth": 12,
+      "halfHeight": 7
     },
     {
       "id": 2,
@@ -1510,31 +1841,247 @@
     }
   ],
   "ingredientRules": [
-    { "id": "water", "label": "清水", "liquid": true, "soluble": true, "gramsPerUnit": 0, "millilitersPerUnit": 200, "coffeeKind": "" },
-    { "id": "hotwater", "label": "热水", "liquid": true, "soluble": true, "gramsPerUnit": 0, "millilitersPerUnit": 200, "coffeeKind": "" },
-    { "id": "milk", "label": "牛奶", "liquid": true, "soluble": true, "gramsPerUnit": 0, "millilitersPerUnit": 200, "coffeeKind": "" },
-    { "id": "hotmilk", "label": "热牛奶", "liquid": true, "soluble": true, "gramsPerUnit": 0, "millilitersPerUnit": 200, "coffeeKind": "" },
-    { "id": "milkfoam", "label": "奶泡", "liquid": true, "soluble": true, "gramsPerUnit": 0, "millilitersPerUnit": 20, "coffeeKind": "" },
-    { "id": "coffee", "label": "咖啡液", "liquid": true, "soluble": true, "gramsPerUnit": 0, "millilitersPerUnit": 200, "coffeeKind": "cold_brew" },
-    { "id": "cocoa.drink", "label": "可可液", "liquid": true, "soluble": true, "gramsPerUnit": 0, "millilitersPerUnit": 200, "coffeeKind": "" },
-    { "id": "matcha.drink", "label": "抹茶液", "liquid": true, "soluble": true, "gramsPerUnit": 0, "millilitersPerUnit": 200, "coffeeKind": "" },
-    { "id": "cream", "label": "奶油", "liquid": false, "soluble": true, "gramsPerUnit": 12, "millilitersPerUnit": 0, "coffeeKind": "" },
-    { "id": "honey", "label": "蜂蜜", "liquid": false, "soluble": true, "gramsPerUnit": 12, "millilitersPerUnit": 0, "coffeeKind": "" },
-    { "id": "sugar", "label": "糖", "liquid": false, "soluble": true, "gramsPerUnit": 5, "millilitersPerUnit": 0, "coffeeKind": "" },
-    { "id": "cocoa.powder", "label": "可可粉", "liquid": false, "soluble": true, "gramsPerUnit": 12, "millilitersPerUnit": 0, "coffeeKind": "" },
-    { "id": "matcha.powder", "label": "抹茶粉", "liquid": false, "soluble": true, "gramsPerUnit": 12, "millilitersPerUnit": 0, "coffeeKind": "" },
-    { "id": "grounds", "label": "咖啡粉", "liquid": false, "soluble": false, "gramsPerUnit": 12, "millilitersPerUnit": 0, "coffeeKind": "" },
-    { "id": "beans", "label": "咖啡豆", "liquid": false, "soluble": false, "gramsPerUnit": 12, "millilitersPerUnit": 0, "coffeeKind": "" }
+    {
+      "id": "water",
+      "label": "清水",
+      "liquid": true,
+      "soluble": true,
+      "gramsPerUnit": 0,
+      "millilitersPerUnit": 200,
+      "coffeeKind": ""
+    },
+    {
+      "id": "hotwater",
+      "label": "热水",
+      "liquid": true,
+      "soluble": true,
+      "gramsPerUnit": 0,
+      "millilitersPerUnit": 200,
+      "coffeeKind": ""
+    },
+    {
+      "id": "milk",
+      "label": "牛奶",
+      "liquid": true,
+      "soluble": true,
+      "gramsPerUnit": 0,
+      "millilitersPerUnit": 200,
+      "coffeeKind": ""
+    },
+    {
+      "id": "hotmilk",
+      "label": "热牛奶",
+      "liquid": true,
+      "soluble": true,
+      "gramsPerUnit": 0,
+      "millilitersPerUnit": 200,
+      "coffeeKind": ""
+    },
+    {
+      "id": "milkfoam",
+      "label": "奶泡",
+      "liquid": true,
+      "soluble": true,
+      "gramsPerUnit": 0,
+      "millilitersPerUnit": 20,
+      "coffeeKind": ""
+    },
+    {
+      "id": "coffee",
+      "label": "咖啡液",
+      "liquid": true,
+      "soluble": true,
+      "gramsPerUnit": 0,
+      "millilitersPerUnit": 200,
+      "coffeeKind": "cold_brew"
+    },
+    {
+      "id": "cocoa.drink",
+      "label": "可可液",
+      "liquid": true,
+      "soluble": true,
+      "gramsPerUnit": 0,
+      "millilitersPerUnit": 200,
+      "coffeeKind": ""
+    },
+    {
+      "id": "matcha.drink",
+      "label": "抹茶液",
+      "liquid": true,
+      "soluble": true,
+      "gramsPerUnit": 0,
+      "millilitersPerUnit": 200,
+      "coffeeKind": ""
+    },
+    {
+      "id": "cream",
+      "label": "奶油",
+      "liquid": false,
+      "soluble": true,
+      "gramsPerUnit": 12,
+      "millilitersPerUnit": 0,
+      "coffeeKind": ""
+    },
+    {
+      "id": "honey",
+      "label": "蜂蜜",
+      "liquid": false,
+      "soluble": true,
+      "gramsPerUnit": 12,
+      "millilitersPerUnit": 0,
+      "coffeeKind": ""
+    },
+    {
+      "id": "sugar",
+      "label": "糖",
+      "liquid": false,
+      "soluble": true,
+      "gramsPerUnit": 5,
+      "millilitersPerUnit": 0,
+      "coffeeKind": ""
+    },
+    {
+      "id": "cocoa.powder",
+      "label": "可可粉",
+      "liquid": false,
+      "soluble": true,
+      "gramsPerUnit": 12,
+      "millilitersPerUnit": 0,
+      "coffeeKind": ""
+    },
+    {
+      "id": "matcha.powder",
+      "label": "抹茶粉",
+      "liquid": false,
+      "soluble": true,
+      "gramsPerUnit": 12,
+      "millilitersPerUnit": 0,
+      "coffeeKind": ""
+    },
+    {
+      "id": "grounds",
+      "label": "咖啡粉",
+      "liquid": false,
+      "soluble": false,
+      "gramsPerUnit": 12,
+      "millilitersPerUnit": 0,
+      "coffeeKind": ""
+    },
+    {
+      "id": "beans",
+      "label": "咖啡豆",
+      "liquid": false,
+      "soluble": false,
+      "gramsPerUnit": 12,
+      "millilitersPerUnit": 0,
+      "coffeeKind": ""
+    }
   ],
   "compositionRules": [
-    { "id": "grounds-water", "label": "咖啡粉与清水生成冷萃", "catalystId": "grounds", "inputId": "water", "inputCoffeeKind": "", "outputId": "coffee", "outputCoffeeKind": "cold_brew", "minimumTemperature": 0, "maximumTemperature": 2, "precisionOnly": false, "consumeCatalyst": true },
-    { "id": "grounds-hotwater", "label": "咖啡粉与热水先生成冷萃", "catalystId": "grounds", "inputId": "hotwater", "inputCoffeeKind": "", "outputId": "coffee", "outputCoffeeKind": "cold_brew", "minimumTemperature": 0, "maximumTemperature": 2, "precisionOnly": false, "consumeCatalyst": true },
-    { "id": "cold-brew-heated", "label": "温热冷萃变为黑咖啡", "catalystId": "", "inputId": "coffee", "inputCoffeeKind": "cold_brew", "outputId": "coffee", "outputCoffeeKind": "black", "minimumTemperature": 1, "maximumTemperature": 2, "precisionOnly": false, "consumeCatalyst": false },
-    { "id": "black-coffee-cooled", "label": "常温黑咖啡变为冷萃", "catalystId": "", "inputId": "coffee", "inputCoffeeKind": "black", "outputId": "coffee", "outputCoffeeKind": "cold_brew", "minimumTemperature": 0, "maximumTemperature": 0, "precisionOnly": false, "consumeCatalyst": false },
-    { "id": "cocoa-water", "label": "可可粉与清水生成可可液", "catalystId": "cocoa.powder", "inputId": "water", "inputCoffeeKind": "", "outputId": "cocoa.drink", "outputCoffeeKind": "", "minimumTemperature": 0, "maximumTemperature": 2, "precisionOnly": false, "consumeCatalyst": true },
-    { "id": "cocoa-hotwater", "label": "可可粉与热水生成可可液", "catalystId": "cocoa.powder", "inputId": "hotwater", "inputCoffeeKind": "", "outputId": "cocoa.drink", "outputCoffeeKind": "", "minimumTemperature": 0, "maximumTemperature": 2, "precisionOnly": false, "consumeCatalyst": true },
-    { "id": "matcha-water", "label": "抹茶粉与清水生成抹茶液", "catalystId": "matcha.powder", "inputId": "water", "inputCoffeeKind": "", "outputId": "matcha.drink", "outputCoffeeKind": "", "minimumTemperature": 0, "maximumTemperature": 2, "precisionOnly": false, "consumeCatalyst": true },
-    { "id": "matcha-hotwater", "label": "抹茶粉与热水生成抹茶液", "catalystId": "matcha.powder", "inputId": "hotwater", "inputCoffeeKind": "", "outputId": "matcha.drink", "outputCoffeeKind": "", "minimumTemperature": 0, "maximumTemperature": 2, "precisionOnly": false, "consumeCatalyst": true }
+    {
+      "id": "grounds-water",
+      "label": "咖啡粉与清水生成冷萃",
+      "catalystId": "grounds",
+      "inputId": "water",
+      "inputCoffeeKind": "",
+      "outputId": "coffee",
+      "outputCoffeeKind": "cold_brew",
+      "minimumTemperature": 0,
+      "maximumTemperature": 2,
+      "precisionOnly": false,
+      "consumeCatalyst": true
+    },
+    {
+      "id": "grounds-hotwater",
+      "label": "咖啡粉与热水先生成冷萃",
+      "catalystId": "grounds",
+      "inputId": "hotwater",
+      "inputCoffeeKind": "",
+      "outputId": "coffee",
+      "outputCoffeeKind": "cold_brew",
+      "minimumTemperature": 0,
+      "maximumTemperature": 2,
+      "precisionOnly": false,
+      "consumeCatalyst": true
+    },
+    {
+      "id": "cold-brew-heated",
+      "label": "温热冷萃变为黑咖啡",
+      "catalystId": "",
+      "inputId": "coffee",
+      "inputCoffeeKind": "cold_brew",
+      "outputId": "coffee",
+      "outputCoffeeKind": "black",
+      "minimumTemperature": 1,
+      "maximumTemperature": 2,
+      "precisionOnly": false,
+      "consumeCatalyst": false
+    },
+    {
+      "id": "black-coffee-cooled",
+      "label": "常温黑咖啡变为冷萃",
+      "catalystId": "",
+      "inputId": "coffee",
+      "inputCoffeeKind": "black",
+      "outputId": "coffee",
+      "outputCoffeeKind": "cold_brew",
+      "minimumTemperature": 0,
+      "maximumTemperature": 0,
+      "precisionOnly": false,
+      "consumeCatalyst": false
+    },
+    {
+      "id": "cocoa-water",
+      "label": "可可粉与清水生成可可液",
+      "catalystId": "cocoa.powder",
+      "inputId": "water",
+      "inputCoffeeKind": "",
+      "outputId": "cocoa.drink",
+      "outputCoffeeKind": "",
+      "minimumTemperature": 0,
+      "maximumTemperature": 2,
+      "precisionOnly": false,
+      "consumeCatalyst": true
+    },
+    {
+      "id": "cocoa-hotwater",
+      "label": "可可粉与热水生成可可液",
+      "catalystId": "cocoa.powder",
+      "inputId": "hotwater",
+      "inputCoffeeKind": "",
+      "outputId": "cocoa.drink",
+      "outputCoffeeKind": "",
+      "minimumTemperature": 0,
+      "maximumTemperature": 2,
+      "precisionOnly": false,
+      "consumeCatalyst": true
+    },
+    {
+      "id": "matcha-water",
+      "label": "抹茶粉与清水生成抹茶液",
+      "catalystId": "matcha.powder",
+      "inputId": "water",
+      "inputCoffeeKind": "",
+      "outputId": "matcha.drink",
+      "outputCoffeeKind": "",
+      "minimumTemperature": 0,
+      "maximumTemperature": 2,
+      "precisionOnly": false,
+      "consumeCatalyst": true
+    },
+    {
+      "id": "matcha-hotwater",
+      "label": "抹茶粉与热水生成抹茶液",
+      "catalystId": "matcha.powder",
+      "inputId": "hotwater",
+      "inputCoffeeKind": "",
+      "outputId": "matcha.drink",
+      "outputCoffeeKind": "",
+      "minimumTemperature": 0,
+      "maximumTemperature": 2,
+      "precisionOnly": false,
+      "consumeCatalyst": true
+    }
   ],
   "drinkNameRules": [],
   "compositionSettings": {
@@ -1564,6 +2111,8 @@
     "brewIdealMl": 200,
     "brewGoldMl": 15,
     "brewGreenMl": 35,
-    "kettleCapacityMl": 400
+    "kettleCapacityMl": 400,
+    "extractionFilterOffsetX": -0.2691,
+    "extractionFilterOffsetY": 2.16623
   }
 }

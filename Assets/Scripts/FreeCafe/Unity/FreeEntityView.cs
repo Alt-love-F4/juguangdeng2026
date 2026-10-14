@@ -27,6 +27,7 @@ namespace Spotlight.FreeCafe
         private Sprite lastCharacterSprite;
         private string specId,lastState,lastArtId;
         private FreeCafePersonView personView;
+        private FreeCafeCupStackVisual cupStack;
         private FreeCafeBusinessSignView businessSignView;
         private bool preview, retired;
         public bool CanInteract => !preview && !retired && !destroyOnArrival && isActiveAndEnabled &&
@@ -232,6 +233,12 @@ namespace Spotlight.FreeCafe
             label.GetComponent<MeshRenderer>().sortingOrder=body.sortingOrder+1;
             if(workspaceCaption!=null) workspaceCaption.GetComponent<MeshRenderer>().sortingOrder=body.sortingOrder+2;
             UpdateGlassTransform();
+            if(entity.specId=="cup.small" || entity.specId=="cup.large" || entity.specId=="source.cups.small" || entity.specId=="source.cups.large")
+            {
+                if(cupStack==null) cupStack=GetComponent<FreeCafeCupStackVisual>();
+                if(cupStack==null) cupStack=gameObject.AddComponent<FreeCafeCupStackVisual>();
+                cupStack.Present(spec,Runtime.World.Catalog,Runtime.artLibrary,entity.stock,Runtime.World.CupAbove(entity)!=null);
+            }
             bool visible=string.IsNullOrEmpty(entity.ownerId);
             gameObject.SetActive(visible);
             hitbox.enabled=CanInteract && !pointerMotion && visible && entity.area==Runtime.World.State.currentArea;

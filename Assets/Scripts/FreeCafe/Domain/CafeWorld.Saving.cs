@@ -87,6 +87,8 @@ namespace Spotlight.FreeCafe
                 ids.Add(e.id, e);
             }
 
+            if (!ValidCupStacks(ids)) return ActionResult.No("存档杯子堆叠无效");
+
             // 第二遍：校验设备任务与归属关系（此时 id 索引已经建好）
             foreach (var e in candidate.entities)
             {
