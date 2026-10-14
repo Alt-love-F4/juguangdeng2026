@@ -267,7 +267,7 @@ namespace Spotlight.FreeCafe
             var entity=World.Find(view.EntityId); if(entity==null || entity.area!=World.State.currentArea) return;
             var spec=World.Spec(entity.specId);
             if(spec.Has(Capability.BusinessControl)) { Report(World.ActivateBusinessControl(entity.id)); return; }
-            if(World.ProductionEnabled && entity.specId=="tool.latte-art") { Report(World.RequestProductionMiniGame()); return; }
+            if(World.ProductionEnabled && World.IsMilkPitcher(entity)) { SelectedId=entity.id; Report(World.FrothMilk(entity.id)); return; }
             if(World.ProductionEnabled && spec.Has(Capability.Source) && World.Spec(spec.sourceItemId).Has(Capability.Container))
             { Report(World.SelectServingCup(entity.id)); return; }
             if(World.ProductionEnabled && spec.Has(Capability.Processor))
@@ -349,6 +349,11 @@ namespace Spotlight.FreeCafe
             var inputCamera=e.pressEventCamera!=null ? e.pressEventCamera : worldCamera;
             if(inputCamera==null || !inputCamera.isActiveAndEnabled) { ShowHint("游戏摄像机未启用，无法拖拽实体"); return; }
             var entity=World.Find(view.EntityId); if(entity==null || entity.area!=World.State.currentArea) return; var spec=World.Spec(entity.specId);
+            if(World.ProductionEnabled && World.IsMilkPitcher(entity) && World.MilkFoamVolume(entity)<=.001f)
+            {
+                ShowHint("请先向拉花杯加入牛奶，点击拉花杯制成奶泡后，再拖到杯子上拉花");
+                return;
+            }
             if(World.Locked(entity)) { ShowHint("正在加工，点击设备可中止"); return; }
             if(World.ProductionEnabled && World.IsContainer(entity))
             { World.SuspendContainerHeating(entity.id); draggingVessel=true; dragItemId=entity.id; draggedView=view; SelectedId=entity.id; }
@@ -446,6 +451,16 @@ namespace Spotlight.FreeCafe
             if(!IsDragging) return;
             if(draggingVessel)
             {
+                if (World.IsMilkPitcher(item))
+                {
+                    if (receiver != null && !placeOnly)
+                    {
+                        var preview = World.Preview(item, World.Find(receiver.EntityId));
+                        receiver.SetDropTarget(true, !preview.success); ShowHint(preview.message);
+                    }
+                    else ShowHint(World.MilkFoamVolume(item)>0 ? "拉花杯已有奶泡：拖到杯子上松手开始拉花；不使用右键倾倒" : "拉花杯不使用右键倾倒；先加入牛奶并点击打奶，再拖到杯子上拉花");
+                    return;
+                }
                 if(receiver!=null)
                 {
                     var target=World.Find(receiver.EntityId);
@@ -470,7 +485,8 @@ namespace Spotlight.FreeCafe
         {
             if(!IsDragging) return;
             if(InputBlocked) { CancelDrag(); return; }
-            if(draggingVessel && (vesselTiltMode || Mouse.current!=null && Mouse.current.rightButton.isPressed))
+            if(draggingVessel && !World.IsMilkPitcher(World.Find(dragItemId))
+                && (vesselTiltMode || Mouse.current!=null && Mouse.current.rightButton.isPressed))
             {
                 if(!vesselTiltMode) BeginVesselTilt();
                 return;
@@ -571,6 +587,7 @@ namespace Spotlight.FreeCafe
 
         private void BeginVesselTilt()
         {
+            if (World.IsMilkPitcher(World.Find(dragItemId))) return;
             // 用右键按下前的左键落点选择一次，此后仅更新倾斜量。
             if(vesselPointer==null) vesselPointer=new PointerEventData(EventSystem.current);
             vesselPointer.position=pointerScreen;
@@ -589,7 +606,7 @@ namespace Spotlight.FreeCafe
         {
             var mouse=Mouse.current;
             if(mouse==null) return;
-            bool rightHeld=mouse.rightButton.isPressed;
+            bool rightHeld=mouse.rightButton.isPressed && !World.IsMilkPitcher(World.Find(dragItemId));
             if(rightHeld && !vesselTiltMode) BeginVesselTilt();
             pointerScreen=mouse.position.ReadValue();
             if(!rightHeld && !vesselTiltMode && mouse.leftButton.wasReleasedThisFrame)

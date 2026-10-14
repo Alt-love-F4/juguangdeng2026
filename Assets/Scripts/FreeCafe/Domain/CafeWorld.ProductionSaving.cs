@@ -153,14 +153,46 @@ namespace Spotlight.FreeCafe
             if (!string.IsNullOrEmpty(candidate.production.miniGameToken) && candidate.production.miniGameToken.StartsWith("minigame_")
                 && int.TryParse(candidate.production.miniGameToken.Substring(9), out var sequence)) candidate.nextId = Math.Max(candidate.nextId, sequence + 1);
             var session = candidate.production;
+            if (!Finite(session.miniGameFoamUsedMl) || session.miniGameFoamUsedMl < 0) return ActionResult.No("拉花奶泡用量无效");
             if (!string.IsNullOrEmpty(session.activeCupId))
             {
                 var cup = candidate.entities.Find(e => e.id == session.activeCupId);
                 if (cup == null || cup.area != AreaId.Counter || !Spec(cup.specId).Has(Capability.Container)) return ActionResult.No("出餐杯引用无效");
             }
-            if (!string.IsNullOrEmpty(session.miniGameToken)
-                && (session.miniGameCupId != session.activeCupId || string.IsNullOrEmpty(session.activeCupId) || session.miniGameKind != "latte-art"))
-                return ActionResult.No("小游戏引用无效");
+            if (!string.IsNullOrEmpty(session.miniGameToken))
+            {
+                var cup = candidate.entities.Find(entity => entity.id == session.miniGameCupId);
+                var pitcher = candidate.entities.Find(entity => entity.id == session.miniGamePitcherId);
+                if (session.miniGameKind != "latte-art" || cup == null
+                    || (string.IsNullOrEmpty(session.miniGamePitcherId)
+                        ? cup.id != session.activeCupId
+                        : !IsMilkPitcher(pitcher) || !IsLatteArtCup(cup) || pitcher.area != cup.area))
+                    return ActionResult.No("小游戏引用无效");
+            }
+            // Batch markers are references into the one real inventory, not independently restorable amounts.
+            double markedFoamMl = 0;
+            foreach (var entity in candidate.entities)
+            {
+                if (!string.IsNullOrEmpty(entity.portionPayload?.latteArtSessionToken))
+                    return ActionResult.No("原料不能持有拉花会话来源");
+                foreach (var portion in entity.contents)
+                {
+                    if (string.IsNullOrEmpty(portion.latteArtSessionToken)) continue;
+                    if (string.IsNullOrEmpty(session.miniGameToken) || string.IsNullOrEmpty(session.miniGamePitcherId)
+                        || portion.latteArtSessionToken != session.miniGameToken || entity.id != session.miniGameCupId
+                        || portion.specId != "milkfoam") return ActionResult.No("拉花奶泡来源无效");
+                    markedFoamMl += portion.milliliters;
+                }
+            }
+            if (markedFoamMl > 0 && Math.Abs(markedFoamMl - session.miniGameFoamUsedMl) > .01)
+                return ActionResult.No("拉花奶泡来源与用量不一致");
+            if (markedFoamMl == 0 && session.miniGameFoamUsedMl > 0)
+            {
+                // Older saves merged session foam with existing foam and lost its source. Keep all liquid,
+                // but terminate that session: guessing a proportional debit would destroy prior batches.
+                session.miniGameToken = session.miniGameCupId = session.miniGameKind = session.miniGamePitcherId = null;
+                session.miniGameFoamUsedMl = 0;
+            }
             // Numeric Celsius is authoritative; legacy sentinel and enum mirrors are normalized only
             // after the complete candidate has validated, before it can replace the live State.
             foreach (var entity in candidate.entities)

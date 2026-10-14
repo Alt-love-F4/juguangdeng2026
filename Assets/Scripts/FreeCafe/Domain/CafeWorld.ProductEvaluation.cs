@@ -22,7 +22,7 @@ namespace Spotlight.FreeCafe
                 needsCoffee |= coffee;
                 foreach (var portion in cup.contents)
                 {
-                    if (!ProductPortionMatches(portion, need)) continue;
+                    if (!ProductPortionMatches(cup, portion, need)) continue;
                     string kind = CoffeeKind(portion);
                     actual += ProductPortionAmount(portion, need.idealMl > 0);
                     if (coffee && kind != null)

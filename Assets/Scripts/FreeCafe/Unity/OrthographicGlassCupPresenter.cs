@@ -26,6 +26,7 @@ namespace Spotlight.FreeCafe
         private float targetFill, previousVolume;
 
         public Color MixedColor { get; private set; }
+        public Color LiquidSurfaceColor { get; private set; }
         public float TargetFill => targetFill;
 
         private void Awake() { Ensure(); }
@@ -132,6 +133,7 @@ namespace Spotlight.FreeCafe
             deep.a = color.a;
             Color surface = Color.Lerp(color, Color.white, 0.45f);
             surface.a = color.a;
+            LiquidSurfaceColor = surface;
             liquid.ConfigureAppearance(color, deep, surface, glass);
         }
 

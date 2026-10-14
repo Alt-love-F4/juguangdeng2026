@@ -277,7 +277,7 @@ namespace Spotlight.FreeCafe
         }
 
         /// <summary>是否被设备占用（ownerId 非空表示材料正锁在设备里，不能搬动）。</summary>
-        public bool Locked(WorldEntity item) => item != null && !string.IsNullOrEmpty(item.ownerId);
+        public bool Locked(WorldEntity item) => item != null && (!string.IsNullOrEmpty(item.ownerId) || MiniGameUses(item));
 
         /// <summary>从来源（豆仓、牛奶柜等）取出一件物品放到指定位置。</summary>
         public ActionResult Take(string sourceId, AreaId area, float x, float y, out WorldEntity item)
@@ -505,7 +505,7 @@ namespace Spotlight.FreeCafe
                     item.contents.Clear(); item.production.filterSpent = false; item.production.filterDrainHold = 0;
                     Notify(); return ActionResult.Yes("滤杯已清空，可继续组合使用");
                 }
-                if (ProductionEnabled && (IsProductionVessel(item) || IsPrecisionExtractor(item)))
+                if (ProductionEnabled && (IsProductionVessel(item) || IsPrecisionExtractor(item) || IsMilkPitcher(item)))
                 {
                     Charge(Catalog.economy.wastePenalty); ConsumeDeliveredContainer(item); Notify();
                     return ActionResult.Yes("壶中内容已丢弃，空壶已归位");

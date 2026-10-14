@@ -11,7 +11,7 @@ using UIEventSystem = UnityEngine.EventSystems.EventSystem;
 namespace OnePersonCompany
 {
     /// <summary>GPU 拉花流体与玩家轨迹采集。轨迹仅用于识别，库存和订单仍由 FreeCafe 域层管理。</summary>
-    public sealed class LatteArtPrototype : MonoBehaviour, ILatteArtSurface
+    public sealed class LatteArtPrototype : MonoBehaviour, ILatteArtSurface, ILatteArtFoamSurface, ILatteArtFeedbackSurface
     {
         [Header("Single multi-pass NS Shader")]
         [SerializeField] private Shader simulationShader;
@@ -52,6 +52,26 @@ namespace OnePersonCompany
         private int advectVelocityPass, copyPass, diffusePass, curlPass, confinePass, divergencePass, pressurePass, projectPass, advectMilkPass, correctMilkPass;
         private bool interactionEnabled = true;
         private bool strokeActive;
+        private Func<float, float> foamConsumer;
+        private float foamMlPerSecond = 6;
+        private Action resetHandler;
+
+        public void SetResetHandler(Action handler) => resetHandler = handler;
+        public void GetPatternFits(IList<LatteArtPatternPreset> presets, IList<LatteArtRecognitionResult> results)
+            => LatteArtPatternRecognizer.GetPatternFits(strokePoints, presets, strokeStarts, results);
+        public void SetLiquidColor(Color color)
+        {
+            if (surfaceMaterial == null) return;
+            color.a = 1;
+            surfaceMaterial.SetColor("_CoffeeColor", color);
+            surfaceMaterial.SetColor("_CremaColor", Color.Lerp(color, Color.white, .12f));
+        }
+
+        public void SetFoamConsumer(Func<float, float> consumer, float millilitersPerSecond)
+        {
+            foamConsumer = consumer;
+            foamMlPerSecond = Mathf.Max(.1f, millilitersPerSecond);
+        }
 
         public RenderTexture VelocityTexture => velocityRead; public RenderTexture MilkTexture => densityRead;
         public RenderTexture PressureTexture => pressureRead; public RenderTexture DivergenceTexture => divergence;
@@ -197,8 +217,25 @@ namespace OnePersonCompany
         }
         private void SimulateInput(float dt)
         {
-            if (Keyboard.current != null && Keyboard.current.rKey.wasPressedThisFrame) ResetLatte();
+            if (interactionEnabled && !IsPointerOverUI() && Keyboard.current != null && Keyboard.current.rKey.wasPressedThisFrame)
+            {
+                if (resetHandler != null) resetHandler();
+                else ResetLatte();
+            }
             bool inside = TryGetPointerUV(out Vector2 uv); bool pouring = inside && !IsPointerOverUI() && (!requireLeftButton || Mouse.current != null && Mouse.current.leftButton.isPressed);
+            float depositFraction = 1;
+            if (pouring && foamConsumer != null)
+            {
+                if (surfaceMaterial == null || dt <= 0 || float.IsNaN(dt) || float.IsInfinity(dt)) pouring = false;
+                else
+                {
+                    float elapsed = Mathf.Min(dt, Mathf.Min(MaxStep, .55f / (densityRead.width * .05f)) * MaxFrameSteps);
+                    float requested = foamMlPerSecond * elapsed * (pourRate / 5f) * BrushRadiusScale * BrushRadiusScale;
+                    float accepted = foamConsumer(requested);
+                    depositFraction = Mathf.Clamp01(accepted / requested);
+                    pouring = accepted > 0;
+                }
+            }
             if (pouring && !strokeActive && strokePoints.Count < MaxStrokePoints)
             {
                 strokeStarts.Add(strokePoints.Count);
@@ -214,7 +251,7 @@ namespace OnePersonCompany
                     strokePoints.Add(point);
             }
             if (!pouring) strokeActive = false;
-            AdvanceFrame(dt, uv, pouring);
+            AdvanceFrame(dt, uv, pouring, depositFraction);
         }
         private bool IsPointerOverUI()
         {
@@ -231,7 +268,7 @@ namespace OnePersonCompany
             }
             return false;
         }
-        private void AdvanceFrame(float dt, Vector2 currentUV, bool pouring)
+        private void AdvanceFrame(float dt, Vector2 currentUV, bool pouring, float depositFraction = 1)
         {
             if (surfaceMaterial == null || dt <= 0 || float.IsNaN(dt) || float.IsInfinity(dt)) return;
             const float waveSpeed = 0.05f;
@@ -251,6 +288,7 @@ namespace OnePersonCompany
             float distancePerStep = Vector2.Distance(start, currentUV) / steps;
             float depositTime = stepDt + Mathf.Min(distancePerStep / Mathf.Max(2f * brushRadius, .001f) * strokeDepositAssist, .08f / steps);
             m.SetFloat("_DepositTime", depositTime);
+            m.SetFloat("_PourRate", pourRate * depositFraction);
             var oldActive = RenderTexture.active; bool oldSRGB = GL.sRGBWrite; try { GL.sRGBWrite = false; for (int s = 0; s < steps; s++) { Vector2 from = Vector2.Lerp(start, currentUV, s / (float)steps), to = Vector2.Lerp(start, currentUV, (s + 1f) / steps); m.SetVector("_PreviousPourUV", new Vector4(from.x, from.y, 0, 0)); m.SetVector("_PourUV", new Vector4(to.x, to.y, 0, 0)); SolveStep(); simulationTime += stepDt; simulationFrameCount++; } } finally { GL.sRGBWrite = oldSRGB; RenderTexture.active = oldActive; }
             if (image != null) image.texture = densityRead; if (worldSurface) surfaceMaterial.SetTexture("_MainTex", densityRead); surfaceMaterial.SetFloat("_SimulationTime", simulationTime); previousUV = currentUV; wasPouring = pouring;
         }

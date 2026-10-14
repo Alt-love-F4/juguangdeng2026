@@ -96,7 +96,7 @@ namespace Spotlight.FreeCafe
                 foreach(var id in runtime.World.State.unlockedProducts)
                 {
                     var product=runtime.World.Product(id);
-                    productionText.Append("【").Append(product.label).Append("】").AppendLine(product.description).AppendLine(product.tutorial).AppendLine();
+                    productionText.Append("【").Append(FreeCafeProductionText.Recipe(product.label)).Append("】").AppendLine(FreeCafeProductionText.Recipe(product.description)).AppendLine(FreeCafeProductionText.Recipe(product.tutorial)).AppendLine();
                 }
                 recipeBody.text=productionText.ToString(); return;
             }
@@ -164,7 +164,7 @@ namespace Spotlight.FreeCafe
                 var customer=runtime.World.Find(request.customerId);string name="顾客";
                 if(customer!=null && runtime.World.Catalog.npcs!=null)
                     foreach(var npc in runtime.World.Catalog.npcs) if(npc.id==customer.npcId) name=npc.name;
-                string recipe=(request.id==state.focusedRequestId ? "● " : "")+name+"  ·  "+request.patience.ToString("0")+" 秒\n"+product.label+"  /  "+product.price+" 王国币";
+                string recipe=(request.id==state.focusedRequestId ? "● " : "")+name+"  ·  "+request.patience.ToString("0")+" 秒\n"+FreeCafeProductionText.Recipe(product.label)+"  /  "+product.price+" 王国币";
                 orderLabels[i].text=recipe; orderButtons[i].interactable=!runtime.InputBlocked;
             }
             pauseButton.interactable=string.IsNullOrEmpty(state.production.miniGameToken) && !(FreeCafeGMPanel.Instance!=null && FreeCafeGMPanel.Instance.IsVisible);

@@ -235,6 +235,11 @@ namespace Spotlight.FreeCafe
             for (int i = 0; i < ingredients.Count; i++)
             {
                 if (i > 0) text.Append('\n');
+                if (ingredients[i] == "milkfoam:" && world.IsLatteArtCup(entity) && entity.latteArt)
+                {
+                    text.Append(FreeCafeProductionText.LatteArtContents(volumes[i], entity.latteArtPattern));
+                    continue;
+                }
                 text.Append(ingredientLabels[i]).Append("   ");
                 if (volumes[i] > 0) text.Append(volumes[i].ToString("0.#")).Append(" ml");
                 if (masses[i] > 0)

@@ -22,7 +22,7 @@ namespace Spotlight.FreeCafe
                 if (request.customerId == entity.id) { active = request; break; }
             orderCaption.gameObject.SetActive(active != null);
             if (active != null)
-                orderCaption.text = "想要 " + world.Product(active.productId).label + "\n" + active.patience.ToString("0") + " 秒 · 点击查看";
+                orderCaption.text = "想要 " + FreeCafeProductionText.Recipe(world.Product(active.productId).label) + "\n" + active.patience.ToString("0") + " 秒 · 点击查看";
             orderCaption.GetComponent<MeshRenderer>().sortingOrder = entityView.body.sortingOrder + 2;
         }
     }

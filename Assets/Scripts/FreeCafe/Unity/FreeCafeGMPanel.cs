@@ -240,6 +240,13 @@ namespace Spotlight.FreeCafe
 
         private void BuildDiagnostics()
         {
+            AddAction("拉花快捷入口（GM）", () =>
+            {
+                if (runtime.GameplayBlocked) { SetStatus("当前流程或小游戏禁止进入拉花"); return; }
+                var result = runtime.World.RequestProductionMiniGame();
+                Report(result);
+                if (result.success) SetVisible(false);
+            }, "测试用：绑定出餐杯，不消耗奶泡；正式玩法请拖动拉花杯");
             AddAction("刷新经营视图", () => runtime.DebugRefreshViews(), "重新同步实体显示");
             AddAction("取消当前拖拽", () => runtime.CancelDrag(), "不改变库存");
             AddAction("显示当前状态", ShowState, "在面板底部显示快照摘要");

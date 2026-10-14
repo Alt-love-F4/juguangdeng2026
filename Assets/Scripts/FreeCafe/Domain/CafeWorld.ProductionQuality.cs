@@ -29,7 +29,7 @@ namespace Spotlight.FreeCafe
                 float ml = 0; float units = 0; float temperature = 0;
                 foreach (var p in cup.contents)
                 {
-                    if (!SameIngredient(p.specId, need.specId)) continue;
+                    if (!RecipeIngredientMatches(cup, p, need.specId)) continue;
                     ml += p.milliliters; units += p.grams > 0 ? p.grams / (p.specId == "sugar" ? 5 : 12) : p.units;
                     temperature += p.milliliters * (100 - Math.Abs((int)TemperatureBand(TemperatureCelsius(p)) - (int)product.requiredTemperature) * 35);
                 }
@@ -48,9 +48,7 @@ namespace Spotlight.FreeCafe
             float liquid = liquidCount > 0 ? liquidScore / liquidCount : 100;
             int latestLiquid = 0;
             foreach (var p in cup.contents) if (p.milliliters > 0) latestLiquid = Math.Max(latestLiquid, p.addedSequence);
-            float order = 100;
-            if (!string.IsNullOrEmpty(product.preferredLatteArtPattern))
-                order -= string.Equals(cup.latteArtPattern, product.preferredLatteArtPattern, StringComparison.OrdinalIgnoreCase) ? 0 : 25;
+            float order = 100; // Latte-art kind requires completion, never a particular pattern or recognizer score.
             float sweet = Clamp(100 - Math.Abs(sweetness - product.idealSweetness) * 20);
             float ratio = totalMl > 0 ? coffeeMl / totalMl : 0;
             float grounds = 0;
@@ -128,7 +126,7 @@ namespace Spotlight.FreeCafe
                     entity.production.heatingVesselId = null;
             var home = Array.Find(Catalog.layout, entry => entry.id == container.id && entry.specId == container.specId);
             bool reusable = home != null && IsContainer(container) &&
-                (Spec(container.specId).Has(Capability.Processor) || Spec(container.specId).Has(Capability.HotExtraction));
+                (IsMilkPitcher(container) || Spec(container.specId).Has(Capability.Processor) || Spec(container.specId).Has(Capability.HotExtraction));
             if (!reusable) { State.entities.Remove(container); return; }
             var filter = ExtractionFilter(container);
             if (filter != null)
@@ -148,6 +146,7 @@ namespace Spotlight.FreeCafe
         public ActionResult EmptyProductionMachine(string id)
         {
             var machine = Find(id);
+            if (MiniGameUses(machine)) return ActionResult.No("请先结束拉花，再清空容器");
             var filter = ExtractionFilter(machine);
             if ((!IsProductionMachine(machine) && !IsContainer(machine)) || machine.contents.Count == 0 && (filter == null || filter.contents.Count == 0))
                 return ActionResult.No("没有可清空的设备内容");
@@ -177,6 +176,7 @@ namespace Spotlight.FreeCafe
                 return ActionResult.No("请先在出餐点选择一只可用的杯子");
             if (!string.IsNullOrEmpty(State.production.miniGameToken)) return ActionResult.No("已有小游戏进行中");
             State.production.miniGameToken = Allocate("minigame_"); State.production.miniGameCupId = cup.id;
+            State.production.miniGamePitcherId = null; State.production.miniGameFoamUsedMl = 0;
             State.production.miniGameKind = kind; Notify(); return ActionResult.Yes("已进入拉花：拖动鼠标绘制图案，完成后提交");
         }
         public ActionResult ResolveProductionMiniGame(string token, bool completed, float score) => ResolveProductionMiniGame(token, completed, score, null);
@@ -185,16 +185,29 @@ namespace Spotlight.FreeCafe
             if (!ProductionEnabled || string.IsNullOrEmpty(token) || token != State.production.miniGameToken
                 || !Finite(score) || score < 0 || score > 100) return ActionResult.No("过期或无效的小游戏回调");
             var cup = Find(State.production.miniGameCupId);
-            if (cup == null || cup != ServingCup) { CancelProductionMiniGame(); return ActionResult.No("目标杯已变化"); }
-            cup.latteArt = completed && score >= 75;
-            cup.latteArtScore = completed ? score : 0;
-            cup.latteArtPattern = completed ? (string.IsNullOrEmpty(pattern) ? "unknown" : pattern) : null;
-            CancelProductionMiniGame(); Notify(); return ActionResult.Yes(completed ? "拉花已完成 · " + (cup.latteArtPattern ?? "未识别") + " · " + score.ToString("0") + "分" : "已取消拉花，不改变杯中内容");
+            bool fromPitcher = !string.IsNullOrEmpty(State.production.miniGamePitcherId);
+            if (cup == null || !fromPitcher && cup != ServingCup) { CancelProductionMiniGame(); return ActionResult.No("目标杯已变化"); }
+            if (completed && fromPitcher && State.production.miniGameFoamUsedMl <= 0) return ActionResult.No("尚未使用奶泡，不能提交拉花");
+            float used = State.production.miniGameFoamUsedMl;
+            if (!completed) { CancelProductionMiniGame(); Notify(); return ActionResult.Yes("已返回吧台 · 已用奶泡 " + used.ToString("0.0") + " ml 保留在杯中，不返还"); }
+            cup.latteArt = true; // Completion is independent of recognizer score and pattern.
+            cup.latteArtScore = score;
+            cup.latteArtPattern = string.IsNullOrEmpty(pattern) ? "unknown" : pattern;
+            CancelProductionMiniGame(); Notify(); return ActionResult.Yes("拉花已完成 · " + cup.latteArtPattern + " · " + score.ToString("0") + "分");
         }
         public void CancelProductionMiniGame()
         {
             if (!ProductionEnabled) return;
+            var cup = Find(State.production.miniGameCupId);
+            string token = State.production.miniGameToken;
+            if (cup != null && !string.IsNullOrEmpty(token))
+            {
+                foreach (var portion in cup.contents)
+                    if (portion.latteArtSessionToken == token) portion.latteArtSessionToken = null;
+                MergeContainerContents(cup); // Kept foam becomes ordinary inventory after completion/cancellation.
+            }
             State.production.miniGameToken = State.production.miniGameCupId = State.production.miniGameKind = null;
+            State.production.miniGamePitcherId = null; State.production.miniGameFoamUsedMl = 0;
         }
     }
 }

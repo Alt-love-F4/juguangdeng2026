@@ -14,6 +14,7 @@ namespace Spotlight.FreeCafe
             || (ProductionEnabled && entity != null && (entity.specId == "machine.grinder" || entity.specId == "machine.mixer" || entity.specId == "machine.stove"));
         public bool IsContainer(WorldEntity entity) => entity != null && (Spec(entity.specId).Has(Capability.Container) || IsProductionVessel(entity));
         public bool CanPour(WorldEntity entity) => ProductionEnabled && IsContainer(entity) && LiquidVolume(entity) > 0
+            && !IsMilkPitcher(entity)
             && (!IsExtractionFilter(entity) || ExtractionJug(entity) == null)
             && (!IsPrecisionExtractor(entity) || ExtractionFilter(entity) == null || !entity.production.brewStarted);
         private bool IsLiquid(string id) => IngredientDefinition(id)?.liquid ??
@@ -52,7 +53,7 @@ namespace Spotlight.FreeCafe
                     }
             }
             foreach (var initial in Catalog.layout)
-                if ((initial.id == "s.water" || initial.id == "s.sugar" || initial.id == "tool.latte-art") && Find(initial.id) == null)
+                if ((initial.id == "s.water" || initial.id == "s.sugar") && Find(initial.id) == null)
                 {
                     var spec = Spec(initial.specId);
                     State.entities.Add(new WorldEntity { id = initial.id, specId = initial.specId, area = initial.area,
@@ -177,7 +178,7 @@ namespace Spotlight.FreeCafe
             result = default;
             if (!ProductionEnabled) return false;
             var input = Spec(item.specId); var receiver = Spec(target.specId);
-            if (!string.IsNullOrEmpty(State.production.miniGameToken) && (target.id == State.production.miniGameCupId || item.id == State.production.miniGameCupId))
+            if (MiniGameUses(target) || MiniGameUses(item))
             { result = ActionResult.No("请先结束或取消小游戏"); return true; }
             if (IsExtractionFilter(item) && IsPrecisionExtractor(target))
             { result = PreviewExtractionAssembly(item, target); return true; }
@@ -351,7 +352,7 @@ namespace Spotlight.FreeCafe
             if (!CanPour(source) || !Finite(requestedMl) || requestedMl <= 0 || !Finite(seconds) || seconds <= 0)
                 return ActionResult.No("当前不能倾倒");
             if (source == target || target != null && (source.area != target.area || !IsContainer(target))) return ActionResult.No("目标无效");
-            if (!string.IsNullOrEmpty(State.production.miniGameToken) && (source.id == State.production.miniGameCupId || target != null && target.id == State.production.miniGameCupId))
+            if (MiniGameUses(source) || MiniGameUses(target))
                 return ActionResult.No("小游戏期间不能改变内容");
             float total = LiquidVolume(source);
             float amount = Math.Min(requestedMl, total);

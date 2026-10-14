@@ -17,10 +17,17 @@ namespace Spotlight.GameFlow
         [SerializeField, Min(0f)] private float coverDuration = 0.55f;
         [SerializeField, Min(0f)] private float disappearDuration = 0.55f;
 
+        [Header("Cup pattern movement")]
+        [Tooltip("整体滚动速度，单位为每秒移动的屏幕 UV 距离；0 表示静止。")]
+        [SerializeField, Min(0f)] private float movementSpeed = 0.08f;
+        [Tooltip("整体移动方向：X 正值向右，Y 正值向上；只使用方向，不使用向量长度。")]
+        [SerializeField] private Vector2 movementDirection = Vector2.one;
+
         private static readonly int TransitionId = Shader.PropertyToID("_Transition");
         private static readonly int DisappearingId = Shader.PropertyToID("_Disappearing");
-        private static readonly int UnscaledTimeId = Shader.PropertyToID("_UnscaledTime");
+        private static readonly int CupScrollOffsetId = Shader.PropertyToID("_CupScrollOffset");
 
+        private Vector2 cupScrollOffset;
         private Material runtimeMaterial;
         private CanvasGroup panelCanvasGroup;
         private Action coveredCallbacks;
@@ -49,6 +56,7 @@ namespace Spotlight.GameFlow
             // UIKit re-opens an already visible panel without replaying its show animation.
             bool alreadyVisible = State == PanelState.Open;
             covered = alreadyVisible;
+            if (!alreadyVisible) cupScrollOffset = Vector2.zero;
             endRequested = false;
             closeRequested = false;
             coveredCallbacks = null;
@@ -211,13 +219,17 @@ namespace Spotlight.GameFlow
             if (runtimeMaterial == null) return;
             runtimeMaterial.SetFloat(TransitionId, Mathf.Clamp01(transition));
             runtimeMaterial.SetFloat(DisappearingId, Mathf.Clamp01(disappearing));
-            runtimeMaterial.SetFloat(UnscaledTimeId, Time.unscaledTime);
+            runtimeMaterial.SetVector(CupScrollOffsetId, cupScrollOffset);
         }
 
         private void Update()
         {
-            if (runtimeMaterial != null)
-                runtimeMaterial.SetFloat(UnscaledTimeId, Time.unscaledTime);
+            if (runtimeMaterial == null) return;
+
+            // Accumulate unscaled displacement so pause does not stop the loading effect,
+            // and changing speed/direction live never jumps the pattern to a new position.
+            cupScrollOffset += movementDirection.normalized * Mathf.Max(0f, movementSpeed) * Time.unscaledDeltaTime;
+            runtimeMaterial.SetVector(CupScrollOffsetId, cupScrollOffset);
         }
 
         private sealed class MaterialTransitionAnimation : IUIAnimation

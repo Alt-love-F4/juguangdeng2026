@@ -45,6 +45,27 @@ namespace Spotlight.FreeCafe.Tests
             Assert.That(production.saveButton.gameObject.activeInHierarchy,Is.False);
             Assert.That(production.productionRoot.GetComponentsInChildren<Canvas>().Length,Is.EqualTo(0));
         }
+        [UnityTest] public IEnumerator BothCoffeeBooksUseLatteArtRecipeTermsWhilePreservingRawIngredientLabels()
+        {
+            var world=app.World;
+            var product=world.Catalog.products[0];
+            product.label="奶泡饮品";product.description="精粹咖啡与奶沫";product.tutorial="配方种类：奶泡";
+            product.ingredients=new[]{new Portion{specId="milkfoam",units=1,milliliters=20}};
+            world.State.unlockedProducts.Clear();world.State.unlockedProducts.Add(product.id);
+            string before=JsonUtility.ToJson(world.Catalog);
+            app.Enter(AreaId.Counter);yield return null;
+            var production=app.GetComponent<FreeCafeProductionHud>();production.bookButton.onClick.Invoke();yield return null;
+            Assert.That(production.bookTitle.text,Does.Contain("拉花饮品"));
+            Assert.That(production.bookBody.text,Does.Contain("精粹咖啡与拉花").And.Contain("拉花  20 ml").And.Not.Contain("奶泡").And.Not.Contain("奶沫"));
+            production.closeBook.onClick.Invoke();
+            app.Enter(AreaId.Cafe);yield return null;
+            hud.recipeButton.onClick.Invoke();yield return null;
+            Assert.That(hud.recipeBody.text,Does.Contain("拉花饮品").And.Contain("配方种类：拉花").And.Not.Contain("奶泡").And.Not.Contain("奶沫"));
+            Assert.That(world.IngredientLabel(product.ingredients[0]),Does.Match("奶泡|奶沫"));
+            Assert.That(JsonUtility.ToJson(world.Catalog),Is.EqualTo(before),"Recipe terminology must not rename authoritative ingredient data");
+            hud.recipeCloseButton.onClick.Invoke();
+        }
+
         [UnityTest] public IEnumerator CoffeeBookBlocksEntityInputAndClosingRestoresIt()
         {
             app.Enter(AreaId.Counter);yield return null;

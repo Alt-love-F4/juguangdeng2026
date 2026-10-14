@@ -29,6 +29,8 @@ MonoBehaviour:
     prefab: {fileID: 4627094430453797958, guid: 7ec6394f0732aa84b8447a39acfeb28e, type: 3}
   - specId: milk
     prefab: {fileID: 7597229014769477674, guid: c715ac020af298b4eb92a630a35ba958, type: 3}
+  - specId: milkfoam
+    prefab: {fileID: 4058037159139386510, guid: dee54a245566d0046be4598f67ecaa5f, type: 3}
   - specId: hotmilk
     prefab: {fileID: 2322658024527779180, guid: 6d9332241aa70f641b71ff7f51600d14, type: 3}
   - specId: matcha.powder
@@ -85,9 +87,9 @@ MonoBehaviour:
     prefab: {fileID: 1276427896412824058, guid: 3cd0dcf19172f8d4fab640647d99befb, type: 3}
   - specId: tool.latte-art
     prefab: {fileID: 4739513656803240139, guid: 2bdca34e5e8888c46867250ac78f4193, type: 3}
+  - specId: container.milk-pitcher
+    prefab: {fileID: 8453421709605995148, guid: 672637ff04a774844b1f72f3e49a839e, type: 3}
   - specId: business.start
     prefab: {fileID: 2570357490750689856, guid: e64b3c0f638a2f84fbeb9113b61696c7, type: 3}
   - specId: machine.stove
     prefab: {fileID: 7785203104757129137, guid: a32d1b9086424264da1bae6c83efdb9a, type: 3}
-  - specId: milkfoam
-    prefab: {fileID: 4058037159139386510, guid: dee54a245566d0046be4598f67ecaa5f, type: 3}
