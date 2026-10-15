@@ -30,9 +30,17 @@ namespace Spotlight.GameFlow
         public string CharacterKey => characterKey ?? string.Empty;
         public string DisplayName => displayName ?? string.Empty;
         public Sprite Portrait => portrait;
+        public bool PortraitSpecified { get; } = true;
+        public static bool SameIdentity(DialogueCharacter a, DialogueCharacter b)
+            => a != null && b != null && !string.IsNullOrEmpty(a.CharacterKey)
+                && string.Equals(a.CharacterKey, b.CharacterKey, StringComparison.Ordinal);
+        public static DialogueCharacter Resolve(DialogueCharacter current, DialogueCharacter incoming)
+            => SameIdentity(current, incoming) && !incoming.PortraitSpecified
+                ? new DialogueCharacter(incoming.CharacterKey, incoming.DisplayName, current.Portrait) : incoming;
         public DialogueCharacter(string displayName, Sprite portrait) : this(string.Empty, displayName, portrait) { }
-        public DialogueCharacter(string characterKey, string displayName, Sprite portrait)
+        public DialogueCharacter(string characterKey, string displayName, Sprite portrait, bool portraitSpecified = true)
         {
+            PortraitSpecified = portraitSpecified;
             this.characterKey = characterKey ?? string.Empty;
             this.displayName = displayName;
             this.portrait = portrait;
@@ -89,6 +97,7 @@ namespace Spotlight.GameFlow
         [SerializeField] private string accentTargetKey;
         [SerializeField] private string sfxKey;
         [SerializeField] private string voiceKey;
+        public DialogueSourceLocation Source { get; }
         public DialogueSpeaker Speaker => speaker;
         public string Text => text ?? string.Empty;
         public string SpeakerNameOverride => speakerNameOverride;
@@ -113,12 +122,13 @@ namespace Spotlight.GameFlow
             bool replaceRight = false, DialogueCharacter rightCharacter = null,
             string accentFxKey = null, string accentTargetKey = null,
             bool replaceCenter = false, DialogueCharacter centerCharacter = null, string passiveHint = null,
-            string sfxKey = null, string voiceKey = null)
+            string sfxKey = null, string voiceKey = null, DialogueSourceLocation source = null)
         {
             if (!Enum.IsDefined(typeof(DialogueSpeaker), speaker)) throw new ArgumentOutOfRangeException(nameof(speaker));
             if (!Enum.IsDefined(typeof(DialogueGesture), gesture)) throw new ArgumentOutOfRangeException(nameof(gesture));
             if (float.IsNaN(autoAdvanceSeconds) || float.IsInfinity(autoAdvanceSeconds) || autoAdvanceSeconds < 0f)
                 throw new ArgumentOutOfRangeException(nameof(autoAdvanceSeconds));
+            Source = source;
             PassiveHint = passiveHint;
             this.speaker = speaker;
             this.text = text;
@@ -142,6 +152,12 @@ namespace Spotlight.GameFlow
     public sealed class DialogueScript
     {
         private readonly DialogueLine[] lines;
+        public object ContinuityOwner { get; }
+        public bool IsPreview { get; }
+        public bool Continues { get; }
+        public string MusicKey { get; }
+        public DialogueScript WithPreviewContext() => new DialogueScript(lines, LeftCharacter, RightCharacter,
+            Title, Background, Options, OptionPrompt, CenterCharacter, ContinuityOwner, true, Continues, MusicKey);
         public string Title { get; }
         public DialogueCharacter LeftCharacter { get; }
         public DialogueCharacter RightCharacter { get; }
@@ -152,26 +168,48 @@ namespace Spotlight.GameFlow
         public int Count => lines.Length;
         public DialogueLine this[int index] => lines[index];
 
+        /// <summary>Reconstruct configured persistent stage only; skipped transient cues are never played.</summary>
+        public DialogueScript RebuildAt(int index)
+        {
+            if (index < 0 || index >= Count) throw new ArgumentOutOfRangeException(nameof(index));
+            var left = LeftCharacter; var right = RightCharacter; var center = CenterCharacter;
+            for (int i = 0; i < index; i++)
+            {
+                var line = lines[i];
+                if (line.ReplaceLeft) left = DialogueCharacter.Resolve(left, line.LeftCharacter);
+                if (line.ReplaceRight) right = DialogueCharacter.Resolve(right, line.RightCharacter);
+                if (line.ReplaceCenter) center = DialogueCharacter.Resolve(center, line.CenterCharacter);
+            }
+            var remaining = new DialogueLine[Count - index];
+            Array.Copy(lines, index, remaining, 0, remaining.Length);
+            return new DialogueScript(remaining, left, right, Title, Background, Options, OptionPrompt, center,
+                isPreview: true, musicKey: MusicKey);
+        }
+
         public DialogueScript WithFirstPageHint(string hint)
         {
             var copy = (DialogueLine[])lines.Clone();
             var first = copy[0];
             copy[0] = new DialogueLine(first.Speaker, first.Text, first.SpeakerNameOverride, first.Gesture,
                 first.AutoAdvanceSeconds, first.ReplaceLeft, first.LeftCharacter, first.ReplaceRight, first.RightCharacter,
-                first.AccentFxKey, first.AccentTargetKey, first.ReplaceCenter, first.CenterCharacter, hint, first.SfxKey, first.VoiceKey);
-            return new DialogueScript(copy, LeftCharacter, RightCharacter, Title, Background, Options, OptionPrompt, CenterCharacter);
+                first.AccentFxKey, first.AccentTargetKey, first.ReplaceCenter, first.CenterCharacter, hint, first.SfxKey, first.VoiceKey, first.Source);
+            return new DialogueScript(copy, LeftCharacter, RightCharacter, Title, Background, Options, OptionPrompt, CenterCharacter, ContinuityOwner, IsPreview, Continues, MusicKey);
         }
 
         public DialogueScript(IReadOnlyList<DialogueLine> lines, DialogueCharacter leftCharacter = null,
             DialogueCharacter rightCharacter = null, string title = null, Texture background = null,
             IReadOnlyList<DialogueOption> options = null, string optionPrompt = null,
-            DialogueCharacter centerCharacter = null)
+            DialogueCharacter centerCharacter = null, object continuityOwner = null, bool isPreview = false, bool continues = false, string musicKey = null)
         {
             if (lines == null) throw new ArgumentNullException(nameof(lines));
             if (lines.Count == 0) throw new ArgumentException("A dialogue script requires at least one line.", nameof(lines));
             this.lines = new DialogueLine[lines.Count];
             for (int i = 0; i < lines.Count; i++)
                 this.lines[i] = lines[i] ?? throw new ArgumentException("Dialogue line " + i + " is null.", nameof(lines));
+            ContinuityOwner = continuityOwner;
+            IsPreview = isPreview;
+            Continues = continues;
+            MusicKey = musicKey;
             LeftCharacter = leftCharacter;
             RightCharacter = rightCharacter;
             CenterCharacter = centerCharacter;

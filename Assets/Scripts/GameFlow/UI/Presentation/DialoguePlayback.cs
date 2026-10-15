@@ -25,20 +25,22 @@ namespace Spotlight.GameFlow
         {
             if (script == null) throw new ArgumentNullException(nameof(script));
             if (DialoguePanel.IsAnyPlaying) throw new InvalidOperationException("A dialogue is already playing. Stop it before replacing it.");
-            DialoguePanel existing = UIKit.GetPanel<DialoguePanel>();
-            if (existing != null && existing.State != PanelState.Close && existing.State != PanelState.Cached
-                && existing.State != PanelState.Preloaded
-                && !string.Equals(existing.Tag, panelTag, StringComparison.Ordinal))
+            DialoguePanel panel = UIKit.GetPanel<DialoguePanel>();
+            if (panel != null && panel.State != PanelState.Close && panel.State != PanelState.Cached
+                && panel.State != PanelState.Preloaded
+                && !string.Equals(panel.Tag, panelTag, StringComparison.Ordinal))
                 throw new InvalidOperationException("A dialogue panel is already open in another scope.");
-            DialoguePanel panel = UIKit.OpenPanel<DialoguePanel>(UILevel.Pop, tag: panelTag,
-                cachePolicy: cachePolicy);
+            if (panel == null || !panel.SeamlessChoicePending)
+                panel = UIKit.OpenPanel<DialoguePanel>(UILevel.Pop, tag: panelTag,
+                    cachePolicy: cachePolicy);
             try
             {
                 panel.Play(script, () =>
                 {
-                    UIKit.ClosePanel(panel);
+                    if (!panel.SeamlessChoicePending) UIKit.ClosePanel(panel);
                     onFinished?.Invoke();
                 }, onCancelled);
+                if (!string.IsNullOrWhiteSpace(script.MusicKey)) Spotlight.Audio.GameAudio.OverrideMusic(panel, script.MusicKey);
                 return panel;
             }
             catch
@@ -46,6 +48,19 @@ namespace Spotlight.GameFlow
                 UIKit.ClosePanel(panel);
                 throw;
             }
+        }
+
+        public static DialoguePanel PlayPreview(DialogueScript script, Action onFinished = null, Action onCancelled = null)
+        {
+            if (script == null) throw new ArgumentNullException(nameof(script));
+            return Play(script.RebuildAt(0), onFinished, onCancelled);
+        }
+
+        /// <summary>Release only the stage belonging to this completed/cancelled event.</summary>
+        public static void ReleaseStage(object owner)
+        {
+            var panel = UIKit.GetPanel<DialoguePanel>();
+            if (panel != null && panel.OwnsContinuity(owner)) Stop();
         }
 
         /// <summary>Read a selected NCS opening without queueing/settling an NCS event.</summary>

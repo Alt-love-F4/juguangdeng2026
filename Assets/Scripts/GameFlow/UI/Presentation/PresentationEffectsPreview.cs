@@ -17,10 +17,10 @@ namespace Spotlight.GameFlow
                 new DialogueLine(DialogueSpeaker.Left, "我说话，但受惊的是右侧客人。", accentFxKey: PresentationEffectIds.AccentShakeStartle, accentTargetKey: "adele"),
                 new DialogueLine(DialogueSpeaker.Right, "现在轮到我说话。所有立绘都保持原图朝向，入场和换位不会再镜像翻转。"),
                 new DialogueLine(DialogueSpeaker.Narrator, "第三名角色替换右侧：先退场，再黑影入场。", replaceRight: true,
-                    rightCharacter: NarrativeCharacterResolver.CreateDialogueCharacter("thibaut")),
-                new DialogueLine(DialogueSpeaker.Left, "新访客出现后仍然可以调用角色ID特效。", accentFxKey: PresentationEffectIds.AccentShakeStartle, accentTargetKey: "thibaut")
-            }, NarrativeCharacterResolver.CreateDialogueCharacter("eugene"),
-                NarrativeCharacterResolver.CreateDialogueCharacter("adele"),
+                    rightCharacter: NarrativeCharacterResolver.CreatePreviewCharacter("npc_a", visuals.CenterPortrait)),
+                new DialogueLine(DialogueSpeaker.Left, "新访客出现后仍然可以调用角色ID特效。", accentFxKey: PresentationEffectIds.AccentShakeStartle, accentTargetKey: "npc_a")
+            }, NarrativeCharacterResolver.CreatePreviewCharacter("player", visuals.LeftPortrait),
+                NarrativeCharacterResolver.CreatePreviewCharacter("adele", visuals.RightPortrait),
                 title: "演出特效 · 独立表现层", background: visuals.Background);
         }
     }

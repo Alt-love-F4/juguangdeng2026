@@ -29,6 +29,25 @@ namespace Spotlight.Narrative
         private readonly List<string> pages = new List<string>();
         private readonly HashSet<string> presentedChoiceGroups = new HashSet<string>(StringComparer.Ordinal);
 
+        public static Func<bool> ExternalInputBlocked { get; set; }
+        private bool externallySuspended;
+        private bool hostSuspended;
+        private int resumeFrame = -1;
+        private bool RefreshSuspension()
+        {
+            bool blocked = ExternalInputBlocked?.Invoke() == true;
+            if (externallySuspended != blocked)
+            {
+                externallySuspended = blocked;
+                if (!blocked) resumeFrame = Time.frameCount;
+                ui.ResetSubmit();
+            }
+            bool paused = hostSuspended || blocked || Time.frameCount <= resumeFrame;
+            ui.SetSuspended(paused);
+            resources.SetSuspended(paused);
+            return paused;
+        }
+
         public bool IsPresenting => completion != null || draining || effects.Count > 0;
         public event Action<NarrativeEventRequest> Started;
         public event Action<NarrativeEventRequest> Finished;
@@ -128,6 +147,7 @@ namespace Spotlight.Narrative
             {
                 while (stack.Count > 0 && !disposed && sessionVersion == version)
                 {
+                    if (RefreshSuspension()) { yield return null; continue; }
                     IEnumerator current = stack.Peek();
                     bool moved;
                     object yielded = null;
@@ -213,6 +233,10 @@ namespace Spotlight.Narrative
                 if (Get("checkDisplay") == "passive")
                 {
                     if (AbilityCheck?.Invoke(setup.checkId) == null) throw new InvalidOperationException("Ability check unavailable: " + setup.checkId);
+                    // A silent check has no presentation atoms to wait for, even while
+                    // the host has suspended its ordinary narrative window.
+                    if (string.IsNullOrWhiteSpace(definition.presentationKey)
+                        && (definition.contentKeys == null || definition.contentKeys.Count == 0)) yield break;
                 }
                 else yield return AbilityCheckPresentation(setup.checkId);
             }
@@ -283,7 +307,8 @@ namespace Spotlight.Narrative
                             }
                             if (conversationPlayback != null)
                             {
-                                var data = new NarrativeConversationPresentationData { title = resolvedTitle };
+                                var data = new NarrativeConversationPresentationData { title = resolvedTitle,
+                                    eventId = definition.eventId, presentationKey = definition.presentationKey };
                                 var speaker = configuration?.objects?.Find(o => o.objId == definition.actorId && o.objType != NarrativeObjectType.World);
                                 var character = speaker == null ? null : characterResolver?.Invoke(speaker.objId, resolve(speaker.nameText), speaker.portraitPath);
                                 foreach (var text in pages)
@@ -350,13 +375,19 @@ namespace Spotlight.Narrative
             if (dialoguePages == null || dialoguePages.Count == 0)
                 throw new InvalidOperationException("Missing conversation pages: " + definition.presentationKey);
             dialoguePages.Sort((left, right) => left.seq.CompareTo(right.seq));
+            dialoguePages.RemoveAll(page => !PageVisible(page.pageId, page.pageCondKeys, page.pageBarConds));
+            object stageOwner = new object();
+            Action releaseStage = null;
+            try
+            {
             foreach (var page in dialoguePages)
             {
                 if (skipRequested) yield break;
-                if (!PageVisible(page.pageId, page.pageCondKeys, page.pageBarConds)) continue;
                 var data = new NarrativeConversationPresentationData
                 {
                     title = resolvedTitle,
+                    eventId = definition.eventId, presentationKey = definition.presentationKey,
+                    continuityOwner = stageOwner, continues = dialoguePages.IndexOf(page) < dialoguePages.Count - 1,
                     backgroundPath = string.IsNullOrWhiteSpace(page.bgOverride) ? background : page.bgOverride,
                     bgmOverride = page.bgmOverride
                 };
@@ -369,6 +400,7 @@ namespace Spotlight.Narrative
                         string.IsNullOrWhiteSpace(speaker?.portraitPath) ? speaker?.iconPath : speaker.portraitPath);
                     data.lines.Add(new NarrativeConversationPresentationLine
                     {
+                        lineId = line.lineId, pageId = line.pageId, seq = line.seq,
                         speakerKey = line.speakerKey, speakerName = character?.name ?? resolve(speaker?.nameText),
                         portraitPath = character?.portraitPath ?? speaker?.portraitPath ?? speaker?.iconPath, portrait = character?.portrait,
                         side = line.side, emote = line.emote, sfxKey = line.sfxKey, voiceKey = line.voiceKey,
@@ -396,6 +428,7 @@ namespace Spotlight.Narrative
                     () => { if (!disposed && sessionVersion == version) done = true; }) ?? false;
                 if (disposed || sessionVersion != version) yield break;
                 if (!handled) throw new InvalidOperationException("Conversation playback is unavailable: " + page.pageId);
+                releaseStage = data.releaseStage;
                 ui.Hide();
                 while (!done && !cancelled && !skipRequested && !disposed && sessionVersion == version) yield return null;
                 if (disposed || sessionVersion != version) yield break;
@@ -404,6 +437,8 @@ namespace Spotlight.Narrative
                 // Do not ask it a second time through the template's A_CHOICE atom.
                 if (data.options.Count > 0) presentedChoiceGroups.Add(page.optionGroupKey);
             }
+            }
+            finally { releaseStage?.Invoke(); }
         }
 
         private IEnumerator Notice(NarrativeEventDefinition definition, string resolvedTitle)
@@ -638,7 +673,7 @@ namespace Spotlight.Narrative
 
         private void OnEscape()
         {
-            if (!IsPresenting || choosing) return;
+            if (!IsPresenting || choosing || RefreshSuspension()) return;
             if (allowSkip) skipRequested = true;
             // Progressive presentation never skips the event; it only reveals the current line.
             else ui.RevealImmediately();
@@ -668,7 +703,7 @@ namespace Spotlight.Narrative
             return false;
         }
 
-        public void SetSuspended(bool suspended) => ui.SetSuspended(suspended);
+        public void SetSuspended(bool suspended) { hostSuspended = suspended; RefreshSuspension(); }
 
         public void SyncNpcLocations(IReadOnlyList<NarrativeStringValue> locations)
         {

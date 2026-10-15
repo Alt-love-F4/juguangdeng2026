@@ -92,7 +92,8 @@ namespace Spotlight.GameFlow
             presenter.Cancelled += reason => { if (!disposed && !failed) { failed = true; playing = false; cancelled?.Invoke(reason); } };
             presenter.ConversationPlayback = (request, data, done) =>
             {
-                bool handled = NarrativeConversationEventPlayback.Play(request, data, done, tag, PanelCachePolicy.Transient);
+                bool handled = NarrativeConversationEventPlayback.Play(request, data, done, tag, PanelCachePolicy.Transient,
+                    isPreview: true);
                 if (handled) panelChanged?.Invoke(UIKit.GetPanel<DialoguePanel>());
                 return handled;
             };
@@ -143,7 +144,7 @@ namespace Spotlight.GameFlow
                 if (string.IsNullOrWhiteSpace(key)) throw new ArgumentException("Missing opening id.");
                 if (!NarrativePresentationDataAdapter.TryCreateOpeningDialogue(configuration, Resolve, key, out var script, out var error))
                     throw new InvalidOperationException(error);
-                panelChanged?.Invoke(DialoguePlayback.Play(script, Complete, Complete,
+                panelChanged?.Invoke(DialoguePlayback.Play(script.WithPreviewContext(), Complete, Complete,
                     tag, PanelCachePolicy.Transient));
                 return;
             }

@@ -12,6 +12,8 @@ namespace Spotlight.Narrative.Tests
             return new Dictionary<string, JArray>
             {
                 ["tbncscafevisit"] = new JArray(), ["tbncscafevisithook"] = new JArray(),
+                ["tbncsabilitycheck"] = new JArray(), ["tbncsabilitycheckcondition"] = new JArray(),
+                ["tbcafetutorialstep"] = new JArray(),
                 ["tbplayerconfig"] = new JArray(), ["tbplayerattribute"] = new JArray(),
                 ["tbcreationgroup"] = new JArray(), ["tbcreationoption"] = new JArray(), ["tbcreationbonus"] = new JArray(),
                 ["tbncsaction"] = new JArray(), ["tbncsmapposition"] = new JArray(),
@@ -31,8 +33,8 @@ namespace Spotlight.Narrative.Tests
                 ["tbncsresult"] = JArray.Parse("[{ 'resultId':'result', 'eventId':'event', 'seq':2, 'resultType':'REL_ADD', 'target':'rel:npc>world', 'value':'4', 'note':'note' }]"),
                 ["tbncscondition"] = JArray.Parse("[{ 'conditionId':'condition', 'ownerType':'', 'ownerId':'event', 'groupIndex':2, 'condType':'BAR_GTE', 'target':'bar:world.calendar', 'value':'3' }]"),
                 ["tbncstemplate"] = JArray.Parse("[{ 'tplName':'template', 'descText':'title', 'interruptType':'none', 'atomSeq':'Dialogue', 'slotDef':'text', 'defaultSkip':true }]"),
-                ["tbncssetupparams"] = JArray.Parse("[{ 'setupKey':'setup', 'tplName':'template', 'slotValues':'text=title,duration=1.5', 'skipAble':true, 'autoAdvance':true }]"),
-                ["tbncschoice"] = JArray.Parse("[{ 'choiceId':'choice', 'groupKey':'group', 'textKey':'title', 'resultOwnerId':'event', 'seq':7 }]")
+                ["tbncssetupparams"] = JArray.Parse("[{ 'setupKey':'setup', 'tplName':'template', 'slotValues':'text=title,duration=1.5', 'checkId':'', 'skipAble':true, 'autoAdvance':true }]"),
+                ["tbncschoice"] = JArray.Parse("[{ 'choiceId':'choice', 'groupKey':'group', 'textKey':'title', 'resultOwnerId':'event', 'checkId':'', 'seq':7 }]")
             };
         }
 

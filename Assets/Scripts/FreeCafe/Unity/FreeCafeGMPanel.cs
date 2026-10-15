@@ -33,6 +33,13 @@ namespace Spotlight.FreeCafe
         public static FreeCafeGMPanel Instance { get; private set; }
         public bool IsVisible => root!=null && root.activeSelf;
         private EventSystem fallbackEvents;
+        private IDisposable dialoguePause;
+        private Spotlight.GameFlow.DialoguePanel pausedDialogue;
+        private static int lastVisibilityFrame = -1;
+        public static bool BlocksDialogueInput => (Instance != null && Instance.IsVisible) || Time.frameCount == lastVisibilityFrame;
+        public event Action<bool> VisibilityChanged;
+        public Transform ContentRoot => body != null ? body.transform : null;
+        public TMP_FontAsset UIFont => font;
 
         [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.SubsystemRegistration)]
         private static void ResetStatics() => Instance = null;
@@ -47,11 +54,14 @@ namespace Spotlight.FreeCafe
         {
             if (Instance != null && Instance != this) { Destroy(gameObject); return; }
             Instance = this;
+            Spotlight.GameFlow.DialoguePanel.ExternalInputBlocked = () => BlocksDialogueInput;
+            Spotlight.Narrative.NarrativePresenter.ExternalInputBlocked = () => BlocksDialogueInput;
             DontDestroyOnLoad(gameObject);
             font = Resources.Load<TMP_FontAsset>("Fonts/乐米曲奇方块体 SDF");
             BuildCategories();
             BuildShell();
             SetVisible(false);
+            gameObject.AddComponent<Spotlight.GameFlow.NarrativeDebugGM>();
             UnityEngine.SceneManagement.SceneManager.sceneLoaded += OnSceneLoaded;
             UnityEngine.SceneManagement.SceneManager.sceneUnloaded += OnSceneUnloaded;
         }
@@ -77,6 +87,8 @@ namespace Spotlight.FreeCafe
         {
             UnityEngine.SceneManagement.SceneManager.sceneLoaded -= OnSceneLoaded;
             UnityEngine.SceneManagement.SceneManager.sceneUnloaded -= OnSceneUnloaded;
+            dialoguePause?.Dispose();
+            dialoguePause = null;
             if (Instance == this) Instance = null;
         }
 
@@ -97,6 +109,13 @@ namespace Spotlight.FreeCafe
 
         private void Update()
         {
+            var activeDialogue = Spotlight.GameFlow.DialoguePanel.Active;
+            if (IsVisible && activeDialogue != pausedDialogue)
+            {
+                dialoguePause?.Dispose();
+                pausedDialogue = activeDialogue;
+                dialoguePause = pausedDialogue != null ? pausedDialogue.AcquireReadingPause(this) : null;
+            }
             if (Keyboard.current != null && Keyboard.current.backquoteKey.wasPressedThisFrame)
             {
                 SetVisible(root != null && !root.activeSelf);
@@ -112,6 +131,13 @@ namespace Spotlight.FreeCafe
         public void RegisterCategory(string name, Action<FreeCafeGMPanel> build)
         {
             if (string.IsNullOrWhiteSpace(name) || build == null) return;
+            int existing = categories.FindIndex(item => item.Name == name);
+            if (existing >= 0)
+            {
+                categories[existing].Build = () => build(this);
+                if (activeCategory == existing) ShowCategory(existing);
+                return;
+            }
             categories.Add(new Category { Name = name, Build = () => build(this) });
             if (sidebarTransform != null) AddCategoryButton(categories.Count - 1);
             if (root != null && activeCategory < 0) ShowCategory(categories.Count - 1);
@@ -223,7 +249,13 @@ namespace Spotlight.FreeCafe
         {
             if (index < 0 || index >= categories.Count || body == null) return;
             activeCategory = index;
-            for (int i = body.transform.childCount - 1; i >= 0; i--) Destroy(body.transform.GetChild(i).gameObject);
+            var oldLayout = body.GetComponent<VerticalLayoutGroup>();
+            if (oldLayout != null) oldLayout.enabled = false;
+            for (int i = body.transform.childCount - 1; i >= 0; i--)
+            {
+                body.transform.GetChild(i).gameObject.SetActive(false);
+                Destroy(body.transform.GetChild(i).gameObject);
+            }
             var heading = CreateText(body.transform, "Heading", categories[index].Name, 27, Color.white);
             SetRect(heading.rectTransform, new Vector2(.04f, .87f), new Vector2(.96f, .99f), Vector2.zero);
             heading.alignment = TextAlignmentOptions.MidlineLeft;
@@ -327,6 +359,7 @@ namespace Spotlight.FreeCafe
                 layoutGroup.childForceExpandWidth = true;
                 layoutGroup.childForceExpandHeight = false;
             }
+            layoutGroup.enabled = true;
             button.transform.SetAsLastSibling();
         }
 
@@ -376,6 +409,11 @@ namespace Spotlight.FreeCafe
             if (visible) { runtime = FindFirstObjectByType<FreeCafeRuntime>();if(runtime!=null) runtime.CancelDrag(); }
             pendingDanger = null;
             root.SetActive(visible);
+            lastVisibilityFrame = Time.frameCount;
+            dialoguePause?.Dispose();
+            pausedDialogue = visible ? Spotlight.GameFlow.DialoguePanel.Active : null;
+            dialoguePause = pausedDialogue != null ? pausedDialogue.AcquireReadingPause(this) : null;
+            VisibilityChanged?.Invoke(visible);
             UpdateEventSystem();
         }
 

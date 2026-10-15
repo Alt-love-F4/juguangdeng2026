@@ -24,7 +24,7 @@ namespace Spotlight.GameFlow.Tests
             oldTimeScale = Time.timeScale;
             Time.timeScale = 1f;
             GameSaveParticipantRegistry.PendingRestore = null;
-            session = new PlayerPresentationTestSession();
+            session = new PlayerPresentationTestSession(includeDayFlowArrival: true);
         }
 
         [UnityTearDown]
@@ -138,17 +138,16 @@ namespace Spotlight.GameFlow.Tests
             endpoint.active = true;
             Assert.That(session.Submit(null), Is.True);
             flow.BeginNewSession(playLetter: false, playIntroduction: false);
-            Assert.That(flow.State, Is.EqualTo(DayFlowState.CityMapLeisure));
-            Assert.That(flow.IsFirstDayMapGuideActive, Is.True);
-            Assert.That(flow.BlocksGameplayInput, Is.False);
+            Assert.That(flow.State, Is.EqualTo(DayFlowState.DateTransition));
+            Assert.That(flow.CurrentPresentation, Is.TypeOf<DateChangePanel>());
+            Assert.That(flow.BlocksGameplayInput, Is.True);
             Assert.That(PlayerRuntime.Current.HasSelectedAvatar, Is.True);
             Assert.That(PlayerRuntime.Current.Avatar, Is.EqualTo(AvatarKind.Male));
             Assert.That(flow.CurrentAvatarSelection, Is.Null);
             yield return null;
-            Assert.That(flow.State, Is.EqualTo(DayFlowState.CityMapLeisure));
-            Assert.That(flow.IsFirstDayMapGuideActive, Is.True);
-            Assert.That(flow.BlocksGameplayInput, Is.False);
+            Assert.That(flow.State, Is.EqualTo(DayFlowState.DateTransition), "An active endpoint cannot skip the date presentation.");
             yield return WaitFor(() => flow.State == DayFlowState.CityMapLeisure);
+            Assert.That(flow.IsFirstDayMapGuideActive, Is.True);
             Assert.That(flow.CurrentPresentation, Is.Null, "The formal map replaces the old CityMap/PreBusiness presentation.");
             Assert.That(flow.BlocksGameplayInput, Is.False);
             Assert.That(endpoint.starts, Is.Zero, "Reaching the map must not automatically start business.");
@@ -203,9 +202,9 @@ namespace Spotlight.GameFlow.Tests
             Assert.That(GameSaveParticipantRegistry.TakePending(DayFlowController.SaveId), Is.Null);
             Assert.That(session.Submit(null), Is.True);
             flow.BeginNewSession(playLetter: false, playIntroduction: false);
-            Assert.That(flow.State, Is.EqualTo(DayFlowState.CityMapLeisure));
-            Assert.That(flow.IsFirstDayMapGuideActive, Is.True);
-            Assert.That(flow.BlocksGameplayInput, Is.False);
+            Assert.That(flow.State, Is.EqualTo(DayFlowState.DateTransition));
+            Assert.That(flow.CurrentPresentation, Is.TypeOf<DateChangePanel>());
+            Assert.That(flow.BlocksGameplayInput, Is.True);
             Assert.That(PlayerRuntime.Current.HasSelectedAvatar, Is.True);
             Assert.That(PlayerRuntime.Current.Avatar, Is.EqualTo(AvatarKind.Male));
             Assert.That(flow.CurrentAvatarSelection, Is.Null);

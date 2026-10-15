@@ -209,9 +209,11 @@ namespace Spotlight.GameFlow.Tests
                 var panel = controller.CurrentPanel as DialoguePanel;
                 Assert.That(panel, Is.Not.Null, "Missing configured page " + pageIndex);
                 Assert.That(panel.SelectedOptionId, Is.Empty);
-                // Transient panels are destroyed at completion: Unity fake-null equality would
-                // consider the destroyed last page equal to a cleared CurrentPanel forever.
-                while (ReferenceEquals(controller.CurrentPanel, panel))
+                string pageId = panel.CurrentSource?.PageId;
+                Assert.That(pageId, Is.Not.Null.And.Not.Empty, "Configured pages must retain their source identity.");
+                // Continuity can reuse the panel across pages, so follow its source page rather
+                // than requiring a new panel instance for every configured page.
+                while (ReferenceEquals(controller.CurrentPanel, panel) && panel.CurrentSource?.PageId == pageId)
                 {
                     Assert.That(Time.realtimeSinceStartup, Is.LessThan(deadline), "Configured page failed to complete: " + pageIndex);
                     Assert.That(panel.IsChoosing, Is.False, "TEST_CONVERSATION currently has no configured options.");

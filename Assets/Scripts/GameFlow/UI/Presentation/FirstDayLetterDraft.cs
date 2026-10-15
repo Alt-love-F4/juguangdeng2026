@@ -80,6 +80,14 @@ namespace Spotlight.GameFlow
         public string Specialization => selected.TryGetValue("education", out string id) ? catalog.Options.Single(o => o.OptionId == id).SpecializationConditionKey.Replace("specialization.player.", "") : "";
         public string Background => IsComplete ? catalog.Background(OptionIds) : "";
 
+        public string HoverEffect(string link)
+        {
+            string[] parts = (link ?? "").Split(':');
+            if (parts.Length != 3 || parts[0] != "choice") return "";
+            var option = catalog.Options.Find(o => o.GroupId == parts[1] && o.OptionId == parts[2]);
+            return option == null ? "" : catalog.Effect(option);
+        }
+
         public string BuildBody(string hoveredLink = null)
         {
             string Link(string id, string label, bool selected = false)
@@ -95,7 +103,7 @@ namespace Spotlight.GameFlow
                 for (int i = 0; i < options.Count; i++)
                 {
                     if (i > 0) result.Append("；");
-                    result.Append(Link($"choice:{catalog.Groups[group].GroupId}:{options[i].OptionId}", catalog.Text(options[i].LabelText) + "【" + catalog.Effect(options[i]) + "】", selections[group] == i));
+                    result.Append(Link($"choice:{catalog.Groups[group].GroupId}:{options[i].OptionId}", catalog.Text(options[i].LabelText), selections[group] == i));
                 }
                 return result.Append("）").ToString();
             }

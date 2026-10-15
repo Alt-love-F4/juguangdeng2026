@@ -104,7 +104,8 @@ namespace Spotlight.GameFlow
                     error = "Invalid NCS opening autoAdvanceSeconds: " + line.lineId;
                     return false;
                 }
-                lines.Add(new DialogueLine(speaker, text, gesture: gesture, autoAdvanceSeconds: line.autoAdvanceSeconds));
+                lines.Add(new DialogueLine(speaker, text, gesture: gesture, autoAdvanceSeconds: line.autoAdvanceSeconds,
+                    source: new DialogueSourceLocation("OpeningPresentation", null, presentationId, line.lineId, line.seq)));
             }
 
             if (lines.Count == 0)
@@ -133,7 +134,8 @@ namespace Spotlight.GameFlow
                     error = "Missing NCS center name: " + presentation.centerNameKey;
                     return false;
                 }
-                center = new DialogueCharacter(centerName, visuals.CenterPortrait);
+                // Opening schema has a fixed center slot but no character ID; use an explicit scoped legacy identity.
+                center = new DialogueCharacter("opening:" + presentationId + ":center", centerName, visuals.CenterPortrait);
             }
             script = new DialogueScript(lines,
                 NarrativeCharacterResolver.CreateDialogueCharacter("player"),

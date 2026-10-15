@@ -14,6 +14,8 @@ namespace Spotlight.Audio
             public string slot;
             public AudioVoiceHandle handle;
             public float end;
+            public bool paused;
+            public float pausedAt;
         }
 
         private sealed class MusicRequest
@@ -192,6 +194,20 @@ namespace Spotlight.Audio
             if (musicRequests.RemoveAll(item => ReferenceEquals(item.owner, owner)) > 0) RefreshMusic();
         }
 
+        public void SetOwnerPaused(object owner, bool paused)
+        {
+            if (disposed || owner == null) return;
+            foreach (Voice voice in voices)
+            {
+                if (!ReferenceEquals(voice.owner, owner) || voice.paused == paused) continue;
+                if (ownedBackend is UnscaledAudioBackend backend) backend.SetVoicePaused(voice.handle.VoiceId, paused);
+                else continue;
+                if (paused) voice.pausedAt = Time.unscaledTime;
+                else voice.end += Time.unscaledTime - voice.pausedAt;
+                voice.paused = paused;
+            }
+        }
+
         public void Tick()
         {
             if (disposed) return;
@@ -200,7 +216,7 @@ namespace Spotlight.Audio
                 Voice voice = voices[index];
                 if (voice.owner is UnityEngine.Object owner && owner == null)
                 { AudioKit.Stop(voice.handle); voices.RemoveAt(index); }
-                else if (Time.unscaledTime >= voice.end) { AudioKit.Stop(voice.handle); voices.RemoveAt(index); }
+                else if (!voice.paused && Time.unscaledTime >= voice.end) { AudioKit.Stop(voice.handle); voices.RemoveAt(index); }
             }
             if (musicRequests.RemoveAll(item => item.owner is UnityEngine.Object owner && owner == null) > 0) RefreshMusic();
         }

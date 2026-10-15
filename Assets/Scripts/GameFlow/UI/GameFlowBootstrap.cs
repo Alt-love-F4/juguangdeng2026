@@ -234,7 +234,7 @@ namespace Spotlight.GameFlow
                     if (config.AutoSaveIntervalSeconds > 0f && autoSaveTimer >= config.AutoSaveIntervalSeconds)
                     {
                         autoSaveTimer %= config.AutoSaveIntervalSeconds;
-                        if (!TryAutoSave(out string autoSaveError))
+                        if (CanSaveCurrentSession && !saving && !TryAutoSave(out string autoSaveError))
                             Debug.LogWarning("Autosave failed: " + autoSaveError, this);
                     }
                 }
@@ -331,6 +331,7 @@ namespace Spotlight.GameFlow
             selectedEnding = null;
             GameSaveParticipantRegistry.PendingRestore = null;
             DialoguePlayback.Stop();
+            DialogueHistoryService.ClearFormal();
             playtime = 0f;
             autoSaveTimer = 0f;
             pendingNarrativeRestore = null;
@@ -781,6 +782,7 @@ namespace Spotlight.GameFlow
 
         private void OpenMainMenu()
         {
+            DialogueHistoryService.ClearFormal();
             Spotlight.Audio.GameAudio.Music(Spotlight.Audio.AudioKeys.MenuMusic);
             openingProloguePanel?.Stop();
             if (openingProloguePanel != null) UIKit.ClosePanel(openingProloguePanel);
@@ -819,6 +821,7 @@ namespace Spotlight.GameFlow
             bool importLegacyProfile = pendingNarrativeRestore?.conditionValues == null;
             if (loadingSavedSession)
             {
+                DialogueHistoryService.ClearFormal();
                 if (pendingNarrativeRestore != null && narrativeIntegration?.Runtime != null) narrativeIntegration.Runtime.RestoreSnapshot(pendingNarrativeRestore);
                 else narrativeIntegration?.ResetSession();
                 pendingNarrativeRestore = null;
@@ -1207,8 +1210,9 @@ namespace Spotlight.GameFlow
         public bool TryAutoSave(out string error)
         {
             error = null;
-            if (!CanSaveCurrentSession) return false;
-            if (!gameplay || saving) return false;
+            if (!CanSaveCurrentSession) { error = "当前教学或会话阶段暂不允许存档。"; return false; }
+            if (!gameplay) { error = "当前没有正在进行的游戏。"; return false; }
+            if (saving) { error = "正在保存，请稍后重试。"; return false; }
             StartCoroutine(AutoSaveAfterRender());
             return true;
         }

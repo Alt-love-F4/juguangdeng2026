@@ -113,8 +113,7 @@ namespace Spotlight.GameFlow
         {
             Spotlight.Audio.GameAudio.StopOwner(this);
             running = false;
-            if (arrivalController != null) arrivalController.EventCompleted -= OnArrivalCompleted;
-            arrivalController = null;
+            UnsubscribeFirstArrival();
             ClosePresentation();
             HideBusinessControls();
             endpointOwner = null;
@@ -201,22 +200,53 @@ namespace Spotlight.GameFlow
         }
 
         private NarrativeController arrivalController;
-        private void BeginFirstArrival()
+        private void BeginFirstArrival() => PlayFirstArrivalEvent("arrival.start");
+
+        private void PlayFirstArrivalEvent(string eventId)
         {
+            if (!SessionAllowsPlay || !running) return;
             ClosePresentation();
+            UnsubscribeFirstArrival();
             SetState(DayFlowState.FirstDayIntroduction);
             arrivalController = NarrativeRuntime.Instance?.Controller;
-            if (arrivalController == null) { Debug.LogError("[DayFlow] NCS unavailable for first arrival."); return; }
+            if (arrivalController == null)
+            {
+                ShowFirstArrivalRetry(eventId);
+                return;
+            }
             arrivalController.EventCompleted += OnArrivalCompleted;
-            if (!arrivalController.QueueEvent("arrival.start")) Debug.LogError("[DayFlow] Could not start first arrival.");
+            arrivalController.EventFailed += OnArrivalFailed;
+            if (!arrivalController.QueueEvent(eventId)) ShowFirstArrivalRetry(eventId);
+        }
+
+        private void UnsubscribeFirstArrival()
+        {
+            if (arrivalController == null) return;
+            arrivalController.EventCompleted -= OnArrivalCompleted;
+            arrivalController.EventFailed -= OnArrivalFailed;
+            arrivalController = null;
+        }
+
+        private void OnArrivalFailed(string eventId, string reason)
+        {
+            if (!SessionAllowsPlay || !running || State != DayFlowState.FirstDayIntroduction
+                || string.IsNullOrEmpty(eventId) || !eventId.StartsWith("arrival.", StringComparison.Ordinal)) return;
+            ShowFirstArrivalRetry(eventId);
+        }
+
+        private void ShowFirstArrivalRetry(string eventId)
+        {
+            UnsubscribeFirstArrival();
+            // Retry the failed event only: previous arrival choices/results have already committed.
+            ShowPresentation<PreBusinessPanel>(() => PlayFirstArrivalEvent(eventId),
+                panel => panel.ShowFirstArrivalUnavailable());
         }
 
         private void OnArrivalCompleted(string id)
         {
             if (!SessionAllowsPlay || !running || (id != "arrival.complete" && id != "arrival.leave")) return;
-            arrivalController.EventCompleted -= OnArrivalCompleted;
-            arrivalController = null;
-            if (id == "arrival.leave") flow.ReturnFromFirstArrival();
+            UnsubscribeFirstArrival();
+            if (id == "arrival.leave") flow?.ReturnFromFirstArrival();
             else EnterCityMap();
         }
 

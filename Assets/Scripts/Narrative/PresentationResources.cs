@@ -140,6 +140,26 @@ namespace Spotlight.Narrative
             npcs[id] = instance;
         }
 
+        private bool suspended;
+        private readonly HashSet<ParticleSystem> pausedParticles = new HashSet<ParticleSystem>();
+        public void SetSuspended(bool value)
+        {
+            if (suspended == value) return;
+            suspended = value;
+            Spotlight.Audio.GameAudio.SetOwnerPaused(this, value);
+            if (value)
+            {
+                foreach (var effect in effects)
+                    if (effect != null) foreach (var particle in effect.GetComponentsInChildren<ParticleSystem>())
+                        if (particle.isPlaying) { pausedParticles.Add(particle); particle.Pause(false); }
+            }
+            else
+            {
+                foreach (var particle in pausedParticles) if (particle != null) particle.Play(false);
+                pausedParticles.Clear();
+            }
+        }
+
         public void StopAudio() => Spotlight.Audio.GameAudio.StopOwner(this);
 
         public void Dispose()
