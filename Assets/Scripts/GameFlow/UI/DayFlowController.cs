@@ -160,14 +160,6 @@ namespace Spotlight.GameFlow
             if (!initialized) Initialize(flow);
             running = true;
             HideBusinessControls();
-            if (newSessionFirstDay && day == 1)
-            {
-                newSessionFirstDay = false;
-                HideGameplayPanel();
-                SetState(DayFlowState.DateTransition);
-                ShowPresentation<DateChangePanel>(BeginFirstArrival, panel => panel.SetDates(previousDate, CurrentDate));
-                return;
-            }
             HideGameplayPanel();
             var runtime = NarrativeRuntime.Instance;
             var actions = runtime?.Actions;
@@ -180,10 +172,32 @@ namespace Spotlight.GameFlow
             }
             finally { runtime?.Controller?.EndOperation(); }
             if (!SessionAllowsPlay) return;
+            if (newSessionFirstDay && day == 1)
+            {
+                newSessionFirstDay = false;
+                SetState(DayFlowState.DateTransition);
+                ShowPresentation<DateChangePanel>(CompleteFirstArrivalDateTransition, panel => panel.SetDates(previousDate, CurrentDate));
+                return;
+            }
             SetState(DayFlowState.DateTransition);
             newSessionFirstDay = false;
             ShowPresentation<DateChangePanel>(CompleteDateTransition,
                 panel => panel.SetDates(previousDate, CurrentDate));
+        }
+
+        private void CompleteFirstArrivalDateTransition()
+        {
+            NarrativeController controller = NarrativeRuntime.Instance?.Controller;
+            if (controller == null) { BeginFirstArrival(); return; }
+            controller.RunAtSafeBoundary(() =>
+            {
+                if (!SessionAllowsPlay || !running || day != 1 || State != DayFlowState.DateTransition) return;
+                controller.ProcessOfficialDay(day);
+                controller.RunAtSafeBoundary(() =>
+                {
+                    if (SessionAllowsPlay && running && day == 1 && State == DayFlowState.DateTransition) BeginFirstArrival();
+                });
+            });
         }
 
         private NarrativeController arrivalController;

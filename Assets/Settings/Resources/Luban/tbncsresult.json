@@ -499,7 +499,7 @@
     "eventId": "arrival.reply.1",
     "seq": 1,
     "resultType": "QUEUE_EVENT",
-    "target": "arrival.agent",
+    "target": "event:arrival.agent",
     "value": "",
     "note": ""
   },
@@ -508,7 +508,7 @@
     "eventId": "arrival.reply.2",
     "seq": 1,
     "resultType": "QUEUE_EVENT",
-    "target": "arrival.agent",
+    "target": "event:arrival.agent",
     "value": "",
     "note": ""
   },
@@ -517,7 +517,7 @@
     "eventId": "MA70.10.06-S1-1.1",
     "seq": 1,
     "resultType": "QUEUE_EVENT",
-    "target": "arrival.reply.1",
+    "target": "event:arrival.reply.1",
     "value": "",
     "note": ""
   },
@@ -526,7 +526,7 @@
     "eventId": "MA70.10.06-S1-1.2",
     "seq": 1,
     "resultType": "QUEUE_EVENT",
-    "target": "arrival.reply.2",
+    "target": "event:arrival.reply.2",
     "value": "",
     "note": ""
   },
@@ -535,7 +535,7 @@
     "eventId": "arrival.agent",
     "seq": 1,
     "resultType": "QUEUE_EVENT",
-    "target": "arrival.check",
+    "target": "event:arrival.check",
     "value": "",
     "note": ""
   },
@@ -544,7 +544,7 @@
     "eventId": "arrival.insight",
     "seq": 1,
     "resultType": "QUEUE_EVENT",
-    "target": "arrival.request",
+    "target": "event:arrival.request",
     "value": "",
     "note": ""
   },
@@ -553,7 +553,7 @@
     "eventId": "arrival.request",
     "seq": 1,
     "resultType": "QUEUE_EVENT",
-    "target": "arrival.decision",
+    "target": "event:arrival.decision",
     "value": "",
     "note": ""
   },
@@ -562,7 +562,7 @@
     "eventId": "MA70.10.06-S1-2.1",
     "seq": 1,
     "resultType": "QUEUE_EVENT",
-    "target": "arrival.refuse",
+    "target": "event:arrival.refuse",
     "value": "",
     "note": ""
   },
@@ -571,7 +571,7 @@
     "eventId": "MA70.10.06-S1-2.2",
     "seq": 1,
     "resultType": "QUEUE_EVENT",
-    "target": "arrival.accept",
+    "target": "event:arrival.accept",
     "value": "",
     "note": ""
   },
@@ -580,7 +580,7 @@
     "eventId": "MA70.10.06-S1-3.1",
     "seq": 1,
     "resultType": "QUEUE_EVENT",
-    "target": "arrival.decision",
+    "target": "event:arrival.decision",
     "value": "",
     "note": ""
   },
@@ -589,7 +589,7 @@
     "eventId": "MA70.10.06-S1-3.2",
     "seq": 1,
     "resultType": "QUEUE_EVENT",
-    "target": "arrival.leave",
+    "target": "event:arrival.leave",
     "value": "",
     "note": ""
   },
@@ -598,7 +598,7 @@
     "eventId": "arrival.accept",
     "seq": 1,
     "resultType": "QUEUE_EVENT",
-    "target": "arrival.complete",
+    "target": "event:arrival.complete",
     "value": "",
     "note": ""
   }

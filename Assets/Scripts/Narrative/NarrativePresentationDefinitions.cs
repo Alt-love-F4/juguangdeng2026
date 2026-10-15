@@ -44,6 +44,7 @@ namespace Spotlight.Narrative
         public string bgmOverride;
         public readonly List<NarrativeConversationPresentationOption> options = new List<NarrativeConversationPresentationOption>();
         public Func<string, bool> selectChoice;
+        public Action cancelled;
         public readonly List<NarrativeConversationPresentationLine> lines = new List<NarrativeConversationPresentationLine>();
     }
     public sealed class NarrativeConversationPresentationOption

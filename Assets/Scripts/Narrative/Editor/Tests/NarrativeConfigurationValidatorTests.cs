@@ -37,7 +37,10 @@ namespace Spotlight.Narrative.Editor.Tests
             Assert.That(NarrativeConfigurationValidator.Validate(c), Is.Empty);
             Assert.That(c.texts.Exists(x => x.key == "ev.chen.tea.p1"), Is.True);
             Assert.That(c.setups[0].parameters.Count, Is.GreaterThan(0));
-            Assert.That(c.templates.Count, Is.EqualTo(9));
+            Assert.That(c.templates.Count, Is.EqualTo(12));
+            Assert.That(c.templates.Exists(x => x.tplName == "Tpl_ArrivalConversation"), Is.True);
+            Assert.That(c.templates.Exists(x => x.tplName == "Tpl_PassiveCheck"), Is.True);
+            Assert.That(c.templates.Exists(x => x.tplName == "Tpl_NarrativeSignal"), Is.True);
             Assert.That(c.eventDates[0].eventId, Is.EqualTo("EV_TALK_CAFE"));
             Assert.That(c.eventDates[0].day, Is.EqualTo(3));
             Assert.That(c.triggers.Exists(x => x.eventId == "EV_TALK_CAFE"), Is.False);

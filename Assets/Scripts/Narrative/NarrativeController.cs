@@ -832,7 +832,7 @@ namespace Spotlight.Narrative
             itemCounts = new Dictionary<string, int>(StringComparer.Ordinal);
             foreach (var result in results)
             {
-                string target = StripPrefix(result.target, "flag:", "item:");
+                string target = StripPrefix(result.target, "flag:", "item:", "event:");
                 try
                 {
                     if (result.resultType == NarrativeResultType.BarAdd || result.resultType == NarrativeResultType.BarSet)
@@ -861,6 +861,10 @@ namespace Spotlight.Narrative
                             && (!bool.TryParse(result.value, out bool clearValue) || clearValue)) throw new InvalidOperationException("CLEAR_FLAG requires false or empty value.");
                         state.ValidateConditionWrite(target, value);
                         boolValues[target] = value;
+                    }
+                    else if (result.resultType == NarrativeResultType.QueueEvent)
+                    {
+                        if (string.IsNullOrWhiteSpace(target) || !events.ContainsKey(target)) throw new InvalidOperationException("Unknown queued event: " + target);
                     }
                     else if (result.resultType == NarrativeResultType.ItemAdd || result.resultType == NarrativeResultType.ItemRemove)
                     {

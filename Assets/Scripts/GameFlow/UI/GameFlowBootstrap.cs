@@ -675,7 +675,7 @@ namespace Spotlight.GameFlow
         {
             if (CanUseGameplayControls()) return true;
             return gameplay && !paused && !loadingTransitioning && !IsMapOpen && detailsPanel == null
-                && !DialoguePanel.IsAnyPlaying && dayFlow != null && dayFlow.IsCafeTutorialActive
+                && !DialoguePanel.IsAnyPlaying && dayFlow != null && dayFlow.IsFirstSessionGuideActive
                 && dayFlow.State == DayFlowState.FirstDayIntroduction;
         }
 
@@ -738,14 +738,17 @@ namespace Spotlight.GameFlow
             PlayerRuntime player = PlayerRuntime.Current;
             if (player?.CreationSubmitted == true) return true;
             if (player == null) return false;
-            if (PlayerCafeOwner.Current == null)
-            {
-                pendingDefaultCreation = draft == null;
-                if (draft != null) player.SaveDraft(draft);
-                return true;
-            }
             try
             {
+                // Arrival runs on the map before the cafe scene exists. Bind the session
+                // economy now; entering the cafe transfers it through the existing save bridge.
+                if (PlayerCafeOwner.Current == null)
+                {
+                    var catalogAsset = Resources.Load<TextAsset>("FreeCafe/catalog");
+                    if (catalogAsset == null) throw new InvalidOperationException("Missing FreeCafe/catalog for player creation.");
+                    PlayerCafeOwner.Bind(new Spotlight.FreeCafe.CafeWorld(
+                        JsonUtility.FromJson<Spotlight.FreeCafe.CafeCatalog>(catalogAsset.text)));
+                }
                 if (!playerSession.IsBound)
                     playerSession.Bind(narrativeIntegration?.Runtime, PlayerCafeOwner.Current, dayFlow);
                 if (!playerSession.Submit(draft)) return false;

@@ -70,5 +70,29 @@
     "atomSeq": "A_BAR_HINT,A_NARRATE",
     "slotDef": "barKey:barKey,delta:int,textKey:textKey",
     "defaultSkip": false
+  },
+  {
+    "tplName": "Tpl_ArrivalConversation",
+    "descText": "抵达剧情分页",
+    "interruptType": "progressive",
+    "atomSeq": "A_DIALOG,A_CHOICE",
+    "slotDef": "opts:optionList",
+    "defaultSkip": false
+  },
+  {
+    "tplName": "Tpl_PassiveCheck",
+    "descText": "静默属性检定",
+    "interruptType": "progressive",
+    "atomSeq": "A_NARRATE",
+    "slotDef": "checkDisplay:text",
+    "defaultSkip": false
+  },
+  {
+    "tplName": "Tpl_NarrativeSignal",
+    "descText": "无正文流程通知",
+    "interruptType": "progressive",
+    "atomSeq": "A_NARRATE",
+    "slotDef": "",
+    "defaultSkip": false
   }
 ]

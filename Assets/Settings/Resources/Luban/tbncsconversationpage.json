@@ -50,13 +50,23 @@
     "bgmOverride": ""
   },
   {
-    "pageId": "arrival.start.page",
+    "pageId": "arrival.start.street",
     "presentationKey": "arrival.start",
     "seq": 1,
     "pageCondKeys": "",
     "pageBarConds": "",
+    "optionGroupKey": "",
+    "bgOverride": "Art/Gameplay/DayFlow/city_map_placeholder",
+    "bgmOverride": ""
+  },
+  {
+    "pageId": "arrival.start.cafe",
+    "presentationKey": "arrival.start",
+    "seq": 2,
+    "pageCondKeys": "",
+    "pageBarConds": "",
     "optionGroupKey": "MA70.10.06-S1-1",
-    "bgOverride": "",
+    "bgOverride": "Art/Gameplay/DayFlow/city_map_placeholder",
     "bgmOverride": ""
   },
   {
@@ -66,7 +76,7 @@
     "pageCondKeys": "",
     "pageBarConds": "",
     "optionGroupKey": "",
-    "bgOverride": "",
+    "bgOverride": "Art/Gameplay/DayFlow/phase_pre_business",
     "bgmOverride": ""
   },
   {
@@ -76,7 +86,7 @@
     "pageCondKeys": "",
     "pageBarConds": "",
     "optionGroupKey": "",
-    "bgOverride": "",
+    "bgOverride": "Art/Gameplay/DayFlow/phase_pre_business",
     "bgmOverride": ""
   },
   {
@@ -86,7 +96,7 @@
     "pageCondKeys": "",
     "pageBarConds": "",
     "optionGroupKey": "",
-    "bgOverride": "",
+    "bgOverride": "Art/Gameplay/DayFlow/phase_pre_business",
     "bgmOverride": ""
   },
   {
@@ -96,7 +106,7 @@
     "pageCondKeys": "",
     "pageBarConds": "",
     "optionGroupKey": "",
-    "bgOverride": "",
+    "bgOverride": "Art/Gameplay/DayFlow/phase_pre_business",
     "bgmOverride": ""
   },
   {
@@ -106,7 +116,7 @@
     "pageCondKeys": "",
     "pageBarConds": "",
     "optionGroupKey": "",
-    "bgOverride": "",
+    "bgOverride": "Art/Gameplay/DayFlow/phase_pre_business",
     "bgmOverride": ""
   },
   {
@@ -116,7 +126,7 @@
     "pageCondKeys": "",
     "pageBarConds": "",
     "optionGroupKey": "MA70.10.06-S1-2",
-    "bgOverride": "",
+    "bgOverride": "Art/Gameplay/DayFlow/phase_pre_business",
     "bgmOverride": ""
   },
   {
@@ -126,17 +136,27 @@
     "pageCondKeys": "",
     "pageBarConds": "",
     "optionGroupKey": "MA70.10.06-S1-3",
-    "bgOverride": "",
+    "bgOverride": "Art/Gameplay/DayFlow/phase_pre_business",
     "bgmOverride": ""
   },
   {
-    "pageId": "arrival.accept.page",
+    "pageId": "arrival.accept.welcome",
     "presentationKey": "arrival.accept",
     "seq": 1,
     "pageCondKeys": "",
     "pageBarConds": "",
     "optionGroupKey": "",
-    "bgOverride": "",
+    "bgOverride": "Art/Gameplay/DayFlow/phase_pre_business",
+    "bgmOverride": ""
+  },
+  {
+    "pageId": "arrival.accept.malice",
+    "presentationKey": "arrival.accept",
+    "seq": 2,
+    "pageCondKeys": "",
+    "pageBarConds": "",
+    "optionGroupKey": "",
+    "bgOverride": "Art/Gameplay/DayFlow/phase_night_choice",
     "bgmOverride": ""
   }
 ]

@@ -198,7 +198,8 @@ namespace Spotlight.Narrative
             skipRequested = false;
             allowSkip = string.Equals(template?.interruptType, "playback", StringComparison.OrdinalIgnoreCase) && (setup?.skipAble ?? template?.defaultSkip ?? false);
             string resolvedTitle = resolve(Get("titleKey", definition.titleText));
-            ui.Show(resolvedTitle);
+            if (!(Get("checkDisplay") == "passive" && string.IsNullOrWhiteSpace(definition.presentationKey)
+                && (definition.contentKeys == null || definition.contentKeys.Count == 0))) ui.Show(resolvedTitle);
             finishPresentation = false;
             pageIndex = 0; choicesEverShown = false; continueEverShown = false; finishPresentation = false; pages.Clear();
             if (!string.IsNullOrWhiteSpace(setup?.checkId))
@@ -218,6 +219,7 @@ namespace Spotlight.Narrative
                 {
                     foreach (NarrativeConversationPageDefinition page in dialoguePages)
                     {
+                        if (!PageVisible(page)) continue;
                         var conversationData = new NarrativeConversationPresentationData { title = resolvedTitle, backgroundPath = page.bgOverride, bgmOverride = page.bgmOverride };
                         List<NarrativeConversationLineDefinition> lines = configuration.presentations.conversationLines.FindAll(item => item != null && item.pageId == page.pageId);
                         lines.Sort((a, b) => a.seq.CompareTo(b.seq));
@@ -246,12 +248,15 @@ namespace Spotlight.Narrative
                     if (conversationData.lines.Count > 0 && conversationPlayback != null)
                     {
                         bool pageFinished = false;
+                        bool pageCancelled = false;
                         long pageVersion = sessionVersion;
+                        conversationData.cancelled = () => { if (sessionVersion == pageVersion) pageCancelled = true; };
                         bool handled = conversationPlayback(request, conversationData, () => { if (sessionVersion == pageVersion) pageFinished = true; });
                         if (handled)
                         {
                             ui.Hide();
-                            while (!pageFinished) yield return null;
+                            while (!pageFinished && !pageCancelled) yield return null;
+                            if (pageCancelled) { AbortPresentation("playback_cancelled"); yield break; }
                         }
                     }
                     }
@@ -418,6 +423,20 @@ namespace Spotlight.Narrative
                 }
             }
         }
+
+        private bool PageVisible(NarrativeConversationPageDefinition page)
+        {
+            if (!string.IsNullOrWhiteSpace(page.pageCondKeys))
+            {
+                if (PageCondition == null) throw new InvalidOperationException("Page condition reader unavailable: " + page.pageId);
+                foreach (string key in page.pageCondKeys.Split(new[] { '|', ',' }, StringSplitOptions.RemoveEmptyEntries))
+                    if (!PageCondition(key.Trim())) return false;
+            }
+            if (!string.IsNullOrWhiteSpace(page.pageBarConds))
+                throw new InvalidOperationException("Unsupported conversation page bar conditions: " + page.pageId);
+            return true;
+        }
+        public Func<string, bool> PageCondition { get; set; }
 
         private IEnumerator DialoguePages(bool autoAdvance)
         {

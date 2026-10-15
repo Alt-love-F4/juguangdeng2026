@@ -34,15 +34,24 @@ namespace Spotlight.GameFlow
                     passiveHint: lines.Count == 0 ? request.PassiveHint : null, sfxKey: item.sfxKey, voiceKey: item.voiceKey));
             }
             // 显式空角色避免纯旁白套用旧 Prefab 的默认人物。
+            if (!string.IsNullOrWhiteSpace(request.PassiveHint) && lines.Count > 0)
+            {
+                DialogueLine first = lines[0];
+                lines[0] = new DialogueLine(first.Speaker, first.Text, first.SpeakerNameOverride, first.Gesture,
+                    first.AutoAdvanceSeconds, first.ReplaceLeft, first.LeftCharacter, first.ReplaceRight, first.RightCharacter,
+                    first.AccentFxKey, first.AccentTargetKey, first.ReplaceCenter, first.CenterCharacter, request.PassiveHint,
+                    sfxKey: first.SfxKey, voiceKey: first.VoiceKey);
+            }
             bool notified = false;
             void Complete() { if (notified) return; notified = true; completed?.Invoke(); }
+            void Cancel() { if (notified) return; notified = true; data.cancelled?.Invoke(); }
             var options = new List<DialogueOption>();
             foreach (var option in data.options)
                 options.Add(new DialogueOption(option.id, option.text, enabled: option.enabled, requirementHint: option.requirement));
             DialoguePanel panel = DialoguePlayback.Play(new DialogueScript(lines, left ?? new DialogueCharacter("", null),
                 right ?? new DialogueCharacter("", null), data.title,
-                string.IsNullOrEmpty(data.backgroundPath) ? null : Resources.Load<Texture>(data.backgroundPath), options), Complete);
-            panel.AllowCancel = false;
+                string.IsNullOrEmpty(data.backgroundPath) ? null : Resources.Load<Texture>(data.backgroundPath), options), Complete, Cancel);
+            panel.AllowCancel = true;
             if (!string.IsNullOrWhiteSpace(data.bgmOverride)) Spotlight.Audio.GameAudio.OverrideMusic(panel, data.bgmOverride);
             panel.OptionSelectionRequested = data.selectChoice;
             return true;
