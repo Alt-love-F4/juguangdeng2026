@@ -244,7 +244,7 @@ namespace Spotlight.FreeCafe.Tests
             app.BeginDrag(source, pointer);
             Assert.That(app.IsDragging, Is.True);
             const System.Reflection.BindingFlags flags = System.Reflection.BindingFlags.Instance | System.Reflection.BindingFlags.NonPublic;
-            typeof(FreeCafeRuntime).GetField("pointerScreen", flags).SetValue(app, Vector2.right * 90f);
+            typeof(FreeCafeRuntime).GetField("pointerScreen", flags).SetValue(app, Vector2.up * 90f);
             typeof(FreeCafeRuntime).GetField("vesselTiltPointerOrigin", flags).SetValue(app, Vector2.zero);
             typeof(FreeCafeRuntime).GetField("receiver", flags).SetValue(app, view);
             typeof(FreeCafeRuntime).GetField("overUI", flags).SetValue(app, false);

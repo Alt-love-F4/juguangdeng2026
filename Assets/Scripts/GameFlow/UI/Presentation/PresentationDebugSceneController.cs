@@ -1,5 +1,6 @@
 using System;
 using System.Collections;
+using System.Collections.Generic;
 using TMPro;
 using UnityEngine;
 using UnityEngine.InputSystem;
@@ -32,6 +33,15 @@ namespace Spotlight.GameFlow
         [SerializeField] private string letterBodyKey = NarrativePresentationDataAdapter.DefaultFirstDayLetterBodyKey;
         [SerializeField] private string letterSignatureKey = NarrativePresentationDataAdapter.DefaultFirstDayLetterSignatureKey;
 
+        [Header("Isolated preview context (never saved)")]
+        [SerializeField] private bool previewAllPages;
+        [SerializeField] private bool previewUnlockChoices;
+        [SerializeField] private int previewAttributeValue = 3;
+        [SerializeField] private string previewPlayerName = "馆长";
+        [SerializeField] private bool hideHelpDuringPlayback = true;
+
+        private PresentationDebugSession configuredSession;
+        private bool restoreHelpAfterPlayback;
         private UIPanel currentPanel;
         private Coroutine pendingEffectCue;
         private Coroutine loadingPreviewRoutine;
@@ -43,6 +53,11 @@ namespace Spotlight.GameFlow
         private bool samplePaused;
         private bool hasLastPreview;
         private Preview lastPreview;
+        private readonly PresentationDebugDialogueMenu dialogueMenu = new PresentationDebugDialogueMenu();
+        private string selectedDialogueId;
+
+        public bool IsDialogueMenuOpen => dialogueMenu.IsOpen;
+        public string SelectedDialogueId => selectedDialogueId;
 
         public UIPanel CurrentPanel => currentPanel;
         public bool HelpVisible => helpGroup == null || helpGroup.alpha > 0f;
@@ -68,6 +83,7 @@ namespace Spotlight.GameFlow
                 StopCurrent();
                 return;
             }
+            if (dialogueMenu.IsOpen) return;
             if (keyboard.hKey.wasPressedThisFrame) { ToggleHelp(); return; }
             if (keyboard.f9Key.wasPressedThisFrame) { ToggleTimePause(); return; }
             if (keyboard.f12Key.wasPressedThisFrame) { ResetHelp(); return; }
@@ -88,6 +104,7 @@ namespace Spotlight.GameFlow
             else if (keyboard.oKey.wasPressedThisFrame) PlayHomeNight();
             else if (keyboard.pKey.wasPressedThisFrame) PlayDayEnd();
             else if (keyboard.fKey.wasPressedThisFrame) PlayIntroduction();
+            else if (keyboard.zKey.wasPressedThisFrame) PlayOpeningPrologue();
             else if (keyboard.gKey.wasPressedThisFrame) PlayEffects();
             else if (keyboard.lKey.wasPressedThisFrame) PlayLongLoading();
             else if (keyboard.kKey.wasPressedThisFrame) PlayShortLoading();
@@ -111,9 +128,10 @@ namespace Spotlight.GameFlow
         public void PlayDetails() => PlayPreview(Preview.Details);
         public void PlayDateChange() => PlayPreview(Preview.DateChange);
         public void PlayLetter() => PlayPreview(Preview.Letter);
-        public void PlayDialogue() => PlayPreview(Preview.Dialogue);
-        public void PlayHardcodedDialogue() => PlayPreview(Preview.HardcodedDialogue);
-        public void PlayDialogueOptions() => PlayPreview(Preview.HardcodedOptions);
+        public void PlayDialogue() => ShowDialogueMenu();
+        // Keep serialized UnityEvent method names, but no longer depend on removed sample characters.
+        public void PlayHardcodedDialogue() => ShowDialogueMenu();
+        public void PlayDialogueOptions() => ShowDialogueMenu();
         public void PlayHardcodedLetter() => PlayPreview(Preview.HardcodedLetter);
         public void PlayReading() => PlayPreview(Preview.Reading);
         public void PlayNotice() => PlayPreview(Preview.Notice);
@@ -176,14 +194,14 @@ namespace Spotlight.GameFlow
         public void PlayPreview(Preview preview)
         {
             StopCurrent();
+            selectedDialogueId = null;
             lastPreview = preview;
             hasLastPreview = true;
             int version = ++requestVersion;
             startedFrame = Time.frameCount;
             try
             {
-                if ((preview == Preview.Letter || preview == Preview.HardcodedLetter) && NarrativeRuntime.Instance == null)
-                    new GameObject("NarrativeRuntime.DebugPreview").AddComponent<NarrativeRuntime>();
+                // Panels own their preview data; even letter samples must not start the live NCS runtime.
                 switch (preview)
                 {
                     case Preview.GameOver:
@@ -204,15 +222,18 @@ namespace Spotlight.GameFlow
                         // 与正式开场一致，默认预览硬编码互动信件。
                         letter.Play(() => Complete(version));
                         break;
-                    case Preview.Dialogue: PlayDialogueSample(new LubanOpeningDialogueSource(openingPresentationId).CreateScript(), version); break;
-                    case Preview.HardcodedDialogue: PlayDialogueSample(DialoguePreviewDialogue.Create(), version); break;
-                    case Preview.HardcodedOptions: PlayDialogueSample(DialoguePreviewDialogue.CreateOptions(), version); break;
+                    case Preview.Dialogue:
+                    case Preview.HardcodedDialogue:
+                    case Preview.HardcodedOptions:
+                    case Preview.Effects:
+                    case Preview.Introduction:
+                        selectedDialogueId = "opening:" + openingPresentationId;
+                        StartConfiguredSession(selectedDialogueId, version);
+                        break;
                     case Preview.HardcodedLetter: Open<FirstDayLetterPanel>().Play(() => Complete(version)); break;
                     case Preview.Reading: PlayReadingSample(version); break;
                     case Preview.Notice: PlayNoticeSample(version); break;
                     case Preview.CutScene: PlayCutSceneSample(version); break;
-                    case Preview.Effects: PlayDialogueSample(PresentationEffectsPreview.Create(), version); break;
-                    case Preview.Introduction: PlayDialogueSample(new LubanOpeningDialogueSource(openingPresentationId).CreateScript(), version); break;
                     case Preview.PreBusiness: Open<PreBusinessPanel>().Play(() => Complete(version)); break;
                     case Preview.CafeOpening: Open<CafeOpeningPanel>().Play(() => Complete(version)); break;
                     case Preview.BusinessEnd: Open<BusinessEndPanel>().Play(() => Complete(version)); break;
@@ -302,6 +323,79 @@ namespace Spotlight.GameFlow
             return panel;
         }
 
+        public void ShowDialogueMenu()
+        {
+            StopCurrent();
+            try
+            {
+                // Discover generated entries without starting the live runtime; results execute only in a selected sandbox sequence.
+                var configuration = LubanNarrativeLoader.Load();
+                var entries = new List<PresentationDebugCatalog.Entry>(PresentationDebugCatalog.ListSequences(configuration));
+                var knownIds = new HashSet<string>(entries.ConvertAll(entry => entry.Id), StringComparer.Ordinal);
+                foreach (var entry in PresentationDebugCatalog.List(configuration))
+                    if (knownIds.Add(entry.Id)) entries.Add(entry);
+                var ids = new List<string>(entries.Count);
+                var labels = new List<string>(entries.Count);
+                foreach (var entry in entries) { ids.Add(entry.Id); labels.Add(entry.Label); }
+                dialogueMenu.Show(transform, statusText != null ? statusText.font : TMP_Settings.defaultFontAsset,
+                    ids, labels, PlayConfiguredDialogue, StopCurrent);
+                SetStatus("选择连续演出", "配表入口 / " + entries.Count);
+                SetHint("自动读取已生成配表。选择入口后连续播放，选项与检定沿用正式调度；结果只作用于临时预览状态，不影响正式游戏或存档。");
+            }
+            catch (Exception error) { ReportDialogueError(error); }
+        }
+
+        public void PlayConfiguredDialogue(string id)
+        {
+            StopCurrent();
+            selectedDialogueId = id;
+            lastPreview = Preview.Dialogue;
+            hasLastPreview = true;
+            int version = ++requestVersion;
+            startedFrame = Time.frameCount;
+            try
+            {
+                StartConfiguredSession(id, version);
+                if (version != requestVersion || configuredSession == null || !configuredSession.IsPresenting) return;
+                SetStatus("播放中", configuredSession.CurrentEventId ?? id);
+                SetHint("隔离预览：H 显示控制台，Esc 停止整段，Backspace 从入口重播。连续演出跟随选项/检定跳转；所有结果只作用于临时状态。" +
+                    (previewAllPages ? " 显示全部条件页。" : " 按预览状态筛页。") +
+                    (previewUnlockChoices ? " 选项全解锁。" : " 按预览状态锁定选项。"));
+            }
+            catch (Exception error) { ReportDialogueError(error); }
+        }
+
+        private void StartConfiguredSession(string id, int version)
+        {
+            configuredSession = new PresentationDebugSession(LubanNarrativeLoader.Load(), DebugTag,
+                previewAllPages, previewUnlockChoices, previewAttributeValue, previewPlayerName,
+                panel => { if (version == requestVersion) currentPanel = panel; },
+                reason => { if (version == requestVersion) { StopCurrent(); SetStatus("已停止", id); SetHint("演出已停止：" + reason); } },
+                followEventChain: id.StartsWith("sequence:", StringComparison.Ordinal));
+            configuredSession.EventStarted += eventId => { if (version == requestVersion) SetStatus("连续演出中", eventId); };
+            if (hideHelpDuringPlayback && HelpVisible)
+            {
+                restoreHelpAfterPlayback = true;
+                ToggleHelp();
+            }
+            configuredSession.Play(id, () => Complete(version));
+        }
+
+        private void RestoreHelp()
+        {
+            if (!restoreHelpAfterPlayback) return;
+            restoreHelpAfterPlayback = false;
+            if (!HelpVisible) ToggleHelp();
+        }
+
+        private void ReportDialogueError(Exception error)
+        {
+            StopCurrent();
+            SetStatus("失败", selectedDialogueId ?? "配表对话");
+            SetHint(error.Message);
+            Debug.LogException(error, this);
+        }
+
         private void PlayReadingSample(int version)
         {
             Texture background = Resources.Load<Texture2D>("Art/Gameplay/DayFlow/phase_business_transition");
@@ -342,7 +436,8 @@ namespace Spotlight.GameFlow
         {
             if (version != requestVersion) return;
             currentPanel = null;
-            SetStatus("已取消", lastPreview.ToString());
+            RestoreHelp();
+            SetStatus("已取消", selectedDialogueId ?? lastPreview.ToString());
             SetHint(DefaultHint);
         }
 
@@ -383,13 +478,18 @@ namespace Spotlight.GameFlow
             currentPanel = null;
             // Transient previews are destroyed on close; no debug panel/cache survives a scene change.
             if (panel != null) UIKit.ClosePanel(panel);
-            SetStatus("已完成", lastPreview.ToString());
+            RestoreHelp();
+            SetStatus("已完成", selectedDialogueId ?? lastPreview.ToString());
             SetHint(DefaultHint);
         }
 
         public void StopCurrent()
         {
+            dialogueMenu.Close();
             requestVersion++;
+            configuredSession?.Dispose();
+            configuredSession = null;
+            RestoreHelp();
             if (loadingPreviewRoutine != null) { StopCoroutine(loadingPreviewRoutine); loadingPreviewRoutine = null; }
             if (pendingEffectCue != null) { StopCoroutine(pendingEffectCue); pendingEffectCue = null; }
             currentPanel = null;
@@ -402,7 +502,9 @@ namespace Spotlight.GameFlow
 
         public void ReplayLast()
         {
-            if (hasLastPreview) PlayPreview(lastPreview);
+            if (!hasLastPreview) return;
+            if (!string.IsNullOrEmpty(selectedDialogueId)) PlayConfiguredDialogue(selectedDialogueId);
+            else PlayPreview(lastPreview);
         }
 
         public void ContinueCurrent()
@@ -428,7 +530,7 @@ namespace Spotlight.GameFlow
         private void LateUpdate()
         {
             Keyboard keyboard = Keyboard.current;
-            if (!enableKeyboardShortcuts || keyboard == null) return;
+            if (!enableKeyboardShortcuts || keyboard == null || dialogueMenu.IsOpen) return;
             if (keyboard.spaceKey.wasPressedThisFrame || keyboard.enterKey.wasPressedThisFrame) ContinueCurrent();
         }
 

@@ -13,6 +13,11 @@ namespace Spotlight.GameFlow
         [SerializeField] private Button quitButton;
         [SerializeField] private TMP_Text noSavesText;
 
+        private static bool entrancePlayed;
+
+        [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.SubsystemRegistration)]
+        private static void ResetEntranceAudio() => entrancePlayed = false;
+
         // Title buttons are pointer-only; UIKit must not restore navigation focus.
         public override bool AutoFocusOnShow => false;
 
@@ -21,6 +26,12 @@ namespace Spotlight.GameFlow
             if (savesButton != null) savesButton.interactable = true;
             if (noSavesText != null) noSavesText.gameObject.SetActive(false);
             base.OnShow();
+            // OnFocus also calls OnShow: play only on the first title display this run.
+            if (!entrancePlayed && Spotlight.Audio.GameAudio.Service != null)
+            {
+                entrancePlayed = true;
+                Spotlight.Audio.GameAudio.Play(Spotlight.Audio.AudioKeys.Open);
+            }
         }
 
         protected override void SelectDefaultControl()

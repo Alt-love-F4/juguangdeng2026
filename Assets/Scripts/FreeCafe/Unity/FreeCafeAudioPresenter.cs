@@ -21,11 +21,15 @@ namespace Spotlight.FreeCafe
         private readonly Dictionary<string, CafeVisitStatus> visits = new Dictionary<string, CafeVisitStatus>();
         private readonly List<string> removed = new List<string>();
         private AreaId? area;
+        private Spotlight.GameFlow.DayFlowController dayFlow;
+        private Spotlight.GameFlow.GameFlowBootstrap gameFlow;
 
         public void Bind(FreeCafeRuntime value)
         {
             if (world != null) world.Changed -= Observe;
             runtime = value; world = runtime.World;
+            dayFlow = FindFirstObjectByType<Spotlight.GameFlow.DayFlowController>();
+            gameFlow = FindFirstObjectByType<Spotlight.GameFlow.GameFlowBootstrap>();
             ResetObservation();
             if (world != null) world.Changed += Observe;
             Observe();
@@ -52,6 +56,10 @@ namespace Spotlight.FreeCafe
             if (area.HasValue && area.Value != world.State.currentArea) GameAudio.Play(AudioKeys.Area);
             area = world.State.currentArea;
             live.Clear();
+            // Standalone scene previews have no day-flow owner to supply ambience.
+            // Formal sessions keep their phase-controlled loop as the sole owner.
+            if (dayFlow == null && gameFlow == null)
+                Loop("standalone-ambience", AudioKeys.CafeAmbience, audible);
             foreach (WorldEntity entity in world.State.entities)
             {
                 ProductionEntityState data = entity.production;

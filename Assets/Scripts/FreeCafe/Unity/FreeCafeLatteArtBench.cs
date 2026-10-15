@@ -22,7 +22,7 @@ namespace Spotlight.FreeCafe
         [Tooltip("标准线宽与流量下每秒消耗的奶泡ml；实际消耗随线宽平方及流量倍率变化。")]
         [Min(.1f)] public float foamMlPerSecond = 6;
         [Tooltip("拉花界面液面底色亮度，不影响杯子颜色或奶泡白色；越小越深。")]
-        [Range(.2f, 1f)] public float liquidColorBrightness = .65f;
+        [Range(.2f, 1f)] public float liquidColorBrightness = 1f;
         public bool IsTransitioning => transition != null;
         private Coroutine transition;
         private CanvasGroup contentGroup;
@@ -192,7 +192,8 @@ namespace Spotlight.FreeCafe
             var liquid = view != null ? view.GetComponentInChildren<OrthographicGlassCupPresenter>(true) : null;
             if (cup == null || liquid == null) return;
             liquid.Present(runtime.World.LiquidSnapshot(cup), 0, false);
-            Color color = liquid.LiquidSurfaceColor;
+            // Match the drink's body color, not the whitened rim highlight.
+            Color color = liquid.MixedColor;
             color.r *= liquidColorBrightness;
             color.g *= liquidColorBrightness;
             color.b *= liquidColorBrightness;

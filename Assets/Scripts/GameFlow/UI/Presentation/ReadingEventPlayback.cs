@@ -11,10 +11,21 @@ namespace Spotlight.GameFlow
     {
         public static bool Play(NarrativeEventRequest request, string title, IReadOnlyList<string> pages,
             string imageResourcePath, bool dialogue, string speaker, string portraitResourcePath, Action completed)
+            => Play(request, title, pages, imageResourcePath, dialogue, speaker, portraitResourcePath, completed,
+                "narrative-reading", PanelCachePolicy.Reusable);
+
+        public static bool Play(NarrativeEventRequest request, string title, IReadOnlyList<string> pages,
+            string imageResourcePath, bool dialogue, string speaker, string portraitResourcePath, Action completed,
+            string panelTag, PanelCachePolicy cachePolicy)
         {
             if (pages == null || pages.Count == 0) return false;
-            ReadingPanel panel = UIKit.OpenPanel<ReadingPanel>(UILevel.Pop, tag: "narrative-reading",
-                cachePolicy: PanelCachePolicy.Reusable);
+            ReadingPanel existing = UIKit.GetPanel<ReadingPanel>();
+            if (existing != null && existing.State != PanelState.Close && existing.State != PanelState.Cached
+                && existing.State != PanelState.Preloaded
+                && !string.Equals(existing.Tag, panelTag, StringComparison.Ordinal))
+                throw new InvalidOperationException("A reading panel is already open in another scope.");
+            ReadingPanel panel = UIKit.OpenPanel<ReadingPanel>(UILevel.Pop, tag: panelTag,
+                cachePolicy: cachePolicy);
             Texture image = string.IsNullOrWhiteSpace(imageResourcePath) ? null : Resources.Load<Texture>(imageResourcePath);
             Sprite portrait = string.IsNullOrWhiteSpace(portraitResourcePath) ? null : Resources.Load<Sprite>(portraitResourcePath);
             var readingPages = new List<ReadingPage>(pages.Count);
@@ -34,18 +45,26 @@ namespace Spotlight.GameFlow
                     kind: dialogue ? ReadingLineKind.Dialogue : ReadingLineKind.Narration);
                 readingPages.Add(new ReadingPage(string.Empty, new[] { line }, image, seq: i + 1));
             }
+            bool notified = false;
+            // Stop precedes the panel's finish/cancel callback; it must not advance the next event itself.
+            void Stopped() => panel.PlaybackStopped -= Stopped;
+            void Complete()
+            {
+                if (notified) return;
+                notified = true;
+                panel.PlaybackStopped -= Stopped;
+                UIKit.ClosePanel(panel);
+                completed?.Invoke();
+            }
             try
             {
-                bool notified = false;
-                void Complete() { if (notified) return; notified = true; completed?.Invoke(); }
-                panel.Play(new ReadingScript(readingPages, title),
-                    () => { UIKit.ClosePanel(panel); Complete(); },
-                    () => { UIKit.ClosePanel(panel); Complete(); });
-                panel.PlaybackStopped += Complete;
+                panel.Play(new ReadingScript(readingPages, title), Complete, Complete);
+                if (!notified) panel.PlaybackStopped += Stopped;
                 return true;
             }
             catch
             {
+                panel.PlaybackStopped -= Stopped;
                 UIKit.ClosePanel(panel);
                 throw;
             }

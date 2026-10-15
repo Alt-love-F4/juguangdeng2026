@@ -359,7 +359,8 @@ namespace Spotlight.FreeCafe.Tests
                 }
                 for (int sample = 1; sample <= 3; sample++)
                 {
-                    MouseAt(pointer.position + Vector2.down * (sample * 45f), true, true);
+                    var direction = phase == 0 ? Vector2.down : Vector2.up;
+                    MouseAt(pointer.position + direction * (sample * 45f), true, true);
                     yield return null;
                     yield return null;
                     Assert.That(Mouse.current, Is.SameAs(mouse));
@@ -505,7 +506,32 @@ namespace Spotlight.FreeCafe.Tests
         }
 
         [UnityTest]
-        public IEnumerator LatteSurfaceTracksCupSurfaceColorAndEveryPresetShowsLiveFitWithOneBest()
+        public IEnumerator LatteBaseUsesWeightedCupColorBeforeDrawingAndAfterReset()
+        {
+            var pitcher = Pitcher(); FillAndFroth(pitcher);
+            var cup = TakeCup();
+            cup.contents.Add(new Portion { specId = "coffee", units = 1, milliliters = 100f });
+            cup.contents.Add(new Portion { specId = "milkfoam", units = 1, milliliters = 50f });
+            yield return null;
+            DropPitcherOnCup(pitcher, cup);
+            yield return WaitForTransition();
+            var surface = FoamSurface();
+            var presenter = app.View(cup.id).GetComponentInChildren<OrthographicGlassCupPresenter>(true);
+            var material = surface.GetComponent<Renderer>().sharedMaterial;
+            Color expected = presenter.MixedColor; expected.a = 1;
+            Assert.That(Vector4.Distance(material.GetColor("_CoffeeColor"), expected), Is.LessThan(.001f));
+            yield return DrawActualStroke(surface);
+            expected = presenter.MixedColor; expected.a = 1;
+            Assert.That(Vector4.Distance(material.GetColor("_CoffeeColor"), expected), Is.LessThan(.001f));
+            Overlay().Find("Content/PresetPanel/Reset").GetComponent<Button>().onClick.Invoke();
+            Assert.That(app.World.State.production.miniGameFoamUsedMl, Is.Zero);
+            Assert.That(app.World.LiquidSnapshot(cup).composition.milkFoamMl, Is.EqualTo(50f).Within(.001f));
+            expected = presenter.MixedColor; expected.a = 1;
+            Assert.That(Vector4.Distance(material.GetColor("_CoffeeColor"), expected), Is.LessThan(.001f));
+        }
+
+        [UnityTest]
+        public IEnumerator LatteSurfaceTracksCupBodyColorAndEveryPresetShowsLiveFitWithOneBest()
         {
             var pitcher = Pitcher(); FillAndFroth(pitcher);
             var cup = TakeCup();
@@ -516,8 +542,9 @@ namespace Spotlight.FreeCafe.Tests
             var surface = FoamSurface();
             var presenter = app.View(cup.id).GetComponentInChildren<OrthographicGlassCupPresenter>(true);
             var material = surface.GetComponent<Renderer>().sharedMaterial;
-            Color expected = presenter.LiquidSurfaceColor * bench.liquidColorBrightness; expected.a = 1;
+            Color expected = presenter.MixedColor * bench.liquidColorBrightness; expected.a = 1;
             Assert.That(Vector4.Distance(material.GetColor("_CoffeeColor"), expected), Is.LessThan(.001f));
+            Assert.That(bench.liquidColorBrightness, Is.EqualTo(1f), "The scene must not darken the drink independently");
             Assert.That(bench.foamMlPerSecond, Is.EqualTo(6f));
             var list = Overlay().Find("Content/PresetPanel/PresetList");
             foreach (Transform preset in list)
@@ -537,7 +564,7 @@ namespace Spotlight.FreeCafe.Tests
             Assert.That(highlighted, Is.EqualTo(1));
             Overlay().Find("Content/PresetPanel/Reset").GetComponent<Button>().onClick.Invoke();
             Assert.That(app.World.State.production.miniGameFoamUsedMl, Is.Zero);
-            expected = presenter.LiquidSurfaceColor * bench.liquidColorBrightness; expected.a = 1;
+            expected = presenter.MixedColor * bench.liquidColorBrightness; expected.a = 1;
             Assert.That(Vector4.Distance(material.GetColor("_CoffeeColor"), expected), Is.LessThan(.001f));
         }
 

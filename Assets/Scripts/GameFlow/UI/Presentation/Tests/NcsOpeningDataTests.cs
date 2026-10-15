@@ -158,7 +158,7 @@ namespace Spotlight.GameFlow.Tests
             Assert.That(config.objects.Any(item => item.objId == "adele"), Is.True,
                 "The formal opening requires Adele in the generated Object table.");
             DialogueScript script = new LubanOpeningDialogueSource(configuration: config).CreateScript();
-            Assert.That(script.Count, Is.EqualTo(13));
+            Assert.That(script.Count, Is.EqualTo(8), "Empty generated text rows are separators and are omitted consistently in game and debug playback.");
             Assert.That(script.LeftCharacter.CharacterKey, Is.EqualTo("player"));
             Assert.That(script.RightCharacter.CharacterKey, Is.EqualTo("adele"));
             Assert.That(script.RightCharacter.DisplayName, Is.EqualTo("阿黛尔·米尼耶"));

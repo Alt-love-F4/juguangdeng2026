@@ -90,6 +90,10 @@ namespace Spotlight.GameFlow
                     error = "Invalid NCS opening gesture: " + line.gesture;
                     return false;
                 }
+                // Authored blank text rows are separators, not playable beats. Apply the same policy
+                // in game and in the debug room; a missing key remains an error below.
+                NarrativeTextDefinition sourceText = configuration.texts?.FirstOrDefault(item => item != null && item.key == line.textKey);
+                if (sourceText != null && string.IsNullOrWhiteSpace(sourceText.content)) continue;
                 if (!TryResolveText(configuration, resolver, line.textKey, out string text))
                 {
                     error = "Missing NCS opening text key: " + line.textKey;

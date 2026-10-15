@@ -113,7 +113,7 @@ namespace Spotlight.FreeCafe
 
         public CafeLiquidSnapshot LiquidSnapshot(WorldEntity entity)
         {
-            float coffee = 0, milk = 0, water = 0, matcha = 0, cocoa = 0, other = 0;
+            float coffee = 0, milk = 0, water = 0, matcha = 0, cocoa = 0, other = 0, milkFoam = 0;
             float capacity = LiquidCapacity(entity);
             Portion primary = null;
             float temperature = TemperatureCelsius(entity);
@@ -130,7 +130,8 @@ namespace Spotlight.FreeCafe
                     switch (portion.specId)
                     {
                         case "coffee": coffee += volume; break;
-                        case "milk": case "hotmilk": case "milkfoam": case "cream": milk += volume; break;
+                        case "milkfoam": milk += volume; milkFoam += volume; break;
+                        case "milk": case "hotmilk": case "cream": milk += volume; break;
                         case "water": case "hotwater": water += volume; break;
                         case "matcha.drink": matcha += volume; break;
                         case "cocoa.drink": cocoa += volume; break;
@@ -138,7 +139,7 @@ namespace Spotlight.FreeCafe
                     }
                 }
             }
-            var composition = new CafeLiquidComposition(coffee, milk, water, matcha, cocoa, other);
+            var composition = new CafeLiquidComposition(coffee, milk, water, matcha, cocoa, other, milkFoam);
             return new CafeLiquidSnapshot(composition.TotalMl, capacity, TemperatureBand(temperature),
                 entity == null ? ProductionPhase.Empty : entity.production.phase, primary?.specId,
                 entity == null ? 100 : entity.production.extractionScore, composition, temperature);

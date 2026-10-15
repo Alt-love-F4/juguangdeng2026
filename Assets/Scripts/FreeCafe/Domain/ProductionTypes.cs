@@ -94,12 +94,15 @@ namespace Spotlight.FreeCafe
     public readonly struct CafeLiquidComposition
     {
         public readonly float coffeeMl, milkMl, waterMl, matchaMl, cocoaMl, otherMl;
+        // Subset of milkMl, not additional volume. Keep the existing milk total API.
+        public readonly float milkFoamMl;
         public float TotalMl => coffeeMl + milkMl + waterMl + matchaMl + cocoaMl + otherMl;
 
-        public CafeLiquidComposition(float coffee, float milk, float water, float matcha, float cocoa, float other)
+        public CafeLiquidComposition(float coffee, float milk, float water, float matcha, float cocoa, float other, float milkFoam = 0)
         {
             coffeeMl = coffee; milkMl = milk; waterMl = water;
             matchaMl = matcha; cocoaMl = cocoa; otherMl = other;
+            milkFoamMl = Math.Max(0, Math.Min(milk, milkFoam));
         }
     }
 

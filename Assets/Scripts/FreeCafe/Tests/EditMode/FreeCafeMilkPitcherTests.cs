@@ -27,6 +27,29 @@ namespace Spotlight.FreeCafe.Tests
             return world.State.production.miniGameToken;
         }
 
+        [Test] public void LiquidSnapshotTracksFoamAsMilkSubsetWithoutChangingVolume()
+        {
+            cup.contents.Add(new Portion { specId = "coffee", milliliters = 100, units = 1 });
+            cup.contents.Add(new Portion { specId = "milk", milliliters = 40, units = 1 });
+            cup.contents.Add(new Portion { specId = "milkfoam", milliliters = 20, units = 1 });
+            cup.contents.Add(new Portion { specId = "milkfoam", milliliters = 30, units = 1 });
+            var snapshot = world.LiquidSnapshot(cup);
+            Assert.That(snapshot.composition.milkMl, Is.EqualTo(90));
+            Assert.That(snapshot.composition.milkFoamMl, Is.EqualTo(50));
+            Assert.That(snapshot.composition.TotalMl, Is.EqualTo(190));
+            Assert.That(snapshot.volumeMl, Is.EqualTo(world.LiquidVolume(cup)));
+            Assert.That(new CafeLiquidComposition(100, 90, 0, 0, 0, 0).milkFoamMl, Is.Zero);
+            string token = Start();
+            Assert.That(world.ConsumeLatteArtFoam(token, 10), Is.EqualTo(10));
+            snapshot = world.LiquidSnapshot(cup);
+            Assert.That(snapshot.composition.milkFoamMl, Is.EqualTo(60));
+            Assert.That(snapshot.volumeMl, Is.EqualTo(200));
+            Assert.That(world.ResetLatteArtFoam(token), Is.True);
+            snapshot = world.LiquidSnapshot(cup);
+            Assert.That(snapshot.composition.milkFoamMl, Is.EqualTo(50));
+            Assert.That(snapshot.volumeMl, Is.EqualTo(190));
+        }
+
         [Test] public void FrothingPreservesMilkAmountTemperatureAndProvenance()
         {
             Assert.That(world.TakeAndInteract("s.milk", pitcher.id, AreaId.Counter, 0, 0).success, Is.True);

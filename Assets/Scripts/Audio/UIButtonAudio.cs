@@ -25,7 +25,7 @@ namespace Spotlight.Audio
             button.onClick.AddListener(Clicked);
         }
 
-        private void Clicked() { if (Usable) GameAudio.Play(clickKey); }
+        private void Clicked() { if (Usable) GameAudio.Play(UIAudioScope.Resolve(GameAudio.Catalog, transform, clickKey)); }
         private void OnDestroy() { if (button != null) button.onClick.RemoveListener(Clicked); }
 
         public static void Install(GameObject root)
@@ -58,7 +58,7 @@ namespace Spotlight.Audio
         {
             if (!Usable || Time.unscaledTime - lastSelect < .08f) return;
             lastSelect = Time.unscaledTime;
-            GameAudio.Play(selectKey, this);
+            GameAudio.Play(UIAudioScope.Resolve(GameAudio.Catalog, transform, selectKey), this);
         }
 
     }

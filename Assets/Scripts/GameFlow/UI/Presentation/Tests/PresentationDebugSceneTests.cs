@@ -2,6 +2,7 @@
 using System;
 using System.Collections;
 using System.IO;
+using System.Linq;
 using Spotlight.Narrative;
 using NUnit.Framework;
 using TMPro;
@@ -134,6 +135,9 @@ namespace Spotlight.GameFlow.Tests
                 if (root.name == "DebugHelpOverlay") help = root.GetComponent<Canvas>();
             Assert.That(help, Is.Not.Null);
             Assert.That(help.sortingOrder, Is.GreaterThan(800));
+            var surface = help.transform.Find("ShortcutSurface").GetComponent<Canvas>();
+            Assert.That(surface.overrideSorting, Is.True);
+            Assert.That(surface.sortingOrder, Is.LessThan(700), "Controls must not cover production panels.");
             Button[] buttons = help.GetComponentsInChildren<Button>(true);
             Assert.That(buttons.Length, Is.EqualTo(33));
             foreach (Button button in buttons)
@@ -145,13 +149,19 @@ namespace Spotlight.GameFlow.Tests
             yield return null;
             buttons[2].onClick.Invoke();
             yield return null;
-            Assert.That(controller.CurrentPanel, Is.InstanceOf<DialoguePanel>());
+            Assert.That(controller.CurrentPanel, Is.Null);
+            Assert.That(controller.IsDialogueMenuOpen, Is.True);
             Assert.That(UnityEngine.Object.FindFirstObjectByType<GameFlowBootstrap>(), Is.Null);
         }
 
         [UnityTest]
-        public IEnumerator SharedSceneChoiceButtonShowsOptionsAndReplaysCleanly()
+        public IEnumerator SharedSceneChoiceButtonOpensSearchableConfiguredMenuAndReplaysSelection()
         {
+            const string selectedId = "sequence:EV_TEST_CONVERSATION";
+            Assert.That(NarrativeRuntime.Instance, Is.Null, "The preview fixture must not start an NCS session.");
+            var scripts = PresentationDebugDialogueSource.Create(LubanNarrativeLoader.Load(), "conversation:TEST_CONVERSATION");
+            Assert.That(scripts.Count, Is.EqualTo(2), "The configured test conversation must exercise page handoff.");
+
             Button launcher = null;
             foreach (GameObject root in debugScene.GetRootGameObjects())
                 foreach (Button button in root.GetComponentsInChildren<Button>(true))
@@ -159,67 +169,89 @@ namespace Spotlight.GameFlow.Tests
             Assert.That(launcher, Is.Not.Null);
             Assert.That(launcher.onClick.GetPersistentMethodName(0), Is.EqualTo("PlayDialogueOptions"));
             launcher.onClick.Invoke();
-            var panel = controller.CurrentPanel as DialoguePanel;
-            Assert.That(panel, Is.Not.Null);
-            float deadline = Time.realtimeSinceStartup + 5f;
-            while (!panel.IsChoosing)
+            Assert.That(controller.IsDialogueMenuOpen, Is.True);
+            Assert.That(controller.CurrentPanel, Is.Null);
+            Assert.That(NarrativeRuntime.Instance, Is.Null);
+
+            Transform menu = controller.transform.Find("PresentationDebugDialogueMenu");
+            Assert.That(menu, Is.Not.Null);
+            Assert.That(menu.gameObject.scene, Is.EqualTo(debugScene));
+            Assert.That(menu.GetComponent<Canvas>().sortingOrder, Is.EqualTo(1100));
+            TMP_InputField search = menu.GetComponentInChildren<TMP_InputField>();
+            Assert.That(search, Is.Not.Null);
+            search.text = "__no_matching_dialogue__";
+            Transform emptyMessage = menu.Find("Backdrop/Panel/EmptyMessage");
+            Assert.That(emptyMessage.gameObject.activeSelf, Is.True);
+            Assert.That(menu.GetComponentsInChildren<Button>().Count(button => button.transform.Find("Id") != null),
+                Is.Zero, "No presentation rows remain when search has no matches.");
+            search.text = selectedId;
+            Assert.That(emptyMessage.gameObject.activeSelf, Is.False);
+            Button entryButton = null;
+            foreach (Button button in menu.GetComponentsInChildren<Button>())
             {
-                Assert.That(Time.realtimeSinceStartup, Is.LessThan(deadline));
-                if (panel.IsReady) panel.Advance();
-                yield return null;
+                Transform idLabel = button.transform.Find("Id");
+                if (idLabel == null) continue;
+                Assert.That(idLabel.GetComponent<TMP_Text>().text, Is.EqualTo(selectedId));
+                Assert.That(entryButton, Is.Null, "Search should leave one matching configured conversation.");
+                entryButton = button;
             }
-            Assert.That(panel.LeftPortrait.enabled && panel.CenterPortrait.enabled && panel.RightPortrait.enabled, Is.True);
-            foreach (Image portrait in new[] { panel.LeftPortrait, panel.CenterPortrait, panel.RightPortrait })
-                Assert.That(portrait.transform.localScale.x, Is.GreaterThan(0f));
-            panel.Effects.SetFocus(DialogueSpeaker.Center, immediate: true);
-            panel.Effects.Tick(0f);
-            Assert.That(panel.CenterPortrait.color.r, Is.GreaterThan(panel.LeftPortrait.color.r));
-            Assert.That(panel.CenterPortrait.color.r, Is.GreaterThan(panel.RightPortrait.color.r));
-            StringAssert.Contains(NarrativeCharacterResolver.Find("thibaut").displayName, string.Join(" ",
-                Array.ConvertAll(panel.GetComponentsInChildren<TMP_Text>(), item => item.text)));
-            Transform options = panel.GetComponentInChildren<ScrollRect>().transform;
-            Assert.That(options.gameObject.activeInHierarchy, Is.True);
-            Button[] choices = options.GetComponentsInChildren<Button>();
-            Assert.That(choices.Length, Is.EqualTo(3));
-            Assert.That(choices[2].interactable, Is.False);
-            StringAssert.Contains("需要更多情报", string.Join(" ",
-                Array.ConvertAll(choices[2].GetComponentsInChildren<TMP_Text>(), item => item.text)));
-            panel.Advance();
-            Assert.That(panel.IsChoosing, Is.True, "Dialogue submit must not select an option.");
-            Assert.That(panel.SelectedOptionId, Is.Empty);
-            yield return new WaitForEndOfFrame();
-            Texture2D capture = ScreenCapture.CaptureScreenshotAsTexture();
-            if (capture != null)
+            Assert.That(entryButton, Is.Not.Null);
+            entryButton.onClick.Invoke();
+            Assert.That(controller.IsDialogueMenuOpen, Is.False);
+            Assert.That(controller.SelectedDialogueId, Is.EqualTo(selectedId));
+            Assert.That(NarrativeRuntime.Instance, Is.Null, "Selecting a preview must not construct NarrativeRuntime.");
+
+            DialoguePanel firstPanel = controller.CurrentPanel as DialoguePanel;
+            Assert.That(firstPanel, Is.Not.Null);
+            float deadline = Time.realtimeSinceStartup + 12f;
+            for (int pageIndex = 0; pageIndex < scripts.Count; pageIndex++)
             {
-                Directory.CreateDirectory(Path.GetFullPath("output"));
-                File.WriteAllBytes(Path.GetFullPath("output/presentation-debug-options.png"), capture.EncodeToPNG());
-                UnityEngine.Object.Destroy(capture);
+                var panel = controller.CurrentPanel as DialoguePanel;
+                Assert.That(panel, Is.Not.Null, "Missing configured page " + pageIndex);
+                Assert.That(panel.SelectedOptionId, Is.Empty);
+                // Transient panels are destroyed at completion: Unity fake-null equality would
+                // consider the destroyed last page equal to a cleared CurrentPanel forever.
+                while (ReferenceEquals(controller.CurrentPanel, panel))
+                {
+                    Assert.That(Time.realtimeSinceStartup, Is.LessThan(deadline), "Configured page failed to complete: " + pageIndex);
+                    Assert.That(panel.IsChoosing, Is.False, "TEST_CONVERSATION currently has no configured options.");
+                    if (panel.IsReady) panel.Advance();
+                    yield return null;
+                }
+                Assert.That(NarrativeRuntime.Instance, Is.Null, "Page handoff must not start or settle an NCS session.");
             }
-            controller.ToggleTimePause();
-            choices[1].onClick.Invoke();
-            Assert.That(panel.SelectedOptionId, Is.EqualTo("caution"));
-            Assert.That(panel.SelectOption("support"), Is.False, "Only accept one choice.");
-            yield return new WaitForSecondsRealtime(.6f);
-            Assert.That(panel.IsChoosing, Is.False);
-            Assert.That(panel.LineIndex, Is.EqualTo(DialoguePreviewDialogue.CreateOptions().Count));
-            controller.ToggleTimePause();
+            Assert.That(controller.CurrentPanel, Is.Null);
+            Assert.That(controller.SelectedDialogueId, Is.EqualTo(selectedId));
             controller.ReplayLast();
             var replay = controller.CurrentPanel as DialoguePanel;
             Assert.That(replay, Is.Not.Null);
+            Assert.That(replay, Is.Not.SameAs(firstPanel));
+            Assert.That(controller.SelectedDialogueId, Is.EqualTo(selectedId));
+            Assert.That(controller.IsDialogueMenuOpen, Is.False, "Replay must play the selected ID rather than reopening the picker.");
             Assert.That(replay.SelectedOptionId, Is.Empty);
             Assert.That(replay.IsChoosing, Is.False);
+            Assert.That(NarrativeRuntime.Instance, Is.Null);
             Assert.That(UnityEngine.Object.FindFirstObjectByType<GameFlowBootstrap>(), Is.Null);
         }
 
         [UnityTest]
         public IEnumerator ThirdPortraitEffectsReplacementAndTwoPersonReplayKeepOriginalOrientation()
         {
-            controller.PlayDialogueOptions();
+            DialogueScript sample = new LubanOpeningDialogueSource("first_day_cafe", LubanNarrativeLoader.Load()).CreateScript();
+            Assert.That(sample.CenterCharacter, Is.Not.Null, "The configured opening must exercise the center portrait.");
+            controller.PlayConfiguredDialogue("opening:first_day_cafe");
             var panel = controller.CurrentPanel as DialoguePanel;
+            Assert.That(panel, Is.Not.Null);
             float deadline = Time.realtimeSinceStartup + 6f;
             while (!panel.IsReady) { Assert.That(Time.realtimeSinceStartup, Is.LessThan(deadline)); yield return null; }
+            // A center name alone does not imply a configured portrait. Exercise the three-slot
+            // renderer with a real table character rather than relying on an unrelated art asset.
+            var centerCharacter = NarrativeCharacterResolver.CreateDialogueCharacter("adele");
+            panel.Play(new DialogueScript(new[] { new DialogueLine(DialogueSpeaker.Center, "三人演出测试") },
+                sample.LeftCharacter, sample.RightCharacter, centerCharacter: centerCharacter));
+            while (!panel.IsReady) { Assert.That(Time.realtimeSinceStartup, Is.LessThan(deadline)); yield return null; }
             Assert.That(panel.CenterPortrait.enabled, Is.True);
-            var centerFx = panel.PlayEffect(PresentationEffectIds.AccentShakeStartle, "thibaut");
+            var centerFx = panel.PlayEffect(PresentationEffectIds.AccentShakeStartle, "center");
             var screenFx = panel.PlayEffect(PresentationEffectIds.ShakeLight);
             Assert.That(centerFx.Status, Is.EqualTo(PresentationEffectStatus.Playing));
             Assert.That(screenFx.Status, Is.EqualTo(PresentationEffectStatus.Playing));
@@ -229,14 +261,13 @@ namespace Spotlight.GameFlow.Tests
             yield return new WaitForEndOfFrame();
             CaptureScreenshot("output/presentation-three-portraits.png");
 
-            DialogueScript sample = DialoguePreviewDialogue.CreateOptions();
             var replacement = NarrativeCharacterResolver.CreateDialogueCharacter("player");
             panel.Play(new DialogueScript(new[]
             {
                 new DialogueLine(DialogueSpeaker.Center, ""),
                 new DialogueLine(DialogueSpeaker.Center, "新线人已经到场", replaceCenter: true, centerCharacter: replacement),
                 new DialogueLine(DialogueSpeaker.Left, "中间角色离开", replaceCenter: true)
-            }, sample.LeftCharacter, sample.RightCharacter, centerCharacter: sample.CenterCharacter));
+            }, sample.LeftCharacter, sample.RightCharacter, centerCharacter: centerCharacter));
             while (!panel.IsReady) { Assert.That(Time.realtimeSinceStartup, Is.LessThan(deadline)); yield return null; }
             panel.Advance();
             yield return null;
@@ -251,7 +282,9 @@ namespace Spotlight.GameFlow.Tests
             while (!panel.IsReady) { Assert.That(Time.realtimeSinceStartup, Is.LessThan(deadline)); yield return null; }
             Assert.That(panel.CenterCharacter, Is.Null);
             Assert.That(panel.CenterPortrait.enabled, Is.False);
-            panel.Play(DialoguePreviewDialogue.Create());
+            panel.Play(new DialogueScript(new[] { new DialogueLine(DialogueSpeaker.Left, "双人重播") },
+                NarrativeCharacterResolver.CreateDialogueCharacter("player"),
+                NarrativeCharacterResolver.CreateDialogueCharacter("adele")));
             while (!panel.IsReady) { Assert.That(Time.realtimeSinceStartup, Is.LessThan(deadline)); yield return null; }
             Assert.That(panel.CenterPortrait.enabled, Is.False);
             Assert.That(panel.RightPortrait.transform.localScale.x, Is.GreaterThan(0f));
@@ -310,15 +343,25 @@ namespace Spotlight.GameFlow.Tests
         public IEnumerator QWERShortcutEndpointsLaunchTheExpectedPanels()
         {
             Action[] launchers = { controller.PlayDateChange, controller.PlayLetter, controller.PlayDialogue, controller.PlayPreBusiness };
-            Type[] types = { typeof(DateChangePanel), typeof(FirstDayLetterPanel), typeof(DialoguePanel), typeof(PreBusinessPanel) };
+            Type[] types = { typeof(DateChangePanel), typeof(FirstDayLetterPanel), null, typeof(PreBusinessPanel) };
             for (int i = 0; i < launchers.Length; i++)
             {
                 launchers[i]();
                 yield return null;
-                Assert.That(controller.CurrentPanel, Is.Not.Null);
-                Assert.That(controller.CurrentPanel.GetType(), Is.EqualTo(types[i]));
+                if (i == 2)
+                {
+                    Assert.That(controller.CurrentPanel, Is.Null);
+                    Assert.That(controller.IsDialogueMenuOpen, Is.True, "E must open the configured dialogue picker.");
+                }
+                else
+                {
+                    Assert.That(controller.CurrentPanel, Is.Not.Null);
+                    Assert.That(controller.CurrentPanel.GetType(), Is.EqualTo(types[i]));
+                    Assert.That(controller.IsDialogueMenuOpen, Is.False);
+                }
                 controller.StopCurrent();
                 yield return null;
+                Assert.That(controller.IsDialogueMenuOpen, Is.False);
             }
             Assert.That(controller.CurrentPanel, Is.Null);
         }
@@ -412,7 +455,7 @@ namespace Spotlight.GameFlow.Tests
         [UnityTest]
         public IEnumerator AudioDialogueSnapshotDoesNotReplayWhenRevealingSameLine()
         {
-            controller.PlayDialogue();
+            controller.PlayConfiguredDialogue("opening:first_day_cafe");
             yield return null;
             var panel = (DialoguePanel)controller.CurrentPanel;
             var played = new System.Collections.Generic.List<string>();
@@ -437,7 +480,7 @@ namespace Spotlight.GameFlow.Tests
             yield return new WaitForEndOfFrame();
             CaptureScreenshot("output/presentation-debug-room.png");
             yield return null;
-            controller.PlayDialogue();
+            controller.PlayConfiguredDialogue("opening:first_day_cafe");
             yield return new WaitForSecondsRealtime(.7f);
             yield return new WaitForEndOfFrame();
             CaptureScreenshot("output/presentation-debug-dialogue.png");

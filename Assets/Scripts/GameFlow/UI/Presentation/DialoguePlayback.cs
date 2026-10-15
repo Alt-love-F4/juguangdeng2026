@@ -8,17 +8,30 @@ namespace Spotlight.GameFlow
     public static class DialoguePlayback
     {
         public static DialoguePanel Play(IDialogueScriptSource source, Action onFinished = null, Action onCancelled = null)
+            => Play(source, onFinished, onCancelled, "character-dialogue", PanelCachePolicy.Reusable);
+
+        public static DialoguePanel Play(IDialogueScriptSource source, Action onFinished, Action onCancelled,
+            string panelTag, PanelCachePolicy cachePolicy)
         {
             if (source == null) throw new ArgumentNullException(nameof(source));
-            return Play(source.CreateScript(), onFinished, onCancelled);
+            return Play(source.CreateScript(), onFinished, onCancelled, panelTag, cachePolicy);
         }
 
         public static DialoguePanel Play(DialogueScript script, Action onFinished = null, Action onCancelled = null)
+            => Play(script, onFinished, onCancelled, "character-dialogue", PanelCachePolicy.Reusable);
+
+        public static DialoguePanel Play(DialogueScript script, Action onFinished, Action onCancelled,
+            string panelTag, PanelCachePolicy cachePolicy)
         {
             if (script == null) throw new ArgumentNullException(nameof(script));
             if (DialoguePanel.IsAnyPlaying) throw new InvalidOperationException("A dialogue is already playing. Stop it before replacing it.");
-            DialoguePanel panel = UIKit.OpenPanel<DialoguePanel>(UILevel.Pop, tag: "character-dialogue",
-                cachePolicy: PanelCachePolicy.Reusable);
+            DialoguePanel existing = UIKit.GetPanel<DialoguePanel>();
+            if (existing != null && existing.State != PanelState.Close && existing.State != PanelState.Cached
+                && existing.State != PanelState.Preloaded
+                && !string.Equals(existing.Tag, panelTag, StringComparison.Ordinal))
+                throw new InvalidOperationException("A dialogue panel is already open in another scope.");
+            DialoguePanel panel = UIKit.OpenPanel<DialoguePanel>(UILevel.Pop, tag: panelTag,
+                cachePolicy: cachePolicy);
             try
             {
                 panel.Play(script, () =>

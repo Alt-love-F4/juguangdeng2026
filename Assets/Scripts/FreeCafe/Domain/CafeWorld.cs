@@ -410,9 +410,9 @@ namespace Spotlight.FreeCafe
             }
         }
 
-        /// <summary>目标能否接收物品：杯具来源、容器、设备、顾客、出餐口或丢弃区。</summary>
+        /// <summary>目标能否接收物品：杯具或原料来源、容器、设备、顾客、出餐口或丢弃区。</summary>
         public bool IsReceiver(WorldEntity target) => target != null
-            && (IsCupSource(Spec(target.specId)) || (Spec(target.specId).capabilities
+            && (IsCupSource(Spec(target.specId)) || IsIngredientSource(Spec(target.specId)) || (Spec(target.specId).capabilities
                 & (Capability.Container | Capability.Processor | Capability.Customer | Capability.Delivery | Capability.Discard)) != 0);
 
         /// <summary>预演一次「把 item 放到 target 上」的结果；只用于提示，不产生任何副作用。</summary>
@@ -439,6 +439,7 @@ namespace Spotlight.FreeCafe
 
             if (CupAbove(item) != null) return ActionResult.No("请先取走最上面的杯子");
             if (IsCupSource(receiver)) return PreviewCupReturn(item, target);
+            if (IsIngredientSource(receiver)) return PreviewIngredientReturn(item, target);
             if (IsCup(item) && IsCup(target) && item.contents.Count == 0 && target.contents.Count == 0)
                 return PreviewCupStack(item, target);
             if (PreviewProduction(item, target, out var productionPreview)) return productionPreview;
@@ -520,6 +521,12 @@ namespace Spotlight.FreeCafe
                 Notify();
                 return preview;
             }
+            if (IsIngredientSource(receiver))
+            {
+                ReturnIngredient(item, target);
+                Notify();
+                return preview;
+            }
             if (ProductionEnabled && (IsProductionMachine(target) || receiver.Has(Capability.Container) || receiver.Has(Capability.Delivery)))
                 return InteractProduction(item, target);
             if (receiver.Has(Capability.Processor))
@@ -588,6 +595,14 @@ namespace Spotlight.FreeCafe
 
             // 先用一个临时对象预演组合，确认可行后再真正取出
             var candidate = new WorldEntity { specId = Spec(source.specId).sourceItemId, area = area, quality = source.quality };
+            // Returning to this same ingredient source never takes stock out or allocates an ID.
+            if (sourceId == targetId && IsIngredientSource(Spec(source.specId)))
+            {
+                if (Locked(source)) return ActionResult.No("材料正在设备内");
+                var position = CanPosition(candidate.specId, area, x, y);
+                if (!position.success) return position;
+                return PreviewIngredientReturn(candidate, source, alreadyInStock: true);
+            }
             var preview = Preview(candidate, Find(targetId));
             if (!preview.success)
             {
@@ -600,7 +615,8 @@ namespace Spotlight.FreeCafe
                 return valid;
             }
 
-            Take(sourceId, area, x, y, out var item);
+            var taken = Take(sourceId, area, x, y, out var item);
+            if (!taken.success) return taken;
             return Interact(item.id, targetId);
         }
 

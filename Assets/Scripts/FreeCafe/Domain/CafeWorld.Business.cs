@@ -436,16 +436,18 @@ namespace Spotlight.FreeCafe
         public ActionResult Refill()
         {
             int cost = 0;
+            bool needsRefill = false;
             foreach (var e in State.entities)
             {
                 var spec = Spec(e.specId);
                 if (spec.Has(Capability.Source) && e.stock < spec.initialStock)
                 {
+                    needsRefill = true;
                     cost += spec.refillCost;
                 }
             }
 
-            if (cost == 0)
+            if (!needsRefill)
             {
                 return ActionResult.No("库存已满，先使用原料再补货");
             }
@@ -461,7 +463,7 @@ namespace Spotlight.FreeCafe
                 var spec = Spec(e.specId);
                 if (spec.Has(Capability.Source))
                 {
-                    e.stock = spec.initialStock;
+                    e.stock = Math.Max(e.stock, spec.initialStock);
                 }
             }
 

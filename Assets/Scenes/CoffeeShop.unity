@@ -7750,7 +7750,7 @@ MonoBehaviour:
   transitionDuration: 0.28
   recognitionInterval: 0.15
   foamMlPerSecond: 6
-  liquidColorBrightness: 0.65
+  liquidColorBrightness: 1
 --- !u!61 &683686750
 BoxCollider2D:
   m_ObjectHideFlags: 0
@@ -17531,10 +17531,7 @@ PrefabInstance:
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
-    m_AddedComponents:
-    - targetCorrespondingSourceObject: {fileID: 3376259146276268105, guid: 50dc4201fea351c44b676d74ecc9c0a8, type: 3}
-      insertIndex: -1
-      addedObject: {fileID: 0}
+    m_AddedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: 50dc4201fea351c44b676d74ecc9c0a8, type: 3}
 --- !u!4 &1513896973 stripped
 Transform:
@@ -23321,10 +23318,7 @@ PrefabInstance:
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
-    m_AddedComponents:
-    - targetCorrespondingSourceObject: {fileID: 6509581507359287010, guid: a32d1b9086424264da1bae6c83efdb9a, type: 3}
-      insertIndex: -1
-      addedObject: {fileID: 0}
+    m_AddedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: a32d1b9086424264da1bae6c83efdb9a, type: 3}
 --- !u!4 &2033701260 stripped
 Transform:
@@ -23446,10 +23440,7 @@ PrefabInstance:
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
-    m_AddedComponents:
-    - targetCorrespondingSourceObject: {fileID: 760874902399843597, guid: 1b074098536fad841a55ca4e4e097625, type: 3}
-      insertIndex: -1
-      addedObject: {fileID: 0}
+    m_AddedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: 1b074098536fad841a55ca4e4e097625, type: 3}
 --- !u!4 &2033757186 stripped
 Transform:

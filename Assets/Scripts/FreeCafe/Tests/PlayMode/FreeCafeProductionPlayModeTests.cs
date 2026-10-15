@@ -179,6 +179,197 @@ namespace Spotlight.FreeCafe.Tests
             yield return WaitForReturn(view,origin);
         }
         
+        private IEnumerator BeginKettlePour()
+        {
+            Assert.That(app.World.SelectServingCup("s.cups.large").success, Is.True);
+            Assert.That(app.World.TakeAndInteract("s.milk", "m.heater", AreaId.Counter, 0, 0).success, Is.True);
+            Assert.That(app.World.OperateProduction("m.heater").success, Is.True);
+            app.World.Tick(4);
+            var kettle = app.World.Find("m.heater");
+            var cup = app.World.ServingCup;
+            var view = app.View(kettle.id);
+            var start = Pointer(kettle.x, kettle.y);
+            MouseAt(start.position, true, false);
+            yield return null; yield return null;
+            Physics2D.SyncTransforms();
+            app.BeginDrag(view, start);
+            Assert.That(app.IsDragging, Is.True);
+            var pointer = Pointer(cup.x, cup.y + .7f);
+            app.MoveDrag(pointer);
+            MouseAt(pointer.position, true, false);
+            // Let the lifted pose settle before right-down freezes it.
+            float deadline = Time.realtimeSinceStartup + 1f;
+            while (Vector3.Distance(view.transform.position, view.DragPosition) > .001f && Time.realtimeSinceStartup < deadline)
+                yield return null;
+            yield return null;
+            MouseAt(pointer.position, true, true);
+            yield return null; yield return null;
+            Assert.That(app.LockedPourTargetId, Is.EqualTo(cup.id));
+            Assert.That(app.World.LiquidVolume(cup), Is.Zero, "Right-down locks the receiver without transferring at neutral tilt");
+        }
+        private static float PourBodyAngle(FreeEntityView view) => Mathf.DeltaAngle(0, view.body.transform.localEulerAngles.z);
+        private IEnumerator WaitForPourAngle(FreeEntityView view, float angle, float tolerance = 1f)
+        {
+            float deadline = Time.realtimeSinceStartup + 1.5f;
+            while (Mathf.Abs(Mathf.DeltaAngle(PourBodyAngle(view), angle)) > tolerance && Time.realtimeSinceStartup < deadline)
+                yield return null;
+            Assert.That(PourBodyAngle(view), Is.EqualTo(angle).Within(tolerance), "Smoothed pour tilt must reach the requested signed angle within the timeout");
+        }
+        [UnityTest] public IEnumerator KettlePoursUpwardAndDownwardWithOppositeBodyAngles()
+        {
+            yield return BeginKettlePour();
+            var kettle = app.World.Find("m.heater");
+            var cup = app.World.ServingCup;
+            var view = app.View(kettle.id);
+            Vector2 anchor = Pointer(cup.x, cup.y + .7f).position;
+            Vector3 frozen = view.transform.position;
+            float total = app.World.LiquidVolume(kettle) + app.World.LiquidVolume(cup);
+            MouseAt(anchor + Vector2.up * 90, true, true);
+            yield return WaitForPourAngle(view, -app.maxPourAngle);
+            float upwardVolume = app.World.LiquidVolume(cup);
+            Assert.That(upwardVolume, Is.GreaterThan(0), "Positive tilt must pour, not be discarded by a one-sided flow clamp");
+            Assert.That(app.View(cup.id).IsReceivingPour, Is.True);
+            Assert.That(Vector3.Distance(view.transform.position, frozen), Is.LessThan(.001f));
+            MouseAt(anchor, true, true);
+            yield return WaitForPourAngle(view, 0);
+            MouseAt(anchor + Vector2.down * 90, true, true);
+            yield return WaitForPourAngle(view, app.maxPourAngle);
+            Assert.That(app.World.LiquidVolume(cup), Is.GreaterThan(upwardVolume), "Negative tilt must retain the original downward pouring direction");
+            Assert.That(app.World.LiquidVolume(kettle) + app.World.LiquidVolume(cup), Is.EqualTo(total).Within(.01f));
+            Assert.That(app.LockedPourTargetId, Is.EqualTo(cup.id));
+            Assert.That(Vector3.Distance(view.transform.position, frozen), Is.LessThan(.001f));
+        }
+        [UnityTest] public IEnumerator KettleNeutralAndReversalStopFlowUntilSmoothedTiltMatchesLockedReceiver()
+        {
+            yield return BeginKettlePour();
+            var kettle = app.World.Find("m.heater");
+            var cup = app.World.ServingCup;
+            var view = app.View(kettle.id);
+            var cupView = app.View(cup.id);
+            Vector2 anchor = Pointer(cup.x, cup.y + .7f).position;
+            Vector3 frozen = view.transform.position;
+            float total = app.World.LiquidVolume(kettle) + app.World.LiquidVolume(cup);
+            MouseAt(anchor + Vector2.down * 90, true, true);
+            yield return WaitForPourAngle(view, app.maxPourAngle);
+            float beforeNeutral = app.World.LiquidVolume(cup);
+            MouseAt(anchor, true, true);
+            yield return null;
+            Assert.That(app.World.LiquidVolume(cup), Is.EqualTo(beforeNeutral).Within(.0001f), "Returning to the press point must stop transfer on the first frame, despite residual visual tilt");
+            Assert.That(cupView.IsReceivingPour, Is.False);
+            yield return WaitForPourAngle(view, 0);
+            Assert.That(app.World.LiquidVolume(cup), Is.EqualTo(beforeNeutral).Within(.0001f));
+            // Sub-threshold requests must remain dry after their visual smoothing settles, on either side.
+            foreach (float pixels in new[] { -9f, 9f })
+            {
+                MouseAt(anchor + Vector2.up * pixels, true, true);
+                yield return WaitForPourAngle(view, -app.maxPourAngle * pixels / 90f, .5f);
+                Assert.That(app.World.LiquidVolume(cup), Is.EqualTo(beforeNeutral).Within(.0001f));
+                Assert.That(cupView.IsReceivingPour, Is.False);
+            }
+            MouseAt(anchor + Vector2.down * 90, true, true);
+            yield return WaitForPourAngle(view, app.maxPourAngle);
+            float beforeReversal = app.World.LiquidVolume(cup);
+            // With the .05s delta cap, a +.25 request cannot cross from settled -1 tilt
+            // to the positive .18 flow threshold in its first frame, even at low FPS.
+            MouseAt(anchor + new Vector2(160, 22.5f), true, true);
+            yield return null;
+            Assert.That(app.World.LiquidVolume(cup), Is.EqualTo(beforeReversal).Within(.0001f), "Reversing direction must stop the old stream immediately");
+            Assert.That(cupView.IsReceivingPour, Is.False);
+            float deadline = Time.realtimeSinceStartup + 1.5f;
+            while (app.World.LiquidVolume(cup) <= beforeReversal && Time.realtimeSinceStartup < deadline)
+            {
+                if (PourBodyAngle(view) >= -app.maxPourAngle * .18f)
+                    Assert.That(cupView.IsReceivingPour, Is.False, "No stream while smoothed tilt is in the old direction or below threshold");
+                yield return null;
+            }
+            Assert.That(app.World.LiquidVolume(cup), Is.GreaterThan(beforeReversal));
+            Assert.That(PourBodyAngle(view), Is.LessThanOrEqualTo(-app.maxPourAngle * .18f + .01f));
+            Assert.That(app.LockedPourTargetId, Is.EqualTo(cup.id), "Cursor travel and reversal cannot replace the right-down receiver");
+            Assert.That(cupView.IsDropTarget, Is.True);
+            Assert.That(Vector3.Distance(view.transform.position, frozen), Is.LessThan(.001f));
+            Assert.That(app.World.LiquidVolume(kettle) + app.World.LiquidVolume(cup), Is.EqualTo(total).Within(.01f));
+        }
+        [UnityTest] public IEnumerator ShiftSuppressesBothPourDirectionsWithoutConsumingLiquid()
+        {
+            var keyboard = InputSystem.AddDevice<Keyboard>("FreeCafeBidirectionalPourKeyboard");
+            try
+            {
+                InputSystem.QueueStateEvent(keyboard, new KeyboardState(Key.LeftShift));
+                yield return null;
+                yield return BeginKettlePour();
+                var kettle = app.World.Find("m.heater");
+                var cup = app.World.ServingCup;
+                var view = app.View(kettle.id);
+                Vector2 anchor = Pointer(cup.x, cup.y + .7f).position;
+                float initial = app.World.LiquidVolume(kettle);
+                foreach (float direction in new[] { -1f, 1f })
+                {
+                    MouseAt(anchor + Vector2.up * (90 * direction), true, true);
+                    yield return WaitForPourAngle(view, -app.maxPourAngle * direction);
+                    Assert.That(app.World.LiquidVolume(kettle), Is.EqualTo(initial).Within(.0001f));
+                    Assert.That(app.World.LiquidVolume(cup), Is.Zero);
+                    Assert.That(app.View(cup.id).IsReceivingPour, Is.False);
+                    Assert.That(app.LockedPourTargetId, Is.EqualTo(cup.id));
+                }
+                InputSystem.QueueStateEvent(keyboard, new KeyboardState());
+                float deadline = Time.realtimeSinceStartup + 1f;
+                while (app.World.LiquidVolume(cup) <= 0 && Time.realtimeSinceStartup < deadline) yield return null;
+                Assert.That(app.World.LiquidVolume(cup), Is.GreaterThan(0), "Releasing Shift must resume pouring at the held upward tilt");
+                Assert.That(app.World.LiquidVolume(kettle), Is.LessThan(initial));
+            }
+            finally
+            {
+                if (keyboard.added) InputSystem.RemoveDevice(keyboard);
+            }
+        }
+        [UnityTest] public IEnumerator KettleTiltClampsAndRightReleaseResumesDragWithoutJumpAndResetsAnchor()
+        {
+            yield return BeginKettlePour();
+            var kettle = app.World.Find("m.heater");
+            var cup = app.World.ServingCup;
+            var view = app.View(kettle.id);
+            Vector2 anchor = Pointer(cup.x, cup.y + .7f).position;
+            Vector3 frozen = view.transform.position;
+            foreach (float direction in new[] { -1f, 1f })
+            {
+                MouseAt(anchor + Vector2.up * (900 * direction), true, true);
+                yield return WaitForPourAngle(view, -app.maxPourAngle * direction);
+                Assert.That(Mathf.Abs(PourBodyAngle(view)), Is.LessThanOrEqualTo(app.maxPourAngle + .01f), "Extreme cursor travel must clamp at the configured angle");
+                Assert.That(Vector3.Distance(view.transform.position, frozen), Is.LessThan(.001f));
+            }
+            Vector2 releasedAt = anchor + Vector2.up * 900;
+            MouseAt(releasedAt, true, false);
+            yield return null; yield return null;
+            Assert.That(app.IsDragging, Is.True);
+            Assert.That(app.DraggedView, Is.SameAs(view));
+            Assert.That(app.LockedPourTargetId, Is.Null);
+            Assert.That(app.View(cup.id).IsReceivingPour, Is.False);
+            Assert.That(Vector3.Distance(view.transform.position, frozen), Is.LessThan(.001f), "Right release must re-anchor the drag offset, not apply the accumulated tilt cursor displacement");
+            Assert.That(Vector3.Distance(view.DragPosition, frozen), Is.LessThan(.001f));
+            float afterRelease = app.World.LiquidVolume(cup);
+            // Explicitly exercise the same held-left pointer callback at an unchanged cursor.
+            app.MoveDrag(new PointerEventData(EventSystem.current) { position = releasedAt });
+            yield return null; yield return null;
+            Assert.That(Vector3.Distance(view.transform.position, frozen), Is.LessThan(.001f));
+            Assert.That(app.World.LiquidVolume(cup), Is.EqualTo(afterRelease).Within(.0001f));
+            Vector2 movedAt = releasedAt + Vector2.right * 12;
+            Vector3 delta = app.worldCamera.ScreenToWorldPoint(new Vector3(movedAt.x, movedAt.y, app.worldCamera.nearClipPlane))
+                - app.worldCamera.ScreenToWorldPoint(new Vector3(releasedAt.x, releasedAt.y, app.worldCamera.nearClipPlane));
+            MouseAt(movedAt, true, false);
+            yield return null;
+            app.MoveDrag(new PointerEventData(EventSystem.current) { position = movedAt });
+            Assert.That(Vector3.Distance(view.DragPosition, frozen + delta), Is.LessThan(.001f), "Subsequent left drag must use only the new cursor delta");
+            MouseAt(movedAt, true, true);
+            yield return null; yield return null;
+            yield return WaitForPourAngle(view, 0);
+            Assert.That(app.World.LiquidVolume(cup), Is.EqualTo(afterRelease).Within(.0001f), "A new right-down must use its own press point, not the previous gesture's origin");
+            Assert.That(app.View(cup.id).IsReceivingPour, Is.False);
+            Assert.That(app.LockedPourTargetId, Is.EqualTo(cup.id));
+            MouseAt(movedAt + Vector2.down * 90, true, true);
+            yield return WaitForPourAngle(view, app.maxPourAngle);
+            Assert.That(app.World.LiquidVolume(cup), Is.GreaterThan(afterRelease), "The new gesture must still pour after its fresh 90px displacement");
+        }
+
         [UnityTest] public IEnumerator KettleCanPourFromAboveABrewerAtTheSameStationHeight()
         {
             app.World.TakeAndInteract("s.beans","m.grinder",AreaId.Counter,0,0);app.World.Operate("m.grinder");app.World.Tick(12);

@@ -18,6 +18,15 @@ namespace Spotlight.FreeCafe
         [SerializeField] private Color cocoa = new Color(0.32f, 0.14f, 0.06f, 0.94f);
         [SerializeField] private Color glass = new Color(0.72f, 0.92f, 1f, 0.82f);
 
+        [Header("Color weights (volume × weight; do not affect inventory)")]
+        [SerializeField, Min(0.01f)] private float coffeeColorWeight = 3f;
+        [SerializeField, Min(0.01f)] private float milkColorWeight = 1f;
+        [SerializeField, Min(0.01f)] private float milkFoamColorWeight = 0.1f;
+        [SerializeField, Min(0.01f)] private float waterColorWeight = 1f;
+        [SerializeField, Min(0.01f)] private float matchaColorWeight = 1f;
+        [SerializeField, Min(0.01f)] private float cocoaColorWeight = 1f;
+        [SerializeField, Min(0.01f)] private float otherColorWeight = 1f;
+
         private Image image;
         private GravityLiquidImage liquid;
         private RectTransform rect;
@@ -35,8 +44,9 @@ namespace Spotlight.FreeCafe
         {
             Ensure();
             hasSnapshot = false;
-            targetFill = 0f;
-            liquid.FillAmount = 0f;
+            // Hiding a parent/workstation is presentation-only. Restore the last
+            // authoritative fill instead of flashing an empty glass until Refresh.
+            liquid.FillAmount = targetFill;
             liquid.ResetMotion();
             liquid.RefreshVisual();
         }
@@ -114,12 +124,22 @@ namespace Spotlight.FreeCafe
         {
             var composition = snapshot.composition;
             if (composition.TotalMl > 0f)
-                return (coffee * composition.coffeeMl + milk * composition.milkMl + water * composition.waterMl
-                    + matcha * composition.matchaMl + cocoa * composition.cocoaMl + water * composition.otherMl) / composition.TotalMl;
+            {
+                float coffeeAmount = composition.coffeeMl * Mathf.Max(.01f, coffeeColorWeight);
+                float milkAmount = (composition.milkMl - composition.milkFoamMl) * Mathf.Max(.01f, milkColorWeight)
+                    + composition.milkFoamMl * Mathf.Max(.01f, milkFoamColorWeight);
+                float waterAmount = composition.waterMl * Mathf.Max(.01f, waterColorWeight);
+                float matchaAmount = composition.matchaMl * Mathf.Max(.01f, matchaColorWeight);
+                float cocoaAmount = composition.cocoaMl * Mathf.Max(.01f, cocoaColorWeight);
+                float otherAmount = composition.otherMl * Mathf.Max(.01f, otherColorWeight);
+                float total = coffeeAmount + milkAmount + waterAmount + matchaAmount + cocoaAmount + otherAmount;
+                return (coffee * coffeeAmount + milk * milkAmount + water * waterAmount
+                    + matcha * matchaAmount + cocoa * cocoaAmount + water * otherAmount) / total;
+            }
             switch (snapshot.primaryIngredient)
             {
                 case "coffee": return coffee;
-                case "milk": case "hotmilk": case "cream": return milk;
+                case "milk": case "hotmilk": case "milkfoam": case "cream": return milk;
                 case "matcha.drink": return matcha;
                 case "cocoa.drink": return cocoa;
                 default: return water;

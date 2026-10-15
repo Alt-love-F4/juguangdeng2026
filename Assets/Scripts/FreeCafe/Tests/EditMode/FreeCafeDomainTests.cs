@@ -128,7 +128,7 @@ namespace Spotlight.FreeCafe.Tests
             int nextId = world.State.nextId;
             string beforePreview = JsonUtility.ToJson(world.State);
             Assert.That(world.IsReceiver(source), Is.True);
-            Assert.That(world.IsReceiver(world.Find("s.beans")), Is.False);
+            Assert.That(world.IsReceiver(world.Find("s.beans")), Is.True);
             Assert.That(world.Preview(cup.id, sourceId).success, Is.True);
             Assert.That(JsonUtility.ToJson(world.State), Is.EqualTo(beforePreview));
             int notifications = 0;

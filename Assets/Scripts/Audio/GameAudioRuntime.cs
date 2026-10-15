@@ -25,11 +25,21 @@ namespace Spotlight.Audio
             SceneManager.sceneUnloaded += SceneUnloaded;
         }
 
-        private void SceneLoaded(Scene scene, LoadSceneMode mode)
+        // With scene reload disabled, entering Play Mode need not raise sceneLoaded.
+        // Use the same application path; SetMusic and UIButtonAudio.Install are
+        // idempotent, so the normal sceneLoaded -> Start order does not restart BGM.
+        private void Start() => ApplyScene(SceneManager.GetActiveScene(), LoadSceneMode.Single);
+
+        private void SceneLoaded(Scene scene, LoadSceneMode mode) => ApplyScene(scene, mode);
+
+        private void ApplyScene(Scene scene, LoadSceneMode mode)
         {
-            foreach (GameObject root in scene.GetRootGameObjects()) UIButtonAudio.Install(root);
-            if (scene.name == "CoffeeShop") GameAudio.Music(AudioKeys.CafeMusic);
-            else if (scene.name == "Map" && mode == LoadSceneMode.Single) GameAudio.Music(AudioKeys.CityMusic);
+            if (scene.IsValid() && scene.isLoaded)
+            {
+                foreach (GameObject root in scene.GetRootGameObjects()) UIButtonAudio.Install(root);
+                if (scene.name == "CoffeeShop") GameAudio.Music(AudioKeys.CafeMusic);
+                else if (scene.name == "Map" && mode == LoadSceneMode.Single) GameAudio.Music(AudioKeys.CityMusic);
+            }
             RefreshListener();
         }
 

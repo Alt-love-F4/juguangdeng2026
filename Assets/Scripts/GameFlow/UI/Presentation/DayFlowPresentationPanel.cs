@@ -72,7 +72,7 @@ namespace Spotlight.GameFlow
                 throw new InvalidOperationException(GetType().Name + " has incomplete prefab bindings.");
             Stop();
             pauseOwner = PresentationPauseRegistry.Acquire(GetType().Name);
-            string cue = this is DateChangePanel ? Spotlight.Audio.AudioKeys.Date : this is CafeOpeningPanel ? Spotlight.Audio.AudioKeys.Open :
+            string cue = this is DateChangePanel ? Spotlight.Audio.AudioKeys.Date :
                 this is BusinessEndPanel ? Spotlight.Audio.AudioKeys.BusinessEnd : this is DayEndPanel ? Spotlight.Audio.AudioKeys.DayEnd : null;
             Spotlight.Audio.GameAudio.Play(cue, this);
             try

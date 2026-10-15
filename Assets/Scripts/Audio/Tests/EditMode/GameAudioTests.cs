@@ -45,6 +45,21 @@ namespace Spotlight.Audio.Tests
         }
 
         [Test]
+        public void ScopedButtonsPreserveSilenceAndDisabledOverrides()
+        {
+            var root = new GameObject("scope", typeof(UIAudioScope));
+            try
+            {
+                catalog.entries.Add(new AudioCue { key = "ui.common.confirm", enabled = false });
+                Assert.That(UIAudioScope.Resolve(catalog, root.transform, AudioKeys.Confirm), Is.EqualTo("ui.common.confirm"));
+                Assert.That(UIAudioScope.Resolve(catalog, root.transform, ""), Is.EqualTo(""));
+                Assert.That(UIAudioScope.Resolve(catalog, root.transform, AudioKeys.Select), Is.EqualTo(AudioKeys.Select));
+                Assert.That(UIAudioScope.Resolve(catalog, root.transform, AudioKeys.Grinder), Is.EqualTo(AudioKeys.Grinder));
+            }
+            finally { Object.DestroyImmediate(root); }
+        }
+
+        [Test]
         public void InitializingOrReadingDiagnosticsDoesNotCreateDefaultBackend()
         {
             GameAudio.Shutdown();

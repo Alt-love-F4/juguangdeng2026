@@ -40,6 +40,32 @@ namespace Spotlight.FreeCafe
             }
         }
 
+        private bool IsIngredientSource(EntitySpec spec) => spec != null && spec.Has(Capability.Source)
+            && Spec(spec.sourceItemId) != null && Spec(spec.sourceItemId).Has(Capability.Portion);
+
+        private ActionResult PreviewIngredientReturn(WorldEntity item, WorldEntity source, bool alreadyInStock = false)
+        {
+            var input = Spec(item.specId);
+            if (input == null || !input.Has(Capability.Movable) || !input.Has(Capability.Portion)
+                || item.specId != Spec(source.specId).sourceItemId)
+                return ActionResult.No("原料不匹配，请归还到对应原料堆");
+            if (item.quality != source.quality)
+                return ActionResult.No("原料品质不匹配");
+            if (item.contents.Count != 0 || item.portionPayload != null || item.task != null
+                || item.production != null && item.production.phase == ProductionPhase.Processing)
+                return ActionResult.No("仅可归还未使用的独立原料");
+            if (item.units <= 0 || !alreadyInStock && source.stock > int.MaxValue - item.units)
+                return ActionResult.No("原料数量无效或库存已达上限");
+            return ActionResult.Yes("归还原料：" + input.label);
+        }
+
+        // Preview has checked integer capacity and that no partial/processed payload will be lost.
+        private void ReturnIngredient(WorldEntity item, WorldEntity source)
+        {
+            State.entities.Remove(item);
+            source.stock += item.units;
+        }
+
         private bool IsCupSource(EntitySpec spec) => spec != null && spec.Has(Capability.Source)
             && Spec(spec.sourceItemId) != null && Spec(spec.sourceItemId).Has(Capability.Container);
 

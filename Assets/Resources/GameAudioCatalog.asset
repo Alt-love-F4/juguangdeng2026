@@ -16,82 +16,71 @@ MonoBehaviour:
   - key: ui.select
     description: "\u6309\u94AE\u60AC\u505C / \u4E3B\u52A8\u5BFC\u822A\u9009\u4E2D"
     enabled: 1
-    clip: {fileID: 8300000, guid: 7f819666b33c1074c9432feb5870b3d1, type: 3}
+    clip: {fileID: 8300000, guid: 39f77e72c5971264681f468a67b2604f, type: 3}
     resourcePath: 
     category: 0
     loop: 0
-    volume: 0.2
+    volume: 0
     pitch: 1
     fadeIn: 0
     fadeOut: 0.15
-    cooldown: 0.08
-    maxVoices: 3
-    provisional: 1
-    materialNote: "\u73B0\u6709\u7D20\u6750\u6309\u6587\u4EF6\u540D\u521D\u914D\uFF0C\u4E34\u65F6\u66FF\u4EE3\uFF1B\u8BF7\u8BD5\u542C\u786E\u8BA4\u6216\u66FF\u6362\u3002"
+    cooldown: 0.15
+    maxVoices: 2
+    provisional: 0
+    materialNote: Kenney RPG Audio / CC0 / https://kenney.nl/assets/rpg-audio ; period
+      cafe paper, book and leather foley; hover silent; listening approval pending
   - key: ui.confirm
     description: "\u6309\u94AE\u70B9\u51FB\u786E\u8BA4"
     enabled: 1
-    clip: {fileID: 8300000, guid: 25c0d0e64aeecaa46aac0283156cc15c, type: 3}
+    clip: {fileID: 8300000, guid: 371165ee3e420de4aa66edb0d39c1ff6, type: 3}
     resourcePath: 
     category: 0
     loop: 0
-    volume: 0.45
+    volume: 0.14
     pitch: 1
     fadeIn: 0
     fadeOut: 0.15
-    cooldown: 0.08
-    maxVoices: 3
+    cooldown: 0.12
+    maxVoices: 2
     provisional: 0
-    materialNote: "\u6309\u6587\u4EF6\u540D\u521D\u914D\uFF0C\u8BF7\u8BD5\u542C\u786E\u8BA4\u97F3\u91CF\u53CA\u5FAA\u73AF\u8854\u63A5\u3002"
+    materialNote: Kenney RPG Audio / CC0 / https://kenney.nl/assets/rpg-audio ; period
+      cafe paper, book and leather foley; hover silent; listening approval pending
   - key: ui.cancel
     description: "\u8FD4\u56DE / \u53D6\u6D88"
     enabled: 1
-    clip: {fileID: 8300000, guid: 0cc7e012ee452e847acb9272027082c3, type: 3}
+    clip: {fileID: 8300000, guid: c176d95f18154f3428c16f38fe5f7be9, type: 3}
     resourcePath: 
     category: 0
     loop: 0
-    volume: 0.3
+    volume: 0.12
     pitch: 1
     fadeIn: 0
     fadeOut: 0.15
-    cooldown: 0.08
-    maxVoices: 3
-    provisional: 1
-    materialNote: "\u73B0\u6709\u7D20\u6750\u6309\u6587\u4EF6\u540D\u521D\u914D\uFF0C\u4E34\u65F6\u66FF\u4EE3\uFF1B\u8BF7\u8BD5\u542C\u786E\u8BA4\u6216\u66FF\u6362\u3002"
+    cooldown: 0.12
+    maxVoices: 2
+    provisional: 0
+    materialNote: Kenney RPG Audio / CC0 / https://kenney.nl/assets/rpg-audio ; period
+      cafe paper, book and leather foley; hover silent; listening approval pending
   - key: ui.error
     description: "\u8FDD\u89C4\u64CD\u4F5C UI / \u884C\u52A8\u62D2\u7EDD"
     enabled: 1
-    clip: {fileID: 8300000, guid: d66aa921d39d0004b894e2ad8ee2b126, type: 3}
+    clip: {fileID: 8300000, guid: 3e647cd552f830a4282650eb714c84e0, type: 3}
     resourcePath: 
     category: 0
     loop: 0
-    volume: 0.5
+    volume: 0.12
     pitch: 1
     fadeIn: 0
     fadeOut: 0.15
-    cooldown: 0.08
-    maxVoices: 3
-    provisional: 1
-    materialNote: "\u73B0\u6709\u7D20\u6750\u6309\u6587\u4EF6\u540D\u521D\u914D\uFF0C\u4E34\u65F6\u66FF\u4EE3\uFF1B\u8BF7\u8BD5\u542C\u786E\u8BA4\u6216\u66FF\u6362\u3002"
+    cooldown: 0.12
+    maxVoices: 2
+    provisional: 0
+    materialNote: Kenney RPG Audio / CC0 / https://kenney.nl/assets/rpg-audio ; period
+      cafe paper, book and leather foley; hover silent; listening approval pending
   - key: ui.save_success
     description: "\u624B\u52A8\u4FDD\u5B58\u6210\u529F"
     enabled: 1
-    clip: {fileID: 8300000, guid: 25c0d0e64aeecaa46aac0283156cc15c, type: 3}
-    resourcePath: 
-    category: 0
-    loop: 0
-    volume: 0.4
-    pitch: 1
-    fadeIn: 0
-    fadeOut: 0.15
-    cooldown: 0.08
-    maxVoices: 3
-    provisional: 1
-    materialNote: "\u73B0\u6709\u7D20\u6750\u6309\u6587\u4EF6\u540D\u521D\u914D\uFF0C\u4E34\u65F6\u66FF\u4EE3\uFF1B\u8BF7\u8BD5\u542C\u786E\u8BA4\u6216\u66FF\u6362\u3002"
-  - key: ui.tab
-    description: "\u5207\u6362\u9875\u7B7E"
-    enabled: 1
-    clip: {fileID: 8300000, guid: 0cc7e012ee452e847acb9272027082c3, type: 3}
+    clip: {fileID: 8300000, guid: 3e647cd552f830a4282650eb714c84e0, type: 3}
     resourcePath: 
     category: 0
     loop: 0
@@ -99,70 +88,91 @@ MonoBehaviour:
     pitch: 1
     fadeIn: 0
     fadeOut: 0.15
-    cooldown: 0.08
-    maxVoices: 3
-    provisional: 1
-    materialNote: "\u73B0\u6709\u7D20\u6750\u6309\u6587\u4EF6\u540D\u521D\u914D\uFF0C\u4E34\u65F6\u66FF\u4EE3\uFF1B\u8BF7\u8BD5\u542C\u786E\u8BA4\u6216\u66FF\u6362\u3002"
+    cooldown: 0.12
+    maxVoices: 2
+    provisional: 0
+    materialNote: Kenney RPG Audio / CC0 / https://kenney.nl/assets/rpg-audio ; period
+      cafe paper, book and leather foley; hover silent; listening approval pending
+  - key: ui.tab
+    description: "\u5207\u6362\u9875\u7B7E"
+    enabled: 1
+    clip: {fileID: 8300000, guid: 3eff3512800ac0346a09b6af8c0fc677, type: 3}
+    resourcePath: 
+    category: 0
+    loop: 0
+    volume: 0.12
+    pitch: 1
+    fadeIn: 0
+    fadeOut: 0.15
+    cooldown: 0.12
+    maxVoices: 2
+    provisional: 0
+    materialNote: Kenney RPG Audio / CC0 / https://kenney.nl/assets/rpg-audio ; period
+      cafe paper, book and leather foley; hover silent; listening approval pending
   - key: ui.page
     description: "\u8BA2\u5355 / \u914D\u65B9\u7FFB\u9875"
     enabled: 1
-    clip: {fileID: 8300000, guid: edf7d19759a8f35419e0fe893b0c4bd3, type: 3}
+    clip: {fileID: 8300000, guid: 6fe15cbd400bf3444b5484130171ee13, type: 3}
     resourcePath: 
     category: 0
     loop: 0
-    volume: 0.35
+    volume: 0.18
     pitch: 1
     fadeIn: 0
     fadeOut: 0.15
-    cooldown: 0.08
-    maxVoices: 3
+    cooldown: 0.12
+    maxVoices: 2
     provisional: 0
-    materialNote: "\u6309\u6587\u4EF6\u540D\u521D\u914D\uFF0C\u8BF7\u8BD5\u542C\u786E\u8BA4\u97F3\u91CF\u53CA\u5FAA\u73AF\u8854\u63A5\u3002"
+    materialNote: Kenney RPG Audio / CC0 / https://kenney.nl/assets/rpg-audio ; period
+      cafe paper, book and leather foley; hover silent; listening approval pending
   - key: ui.volume_preview
     description: "\u8C03\u8282\u7ED3\u675F\u8BD5\u542C"
     enabled: 1
-    clip: {fileID: 8300000, guid: 25c0d0e64aeecaa46aac0283156cc15c, type: 3}
+    clip: {fileID: 8300000, guid: 371165ee3e420de4aa66edb0d39c1ff6, type: 3}
     resourcePath: 
     category: 0
     loop: 0
-    volume: 0.4
+    volume: 0.14
     pitch: 1
     fadeIn: 0
     fadeOut: 0.15
-    cooldown: 0.08
-    maxVoices: 3
+    cooldown: 0.12
+    maxVoices: 2
     provisional: 0
-    materialNote: "\u6309\u6587\u4EF6\u540D\u521D\u914D\uFF0C\u8BF7\u8BD5\u542C\u786E\u8BA4\u97F3\u91CF\u53CA\u5FAA\u73AF\u8854\u63A5\u3002"
+    materialNote: Kenney RPG Audio / CC0 / https://kenney.nl/assets/rpg-audio ; period
+      cafe paper, book and leather foley; hover silent; listening approval pending
   - key: ui.panel_open
     description: "\u6253\u5F00\u5F39\u7A97 / \u4FA7\u680F"
     enabled: 1
-    clip: {fileID: 0}
+    clip: {fileID: 8300000, guid: d20c47ef1aef41d4f8410de46ecd0e4b, type: 3}
     resourcePath: 
     category: 0
     loop: 0
-    volume: 0.5
+    volume: 0.16
     pitch: 1
     fadeIn: 0
     fadeOut: 0.15
-    cooldown: 0.08
-    maxVoices: 3
+    cooldown: 0.12
+    maxVoices: 2
     provisional: 0
-    materialNote: "\u5C1A\u7F3A\u5BF9\u5E94\u7D20\u6750\uFF0C\u6682\u65F6\u9759\u97F3\u3002"
+    materialNote: Kenney RPG Audio / CC0 / https://kenney.nl/assets/rpg-audio ; period
+      cafe paper, book and leather foley; hover silent; listening approval pending
   - key: ui.panel_close
     description: "\u5173\u95ED\u5F39\u7A97 / \u4FA7\u680F"
     enabled: 1
-    clip: {fileID: 0}
+    clip: {fileID: 8300000, guid: 3e647cd552f830a4282650eb714c84e0, type: 3}
     resourcePath: 
     category: 0
     loop: 0
-    volume: 0.5
+    volume: 0.14
     pitch: 1
     fadeIn: 0
     fadeOut: 0.15
-    cooldown: 0.08
-    maxVoices: 3
+    cooldown: 0.12
+    maxVoices: 2
     provisional: 0
-    materialNote: "\u5C1A\u7F3A\u5BF9\u5E94\u7D20\u6750\uFF0C\u6682\u65F6\u9759\u97F3\u3002"
+    materialNote: Kenney RPG Audio / CC0 / https://kenney.nl/assets/rpg-audio ; period
+      cafe paper, book and leather foley; hover silent; listening approval pending
   - key: map.action_complete
     description: "\u5730\u56FE\u884C\u52A8\u5B8C\u6210"
     enabled: 1
@@ -661,63 +671,68 @@ MonoBehaviour:
   - key: presentation.page_turn
     description: "\u9605\u8BFB\u7FFB\u9875"
     enabled: 1
-    clip: {fileID: 8300000, guid: edf7d19759a8f35419e0fe893b0c4bd3, type: 3}
+    clip: {fileID: 8300000, guid: 6fe15cbd400bf3444b5484130171ee13, type: 3}
     resourcePath: 
     category: 0
     loop: 0
-    volume: 0.35
+    volume: 0.18
     pitch: 1
     fadeIn: 0
     fadeOut: 0.15
-    cooldown: 0.08
-    maxVoices: 3
+    cooldown: 0.12
+    maxVoices: 2
     provisional: 0
-    materialNote: "\u6309\u6587\u4EF6\u540D\u521D\u914D\uFF0C\u8BF7\u8BD5\u542C\u786E\u8BA4\u97F3\u91CF\u53CA\u5FAA\u73AF\u8854\u63A5\u3002"
+    materialNote: Kenney RPG Audio / CC0 / https://kenney.nl/assets/rpg-audio ; period
+      cafe paper, book and leather foley; hover silent; listening approval pending
   - key: presentation.envelope_open
     description: "\u62C6\u5F00\u4FE1\u5C01"
     enabled: 1
-    clip: {fileID: 8300000, guid: edf7d19759a8f35419e0fe893b0c4bd3, type: 3}
+    clip: {fileID: 8300000, guid: 3eff3512800ac0346a09b6af8c0fc677, type: 3}
     resourcePath: 
     category: 1
     loop: 0
-    volume: 0.45
+    volume: 0.07
     pitch: 1
     fadeIn: 0
     fadeOut: 0.15
-    cooldown: 0.08
-    maxVoices: 3
+    cooldown: 0.12
+    maxVoices: 1
     provisional: 1
-    materialNote: "\u73B0\u6709\u7D20\u6750\u6309\u6587\u4EF6\u540D\u521D\u914D\uFF0C\u4E34\u65F6\u66FF\u4EE3\uFF1B\u8BF7\u8BD5\u542C\u786E\u8BA4\u6216\u66FF\u6362\u3002"
+    materialNote: Kenney RPG Audio / CC0 / https://kenney.nl/assets/rpg-audio ; short
+      bookFlip3 paper proxy for envelope, reduced gain; listening approval pending
   - key: presentation.signature
     description: "\u7B7E\u540D\u786E\u8BA4"
     enabled: 1
-    clip: {fileID: 8300000, guid: 25c0d0e64aeecaa46aac0283156cc15c, type: 3}
+    clip: {fileID: 8300000, guid: 58d339b010f33d846b9640a3e7fe665a, type: 3}
     resourcePath: 
     category: 1
     loop: 0
-    volume: 0.4
+    volume: 0.12
     pitch: 1
     fadeIn: 0
     fadeOut: 0.15
-    cooldown: 0.08
-    maxVoices: 3
+    cooldown: 0.12
+    maxVoices: 2
     provisional: 1
-    materialNote: "\u73B0\u6709\u7D20\u6750\u6309\u6587\u4EF6\u540D\u521D\u914D\uFF0C\u4E34\u65F6\u66FF\u4EE3\uFF1B\u8BF7\u8BD5\u542C\u786E\u8BA4\u6216\u66FF\u6362\u3002"
+    materialNote: Kenney RPG Audio / CC0 / https://kenney.nl/assets/rpg-audio ; period
+      cafe paper, book and leather foley; hover silent; listening approval pending;
+      material proxy, not literal pen/envelope recording
   - key: presentation.notice
     description: "\u65B0\u901A\u77E5\u5C55\u793A"
     enabled: 1
-    clip: {fileID: 8300000, guid: 0cc7e012ee452e847acb9272027082c3, type: 3}
+    clip: {fileID: 8300000, guid: 1daeb8abfeaf3ad4faed6253c7848709, type: 3}
     resourcePath: 
     category: 0
     loop: 0
-    volume: 0.3
+    volume: 0.16
     pitch: 1
     fadeIn: 0
     fadeOut: 0.15
-    cooldown: 0.08
-    maxVoices: 3
-    provisional: 1
-    materialNote: "\u73B0\u6709\u7D20\u6750\u6309\u6587\u4EF6\u540D\u521D\u914D\uFF0C\u4E34\u65F6\u66FF\u4EE3\uFF1B\u8BF7\u8BD5\u542C\u786E\u8BA4\u6216\u66FF\u6362\u3002"
+    cooldown: 0.12
+    maxVoices: 2
+    provisional: 0
+    materialNote: Kenney RPG Audio / CC0 / https://kenney.nl/assets/rpg-audio ; period
+      cafe paper, book and leather foley; hover silent; listening approval pending
   - key: "music.track.\u5DF4\u6D1B\u514B\u98CE\u683C"
     description: "\u5267\u60C5\u53EF\u5F15\u7528\u97F3\u4E50\uFF1A\u5DF4\u6D1B\u514B\u98CE\u683C"
     enabled: 1
@@ -913,6 +928,3526 @@ MonoBehaviour:
     maxVoices: 8
     provisional: 0
     materialNote: "\u6309\u6587\u4EF6\u540D\u521D\u914D\uFF0C\u8BF7\u8BD5\u542C\u786E\u8BA4\u97F3\u91CF\u53CA\u5FAA\u73AF\u8854\u63A5\u3002"
+  - key: ui.menu.select
+    description: "menu / \u6309\u94AE\u60AC\u505C / \u4E3B\u52A8\u5BFC\u822A\u9009\u4E2D"
+    enabled: 1
+    clip: {fileID: 8300000, guid: 39f77e72c5971264681f468a67b2604f, type: 3}
+    resourcePath: 
+    category: 0
+    loop: 0
+    volume: 0
+    pitch: 1
+    fadeIn: 0
+    fadeOut: 0.15
+    cooldown: 0.15
+    maxVoices: 2
+    provisional: 0
+    materialNote: Kenney RPG Audio / CC0 / https://kenney.nl/assets/rpg-audio ; period
+      cafe paper, book and leather foley; hover silent; listening approval pending
+  - key: ui.menu.confirm
+    description: "menu / \u6309\u94AE\u70B9\u51FB\u786E\u8BA4"
+    enabled: 1
+    clip: {fileID: 8300000, guid: 371165ee3e420de4aa66edb0d39c1ff6, type: 3}
+    resourcePath: 
+    category: 0
+    loop: 0
+    volume: 0.14
+    pitch: 1
+    fadeIn: 0
+    fadeOut: 0.15
+    cooldown: 0.12
+    maxVoices: 2
+    provisional: 0
+    materialNote: Kenney RPG Audio / CC0 / https://kenney.nl/assets/rpg-audio ; period
+      cafe paper, book and leather foley; hover silent; listening approval pending
+  - key: ui.menu.cancel
+    description: "menu / \u8FD4\u56DE / \u53D6\u6D88"
+    enabled: 1
+    clip: {fileID: 8300000, guid: c176d95f18154f3428c16f38fe5f7be9, type: 3}
+    resourcePath: 
+    category: 0
+    loop: 0
+    volume: 0.12
+    pitch: 1
+    fadeIn: 0
+    fadeOut: 0.15
+    cooldown: 0.12
+    maxVoices: 2
+    provisional: 0
+    materialNote: Kenney RPG Audio / CC0 / https://kenney.nl/assets/rpg-audio ; period
+      cafe paper, book and leather foley; hover silent; listening approval pending
+  - key: ui.menu.error
+    description: "menu / \u8FDD\u89C4\u64CD\u4F5C UI / \u884C\u52A8\u62D2\u7EDD"
+    enabled: 1
+    clip: {fileID: 8300000, guid: 3e647cd552f830a4282650eb714c84e0, type: 3}
+    resourcePath: 
+    category: 0
+    loop: 0
+    volume: 0.12
+    pitch: 1
+    fadeIn: 0
+    fadeOut: 0.15
+    cooldown: 0.12
+    maxVoices: 2
+    provisional: 0
+    materialNote: Kenney RPG Audio / CC0 / https://kenney.nl/assets/rpg-audio ; period
+      cafe paper, book and leather foley; hover silent; listening approval pending
+  - key: ui.menu.save_success
+    description: "menu / \u624B\u52A8\u4FDD\u5B58\u6210\u529F"
+    enabled: 1
+    clip: {fileID: 8300000, guid: 3e647cd552f830a4282650eb714c84e0, type: 3}
+    resourcePath: 
+    category: 0
+    loop: 0
+    volume: 0.2
+    pitch: 1
+    fadeIn: 0
+    fadeOut: 0.15
+    cooldown: 0.12
+    maxVoices: 2
+    provisional: 0
+    materialNote: Kenney RPG Audio / CC0 / https://kenney.nl/assets/rpg-audio ; period
+      cafe paper, book and leather foley; hover silent; listening approval pending
+  - key: ui.menu.tab
+    description: "menu / \u5207\u6362\u9875\u7B7E"
+    enabled: 1
+    clip: {fileID: 8300000, guid: 3eff3512800ac0346a09b6af8c0fc677, type: 3}
+    resourcePath: 
+    category: 0
+    loop: 0
+    volume: 0.12
+    pitch: 1
+    fadeIn: 0
+    fadeOut: 0.15
+    cooldown: 0.12
+    maxVoices: 2
+    provisional: 0
+    materialNote: Kenney RPG Audio / CC0 / https://kenney.nl/assets/rpg-audio ; period
+      cafe paper, book and leather foley; hover silent; listening approval pending
+  - key: ui.menu.page
+    description: "menu / \u8BA2\u5355 / \u914D\u65B9\u7FFB\u9875"
+    enabled: 1
+    clip: {fileID: 8300000, guid: 6fe15cbd400bf3444b5484130171ee13, type: 3}
+    resourcePath: 
+    category: 0
+    loop: 0
+    volume: 0.18
+    pitch: 1
+    fadeIn: 0
+    fadeOut: 0.15
+    cooldown: 0.12
+    maxVoices: 2
+    provisional: 0
+    materialNote: Kenney RPG Audio / CC0 / https://kenney.nl/assets/rpg-audio ; period
+      cafe paper, book and leather foley; hover silent; listening approval pending
+  - key: ui.menu.volume_preview
+    description: "menu / \u8C03\u8282\u7ED3\u675F\u8BD5\u542C"
+    enabled: 1
+    clip: {fileID: 8300000, guid: 371165ee3e420de4aa66edb0d39c1ff6, type: 3}
+    resourcePath: 
+    category: 0
+    loop: 0
+    volume: 0.14
+    pitch: 1
+    fadeIn: 0
+    fadeOut: 0.15
+    cooldown: 0.12
+    maxVoices: 2
+    provisional: 0
+    materialNote: Kenney RPG Audio / CC0 / https://kenney.nl/assets/rpg-audio ; period
+      cafe paper, book and leather foley; hover silent; listening approval pending
+  - key: ui.menu.panel_open
+    description: "menu / \u6253\u5F00\u5F39\u7A97 / \u4FA7\u680F"
+    enabled: 1
+    clip: {fileID: 8300000, guid: d20c47ef1aef41d4f8410de46ecd0e4b, type: 3}
+    resourcePath: 
+    category: 0
+    loop: 0
+    volume: 0.16
+    pitch: 1
+    fadeIn: 0
+    fadeOut: 0.15
+    cooldown: 0.12
+    maxVoices: 2
+    provisional: 0
+    materialNote: Kenney RPG Audio / CC0 / https://kenney.nl/assets/rpg-audio ; period
+      cafe paper, book and leather foley; hover silent; listening approval pending
+  - key: ui.menu.panel_close
+    description: "menu / \u5173\u95ED\u5F39\u7A97 / \u4FA7\u680F"
+    enabled: 1
+    clip: {fileID: 8300000, guid: 3e647cd552f830a4282650eb714c84e0, type: 3}
+    resourcePath: 
+    category: 0
+    loop: 0
+    volume: 0.14
+    pitch: 1
+    fadeIn: 0
+    fadeOut: 0.15
+    cooldown: 0.12
+    maxVoices: 2
+    provisional: 0
+    materialNote: Kenney RPG Audio / CC0 / https://kenney.nl/assets/rpg-audio ; period
+      cafe paper, book and leather foley; hover silent; listening approval pending
+  - key: ui.system.settings.select
+    description: "system.settings / \u6309\u94AE\u60AC\u505C / \u4E3B\u52A8\u5BFC\u822A\u9009\u4E2D"
+    enabled: 1
+    clip: {fileID: 8300000, guid: 39f77e72c5971264681f468a67b2604f, type: 3}
+    resourcePath: 
+    category: 0
+    loop: 0
+    volume: 0
+    pitch: 1
+    fadeIn: 0
+    fadeOut: 0.15
+    cooldown: 0.15
+    maxVoices: 2
+    provisional: 0
+    materialNote: Kenney RPG Audio / CC0 / https://kenney.nl/assets/rpg-audio ; period
+      cafe paper, book and leather foley; hover silent; listening approval pending
+  - key: ui.system.settings.confirm
+    description: "system.settings / \u6309\u94AE\u70B9\u51FB\u786E\u8BA4"
+    enabled: 1
+    clip: {fileID: 8300000, guid: 371165ee3e420de4aa66edb0d39c1ff6, type: 3}
+    resourcePath: 
+    category: 0
+    loop: 0
+    volume: 0.14
+    pitch: 1
+    fadeIn: 0
+    fadeOut: 0.15
+    cooldown: 0.12
+    maxVoices: 2
+    provisional: 0
+    materialNote: Kenney RPG Audio / CC0 / https://kenney.nl/assets/rpg-audio ; period
+      cafe paper, book and leather foley; hover silent; listening approval pending
+  - key: ui.system.settings.cancel
+    description: "system.settings / \u8FD4\u56DE / \u53D6\u6D88"
+    enabled: 1
+    clip: {fileID: 8300000, guid: c176d95f18154f3428c16f38fe5f7be9, type: 3}
+    resourcePath: 
+    category: 0
+    loop: 0
+    volume: 0.12
+    pitch: 1
+    fadeIn: 0
+    fadeOut: 0.15
+    cooldown: 0.12
+    maxVoices: 2
+    provisional: 0
+    materialNote: Kenney RPG Audio / CC0 / https://kenney.nl/assets/rpg-audio ; period
+      cafe paper, book and leather foley; hover silent; listening approval pending
+  - key: ui.system.settings.error
+    description: "system.settings / \u8FDD\u89C4\u64CD\u4F5C UI / \u884C\u52A8\u62D2\u7EDD"
+    enabled: 1
+    clip: {fileID: 8300000, guid: 3e647cd552f830a4282650eb714c84e0, type: 3}
+    resourcePath: 
+    category: 0
+    loop: 0
+    volume: 0.12
+    pitch: 1
+    fadeIn: 0
+    fadeOut: 0.15
+    cooldown: 0.12
+    maxVoices: 2
+    provisional: 0
+    materialNote: Kenney RPG Audio / CC0 / https://kenney.nl/assets/rpg-audio ; period
+      cafe paper, book and leather foley; hover silent; listening approval pending
+  - key: ui.system.settings.save_success
+    description: "system.settings / \u624B\u52A8\u4FDD\u5B58\u6210\u529F"
+    enabled: 1
+    clip: {fileID: 8300000, guid: 3e647cd552f830a4282650eb714c84e0, type: 3}
+    resourcePath: 
+    category: 0
+    loop: 0
+    volume: 0.2
+    pitch: 1
+    fadeIn: 0
+    fadeOut: 0.15
+    cooldown: 0.12
+    maxVoices: 2
+    provisional: 0
+    materialNote: Kenney RPG Audio / CC0 / https://kenney.nl/assets/rpg-audio ; period
+      cafe paper, book and leather foley; hover silent; listening approval pending
+  - key: ui.system.settings.tab
+    description: "system.settings / \u5207\u6362\u9875\u7B7E"
+    enabled: 1
+    clip: {fileID: 8300000, guid: 3eff3512800ac0346a09b6af8c0fc677, type: 3}
+    resourcePath: 
+    category: 0
+    loop: 0
+    volume: 0.12
+    pitch: 1
+    fadeIn: 0
+    fadeOut: 0.15
+    cooldown: 0.12
+    maxVoices: 2
+    provisional: 0
+    materialNote: Kenney RPG Audio / CC0 / https://kenney.nl/assets/rpg-audio ; period
+      cafe paper, book and leather foley; hover silent; listening approval pending
+  - key: ui.system.settings.page
+    description: "system.settings / \u8BA2\u5355 / \u914D\u65B9\u7FFB\u9875"
+    enabled: 1
+    clip: {fileID: 8300000, guid: 6fe15cbd400bf3444b5484130171ee13, type: 3}
+    resourcePath: 
+    category: 0
+    loop: 0
+    volume: 0.18
+    pitch: 1
+    fadeIn: 0
+    fadeOut: 0.15
+    cooldown: 0.12
+    maxVoices: 2
+    provisional: 0
+    materialNote: Kenney RPG Audio / CC0 / https://kenney.nl/assets/rpg-audio ; period
+      cafe paper, book and leather foley; hover silent; listening approval pending
+  - key: ui.system.settings.volume_preview
+    description: "system.settings / \u8C03\u8282\u7ED3\u675F\u8BD5\u542C"
+    enabled: 1
+    clip: {fileID: 8300000, guid: 371165ee3e420de4aa66edb0d39c1ff6, type: 3}
+    resourcePath: 
+    category: 0
+    loop: 0
+    volume: 0.14
+    pitch: 1
+    fadeIn: 0
+    fadeOut: 0.15
+    cooldown: 0.12
+    maxVoices: 2
+    provisional: 0
+    materialNote: Kenney RPG Audio / CC0 / https://kenney.nl/assets/rpg-audio ; period
+      cafe paper, book and leather foley; hover silent; listening approval pending
+  - key: ui.system.settings.panel_open
+    description: "system.settings / \u6253\u5F00\u5F39\u7A97 / \u4FA7\u680F"
+    enabled: 1
+    clip: {fileID: 8300000, guid: d20c47ef1aef41d4f8410de46ecd0e4b, type: 3}
+    resourcePath: 
+    category: 0
+    loop: 0
+    volume: 0.16
+    pitch: 1
+    fadeIn: 0
+    fadeOut: 0.15
+    cooldown: 0.12
+    maxVoices: 2
+    provisional: 0
+    materialNote: Kenney RPG Audio / CC0 / https://kenney.nl/assets/rpg-audio ; period
+      cafe paper, book and leather foley; hover silent; listening approval pending
+  - key: ui.system.settings.panel_close
+    description: "system.settings / \u5173\u95ED\u5F39\u7A97 / \u4FA7\u680F"
+    enabled: 1
+    clip: {fileID: 8300000, guid: 3e647cd552f830a4282650eb714c84e0, type: 3}
+    resourcePath: 
+    category: 0
+    loop: 0
+    volume: 0.14
+    pitch: 1
+    fadeIn: 0
+    fadeOut: 0.15
+    cooldown: 0.12
+    maxVoices: 2
+    provisional: 0
+    materialNote: Kenney RPG Audio / CC0 / https://kenney.nl/assets/rpg-audio ; period
+      cafe paper, book and leather foley; hover silent; listening approval pending
+  - key: ui.system.save.select
+    description: "system.save / \u6309\u94AE\u60AC\u505C / \u4E3B\u52A8\u5BFC\u822A\u9009\u4E2D"
+    enabled: 1
+    clip: {fileID: 8300000, guid: 39f77e72c5971264681f468a67b2604f, type: 3}
+    resourcePath: 
+    category: 0
+    loop: 0
+    volume: 0
+    pitch: 1
+    fadeIn: 0
+    fadeOut: 0.15
+    cooldown: 0.15
+    maxVoices: 2
+    provisional: 0
+    materialNote: Kenney RPG Audio / CC0 / https://kenney.nl/assets/rpg-audio ; period
+      cafe paper, book and leather foley; hover silent; listening approval pending
+  - key: ui.system.save.confirm
+    description: "system.save / \u6309\u94AE\u70B9\u51FB\u786E\u8BA4"
+    enabled: 1
+    clip: {fileID: 8300000, guid: 371165ee3e420de4aa66edb0d39c1ff6, type: 3}
+    resourcePath: 
+    category: 0
+    loop: 0
+    volume: 0.14
+    pitch: 1
+    fadeIn: 0
+    fadeOut: 0.15
+    cooldown: 0.12
+    maxVoices: 2
+    provisional: 0
+    materialNote: Kenney RPG Audio / CC0 / https://kenney.nl/assets/rpg-audio ; period
+      cafe paper, book and leather foley; hover silent; listening approval pending
+  - key: ui.system.save.cancel
+    description: "system.save / \u8FD4\u56DE / \u53D6\u6D88"
+    enabled: 1
+    clip: {fileID: 8300000, guid: c176d95f18154f3428c16f38fe5f7be9, type: 3}
+    resourcePath: 
+    category: 0
+    loop: 0
+    volume: 0.12
+    pitch: 1
+    fadeIn: 0
+    fadeOut: 0.15
+    cooldown: 0.12
+    maxVoices: 2
+    provisional: 0
+    materialNote: Kenney RPG Audio / CC0 / https://kenney.nl/assets/rpg-audio ; period
+      cafe paper, book and leather foley; hover silent; listening approval pending
+  - key: ui.system.save.error
+    description: "system.save / \u8FDD\u89C4\u64CD\u4F5C UI / \u884C\u52A8\u62D2\u7EDD"
+    enabled: 1
+    clip: {fileID: 8300000, guid: 3e647cd552f830a4282650eb714c84e0, type: 3}
+    resourcePath: 
+    category: 0
+    loop: 0
+    volume: 0.12
+    pitch: 1
+    fadeIn: 0
+    fadeOut: 0.15
+    cooldown: 0.12
+    maxVoices: 2
+    provisional: 0
+    materialNote: Kenney RPG Audio / CC0 / https://kenney.nl/assets/rpg-audio ; period
+      cafe paper, book and leather foley; hover silent; listening approval pending
+  - key: ui.system.save.save_success
+    description: "system.save / \u624B\u52A8\u4FDD\u5B58\u6210\u529F"
+    enabled: 1
+    clip: {fileID: 8300000, guid: 3e647cd552f830a4282650eb714c84e0, type: 3}
+    resourcePath: 
+    category: 0
+    loop: 0
+    volume: 0.2
+    pitch: 1
+    fadeIn: 0
+    fadeOut: 0.15
+    cooldown: 0.12
+    maxVoices: 2
+    provisional: 0
+    materialNote: Kenney RPG Audio / CC0 / https://kenney.nl/assets/rpg-audio ; period
+      cafe paper, book and leather foley; hover silent; listening approval pending
+  - key: ui.system.save.tab
+    description: "system.save / \u5207\u6362\u9875\u7B7E"
+    enabled: 1
+    clip: {fileID: 8300000, guid: 3eff3512800ac0346a09b6af8c0fc677, type: 3}
+    resourcePath: 
+    category: 0
+    loop: 0
+    volume: 0.12
+    pitch: 1
+    fadeIn: 0
+    fadeOut: 0.15
+    cooldown: 0.12
+    maxVoices: 2
+    provisional: 0
+    materialNote: Kenney RPG Audio / CC0 / https://kenney.nl/assets/rpg-audio ; period
+      cafe paper, book and leather foley; hover silent; listening approval pending
+  - key: ui.system.save.page
+    description: "system.save / \u8BA2\u5355 / \u914D\u65B9\u7FFB\u9875"
+    enabled: 1
+    clip: {fileID: 8300000, guid: 6fe15cbd400bf3444b5484130171ee13, type: 3}
+    resourcePath: 
+    category: 0
+    loop: 0
+    volume: 0.18
+    pitch: 1
+    fadeIn: 0
+    fadeOut: 0.15
+    cooldown: 0.12
+    maxVoices: 2
+    provisional: 0
+    materialNote: Kenney RPG Audio / CC0 / https://kenney.nl/assets/rpg-audio ; period
+      cafe paper, book and leather foley; hover silent; listening approval pending
+  - key: ui.system.save.volume_preview
+    description: "system.save / \u8C03\u8282\u7ED3\u675F\u8BD5\u542C"
+    enabled: 1
+    clip: {fileID: 8300000, guid: 371165ee3e420de4aa66edb0d39c1ff6, type: 3}
+    resourcePath: 
+    category: 0
+    loop: 0
+    volume: 0.14
+    pitch: 1
+    fadeIn: 0
+    fadeOut: 0.15
+    cooldown: 0.12
+    maxVoices: 2
+    provisional: 0
+    materialNote: Kenney RPG Audio / CC0 / https://kenney.nl/assets/rpg-audio ; period
+      cafe paper, book and leather foley; hover silent; listening approval pending
+  - key: ui.system.save.panel_open
+    description: "system.save / \u6253\u5F00\u5F39\u7A97 / \u4FA7\u680F"
+    enabled: 1
+    clip: {fileID: 8300000, guid: d20c47ef1aef41d4f8410de46ecd0e4b, type: 3}
+    resourcePath: 
+    category: 0
+    loop: 0
+    volume: 0.16
+    pitch: 1
+    fadeIn: 0
+    fadeOut: 0.15
+    cooldown: 0.12
+    maxVoices: 2
+    provisional: 0
+    materialNote: Kenney RPG Audio / CC0 / https://kenney.nl/assets/rpg-audio ; period
+      cafe paper, book and leather foley; hover silent; listening approval pending
+  - key: ui.system.save.panel_close
+    description: "system.save / \u5173\u95ED\u5F39\u7A97 / \u4FA7\u680F"
+    enabled: 1
+    clip: {fileID: 8300000, guid: 3e647cd552f830a4282650eb714c84e0, type: 3}
+    resourcePath: 
+    category: 0
+    loop: 0
+    volume: 0.14
+    pitch: 1
+    fadeIn: 0
+    fadeOut: 0.15
+    cooldown: 0.12
+    maxVoices: 2
+    provisional: 0
+    materialNote: Kenney RPG Audio / CC0 / https://kenney.nl/assets/rpg-audio ; period
+      cafe paper, book and leather foley; hover silent; listening approval pending
+  - key: ui.system.pause.select
+    description: "system.pause / \u6309\u94AE\u60AC\u505C / \u4E3B\u52A8\u5BFC\u822A\u9009\u4E2D"
+    enabled: 1
+    clip: {fileID: 8300000, guid: 39f77e72c5971264681f468a67b2604f, type: 3}
+    resourcePath: 
+    category: 0
+    loop: 0
+    volume: 0
+    pitch: 1
+    fadeIn: 0
+    fadeOut: 0.15
+    cooldown: 0.15
+    maxVoices: 2
+    provisional: 0
+    materialNote: Kenney RPG Audio / CC0 / https://kenney.nl/assets/rpg-audio ; period
+      cafe paper, book and leather foley; hover silent; listening approval pending
+  - key: ui.system.pause.confirm
+    description: "system.pause / \u6309\u94AE\u70B9\u51FB\u786E\u8BA4"
+    enabled: 1
+    clip: {fileID: 8300000, guid: 371165ee3e420de4aa66edb0d39c1ff6, type: 3}
+    resourcePath: 
+    category: 0
+    loop: 0
+    volume: 0.14
+    pitch: 1
+    fadeIn: 0
+    fadeOut: 0.15
+    cooldown: 0.12
+    maxVoices: 2
+    provisional: 0
+    materialNote: Kenney RPG Audio / CC0 / https://kenney.nl/assets/rpg-audio ; period
+      cafe paper, book and leather foley; hover silent; listening approval pending
+  - key: ui.system.pause.cancel
+    description: "system.pause / \u8FD4\u56DE / \u53D6\u6D88"
+    enabled: 1
+    clip: {fileID: 8300000, guid: c176d95f18154f3428c16f38fe5f7be9, type: 3}
+    resourcePath: 
+    category: 0
+    loop: 0
+    volume: 0.12
+    pitch: 1
+    fadeIn: 0
+    fadeOut: 0.15
+    cooldown: 0.12
+    maxVoices: 2
+    provisional: 0
+    materialNote: Kenney RPG Audio / CC0 / https://kenney.nl/assets/rpg-audio ; period
+      cafe paper, book and leather foley; hover silent; listening approval pending
+  - key: ui.system.pause.error
+    description: "system.pause / \u8FDD\u89C4\u64CD\u4F5C UI / \u884C\u52A8\u62D2\u7EDD"
+    enabled: 1
+    clip: {fileID: 8300000, guid: 3e647cd552f830a4282650eb714c84e0, type: 3}
+    resourcePath: 
+    category: 0
+    loop: 0
+    volume: 0.12
+    pitch: 1
+    fadeIn: 0
+    fadeOut: 0.15
+    cooldown: 0.12
+    maxVoices: 2
+    provisional: 0
+    materialNote: Kenney RPG Audio / CC0 / https://kenney.nl/assets/rpg-audio ; period
+      cafe paper, book and leather foley; hover silent; listening approval pending
+  - key: ui.system.pause.save_success
+    description: "system.pause / \u624B\u52A8\u4FDD\u5B58\u6210\u529F"
+    enabled: 1
+    clip: {fileID: 8300000, guid: 3e647cd552f830a4282650eb714c84e0, type: 3}
+    resourcePath: 
+    category: 0
+    loop: 0
+    volume: 0.2
+    pitch: 1
+    fadeIn: 0
+    fadeOut: 0.15
+    cooldown: 0.12
+    maxVoices: 2
+    provisional: 0
+    materialNote: Kenney RPG Audio / CC0 / https://kenney.nl/assets/rpg-audio ; period
+      cafe paper, book and leather foley; hover silent; listening approval pending
+  - key: ui.system.pause.tab
+    description: "system.pause / \u5207\u6362\u9875\u7B7E"
+    enabled: 1
+    clip: {fileID: 8300000, guid: 3eff3512800ac0346a09b6af8c0fc677, type: 3}
+    resourcePath: 
+    category: 0
+    loop: 0
+    volume: 0.12
+    pitch: 1
+    fadeIn: 0
+    fadeOut: 0.15
+    cooldown: 0.12
+    maxVoices: 2
+    provisional: 0
+    materialNote: Kenney RPG Audio / CC0 / https://kenney.nl/assets/rpg-audio ; period
+      cafe paper, book and leather foley; hover silent; listening approval pending
+  - key: ui.system.pause.page
+    description: "system.pause / \u8BA2\u5355 / \u914D\u65B9\u7FFB\u9875"
+    enabled: 1
+    clip: {fileID: 8300000, guid: 6fe15cbd400bf3444b5484130171ee13, type: 3}
+    resourcePath: 
+    category: 0
+    loop: 0
+    volume: 0.18
+    pitch: 1
+    fadeIn: 0
+    fadeOut: 0.15
+    cooldown: 0.12
+    maxVoices: 2
+    provisional: 0
+    materialNote: Kenney RPG Audio / CC0 / https://kenney.nl/assets/rpg-audio ; period
+      cafe paper, book and leather foley; hover silent; listening approval pending
+  - key: ui.system.pause.volume_preview
+    description: "system.pause / \u8C03\u8282\u7ED3\u675F\u8BD5\u542C"
+    enabled: 1
+    clip: {fileID: 8300000, guid: 371165ee3e420de4aa66edb0d39c1ff6, type: 3}
+    resourcePath: 
+    category: 0
+    loop: 0
+    volume: 0.14
+    pitch: 1
+    fadeIn: 0
+    fadeOut: 0.15
+    cooldown: 0.12
+    maxVoices: 2
+    provisional: 0
+    materialNote: Kenney RPG Audio / CC0 / https://kenney.nl/assets/rpg-audio ; period
+      cafe paper, book and leather foley; hover silent; listening approval pending
+  - key: ui.system.pause.panel_open
+    description: "system.pause / \u6253\u5F00\u5F39\u7A97 / \u4FA7\u680F"
+    enabled: 1
+    clip: {fileID: 8300000, guid: d20c47ef1aef41d4f8410de46ecd0e4b, type: 3}
+    resourcePath: 
+    category: 0
+    loop: 0
+    volume: 0.16
+    pitch: 1
+    fadeIn: 0
+    fadeOut: 0.15
+    cooldown: 0.12
+    maxVoices: 2
+    provisional: 0
+    materialNote: Kenney RPG Audio / CC0 / https://kenney.nl/assets/rpg-audio ; period
+      cafe paper, book and leather foley; hover silent; listening approval pending
+  - key: ui.system.pause.panel_close
+    description: "system.pause / \u5173\u95ED\u5F39\u7A97 / \u4FA7\u680F"
+    enabled: 1
+    clip: {fileID: 8300000, guid: 3e647cd552f830a4282650eb714c84e0, type: 3}
+    resourcePath: 
+    category: 0
+    loop: 0
+    volume: 0.14
+    pitch: 1
+    fadeIn: 0
+    fadeOut: 0.15
+    cooldown: 0.12
+    maxVoices: 2
+    provisional: 0
+    materialNote: Kenney RPG Audio / CC0 / https://kenney.nl/assets/rpg-audio ; period
+      cafe paper, book and leather foley; hover silent; listening approval pending
+  - key: ui.system.confirmation.select
+    description: "system.confirmation / \u6309\u94AE\u60AC\u505C / \u4E3B\u52A8\u5BFC\u822A\u9009\u4E2D"
+    enabled: 1
+    clip: {fileID: 8300000, guid: 39f77e72c5971264681f468a67b2604f, type: 3}
+    resourcePath: 
+    category: 0
+    loop: 0
+    volume: 0
+    pitch: 1
+    fadeIn: 0
+    fadeOut: 0.15
+    cooldown: 0.15
+    maxVoices: 2
+    provisional: 0
+    materialNote: Kenney RPG Audio / CC0 / https://kenney.nl/assets/rpg-audio ; period
+      cafe paper, book and leather foley; hover silent; listening approval pending
+  - key: ui.system.confirmation.confirm
+    description: "system.confirmation / \u6309\u94AE\u70B9\u51FB\u786E\u8BA4"
+    enabled: 1
+    clip: {fileID: 8300000, guid: 371165ee3e420de4aa66edb0d39c1ff6, type: 3}
+    resourcePath: 
+    category: 0
+    loop: 0
+    volume: 0.14
+    pitch: 1
+    fadeIn: 0
+    fadeOut: 0.15
+    cooldown: 0.12
+    maxVoices: 2
+    provisional: 0
+    materialNote: Kenney RPG Audio / CC0 / https://kenney.nl/assets/rpg-audio ; period
+      cafe paper, book and leather foley; hover silent; listening approval pending
+  - key: ui.system.confirmation.cancel
+    description: "system.confirmation / \u8FD4\u56DE / \u53D6\u6D88"
+    enabled: 1
+    clip: {fileID: 8300000, guid: c176d95f18154f3428c16f38fe5f7be9, type: 3}
+    resourcePath: 
+    category: 0
+    loop: 0
+    volume: 0.12
+    pitch: 1
+    fadeIn: 0
+    fadeOut: 0.15
+    cooldown: 0.12
+    maxVoices: 2
+    provisional: 0
+    materialNote: Kenney RPG Audio / CC0 / https://kenney.nl/assets/rpg-audio ; period
+      cafe paper, book and leather foley; hover silent; listening approval pending
+  - key: ui.system.confirmation.error
+    description: "system.confirmation / \u8FDD\u89C4\u64CD\u4F5C UI / \u884C\u52A8\u62D2\u7EDD"
+    enabled: 1
+    clip: {fileID: 8300000, guid: 3e647cd552f830a4282650eb714c84e0, type: 3}
+    resourcePath: 
+    category: 0
+    loop: 0
+    volume: 0.12
+    pitch: 1
+    fadeIn: 0
+    fadeOut: 0.15
+    cooldown: 0.12
+    maxVoices: 2
+    provisional: 0
+    materialNote: Kenney RPG Audio / CC0 / https://kenney.nl/assets/rpg-audio ; period
+      cafe paper, book and leather foley; hover silent; listening approval pending
+  - key: ui.system.confirmation.save_success
+    description: "system.confirmation / \u624B\u52A8\u4FDD\u5B58\u6210\u529F"
+    enabled: 1
+    clip: {fileID: 8300000, guid: 3e647cd552f830a4282650eb714c84e0, type: 3}
+    resourcePath: 
+    category: 0
+    loop: 0
+    volume: 0.2
+    pitch: 1
+    fadeIn: 0
+    fadeOut: 0.15
+    cooldown: 0.12
+    maxVoices: 2
+    provisional: 0
+    materialNote: Kenney RPG Audio / CC0 / https://kenney.nl/assets/rpg-audio ; period
+      cafe paper, book and leather foley; hover silent; listening approval pending
+  - key: ui.system.confirmation.tab
+    description: "system.confirmation / \u5207\u6362\u9875\u7B7E"
+    enabled: 1
+    clip: {fileID: 8300000, guid: 3eff3512800ac0346a09b6af8c0fc677, type: 3}
+    resourcePath: 
+    category: 0
+    loop: 0
+    volume: 0.12
+    pitch: 1
+    fadeIn: 0
+    fadeOut: 0.15
+    cooldown: 0.12
+    maxVoices: 2
+    provisional: 0
+    materialNote: Kenney RPG Audio / CC0 / https://kenney.nl/assets/rpg-audio ; period
+      cafe paper, book and leather foley; hover silent; listening approval pending
+  - key: ui.system.confirmation.page
+    description: "system.confirmation / \u8BA2\u5355 / \u914D\u65B9\u7FFB\u9875"
+    enabled: 1
+    clip: {fileID: 8300000, guid: 6fe15cbd400bf3444b5484130171ee13, type: 3}
+    resourcePath: 
+    category: 0
+    loop: 0
+    volume: 0.18
+    pitch: 1
+    fadeIn: 0
+    fadeOut: 0.15
+    cooldown: 0.12
+    maxVoices: 2
+    provisional: 0
+    materialNote: Kenney RPG Audio / CC0 / https://kenney.nl/assets/rpg-audio ; period
+      cafe paper, book and leather foley; hover silent; listening approval pending
+  - key: ui.system.confirmation.volume_preview
+    description: "system.confirmation / \u8C03\u8282\u7ED3\u675F\u8BD5\u542C"
+    enabled: 1
+    clip: {fileID: 8300000, guid: 371165ee3e420de4aa66edb0d39c1ff6, type: 3}
+    resourcePath: 
+    category: 0
+    loop: 0
+    volume: 0.14
+    pitch: 1
+    fadeIn: 0
+    fadeOut: 0.15
+    cooldown: 0.12
+    maxVoices: 2
+    provisional: 0
+    materialNote: Kenney RPG Audio / CC0 / https://kenney.nl/assets/rpg-audio ; period
+      cafe paper, book and leather foley; hover silent; listening approval pending
+  - key: ui.system.confirmation.panel_open
+    description: "system.confirmation / \u6253\u5F00\u5F39\u7A97 / \u4FA7\u680F"
+    enabled: 1
+    clip: {fileID: 8300000, guid: d20c47ef1aef41d4f8410de46ecd0e4b, type: 3}
+    resourcePath: 
+    category: 0
+    loop: 0
+    volume: 0.16
+    pitch: 1
+    fadeIn: 0
+    fadeOut: 0.15
+    cooldown: 0.12
+    maxVoices: 2
+    provisional: 0
+    materialNote: Kenney RPG Audio / CC0 / https://kenney.nl/assets/rpg-audio ; period
+      cafe paper, book and leather foley; hover silent; listening approval pending
+  - key: ui.system.confirmation.panel_close
+    description: "system.confirmation / \u5173\u95ED\u5F39\u7A97 / \u4FA7\u680F"
+    enabled: 1
+    clip: {fileID: 8300000, guid: 3e647cd552f830a4282650eb714c84e0, type: 3}
+    resourcePath: 
+    category: 0
+    loop: 0
+    volume: 0.14
+    pitch: 1
+    fadeIn: 0
+    fadeOut: 0.15
+    cooldown: 0.12
+    maxVoices: 2
+    provisional: 0
+    materialNote: Kenney RPG Audio / CC0 / https://kenney.nl/assets/rpg-audio ; period
+      cafe paper, book and leather foley; hover silent; listening approval pending
+  - key: ui.system.result.select
+    description: "system.result / \u6309\u94AE\u60AC\u505C / \u4E3B\u52A8\u5BFC\u822A\u9009\u4E2D"
+    enabled: 1
+    clip: {fileID: 8300000, guid: 39f77e72c5971264681f468a67b2604f, type: 3}
+    resourcePath: 
+    category: 0
+    loop: 0
+    volume: 0
+    pitch: 1
+    fadeIn: 0
+    fadeOut: 0.15
+    cooldown: 0.15
+    maxVoices: 2
+    provisional: 0
+    materialNote: Kenney RPG Audio / CC0 / https://kenney.nl/assets/rpg-audio ; period
+      cafe paper, book and leather foley; hover silent; listening approval pending
+  - key: ui.system.result.confirm
+    description: "system.result / \u6309\u94AE\u70B9\u51FB\u786E\u8BA4"
+    enabled: 1
+    clip: {fileID: 8300000, guid: 371165ee3e420de4aa66edb0d39c1ff6, type: 3}
+    resourcePath: 
+    category: 0
+    loop: 0
+    volume: 0.14
+    pitch: 1
+    fadeIn: 0
+    fadeOut: 0.15
+    cooldown: 0.12
+    maxVoices: 2
+    provisional: 0
+    materialNote: Kenney RPG Audio / CC0 / https://kenney.nl/assets/rpg-audio ; period
+      cafe paper, book and leather foley; hover silent; listening approval pending
+  - key: ui.system.result.cancel
+    description: "system.result / \u8FD4\u56DE / \u53D6\u6D88"
+    enabled: 1
+    clip: {fileID: 8300000, guid: c176d95f18154f3428c16f38fe5f7be9, type: 3}
+    resourcePath: 
+    category: 0
+    loop: 0
+    volume: 0.12
+    pitch: 1
+    fadeIn: 0
+    fadeOut: 0.15
+    cooldown: 0.12
+    maxVoices: 2
+    provisional: 0
+    materialNote: Kenney RPG Audio / CC0 / https://kenney.nl/assets/rpg-audio ; period
+      cafe paper, book and leather foley; hover silent; listening approval pending
+  - key: ui.system.result.error
+    description: "system.result / \u8FDD\u89C4\u64CD\u4F5C UI / \u884C\u52A8\u62D2\u7EDD"
+    enabled: 1
+    clip: {fileID: 8300000, guid: 3e647cd552f830a4282650eb714c84e0, type: 3}
+    resourcePath: 
+    category: 0
+    loop: 0
+    volume: 0.12
+    pitch: 1
+    fadeIn: 0
+    fadeOut: 0.15
+    cooldown: 0.12
+    maxVoices: 2
+    provisional: 0
+    materialNote: Kenney RPG Audio / CC0 / https://kenney.nl/assets/rpg-audio ; period
+      cafe paper, book and leather foley; hover silent; listening approval pending
+  - key: ui.system.result.save_success
+    description: "system.result / \u624B\u52A8\u4FDD\u5B58\u6210\u529F"
+    enabled: 1
+    clip: {fileID: 8300000, guid: 3e647cd552f830a4282650eb714c84e0, type: 3}
+    resourcePath: 
+    category: 0
+    loop: 0
+    volume: 0.2
+    pitch: 1
+    fadeIn: 0
+    fadeOut: 0.15
+    cooldown: 0.12
+    maxVoices: 2
+    provisional: 0
+    materialNote: Kenney RPG Audio / CC0 / https://kenney.nl/assets/rpg-audio ; period
+      cafe paper, book and leather foley; hover silent; listening approval pending
+  - key: ui.system.result.tab
+    description: "system.result / \u5207\u6362\u9875\u7B7E"
+    enabled: 1
+    clip: {fileID: 8300000, guid: 3eff3512800ac0346a09b6af8c0fc677, type: 3}
+    resourcePath: 
+    category: 0
+    loop: 0
+    volume: 0.12
+    pitch: 1
+    fadeIn: 0
+    fadeOut: 0.15
+    cooldown: 0.12
+    maxVoices: 2
+    provisional: 0
+    materialNote: Kenney RPG Audio / CC0 / https://kenney.nl/assets/rpg-audio ; period
+      cafe paper, book and leather foley; hover silent; listening approval pending
+  - key: ui.system.result.page
+    description: "system.result / \u8BA2\u5355 / \u914D\u65B9\u7FFB\u9875"
+    enabled: 1
+    clip: {fileID: 8300000, guid: 6fe15cbd400bf3444b5484130171ee13, type: 3}
+    resourcePath: 
+    category: 0
+    loop: 0
+    volume: 0.18
+    pitch: 1
+    fadeIn: 0
+    fadeOut: 0.15
+    cooldown: 0.12
+    maxVoices: 2
+    provisional: 0
+    materialNote: Kenney RPG Audio / CC0 / https://kenney.nl/assets/rpg-audio ; period
+      cafe paper, book and leather foley; hover silent; listening approval pending
+  - key: ui.system.result.volume_preview
+    description: "system.result / \u8C03\u8282\u7ED3\u675F\u8BD5\u542C"
+    enabled: 1
+    clip: {fileID: 8300000, guid: 371165ee3e420de4aa66edb0d39c1ff6, type: 3}
+    resourcePath: 
+    category: 0
+    loop: 0
+    volume: 0.14
+    pitch: 1
+    fadeIn: 0
+    fadeOut: 0.15
+    cooldown: 0.12
+    maxVoices: 2
+    provisional: 0
+    materialNote: Kenney RPG Audio / CC0 / https://kenney.nl/assets/rpg-audio ; period
+      cafe paper, book and leather foley; hover silent; listening approval pending
+  - key: ui.system.result.panel_open
+    description: "system.result / \u6253\u5F00\u5F39\u7A97 / \u4FA7\u680F"
+    enabled: 1
+    clip: {fileID: 8300000, guid: d20c47ef1aef41d4f8410de46ecd0e4b, type: 3}
+    resourcePath: 
+    category: 0
+    loop: 0
+    volume: 0.16
+    pitch: 1
+    fadeIn: 0
+    fadeOut: 0.15
+    cooldown: 0.12
+    maxVoices: 2
+    provisional: 0
+    materialNote: Kenney RPG Audio / CC0 / https://kenney.nl/assets/rpg-audio ; period
+      cafe paper, book and leather foley; hover silent; listening approval pending
+  - key: ui.system.result.panel_close
+    description: "system.result / \u5173\u95ED\u5F39\u7A97 / \u4FA7\u680F"
+    enabled: 1
+    clip: {fileID: 8300000, guid: 3e647cd552f830a4282650eb714c84e0, type: 3}
+    resourcePath: 
+    category: 0
+    loop: 0
+    volume: 0.14
+    pitch: 1
+    fadeIn: 0
+    fadeOut: 0.15
+    cooldown: 0.12
+    maxVoices: 2
+    provisional: 0
+    materialNote: Kenney RPG Audio / CC0 / https://kenney.nl/assets/rpg-audio ; period
+      cafe paper, book and leather foley; hover silent; listening approval pending
+  - key: ui.details.select
+    description: "details / \u6309\u94AE\u60AC\u505C / \u4E3B\u52A8\u5BFC\u822A\u9009\u4E2D"
+    enabled: 1
+    clip: {fileID: 8300000, guid: 39f77e72c5971264681f468a67b2604f, type: 3}
+    resourcePath: 
+    category: 0
+    loop: 0
+    volume: 0
+    pitch: 1
+    fadeIn: 0
+    fadeOut: 0.15
+    cooldown: 0.15
+    maxVoices: 2
+    provisional: 0
+    materialNote: Kenney RPG Audio / CC0 / https://kenney.nl/assets/rpg-audio ; period
+      cafe paper, book and leather foley; hover silent; listening approval pending
+  - key: ui.details.confirm
+    description: "details / \u6309\u94AE\u70B9\u51FB\u786E\u8BA4"
+    enabled: 1
+    clip: {fileID: 8300000, guid: 371165ee3e420de4aa66edb0d39c1ff6, type: 3}
+    resourcePath: 
+    category: 0
+    loop: 0
+    volume: 0.14
+    pitch: 1
+    fadeIn: 0
+    fadeOut: 0.15
+    cooldown: 0.12
+    maxVoices: 2
+    provisional: 0
+    materialNote: Kenney RPG Audio / CC0 / https://kenney.nl/assets/rpg-audio ; period
+      cafe paper, book and leather foley; hover silent; listening approval pending
+  - key: ui.details.cancel
+    description: "details / \u8FD4\u56DE / \u53D6\u6D88"
+    enabled: 1
+    clip: {fileID: 8300000, guid: c176d95f18154f3428c16f38fe5f7be9, type: 3}
+    resourcePath: 
+    category: 0
+    loop: 0
+    volume: 0.12
+    pitch: 1
+    fadeIn: 0
+    fadeOut: 0.15
+    cooldown: 0.12
+    maxVoices: 2
+    provisional: 0
+    materialNote: Kenney RPG Audio / CC0 / https://kenney.nl/assets/rpg-audio ; period
+      cafe paper, book and leather foley; hover silent; listening approval pending
+  - key: ui.details.error
+    description: "details / \u8FDD\u89C4\u64CD\u4F5C UI / \u884C\u52A8\u62D2\u7EDD"
+    enabled: 1
+    clip: {fileID: 8300000, guid: 3e647cd552f830a4282650eb714c84e0, type: 3}
+    resourcePath: 
+    category: 0
+    loop: 0
+    volume: 0.12
+    pitch: 1
+    fadeIn: 0
+    fadeOut: 0.15
+    cooldown: 0.12
+    maxVoices: 2
+    provisional: 0
+    materialNote: Kenney RPG Audio / CC0 / https://kenney.nl/assets/rpg-audio ; period
+      cafe paper, book and leather foley; hover silent; listening approval pending
+  - key: ui.details.save_success
+    description: "details / \u624B\u52A8\u4FDD\u5B58\u6210\u529F"
+    enabled: 1
+    clip: {fileID: 8300000, guid: 3e647cd552f830a4282650eb714c84e0, type: 3}
+    resourcePath: 
+    category: 0
+    loop: 0
+    volume: 0.2
+    pitch: 1
+    fadeIn: 0
+    fadeOut: 0.15
+    cooldown: 0.12
+    maxVoices: 2
+    provisional: 0
+    materialNote: Kenney RPG Audio / CC0 / https://kenney.nl/assets/rpg-audio ; period
+      cafe paper, book and leather foley; hover silent; listening approval pending
+  - key: ui.details.tab
+    description: "details / \u5207\u6362\u9875\u7B7E"
+    enabled: 1
+    clip: {fileID: 8300000, guid: 3eff3512800ac0346a09b6af8c0fc677, type: 3}
+    resourcePath: 
+    category: 0
+    loop: 0
+    volume: 0.12
+    pitch: 1
+    fadeIn: 0
+    fadeOut: 0.15
+    cooldown: 0.12
+    maxVoices: 2
+    provisional: 0
+    materialNote: Kenney RPG Audio / CC0 / https://kenney.nl/assets/rpg-audio ; period
+      cafe paper, book and leather foley; hover silent; listening approval pending
+  - key: ui.details.page
+    description: "details / \u8BA2\u5355 / \u914D\u65B9\u7FFB\u9875"
+    enabled: 1
+    clip: {fileID: 8300000, guid: 6fe15cbd400bf3444b5484130171ee13, type: 3}
+    resourcePath: 
+    category: 0
+    loop: 0
+    volume: 0.18
+    pitch: 1
+    fadeIn: 0
+    fadeOut: 0.15
+    cooldown: 0.12
+    maxVoices: 2
+    provisional: 0
+    materialNote: Kenney RPG Audio / CC0 / https://kenney.nl/assets/rpg-audio ; period
+      cafe paper, book and leather foley; hover silent; listening approval pending
+  - key: ui.details.volume_preview
+    description: "details / \u8C03\u8282\u7ED3\u675F\u8BD5\u542C"
+    enabled: 1
+    clip: {fileID: 8300000, guid: 371165ee3e420de4aa66edb0d39c1ff6, type: 3}
+    resourcePath: 
+    category: 0
+    loop: 0
+    volume: 0.14
+    pitch: 1
+    fadeIn: 0
+    fadeOut: 0.15
+    cooldown: 0.12
+    maxVoices: 2
+    provisional: 0
+    materialNote: Kenney RPG Audio / CC0 / https://kenney.nl/assets/rpg-audio ; period
+      cafe paper, book and leather foley; hover silent; listening approval pending
+  - key: ui.details.panel_open
+    description: "details / \u6253\u5F00\u5F39\u7A97 / \u4FA7\u680F"
+    enabled: 1
+    clip: {fileID: 8300000, guid: d20c47ef1aef41d4f8410de46ecd0e4b, type: 3}
+    resourcePath: 
+    category: 0
+    loop: 0
+    volume: 0.16
+    pitch: 1
+    fadeIn: 0
+    fadeOut: 0.15
+    cooldown: 0.12
+    maxVoices: 2
+    provisional: 0
+    materialNote: Kenney RPG Audio / CC0 / https://kenney.nl/assets/rpg-audio ; period
+      cafe paper, book and leather foley; hover silent; listening approval pending
+  - key: ui.details.panel_close
+    description: "details / \u5173\u95ED\u5F39\u7A97 / \u4FA7\u680F"
+    enabled: 1
+    clip: {fileID: 8300000, guid: 3e647cd552f830a4282650eb714c84e0, type: 3}
+    resourcePath: 
+    category: 0
+    loop: 0
+    volume: 0.14
+    pitch: 1
+    fadeIn: 0
+    fadeOut: 0.15
+    cooldown: 0.12
+    maxVoices: 2
+    provisional: 0
+    materialNote: Kenney RPG Audio / CC0 / https://kenney.nl/assets/rpg-audio ; period
+      cafe paper, book and leather foley; hover silent; listening approval pending
+  - key: ui.details.inventory.select
+    description: "details.inventory / \u6309\u94AE\u60AC\u505C / \u4E3B\u52A8\u5BFC\u822A\u9009\u4E2D"
+    enabled: 1
+    clip: {fileID: 8300000, guid: 39f77e72c5971264681f468a67b2604f, type: 3}
+    resourcePath: 
+    category: 0
+    loop: 0
+    volume: 0
+    pitch: 1
+    fadeIn: 0
+    fadeOut: 0.15
+    cooldown: 0.15
+    maxVoices: 2
+    provisional: 0
+    materialNote: Kenney RPG Audio / CC0 / https://kenney.nl/assets/rpg-audio ; period
+      cafe paper, book and leather foley; hover silent; listening approval pending
+  - key: ui.details.inventory.confirm
+    description: "details.inventory / \u6309\u94AE\u70B9\u51FB\u786E\u8BA4"
+    enabled: 1
+    clip: {fileID: 8300000, guid: 371165ee3e420de4aa66edb0d39c1ff6, type: 3}
+    resourcePath: 
+    category: 0
+    loop: 0
+    volume: 0.14
+    pitch: 1
+    fadeIn: 0
+    fadeOut: 0.15
+    cooldown: 0.12
+    maxVoices: 2
+    provisional: 0
+    materialNote: Kenney RPG Audio / CC0 / https://kenney.nl/assets/rpg-audio ; period
+      cafe paper, book and leather foley; hover silent; listening approval pending
+  - key: ui.details.inventory.cancel
+    description: "details.inventory / \u8FD4\u56DE / \u53D6\u6D88"
+    enabled: 1
+    clip: {fileID: 8300000, guid: c176d95f18154f3428c16f38fe5f7be9, type: 3}
+    resourcePath: 
+    category: 0
+    loop: 0
+    volume: 0.12
+    pitch: 1
+    fadeIn: 0
+    fadeOut: 0.15
+    cooldown: 0.12
+    maxVoices: 2
+    provisional: 0
+    materialNote: Kenney RPG Audio / CC0 / https://kenney.nl/assets/rpg-audio ; period
+      cafe paper, book and leather foley; hover silent; listening approval pending
+  - key: ui.details.inventory.error
+    description: "details.inventory / \u8FDD\u89C4\u64CD\u4F5C UI / \u884C\u52A8\u62D2\u7EDD"
+    enabled: 1
+    clip: {fileID: 8300000, guid: 3e647cd552f830a4282650eb714c84e0, type: 3}
+    resourcePath: 
+    category: 0
+    loop: 0
+    volume: 0.12
+    pitch: 1
+    fadeIn: 0
+    fadeOut: 0.15
+    cooldown: 0.12
+    maxVoices: 2
+    provisional: 0
+    materialNote: Kenney RPG Audio / CC0 / https://kenney.nl/assets/rpg-audio ; period
+      cafe paper, book and leather foley; hover silent; listening approval pending
+  - key: ui.details.inventory.save_success
+    description: "details.inventory / \u624B\u52A8\u4FDD\u5B58\u6210\u529F"
+    enabled: 1
+    clip: {fileID: 8300000, guid: 3e647cd552f830a4282650eb714c84e0, type: 3}
+    resourcePath: 
+    category: 0
+    loop: 0
+    volume: 0.2
+    pitch: 1
+    fadeIn: 0
+    fadeOut: 0.15
+    cooldown: 0.12
+    maxVoices: 2
+    provisional: 0
+    materialNote: Kenney RPG Audio / CC0 / https://kenney.nl/assets/rpg-audio ; period
+      cafe paper, book and leather foley; hover silent; listening approval pending
+  - key: ui.details.inventory.tab
+    description: "details.inventory / \u5207\u6362\u9875\u7B7E"
+    enabled: 1
+    clip: {fileID: 8300000, guid: 3eff3512800ac0346a09b6af8c0fc677, type: 3}
+    resourcePath: 
+    category: 0
+    loop: 0
+    volume: 0.12
+    pitch: 1
+    fadeIn: 0
+    fadeOut: 0.15
+    cooldown: 0.12
+    maxVoices: 2
+    provisional: 0
+    materialNote: Kenney RPG Audio / CC0 / https://kenney.nl/assets/rpg-audio ; period
+      cafe paper, book and leather foley; hover silent; listening approval pending
+  - key: ui.details.inventory.page
+    description: "details.inventory / \u8BA2\u5355 / \u914D\u65B9\u7FFB\u9875"
+    enabled: 1
+    clip: {fileID: 8300000, guid: 6fe15cbd400bf3444b5484130171ee13, type: 3}
+    resourcePath: 
+    category: 0
+    loop: 0
+    volume: 0.18
+    pitch: 1
+    fadeIn: 0
+    fadeOut: 0.15
+    cooldown: 0.12
+    maxVoices: 2
+    provisional: 0
+    materialNote: Kenney RPG Audio / CC0 / https://kenney.nl/assets/rpg-audio ; period
+      cafe paper, book and leather foley; hover silent; listening approval pending
+  - key: ui.details.inventory.volume_preview
+    description: "details.inventory / \u8C03\u8282\u7ED3\u675F\u8BD5\u542C"
+    enabled: 1
+    clip: {fileID: 8300000, guid: 371165ee3e420de4aa66edb0d39c1ff6, type: 3}
+    resourcePath: 
+    category: 0
+    loop: 0
+    volume: 0.14
+    pitch: 1
+    fadeIn: 0
+    fadeOut: 0.15
+    cooldown: 0.12
+    maxVoices: 2
+    provisional: 0
+    materialNote: Kenney RPG Audio / CC0 / https://kenney.nl/assets/rpg-audio ; period
+      cafe paper, book and leather foley; hover silent; listening approval pending
+  - key: ui.details.inventory.panel_open
+    description: "details.inventory / \u6253\u5F00\u5F39\u7A97 / \u4FA7\u680F"
+    enabled: 1
+    clip: {fileID: 8300000, guid: d20c47ef1aef41d4f8410de46ecd0e4b, type: 3}
+    resourcePath: 
+    category: 0
+    loop: 0
+    volume: 0.16
+    pitch: 1
+    fadeIn: 0
+    fadeOut: 0.15
+    cooldown: 0.12
+    maxVoices: 2
+    provisional: 0
+    materialNote: Kenney RPG Audio / CC0 / https://kenney.nl/assets/rpg-audio ; period
+      cafe paper, book and leather foley; hover silent; listening approval pending
+  - key: ui.details.inventory.panel_close
+    description: "details.inventory / \u5173\u95ED\u5F39\u7A97 / \u4FA7\u680F"
+    enabled: 1
+    clip: {fileID: 8300000, guid: 3e647cd552f830a4282650eb714c84e0, type: 3}
+    resourcePath: 
+    category: 0
+    loop: 0
+    volume: 0.14
+    pitch: 1
+    fadeIn: 0
+    fadeOut: 0.15
+    cooldown: 0.12
+    maxVoices: 2
+    provisional: 0
+    materialNote: Kenney RPG Audio / CC0 / https://kenney.nl/assets/rpg-audio ; period
+      cafe paper, book and leather foley; hover silent; listening approval pending
+  - key: ui.details.character.select
+    description: "details.character / \u6309\u94AE\u60AC\u505C / \u4E3B\u52A8\u5BFC\u822A\u9009\u4E2D"
+    enabled: 1
+    clip: {fileID: 8300000, guid: 39f77e72c5971264681f468a67b2604f, type: 3}
+    resourcePath: 
+    category: 0
+    loop: 0
+    volume: 0
+    pitch: 1
+    fadeIn: 0
+    fadeOut: 0.15
+    cooldown: 0.15
+    maxVoices: 2
+    provisional: 0
+    materialNote: Kenney RPG Audio / CC0 / https://kenney.nl/assets/rpg-audio ; period
+      cafe paper, book and leather foley; hover silent; listening approval pending
+  - key: ui.details.character.confirm
+    description: "details.character / \u6309\u94AE\u70B9\u51FB\u786E\u8BA4"
+    enabled: 1
+    clip: {fileID: 8300000, guid: 371165ee3e420de4aa66edb0d39c1ff6, type: 3}
+    resourcePath: 
+    category: 0
+    loop: 0
+    volume: 0.14
+    pitch: 1
+    fadeIn: 0
+    fadeOut: 0.15
+    cooldown: 0.12
+    maxVoices: 2
+    provisional: 0
+    materialNote: Kenney RPG Audio / CC0 / https://kenney.nl/assets/rpg-audio ; period
+      cafe paper, book and leather foley; hover silent; listening approval pending
+  - key: ui.details.character.cancel
+    description: "details.character / \u8FD4\u56DE / \u53D6\u6D88"
+    enabled: 1
+    clip: {fileID: 8300000, guid: c176d95f18154f3428c16f38fe5f7be9, type: 3}
+    resourcePath: 
+    category: 0
+    loop: 0
+    volume: 0.12
+    pitch: 1
+    fadeIn: 0
+    fadeOut: 0.15
+    cooldown: 0.12
+    maxVoices: 2
+    provisional: 0
+    materialNote: Kenney RPG Audio / CC0 / https://kenney.nl/assets/rpg-audio ; period
+      cafe paper, book and leather foley; hover silent; listening approval pending
+  - key: ui.details.character.error
+    description: "details.character / \u8FDD\u89C4\u64CD\u4F5C UI / \u884C\u52A8\u62D2\u7EDD"
+    enabled: 1
+    clip: {fileID: 8300000, guid: 3e647cd552f830a4282650eb714c84e0, type: 3}
+    resourcePath: 
+    category: 0
+    loop: 0
+    volume: 0.12
+    pitch: 1
+    fadeIn: 0
+    fadeOut: 0.15
+    cooldown: 0.12
+    maxVoices: 2
+    provisional: 0
+    materialNote: Kenney RPG Audio / CC0 / https://kenney.nl/assets/rpg-audio ; period
+      cafe paper, book and leather foley; hover silent; listening approval pending
+  - key: ui.details.character.save_success
+    description: "details.character / \u624B\u52A8\u4FDD\u5B58\u6210\u529F"
+    enabled: 1
+    clip: {fileID: 8300000, guid: 3e647cd552f830a4282650eb714c84e0, type: 3}
+    resourcePath: 
+    category: 0
+    loop: 0
+    volume: 0.2
+    pitch: 1
+    fadeIn: 0
+    fadeOut: 0.15
+    cooldown: 0.12
+    maxVoices: 2
+    provisional: 0
+    materialNote: Kenney RPG Audio / CC0 / https://kenney.nl/assets/rpg-audio ; period
+      cafe paper, book and leather foley; hover silent; listening approval pending
+  - key: ui.details.character.tab
+    description: "details.character / \u5207\u6362\u9875\u7B7E"
+    enabled: 1
+    clip: {fileID: 8300000, guid: 3eff3512800ac0346a09b6af8c0fc677, type: 3}
+    resourcePath: 
+    category: 0
+    loop: 0
+    volume: 0.12
+    pitch: 1
+    fadeIn: 0
+    fadeOut: 0.15
+    cooldown: 0.12
+    maxVoices: 2
+    provisional: 0
+    materialNote: Kenney RPG Audio / CC0 / https://kenney.nl/assets/rpg-audio ; period
+      cafe paper, book and leather foley; hover silent; listening approval pending
+  - key: ui.details.character.page
+    description: "details.character / \u8BA2\u5355 / \u914D\u65B9\u7FFB\u9875"
+    enabled: 1
+    clip: {fileID: 8300000, guid: 6fe15cbd400bf3444b5484130171ee13, type: 3}
+    resourcePath: 
+    category: 0
+    loop: 0
+    volume: 0.18
+    pitch: 1
+    fadeIn: 0
+    fadeOut: 0.15
+    cooldown: 0.12
+    maxVoices: 2
+    provisional: 0
+    materialNote: Kenney RPG Audio / CC0 / https://kenney.nl/assets/rpg-audio ; period
+      cafe paper, book and leather foley; hover silent; listening approval pending
+  - key: ui.details.character.volume_preview
+    description: "details.character / \u8C03\u8282\u7ED3\u675F\u8BD5\u542C"
+    enabled: 1
+    clip: {fileID: 8300000, guid: 371165ee3e420de4aa66edb0d39c1ff6, type: 3}
+    resourcePath: 
+    category: 0
+    loop: 0
+    volume: 0.14
+    pitch: 1
+    fadeIn: 0
+    fadeOut: 0.15
+    cooldown: 0.12
+    maxVoices: 2
+    provisional: 0
+    materialNote: Kenney RPG Audio / CC0 / https://kenney.nl/assets/rpg-audio ; period
+      cafe paper, book and leather foley; hover silent; listening approval pending
+  - key: ui.details.character.panel_open
+    description: "details.character / \u6253\u5F00\u5F39\u7A97 / \u4FA7\u680F"
+    enabled: 1
+    clip: {fileID: 8300000, guid: d20c47ef1aef41d4f8410de46ecd0e4b, type: 3}
+    resourcePath: 
+    category: 0
+    loop: 0
+    volume: 0.16
+    pitch: 1
+    fadeIn: 0
+    fadeOut: 0.15
+    cooldown: 0.12
+    maxVoices: 2
+    provisional: 0
+    materialNote: Kenney RPG Audio / CC0 / https://kenney.nl/assets/rpg-audio ; period
+      cafe paper, book and leather foley; hover silent; listening approval pending
+  - key: ui.details.character.panel_close
+    description: "details.character / \u5173\u95ED\u5F39\u7A97 / \u4FA7\u680F"
+    enabled: 1
+    clip: {fileID: 8300000, guid: 3e647cd552f830a4282650eb714c84e0, type: 3}
+    resourcePath: 
+    category: 0
+    loop: 0
+    volume: 0.14
+    pitch: 1
+    fadeIn: 0
+    fadeOut: 0.15
+    cooldown: 0.12
+    maxVoices: 2
+    provisional: 0
+    materialNote: Kenney RPG Audio / CC0 / https://kenney.nl/assets/rpg-audio ; period
+      cafe paper, book and leather foley; hover silent; listening approval pending
+  - key: ui.map.tasks.select
+    description: "map.tasks / \u6309\u94AE\u60AC\u505C / \u4E3B\u52A8\u5BFC\u822A\u9009\u4E2D"
+    enabled: 1
+    clip: {fileID: 8300000, guid: 39f77e72c5971264681f468a67b2604f, type: 3}
+    resourcePath: 
+    category: 0
+    loop: 0
+    volume: 0
+    pitch: 1
+    fadeIn: 0
+    fadeOut: 0.15
+    cooldown: 0.15
+    maxVoices: 2
+    provisional: 0
+    materialNote: Kenney RPG Audio / CC0 / https://kenney.nl/assets/rpg-audio ; period
+      cafe paper, book and leather foley; hover silent; listening approval pending
+  - key: ui.map.tasks.confirm
+    description: "map.tasks / \u6309\u94AE\u70B9\u51FB\u786E\u8BA4"
+    enabled: 1
+    clip: {fileID: 8300000, guid: 371165ee3e420de4aa66edb0d39c1ff6, type: 3}
+    resourcePath: 
+    category: 0
+    loop: 0
+    volume: 0.14
+    pitch: 1
+    fadeIn: 0
+    fadeOut: 0.15
+    cooldown: 0.12
+    maxVoices: 2
+    provisional: 0
+    materialNote: Kenney RPG Audio / CC0 / https://kenney.nl/assets/rpg-audio ; period
+      cafe paper, book and leather foley; hover silent; listening approval pending
+  - key: ui.map.tasks.cancel
+    description: "map.tasks / \u8FD4\u56DE / \u53D6\u6D88"
+    enabled: 1
+    clip: {fileID: 8300000, guid: c176d95f18154f3428c16f38fe5f7be9, type: 3}
+    resourcePath: 
+    category: 0
+    loop: 0
+    volume: 0.12
+    pitch: 1
+    fadeIn: 0
+    fadeOut: 0.15
+    cooldown: 0.12
+    maxVoices: 2
+    provisional: 0
+    materialNote: Kenney RPG Audio / CC0 / https://kenney.nl/assets/rpg-audio ; period
+      cafe paper, book and leather foley; hover silent; listening approval pending
+  - key: ui.map.tasks.error
+    description: "map.tasks / \u8FDD\u89C4\u64CD\u4F5C UI / \u884C\u52A8\u62D2\u7EDD"
+    enabled: 1
+    clip: {fileID: 8300000, guid: 3e647cd552f830a4282650eb714c84e0, type: 3}
+    resourcePath: 
+    category: 0
+    loop: 0
+    volume: 0.12
+    pitch: 1
+    fadeIn: 0
+    fadeOut: 0.15
+    cooldown: 0.12
+    maxVoices: 2
+    provisional: 0
+    materialNote: Kenney RPG Audio / CC0 / https://kenney.nl/assets/rpg-audio ; period
+      cafe paper, book and leather foley; hover silent; listening approval pending
+  - key: ui.map.tasks.save_success
+    description: "map.tasks / \u624B\u52A8\u4FDD\u5B58\u6210\u529F"
+    enabled: 1
+    clip: {fileID: 8300000, guid: 3e647cd552f830a4282650eb714c84e0, type: 3}
+    resourcePath: 
+    category: 0
+    loop: 0
+    volume: 0.2
+    pitch: 1
+    fadeIn: 0
+    fadeOut: 0.15
+    cooldown: 0.12
+    maxVoices: 2
+    provisional: 0
+    materialNote: Kenney RPG Audio / CC0 / https://kenney.nl/assets/rpg-audio ; period
+      cafe paper, book and leather foley; hover silent; listening approval pending
+  - key: ui.map.tasks.tab
+    description: "map.tasks / \u5207\u6362\u9875\u7B7E"
+    enabled: 1
+    clip: {fileID: 8300000, guid: 3eff3512800ac0346a09b6af8c0fc677, type: 3}
+    resourcePath: 
+    category: 0
+    loop: 0
+    volume: 0.12
+    pitch: 1
+    fadeIn: 0
+    fadeOut: 0.15
+    cooldown: 0.12
+    maxVoices: 2
+    provisional: 0
+    materialNote: Kenney RPG Audio / CC0 / https://kenney.nl/assets/rpg-audio ; period
+      cafe paper, book and leather foley; hover silent; listening approval pending
+  - key: ui.map.tasks.page
+    description: "map.tasks / \u8BA2\u5355 / \u914D\u65B9\u7FFB\u9875"
+    enabled: 1
+    clip: {fileID: 8300000, guid: 6fe15cbd400bf3444b5484130171ee13, type: 3}
+    resourcePath: 
+    category: 0
+    loop: 0
+    volume: 0.18
+    pitch: 1
+    fadeIn: 0
+    fadeOut: 0.15
+    cooldown: 0.12
+    maxVoices: 2
+    provisional: 0
+    materialNote: Kenney RPG Audio / CC0 / https://kenney.nl/assets/rpg-audio ; period
+      cafe paper, book and leather foley; hover silent; listening approval pending
+  - key: ui.map.tasks.volume_preview
+    description: "map.tasks / \u8C03\u8282\u7ED3\u675F\u8BD5\u542C"
+    enabled: 1
+    clip: {fileID: 8300000, guid: 371165ee3e420de4aa66edb0d39c1ff6, type: 3}
+    resourcePath: 
+    category: 0
+    loop: 0
+    volume: 0.14
+    pitch: 1
+    fadeIn: 0
+    fadeOut: 0.15
+    cooldown: 0.12
+    maxVoices: 2
+    provisional: 0
+    materialNote: Kenney RPG Audio / CC0 / https://kenney.nl/assets/rpg-audio ; period
+      cafe paper, book and leather foley; hover silent; listening approval pending
+  - key: ui.map.tasks.panel_open
+    description: "map.tasks / \u6253\u5F00\u5F39\u7A97 / \u4FA7\u680F"
+    enabled: 1
+    clip: {fileID: 8300000, guid: d20c47ef1aef41d4f8410de46ecd0e4b, type: 3}
+    resourcePath: 
+    category: 0
+    loop: 0
+    volume: 0.16
+    pitch: 1
+    fadeIn: 0
+    fadeOut: 0.15
+    cooldown: 0.12
+    maxVoices: 2
+    provisional: 0
+    materialNote: Kenney RPG Audio / CC0 / https://kenney.nl/assets/rpg-audio ; period
+      cafe paper, book and leather foley; hover silent; listening approval pending
+  - key: ui.map.tasks.panel_close
+    description: "map.tasks / \u5173\u95ED\u5F39\u7A97 / \u4FA7\u680F"
+    enabled: 1
+    clip: {fileID: 8300000, guid: 3e647cd552f830a4282650eb714c84e0, type: 3}
+    resourcePath: 
+    category: 0
+    loop: 0
+    volume: 0.14
+    pitch: 1
+    fadeIn: 0
+    fadeOut: 0.15
+    cooldown: 0.12
+    maxVoices: 2
+    provisional: 0
+    materialNote: Kenney RPG Audio / CC0 / https://kenney.nl/assets/rpg-audio ; period
+      cafe paper, book and leather foley; hover silent; listening approval pending
+  - key: ui.map.action.select
+    description: "map.action / \u6309\u94AE\u60AC\u505C / \u4E3B\u52A8\u5BFC\u822A\u9009\u4E2D"
+    enabled: 1
+    clip: {fileID: 8300000, guid: 39f77e72c5971264681f468a67b2604f, type: 3}
+    resourcePath: 
+    category: 0
+    loop: 0
+    volume: 0
+    pitch: 1
+    fadeIn: 0
+    fadeOut: 0.15
+    cooldown: 0.15
+    maxVoices: 2
+    provisional: 0
+    materialNote: Kenney RPG Audio / CC0 / https://kenney.nl/assets/rpg-audio ; period
+      cafe paper, book and leather foley; hover silent; listening approval pending
+  - key: ui.map.action.confirm
+    description: "map.action / \u6309\u94AE\u70B9\u51FB\u786E\u8BA4"
+    enabled: 1
+    clip: {fileID: 8300000, guid: 371165ee3e420de4aa66edb0d39c1ff6, type: 3}
+    resourcePath: 
+    category: 0
+    loop: 0
+    volume: 0.14
+    pitch: 1
+    fadeIn: 0
+    fadeOut: 0.15
+    cooldown: 0.12
+    maxVoices: 2
+    provisional: 0
+    materialNote: Kenney RPG Audio / CC0 / https://kenney.nl/assets/rpg-audio ; period
+      cafe paper, book and leather foley; hover silent; listening approval pending
+  - key: ui.map.action.cancel
+    description: "map.action / \u8FD4\u56DE / \u53D6\u6D88"
+    enabled: 1
+    clip: {fileID: 8300000, guid: c176d95f18154f3428c16f38fe5f7be9, type: 3}
+    resourcePath: 
+    category: 0
+    loop: 0
+    volume: 0.12
+    pitch: 1
+    fadeIn: 0
+    fadeOut: 0.15
+    cooldown: 0.12
+    maxVoices: 2
+    provisional: 0
+    materialNote: Kenney RPG Audio / CC0 / https://kenney.nl/assets/rpg-audio ; period
+      cafe paper, book and leather foley; hover silent; listening approval pending
+  - key: ui.map.action.error
+    description: "map.action / \u8FDD\u89C4\u64CD\u4F5C UI / \u884C\u52A8\u62D2\u7EDD"
+    enabled: 1
+    clip: {fileID: 8300000, guid: 3e647cd552f830a4282650eb714c84e0, type: 3}
+    resourcePath: 
+    category: 0
+    loop: 0
+    volume: 0.12
+    pitch: 1
+    fadeIn: 0
+    fadeOut: 0.15
+    cooldown: 0.12
+    maxVoices: 2
+    provisional: 0
+    materialNote: Kenney RPG Audio / CC0 / https://kenney.nl/assets/rpg-audio ; period
+      cafe paper, book and leather foley; hover silent; listening approval pending
+  - key: ui.map.action.save_success
+    description: "map.action / \u624B\u52A8\u4FDD\u5B58\u6210\u529F"
+    enabled: 1
+    clip: {fileID: 8300000, guid: 3e647cd552f830a4282650eb714c84e0, type: 3}
+    resourcePath: 
+    category: 0
+    loop: 0
+    volume: 0.2
+    pitch: 1
+    fadeIn: 0
+    fadeOut: 0.15
+    cooldown: 0.12
+    maxVoices: 2
+    provisional: 0
+    materialNote: Kenney RPG Audio / CC0 / https://kenney.nl/assets/rpg-audio ; period
+      cafe paper, book and leather foley; hover silent; listening approval pending
+  - key: ui.map.action.tab
+    description: "map.action / \u5207\u6362\u9875\u7B7E"
+    enabled: 1
+    clip: {fileID: 8300000, guid: 3eff3512800ac0346a09b6af8c0fc677, type: 3}
+    resourcePath: 
+    category: 0
+    loop: 0
+    volume: 0.12
+    pitch: 1
+    fadeIn: 0
+    fadeOut: 0.15
+    cooldown: 0.12
+    maxVoices: 2
+    provisional: 0
+    materialNote: Kenney RPG Audio / CC0 / https://kenney.nl/assets/rpg-audio ; period
+      cafe paper, book and leather foley; hover silent; listening approval pending
+  - key: ui.map.action.page
+    description: "map.action / \u8BA2\u5355 / \u914D\u65B9\u7FFB\u9875"
+    enabled: 1
+    clip: {fileID: 8300000, guid: 6fe15cbd400bf3444b5484130171ee13, type: 3}
+    resourcePath: 
+    category: 0
+    loop: 0
+    volume: 0.18
+    pitch: 1
+    fadeIn: 0
+    fadeOut: 0.15
+    cooldown: 0.12
+    maxVoices: 2
+    provisional: 0
+    materialNote: Kenney RPG Audio / CC0 / https://kenney.nl/assets/rpg-audio ; period
+      cafe paper, book and leather foley; hover silent; listening approval pending
+  - key: ui.map.action.volume_preview
+    description: "map.action / \u8C03\u8282\u7ED3\u675F\u8BD5\u542C"
+    enabled: 1
+    clip: {fileID: 8300000, guid: 371165ee3e420de4aa66edb0d39c1ff6, type: 3}
+    resourcePath: 
+    category: 0
+    loop: 0
+    volume: 0.14
+    pitch: 1
+    fadeIn: 0
+    fadeOut: 0.15
+    cooldown: 0.12
+    maxVoices: 2
+    provisional: 0
+    materialNote: Kenney RPG Audio / CC0 / https://kenney.nl/assets/rpg-audio ; period
+      cafe paper, book and leather foley; hover silent; listening approval pending
+  - key: ui.map.action.panel_open
+    description: "map.action / \u6253\u5F00\u5F39\u7A97 / \u4FA7\u680F"
+    enabled: 1
+    clip: {fileID: 8300000, guid: d20c47ef1aef41d4f8410de46ecd0e4b, type: 3}
+    resourcePath: 
+    category: 0
+    loop: 0
+    volume: 0.16
+    pitch: 1
+    fadeIn: 0
+    fadeOut: 0.15
+    cooldown: 0.12
+    maxVoices: 2
+    provisional: 0
+    materialNote: Kenney RPG Audio / CC0 / https://kenney.nl/assets/rpg-audio ; period
+      cafe paper, book and leather foley; hover silent; listening approval pending
+  - key: ui.map.action.panel_close
+    description: "map.action / \u5173\u95ED\u5F39\u7A97 / \u4FA7\u680F"
+    enabled: 1
+    clip: {fileID: 8300000, guid: 3e647cd552f830a4282650eb714c84e0, type: 3}
+    resourcePath: 
+    category: 0
+    loop: 0
+    volume: 0.14
+    pitch: 1
+    fadeIn: 0
+    fadeOut: 0.15
+    cooldown: 0.12
+    maxVoices: 2
+    provisional: 0
+    materialNote: Kenney RPG Audio / CC0 / https://kenney.nl/assets/rpg-audio ; period
+      cafe paper, book and leather foley; hover silent; listening approval pending
+  - key: ui.map.inventory.select
+    description: "map.inventory / \u6309\u94AE\u60AC\u505C / \u4E3B\u52A8\u5BFC\u822A\u9009\u4E2D"
+    enabled: 1
+    clip: {fileID: 8300000, guid: 39f77e72c5971264681f468a67b2604f, type: 3}
+    resourcePath: 
+    category: 0
+    loop: 0
+    volume: 0
+    pitch: 1
+    fadeIn: 0
+    fadeOut: 0.15
+    cooldown: 0.15
+    maxVoices: 2
+    provisional: 0
+    materialNote: Kenney RPG Audio / CC0 / https://kenney.nl/assets/rpg-audio ; period
+      cafe paper, book and leather foley; hover silent; listening approval pending
+  - key: ui.map.inventory.confirm
+    description: "map.inventory / \u6309\u94AE\u70B9\u51FB\u786E\u8BA4"
+    enabled: 1
+    clip: {fileID: 8300000, guid: 371165ee3e420de4aa66edb0d39c1ff6, type: 3}
+    resourcePath: 
+    category: 0
+    loop: 0
+    volume: 0.14
+    pitch: 1
+    fadeIn: 0
+    fadeOut: 0.15
+    cooldown: 0.12
+    maxVoices: 2
+    provisional: 0
+    materialNote: Kenney RPG Audio / CC0 / https://kenney.nl/assets/rpg-audio ; period
+      cafe paper, book and leather foley; hover silent; listening approval pending
+  - key: ui.map.inventory.cancel
+    description: "map.inventory / \u8FD4\u56DE / \u53D6\u6D88"
+    enabled: 1
+    clip: {fileID: 8300000, guid: c176d95f18154f3428c16f38fe5f7be9, type: 3}
+    resourcePath: 
+    category: 0
+    loop: 0
+    volume: 0.12
+    pitch: 1
+    fadeIn: 0
+    fadeOut: 0.15
+    cooldown: 0.12
+    maxVoices: 2
+    provisional: 0
+    materialNote: Kenney RPG Audio / CC0 / https://kenney.nl/assets/rpg-audio ; period
+      cafe paper, book and leather foley; hover silent; listening approval pending
+  - key: ui.map.inventory.error
+    description: "map.inventory / \u8FDD\u89C4\u64CD\u4F5C UI / \u884C\u52A8\u62D2\u7EDD"
+    enabled: 1
+    clip: {fileID: 8300000, guid: 3e647cd552f830a4282650eb714c84e0, type: 3}
+    resourcePath: 
+    category: 0
+    loop: 0
+    volume: 0.12
+    pitch: 1
+    fadeIn: 0
+    fadeOut: 0.15
+    cooldown: 0.12
+    maxVoices: 2
+    provisional: 0
+    materialNote: Kenney RPG Audio / CC0 / https://kenney.nl/assets/rpg-audio ; period
+      cafe paper, book and leather foley; hover silent; listening approval pending
+  - key: ui.map.inventory.save_success
+    description: "map.inventory / \u624B\u52A8\u4FDD\u5B58\u6210\u529F"
+    enabled: 1
+    clip: {fileID: 8300000, guid: 3e647cd552f830a4282650eb714c84e0, type: 3}
+    resourcePath: 
+    category: 0
+    loop: 0
+    volume: 0.2
+    pitch: 1
+    fadeIn: 0
+    fadeOut: 0.15
+    cooldown: 0.12
+    maxVoices: 2
+    provisional: 0
+    materialNote: Kenney RPG Audio / CC0 / https://kenney.nl/assets/rpg-audio ; period
+      cafe paper, book and leather foley; hover silent; listening approval pending
+  - key: ui.map.inventory.tab
+    description: "map.inventory / \u5207\u6362\u9875\u7B7E"
+    enabled: 1
+    clip: {fileID: 8300000, guid: 3eff3512800ac0346a09b6af8c0fc677, type: 3}
+    resourcePath: 
+    category: 0
+    loop: 0
+    volume: 0.12
+    pitch: 1
+    fadeIn: 0
+    fadeOut: 0.15
+    cooldown: 0.12
+    maxVoices: 2
+    provisional: 0
+    materialNote: Kenney RPG Audio / CC0 / https://kenney.nl/assets/rpg-audio ; period
+      cafe paper, book and leather foley; hover silent; listening approval pending
+  - key: ui.map.inventory.page
+    description: "map.inventory / \u8BA2\u5355 / \u914D\u65B9\u7FFB\u9875"
+    enabled: 1
+    clip: {fileID: 8300000, guid: 6fe15cbd400bf3444b5484130171ee13, type: 3}
+    resourcePath: 
+    category: 0
+    loop: 0
+    volume: 0.18
+    pitch: 1
+    fadeIn: 0
+    fadeOut: 0.15
+    cooldown: 0.12
+    maxVoices: 2
+    provisional: 0
+    materialNote: Kenney RPG Audio / CC0 / https://kenney.nl/assets/rpg-audio ; period
+      cafe paper, book and leather foley; hover silent; listening approval pending
+  - key: ui.map.inventory.volume_preview
+    description: "map.inventory / \u8C03\u8282\u7ED3\u675F\u8BD5\u542C"
+    enabled: 1
+    clip: {fileID: 8300000, guid: 371165ee3e420de4aa66edb0d39c1ff6, type: 3}
+    resourcePath: 
+    category: 0
+    loop: 0
+    volume: 0.14
+    pitch: 1
+    fadeIn: 0
+    fadeOut: 0.15
+    cooldown: 0.12
+    maxVoices: 2
+    provisional: 0
+    materialNote: Kenney RPG Audio / CC0 / https://kenney.nl/assets/rpg-audio ; period
+      cafe paper, book and leather foley; hover silent; listening approval pending
+  - key: ui.map.inventory.panel_open
+    description: "map.inventory / \u6253\u5F00\u5F39\u7A97 / \u4FA7\u680F"
+    enabled: 1
+    clip: {fileID: 8300000, guid: d20c47ef1aef41d4f8410de46ecd0e4b, type: 3}
+    resourcePath: 
+    category: 0
+    loop: 0
+    volume: 0.16
+    pitch: 1
+    fadeIn: 0
+    fadeOut: 0.15
+    cooldown: 0.12
+    maxVoices: 2
+    provisional: 0
+    materialNote: Kenney RPG Audio / CC0 / https://kenney.nl/assets/rpg-audio ; period
+      cafe paper, book and leather foley; hover silent; listening approval pending
+  - key: ui.map.inventory.panel_close
+    description: "map.inventory / \u5173\u95ED\u5F39\u7A97 / \u4FA7\u680F"
+    enabled: 1
+    clip: {fileID: 8300000, guid: 3e647cd552f830a4282650eb714c84e0, type: 3}
+    resourcePath: 
+    category: 0
+    loop: 0
+    volume: 0.14
+    pitch: 1
+    fadeIn: 0
+    fadeOut: 0.15
+    cooldown: 0.12
+    maxVoices: 2
+    provisional: 0
+    materialNote: Kenney RPG Audio / CC0 / https://kenney.nl/assets/rpg-audio ; period
+      cafe paper, book and leather foley; hover silent; listening approval pending
+  - key: ui.map.location.select
+    description: "map.location / \u6309\u94AE\u60AC\u505C / \u4E3B\u52A8\u5BFC\u822A\u9009\u4E2D"
+    enabled: 1
+    clip: {fileID: 8300000, guid: 39f77e72c5971264681f468a67b2604f, type: 3}
+    resourcePath: 
+    category: 0
+    loop: 0
+    volume: 0
+    pitch: 1
+    fadeIn: 0
+    fadeOut: 0.15
+    cooldown: 0.15
+    maxVoices: 2
+    provisional: 0
+    materialNote: Kenney RPG Audio / CC0 / https://kenney.nl/assets/rpg-audio ; period
+      cafe paper, book and leather foley; hover silent; listening approval pending
+  - key: ui.map.location.confirm
+    description: "map.location / \u6309\u94AE\u70B9\u51FB\u786E\u8BA4"
+    enabled: 1
+    clip: {fileID: 8300000, guid: 371165ee3e420de4aa66edb0d39c1ff6, type: 3}
+    resourcePath: 
+    category: 0
+    loop: 0
+    volume: 0.14
+    pitch: 1
+    fadeIn: 0
+    fadeOut: 0.15
+    cooldown: 0.12
+    maxVoices: 2
+    provisional: 0
+    materialNote: Kenney RPG Audio / CC0 / https://kenney.nl/assets/rpg-audio ; period
+      cafe paper, book and leather foley; hover silent; listening approval pending
+  - key: ui.map.location.cancel
+    description: "map.location / \u8FD4\u56DE / \u53D6\u6D88"
+    enabled: 1
+    clip: {fileID: 8300000, guid: c176d95f18154f3428c16f38fe5f7be9, type: 3}
+    resourcePath: 
+    category: 0
+    loop: 0
+    volume: 0.12
+    pitch: 1
+    fadeIn: 0
+    fadeOut: 0.15
+    cooldown: 0.12
+    maxVoices: 2
+    provisional: 0
+    materialNote: Kenney RPG Audio / CC0 / https://kenney.nl/assets/rpg-audio ; period
+      cafe paper, book and leather foley; hover silent; listening approval pending
+  - key: ui.map.location.error
+    description: "map.location / \u8FDD\u89C4\u64CD\u4F5C UI / \u884C\u52A8\u62D2\u7EDD"
+    enabled: 1
+    clip: {fileID: 8300000, guid: 3e647cd552f830a4282650eb714c84e0, type: 3}
+    resourcePath: 
+    category: 0
+    loop: 0
+    volume: 0.12
+    pitch: 1
+    fadeIn: 0
+    fadeOut: 0.15
+    cooldown: 0.12
+    maxVoices: 2
+    provisional: 0
+    materialNote: Kenney RPG Audio / CC0 / https://kenney.nl/assets/rpg-audio ; period
+      cafe paper, book and leather foley; hover silent; listening approval pending
+  - key: ui.map.location.save_success
+    description: "map.location / \u624B\u52A8\u4FDD\u5B58\u6210\u529F"
+    enabled: 1
+    clip: {fileID: 8300000, guid: 3e647cd552f830a4282650eb714c84e0, type: 3}
+    resourcePath: 
+    category: 0
+    loop: 0
+    volume: 0.2
+    pitch: 1
+    fadeIn: 0
+    fadeOut: 0.15
+    cooldown: 0.12
+    maxVoices: 2
+    provisional: 0
+    materialNote: Kenney RPG Audio / CC0 / https://kenney.nl/assets/rpg-audio ; period
+      cafe paper, book and leather foley; hover silent; listening approval pending
+  - key: ui.map.location.tab
+    description: "map.location / \u5207\u6362\u9875\u7B7E"
+    enabled: 1
+    clip: {fileID: 8300000, guid: 3eff3512800ac0346a09b6af8c0fc677, type: 3}
+    resourcePath: 
+    category: 0
+    loop: 0
+    volume: 0.12
+    pitch: 1
+    fadeIn: 0
+    fadeOut: 0.15
+    cooldown: 0.12
+    maxVoices: 2
+    provisional: 0
+    materialNote: Kenney RPG Audio / CC0 / https://kenney.nl/assets/rpg-audio ; period
+      cafe paper, book and leather foley; hover silent; listening approval pending
+  - key: ui.map.location.page
+    description: "map.location / \u8BA2\u5355 / \u914D\u65B9\u7FFB\u9875"
+    enabled: 1
+    clip: {fileID: 8300000, guid: 6fe15cbd400bf3444b5484130171ee13, type: 3}
+    resourcePath: 
+    category: 0
+    loop: 0
+    volume: 0.18
+    pitch: 1
+    fadeIn: 0
+    fadeOut: 0.15
+    cooldown: 0.12
+    maxVoices: 2
+    provisional: 0
+    materialNote: Kenney RPG Audio / CC0 / https://kenney.nl/assets/rpg-audio ; period
+      cafe paper, book and leather foley; hover silent; listening approval pending
+  - key: ui.map.location.volume_preview
+    description: "map.location / \u8C03\u8282\u7ED3\u675F\u8BD5\u542C"
+    enabled: 1
+    clip: {fileID: 8300000, guid: 371165ee3e420de4aa66edb0d39c1ff6, type: 3}
+    resourcePath: 
+    category: 0
+    loop: 0
+    volume: 0.14
+    pitch: 1
+    fadeIn: 0
+    fadeOut: 0.15
+    cooldown: 0.12
+    maxVoices: 2
+    provisional: 0
+    materialNote: Kenney RPG Audio / CC0 / https://kenney.nl/assets/rpg-audio ; period
+      cafe paper, book and leather foley; hover silent; listening approval pending
+  - key: ui.map.location.panel_open
+    description: "map.location / \u6253\u5F00\u5F39\u7A97 / \u4FA7\u680F"
+    enabled: 1
+    clip: {fileID: 8300000, guid: d20c47ef1aef41d4f8410de46ecd0e4b, type: 3}
+    resourcePath: 
+    category: 0
+    loop: 0
+    volume: 0.16
+    pitch: 1
+    fadeIn: 0
+    fadeOut: 0.15
+    cooldown: 0.12
+    maxVoices: 2
+    provisional: 0
+    materialNote: Kenney RPG Audio / CC0 / https://kenney.nl/assets/rpg-audio ; period
+      cafe paper, book and leather foley; hover silent; listening approval pending
+  - key: ui.map.location.panel_close
+    description: "map.location / \u5173\u95ED\u5F39\u7A97 / \u4FA7\u680F"
+    enabled: 1
+    clip: {fileID: 8300000, guid: 3e647cd552f830a4282650eb714c84e0, type: 3}
+    resourcePath: 
+    category: 0
+    loop: 0
+    volume: 0.14
+    pitch: 1
+    fadeIn: 0
+    fadeOut: 0.15
+    cooldown: 0.12
+    maxVoices: 2
+    provisional: 0
+    materialNote: Kenney RPG Audio / CC0 / https://kenney.nl/assets/rpg-audio ; period
+      cafe paper, book and leather foley; hover silent; listening approval pending
+  - key: ui.cafe.production.select
+    description: "cafe.production / \u6309\u94AE\u60AC\u505C / \u4E3B\u52A8\u5BFC\u822A\u9009\u4E2D"
+    enabled: 1
+    clip: {fileID: 8300000, guid: 39f77e72c5971264681f468a67b2604f, type: 3}
+    resourcePath: 
+    category: 0
+    loop: 0
+    volume: 0
+    pitch: 1
+    fadeIn: 0
+    fadeOut: 0.15
+    cooldown: 0.15
+    maxVoices: 2
+    provisional: 0
+    materialNote: Kenney RPG Audio / CC0 / https://kenney.nl/assets/rpg-audio ; period
+      cafe paper, book and leather foley; hover silent; listening approval pending
+  - key: ui.cafe.production.confirm
+    description: "cafe.production / \u6309\u94AE\u70B9\u51FB\u786E\u8BA4"
+    enabled: 1
+    clip: {fileID: 8300000, guid: 8ce802b540a046244b97309747d386c9, type: 3}
+    resourcePath: 
+    category: 0
+    loop: 0
+    volume: 0.14
+    pitch: 1
+    fadeIn: 0
+    fadeOut: 0.15
+    cooldown: 0.12
+    maxVoices: 2
+    provisional: 0
+    materialNote: Kenney RPG Audio / CC0 / https://kenney.nl/assets/rpg-audio ; period
+      cafe paper, book and leather foley; hover silent; listening approval pending
+  - key: ui.cafe.production.cancel
+    description: "cafe.production / \u8FD4\u56DE / \u53D6\u6D88"
+    enabled: 1
+    clip: {fileID: 8300000, guid: c176d95f18154f3428c16f38fe5f7be9, type: 3}
+    resourcePath: 
+    category: 0
+    loop: 0
+    volume: 0.12
+    pitch: 1
+    fadeIn: 0
+    fadeOut: 0.15
+    cooldown: 0.12
+    maxVoices: 2
+    provisional: 0
+    materialNote: Kenney RPG Audio / CC0 / https://kenney.nl/assets/rpg-audio ; period
+      cafe paper, book and leather foley; hover silent; listening approval pending
+  - key: ui.cafe.production.error
+    description: "cafe.production / \u8FDD\u89C4\u64CD\u4F5C UI / \u884C\u52A8\u62D2\u7EDD"
+    enabled: 1
+    clip: {fileID: 8300000, guid: 3e647cd552f830a4282650eb714c84e0, type: 3}
+    resourcePath: 
+    category: 0
+    loop: 0
+    volume: 0.12
+    pitch: 1
+    fadeIn: 0
+    fadeOut: 0.15
+    cooldown: 0.12
+    maxVoices: 2
+    provisional: 0
+    materialNote: Kenney RPG Audio / CC0 / https://kenney.nl/assets/rpg-audio ; period
+      cafe paper, book and leather foley; hover silent; listening approval pending
+  - key: ui.cafe.production.save_success
+    description: "cafe.production / \u624B\u52A8\u4FDD\u5B58\u6210\u529F"
+    enabled: 1
+    clip: {fileID: 8300000, guid: 3e647cd552f830a4282650eb714c84e0, type: 3}
+    resourcePath: 
+    category: 0
+    loop: 0
+    volume: 0.2
+    pitch: 1
+    fadeIn: 0
+    fadeOut: 0.15
+    cooldown: 0.12
+    maxVoices: 2
+    provisional: 0
+    materialNote: Kenney RPG Audio / CC0 / https://kenney.nl/assets/rpg-audio ; period
+      cafe paper, book and leather foley; hover silent; listening approval pending
+  - key: ui.cafe.production.tab
+    description: "cafe.production / \u5207\u6362\u9875\u7B7E"
+    enabled: 1
+    clip: {fileID: 8300000, guid: 3eff3512800ac0346a09b6af8c0fc677, type: 3}
+    resourcePath: 
+    category: 0
+    loop: 0
+    volume: 0.12
+    pitch: 1
+    fadeIn: 0
+    fadeOut: 0.15
+    cooldown: 0.12
+    maxVoices: 2
+    provisional: 0
+    materialNote: Kenney RPG Audio / CC0 / https://kenney.nl/assets/rpg-audio ; period
+      cafe paper, book and leather foley; hover silent; listening approval pending
+  - key: ui.cafe.production.page
+    description: "cafe.production / \u8BA2\u5355 / \u914D\u65B9\u7FFB\u9875"
+    enabled: 1
+    clip: {fileID: 8300000, guid: 6fe15cbd400bf3444b5484130171ee13, type: 3}
+    resourcePath: 
+    category: 0
+    loop: 0
+    volume: 0.18
+    pitch: 1
+    fadeIn: 0
+    fadeOut: 0.15
+    cooldown: 0.12
+    maxVoices: 2
+    provisional: 0
+    materialNote: Kenney RPG Audio / CC0 / https://kenney.nl/assets/rpg-audio ; period
+      cafe paper, book and leather foley; hover silent; listening approval pending
+  - key: ui.cafe.production.volume_preview
+    description: "cafe.production / \u8C03\u8282\u7ED3\u675F\u8BD5\u542C"
+    enabled: 1
+    clip: {fileID: 8300000, guid: 8ce802b540a046244b97309747d386c9, type: 3}
+    resourcePath: 
+    category: 0
+    loop: 0
+    volume: 0.14
+    pitch: 1
+    fadeIn: 0
+    fadeOut: 0.15
+    cooldown: 0.12
+    maxVoices: 2
+    provisional: 0
+    materialNote: Kenney RPG Audio / CC0 / https://kenney.nl/assets/rpg-audio ; period
+      cafe paper, book and leather foley; hover silent; listening approval pending
+  - key: ui.cafe.production.panel_open
+    description: "cafe.production / \u6253\u5F00\u5F39\u7A97 / \u4FA7\u680F"
+    enabled: 1
+    clip: {fileID: 8300000, guid: d20c47ef1aef41d4f8410de46ecd0e4b, type: 3}
+    resourcePath: 
+    category: 0
+    loop: 0
+    volume: 0.16
+    pitch: 1
+    fadeIn: 0
+    fadeOut: 0.15
+    cooldown: 0.12
+    maxVoices: 2
+    provisional: 0
+    materialNote: Kenney RPG Audio / CC0 / https://kenney.nl/assets/rpg-audio ; period
+      cafe paper, book and leather foley; hover silent; listening approval pending
+  - key: ui.cafe.production.panel_close
+    description: "cafe.production / \u5173\u95ED\u5F39\u7A97 / \u4FA7\u680F"
+    enabled: 1
+    clip: {fileID: 8300000, guid: 3e647cd552f830a4282650eb714c84e0, type: 3}
+    resourcePath: 
+    category: 0
+    loop: 0
+    volume: 0.14
+    pitch: 1
+    fadeIn: 0
+    fadeOut: 0.15
+    cooldown: 0.12
+    maxVoices: 2
+    provisional: 0
+    materialNote: Kenney RPG Audio / CC0 / https://kenney.nl/assets/rpg-audio ; period
+      cafe paper, book and leather foley; hover silent; listening approval pending
+  - key: ui.cafe.order.select
+    description: "cafe.order / \u6309\u94AE\u60AC\u505C / \u4E3B\u52A8\u5BFC\u822A\u9009\u4E2D"
+    enabled: 1
+    clip: {fileID: 8300000, guid: 39f77e72c5971264681f468a67b2604f, type: 3}
+    resourcePath: 
+    category: 0
+    loop: 0
+    volume: 0
+    pitch: 1
+    fadeIn: 0
+    fadeOut: 0.15
+    cooldown: 0.15
+    maxVoices: 2
+    provisional: 0
+    materialNote: Kenney RPG Audio / CC0 / https://kenney.nl/assets/rpg-audio ; period
+      cafe paper, book and leather foley; hover silent; listening approval pending
+  - key: ui.cafe.order.confirm
+    description: "cafe.order / \u6309\u94AE\u70B9\u51FB\u786E\u8BA4"
+    enabled: 1
+    clip: {fileID: 8300000, guid: 8ce802b540a046244b97309747d386c9, type: 3}
+    resourcePath: 
+    category: 0
+    loop: 0
+    volume: 0.14
+    pitch: 1
+    fadeIn: 0
+    fadeOut: 0.15
+    cooldown: 0.12
+    maxVoices: 2
+    provisional: 0
+    materialNote: Kenney RPG Audio / CC0 / https://kenney.nl/assets/rpg-audio ; period
+      cafe paper, book and leather foley; hover silent; listening approval pending
+  - key: ui.cafe.order.cancel
+    description: "cafe.order / \u8FD4\u56DE / \u53D6\u6D88"
+    enabled: 1
+    clip: {fileID: 8300000, guid: c176d95f18154f3428c16f38fe5f7be9, type: 3}
+    resourcePath: 
+    category: 0
+    loop: 0
+    volume: 0.12
+    pitch: 1
+    fadeIn: 0
+    fadeOut: 0.15
+    cooldown: 0.12
+    maxVoices: 2
+    provisional: 0
+    materialNote: Kenney RPG Audio / CC0 / https://kenney.nl/assets/rpg-audio ; period
+      cafe paper, book and leather foley; hover silent; listening approval pending
+  - key: ui.cafe.order.error
+    description: "cafe.order / \u8FDD\u89C4\u64CD\u4F5C UI / \u884C\u52A8\u62D2\u7EDD"
+    enabled: 1
+    clip: {fileID: 8300000, guid: 3e647cd552f830a4282650eb714c84e0, type: 3}
+    resourcePath: 
+    category: 0
+    loop: 0
+    volume: 0.12
+    pitch: 1
+    fadeIn: 0
+    fadeOut: 0.15
+    cooldown: 0.12
+    maxVoices: 2
+    provisional: 0
+    materialNote: Kenney RPG Audio / CC0 / https://kenney.nl/assets/rpg-audio ; period
+      cafe paper, book and leather foley; hover silent; listening approval pending
+  - key: ui.cafe.order.save_success
+    description: "cafe.order / \u624B\u52A8\u4FDD\u5B58\u6210\u529F"
+    enabled: 1
+    clip: {fileID: 8300000, guid: 3e647cd552f830a4282650eb714c84e0, type: 3}
+    resourcePath: 
+    category: 0
+    loop: 0
+    volume: 0.2
+    pitch: 1
+    fadeIn: 0
+    fadeOut: 0.15
+    cooldown: 0.12
+    maxVoices: 2
+    provisional: 0
+    materialNote: Kenney RPG Audio / CC0 / https://kenney.nl/assets/rpg-audio ; period
+      cafe paper, book and leather foley; hover silent; listening approval pending
+  - key: ui.cafe.order.tab
+    description: "cafe.order / \u5207\u6362\u9875\u7B7E"
+    enabled: 1
+    clip: {fileID: 8300000, guid: 3eff3512800ac0346a09b6af8c0fc677, type: 3}
+    resourcePath: 
+    category: 0
+    loop: 0
+    volume: 0.12
+    pitch: 1
+    fadeIn: 0
+    fadeOut: 0.15
+    cooldown: 0.12
+    maxVoices: 2
+    provisional: 0
+    materialNote: Kenney RPG Audio / CC0 / https://kenney.nl/assets/rpg-audio ; period
+      cafe paper, book and leather foley; hover silent; listening approval pending
+  - key: ui.cafe.order.page
+    description: "cafe.order / \u8BA2\u5355 / \u914D\u65B9\u7FFB\u9875"
+    enabled: 1
+    clip: {fileID: 8300000, guid: 6fe15cbd400bf3444b5484130171ee13, type: 3}
+    resourcePath: 
+    category: 0
+    loop: 0
+    volume: 0.18
+    pitch: 1
+    fadeIn: 0
+    fadeOut: 0.15
+    cooldown: 0.12
+    maxVoices: 2
+    provisional: 0
+    materialNote: Kenney RPG Audio / CC0 / https://kenney.nl/assets/rpg-audio ; period
+      cafe paper, book and leather foley; hover silent; listening approval pending
+  - key: ui.cafe.order.volume_preview
+    description: "cafe.order / \u8C03\u8282\u7ED3\u675F\u8BD5\u542C"
+    enabled: 1
+    clip: {fileID: 8300000, guid: 8ce802b540a046244b97309747d386c9, type: 3}
+    resourcePath: 
+    category: 0
+    loop: 0
+    volume: 0.14
+    pitch: 1
+    fadeIn: 0
+    fadeOut: 0.15
+    cooldown: 0.12
+    maxVoices: 2
+    provisional: 0
+    materialNote: Kenney RPG Audio / CC0 / https://kenney.nl/assets/rpg-audio ; period
+      cafe paper, book and leather foley; hover silent; listening approval pending
+  - key: ui.cafe.order.panel_open
+    description: "cafe.order / \u6253\u5F00\u5F39\u7A97 / \u4FA7\u680F"
+    enabled: 1
+    clip: {fileID: 8300000, guid: d20c47ef1aef41d4f8410de46ecd0e4b, type: 3}
+    resourcePath: 
+    category: 0
+    loop: 0
+    volume: 0.16
+    pitch: 1
+    fadeIn: 0
+    fadeOut: 0.15
+    cooldown: 0.12
+    maxVoices: 2
+    provisional: 0
+    materialNote: Kenney RPG Audio / CC0 / https://kenney.nl/assets/rpg-audio ; period
+      cafe paper, book and leather foley; hover silent; listening approval pending
+  - key: ui.cafe.order.panel_close
+    description: "cafe.order / \u5173\u95ED\u5F39\u7A97 / \u4FA7\u680F"
+    enabled: 1
+    clip: {fileID: 8300000, guid: 3e647cd552f830a4282650eb714c84e0, type: 3}
+    resourcePath: 
+    category: 0
+    loop: 0
+    volume: 0.14
+    pitch: 1
+    fadeIn: 0
+    fadeOut: 0.15
+    cooldown: 0.12
+    maxVoices: 2
+    provisional: 0
+    materialNote: Kenney RPG Audio / CC0 / https://kenney.nl/assets/rpg-audio ; period
+      cafe paper, book and leather foley; hover silent; listening approval pending
+  - key: ui.cafe.recipe.select
+    description: "cafe.recipe / \u6309\u94AE\u60AC\u505C / \u4E3B\u52A8\u5BFC\u822A\u9009\u4E2D"
+    enabled: 1
+    clip: {fileID: 8300000, guid: 39f77e72c5971264681f468a67b2604f, type: 3}
+    resourcePath: 
+    category: 0
+    loop: 0
+    volume: 0
+    pitch: 1
+    fadeIn: 0
+    fadeOut: 0.15
+    cooldown: 0.15
+    maxVoices: 2
+    provisional: 0
+    materialNote: Kenney RPG Audio / CC0 / https://kenney.nl/assets/rpg-audio ; period
+      cafe paper, book and leather foley; hover silent; listening approval pending
+  - key: ui.cafe.recipe.confirm
+    description: "cafe.recipe / \u6309\u94AE\u70B9\u51FB\u786E\u8BA4"
+    enabled: 1
+    clip: {fileID: 8300000, guid: 8ce802b540a046244b97309747d386c9, type: 3}
+    resourcePath: 
+    category: 0
+    loop: 0
+    volume: 0.14
+    pitch: 1
+    fadeIn: 0
+    fadeOut: 0.15
+    cooldown: 0.12
+    maxVoices: 2
+    provisional: 0
+    materialNote: Kenney RPG Audio / CC0 / https://kenney.nl/assets/rpg-audio ; period
+      cafe paper, book and leather foley; hover silent; listening approval pending
+  - key: ui.cafe.recipe.cancel
+    description: "cafe.recipe / \u8FD4\u56DE / \u53D6\u6D88"
+    enabled: 1
+    clip: {fileID: 8300000, guid: c176d95f18154f3428c16f38fe5f7be9, type: 3}
+    resourcePath: 
+    category: 0
+    loop: 0
+    volume: 0.12
+    pitch: 1
+    fadeIn: 0
+    fadeOut: 0.15
+    cooldown: 0.12
+    maxVoices: 2
+    provisional: 0
+    materialNote: Kenney RPG Audio / CC0 / https://kenney.nl/assets/rpg-audio ; period
+      cafe paper, book and leather foley; hover silent; listening approval pending
+  - key: ui.cafe.recipe.error
+    description: "cafe.recipe / \u8FDD\u89C4\u64CD\u4F5C UI / \u884C\u52A8\u62D2\u7EDD"
+    enabled: 1
+    clip: {fileID: 8300000, guid: 3e647cd552f830a4282650eb714c84e0, type: 3}
+    resourcePath: 
+    category: 0
+    loop: 0
+    volume: 0.12
+    pitch: 1
+    fadeIn: 0
+    fadeOut: 0.15
+    cooldown: 0.12
+    maxVoices: 2
+    provisional: 0
+    materialNote: Kenney RPG Audio / CC0 / https://kenney.nl/assets/rpg-audio ; period
+      cafe paper, book and leather foley; hover silent; listening approval pending
+  - key: ui.cafe.recipe.save_success
+    description: "cafe.recipe / \u624B\u52A8\u4FDD\u5B58\u6210\u529F"
+    enabled: 1
+    clip: {fileID: 8300000, guid: 3e647cd552f830a4282650eb714c84e0, type: 3}
+    resourcePath: 
+    category: 0
+    loop: 0
+    volume: 0.2
+    pitch: 1
+    fadeIn: 0
+    fadeOut: 0.15
+    cooldown: 0.12
+    maxVoices: 2
+    provisional: 0
+    materialNote: Kenney RPG Audio / CC0 / https://kenney.nl/assets/rpg-audio ; period
+      cafe paper, book and leather foley; hover silent; listening approval pending
+  - key: ui.cafe.recipe.tab
+    description: "cafe.recipe / \u5207\u6362\u9875\u7B7E"
+    enabled: 1
+    clip: {fileID: 8300000, guid: 3eff3512800ac0346a09b6af8c0fc677, type: 3}
+    resourcePath: 
+    category: 0
+    loop: 0
+    volume: 0.12
+    pitch: 1
+    fadeIn: 0
+    fadeOut: 0.15
+    cooldown: 0.12
+    maxVoices: 2
+    provisional: 0
+    materialNote: Kenney RPG Audio / CC0 / https://kenney.nl/assets/rpg-audio ; period
+      cafe paper, book and leather foley; hover silent; listening approval pending
+  - key: ui.cafe.recipe.page
+    description: "cafe.recipe / \u8BA2\u5355 / \u914D\u65B9\u7FFB\u9875"
+    enabled: 1
+    clip: {fileID: 8300000, guid: 6fe15cbd400bf3444b5484130171ee13, type: 3}
+    resourcePath: 
+    category: 0
+    loop: 0
+    volume: 0.18
+    pitch: 1
+    fadeIn: 0
+    fadeOut: 0.15
+    cooldown: 0.12
+    maxVoices: 2
+    provisional: 0
+    materialNote: Kenney RPG Audio / CC0 / https://kenney.nl/assets/rpg-audio ; period
+      cafe paper, book and leather foley; hover silent; listening approval pending
+  - key: ui.cafe.recipe.volume_preview
+    description: "cafe.recipe / \u8C03\u8282\u7ED3\u675F\u8BD5\u542C"
+    enabled: 1
+    clip: {fileID: 8300000, guid: 8ce802b540a046244b97309747d386c9, type: 3}
+    resourcePath: 
+    category: 0
+    loop: 0
+    volume: 0.14
+    pitch: 1
+    fadeIn: 0
+    fadeOut: 0.15
+    cooldown: 0.12
+    maxVoices: 2
+    provisional: 0
+    materialNote: Kenney RPG Audio / CC0 / https://kenney.nl/assets/rpg-audio ; period
+      cafe paper, book and leather foley; hover silent; listening approval pending
+  - key: ui.cafe.recipe.panel_open
+    description: "cafe.recipe / \u6253\u5F00\u5F39\u7A97 / \u4FA7\u680F"
+    enabled: 1
+    clip: {fileID: 8300000, guid: d20c47ef1aef41d4f8410de46ecd0e4b, type: 3}
+    resourcePath: 
+    category: 0
+    loop: 0
+    volume: 0.16
+    pitch: 1
+    fadeIn: 0
+    fadeOut: 0.15
+    cooldown: 0.12
+    maxVoices: 2
+    provisional: 0
+    materialNote: Kenney RPG Audio / CC0 / https://kenney.nl/assets/rpg-audio ; period
+      cafe paper, book and leather foley; hover silent; listening approval pending
+  - key: ui.cafe.recipe.panel_close
+    description: "cafe.recipe / \u5173\u95ED\u5F39\u7A97 / \u4FA7\u680F"
+    enabled: 1
+    clip: {fileID: 8300000, guid: 3e647cd552f830a4282650eb714c84e0, type: 3}
+    resourcePath: 
+    category: 0
+    loop: 0
+    volume: 0.14
+    pitch: 1
+    fadeIn: 0
+    fadeOut: 0.15
+    cooldown: 0.12
+    maxVoices: 2
+    provisional: 0
+    materialNote: Kenney RPG Audio / CC0 / https://kenney.nl/assets/rpg-audio ; period
+      cafe paper, book and leather foley; hover silent; listening approval pending
+  - key: ui.cafe.latte.select
+    description: "cafe.latte / \u6309\u94AE\u60AC\u505C / \u4E3B\u52A8\u5BFC\u822A\u9009\u4E2D"
+    enabled: 1
+    clip: {fileID: 8300000, guid: 39f77e72c5971264681f468a67b2604f, type: 3}
+    resourcePath: 
+    category: 0
+    loop: 0
+    volume: 0
+    pitch: 1
+    fadeIn: 0
+    fadeOut: 0.15
+    cooldown: 0.15
+    maxVoices: 2
+    provisional: 0
+    materialNote: Kenney RPG Audio / CC0 / https://kenney.nl/assets/rpg-audio ; period
+      cafe paper, book and leather foley; hover silent; listening approval pending
+  - key: ui.cafe.latte.confirm
+    description: "cafe.latte / \u6309\u94AE\u70B9\u51FB\u786E\u8BA4"
+    enabled: 1
+    clip: {fileID: 8300000, guid: 8ce802b540a046244b97309747d386c9, type: 3}
+    resourcePath: 
+    category: 0
+    loop: 0
+    volume: 0.14
+    pitch: 1
+    fadeIn: 0
+    fadeOut: 0.15
+    cooldown: 0.12
+    maxVoices: 2
+    provisional: 0
+    materialNote: Kenney RPG Audio / CC0 / https://kenney.nl/assets/rpg-audio ; period
+      cafe paper, book and leather foley; hover silent; listening approval pending
+  - key: ui.cafe.latte.cancel
+    description: "cafe.latte / \u8FD4\u56DE / \u53D6\u6D88"
+    enabled: 1
+    clip: {fileID: 8300000, guid: c176d95f18154f3428c16f38fe5f7be9, type: 3}
+    resourcePath: 
+    category: 0
+    loop: 0
+    volume: 0.12
+    pitch: 1
+    fadeIn: 0
+    fadeOut: 0.15
+    cooldown: 0.12
+    maxVoices: 2
+    provisional: 0
+    materialNote: Kenney RPG Audio / CC0 / https://kenney.nl/assets/rpg-audio ; period
+      cafe paper, book and leather foley; hover silent; listening approval pending
+  - key: ui.cafe.latte.error
+    description: "cafe.latte / \u8FDD\u89C4\u64CD\u4F5C UI / \u884C\u52A8\u62D2\u7EDD"
+    enabled: 1
+    clip: {fileID: 8300000, guid: 3e647cd552f830a4282650eb714c84e0, type: 3}
+    resourcePath: 
+    category: 0
+    loop: 0
+    volume: 0.12
+    pitch: 1
+    fadeIn: 0
+    fadeOut: 0.15
+    cooldown: 0.12
+    maxVoices: 2
+    provisional: 0
+    materialNote: Kenney RPG Audio / CC0 / https://kenney.nl/assets/rpg-audio ; period
+      cafe paper, book and leather foley; hover silent; listening approval pending
+  - key: ui.cafe.latte.save_success
+    description: "cafe.latte / \u624B\u52A8\u4FDD\u5B58\u6210\u529F"
+    enabled: 1
+    clip: {fileID: 8300000, guid: 3e647cd552f830a4282650eb714c84e0, type: 3}
+    resourcePath: 
+    category: 0
+    loop: 0
+    volume: 0.2
+    pitch: 1
+    fadeIn: 0
+    fadeOut: 0.15
+    cooldown: 0.12
+    maxVoices: 2
+    provisional: 0
+    materialNote: Kenney RPG Audio / CC0 / https://kenney.nl/assets/rpg-audio ; period
+      cafe paper, book and leather foley; hover silent; listening approval pending
+  - key: ui.cafe.latte.tab
+    description: "cafe.latte / \u5207\u6362\u9875\u7B7E"
+    enabled: 1
+    clip: {fileID: 8300000, guid: 3eff3512800ac0346a09b6af8c0fc677, type: 3}
+    resourcePath: 
+    category: 0
+    loop: 0
+    volume: 0.12
+    pitch: 1
+    fadeIn: 0
+    fadeOut: 0.15
+    cooldown: 0.12
+    maxVoices: 2
+    provisional: 0
+    materialNote: Kenney RPG Audio / CC0 / https://kenney.nl/assets/rpg-audio ; period
+      cafe paper, book and leather foley; hover silent; listening approval pending
+  - key: ui.cafe.latte.page
+    description: "cafe.latte / \u8BA2\u5355 / \u914D\u65B9\u7FFB\u9875"
+    enabled: 1
+    clip: {fileID: 8300000, guid: 6fe15cbd400bf3444b5484130171ee13, type: 3}
+    resourcePath: 
+    category: 0
+    loop: 0
+    volume: 0.18
+    pitch: 1
+    fadeIn: 0
+    fadeOut: 0.15
+    cooldown: 0.12
+    maxVoices: 2
+    provisional: 0
+    materialNote: Kenney RPG Audio / CC0 / https://kenney.nl/assets/rpg-audio ; period
+      cafe paper, book and leather foley; hover silent; listening approval pending
+  - key: ui.cafe.latte.volume_preview
+    description: "cafe.latte / \u8C03\u8282\u7ED3\u675F\u8BD5\u542C"
+    enabled: 1
+    clip: {fileID: 8300000, guid: 8ce802b540a046244b97309747d386c9, type: 3}
+    resourcePath: 
+    category: 0
+    loop: 0
+    volume: 0.14
+    pitch: 1
+    fadeIn: 0
+    fadeOut: 0.15
+    cooldown: 0.12
+    maxVoices: 2
+    provisional: 0
+    materialNote: Kenney RPG Audio / CC0 / https://kenney.nl/assets/rpg-audio ; period
+      cafe paper, book and leather foley; hover silent; listening approval pending
+  - key: ui.cafe.latte.panel_open
+    description: "cafe.latte / \u6253\u5F00\u5F39\u7A97 / \u4FA7\u680F"
+    enabled: 1
+    clip: {fileID: 8300000, guid: d20c47ef1aef41d4f8410de46ecd0e4b, type: 3}
+    resourcePath: 
+    category: 0
+    loop: 0
+    volume: 0.16
+    pitch: 1
+    fadeIn: 0
+    fadeOut: 0.15
+    cooldown: 0.12
+    maxVoices: 2
+    provisional: 0
+    materialNote: Kenney RPG Audio / CC0 / https://kenney.nl/assets/rpg-audio ; period
+      cafe paper, book and leather foley; hover silent; listening approval pending
+  - key: ui.cafe.latte.panel_close
+    description: "cafe.latte / \u5173\u95ED\u5F39\u7A97 / \u4FA7\u680F"
+    enabled: 1
+    clip: {fileID: 8300000, guid: 3e647cd552f830a4282650eb714c84e0, type: 3}
+    resourcePath: 
+    category: 0
+    loop: 0
+    volume: 0.14
+    pitch: 1
+    fadeIn: 0
+    fadeOut: 0.15
+    cooldown: 0.12
+    maxVoices: 2
+    provisional: 0
+    materialNote: Kenney RPG Audio / CC0 / https://kenney.nl/assets/rpg-audio ; period
+      cafe paper, book and leather foley; hover silent; listening approval pending
+  - key: ui.cafe.business.select
+    description: "cafe.business / \u6309\u94AE\u60AC\u505C / \u4E3B\u52A8\u5BFC\u822A\u9009\u4E2D"
+    enabled: 1
+    clip: {fileID: 8300000, guid: 39f77e72c5971264681f468a67b2604f, type: 3}
+    resourcePath: 
+    category: 0
+    loop: 0
+    volume: 0
+    pitch: 1
+    fadeIn: 0
+    fadeOut: 0.15
+    cooldown: 0.15
+    maxVoices: 2
+    provisional: 0
+    materialNote: Kenney RPG Audio / CC0 / https://kenney.nl/assets/rpg-audio ; period
+      cafe paper, book and leather foley; hover silent; listening approval pending
+  - key: ui.cafe.business.confirm
+    description: "cafe.business / \u6309\u94AE\u70B9\u51FB\u786E\u8BA4"
+    enabled: 1
+    clip: {fileID: 8300000, guid: 8ce802b540a046244b97309747d386c9, type: 3}
+    resourcePath: 
+    category: 0
+    loop: 0
+    volume: 0.14
+    pitch: 1
+    fadeIn: 0
+    fadeOut: 0.15
+    cooldown: 0.12
+    maxVoices: 2
+    provisional: 0
+    materialNote: Kenney RPG Audio / CC0 / https://kenney.nl/assets/rpg-audio ; period
+      cafe paper, book and leather foley; hover silent; listening approval pending
+  - key: ui.cafe.business.cancel
+    description: "cafe.business / \u8FD4\u56DE / \u53D6\u6D88"
+    enabled: 1
+    clip: {fileID: 8300000, guid: c176d95f18154f3428c16f38fe5f7be9, type: 3}
+    resourcePath: 
+    category: 0
+    loop: 0
+    volume: 0.12
+    pitch: 1
+    fadeIn: 0
+    fadeOut: 0.15
+    cooldown: 0.12
+    maxVoices: 2
+    provisional: 0
+    materialNote: Kenney RPG Audio / CC0 / https://kenney.nl/assets/rpg-audio ; period
+      cafe paper, book and leather foley; hover silent; listening approval pending
+  - key: ui.cafe.business.error
+    description: "cafe.business / \u8FDD\u89C4\u64CD\u4F5C UI / \u884C\u52A8\u62D2\u7EDD"
+    enabled: 1
+    clip: {fileID: 8300000, guid: 3e647cd552f830a4282650eb714c84e0, type: 3}
+    resourcePath: 
+    category: 0
+    loop: 0
+    volume: 0.12
+    pitch: 1
+    fadeIn: 0
+    fadeOut: 0.15
+    cooldown: 0.12
+    maxVoices: 2
+    provisional: 0
+    materialNote: Kenney RPG Audio / CC0 / https://kenney.nl/assets/rpg-audio ; period
+      cafe paper, book and leather foley; hover silent; listening approval pending
+  - key: ui.cafe.business.save_success
+    description: "cafe.business / \u624B\u52A8\u4FDD\u5B58\u6210\u529F"
+    enabled: 1
+    clip: {fileID: 8300000, guid: 3e647cd552f830a4282650eb714c84e0, type: 3}
+    resourcePath: 
+    category: 0
+    loop: 0
+    volume: 0.2
+    pitch: 1
+    fadeIn: 0
+    fadeOut: 0.15
+    cooldown: 0.12
+    maxVoices: 2
+    provisional: 0
+    materialNote: Kenney RPG Audio / CC0 / https://kenney.nl/assets/rpg-audio ; period
+      cafe paper, book and leather foley; hover silent; listening approval pending
+  - key: ui.cafe.business.tab
+    description: "cafe.business / \u5207\u6362\u9875\u7B7E"
+    enabled: 1
+    clip: {fileID: 8300000, guid: 3eff3512800ac0346a09b6af8c0fc677, type: 3}
+    resourcePath: 
+    category: 0
+    loop: 0
+    volume: 0.12
+    pitch: 1
+    fadeIn: 0
+    fadeOut: 0.15
+    cooldown: 0.12
+    maxVoices: 2
+    provisional: 0
+    materialNote: Kenney RPG Audio / CC0 / https://kenney.nl/assets/rpg-audio ; period
+      cafe paper, book and leather foley; hover silent; listening approval pending
+  - key: ui.cafe.business.page
+    description: "cafe.business / \u8BA2\u5355 / \u914D\u65B9\u7FFB\u9875"
+    enabled: 1
+    clip: {fileID: 8300000, guid: 6fe15cbd400bf3444b5484130171ee13, type: 3}
+    resourcePath: 
+    category: 0
+    loop: 0
+    volume: 0.18
+    pitch: 1
+    fadeIn: 0
+    fadeOut: 0.15
+    cooldown: 0.12
+    maxVoices: 2
+    provisional: 0
+    materialNote: Kenney RPG Audio / CC0 / https://kenney.nl/assets/rpg-audio ; period
+      cafe paper, book and leather foley; hover silent; listening approval pending
+  - key: ui.cafe.business.volume_preview
+    description: "cafe.business / \u8C03\u8282\u7ED3\u675F\u8BD5\u542C"
+    enabled: 1
+    clip: {fileID: 8300000, guid: 8ce802b540a046244b97309747d386c9, type: 3}
+    resourcePath: 
+    category: 0
+    loop: 0
+    volume: 0.14
+    pitch: 1
+    fadeIn: 0
+    fadeOut: 0.15
+    cooldown: 0.12
+    maxVoices: 2
+    provisional: 0
+    materialNote: Kenney RPG Audio / CC0 / https://kenney.nl/assets/rpg-audio ; period
+      cafe paper, book and leather foley; hover silent; listening approval pending
+  - key: ui.cafe.business.panel_open
+    description: "cafe.business / \u6253\u5F00\u5F39\u7A97 / \u4FA7\u680F"
+    enabled: 1
+    clip: {fileID: 8300000, guid: d20c47ef1aef41d4f8410de46ecd0e4b, type: 3}
+    resourcePath: 
+    category: 0
+    loop: 0
+    volume: 0.16
+    pitch: 1
+    fadeIn: 0
+    fadeOut: 0.15
+    cooldown: 0.12
+    maxVoices: 2
+    provisional: 0
+    materialNote: Kenney RPG Audio / CC0 / https://kenney.nl/assets/rpg-audio ; period
+      cafe paper, book and leather foley; hover silent; listening approval pending
+  - key: ui.cafe.business.panel_close
+    description: "cafe.business / \u5173\u95ED\u5F39\u7A97 / \u4FA7\u680F"
+    enabled: 1
+    clip: {fileID: 8300000, guid: 3e647cd552f830a4282650eb714c84e0, type: 3}
+    resourcePath: 
+    category: 0
+    loop: 0
+    volume: 0.14
+    pitch: 1
+    fadeIn: 0
+    fadeOut: 0.15
+    cooldown: 0.12
+    maxVoices: 2
+    provisional: 0
+    materialNote: Kenney RPG Audio / CC0 / https://kenney.nl/assets/rpg-audio ; period
+      cafe paper, book and leather foley; hover silent; listening approval pending
+  - key: ui.story.dialogue.select
+    description: "story.dialogue / \u6309\u94AE\u60AC\u505C / \u4E3B\u52A8\u5BFC\u822A\u9009\u4E2D"
+    enabled: 1
+    clip: {fileID: 8300000, guid: 39f77e72c5971264681f468a67b2604f, type: 3}
+    resourcePath: 
+    category: 0
+    loop: 0
+    volume: 0
+    pitch: 1
+    fadeIn: 0
+    fadeOut: 0.15
+    cooldown: 0.15
+    maxVoices: 2
+    provisional: 0
+    materialNote: Kenney RPG Audio / CC0 / https://kenney.nl/assets/rpg-audio ; period
+      cafe paper, book and leather foley; hover silent; listening approval pending
+  - key: ui.story.dialogue.confirm
+    description: "story.dialogue / \u6309\u94AE\u70B9\u51FB\u786E\u8BA4"
+    enabled: 1
+    clip: {fileID: 8300000, guid: 58d339b010f33d846b9640a3e7fe665a, type: 3}
+    resourcePath: 
+    category: 0
+    loop: 0
+    volume: 0.14
+    pitch: 1
+    fadeIn: 0
+    fadeOut: 0.15
+    cooldown: 0.12
+    maxVoices: 2
+    provisional: 0
+    materialNote: Kenney RPG Audio / CC0 / https://kenney.nl/assets/rpg-audio ; period
+      cafe paper, book and leather foley; hover silent; listening approval pending
+  - key: ui.story.dialogue.cancel
+    description: "story.dialogue / \u8FD4\u56DE / \u53D6\u6D88"
+    enabled: 1
+    clip: {fileID: 8300000, guid: c176d95f18154f3428c16f38fe5f7be9, type: 3}
+    resourcePath: 
+    category: 0
+    loop: 0
+    volume: 0.12
+    pitch: 1
+    fadeIn: 0
+    fadeOut: 0.15
+    cooldown: 0.12
+    maxVoices: 2
+    provisional: 0
+    materialNote: Kenney RPG Audio / CC0 / https://kenney.nl/assets/rpg-audio ; period
+      cafe paper, book and leather foley; hover silent; listening approval pending
+  - key: ui.story.dialogue.error
+    description: "story.dialogue / \u8FDD\u89C4\u64CD\u4F5C UI / \u884C\u52A8\u62D2\u7EDD"
+    enabled: 1
+    clip: {fileID: 8300000, guid: 3e647cd552f830a4282650eb714c84e0, type: 3}
+    resourcePath: 
+    category: 0
+    loop: 0
+    volume: 0.12
+    pitch: 1
+    fadeIn: 0
+    fadeOut: 0.15
+    cooldown: 0.12
+    maxVoices: 2
+    provisional: 0
+    materialNote: Kenney RPG Audio / CC0 / https://kenney.nl/assets/rpg-audio ; period
+      cafe paper, book and leather foley; hover silent; listening approval pending
+  - key: ui.story.dialogue.save_success
+    description: "story.dialogue / \u624B\u52A8\u4FDD\u5B58\u6210\u529F"
+    enabled: 1
+    clip: {fileID: 8300000, guid: 3e647cd552f830a4282650eb714c84e0, type: 3}
+    resourcePath: 
+    category: 0
+    loop: 0
+    volume: 0.2
+    pitch: 1
+    fadeIn: 0
+    fadeOut: 0.15
+    cooldown: 0.12
+    maxVoices: 2
+    provisional: 0
+    materialNote: Kenney RPG Audio / CC0 / https://kenney.nl/assets/rpg-audio ; period
+      cafe paper, book and leather foley; hover silent; listening approval pending
+  - key: ui.story.dialogue.tab
+    description: "story.dialogue / \u5207\u6362\u9875\u7B7E"
+    enabled: 1
+    clip: {fileID: 8300000, guid: 3eff3512800ac0346a09b6af8c0fc677, type: 3}
+    resourcePath: 
+    category: 0
+    loop: 0
+    volume: 0.12
+    pitch: 1
+    fadeIn: 0
+    fadeOut: 0.15
+    cooldown: 0.12
+    maxVoices: 2
+    provisional: 0
+    materialNote: Kenney RPG Audio / CC0 / https://kenney.nl/assets/rpg-audio ; period
+      cafe paper, book and leather foley; hover silent; listening approval pending
+  - key: ui.story.dialogue.page
+    description: "story.dialogue / \u8BA2\u5355 / \u914D\u65B9\u7FFB\u9875"
+    enabled: 1
+    clip: {fileID: 8300000, guid: 6fe15cbd400bf3444b5484130171ee13, type: 3}
+    resourcePath: 
+    category: 0
+    loop: 0
+    volume: 0.18
+    pitch: 1
+    fadeIn: 0
+    fadeOut: 0.15
+    cooldown: 0.12
+    maxVoices: 2
+    provisional: 0
+    materialNote: Kenney RPG Audio / CC0 / https://kenney.nl/assets/rpg-audio ; period
+      cafe paper, book and leather foley; hover silent; listening approval pending
+  - key: ui.story.dialogue.volume_preview
+    description: "story.dialogue / \u8C03\u8282\u7ED3\u675F\u8BD5\u542C"
+    enabled: 1
+    clip: {fileID: 8300000, guid: 58d339b010f33d846b9640a3e7fe665a, type: 3}
+    resourcePath: 
+    category: 0
+    loop: 0
+    volume: 0.14
+    pitch: 1
+    fadeIn: 0
+    fadeOut: 0.15
+    cooldown: 0.12
+    maxVoices: 2
+    provisional: 0
+    materialNote: Kenney RPG Audio / CC0 / https://kenney.nl/assets/rpg-audio ; period
+      cafe paper, book and leather foley; hover silent; listening approval pending
+  - key: ui.story.dialogue.panel_open
+    description: "story.dialogue / \u6253\u5F00\u5F39\u7A97 / \u4FA7\u680F"
+    enabled: 1
+    clip: {fileID: 8300000, guid: d20c47ef1aef41d4f8410de46ecd0e4b, type: 3}
+    resourcePath: 
+    category: 0
+    loop: 0
+    volume: 0.16
+    pitch: 1
+    fadeIn: 0
+    fadeOut: 0.15
+    cooldown: 0.12
+    maxVoices: 2
+    provisional: 0
+    materialNote: Kenney RPG Audio / CC0 / https://kenney.nl/assets/rpg-audio ; period
+      cafe paper, book and leather foley; hover silent; listening approval pending
+  - key: ui.story.dialogue.panel_close
+    description: "story.dialogue / \u5173\u95ED\u5F39\u7A97 / \u4FA7\u680F"
+    enabled: 1
+    clip: {fileID: 8300000, guid: 3e647cd552f830a4282650eb714c84e0, type: 3}
+    resourcePath: 
+    category: 0
+    loop: 0
+    volume: 0.14
+    pitch: 1
+    fadeIn: 0
+    fadeOut: 0.15
+    cooldown: 0.12
+    maxVoices: 2
+    provisional: 0
+    materialNote: Kenney RPG Audio / CC0 / https://kenney.nl/assets/rpg-audio ; period
+      cafe paper, book and leather foley; hover silent; listening approval pending
+  - key: ui.story.reading.select
+    description: "story.reading / \u6309\u94AE\u60AC\u505C / \u4E3B\u52A8\u5BFC\u822A\u9009\u4E2D"
+    enabled: 1
+    clip: {fileID: 8300000, guid: 39f77e72c5971264681f468a67b2604f, type: 3}
+    resourcePath: 
+    category: 0
+    loop: 0
+    volume: 0
+    pitch: 1
+    fadeIn: 0
+    fadeOut: 0.15
+    cooldown: 0.15
+    maxVoices: 2
+    provisional: 0
+    materialNote: Kenney RPG Audio / CC0 / https://kenney.nl/assets/rpg-audio ; period
+      cafe paper, book and leather foley; hover silent; listening approval pending
+  - key: ui.story.reading.confirm
+    description: "story.reading / \u6309\u94AE\u70B9\u51FB\u786E\u8BA4"
+    enabled: 1
+    clip: {fileID: 8300000, guid: 58d339b010f33d846b9640a3e7fe665a, type: 3}
+    resourcePath: 
+    category: 0
+    loop: 0
+    volume: 0.14
+    pitch: 1
+    fadeIn: 0
+    fadeOut: 0.15
+    cooldown: 0.12
+    maxVoices: 2
+    provisional: 0
+    materialNote: Kenney RPG Audio / CC0 / https://kenney.nl/assets/rpg-audio ; period
+      cafe paper, book and leather foley; hover silent; listening approval pending
+  - key: ui.story.reading.cancel
+    description: "story.reading / \u8FD4\u56DE / \u53D6\u6D88"
+    enabled: 1
+    clip: {fileID: 8300000, guid: c176d95f18154f3428c16f38fe5f7be9, type: 3}
+    resourcePath: 
+    category: 0
+    loop: 0
+    volume: 0.12
+    pitch: 1
+    fadeIn: 0
+    fadeOut: 0.15
+    cooldown: 0.12
+    maxVoices: 2
+    provisional: 0
+    materialNote: Kenney RPG Audio / CC0 / https://kenney.nl/assets/rpg-audio ; period
+      cafe paper, book and leather foley; hover silent; listening approval pending
+  - key: ui.story.reading.error
+    description: "story.reading / \u8FDD\u89C4\u64CD\u4F5C UI / \u884C\u52A8\u62D2\u7EDD"
+    enabled: 1
+    clip: {fileID: 8300000, guid: 3e647cd552f830a4282650eb714c84e0, type: 3}
+    resourcePath: 
+    category: 0
+    loop: 0
+    volume: 0.12
+    pitch: 1
+    fadeIn: 0
+    fadeOut: 0.15
+    cooldown: 0.12
+    maxVoices: 2
+    provisional: 0
+    materialNote: Kenney RPG Audio / CC0 / https://kenney.nl/assets/rpg-audio ; period
+      cafe paper, book and leather foley; hover silent; listening approval pending
+  - key: ui.story.reading.save_success
+    description: "story.reading / \u624B\u52A8\u4FDD\u5B58\u6210\u529F"
+    enabled: 1
+    clip: {fileID: 8300000, guid: 3e647cd552f830a4282650eb714c84e0, type: 3}
+    resourcePath: 
+    category: 0
+    loop: 0
+    volume: 0.2
+    pitch: 1
+    fadeIn: 0
+    fadeOut: 0.15
+    cooldown: 0.12
+    maxVoices: 2
+    provisional: 0
+    materialNote: Kenney RPG Audio / CC0 / https://kenney.nl/assets/rpg-audio ; period
+      cafe paper, book and leather foley; hover silent; listening approval pending
+  - key: ui.story.reading.tab
+    description: "story.reading / \u5207\u6362\u9875\u7B7E"
+    enabled: 1
+    clip: {fileID: 8300000, guid: 3eff3512800ac0346a09b6af8c0fc677, type: 3}
+    resourcePath: 
+    category: 0
+    loop: 0
+    volume: 0.12
+    pitch: 1
+    fadeIn: 0
+    fadeOut: 0.15
+    cooldown: 0.12
+    maxVoices: 2
+    provisional: 0
+    materialNote: Kenney RPG Audio / CC0 / https://kenney.nl/assets/rpg-audio ; period
+      cafe paper, book and leather foley; hover silent; listening approval pending
+  - key: ui.story.reading.page
+    description: "story.reading / \u8BA2\u5355 / \u914D\u65B9\u7FFB\u9875"
+    enabled: 1
+    clip: {fileID: 8300000, guid: 6fe15cbd400bf3444b5484130171ee13, type: 3}
+    resourcePath: 
+    category: 0
+    loop: 0
+    volume: 0.18
+    pitch: 1
+    fadeIn: 0
+    fadeOut: 0.15
+    cooldown: 0.12
+    maxVoices: 2
+    provisional: 0
+    materialNote: Kenney RPG Audio / CC0 / https://kenney.nl/assets/rpg-audio ; period
+      cafe paper, book and leather foley; hover silent; listening approval pending
+  - key: ui.story.reading.volume_preview
+    description: "story.reading / \u8C03\u8282\u7ED3\u675F\u8BD5\u542C"
+    enabled: 1
+    clip: {fileID: 8300000, guid: 58d339b010f33d846b9640a3e7fe665a, type: 3}
+    resourcePath: 
+    category: 0
+    loop: 0
+    volume: 0.14
+    pitch: 1
+    fadeIn: 0
+    fadeOut: 0.15
+    cooldown: 0.12
+    maxVoices: 2
+    provisional: 0
+    materialNote: Kenney RPG Audio / CC0 / https://kenney.nl/assets/rpg-audio ; period
+      cafe paper, book and leather foley; hover silent; listening approval pending
+  - key: ui.story.reading.panel_open
+    description: "story.reading / \u6253\u5F00\u5F39\u7A97 / \u4FA7\u680F"
+    enabled: 1
+    clip: {fileID: 8300000, guid: d20c47ef1aef41d4f8410de46ecd0e4b, type: 3}
+    resourcePath: 
+    category: 0
+    loop: 0
+    volume: 0.16
+    pitch: 1
+    fadeIn: 0
+    fadeOut: 0.15
+    cooldown: 0.12
+    maxVoices: 2
+    provisional: 0
+    materialNote: Kenney RPG Audio / CC0 / https://kenney.nl/assets/rpg-audio ; period
+      cafe paper, book and leather foley; hover silent; listening approval pending
+  - key: ui.story.reading.panel_close
+    description: "story.reading / \u5173\u95ED\u5F39\u7A97 / \u4FA7\u680F"
+    enabled: 1
+    clip: {fileID: 8300000, guid: 3e647cd552f830a4282650eb714c84e0, type: 3}
+    resourcePath: 
+    category: 0
+    loop: 0
+    volume: 0.14
+    pitch: 1
+    fadeIn: 0
+    fadeOut: 0.15
+    cooldown: 0.12
+    maxVoices: 2
+    provisional: 0
+    materialNote: Kenney RPG Audio / CC0 / https://kenney.nl/assets/rpg-audio ; period
+      cafe paper, book and leather foley; hover silent; listening approval pending
+  - key: ui.story.letter.select
+    description: "story.letter / \u6309\u94AE\u60AC\u505C / \u4E3B\u52A8\u5BFC\u822A\u9009\u4E2D"
+    enabled: 1
+    clip: {fileID: 8300000, guid: 39f77e72c5971264681f468a67b2604f, type: 3}
+    resourcePath: 
+    category: 0
+    loop: 0
+    volume: 0
+    pitch: 1
+    fadeIn: 0
+    fadeOut: 0.15
+    cooldown: 0.15
+    maxVoices: 2
+    provisional: 0
+    materialNote: Kenney RPG Audio / CC0 / https://kenney.nl/assets/rpg-audio ; period
+      cafe paper, book and leather foley; hover silent; listening approval pending
+  - key: ui.story.letter.confirm
+    description: "story.letter / \u6309\u94AE\u70B9\u51FB\u786E\u8BA4"
+    enabled: 1
+    clip: {fileID: 8300000, guid: 58d339b010f33d846b9640a3e7fe665a, type: 3}
+    resourcePath: 
+    category: 0
+    loop: 0
+    volume: 0.14
+    pitch: 1
+    fadeIn: 0
+    fadeOut: 0.15
+    cooldown: 0.12
+    maxVoices: 2
+    provisional: 0
+    materialNote: Kenney RPG Audio / CC0 / https://kenney.nl/assets/rpg-audio ; period
+      cafe paper, book and leather foley; hover silent; listening approval pending
+  - key: ui.story.letter.cancel
+    description: "story.letter / \u8FD4\u56DE / \u53D6\u6D88"
+    enabled: 1
+    clip: {fileID: 8300000, guid: c176d95f18154f3428c16f38fe5f7be9, type: 3}
+    resourcePath: 
+    category: 0
+    loop: 0
+    volume: 0.12
+    pitch: 1
+    fadeIn: 0
+    fadeOut: 0.15
+    cooldown: 0.12
+    maxVoices: 2
+    provisional: 0
+    materialNote: Kenney RPG Audio / CC0 / https://kenney.nl/assets/rpg-audio ; period
+      cafe paper, book and leather foley; hover silent; listening approval pending
+  - key: ui.story.letter.error
+    description: "story.letter / \u8FDD\u89C4\u64CD\u4F5C UI / \u884C\u52A8\u62D2\u7EDD"
+    enabled: 1
+    clip: {fileID: 8300000, guid: 3e647cd552f830a4282650eb714c84e0, type: 3}
+    resourcePath: 
+    category: 0
+    loop: 0
+    volume: 0.12
+    pitch: 1
+    fadeIn: 0
+    fadeOut: 0.15
+    cooldown: 0.12
+    maxVoices: 2
+    provisional: 0
+    materialNote: Kenney RPG Audio / CC0 / https://kenney.nl/assets/rpg-audio ; period
+      cafe paper, book and leather foley; hover silent; listening approval pending
+  - key: ui.story.letter.save_success
+    description: "story.letter / \u624B\u52A8\u4FDD\u5B58\u6210\u529F"
+    enabled: 1
+    clip: {fileID: 8300000, guid: 3e647cd552f830a4282650eb714c84e0, type: 3}
+    resourcePath: 
+    category: 0
+    loop: 0
+    volume: 0.2
+    pitch: 1
+    fadeIn: 0
+    fadeOut: 0.15
+    cooldown: 0.12
+    maxVoices: 2
+    provisional: 0
+    materialNote: Kenney RPG Audio / CC0 / https://kenney.nl/assets/rpg-audio ; period
+      cafe paper, book and leather foley; hover silent; listening approval pending
+  - key: ui.story.letter.tab
+    description: "story.letter / \u5207\u6362\u9875\u7B7E"
+    enabled: 1
+    clip: {fileID: 8300000, guid: 3eff3512800ac0346a09b6af8c0fc677, type: 3}
+    resourcePath: 
+    category: 0
+    loop: 0
+    volume: 0.12
+    pitch: 1
+    fadeIn: 0
+    fadeOut: 0.15
+    cooldown: 0.12
+    maxVoices: 2
+    provisional: 0
+    materialNote: Kenney RPG Audio / CC0 / https://kenney.nl/assets/rpg-audio ; period
+      cafe paper, book and leather foley; hover silent; listening approval pending
+  - key: ui.story.letter.page
+    description: "story.letter / \u8BA2\u5355 / \u914D\u65B9\u7FFB\u9875"
+    enabled: 1
+    clip: {fileID: 8300000, guid: 6fe15cbd400bf3444b5484130171ee13, type: 3}
+    resourcePath: 
+    category: 0
+    loop: 0
+    volume: 0.18
+    pitch: 1
+    fadeIn: 0
+    fadeOut: 0.15
+    cooldown: 0.12
+    maxVoices: 2
+    provisional: 0
+    materialNote: Kenney RPG Audio / CC0 / https://kenney.nl/assets/rpg-audio ; period
+      cafe paper, book and leather foley; hover silent; listening approval pending
+  - key: ui.story.letter.volume_preview
+    description: "story.letter / \u8C03\u8282\u7ED3\u675F\u8BD5\u542C"
+    enabled: 1
+    clip: {fileID: 8300000, guid: 58d339b010f33d846b9640a3e7fe665a, type: 3}
+    resourcePath: 
+    category: 0
+    loop: 0
+    volume: 0.14
+    pitch: 1
+    fadeIn: 0
+    fadeOut: 0.15
+    cooldown: 0.12
+    maxVoices: 2
+    provisional: 0
+    materialNote: Kenney RPG Audio / CC0 / https://kenney.nl/assets/rpg-audio ; period
+      cafe paper, book and leather foley; hover silent; listening approval pending
+  - key: ui.story.letter.panel_open
+    description: "story.letter / \u6253\u5F00\u5F39\u7A97 / \u4FA7\u680F"
+    enabled: 1
+    clip: {fileID: 8300000, guid: d20c47ef1aef41d4f8410de46ecd0e4b, type: 3}
+    resourcePath: 
+    category: 0
+    loop: 0
+    volume: 0.16
+    pitch: 1
+    fadeIn: 0
+    fadeOut: 0.15
+    cooldown: 0.12
+    maxVoices: 2
+    provisional: 0
+    materialNote: Kenney RPG Audio / CC0 / https://kenney.nl/assets/rpg-audio ; period
+      cafe paper, book and leather foley; hover silent; listening approval pending
+  - key: ui.story.letter.panel_close
+    description: "story.letter / \u5173\u95ED\u5F39\u7A97 / \u4FA7\u680F"
+    enabled: 1
+    clip: {fileID: 8300000, guid: 3e647cd552f830a4282650eb714c84e0, type: 3}
+    resourcePath: 
+    category: 0
+    loop: 0
+    volume: 0.14
+    pitch: 1
+    fadeIn: 0
+    fadeOut: 0.15
+    cooldown: 0.12
+    maxVoices: 2
+    provisional: 0
+    materialNote: Kenney RPG Audio / CC0 / https://kenney.nl/assets/rpg-audio ; period
+      cafe paper, book and leather foley; hover silent; listening approval pending
+  - key: ui.story.notice.select
+    description: "story.notice / \u6309\u94AE\u60AC\u505C / \u4E3B\u52A8\u5BFC\u822A\u9009\u4E2D"
+    enabled: 1
+    clip: {fileID: 8300000, guid: 39f77e72c5971264681f468a67b2604f, type: 3}
+    resourcePath: 
+    category: 0
+    loop: 0
+    volume: 0
+    pitch: 1
+    fadeIn: 0
+    fadeOut: 0.15
+    cooldown: 0.15
+    maxVoices: 2
+    provisional: 0
+    materialNote: Kenney RPG Audio / CC0 / https://kenney.nl/assets/rpg-audio ; period
+      cafe paper, book and leather foley; hover silent; listening approval pending
+  - key: ui.story.notice.confirm
+    description: "story.notice / \u6309\u94AE\u70B9\u51FB\u786E\u8BA4"
+    enabled: 1
+    clip: {fileID: 8300000, guid: 58d339b010f33d846b9640a3e7fe665a, type: 3}
+    resourcePath: 
+    category: 0
+    loop: 0
+    volume: 0.14
+    pitch: 1
+    fadeIn: 0
+    fadeOut: 0.15
+    cooldown: 0.12
+    maxVoices: 2
+    provisional: 0
+    materialNote: Kenney RPG Audio / CC0 / https://kenney.nl/assets/rpg-audio ; period
+      cafe paper, book and leather foley; hover silent; listening approval pending
+  - key: ui.story.notice.cancel
+    description: "story.notice / \u8FD4\u56DE / \u53D6\u6D88"
+    enabled: 1
+    clip: {fileID: 8300000, guid: c176d95f18154f3428c16f38fe5f7be9, type: 3}
+    resourcePath: 
+    category: 0
+    loop: 0
+    volume: 0.12
+    pitch: 1
+    fadeIn: 0
+    fadeOut: 0.15
+    cooldown: 0.12
+    maxVoices: 2
+    provisional: 0
+    materialNote: Kenney RPG Audio / CC0 / https://kenney.nl/assets/rpg-audio ; period
+      cafe paper, book and leather foley; hover silent; listening approval pending
+  - key: ui.story.notice.error
+    description: "story.notice / \u8FDD\u89C4\u64CD\u4F5C UI / \u884C\u52A8\u62D2\u7EDD"
+    enabled: 1
+    clip: {fileID: 8300000, guid: 3e647cd552f830a4282650eb714c84e0, type: 3}
+    resourcePath: 
+    category: 0
+    loop: 0
+    volume: 0.12
+    pitch: 1
+    fadeIn: 0
+    fadeOut: 0.15
+    cooldown: 0.12
+    maxVoices: 2
+    provisional: 0
+    materialNote: Kenney RPG Audio / CC0 / https://kenney.nl/assets/rpg-audio ; period
+      cafe paper, book and leather foley; hover silent; listening approval pending
+  - key: ui.story.notice.save_success
+    description: "story.notice / \u624B\u52A8\u4FDD\u5B58\u6210\u529F"
+    enabled: 1
+    clip: {fileID: 8300000, guid: 3e647cd552f830a4282650eb714c84e0, type: 3}
+    resourcePath: 
+    category: 0
+    loop: 0
+    volume: 0.2
+    pitch: 1
+    fadeIn: 0
+    fadeOut: 0.15
+    cooldown: 0.12
+    maxVoices: 2
+    provisional: 0
+    materialNote: Kenney RPG Audio / CC0 / https://kenney.nl/assets/rpg-audio ; period
+      cafe paper, book and leather foley; hover silent; listening approval pending
+  - key: ui.story.notice.tab
+    description: "story.notice / \u5207\u6362\u9875\u7B7E"
+    enabled: 1
+    clip: {fileID: 8300000, guid: 3eff3512800ac0346a09b6af8c0fc677, type: 3}
+    resourcePath: 
+    category: 0
+    loop: 0
+    volume: 0.12
+    pitch: 1
+    fadeIn: 0
+    fadeOut: 0.15
+    cooldown: 0.12
+    maxVoices: 2
+    provisional: 0
+    materialNote: Kenney RPG Audio / CC0 / https://kenney.nl/assets/rpg-audio ; period
+      cafe paper, book and leather foley; hover silent; listening approval pending
+  - key: ui.story.notice.page
+    description: "story.notice / \u8BA2\u5355 / \u914D\u65B9\u7FFB\u9875"
+    enabled: 1
+    clip: {fileID: 8300000, guid: 6fe15cbd400bf3444b5484130171ee13, type: 3}
+    resourcePath: 
+    category: 0
+    loop: 0
+    volume: 0.18
+    pitch: 1
+    fadeIn: 0
+    fadeOut: 0.15
+    cooldown: 0.12
+    maxVoices: 2
+    provisional: 0
+    materialNote: Kenney RPG Audio / CC0 / https://kenney.nl/assets/rpg-audio ; period
+      cafe paper, book and leather foley; hover silent; listening approval pending
+  - key: ui.story.notice.volume_preview
+    description: "story.notice / \u8C03\u8282\u7ED3\u675F\u8BD5\u542C"
+    enabled: 1
+    clip: {fileID: 8300000, guid: 58d339b010f33d846b9640a3e7fe665a, type: 3}
+    resourcePath: 
+    category: 0
+    loop: 0
+    volume: 0.14
+    pitch: 1
+    fadeIn: 0
+    fadeOut: 0.15
+    cooldown: 0.12
+    maxVoices: 2
+    provisional: 0
+    materialNote: Kenney RPG Audio / CC0 / https://kenney.nl/assets/rpg-audio ; period
+      cafe paper, book and leather foley; hover silent; listening approval pending
+  - key: ui.story.notice.panel_open
+    description: "story.notice / \u6253\u5F00\u5F39\u7A97 / \u4FA7\u680F"
+    enabled: 1
+    clip: {fileID: 8300000, guid: d20c47ef1aef41d4f8410de46ecd0e4b, type: 3}
+    resourcePath: 
+    category: 0
+    loop: 0
+    volume: 0.16
+    pitch: 1
+    fadeIn: 0
+    fadeOut: 0.15
+    cooldown: 0.12
+    maxVoices: 2
+    provisional: 0
+    materialNote: Kenney RPG Audio / CC0 / https://kenney.nl/assets/rpg-audio ; period
+      cafe paper, book and leather foley; hover silent; listening approval pending
+  - key: ui.story.notice.panel_close
+    description: "story.notice / \u5173\u95ED\u5F39\u7A97 / \u4FA7\u680F"
+    enabled: 1
+    clip: {fileID: 8300000, guid: 3e647cd552f830a4282650eb714c84e0, type: 3}
+    resourcePath: 
+    category: 0
+    loop: 0
+    volume: 0.14
+    pitch: 1
+    fadeIn: 0
+    fadeOut: 0.15
+    cooldown: 0.12
+    maxVoices: 2
+    provisional: 0
+    materialNote: Kenney RPG Audio / CC0 / https://kenney.nl/assets/rpg-audio ; period
+      cafe paper, book and leather foley; hover silent; listening approval pending
   videoVolume: 1
   videoCategory: 1
   musicTransitionSeconds: 0.5

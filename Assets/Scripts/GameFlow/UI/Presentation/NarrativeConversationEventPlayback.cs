@@ -2,14 +2,19 @@ using System;
 using System.Collections.Generic;
 using Spotlight.Narrative;
 using UnityEngine;
+using YokiFrame;
 
 namespace Spotlight.GameFlow
 {
     public static class NarrativeConversationEventPlayback
     {
         public static bool Play(NarrativeEventRequest request, NarrativeConversationPresentationData data, Action completed)
+            => Play(request, data, completed, "character-dialogue", PanelCachePolicy.Reusable);
+
+        public static bool Play(NarrativeEventRequest request, NarrativeConversationPresentationData data, Action completed,
+            string panelTag, PanelCachePolicy cachePolicy)
         {
-            if (data == null || data.lines.Count == 0) return false;
+            if (data == null || data.lines.Count == 0 && data.options.Count == 0) return false;
             var lines = new List<DialogueLine>(data.lines.Count);
             DialogueCharacter left = null, right = null;
             foreach (NarrativeConversationPresentationLine item in data.lines)
@@ -17,6 +22,7 @@ namespace Spotlight.GameFlow
                 if (string.IsNullOrWhiteSpace(item.speakerKey))
                 {
                     lines.Add(new DialogueLine(DialogueSpeaker.Narrator, item.text, passiveHint: lines.Count == 0 ? request.PassiveHint : null,
+                        accentFxKey: item.accentFxKey, accentTargetKey: item.accentTargetKey,
                         sfxKey: item.sfxKey, voiceKey: item.voiceKey));
                     continue;
                 }
@@ -33,6 +39,7 @@ namespace Spotlight.GameFlow
                     accentFxKey: item.accentFxKey, accentTargetKey: item.accentTargetKey,
                     passiveHint: lines.Count == 0 ? request.PassiveHint : null, sfxKey: item.sfxKey, voiceKey: item.voiceKey));
             }
+            if (lines.Count == 0) lines.Add(new DialogueLine(DialogueSpeaker.Narrator, string.Empty));
             // 显式空角色避免纯旁白套用旧 Prefab 的默认人物。
             if (!string.IsNullOrWhiteSpace(request.PassiveHint) && lines.Count > 0)
             {
@@ -50,7 +57,8 @@ namespace Spotlight.GameFlow
                 options.Add(new DialogueOption(option.id, option.text, enabled: option.enabled, requirementHint: option.requirement));
             DialoguePanel panel = DialoguePlayback.Play(new DialogueScript(lines, left ?? new DialogueCharacter("", null),
                 right ?? new DialogueCharacter("", null), data.title,
-                string.IsNullOrEmpty(data.backgroundPath) ? null : Resources.Load<Texture>(data.backgroundPath), options), Complete, Cancel);
+                string.IsNullOrEmpty(data.backgroundPath) ? null : Resources.Load<Texture>(data.backgroundPath), options), Complete, Cancel,
+                panelTag, cachePolicy);
             panel.AllowCancel = true;
             if (!string.IsNullOrWhiteSpace(data.bgmOverride)) Spotlight.Audio.GameAudio.OverrideMusic(panel, data.bgmOverride);
             panel.OptionSelectionRequested = data.selectChoice;
