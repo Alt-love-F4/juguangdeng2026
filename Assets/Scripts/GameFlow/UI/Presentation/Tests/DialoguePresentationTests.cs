@@ -131,6 +131,43 @@ namespace Spotlight.GameFlow.Tests
         }
 
         [UnityTest]
+        public IEnumerator RepeatedSkipStopsAtChoiceAndContinuesWithoutClosingPanel()
+        {
+            int submitted = 0, completed = 0;
+            var panel = DialoguePlayback.Play(new DialogueScript(new[]
+            {
+                new DialogueLine(DialogueSpeaker.Narrator, "请选择回应。")
+            }, options: new[] { new DialogueOption("accept", "接受") }), () => completed++);
+            panel.OptionSelectionRequested = id => { submitted++; return true; };
+            yield return Ready(panel);
+            panel.Skip();
+            float deadline = Time.realtimeSinceStartup + 5f;
+            while (!panel.IsChoosing)
+            {
+                Assert.That(Time.realtimeSinceStartup, Is.LessThan(deadline));
+                panel.Skip();
+                yield return null;
+            }
+            panel.Skip();
+            panel.Advance();
+            Assert.That(panel.IsSkipping, Is.False);
+            Assert.That(submitted, Is.Zero);
+            Assert.That(panel.SelectOption("accept"), Is.True);
+            Assert.That(panel.SelectOption("accept"), Is.False);
+            Assert.That(submitted, Is.EqualTo(1));
+            Assert.That(completed, Is.EqualTo(1));
+            Assert.That(panel.SeamlessChoicePending, Is.True);
+            var next = DialoguePlayback.Play(new DialogueScript(new[]
+            {
+                new DialogueLine(DialogueSpeaker.Narrator, "我接受。")
+            }));
+            Assert.That(next, Is.SameAs(panel));
+            Assert.That(next.GetComponent<CanvasGroup>().alpha, Is.EqualTo(1f));
+            Assert.That(next.LineIndex, Is.Zero);
+            DialoguePlayback.Stop();
+        }
+
+        [UnityTest]
         public IEnumerator RevealAndAdvanceAreSeparateAndDuplicateSubmitIsIgnored()
         {
             DialoguePanel panel = Open();

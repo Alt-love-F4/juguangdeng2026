@@ -207,6 +207,10 @@ namespace Spotlight.Narrative
                 if (Get("checkDisplay") == "passive")
                 {
                     if (AbilityCheck?.Invoke(setup.checkId) == null) throw new InvalidOperationException("Ability check unavailable: " + setup.checkId);
+                    // A silent check has no presentation atoms to wait for, even while
+                    // the host has suspended its ordinary narrative window.
+                    if (string.IsNullOrWhiteSpace(definition.presentationKey)
+                        && (definition.contentKeys == null || definition.contentKeys.Count == 0)) yield break;
                 }
                 else yield return AbilityCheckPresentation(setup.checkId);
             }

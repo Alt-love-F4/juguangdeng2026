@@ -17,13 +17,15 @@ namespace Spotlight.GameFlow
         {
             if (script == null) throw new ArgumentNullException(nameof(script));
             if (DialoguePanel.IsAnyPlaying) throw new InvalidOperationException("A dialogue is already playing. Stop it before replacing it.");
-            DialoguePanel panel = UIKit.OpenPanel<DialoguePanel>(UILevel.Pop, tag: "character-dialogue",
-                cachePolicy: PanelCachePolicy.Reusable);
+            DialoguePanel panel = UIKit.GetPanel<DialoguePanel>();
+            if (panel == null || !panel.SeamlessChoicePending)
+                panel = UIKit.OpenPanel<DialoguePanel>(UILevel.Pop, tag: "character-dialogue",
+                    cachePolicy: PanelCachePolicy.Reusable);
             try
             {
                 panel.Play(script, () =>
                 {
-                    UIKit.ClosePanel(panel);
+                    if (!panel.SeamlessChoicePending) UIKit.ClosePanel(panel);
                     onFinished?.Invoke();
                 }, onCancelled);
                 return panel;

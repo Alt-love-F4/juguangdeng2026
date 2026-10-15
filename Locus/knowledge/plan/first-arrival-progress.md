@@ -19,6 +19,15 @@ aiEditMode: inherit
 - 测试 run c8e5b121ce454ef9b90c81c90f9d5564：FirstArrivalTests、NarrativeAbilityCheckTests、ActualGeneratedLubanDataLoadsAndValidates，共 6 项通过。
 - 导入脚本重复执行后两份工作簿所有 sheet 值相同，已验证幂等性。
 
+## 后续 UI 检查点
+
+- GameFlowBootstrap 已提前绑定 CafeWorld，并放行首日引导 NCS。先前实机 Advance/SelectOption 接受分支能到 CityMapLeisure，但反复 Skip 仍曾出现 DateTransition 与 arrival.check 同时存在的异常，根因未闭环。
+- 无正文 passive check 计算后直接结束；尚未证明能解决上述日流程状态异常。
+- 移除选项的“已选择”反馈和延迟。正式 NCS 选择完成时保留面板，下段复用并跳过入场淡入。信件正文仅保留标签，HoverEffect 在 readingHint 显示效果，奖励逻辑未变。
+- 完整编译通过；新增 PlayMode 回归 RepeatedSkipStopsAtChoiceAndContinuesWithoutClosingPanel，通过 1/1（run 674c8c5eae89466b9e3fc0ac32095304），验证反复 Skip 停选择、一次提交、同面板衔接且 alpha=1。
+- Presentation 全程序集 PlayMode 运行提前取消，取消时 58 通过、16 失败（共发现307项）；存在旧流程期待地图而实际日期、Unknown character: eugene 等，未全部归因。run 95189063a474448b88c409b33162e1e3。EditMode 对此程序集发现0项，不算通过验证。
+- 仍需正式新游戏实机复验、信件 hover 视觉验收、NCS 分支结束时保留面板的清理验证。新增测试场景 InitTestScene5d772b1e-8ca4-408b-acb7-8441dacb7429.unity 为本次测试运行产生，尚未清理。
+
 ## 尚需完成
 
 - 正式 conversation 页面条件：当前 PageVisible 的 pageBarConds 抛错，pageCondKeys 临时使用状态 bool；需依据项目约定实现并测试。

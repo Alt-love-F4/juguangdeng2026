@@ -147,6 +147,7 @@ namespace Spotlight.GameFlow
             if (value == null) throw new ArgumentNullException(nameof(value));
             for (int i = 0; i < value.Count; i++)
                 if (!string.IsNullOrWhiteSpace(value[i].AccentFxKey)) effectLibrary.Find(value[i].AccentFxKey);
+            bool seamless = SeamlessChoicePending;
             Stop();
             pauseOwner = PresentationPauseRegistry.Acquire(nameof(DialoguePanel));
             try
@@ -169,13 +170,19 @@ namespace Spotlight.GameFlow
             active = this;
             IsPlaying = true;
             lastAdvanceFrame = Time.frameCount;
-            canvasGroup.alpha = 0f;
+            canvasGroup.alpha = seamless ? 1f : 0f;
             canvasGroup.blocksRaycasts = canvasGroup.interactable = true;
             continueButton.interactable = false;
             leftPortrait.color = rightPortrait.color = centerPortrait.color = Color.white;
             UnityEngine.EventSystems.EventSystem system = UnityEngine.EventSystems.EventSystem.current;
             if (system != null) system.SetSelectedGameObject(null);
             ShowLine(0);
+            if (seamless)
+            {
+                dialogueBox.anchoredPosition = boxPosition;
+                entranceComplete = true;
+                return;
+            }
             dialogueBox.anchoredPosition = boxPosition + new Vector2(0f, -32f);
             EnterVisiblePortraits();
             transition = Sequence();

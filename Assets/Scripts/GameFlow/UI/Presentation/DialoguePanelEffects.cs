@@ -371,33 +371,33 @@ namespace Spotlight.GameFlow
             Spotlight.Audio.GameAudio.Play(Spotlight.Audio.AudioKeys.Confirm);
             optionGroup.interactable = false;
             for (int i = 0; i < optionButtons.Count; i++) optionButtons[i].interactable = false;
-            Button selected = optionButtons[index];
-            selected.GetComponent<Image>().color = optionTemplate != null
-                ? new Color(1f, .91f, .76f) : new Color(.24f, .40f, .29f);
-            selected.GetComponentInChildren<TMP_Text>().text = "[已选择]  " + option.Text;
-            if (optionPrompt != null) optionPrompt.text = "已选择 · " + option.Text;
-            if (hintText != null) hintText.text = "已选择回应";
-            // Keep selection feedback briefly; Stop/close/replay explicitly kills this owned callback.
-            optionFeedback = DOVirtual.DelayedCall(.45f, () =>
+            HideOptions();
+            optionsVisible = false;
+            hold = 0f;
+            if (option.Response != null)
             {
-                optionFeedback = null;
-                HideOptions();
-                optionsVisible = false;
-                lastAdvanceFrame = Time.frameCount;
-                hold = 0f;
-                if (option.Response != null)
-                {
-                    activeLines.Add(option.Response);
-                    PrepareNextLine(activeLines.Count - 1);
-                }
-                continueButton.interactable = IsReady;
-                UpdateHint();
-            }, true).SetLink(gameObject, LinkBehaviour.KillOnDestroy);
+                activeLines.Add(option.Response);
+                PrepareNextLine(activeLines.Count - 1);
+            }
+            else if (OptionSelectionRequested != null)
+            {
+                // The selected NCS branch owns the response, not a feedback page.
+                SeamlessChoicePending = true;
+                IsPlaying = ready = false;
+                Action callback = finished;
+                finished = null;
+                callback?.Invoke();
+            }
+            continueButton.interactable = IsReady;
+            UpdateHint();
             return true;
         }
 
+        public bool SeamlessChoicePending { get; private set; }
+
         private void ResetOptions()
         {
+            SeamlessChoicePending = false;
             OptionSelectionRequested = null;
             optionFeedback?.Kill(false);
             optionFeedback = null;

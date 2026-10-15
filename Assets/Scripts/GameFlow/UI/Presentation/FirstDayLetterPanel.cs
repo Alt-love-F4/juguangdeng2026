@@ -318,10 +318,16 @@ namespace Spotlight.GameFlow
 
         private void UpdateReadingHint()
         {
+            string effect = InteractiveLetter ? draft.HoverEffect(hoveredLink) : "";
+            if (Stage == LetterStage.Reading)
+            {
+                readingHint.text = effect.Length > 0 ? effect : "信中的文字正在慢慢浮现…";
+                return;
+            }
             if (Stage != LetterStage.AwaitingSignature) return;
             bool complete = !InteractiveLetter || draft.IsComplete;
             signatureButton.interactable = complete;
-            readingHint.text = complete ? "> 读完后，点击署名继续" : "> 请填写姓名并完成五组选项，再点击署名继续";
+            readingHint.text = effect.Length > 0 ? effect : complete ? "> 读完后，点击署名继续" : "> 请填写姓名并完成五组选项，再点击署名继续";
         }
 
         // Commit completion before invoking external code: callbacks may close or reuse the panel.
