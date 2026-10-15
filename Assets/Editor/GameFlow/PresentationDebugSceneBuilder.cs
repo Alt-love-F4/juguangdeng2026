@@ -118,7 +118,7 @@ namespace Spotlight.GameFlow.Editor
             TMP_Text active = Text(sidebar.transform, "Active", "当前 / 无", new Vector2(.045f, .872f), new Vector2(.955f, .905f), 17f, Muted);
 
             PresentationDebugSceneController controller = root.AddComponent<PresentationDebugSceneController>();
-            string[] labels = { "Q   新一天 / 日期切换", "W   NCS 来信（Shift：草稿）", "E   NCS 对话（Shift：长文本测试）", "R   经营前阶段", "T   开店演出", "Y   经营结束", "U   城区地图", "I   夜晚前阶段", "O   住房夜晚", "P   一天结束", "F   NCS 第一天阿黛尔引入", "G   特效试验台（1~0）", "V   阅读（图文 / 旁白 / 对话）", "B   单页事件通知", "N   视频过场 / 长按跳过", "C   三人选项对话", "M   详情面板（全占位）", "L   长加载测试", "K   短加载测试", "游戏结束 / 返回主菜单" };
+            string[] labels = { "Q   新一天 / 日期切换", "W   NCS 来信（Shift：草稿）", "E   NCS 对话（Shift：长文本测试）", "R   经营前阶段", "T   开店演出", "Y   经营结束", "U   城区地图", "I   夜晚前阶段", "O   住房夜晚", "P   一天结束", "F   NCS 第一天阿黛尔引入", "G   特效试验台（1~0）", "V   阅读（图文 / 旁白 / 对话）", "B   单页事件通知", "N   视频过场 / 长按跳过", "C   三人选项对话", "M   详情面板（全占位）", "L   长加载测试", "K   短加载测试", "游戏结束 / 返回主菜单", "Z   开场序章（独立预览）" };
             for (int i = 0; i < labels.Length; i++)
             {
                 float top = .855f - i * .021f;
@@ -174,8 +174,8 @@ namespace Spotlight.GameFlow.Editor
                     if (root.name == "DebugHelpOverlay") sidebar = root.transform.Find("ShortcutSurface");
                 }
                 if (controller == null || sidebar == null) throw new InvalidOperationException("Shared debug scene bindings not found.");
-                string[] labels = { "V   阅读（图文 / 旁白 / 对话）", "B   单页事件通知", "N   视频过场 / 长按跳过", "C   三人选项对话", "M   详情面板（全占位）", "L   长加载测试", "K   短加载测试", "游戏结束 / 返回主菜单" };
-                for (int i = 0; i < 20; i++)
+                string[] labels = { "V   阅读（图文 / 旁白 / 对话）", "B   单页事件通知", "N   视频过场 / 长按跳过", "C   三人选项对话", "M   详情面板（全占位）", "L   长加载测试", "K   短加载测试", "游戏结束 / 返回主菜单", "Z   开场序章（独立预览）" };
+                for (int i = 0; i < 21; i++)
                 {
                     Transform entry = sidebar.Find("Preview_" + i);
                     float top = .855f - i * .021f;
@@ -230,6 +230,7 @@ namespace Spotlight.GameFlow.Editor
                 case 17: UnityEventTools.AddVoidPersistentListener(button.onClick, controller.PlayLongLoading); break;
                 case 18: UnityEventTools.AddVoidPersistentListener(button.onClick, controller.PlayShortLoading); break;
                 case 19: UnityEventTools.AddVoidPersistentListener(button.onClick, controller.PlayGameOver); break;
+                case 20: UnityEventTools.AddVoidPersistentListener(button.onClick, controller.PlayOpeningPrologue); break;
             }
         }
 

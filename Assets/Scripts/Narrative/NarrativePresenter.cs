@@ -199,7 +199,14 @@ namespace Spotlight.Narrative
             ui.Show(resolvedTitle);
             finishPresentation = false;
             pageIndex = 0; choicesEverShown = false; continueEverShown = false; finishPresentation = false; pages.Clear();
-            if (!string.IsNullOrWhiteSpace(setup?.checkId)) yield return AbilityCheckPresentation(setup.checkId);
+            if (!string.IsNullOrWhiteSpace(setup?.checkId))
+            {
+                if (Get("checkDisplay") == "passive")
+                {
+                    if (AbilityCheck?.Invoke(setup.checkId) == null) throw new InvalidOperationException("Ability check unavailable: " + setup.checkId);
+                }
+                else yield return AbilityCheckPresentation(setup.checkId);
+            }
             bool isReading = string.Equals(presentationClass, "reading", StringComparison.OrdinalIgnoreCase);
             if (string.Equals(presentationClass, "conversation", StringComparison.OrdinalIgnoreCase))
             {
@@ -207,9 +214,9 @@ namespace Spotlight.Narrative
                 dialoguePages?.Sort((a, b) => a.seq.CompareTo(b.seq));
                 if (dialoguePages != null && dialoguePages.Count > 0)
                 {
-                    var conversationData = new NarrativeConversationPresentationData { title = resolvedTitle };
                     foreach (NarrativeConversationPageDefinition page in dialoguePages)
                     {
+                        var conversationData = new NarrativeConversationPresentationData { title = resolvedTitle, backgroundPath = page.bgOverride };
                         List<NarrativeConversationLineDefinition> lines = configuration.presentations.conversationLines.FindAll(item => item != null && item.pageId == page.pageId);
                         lines.Sort((a, b) => a.seq.CompareTo(b.seq));
                         foreach (NarrativeConversationLineDefinition line in lines)
@@ -224,17 +231,29 @@ namespace Spotlight.Narrative
                                 text = resolve(line.textKey), accentFxKey = line.accentFxKey, accentTargetKey = line.accentTargetKey
                             });
                         }
-                    }
+                        if (!string.IsNullOrWhiteSpace(page.optionGroupKey))
+                        {
+                            long version = sessionVersion;
+                            conversationData.selectChoice = id => version == sessionVersion && completion != null && (ChoiceSelected?.Invoke(id) ?? false);
+                            var choices = configuration.choices.FindAll(c => c.groupKey == page.optionGroupKey);
+                            choices.Sort((a, b) => a.seq.CompareTo(b.seq));
+                            foreach (var choice in choices)
+                                conversationData.options.Add(new NarrativeConversationPresentationOption { id = choice.choiceId, text = resolve(choice.textKey),
+                                    enabled = ChoiceUnlocked?.Invoke(choice.choiceId, request.Context) ?? false, requirement = ChoiceRequirement(choice.choiceId) });
+                        }
                     if (conversationData.lines.Count > 0 && conversationPlayback != null)
                     {
-                        bool handled = conversationPlayback(request, conversationData, () => finishPresentation = true);
+                        bool pageFinished = false;
+                        long pageVersion = sessionVersion;
+                        bool handled = conversationPlayback(request, conversationData, () => { if (sessionVersion == pageVersion) pageFinished = true; });
                         if (handled)
                         {
                             ui.Hide();
-                            while (!finishPresentation && !skipRequested) yield return null;
-                            yield break;
+                            while (!pageFinished) yield return null;
                         }
                     }
+                    }
+                    yield break;
                 }
             }
             if (string.Equals(presentationClass, "notice", StringComparison.OrdinalIgnoreCase))

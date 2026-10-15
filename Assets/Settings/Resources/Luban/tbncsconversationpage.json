@@ -48,5 +48,95 @@
     "optionGroupKey": "",
     "bgOverride": "",
     "bgmOverride": ""
+  },
+  {
+    "pageId": "arrival.start.page",
+    "presentationKey": "arrival.start",
+    "seq": 1,
+    "pageCondKeys": "",
+    "pageBarConds": "",
+    "optionGroupKey": "MA70.10.06-S1-1",
+    "bgOverride": "",
+    "bgmOverride": ""
+  },
+  {
+    "pageId": "arrival.reply.1.page",
+    "presentationKey": "arrival.reply.1",
+    "seq": 1,
+    "pageCondKeys": "",
+    "pageBarConds": "",
+    "optionGroupKey": "",
+    "bgOverride": "",
+    "bgmOverride": ""
+  },
+  {
+    "pageId": "arrival.reply.2.page",
+    "presentationKey": "arrival.reply.2",
+    "seq": 1,
+    "pageCondKeys": "",
+    "pageBarConds": "",
+    "optionGroupKey": "",
+    "bgOverride": "",
+    "bgmOverride": ""
+  },
+  {
+    "pageId": "arrival.agent.page",
+    "presentationKey": "arrival.agent",
+    "seq": 1,
+    "pageCondKeys": "",
+    "pageBarConds": "",
+    "optionGroupKey": "",
+    "bgOverride": "",
+    "bgmOverride": ""
+  },
+  {
+    "pageId": "arrival.insight.page",
+    "presentationKey": "arrival.insight",
+    "seq": 1,
+    "pageCondKeys": "",
+    "pageBarConds": "",
+    "optionGroupKey": "",
+    "bgOverride": "",
+    "bgmOverride": ""
+  },
+  {
+    "pageId": "arrival.request.page",
+    "presentationKey": "arrival.request",
+    "seq": 1,
+    "pageCondKeys": "",
+    "pageBarConds": "",
+    "optionGroupKey": "",
+    "bgOverride": "",
+    "bgmOverride": ""
+  },
+  {
+    "pageId": "arrival.decision.page",
+    "presentationKey": "arrival.decision",
+    "seq": 1,
+    "pageCondKeys": "",
+    "pageBarConds": "",
+    "optionGroupKey": "MA70.10.06-S1-2",
+    "bgOverride": "",
+    "bgmOverride": ""
+  },
+  {
+    "pageId": "arrival.refuse.page",
+    "presentationKey": "arrival.refuse",
+    "seq": 1,
+    "pageCondKeys": "",
+    "pageBarConds": "",
+    "optionGroupKey": "MA70.10.06-S1-3",
+    "bgOverride": "",
+    "bgmOverride": ""
+  },
+  {
+    "pageId": "arrival.accept.page",
+    "presentationKey": "arrival.accept",
+    "seq": 1,
+    "pageCondKeys": "",
+    "pageBarConds": "",
+    "optionGroupKey": "",
+    "bgOverride": "",
+    "bgmOverride": ""
   }
 ]

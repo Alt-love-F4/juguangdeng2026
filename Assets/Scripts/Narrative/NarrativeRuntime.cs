@@ -13,6 +13,7 @@ namespace Spotlight.Narrative
         private INarrativePresenter injectedPresenter;
         private NarrativeActionController actionController;
         private Func<string, string> textResolver;
+        private Func<string> playerNameProvider;
 
         public static NarrativeRuntime Instance { get; private set; }
         /// <summary>当前 NCS 会话使用的配置快照。演出适配层只读访问，不修改 NCS 数据。</summary>
@@ -39,6 +40,13 @@ namespace Spotlight.Narrative
         private NarrativeConversationPlayback conversationPlayback;
         private Func<string, string, string, NarrativeCharacterPresentationData> characterResolver;
         private Func<string, (bool ready, int value)> abilityReader;
+        /// <summary>Provides the current player name for NCS text placeholders such as {playername}.</summary>
+        public Func<string> PlayerNameProvider
+        {
+            get => playerNameProvider;
+            set => playerNameProvider = value;
+        }
+
         public Func<string, (bool ready, int value)> AbilityReader
         {
             get => abilityReader;
@@ -174,13 +182,24 @@ namespace Spotlight.Narrative
             if (textResolver != null)
             {
                 string resolved = textResolver(key);
-                if (!string.IsNullOrEmpty(resolved) && resolved != key) return resolved;
+                if (!string.IsNullOrEmpty(resolved) && resolved != key) return SubstitutePlayerName(resolved);
             }
             if (configuration != null && configuration.texts != null)
                 for (int i = 0; i < configuration.texts.Count; i++)
                     if (configuration.texts[i] != null && configuration.texts[i].key == key)
-                        return configuration.texts[i].content ?? key;
-            return key;
+                        return SubstitutePlayerName(configuration.texts[i].content ?? key);
+            return SubstitutePlayerName(key);
+        }
+
+        private string SubstitutePlayerName(string text)
+        {
+            if (string.IsNullOrEmpty(text) || playerNameProvider == null) return text;
+            string playerName = playerNameProvider();
+            if (string.IsNullOrEmpty(playerName)) return text;
+            return text
+                .Replace("{playername}", playerName, StringComparison.OrdinalIgnoreCase)
+                .Replace("｛playername}", playerName, StringComparison.OrdinalIgnoreCase)
+                .Replace("｛playername｝", playerName, StringComparison.OrdinalIgnoreCase);
         }
 
         private void OnDestroy()

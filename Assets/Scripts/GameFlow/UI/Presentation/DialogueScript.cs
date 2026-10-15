@@ -101,18 +101,20 @@ namespace Spotlight.GameFlow
         public DialogueCharacter CenterCharacter => centerCharacter;
         public string AccentFxKey => accentFxKey ?? string.Empty;
         public string AccentTargetKey => accentTargetKey ?? string.Empty;
+        public string PassiveHint { get; }
 
         public DialogueLine(DialogueSpeaker speaker, string text, string speakerNameOverride = null,
             DialogueGesture gesture = DialogueGesture.None, float autoAdvanceSeconds = 0f,
             bool replaceLeft = false, DialogueCharacter leftCharacter = null,
             bool replaceRight = false, DialogueCharacter rightCharacter = null,
             string accentFxKey = null, string accentTargetKey = null,
-            bool replaceCenter = false, DialogueCharacter centerCharacter = null)
+            bool replaceCenter = false, DialogueCharacter centerCharacter = null, string passiveHint = null)
         {
             if (!Enum.IsDefined(typeof(DialogueSpeaker), speaker)) throw new ArgumentOutOfRangeException(nameof(speaker));
             if (!Enum.IsDefined(typeof(DialogueGesture), gesture)) throw new ArgumentOutOfRangeException(nameof(gesture));
             if (float.IsNaN(autoAdvanceSeconds) || float.IsInfinity(autoAdvanceSeconds) || autoAdvanceSeconds < 0f)
                 throw new ArgumentOutOfRangeException(nameof(autoAdvanceSeconds));
+            PassiveHint = passiveHint;
             this.speaker = speaker;
             this.text = text;
             this.speakerNameOverride = speakerNameOverride;
@@ -142,6 +144,16 @@ namespace Spotlight.GameFlow
         public IReadOnlyList<DialogueOption> Options { get; }
         public int Count => lines.Length;
         public DialogueLine this[int index] => lines[index];
+
+        public DialogueScript WithFirstPageHint(string hint)
+        {
+            var copy = (DialogueLine[])lines.Clone();
+            var first = copy[0];
+            copy[0] = new DialogueLine(first.Speaker, first.Text, first.SpeakerNameOverride, first.Gesture,
+                first.AutoAdvanceSeconds, first.ReplaceLeft, first.LeftCharacter, first.ReplaceRight, first.RightCharacter,
+                first.AccentFxKey, first.AccentTargetKey, first.ReplaceCenter, first.CenterCharacter, hint);
+            return new DialogueScript(copy, LeftCharacter, RightCharacter, Title, Background, Options, OptionPrompt, CenterCharacter);
+        }
 
         public DialogueScript(IReadOnlyList<DialogueLine> lines, DialogueCharacter leftCharacter = null,
             DialogueCharacter rightCharacter = null, string title = null, Texture background = null,

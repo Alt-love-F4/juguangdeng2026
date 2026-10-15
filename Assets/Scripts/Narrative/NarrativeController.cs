@@ -392,6 +392,9 @@ namespace Spotlight.Narrative
             }
             activeAbilityCheckId = checkId;
             activeAbilityCheck = EvaluateAbilityCheck(checkId);
+            var setup = configuration.setups.Find(s => s.setupKey == activeRequest.Event.setupKey);
+            if (PresentationSlots.Parse(setup).TryGetValue("checkDisplay", out var display) && display == "passive")
+                PassiveCheckPresentationConfig.Hint(activeAbilityCheck);
             AbilityCheckEvaluated?.Invoke(activeAbilityCheck);
             QueueAbilityBranch(checkId, activeAbilityCheck);
             return CloneAbilityCheck(activeAbilityCheck);
@@ -415,14 +418,14 @@ namespace Spotlight.Narrative
             if (pendingEvents.Contains(eventId) || activeRequest.Event.eventId == eventId)
                 throw new InvalidOperationException("Ability check branch cannot re-enter its active event: " + eventId);
             pendingEvents.Add(eventId);
-            queue.Enqueue(new NarrativeEventRequest(branch, null, activeRequest.Depth + 1, null, Context(branch)));
+            queue.Enqueue(new NarrativeEventRequest(branch, null, activeRequest.Depth + 1, null, Context(branch), passiveHint: string.IsNullOrEmpty(result.presentationWord) ? null : PassiveCheckPresentationConfig.Hint(result)));
             result.branchQueued = true;
         }
 
         private static NarrativeAbilityCheckSnapshot CloneAbilityCheck(NarrativeAbilityCheckSnapshot source)
         {
             if (source == null) return null;
-            var clone = new NarrativeAbilityCheckSnapshot { checkId = source.checkId, passed = source.passed, branchQueued = source.branchQueued, resultApplied = source.resultApplied };
+            var clone = new NarrativeAbilityCheckSnapshot { checkId = source.checkId, presentationWord = source.presentationWord, passed = source.passed, branchQueued = source.branchQueued, resultApplied = source.resultApplied };
             if (source.values != null) foreach (var item in source.values)
                 if (item != null) clone.values.Add(new NarrativeAbilityCheckValue { attributeId = item.attributeId, displayName = item.displayName, currentValue = item.currentValue, threshold = item.threshold, groupIndex = item.groupIndex, passed = item.passed });
             return clone;
@@ -493,7 +496,7 @@ namespace Spotlight.Narrative
 
         private NarrativePendingValue ToSaved(NarrativeEventRequest request)
         {
-            var saved = new NarrativePendingValue { eventId = request.Event.eventId, triggerId = request.Trigger?.triggerId, requestId = request.RequestId, depth = request.Depth, timeSlot = request.Context?.TimeSlot ?? TimeSlot, location = request.Context?.Location ?? Location };
+            var saved = new NarrativePendingValue { eventId = request.Event.eventId, triggerId = request.Trigger?.triggerId, requestId = request.RequestId, passiveHint = request.PassiveHint, depth = request.Depth, timeSlot = request.Context?.TimeSlot ?? TimeSlot, location = request.Context?.Location ?? Location };
             if (request.SelectedChoices != null) saved.selectedChoices.AddRange(request.SelectedChoices);
             return saved;
         }
@@ -502,7 +505,7 @@ namespace Spotlight.Narrative
             if (saved == null || saved.depth < 0 || saved.depth > 3 || !events.TryGetValue(saved.eventId ?? string.Empty, out NarrativeEventDefinition definition)) return;
             NarrativeTriggerDefinition trigger = configuration.triggers.Find(t => t != null && t.triggerId == saved.triggerId);
             var context = Context(definition); context.TimeSlot = saved.timeSlot; context.Location = saved.location ?? Location;
-            queue.Enqueue(new NarrativeEventRequest(definition, trigger, saved.depth, saved.selectedChoices == null ? null : saved.selectedChoices.ToArray(), context, saved.requestId));
+            queue.Enqueue(new NarrativeEventRequest(definition, trigger, saved.depth, saved.selectedChoices == null ? null : saved.selectedChoices.ToArray(), context, saved.requestId, saved.passiveHint));
             pendingEvents.Add(definition.eventId);
         }
         private static string OwnerKey(string type, string id) => (string.IsNullOrWhiteSpace(type) ? "event" : type.Trim().ToLowerInvariant()) + ":" + id;
@@ -740,7 +743,7 @@ namespace Spotlight.Narrative
                     if (activeRequest.SelectedChoices != null) selectedChoices.AddRange(activeRequest.SelectedChoices);
                     activePresentation = true;
                     long epoch = ++presentationEpoch;
-                    NarrativeEventRequest request = new NarrativeEventRequest(activeRequest.Event, activeRequest.Trigger, activeRequest.Depth, selectedChoices.ToArray(), activeRequest.Context, activeRequest.RequestId);
+                    NarrativeEventRequest request = new NarrativeEventRequest(activeRequest.Event, activeRequest.Trigger, activeRequest.Depth, selectedChoices.ToArray(), activeRequest.Context, activeRequest.RequestId, activeRequest.PassiveHint);
                     // A broken presenter is not treated as successful: its active request remains saveable.
                     try { presenter.Play(request, () => { if (epoch == presentationEpoch && activePresentation) CompleteEvent(request); }); }
                     catch (Exception error) { Debug.LogException(error); break; }
@@ -924,6 +927,14 @@ namespace Spotlight.Narrative
                     if (!bool.TryParse(result.value, out bool on)) return;
                     state.SetSwitch(target, on); break;
                 case NarrativeResultType.ObjectState: state.SetObjectState(target, result.value); break;
+                case NarrativeResultType.QueueEvent:
+                    if (!events.TryGetValue(target, out var next)) throw new InvalidOperationException("Missing next event: " + target);
+                    if (activeRequest.Event.eventId != target && !queue.Any(r => r.Event.eventId == target))
+                    {
+                        pendingEvents.Add(target);
+                        queue.Enqueue(new NarrativeEventRequest(next, null, 0, null, Context(next)));
+                    }
+                    break;
                 case NarrativeResultType.UnlockEvent: state.SetEventLocked(target, false); break;
                 case NarrativeResultType.LockEvent: state.SetEventLocked(target, true); break;
                 case NarrativeResultType.ReserveCafeVisit: ReserveCafeVisit(target, StripPrefix(result.value, "visit:")); break;

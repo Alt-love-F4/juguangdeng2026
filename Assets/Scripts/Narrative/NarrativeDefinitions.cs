@@ -13,7 +13,7 @@ namespace Spotlight.Narrative
     public enum NarrativeCrossType { Cross, Hold }
     public enum NarrativeOnceType { Once, Repeat }
     public enum NarrativeEventKind { Actor, World }
-    public enum NarrativeResultType { BarAdd, BarSet, RelAdd, SetFlag, ClearFlag, SetSwitch, ObjectState, UnlockEvent, LockEvent, AdvanceDay, AwardAchievement, PlaySetup, BarHint, SpawnNpc, DespawnNpc, ShowPosition, HidePosition, AddTempPosition, RemoveTempPosition, ItemAdd, ItemRemove, MoneyAdd, MoneyRemove, ReserveCafeVisit }
+    public enum NarrativeResultType { BarAdd, BarSet, RelAdd, SetFlag, ClearFlag, SetSwitch, ObjectState, UnlockEvent, LockEvent, AdvanceDay, AwardAchievement, PlaySetup, BarHint, SpawnNpc, DespawnNpc, ShowPosition, HidePosition, AddTempPosition, RemoveTempPosition, ItemAdd, ItemRemove, MoneyAdd, MoneyRemove, ReserveCafeVisit, QueueEvent }
     public enum NarrativeTimeSlot { Morning, Noon, Night }
     public enum NarrativeRepeatRule { Once, Daily, Weekly, Yearly }
 
@@ -218,13 +218,14 @@ namespace Spotlight.Narrative
         public readonly NarrativeTriggerDefinition Trigger;
         public readonly int Depth;
         public readonly string RequestId;
+        public readonly string PassiveHint;
         public readonly IReadOnlyList<string> SelectedChoices;
         public readonly NarrativeConditionContext Context;
         public string SelectedChoiceId => SelectedChoices != null && SelectedChoices.Count > 0 ? SelectedChoices[0] : null;
-        public NarrativeEventRequest(NarrativeEventDefinition @event, NarrativeTriggerDefinition trigger, int depth, IReadOnlyList<string> selectedChoices = null, NarrativeConditionContext context = null, string requestId = null)
-        { Event = @event; Trigger = trigger; Depth = depth; SelectedChoices = selectedChoices; Context = context; RequestId = requestId ?? Guid.NewGuid().ToString("N"); }
+        public NarrativeEventRequest(NarrativeEventDefinition @event, NarrativeTriggerDefinition trigger, int depth, IReadOnlyList<string> selectedChoices = null, NarrativeConditionContext context = null, string requestId = null, string passiveHint = null)
+        { PassiveHint = passiveHint; Event = @event; Trigger = trigger; Depth = depth; SelectedChoices = selectedChoices; Context = context; RequestId = requestId ?? Guid.NewGuid().ToString("N"); }
     }
-    [Serializable] public sealed class NarrativePendingValue { public string eventId, triggerId, requestId, location; public int depth; public NarrativeTimeSlot timeSlot; public List<string> selectedChoices = new List<string>(); }
+    [Serializable] public sealed class NarrativePendingValue { public string eventId, triggerId, requestId, location, passiveHint; public int depth; public NarrativeTimeSlot timeSlot; public List<string> selectedChoices = new List<string>(); }
     [Serializable] public sealed class NarrativeBarChange { public string key; public int oldValue, newValue, depth; }
     public sealed class NarrativeEffectNotification { public NarrativeResultDefinition Result; public string Target, Value; }
 

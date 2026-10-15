@@ -40,6 +40,7 @@ namespace Spotlight.Narrative
     public sealed class NarrativeAbilityCheckSnapshot
     {
         public string checkId;
+        public string presentationWord;
         public bool passed;
         public bool branchQueued;
         public bool resultApplied;
@@ -65,7 +66,7 @@ namespace Spotlight.Narrative
                 bool passed = value.value >= condition.threshold;
                 snapshot.values.Add(new NarrativeAbilityCheckValue { attributeId = condition.attributeId, displayName = resolveName?.Invoke(condition.attributeId) ?? condition.attributeId, currentValue = value.value,
                     threshold = condition.threshold, groupIndex = condition.groupIndex, passed = passed });
-                groups[condition.groupIndex] = !groups.TryGetValue(condition.groupIndex, out bool prior) || prior && passed;
+                groups[condition.groupIndex] = (!groups.TryGetValue(condition.groupIndex, out bool prior) || prior) && passed;
             }
             snapshot.passed = groups.Values.Any(x => x);
             return snapshot;

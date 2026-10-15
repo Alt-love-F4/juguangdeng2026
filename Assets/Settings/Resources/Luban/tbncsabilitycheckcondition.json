@@ -6,5 +6,13 @@
     "threshold": 3,
     "groupIndex": 1,
     "seq": 1
+  },
+  {
+    "conditionId": "arrival.perception.1",
+    "checkId": "arrival.perception",
+    "attributeId": "perception",
+    "threshold": 3,
+    "groupIndex": 1,
+    "seq": 1
   }
 ]

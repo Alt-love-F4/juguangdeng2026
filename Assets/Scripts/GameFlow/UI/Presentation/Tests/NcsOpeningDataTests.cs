@@ -127,6 +127,28 @@ namespace Spotlight.GameFlow.Tests
         }
 
         [Test]
+        public void PlayerNamePlaceholderIsResolvedForConfiguredAndRuntimeText()
+        {
+            var config = new NarrativeConfiguration();
+            config.texts.Add(new NarrativeTextDefinition { key = "configured", content = "馆长：{playername} / ｛playername｝ / ｛playername｝" });
+            var owner = new GameObject("NcsPlayerNameResolverTest");
+            owner.SetActive(false);
+            try
+            {
+                var runtime = owner.AddComponent<NarrativeRuntime>();
+                string name = "阿黛尔";
+                runtime.PlayerNameProvider = () => name;
+                runtime.Initialize(config, new NoopPresenter(), key => key == "runtime" ? "外部：{playername}" : key);
+
+                Assert.That(runtime.ResolveText("configured"), Is.EqualTo("馆长：阿黛尔 / 阿黛尔 / 阿黛尔"));
+                Assert.That(runtime.ResolveText("runtime"), Is.EqualTo("外部：阿黛尔"));
+                name = "";
+                Assert.That(runtime.ResolveText("configured"), Is.EqualTo("馆长：{playername} / ｛playername｝ / ｛playername｝"));
+            }
+            finally { Object.DestroyImmediate(owner); }
+        }
+
+        [Test]
         public void GeneratedDefaultsLoadWithoutEnablingNcsGameplayModule()
         {
             NarrativeConfiguration config = LubanNarrativeLoader.Load();

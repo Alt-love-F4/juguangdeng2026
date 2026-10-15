@@ -112,6 +112,8 @@ namespace Spotlight.GameFlow
         public void HideForMainMenu()
         {
             running = false;
+            if (arrivalController != null) arrivalController.EventCompleted -= OnArrivalCompleted;
+            arrivalController = null;
             ClosePresentation();
             HideBusinessControls();
             endpointOwner = null;
@@ -160,7 +162,9 @@ namespace Spotlight.GameFlow
             if (newSessionFirstDay && day == 1)
             {
                 newSessionFirstDay = false;
-                EnterCityMap();
+                HideGameplayPanel();
+                SetState(DayFlowState.DateTransition);
+                ShowPresentation<DateChangePanel>(BeginFirstArrival, panel => panel.SetDates(previousDate, CurrentDate));
                 return;
             }
             HideGameplayPanel();
@@ -179,6 +183,26 @@ namespace Spotlight.GameFlow
             newSessionFirstDay = false;
             ShowPresentation<DateChangePanel>(CompleteDateTransition,
                 panel => panel.SetDates(previousDate, CurrentDate));
+        }
+
+        private NarrativeController arrivalController;
+        private void BeginFirstArrival()
+        {
+            ClosePresentation();
+            SetState(DayFlowState.FirstDayIntroduction);
+            arrivalController = NarrativeRuntime.Instance?.Controller;
+            if (arrivalController == null) { Debug.LogError("[DayFlow] NCS unavailable for first arrival."); return; }
+            arrivalController.EventCompleted += OnArrivalCompleted;
+            if (!arrivalController.QueueEvent("arrival.start")) Debug.LogError("[DayFlow] Could not start first arrival.");
+        }
+
+        private void OnArrivalCompleted(string id)
+        {
+            if (!SessionAllowsPlay || !running || (id != "arrival.complete" && id != "arrival.leave")) return;
+            arrivalController.EventCompleted -= OnArrivalCompleted;
+            arrivalController = null;
+            if (id == "arrival.leave") flow.ReturnFromFirstArrival();
+            else EnterCityMap();
         }
 
         private void CompleteDateTransition()
@@ -308,12 +332,20 @@ namespace Spotlight.GameFlow
             }
         }
 
+        private string firstDayPassiveHint;
+        private void CaptureFirstDayCheck(NarrativeAbilityCheckSnapshot snapshot)
+        {
+            firstDayPassiveHint = PassiveCheckPresentationConfig.Hint(snapshot);
+        }
+
         private void PlayCafeTutorialContent(string stepId, int version, Action completed)
         {
             if (!SessionAllowsPlay || !running || version != presentationVersion) return;
             try
             {
-                introductionPanel = DialoguePlayback.PlayNcsOpening("cafe_tutorial." + stepId, () =>
+                var script = new LubanOpeningDialogueSource("cafe_tutorial." + stepId).CreateScript();
+                if (stepId == "perception_success") script = script.WithFirstPageHint(firstDayPassiveHint);
+                introductionPanel = DialoguePlayback.Play(script, () =>
                 {
                     if (!SessionAllowsPlay || !running || version != presentationVersion) return;
                     introductionPanel = null;
@@ -339,6 +371,8 @@ namespace Spotlight.GameFlow
 
             UnsubscribeFirstDayPerceptionEvents();
             firstDayCheckRuntime = runtime;
+            firstDayPassiveHint = null;
+            runtime.Controller.AbilityCheckEvaluated += CaptureFirstDayCheck;
             waitingForFirstDayPerceptionBranch = true;
             runtime.Controller.EventCompleted += OnFirstDayPerceptionEventCompleted;
             runtime.Controller.EventFailed += OnFirstDayPerceptionEventFailed;
@@ -382,6 +416,7 @@ namespace Spotlight.GameFlow
         {
             if (firstDayCheckRuntime != null && firstDayCheckRuntime.Controller != null)
             {
+                firstDayCheckRuntime.Controller.AbilityCheckEvaluated -= CaptureFirstDayCheck;
                 firstDayCheckRuntime.Controller.EventCompleted -= OnFirstDayPerceptionEventCompleted;
                 firstDayCheckRuntime.Controller.EventFailed -= OnFirstDayPerceptionEventFailed;
             }

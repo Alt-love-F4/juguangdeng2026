@@ -493,5 +493,113 @@
     "target": "demo.cafe.ended",
     "value": "true",
     "note": "示例阶段反馈可查看条件"
+  },
+  {
+    "resultId": "arrival.reply.1.next",
+    "eventId": "arrival.reply.1",
+    "seq": 1,
+    "resultType": "QUEUE_EVENT",
+    "target": "arrival.agent",
+    "value": "",
+    "note": ""
+  },
+  {
+    "resultId": "arrival.reply.2.next",
+    "eventId": "arrival.reply.2",
+    "seq": 1,
+    "resultType": "QUEUE_EVENT",
+    "target": "arrival.agent",
+    "value": "",
+    "note": ""
+  },
+  {
+    "resultId": "MA70.10.06-S1-1.1.next",
+    "eventId": "MA70.10.06-S1-1.1",
+    "seq": 1,
+    "resultType": "QUEUE_EVENT",
+    "target": "arrival.reply.1",
+    "value": "",
+    "note": ""
+  },
+  {
+    "resultId": "MA70.10.06-S1-1.2.next",
+    "eventId": "MA70.10.06-S1-1.2",
+    "seq": 1,
+    "resultType": "QUEUE_EVENT",
+    "target": "arrival.reply.2",
+    "value": "",
+    "note": ""
+  },
+  {
+    "resultId": "arrival.agent.next",
+    "eventId": "arrival.agent",
+    "seq": 1,
+    "resultType": "QUEUE_EVENT",
+    "target": "arrival.check",
+    "value": "",
+    "note": ""
+  },
+  {
+    "resultId": "arrival.insight.next",
+    "eventId": "arrival.insight",
+    "seq": 1,
+    "resultType": "QUEUE_EVENT",
+    "target": "arrival.request",
+    "value": "",
+    "note": ""
+  },
+  {
+    "resultId": "arrival.request.next",
+    "eventId": "arrival.request",
+    "seq": 1,
+    "resultType": "QUEUE_EVENT",
+    "target": "arrival.decision",
+    "value": "",
+    "note": ""
+  },
+  {
+    "resultId": "MA70.10.06-S1-2.1.next",
+    "eventId": "MA70.10.06-S1-2.1",
+    "seq": 1,
+    "resultType": "QUEUE_EVENT",
+    "target": "arrival.refuse",
+    "value": "",
+    "note": ""
+  },
+  {
+    "resultId": "MA70.10.06-S1-2.2.next",
+    "eventId": "MA70.10.06-S1-2.2",
+    "seq": 1,
+    "resultType": "QUEUE_EVENT",
+    "target": "arrival.accept",
+    "value": "",
+    "note": ""
+  },
+  {
+    "resultId": "MA70.10.06-S1-3.1.next",
+    "eventId": "MA70.10.06-S1-3.1",
+    "seq": 1,
+    "resultType": "QUEUE_EVENT",
+    "target": "arrival.decision",
+    "value": "",
+    "note": ""
+  },
+  {
+    "resultId": "MA70.10.06-S1-3.2.next",
+    "eventId": "MA70.10.06-S1-3.2",
+    "seq": 1,
+    "resultType": "QUEUE_EVENT",
+    "target": "arrival.leave",
+    "value": "",
+    "note": ""
+  },
+  {
+    "resultId": "arrival.accept.next",
+    "eventId": "arrival.accept",
+    "seq": 1,
+    "resultType": "QUEUE_EVENT",
+    "target": "arrival.complete",
+    "value": "",
+    "note": ""
   }
 ]

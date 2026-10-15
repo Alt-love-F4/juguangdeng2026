@@ -40,7 +40,15 @@ namespace Spotlight.Narrative
     public sealed class NarrativeConversationPresentationData
     {
         public string title;
+        public string backgroundPath;
+        public readonly List<NarrativeConversationPresentationOption> options = new List<NarrativeConversationPresentationOption>();
+        public Func<string, bool> selectChoice;
         public readonly List<NarrativeConversationPresentationLine> lines = new List<NarrativeConversationPresentationLine>();
+    }
+    public sealed class NarrativeConversationPresentationOption
+    {
+        public string id, text, requirement;
+        public bool enabled;
     }
     public sealed class NarrativeConversationPresentationLine
     {

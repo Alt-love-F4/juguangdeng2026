@@ -26,6 +26,7 @@ namespace Spotlight.GameFlow
         private Coroutine loadingRoutine;
         private LoadingPanel loadingPanel;
         private ShortLoadingPanel shortLoadingPanel;
+        private OpeningProloguePanel openingProloguePanel;
         private int rootNavigationVersion;
         private int loadingVersion;
         private bool loadingTransitioning;
@@ -142,6 +143,7 @@ namespace Spotlight.GameFlow
                 narrativeIntegration.Runtime.NoticePlayback = NarrativeNoticeEventPlayback.Play;
                 narrativeIntegration.Runtime.ConversationPlayback = NarrativeConversationEventPlayback.Play;
                 narrativeIntegration.Runtime.CharacterResolver = NarrativeCharacterResolver.Resolve;
+                narrativeIntegration.Runtime.PlayerNameProvider = () => PlayerRuntime.Current?.PlayerName ?? string.Empty;
             }
             dayFlow = GetComponent<DayFlowController>();
             if (dayFlow == null)
@@ -177,6 +179,7 @@ namespace Spotlight.GameFlow
 
         private void OnDestroy()
         {
+            openingProloguePanel?.Stop();
             playerSession.Dispose();
             PlayerRuntime.Current = null;
             PlayerCafeOwner.EndSession();
@@ -318,6 +321,12 @@ namespace Spotlight.GameFlow
 
         public void StartGame()
         {
+            if (openingProloguePanel != null)
+            {
+                openingProloguePanel.Stop();
+                UIKit.ClosePanel(openingProloguePanel);
+                openingProloguePanel = null;
+            }
             ++sessionVersion;
             selectedEnding = null;
             GameSaveParticipantRegistry.PendingRestore = null;
@@ -351,6 +360,32 @@ namespace Spotlight.GameFlow
 
         private void InitializeNewGameplay()
         {
+            try
+            {
+                // New games alone get the standalone prologue. Gameplay/DayFlow are not opened until it completes.
+                if (openingProloguePanel == null)
+                {
+                    openingProloguePanel = UIKit.OpenPanel<OpeningProloguePanel>(UILevel.AlwayTop,
+                        tag: "game-opening-prologue", cachePolicy: PanelCachePolicy.Transient);
+                    OpeningProloguePanel panel = openingProloguePanel;
+                    panel.Play(() => FinishOpeningPrologue(panel));
+                    return;
+                }
+                FinishOpeningPrologue(openingProloguePanel);
+            }
+            catch (Exception exception)
+            {
+                openingProloguePanel = null;
+                OpenMainMenu();
+                ShowResult("初始化失败", exception.Message, () => { });
+            }
+        }
+
+        private void FinishOpeningPrologue(OpeningProloguePanel panel)
+        {
+            if (panel == null || panel != openingProloguePanel) return;
+            openingProloguePanel = null;
+            UIKit.ClosePanel(panel);
             try
             {
                 OpenGameplayPlaceholder();
@@ -635,6 +670,7 @@ namespace Spotlight.GameFlow
 
         private void HandleEscape()
         {
+            if (openingProloguePanel != null && openingProloguePanel.IsPlaying) return;
             if (SessionState == GameSessionState.GameOver || saving || openingPause) return;
             bool tutorialPause = dayFlow != null && dayFlow.IsFirstSessionGuideActive;
             if (detailsPanel != null || detailsClosedFrame == Time.frameCount || DialoguePanel.BlocksEscapeThisFrame && !tutorialPause) return;
@@ -731,6 +767,9 @@ namespace Spotlight.GameFlow
 
         private void OpenMainMenu()
         {
+            openingProloguePanel?.Stop();
+            if (openingProloguePanel != null) UIKit.ClosePanel(openingProloguePanel);
+            openingProloguePanel = null;
             ++sessionVersion;
             boundController?.SetEndingChecksEnabled(false);
             playerSession.Dispose();
@@ -868,6 +907,14 @@ namespace Spotlight.GameFlow
                 runtime?.ResolveText(selectedEnding?.messageText) ?? "", ReturnFromGameOver, "返回主菜单");
             ResultPanel panel = UIKit.OpenPanel<ResultPanel>(UILevel.Pop, data, cachePolicy: PanelCachePolicy.Reusable);
             StartCoroutine(PushPanelWhenReady(panel, true, rootNavigationVersion));
+        }
+
+        public void ReturnFromFirstArrival()
+        {
+            if (!gameplay || dayFlow == null || !dayFlow.IsFirstSessionGuideActive) return;
+            dayFlow.HideForMainMenu();
+            Time.timeScale = 1f;
+            LoadThen(OpenMainMenu, config.MainMenuScene);
         }
 
         private void ReturnFromGameOver()

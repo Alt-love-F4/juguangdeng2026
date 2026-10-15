@@ -15,7 +15,7 @@ namespace Spotlight.GameFlow
         public const string ScenePath = "Assets/Scenes/PresentationDebugScene.unity";
         public const string DefaultHint = "按键/按钮可随时切换演出。Esc 关闭 · Backspace 重播 · H 收起说明 · F9 切换暂停时间。";
 
-        public enum Preview { DateChange, Letter, Dialogue, PreBusiness, CafeOpening, BusinessEnd, CityMap, PreNight, HomeNight, DayEnd, Introduction, Effects, Reading, Notice, CutScene, HardcodedDialogue, HardcodedLetter, HardcodedOptions, Details, LongLoading, ShortLoading, GameOver }
+        public enum Preview { DateChange, Letter, Dialogue, PreBusiness, CafeOpening, BusinessEnd, CityMap, PreNight, HomeNight, DayEnd, Introduction, Effects, Reading, Notice, CutScene, HardcodedDialogue, HardcodedLetter, HardcodedOptions, Details, LongLoading, ShortLoading, GameOver, OpeningPrologue }
 
         [Header("Scene bindings")]
         [SerializeField] private TMP_Text statusText;
@@ -62,7 +62,12 @@ namespace Spotlight.GameFlow
             Keyboard keyboard = Keyboard.current;
             if (keyboard == null) return;
             // Single owner for launch/stop; each actual panel continues to handle its own dialogue/letter input.
-            if (keyboard.escapeKey.wasPressedThisFrame) { StopCurrent(); return; }
+            if (keyboard.escapeKey.wasPressedThisFrame)
+            {
+                if (currentPanel is OpeningProloguePanel && ((OpeningProloguePanel)currentPanel).IsPlaying) return;
+                StopCurrent();
+                return;
+            }
             if (keyboard.hKey.wasPressedThisFrame) { ToggleHelp(); return; }
             if (keyboard.f9Key.wasPressedThisFrame) { ToggleTimePause(); return; }
             if (keyboard.f12Key.wasPressedThisFrame) { ResetHelp(); return; }
@@ -100,6 +105,7 @@ namespace Spotlight.GameFlow
         }
 
         public void PlayGameOver() => PlayPreview(Preview.GameOver);
+        public void PlayOpeningPrologue() => PlayPreview(Preview.OpeningPrologue);
         public void PlayLongLoading() => PlayPreview(Preview.LongLoading);
         public void PlayShortLoading() => PlayPreview(Preview.ShortLoading);
         public void PlayDetails() => PlayPreview(Preview.Details);
@@ -184,6 +190,9 @@ namespace Spotlight.GameFlow
                         currentPanel = UIKit.OpenPanel<ResultPanel>(UILevel.Pop,
                             new ResultPanelData(null, "游戏结束", "每日交付已完成。你的选择让这段旅程迎来了结局。", () => Complete(version), "返回主菜单"),
                             tag: DebugTag, cachePolicy: PanelCachePolicy.Transient);
+                        break;
+                    case Preview.OpeningPrologue:
+                        Open<OpeningProloguePanel>().Play(() => Complete(version));
                         break;
                     case Preview.DateChange:
                         var date = Open<DateChangePanel>();
@@ -412,6 +421,7 @@ namespace Spotlight.GameFlow
                 if (letter.Stage == FirstDayLetterPanel.LetterStage.Envelope) letter.OpenEnvelope();
                 else if (letter.Stage == FirstDayLetterPanel.LetterStage.AwaitingSignature) letter.ConfirmSignature();
             }
+            else if (currentPanel is OpeningProloguePanel prologue) prologue.Continue();
             // Dialogue/Reading/Notice panels own their keyboard input to preserve reveal/advance and same-frame deduplication.
         }
 

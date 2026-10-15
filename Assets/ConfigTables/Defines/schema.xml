@@ -258,7 +258,7 @@
     <var name="resultId" type="string"/>
     <var name="eventId" type="string"/>
     <var name="seq" type="int"/>
-    <var name="resultType" type="string#set=BAR_ADD,BAR_SET,REL_ADD,SET_FLAG,CLEAR_FLAG,SET_SWITCH,OBJ_STATE,OBJECT_STATE,UNLOCK_EVENT,LOCK_EVENT,ADVANCE_DAY,AWARD_ACH,AWARD_ACHIEVEMENT,PLAY_SETUP,BAR_HINT,SPAWN_NPC,DESPAWN_NPC,RESERVE_CAFE_VISIT,ITEM_ADD,ITEM_REMOVE,MONEY_ADD,MONEY_REMOVE"/>
+    <var name="resultType" type="string#set=BAR_ADD,BAR_SET,REL_ADD,SET_FLAG,CLEAR_FLAG,SET_SWITCH,OBJ_STATE,OBJECT_STATE,UNLOCK_EVENT,LOCK_EVENT,ADVANCE_DAY,AWARD_ACH,AWARD_ACHIEVEMENT,PLAY_SETUP,BAR_HINT,SPAWN_NPC,DESPAWN_NPC,RESERVE_CAFE_VISIT,QUEUE_EVENT,ITEM_ADD,ITEM_REMOVE,MONEY_ADD,MONEY_REMOVE"/>
     <var name="target" type="string"/>
     <var name="value" type="string"/>
     <var name="note" type="string"/>

@@ -644,6 +644,7 @@ namespace Spotlight.Narrative
             "BAR_HINT" => NarrativeResultType.BarHint, "SPAWN_NPC" => NarrativeResultType.SpawnNpc,
             "DESPAWN_NPC" => NarrativeResultType.DespawnNpc,
             "RESERVE_CAFE_VISIT" => NarrativeResultType.ReserveCafeVisit,
+            "QUEUE_EVENT" => NarrativeResultType.QueueEvent,
             "SHOWPOSITION" or "SHOW_POSITION" => NarrativeResultType.ShowPosition,
             "HIDEPOSITION" or "HIDE_POSITION" => NarrativeResultType.HidePosition,
             "ADDTEMPPOSITION" or "ADD_TEMP_POSITION" => NarrativeResultType.AddTempPosition,

@@ -28,5 +28,50 @@
     "presentationKey": "DEMO_CAFE_CHAT",
     "presentationClass": "Conversation",
     "logTag": "CAFE_VISIT_DEMO"
+  },
+  {
+    "presentationKey": "arrival.start",
+    "presentationClass": "Conversation",
+    "logTag": "FIRST_ARRIVAL"
+  },
+  {
+    "presentationKey": "arrival.reply.1",
+    "presentationClass": "Conversation",
+    "logTag": "FIRST_ARRIVAL"
+  },
+  {
+    "presentationKey": "arrival.reply.2",
+    "presentationClass": "Conversation",
+    "logTag": "FIRST_ARRIVAL"
+  },
+  {
+    "presentationKey": "arrival.agent",
+    "presentationClass": "Conversation",
+    "logTag": "FIRST_ARRIVAL"
+  },
+  {
+    "presentationKey": "arrival.insight",
+    "presentationClass": "Conversation",
+    "logTag": "FIRST_ARRIVAL"
+  },
+  {
+    "presentationKey": "arrival.request",
+    "presentationClass": "Conversation",
+    "logTag": "FIRST_ARRIVAL"
+  },
+  {
+    "presentationKey": "arrival.decision",
+    "presentationClass": "Conversation",
+    "logTag": "FIRST_ARRIVAL"
+  },
+  {
+    "presentationKey": "arrival.refuse",
+    "presentationClass": "Conversation",
+    "logTag": "FIRST_ARRIVAL"
+  },
+  {
+    "presentationKey": "arrival.accept",
+    "presentationClass": "Conversation",
+    "logTag": "FIRST_ARRIVAL"
   }
 ]

@@ -178,7 +178,7 @@
   {
     "setupKey": "first_day_perception_check",
     "tplName": "Tpl_Narration",
-    "slotValues": "",
+    "slotValues": "checkDisplay=passive",
     "checkId": "first_day_perception",
     "skipAble": false,
     "autoAdvance": false
@@ -194,6 +194,86 @@
   {
     "setupKey": "first_day_perception_failure",
     "tplName": "Tpl_Narration",
+    "slotValues": "",
+    "checkId": "",
+    "skipAble": false,
+    "autoAdvance": false
+  },
+  {
+    "setupKey": "arrival.start",
+    "tplName": "Tpl_TwoPersonTalk",
+    "slotValues": "opts=MA70.10.06-S1-1",
+    "checkId": "",
+    "skipAble": false,
+    "autoAdvance": false
+  },
+  {
+    "setupKey": "arrival.reply.1",
+    "tplName": "Tpl_TwoPersonTalk",
+    "slotValues": "",
+    "checkId": "",
+    "skipAble": false,
+    "autoAdvance": false
+  },
+  {
+    "setupKey": "arrival.reply.2",
+    "tplName": "Tpl_TwoPersonTalk",
+    "slotValues": "",
+    "checkId": "",
+    "skipAble": false,
+    "autoAdvance": false
+  },
+  {
+    "setupKey": "arrival.agent",
+    "tplName": "Tpl_TwoPersonTalk",
+    "slotValues": "",
+    "checkId": "",
+    "skipAble": false,
+    "autoAdvance": false
+  },
+  {
+    "setupKey": "arrival.check",
+    "tplName": "Tpl_Narration",
+    "slotValues": "checkDisplay=passive",
+    "checkId": "arrival.perception",
+    "skipAble": false,
+    "autoAdvance": false
+  },
+  {
+    "setupKey": "arrival.insight",
+    "tplName": "Tpl_TwoPersonTalk",
+    "slotValues": "",
+    "checkId": "",
+    "skipAble": false,
+    "autoAdvance": false
+  },
+  {
+    "setupKey": "arrival.request",
+    "tplName": "Tpl_TwoPersonTalk",
+    "slotValues": "",
+    "checkId": "",
+    "skipAble": false,
+    "autoAdvance": false
+  },
+  {
+    "setupKey": "arrival.decision",
+    "tplName": "Tpl_TwoPersonTalk",
+    "slotValues": "opts=MA70.10.06-S1-2",
+    "checkId": "",
+    "skipAble": false,
+    "autoAdvance": false
+  },
+  {
+    "setupKey": "arrival.refuse",
+    "tplName": "Tpl_TwoPersonTalk",
+    "slotValues": "opts=MA70.10.06-S1-3",
+    "checkId": "",
+    "skipAble": false,
+    "autoAdvance": false
+  },
+  {
+    "setupKey": "arrival.accept",
+    "tplName": "Tpl_TwoPersonTalk",
     "slotValues": "",
     "checkId": "",
     "skipAble": false,

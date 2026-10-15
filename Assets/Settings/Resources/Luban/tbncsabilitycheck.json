@@ -5,5 +5,12 @@
     "failureEventId": "EV_FIRST_DAY_PERCEPTION_FAILURE",
     "successResultOwnerId": "",
     "failureResultOwnerId": ""
+  },
+  {
+    "checkId": "arrival.perception",
+    "successEventId": "arrival.insight",
+    "failureEventId": "arrival.request",
+    "successResultOwnerId": "",
+    "failureResultOwnerId": ""
   }
 ]

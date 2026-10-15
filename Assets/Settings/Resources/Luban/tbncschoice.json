@@ -30,5 +30,53 @@
     "resultOwnerId": "choice.chen.tea.result",
     "seq": 1,
     "checkId": ""
+  },
+  {
+    "choiceId": "MA70.10.06-S1-1.1",
+    "groupKey": "MA70.10.06-S1-1",
+    "textKey": "MA70.10.06-S1-1.1",
+    "resultOwnerId": "MA70.10.06-S1-1.1",
+    "seq": 1,
+    "checkId": ""
+  },
+  {
+    "choiceId": "MA70.10.06-S1-1.2",
+    "groupKey": "MA70.10.06-S1-1",
+    "textKey": "MA70.10.06-S1-1.2",
+    "resultOwnerId": "MA70.10.06-S1-1.2",
+    "seq": 2,
+    "checkId": ""
+  },
+  {
+    "choiceId": "MA70.10.06-S1-2.1",
+    "groupKey": "MA70.10.06-S1-2",
+    "textKey": "MA70.10.06-S1-2.1",
+    "resultOwnerId": "MA70.10.06-S1-2.1",
+    "seq": 1,
+    "checkId": ""
+  },
+  {
+    "choiceId": "MA70.10.06-S1-2.2",
+    "groupKey": "MA70.10.06-S1-2",
+    "textKey": "MA70.10.06-S1-2.2",
+    "resultOwnerId": "MA70.10.06-S1-2.2",
+    "seq": 2,
+    "checkId": ""
+  },
+  {
+    "choiceId": "MA70.10.06-S1-3.1",
+    "groupKey": "MA70.10.06-S1-3",
+    "textKey": "MA70.10.06-S1-3.1",
+    "resultOwnerId": "MA70.10.06-S1-3.1",
+    "seq": 1,
+    "checkId": ""
+  },
+  {
+    "choiceId": "MA70.10.06-S1-3.2",
+    "groupKey": "MA70.10.06-S1-3",
+    "textKey": "MA70.10.06-S1-3.2",
+    "resultOwnerId": "MA70.10.06-S1-3.2",
+    "seq": 2,
+    "checkId": ""
   }
 ]

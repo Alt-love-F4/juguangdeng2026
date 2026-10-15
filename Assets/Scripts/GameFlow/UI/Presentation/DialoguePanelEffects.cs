@@ -355,6 +355,8 @@ namespace Spotlight.GameFlow
         }
 
         /// <summary>Accept only a visible, enabled option once. Results are not executed here.</summary>
+        public Func<string, bool> OptionSelectionRequested { get; set; }
+
         public bool SelectOption(string optionId)
         {
             if (!IsChoosing || !string.IsNullOrEmpty(SelectedOptionId) || !IsReady) return false;
@@ -363,6 +365,7 @@ namespace Spotlight.GameFlow
                 if (string.Equals(script.Options[i].OptionId, optionId, StringComparison.Ordinal)) { index = i; break; }
             if (index < 0 || !script.Options[index].Enabled) return false;
             DialogueOption option = script.Options[index];
+            if (OptionSelectionRequested != null && !OptionSelectionRequested(optionId)) return false;
             SelectedOptionId = option.OptionId;
             optionGroup.interactable = false;
             for (int i = 0; i < optionButtons.Count; i++) optionButtons[i].interactable = false;
@@ -393,6 +396,7 @@ namespace Spotlight.GameFlow
 
         private void ResetOptions()
         {
+            OptionSelectionRequested = null;
             optionFeedback?.Kill(false);
             optionFeedback = null;
             optionsVisible = false;

@@ -27,6 +27,7 @@ namespace Spotlight.GameFlow
         [SerializeField] private TMP_Text dialogueText;
         [SerializeField] private TMP_Text progressText;
         [SerializeField] private TMP_Text hintText;
+        [SerializeField] private TMP_Text passiveHintText;
         [SerializeField] private Button continueButton;
         [SerializeField] private Button cancelButton;
         [SerializeField] private Sprite optionEnabledSprite;
@@ -148,6 +149,7 @@ namespace Spotlight.GameFlow
             {
             script = value;
             activeLines.Clear();
+            if (passiveHintText != null) { passiveHintText.text = string.Empty; passiveHintText.gameObject.SetActive(false); }
             for (int i = 0; i < value.Count; i++) activeLines.Add(value[i]);
             SelectedOptionId = string.Empty;
             left = value.LeftCharacter ?? new DialogueCharacter(defaultLeftName, defaultLeft);
@@ -330,6 +332,11 @@ namespace Spotlight.GameFlow
         private void ShowPage(int number)
         {
             page = number;
+            if (passiveHintText != null)
+            {
+                passiveHintText.text = number == 1 ? activeLines[LineIndex].PassiveHint ?? string.Empty : string.Empty;
+                passiveHintText.gameObject.SetActive(!string.IsNullOrEmpty(passiveHintText.text));
+            }
             dialogueText.pageToDisplay = number;
             TMP_TextInfo info = dialogueText.textInfo;
             if (info.characterCount == 0 || info.pageCount == 0)
@@ -480,6 +487,7 @@ namespace Spotlight.GameFlow
             CancelEffectWork();
             script = null;
             activeLines.Clear();
+            if (passiveHintText != null) { passiveHintText.text = string.Empty; passiveHintText.gameObject.SetActive(false); }
             ResetOptions();
             left = right = center = null;
             if (centerPortrait != null) ApplyPortrait(centerPortrait, centerPortraitFrame, null);

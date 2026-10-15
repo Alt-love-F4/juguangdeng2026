@@ -51,6 +51,21 @@ namespace Spotlight.GameFlow.Tests
         }
 
         [UnityTest]
+        public IEnumerator OpeningProloguePreviewUsesSharedSceneAndRemainsIndependent()
+        {
+            controller.PlayOpeningPrologue();
+            yield return null;
+            var panel = controller.CurrentPanel as OpeningProloguePanel;
+            Assert.That(panel, Is.Not.Null);
+            Assert.That(panel.BeatCount, Is.EqualTo(8));
+            Assert.That(panel.IsPlaying, Is.True);
+            Assert.That(UnityEngine.Object.FindFirstObjectByType<GameFlowBootstrap>(), Is.Null);
+            controller.StopCurrent();
+            yield return null;
+            Assert.That(controller.CurrentPanel, Is.Null);
+        }
+
+        [UnityTest]
         public IEnumerator CafeDemoConversationsPauseUntilAdvancedAndClosed()
         {
             controller.StopCurrent();
@@ -120,7 +135,7 @@ namespace Spotlight.GameFlow.Tests
             Assert.That(help, Is.Not.Null);
             Assert.That(help.sortingOrder, Is.GreaterThan(800));
             Button[] buttons = help.GetComponentsInChildren<Button>(true);
-            Assert.That(buttons.Length, Is.EqualTo(29));
+            Assert.That(buttons.Length, Is.EqualTo(33));
             foreach (Button button in buttons)
             {
                 Assert.That(button.onClick.GetPersistentEventCount(), Is.EqualTo(1));
