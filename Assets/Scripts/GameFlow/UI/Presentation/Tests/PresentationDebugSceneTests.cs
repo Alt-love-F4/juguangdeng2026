@@ -376,6 +376,62 @@ namespace Spotlight.GameFlow.Tests
         }
 
         [UnityTest]
+        public IEnumerator AudioToastFeedbackUsesDistinctKeysInSharedScene()
+        {
+            Assert.That(Spotlight.Audio.GameAudio.Service, Is.Not.Null);
+            var played = new System.Collections.Generic.List<string>();
+            Spotlight.Audio.GameAudio.Service.CuePlayed += played.Add;
+            try
+            {
+                OperationToastPanel.ShowMessage("音频回归：违规操作");
+                OperationToastPanel.ShowMessage("音频回归：出品成功", Spotlight.Audio.AudioKeys.OrderSuccess);
+                OperationToastPanel.ShowMessage("音频回归：要求重做", Spotlight.Audio.AudioKeys.OrderRemake);
+                OperationToastPanel.ShowMessage("音频回归：出品失败", Spotlight.Audio.AudioKeys.OrderFailed);
+                CollectionAssert.AreEqual(new[] { Spotlight.Audio.AudioKeys.Error, Spotlight.Audio.AudioKeys.OrderSuccess,
+                    Spotlight.Audio.AudioKeys.OrderRemake, Spotlight.Audio.AudioKeys.OrderFailed }, played);
+                yield return new WaitForSecondsRealtime(2.3f);
+                Assert.That(UnityEngine.Object.FindFirstObjectByType<OperationToastPanel>(), Is.Null);
+            }
+            finally { if (Spotlight.Audio.GameAudio.Service != null) Spotlight.Audio.GameAudio.Service.CuePlayed -= played.Add; }
+        }
+
+        [UnityTest]
+        public IEnumerator AudioFadesContinueAtZeroTimeScaleInSharedScene()
+        {
+            var handle = Spotlight.Audio.GameAudio.Service.Play(Spotlight.Audio.AudioKeys.Grinder, controller);
+            Assert.That(handle.IsValid, Is.True);
+            Time.timeScale = 0f;
+            AudioKit.StopWithFade(handle, .1f);
+            yield return new WaitForSecondsRealtime(.3f);
+            var active = new System.Collections.Generic.List<AudioVoiceSnapshot>();
+            AudioKit.GetBackend().GetActiveVoices(active);
+            Assert.That(active.Exists(voice => voice.VoiceId == handle.VoiceId), Is.False);
+            Spotlight.Audio.GameAudio.StopOwner(controller);
+        }
+
+        [UnityTest]
+        public IEnumerator AudioDialogueSnapshotDoesNotReplayWhenRevealingSameLine()
+        {
+            controller.PlayDialogue();
+            yield return null;
+            var panel = (DialoguePanel)controller.CurrentPanel;
+            var played = new System.Collections.Generic.List<string>();
+            Spotlight.Audio.GameAudio.Service.CuePlayed += played.Add;
+            try
+            {
+                var line = new DialogueLine(DialogueSpeaker.Narrator, new string('字', 150),
+                    sfxKey: Spotlight.Audio.AudioKeys.Date, voiceKey: Spotlight.Audio.AudioKeys.Save);
+                panel.Play(new DialogueScript(new[] { line }));
+                yield return new WaitForSecondsRealtime(.4f);
+                panel.Advance();
+                Assert.That(played.FindAll(key => key == Spotlight.Audio.AudioKeys.Date).Count, Is.EqualTo(1));
+                Assert.That(played.FindAll(key => key == Spotlight.Audio.AudioKeys.Save).Count, Is.EqualTo(1));
+                panel.Stop();
+            }
+            finally { if (Spotlight.Audio.GameAudio.Service != null) Spotlight.Audio.GameAudio.Service.CuePlayed -= played.Add; }
+        }
+
+        [UnityTest]
         public IEnumerator CaptureActualSharedSceneAndDialogue()
         {
             yield return new WaitForEndOfFrame();

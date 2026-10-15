@@ -65,6 +65,7 @@ namespace Spotlight.GameFlow
 
         protected override void OnInit(IUIData data = null)
         {
+            Spotlight.Audio.UIButtonAudio.Install(gameObject);
             if (advanceArea != null) advanceArea.onClick.AddListener(Continue);
             if (skipButton != null) skipButton.onClick.AddListener(Skip);
         }

@@ -170,7 +170,7 @@ namespace Spotlight.FreeCafe
             if (old != null) ReturnCup(old, oldSource);
             var cup = new WorldEntity { id = Allocate("free_"), specId = Spec(source.specId).sourceItemId, area = AreaId.Counter, x = tray.x, y = tray.y };
             source.stock--; State.entities.Add(cup); State.production.activeCupId = cup.id;
-            Notify(); return ActionResult.Yes("出餐托盘：" + Spec(cup.specId).label);
+            Notify(); return ActionResult.Yes("出餐托盘：" + Spec(cup.specId).label, CafeFeedbackKind.CupPickup);
         }
 
         private bool PreviewProduction(WorldEntity item, WorldEntity target, out ActionResult result)
@@ -246,7 +246,7 @@ namespace Spotlight.FreeCafe
                 if (data.clickCooldown > 0) return ActionResult.No("手柄正在转动");
                 data.clickCooldown = Prep.grindClickCooldown; data.remaining = Math.Max(0, data.remaining - Prep.grindClickAdvance);
                 if (data.remaining == 0) FinishProductionMachine(machine);
-                Notify(); return ActionResult.Yes("研磨加速 1 秒");
+                Notify(); return ActionResult.Yes("研磨加速 1 秒", CafeFeedbackKind.GrinderTurn);
             }
             return ActionResult.Yes(CanPour(machine) ? "左键拖动壶，按住右键移动鼠标倾倒，松开右键停止" : "成品就绪，拖出产物");
         }

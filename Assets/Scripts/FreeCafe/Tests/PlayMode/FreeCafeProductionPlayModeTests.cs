@@ -2,6 +2,7 @@ using System.Collections;
 using UnityEngine.InputSystem;
 using UnityEngine.InputSystem.LowLevel;
 using NUnit.Framework;
+using Spotlight.Audio;
 using Spotlight.GameFlow;
 using UnityEngine;
 using UnityEngine.EventSystems;
@@ -70,6 +71,50 @@ namespace Spotlight.FreeCafe.Tests
             hud.smallCup.onClick.Invoke();yield return null;Assert.That(app.World.ServingCup.specId,Is.EqualTo("cup.small"));
             hud.largeCup.onClick.Invoke();yield return null;Assert.That(app.World.ServingCup.specId,Is.EqualTo("cup.large"));
             Assert.That(SceneManager.GetActiveScene().name,Is.EqualTo("CoffeeShop"));
+        }
+        [UnityTest] public IEnumerator GrinderAudioStopsForPauseAndEmptyAndOnlyCompletesOncePerBatch()
+        {
+            var service = GameAudio.Service;
+            Assert.That(service, Is.Not.Null);
+            int starts = 0, ready = 0;
+            System.Action<string> observe = key =>
+            {
+                if (key == AudioKeys.Grinder) starts++;
+                if (key == AudioKeys.Ready) ready++;
+            };
+            service.CuePlayed += observe;
+            try
+            {
+                Assert.That(app.World.TakeAndInteract("s.beans", "m.grinder", AreaId.Counter, 0, 0).success, Is.True);
+                Assert.That(app.World.OperateProduction("m.grinder").success, Is.True);
+                yield return null;
+                Assert.That(starts, Is.EqualTo(1), "State refresh must not restart a running loop");
+                Time.timeScale = 0;
+                yield return null;
+                Time.timeScale = 1;
+                yield return null;
+                Assert.That(starts, Is.EqualTo(2), "A paused grinder must release and restart its loop once");
+                Assert.That(app.World.EmptyProductionMachine("m.grinder").success, Is.True);
+                yield return null;
+                Assert.That(ready, Is.Zero, "Clearing a processing machine is not batch completion");
+
+                Assert.That(app.World.TakeAndInteract("s.beans", "m.grinder", AreaId.Counter, 0, 0).success, Is.True);
+                Assert.That(app.World.OperateProduction("m.grinder").success, Is.True);
+                yield return null;
+                Assert.That(starts, Is.EqualTo(3));
+                app.World.Tick(app.World.Find("m.grinder").production.remaining + 1f);
+                yield return null;
+                Assert.That(ready, Is.EqualTo(1));
+                app.RestoreJson(app.CaptureJson());
+                yield return null;
+                yield return null;
+                Assert.That(ready, Is.EqualTo(1), "Restoring a ready machine must not replay completion");
+            }
+            finally
+            {
+                Time.timeScale = 1;
+                service.CuePlayed -= observe;
+            }
         }
         [UnityTest] public IEnumerator InvalidActualSourceDragReturnsWithoutWithdrawingStock()
         {

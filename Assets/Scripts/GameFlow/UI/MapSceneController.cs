@@ -157,6 +157,7 @@ namespace Spotlight.GameFlow
             flow = owner;
             SetFlow(owner);
             gameObject.SetActive(true);
+            Spotlight.Audio.GameAudio.OverrideMusic(this, Spotlight.Audio.AudioKeys.CityMusic);
             GetComponent<Canvas>().sortingOrder = 30;
             HideFocus();
             if (transform.Find("返回咖啡馆 / M") == null)
@@ -165,6 +166,7 @@ namespace Spotlight.GameFlow
                 ((RectTransform)close.transform).SetAnchors(new Vector2(1, 0), new Vector2(1, 0),
                     new Vector2(-155, 110), new Vector2(230, 48));
                 close.onClick.AddListener(owner.CloseMap);
+                Spotlight.Audio.UIButtonAudio.Configure(close, Spotlight.Audio.AudioKeys.Cancel);
             }
         }
 
@@ -193,6 +195,7 @@ namespace Spotlight.GameFlow
         private void BindLocation(Button button, NarrativeMapPositionDefinition position)
         {
             button.onClick.AddListener(() => { if (!dragging) OnPositionClicked(position); });
+            Spotlight.Audio.UIButtonAudio.Configure(button);
             var hover = button.GetComponent<MapLocationHover>();
             if (hover == null) hover = button.gameObject.AddComponent<MapLocationHover>();
             hover.Initialize(this);
@@ -627,6 +630,7 @@ namespace Spotlight.GameFlow
 
         private void OnDisable()
         {
+            Spotlight.Audio.GameAudio.StopOwner(this);
             keyboardPanVelocity = Vector2.zero;
             panVelocity = Vector2.zero;
             pointerDragging = dragging = false;
@@ -1235,6 +1239,7 @@ namespace Spotlight.GameFlow
             label.text = displayName; label.fontSize = 22; label.alignment = TextAlignmentOptions.Center; label.raycastTarget = false;
             MapVisualTheme.Font(label, false);
             button.onClick.AddListener(() => { if (!dragging) OnPositionClicked(position); });
+            Spotlight.Audio.UIButtonAudio.Configure(button);
             button.gameObject.AddComponent<MapLocationHover>().Initialize(this);
             locationButtons[position.positionKey] = button;
             locationLabels[position.positionKey] = label;

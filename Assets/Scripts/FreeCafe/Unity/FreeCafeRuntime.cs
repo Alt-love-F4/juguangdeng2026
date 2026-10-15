@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using Spotlight.Audio;
 using Spotlight.GameFlow;
 using Spotlight.Narrative;
 using UnityEngine;
@@ -128,6 +129,9 @@ namespace Spotlight.FreeCafe
             if(productionMode) World.EnableProduction();
             AdoptAuthoredEntities(authored);
             World.Changed+=SyncViews;
+            var audioPresenter = GetComponent<FreeCafeAudioPresenter>();
+            if (audioPresenter == null) audioPresenter = gameObject.AddComponent<FreeCafeAudioPresenter>();
+            audioPresenter.Bind(this);
             if(GameSaveParticipantRegistry.Capturers.ContainsKey(SaveId)) throw new InvalidOperationException("Duplicate FreeCafe world in loaded scenes");
             GameSaveParticipantRegistry.Capturers[SaveId]=CaptureJson;
             GameSaveParticipantRegistry.Restorers[SaveId]=RestoreJson;
@@ -151,6 +155,9 @@ namespace Spotlight.FreeCafe
         }
         private void OnDisable()
         {
+            GameAudio.StopOwner(this);
+            var audioPresenter = GetComponent<FreeCafeAudioPresenter>();
+            if (audioPresenter != null) audioPresenter.ResetObservation();
             CancelDrag();
             cafeVisits?.Dispose();
             cafeVisits = null;
@@ -259,6 +266,13 @@ namespace Spotlight.FreeCafe
         {
             ShowHint(result.message);
             if(!result.success) OperationToastPanel.ShowMessage(result.message);
+            else
+            {
+                string cue = FreeCafeAudioPresenter.FeedbackKey(result.feedback);
+                if (result.feedback == CafeFeedbackKind.DeliverySatisfied || result.feedback == CafeFeedbackKind.DeliveryRemake || result.feedback == CafeFeedbackKind.DeliveryFailed)
+                    OperationToastPanel.ShowMessage(result.message, cue);
+                else GameAudio.Play(cue);
+            }
             Debug.Log("[FreeCafe] "+(result.success ? "OK " : "拒绝 ")+result.message,this);
         }
         public ActionResult DeliverCup()
@@ -633,7 +647,10 @@ namespace Spotlight.FreeCafe
                     ghost.AnimateReturn(dropPosition,home,sourceId!=null || machineId!=null);
                 }
             }
-            Report(result);
+            if (result.success && result.feedback == CafeFeedbackKind.None && !wasTilted)
+                GameAudio.Play(sourceId != null ? cupPickup ? AudioKeys.CupPickup : AudioKeys.Ingredient : targetId != null ? AudioKeys.Ingredient : AudioKeys.Place);
+            if (!validScreen) ShowHint(result.message);
+            else Report(result);
         }
         private void RetireDragPreview(FreeEntityView preview)
         {
@@ -769,6 +786,7 @@ namespace Spotlight.FreeCafe
             if(result.success)
             {
                 pouredThisDrag=true; lastPourTarget=targetId;
+                GameAudio.SetLoop(this, "pour", AudioKeys.Pour, true);
                 if(draggedView!=null) draggedView.RefreshLiquid(signedTilt,true);
                 if(target!=null && views.TryGetValue(target.id,out var targetView) && targetView!=null)
                 {
@@ -785,6 +803,7 @@ namespace Spotlight.FreeCafe
             else
             {
                 ShowHint(result.message);
+                GameAudio.SetLoop(this, "pour", AudioKeys.Pour, false);
                 if(lastPourError!=result.message) { lastPourError=result.message; OperationToastPanel.ShowMessage(result.message); }
             }
         }
@@ -812,6 +831,7 @@ namespace Spotlight.FreeCafe
         }
         private void StopVesselPour()
         {
+            GameAudio.SetLoop(this, "pour", AudioKeys.Pour, false);
             if(receivingView!=null) receivingView.SetReceivingPour(false);
             if(!pouredThisDrag) return;
             var result=World.FinishPour(lastPourTarget); pouredThisDrag=false; lastPourTarget=null;
@@ -828,6 +848,8 @@ namespace Spotlight.FreeCafe
         {
             CancelDrag();
             var gateway=GetComponent<FreeCafeMiniGameGateway>(); if(gateway!=null) gateway.Abort();
+            var audioPresenter = GetComponent<FreeCafeAudioPresenter>();
+            if (audioPresenter != null) audioPresenter.ResetObservation();
             var result=World.Restore(JsonUtility.FromJson<CafeSnapshot>(json));
             if(!result.success) throw new FormatException(result.message); SelectedId=null; if(productionMode && !World.ProductionEnabled) World.EnableProduction(); SyncViews();
             // 读档后镜头瞬间就位，不做区域切换的平滑平移

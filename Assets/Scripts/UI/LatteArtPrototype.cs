@@ -236,6 +236,7 @@ namespace OnePersonCompany
                     pouring = accepted > 0;
                 }
             }
+            Spotlight.Audio.GameAudio.SetLoop(this, "latte", Spotlight.Audio.AudioKeys.LattePour, pouring && dt > 0);
             if (pouring && !strokeActive && strokePoints.Count < MaxStrokePoints)
             {
                 strokeStarts.Add(strokePoints.Count);
@@ -299,6 +300,7 @@ namespace OnePersonCompany
         private static void Swap(ref RenderTexture a, ref RenderTexture b) { RenderTexture t = a; a = b; b = t; }
         private void OnDisable()
         {
+            Spotlight.Audio.GameAudio.StopOwner(this);
             if (image != null && surfaceMaterial != null) { image.material = originalMaterial; image.texture = originalTexture; } if (worldSurface && worldRenderer != null) worldRenderer.sharedMaterial = originalRendererMaterial;
             Release(ref velocityRead); Release(ref velocityWrite); Release(ref velocityScratch); Release(ref pressureRead); Release(ref pressureWrite); Release(ref divergence); Release(ref densityRead); Release(ref densityWrite); Release(ref densityForward); if (simulationMaterial != null) Destroy(simulationMaterial); if (surfaceMaterial != null) Destroy(surfaceMaterial); simulationMaterial = null; surfaceMaterial = null;
         }

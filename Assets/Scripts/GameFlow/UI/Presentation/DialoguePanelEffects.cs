@@ -331,6 +331,7 @@ namespace Spotlight.GameFlow
                 size.preferredHeight = Mathf.Max(58f, preferredTextHeight + 28f);
                 string id = option.OptionId;
                 button.onClick.AddListener(() => SelectOption(id));
+                Spotlight.Audio.UIButtonAudio.Configure(button, string.Empty);
                 optionButtons.Add(button);
             }
             optionRoot.SetActive(true);
@@ -367,6 +368,7 @@ namespace Spotlight.GameFlow
             DialogueOption option = script.Options[index];
             if (OptionSelectionRequested != null && !OptionSelectionRequested(optionId)) return false;
             SelectedOptionId = option.OptionId;
+            Spotlight.Audio.GameAudio.Play(Spotlight.Audio.AudioKeys.Confirm);
             optionGroup.interactable = false;
             for (int i = 0; i < optionButtons.Count; i++) optionButtons[i].interactable = false;
             Button selected = optionButtons[index];

@@ -18,7 +18,16 @@ namespace Spotlight.GameFlow
             Texture image = string.IsNullOrWhiteSpace(imageResourcePath) ? null : Resources.Load<Texture>(imageResourcePath);
             Sprite portrait = string.IsNullOrWhiteSpace(portraitResourcePath) ? null : Resources.Load<Sprite>(portraitResourcePath);
             var readingPages = new List<ReadingPage>(pages.Count);
-            for (int i = 0; i < pages.Count; i++)
+            if (request.ReadingLines != null && request.ReadingLines.Count > 0)
+            {
+                var lines = new List<ReadingLine>();
+                foreach (NarrativeReadingLinePresentationData item in request.ReadingLines)
+                    lines.Add(new ReadingLine(item.text, item.speakerName, item.textKey, item.speakerKey, item.voiceKey,
+                        item.portrait != null ? item.portrait : string.IsNullOrWhiteSpace(item.portraitPath) ? null : Resources.Load<Sprite>(item.portraitPath),
+                        item.mode == "dialogue" ? ReadingLineKind.Dialogue : ReadingLineKind.Narration));
+                readingPages.Add(new ReadingPage(string.Empty, lines, image));
+            }
+            else for (int i = 0; i < pages.Count; i++)
             {
                 ReadingLine line = new ReadingLine(pages[i], dialogue ? speaker : string.Empty,
                     portrait: dialogue ? portrait : null,

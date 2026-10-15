@@ -19,12 +19,12 @@ namespace Spotlight.GameFlow
         private Coroutine animation;
         public string Message => messageText != null ? messageText.text : "";
 
-        public static void ShowMessage(string message)
+        public static void ShowMessage(string message, string soundKey = Spotlight.Audio.AudioKeys.Error)
         {
             if (string.IsNullOrWhiteSpace(message)) return;
             if (active == null)
                 active = UIKit.OpenPanel<OperationToastPanel>(UILevel.Pop, tag: "operation-toast", cachePolicy: PanelCachePolicy.Transient);
-            active.Play(message);
+            active.Play(message, soundKey);
         }
 
         protected override void OnShow()
@@ -39,8 +39,9 @@ namespace Spotlight.GameFlow
             group.blocksRaycasts = group.interactable = false;
         }
 
-        public void Play(string message)
+        public void Play(string message, string soundKey = Spotlight.Audio.AudioKeys.Error)
         {
+            Spotlight.Audio.GameAudio.Play(soundKey);
             if (animation != null) StopCoroutine(animation);
             messageText.text = message;
             group.blocksRaycasts = group.interactable = false;

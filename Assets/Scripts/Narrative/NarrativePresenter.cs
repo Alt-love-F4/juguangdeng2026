@@ -86,6 +86,7 @@ namespace Spotlight.Narrative
             completion = null;
             routine = null;
             resources.RestoreCamera();
+            resources.StopAudio();
             ui.Hide();
             Finished?.Invoke(request);
             callback?.Invoke();
@@ -151,6 +152,7 @@ namespace Spotlight.Narrative
             draining = choosing = false;
             effects.Clear();
             resources.RestoreCamera();
+            resources.StopAudio();
             if (ui != null) ui.Hide();
             if (wasActive) Cancelled?.Invoke(reason);
         }
@@ -216,7 +218,7 @@ namespace Spotlight.Narrative
                 {
                     foreach (NarrativeConversationPageDefinition page in dialoguePages)
                     {
-                        var conversationData = new NarrativeConversationPresentationData { title = resolvedTitle, backgroundPath = page.bgOverride };
+                        var conversationData = new NarrativeConversationPresentationData { title = resolvedTitle, backgroundPath = page.bgOverride, bgmOverride = page.bgmOverride };
                         List<NarrativeConversationLineDefinition> lines = configuration.presentations.conversationLines.FindAll(item => item != null && item.pageId == page.pageId);
                         lines.Sort((a, b) => a.seq.CompareTo(b.seq));
                         foreach (NarrativeConversationLineDefinition line in lines)
@@ -227,7 +229,7 @@ namespace Spotlight.Narrative
                             {
                                 speakerKey = line.speakerKey, speakerName = characterData?.name ?? resolve(speakerObject?.nameText),
                                 portraitPath = characterData?.portraitPath ?? speakerObject?.iconPath, portrait = characterData?.portrait,
-                                side = line.side, emote = line.emote,
+                                side = line.side, emote = line.emote, sfxKey = line.sfxKey, voiceKey = line.voiceKey,
                                 text = resolve(line.textKey), accentFxKey = line.accentFxKey, accentTargetKey = line.accentTargetKey
                             });
                         }
@@ -330,7 +332,23 @@ namespace Spotlight.Narrative
                                 NarrativeReadingLineDefinition dialogueLine = configuredPage == null ? null : configuration.presentations.readingLines.Find(line => line != null && line.pageId == configuredPage.pageId && line.mode == "dialogue");
                                 NarrativeObjectDefinition readingSpeaker = dialogueLine == null ? null : configuration.objects.Find(item => item != null && item.objId == dialogueLine.speakerKey);
                                 NarrativeCharacterPresentationData speakerPresentation = dialogueLine == null ? null : characterResolver?.Invoke(dialogueLine.speakerKey, resolve(readingSpeaker?.nameText), string.IsNullOrWhiteSpace(readingSpeaker?.portraitPath) ? readingSpeaker?.iconPath : readingSpeaker.portraitPath);
-                                bool handled = readingPlayback(request, configuredTitle, new[] { pages[pageIndex] }, imagePath,
+                                var readingLines = new List<NarrativeReadingLinePresentationData>();
+                                if (configuredPage != null)
+                                {
+                                    var sourceLines = configuration.presentations.readingLines.FindAll(line => line != null && line.pageId == configuredPage.pageId);
+                                    sourceLines.Sort((left, right) => left.seq.CompareTo(right.seq));
+                                    foreach (NarrativeReadingLineDefinition line in sourceLines)
+                                    {
+                                        NarrativeObjectDefinition sourceSpeaker = configuration.objects.Find(item => item != null && item.objId == line.speakerKey);
+                                        NarrativeCharacterPresentationData resolved = characterResolver?.Invoke(line.speakerKey, resolve(sourceSpeaker?.nameText), sourceSpeaker?.portraitPath ?? sourceSpeaker?.iconPath);
+                                        readingLines.Add(new NarrativeReadingLinePresentationData { text = resolve(line.textKey), textKey = line.textKey,
+                                            speakerKey = line.speakerKey, speakerName = resolved?.name ?? resolve(sourceSpeaker?.nameText),
+                                            portraitPath = resolved?.portraitPath ?? sourceSpeaker?.portraitPath, portrait = resolved?.portrait, mode = line.mode, voiceKey = line.voiceKey });
+                                    }
+                                }
+                                var readingRequest = new NarrativeEventRequest(request.Event, request.Trigger, request.Depth, request.SelectedChoices,
+                                    request.Context, request.RequestId, request.PassiveHint, readingLines);
+                                bool handled = readingPlayback(readingRequest, configuredTitle, new[] { pages[pageIndex] }, imagePath,
                                     dialogueLine != null,
                                     speakerPresentation?.name ?? resolve(readingSpeaker?.nameText), speakerPresentation?.portraitPath ?? Get("portrait"),
                                     () => finishPresentation = true);

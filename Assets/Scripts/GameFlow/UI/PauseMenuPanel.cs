@@ -27,6 +27,7 @@ namespace Spotlight.GameFlow
         protected override void Awake()
         {
             base.Awake();
+            Spotlight.Audio.UIButtonAudio.Configure(resumeButton, string.Empty);
             resumeButton?.onClick.AddListener(() => Flow?.ResumeGame());
             saveButton?.onClick.AddListener(() => Flow?.QuickSave());
             savesButton?.onClick.AddListener(() => Flow?.OpenSaves(true));

@@ -2,6 +2,7 @@
     "name": "Spotlight.Narrative",
     "rootNamespace": "Spotlight.Narrative",
     "references": [
+        "Spotlight.Audio",
         "Unity.TextMeshPro",
         "Unity.ugui",
         "Unity.InputSystem",

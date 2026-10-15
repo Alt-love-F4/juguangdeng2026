@@ -49,6 +49,8 @@ namespace Spotlight.GameFlow
 
         protected override void OnInit(IUIData data = null)
         {
+            Spotlight.Audio.UIButtonAudio.Install(gameObject);
+            Spotlight.Audio.UIButtonAudio.Configure(cancelButton, string.Empty);
             if (cancelButton != null) cancelButton.onClick.AddListener(Cancel);
             if (videoPlayer != null)
             {
@@ -148,12 +150,15 @@ namespace Spotlight.GameFlow
             var fitter = videoImage.GetComponent<AspectRatioFitter>();
             if (fitter != null) fitter.aspectRatio = width / (float)height;
             if (placeholderText != null) placeholderText.gameObject.SetActive(false);
+            for (ushort track = 0; track < source.audioTrackCount; track++) source.SetDirectAudioVolume(track, Spotlight.Audio.GameAudio.VideoGain);
             source.Play();
         }
 
         private void Update()
         {
             if (!IsPlaying || exiting) return;
+            if (videoPlayer != null)
+                for (ushort track = 0; track < videoPlayer.audioTrackCount; track++) videoPlayer.SetDirectAudioVolume(track, Spotlight.Audio.GameAudio.VideoGain);
             Keyboard keyboard = Keyboard.current;
             if (keyboard != null && keyboard.escapeKey.wasPressedThisFrame) { Cancel(); return; }
             if (waitingForVideo)
@@ -184,7 +189,7 @@ namespace Spotlight.GameFlow
             LastError = message;
             Debug.LogWarning("[CutScenePanel] " + message, this);
             Action<string> failed = PlaybackFailed;
-            Cancel();
+            CancelInternal(false);
             failed?.Invoke(message);
         }
 
@@ -207,9 +212,12 @@ namespace Spotlight.GameFlow
             transition.OnComplete(() => { Action callback = finished; Stop(); callback?.Invoke(); });
         }
 
-        public void Cancel()
+        public void Cancel() => CancelInternal(true);
+
+        private void CancelInternal(bool audible)
         {
             if (!IsPlaying) return;
+            if (audible) Spotlight.Audio.GameAudio.Play(Spotlight.Audio.AudioKeys.Cancel);
             Action callback = cancelled;
             Stop();
             CloseSelf();

@@ -430,6 +430,7 @@ namespace Spotlight.GameFlow
         public void ResumeGame()
         {
             if (!gameplay || !paused || UIKit.PeekPanel(MainStack) is not PauseMenuPanel panel) return;
+            Spotlight.Audio.GameAudio.Play(Spotlight.Audio.AudioKeys.Cancel);
             panel.CloseAnimated(FinishResume);
         }
 
@@ -466,7 +467,10 @@ namespace Spotlight.GameFlow
             if (UIKit.PeekPanel(MainStack) is SaveManagementPanel || UIKit.PeekPanel(MainStack) is SettingsPanel)
             {
                 if (UIKit.PeekPanel(MainStack) is GameFlowPanel panel)
+                {
+                    Spotlight.Audio.GameAudio.Play(Spotlight.Audio.AudioKeys.Cancel);
                     panel.CloseAnimated();
+                }
             }
         }
 
@@ -478,16 +482,19 @@ namespace Spotlight.GameFlow
             {
                 if (!saves.TryLoad(index, out GameSaveData data, out string error))
                 {
+                    Spotlight.Audio.GameAudio.Play(Spotlight.Audio.AudioKeys.Error);
                     ShowResult("读取失败", error, () => { });
                     return;
                 }
                 if (!PlayerSaveBridge.TryPrepareRestore(data, out PlayerState playerState, out NarrativeSnapshot snapshot, out error))
                 {
+                    Spotlight.Audio.GameAudio.Play(Spotlight.Audio.AudioKeys.Error);
                     ShowResult("读取失败", error, () => { });
                     return;
                 }
                 if (data.Participants == null || !data.Participants.Any(item => item != null && item.Id == PlayerCafeOwner.SaveId))
                 {
+                    Spotlight.Audio.GameAudio.Play(Spotlight.Audio.AudioKeys.Error);
                     ShowResult("读取失败", "该旧档缺少经营资金与世界快照，无法安全恢复共用余额。原档已保留，请使用其他完整存档或开始新游戏。", () => { });
                     return;
                 }
@@ -511,6 +518,7 @@ namespace Spotlight.GameFlow
                         loadingSavedSession = false;
                         GameSaveParticipantRegistry.PendingRestore = null;
                         OpenMainMenu();
+                        Spotlight.Audio.GameAudio.Play(Spotlight.Audio.AudioKeys.Error);
                         ShowResult("读取失败", exception.Message, () => { });
                     }
                 }, "CoffeeShop", forceReload: true);
@@ -537,7 +545,10 @@ namespace Spotlight.GameFlow
             ShowConfirmation("删除存档", $"确认删除槽 {index + 1} 的存档？删除后无法恢复。", "确认删除", () =>
             {
                 if (!saves.TryDeleteManual(index, out string error))
+                {
+                    Spotlight.Audio.GameAudio.Play(Spotlight.Audio.AudioKeys.Error);
                     ShowResult("删除失败", error, () => { });
+                }
                 else
                     RefreshSavePanel();
             }, "取消", () => { });
@@ -767,6 +778,7 @@ namespace Spotlight.GameFlow
 
         private void OpenMainMenu()
         {
+            Spotlight.Audio.GameAudio.Music(Spotlight.Audio.AudioKeys.MenuMusic);
             openingProloguePanel?.Stop();
             if (openingProloguePanel != null) UIKit.ClosePanel(openingProloguePanel);
             openingProloguePanel = null;
@@ -1107,6 +1119,7 @@ namespace Spotlight.GameFlow
             if (!gameplay || version != sessionVersion) { saving = false; yield break; }
             bool success = TryCaptureSaveData(out GameSaveData data, out string error)
                 && saves.TrySaveManual(index, data, out error);
+            Spotlight.Audio.GameAudio.Play(success ? Spotlight.Audio.AudioKeys.Save : Spotlight.Audio.AudioKeys.Error);
             saving = false;
             pause?.SetSaveStatus(success ? "保存成功" : "保存失败");
             if (!success) { ShowResult("保存失败", error, RefreshSavePanel); yield break; }

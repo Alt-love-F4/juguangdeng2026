@@ -307,6 +307,23 @@ namespace Spotlight.FreeCafe.Tests
             else AssertUnknown(result);
         }
 
+        [Test]
+        public void AcceptedSatisfiedDeliveryExposesSemanticFeedbackWithoutParsingMessage()
+        {
+            world.EnableProduction();
+            world.EnterProduction();
+            Assert.That(world.StartDay().success, Is.True);
+            var request = world.Request(world.State.focusedRequestId);
+            request.productId = "espresso";
+            Assert.That(world.SelectServingCup("s.cups.small").success, Is.True);
+            var cup = world.ServingCup;
+            cup.contents.AddRange(RecommendedCup(world.Product("espresso")).contents);
+            Assert.That(world.Matches(cup, world.Product("espresso")), Is.True);
+            ActionResult delivered = world.DeliverProductionCup();
+            Assert.That(delivered.success, Is.True);
+            Assert.That(delivered.feedback, Is.EqualTo(CafeFeedbackKind.DeliverySatisfied));
+        }
+
         [TestCase("latte", "macchiato", false)]
         [TestCase("espresso", "espresso", true)]
         public void HighScoreCannotSatisfyDeliveryWithWrongOrUnknownCategory(string actualId, string requestedId, bool addBeans)
@@ -330,7 +347,9 @@ namespace Spotlight.FreeCafe.Tests
                 Assert.That(score.total, Is.GreaterThanOrEqualTo(requested.minimumScore));
                 Assert.That(world.ClassifyCoffee(cup).productId, Is.Not.EqualTo(requestedId));
                 Assert.That(world.Matches(cup, requested), Is.False);
-                Assert.That(world.DeliverProductionCup().success, Is.True, "Acceptance is not satisfaction.");
+                ActionResult delivered = world.DeliverProductionCup();
+                Assert.That(delivered.success, Is.True, "Acceptance is not satisfaction.");
+                Assert.That(delivered.feedback, Is.EqualTo(delivery < requested.maxRemakes ? CafeFeedbackKind.DeliveryRemake : CafeFeedbackKind.DeliveryFailed));
                 Assert.That(request.lastProductionScore, Is.EqualTo(score.total).Within(.001f));
                 Assert.That(world.State.todayServed, Is.Zero);
                 Assert.That(world.State.todayRevenue, Is.Zero);

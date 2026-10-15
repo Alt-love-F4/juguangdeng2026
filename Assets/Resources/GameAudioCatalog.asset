@@ -1,0 +1,919 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 1e55d752edb45f24f9e4ac73b9d44973, type: 3}
+  m_Name: GameAudioCatalog
+  m_EditorClassIdentifier: Spotlight.Audio::Spotlight.Audio.AudioCatalog
+  entries:
+  - key: ui.select
+    description: "\u6309\u94AE\u60AC\u505C / \u4E3B\u52A8\u5BFC\u822A\u9009\u4E2D"
+    enabled: 1
+    clip: {fileID: 8300000, guid: 7f819666b33c1074c9432feb5870b3d1, type: 3}
+    resourcePath: 
+    category: 0
+    loop: 0
+    volume: 0.2
+    pitch: 1
+    fadeIn: 0
+    fadeOut: 0.15
+    cooldown: 0.08
+    maxVoices: 3
+    provisional: 1
+    materialNote: "\u73B0\u6709\u7D20\u6750\u6309\u6587\u4EF6\u540D\u521D\u914D\uFF0C\u4E34\u65F6\u66FF\u4EE3\uFF1B\u8BF7\u8BD5\u542C\u786E\u8BA4\u6216\u66FF\u6362\u3002"
+  - key: ui.confirm
+    description: "\u6309\u94AE\u70B9\u51FB\u786E\u8BA4"
+    enabled: 1
+    clip: {fileID: 8300000, guid: 25c0d0e64aeecaa46aac0283156cc15c, type: 3}
+    resourcePath: 
+    category: 0
+    loop: 0
+    volume: 0.45
+    pitch: 1
+    fadeIn: 0
+    fadeOut: 0.15
+    cooldown: 0.08
+    maxVoices: 3
+    provisional: 0
+    materialNote: "\u6309\u6587\u4EF6\u540D\u521D\u914D\uFF0C\u8BF7\u8BD5\u542C\u786E\u8BA4\u97F3\u91CF\u53CA\u5FAA\u73AF\u8854\u63A5\u3002"
+  - key: ui.cancel
+    description: "\u8FD4\u56DE / \u53D6\u6D88"
+    enabled: 1
+    clip: {fileID: 8300000, guid: 0cc7e012ee452e847acb9272027082c3, type: 3}
+    resourcePath: 
+    category: 0
+    loop: 0
+    volume: 0.3
+    pitch: 1
+    fadeIn: 0
+    fadeOut: 0.15
+    cooldown: 0.08
+    maxVoices: 3
+    provisional: 1
+    materialNote: "\u73B0\u6709\u7D20\u6750\u6309\u6587\u4EF6\u540D\u521D\u914D\uFF0C\u4E34\u65F6\u66FF\u4EE3\uFF1B\u8BF7\u8BD5\u542C\u786E\u8BA4\u6216\u66FF\u6362\u3002"
+  - key: ui.error
+    description: "\u8FDD\u89C4\u64CD\u4F5C UI / \u884C\u52A8\u62D2\u7EDD"
+    enabled: 1
+    clip: {fileID: 8300000, guid: d66aa921d39d0004b894e2ad8ee2b126, type: 3}
+    resourcePath: 
+    category: 0
+    loop: 0
+    volume: 0.5
+    pitch: 1
+    fadeIn: 0
+    fadeOut: 0.15
+    cooldown: 0.08
+    maxVoices: 3
+    provisional: 1
+    materialNote: "\u73B0\u6709\u7D20\u6750\u6309\u6587\u4EF6\u540D\u521D\u914D\uFF0C\u4E34\u65F6\u66FF\u4EE3\uFF1B\u8BF7\u8BD5\u542C\u786E\u8BA4\u6216\u66FF\u6362\u3002"
+  - key: ui.save_success
+    description: "\u624B\u52A8\u4FDD\u5B58\u6210\u529F"
+    enabled: 1
+    clip: {fileID: 8300000, guid: 25c0d0e64aeecaa46aac0283156cc15c, type: 3}
+    resourcePath: 
+    category: 0
+    loop: 0
+    volume: 0.4
+    pitch: 1
+    fadeIn: 0
+    fadeOut: 0.15
+    cooldown: 0.08
+    maxVoices: 3
+    provisional: 1
+    materialNote: "\u73B0\u6709\u7D20\u6750\u6309\u6587\u4EF6\u540D\u521D\u914D\uFF0C\u4E34\u65F6\u66FF\u4EE3\uFF1B\u8BF7\u8BD5\u542C\u786E\u8BA4\u6216\u66FF\u6362\u3002"
+  - key: ui.tab
+    description: "\u5207\u6362\u9875\u7B7E"
+    enabled: 1
+    clip: {fileID: 8300000, guid: 0cc7e012ee452e847acb9272027082c3, type: 3}
+    resourcePath: 
+    category: 0
+    loop: 0
+    volume: 0.2
+    pitch: 1
+    fadeIn: 0
+    fadeOut: 0.15
+    cooldown: 0.08
+    maxVoices: 3
+    provisional: 1
+    materialNote: "\u73B0\u6709\u7D20\u6750\u6309\u6587\u4EF6\u540D\u521D\u914D\uFF0C\u4E34\u65F6\u66FF\u4EE3\uFF1B\u8BF7\u8BD5\u542C\u786E\u8BA4\u6216\u66FF\u6362\u3002"
+  - key: ui.page
+    description: "\u8BA2\u5355 / \u914D\u65B9\u7FFB\u9875"
+    enabled: 1
+    clip: {fileID: 8300000, guid: edf7d19759a8f35419e0fe893b0c4bd3, type: 3}
+    resourcePath: 
+    category: 0
+    loop: 0
+    volume: 0.35
+    pitch: 1
+    fadeIn: 0
+    fadeOut: 0.15
+    cooldown: 0.08
+    maxVoices: 3
+    provisional: 0
+    materialNote: "\u6309\u6587\u4EF6\u540D\u521D\u914D\uFF0C\u8BF7\u8BD5\u542C\u786E\u8BA4\u97F3\u91CF\u53CA\u5FAA\u73AF\u8854\u63A5\u3002"
+  - key: ui.volume_preview
+    description: "\u8C03\u8282\u7ED3\u675F\u8BD5\u542C"
+    enabled: 1
+    clip: {fileID: 8300000, guid: 25c0d0e64aeecaa46aac0283156cc15c, type: 3}
+    resourcePath: 
+    category: 0
+    loop: 0
+    volume: 0.4
+    pitch: 1
+    fadeIn: 0
+    fadeOut: 0.15
+    cooldown: 0.08
+    maxVoices: 3
+    provisional: 0
+    materialNote: "\u6309\u6587\u4EF6\u540D\u521D\u914D\uFF0C\u8BF7\u8BD5\u542C\u786E\u8BA4\u97F3\u91CF\u53CA\u5FAA\u73AF\u8854\u63A5\u3002"
+  - key: ui.panel_open
+    description: "\u6253\u5F00\u5F39\u7A97 / \u4FA7\u680F"
+    enabled: 1
+    clip: {fileID: 0}
+    resourcePath: 
+    category: 0
+    loop: 0
+    volume: 0.5
+    pitch: 1
+    fadeIn: 0
+    fadeOut: 0.15
+    cooldown: 0.08
+    maxVoices: 3
+    provisional: 0
+    materialNote: "\u5C1A\u7F3A\u5BF9\u5E94\u7D20\u6750\uFF0C\u6682\u65F6\u9759\u97F3\u3002"
+  - key: ui.panel_close
+    description: "\u5173\u95ED\u5F39\u7A97 / \u4FA7\u680F"
+    enabled: 1
+    clip: {fileID: 0}
+    resourcePath: 
+    category: 0
+    loop: 0
+    volume: 0.5
+    pitch: 1
+    fadeIn: 0
+    fadeOut: 0.15
+    cooldown: 0.08
+    maxVoices: 3
+    provisional: 0
+    materialNote: "\u5C1A\u7F3A\u5BF9\u5E94\u7D20\u6750\uFF0C\u6682\u65F6\u9759\u97F3\u3002"
+  - key: map.action_complete
+    description: "\u5730\u56FE\u884C\u52A8\u5B8C\u6210"
+    enabled: 1
+    clip: {fileID: 8300000, guid: 25c0d0e64aeecaa46aac0283156cc15c, type: 3}
+    resourcePath: 
+    category: 0
+    loop: 0
+    volume: 0.4
+    pitch: 1
+    fadeIn: 0
+    fadeOut: 0.15
+    cooldown: 0.08
+    maxVoices: 3
+    provisional: 1
+    materialNote: "\u73B0\u6709\u7D20\u6750\u6309\u6587\u4EF6\u540D\u521D\u914D\uFF0C\u4E34\u65F6\u66FF\u4EE3\uFF1B\u8BF7\u8BD5\u542C\u786E\u8BA4\u6216\u66FF\u6362\u3002"
+  - key: cafe.cup_pickup
+    description: "\u53D6\u676F"
+    enabled: 1
+    clip: {fileID: 0}
+    resourcePath: 
+    category: 1
+    loop: 0
+    volume: 0.5
+    pitch: 1
+    fadeIn: 0
+    fadeOut: 0.15
+    cooldown: 0.08
+    maxVoices: 3
+    provisional: 0
+    materialNote: "\u5C1A\u7F3A\u5BF9\u5E94\u7D20\u6750\uFF0C\u6682\u65F6\u9759\u97F3\u3002"
+  - key: cafe.item_place
+    description: "\u653E\u4E0B\u5668\u76BF"
+    enabled: 1
+    clip: {fileID: 0}
+    resourcePath: 
+    category: 1
+    loop: 0
+    volume: 0.5
+    pitch: 1
+    fadeIn: 0
+    fadeOut: 0.15
+    cooldown: 0.08
+    maxVoices: 3
+    provisional: 0
+    materialNote: "\u5C1A\u7F3A\u5BF9\u5E94\u7D20\u6750\uFF0C\u6682\u65F6\u9759\u97F3\u3002"
+  - key: cafe.ingredient_add
+    description: "\u6750\u6599\u6295\u5165"
+    enabled: 1
+    clip: {fileID: 0}
+    resourcePath: 
+    category: 1
+    loop: 0
+    volume: 0.5
+    pitch: 1
+    fadeIn: 0
+    fadeOut: 0.15
+    cooldown: 0.08
+    maxVoices: 3
+    provisional: 0
+    materialNote: "\u5C1A\u7F3A\u5BF9\u5E94\u7D20\u6750\uFF0C\u6682\u65F6\u9759\u97F3\u3002"
+  - key: cafe.liquid_pour
+    description: "\u6DB2\u4F53\u503E\u5012"
+    enabled: 1
+    clip: {fileID: 0}
+    resourcePath: 
+    category: 1
+    loop: 1
+    volume: 0.5
+    pitch: 1
+    fadeIn: 0.15
+    fadeOut: 0.15
+    cooldown: 0.08
+    maxVoices: 8
+    provisional: 0
+    materialNote: "\u5C1A\u7F3A\u5BF9\u5E94\u7D20\u6750\uFF0C\u6682\u65F6\u9759\u97F3\u3002"
+  - key: cafe.grinder_run
+    description: "\u7814\u78E8\u8FD0\u884C"
+    enabled: 1
+    clip: {fileID: 8300000, guid: c2cca6d011d2549498f2193d308f4611, type: 3}
+    resourcePath: 
+    category: 1
+    loop: 1
+    volume: 0.45
+    pitch: 1
+    fadeIn: 0.15
+    fadeOut: 0.15
+    cooldown: 0.08
+    maxVoices: 8
+    provisional: 0
+    materialNote: "\u6309\u6587\u4EF6\u540D\u521D\u914D\uFF0C\u8BF7\u8BD5\u542C\u786E\u8BA4\u97F3\u91CF\u53CA\u5FAA\u73AF\u8854\u63A5\u3002"
+  - key: cafe.grinder_turn
+    description: "\u624B\u52A8\u7814\u78E8\u52A0\u901F"
+    enabled: 1
+    clip: {fileID: 0}
+    resourcePath: 
+    category: 1
+    loop: 0
+    volume: 0.5
+    pitch: 1
+    fadeIn: 0
+    fadeOut: 0.15
+    cooldown: 0.08
+    maxVoices: 3
+    provisional: 0
+    materialNote: "\u5C1A\u7F3A\u5BF9\u5E94\u7D20\u6750\uFF0C\u6682\u65F6\u9759\u97F3\u3002"
+  - key: cafe.mixer_run
+    description: "\u6405\u62CC\u673A\u8FD0\u884C"
+    enabled: 1
+    clip: {fileID: 0}
+    resourcePath: 
+    category: 1
+    loop: 1
+    volume: 0.5
+    pitch: 1
+    fadeIn: 0.15
+    fadeOut: 0.15
+    cooldown: 0.08
+    maxVoices: 8
+    provisional: 0
+    materialNote: "\u5C1A\u7F3A\u5BF9\u5E94\u7D20\u6750\uFF0C\u6682\u65F6\u9759\u97F3\u3002"
+  - key: cafe.heating_run
+    description: "\u52A0\u70ED / \u6CB8\u817E"
+    enabled: 1
+    clip: {fileID: 8300000, guid: 9530da105c485144897b235f9cede237, type: 3}
+    resourcePath: 
+    category: 1
+    loop: 1
+    volume: 0.3
+    pitch: 1
+    fadeIn: 0.15
+    fadeOut: 0.15
+    cooldown: 0.08
+    maxVoices: 8
+    provisional: 0
+    materialNote: "\u6309\u6587\u4EF6\u540D\u521D\u914D\uFF0C\u8BF7\u8BD5\u542C\u786E\u8BA4\u97F3\u91CF\u53CA\u5FAA\u73AF\u8854\u63A5\u3002"
+  - key: cafe.extraction_drip
+    description: "\u8FC7\u6EE4\u6EF4\u6C34"
+    enabled: 1
+    clip: {fileID: 0}
+    resourcePath: 
+    category: 1
+    loop: 1
+    volume: 0.5
+    pitch: 1
+    fadeIn: 0.15
+    fadeOut: 0.15
+    cooldown: 0.08
+    maxVoices: 8
+    provisional: 0
+    materialNote: "\u5C1A\u7F3A\u5BF9\u5E94\u7D20\u6750\uFF0C\u6682\u65F6\u9759\u97F3\u3002"
+  - key: cafe.machine_ready
+    description: "\u8BBE\u5907\u5B8C\u6210"
+    enabled: 1
+    clip: {fileID: 8300000, guid: 7f819666b33c1074c9432feb5870b3d1, type: 3}
+    resourcePath: 
+    category: 1
+    loop: 0
+    volume: 0.3
+    pitch: 1
+    fadeIn: 0
+    fadeOut: 0.15
+    cooldown: 0.08
+    maxVoices: 3
+    provisional: 1
+    materialNote: "\u73B0\u6709\u7D20\u6750\u6309\u6587\u4EF6\u540D\u521D\u914D\uFF0C\u4E34\u65F6\u66FF\u4EE3\uFF1B\u8BF7\u8BD5\u542C\u786E\u8BA4\u6216\u66FF\u6362\u3002"
+  - key: cafe.milk_froth
+    description: "\u5373\u65F6\u6253\u5976\u5B8C\u6210"
+    enabled: 1
+    clip: {fileID: 0}
+    resourcePath: 
+    category: 1
+    loop: 0
+    volume: 0.5
+    pitch: 1
+    fadeIn: 0
+    fadeOut: 0.15
+    cooldown: 0.08
+    maxVoices: 3
+    provisional: 0
+    materialNote: "\u5C1A\u7F3A\u5BF9\u5E94\u7D20\u6750\uFF0C\u6682\u65F6\u9759\u97F3\u3002"
+  - key: cafe.delivery_bell
+    description: "\u51FA\u9910\u94C3"
+    enabled: 1
+    clip: {fileID: 8300000, guid: 7f819666b33c1074c9432feb5870b3d1, type: 3}
+    resourcePath: 
+    category: 1
+    loop: 0
+    volume: 0.4
+    pitch: 1
+    fadeIn: 0
+    fadeOut: 0.15
+    cooldown: 0.08
+    maxVoices: 3
+    provisional: 1
+    materialNote: "\u73B0\u6709\u7D20\u6750\u6309\u6587\u4EF6\u540D\u521D\u914D\uFF0C\u4E34\u65F6\u66FF\u4EE3\uFF1B\u8BF7\u8BD5\u542C\u786E\u8BA4\u6216\u66FF\u6362\u3002"
+  - key: cafe.order_success
+    description: "\u51FA\u54C1 UI \u2014 \u987E\u5BA2\u6EE1\u610F"
+    enabled: 1
+    clip: {fileID: 8300000, guid: 25c0d0e64aeecaa46aac0283156cc15c, type: 3}
+    resourcePath: 
+    category: 0
+    loop: 0
+    volume: 0.55
+    pitch: 1
+    fadeIn: 0
+    fadeOut: 0.15
+    cooldown: 0.08
+    maxVoices: 3
+    provisional: 1
+    materialNote: "\u73B0\u6709\u7D20\u6750\u6309\u6587\u4EF6\u540D\u521D\u914D\uFF0C\u4E34\u65F6\u66FF\u4EE3\uFF1B\u8BF7\u8BD5\u542C\u786E\u8BA4\u6216\u66FF\u6362\u3002"
+  - key: cafe.order_remake
+    description: "\u51FA\u54C1 UI \u2014 \u8981\u6C42\u91CD\u505A"
+    enabled: 1
+    clip: {fileID: 8300000, guid: 0cc7e012ee452e847acb9272027082c3, type: 3}
+    resourcePath: 
+    category: 0
+    loop: 0
+    volume: 0.5
+    pitch: 1
+    fadeIn: 0
+    fadeOut: 0.15
+    cooldown: 0.08
+    maxVoices: 3
+    provisional: 1
+    materialNote: "\u73B0\u6709\u7D20\u6750\u6309\u6587\u4EF6\u540D\u521D\u914D\uFF0C\u4E34\u65F6\u66FF\u4EE3\uFF1B\u8BF7\u8BD5\u542C\u786E\u8BA4\u6216\u66FF\u6362\u3002"
+  - key: cafe.order_failed
+    description: "\u51FA\u54C1 UI \u2014 \u4E0D\u6EE1\u610F\u79BB\u5F00"
+    enabled: 1
+    clip: {fileID: 8300000, guid: d66aa921d39d0004b894e2ad8ee2b126, type: 3}
+    resourcePath: 
+    category: 0
+    loop: 0
+    volume: 0.55
+    pitch: 1
+    fadeIn: 0
+    fadeOut: 0.15
+    cooldown: 0.08
+    maxVoices: 3
+    provisional: 1
+    materialNote: "\u73B0\u6709\u7D20\u6750\u6309\u6587\u4EF6\u540D\u521D\u914D\uFF0C\u4E34\u65F6\u66FF\u4EE3\uFF1B\u8BF7\u8BD5\u542C\u786E\u8BA4\u6216\u66FF\u6362\u3002"
+  - key: cafe.discard
+    description: "\u4E22\u5F03\u676F\u5B50"
+    enabled: 1
+    clip: {fileID: 0}
+    resourcePath: 
+    category: 1
+    loop: 0
+    volume: 0.5
+    pitch: 1
+    fadeIn: 0
+    fadeOut: 0.15
+    cooldown: 0.08
+    maxVoices: 3
+    provisional: 0
+    materialNote: "\u5C1A\u7F3A\u5BF9\u5E94\u7D20\u6750\uFF0C\u6682\u65F6\u9759\u97F3\u3002"
+  - key: cafe.container_empty
+    description: "\u6E05\u7A7A\u5BB9\u5668"
+    enabled: 1
+    clip: {fileID: 0}
+    resourcePath: 
+    category: 1
+    loop: 0
+    volume: 0.5
+    pitch: 1
+    fadeIn: 0
+    fadeOut: 0.15
+    cooldown: 0.08
+    maxVoices: 3
+    provisional: 0
+    materialNote: "\u5C1A\u7F3A\u5BF9\u5E94\u7D20\u6750\uFF0C\u6682\u65F6\u9759\u97F3\u3002"
+  - key: cafe.latte_pour
+    description: "\u62C9\u82B1\u6709\u6548\u6CE8\u5976"
+    enabled: 1
+    clip: {fileID: 0}
+    resourcePath: 
+    category: 1
+    loop: 1
+    volume: 0.5
+    pitch: 1
+    fadeIn: 0.15
+    fadeOut: 0.15
+    cooldown: 0.08
+    maxVoices: 8
+    provisional: 0
+    materialNote: "\u5C1A\u7F3A\u5BF9\u5E94\u7D20\u6750\uFF0C\u6682\u65F6\u9759\u97F3\u3002"
+  - key: cafe.latte_complete
+    description: "\u62C9\u82B1\u63D0\u4EA4\u5B8C\u6210"
+    enabled: 1
+    clip: {fileID: 8300000, guid: 25c0d0e64aeecaa46aac0283156cc15c, type: 3}
+    resourcePath: 
+    category: 1
+    loop: 0
+    volume: 0.35
+    pitch: 1
+    fadeIn: 0
+    fadeOut: 0.15
+    cooldown: 0.08
+    maxVoices: 3
+    provisional: 1
+    materialNote: "\u73B0\u6709\u7D20\u6750\u6309\u6587\u4EF6\u540D\u521D\u914D\uFF0C\u4E34\u65F6\u66FF\u4EE3\uFF1B\u8BF7\u8BD5\u542C\u786E\u8BA4\u6216\u66FF\u6362\u3002"
+  - key: cafe.customer_arrive
+    description: "\u987E\u5BA2\u5B9E\u9645\u5230\u5E97"
+    enabled: 1
+    clip: {fileID: 0}
+    resourcePath: 
+    category: 1
+    loop: 0
+    volume: 0.5
+    pitch: 1
+    fadeIn: 0
+    fadeOut: 0.15
+    cooldown: 0.08
+    maxVoices: 3
+    provisional: 0
+    materialNote: "\u5C1A\u7F3A\u5BF9\u5E94\u7D20\u6750\uFF0C\u6682\u65F6\u9759\u97F3\u3002"
+  - key: cafe.customer_leave
+    description: "\u987E\u5BA2\u5B9E\u9645\u79BB\u5E97"
+    enabled: 1
+    clip: {fileID: 0}
+    resourcePath: 
+    category: 1
+    loop: 0
+    volume: 0.5
+    pitch: 1
+    fadeIn: 0
+    fadeOut: 0.15
+    cooldown: 0.08
+    maxVoices: 3
+    provisional: 0
+    materialNote: "\u5C1A\u7F3A\u5BF9\u5E94\u7D20\u6750\uFF0C\u6682\u65F6\u9759\u97F3\u3002"
+  - key: cafe.area_transition
+    description: "\u5207\u6362\u5927\u5385 / \u5236\u4F5C\u53F0"
+    enabled: 1
+    clip: {fileID: 0}
+    resourcePath: 
+    category: 1
+    loop: 0
+    volume: 0.5
+    pitch: 1
+    fadeIn: 0
+    fadeOut: 0.15
+    cooldown: 0.08
+    maxVoices: 3
+    provisional: 0
+    materialNote: "\u5C1A\u7F3A\u5BF9\u5E94\u7D20\u6750\uFF0C\u6682\u65F6\u9759\u97F3\u3002"
+  - key: music.menu
+    description: "\u4E3B\u83DC\u5355\u97F3\u4E50"
+    enabled: 1
+    clip: {fileID: 8300000, guid: a43debdae3b539646aa48c162490e99b, type: 3}
+    resourcePath: 
+    category: 2
+    loop: 1
+    volume: 0.35
+    pitch: 1
+    fadeIn: 0.15
+    fadeOut: 0.15
+    cooldown: 0.08
+    maxVoices: 8
+    provisional: 0
+    materialNote: "\u6309\u6587\u4EF6\u540D\u521D\u914D\uFF0C\u8BF7\u8BD5\u542C\u786E\u8BA4\u97F3\u91CF\u53CA\u5FAA\u73AF\u8854\u63A5\u3002"
+  - key: music.cafe_day
+    description: "\u7ECF\u8425\u97F3\u4E50"
+    enabled: 1
+    clip: {fileID: 8300000, guid: 8c74739d1c0ffde4f9042bb2c3897eb7, type: 3}
+    resourcePath: 
+    category: 2
+    loop: 1
+    volume: 0.25
+    pitch: 1
+    fadeIn: 0.15
+    fadeOut: 0.15
+    cooldown: 0.08
+    maxVoices: 8
+    provisional: 0
+    materialNote: "\u6309\u6587\u4EF6\u540D\u521D\u914D\uFF0C\u8BF7\u8BD5\u542C\u786E\u8BA4\u97F3\u91CF\u53CA\u5FAA\u73AF\u8854\u63A5\u3002"
+  - key: music.city
+    description: "\u57CE\u533A\u97F3\u4E50"
+    enabled: 1
+    clip: {fileID: 8300000, guid: 2a1a4379bdccd7742a66694b4812d528, type: 3}
+    resourcePath: 
+    category: 2
+    loop: 1
+    volume: 0.25
+    pitch: 1
+    fadeIn: 0.15
+    fadeOut: 0.15
+    cooldown: 0.08
+    maxVoices: 8
+    provisional: 0
+    materialNote: "\u6309\u6587\u4EF6\u540D\u521D\u914D\uFF0C\u8BF7\u8BD5\u542C\u786E\u8BA4\u97F3\u91CF\u53CA\u5FAA\u73AF\u8854\u63A5\u3002"
+  - key: music.home_night
+    description: "\u591C\u665A\u97F3\u4E50"
+    enabled: 1
+    clip: {fileID: 8300000, guid: cdb097e24f912ca4ca83b8261b7c81cb, type: 3}
+    resourcePath: 
+    category: 2
+    loop: 1
+    volume: 0.25
+    pitch: 1
+    fadeIn: 0.15
+    fadeOut: 0.15
+    cooldown: 0.08
+    maxVoices: 8
+    provisional: 0
+    materialNote: "\u6309\u6587\u4EF6\u540D\u521D\u914D\uFF0C\u8BF7\u8BD5\u542C\u786E\u8BA4\u97F3\u91CF\u53CA\u5FAA\u73AF\u8854\u63A5\u3002"
+  - key: ambience.cafe
+    description: "\u5496\u5561\u5E97\u73AF\u5883"
+    enabled: 1
+    clip: {fileID: 8300000, guid: 74e736afcd2b26c4cb7ae2d746c4a8b1, type: 3}
+    resourcePath: 
+    category: 3
+    loop: 1
+    volume: 0.08
+    pitch: 1
+    fadeIn: 0.15
+    fadeOut: 0.15
+    cooldown: 0.08
+    maxVoices: 8
+    provisional: 1
+    materialNote: "\u73B0\u6709\u7D20\u6750\u6309\u6587\u4EF6\u540D\u521D\u914D\uFF0C\u4E34\u65F6\u66FF\u4EE3\uFF1B\u8BF7\u8BD5\u542C\u786E\u8BA4\u6216\u66FF\u6362\u3002"
+  - key: ambience.city
+    description: "\u57CE\u533A\u8857\u9053\u73AF\u5883"
+    enabled: 1
+    clip: {fileID: 8300000, guid: 92e3427a764d9a843be0a5c45a85523f, type: 3}
+    resourcePath: 
+    category: 3
+    loop: 1
+    volume: 0.12
+    pitch: 1
+    fadeIn: 0.15
+    fadeOut: 0.15
+    cooldown: 0.08
+    maxVoices: 8
+    provisional: 0
+    materialNote: "\u6309\u6587\u4EF6\u540D\u521D\u914D\uFF0C\u8BF7\u8BD5\u542C\u786E\u8BA4\u97F3\u91CF\u53CA\u5FAA\u73AF\u8854\u63A5\u3002"
+  - key: flow.date_change
+    description: "\u65E5\u671F\u5207\u6362"
+    enabled: 1
+    clip: {fileID: 8300000, guid: edf7d19759a8f35419e0fe893b0c4bd3, type: 3}
+    resourcePath: 
+    category: 1
+    loop: 0
+    volume: 0.4
+    pitch: 1
+    fadeIn: 0
+    fadeOut: 0.15
+    cooldown: 0.08
+    maxVoices: 3
+    provisional: 1
+    materialNote: "\u73B0\u6709\u7D20\u6750\u6309\u6587\u4EF6\u540D\u521D\u914D\uFF0C\u4E34\u65F6\u66FF\u4EE3\uFF1B\u8BF7\u8BD5\u542C\u786E\u8BA4\u6216\u66FF\u6362\u3002"
+  - key: flow.cafe_open
+    description: "\u5F00\u5E97\u6F14\u51FA"
+    enabled: 1
+    clip: {fileID: 8300000, guid: 052bb819c15b0bc4f9041fd657f2f45d, type: 3}
+    resourcePath: 
+    category: 1
+    loop: 0
+    volume: 0.35
+    pitch: 1
+    fadeIn: 0
+    fadeOut: 0.15
+    cooldown: 0.08
+    maxVoices: 3
+    provisional: 0
+    materialNote: "\u6309\u6587\u4EF6\u540D\u521D\u914D\uFF0C\u8BF7\u8BD5\u542C\u786E\u8BA4\u97F3\u91CF\u53CA\u5FAA\u73AF\u8854\u63A5\u3002"
+  - key: flow.business_end
+    description: "\u8425\u4E1A\u7ED3\u675F"
+    enabled: 1
+    clip: {fileID: 0}
+    resourcePath: 
+    category: 1
+    loop: 0
+    volume: 0.5
+    pitch: 1
+    fadeIn: 0
+    fadeOut: 0.15
+    cooldown: 0.08
+    maxVoices: 3
+    provisional: 0
+    materialNote: "\u5C1A\u7F3A\u5BF9\u5E94\u7D20\u6750\uFF0C\u6682\u65F6\u9759\u97F3\u3002"
+  - key: flow.day_end
+    description: "\u65E5\u7ED3"
+    enabled: 1
+    clip: {fileID: 0}
+    resourcePath: 
+    category: 1
+    loop: 0
+    volume: 0.5
+    pitch: 1
+    fadeIn: 0
+    fadeOut: 0.15
+    cooldown: 0.08
+    maxVoices: 3
+    provisional: 0
+    materialNote: "\u5C1A\u7F3A\u5BF9\u5E94\u7D20\u6750\uFF0C\u6682\u65F6\u9759\u97F3\u3002"
+  - key: presentation.page_turn
+    description: "\u9605\u8BFB\u7FFB\u9875"
+    enabled: 1
+    clip: {fileID: 8300000, guid: edf7d19759a8f35419e0fe893b0c4bd3, type: 3}
+    resourcePath: 
+    category: 0
+    loop: 0
+    volume: 0.35
+    pitch: 1
+    fadeIn: 0
+    fadeOut: 0.15
+    cooldown: 0.08
+    maxVoices: 3
+    provisional: 0
+    materialNote: "\u6309\u6587\u4EF6\u540D\u521D\u914D\uFF0C\u8BF7\u8BD5\u542C\u786E\u8BA4\u97F3\u91CF\u53CA\u5FAA\u73AF\u8854\u63A5\u3002"
+  - key: presentation.envelope_open
+    description: "\u62C6\u5F00\u4FE1\u5C01"
+    enabled: 1
+    clip: {fileID: 8300000, guid: edf7d19759a8f35419e0fe893b0c4bd3, type: 3}
+    resourcePath: 
+    category: 1
+    loop: 0
+    volume: 0.45
+    pitch: 1
+    fadeIn: 0
+    fadeOut: 0.15
+    cooldown: 0.08
+    maxVoices: 3
+    provisional: 1
+    materialNote: "\u73B0\u6709\u7D20\u6750\u6309\u6587\u4EF6\u540D\u521D\u914D\uFF0C\u4E34\u65F6\u66FF\u4EE3\uFF1B\u8BF7\u8BD5\u542C\u786E\u8BA4\u6216\u66FF\u6362\u3002"
+  - key: presentation.signature
+    description: "\u7B7E\u540D\u786E\u8BA4"
+    enabled: 1
+    clip: {fileID: 8300000, guid: 25c0d0e64aeecaa46aac0283156cc15c, type: 3}
+    resourcePath: 
+    category: 1
+    loop: 0
+    volume: 0.4
+    pitch: 1
+    fadeIn: 0
+    fadeOut: 0.15
+    cooldown: 0.08
+    maxVoices: 3
+    provisional: 1
+    materialNote: "\u73B0\u6709\u7D20\u6750\u6309\u6587\u4EF6\u540D\u521D\u914D\uFF0C\u4E34\u65F6\u66FF\u4EE3\uFF1B\u8BF7\u8BD5\u542C\u786E\u8BA4\u6216\u66FF\u6362\u3002"
+  - key: presentation.notice
+    description: "\u65B0\u901A\u77E5\u5C55\u793A"
+    enabled: 1
+    clip: {fileID: 8300000, guid: 0cc7e012ee452e847acb9272027082c3, type: 3}
+    resourcePath: 
+    category: 0
+    loop: 0
+    volume: 0.3
+    pitch: 1
+    fadeIn: 0
+    fadeOut: 0.15
+    cooldown: 0.08
+    maxVoices: 3
+    provisional: 1
+    materialNote: "\u73B0\u6709\u7D20\u6750\u6309\u6587\u4EF6\u540D\u521D\u914D\uFF0C\u4E34\u65F6\u66FF\u4EE3\uFF1B\u8BF7\u8BD5\u542C\u786E\u8BA4\u6216\u66FF\u6362\u3002"
+  - key: "music.track.\u5DF4\u6D1B\u514B\u98CE\u683C"
+    description: "\u5267\u60C5\u53EF\u5F15\u7528\u97F3\u4E50\uFF1A\u5DF4\u6D1B\u514B\u98CE\u683C"
+    enabled: 1
+    clip: {fileID: 8300000, guid: 292727eca48265f468420815b6e38f0c, type: 3}
+    resourcePath: 
+    category: 2
+    loop: 1
+    volume: 0.3
+    pitch: 1
+    fadeIn: 0.15
+    fadeOut: 0.15
+    cooldown: 0.08
+    maxVoices: 8
+    provisional: 0
+    materialNote: "\u6309\u6587\u4EF6\u540D\u521D\u914D\uFF0C\u8BF7\u8BD5\u542C\u786E\u8BA4\u97F3\u91CF\u53CA\u5FAA\u73AF\u8854\u63A5\u3002"
+  - key: "music.track.\u5BF9\u5CD9\uFF0C\u51B2\u7A81\u524D"
+    description: "\u5267\u60C5\u53EF\u5F15\u7528\u97F3\u4E50\uFF1A\u5BF9\u5CD9\uFF0C\u51B2\u7A81\u524D"
+    enabled: 1
+    clip: {fileID: 8300000, guid: 07f438d5edaf6654a9183bee1b64dd7a, type: 3}
+    resourcePath: 
+    category: 2
+    loop: 1
+    volume: 0.3
+    pitch: 1
+    fadeIn: 0.15
+    fadeOut: 0.15
+    cooldown: 0.08
+    maxVoices: 8
+    provisional: 0
+    materialNote: "\u6309\u6587\u4EF6\u540D\u521D\u914D\uFF0C\u8BF7\u8BD5\u542C\u786E\u8BA4\u97F3\u91CF\u53CA\u5FAA\u73AF\u8854\u63A5\u3002"
+  - key: "music.track.\u56DE\u5FC6"
+    description: "\u5267\u60C5\u53EF\u5F15\u7528\u97F3\u4E50\uFF1A\u56DE\u5FC6"
+    enabled: 1
+    clip: {fileID: 8300000, guid: cdb097e24f912ca4ca83b8261b7c81cb, type: 3}
+    resourcePath: 
+    category: 2
+    loop: 1
+    volume: 0.3
+    pitch: 1
+    fadeIn: 0.15
+    fadeOut: 0.15
+    cooldown: 0.08
+    maxVoices: 8
+    provisional: 0
+    materialNote: "\u6309\u6587\u4EF6\u540D\u521D\u914D\uFF0C\u8BF7\u8BD5\u542C\u786E\u8BA4\u97F3\u91CF\u53CA\u5FAA\u73AF\u8854\u63A5\u3002"
+  - key: "music.track.\u7D27\u5F20"
+    description: "\u5267\u60C5\u53EF\u5F15\u7528\u97F3\u4E50\uFF1A\u7D27\u5F20"
+    enabled: 1
+    clip: {fileID: 8300000, guid: 44507b7a5f4c6254181a510c730a0a4e, type: 3}
+    resourcePath: 
+    category: 2
+    loop: 1
+    volume: 0.3
+    pitch: 1
+    fadeIn: 0.15
+    fadeOut: 0.15
+    cooldown: 0.08
+    maxVoices: 8
+    provisional: 0
+    materialNote: "\u6309\u6587\u4EF6\u540D\u521D\u914D\uFF0C\u8BF7\u8BD5\u542C\u786E\u8BA4\u97F3\u91CF\u53CA\u5FAA\u73AF\u8854\u63A5\u3002"
+  - key: "music.track.\u6050\u6016\uFF1F"
+    description: "\u5267\u60C5\u53EF\u5F15\u7528\u97F3\u4E50\uFF1A\u6050\u6016\uFF1F"
+    enabled: 1
+    clip: {fileID: 8300000, guid: acc7de91496ec8649b97bea74d8d3705, type: 3}
+    resourcePath: 
+    category: 2
+    loop: 1
+    volume: 0.3
+    pitch: 1
+    fadeIn: 0.15
+    fadeOut: 0.15
+    cooldown: 0.08
+    maxVoices: 8
+    provisional: 0
+    materialNote: "\u6309\u6587\u4EF6\u540D\u521D\u914D\uFF0C\u8BF7\u8BD5\u542C\u786E\u8BA4\u97F3\u91CF\u53CA\u5FAA\u73AF\u8854\u63A5\u3002"
+  - key: "music.track.\u65E5\u5E38\u63A8\u8FDB"
+    description: "\u5267\u60C5\u53EF\u5F15\u7528\u97F3\u4E50\uFF1A\u65E5\u5E38\u63A8\u8FDB"
+    enabled: 1
+    clip: {fileID: 8300000, guid: 2a1a4379bdccd7742a66694b4812d528, type: 3}
+    resourcePath: 
+    category: 2
+    loop: 1
+    volume: 0.3
+    pitch: 1
+    fadeIn: 0.15
+    fadeOut: 0.15
+    cooldown: 0.08
+    maxVoices: 8
+    provisional: 0
+    materialNote: "\u6309\u6587\u4EF6\u540D\u521D\u914D\uFF0C\u8BF7\u8BD5\u542C\u786E\u8BA4\u97F3\u91CF\u53CA\u5FAA\u73AF\u8854\u63A5\u3002"
+  - key: "music.track.\u65F6\u95F4\u6D41\u901D"
+    description: "\u5267\u60C5\u53EF\u5F15\u7528\u97F3\u4E50\uFF1A\u65F6\u95F4\u6D41\u901D"
+    enabled: 1
+    clip: {fileID: 8300000, guid: fa3f391d17ea22c4aa370a9120ef8168, type: 3}
+    resourcePath: 
+    category: 2
+    loop: 1
+    volume: 0.3
+    pitch: 1
+    fadeIn: 0.15
+    fadeOut: 0.15
+    cooldown: 0.08
+    maxVoices: 8
+    provisional: 0
+    materialNote: "\u6309\u6587\u4EF6\u540D\u521D\u914D\uFF0C\u8BF7\u8BD5\u542C\u786E\u8BA4\u97F3\u91CF\u53CA\u5FAA\u73AF\u8854\u63A5\u3002"
+  - key: "music.track.\u4F11\u95F2"
+    description: "\u5267\u60C5\u53EF\u5F15\u7528\u97F3\u4E50\uFF1A\u4F11\u95F2"
+    enabled: 1
+    clip: {fileID: 8300000, guid: 8c74739d1c0ffde4f9042bb2c3897eb7, type: 3}
+    resourcePath: 
+    category: 2
+    loop: 1
+    volume: 0.3
+    pitch: 1
+    fadeIn: 0.15
+    fadeOut: 0.15
+    cooldown: 0.08
+    maxVoices: 8
+    provisional: 0
+    materialNote: "\u6309\u6587\u4EF6\u540D\u521D\u914D\uFF0C\u8BF7\u8BD5\u542C\u786E\u8BA4\u97F3\u91CF\u53CA\u5FAA\u73AF\u8854\u63A5\u3002"
+  - key: "music.track.\u9633\u5149\u7684\u97F3\u4E50"
+    description: "\u5267\u60C5\u53EF\u5F15\u7528\u97F3\u4E50\uFF1A\u9633\u5149\u7684\u97F3\u4E50"
+    enabled: 1
+    clip: {fileID: 8300000, guid: 8d80afc944927d54190d6a1b588d8b63, type: 3}
+    resourcePath: 
+    category: 2
+    loop: 1
+    volume: 0.3
+    pitch: 1
+    fadeIn: 0.15
+    fadeOut: 0.15
+    cooldown: 0.08
+    maxVoices: 8
+    provisional: 0
+    materialNote: "\u6309\u6587\u4EF6\u540D\u521D\u914D\uFF0C\u8BF7\u8BD5\u542C\u786E\u8BA4\u97F3\u91CF\u53CA\u5FAA\u73AF\u8854\u63A5\u3002"
+  - key: "music.track.\u4E5F\u8BB8\u60B2\u4F24"
+    description: "\u5267\u60C5\u53EF\u5F15\u7528\u97F3\u4E50\uFF1A\u4E5F\u8BB8\u60B2\u4F24"
+    enabled: 1
+    clip: {fileID: 8300000, guid: 6d6684716574f9e4d9e18bfd9dc6d383, type: 3}
+    resourcePath: 
+    category: 2
+    loop: 1
+    volume: 0.3
+    pitch: 1
+    fadeIn: 0.15
+    fadeOut: 0.15
+    cooldown: 0.08
+    maxVoices: 8
+    provisional: 0
+    materialNote: "\u6309\u6587\u4EF6\u540D\u521D\u914D\uFF0C\u8BF7\u8BD5\u542C\u786E\u8BA4\u97F3\u91CF\u53CA\u5FAA\u73AF\u8854\u63A5\u3002"
+  - key: "music.track.\u6218\u6597\uFF01"
+    description: "\u5267\u60C5\u53EF\u5F15\u7528\u97F3\u4E50\uFF1A\u6218\u6597\uFF01"
+    enabled: 1
+    clip: {fileID: 8300000, guid: 2b6dd95bfa198fa419a8beea6f600a6c, type: 3}
+    resourcePath: 
+    category: 2
+    loop: 1
+    volume: 0.3
+    pitch: 1
+    fadeIn: 0.15
+    fadeOut: 0.15
+    cooldown: 0.08
+    maxVoices: 8
+    provisional: 0
+    materialNote: "\u6309\u6587\u4EF6\u540D\u521D\u914D\uFF0C\u8BF7\u8BD5\u542C\u786E\u8BA4\u97F3\u91CF\u53CA\u5FAA\u73AF\u8854\u63A5\u3002"
+  - key: "music.track.Eb \u5E0C\u671B"
+    description: "\u5267\u60C5\u53EF\u5F15\u7528\u97F3\u4E50\uFF1AEb \u5E0C\u671B"
+    enabled: 1
+    clip: {fileID: 8300000, guid: d73650a2702926a4a9cae3af058c3609, type: 3}
+    resourcePath: 
+    category: 2
+    loop: 1
+    volume: 0.3
+    pitch: 1
+    fadeIn: 0.15
+    fadeOut: 0.15
+    cooldown: 0.08
+    maxVoices: 8
+    provisional: 0
+    materialNote: "\u6309\u6587\u4EF6\u540D\u521D\u914D\uFF0C\u8BF7\u8BD5\u542C\u786E\u8BA4\u97F3\u91CF\u53CA\u5FAA\u73AF\u8854\u63A5\u3002"
+  - key: "music.track.win\uFF01"
+    description: "\u5267\u60C5\u53EF\u5F15\u7528\u97F3\u4E50\uFF1Awin\uFF01"
+    enabled: 1
+    clip: {fileID: 8300000, guid: b775ee0aaec7ce34ba1b33d924e9e5a2, type: 3}
+    resourcePath: 
+    category: 2
+    loop: 1
+    volume: 0.3
+    pitch: 1
+    fadeIn: 0.15
+    fadeOut: 0.15
+    cooldown: 0.08
+    maxVoices: 8
+    provisional: 0
+    materialNote: "\u6309\u6587\u4EF6\u540D\u521D\u914D\uFF0C\u8BF7\u8BD5\u542C\u786E\u8BA4\u97F3\u91CF\u53CA\u5FAA\u73AF\u8854\u63A5\u3002"
+  videoVolume: 1
+  videoCategory: 1
+  musicTransitionSeconds: 0.5
+  warnMissing: 1

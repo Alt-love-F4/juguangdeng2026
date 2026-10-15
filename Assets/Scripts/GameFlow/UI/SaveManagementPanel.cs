@@ -41,6 +41,7 @@ namespace Spotlight.GameFlow
                 if (slot != null) slot.BindSelection(SelectSlot);
             }
             backButton?.onClick.AddListener(() => Flow?.BackToPrevious());
+            Spotlight.Audio.UIButtonAudio.Configure(backButton, string.Empty);
         }
 
         private void ResolveSlotViews()

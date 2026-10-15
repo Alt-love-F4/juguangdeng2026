@@ -357,19 +357,23 @@ namespace Spotlight.FreeCafe
     }
 
     /// <summary>一次操作的结果：是否成功 + 给玩家看的提示文案。</summary>
+    public enum CafeFeedbackKind { None, DeliverySatisfied, DeliveryRemake, DeliveryFailed, CupPickup, Froth, Discard, Empty, GrinderTurn, LatteComplete }
+
     public readonly struct ActionResult
     {
         public readonly bool success;
         public readonly string message;
+        public readonly CafeFeedbackKind feedback;
 
-        public ActionResult(bool success, string message)
+        public ActionResult(bool success, string message, CafeFeedbackKind feedback = CafeFeedbackKind.None)
         {
             this.success = success;
             this.message = message;
+            this.feedback = feedback;
         }
 
         /// <summary>成功结果。</summary>
-        public static ActionResult Yes(string message) => new ActionResult(true, message);
+        public static ActionResult Yes(string message, CafeFeedbackKind feedback = CafeFeedbackKind.None) => new ActionResult(true, message, feedback);
 
         /// <summary>失败结果。</summary>
         public static ActionResult No(string message) => new ActionResult(false, message);

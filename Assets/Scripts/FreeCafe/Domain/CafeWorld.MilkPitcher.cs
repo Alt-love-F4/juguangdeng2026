@@ -65,7 +65,7 @@ namespace Spotlight.FreeCafe
                 }
             RefreshContainerTemperature(pitcher);
             Notify();
-            return ActionResult.Yes("牛奶已打成奶泡 · " + MilkFoamVolume(pitcher).ToString("0.0") + " ml；拖到杯子上开始拉花");
+            return ActionResult.Yes("牛奶已打成奶泡 · " + MilkFoamVolume(pitcher).ToString("0.0") + " ml；拖到杯子上开始拉花", CafeFeedbackKind.Froth);
         }
 
         public ActionResult PreviewMilkPitcherLatteArt(WorldEntity pitcher, WorldEntity cup)

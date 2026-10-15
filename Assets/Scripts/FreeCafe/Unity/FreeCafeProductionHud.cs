@@ -39,6 +39,10 @@ namespace Spotlight.FreeCafe
             cancelMiniGame.onClick.AddListener(CancelMiniGame);
             pauseButton.onClick.AddListener(runtime.OpenPlayerMenu);
             clearMachine.onClick.AddListener(ClearMachine);
+            foreach (Button button in new[] { previousOrder, nextOrder, previousRecipe, nextRecipe, smallCup, largeCup, deliver, discard, clearMachine })
+                Spotlight.Audio.UIButtonAudio.Configure(button, string.Empty);
+            foreach (Button button in new[] { returnButton, closeBook, cancelMiniGame })
+                Spotlight.Audio.UIButtonAudio.Configure(button, Spotlight.Audio.AudioKeys.Cancel);
         }
         private void OnDisable()
         {
@@ -54,8 +58,17 @@ namespace Spotlight.FreeCafe
             cancelMiniGame.onClick.RemoveListener(CancelMiniGame); clearMachine.onClick.RemoveListener(ClearMachine);
         }
         private void Execute(ActionResult action) => runtime.Report(action);
-        private void PreviousOrder() { if(!runtime.InputBlocked) Execute(runtime.World.PageProductionOrder(-1)); }
-        private void NextOrder() { if(!runtime.InputBlocked) Execute(runtime.World.PageProductionOrder(1)); }
+        private void PreviousOrder() => ChangeOrder(-1);
+        private void NextOrder() => ChangeOrder(1);
+        private void ChangeOrder(int direction)
+        {
+            if (runtime.InputBlocked) return;
+            string previous = runtime.World.State.focusedRequestId;
+            ActionResult changed = runtime.World.PageProductionOrder(direction);
+            if (changed.success && previous != runtime.World.State.focusedRequestId)
+                Spotlight.Audio.GameAudio.Play(Spotlight.Audio.AudioKeys.Page);
+            Execute(changed);
+        }
         private void SmallCup() { if(!runtime.InputBlocked) Execute(runtime.World.SelectServingCup("s.cups.small")); }
         private void LargeCup() { if(!runtime.InputBlocked) Execute(runtime.World.SelectServingCup("s.cups.large")); }
         private void Deliver()
@@ -80,8 +93,16 @@ namespace Spotlight.FreeCafe
         }
         private void OpenBook() { if(runtime.InputBlocked) return; runtime.CancelDrag(); bookPanel.SetActive(true); RefreshBook(); }
         private void CloseBook() { bookPanel.SetActive(false); }
-        private void PreviousRecipe() { recipeIndex--; RefreshBook(); }
-        private void NextRecipe() { recipeIndex++; RefreshBook(); }
+        private void PreviousRecipe() => ChangeRecipe(-1);
+        private void NextRecipe() => ChangeRecipe(1);
+        private void ChangeRecipe(int direction)
+        {
+            int previous = recipeIndex;
+            recipeIndex += direction;
+            RefreshBook();
+            if (previous != recipeIndex && runtime.World.State.unlockedProducts.Count > 1)
+                Spotlight.Audio.GameAudio.Play(Spotlight.Audio.AudioKeys.Page);
+        }
         private void RefreshBook()
         {
             var world=runtime.World; var learned=world.State.unlockedProducts;

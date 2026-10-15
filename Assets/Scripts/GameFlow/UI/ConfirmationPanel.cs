@@ -25,6 +25,8 @@ namespace Spotlight.GameFlow
         {
             SetModal(true);
             base.Awake();
+            foreach (Button button in new[] { acceptButton, cancelButton, backButton, saveAcceptButton, saveCancelButton })
+                Spotlight.Audio.UIButtonAudio.Configure(button, string.Empty);
             acceptButton?.onClick.AddListener(() => ActionOnce(true));
             cancelButton?.onClick.AddListener(() => ActionOnce(false));
             backButton?.onClick.AddListener(DismissFromFlow);
@@ -87,6 +89,8 @@ namespace Spotlight.GameFlow
         {
             ConfirmationPanelData result = current;
             current = null;
+            if (result == null) return;
+            Spotlight.Audio.GameAudio.Play(Spotlight.Audio.AudioKeys.Cancel);
             Flow?.CloseModalPanel(this, () =>
             {
                 if (result?.CancelLabel == "取消" || result?.Title == "确认分辨率") result.Cancelled?.Invoke();
@@ -98,6 +102,7 @@ namespace Spotlight.GameFlow
             ConfirmationPanelData result = current;
             current = null;
             if (result == null) return;
+            Spotlight.Audio.GameAudio.Play(accepted ? Spotlight.Audio.AudioKeys.Confirm : Spotlight.Audio.AudioKeys.Cancel);
             result.Flow?.CloseModalPanel(this, () =>
             {
                 if (accepted) result.Accepted?.Invoke(); else result.Cancelled?.Invoke();

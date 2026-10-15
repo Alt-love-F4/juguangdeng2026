@@ -138,6 +138,9 @@ namespace Spotlight.GameFlow
             AudioKit.SetGlobalVolume(settings.MasterVolume);
             AudioKit.SetBusVolume(AudioBus.Music, settings.MusicVolume);
             AudioKit.SetBusVolume(AudioBus.Sfx, settings.SfxVolume);
+            AudioKit.SetBusVolume(AudioBus.UI, settings.SfxVolume);
+            AudioKit.SetBusVolume(AudioBus.Ambience, settings.SfxVolume);
+            AudioKit.SetBusVolume(AudioBus.Voice, settings.SfxVolume);
         }
 
         private void ApplyDisplay()

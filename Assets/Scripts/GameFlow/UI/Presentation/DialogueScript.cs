@@ -87,6 +87,8 @@ namespace Spotlight.GameFlow
         // Matches NCS line field names; no NCS table/runtime access in the presentation layer.
         [SerializeField] private string accentFxKey;
         [SerializeField] private string accentTargetKey;
+        [SerializeField] private string sfxKey;
+        [SerializeField] private string voiceKey;
         public DialogueSpeaker Speaker => speaker;
         public string Text => text ?? string.Empty;
         public string SpeakerNameOverride => speakerNameOverride;
@@ -102,13 +104,16 @@ namespace Spotlight.GameFlow
         public string AccentFxKey => accentFxKey ?? string.Empty;
         public string AccentTargetKey => accentTargetKey ?? string.Empty;
         public string PassiveHint { get; }
+        public string SfxKey => sfxKey ?? string.Empty;
+        public string VoiceKey => voiceKey ?? string.Empty;
 
         public DialogueLine(DialogueSpeaker speaker, string text, string speakerNameOverride = null,
             DialogueGesture gesture = DialogueGesture.None, float autoAdvanceSeconds = 0f,
             bool replaceLeft = false, DialogueCharacter leftCharacter = null,
             bool replaceRight = false, DialogueCharacter rightCharacter = null,
             string accentFxKey = null, string accentTargetKey = null,
-            bool replaceCenter = false, DialogueCharacter centerCharacter = null, string passiveHint = null)
+            bool replaceCenter = false, DialogueCharacter centerCharacter = null, string passiveHint = null,
+            string sfxKey = null, string voiceKey = null)
         {
             if (!Enum.IsDefined(typeof(DialogueSpeaker), speaker)) throw new ArgumentOutOfRangeException(nameof(speaker));
             if (!Enum.IsDefined(typeof(DialogueGesture), gesture)) throw new ArgumentOutOfRangeException(nameof(gesture));
@@ -128,6 +133,8 @@ namespace Spotlight.GameFlow
             this.centerCharacter = centerCharacter;
             this.accentFxKey = accentFxKey;
             this.accentTargetKey = accentTargetKey;
+            this.sfxKey = sfxKey;
+            this.voiceKey = voiceKey;
         }
     }
 
@@ -151,7 +158,7 @@ namespace Spotlight.GameFlow
             var first = copy[0];
             copy[0] = new DialogueLine(first.Speaker, first.Text, first.SpeakerNameOverride, first.Gesture,
                 first.AutoAdvanceSeconds, first.ReplaceLeft, first.LeftCharacter, first.ReplaceRight, first.RightCharacter,
-                first.AccentFxKey, first.AccentTargetKey, first.ReplaceCenter, first.CenterCharacter, hint);
+                first.AccentFxKey, first.AccentTargetKey, first.ReplaceCenter, first.CenterCharacter, hint, first.SfxKey, first.VoiceKey);
             return new DialogueScript(copy, LeftCharacter, RightCharacter, Title, Background, Options, OptionPrompt, CenterCharacter);
         }
 

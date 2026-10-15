@@ -2,6 +2,8 @@
     "name": "Spotlight.GameFlow.Presentation.Tests",
     "rootNamespace": "Spotlight.GameFlow.Tests",
     "references": [
+        "Spotlight.Audio",
+        "YokiFrame.AudioKit",
         "Spotlight.GameFlow.UI",
         "Spotlight.GameFlow.Saving",
         "Spotlight.GameFlow.Settings",

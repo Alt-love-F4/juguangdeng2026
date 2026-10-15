@@ -15,6 +15,7 @@ namespace Spotlight.GameFlow
         private CanvasGroup group;
         protected override void OnInit(IUIData data = null)
         {
+            Spotlight.Audio.UIButtonAudio.Install(gameObject);
             group = GetComponent<CanvasGroup>();
             if (group == null) group = gameObject.AddComponent<CanvasGroup>();
             if (endBusinessButton != null)

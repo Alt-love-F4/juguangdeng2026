@@ -101,7 +101,7 @@ namespace Spotlight.FreeCafe
             if (!satisfied && request.remakes < product.maxRemakes)
             {
                 request.remakes++; State.production.lastDelivery = "顾客要求重做（" + request.remakes + "/" + product.maxRemakes + "）· " + detail;
-                Notify(); return ActionResult.Yes(State.production.lastDelivery);
+                Notify(); return ActionResult.Yes(State.production.lastDelivery, CafeFeedbackKind.DeliveryRemake);
             }
             State.served++;
             if (satisfied)
@@ -117,7 +117,7 @@ namespace Spotlight.FreeCafe
             }
             CompleteCustomerOrder(request, satisfied);
             UpdateFocusedRequest(); Notify();
-            return ActionResult.Yes(State.production.lastDelivery);
+            return ActionResult.Yes(State.production.lastDelivery, satisfied ? CafeFeedbackKind.DeliverySatisfied : CafeFeedbackKind.DeliveryFailed);
         }
         private void ConsumeDeliveredContainer(WorldEntity container)
         {
@@ -142,7 +142,7 @@ namespace Spotlight.FreeCafe
         {
             var cup = ServingCup; if (cup == null) return ActionResult.No("托盘为空");
             CancelProductionMiniGame(); ConsumeDeliveredContainer(cup);
-            Notify(); return ActionResult.Yes("出餐杯已丢弃，消耗的资源不返还");
+            Notify(); return ActionResult.Yes("出餐杯已丢弃，消耗的资源不返还", CafeFeedbackKind.Discard);
         }
         public ActionResult EmptyProductionMachine(string id)
         {
@@ -159,7 +159,7 @@ namespace Spotlight.FreeCafe
             }
             machine.production = new ProductionEntityState { extractionFilterId = filter?.id,
                 extractionJugId = machine.production.extractionJugId, extractionAssemblyInitialized = IsPrecisionExtractor(machine) };
-            Notify(); return ActionResult.Yes("设备内容已丢弃，资源不返还");
+            Notify(); return ActionResult.Yes("设备内容已丢弃，资源不返还", CafeFeedbackKind.Empty);
         }
         public ActionResult PageProductionOrder(int direction)
         {
@@ -194,7 +194,7 @@ namespace Spotlight.FreeCafe
             cup.latteArt = true; // Completion is independent of recognizer score and pattern.
             cup.latteArtScore = score;
             cup.latteArtPattern = string.IsNullOrEmpty(pattern) ? "unknown" : pattern;
-            CancelProductionMiniGame(); Notify(); return ActionResult.Yes("拉花已完成 · " + cup.latteArtPattern + " · " + score.ToString("0") + "分");
+            CancelProductionMiniGame(); Notify(); return ActionResult.Yes("拉花已完成 · " + cup.latteArtPattern + " · " + score.ToString("0") + "分", CafeFeedbackKind.LatteComplete);
         }
         public void CancelProductionMiniGame()
         {

@@ -27,6 +27,7 @@ namespace Spotlight.GameFlow
             requirement.gameObject.SetActive(!option.Enabled && !string.IsNullOrEmpty(option.RequirementHint));
             button.interactable = option.Enabled;
             button.onClick.AddListener(() => select(option.OptionId));
+            Spotlight.Audio.UIButtonAudio.Configure(button, string.Empty);
         }
     }
 }

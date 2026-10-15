@@ -16,7 +16,8 @@ namespace Spotlight.GameFlow
             {
                 if (string.IsNullOrWhiteSpace(item.speakerKey))
                 {
-                    lines.Add(new DialogueLine(DialogueSpeaker.Narrator, item.text, passiveHint: lines.Count == 0 ? request.PassiveHint : null));
+                    lines.Add(new DialogueLine(DialogueSpeaker.Narrator, item.text, passiveHint: lines.Count == 0 ? request.PassiveHint : null,
+                        sfxKey: item.sfxKey, voiceKey: item.voiceKey));
                     continue;
                 }
                 CharacterProfile profile = NarrativeCharacterResolver.Find(item.speakerKey);
@@ -30,7 +31,7 @@ namespace Spotlight.GameFlow
                     replaceLeft: isLeft, leftCharacter: isLeft ? character : null,
                     replaceRight: !isLeft, rightCharacter: !isLeft ? character : null,
                     accentFxKey: item.accentFxKey, accentTargetKey: item.accentTargetKey,
-                    passiveHint: lines.Count == 0 ? request.PassiveHint : null));
+                    passiveHint: lines.Count == 0 ? request.PassiveHint : null, sfxKey: item.sfxKey, voiceKey: item.voiceKey));
             }
             // 显式空角色避免纯旁白套用旧 Prefab 的默认人物。
             bool notified = false;
@@ -42,6 +43,7 @@ namespace Spotlight.GameFlow
                 right ?? new DialogueCharacter("", null), data.title,
                 string.IsNullOrEmpty(data.backgroundPath) ? null : Resources.Load<Texture>(data.backgroundPath), options), Complete);
             panel.AllowCancel = false;
+            if (!string.IsNullOrWhiteSpace(data.bgmOverride)) Spotlight.Audio.GameAudio.OverrideMusic(panel, data.bgmOverride);
             panel.OptionSelectionRequested = data.selectChoice;
             return true;
         }

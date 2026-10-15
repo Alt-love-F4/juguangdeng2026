@@ -2,6 +2,7 @@
     "name": "Spotlight.GameFlow.UI",
     "rootNamespace": "Spotlight.GameFlow",
     "references": [
+        "Spotlight.Audio",
         "Spotlight.GameFlow.Core",
         "Spotlight.GameFlow.Saving",
         "Spotlight.GameFlow.Settings",

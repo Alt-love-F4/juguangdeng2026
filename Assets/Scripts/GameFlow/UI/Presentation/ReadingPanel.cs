@@ -48,6 +48,10 @@ namespace Spotlight.GameFlow
 
         protected override void OnInit(IUIData data = null)
         {
+            Spotlight.Audio.UIButtonAudio.Install(gameObject);
+            Spotlight.Audio.UIButtonAudio.Configure(continueButton, string.Empty);
+            Spotlight.Audio.UIButtonAudio.Configure(backButton, string.Empty);
+            Spotlight.Audio.UIButtonAudio.Configure(cancelButton, string.Empty);
             if (continueButton != null) continueButton.onClick.AddListener(Advance);
             if (backButton != null) backButton.onClick.AddListener(Back);
             if (cancelButton != null) cancelButton.onClick.AddListener(Cancel);
@@ -100,7 +104,7 @@ namespace Spotlight.GameFlow
                 readingText.maxVisibleCharacters = pageEnd;
                 UpdateHint();
             }
-            else if (textPage < readingText.textInfo.pageCount) ShowTextPage(textPage + 1);
+            else if (textPage < readingText.textInfo.pageCount) { Spotlight.Audio.GameAudio.Play(Spotlight.Audio.AudioKeys.PageTurn); ShowTextPage(textPage + 1); }
             else if (LineIndex + 1 < script[PageIndex].Lines.Count) { LineIndex++; RenderLine(); }
             else if (PageIndex + 1 < script.Count) { PageIndex++; LineIndex = 0; RenderLine(); }
             else Finish();
@@ -109,7 +113,7 @@ namespace Spotlight.GameFlow
         public void Back()
         {
             if (!TakeInput()) return;
-            if (textPage > 1) { ShowTextPage(textPage - 1, true); return; }
+            if (textPage > 1) { Spotlight.Audio.GameAudio.Play(Spotlight.Audio.AudioKeys.PageTurn); ShowTextPage(textPage - 1, true); return; }
             if (LineIndex > 0) LineIndex--;
             else if (PageIndex > 0) { PageIndex--; LineIndex = script[PageIndex].Lines.Count - 1; }
             else return;
@@ -145,6 +149,9 @@ namespace Spotlight.GameFlow
         {
             ReadingPage current = script[PageIndex];
             ReadingLine line = current.Lines[LineIndex];
+            Spotlight.Audio.GameAudio.StopOwner(this);
+            Spotlight.Audio.GameAudio.Play(Spotlight.Audio.AudioKeys.PageTurn);
+            Spotlight.Audio.GameAudio.PlayNarrative(line.voiceKey, this, voice: true);
             bool hasImage = current.Image != null;
             if (pageImage != null)
             {
@@ -223,6 +230,7 @@ namespace Spotlight.GameFlow
         public void Cancel()
         {
             if (!IsPlaying) return;
+            Spotlight.Audio.GameAudio.Play(Spotlight.Audio.AudioKeys.Cancel);
             Action callback = cancelled;
             Stop();
             CloseSelf();
@@ -232,6 +240,7 @@ namespace Spotlight.GameFlow
         /// <summary>Silent interruption; cancellation notification belongs to Cancel, not hide/destroy.</summary>
         public void Stop()
         {
+            Spotlight.Audio.GameAudio.StopOwner(this);
             pauseOwner?.Dispose();
             pauseOwner = null;
             Action stopped = PlaybackStopped;

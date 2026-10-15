@@ -115,6 +115,7 @@ namespace Spotlight.GameFlow
                 {
                     existingClose.onClick.RemoveAllListeners();
                     existingClose.onClick.AddListener(() => { if (!busy) gameObject.SetActive(false); });
+                    Spotlight.Audio.UIButtonAudio.Configure(existingClose, Spotlight.Audio.AudioKeys.Cancel);
                 }
                 return;
             }
@@ -243,6 +244,7 @@ namespace Spotlight.GameFlow
                     execute.gameObject.SetActive(true);
                     execute.onClick.RemoveAllListeners();
                     execute.onClick.AddListener(OnEnterCafe);
+                    Spotlight.Audio.UIButtonAudio.Configure(execute);
                     var label = execute.GetComponentInChildren<TextMeshProUGUI>(true);
                     if (label != null) label.text = CafeEntryLabel;
                     var card = new Card { root = entry, button = execute };
@@ -371,6 +373,7 @@ namespace Spotlight.GameFlow
             {
                 execute.onClick.RemoveAllListeners();
                 execute.onClick.AddListener(() => OnExecute(card));
+                Spotlight.Audio.UIButtonAudio.Configure(execute, string.Empty);
             }
             var requirements = action.parsedRequirements;
             if (card.type != null) card.type.text = action.type.ToString();
@@ -511,6 +514,7 @@ namespace Spotlight.GameFlow
             if (actions == null) return;
             if (!actions.IsAvailable(card.action.actionKey, out var checks))
             {
+                Spotlight.Audio.GameAudio.Play(Spotlight.Audio.AudioKeys.Error);
                 Notice(card.action.IsDelivery && actions.IsCompleted(card.action.actionKey) ? "交付已完成" :
                     card.action.IsDelivery && actions.HasSubmittedToday(card.action.actionKey) ? "今日已交付，每天只能提交一份" :
                     card.action.endDay && actions.HasBlockingActions() ? "有需要进行的行动" :
@@ -544,11 +548,12 @@ namespace Spotlight.GameFlow
             bool finished = false;
             bool accepted = NarrativeRuntime.Instance.Actions.Execute(card.action.actionKey, success =>
             {
+                Spotlight.Audio.GameAudio.Play(success ? Spotlight.Audio.AudioKeys.MapComplete : Spotlight.Audio.AudioKeys.Error);
                 finished = true;
                 if (success && (controls?.Invoke() ?? true) && card.action.endDay) { busy = false; endDay?.Invoke(); }
                 if (!success) Notice("行动事件未能执行");
             });
-            if (!accepted) { Notice("要求不满足"); finished = true; }
+            if (!accepted && !finished) { Spotlight.Audio.GameAudio.Play(Spotlight.Audio.AudioKeys.Error); Notice("要求不满足"); finished = true; }
             while (!finished) yield return null;
             busy = false; inventory.Refresh(); Rebuild();
         }
@@ -631,7 +636,9 @@ namespace Spotlight.GameFlow
             MapVisualTheme.Skin(image, MapVisualTheme.Current?.tracking);
             var button = rect.gameObject.AddComponent<Button>(); button.targetGraphic = image;
             var label = Label("Label", rect, text, 20); Stretch(label.rectTransform, 4); label.alignment = TextAlignmentOptions.Center;
-            button.onClick.AddListener(click); return button;
+            button.onClick.AddListener(click);
+            Spotlight.Audio.UIButtonAudio.Configure(button);
+            return button;
         }
     }
 

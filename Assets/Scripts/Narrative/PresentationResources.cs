@@ -10,16 +10,6 @@ namespace Spotlight.Narrative
     public sealed class PresentationResources : IDisposable
     {
         private readonly NarrativePresentationUI ui;
-        private readonly AudioSource sfx, music;
-        private float musicLevel;
-        private float masterGain, musicGain;
-        private void ApplyAudioSettings(float master, float bgm, float effects)
-        {
-            masterGain = master; musicGain = bgm;
-            if (sfx != null) sfx.volume = master * effects;
-            if (music != null) music.volume = musicLevel * master * bgm;
-        }
-        private void SetMusicLevel(float value) { musicLevel = value; music.volume = value * masterGain * musicGain; }
         private readonly Dictionary<string, GameObject> npcs = new Dictionary<string, GameObject>(StringComparer.Ordinal);
         private readonly List<GameObject> effects = new List<GameObject>();
         private Camera camera;
@@ -30,10 +20,6 @@ namespace Spotlight.Narrative
         public PresentationResources(NarrativePresentationUI ui)
         {
             this.ui = ui;
-            sfx = ui.gameObject.AddComponent<AudioSource>(); sfx.playOnAwake = false;
-            music = ui.gameObject.AddComponent<AudioSource>(); music.playOnAwake = false; music.loop = true;
-            Spotlight.GameFlow.GameSettingsService.AudioChanged += ApplyAudioSettings;
-            ApplyAudioSettings(Spotlight.GameFlow.GameSettingsService.MasterGain, Spotlight.GameFlow.GameSettingsService.MusicGain, Spotlight.GameFlow.GameSettingsService.SfxGain);
         }
 
         private T Load<T>(string path, string kind) where T : UnityEngine.Object
@@ -117,27 +103,14 @@ namespace Spotlight.Narrative
 
         public void Sfx(string path, float volume)
         {
-            AudioClip clip = Load<AudioClip>(path, "sound");
-            if (clip != null) sfx.PlayOneShot(clip, Mathf.Clamp01(volume));
+            Spotlight.Audio.GameAudio.PlayNarrative(path, this, volume);
         }
 
         public IEnumerator Bgm(string path, float volume, float fadeIn, float fadeOut, Func<bool> skipped)
         {
-            AudioClip clip = string.IsNullOrWhiteSpace(path) ? null : Load<AudioClip>(path, "music");
-            if (!string.IsNullOrWhiteSpace(path) && clip == null) yield break;
-            float start = musicLevel;
-            for (float elapsed = 0; music.isPlaying && elapsed < fadeOut && !skipped(); elapsed += Time.unscaledDeltaTime)
-            {
-                SetMusicLevel(Mathf.Lerp(start, 0, elapsed / fadeOut)); yield return null;
-            }
-            music.Stop(); music.clip = clip;
-            if (clip == null) yield break;
-            SetMusicLevel(0); music.Play();
-            for (float elapsed = 0; elapsed < fadeIn && !skipped(); elapsed += Time.unscaledDeltaTime)
-            {
-                SetMusicLevel(Mathf.Lerp(0, Mathf.Clamp01(volume), elapsed / fadeIn)); yield return null;
-            }
-            SetMusicLevel(Mathf.Clamp01(volume));
+            Spotlight.Audio.GameAudio.OverrideMusic(this, path, volume, fadeIn, fadeOut);
+            for (float elapsed = 0; elapsed < Mathf.Max(fadeIn, fadeOut) && !skipped(); elapsed += Time.unscaledDeltaTime)
+                yield return null;
         }
 
         public IEnumerator Fx(string path, float duration, Func<bool> skipped)
@@ -167,12 +140,12 @@ namespace Spotlight.Narrative
             npcs[id] = instance;
         }
 
+        public void StopAudio() => Spotlight.Audio.GameAudio.StopOwner(this);
+
         public void Dispose()
         {
-            Spotlight.GameFlow.GameSettingsService.AudioChanged -= ApplyAudioSettings;
             RestoreCamera();
-            if (music != null) music.Stop();
-            if (sfx != null) sfx.Stop();
+            StopAudio();
             foreach (GameObject effect in effects) if (effect != null) UnityEngine.Object.Destroy(effect);
             foreach (GameObject npc in npcs.Values) if (npc != null) UnityEngine.Object.Destroy(npc);
             effects.Clear(); npcs.Clear();

@@ -82,6 +82,10 @@ namespace Spotlight.GameFlow
 
         protected override void OnInit(IUIData data = null)
         {
+            Spotlight.Audio.UIButtonAudio.Install(gameObject);
+            Spotlight.Audio.UIButtonAudio.Configure(envelopeButton, string.Empty);
+            Spotlight.Audio.UIButtonAudio.Configure(signatureButton, string.Empty);
+            Spotlight.Audio.UIButtonAudio.Configure(nameCancelButton, Spotlight.Audio.AudioKeys.Cancel);
             CapturePose();
             envelopeButton.onClick.AddListener(OpenEnvelope);
             signatureButton.onClick.AddListener(ConfirmSignature);
@@ -161,6 +165,7 @@ namespace Spotlight.GameFlow
         public void OpenEnvelope()
         {
             if (!IsPlaying || Stage != LetterStage.Envelope) return;
+            Spotlight.Audio.GameAudio.Play(Spotlight.Audio.AudioKeys.Envelope, this);
             Stage = LetterStage.Opening;
             envelopeButton.interactable = false;
             if (envelopeArt != null && envelopeOpenSprite != null) envelopeArt.sprite = envelopeOpenSprite;
@@ -217,6 +222,7 @@ namespace Spotlight.GameFlow
             }
             CancelPlayerName();
             Stage = LetterStage.Closing;
+            Spotlight.Audio.GameAudio.Play(Spotlight.Audio.AudioKeys.Signature, this);
             signatureButton.interactable = false;
             readingHint.text = "";
             transition = DOTween.Sequence().SetUpdate(true).SetLink(gameObject, LinkBehaviour.KillOnDestroy);
@@ -340,6 +346,7 @@ namespace Spotlight.GameFlow
 
         public void Stop()
         {
+            Spotlight.Audio.GameAudio.StopOwner(this);
             finished = null;
             pendingContent = null;
             IsPlaying = false;

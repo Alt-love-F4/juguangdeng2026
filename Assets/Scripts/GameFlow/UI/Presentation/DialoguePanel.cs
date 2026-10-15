@@ -102,6 +102,10 @@ namespace Spotlight.GameFlow
 
         protected override void OnInit(IUIData data = null)
         {
+            Spotlight.Audio.UIButtonAudio.Install(gameObject);
+            Spotlight.Audio.UIButtonAudio.Configure(continueButton, string.Empty);
+            Spotlight.Audio.UIButtonAudio.Configure(dialogueBodyButton, string.Empty);
+            Spotlight.Audio.UIButtonAudio.Configure(cancelButton, string.Empty);
             if (canvasGroup == null || background == null || leftPortrait == null || rightPortrait == null
                 || dialogueBox == null || speakerText == null || dialogueText == null || continueButton == null)
                 throw new InvalidOperationException("DialoguePanel has incomplete prefab bindings.");
@@ -194,8 +198,14 @@ namespace Spotlight.GameFlow
 
         private void ShowLine(int index)
         {
+            Spotlight.Audio.GameAudio.StopOwner(voiceOwner);
             LineIndex = index;
             DialogueLine line = activeLines[index];
+            if (!IsSkipping)
+            {
+                Spotlight.Audio.GameAudio.PlayNarrative(line.SfxKey, this);
+                Spotlight.Audio.GameAudio.PlayNarrative(line.VoiceKey, voiceOwner, voice: true);
+            }
             if (line.ReplaceLeft) left = line.LeftCharacter;
             if (line.ReplaceRight) right = line.RightCharacter;
             if (line.ReplaceCenter) center = line.CenterCharacter;
@@ -455,6 +465,7 @@ namespace Spotlight.GameFlow
         {
             if (!IsPlaying || !IsReady || exiting || script == null || optionsVisible || IsSkipping) return;
             IsSkipping = true;
+            Spotlight.Audio.GameAudio.StopOwner(voiceOwner);
             skipElapsed = 0f;
             revealed = pageEnd;
             dialogueText.maxVisibleCharacters = pageEnd;
@@ -465,6 +476,7 @@ namespace Spotlight.GameFlow
         public void Cancel()
         {
             if (!IsPlaying || !AllowCancel) return;
+            Spotlight.Audio.GameAudio.Play(Spotlight.Audio.AudioKeys.Cancel);
             lastCancelFrame = Time.frameCount;
             Action callback = cancelled;
             Stop();
@@ -475,6 +487,8 @@ namespace Spotlight.GameFlow
         /// <summary>静默中止，不触发完成/取消回调；关闭、隐藏、销毁均调用此方法。</summary>
         public void Stop()
         {
+            Spotlight.Audio.GameAudio.StopOwner(voiceOwner);
+            Spotlight.Audio.GameAudio.StopOwner(this);
             pauseOwner?.Dispose();
             pauseOwner = null;
             Action stopped = PlaybackStopped;
@@ -524,6 +538,7 @@ namespace Spotlight.GameFlow
             if (skipButton != null) skipButton.onClick.RemoveListener(Skip);
             base.OnBeforeDestroy();
         }
+        private readonly object voiceOwner = new object();
         private void OnDisable() => Stop();
     }
 }

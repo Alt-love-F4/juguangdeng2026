@@ -30,6 +30,7 @@ namespace Spotlight.GameFlow
         {
             if (rect == null) Initialize();
             if (visible == value) return;
+            Spotlight.Audio.GameAudio.Play(value ? Spotlight.Audio.AudioKeys.PanelOpen : Spotlight.Audio.AudioKeys.PanelClose);
             visible = value;
             if (motion != null) StopCoroutine(motion);
             motion = null;

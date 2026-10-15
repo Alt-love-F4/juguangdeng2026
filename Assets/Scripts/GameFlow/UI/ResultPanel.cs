@@ -15,6 +15,7 @@ namespace Spotlight.GameFlow
         {
             SetModal(true);
             base.Awake();
+            Spotlight.Audio.UIButtonAudio.Configure(closeButton, string.Empty);
             closeButton?.onClick.AddListener(CloseResult);
         }
 
@@ -41,6 +42,7 @@ namespace Spotlight.GameFlow
             ResultPanelData result = current;
             current = null;
             if (result == null) return;
+            Spotlight.Audio.GameAudio.Play(Spotlight.Audio.AudioKeys.Cancel);
             if (result.Flow != null) result.Flow.CloseModalPanel(this, () => result.Closed?.Invoke());
             else CloseAnimated(() => result.Closed?.Invoke());
         }

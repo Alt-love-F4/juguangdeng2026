@@ -422,6 +422,7 @@ namespace Spotlight.FreeCafe
         }
         private static void ConfigureButton(Button button)
         {
+            Spotlight.Audio.UIButtonAudio.Configure(button);
             var colors = button.colors;
             colors.highlightedColor = new Color(1.2f, 1.15f, 1.1f);
             colors.pressedColor = new Color(.8f, .8f, .8f);

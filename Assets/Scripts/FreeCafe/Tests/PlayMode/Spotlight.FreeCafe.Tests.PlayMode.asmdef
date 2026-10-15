@@ -4,6 +4,7 @@
   "references": [
     "Spotlight.FreeCafe.Domain",
     "Spotlight.FreeCafe.Unity",
+    "Spotlight.Audio",
     "Spotlight.Narrative",
     "Spotlight.GameFlow.Settings",
     "Spotlight.GameFlow.Saving",

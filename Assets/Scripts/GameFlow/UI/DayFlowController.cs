@@ -111,6 +111,7 @@ namespace Spotlight.GameFlow
 
         public void HideForMainMenu()
         {
+            Spotlight.Audio.GameAudio.StopOwner(this);
             running = false;
             if (arrivalController != null) arrivalController.EventCompleted -= OnArrivalCompleted;
             arrivalController = null;
@@ -601,7 +602,16 @@ namespace Spotlight.GameFlow
         private void SetState(DayFlowState state)
         {
             State = state;
+            ApplyAudioState();
             Debug.Log("[DayFlow] " + state);
+        }
+
+        private void ApplyAudioState()
+        {
+            bool city = State == DayFlowState.CityMapLeisure || State == DayFlowState.PreLeisure;
+            bool night = State == DayFlowState.PreNight || State == DayFlowState.HomeNight || State == DayFlowState.DayComplete;
+            Spotlight.Audio.GameAudio.Music(night ? Spotlight.Audio.AudioKeys.NightMusic : city ? Spotlight.Audio.AudioKeys.CityMusic : Spotlight.Audio.AudioKeys.CafeMusic);
+            Spotlight.Audio.GameAudio.SetLoop(this, "ambience", city ? "ambience.city" : Spotlight.Audio.AudioKeys.CafeAmbience, !night);
         }
 
         private void HideGameplayPanel()
@@ -691,6 +701,7 @@ namespace Spotlight.GameFlow
         public void ResumeSavedPhase()
         {
             if (!SessionAllowsPlay) return;
+            ApplyAudioState();
             running = true;
             HideBusinessControls();
             if (State != DayFlowState.FreeCafeBusiness) HideGameplayPanel();

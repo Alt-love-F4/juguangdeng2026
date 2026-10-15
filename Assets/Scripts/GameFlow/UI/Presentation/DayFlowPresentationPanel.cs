@@ -46,6 +46,7 @@ namespace Spotlight.GameFlow
 
         protected override void OnInit(IUIData data = null)
         {
+            Spotlight.Audio.UIButtonAudio.Install(gameObject);
             CapturePose();
             defaultDetail = detailText == null ? string.Empty : detailText.text;
             if (continueButton != null) continueButton.onClick.AddListener(Continue);
@@ -71,6 +72,9 @@ namespace Spotlight.GameFlow
                 throw new InvalidOperationException(GetType().Name + " has incomplete prefab bindings.");
             Stop();
             pauseOwner = PresentationPauseRegistry.Acquire(GetType().Name);
+            string cue = this is DateChangePanel ? Spotlight.Audio.AudioKeys.Date : this is CafeOpeningPanel ? Spotlight.Audio.AudioKeys.Open :
+                this is BusinessEndPanel ? Spotlight.Audio.AudioKeys.BusinessEnd : this is DayEndPanel ? Spotlight.Audio.AudioKeys.DayEnd : null;
+            Spotlight.Audio.GameAudio.Play(cue, this);
             try
             {
             CapturePose();
@@ -127,6 +131,7 @@ namespace Spotlight.GameFlow
 
         public void Stop()
         {
+            Spotlight.Audio.GameAudio.StopOwner(this);
             pauseOwner?.Dispose();
             pauseOwner = null;
             finished = null;

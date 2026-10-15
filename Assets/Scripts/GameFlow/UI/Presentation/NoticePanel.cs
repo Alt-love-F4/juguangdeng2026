@@ -44,6 +44,7 @@ namespace Spotlight.GameFlow
 
         protected override void OnInit(IUIData data = null)
         {
+            Spotlight.Audio.UIButtonAudio.Install(gameObject);
             SetShowAnimation(null);
             SetHideAnimation(null);
             if (confirmButton != null) confirmButton.onClick.AddListener(Confirm);
@@ -91,6 +92,7 @@ namespace Spotlight.GameFlow
             if (canvasGroup == null || confirmButton == null) throw new InvalidOperationException("NoticePanel has incomplete prefab bindings.");
             Stop();
             if (!value.Visible) { CloseSelf(); onFinished?.Invoke(); return; }
+            Spotlight.Audio.GameAudio.Play(Spotlight.Audio.AudioKeys.Notice, this);
             pauseOwner = PresentationPauseRegistry.Acquire(nameof(NoticePanel));
             try
             {
@@ -187,6 +189,7 @@ namespace Spotlight.GameFlow
 
         public void Stop()
         {
+            Spotlight.Audio.GameAudio.StopOwner(this);
             pauseOwner?.Dispose();
             pauseOwner = null;
             Action stopped = PlaybackStopped;

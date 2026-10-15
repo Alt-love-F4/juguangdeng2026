@@ -34,6 +34,7 @@ namespace Spotlight.GameFlow
 
         protected virtual void Awake()
         {
+            Spotlight.Audio.UIButtonAudio.Install(gameObject);
             if (canvasGroup == null)
                 canvasGroup = GetComponent<CanvasGroup>();
             if (canvasGroup == null)
@@ -49,6 +50,7 @@ namespace Spotlight.GameFlow
 
         protected override void OnOpen(IUIData data = null)
         {
+            Spotlight.Audio.GameAudio.Play(Spotlight.Audio.AudioKeys.PanelOpen);
             IGameFlowPanelData panelData = data as IGameFlowPanelData;
             if (panelData?.Flow != null)
                 Flow = panelData.Flow;
@@ -125,6 +127,7 @@ namespace Spotlight.GameFlow
         public void CloseAnimated(Action afterClose = null)
         {
             if (afterAnimatedClose != null) return;
+            Spotlight.Audio.GameAudio.Play(Spotlight.Audio.AudioKeys.PanelClose);
             if (State != PanelState.Open && State != PanelState.Opening)
             {
                 UIKit.ClosePanel(this);

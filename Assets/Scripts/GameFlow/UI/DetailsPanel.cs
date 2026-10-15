@@ -133,6 +133,8 @@ namespace Spotlight.GameFlow
             descriptionGroup = tooltip.GetComponent<CanvasGroup>();
             if (descriptionGroup == default) descriptionGroup = tooltip.gameObject.AddComponent<CanvasGroup>();
             descriptionGroup.blocksRaycasts = descriptionGroup.interactable = false;
+            Spotlight.Audio.UIButtonAudio.Configure(closeButton, string.Empty);
+            Spotlight.Audio.UIButtonAudio.Configure(outsideButton, string.Empty);
             closeButton.onClick.AddListener(RequestClose);
             outsideButton.onClick.AddListener(RequestClose);
             tabButtons[0].onClick.AddListener(ShowMyInfo);
@@ -325,6 +327,7 @@ namespace Spotlight.GameFlow
         {
             if (closing || (int)page < 0 || (int)page > 2) return;
             bool changed = CurrentPage != page;
+            if (changed) Spotlight.Audio.GameAudio.Play(Spotlight.Audio.AudioKeys.Tab);
             StopPageTransition();
             CurrentPage = page;
             paperStyles[(int)page].Render(paperSurface);
@@ -339,6 +342,7 @@ namespace Spotlight.GameFlow
                 if (tabButtons[i] == default) continue;
                 // Shared artwork owns tab states; page groups contain only their own content.
                 tabButtons[i].transition = Selectable.Transition.None;
+                Spotlight.Audio.UIButtonAudio.Configure(tabButtons[i], string.Empty);
             }
             if (changed && pageGroups != null && pageFadeDuration > 0 && isActiveAndEnabled)
             {
@@ -365,6 +369,7 @@ namespace Spotlight.GameFlow
         public void RequestClose()
         {
             if (closing) return;
+            Spotlight.Audio.GameAudio.Play(Spotlight.Audio.AudioKeys.Cancel);
             closing = true;
             StopDisplayTransitions();
             HideTooltip();

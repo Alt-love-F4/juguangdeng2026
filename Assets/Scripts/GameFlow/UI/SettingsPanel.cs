@@ -48,6 +48,10 @@ namespace Spotlight.GameFlow
             windowModeButton?.onClick.AddListener(CycleWindowMode);
             resolutionButton?.onClick.AddListener(CycleResolution);
             backButton?.onClick.AddListener(() => Flow?.BackToPrevious());
+            Spotlight.Audio.UIButtonAudio.Configure(backButton, string.Empty);
+            foreach (Slider slider in new[] { masterVolume, musicVolume, sfxVolume })
+                if (slider != null && slider.GetComponent<Spotlight.Audio.AudioSliderPreview>() == null)
+                    slider.gameObject.AddComponent<Spotlight.Audio.AudioSliderPreview>();
         }
 
         protected override void OnOpen(YokiFrame.IUIData data = null)

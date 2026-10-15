@@ -36,7 +36,7 @@ namespace Spotlight.FreeCafe
                     {
                         if(this==null || epoch!=generation || token!=expected || returned!=expected) return;
                         string pattern = (adapter as ICafeLatteArtResultPresenter)?.LastPatternId;
-                        runtime.ShowHint(runtime.World.ResolveProductionMiniGame(returned, completed, score, pattern).message);
+                        runtime.Report(runtime.World.ResolveProductionMiniGame(returned, completed, score, pattern));
                     });
                 }
             }

@@ -1,0 +1,6 @@
+{
+    "name": "Spotlight.Audio",
+    "rootNamespace": "Spotlight.Audio",
+    "references": ["YokiFrame.AudioKit", "YokiFrame.AudioKit.Unity", "Unity.ugui", "Unity.InputSystem"],
+    "autoReferenced": true
+}

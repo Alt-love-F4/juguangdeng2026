@@ -2,6 +2,7 @@
   "name": "Spotlight.FreeCafe.Unity",
   "rootNamespace": "Spotlight.FreeCafe",
   "references": [
+    "Spotlight.Audio",
     "Spotlight.FreeCafe.Domain",
     "Spotlight.Narrative",
     "Spotlight.GameFlow.Saving",

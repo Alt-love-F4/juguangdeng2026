@@ -17,6 +17,7 @@ namespace Spotlight.FreeCafe
         {
             if(eventData.button!=PointerEventData.InputButton.Left || runtime==null || runtime.InputBlocked || runtime.IsDragging) return;
             runtime.DeliverCup();
+            Spotlight.Audio.GameAudio.Play(Spotlight.Audio.AudioKeys.Bell);
             if(press!=null) StopCoroutine(press);
             press=StartCoroutine(Press());
         }

@@ -62,6 +62,9 @@ namespace Spotlight.GameFlow
                 if (toggle != null) { toggle.onClick.RemoveAllListeners(); toggle.onClick.AddListener(Toggle); }
                 if (activeTab != null) { activeTab.onClick.RemoveAllListeners(); activeTab.onClick.AddListener(() => SelectTab(false)); }
                 if (completedTab != null) { completedTab.onClick.RemoveAllListeners(); completedTab.onClick.AddListener(() => SelectTab(true)); }
+                Spotlight.Audio.UIButtonAudio.Configure(toggle);
+                Spotlight.Audio.UIButtonAudio.Configure(activeTab, string.Empty);
+                Spotlight.Audio.UIButtonAudio.Configure(completedTab, string.Empty);
                 if (content.childCount > 0 && taskRowTemplate == null)
                     taskRowTemplate = content.GetChild(0) as RectTransform;
                 if (Application.isPlaying || !showEditorPreview) Refresh();
@@ -81,6 +84,8 @@ namespace Spotlight.GameFlow
             activeTab = Button("InProgressTab", body, "进行中", () => SelectTab(false));
             Top((RectTransform)activeTab.transform, 8, -8, 224, 44);
             completedTab = Button("CompletedTab", body, "已完成", () => SelectTab(true));
+            Spotlight.Audio.UIButtonAudio.Configure(activeTab, string.Empty);
+            Spotlight.Audio.UIButtonAudio.Configure(completedTab, string.Empty);
             Top((RectTransform)completedTab.transform, 254, -8, 224, 44);
 
             RectTransform viewport = Rect("TaskViewport", body);
@@ -153,6 +158,8 @@ namespace Spotlight.GameFlow
 
         private void SelectTab(bool completed)
         {
+            if (showCompleted == completed) return;
+            Spotlight.Audio.GameAudio.Play(Spotlight.Audio.AudioKeys.Tab);
             showCompleted = completed;
             expandedId = null;
             Refresh();
@@ -202,6 +209,7 @@ namespace Spotlight.GameFlow
                 ConfigureTimerIcons(row, item.remainingDays);
                 var rowButton = row.GetComponent<Button>();
                 if (rowButton != null) { rowButton.onClick.RemoveAllListeners(); rowButton.onClick.AddListener(() => { expandedId = expandedId == item.id ? null : item.id; Refresh(); }); }
+                Spotlight.Audio.UIButtonAudio.Configure(rowButton);
                 float height = row.sizeDelta.y;
                 Top(row, 0, -y, Width - 64, height); y += height + 14;
                 if (expandedId != item.id) continue;
@@ -217,6 +225,7 @@ namespace Spotlight.GameFlow
                     var label = trackRect.GetComponentInChildren<TextMeshProUGUI>(true);
                     if (label != null) label.text = trackedId == item.id ? "取消追踪" : "追踪此事件";
                     track.onClick.RemoveAllListeners(); track.onClick.AddListener(() => SetTracked(trackedId == item.id ? null : item.id));
+                    Spotlight.Audio.UIButtonAudio.Configure(track);
                     Top(trackRect, 8, -y, Width - 64, trackRect.sizeDelta.y); y += trackRect.sizeDelta.y + 8;
                 }
             }
@@ -314,6 +323,7 @@ namespace Spotlight.GameFlow
             label.rectTransform.offsetMin = new Vector2(6, 2);
             label.rectTransform.offsetMax = new Vector2(-6, -2);
             button.onClick.AddListener(action);
+            Spotlight.Audio.UIButtonAudio.Configure(button);
             return button;
         }
     }
