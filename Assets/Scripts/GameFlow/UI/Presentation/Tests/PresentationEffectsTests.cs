@@ -49,6 +49,83 @@ namespace Spotlight.GameFlow.Tests
             { Assert.That(Time.realtimeSinceStartup, Is.LessThan(deadline)); yield return null; }
         }
         [UnityTest]
+        public IEnumerator HistoryPausesPartialRevealAndNestedPauseSurvivesClose()
+        {
+            DialogueHistoryService.ClearFormal();
+            string text = new string('字', 300);
+            panel.Play(new DialogueScript(new[] { new DialogueLine(DialogueSpeaker.Narrator, text) }));
+            yield return Ready();
+            yield return new WaitForSecondsRealtime(.1f);
+            panel.OpenHistory();
+            Assert.That(panel.IsHistoryOpen, Is.True);
+            Assert.That(panel.ReadingPaused, Is.True);
+            Assert.That(DialogueHistoryService.Formal.Entries.Count, Is.EqualTo(1));
+            string partial = DialogueHistoryService.Formal.Entries[0].Text;
+            Assert.That(partial.Length, Is.LessThan(text.Length));
+            var other = panel.AcquireReadingPause(this);
+            panel.Advance();
+            yield return new WaitForSecondsRealtime(.1f);
+            Assert.That(DialogueHistoryService.Formal.Entries[0].Text, Is.EqualTo(partial));
+            panel.CloseHistory();
+            Assert.That(panel.ReadingPaused, Is.True);
+            other.Dispose();
+            Assert.That(panel.ReadingPaused, Is.False);
+            Assert.That(panel.LineIndex, Is.Zero);
+        }
+
+        [UnityTest]
+        public IEnumerator HistoryBlocksChoiceUntilClosedWithoutRebuildingOptions()
+        {
+            DialogueHistoryService.ClearFormal();
+            panel.Play(new DialogueScript(new[] { new DialogueLine(DialogueSpeaker.Narrator, "选择") },
+                options: new[] { new DialogueOption("yes", "继续") }));
+            yield return Ready();
+            panel.Advance(); yield return null; panel.Advance(); yield return null;
+            Assert.That(panel.IsChoosing, Is.True);
+            panel.OpenHistory();
+            Assert.That(panel.SelectOption("yes"), Is.False);
+            Assert.That(panel.SelectedOptionId, Is.Empty);
+            panel.CloseHistory(); yield return null;
+            Assert.That(panel.IsChoosing, Is.True);
+            Assert.That(panel.SelectOption("yes"), Is.True);
+            Assert.That(DialogueHistoryService.Formal.Entries.Count, Is.EqualTo(2));
+        }
+
+        [UnityTest]
+        public IEnumerator SameCharacterExpressionUpdateDoesNotStartReplacement()
+        {
+            var character = NarrativeCharacterResolver.CreateDialogueCharacter("adele");
+            panel.Play(new DialogueScript(new[]
+            {
+                new DialogueLine(DialogueSpeaker.Right, "first"),
+                new DialogueLine(DialogueSpeaker.Right, "second", replaceRight: true,
+                    rightCharacter: new DialogueCharacter(character.CharacterKey, character.DisplayName, character.Portrait))
+            }, rightCharacter: character));
+            yield return Ready();
+            panel.Advance(); yield return null;
+            panel.Advance();
+            Assert.That(panel.LineIndex, Is.EqualTo(1));
+            Assert.That(panel.Effects.IsPortraitTransitioning, Is.False);
+            Assert.That(panel.IsEffectBlocking, Is.False);
+        }
+
+        [UnityTest]
+        public IEnumerator PausedEffectDoesNotAdvanceUnscaledTimerOrCallback()
+        {
+            bool completed = false;
+            var handle = panel.PlayFade("black", .2f, completed: () => completed = true);
+            panel.Effects.SetPaused(true);
+            float alpha = panel.Effects.OverlayAlpha;
+            yield return new WaitForSecondsRealtime(.3f);
+            Assert.That(panel.Effects.OverlayAlpha, Is.EqualTo(alpha));
+            Assert.That(handle.IsDone, Is.False);
+            Assert.That(completed, Is.False);
+            panel.Effects.SetPaused(false);
+            yield return new WaitForSecondsRealtime(.3f);
+            Assert.That(completed, Is.True);
+        }
+
+        [UnityTest]
         public IEnumerator DefaultEntranceKeepsEveryPortraitUnmirroredAndNamesReadable()
         {
             Assert.That(panel.RightPortrait.transform.localScale.x, Is.GreaterThan(0));
@@ -63,7 +140,7 @@ namespace Spotlight.GameFlow.Tests
         public IEnumerator EntranceAndCharacterReplacementFinishBeforeTextStarts()
         {
             DialogueScript sample = PresentationEffectsPreview.Create();
-            var replacement = NarrativeCharacterResolver.CreateDialogueCharacter("thibaut");
+            var replacement = NarrativeCharacterResolver.CreatePreviewCharacter("npc_a", Resources.Load<DialogueVisualsAsset>("Dialogue/DialoguePreview").CenterPortrait);
             panel.Play(new DialogueScript(new[]
             {
                 new DialogueLine(DialogueSpeaker.Left, "第一句"),

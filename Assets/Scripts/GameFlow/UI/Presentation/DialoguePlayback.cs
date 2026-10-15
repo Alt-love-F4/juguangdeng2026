@@ -28,6 +28,7 @@ namespace Spotlight.GameFlow
                     if (!panel.SeamlessChoicePending) UIKit.ClosePanel(panel);
                     onFinished?.Invoke();
                 }, onCancelled);
+                if (!string.IsNullOrWhiteSpace(script.MusicKey)) Spotlight.Audio.GameAudio.OverrideMusic(panel, script.MusicKey);
                 return panel;
             }
             catch
@@ -35,6 +36,19 @@ namespace Spotlight.GameFlow
                 UIKit.ClosePanel(panel);
                 throw;
             }
+        }
+
+        public static DialoguePanel PlayPreview(DialogueScript script, Action onFinished = null, Action onCancelled = null)
+        {
+            if (script == null) throw new ArgumentNullException(nameof(script));
+            return Play(script.RebuildAt(0), onFinished, onCancelled);
+        }
+
+        /// <summary>Release only the stage belonging to this completed/cancelled event.</summary>
+        public static void ReleaseStage(object owner)
+        {
+            var panel = UIKit.GetPanel<DialoguePanel>();
+            if (panel != null && panel.OwnsContinuity(owner)) Stop();
         }
 
         /// <summary>Read a selected NCS opening without queueing/settling an NCS event.</summary>

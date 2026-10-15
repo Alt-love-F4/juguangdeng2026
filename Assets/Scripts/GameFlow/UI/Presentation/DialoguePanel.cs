@@ -79,6 +79,7 @@ namespace Spotlight.GameFlow
         private float revealed;
         private float hold;
         private float skipElapsed;
+        private float configuredCharactersPerSecond;
 
         public bool IsSkipping { get; private set; }
         private bool allowCancel = true;
@@ -109,6 +110,7 @@ namespace Spotlight.GameFlow
             if (canvasGroup == null || background == null || leftPortrait == null || rightPortrait == null
                 || dialogueBox == null || speakerText == null || dialogueText == null || continueButton == null)
                 throw new InvalidOperationException("DialoguePanel has incomplete prefab bindings.");
+            configuredCharactersPerSecond = charactersPerSecond;
             defaultLeft = leftPortrait.sprite;
             defaultRight = rightPortrait.sprite;
             boxPosition = dialogueBox.anchoredPosition;
@@ -124,6 +126,7 @@ namespace Spotlight.GameFlow
             centerImageLayout = new PortraitLayout(centerPortrait.rectTransform);
             InitializeEffects();
             CreateOptionOverlay();
+            CreateHistoryView();
             continueButton.onClick.AddListener(Advance);
             if (cancelButton != null) cancelButton.onClick.AddListener(Cancel);
             if (dialogueBodyButton != null) dialogueBodyButton.onClick.AddListener(Advance);
@@ -147,21 +150,29 @@ namespace Spotlight.GameFlow
             if (value == null) throw new ArgumentNullException(nameof(value));
             for (int i = 0; i < value.Count; i++)
                 if (!string.IsNullOrWhiteSpace(value[i].AccentFxKey)) effectLibrary.Find(value[i].AccentFxKey);
-            bool seamless = SeamlessChoicePending;
-            Stop();
-            pauseOwner = PresentationPauseRegistry.Acquire(nameof(DialoguePanel));
+            bool seamless = SeamlessChoicePending && script != null && value.ContinuityOwner != null
+                && ReferenceEquals(script.ContinuityOwner, value.ContinuityOwner);
+            CaptureHistory();
+            if (!seamless) Stop();
+            else { ResetOptions(); finished = cancelled = null; ready = false; }
+            if (pauseOwner == null) pauseOwner = PresentationPauseRegistry.Acquire(nameof(DialoguePanel));
             try
             {
             script = value;
+            BeginHistory(value, seamless);
+            if (!value.IsPreview) charactersPerSecond = configuredCharactersPerSecond;
             activeLines.Clear();
             if (passiveHintText != null) { passiveHintText.text = string.Empty; passiveHintText.gameObject.SetActive(false); }
             for (int i = 0; i < value.Count; i++) activeLines.Add(value[i]);
             SelectedOptionId = string.Empty;
+            if (!seamless)
+            {
             left = value.LeftCharacter ?? new DialogueCharacter(defaultLeftName, defaultLeft);
             right = value.RightCharacter ?? new DialogueCharacter(defaultRightName, defaultRight);
             center = value.CenterCharacter;
             background.texture = value.Background;
             background.enabled = value.Background != null;
+            }
             if (psdBackground != null) psdBackground.SetActive(false);
             if (titleText != null) titleText.text = string.IsNullOrEmpty(value.Title) ? "角色对话" : value.Title;
             finished = onFinished;
@@ -173,16 +184,19 @@ namespace Spotlight.GameFlow
             canvasGroup.alpha = seamless ? 1f : 0f;
             canvasGroup.blocksRaycasts = canvasGroup.interactable = true;
             continueButton.interactable = false;
-            leftPortrait.color = rightPortrait.color = centerPortrait.color = Color.white;
+            if (!seamless) leftPortrait.color = rightPortrait.color = centerPortrait.color = Color.white;
             UnityEngine.EventSystems.EventSystem system = UnityEngine.EventSystems.EventSystem.current;
             if (system != null) system.SetSelectedGameObject(null);
-            ShowLine(0);
             if (seamless)
             {
+                if (value.Background != null) { background.texture = value.Background; background.enabled = true; }
                 dialogueBox.anchoredPosition = boxPosition;
                 entranceComplete = true;
+                LineIndex = -1;
+                PrepareNextLine(0);
                 return;
             }
+            ShowLine(0);
             dialogueBox.anchoredPosition = boxPosition + new Vector2(0f, -32f);
             EnterVisiblePortraits();
             transition = Sequence();
@@ -205,6 +219,7 @@ namespace Spotlight.GameFlow
 
         private void ShowLine(int index)
         {
+            CaptureHistory();
             Spotlight.Audio.GameAudio.StopOwner(voiceOwner);
             LineIndex = index;
             DialogueLine line = activeLines[index];
@@ -213,9 +228,9 @@ namespace Spotlight.GameFlow
                 Spotlight.Audio.GameAudio.PlayNarrative(line.SfxKey, this);
                 Spotlight.Audio.GameAudio.PlayNarrative(line.VoiceKey, voiceOwner, voice: true);
             }
-            if (line.ReplaceLeft) left = line.LeftCharacter;
-            if (line.ReplaceRight) right = line.RightCharacter;
-            if (line.ReplaceCenter) center = line.CenterCharacter;
+            if (line.ReplaceLeft) left = DialogueCharacter.Resolve(left, line.LeftCharacter);
+            if (line.ReplaceRight) right = DialogueCharacter.Resolve(right, line.RightCharacter);
+            if (line.ReplaceCenter) center = DialogueCharacter.Resolve(center, line.CenterCharacter);
             ApplyPortrait(leftPortrait, leftPortraitFrame, left);
             ApplyPortrait(rightPortrait, rightPortraitFrame, right);
             ApplyPortrait(centerPortrait, centerPortraitFrame, center);
@@ -382,8 +397,12 @@ namespace Spotlight.GameFlow
 
         private void Update()
         {
+            CaptureHistory();
+            ReadingInput();
+            UpdateControlSkip();
+            if (ReadingInputBlocked) return;
             if (effects != null) effects.Tick(Time.unscaledDeltaTime);
-            if (!IsPlaying || exiting || InputSuspended) return;
+            if (!IsPlaying || exiting) return;
             if (!ready && entranceComplete && !effects.IsPortraitTransitioning && portraitChange == null && blockingEffects == 0)
             {
                 ready = true;
@@ -421,7 +440,7 @@ namespace Spotlight.GameFlow
         /// <summary>第一次提交只补完当前页；下一次才翻页/换句。进退场期间不接受提交。</summary>
         public void Advance()
         {
-            if (!IsPlaying || !ready || optionsVisible || exiting || blockingEffects > 0 || portraitChange != null || lastAdvanceFrame == Time.frameCount) return;
+            if (ReadingInputBlocked || !IsPlaying || !ready || optionsVisible || exiting || blockingEffects > 0 || portraitChange != null || lastAdvanceFrame == Time.frameCount) return;
             lastAdvanceFrame = Time.frameCount;
             if (IsTyping)
             {
@@ -435,6 +454,16 @@ namespace Spotlight.GameFlow
             if (page < dialogueText.textInfo.pageCount) { ShowPage(page + 1); return; }
             if (LineIndex + 1 < activeLines.Count) { PrepareNextLine(LineIndex + 1); return; }
             if (TryShowOptions()) return;
+            CaptureHistory();
+            if (script.Continues)
+            {
+                SeamlessChoicePending = true;
+                IsPlaying = ready = false;
+                Action continuation = finished;
+                finished = null;
+                continuation?.Invoke();
+                return;
+            }
             IsSkipping = false;
             exiting = true;
             ready = false;
@@ -470,7 +499,9 @@ namespace Spotlight.GameFlow
         /// <summary>Reveal each page briefly in unscaled time, stopping at choices without selecting them.</summary>
         public void Skip()
         {
-            if (!IsPlaying || !IsReady || exiting || script == null || optionsVisible || IsSkipping) return;
+            if (ReadingInputBlocked || !IsPlaying || !IsReady || exiting || script == null || optionsVisible) return;
+            controlSkipping = false;
+            if (IsSkipping) return;
             IsSkipping = true;
             Spotlight.Audio.GameAudio.StopOwner(voiceOwner);
             skipElapsed = 0f;
@@ -482,7 +513,7 @@ namespace Spotlight.GameFlow
 
         public void Cancel()
         {
-            if (!IsPlaying || !AllowCancel) return;
+            if (ReadingInputBlocked || !IsPlaying || !AllowCancel) return;
             Spotlight.Audio.GameAudio.Play(Spotlight.Audio.AudioKeys.Cancel);
             lastCancelFrame = Time.frameCount;
             Action callback = cancelled;
@@ -494,6 +525,7 @@ namespace Spotlight.GameFlow
         /// <summary>静默中止，不触发完成/取消回调；关闭、隐藏、销毁均调用此方法。</summary>
         public void Stop()
         {
+            StopReading();
             Spotlight.Audio.GameAudio.StopOwner(voiceOwner);
             Spotlight.Audio.GameAudio.StopOwner(this);
             pauseOwner?.Dispose();
@@ -501,6 +533,7 @@ namespace Spotlight.GameFlow
             Action stopped = PlaybackStopped;
             PlaybackStopped = null;
             IsSkipping = false;
+            controlSkipping = false;
             skipElapsed = 0f;
             finished = cancelled = null;
             AllowCancel = true;

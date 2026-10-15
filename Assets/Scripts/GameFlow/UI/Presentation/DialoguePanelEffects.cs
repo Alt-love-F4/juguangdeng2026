@@ -25,6 +25,8 @@ namespace Spotlight.GameFlow
                 return blockingHandles.Count;
             }
         }
+        public bool OwnsContinuity(object owner) => owner != null && script != null
+            && ReferenceEquals(script.ContinuityOwner, owner);
         public PresentationEffects Effects => effects;
         public bool IsEffectBlocking => blockingEffects > 0 || portraitChange != null;
         public bool IsReady => ready && !IsEffectBlocking;
@@ -142,25 +144,41 @@ namespace Spotlight.GameFlow
         private void PrepareNextLine(int index)
         {
             DialogueLine line = activeLines[index];
-            if (!line.ReplaceLeft && !line.ReplaceRight && !line.ReplaceCenter) { ShowLine(index); return; }
+            if (!ChangesIdentity(line.ReplaceLeft, left, line.LeftCharacter)
+                && !ChangesIdentity(line.ReplaceRight, right, line.RightCharacter)
+                && !ChangesIdentity(line.ReplaceCenter, center, line.CenterCharacter)) { ShowLine(index); return; }
             ready = false;
             continueButton.interactable = false;
             portraitChange = StartCoroutine(ChangeCharacters(index));
         }
+        private static bool ChangesIdentity(bool replace, DialogueCharacter current, DialogueCharacter incoming)
+        {
+            if (!replace || current == null && incoming == null) return false;
+            if (incoming != null && incoming.Portrait != null && string.IsNullOrEmpty(incoming.CharacterKey))
+                Debug.LogWarning("Dialogue character has no stable CharacterKey; using explicit replacement compatibility mode.");
+            return !DialogueCharacter.SameIdentity(current, incoming);
+        }
+
         private IEnumerator ChangeCharacters(int index)
         {
             yield return null; // Ensure StartCoroutine has returned before the routine may clear its owner field.
+            while (ReadingPaused) yield return null;
             DialogueLine line = activeLines[index];
-            PresentationEffectHandle a = line.ReplaceLeft && leftPortrait.enabled ? effects.Play(PresentationEffectIds.PortraitFadeOut, 0) : null;
-            PresentationEffectHandle b = line.ReplaceRight && rightPortrait.enabled ? effects.Play(PresentationEffectIds.PortraitFadeOut, 1) : null;
-            PresentationEffectHandle c = line.ReplaceCenter && centerPortrait.enabled ? effects.Play(PresentationEffectIds.PortraitFadeOut, 2) : null;
+            bool changeLeft = ChangesIdentity(line.ReplaceLeft, left, line.LeftCharacter);
+            bool changeRight = ChangesIdentity(line.ReplaceRight, right, line.RightCharacter);
+            bool changeCenter = ChangesIdentity(line.ReplaceCenter, center, line.CenterCharacter);
+            PresentationEffectHandle a = changeLeft && leftPortrait.enabled ? effects.Play(PresentationEffectIds.PortraitFadeOut, 0) : null;
+            PresentationEffectHandle b = changeRight && rightPortrait.enabled ? effects.Play(PresentationEffectIds.PortraitFadeOut, 1) : null;
+            PresentationEffectHandle c = changeCenter && centerPortrait.enabled ? effects.Play(PresentationEffectIds.PortraitFadeOut, 2) : null;
             while ((a != null && !a.IsDone) || (b != null && !b.IsDone) || (c != null && !c.IsDone)) yield return null;
             if ((a != null && !a.IsCompleted) || (b != null && !b.IsCompleted) || (c != null && !c.IsCompleted)) { FinishPortraitChange(); yield break; }
+            while (ReadingPaused) yield return null;
             ShowLine(index);
-            a = line.ReplaceLeft && leftPortrait.enabled ? effects.Play(PresentationEffectIds.EnterShadowWalk, 0) : null;
-            b = line.ReplaceRight && rightPortrait.enabled ? effects.Play(PresentationEffectIds.EnterShadowWalk, 1) : null;
-            c = line.ReplaceCenter && centerPortrait.enabled ? effects.Play(PresentationEffectIds.EnterShadowWalk, 2) : null;
+            a = changeLeft && leftPortrait.enabled ? effects.Play(PresentationEffectIds.EnterShadowWalk, 0) : null;
+            b = changeRight && rightPortrait.enabled ? effects.Play(PresentationEffectIds.EnterShadowWalk, 1) : null;
+            c = changeCenter && centerPortrait.enabled ? effects.Play(PresentationEffectIds.EnterShadowWalk, 2) : null;
             while ((a != null && !a.IsDone) || (b != null && !b.IsDone) || (c != null && !c.IsDone)) yield return null;
+            while (ReadingPaused) yield return null;
             FinishPortraitChange();
             if (IsPlaying && script != null) PlayLineAccent(activeLines[LineIndex]);
         }
@@ -175,10 +193,12 @@ namespace Spotlight.GameFlow
         private IEnumerator SwapPortraitRoutine(Action completed)
         {
             yield return null;
+            while (ReadingPaused) yield return null;
             PresentationEffectHandle a = effects.Play(PresentationEffectIds.PortraitFadeOut, 0);
             PresentationEffectHandle b = effects.Play(PresentationEffectIds.PortraitFadeOut, 1);
             while (!a.IsDone || !b.IsDone) yield return null;
             if (!a.IsCompleted || !b.IsCompleted) { FinishPortraitChange(); yield break; }
+            while (ReadingPaused) yield return null;
             DialogueCharacter original = left; left = right; right = original;
             ApplyPortrait(leftPortrait, leftPortraitFrame, left);
             ApplyPortrait(rightPortrait, rightPortraitFrame, right);
@@ -187,6 +207,7 @@ namespace Spotlight.GameFlow
             a = effects.Play(PresentationEffectIds.PortraitFadeIn, 0);
             b = effects.Play(PresentationEffectIds.PortraitFadeIn, 1);
             while (!a.IsDone || !b.IsDone) yield return null;
+            while (ReadingPaused) yield return null;
             bool success = a.IsCompleted && b.IsCompleted;
             FinishPortraitChange();
             if (success) completed?.Invoke();
@@ -360,13 +381,15 @@ namespace Spotlight.GameFlow
 
         public bool SelectOption(string optionId)
         {
-            if (!IsChoosing || !string.IsNullOrEmpty(SelectedOptionId) || !IsReady) return false;
+            if (ReadingPaused || InputSuspended || IsExternalInputBlocked
+                || !IsChoosing || !string.IsNullOrEmpty(SelectedOptionId) || !IsReady) return false;
             int index = -1;
             for (int i = 0; i < script.Options.Count; i++)
                 if (string.Equals(script.Options[i].OptionId, optionId, StringComparison.Ordinal)) { index = i; break; }
             if (index < 0 || !script.Options[index].Enabled) return false;
             DialogueOption option = script.Options[index];
             if (OptionSelectionRequested != null && !OptionSelectionRequested(optionId)) return false;
+            RecordSelectedOption(option.Text);
             SelectedOptionId = option.OptionId;
             Spotlight.Audio.GameAudio.Play(Spotlight.Audio.AudioKeys.Confirm);
             optionGroup.interactable = false;

@@ -17,7 +17,7 @@ namespace Spotlight.GameFlow.Tests
         internal NarrativeRuntime Narrative { get; }
         internal CafeWorld World { get; }
 
-        internal PlayerPresentationTestSession()
+        internal PlayerPresentationTestSession(bool includeDayFlowArrival = false)
         {
             var config = new NarrativeConfiguration();
             config.bars.Add(new NarrativeBarDefinition { barKey = "world.calendar", ownerId = "world", min = 1, max = 9999,
@@ -27,6 +27,14 @@ namespace Spotlight.GameFlow.Tests
                     initValue = 0, advanceMode = NarrativeAdvanceMode.EventDriven });
             foreach (string id in FirstDayLetterDraft.SpecializationIds)
                 config.conditionKeys.Add(new NarrativeConditionKeyDefinition { key = "specialization.player." + id });
+            if (includeDayFlowArrival)
+            {
+                // This fixture tests day-flow completion boundaries, not first-arrival content.
+                config.events.Add(new NarrativeEventDefinition { eventId = "arrival.start" });
+                config.events.Add(new NarrativeEventDefinition { eventId = "arrival.complete" });
+                config.results.Add(new NarrativeResultDefinition { resultId = "fixture.arrival.complete", eventId = "arrival.start",
+                    resultType = NarrativeResultType.QueueEvent, target = "event:arrival.complete" });
+            }
             root = new GameObject("Isolated player presentation session");
             root.SetActive(false);
             Narrative = root.AddComponent<NarrativeRuntime>();

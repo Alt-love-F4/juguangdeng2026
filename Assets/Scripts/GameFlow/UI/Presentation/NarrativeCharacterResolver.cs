@@ -25,6 +25,14 @@ namespace Spotlight.GameFlow
             return new DialogueCharacter(key, profile.displayName, profile.PortraitFor(emote));
         }
 
+        /// <summary>Debug-only actor identity from generated data with an explicitly supplied scene-preview portrait.</summary>
+        public static DialogueCharacter CreatePreviewCharacter(string key, Sprite previewPortrait)
+        {
+            CharacterProfile profile = Find(key);
+            if (profile == null) throw new System.ArgumentException("Unknown character: " + key, nameof(key));
+            return new DialogueCharacter(key, profile.displayName, previewPortrait != null ? previewPortrait : profile.PortraitFor(null));
+        }
+
         public static NarrativeCharacterPresentationData Resolve(string key, string displayName, string portraitPath)
         {
             CharacterProfile profile = Find(key);

@@ -28,6 +28,25 @@ namespace Spotlight.Narrative
         private bool choicesEverShown, continueEverShown, finishPresentation;
         private readonly List<string> pages = new List<string>();
 
+        public static Func<bool> ExternalInputBlocked { get; set; }
+        private bool externallySuspended;
+        private bool hostSuspended;
+        private int resumeFrame = -1;
+        private bool RefreshSuspension()
+        {
+            bool blocked = ExternalInputBlocked?.Invoke() == true;
+            if (externallySuspended != blocked)
+            {
+                externallySuspended = blocked;
+                if (!blocked) resumeFrame = Time.frameCount;
+                ui.ResetSubmit();
+            }
+            bool paused = hostSuspended || blocked || Time.frameCount <= resumeFrame;
+            ui.SetSuspended(paused);
+            resources.SetSuspended(paused);
+            return paused;
+        }
+
         public bool IsPresenting => completion != null || draining || effects.Count > 0;
         public event Action<NarrativeEventRequest> Started;
         public event Action<NarrativeEventRequest> Finished;
@@ -124,6 +143,7 @@ namespace Spotlight.Narrative
             {
                 while (stack.Count > 0)
                 {
+                    if (RefreshSuspension()) { yield return null; continue; }
                     IEnumerator current = stack.Peek();
                     bool moved;
                     object yielded = null;
@@ -221,10 +241,16 @@ namespace Spotlight.Narrative
                 dialoguePages?.Sort((a, b) => a.seq.CompareTo(b.seq));
                 if (dialoguePages != null && dialoguePages.Count > 0)
                 {
+                    object stageOwner = new object();
+                    Action releaseStage = null;
+                    try
+                    {
                     foreach (NarrativeConversationPageDefinition page in dialoguePages)
                     {
                         if (!PageVisible(page)) continue;
-                        var conversationData = new NarrativeConversationPresentationData { title = resolvedTitle, backgroundPath = page.bgOverride, bgmOverride = page.bgmOverride };
+                        var conversationData = new NarrativeConversationPresentationData { title = resolvedTitle, backgroundPath = page.bgOverride, bgmOverride = page.bgmOverride,
+                            eventId = definition.eventId, presentationKey = definition.presentationKey, continuityOwner = stageOwner,
+                            continues = dialoguePages.IndexOf(page) < dialoguePages.Count - 1 };
                         List<NarrativeConversationLineDefinition> lines = configuration.presentations.conversationLines.FindAll(item => item != null && item.pageId == page.pageId);
                         lines.Sort((a, b) => a.seq.CompareTo(b.seq));
                         foreach (NarrativeConversationLineDefinition line in lines)
@@ -233,6 +259,7 @@ namespace Spotlight.Narrative
                             NarrativeCharacterPresentationData characterData = characterResolver?.Invoke(line.speakerKey, resolve(speakerObject?.nameText), string.IsNullOrWhiteSpace(speakerObject?.portraitPath) ? speakerObject?.iconPath : speakerObject.portraitPath);
                             conversationData.lines.Add(new NarrativeConversationPresentationLine
                             {
+                                lineId = line.lineId, pageId = line.pageId, seq = line.seq,
                                 speakerKey = line.speakerKey, speakerName = characterData?.name ?? resolve(speakerObject?.nameText),
                                 portraitPath = characterData?.portraitPath ?? speakerObject?.iconPath, portrait = characterData?.portrait,
                                 side = line.side, emote = line.emote, sfxKey = line.sfxKey, voiceKey = line.voiceKey,
@@ -258,12 +285,15 @@ namespace Spotlight.Narrative
                         bool handled = conversationPlayback(request, conversationData, () => { if (sessionVersion == pageVersion) pageFinished = true; });
                         if (handled)
                         {
+                            releaseStage = conversationData.releaseStage;
                             ui.Hide();
                             while (!pageFinished && !pageCancelled) yield return null;
                             if (pageCancelled) { AbortPresentation("playback_cancelled"); yield break; }
                         }
                     }
                     }
+                    }
+                    finally { releaseStage?.Invoke(); }
                     yield break;
                 }
             }
@@ -371,7 +401,8 @@ namespace Spotlight.Narrative
                             }
                             if (!isReading && conversationPlayback != null)
                             {
-                                var data = new NarrativeConversationPresentationData { title = resolvedTitle };
+                                var data = new NarrativeConversationPresentationData { title = resolvedTitle,
+                                    eventId = definition.eventId, presentationKey = definition.presentationKey };
                                 var speaker = configuration?.objects?.Find(o => o.objId == definition.actorId && o.objType != NarrativeObjectType.World);
                                 var character = speaker == null ? null : characterResolver?.Invoke(speaker.objId, resolve(speaker.nameText), speaker.portraitPath);
                                 foreach (var text in pages)
@@ -596,7 +627,7 @@ namespace Spotlight.Narrative
 
         private void OnEscape()
         {
-            if (!IsPresenting || choosing) return;
+            if (!IsPresenting || choosing || RefreshSuspension()) return;
             if (allowSkip) skipRequested = true;
             // Progressive presentation never skips the event; it only reveals the current line.
             else ui.RevealImmediately();
@@ -626,7 +657,7 @@ namespace Spotlight.Narrative
             return false;
         }
 
-        public void SetSuspended(bool suspended) => ui.SetSuspended(suspended);
+        public void SetSuspended(bool suspended) { hostSuspended = suspended; RefreshSuspension(); }
 
         public void SyncNpcLocations(IReadOnlyList<NarrativeStringValue> locations)
         {

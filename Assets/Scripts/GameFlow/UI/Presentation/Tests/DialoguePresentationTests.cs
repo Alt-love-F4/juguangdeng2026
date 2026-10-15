@@ -27,6 +27,59 @@ namespace Spotlight.GameFlow.Tests
             yield return null;
         }
 
+        [UnityTest]
+        public IEnumerator NormalizedWheelAndHeldControlDriveReading()
+        {
+            var mouse = UnityEngine.InputSystem.InputSystem.AddDevice<UnityEngine.InputSystem.Mouse>();
+            var keyboard = UnityEngine.InputSystem.InputSystem.AddDevice<UnityEngine.InputSystem.Keyboard>();
+            var previousScroll = UnityEngine.InputSystem.InputSystem.settings.scrollDeltaBehavior;
+            try
+            {
+                UnityEngine.InputSystem.InputSystem.settings.scrollDeltaBehavior = UnityEngine.InputSystem.InputSettings.ScrollDeltaBehavior.UniformAcrossAllPlatforms;
+                DialoguePanel panel = Open();
+                var lines = new List<DialogueLine>();
+                for (int i = 0; i < 30; i++) lines.Add(new DialogueLine(DialogueSpeaker.Narrator, new string('文', 180)));
+                panel.Play(new DialogueScript(lines));
+                yield return Ready(panel);
+                UnityEngine.InputSystem.InputSystem.QueueDeltaStateEvent(mouse.scroll, new Vector2(0, 1));
+                yield return null;
+                yield return null;
+                Assert.That(panel.IsHistoryOpen, Is.True, "One normalized upward notch opens history.");
+                panel.CloseHistory();
+                yield return new WaitForSecondsRealtime(.25f);
+                UnityEngine.InputSystem.InputSystem.QueueDeltaStateEvent(mouse.scroll, new Vector2(0, -1));
+                yield return null;
+                yield return null;
+                Assert.That(panel.IsTyping, Is.False, "Downward notch reveals the page.");
+                int previousPage = panel.PageNumber;
+                int previousLine = panel.LineIndex;
+                yield return new WaitForSecondsRealtime(.25f);
+                UnityEngine.InputSystem.InputSystem.QueueDeltaStateEvent(mouse.scroll, new Vector2(0, -1));
+                yield return null;
+                yield return null;
+                Assert.That(panel.PageNumber > previousPage || panel.LineIndex > previousLine, Is.True, "A second notch advances.");
+                yield return Ready(panel);
+                UnityEngine.InputSystem.InputSystem.QueueStateEvent(keyboard, new UnityEngine.InputSystem.LowLevel.KeyboardState(UnityEngine.InputSystem.Key.LeftCtrl));
+                yield return null;
+                yield return null;
+                Assert.That(panel.IsSkipping, Is.True);
+                UnityEngine.InputSystem.InputSystem.QueueStateEvent(keyboard, new UnityEngine.InputSystem.LowLevel.KeyboardState());
+                yield return null;
+                yield return null;
+                Assert.That(panel.IsSkipping, Is.False, "Releasing Ctrl stops held skipping.");
+                yield return Ready(panel);
+                panel.Skip();
+                yield return null;
+                Assert.That(panel.IsSkipping, Is.True, "Button skipping remains latched without Ctrl.");
+            }
+            finally
+            {
+                UnityEngine.InputSystem.InputSystem.settings.scrollDeltaBehavior = previousScroll;
+                UnityEngine.InputSystem.InputSystem.RemoveDevice(mouse);
+                UnityEngine.InputSystem.InputSystem.RemoveDevice(keyboard);
+            }
+        }
+
         [Test]
         public void ScriptRejectsInvalidDataAndSnapshotsTheCallerList()
         {
@@ -62,17 +115,17 @@ namespace Spotlight.GameFlow.Tests
         public void PreviewCharactersAndReplacementEffectsUseUnifiedCatalogIdentity()
         {
             DialogueScript preview = DialoguePreviewDialogue.Create();
-            AssertCatalogCharacter(preview.LeftCharacter, "eugene");
+            AssertCatalogCharacter(preview.LeftCharacter, "player");
             AssertCatalogCharacter(preview.RightCharacter, "adele");
             DialogueScript options = DialoguePreviewDialogue.CreateOptions();
-            AssertCatalogCharacter(options.LeftCharacter, "eugene");
+            AssertCatalogCharacter(options.LeftCharacter, "player");
             AssertCatalogCharacter(options.RightCharacter, "adele");
-            AssertCatalogCharacter(options.CenterCharacter, "thibaut");
+            AssertCatalogCharacter(options.CenterCharacter, "npc_a");
             DialogueScript effects = PresentationEffectsPreview.Create();
-            AssertCatalogCharacter(effects.LeftCharacter, "eugene");
+            AssertCatalogCharacter(effects.LeftCharacter, "player");
             AssertCatalogCharacter(effects.RightCharacter, "adele");
             Assert.That(effects[1].AccentTargetKey, Is.EqualTo(effects.RightCharacter.CharacterKey));
-            AssertCatalogCharacter(effects[3].RightCharacter, "thibaut");
+            AssertCatalogCharacter(effects[3].RightCharacter, "npc_a");
             Assert.That(effects[4].AccentTargetKey, Is.EqualTo(effects[3].RightCharacter.CharacterKey));
         }
 
@@ -82,7 +135,8 @@ namespace Spotlight.GameFlow.Tests
             Assert.That(profile, Is.Not.Null);
             Assert.That(character.CharacterKey, Is.EqualTo(id));
             Assert.That(character.DisplayName, Is.EqualTo(profile.displayName));
-            Assert.That(character.Portrait, Is.SameAs(profile.PortraitFor(null)));
+            // Shared debug examples may provide artist-authored sprites where generated actors have no portrait.
+            Assert.That(character.Portrait, Is.Not.Null);
         }
 
         [Test]
@@ -134,10 +188,11 @@ namespace Spotlight.GameFlow.Tests
         public IEnumerator RepeatedSkipStopsAtChoiceAndContinuesWithoutClosingPanel()
         {
             int submitted = 0, completed = 0;
+            object continuity = new object();
             var panel = DialoguePlayback.Play(new DialogueScript(new[]
             {
                 new DialogueLine(DialogueSpeaker.Narrator, "请选择回应。")
-            }, options: new[] { new DialogueOption("accept", "接受") }), () => completed++);
+            }, options: new[] { new DialogueOption("accept", "接受") }, continuityOwner: continuity), () => completed++);
             panel.OptionSelectionRequested = id => { submitted++; return true; };
             yield return Ready(panel);
             panel.Skip();
@@ -160,7 +215,7 @@ namespace Spotlight.GameFlow.Tests
             var next = DialoguePlayback.Play(new DialogueScript(new[]
             {
                 new DialogueLine(DialogueSpeaker.Narrator, "我接受。")
-            }));
+            }, continuityOwner: continuity));
             Assert.That(next, Is.SameAs(panel));
             Assert.That(next.GetComponent<CanvasGroup>().alpha, Is.EqualTo(1f));
             Assert.That(next.LineIndex, Is.Zero);

@@ -25,6 +25,7 @@ namespace Spotlight.Audio
         public static void OverrideMusic(object owner, string key, float volume = 1f, float fadeIn = -1f, float fadeOut = -1f)
             => Service?.SetMusic(key, owner, volume, fadeIn, fadeOut, true);
         public static void StopOwner(object owner) => Service?.StopOwner(owner);
+        public static void SetOwnerPaused(object owner, bool paused) => Service?.SetOwnerPaused(owner, paused);
 
         public static void Shutdown()
         {

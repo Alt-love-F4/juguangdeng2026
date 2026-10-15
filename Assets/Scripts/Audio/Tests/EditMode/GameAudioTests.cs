@@ -45,6 +45,38 @@ namespace Spotlight.Audio.Tests
         }
 
         [Test]
+        public void OwnerPauseIsolatedFromOtherVoiceAndGlobalPause()
+        {
+            GameAudio.Shutdown();
+            AudioKit.ClearBackend();
+            GameAudio.Initialize(catalog);
+            var first = new object(); var second = new object();
+            GameAudio.SetLoop(first, "loop", AudioKeys.Grinder, true);
+            GameAudio.SetLoop(second, "loop", AudioKeys.Grinder, true);
+            var actual = AudioKit.GetBackend();
+            var snapshots = new List<AudioVoiceSnapshot>();
+            actual.GetActiveVoices(snapshots);
+            Assert.That(snapshots.Count, Is.EqualTo(2));
+            Assert.That(snapshots[0].VoiceId, Is.Not.EqualTo(snapshots[1].VoiceId));
+            GameAudio.SetOwnerPaused(first, true);
+            actual.GetActiveVoices(snapshots);
+            Assert.That(snapshots.Count(item => item.IsPaused), Is.EqualTo(1));
+            actual.PauseAll();
+            GameAudio.SetOwnerPaused(first, false);
+            actual.GetActiveVoices(snapshots);
+            Assert.That(snapshots.All(item => item.IsPaused), Is.True);
+            GameAudio.SetOwnerPaused(first, true);
+            actual.ResumeAll();
+            actual.GetActiveVoices(snapshots);
+            Assert.That(snapshots.Count(item => item.IsPaused), Is.EqualTo(1));
+            actual.SetBusVolume(AudioBus.Sfx, .25f);
+            Assert.That(actual.GetBusVolume(AudioBus.Sfx), Is.EqualTo(.25f));
+            actual.StopBus(AudioBus.Sfx);
+            actual.GetActiveVoices(snapshots);
+            Assert.That(snapshots, Is.Empty);
+        }
+
+        [Test]
         public void InitializingOrReadingDiagnosticsDoesNotCreateDefaultBackend()
         {
             GameAudio.Shutdown();

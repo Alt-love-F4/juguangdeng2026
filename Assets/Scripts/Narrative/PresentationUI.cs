@@ -28,7 +28,7 @@ namespace Spotlight.Narrative
         private float noticeUntil;
         private bool disposed;
         public bool IsProgressing { get; private set; }
-        public bool IsSuspended => suspended;
+        public bool IsSuspended => suspended || NarrativePresenter.ExternalInputBlocked?.Invoke() == true;
         public event Action Escape;
 
         public static NarrativePresentationUI Create()
@@ -67,9 +67,9 @@ namespace Spotlight.Narrative
             previousButton = NavigationButton("Previous", new Vector2(.04f, .045f), new Vector2(.14f, .11f), "‹");
             nextButton = NavigationButton("Next", new Vector2(.86f, .045f), new Vector2(.96f, .11f), "›");
             continueButton = NavigationButton("Continue", new Vector2(.43f, .045f), new Vector2(.57f, .11f), "继续");
-            previousButton.onClick.AddListener(() => previousPage?.Invoke());
-            nextButton.onClick.AddListener(() => nextPage?.Invoke());
-            continueButton.onClick.AddListener(() => continuePresentation?.Invoke());
+            previousButton.onClick.AddListener(() => { if (!IsSuspended) previousPage?.Invoke(); });
+            nextButton.onClick.AddListener(() => { if (!IsSuspended) nextPage?.Invoke(); });
+            continueButton.onClick.AddListener(() => { if (!IsSuspended) continuePresentation?.Invoke(); });
             ScrollRect scroll = choicesPanel.AddComponent<ScrollRect>(); scroll.horizontal = false;
             Image viewport = Image("Viewport", choicesPanel.transform, new Vector2(.025f, .025f), new Vector2(.975f, .975f), Color.clear);
             viewport.gameObject.AddComponent<RectMask2D>();
@@ -154,7 +154,7 @@ namespace Spotlight.Narrative
 
         private void Submit()
         {
-            if (!visible || suspended || choicesVisible) return;
+            if (!visible || IsSuspended || choicesVisible) return;
             if (IsProgressing) revealNow = true;
             else if (navigationActive && nextPage != null) nextPage();
             else submitted = true;
@@ -201,6 +201,7 @@ namespace Spotlight.Narrative
                 label.color = button.interactable ? Color.white : new Color(.6f, .6f, .6f);
                 string id = choice.choiceId; button.onClick.AddListener(() =>
                 {
+                    if (IsSuspended) return;
                     row.color = new Color(.28f, .58f, .52f);
                     selected(id);
                     MarkChoiceSelected(id);
@@ -256,8 +257,14 @@ namespace Spotlight.Narrative
         }
         private void Update()
         {
+            if (IsSuspended)
+            {
+                if (noticeRoot != null && noticeRoot.activeSelf) noticeUntil += Time.unscaledDeltaTime;
+                ResetSubmit();
+                return;
+            }
             if (noticeRoot != null && noticeRoot.activeSelf && Time.unscaledTime >= noticeUntil) noticeRoot.SetActive(false);
-            if (!visible || suspended) return;
+            if (!visible) return;
             Keyboard keyboard = Keyboard.current;
             if (keyboard == null) return;
             if (keyboard.escapeKey.wasPressedThisFrame) Escape?.Invoke();

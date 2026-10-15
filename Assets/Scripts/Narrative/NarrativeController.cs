@@ -206,9 +206,8 @@ namespace Spotlight.Narrative
 
         public bool QueueEvent(string eventId)
         {
-            if (presenterUnavailable || valueRestore || !valueBaselineReady || IsEnded || string.IsNullOrWhiteSpace(eventId) || !events.TryGetValue(eventId, out NarrativeEventDefinition definition)) return false;
-            if (activePresentation || draining || queue.Any(request => request.Event.eventId == eventId) || state.IsEventLocked(eventId) || state.IsFlagSet("event.once." + eventId) || definition.onceOnly && state.HasHappenedEvent(eventId)) return false;
-            if (!EvaluateConditions("event", string.IsNullOrWhiteSpace(definition.conditionOwnerId) ? eventId : definition.conditionOwnerId, Context(definition))) return false;
+            if (GetEventRejection(eventId) != null) return false;
+            NarrativeEventDefinition definition = events[eventId];
             if (!turnOpen) BeginTurn();
             pendingEvents.Add(eventId);
             var request = new NarrativeEventRequest(definition, null, 0, null, Context(definition));
@@ -835,11 +834,27 @@ namespace Spotlight.Narrative
                 string target = StripPrefix(result.target, "flag:", "item:", "event:");
                 try
                 {
+                    if (!Enum.IsDefined(typeof(NarrativeResultType), result.resultType))
+                        throw new InvalidOperationException("Unknown result type: " + result.resultType);
+                    string dependencyError = ResultDependencyValidator?.Invoke(result);
+                    if (!string.IsNullOrEmpty(dependencyError)) throw new InvalidOperationException(dependencyError);
                     if (result.resultType == NarrativeResultType.BarAdd || result.resultType == NarrativeResultType.BarSet)
                     {
                         string barKey = StripPrefix(result.target, "bar:");
                         if (!state.IsWritableBar(barKey)) throw new InvalidOperationException("Bar is external, derived or unknown: " + barKey);
+                        if (!int.TryParse(result.value, out _)) throw new InvalidOperationException("Expected integer bar value.");
                     }
+                    else if (result.resultType == NarrativeResultType.RelAdd)
+                    {
+                        string relation = StripPrefix(result.target, "rel:");
+                        if (state.ResolveRelation(relation) == null || !int.TryParse(result.value, out _)) throw new InvalidOperationException("Expected configured relation and integer delta.");
+                    }
+                    else if (result.resultType == NarrativeResultType.AdvanceDay)
+                    {
+                        if (!int.TryParse(result.value, out int days) || days <= 0) throw new InvalidOperationException("Expected positive day count.");
+                    }
+                    else if (result.resultType == NarrativeResultType.SetSwitch && !bool.TryParse(result.value, out _))
+                        throw new InvalidOperationException("Expected true/false switch value.");
                     else if (result.resultType == NarrativeResultType.MoneyAdd || result.resultType == NarrativeResultType.MoneyRemove)
                     {
                         if (target != "cafe" || MoneyAccount == null || !int.TryParse(result.value, out int amount) || amount <= 0)

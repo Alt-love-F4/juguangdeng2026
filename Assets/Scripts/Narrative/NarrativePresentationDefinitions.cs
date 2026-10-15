@@ -39,12 +39,16 @@ namespace Spotlight.Narrative
 
     public sealed class NarrativeConversationPresentationData
     {
+        public object continuityOwner;
+        public bool continues;
+        public string eventId, presentationKey;
         public string title;
         public string backgroundPath;
         public string bgmOverride;
         public readonly List<NarrativeConversationPresentationOption> options = new List<NarrativeConversationPresentationOption>();
         public Func<string, bool> selectChoice;
         public Action cancelled;
+        public Action releaseStage;
         public readonly List<NarrativeConversationPresentationLine> lines = new List<NarrativeConversationPresentationLine>();
     }
     public sealed class NarrativeConversationPresentationOption
@@ -55,6 +59,8 @@ namespace Spotlight.Narrative
     public sealed class NarrativeConversationPresentationLine
     {
         public string speakerKey, speakerName, portraitPath, side, text, accentFxKey, accentTargetKey, sfxKey, voiceKey;
+        public string lineId, pageId;
+        public int seq;
         public string emote;
         public UnityEngine.Sprite portrait;
     }

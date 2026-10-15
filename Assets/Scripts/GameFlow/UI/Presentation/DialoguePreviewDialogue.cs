@@ -26,9 +26,9 @@ namespace Spotlight.GameFlow
                 new DialogueLine(DialogueSpeaker.Left, "那就不能把这张纸留在桌上。先收起来。"),
                 new DialogueLine(DialogueSpeaker.Right, "我想在天亮之前提醒他们，但需要一个可靠的帮手。"),
                 new DialogueLine(DialogueSpeaker.Center, "我们三个人得一起想想：你准备怎么处理？")
-            }, NarrativeCharacterResolver.CreateDialogueCharacter("eugene"),
-                NarrativeCharacterResolver.CreateDialogueCharacter("adele"),
-                centerCharacter: NarrativeCharacterResolver.CreateDialogueCharacter("thibaut"),
+            }, NarrativeCharacterResolver.CreatePreviewCharacter("player", visuals.LeftPortrait),
+                NarrativeCharacterResolver.CreatePreviewCharacter("adele", visuals.RightPortrait),
+                centerCharacter: NarrativeCharacterResolver.CreatePreviewCharacter("npc_a", visuals.CenterPortrait),
                 title: "咖啡馆 · 三人选项演出测试", background: visuals.Background,
                 optionPrompt: "你要如何回应？",
                 options: new[]
@@ -62,8 +62,8 @@ namespace Spotlight.GameFlow
                     "我没有问名单上是谁。他也没有解释。门外又传来一阵脚步声，我们同时看向窗边。\n\n" +
                     "有些故事，从一杯咖啡开始，却不会在咖啡凉下来时结束。"),
                 new DialogueLine(DialogueSpeaker.Left, "那就先喝一口吧。无论外面发生什么，这杯咖啡都还是热的。")
-            }, NarrativeCharacterResolver.CreateDialogueCharacter("eugene"),
-                NarrativeCharacterResolver.CreateDialogueCharacter("adele"),
+            }, NarrativeCharacterResolver.CreatePreviewCharacter("player", visuals.LeftPortrait),
+                NarrativeCharacterResolver.CreatePreviewCharacter("adele", visuals.RightPortrait),
                 title: "咖啡馆 · 不期而至的访客", background: visuals.Background);
         }
     }

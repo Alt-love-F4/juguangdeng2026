@@ -175,7 +175,7 @@ namespace Spotlight.GameFlow.Tests
             panel.Effects.Tick(0f);
             Assert.That(panel.CenterPortrait.color.r, Is.GreaterThan(panel.LeftPortrait.color.r));
             Assert.That(panel.CenterPortrait.color.r, Is.GreaterThan(panel.RightPortrait.color.r));
-            StringAssert.Contains(NarrativeCharacterResolver.Find("thibaut").displayName, string.Join(" ",
+            StringAssert.Contains(NarrativeCharacterResolver.Find("npc_a").displayName, string.Join(" ",
                 Array.ConvertAll(panel.GetComponentsInChildren<TMP_Text>(), item => item.text)));
             Transform options = panel.GetComponentInChildren<ScrollRect>().transform;
             Assert.That(options.gameObject.activeInHierarchy, Is.True);
@@ -219,7 +219,7 @@ namespace Spotlight.GameFlow.Tests
             float deadline = Time.realtimeSinceStartup + 6f;
             while (!panel.IsReady) { Assert.That(Time.realtimeSinceStartup, Is.LessThan(deadline)); yield return null; }
             Assert.That(panel.CenterPortrait.enabled, Is.True);
-            var centerFx = panel.PlayEffect(PresentationEffectIds.AccentShakeStartle, "thibaut");
+            var centerFx = panel.PlayEffect(PresentationEffectIds.AccentShakeStartle, "npc_a");
             var screenFx = panel.PlayEffect(PresentationEffectIds.ShakeLight);
             Assert.That(centerFx.Status, Is.EqualTo(PresentationEffectStatus.Playing));
             Assert.That(screenFx.Status, Is.EqualTo(PresentationEffectStatus.Playing));

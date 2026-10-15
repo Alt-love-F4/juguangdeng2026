@@ -58,7 +58,7 @@ namespace Spotlight.GameFlow
 
         private void Update()
         {
-            if (!enableKeyboardShortcuts) return;
+            if (!enableKeyboardShortcuts || DialoguePanel.IsExternalInputBlocked) return;
             Keyboard keyboard = Keyboard.current;
             if (keyboard == null) return;
             // Single owner for launch/stop; each actual panel continues to handle its own dialogue/letter input.

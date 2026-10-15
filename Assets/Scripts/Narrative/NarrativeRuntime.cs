@@ -197,10 +197,7 @@ namespace Spotlight.Narrative
             if (string.IsNullOrEmpty(text) || playerNameProvider == null) return text;
             string playerName = playerNameProvider();
             if (string.IsNullOrEmpty(playerName)) return text;
-            return text
-                .Replace("{playername}", playerName, StringComparison.OrdinalIgnoreCase)
-                .Replace("｛playername}", playerName, StringComparison.OrdinalIgnoreCase)
-                .Replace("｛playername｝", playerName, StringComparison.OrdinalIgnoreCase);
+            return NarrativeTextSubstitution.PlayerName(text, playerName);
         }
 
         private void OnDestroy()

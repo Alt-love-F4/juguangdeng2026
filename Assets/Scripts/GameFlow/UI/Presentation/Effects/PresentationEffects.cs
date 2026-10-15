@@ -46,6 +46,8 @@ namespace Spotlight.GameFlow
         private int shakePriority;
         private float focusSeconds;
         private bool disposed;
+        public bool IsPaused { get; private set; }
+        public void SetPaused(bool paused) => IsPaused = paused;
         public int ScreenShakePriority => channels[ShakeChannel].Active ? shakePriority : 0;
         public float OverlayAlpha => overlay.color.a;
         public float CameraZoom => cameraZoom;
@@ -236,7 +238,7 @@ namespace Spotlight.GameFlow
         }
         public void Tick(float seconds)
         {
-            if (disposed) return;
+            if (disposed || IsPaused) return;
             if (!IsFinite(seconds) || seconds < 0f) throw new ArgumentOutOfRangeException(nameof(seconds));
             for (int i = 0; i < channels.Length; i++)
             {

@@ -260,7 +260,7 @@ namespace Spotlight.GameFlow.Tests
                 new DialogueLine(DialogueSpeaker.Left, "第三条快速切换的台词。"),
                 new DialogueLine(DialogueSpeaker.Right, "请选择你的回应。")
             }, options: new[] { new DialogueOption("a", "继续交谈",
-                new DialogueLine(DialogueSpeaker.Left, "选择后的回应恢复正常打字。")) }), () => done++);
+                new DialogueLine(DialogueSpeaker.Left, "选择后的回应恢复正常打字。" + new string('字', 150))) }), () => done++);
             yield return Ready();
             Time.timeScale = 0f;
             panel.transform.Find("EffectStage/Artwork/DialogueBox/Skip").GetComponent<Button>().onClick.Invoke();
