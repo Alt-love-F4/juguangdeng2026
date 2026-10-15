@@ -67,7 +67,7 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0.5, y: 0.5}
   m_AnchorMax: {x: 0.5, y: 0.5}
-  m_AnchoredPosition: {x: 0, y: -1.005}
+  m_AnchoredPosition: {x: 0, y: -2.2681952}
   m_SizeDelta: {x: 3.3, y: 0.7}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!23 &325186513757196303
@@ -864,6 +864,11 @@ MonoBehaviour:
   label: {fileID: 3159605341402145009}
   workspaceCaption: {fileID: 356760891240325812}
   hitbox: {fileID: 5070532794014670379}
+  dragSmoothTime: 0.055
+  releaseSmoothTime: 0.18
+  maxDragLean: 14
+  leanPerSpeed: 1.6
+  leanSmoothTime: 0.09
 --- !u!61 &5070532794014670379
 BoxCollider2D:
   m_ObjectHideFlags: 0
@@ -908,7 +913,7 @@ BoxCollider2D:
     drawMode: 0
     adaptiveTiling: 0
   m_AutoTiling: 0
-  m_Size: {x: 1.45, y: 1.65}
+  m_Size: {x: 2.51337, y: 4.17639}
   m_EdgeRadius: 0
 --- !u!1 &5264792445857879825
 GameObject:
@@ -1453,7 +1458,7 @@ Transform:
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
   m_LocalPosition: {x: 0, y: 0, z: 0}
-  m_LocalScale: {x: 0.21577382, y: 0.21577382, z: 1}
+  m_LocalScale: {x: 0.5381946, y: 0.5381946, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 6087441835289812801}
@@ -1507,7 +1512,7 @@ SpriteRenderer:
   m_SortingLayer: 0
   m_SortingOrder: 130
   m_MaskInteraction: 0
-  m_Sprite: {fileID: 21300000, guid: 19404e2ef6b5c6f45a1cca98c18473c1, type: 3}
+  m_Sprite: {fileID: 21300000, guid: 945ee80374845ad45bb54c1b31df175e, type: 3}
   m_Color: {r: 1, g: 1, b: 1, a: 1}
   m_FlipX: 0
   m_FlipY: 0

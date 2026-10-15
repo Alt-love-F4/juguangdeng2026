@@ -168,19 +168,14 @@ namespace Spotlight.FreeCafe.Tests
 
         [TestCase(false)]
         [TestCase(true)]
-        public void FullCupStackRejectsReturnWithoutMutation(bool production)
+        public void CupStackAcceptsAdditionalEmptyCupsBeyondItsInitialStock(bool production)
         {
             if (production) world.EnableProduction();
-            var cup = Take("s.cups.small");
-            var source = world.Find("s.cups.small");
-            source.stock = world.Spec(source.specId).initialStock; // Refilled after withdrawal.
-            string before = JsonUtility.ToJson(world.State);
-            Assert.That(world.Preview(cup.id, source.id).success, Is.False);
-            var result = world.Interact(cup.id, source.id);
-            Assert.That(result.success, Is.False);
-            Assert.That(result.message, Does.Contain("杯堆已满"));
-            Assert.That(JsonUtility.ToJson(world.State), Is.EqualTo(before));
-            Assert.That(world.Find(cup.id), Is.SameAs(cup));
+            var cup = Take("s.cups.small"); var source = world.Find("s.cups.small");
+            source.stock = world.Spec(source.specId).initialStock;
+            Assert.That(world.Interact(cup.id, source.id).success, Is.True);
+            Assert.That(source.stock, Is.EqualTo(world.Spec(source.specId).initialStock + 1));
+            Assert.That(world.Find(cup.id), Is.Null);
         }
 
         [TestCase(false, "s.milk")]

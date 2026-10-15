@@ -35,16 +35,10 @@ MonoBehaviour:
       - mixed
     whitebox: {fileID: 21300000, guid: c8466a814beb48c49b80f88dc59c6f83, type: 3}
     variants:
-    - state: coffee
-      sprite: {fileID: 21300000, guid: 17ae6137cb36dfd4f9b7953d33d7aada, type: 3}
-    - state: empty
-      sprite: {fileID: 21300000, guid: 49a313529749dcd468f2b4f2572add85, type: 3}
-    - state: full
-      sprite: {fileID: 21300000, guid: 69e6832f1925ff548b855d96144deb4f, type: 3}
-    - state: milk
-      sprite: {fileID: 21300000, guid: 4273781edbd20784c8e517de4de396f8, type: 3}
-    - state: mixed
-      sprite: {fileID: 21300000, guid: 2157daa851977014eb2713f5ccecf353, type: 3}
+    - state: default
+      sprite: {fileID: 21300000, guid: 8ad89f8ec81c6544cbdbae65f3d66cd7, type: 3}
+    - state: nested
+      sprite: {fileID: 21300000, guid: 200910cad27081041b5d444a6029d9a0, type: 3}
   - brief:
       id: cup.large
       label: "\u5927\u676F"
@@ -67,16 +61,10 @@ MonoBehaviour:
       - mixed
     whitebox: {fileID: 21300000, guid: 40f889ba329cbdc41bfeec39fd366f57, type: 3}
     variants:
-    - state: coffee
-      sprite: {fileID: 21300000, guid: 299cd2bd8c38193488a945d3f4bd6ffe, type: 3}
-    - state: empty
-      sprite: {fileID: 21300000, guid: d245b3ac13082ac4b9ce3071f29e3255, type: 3}
-    - state: full
-      sprite: {fileID: 21300000, guid: f7a431bfc7c36a64eb71993e3a45249a, type: 3}
-    - state: milk
-      sprite: {fileID: 21300000, guid: 74e6688e5e4d92549bd8908a7b59885d, type: 3}
-    - state: mixed
-      sprite: {fileID: 21300000, guid: fc261778ead296941a1943807c626707, type: 3}
+    - state: default
+      sprite: {fileID: 21300000, guid: 0c02f4bdb473edb4aa92e32f7040429a, type: 3}
+    - state: nested
+      sprite: {fileID: 21300000, guid: 479c73dc6926f644595e089507f7536e, type: 3}
   - brief:
       id: beans
       label: "\u5496\u5561\u8C46"
@@ -307,7 +295,7 @@ MonoBehaviour:
     whitebox: {fileID: 21300000, guid: c8466a814beb48c49b80f88dc59c6f83, type: 3}
     variants:
     - state: default
-      sprite: {fileID: 21300000, guid: 81a747164d6386f4490267ef1733f452, type: 3}
+      sprite: {fileID: 21300000, guid: 8ad89f8ec81c6544cbdbae65f3d66cd7, type: 3}
   - brief:
       id: source.cups.large
       label: "\u5927\u676F\u5806"
@@ -328,7 +316,7 @@ MonoBehaviour:
     whitebox: {fileID: 21300000, guid: 40f889ba329cbdc41bfeec39fd366f57, type: 3}
     variants:
     - state: default
-      sprite: {fileID: 21300000, guid: 270fb02606e8d70439d4383350d12437, type: 3}
+      sprite: {fileID: 21300000, guid: 0c02f4bdb473edb4aa92e32f7040429a, type: 3}
   - brief:
       id: source.beans
       label: "\u5496\u5561\u8C46\u888B"
@@ -349,7 +337,7 @@ MonoBehaviour:
     whitebox: {fileID: 21300000, guid: c1d2495d389e3ae4a91babc5cd272264, type: 3}
     variants:
     - state: default
-      sprite: {fileID: 21300000, guid: bee060fa09eab134a9d63009ce967393, type: 3}
+      sprite: {fileID: 21300000, guid: ce097697527892a44a732997392f1a67, type: 3}
   - brief:
       id: source.milk
       label: "\u725B\u5976\u74F6"
@@ -370,7 +358,7 @@ MonoBehaviour:
     whitebox: {fileID: 21300000, guid: d07a06a539cfa574e8c19bf8e4d109b3, type: 3}
     variants:
     - state: default
-      sprite: {fileID: 21300000, guid: 7f2f215ed995a67408eec45ed3d0595b, type: 3}
+      sprite: {fileID: 21300000, guid: 8e241f7a4354e5c4d913ff8331391326, type: 3}
   - brief:
       id: source.matcha
       label: "\u62B9\u8336\u7F50"
@@ -391,7 +379,7 @@ MonoBehaviour:
     whitebox: {fileID: 21300000, guid: c36a81f54e5cddb4a875e35533eee591, type: 3}
     variants:
     - state: default
-      sprite: {fileID: 21300000, guid: 978092f9b2fcea148ace900606292e52, type: 3}
+      sprite: {fileID: 21300000, guid: 6fd0dd618d03dbf4a86ad15bc0a3a6e3, type: 3}
   - brief:
       id: source.cocoa
       label: "\u53EF\u53EF\u7F50"
@@ -412,7 +400,7 @@ MonoBehaviour:
     whitebox: {fileID: 21300000, guid: 80e077b40a1787749b498bc83372eb6b, type: 3}
     variants:
     - state: default
-      sprite: {fileID: 21300000, guid: a4411a22c7195ff47ba1ff03d3f7ff25, type: 3}
+      sprite: {fileID: 21300000, guid: 6354c16ae1426984c8333824b1d36054, type: 3}
   - brief:
       id: source.honey
       label: "\u8702\u871C\u7F50"
@@ -433,7 +421,7 @@ MonoBehaviour:
     whitebox: {fileID: 21300000, guid: f6aa383aa4c9d794286634a09a94068f, type: 3}
     variants:
     - state: default
-      sprite: {fileID: 21300000, guid: 99b4b1ff442dc2d4fb6d757e552ff483, type: 3}
+      sprite: {fileID: 21300000, guid: 5c446d0a76339f2438b7b25565db54ce, type: 3}
   - brief:
       id: machine.grinder
       label: "\u7814\u78E8\u5668"
@@ -455,14 +443,8 @@ MonoBehaviour:
       - ready
     whitebox: {fileID: 21300000, guid: 0faddad22f22abf469e40d6924242b48, type: 3}
     variants:
-    - state: empty
-      sprite: {fileID: 21300000, guid: 7027ea50e1c36d44cbe20315cb12cff6, type: 3}
-    - state: loaded
-      sprite: {fileID: 21300000, guid: a12bd95264e74fb45848eaf02e594bd1, type: 3}
-    - state: processing
-      sprite: {fileID: 21300000, guid: e81c97bd09f51954194e5f3a0f69126a, type: 3}
-    - state: ready
-      sprite: {fileID: 21300000, guid: d585b1b4c6d799c4a91e3b9d24db22ad, type: 3}
+    - state: default
+      sprite: {fileID: 21300000, guid: 8acaa70a0feb32648a52da2dfefc2bfb, type: 3}
   - brief:
       id: machine.brewer
       label: "\u5496\u5561\u58F6"
@@ -511,18 +493,8 @@ MonoBehaviour:
       - ready
     whitebox: {fileID: 21300000, guid: fc6b98151278e084fa615ba738c4383f, type: 3}
     variants:
-    - state: boiling
-      sprite: {fileID: 21300000, guid: 4732231a42f5d584c9713434aaeb8685, type: 3}
-    - state: empty
-      sprite: {fileID: 21300000, guid: 60c499d0eaa1dc2498871ce9ed67d1dc, type: 3}
-    - state: loaded
-      sprite: {fileID: 21300000, guid: dadda7cac810bec4fa89c065cea987a6, type: 3}
-    - state: processing
-      sprite: {fileID: 21300000, guid: f5836b731151a6949ad8fc1405a6bd00, type: 3}
-    - state: room
-      sprite: {fileID: 21300000, guid: d29dbea0ff0f5a04b99cf42fe3c5e5b9, type: 3}
-    - state: warm
-      sprite: {fileID: 21300000, guid: dad0e4e52d9aa8044b1dc2904befc66f, type: 3}
+    - state: default
+      sprite: {fileID: 21300000, guid: 945ee80374845ad45bb54c1b31df175e, type: 3}
   - brief:
       id: machine.mixer
       label: "\u6405\u62CC\u5668"
@@ -990,7 +962,7 @@ MonoBehaviour:
     whitebox: {fileID: 21300000, guid: 10250527881bdc24495d76b24e79577d, type: 3}
     variants:
     - state: default
-      sprite: {fileID: 21300000, guid: 10250527881bdc24495d76b24e79577d, type: 3}
+      sprite: {fileID: 21300000, guid: bec447f02e8469f4fa703786efb29295, type: 3}
   - brief:
       id: container.extractor.filter
       label: container.extractor.filter
@@ -1009,7 +981,7 @@ MonoBehaviour:
     whitebox: {fileID: 21300000, guid: a7905cc1a6ca6eb4187d9aec41a5a9cd, type: 3}
     variants:
     - state: default
-      sprite: {fileID: 21300000, guid: a7905cc1a6ca6eb4187d9aec41a5a9cd, type: 3}
+      sprite: {fileID: 21300000, guid: 0d11ddb5a2fa4094da3614d367188540, type: 3}
   - brief:
       id: container.extractor.lid
       label: container.extractor.lid
@@ -1054,7 +1026,8 @@ MonoBehaviour:
       category: entity
       pivot: center (0.5,0.5)
       outputFolder: Assets/Art/FreeCafe/Entities/container.milk-pitcher
-      prompt: Warm hand-drawn stainless steel milk frothing pitcher, left spout, right handle, isolated sprite.
+      prompt: Warm hand-drawn stainless steel milk frothing pitcher, left spout,
+        right handle, isolated sprite.
       negativePrompt: No text, no logo, no background.
       width: 1024
       height: 1024
@@ -1069,3 +1042,39 @@ MonoBehaviour:
     variants:
     - state: default
       sprite: {fileID: 21300000, guid: 1c05d98b959b1044f8526c2e1a1f188c, type: 3}
+  - brief:
+      id: source.cream
+      label: source.cream
+      category: 
+      pivot: 
+      outputFolder: 
+      prompt: 
+      negativePrompt: 
+      width: 0
+      height: 0
+      transparent: 0
+      worldWidth: 0
+      worldHeight: 0
+      states: []
+    whitebox: {fileID: 0}
+    variants:
+    - state: default
+      sprite: {fileID: 21300000, guid: e43f318cf03848947afd01b85f4aada8, type: 3}
+  - brief:
+      id: source.sugar
+      label: source.sugar
+      category: 
+      pivot: 
+      outputFolder: 
+      prompt: 
+      negativePrompt: 
+      width: 0
+      height: 0
+      transparent: 0
+      worldWidth: 0
+      worldHeight: 0
+      states: []
+    whitebox: {fileID: 0}
+    variants:
+    - state: default
+      sprite: {fileID: 21300000, guid: 564558c20be0fbf419561b0c72fb0b94, type: 3}

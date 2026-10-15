@@ -39,7 +39,19 @@ namespace Spotlight.FreeCafe
         {
             var filter = ExtractionFilter(jug);
             if (filter == null) return;
-            filter.area = jug.area; filter.x = jug.x - .22f; filter.y = jug.y + .91f;
+            filter.area = jug.area; filter.x = jug.x + Prep.extractionFilterOffsetX; filter.y = jug.y + Prep.extractionFilterOffsetY;
+        }
+
+        /// <summary>Picking up the lower vessel leaves the upper filter at its current position.</summary>
+        public ActionResult PrepareExtractionDrag(string id)
+        {
+            var item = Find(id);
+            if (item == null || Locked(item) || MiniGameUses(item)) return ActionResult.No("器皿正在使用");
+            var companion = IsExtractionFilter(item) ? ExtractionJug(item) : ExtractionFilter(item);
+            if (companion != null && (Locked(companion) || MiniGameUses(companion))) return ActionResult.No("组装器皿正在使用");
+            if (IsPrecisionExtractor(item) && companion != null)
+            { DetachExtractionFilter(companion); Notify(); }
+            return ActionResult.Yes("已拿起器皿");
         }
 
         public ActionResult AttachExtractionFilter(string filterId, string jugId)

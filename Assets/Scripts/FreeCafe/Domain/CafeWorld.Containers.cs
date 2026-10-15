@@ -56,8 +56,8 @@ namespace Spotlight.FreeCafe
             // A solid-only or legacy portion is still content; never discard a drink or residue on return.
             if (cup.contents.Count != 0)
                 return ActionResult.No("杯子还有内容，请先倒空或丢弃内容后再归还");
-            if (source.stock >= sourceSpec.initialStock)
-                return ActionResult.No("杯堆已满，请先取出杯子再归还");
+            if (source.stock == int.MaxValue)
+                return ActionResult.No("杯堆数量已达上限");
             return ActionResult.Yes("归还空杯：" + Spec(cup.specId).label);
         }
 
@@ -239,6 +239,8 @@ namespace Spotlight.FreeCafe
 
         private ActionResult PreviewContainer(WorldEntity item, WorldEntity target)
         {
+            if (IsCup(target) && (CupAbove(target) != null || !string.IsNullOrEmpty(target.cupStackBelowId)))
+                return ActionResult.No("请先从杯堆取出杯子再加入原料");
             if (IsMilkPitcher(item) && MilkFoamVolume(item) > 0 && IsLatteArtCup(target))
                 return PreviewMilkPitcherLatteArt(item, target);
             target = ExtractionInputTarget(target, item.specId);
@@ -301,6 +303,7 @@ namespace Spotlight.FreeCafe
             var entity = Find(entityId);
             if (!IsContainer(entity) || entity.production.phase != ProductionPhase.Processing) return;
             entity.production.phase = ProductionPhase.Room;
+            entity.production.selfHeating = false;
             RefreshContainerTemperature(entity);
             Notify();
         }
@@ -327,6 +330,7 @@ namespace Spotlight.FreeCafe
             if (MiniGameUses(vessel)) return ActionResult.No("请先结束小游戏");
             if (vessel.contents.Count == 0) return ActionResult.No("空容器没有内容可加热");
             if (vessel.production.phase == ProductionPhase.Processing) return ActionResult.Yes("正在加热");
+            vessel.production.selfHeating = false;
             vessel.production.phase = ProductionPhase.Processing;
             vessel.production.remaining = Prep.heatSeconds;
             Notify();

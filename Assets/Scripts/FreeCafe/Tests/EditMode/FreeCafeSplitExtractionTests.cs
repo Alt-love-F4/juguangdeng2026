@@ -70,6 +70,7 @@ namespace Spotlight.FreeCafe.Tests
         [Test] public void DetachedFilterDoesNotCreateCoffeeInRemoteJugAndCanBeReassembled()
         {
             Grounds();
+            Assert.That(world.PrepareExtractionDrag(Jug.id).success, Is.True);
             Assert.That(world.Move(Filter.id, AreaId.Counter, -3, -3).success, Is.True);
             Assert.That(world.ExtractionFilter(Jug), Is.Null);
             Water(); Assert.That(world.PourLiquid("m.heater", Filter.id, 20, 1).success, Is.True);
@@ -115,10 +116,10 @@ namespace Spotlight.FreeCafe.Tests
             Assert.That(world.LiquidVolume(Jug), Is.EqualTo(400).Within(.001f));
         }
 
-        [Test] public void AssemblyFollowsLowerJugAndCannotPourBackIntoItsOwnFilter()
+        [Test] public void AssemblyFollowsUpperFilterAndCannotPourBackIntoItsOwnFilter()
         {
-            world.Move(Jug.id, AreaId.Counter, -1, 0);
-            Assert.That(Filter.x, Is.EqualTo(Jug.x - .22f)); Assert.That(Filter.y, Is.EqualTo(Jug.y + .91f));
+            world.Move(Filter.id, AreaId.Counter, -1, 0);
+            Assert.That(Filter.x, Is.EqualTo(Jug.x + world.Catalog.production.extractionFilterOffsetX)); Assert.That(Filter.y, Is.EqualTo(Jug.y + world.Catalog.production.extractionFilterOffsetY));
             Jug.contents.Add(new Portion { specId = "water", units = 1, milliliters = 10 });
             Assert.That(world.PourLiquid(Jug.id, Filter.id, 5, .1f).success, Is.False);
             Assert.That(world.LiquidVolume(Jug), Is.EqualTo(10));

@@ -7,7 +7,7 @@ namespace Spotlight.FreeCafe
     /// <summary>只在启动时读取场景实体布局。配表定义规格，Scene 定义初始位置；读档后由快照权威驱动。</summary>
     public static class FreeCafeSceneLayout
     {
-        public static List<FreeEntityView> FindAuthoredEntities(FreeCafeRuntime runtime)
+        public static List<FreeEntityView> FindAuthoredEntities(FreeCafeRuntime runtime, bool includeInactive = true)
         {
             var result = new List<FreeEntityView>();
             var ids = new HashSet<string>();
@@ -17,6 +17,7 @@ namespace Spotlight.FreeCafe
                 if (area == null) throw new InvalidOperationException("缺少场景区域根");
                 foreach (var view in area.GetComponentsInChildren<FreeEntityView>(true))
                 {
+                    if (!includeInactive && !view.gameObject.activeInHierarchy) continue;
                     // 区域场景可相互嵌套（工作台嵌在大厅下）：实体归属最近的区域根
                     if (NearestAreaRoot(runtime, view.transform) != area) continue;
                     // 运行时新生成的杯子/顾客没有 authoring id，不属于初始布局。
