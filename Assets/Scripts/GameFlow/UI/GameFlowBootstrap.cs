@@ -77,6 +77,8 @@ namespace Spotlight.GameFlow
         private DetailsPanel detailsPanel;
         private MapSceneController mapOverlay;
         private bool openingMap;
+        private GameFlowPanel gameplayScenePanel;
+        private bool gameplayScenePanelHiddenForMap;
         public bool IsMapOpen => mapOverlay != null || openingMap;
         internal bool MapControlsAvailable => gameplay && !paused && !loadingTransitioning && detailsPanel == null
             && !(narrativeIntegration?.Runtime?.Actions?.IsExecuting ?? false)
@@ -279,15 +281,32 @@ namespace Spotlight.GameFlow
 
         public void OpenMap()
         {
-            if (dayFlow != null && dayFlow.IsFirstSessionGuideActive) return;
-            if (!CanUseGameplayControls() || SceneManager.GetActiveScene().name != "CoffeeShop") return;
-            openingMap = true;
-            StartCoroutine(OpenMapRoutine());
+            OpenMapInternal(false);
         }
 
-        private IEnumerator OpenMapRoutine()
+        public bool DebugForceOpenMap(out string message)
+        {
+            message = "无法打开地图：当前还未进入游戏。";
+            if (!gameplay || !SceneManager.GetSceneByName("CoffeeShop").isLoaded) return false;
+            if (IsMapOpen) { message = "地图已经打开。"; return true; }
+            openingMap = true;
+            StartCoroutine(OpenMapRoutine(true));
+            message = "已强制打开地图，已忽略新手教程限制。";
+            return true;
+        }
+
+        private void OpenMapInternal(bool ignoreTutorial)
+        {
+            if (!ignoreTutorial && dayFlow != null && dayFlow.IsFirstSessionGuideActive) return;
+            if (!CanUseGameplayControls() || !SceneManager.GetSceneByName("CoffeeShop").isLoaded) return;
+            openingMap = true;
+            StartCoroutine(OpenMapRoutine(ignoreTutorial));
+        }
+
+        private IEnumerator OpenMapRoutine(bool ignoreTutorial = false)
         {
             int version = sessionVersion;
+            if (!ignoreTutorial && !CanUseGameplayControls()) { openingMap = false; yield break; }
             Scene scene = SceneManager.GetSceneByName("Map");
             if (!scene.isLoaded)
                 yield return SceneManager.LoadSceneAsync("Map", LoadSceneMode.Additive);
@@ -300,6 +319,7 @@ namespace Spotlight.GameFlow
                 if (mapOverlay == null) mapOverlay = root.GetComponentInChildren<MapSceneController>(true);
             }
             if (mapOverlay != null) mapOverlay.OpenOverlay(this);
+            HideGameplayScenePanelForMap();
             openingMap = false;
         }
 
@@ -308,6 +328,7 @@ namespace Spotlight.GameFlow
             if (openingMap || mapOverlay == null || detailsPanel != null) return;
             mapOverlay.gameObject.SetActive(false);
             mapOverlay = null;
+            RestoreGameplayScenePanelAfterMap();
 
         }
 
@@ -907,6 +928,7 @@ namespace Spotlight.GameFlow
             if (GameplayPanelHooks.OpenPanel != null)
             {
                 panel = GameplayPanelHooks.OpenPanel(this);
+                gameplayScenePanel = panel;
             }
             else
             {
@@ -994,6 +1016,21 @@ namespace Spotlight.GameFlow
             LoadThen(OpenMainMenu, config.MainMenuScene);
         }
 
+        private void HideGameplayScenePanelForMap()
+        {
+            if (gameplayScenePanel == null)
+                gameplayScenePanel = FindFirstObjectByType<GameFlowPanel>();
+            if (gameplayScenePanel == null || gameplayScenePanel == mapOverlay) return;
+            gameplayScenePanel.gameObject.SetActive(false);
+            gameplayScenePanelHiddenForMap = true;
+        }
+
+        private void RestoreGameplayScenePanelAfterMap()
+        {
+            if (!gameplayScenePanelHiddenForMap || gameplayScenePanel == null) return;
+            gameplayScenePanel.gameObject.SetActive(true);
+            gameplayScenePanelHiddenForMap = false;
+        }
         private IEnumerator PushPanelWhenReady(GameFlowPanel panel, bool hidePrevious, int navigationVersion = -1)
         {
             while (panel != null

@@ -37,6 +37,8 @@ namespace Spotlight.FreeCafe
         public bool ShowAssetIds { get; set; }
         public bool IsDragging => draggedView!=null;
         public FreeEntityView DraggedView => draggedView;
+        public FreeCafeWorkstationTutorial WorkstationTutorial { get; private set; }
+        public bool PracticeTutorialActive => WorkstationTutorial != null && WorkstationTutorial.IsRunning;
         private CafeTutorialSession cafeTutorial;
         public event System.Action<string, string> CafeTutorialStepCompleted;
         private NarrativeConfiguration tutorialConfiguration;
@@ -151,6 +153,8 @@ namespace Spotlight.FreeCafe
         }
         private void Start()
         {
+            WorkstationTutorial = gameObject.AddComponent<FreeCafeWorkstationTutorial>();
+            WorkstationTutorial.Initialize(this);
             tutorialConfiguration = LubanNarrativeLoader.Load();
             dayFlow = FindFirstObjectByType<DayFlowController>();
             gameFlow = FindFirstObjectByType<GameFlowBootstrap>();
@@ -322,6 +326,7 @@ namespace Spotlight.FreeCafe
             if(World==null || view==null || !view.CanInteract || InputBlocked || IsDragging || dragFinishedFrame==Time.frameCount) return;
             var entity=World.Find(view.EntityId); if(entity==null || entity.area!=World.State.currentArea) return;
             if (cafeTutorial != null && cafeTutorial.WaitingForWorkstation) return;
+            if (WorkstationTutorial != null && !WorkstationTutorial.AllowClick(entity.id)) return;
             var spec=World.Spec(entity.specId);
             if(spec.Has(Capability.BusinessControl)) { StartBusiness(); return; }
             if(World.ProductionEnabled && entity.specId=="tool.latte-art") { Report(World.RequestProductionMiniGame()); return; }
@@ -398,6 +403,7 @@ namespace Spotlight.FreeCafe
             if(World==null || view==null || !view.CanInteract || InputBlocked || IsDragging) return;
             var entity=World.Find(view.EntityId);
             if(entity==null || entity.area!=World.State.currentArea || !World.Spec(entity.specId).Has(Capability.Processor)) return;
+            if (PracticeTutorialActive) { WorkstationTutorial.ReportError("练习中请勿清空设备；请按当前提示操作。"); return; }
             if(World.ProductionEnabled) { Report(World.EmptyProductionMachine(entity.id)); return; }
             if(entity.task==null) { ShowHint("设备当前没有加工任务。"); return; }
             confirmCancelId=null;
@@ -418,6 +424,7 @@ namespace Spotlight.FreeCafe
             var inputCamera=e.pressEventCamera!=null ? e.pressEventCamera : worldCamera;
             if(inputCamera==null || !inputCamera.isActiveAndEnabled) { ShowHint("游戏摄像机未启用，无法拖拽实体"); return; }
             var entity=World.Find(view.EntityId); if(entity==null || entity.area!=World.State.currentArea) return; var spec=World.Spec(entity.specId);
+            if (WorkstationTutorial != null && !WorkstationTutorial.AllowDrag(entity.id)) return;
             if(World.ProductionEnabled && World.IsMilkPitcher(entity) && World.MilkFoamVolume(entity)<=.001f)
             {
                 ShowHint("请先向拉花杯加入牛奶，点击拉花杯制成奶泡后，再拖到杯子上拉花");
@@ -595,6 +602,7 @@ namespace Spotlight.FreeCafe
             if(!IsDragging) return;
             bool placeOnly=Keyboard.current!=null && (Keyboard.current.leftShiftKey.isPressed || Keyboard.current.rightShiftKey.isPressed);
             string itemId=dragItemId,sourceId=dragSourceId,targetId=receiver==null ? null : receiver.EntityId;
+            if (WorkstationTutorial != null && !WorkstationTutorial.AllowDrop(targetId, placeOnly)) { CancelDrag(); return; }
             string machineId=dragMachineId,outputId=dragOutputId;
             var rejectedTarget=receiver; var ghost=draggedView; Vector3 dropPosition=ghost.transform.position; var position=WorldToArea(World.State.currentArea,ghost.DragPosition);
             bool validScreen=dragCamera!=null && dragCamera.pixelRect.Contains(e.position) && !overUI;
@@ -827,6 +835,7 @@ namespace Spotlight.FreeCafe
             if(target==null && receiver!=null) target=World.Find(receiver.EntityId);
             if(target!=null && !HasActiveView(target)) { StopVesselPour(); return; }
             string targetId=target==null ? null : target.id;
+            if (WorkstationTutorial != null && !WorkstationTutorial.AllowPour(dragItemId, targetId)) { StopVesselPour(); return; }
             if(pouredThisDrag && lastPourTarget!=targetId) StopVesselPour();
             var result=World.PourLiquid(dragItemId,targetId,World.Catalog.production.pourRateMl*Mathf.Max(.1f,pourRateMultiplier)*tilt*Time.deltaTime,Time.deltaTime);
             if(result.success)

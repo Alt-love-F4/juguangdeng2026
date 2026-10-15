@@ -173,12 +173,31 @@ namespace Spotlight.FreeCafe
         private void BuildCategories()
         {
             categories.Add(new Category { Name = "全局调试", Build = BuildGlobal });
+            categories.Add(new Category { Name = "咖啡馆教程", Build = BuildTutorials });
             categories.Add(new Category { Name = "经营流程", Build = BuildBusiness });
             categories.Add(new Category { Name = "资源数值", Build = BuildResources });
             categories.Add(new Category { Name = "时间与顾客", Build = BuildTimeAndCustomers });
             categories.Add(new Category { Name = "状态诊断", Build = BuildDiagnostics });
             categories.Add(new Category { Name = "特殊来访", Build = BuildCafeVisits });
             categories.Add(new Category { Name = "界面与场景", Build = BuildNavigation });
+        }
+
+        private void BuildTutorials()
+        {
+            AddAction("黑咖啡操作教程", () => StartTutorial(false), "工作台内启动：拖豆、研磨、加水加热、右键倾倒。退出恢复原物品。", false);
+            AddAction("精粹炉操作教程", () => StartTutorial(true), "工作台内启动：装粉、热水、控制注水成分、倒出精粹咖啡液。", false);
+            AddAction("结束操作教程", () => { if (runtime != null) runtime.WorkstationTutorial?.Stop(); }, "恢复练习前工作台，不提交剧情教程进度。", false);
+        }
+
+        private void StartTutorial(bool extraction)
+        {
+            if (runtime == null || runtime.WorkstationTutorial == null) { SetStatus("请先进入模拟经营场景的工作台。"); return; }
+            SetVisible(false);
+            if (!runtime.WorkstationTutorial.Begin(extraction))
+            {
+                SetVisible(true);
+                SetStatus("无法启动：请进入工作台，结束对话/小游戏并确认豆袋、水、杯堆及设备可用。");
+            }
         }
 
         private void BuildShell()
@@ -264,6 +283,13 @@ namespace Spotlight.FreeCafe
 
         private void BuildGlobal()
         {
+            AddAction("强制打开地图（忽略新手教程）", () =>
+            {
+                var flow = FindFirstObjectByType<Spotlight.GameFlow.GameFlowBootstrap>();
+                if (flow == null) { SetStatus("请先进入游戏。"); return; }
+                if (flow.DebugForceOpenMap(out string message)) SetVisible(false);
+                SetStatus(message);
+            }, "GM 调试：无视新手教程的地图限制，打开地图并隐藏咖啡店 HUD", false);
             AddAction("跳到教程初次地图", () =>
             {
                 var flow = FindFirstObjectByType<Spotlight.GameFlow.GameFlowBootstrap>();
