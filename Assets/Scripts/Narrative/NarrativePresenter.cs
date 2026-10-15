@@ -166,6 +166,13 @@ namespace Spotlight.Narrative
             }
         }
 
+        /// <summary>GM only: stop visuals after the controller has invalidated pending work.</summary>
+        public void DebugStopPresentation()
+        {
+            if (ui != null) ui.StopAllCoroutines();
+            AbortPresentation("gm_skip");
+        }
+
         private void AbortPresentation(string reason)
         {
             bool wasActive = completion != null || draining;

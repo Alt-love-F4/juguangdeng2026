@@ -264,6 +264,14 @@ namespace Spotlight.FreeCafe
 
         private void BuildGlobal()
         {
+            AddAction("跳到教程初次地图", () =>
+            {
+                var flow = FindFirstObjectByType<Spotlight.GameFlow.GameFlowBootstrap>();
+                if (flow == null) { SetStatus("请先开始新游戏。"); return; }
+                bool skipped = flow.DebugSkipTutorialToMap(out string message);
+                SetStatus(message);
+                if (skipped) SetVisible(false);
+            }, "跳过地图前的开场；保留咖啡馆教程与地图引导，不自动保存", false);
             AddAction("查看场景与时间状态", () => SetStatus("场景：" + UnityEngine.SceneManagement.SceneManager.GetActiveScene().name + " | 时间倍率：" + Time.timeScale.ToString("0.##") + " | 经营系统：" + (runtime != null && runtime.World != null ? "已连接" : "未加载")), "任意场景都可使用", false);
             AddAction("切换到咖啡馆场景", () =>
             {

@@ -319,6 +319,24 @@ namespace Spotlight.GameFlow
                 throw new InvalidOperationException("无法完成角色创建，请检查玩家与咖啡馆运行时初始化状态。");
         }
 
+        public bool DebugSkipTutorialToMap(out string message)
+        {
+            message = "场景正在加载，请稍后重试。";
+            if (loadingTransitioning) return false;
+            if (openingProloguePanel != null)
+            {
+                var panel = openingProloguePanel;
+                panel.Stop();
+                FinishOpeningPrologue(panel);
+            }
+            if (dayFlow == null)
+            {
+                message = "请先开始新游戏。";
+                return false;
+            }
+            return dayFlow.DebugSkipTutorialToMap(out message);
+        }
+
         public void StartGame()
         {
             if (openingProloguePanel != null)
@@ -328,6 +346,12 @@ namespace Spotlight.GameFlow
                 openingProloguePanel = null;
             }
             ++sessionVersion;
+            // The prologue has its own Canvas sorting order. Do not leave the opaque
+            // topmost menu behind it while a new session is loading/starting.
+            ++rootNavigationVersion;
+            UIKit.ClearStack(MainStack, true);
+            MainMenuPanel mainMenu = UIKit.GetPanel<MainMenuPanel>();
+            if (mainMenu != null) UIKit.ClosePanel(mainMenu);
             selectedEnding = null;
             GameSaveParticipantRegistry.PendingRestore = null;
             DialoguePlayback.Stop();
@@ -809,7 +833,7 @@ namespace Spotlight.GameFlow
                 var scenePanel = FindFirstObjectByType(GameplayPanelHooks.PanelType, FindObjectsInactive.Include) as GameFlowPanel;
                 if (scenePanel != null) scenePanel.gameObject.SetActive(false);
             }
-            MainMenuPanel panel = UIKit.OpenPanel<MainMenuPanel>(UILevel.Common, Data(), cachePolicy: PanelCachePolicy.Reusable);
+            MainMenuPanel panel = UIKit.OpenPanel<MainMenuPanel>(UILevel.Pop, Data(), cachePolicy: PanelCachePolicy.Reusable);
             StartCoroutine(PushPanelWhenReady(panel, false, ++rootNavigationVersion));
         }
 

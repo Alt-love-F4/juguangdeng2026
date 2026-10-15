@@ -497,6 +497,41 @@ namespace Spotlight.GameFlow
             ShowPresentation<BusinessEndPanel>(EnterCityMap);
         }
 
+        public bool DebugSkipTutorialToMap(out string message)
+        {
+            message = "请先开始新游戏，并在新手教程期间使用。";
+            if (flow == null || !SessionAllowsPlay || !IsFirstSessionGuideActive) return false;
+            var narrative = NarrativeRuntime.Instance;
+            if (narrative == null || !narrative.IsReady
+                || narrative.Actions != null && narrative.Actions.IsExecuting)
+            {
+                message = "当前事件正在结算，请稍后重试。";
+                return false;
+            }
+            if (!flow.TrySubmitPlayerCreation(null))
+            {
+                message = "角色初始化失败，未跳过教程。";
+                return false;
+            }
+            if (!narrative.Controller.DebugCancelPendingPresentations())
+            {
+                message = "当前事件正在结算，请稍后重试。";
+                return false;
+            }
+            HideForMainMenu();
+            UnsubscribeFirstDayPerceptionEvents();
+            narrative.Presenter?.DebugStopPresentation();
+            DialoguePlayback.Stop();
+            newSessionFirstDay = false;
+            firstDayIntroductionCompleted = false;
+            firstDayCafeTutorialStarted = false;
+            firstDayCafeTutorialCompleted = false;
+            running = true;
+            EnterCityMap();
+            message = "已跳到新手教程首次地图阶段，请进入咖啡馆继续教程；未自动保存。";
+            return true;
+        }
+
         private void EnterCityMap()
         {
             if (!SessionAllowsPlay) return;

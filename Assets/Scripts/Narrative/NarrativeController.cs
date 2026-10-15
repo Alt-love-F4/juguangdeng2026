@@ -666,6 +666,21 @@ namespace Spotlight.Narrative
             }
         }
 
+        /// <summary>GM only: discard unfinished tutorial work without applying its results.</summary>
+        public bool DebugCancelPendingPresentations()
+        {
+            if (!CanCaptureSnapshot || settling || pumping || operationDepth != 0) return false;
+            presentationEpoch++;
+            queue.Clear(); pendingEvents.Clear(); pendingEffects.Clear(); safeCallbacks.Clear();
+            selectedChoices.Clear();
+            activeRequest = default;
+            activeAbilityCheck = null;
+            activeAbilityCheckId = null;
+            processing = activePresentation = draining = false;
+            turnOpen = turnEnding = resumeBoundary = false;
+            return true;
+        }
+
         private void OnPresentationCancelled(string reason)
         {
             bool terminal = reason == "disposed" || reason == "host_unavailable";

@@ -25,6 +25,9 @@ namespace Spotlight.GameFlow
         private Vector2 basePosition;
         private Vector3 baseScale;
 
+        private Canvas elevatedRoot;
+        private static readonly System.Collections.Generic.Dictionary<Canvas, (int Order, int Users)> elevatedRoots = new();
+
         protected GameFlowBootstrap Flow { get; private set; }
 
         /// <summary>场景内面板（非 UIKit 实例化）由钩子直接设置 Flow 时调用。</summary>
@@ -79,6 +82,7 @@ namespace Spotlight.GameFlow
 
         protected override void OnWillHide()
         {
+            ReleaseMenuSorting();
             if (canvasGroup != null)
             {
                 canvasGroup.interactable = false;
@@ -89,11 +93,22 @@ namespace Spotlight.GameFlow
         protected override void OnShow()
         {
             ResetInteractionState();
-            // UIKit panels share a root canvas; keep the entire navigation stack above
-            // the scene-owned map (sorting orders 10 and 30), including save confirmations.
-            Canvas canvas = GetComponentInParent<Canvas>();
-            if (canvas != null && canvas.rootCanvas.transform != transform)
-                canvas.rootCanvas.sortingOrder = Mathf.Max(canvas.rootCanvas.sortingOrder, 100);
+            // Only system menus need elevation. Raising the shared root permanently
+            // puts UIKit modal blockers above gameplay panels with independent canvases.
+            if (elevatedRoot == null && (this is MainMenuPanel || this is PauseMenuPanel
+                || this is SettingsPanel || this is SaveManagementPanel
+                || this is ConfirmationPanel || this is ResultPanel))
+            {
+                Canvas canvas = GetComponentInParent<Canvas>();
+                if (canvas != null && canvas.rootCanvas.transform != transform)
+                {
+                    elevatedRoot = canvas.rootCanvas;
+                    if (!elevatedRoots.TryGetValue(elevatedRoot, out var entry))
+                        entry = (Mathf.Max(elevatedRoot.sortingOrder, 100), 0);
+                    elevatedRoots[elevatedRoot] = (entry.Order, entry.Users + 1);
+                    elevatedRoot.sortingOrder = Mathf.Max(entry.Order, 3000);
+                }
+            }
             SelectDefaultControl();
         }
 
@@ -119,8 +134,30 @@ namespace Spotlight.GameFlow
             callback();
         }
 
+        private void ReleaseMenuSorting()
+        {
+            if (elevatedRoot == null) return;
+            if (elevatedRoots.TryGetValue(elevatedRoot, out var entry))
+            {
+                if (entry.Users <= 1)
+                {
+                    elevatedRoot.sortingOrder = entry.Order;
+                    elevatedRoots.Remove(elevatedRoot);
+                }
+                else elevatedRoots[elevatedRoot] = (entry.Order, entry.Users - 1);
+            }
+            elevatedRoot = null;
+        }
+
+        protected override void OnBeforeDestroy()
+        {
+            ReleaseMenuSorting();
+            base.OnBeforeDestroy();
+        }
+
         protected override void OnClose()
         {
+            ReleaseMenuSorting();
             ResetInteractionState();
         }
 

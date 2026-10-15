@@ -49,6 +49,23 @@ namespace Spotlight.GameFlow.Tests
         }
 
         [Test]
+        public void ContinueButtonUsesTheSameNativeFeedbackAsOtherMenuButtons()
+        {
+            var prefab = AssetDatabase.LoadAssetAtPath<GameObject>(PanelPath);
+            var fields = new SerializedObject(prefab.GetComponent<MainMenuPanel>());
+            var saves = (Button)fields.FindProperty("savesButton").objectReferenceValue;
+            var start = (Button)fields.FindProperty("startButton").objectReferenceValue;
+
+            Assert.That(saves.GetType(), Is.EqualTo(typeof(Button)));
+            Assert.That(saves.GetComponent<ContinueGameHoverOverlay>(), Is.Null);
+            Assert.That(saves.targetGraphic, Is.SameAs(saves.GetComponent<Image>()));
+            Assert.That(saves.transition, Is.EqualTo(Selectable.Transition.ColorTint));
+            Assert.That(saves.colors, Is.EqualTo(start.colors));
+            Assert.That(saves.navigation.mode, Is.EqualTo(start.navigation.mode));
+            Assert.That(saves.GetComponent<ButtonClickFeedback>(), Is.Not.Null);
+        }
+
+        [Test]
         public void MenuLayoutIsFiniteAndCoversCanvasWithoutScreenMotion()
         {
             var prefab = AssetDatabase.LoadAssetAtPath<GameObject>(PanelPath);
@@ -105,7 +122,7 @@ namespace Spotlight.GameFlow.Tests
             // overwriting the test's hover state on the next frame.
             foreach (BaseInputModule module in eventSystem.GetComponents<BaseInputModule>())
                 module.enabled = false;
-            panel = UIKit.OpenPanel<MainMenuPanel>(UILevel.Common, tag: TestTag,
+            panel = UIKit.OpenPanel<MainMenuPanel>(UILevel.Pop, tag: TestTag,
                 cachePolicy: PanelCachePolicy.Transient);
             float deadline = Time.realtimeSinceStartup + 3f;
             while (panel.State == PanelState.Opening)
@@ -123,6 +140,26 @@ namespace Spotlight.GameFlow.Tests
             if (previousSystems != null)
                 foreach (EventSystem system in previousSystems) if (system != null) system.enabled = true;
             Time.timeScale = previousTimeScale;
+        }
+
+        [UnityTest]
+        public IEnumerator SystemMenusRenderAboveGameplayWhileSettingsRemainAboveMenus()
+        {
+            Canvas root = panel.GetComponentInParent<Canvas>().rootCanvas;
+            Assert.That(root.sortingOrder, Is.GreaterThan(2000));
+            Assert.That(panel.Level, Is.EqualTo(UILevel.Pop));
+
+            var pause = UIKit.OpenPanel<PauseMenuPanel>(UILevel.Pop, tag: TestTag,
+                cachePolicy: PanelCachePolicy.Transient);
+            while (pause.State == PanelState.Opening) yield return null;
+            Assert.That(pause.GetComponentInParent<Canvas>().rootCanvas, Is.SameAs(root));
+            Assert.That(pause.transform.GetSiblingIndex(), Is.GreaterThan(panel.transform.GetSiblingIndex()));
+
+            var settings = UIKit.OpenPanel<SettingsPanel>(UILevel.Pop, tag: TestTag,
+                cachePolicy: PanelCachePolicy.Transient);
+            while (settings.State == PanelState.Opening) yield return null;
+            Assert.That(settings.GetComponentInParent<Canvas>().rootCanvas, Is.SameAs(root));
+            Assert.That(settings.transform.GetSiblingIndex(), Is.GreaterThan(pause.transform.GetSiblingIndex()));
         }
 
         [UnityTest]
@@ -169,14 +206,6 @@ namespace Spotlight.GameFlow.Tests
 
         private static void AssertVisual(Button button, bool hovered)
         {
-            ContinueGameHoverOverlay overlay = button.GetComponent<ContinueGameHoverOverlay>();
-            if (overlay != null)
-            {
-                var graphic = (Graphic)new SerializedObject(overlay)
-                    .FindProperty("overlay").objectReferenceValue;
-                Assert.That(graphic.color.a, Is.EqualTo(hovered ? 1f : 0f), button.name);
-                return;
-            }
             Color expected = (hovered ? button.colors.highlightedColor : button.colors.normalColor)
                 * button.colors.colorMultiplier;
             Color actual = button.targetGraphic.canvasRenderer.GetColor();
