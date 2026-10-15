@@ -28,6 +28,8 @@ namespace Spotlight.GameFlow
         private readonly Dictionary<string, NarrativeMapPositionDefinition> runtimePositions = new Dictionary<string, NarrativeMapPositionDefinition>(StringComparer.Ordinal);
         private readonly Dictionary<string, Button> locationButtons = new Dictionary<string, Button>(StringComparer.Ordinal);
         private readonly Dictionary<string, TextMeshProUGUI> locationLabels = new Dictionary<string, TextMeshProUGUI>(StringComparer.Ordinal);
+        private readonly Dictionary<string, MapActionNewContentDot> locationDots = new Dictionary<string, MapActionNewContentDot>(StringComparer.Ordinal);
+        private GameObject blockingNotice;
         [Header("Map camera")]
         [SerializeField] private MapFeelConfig feelConfig;
         private float focusSmoothTime => feelConfig.focusSmoothTime;
@@ -76,7 +78,8 @@ namespace Spotlight.GameFlow
         private RectTransform artworkHudRect;
         private TextMeshProUGUI endDayLabel;
         private Image endDayImage;
-        private NarrativeRuntime subscribedNarrativeRuntime;
+        private NarrativeController subscribedNarrativeController;
+        private NarrativeActionController subscribedActions;
         private bool firstDayGuideApplied;
 
         protected override void Awake()
@@ -138,8 +141,8 @@ namespace Spotlight.GameFlow
 
         private void OnDestroy()
         {
-            if (subscribedNarrativeRuntime != null && subscribedNarrativeRuntime.Controller != null)
-                subscribedNarrativeRuntime.Controller.EffectRequested -= OnNarrativeEffect;
+            if (subscribedNarrativeController != null) subscribedNarrativeController.EffectRequested -= OnNarrativeEffect;
+            if (subscribedActions != null) subscribedActions.MapContentChanged -= OnMapContentChanged;
             if (GameplayPanelHooks.OpenPanel == OpenPanel)
             {
                 GameplayPanelHooks.OpenPanel = null;
@@ -149,7 +152,8 @@ namespace Spotlight.GameFlow
         }
 
         internal bool ControlsAvailable => !standaloneLoading && (flow == null || flow.MapControlsAvailable);
-        private bool GuideLocked => flow != null && flow.GetComponent<DayFlowController>()?.IsFirstSessionGuideActive == true;
+        private bool GuideLocked => IsFirstDay && flow != null && flow.GetComponent<DayFlowController>()?.IsFirstSessionGuideActive == true;
+        private bool IsFirstDay => (NarrativeRuntime.Instance?.Actions?.CurrentDay ?? 1) == 1;
 
         internal void OpenOverlay(GameFlowBootstrap owner)
         {
@@ -450,6 +454,7 @@ namespace Spotlight.GameFlow
         private void Update()
         {
             if (!isActiveAndEnabled) return;
+            SubscribePositionEffects();
             Keyboard key = Keyboard.current;
             if (ControlsAvailable)
             {
@@ -484,6 +489,7 @@ namespace Spotlight.GameFlow
                 if (endDayImage != null && !endDayImage.color.Equals(endDayColor)) endDayImage.color = endDayColor;
             }
             ApplyFirstDayGuide();
+            TryFocusCompletedAction();
             if (zoomSlider != null) zoomSlider.interactable = ControlsAvailable && !GuideLocked;
             if (GuideLocked && ControlsAvailable)
             {
@@ -634,6 +640,7 @@ namespace Spotlight.GameFlow
             keyboardPanVelocity = Vector2.zero;
             panVelocity = Vector2.zero;
             pointerDragging = dragging = false;
+            CancelFocusMovement();
         }
 
         private void UpdatePanInertia(float deltaTime)
@@ -750,7 +757,7 @@ namespace Spotlight.GameFlow
                 if (position == null || string.IsNullOrWhiteSpace(position.positionKey)) continue;
                 runtimePositions[position.positionKey] = position;
                 bool visible = position.isImportant || position.enabled;
-                bool cafeGuide = flow != null && flow.GetComponent<DayFlowController>()?.IsFirstDayMapGuideActive == true;
+                bool cafeGuide = IsFirstDay && flow != null && flow.GetComponent<DayFlowController>()?.IsFirstDayMapGuideActive == true;
                 BindAuthoredLocation(position);
                 if (locationButtons.TryGetValue(position.positionKey, out Button authoredButton))
                 {
@@ -774,6 +781,29 @@ namespace Spotlight.GameFlow
             var label = button.transform.Find("LocationName")?.GetComponent<TextMeshProUGUI>();
             if (label != null) { label.text = ResolveText(position.nameText, position.positionKey); locationLabels[position.positionKey] = label; }
             BindLocation(button, position);
+            BindNewContentDot(button, position.positionKey);
+        }
+
+        private void BindNewContentDot(Button button, string positionKey)
+        {
+            var dot = button.GetComponentInChildren<MapActionNewContentDot>(true);
+            if (dot == null)
+            {
+                var root = new GameObject("NewActionDot", typeof(RectTransform), typeof(CanvasRenderer), typeof(MapActionNewContentDot));
+                var rect = (RectTransform)root.transform;
+                rect.SetParent(button.transform, false);
+                rect.anchorMin = rect.anchorMax = new Vector2(.85f, .85f);
+                rect.sizeDelta = new Vector2(20, 20);
+                dot = root.GetComponent<MapActionNewContentDot>();
+            }
+            locationDots[positionKey] = dot;
+            OnMapContentChanged(positionKey);
+        }
+
+        private void OnMapContentChanged(string positionKey)
+        {
+            if (locationDots.TryGetValue(positionKey, out var dot) && dot != null)
+                dot.gameObject.SetActive(NarrativeRuntime.Instance?.Actions?.HasUnseenActions(positionKey) ?? false);
         }
 
         private void EnsureNarrativeRuntime()
@@ -793,10 +823,19 @@ namespace Spotlight.GameFlow
         private void SubscribePositionEffects()
         {
             NarrativeRuntime runtime = NarrativeRuntime.Instance;
-            if (runtime == null || runtime == subscribedNarrativeRuntime) return;
-            if (subscribedNarrativeRuntime != null) subscribedNarrativeRuntime.Controller.EffectRequested -= OnNarrativeEffect;
-            subscribedNarrativeRuntime = runtime;
-            runtime.Controller.EffectRequested += OnNarrativeEffect;
+            var controller = runtime != null ? runtime.Controller : null;
+            var actions = runtime != null ? runtime.Actions : null;
+            if (controller == subscribedNarrativeController && actions == subscribedActions) return;
+            if (subscribedNarrativeController != null) subscribedNarrativeController.EffectRequested -= OnNarrativeEffect;
+            if (subscribedActions != null) subscribedActions.MapContentChanged -= OnMapContentChanged;
+            subscribedNarrativeController = controller; subscribedActions = actions;
+            if (controller != null) controller.EffectRequested += OnNarrativeEffect;
+            if (actions != null)
+            {
+                actions.MapContentChanged += OnMapContentChanged;
+                actions.RefreshMapContent();
+            }
+            foreach (string key in locationDots.Keys) OnMapContentChanged(key);
         }
 
         private void OnNarrativeEffect(NarrativeEffectNotification notification)
@@ -860,7 +899,7 @@ namespace Spotlight.GameFlow
         {
             if (!runtimePositions.TryGetValue(key, out var position) || !position.isTemporary) return;
             if (locationButtons.TryGetValue(key, out Button existing)) Destroy(existing.gameObject);
-            locationButtons.Remove(key); locationLabels.Remove(key);
+            locationButtons.Remove(key); locationLabels.Remove(key); locationDots.Remove(key);
             if (focusedPosition == position) HideFocus();
             runtimePositions.Remove(key);
         }
@@ -869,8 +908,9 @@ namespace Spotlight.GameFlow
         {
             if (!ControlsAvailable || (actionDetails != null && actionDetails.IsBusy) || position == null) return;
             DayFlowController dayFlow = flow != null ? flow.GetComponent<DayFlowController>() : null;
-            if (dayFlow != null && dayFlow.IsFirstDayMapGuideActive && !MapActionDetailsView.IsCafeEntryPosition(position.positionKey)) return;
-            if (MapActionDetailsView.IsCafeEntryPosition(position.positionKey))
+            if (IsFirstDay && dayFlow != null && dayFlow.IsFirstDayMapGuideActive && !MapActionDetailsView.IsCafeEntryPosition(position.positionKey)) return;
+            bool hasConfiguredContent = NarrativeRuntime.Instance?.Actions?.GetDisplayableActions(position.positionKey).Any() ?? false;
+            if (MapActionDetailsView.IsCafeEntryPosition(position.positionKey) || (!IsFirstDay && hasConfiguredContent))
             {
                 FocusPosition(position);
             }
@@ -890,7 +930,7 @@ namespace Spotlight.GameFlow
         private void ApplyFirstDayGuide()
         {
             DayFlowController dayFlow = flow != null ? flow.GetComponent<DayFlowController>() : null;
-            bool active = dayFlow != null && dayFlow.IsFirstDayMapGuideActive;
+            bool active = IsFirstDay && dayFlow != null && dayFlow.IsFirstDayMapGuideActive;
             if (active)
             {
                 foreach (var pair in locationButtons)
@@ -1098,15 +1138,8 @@ namespace Spotlight.GameFlow
             if (!ControlsAvailable || GuideLocked || (actionDetails != null && actionDetails.IsBusy)) return;
             if (NarrativeRuntime.Instance?.Actions?.HasBlockingActions() ?? false)
             {
-                status.text = "有需要进行的行动：请先完成地图上的今日必做行动";
-                var notice = MapActionDetailsView.Rect("EndDayBlockedNotice", transform);
-                notice.anchorMin = notice.anchorMax = new Vector2(.5f, .5f);
-                notice.sizeDelta = new Vector2(440, 120);
-                notice.gameObject.AddComponent<Image>().color = new Color(.16f, .07f, .07f, .98f);
-                var label = MapActionDetailsView.Label("Message", notice, "有需要进行的行动", 24);
-                MapActionDetailsView.Stretch(label.rectTransform, 16);
-                label.alignment = TextAlignmentOptions.Center;
-                Destroy(notice.gameObject, 2);
+                FocusFirstBlockingAction();
+                ShowBlockingActionHint();
                 return;
             }
             var actions = NarrativeRuntime.Instance?.Actions;
@@ -1116,9 +1149,62 @@ namespace Spotlight.GameFlow
             else actions.BeginDay(checked(actions.CurrentDay + 1));
         }
 
+        /// <summary>Guidance only: focus/open the first real blocking location, never execute its action.</summary>
+        public bool FocusFirstBlockingAction()
+        {
+            if (scenePanelInstance != null) return scenePanelInstance.FocusFirstBlockingAction();
+            var actions = NarrativeRuntime.Instance?.Actions;
+            if (actions == null) return false;
+            foreach (string key in actions.GetBlockingPositions())
+            {
+                if (!runtimePositions.TryGetValue(key, out var position) || !locationButtons.TryGetValue(key, out var button)
+                    || button == null || !button.gameObject.activeInHierarchy) continue;
+                FocusPosition(position);
+                BeginFocusMovement(position.position);
+                return true;
+            }
+            return false;
+        }
+
+        public void ShowBlockingActionHint(string message = "还有事情需要先处理。")
+        {
+            if (scenePanelInstance != null) { scenePanelInstance.ShowBlockingActionHint(message); return; }
+            if (status != null) { status.gameObject.SetActive(true); status.text = message; }
+            if (blockingNotice != null) Destroy(blockingNotice);
+            var notice = MapActionDetailsView.Rect("EndDayBlockedNotice", widgets != null ? widgets : transform);
+            blockingNotice = notice.gameObject;
+            notice.anchorMin = notice.anchorMax = new Vector2(.5f, .5f);
+            notice.sizeDelta = new Vector2(480, 100);
+            var image = notice.gameObject.AddComponent<Image>();
+            image.color = new Color(.16f, .07f, .07f, .98f); image.raycastTarget = false;
+            var label = MapActionDetailsView.Label("Message", notice, message, 24);
+            MapActionDetailsView.Stretch(label.rectTransform, 16);
+            label.alignment = TextAlignmentOptions.Center;
+            Destroy(notice.gameObject, 2);
+        }
+
+        private void TryFocusCompletedAction()
+        {
+            if (!ControlsAvailable || GuideLocked || (actionDetails != null && actionDetails.IsBusy)) return;
+            var actions = NarrativeRuntime.Instance?.Actions;
+            if (actions == null) return;
+            string key = actions.PendingFocusPosition;
+            if (key == null || !runtimePositions.TryGetValue(key, out var position)
+                || !locationButtons.TryGetValue(key, out var button) || button == null || !button.gameObject.activeInHierarchy) return;
+            // Consume at the actual visible handoff. User pan/dismiss afterwards must not
+            // reschedule a focus callback or steal focus on the next map entry.
+            if (!actions.ConsumePendingFocus(key)) return;
+            FocusPosition(position);
+            BeginFocusMovement(position.position);
+        }
+
         private void StartCafe()
         {
             if (!ControlsAvailable) return;
+            if (NarrativeRuntime.Instance?.Actions?.ReplacesLocationActions(MapActionDetailsView.CafePositionKey) ?? false)
+            {
+                FocusFirstBlockingAction(); ShowBlockingActionHint(); return;
+            }
             if (UnityEngine.SceneManagement.SceneManager.GetActiveScene().name == "CoffeeShop")
             {
                 RebuildActionList();
@@ -1243,6 +1329,7 @@ namespace Spotlight.GameFlow
             button.gameObject.AddComponent<MapLocationHover>().Initialize(this);
             locationButtons[position.positionKey] = button;
             locationLabels[position.positionKey] = label;
+            BindNewContentDot(button, position.positionKey);
         }
 
         private static Sprite LoadMapSprite(string resourcePath)

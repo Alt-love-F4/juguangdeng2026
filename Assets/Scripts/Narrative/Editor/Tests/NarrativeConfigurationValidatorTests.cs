@@ -1,4 +1,5 @@
 using System;
+using System.Linq;
 using NUnit.Framework;
 using Spotlight.Narrative;
 
@@ -41,10 +42,32 @@ namespace Spotlight.Narrative.Editor.Tests
             Assert.That(c.templates.Exists(x => x.tplName == "Tpl_ArrivalConversation"), Is.True);
             Assert.That(c.templates.Exists(x => x.tplName == "Tpl_PassiveCheck"), Is.True);
             Assert.That(c.templates.Exists(x => x.tplName == "Tpl_NarrativeSignal"), Is.True);
-            Assert.That(c.eventDates[0].eventId, Is.EqualTo("EV_TALK_CAFE"));
-            Assert.That(c.eventDates[0].day, Is.EqualTo(3));
-            Assert.That(c.triggers.Exists(x => x.eventId == "EV_TALK_CAFE"), Is.False);
-            Assert.That(NarrativeEventByBarWindow.IsAnchor(c, c.events.Find(x => x.eventId == "EV_TALK_CAFE")), Is.True);
+            Assert.That(c.eventDates.Exists(x => x.eventId == "oct07.s2" && x.day == 2), Is.True);
+            Assert.That(c.eventDates.Exists(x => x.eventId == "EV_TALK_CAFE" || x.eventId == "EV_REVOLUTION"), Is.False);
+            Assert.That(c.triggers.Exists(x => x.eventId == "EV_REVOLUTION" && x.enabled), Is.False);
+            Assert.That(c.actions.Exists(x => x.actionKey == "act_meet_b" || x.actionKey == "act_c_with_b"), Is.False);
+            Assert.That(c.mapPositions.Exists(x => x.defaultAction == "act_meet_b" || x.defaultAction == "act_c_with_b"), Is.False);
+            Assert.That(c.mapPositions.Exists(x => x.positionKey == "cafe" && x.extendedActions.Contains("oct07.cafe.s1")), Is.True);
+        }
+        [Test] public void RetiredDemoMountsInOldSavesDoNotRestoreToFormalMap()
+        {
+            var c = LubanNarrativeLoader.Load();
+            var controller = new NarrativeController(c);
+            var actions = new NarrativeActionController(controller, c.actions);
+            var snapshot = new NarrativeActionStateSnapshot
+            {
+                day = 2, actionPoints = 5, actionPointMax = 5,
+                mounts = new System.Collections.Generic.List<NarrativeActionMountValue>
+                {
+                    new NarrativeActionMountValue { position = "market", action = "act_meet_b", day = 2 },
+                    new NarrativeActionMountValue { position = "temporary", action = "act_c_with_b", day = 2 },
+                    new NarrativeActionMountValue { position = "cafe", action = "oct07.cafe.s1", day = 2 }
+                }
+            };
+            actions.RestoreFrom(snapshot);
+            Assert.That(actions.GetMountedActions("market"), Is.Empty);
+            Assert.That(actions.GetMountedActions("temporary"), Is.Empty);
+            Assert.That(actions.GetMountedActions("cafe").Any(x => x.actionKey == "oct07.cafe.s1"), Is.True);
         }
         [Test] public void SharedCounterRequiresConsistentResetOnExit()
         {

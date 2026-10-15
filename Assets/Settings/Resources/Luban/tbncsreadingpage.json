@@ -16,5 +16,23 @@
     "imageKey": "",
     "pageCondKeys": "",
     "pageBarConds": ""
+  },
+  {
+    "pageId": "oct07.s2.letter.page",
+    "presentationKey": "oct07.s2.letter",
+    "seq": 1,
+    "titleKey": "oct07.s2.p023",
+    "imageKey": "",
+    "pageCondKeys": "",
+    "pageBarConds": ""
+  },
+  {
+    "pageId": "revolution.1014.s1.letter.page",
+    "presentationKey": "revolution.1014.s1.letter",
+    "seq": 1,
+    "titleKey": "",
+    "imageKey": "",
+    "pageCondKeys": "",
+    "pageBarConds": ""
   }
 ]

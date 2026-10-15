@@ -234,6 +234,20 @@ namespace Spotlight.Narrative
             if (cafeFeedback.Count > 0 && cafeFeedback[0].waitingEvent == eventId) cafeFeedback[0].waitingEvent = null;
         }
 
+        private void SkipCafeFeedbackBatch()
+        {
+            foreach (var work in cafeFeedback)
+            {
+                // Settle both a discarded queued hook and hooks not yet queued; never play a lost batch.
+                work.accepted = true;
+                work.waitingEvent = null;
+                work.nextHook = work.hooks.Count;
+                var visit = cafeVisits.Find(v => v.id == work.fact.visitInstanceId && v.characterId == work.fact.characterId);
+                if (visit != null && !visit.acceptedFacts.Contains(CafeFactKey(work.fact)))
+                    visit.acceptedFacts.Add(CafeFactKey(work.fact));
+            }
+        }
+
         private void CaptureCafeVisits(NarrativeSnapshot snapshot)
         {
             snapshot.cafeVisitVersion = cafeVisitVersion; snapshot.cafeVisitSequence = cafeVisitSequence;

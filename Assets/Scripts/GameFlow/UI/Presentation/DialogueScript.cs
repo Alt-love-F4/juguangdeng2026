@@ -4,7 +4,7 @@ using UnityEngine;
 
 namespace Spotlight.GameFlow
 {
-    public enum DialogueSpeaker { Narrator = 0, Left = 1, Right = 2, Center = 3 }
+    public enum DialogueSpeaker { Narrator = 0, Left = 1, Right = 2, Center = 3, Offstage = 4 }
     public enum DialogueGesture { None, Nod, Shake }
 
     /// <summary>剧本由调用方提供，可来自 Luban、ScriptableObject 或测试数据源。</summary>
@@ -157,12 +157,13 @@ namespace Spotlight.GameFlow
         public bool Continues { get; }
         public string MusicKey { get; }
         public DialogueScript WithPreviewContext() => new DialogueScript(lines, LeftCharacter, RightCharacter,
-            Title, Background, Options, OptionPrompt, CenterCharacter, ContinuityOwner, true, Continues, MusicKey);
+            Title, Background, Options, OptionPrompt, CenterCharacter, ContinuityOwner, true, Continues, MusicKey, BackgroundVisual);
         public string Title { get; }
         public DialogueCharacter LeftCharacter { get; }
         public DialogueCharacter RightCharacter { get; }
         public DialogueCharacter CenterCharacter { get; }
         public Texture Background { get; }
+        public NarrativeStageVisuals.Entry BackgroundVisual { get; }
         public string OptionPrompt { get; }
         public IReadOnlyList<DialogueOption> Options { get; }
         public int Count => lines.Length;
@@ -183,7 +184,7 @@ namespace Spotlight.GameFlow
             var remaining = new DialogueLine[Count - index];
             Array.Copy(lines, index, remaining, 0, remaining.Length);
             return new DialogueScript(remaining, left, right, Title, Background, Options, OptionPrompt, center,
-                isPreview: true, musicKey: MusicKey);
+                isPreview: true, musicKey: MusicKey, backgroundVisual: BackgroundVisual);
         }
 
         public DialogueScript WithFirstPageHint(string hint)
@@ -193,13 +194,13 @@ namespace Spotlight.GameFlow
             copy[0] = new DialogueLine(first.Speaker, first.Text, first.SpeakerNameOverride, first.Gesture,
                 first.AutoAdvanceSeconds, first.ReplaceLeft, first.LeftCharacter, first.ReplaceRight, first.RightCharacter,
                 first.AccentFxKey, first.AccentTargetKey, first.ReplaceCenter, first.CenterCharacter, hint, first.SfxKey, first.VoiceKey, first.Source);
-            return new DialogueScript(copy, LeftCharacter, RightCharacter, Title, Background, Options, OptionPrompt, CenterCharacter, ContinuityOwner, IsPreview, Continues, MusicKey);
+            return new DialogueScript(copy, LeftCharacter, RightCharacter, Title, Background, Options, OptionPrompt, CenterCharacter, ContinuityOwner, IsPreview, Continues, MusicKey, BackgroundVisual);
         }
 
         public DialogueScript(IReadOnlyList<DialogueLine> lines, DialogueCharacter leftCharacter = null,
             DialogueCharacter rightCharacter = null, string title = null, Texture background = null,
             IReadOnlyList<DialogueOption> options = null, string optionPrompt = null,
-            DialogueCharacter centerCharacter = null, object continuityOwner = null, bool isPreview = false, bool continues = false, string musicKey = null)
+            DialogueCharacter centerCharacter = null, object continuityOwner = null, bool isPreview = false, bool continues = false, string musicKey = null, NarrativeStageVisuals.Entry backgroundVisual = null)
         {
             if (lines == null) throw new ArgumentNullException(nameof(lines));
             if (lines.Count == 0) throw new ArgumentException("A dialogue script requires at least one line.", nameof(lines));
@@ -214,7 +215,8 @@ namespace Spotlight.GameFlow
             RightCharacter = rightCharacter;
             CenterCharacter = centerCharacter;
             Title = title ?? string.Empty;
-            Background = background;
+            BackgroundVisual = backgroundVisual?.Snapshot();
+            Background = BackgroundVisual?.texture ?? background;
             OptionPrompt = optionPrompt ?? string.Empty;
             if (options != null)
             {

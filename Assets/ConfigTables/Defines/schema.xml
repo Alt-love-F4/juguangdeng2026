@@ -107,6 +107,8 @@
     <var name="progressTarget" type="int"/>
     <var name="nextActionKey" type="string"/>
     <var name="deliveryMode" type="string#set=None,Cumulative,Consecutive"/>
+    <var name="replacesLocationActions" type="bool"/>
+    <var name="focusLocationOnComplete" type="bool"/>
   </bean>
   <table name="TbNcsAction" value="NcsActionEntry" mode="map" index="actionKey" input="Action@Narrative/Narrative.xlsx"/>
   <bean name="NcsMapPositionEntry">
@@ -209,6 +211,9 @@
     <var name="optionGroupKey" type="string"/>
     <var name="bgOverride" type="string"/>
     <var name="bgmOverride" type="string"/>
+    <var name="stepType" type="string#set=,Dialogue,PassiveCheck,LetterReveal,LetterRead"/>
+    <var name="readingKey" type="string#ref=TbNcsPresentationIndex?"/>
+    <var name="checkId" type="string#ref=TbNcsAbilityCheck?"/>
   </bean>
   <table name="TbNcsConversationPage" value="NcsConversationPageEntry" mode="map" index="pageId" input="ConversationPage@Narrative/Narrative.xlsx"/>
 
@@ -217,10 +222,11 @@
     <var name="pageId" type="string#ref=TbNcsConversationPage"/>
     <var name="seq" type="int"/>
     <var name="speakerKey" type="string#ref=TbNcsObject?"/>
-    <var name="side" type="string#set=left,right"/>
+    <var name="side" type="string#set=left,right,none"/>
     <var name="textKey" type="string#ref=TbText"/>
     <var name="voiceKey" type="string"/><var name="emote" type="string"/><var name="sfxKey" type="string"/>
-    <var name="accentFxKey" type="string"/><var name="accentTargetKey" type="string#ref=TbNcsObject?"/>
+    <var name="accentFxKey" type="string"/><var name="accentTargetKey" type="string"/>
+    <var name="speakerNameKey" type="string#ref=TbText?"/>
   </bean>
   <table name="TbNcsConversationLine" value="NcsConversationLineEntry" mode="list" index="lineId" input="ConversationLine@Narrative/Narrative.xlsx"/>
 
@@ -326,10 +332,11 @@
   <table name="TbNcsChoice" value="NcsChoiceEntry" mode="map" index="choiceId" input="Choice@Narrative/Narrative.xlsx"/>
   <bean name="NcsAbilityCheckEntry">
     <var name="checkId" type="string"/>
-    <var name="successEventId" type="string#ref=TbNcsEvent"/>
-    <var name="failureEventId" type="string#ref=TbNcsEvent"/>
+    <var name="successEventId" type="string#ref=TbNcsEvent?"/>
+    <var name="failureEventId" type="string#ref=TbNcsEvent?"/>
     <var name="successResultOwnerId" type="string"/>
     <var name="failureResultOwnerId" type="string"/>
+    <var name="mode" type="string#set=,Branch,Inline"/>
   </bean>
   <table name="TbNcsAbilityCheck" value="NcsAbilityCheckEntry" mode="map" index="checkId" input="AbilityCheck@Narrative/Narrative.xlsx"/>
   <bean name="NcsAbilityCheckConditionEntry">

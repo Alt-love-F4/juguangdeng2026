@@ -33,4 +33,6 @@ MonoBehaviour:
     - "\u9F13\u8D77\u52C7\u6C14"
     - "\u6BEB\u4E0D\u9000\u7F29"
     - "\u7A33\u4F4F\u5FC3\u795E"
-  fixedWords: []
+  fixedWords:
+  - checkId: oct07.s2.perception
+    word: "\u5DF2\u5BDF\u89C9"

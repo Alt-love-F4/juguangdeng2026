@@ -2,6 +2,7 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using NUnit.Framework;
+using Spotlight.Narrative;
 using TMPro;
 using UnityEngine;
 using UnityEngine.TestTools;
@@ -307,6 +308,77 @@ namespace Spotlight.GameFlow.Tests
             Assert.That(completed, Is.Zero);
             Assert.That(cancelled, Is.EqualTo(1));
             Assert.That(DialoguePanel.IsAnyPlaying, Is.False);
+        }
+
+        private static NarrativeConversationPresentationData InterruptionPage(object owner = null, bool continues = false)
+        {
+            var data = new NarrativeConversationPresentationData { eventId = "c06", presentationKey = "c06", continuityOwner = owner, continues = continues };
+            data.lines.Add(new NarrativeConversationPresentationLine { lineId = "c06.line", text = string.Empty });
+            return data;
+        }
+
+        [UnityTest]
+        public IEnumerator C06AdapterExternalStopDisableCloseAndExplicitCancelNotifyOnlyOnce()
+        {
+            foreach (string mode in new[] { "stop", "disable", "close", "cancel" })
+            {
+                int completed = 0, cancelled = 0;
+                var data = InterruptionPage(); data.cancelled = () => cancelled++;
+                Assert.That(NarrativeConversationEventPlayback.Play(default, data, () => completed++));
+                DialoguePanel panel = UIKit.GetPanel<DialoguePanel>(); panel.AllowCancel = true;
+                switch (mode)
+                {
+                    case "disable": panel.gameObject.SetActive(false); break;
+                    case "close": UIKit.ClosePanel(panel); break;
+                    case "cancel": panel.Cancel(); break;
+                    default: panel.Stop(); break;
+                }
+                panel.Stop(); data.releaseStage();
+                Assert.That(cancelled, Is.EqualTo(1), mode); Assert.That(completed, Is.Zero, mode);
+                Assert.That(panel.IsPlaying, Is.False);
+                UIKit.ClosePanel(panel);
+                yield return null;
+            }
+        }
+
+        [UnityTest]
+        public IEnumerator C06AdapterContinuousPageDetachesAndFinalStopCompletesWithoutCancellation()
+        {
+            var owner = new object(); int completed = 0, firstCancelled = 0, secondCancelled = 0;
+            var first = InterruptionPage(owner, true); first.cancelled = () => firstCancelled++;
+            Assert.That(NarrativeConversationEventPlayback.Play(default, first, () => completed++));
+            var panel = UIKit.GetPanel<DialoguePanel>(); yield return Ready(panel); panel.Advance();
+            Assert.That(panel.SeamlessChoicePending); Assert.That(completed, Is.EqualTo(1));
+            var interrupted = typeof(DialoguePanel).GetField("PlaybackInterrupted", System.Reflection.BindingFlags.Instance | System.Reflection.BindingFlags.NonPublic);
+            Assert.That(interrupted.GetValue(panel), Is.Null, "A completed page must not own the next stage's interruption.");
+            var second = InterruptionPage(owner); second.cancelled = () => secondCancelled++;
+            Assert.That(NarrativeConversationEventPlayback.Play(default, second, () => completed++));
+            panel.Stop();
+            Assert.That(firstCancelled, Is.Zero); Assert.That(secondCancelled, Is.EqualTo(1));
+            var final = InterruptionPage(owner); final.cancelled = () => secondCancelled++;
+            int stopped = 0, interruptions = 0;
+            Assert.That(NarrativeConversationEventPlayback.Play(default, final, () =>
+            {
+                Assert.That(stopped, Is.EqualTo(1), "PlaybackStopped retains its pre-finished ordering."); completed++;
+            }));
+            panel = UIKit.GetPanel<DialoguePanel>();
+            panel.PlaybackStopped += () => stopped++; panel.PlaybackInterrupted += () => interruptions++;
+            yield return Ready(panel); panel.Advance(); yield return Until(() => completed == 2);
+            final.releaseStage(); first.releaseStage();
+            Assert.That(stopped, Is.EqualTo(1)); Assert.That(interruptions, Is.Zero);
+            Assert.That(firstCancelled, Is.Zero); Assert.That(secondCancelled, Is.EqualTo(1));
+        }
+
+        [UnityTest]
+        public IEnumerator C06AdapterExternalStopDuringFinalExitCancelsRatherThanLosingBothCallbacks()
+        {
+            int completed = 0, cancelled = 0; var data = InterruptionPage(); data.cancelled = () => cancelled++;
+            Assert.That(NarrativeConversationEventPlayback.Play(default, data, () => completed++));
+            var panel = UIKit.GetPanel<DialoguePanel>(); yield return Ready(panel); panel.Advance();
+            Assert.That(panel.IsPlaying, "The final exit tween has not completed yet.");
+            Assert.That(panel.IsReady, Is.False); panel.Stop();
+            yield return new WaitForSecondsRealtime(.4f);
+            Assert.That(cancelled, Is.EqualTo(1)); Assert.That(completed, Is.Zero);
         }
 
         [UnityTest]

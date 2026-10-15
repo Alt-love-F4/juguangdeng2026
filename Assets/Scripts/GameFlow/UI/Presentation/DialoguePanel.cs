@@ -68,6 +68,7 @@ namespace Spotlight.GameFlow
         private Sequence transition;
         private IDisposable pauseOwner;
         public event Action PlaybackStopped;
+        public event Action PlaybackInterrupted;
         private Action finished;
         private Action cancelled;
         private bool ready;
@@ -170,8 +171,7 @@ namespace Spotlight.GameFlow
             left = value.LeftCharacter ?? new DialogueCharacter(defaultLeftName, defaultLeft);
             right = value.RightCharacter ?? new DialogueCharacter(defaultRightName, defaultRight);
             center = value.CenterCharacter;
-            background.texture = value.Background;
-            background.enabled = value.Background != null;
+            ApplyBackground(value, false);
             }
             if (psdBackground != null) psdBackground.SetActive(false);
             if (titleText != null) titleText.text = string.IsNullOrEmpty(value.Title) ? "角色对话" : value.Title;
@@ -189,7 +189,7 @@ namespace Spotlight.GameFlow
             if (system != null) system.SetSelectedGameObject(null);
             if (seamless)
             {
-                if (value.Background != null) { background.texture = value.Background; background.enabled = true; }
+                ApplyBackground(value, true);
                 dialogueBox.anchoredPosition = boxPosition;
                 entranceComplete = true;
                 LineIndex = -1;
@@ -313,9 +313,10 @@ namespace Spotlight.GameFlow
                 int count = (leftPortrait.enabled ? 1 : 0) + (centerPortrait.enabled ? 1 : 0)
                     + (rightPortrait.enabled ? 1 : 0);
                 int index = 0;
-                if (leftPortrait.enabled) PlaceArtworkPortrait(leftPortrait, leftPortraitFrame, index++, count);
+                // Authored artwork frames share a centered pose; the script slot supplies left/right placement.
+                if (leftPortrait.enabled) PlaceArtworkPortrait(leftPortrait, leftPortraitFrame, index++, count == 1 ? 2 : count);
                 if (centerPortrait.enabled) PlaceArtworkPortrait(centerPortrait, centerPortraitFrame, index++, count);
-                if (rightPortrait.enabled) PlaceArtworkPortrait(rightPortrait, rightPortraitFrame, index, count);
+                if (rightPortrait.enabled) PlaceArtworkPortrait(rightPortrait, rightPortraitFrame, count == 1 ? 1 : index, count == 1 ? 2 : count);
                 effects?.RefreshPortraitPositions();
                 return;
             }
@@ -340,7 +341,9 @@ namespace Spotlight.GameFlow
         private static void PlaceArtworkPortrait(Image image, Image frame, int index, int count)
         {
             RectTransform outer = frame != null ? frame.rectTransform : image.rectTransform;
-            float center = count == 1 ? .5f : count == 2 ? .25f + index * .5f : .175f + index * .325f;
+            // A center-only actor keeps the authored center pose; side slots pass their two-slot position.
+            if (count == 1) return;
+            float center = count == 2 ? .25f + index * .5f : .175f + index * .325f;
             float shift = center - (outer.anchorMin.x + outer.anchorMax.x) * .5f;
             outer.anchorMin += new Vector2(shift, 0f);
             outer.anchorMax += new Vector2(shift, 0f);
@@ -403,7 +406,7 @@ namespace Spotlight.GameFlow
             if (ReadingInputBlocked) return;
             if (effects != null) effects.Tick(Time.unscaledDeltaTime);
             if (!IsPlaying || exiting) return;
-            if (!ready && entranceComplete && !effects.IsPortraitTransitioning && portraitChange == null && blockingEffects == 0)
+            if (!ready && entranceComplete && !effects.IsPortraitTransitioning && portraitChange == null && blockingEffects == 0 && !effects.IsBackgroundTransitioning)
             {
                 ready = true;
                 continueButton.interactable = true;
@@ -412,7 +415,7 @@ namespace Spotlight.GameFlow
             if (script == null || !IsPlaying) return;
             Keyboard keyboard = Keyboard.current;
             if (keyboard != null && keyboard.escapeKey.wasPressedThisFrame && AllowCancel) { Cancel(); return; }
-            if (!ready || blockingEffects > 0 || portraitChange != null || optionsVisible) return;
+            if (!ready || blockingEffects > 0 || portraitChange != null || effects.IsBackgroundTransitioning || optionsVisible) return;
             if (IsSkipping)
             {
                 if (TryShowOptions()) return;
@@ -440,7 +443,7 @@ namespace Spotlight.GameFlow
         /// <summary>第一次提交只补完当前页；下一次才翻页/换句。进退场期间不接受提交。</summary>
         public void Advance()
         {
-            if (ReadingInputBlocked || !IsPlaying || !ready || optionsVisible || exiting || blockingEffects > 0 || portraitChange != null || lastAdvanceFrame == Time.frameCount) return;
+            if (ReadingInputBlocked || !IsPlaying || !ready || optionsVisible || exiting || blockingEffects > 0 || portraitChange != null || effects.IsBackgroundTransitioning || lastAdvanceFrame == Time.frameCount) return;
             lastAdvanceFrame = Time.frameCount;
             if (IsTyping)
             {
@@ -478,7 +481,7 @@ namespace Spotlight.GameFlow
             {
                 transition = null;
                 Action callback = finished;
-                Stop();
+                Stop(completed: true);
                 callback?.Invoke();
             });
         }
@@ -522,9 +525,15 @@ namespace Spotlight.GameFlow
             callback?.Invoke();
         }
 
-        /// <summary>静默中止，不触发完成/取消回调；关闭、隐藏、销毁均调用此方法。</summary>
-        public void Stop()
+        /// <summary>Stops without invoking finished/cancelled delegates; active playback notifies PlaybackInterrupted.</summary>
+        public void Stop() => Stop(completed: false);
+
+        private void Stop(bool completed)
         {
+            // Exiting alone is not completion: an external Stop/Cancel can kill its tween.
+            bool interrupted = !completed && (IsPlaying || SeamlessChoicePending);
+            Action interruption = interrupted ? PlaybackInterrupted : null;
+            PlaybackInterrupted = null;
             StopReading();
             Spotlight.Audio.GameAudio.StopOwner(voiceOwner);
             Spotlight.Audio.GameAudio.StopOwner(this);
@@ -564,6 +573,7 @@ namespace Spotlight.GameFlow
             }
             if (effects != null) effects.Reset();
             stopped?.Invoke();
+            interruption?.Invoke();
         }
 
         protected override void OnClose() => Stop();

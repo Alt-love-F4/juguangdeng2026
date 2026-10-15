@@ -19,6 +19,9 @@ namespace Spotlight.Narrative
         public List<NarrativeActionMilestoneDefinition> milestones = new List<NarrativeActionMilestoneDefinition>();
         public bool IsDelivery => deliveryMode != NarrativeDeliveryMode.None;
         public bool mustExecute;
+        // Generic map presentation policies; configured on Action, never inferred from story IDs.
+        public bool replacesLocationActions;
+        public bool focusLocationOnComplete;
         public string nameText;
         public string descText;
         public string requirements;
@@ -100,9 +103,18 @@ namespace Spotlight.Narrative
         public string currentEvent;
         public List<string> pendingEvents = new List<string>();
         public List<string> dueActions = new List<string>();
+        public List<string> seenActionInstances = new List<string>();
+        public List<string> pendingFocusPositions = new List<string>();
     }
 
-    [Serializable] public sealed class NarrativeActionMountValue { public string position; public string action; public int day; }
+    [Serializable] public sealed class NarrativeActionMountValue
+    {
+        public string position;
+        public string action;
+        public int day;
+        // Caller-owned stable stage/version token. Refreshing visibility never increments it.
+        public string instanceVersion;
+    }
 
     [Serializable] public sealed class NarrativeActionCounterValue { public string key; public int value; }
     [Serializable] public sealed class NarrativeActionDayValue { public string key; public int day; }

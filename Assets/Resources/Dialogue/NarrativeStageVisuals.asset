@@ -1,0 +1,33 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: c156d4f7bf1cd164c9cb870a0d867820, type: 3}
+  m_Name: NarrativeStageVisuals
+  m_EditorClassIdentifier: Spotlight.GameFlow.UI::Spotlight.GameFlow.NarrativeStageVisuals
+  entries:
+  - key: oct07.cafe.day
+    texture: {fileID: 2800000, guid: e4a7b244758a8fb48ac12e953d3a6d58, type: 3}
+    tint: {r: 1, g: 1, b: 1, a: 1}
+    placeholderColor: {r: 0.23, g: 0.25, b: 0.28, a: 1}
+    placeholder: 0
+    fadeSeconds: 0.3
+  - key: oct07.street.day
+    texture: {fileID: 0}
+    tint: {r: 1, g: 1, b: 1, a: 1}
+    placeholderColor: {r: 0.23, g: 0.25, b: 0.28, a: 1}
+    placeholder: 1
+    fadeSeconds: 0.3
+  - key: oct07.cafe.night
+    texture: {fileID: 2800000, guid: e4a7b244758a8fb48ac12e953d3a6d58, type: 3}
+    tint: {r: 0.42, g: 0.48, b: 0.62, a: 1}
+    placeholderColor: {r: 0.23, g: 0.25, b: 0.28, a: 1}
+    placeholder: 0
+    fadeSeconds: 0.3

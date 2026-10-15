@@ -73,5 +73,50 @@
     "presentationKey": "arrival.accept",
     "presentationClass": "Conversation",
     "logTag": "FIRST_ARRIVAL"
+  },
+  {
+    "presentationKey": "oct07.s1.conversation",
+    "presentationClass": "Conversation",
+    "logTag": "OCT07_S1"
+  },
+  {
+    "presentationKey": "oct07.s2.conversation",
+    "presentationClass": "Conversation",
+    "logTag": "OCT07_S2"
+  },
+  {
+    "presentationKey": "oct07.s2.letter",
+    "presentationClass": "Reading",
+    "logTag": "OCT07_S2"
+  },
+  {
+    "presentationKey": "rose.1009.s1.conversation",
+    "presentationClass": "Conversation",
+    "logTag": "B1009 blocked P003-P071"
+  },
+  {
+    "presentationKey": "revolution.1013.s2.conversation",
+    "presentationClass": "Conversation",
+    "logTag": "C13"
+  },
+  {
+    "presentationKey": "revolution.1028.s1.conversation",
+    "presentationClass": "Conversation",
+    "logTag": "C28"
+  },
+  {
+    "presentationKey": "revolution.1014.s1.conversation",
+    "presentationClass": "Conversation",
+    "logTag": "C14"
+  },
+  {
+    "presentationKey": "revolution.1014.s1.letter",
+    "presentationClass": "Reading",
+    "logTag": "C14"
+  },
+  {
+    "presentationKey": "church.1009.s2.conversation",
+    "presentationClass": "Conversation",
+    "logTag": "D1009"
   }
 ]

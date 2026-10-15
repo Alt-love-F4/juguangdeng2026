@@ -57,6 +57,7 @@ namespace Spotlight.Narrative
         }
         private void DispatchSafeCallbacks()
         {
+            CompleteEntryAtSafeBoundary();
             PumpCafeBoundary();
             if (dispatchingSafeCallbacks) return;
             dispatchingSafeCallbacks = true;
@@ -204,20 +205,7 @@ namespace Spotlight.Narrative
             valueBaselineReady = !configuration.bars.Any(b => b.sourceMode == NarrativeSourceMode.External);
         }
 
-        public bool QueueEvent(string eventId)
-        {
-            if (GetEventRejection(eventId) != null) return false;
-            NarrativeEventDefinition definition = events[eventId];
-            if (!turnOpen) BeginTurn();
-            pendingEvents.Add(eventId);
-            var request = new NarrativeEventRequest(definition, null, 0, null, Context(definition));
-            queue.Enqueue(request);
-            Debug.Log($"[NCS][ManualEvent] event={eventId} tag={definition.logTag}");
-            try { EventQueued?.Invoke(request); }
-            catch (Exception error) { Debug.LogException(error); }
-            ProcessQueue();
-            return true;
-        }
+        public bool QueueEvent(string eventId) => QueueManualEvent(eventId, false);
 
         public void BeginTurn()
         {
@@ -361,6 +349,7 @@ namespace Spotlight.Narrative
         private bool ChoiceBelongsToActiveSetup(NarrativeChoiceDefinition choice)
         {
             NarrativeSetupParamsDefinition setup = configuration.setups.Find(s => s != null && s.setupKey == activeRequest.Event.setupKey);
+            if (configuration.presentations.conversationPages.Exists(p => p.presentationKey == activeRequest.Event.presentationKey && p.optionGroupKey == choice.groupKey)) return true;
             if (setup == null) return true;
             bool hasOptions = false;
             foreach (string assignment in (setup.slotValues ?? string.Empty).Split(','))
@@ -384,6 +373,8 @@ namespace Spotlight.Narrative
         public NarrativeAbilityCheckSnapshot EvaluateAbilityCheckForPresentation(string checkId)
         {
             if (!activePresentation) throw new InvalidOperationException("Ability checks require an active narrative presentation.");
+            if (configuration.abilityChecks.Find(x => x != null && x.checkId == checkId)?.mode == NarrativeAbilityCheckMode.Inline)
+                return EvaluateInlineAbilityCheckForPresentation(checkId);
             if (activeAbilityCheck != null)
             {
                 if (activeAbilityCheckId != checkId) throw new InvalidOperationException("A different ability check is already active.");
@@ -405,19 +396,29 @@ namespace Spotlight.Narrative
             if (definition == null) throw new InvalidOperationException("Unknown ability check: " + checkId);
             var rows = configuration.abilityCheckConditions.FindAll(x => x != null && x.checkId == checkId);
             return NarrativeAbilityCheckEvaluator.Evaluate(definition, rows, AbilityReader,
-                attributeId => AbilityNameResolver?.Invoke(attributeId) ?? attributeId);
+                attributeId => AbilityNameResolver?.Invoke(attributeId) ?? ResolveAbilityName(attributeId));
+        }
+
+        private string ResolveAbilityName(string attributeId)
+        {
+            if (configuration.abilityNameKeys.TryGetValue(attributeId, out var key))
+                return TextResolver?.Invoke(key) ?? configuration.texts.Find(t => t.key == key)?.content ?? attributeId;
+            return attributeId;
         }
 
         private void QueueAbilityBranch(string checkId, NarrativeAbilityCheckSnapshot result)
         {
             var definition = configuration.abilityChecks.Find(x => x != null && x.checkId == checkId);
+            if (definition.mode == NarrativeAbilityCheckMode.Inline)
+                throw new InvalidOperationException("Inline checks cannot queue branch events: " + checkId);
             string eventId = result.passed ? definition.successEventId : definition.failureEventId;
             if (string.IsNullOrWhiteSpace(eventId) || !events.TryGetValue(eventId, out var branch))
                 throw new InvalidOperationException("Ability check branch event is missing: " + eventId);
             if (pendingEvents.Contains(eventId) || activeRequest.Event.eventId == eventId)
                 throw new InvalidOperationException("Ability check branch cannot re-enter its active event: " + eventId);
             pendingEvents.Add(eventId);
-            queue.Enqueue(new NarrativeEventRequest(branch, null, activeRequest.Depth + 1, null, Context(branch), passiveHint: string.IsNullOrEmpty(result.presentationWord) ? null : PassiveCheckPresentationConfig.Hint(result)));
+            if (branch.entry != NarrativeEntryPoint.Immediate) throw new InvalidOperationException("Ability branch must use Immediate entry: " + eventId);
+            PrependContinuation(new NarrativeEventRequest(branch, null, activeRequest.Depth + 1, null, Context(branch), passiveHint: string.IsNullOrEmpty(result.presentationWord) ? null : PassiveCheckPresentationConfig.Hint(result), candidate: ContinuationCandidate(eventId)));
             result.branchQueued = true;
         }
 
@@ -439,6 +440,12 @@ namespace Spotlight.Narrative
             snapshot.selectedEndingId = SelectedEndingId;
             snapshot.officialDayVersion = migrateOfficialDay ? 0 : 1;
             snapshot.officialDayProcessed = officialDayProcessed;
+            snapshot.entryStateVersion = 1;
+            snapshot.morningEntryProcessedDay = morningEntryProcessedDay;
+            snapshot.candidateSequence = candidateSequence;
+            snapshot.candidates.AddRange(candidates.Select(CloneCandidate));
+            snapshot.entryInProgress = activeEntry.HasValue;
+            snapshot.activeEntry = activeEntry ?? NarrativeEntryPoint.Immediate;
             snapshot.location = Location; snapshot.timeSlot = TimeSlot; snapshot.randomSeed = randomSeed;
             snapshot.turnOpen = turnOpen; snapshot.turnEnding = turnEnding;
             snapshot.turnEvents.AddRange(pendingEvents);
@@ -470,8 +477,18 @@ namespace Spotlight.Narrative
             SelectedEndingId = snapshot.selectedEndingId;
             migrateOfficialDay = snapshot.officialDayVersion == 0;
             officialDayProcessed = Math.Max(0, snapshot.officialDayProcessed);
+            morningEntryProcessedDay = Math.Max(0, snapshot.morningEntryProcessedDay);
+            candidateSequence = Math.Max(0, snapshot.candidateSequence);
+            candidates.Clear();
+            if (snapshot.candidates != null) foreach (var candidate in snapshot.candidates)
+                if (candidate != null && events.ContainsKey(candidate.eventId ?? string.Empty))
+                { candidates.Add(CloneCandidate(candidate)); candidateSequence = Math.Max(candidateSequence, candidate.sequence); }
+            activeEntry = snapshot.entryInProgress ? (NarrativeEntryPoint?)snapshot.activeEntry : null;
+            activeEntryDay = snapshot.bars?.Find(b => b != null && b.key == "world.calendar")?.value ?? 1;
+            entryCompleted = null; entryFailed = false;
             presentationEpoch++;
             queue.Clear(); pendingEvents.Clear(); changes.Clear(); selectedChoices.Clear(); pendingEffects.Clear(); safeCallbacks.Clear(); draining = false;
+            inlineAbilityChecks.Clear();
             activeAbilityCheck = CloneAbilityCheck(snapshot.activeAbilityCheck);
             activeAbilityCheckId = snapshot.activeAbilityCheckId ?? activeAbilityCheck?.checkId;
             resumeActiveAbilityCheck = snapshot.active != null && activeAbilityCheck != null;
@@ -495,7 +512,7 @@ namespace Spotlight.Narrative
 
         private NarrativePendingValue ToSaved(NarrativeEventRequest request)
         {
-            var saved = new NarrativePendingValue { eventId = request.Event.eventId, triggerId = request.Trigger?.triggerId, requestId = request.RequestId, passiveHint = request.PassiveHint, depth = request.Depth, timeSlot = request.Context?.TimeSlot ?? TimeSlot, location = request.Context?.Location ?? Location };
+            var saved = new NarrativePendingValue { eventId = request.Event.eventId, triggerId = request.Trigger?.triggerId, requestId = request.RequestId, passiveHint = request.PassiveHint, depth = request.Depth, timeSlot = request.Context?.TimeSlot ?? TimeSlot, location = request.Context?.Location ?? Location, candidate = CloneCandidate(request.Candidate) };
             if (request.SelectedChoices != null) saved.selectedChoices.AddRange(request.SelectedChoices);
             return saved;
         }
@@ -504,7 +521,7 @@ namespace Spotlight.Narrative
             if (saved == null || saved.depth < 0 || saved.depth > 3 || !events.TryGetValue(saved.eventId ?? string.Empty, out NarrativeEventDefinition definition)) return;
             NarrativeTriggerDefinition trigger = configuration.triggers.Find(t => t != null && t.triggerId == saved.triggerId);
             var context = Context(definition); context.TimeSlot = saved.timeSlot; context.Location = saved.location ?? Location;
-            queue.Enqueue(new NarrativeEventRequest(definition, trigger, saved.depth, saved.selectedChoices == null ? null : saved.selectedChoices.ToArray(), context, saved.requestId, saved.passiveHint));
+            queue.Enqueue(new NarrativeEventRequest(definition, trigger, saved.depth, saved.selectedChoices == null ? null : saved.selectedChoices.ToArray(), context, saved.requestId, saved.passiveHint, candidate: CloneCandidate(saved.candidate)));
             pendingEvents.Add(definition.eventId);
         }
         private static string OwnerKey(string type, string id) => (string.IsNullOrWhiteSpace(type) ? "event" : type.Trim().ToLowerInvariant()) + ":" + id;
@@ -579,7 +596,7 @@ namespace Spotlight.Narrative
             public NarrativeConditionContext Context;
         }
 
-        private void EvaluateBoundary(int depth, bool includeHoldAndDates)
+        private void EvaluateBoundary(int depth, bool includeHoldAndDates, bool promote = true)
         {
             if (valueRestore || !valueBaselineReady || operationDepth > 0) return;
             var hits = new List<Hit>();
@@ -614,7 +631,7 @@ namespace Spotlight.Narrative
                     for (int i = 0; i < configuration.eventDates.Count; i++)
                     {
                         NarrativeEventDateDefinition date = configuration.eventDates[i];
-                        if (date == null || !DateMatches(date, day) || !events.TryGetValue(date.eventId ?? string.Empty, out NarrativeEventDefinition definition)) continue;
+                        if (date == null || !DateMatches(date, day) || !DateBoundaryMatches(date) || !events.TryGetValue(date.eventId ?? string.Empty, out NarrativeEventDefinition definition)) continue;
                         if (date.repeatRule == NarrativeRepeatRule.Once && state.IsFlagSet("date.once." + date.eventId + "." + date.day + "." + date.timeSlot)) continue;
                         var context = Context(definition); context.TimeSlot = date.timeSlot;
                         hits.Add(new Hit { Event = definition, Priority = date.priority, Row = configuration.triggers.Count + i, OnceDate = date.repeatRule == NarrativeRepeatRule.Once, Date = date, Context = context });
@@ -632,23 +649,9 @@ namespace Spotlight.Narrative
                     if (trigger.onceType == NarrativeOnceType.Once && state.HasFiredTrigger(trigger.triggerId)) continue;
                 }
                 if (depth > 3) { Debug.LogWarning("[NCS] Trigger depth exceeds 3: " + hit.Event.eventId); continue; }
-                if (state.IsEventLocked(hit.Event.eventId) || state.IsFlagSet("event.once." + hit.Event.eventId) || hit.Event.onceOnly && state.HasHappenedEvent(hit.Event.eventId) || pendingEvents.Contains(hit.Event.eventId)) continue;
-                NarrativeConditionContext frozenContext = hit.Context ?? Context(hit.Event);
-                if (!EvaluateConditions("event", string.IsNullOrWhiteSpace(hit.Event.conditionOwnerId) ? hit.Event.eventId : hit.Event.conditionOwnerId, frozenContext)) continue;
-                pendingEvents.Add(hit.Event.eventId);
-                if (trigger != null && trigger.onceType == NarrativeOnceType.Once)
-                {
-                    state.MarkTriggerFired(trigger.triggerId);
-                    state.SetFlag("trigger.once." + trigger.triggerId, true);
-                }
-                if (hit.Event.onceOnly) state.SetFlag("event.once." + hit.Event.eventId, true);
-                if (hit.OnceDate) state.SetFlag("date.once." + hit.Date.eventId + "." + hit.Date.day + "." + hit.Date.timeSlot, true);
-                var request = new NarrativeEventRequest(hit.Event, trigger, depth, null, frozenContext);
-                queue.Enqueue(request);
-                Debug.Log($"[NCS][Trigger] bar={trigger?.barKey ?? "date"} trigger={trigger?.triggerId ?? "EventDate"} threshold={trigger?.threshold} count={hit.Count} depth={depth} event={hit.Event.eventId} tag={hit.Event.logTag}");
-                try { EventQueued?.Invoke(request); }
-                catch (Exception error) { Debug.LogException(error); }
+                CaptureHit(hit, depth);
             }
+            if (promote) PromoteCandidates();
         }
 
         private int GetDay() => state.TryGetBar("world.calendar", out int day) ? day : 1;
@@ -683,30 +686,44 @@ namespace Spotlight.Narrative
 
         private void OnPresentationCancelled(string reason)
         {
-            bool terminal = reason == "disposed" || reason == "host_unavailable";
-            if (!activePresentation && !draining && pendingEffects.Count == 0 && !terminal) return;
+            bool terminal = reason == "disposed";
+            bool hostUnavailable = reason == "host_unavailable";
+            if (!activePresentation && !draining && pendingEffects.Count == 0 && !terminal && !hostUnavailable) return;
             string failedEvent = activeRequest.Event?.eventId;
-            presentationEpoch++;
-            activePresentation = draining = processing = false;
-            activeRequest = default;
-            activeAbilityCheck = null;
-            activeAbilityCheckId = null;
-            selectedChoices.Clear(); pendingEffects.Clear();
-            if (terminal) presenterUnavailable = true;
-            if (!string.IsNullOrEmpty(failedEvent))
+            bool wasPumping = pumping;
+            pumping = true; // Failure listeners must not start the next hook before cancellation settles.
+            try
             {
-                pendingEvents.Remove(failedEvent);
-                CompleteCafeHook(failedEvent);
-                try { EventFailed?.Invoke(failedEvent, "presentation_cancelled: " + reason); }
-                catch (Exception error) { Debug.LogException(error); }
+                presentationEpoch++;
+                // Manual requests are retryable by a NEW explicit request, not by automatic promotion.
+                long failedCandidate = activeRequest.Candidate?.sequence ?? 0;
+                candidates.RemoveAll(c => c.source == NarrativeCandidateSource.Manual &&
+                    (c.sequence == failedCandidate || (terminal || hostUnavailable) && queue.Any(r => r.Candidate?.sequence == c.sequence)));
+                FailEntryBatch();
+                activePresentation = draining = processing = false;
+                activeRequest = default;
+                activeAbilityCheck = null;
+                activeAbilityCheckId = null;
+                inlineAbilityChecks.Clear();
+                selectedChoices.Clear(); pendingEffects.Clear();
+                if (terminal) presenterUnavailable = true;
+                if (terminal || hostUnavailable)
+                {
+                    // A scene unload loses this batch, not the persistent presenter's next host.
+                    queue.Clear(); pendingEvents.Clear();
+                    SkipCafeFeedbackBatch();
+                    turnOpen = turnEnding = resumeBoundary = false;
+                    if (terminal && presenter is INarrativePresentationCancellation cancellation) cancellation.Cancelled -= OnPresentationCancelled;
+                }
+                if (!string.IsNullOrEmpty(failedEvent))
+                {
+                    pendingEvents.Remove(failedEvent);
+                    CompleteCafeHook(failedEvent);
+                    try { EventFailed?.Invoke(failedEvent, "presentation_cancelled: " + reason); }
+                    catch (Exception error) { Debug.LogException(error); }
+                }
             }
-            if (terminal)
-            {
-                presenterUnavailable = true;
-                queue.Clear(); pendingEvents.Clear();
-                turnOpen = turnEnding = resumeBoundary = false;
-                if (presenter is INarrativePresentationCancellation cancellation) cancellation.Cancelled -= OnPresentationCancelled;
-            }
+            finally { pumping = wasPumping; }
             // During Play's synchronous callback the outer pump owns continuation.
             if (!pumping && !settling) ProcessQueue();
         }
@@ -747,20 +764,39 @@ namespace Spotlight.Narrative
                 while (!presenterUnavailable && !activePresentation && queue.Count > 0 && pendingEffects.Count == 0)
                 {
                     activeRequest = queue.Dequeue();
+                    // Eligibility never bypasses fresh locks, completion, Hold values or date/phase constraints.
+                    if (!EventCanStart(activeRequest.Event) || activeRequest.Candidate != null && !CanStartCandidate(activeRequest.Candidate))
+                    {
+                        var rejected = activeRequest;
+                        pendingEvents.Remove(rejected.Event.eventId);
+                        if (rejected.Event.entry == NarrativeEntryPoint.MapAction || rejected.Candidate?.source == NarrativeCandidateSource.Manual || rejected.Candidate?.source == NarrativeCandidateSource.Continuation)
+                        {
+                            if (rejected.Candidate?.source == NarrativeCandidateSource.Continuation) FailEntryBatch();
+                            try { EventFailed?.Invoke(rejected.Event.eventId, "start_preconditions_changed"); }
+                            catch (Exception error) { Debug.LogException(error); }
+                        }
+                        continue;
+                    }
                     selectedChoices.Clear();
                     if (!resumeActiveAbilityCheck && (activeRequest.SelectedChoices == null || activeRequest.SelectedChoices.Count == 0))
                     {
                         activeAbilityCheck = null;
                         activeAbilityCheckId = null;
+                        inlineAbilityChecks.Clear();
                     }
                     resumeActiveAbilityCheck = false;
                     if (activeRequest.SelectedChoices != null) selectedChoices.AddRange(activeRequest.SelectedChoices);
                     activePresentation = true;
                     long epoch = ++presentationEpoch;
-                    NarrativeEventRequest request = new NarrativeEventRequest(activeRequest.Event, activeRequest.Trigger, activeRequest.Depth, selectedChoices.ToArray(), activeRequest.Context, activeRequest.RequestId, activeRequest.PassiveHint);
+                    NarrativeEventRequest request = new NarrativeEventRequest(activeRequest.Event, activeRequest.Trigger, activeRequest.Depth, selectedChoices.ToArray(), activeRequest.Context, activeRequest.RequestId, activeRequest.PassiveHint, candidate: activeRequest.Candidate);
                     // A broken presenter is not treated as successful: its active request remains saveable.
                     try { presenter.Play(request, () => { if (epoch == presentationEpoch && activePresentation) CompleteEvent(request); }); }
-                    catch (Exception error) { Debug.LogException(error); break; }
+                    catch (Exception error)
+                    {
+                        Debug.LogException(error);
+                        if (activeEntry.HasValue || request.Event.entry != NarrativeEntryPoint.Immediate) OnPresentationCancelled("presenter_exception");
+                        break;
+                    }
                 }
                 if (!activePresentation && queue.Count == 0 && pendingEffects.Count == 0)
                 {
@@ -778,6 +814,7 @@ namespace Spotlight.Narrative
             presentationEpoch++;
             settling = true;
             int entryOperationDepth = operationDepth;
+            bool transactionSucceeded = false;
             transactionDepth = request.Depth + 1;
             var batch = new List<NarrativeResultDefinition>();
             if (resultsByEvent.TryGetValue(request.Event.eventId, out var eventResults)) batch.AddRange(eventResults);
@@ -809,20 +846,30 @@ namespace Spotlight.Narrative
                 }
                 foreach (var result in batch) ApplyResult(result);
                 state.MarkEventHappened(request.Event.eventId);
+                CommitCandidate(request);
                 activePresentation = false;
                 activeAbilityCheck = null;
                 activeAbilityCheckId = null;
+                inlineAbilityChecks.Clear();
                 selectedChoices.Clear();
                 EndOperation();
                 DrainSettledValueChanges();
                 EvaluateBoundary(transactionDepth, false);
+                transactionSucceeded = true;
             }
             catch (Exception error)
             {
                 Debug.LogError($"[NCS] Event {request.Event.eventId} result transaction failed: {error.Message}");
                 try { EventFailed?.Invoke(request.Event.eventId, error.Message); }
                 catch (Exception listenerError) { Debug.LogException(listenerError); }
-                return;
+                if (activeEntry.HasValue || request.Event.entry != NarrativeEntryPoint.Immediate)
+                {
+                    FailEntryBatch();
+                    presentationEpoch++; activePresentation = processing = false;
+                    pendingEvents.Remove(request.Event.eventId);
+                    activeAbilityCheck = null; activeAbilityCheckId = null; inlineAbilityChecks.Clear(); selectedChoices.Clear();
+                }
+                else return; // Preserve legacy transaction-failure inspection/recovery.
             }
             finally
             {
@@ -833,6 +880,7 @@ namespace Spotlight.Narrative
                 }
                 transactionDepth = 0; settling = false;
             }
+            if (!transactionSucceeded) { ProcessQueue(); return; }
             CompleteCafeHook(request.Event.eventId);
             try { EventCompleted?.Invoke(request.Event.eventId); }
             catch (Exception error) { Debug.LogException(error); }
@@ -894,7 +942,8 @@ namespace Spotlight.Narrative
                     }
                     else if (result.resultType == NarrativeResultType.QueueEvent)
                     {
-                        if (string.IsNullOrWhiteSpace(target) || !events.ContainsKey(target)) throw new InvalidOperationException("Unknown queued event: " + target);
+                        if (string.IsNullOrWhiteSpace(target) || !events.TryGetValue(target, out var continuation)) throw new InvalidOperationException("Unknown queued event: " + target);
+                    if (continuation.entry != NarrativeEntryPoint.Immediate) throw new InvalidOperationException("Continuation cannot bypass declared entry: " + target);
                     }
                     else if (result.resultType == NarrativeResultType.ItemAdd || result.resultType == NarrativeResultType.ItemRemove)
                     {
@@ -966,7 +1015,7 @@ namespace Spotlight.Narrative
                     if (activeRequest.Event.eventId != target && !queue.Any(r => r.Event.eventId == target))
                     {
                         pendingEvents.Add(target);
-                        queue.Enqueue(new NarrativeEventRequest(next, null, 0, null, Context(next)));
+                        PrependContinuation(new NarrativeEventRequest(next, null, 0, null, Context(next), candidate: ContinuationCandidate(target)));
                     }
                     break;
                 case NarrativeResultType.UnlockEvent: state.SetEventLocked(target, false); break;

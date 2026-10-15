@@ -4,13 +4,47 @@
     "successEventId": "EV_FIRST_DAY_PERCEPTION_SUCCESS",
     "failureEventId": "EV_FIRST_DAY_PERCEPTION_FAILURE",
     "successResultOwnerId": "",
-    "failureResultOwnerId": ""
+    "failureResultOwnerId": "",
+    "mode": ""
   },
   {
     "checkId": "arrival.perception",
     "successEventId": "arrival.insight",
     "failureEventId": "arrival.request",
     "successResultOwnerId": "",
-    "failureResultOwnerId": ""
+    "failureResultOwnerId": "",
+    "mode": ""
+  },
+  {
+    "checkId": "oct07.s2.perception",
+    "successEventId": "",
+    "failureEventId": "",
+    "successResultOwnerId": "",
+    "failureResultOwnerId": "",
+    "mode": "Inline"
+  },
+  {
+    "checkId": "revolution.1014.s1.wisdom4",
+    "successEventId": "",
+    "failureEventId": "",
+    "successResultOwnerId": "",
+    "failureResultOwnerId": "",
+    "mode": "Inline"
+  },
+  {
+    "checkId": "revolution.1014.s1.perception6",
+    "successEventId": "",
+    "failureEventId": "",
+    "successResultOwnerId": "",
+    "failureResultOwnerId": "",
+    "mode": "Inline"
+  },
+  {
+    "checkId": "revolution.1014.s1.wisdom5",
+    "successEventId": "",
+    "failureEventId": "",
+    "successResultOwnerId": "",
+    "failureResultOwnerId": "",
+    "mode": "Inline"
   }
 ]

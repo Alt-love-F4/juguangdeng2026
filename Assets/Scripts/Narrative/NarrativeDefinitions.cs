@@ -15,6 +15,8 @@ namespace Spotlight.Narrative
     public enum NarrativeEventKind { Actor, World }
     public enum NarrativeResultType { BarAdd, BarSet, RelAdd, SetFlag, ClearFlag, SetSwitch, ObjectState, UnlockEvent, LockEvent, AdvanceDay, AwardAchievement, PlaySetup, BarHint, SpawnNpc, DespawnNpc, ShowPosition, HidePosition, AddTempPosition, RemoveTempPosition, ItemAdd, ItemRemove, MoneyAdd, MoneyRemove, ReserveCafeVisit, QueueEvent }
     public enum NarrativeTimeSlot { Morning, Noon, Night }
+    public enum NarrativeEntryPoint { Immediate, MorningBeforeMap, AfterBusiness, BeforeNight, MapAction }
+    public enum NarrativeCandidateSource { Manual, Cross, Hold, Date, Continuation }
     public enum NarrativeRepeatRule { Once, Daily, Weekly, Yearly }
 
     [Serializable]
@@ -91,6 +93,9 @@ namespace Spotlight.Narrative
         public string presentationKey;
         public string presentationLogTag;
         public string eventProperty;
+        // Serialized through Event.eventProperty (entry=...), not a second configuration source.
+        public NarrativeEntryPoint entry;
+        public bool blocksSave;
         public string setupType;
         public string setupKey;
         public List<NarrativeEventProperty> eventProperties = new List<NarrativeEventProperty>();
@@ -185,6 +190,11 @@ namespace Spotlight.Narrative
         public string selectedEndingId;
         public int officialDayVersion;
         public int officialDayProcessed;
+        public int entryStateVersion, morningEntryProcessedDay;
+        public bool entryInProgress;
+        public NarrativeEntryPoint activeEntry;
+        public long candidateSequence;
+        public List<NarrativeCandidateValue> candidates = new List<NarrativeCandidateValue>();
         public List<NarrativeBarValue> bars = new List<NarrativeBarValue>();
         public List<NarrativeCounterValue> counters = new List<NarrativeCounterValue>();
         public List<string> firedTriggers = new List<string>();
@@ -219,19 +229,31 @@ namespace Spotlight.Narrative
         public readonly int Depth;
         public readonly string RequestId;
         public readonly string PassiveHint;
+        public readonly NarrativeCandidateValue Candidate;
         public readonly IReadOnlyList<NarrativeReadingLinePresentationData> ReadingLines;
         public readonly IReadOnlyList<string> SelectedChoices;
         public readonly NarrativeConditionContext Context;
         public string SelectedChoiceId => SelectedChoices != null && SelectedChoices.Count > 0 ? SelectedChoices[0] : null;
         public NarrativeEventRequest(NarrativeEventDefinition @event, NarrativeTriggerDefinition trigger, int depth, IReadOnlyList<string> selectedChoices = null, NarrativeConditionContext context = null, string requestId = null, string passiveHint = null,
-            IReadOnlyList<NarrativeReadingLinePresentationData> readingLines = null)
-        { ReadingLines = readingLines; PassiveHint = passiveHint; Event = @event; Trigger = trigger; Depth = depth; SelectedChoices = selectedChoices; Context = context; RequestId = requestId ?? Guid.NewGuid().ToString("N"); }
+            IReadOnlyList<NarrativeReadingLinePresentationData> readingLines = null, NarrativeCandidateValue candidate = null)
+        { Candidate = candidate; ReadingLines = readingLines; PassiveHint = passiveHint; Event = @event; Trigger = trigger; Depth = depth; SelectedChoices = selectedChoices; Context = context; RequestId = requestId ?? Guid.NewGuid().ToString("N"); }
     }
-    [Serializable] public sealed class NarrativePendingValue { public string eventId, triggerId, requestId, location, passiveHint; public int depth; public NarrativeTimeSlot timeSlot; public List<string> selectedChoices = new List<string>(); }
+    // Waiting eligibility is not a playback request and never contributes to IsBusy.
+    [Serializable] public sealed class NarrativeCandidateValue
+    {
+        public string eventId, triggerId;
+        public NarrativeCandidateSource source;
+        public NarrativeEntryPoint entry;
+        public int priority, row, count, depth, day, dateDay;
+        public long sequence;
+        public NarrativeTimeSlot timeSlot;
+        public NarrativeRepeatRule repeatRule;
+    }
+    [Serializable] public sealed class NarrativePendingValue { public string eventId, triggerId, requestId, location, passiveHint; public int depth; public NarrativeTimeSlot timeSlot; public NarrativeCandidateValue candidate; public List<string> selectedChoices = new List<string>(); }
     [Serializable] public sealed class NarrativeBarChange { public string key; public int oldValue, newValue, depth; }
     public sealed class NarrativeEffectNotification { public NarrativeResultDefinition Result; public string Target, Value; }
 
-    /// <summary>Cancellation is not successful completion. Terminal reasons: disposed, host_unavailable.</summary>
+    /// <summary>Cancellation is not completion. Disposed is terminal; host_unavailable abandons the current batch and allows a later entrance retry.</summary>
     public interface INarrativePresentationCancellation
     {
         event Action<string> Cancelled;

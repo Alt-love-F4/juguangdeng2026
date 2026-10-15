@@ -8,7 +8,7 @@ using UnityEngine;
 
 namespace Spotlight.Narrative
 {
-    public static class LubanNarrativeLoader
+    public static partial class LubanNarrativeLoader
     {
         public static NarrativeConfiguration Load()
         {
@@ -36,6 +36,7 @@ namespace Spotlight.Narrative
                 config.actions.Add(new NarrativeActionDefinition
                 {
                     actionKey = row.ActionKey, type = ActionType(row.Type), mustExecute = row.MustExecute,
+                    replacesLocationActions = row.ReplacesLocationActions, focusLocationOnComplete = row.FocusLocationOnComplete,
                     nameText = row.NameText, descText = row.DescText, requirements = row.Requirements,
                     resultEvents = Strings(row.ResultEvents), durationDays = row.DurationDays,
                     progressTarget = row.ProgressTarget, nextActionKey = row.NextActionKey, deliveryMode = DeliveryMode(row.DeliveryMode),
@@ -114,7 +115,8 @@ namespace Spotlight.Narrative
                     titleText = row.TitleText, contentKeys = Strings(row.ContentKey), presentationClass = row.PresentationClass,
                     presentationKey = row.PresentationKey, presentationLogTag = row.PresentationLogTag,
                     setupType = row.SetupType, setupKey = row.SetupKey, onceOnly = row.OnceOnly, logTag = row.LogTag, conditionOwnerId = row.EventId,
-                    eventProperties = ParseEventProperties(row.EventProperty), eventKindRaw = row.EventKind
+                    eventProperties = ParseEventProperties(row.EventProperty), eventProperty = row.EventProperty, eventKindRaw = row.EventKind,
+                    entry = ReadEntryPoint(row.EventProperty), blocksSave = ReadBlocksSave(row.EventProperty)
                 });
             int dateIndex = 0;
             foreach (var row in tables.TbNcsEventDate.DataList)
@@ -162,10 +164,12 @@ namespace Spotlight.Narrative
                     choiceId = row.ChoiceId, groupKey = row.GroupKey, textKey = row.TextKey,
                     resultOwnerId = row.ResultOwnerId, seq = row.Seq, checkId = row.CheckId
                 });
+            foreach (var row in tables.TbPlayerAttribute.DataList)
+                config.abilityNameKeys.Add(row.AttributeId, row.NameText);
             foreach (var row in tables.TbNcsAbilityCheck.DataList)
                 config.abilityChecks.Add(new NarrativeAbilityCheckDefinition
                 {
-                    checkId = row.CheckId, successEventId = row.SuccessEventId, failureEventId = row.FailureEventId,
+                    checkId = row.CheckId, mode = ParseAbilityCheckMode(row.Mode), successEventId = row.SuccessEventId, failureEventId = row.FailureEventId,
                     successResultOwnerId = row.SuccessResultOwnerId, failureResultOwnerId = row.FailureResultOwnerId
                 });
             foreach (var row in tables.TbNcsAbilityCheckCondition.DataList)
@@ -187,9 +191,9 @@ namespace Spotlight.Narrative
             foreach (var row in tables.TbNcsPresentationIndex.DataList)
                 config.presentations.index.Add(new NarrativePresentationIndexDefinition { presentationKey = row.PresentationKey, presentationClass = row.PresentationClass, logTag = row.LogTag });
             foreach (var row in tables.TbNcsConversationPage.DataList)
-                config.presentations.conversationPages.Add(new NarrativeConversationPageDefinition { pageId = row.PageId, presentationKey = row.PresentationKey, seq = row.Seq, pageCondKeys = row.PageCondKeys, pageBarConds = row.PageBarConds, optionGroupKey = row.OptionGroupKey, bgOverride = row.BgOverride, bgmOverride = row.BgmOverride });
+                config.presentations.conversationPages.Add(new NarrativeConversationPageDefinition { pageId = row.PageId, presentationKey = row.PresentationKey, seq = row.Seq, pageCondKeys = row.PageCondKeys, pageBarConds = row.PageBarConds, optionGroupKey = row.OptionGroupKey, bgOverride = row.BgOverride, bgmOverride = row.BgmOverride, stepType = ParseConversationStepType(row.StepType), readingKey = row.ReadingKey, checkId = row.CheckId });
             foreach (var row in tables.TbNcsConversationLine.DataList)
-                config.presentations.conversationLines.Add(new NarrativeConversationLineDefinition { lineId = row.LineId, pageId = row.PageId, seq = row.Seq, speakerKey = row.SpeakerKey, side = row.Side, textKey = row.TextKey, voiceKey = row.VoiceKey, emote = row.Emote, sfxKey = row.SfxKey, accentFxKey = row.AccentFxKey, accentTargetKey = row.AccentTargetKey });
+                config.presentations.conversationLines.Add(new NarrativeConversationLineDefinition { lineId = row.LineId, pageId = row.PageId, seq = row.Seq, speakerKey = row.SpeakerKey, side = row.Side, textKey = row.TextKey, voiceKey = row.VoiceKey, emote = row.Emote, sfxKey = row.SfxKey, accentFxKey = row.AccentFxKey, accentTargetKey = row.AccentTargetKey, speakerNameKey = row.SpeakerNameKey });
             foreach (var row in tables.TbNcsNotice.DataList)
                 config.presentations.notices.Add(new NarrativeNoticeDefinition { presentationKey = row.PresentationKey, titleKey = row.TitleKey, timeKey = row.TimeKey, imageKey = row.ImageKey, textKey = row.TextKey, barConds = row.BarConds, noticeBarConds = row.NoticeBarConds });
             foreach (var row in tables.TbNcsReadingPage.DataList)
@@ -198,6 +202,8 @@ namespace Spotlight.Narrative
                 config.presentations.readingLines.Add(new NarrativeReadingLineDefinition { lineId = row.LineId, pageId = row.PageId, seq = row.Seq, mode = row.Mode, speakerKey = row.SpeakerKey, textKey = row.TextKey, voiceKey = row.VoiceKey });
             ValidateLinks(config);
             List<string> errors = ValidateConditionConfiguration(config);
+            errors.AddRange(ValidateEntryConfiguration(config));
+            errors.AddRange(ValidateConversationSteps(config));
             errors.AddRange(ValidateAbilityCheckConfiguration(config, tables));
             if (errors.Count > 0) throw new FormatException(string.Join("\n", errors));
             return config;
@@ -210,8 +216,7 @@ namespace Spotlight.Narrative
             foreach (var check in c.abilityChecks)
             {
                 if (check == null || string.IsNullOrWhiteSpace(check.checkId) || !checks.TryAdd(check.checkId, check)) { errors.Add("AbilityCheck: missing or duplicate checkId " + check?.checkId); continue; }
-                if (!c.events.Any(e => e != null && e.eventId == check.successEventId)) errors.Add("AbilityCheck " + check.checkId + ": unknown successEventId " + check.successEventId);
-                if (!c.events.Any(e => e != null && e.eventId == check.failureEventId)) errors.Add("AbilityCheck " + check.checkId + ": unknown failureEventId " + check.failureEventId);
+                errors.AddRange(ValidateAbilityCheckMode(c, check));
             }
             var conditionIds = new HashSet<string>(StringComparer.Ordinal);
             foreach (var condition in c.abilityCheckConditions)
@@ -509,6 +514,54 @@ namespace Spotlight.Narrative
             foreach (string part in (value ?? string.Empty).Split(new[] { '|', ',', ';', '\n' }, StringSplitOptions.RemoveEmptyEntries))
                 if (!string.IsNullOrWhiteSpace(part)) result.Add(part.Trim());
             return result;
+        }
+
+        public static NarrativeEntryPoint ReadEntryPoint(string eventProperty)
+        {
+            var rows = ParseEventProperties(eventProperty).FindAll(p => string.Equals(p.property, "entry", StringComparison.OrdinalIgnoreCase));
+            if (rows.Count > 1) throw new FormatException("Duplicate Event.entry property.");
+            if (rows.Count == 0) return NarrativeEntryPoint.Immediate;
+            if (!Enum.TryParse(rows[0].value, true, out NarrativeEntryPoint entry) || !Enum.IsDefined(typeof(NarrativeEntryPoint), entry)
+                || int.TryParse(rows[0].value, out _)) throw new FormatException("Unknown Event.entry: " + rows[0].value);
+            return entry;
+        }
+
+        public static bool ReadBlocksSave(string eventProperty)
+        {
+            var rows = ParseEventProperties(eventProperty).FindAll(p => string.Equals(p.property, "blocksSave", StringComparison.OrdinalIgnoreCase));
+            if (rows.Count > 1) throw new FormatException("Duplicate Event.blocksSave property.");
+            if (rows.Count == 0) return false;
+            if (!bool.TryParse(rows[0].value, out bool value)) throw new FormatException("Event.blocksSave requires true/false.");
+            return value;
+        }
+
+        public static List<string> ValidateEntryConfiguration(NarrativeConfiguration config)
+        {
+            var errors = new List<string>();
+            foreach (var definition in config.events)
+            {
+                if (definition == null) continue;
+                try { ReadEntryPoint(definition.eventProperty); ReadBlocksSave(definition.eventProperty); }
+                catch (FormatException error) { errors.Add("Event " + definition.eventId + ": " + error.Message); }
+                if (!Enum.IsDefined(typeof(NarrativeEntryPoint), definition.entry)) errors.Add("Event " + definition.eventId + ": invalid entry.");
+            }
+            foreach (var date in config.eventDates)
+            {
+                if (date == null) continue;
+                var definition = config.events.Find(e => e != null && e.eventId == date.eventId);
+                var entry = date.timeSlot == NarrativeTimeSlot.Morning ? NarrativeEntryPoint.MorningBeforeMap
+                    : date.timeSlot == NarrativeTimeSlot.Noon ? NarrativeEntryPoint.AfterBusiness : NarrativeEntryPoint.BeforeNight;
+                if (!Enum.IsDefined(typeof(NarrativeTimeSlot), date.timeSlot)) errors.Add("EventDate " + date.eventId + ": invalid timeSlot.");
+                if (definition != null && definition.entry != NarrativeEntryPoint.Immediate && definition.entry != entry)
+                    errors.Add("EventDate " + date.eventId + ": timeSlot conflicts with Event.entry.");
+            }
+            foreach (var result in config.results)
+                if (result != null && result.resultType == NarrativeResultType.QueueEvent)
+                {
+                    var target = config.events.Find(e => e != null && e.eventId == (result.target ?? string.Empty).Replace("event:", string.Empty));
+                    if (target != null && target.entry != NarrativeEntryPoint.Immediate) errors.Add("Result " + result.resultId + ": continuation must use Immediate entry.");
+                }
+            return errors;
         }
 
         private static List<NarrativeEventProperty> ParseEventProperties(string value)

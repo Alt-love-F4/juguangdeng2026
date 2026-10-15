@@ -14,6 +14,8 @@ namespace Spotlight.GameFlow
         public const string TransitionBlack = "fx_transition_black";
         public const string PortraitFadeOut = "fx_portrait_fade_out";
         public const string PortraitFadeIn = "fx_portrait_fade_in";
+        public const string PortraitNod = "fx_portrait_nod";
+        public const string BackgroundPan = "fx_background_pan";
     }
 
     public enum PresentationEffectStatus { Playing, Completed, Cancelled }

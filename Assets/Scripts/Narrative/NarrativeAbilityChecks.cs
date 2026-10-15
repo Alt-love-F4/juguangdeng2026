@@ -8,11 +8,14 @@ namespace Spotlight.Narrative
     public sealed class NarrativeAbilityCheckDefinition
     {
         public string checkId;
+        public NarrativeAbilityCheckMode mode;
         public string successEventId;
         public string failureEventId;
         public string successResultOwnerId;
         public string failureResultOwnerId;
     }
+
+    public enum NarrativeAbilityCheckMode { Branch, Inline }
 
     [Serializable]
     public sealed class NarrativeAbilityCheckConditionDefinition

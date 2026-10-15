@@ -138,7 +138,6 @@ namespace Spotlight.FreeCafe
             if(identities==null && characterCatalog!=null && characterCatalog.Characters.Count>0)
                 identities=new CatalogCustomerIdentitySource(characterCatalog);
             World=new CafeWorld(catalog,identities);
-            PlayerCafeOwner.Bind(World, CaptureJson, RestoreJson);
             if(prefabLibrary==null) throw new InvalidOperationException("请配置 EntityPrefabLibrary");
             prefabLibrary.Validate(World.Catalog);
             spawnScale=new FreeCafeSpawnScale(this,authored,catalog);
@@ -148,6 +147,7 @@ namespace Spotlight.FreeCafe
             var audioPresenter = GetComponent<FreeCafeAudioPresenter>();
             if (audioPresenter == null) audioPresenter = gameObject.AddComponent<FreeCafeAudioPresenter>();
             audioPresenter.Bind(this);
+            PlayerCafeOwner.Bind(World, CaptureJson, RestoreJson);
         }
         private void Start()
         {
@@ -899,11 +899,13 @@ namespace Spotlight.FreeCafe
         public string CaptureJson() => JsonUtility.ToJson(World.State);
         public void RestoreJson(string json)
         {
+            try
+            {
             CancelDrag();
             var gateway=GetComponent<FreeCafeMiniGameGateway>(); if(gateway!=null) gateway.Abort();
             var audioPresenter = GetComponent<FreeCafeAudioPresenter>();
             if (audioPresenter != null) audioPresenter.ResetObservation();
-            var candidate=JsonUtility.FromJson<CafeSnapshot>(json);
+            var candidate=CafeSaveMigration.Prepare(JsonUtility.FromJson<CafeSnapshot>(json));
             // Sources cannot be moved by gameplay. Old catalog/session snapshots
             // must restore their stock, not overwrite the scene-authored PSD layout.
             if(candidate?.entities!=null)
@@ -918,6 +920,14 @@ namespace Spotlight.FreeCafe
             if(!result.success) throw new FormatException(result.message); SelectedId=null; if(productionMode && !World.ProductionEnabled) World.EnableProduction(); SyncViews();
             // 读档后镜头瞬间就位，不做区域切换的平滑平移
             areaManager.SnapNow();
+
+                PlayerCafeOwner.ReportRestoreFailure(null);
+            }
+            catch(Exception exception)
+            {
+                PlayerCafeOwner.ReportRestoreFailure(exception.Message);
+                throw;
+            }
         }
         public void Save()
         {

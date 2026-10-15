@@ -16,5 +16,77 @@
     "speakerKey": "npc_a",
     "textKey": "narrative.test.reading.02",
     "voiceKey": ""
+  },
+  {
+    "lineId": "oct07.s2.p024",
+    "pageId": "oct07.s2.letter.page",
+    "seq": 1,
+    "mode": "narration",
+    "speakerKey": "",
+    "textKey": "oct07.s2.p024",
+    "voiceKey": ""
+  },
+  {
+    "lineId": "oct07.s2.p025",
+    "pageId": "oct07.s2.letter.page",
+    "seq": 2,
+    "mode": "narration",
+    "speakerKey": "",
+    "textKey": "oct07.s2.p025",
+    "voiceKey": ""
+  },
+  {
+    "lineId": "oct07.s2.p026",
+    "pageId": "oct07.s2.letter.page",
+    "seq": 3,
+    "mode": "narration",
+    "speakerKey": "",
+    "textKey": "oct07.s2.p026",
+    "voiceKey": ""
+  },
+  {
+    "lineId": "oct07.s2.p027",
+    "pageId": "oct07.s2.letter.page",
+    "seq": 4,
+    "mode": "narration",
+    "speakerKey": "",
+    "textKey": "oct07.s2.p027",
+    "voiceKey": ""
+  },
+  {
+    "lineId": "oct07.s2.p028",
+    "pageId": "oct07.s2.letter.page",
+    "seq": 5,
+    "mode": "narration",
+    "speakerKey": "",
+    "textKey": "oct07.s2.p028",
+    "voiceKey": ""
+  },
+  {
+    "lineId": "oct07.s2.p029",
+    "pageId": "oct07.s2.letter.page",
+    "seq": 6,
+    "mode": "narration",
+    "speakerKey": "",
+    "textKey": "oct07.s2.p029",
+    "voiceKey": ""
+  },
+  {
+    "lineId": "oct07.s2.p030",
+    "pageId": "oct07.s2.letter.page",
+    "seq": 7,
+    "mode": "narration",
+    "speakerKey": "",
+    "textKey": "oct07.s2.p030",
+    "voiceKey": ""
+  },
+  {
+    "lineId": "revolution.1014.s1.letter.p017",
+    "pageId": "revolution.1014.s1.letter.page",
+    "seq": 1,
+    "mode": "narration",
+    "speakerKey": "",
+    "textKey": "ncs.revolution.1014.s1.p017",
+    "voiceKey": ""
   }
 ]

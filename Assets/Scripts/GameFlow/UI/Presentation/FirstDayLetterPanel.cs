@@ -7,8 +7,8 @@ using YokiFrame;
 
 namespace Spotlight.GameFlow
 {
-    /// <summary>仅新游戏开场使用：点击拆信、信纸展开、逐字阅读、署名确认。</summary>
-    public sealed class FirstDayLetterPanel : UIPanel, IDayFlowPresentation
+    /// <summary>开场互动信件与快照驱动的通用读信；两种模式不共享结算流程。</summary>
+    public sealed partial class FirstDayLetterPanel : UIPanel, IDayFlowPresentation
     {
         public enum LetterStage { Stopped, Envelope, Opening, Reading, AwaitingSignature, Closing, Finished }
 
@@ -129,6 +129,8 @@ namespace Spotlight.GameFlow
             Stop();
             CapturePose();
             RestorePose();
+            UIKit.SetPanelLevel(this, UILevel.Pop);
+            UIKit.SetPanelModal(this, true);
             draft = content == null ? pendingDraft ?? new FirstDayLetterDraft() : null;
             pendingDraft = null;
             hoveredLink = null;
@@ -164,6 +166,7 @@ namespace Spotlight.GameFlow
         /// <summary>Button entry point. Repeated clicks cannot restart the opening.</summary>
         public void OpenEnvelope()
         {
+            if (genericLetterMode) { OpenGenericEnvelope(); return; }
             if (!IsPlaying || Stage != LetterStage.Envelope) return;
             Spotlight.Audio.GameAudio.Play(Spotlight.Audio.AudioKeys.Envelope, this);
             Stage = LetterStage.Opening;
@@ -199,6 +202,7 @@ namespace Spotlight.GameFlow
 
         private void Update()
         {
+            if (genericLetterMode) { UpdateGenericLetter(); return; }
             if (!IsPlaying || Stage != LetterStage.Reading) return;
             typeTimer += Time.unscaledDeltaTime;
             int visible = Mathf.Min(characterCount,
@@ -214,6 +218,7 @@ namespace Spotlight.GameFlow
         /// <summary>Completion requires a fresh click after all text has appeared.</summary>
         public void ConfirmSignature()
         {
+            if (genericLetterMode) return; // Generic letters never submit character creation or sign.
             if (!IsPlaying || Stage != LetterStage.AwaitingSignature) return;
             if (InteractiveLetter)
             {
@@ -239,6 +244,7 @@ namespace Spotlight.GameFlow
         /// <summary>跳过整段信件演出，立即调用完成回调并进入第一天流程。</summary>
         public void SkipLetter()
         {
+            if (genericLetterMode) return; // No skip-as-completion path for narrative letters.
             if (!IsPlaying) return;
             if (InteractiveLetter && SubmitDefault != null && !SubmitDefault()) return;
             transition?.Kill(false);
@@ -352,6 +358,7 @@ namespace Spotlight.GameFlow
 
         public void Stop()
         {
+            Action letterCancelled = StopGenericLetter();
             Spotlight.Audio.GameAudio.StopOwner(this);
             finished = null;
             pendingContent = null;
@@ -367,6 +374,7 @@ namespace Spotlight.GameFlow
             if (envelopeButton != null) envelopeButton.interactable = false;
             if (signatureButton != null) signatureButton.interactable = false;
             if (skipButton != null) skipButton.interactable = false;
+            letterCancelled?.Invoke();
         }
 
         private void StopHint()

@@ -124,5 +124,53 @@
     "nameText": "demo.cafe.ended",
     "initialValue": false,
     "onlySetTrue": false
+  },
+  {
+    "key": "story.oct07.s1.completed",
+    "nameText": "condition.story.oct07.s1.completed",
+    "initialValue": false,
+    "onlySetTrue": true
+  },
+  {
+    "key": "world.map.active",
+    "nameText": "condition.world.map.active",
+    "initialValue": false,
+    "onlySetTrue": false
+  },
+  {
+    "key": "story.oct07.s2.completed",
+    "nameText": "condition.story.oct07.s2.completed",
+    "initialValue": false,
+    "onlySetTrue": true
+  },
+  {
+    "key": "story.oct09.meeting.known",
+    "nameText": "condition.story.oct09.meeting.known",
+    "initialValue": false,
+    "onlySetTrue": true
+  },
+  {
+    "key": "story.revolution.1013.s2.completed",
+    "nameText": "condition.story.revolution.1013.s2.completed",
+    "initialValue": false,
+    "onlySetTrue": true
+  },
+  {
+    "key": "story.revolution.1028.s1.completed",
+    "nameText": "condition.story.revolution.1028.s1.completed",
+    "initialValue": false,
+    "onlySetTrue": true
+  },
+  {
+    "key": "story.revolution.1014.s1.completed",
+    "nameText": "condition.story.revolution.1014.s1.completed",
+    "initialValue": false,
+    "onlySetTrue": true
+  },
+  {
+    "key": "story.church.1009.s2.completed",
+    "nameText": "condition.story.church.1009.s2.completed",
+    "initialValue": false,
+    "onlySetTrue": true
   }
 ]

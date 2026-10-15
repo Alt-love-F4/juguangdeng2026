@@ -1,5 +1,7 @@
 using System;
 using System.Collections.Generic;
+using System.Linq;
+using Spotlight.Narrative;
 using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
@@ -11,6 +13,7 @@ namespace Spotlight.GameFlow
     public sealed class MapTaskItem
     {
         public string id;
+        public string actionKey;
         public string name;
         public string description;
         public bool completed;
@@ -41,6 +44,46 @@ namespace Spotlight.GameFlow
         [SerializeField] private RectTransform detailTextTemplate;
         [SerializeField] private RectTransform trackButtonTemplate;
         public bool IsVisible => sidebar != null && sidebar.IsVisible;
+        private NarrativeActionController actionSource;
+        private bool externalItems;
+
+        public static bool ShouldListAction(NarrativeActionDefinition action)
+            => action != null && (action.parsedRequirements != null && action.parsedRequirements.Count > 0
+                ? action.parsedRequirements : NarrativeActionRequirementParser.Parse(action.requirements))
+                .Any(r => r.type == NarrativeActionRequirementType.ActionPoint && r.value > 0);
+
+        private void BindActions()
+        {
+            var source = NarrativeRuntime.Instance?.Actions;
+            if (source == actionSource) return;
+            if (actionSource != null) { actionSource.StateChanged -= RefreshActions; actionSource.MapContentChanged -= OnMapContentChanged; }
+            actionSource = source;
+            if (source != null) { source.StateChanged += RefreshActions; source.MapContentChanged += OnMapContentChanged; }
+            RefreshActions();
+        }
+
+        private void OnMapContentChanged(string _) => RefreshActions();
+        private void OnEnable() { if (Application.isPlaying) BindActions(); }
+        private void OnDestroy()
+        {
+            if (actionSource == null) return;
+            actionSource.StateChanged -= RefreshActions; actionSource.MapContentChanged -= OnMapContentChanged;
+        }
+
+        private void RefreshActions()
+        {
+            if (externalItems || actionSource == null) return;
+            // Query only mount identities; never capture/save during a running action.
+            var values = actionSource.GetMapPositions().SelectMany(position => actionSource.GetDisplayableActions(position)
+                .Where(ShouldListAction).Select(action => new { position, action }))
+                .GroupBy(value => value.action.actionKey).Select(group => group.First());
+            ReplaceItems(values.Select(value => new MapTaskItem { id = value.action.actionKey, actionKey = value.action.actionKey,
+                name = NarrativeRuntime.Instance.ResolveText(value.action.nameText),
+                description = NarrativeRuntime.Instance.ResolveText(value.action.descText),
+                currentTask = NarrativeRuntime.Instance.ResolveText(value.action.nameText),
+                completed = actionSource.IsCompleted(value.action.actionKey), location = value.position,
+                remainingDays = actionSource.GetRemainingDays(value.action.actionKey) }));
+        }
 
         public void Initialize()
         {
@@ -48,6 +91,7 @@ namespace Spotlight.GameFlow
             sidebar = GetComponent<MapSidebarView>();
             if (sidebar == null) sidebar = gameObject.AddComponent<MapSidebarView>();
             sidebar.Initialize();
+            if (Application.isPlaying) BindActions();
             if (transform.Find("TaskBody/TaskViewport/TaskContent") is RectTransform existingContent)
             {
                 content = existingContent;
@@ -130,6 +174,7 @@ namespace Spotlight.GameFlow
         {
             // The inventory and task buttons can call this before the panel's first explicit initialization.
             if (sidebar == null) Initialize();
+            if (Application.isPlaying) BindActions();
             expanded = value;
             Refresh();
             sidebar.SetVisible(value);
@@ -137,11 +182,21 @@ namespace Spotlight.GameFlow
 
         public void SetItems(IEnumerable<MapTaskItem> values)
         {
+            externalItems = true;
+            ReplaceItems(values);
+        }
+
+        private void ReplaceItems(IEnumerable<MapTaskItem> values)
+        {
             items.Clear();
             var ids = new HashSet<string>();
             if (values != null)
                 foreach (MapTaskItem item in values)
-                    if (item != null && !string.IsNullOrEmpty(item.id) && ids.Add(item.id)) items.Add(item);
+                    if (item != null && !string.IsNullOrEmpty(item.id) && ids.Add(item.id))
+                    {
+                        var action = NarrativeRuntime.Instance?.Actions?.Get(string.IsNullOrEmpty(item.actionKey) ? item.id : item.actionKey);
+                        if (action == null || ShouldListAction(action)) items.Add(item);
+                    }
             if (items.Find(item => item.id == expandedId) == null) expandedId = null;
             if (items.Find(item => item.id == trackedId) == null) SetTracked(null);
             else Refresh();
@@ -169,7 +224,7 @@ namespace Spotlight.GameFlow
 
         private void Refresh()
         {
-            if (panel == null) return;
+            if (panel == null || body == null || content == null) return;
             MapTaskItem tracked = items.Find(item => item.id == trackedId);
             body.gameObject.SetActive(true);
             if (summary != null) summary.gameObject.SetActive(false);

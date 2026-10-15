@@ -24,6 +24,7 @@ namespace Spotlight.GameFlow
         private DialoguePanel preview;
         private DialogueScript script;
         private NarrativePresenter visualPresenter;
+        private NarrativeChapterPreview chapterPreview;
         private IDisposable simulationPause;
         private bool branchVisual;
         private bool optionsRequested;
@@ -107,6 +108,8 @@ namespace Spotlight.GameFlow
         private void BuildPlayback()
         {
             Label("只看演出，不结算。Conversation按源段落展示，条件不作判定；选项禁用并指向真实分支测试。定位输入为本段0起始快照行索引，源行ID/seq见诊断。");
+            Row("10/7 S1 完整预览", () => Run(() => PlayChapter("oct07.s1", 2)), "S2 知觉1", () => Run(() => PlayChapter("oct07.s2", 1)), "S2 知觉2", () => Run(() => PlayChapter("oct07.s2", 2)));
+            Row("S2 知觉节点", () => Run(() => PlayChapter("oct07.s2", 2, "oct07.s2.perception")), "S2 信纸节点", () => Run(() => PlayChapter("oct07.s2", 2, "oct07.s2.read_letter")));
             if (selected != null && selected.Kind == "Event")
             {
                 foreach (var item in catalog.Entries.Where(e => e.Kind != "Event" && e.EventIds.Contains(selected.Key)))
@@ -154,8 +157,16 @@ namespace Spotlight.GameFlow
             }
             shell.SetVisible(false);
         }
+        private void PlayChapter(string eventId, int perception, string pageId = null)
+        {
+            StopPreview(); RequireSafeBoundary();
+            chapterPreview = new NarrativeChapterPreview();
+            chapterPreview.Play(eventId, perception, pageId);
+            shell.SetVisible(false);
+        }
         private void StopPreview()
         {
+            chapterPreview?.Dispose(); chapterPreview = null;
             if (preview != null && DialoguePanel.Active == preview) DialoguePlayback.Stop();
             preview = null; optionsRequested = false;
         }
@@ -177,6 +188,8 @@ namespace Spotlight.GameFlow
             visualPresenter.ChoiceSelected += test.SelectChoice;
             visualPresenter.ChoiceUnlocked = (id, context) => test.Controller.EvaluateConditions("choice", id, context);
             visualPresenter.AbilityCheck = test.EvaluateAbilityCheck;
+            visualPresenter.InlineAbilityCheck = test.Controller.EvaluateInlineAbilityCheckForPresentation;
+            visualPresenter.LetterPlayback = LetterEventPlayback.PlayPreview;
             visualPresenter.PageCondition = key => test.Controller.State.GetCondition(key);
             visualPresenter.ConversationPlayback = (request, data, completed) =>
             {
@@ -225,7 +238,11 @@ namespace Spotlight.GameFlow
             if (selected == null || selected.Kind != "Event") throw new InvalidOperationException("请从内容查找选择 Event，避免把复用演出的多个事件混为一个。");
             StartVisualTest();
             shell.SetVisible(false);
-            if (!test.RequestEvent(selected.Key)) throw new InvalidOperationException("事件请求被拒绝：" + test.Controller.ExplainEvent(selected.Key));
+            var definition = test.Configuration.events.Single(e => e.eventId == selected.Key);
+            bool accepted = definition.entry == NarrativeEntryPoint.Immediate ? test.RequestEvent(selected.Key)
+                : definition.entry == NarrativeEntryPoint.MapAction ? test.Controller.QueueMapActionEvent(selected.Key)
+                : test.Controller.ProcessEntry(definition.entry);
+            if (!accepted) throw new InvalidOperationException("事件请求被拒绝：" + test.Controller.ExplainEvent(selected.Key));
         }
         private void BuildDiagnostics()
         {

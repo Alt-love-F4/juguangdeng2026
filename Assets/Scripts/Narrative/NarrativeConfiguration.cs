@@ -16,6 +16,7 @@ namespace Spotlight.Narrative
         public List<NarrativeTemplateDefinition> templates = new List<NarrativeTemplateDefinition>();
         public List<NarrativeSetupParamsDefinition> setups = new List<NarrativeSetupParamsDefinition>();
         public List<NarrativeChoiceDefinition> choices = new List<NarrativeChoiceDefinition>();
+        public Dictionary<string, string> abilityNameKeys = new Dictionary<string, string>();
         public List<NarrativeAbilityCheckDefinition> abilityChecks = new List<NarrativeAbilityCheckDefinition>();
         public List<NarrativeAbilityCheckConditionDefinition> abilityCheckConditions = new List<NarrativeAbilityCheckConditionDefinition>();
         public List<NarrativeTextDefinition> texts = new List<NarrativeTextDefinition>();

@@ -1,16 +1,23 @@
 [
   {
-    "eventId": "EV_TALK_CAFE",
-    "day": 3,
-    "timeSlot": "morning",
+    "eventId": "oct07.s2",
+    "day": 2,
+    "timeSlot": "night",
     "repeatRule": "once",
-    "priority": 50
+    "priority": 0
   },
   {
-    "eventId": "EV_REVOLUTION",
-    "day": 60,
+    "eventId": "revolution.1028.s1",
+    "day": 23,
+    "timeSlot": "night",
+    "repeatRule": "once",
+    "priority": 0
+  },
+  {
+    "eventId": "revolution.1014.s1",
+    "day": 9,
     "timeSlot": "morning",
     "repeatRule": "once",
-    "priority": 60
+    "priority": 0
   }
 ]

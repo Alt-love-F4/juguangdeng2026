@@ -29,6 +29,11 @@ public sealed partial class NcsConversationPageEntry : Luban.BeanBase
         OptionGroupKey = (string)_obj.GetValue("optionGroupKey");
         BgOverride = (string)_obj.GetValue("bgOverride");
         BgmOverride = (string)_obj.GetValue("bgmOverride");
+        StepType = (string)_obj.GetValue("stepType");
+        ReadingKey = (string)_obj.GetValue("readingKey");
+        ReadingKey_Ref = null;
+        CheckId = (string)_obj.GetValue("checkId");
+        CheckId_Ref = null;
     }
 
     public static NcsConversationPageEntry DeserializeNcsConversationPageEntry(JToken _buf)
@@ -45,6 +50,11 @@ public sealed partial class NcsConversationPageEntry : Luban.BeanBase
     public readonly string OptionGroupKey;
     public readonly string BgOverride;
     public readonly string BgmOverride;
+    public readonly string StepType;
+    public readonly string ReadingKey;
+    public NcsPresentationIndexEntry ReadingKey_Ref;
+    public readonly string CheckId;
+    public NcsAbilityCheckEntry CheckId_Ref;
 
 
     public const int __ID__ = 1117425474;
@@ -53,6 +63,8 @@ public sealed partial class NcsConversationPageEntry : Luban.BeanBase
     public  void ResolveRef(Tables tables)
     {
         PresentationKey_Ref = tables.TbNcsPresentationIndex.GetOrDefault(PresentationKey);
+        ReadingKey_Ref = tables.TbNcsPresentationIndex.GetOrDefault(ReadingKey);
+        CheckId_Ref = tables.TbNcsAbilityCheck.GetOrDefault(CheckId);
     }
 
     public override string ToString()
@@ -66,6 +78,9 @@ public sealed partial class NcsConversationPageEntry : Luban.BeanBase
         + "optionGroupKey:" + OptionGroupKey + ","
         + "bgOverride:" + BgOverride + ","
         + "bgmOverride:" + BgmOverride + ","
+        + "stepType:" + StepType + ","
+        + "readingKey:" + ReadingKey + ","
+        + "checkId:" + CheckId + ","
         + "}";
     }
 }

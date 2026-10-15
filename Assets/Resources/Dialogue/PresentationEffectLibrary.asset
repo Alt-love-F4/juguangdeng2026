@@ -17,31 +17,49 @@ MonoBehaviour:
     duration: 0.52
     strength: 110
     priority: 0
+    zoom: 0
   - fx: fx_accent_shake_startle
     duration: 0.28
     strength: 18
     priority: 0
+    zoom: 0
   - fx: fx_shake_light
     duration: 0.24
     strength: 7
     priority: 1
+    zoom: 0
   - fx: fx_shake_heavy
     duration: 0.46
     strength: 22
     priority: 2
+    zoom: 0
   - fx: fx_flash_white
     duration: 0.16
     strength: 0.9
     priority: 0
+    zoom: 0
   - fx: fx_transition_black
     duration: 0.6
     strength: 1
     priority: 0
+    zoom: 0
   - fx: fx_portrait_fade_out
     duration: 0.22
     strength: 0
     priority: 0
+    zoom: 0
   - fx: fx_portrait_fade_in
     duration: 0.22
     strength: 0
     priority: 0
+    zoom: 0
+  - fx: fx_portrait_nod
+    duration: 0.25
+    strength: 8
+    priority: 0
+    zoom: 1
+  - fx: fx_background_pan
+    duration: 1.6
+    strength: 0.02
+    priority: 0
+    zoom: 1.05

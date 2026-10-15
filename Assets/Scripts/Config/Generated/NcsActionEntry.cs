@@ -33,6 +33,8 @@ public sealed partial class NcsActionEntry : Luban.BeanBase
         ProgressTarget = (int)_obj.GetValue("progressTarget");
         NextActionKey = (string)_obj.GetValue("nextActionKey");
         DeliveryMode = (string)_obj.GetValue("deliveryMode");
+        ReplacesLocationActions = (bool)_obj.GetValue("replacesLocationActions");
+        FocusLocationOnComplete = (bool)_obj.GetValue("focusLocationOnComplete");
     }
 
     public static NcsActionEntry DeserializeNcsActionEntry(JToken _buf)
@@ -53,6 +55,8 @@ public sealed partial class NcsActionEntry : Luban.BeanBase
     public readonly int ProgressTarget;
     public readonly string NextActionKey;
     public readonly string DeliveryMode;
+    public readonly bool ReplacesLocationActions;
+    public readonly bool FocusLocationOnComplete;
 
 
     public const int __ID__ = 1131081662;
@@ -78,6 +82,8 @@ public sealed partial class NcsActionEntry : Luban.BeanBase
         + "progressTarget:" + ProgressTarget + ","
         + "nextActionKey:" + NextActionKey + ","
         + "deliveryMode:" + DeliveryMode + ","
+        + "replacesLocationActions:" + ReplacesLocationActions + ","
+        + "focusLocationOnComplete:" + FocusLocationOnComplete + ","
         + "}";
     }
 }

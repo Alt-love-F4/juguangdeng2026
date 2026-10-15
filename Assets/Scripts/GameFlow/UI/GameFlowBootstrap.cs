@@ -79,6 +79,7 @@ namespace Spotlight.GameFlow
         private bool openingMap;
         public bool IsMapOpen => mapOverlay != null || openingMap;
         internal bool MapControlsAvailable => gameplay && !paused && !loadingTransitioning && detailsPanel == null
+            && !(narrativeIntegration?.Runtime?.Actions?.IsExecuting ?? false)
             && !DialoguePanel.IsAnyPlaying && (dayFlow == null || !dayFlow.BlocksGameplayInput)
             && (PlayerRuntime.Current?.CreationSubmitted == true || dayFlow != null && dayFlow.State == DayFlowState.CityMapLeisure);
         private int detailsClosedFrame = -1;
@@ -92,6 +93,8 @@ namespace Spotlight.GameFlow
 
         public GameSettings CurrentSettings => settings.Current;
         internal bool GameplayControlsAvailable => CanUseGameplayControls();
+        internal bool CanUseTutorialTestSkip => gameplay && !paused && !saving && !loadingTransitioning
+            && !IsMapOpen && detailsPanel == null;
         internal bool CanPreviewDialogue => SessionState != GameSessionState.GameOver && !paused && !loadingTransitioning
             && !(narrativeIntegration?.Runtime?.BlocksGameplayInput ?? false)
             && (!gameplay || CanUseGameplayControls());
@@ -104,8 +107,17 @@ namespace Spotlight.GameFlow
         };
         public string ResolutionLabel => settings.Current.ResolutionWidth + " x " + settings.Current.ResolutionHeight;
 
+        private static GameFlowBootstrap instance;
+
         private void Awake()
         {
+            if (instance != null && instance != this)
+            {
+                enabled = false;
+                Destroy(gameObject);
+                return;
+            }
+            instance = this;
             SetSessionState(GameSessionState.Menu);
             DontDestroyOnLoad(transform.root.gameObject);
             persistentEventSystem = EventSystem.current;
@@ -142,6 +154,7 @@ namespace Spotlight.GameFlow
                 narrativeIntegration.Runtime.ReadingPlayback = ReadingEventPlayback.Play;
                 narrativeIntegration.Runtime.NoticePlayback = NarrativeNoticeEventPlayback.Play;
                 narrativeIntegration.Runtime.ConversationPlayback = NarrativeConversationEventPlayback.Play;
+                narrativeIntegration.Runtime.LetterPlayback = LetterEventPlayback.Play;
                 narrativeIntegration.Runtime.CharacterResolver = NarrativeCharacterResolver.Resolve;
                 narrativeIntegration.Runtime.PlayerNameProvider = () => PlayerRuntime.Current?.PlayerName ?? string.Empty;
             }
@@ -179,6 +192,9 @@ namespace Spotlight.GameFlow
 
         private void OnDestroy()
         {
+            // A rejected scene duplicate never owned the shared player/narrative session.
+            if (instance != this) return;
+            instance = null;
             openingProloguePanel?.Stop();
             playerSession.Dispose();
             PlayerRuntime.Current = null;
@@ -426,7 +442,8 @@ namespace Spotlight.GameFlow
 
         public void OpenPause()
         {
-            bool tutorialPause = dayFlow != null && dayFlow.IsFirstSessionGuideActive;
+            bool tutorialPause = dayFlow != null && (dayFlow.IsFirstSessionGuideActive || dayFlow.IsNarrativeEntryActive)
+                || (narrativeIntegration?.Runtime?.Controller?.BlocksSave ?? false);
             if ((!tutorialPause && DialoguePanel.IsAnyPlaying) || !gameplay || paused || loadingTransitioning
                 || (!tutorialPause && dayFlow != null && dayFlow.BlocksGameplayInput)
                 || (!tutorialPause && (narrativeIntegration?.Runtime?.BlocksGameplayInput ?? false))) return;
@@ -441,11 +458,15 @@ namespace Spotlight.GameFlow
             yield return new WaitForEndOfFrame();
             openingPause = false;
             if (!gameplay || version != sessionVersion) yield break;
-            bool tutorialPause = dayFlow != null && dayFlow.IsFirstSessionGuideActive;
+            bool tutorialPause = dayFlow != null && (dayFlow.IsFirstSessionGuideActive || dayFlow.IsNarrativeEntryActive)
+                || (narrativeIntegration?.Runtime?.Controller?.BlocksSave ?? false);
             CaptureGameplayThumbnail();
             paused = true;
-            if (tutorialPause && dayFlow.CurrentDialogue != null)
-                dayFlow.CurrentDialogue.InputSuspended = true;
+            if (tutorialPause)
+            {
+                var dialogue = UIKit.GetPanel<DialoguePanel>();
+                if (dialogue != null) dialogue.InputSuspended = true;
+            }
             previousTimeScale = Time.timeScale;
             Time.timeScale = 0f;
             PauseMenuPanel panel = UIKit.OpenPanel<PauseMenuPanel>(UILevel.Pop, Data(true), cachePolicy: PanelCachePolicy.Reusable);
@@ -463,8 +484,8 @@ namespace Spotlight.GameFlow
         {
             if (!gameplay) return;
             paused = false;
-            if (dayFlow != null && dayFlow.CurrentDialogue != null)
-                dayFlow.CurrentDialogue.InputSuspended = false;
+            var dialogue = UIKit.GetPanel<DialoguePanel>();
+            if (dialogue != null) dialogue.InputSuspended = false;
             Time.timeScale = previousTimeScale;
         }
 
@@ -472,7 +493,7 @@ namespace Spotlight.GameFlow
         {
             if (fromGameplay && !CanSaveCurrentSession)
             {
-                ShowResult("暂不可存档", "首日咖啡馆教学进行中，完成教学前不能存档。", () => { });
+                ShowResult("暂不可存档", "当前教学或剧情正在播放，请在结束后的安全节点存档。", () => { });
                 return;
             }
             SaveManagementPanel panel = UIKit.OpenPanel<SaveManagementPanel>(UILevel.Pop, Data(fromGameplay), cachePolicy: PanelCachePolicy.Reusable);
@@ -583,7 +604,7 @@ namespace Spotlight.GameFlow
         {
             if (!CanSaveCurrentSession)
             {
-                ShowResult("暂不可存档", "首日咖啡馆教学进行中，完成教学前不能存档。", () => { });
+                ShowResult("暂不可存档", "当前教学或剧情正在播放，请在结束后的安全节点存档。", () => { });
                 return;
             }
             BeginQuickSave(null);
@@ -607,8 +628,8 @@ namespace Spotlight.GameFlow
             if (SessionState == GameSessionState.GameOver) { ReturnFromGameOver(); return; }
             if (!CanSaveCurrentSession)
             {
-                ShowConfirmation("退出主菜单", "教学尚未完成，当前进度不会保存。要返回主菜单吗？", "返回主菜单",
-                    () => LoadThen(OpenMainMenu, config.MainMenuScene), "继续教学", () => { });
+                ShowConfirmation("退出主菜单", "当前教学或剧情尚未完成，本段进度不会保存。要返回主菜单吗？", "返回主菜单",
+                    () => LoadThen(OpenMainMenu, config.MainMenuScene), "继续游戏", () => { });
                 return;
             }
             ShowConfirmation("退出主菜单", "是否保存当前游戏进度？不保存退出将丢失当前未保存的进度。", "保存游戏并退出",
@@ -620,8 +641,8 @@ namespace Spotlight.GameFlow
         {
             if (!CanSaveCurrentSession)
             {
-                ShowConfirmation("退出游戏", "教学尚未完成，当前进度不会保存。要退出游戏吗？", "退出游戏",
-                    QuitGame, "继续教学", () => { });
+                ShowConfirmation("退出游戏", "当前教学或剧情尚未完成，本段进度不会保存。要退出游戏吗？", "退出游戏",
+                    QuitGame, "继续游戏", () => { });
                 return;
             }
             ShowConfirmation("退出游戏", "是否保存游戏并退出？", "保存并退出", () =>
@@ -699,16 +720,20 @@ namespace Spotlight.GameFlow
         private bool CanUseNarrativePresentation()
         {
             if (CanUseGameplayControls()) return true;
-            return gameplay && !paused && !loadingTransitioning && !IsMapOpen && detailsPanel == null
-                && !DialoguePanel.IsAnyPlaying && dayFlow != null && dayFlow.IsFirstSessionGuideActive
-                && dayFlow.State == DayFlowState.FirstDayIntroduction;
+            bool executingAction = narrativeIntegration?.Runtime?.Actions?.IsExecuting ?? false;
+            // An action keeps the map open while its result events play, including the fallback narrative UI.
+            return gameplay && !paused && !loadingTransitioning && (!IsMapOpen || executingAction) && detailsPanel == null
+                && (executingAction || dayFlow != null && (dayFlow.IsNarrativeEntryActive
+                    || dayFlow.IsFirstSessionGuideActive && dayFlow.State == DayFlowState.FirstDayIntroduction
+                    || (narrativeIntegration?.Runtime?.Controller?.BlocksSave ?? false)));
         }
 
         private void HandleEscape()
         {
             if (openingProloguePanel != null && openingProloguePanel.IsPlaying) return;
             if (SessionState == GameSessionState.GameOver || saving || openingPause) return;
-            bool tutorialPause = dayFlow != null && dayFlow.IsFirstSessionGuideActive;
+            bool tutorialPause = dayFlow != null && (dayFlow.IsFirstSessionGuideActive || dayFlow.IsNarrativeEntryActive)
+                || (narrativeIntegration?.Runtime?.Controller?.BlocksSave ?? false);
             if (detailsPanel != null || detailsClosedFrame == Time.frameCount || DialoguePanel.BlocksEscapeThisFrame && !tutorialPause) return;
             // The map is an additive gameplay overlay. Escape should open the pause stack over it;
             // closing the map here leaves the player without map controls after the first press.
@@ -806,6 +831,11 @@ namespace Spotlight.GameFlow
 
         private void OpenMainMenu()
         {
+            // Persistent NCS UI is not unloaded with the gameplay scene. Invalidate
+            // DayFlow callbacks first, then release the entire composite stage.
+            SetSessionState(GameSessionState.Menu);
+            dayFlow?.HideForMainMenu();
+            narrativeIntegration?.Runtime?.Presenter?.InterruptForHost();
             DialogueHistoryService.ClearFormal();
             Spotlight.Audio.GameAudio.Music(Spotlight.Audio.AudioKeys.MenuMusic);
             openingProloguePanel?.Stop();
@@ -824,8 +854,6 @@ namespace Spotlight.GameFlow
             narrativeIntegration?.Runtime?.Presenter?.SetSuspended(true);
             Time.timeScale = 1f;
             paused = false;
-            SetSessionState(GameSessionState.Menu);
-            dayFlow?.HideForMainMenu();
             UIKit.ClearStack(MainStack, true);
             if (GameplayPanelHooks.IsScenePanel && GameplayPanelHooks.OpenPanel != null)
             {
@@ -1195,7 +1223,7 @@ namespace Spotlight.GameFlow
         {
             data = null;
             if (!CanSaveCurrentSession)
-            { error = "首日咖啡馆教学进行中，完成教学前不能存档。"; return false; }
+            { error = "当前教学或剧情正在播放，请在结束后的安全节点存档。"; return false; }
             if (!gameplay || loadingSavedSession || loadingTransitioning)
             { error = "当前会话状态不允许保存。"; return false; }
             data = new GameSaveData

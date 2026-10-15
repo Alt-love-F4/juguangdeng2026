@@ -14,5 +14,37 @@
     "threshold": 3,
     "groupIndex": 1,
     "seq": 1
+  },
+  {
+    "conditionId": "oct07.s2.perception.1",
+    "checkId": "oct07.s2.perception",
+    "attributeId": "perception",
+    "threshold": 2,
+    "groupIndex": 1,
+    "seq": 1
+  },
+  {
+    "conditionId": "revolution.1014.s1.wisdom4.1",
+    "checkId": "revolution.1014.s1.wisdom4",
+    "attributeId": "wisdom",
+    "threshold": 4,
+    "groupIndex": 1,
+    "seq": 1
+  },
+  {
+    "conditionId": "revolution.1014.s1.perception6.1",
+    "checkId": "revolution.1014.s1.perception6",
+    "attributeId": "perception",
+    "threshold": 6,
+    "groupIndex": 1,
+    "seq": 1
+  },
+  {
+    "conditionId": "revolution.1014.s1.wisdom5.1",
+    "checkId": "revolution.1014.s1.wisdom5",
+    "attributeId": "wisdom",
+    "threshold": 5,
+    "groupIndex": 1,
+    "seq": 1
   }
 ]

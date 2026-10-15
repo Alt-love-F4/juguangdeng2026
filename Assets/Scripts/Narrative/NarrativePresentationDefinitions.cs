@@ -8,15 +8,19 @@ namespace Spotlight.Narrative
         public string presentationKey, presentationClass, logTag;
     }
 
+    public enum NarrativeConversationStepType { Dialogue, PassiveCheck, LetterReveal, LetterRead }
+
     [Serializable] public sealed class NarrativeConversationPageDefinition
     {
         public string pageId, presentationKey, pageCondKeys, pageBarConds, optionGroupKey, bgOverride, bgmOverride;
+        public NarrativeConversationStepType stepType;
+        public string readingKey, checkId;
         public int seq;
     }
 
     [Serializable] public sealed class NarrativeConversationLineDefinition
     {
-        public string lineId, pageId, speakerKey, side, textKey, voiceKey, emote, sfxKey, accentFxKey, accentTargetKey;
+        public string lineId, pageId, speakerKey, side, textKey, voiceKey, emote, sfxKey, accentFxKey, accentTargetKey, speakerNameKey;
         public int seq;
     }
 
@@ -70,6 +74,27 @@ namespace Spotlight.Narrative
         public string text, textKey, speakerKey, speakerName, portraitPath, mode, voiceKey;
         public UnityEngine.Sprite portrait;
     }
+
+    /// <summary>Resolved, per-step snapshot. UI must not query NCS or commit story results.</summary>
+    public sealed class NarrativeLetterPresentationData
+    {
+        public object continuityOwner;
+        public string eventId, presentationKey, pageId, readingKey, title, imagePath, envelopePath;
+        public string titleKey, readingPageId;
+        public bool revealOnly, allowCancel;
+        public Action<bool> setSuspended;
+        public Action cancelled;
+        public Action releaseStage;
+        public readonly List<NarrativeLetterPresentationLine> lines = new List<NarrativeLetterPresentationLine>();
+    }
+
+    public sealed class NarrativeLetterPresentationLine
+    {
+        public string eventId, presentationKey, pageId, lineId, textKey, text, mode, speakerKey, speakerName, voiceKey;
+        public int seq;
+    }
+
+    public delegate bool NarrativeLetterPlayback(NarrativeEventRequest request, NarrativeLetterPresentationData data, Action completed);
 
     public sealed class NarrativeCharacterPresentationData
     {

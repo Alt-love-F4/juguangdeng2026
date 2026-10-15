@@ -1,31 +1,5 @@
 [
   {
-    "actionKey": "act_meet_b",
-    "type": "DAILY",
-    "mustExecute": false,
-    "nameText": "action.meet_b.name",
-    "descText": "action.meet_b.desc",
-    "requirements": "ActionPoint(1)",
-    "resultEvents": "EV_ACT_MEET",
-    "durationDays": 0,
-    "progressTarget": 0,
-    "nextActionKey": "",
-    "deliveryMode": "None"
-  },
-  {
-    "actionKey": "act_c_with_b",
-    "type": "DAILY",
-    "mustExecute": false,
-    "nameText": "action.c_with_b.name",
-    "descText": "action.c_with_b.desc",
-    "requirements": "ActionPoint(1)",
-    "resultEvents": "EV_ACT_C_WITH_B",
-    "durationDays": 0,
-    "progressTarget": 0,
-    "nextActionKey": "",
-    "deliveryMode": "None"
-  },
-  {
     "actionKey": "act_salon",
     "type": "ONCE",
     "mustExecute": false,
@@ -36,7 +10,9 @@
     "durationDays": 0,
     "progressTarget": 0,
     "nextActionKey": "",
-    "deliveryMode": "None"
+    "deliveryMode": "None",
+    "replacesLocationActions": false,
+    "focusLocationOnComplete": false
   },
   {
     "actionKey": "act_peer",
@@ -49,7 +25,9 @@
     "durationDays": 0,
     "progressTarget": 0,
     "nextActionKey": "",
-    "deliveryMode": "None"
+    "deliveryMode": "None",
+    "replacesLocationActions": false,
+    "focusLocationOnComplete": false
   },
   {
     "actionKey": "act_test_delivery_cumulative",
@@ -62,7 +40,9 @@
     "durationDays": 0,
     "progressTarget": 5,
     "nextActionKey": "",
-    "deliveryMode": "Cumulative"
+    "deliveryMode": "Cumulative",
+    "replacesLocationActions": false,
+    "focusLocationOnComplete": false
   },
   {
     "actionKey": "act_test_delivery_consecutive",
@@ -75,6 +55,23 @@
     "durationDays": 0,
     "progressTarget": 5,
     "nextActionKey": "",
-    "deliveryMode": "Consecutive"
+    "deliveryMode": "Consecutive",
+    "replacesLocationActions": false,
+    "focusLocationOnComplete": false
+  },
+  {
+    "actionKey": "oct07.cafe.s1",
+    "type": "ONCE",
+    "mustExecute": true,
+    "nameText": "oct07.cafe.s1.name",
+    "descText": "",
+    "requirements": "",
+    "resultEvents": "oct07.s1",
+    "durationDays": 0,
+    "progressTarget": 0,
+    "nextActionKey": "",
+    "deliveryMode": "None",
+    "replacesLocationActions": true,
+    "focusLocationOnComplete": true
   }
 ]

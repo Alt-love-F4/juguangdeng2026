@@ -14,7 +14,7 @@ namespace Spotlight.GameFlow
     {
         public const string DebugTag = "presentation-debug";
         public const string ScenePath = "Assets/Scenes/PresentationDebugScene.unity";
-        public const string DefaultHint = "按键/按钮可随时切换演出。Esc 关闭 · Backspace 重播 · H 收起说明 · F9 切换暂停时间。";
+        public const string DefaultHint = "F1 10/7 S1 · F2/F3 S2知觉1/2 · F4知觉节点 · F5信纸。Esc 关闭 · Backspace 重播 · H 收起说明 · F9 暂停。";
 
         public enum Preview { DateChange, Letter, Dialogue, PreBusiness, CafeOpening, BusinessEnd, CityMap, PreNight, HomeNight, DayEnd, Introduction, Effects, Reading, Notice, CutScene, HardcodedDialogue, HardcodedLetter, HardcodedOptions, Details, LongLoading, ShortLoading, GameOver, OpeningPrologue }
 
@@ -46,6 +46,9 @@ namespace Spotlight.GameFlow
         private Coroutine pendingEffectCue;
         private Coroutine loadingPreviewRoutine;
         private bool alternateBackdrop;
+        private NarrativeChapterPreview chapterPreview;
+        private string chapterEvent, chapterPage;
+        private int chapterPerception;
         private int requestVersion;
         private int startedFrame;
         private float originalTimeScale;
@@ -89,6 +92,11 @@ namespace Spotlight.GameFlow
             if (keyboard.f12Key.wasPressedThisFrame) { ResetHelp(); return; }
             if (keyboard.backspaceKey.wasPressedThisFrame) { ReplayLast(); return; }
             bool draftPreview = keyboard.leftShiftKey.isPressed || keyboard.rightShiftKey.isPressed;
+            if (keyboard.f1Key.wasPressedThisFrame) { PlayOctober07S1(); return; }
+            if (keyboard.f2Key.wasPressedThisFrame) { PlayOctober07S2Low(); return; }
+            if (keyboard.f3Key.wasPressedThisFrame) { PlayOctober07S2High(); return; }
+            if (keyboard.f4Key.wasPressedThisFrame) { PlayOctober07Perception(); return; }
+            if (keyboard.f5Key.wasPressedThisFrame) { PlayOctober07Letter(); return; }
             if (keyboard.qKey.wasPressedThisFrame) PlayDateChange();
             else if (keyboard.wKey.wasPressedThisFrame) { if (draftPreview) PlayHardcodedLetter(); else PlayLetter(); }
             else if (keyboard.eKey.wasPressedThisFrame) { if (draftPreview) PlayHardcodedDialogue(); else PlayDialogue(); }
@@ -119,6 +127,26 @@ namespace Spotlight.GameFlow
             else if (keyboard.digit8Key.wasPressedThisFrame) PreviewZoom();
             else if (keyboard.digit9Key.wasPressedThisFrame) PreviewResetCamera();
             else if (keyboard.digit0Key.wasPressedThisFrame) PreviewExit();
+        }
+
+        public void PlayOctober07S1() => PlayChapter("oct07.s1", 2);
+        public void PlayOctober07S2Low() => PlayChapter("oct07.s2", 1);
+        public void PlayOctober07S2High() => PlayChapter("oct07.s2", 2);
+        public void PlayOctober07Perception() => PlayChapter("oct07.s2", 2, "oct07.s2.perception");
+        public void PlayOctober07Letter() => PlayChapter("oct07.s2", 2, "oct07.s2.read_letter");
+        private void PlayChapter(string eventId, int perception, string pageId = null)
+        {
+            StopCurrent();
+            chapterEvent = eventId; chapterPage = pageId; chapterPerception = perception;
+            hasLastPreview = false;
+            chapterPreview = new NarrativeChapterPreview();
+            try
+            {
+                chapterPreview.Play(eventId, perception, pageId);
+                SetStatus("正式配置 · 独立预览", eventId + " / 知觉=" + perception);
+                SetHint("F1 S1 · F2/F3 S2知觉1/2 · F4知觉节点 · F5信纸。Esc关闭，不结算正式状态。");
+            }
+            catch (Exception error) { chapterPreview.Dispose(); chapterPreview = null; SetStatus("预览失败", error.Message); }
         }
 
         public void PlayGameOver() => PlayPreview(Preview.GameOver);
@@ -490,6 +518,7 @@ namespace Spotlight.GameFlow
             configuredSession?.Dispose();
             configuredSession = null;
             RestoreHelp();
+            chapterPreview?.Dispose(); chapterPreview = null;
             if (loadingPreviewRoutine != null) { StopCoroutine(loadingPreviewRoutine); loadingPreviewRoutine = null; }
             if (pendingEffectCue != null) { StopCoroutine(pendingEffectCue); pendingEffectCue = null; }
             currentPanel = null;
@@ -502,9 +531,12 @@ namespace Spotlight.GameFlow
 
         public void ReplayLast()
         {
-            if (!hasLastPreview) return;
-            if (!string.IsNullOrEmpty(selectedDialogueId)) PlayConfiguredDialogue(selectedDialogueId);
-            else PlayPreview(lastPreview);
+            if (chapterPreview != null) PlayChapter(chapterEvent, chapterPerception, chapterPage);
+            else if (hasLastPreview)
+            {
+                if (!string.IsNullOrEmpty(selectedDialogueId)) PlayConfiguredDialogue(selectedDialogueId);
+                else PlayPreview(lastPreview);
+            }
         }
 
         public void ContinueCurrent()

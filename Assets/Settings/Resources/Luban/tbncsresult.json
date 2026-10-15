@@ -601,5 +601,41 @@
     "target": "event:arrival.complete",
     "value": "",
     "note": ""
+  },
+  {
+    "resultId": "oct07.s1.complete",
+    "eventId": "oct07.s1",
+    "seq": 1,
+    "resultType": "SET_FLAG",
+    "target": "story.oct07.s1.completed",
+    "value": "true",
+    "note": "仅全部40正文完成才结算；分页/切场景/取消不算完成；无奖励/道具/额外事件。"
+  },
+  {
+    "resultId": "oct07.s2.complete",
+    "eventId": "oct07.s2",
+    "seq": 1,
+    "resultType": "SET_FLAG",
+    "target": "story.oct07.s2.completed",
+    "value": "true",
+    "note": "仅P047后整根event完成才结算；读完信纸不算结束；无任务/道具/奖励/额外剧情。"
+  },
+  {
+    "resultId": "oct07.s2.meeting_known",
+    "eventId": "oct07.s2",
+    "seq": 2,
+    "resultType": "SET_FLAG",
+    "target": "story.oct09.meeting.known",
+    "value": "true",
+    "note": "仅P047后整根event完成才结算；读完信纸不算结束；无任务/道具/奖励/额外剧情。"
+  },
+  {
+    "resultId": "church.1009.s2.complete",
+    "eventId": "church.1009.s2",
+    "seq": 1,
+    "resultType": "SET_FLAG",
+    "target": "story.church.1009.s2.completed",
+    "value": "true",
+    "note": "P050 root completion only; no hat fact/reward"
   }
 ]

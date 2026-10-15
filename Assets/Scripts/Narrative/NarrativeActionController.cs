@@ -20,6 +20,9 @@ namespace Spotlight.Narrative
         private readonly HashSet<string> retired = new HashSet<string>(StringComparer.Ordinal);
         private readonly Queue<string> dueActions = new Queue<string>();
         private readonly Dictionary<string, NarrativeActionDeliveryValue> deliveries = new Dictionary<string, NarrativeActionDeliveryValue>(StringComparer.Ordinal);
+        private readonly HashSet<string> seenActionInstances = new HashSet<string>(StringComparer.Ordinal);
+        private readonly List<string> pendingFocusPositions = new List<string>();
+        private readonly Dictionary<string, string> mapContentSignatures = new Dictionary<string, string>(StringComparer.Ordinal);
         private bool committing;
         private bool operationOpen;
         private bool executing;
@@ -31,8 +34,9 @@ namespace Spotlight.Narrative
         public NarrativeActionPoints ActionPoints { get; }
         public int CurrentDay { get; private set; } = 1;
         public bool IsExecuting => executing;
-        public bool CanCaptureSnapshot => !committing;
+        public bool CanCaptureSnapshot => !committing && !(executing && DefersCompletion(Get(executingAction)));
         public event Action StateChanged;
+        public event Action<string> MapContentChanged;
         public event Action<NarrativeActionDefinition> ActionStarted;
         public event Action<NarrativeActionDefinition, bool> ActionFinished;
 
@@ -57,6 +61,9 @@ namespace Spotlight.Narrative
                 if (action.type == NarrativeActionType.Future && (string.IsNullOrEmpty(action.nextActionKey) || Get(action.nextActionKey) == null || action.nextActionKey == action.actionKey))
                     throw new FormatException("Future action requires a different configured nextActionKey: " + action.actionKey);
             ActionPoints = new NarrativeActionPoints(actionPointMax);
+            StateChanged += () => RefreshMapContent();
+            narrative.State.ConditionsChanged += () => { if (!committing) RefreshMapContent(); };
+            narrative.BarChanged += (_, __, ___) => { if (!committing) { RefreshMapContent(); StateChanged?.Invoke(); } };
             ActionPoints.Changed += (_, __) => { if (!committing) StateChanged?.Invoke(); };
             SetInventory(inventory);
             narrative.ActionProgressReader = key => Get(key) == null ? (int?)null : GetProgress(key);
@@ -117,20 +124,91 @@ namespace Spotlight.Narrative
                     changed = true;
                 }
             }
+            RefreshMapContent();
             if (!changed) return;
             narrative.NotifyConditionsChanged();
             StateChanged?.Invoke();
         }
 
-        public void Mount(string position, string key)
+        public void Mount(string position, string key, string instanceVersion = null)
         {
             var action = Get(key);
             if (action == null) throw new FormatException("Unknown mounted action: " + key);
-            if (mounts.Any(m => m.position == position && m.action == key)) return;
-            mounts.Add(new NarrativeActionMountValue { position = position, action = key, day = CurrentDay });
+            if (string.IsNullOrWhiteSpace(position)) throw new ArgumentException("A map position is required.", nameof(position));
+            var mounted = mounts.FirstOrDefault(m => m.position == position && m.action == key);
+            if (mounted != null)
+            {
+                if (string.IsNullOrEmpty(instanceVersion) || mounted.instanceVersion == instanceVersion) return;
+                mounted.instanceVersion = instanceVersion;
+            }
+            else mounts.Add(new NarrativeActionMountValue { position = position, action = key, day = CurrentDay, instanceVersion = instanceVersion });
             if ((action.IsTimed || action.type == NarrativeActionType.Future) && !expiryDays.ContainsKey(key))
                 expiryDays[key] = checked(CurrentDay + action.durationDays);
+            RefreshMapContent(position);
         }
+
+        /// <summary>One projection shared by details, badges and mandatory guidance. Costs do not hide cards.</summary>
+        public IEnumerable<NarrativeActionDefinition> GetDisplayableActions(string position)
+        {
+            if (!narrative.ValuesReady) return Enumerable.Empty<NarrativeActionDefinition>();
+            var values = GetMountedActions(position).Where(a => narrative.EvaluateConditions("action", a.actionKey)).ToList();
+            return values.Any(a => a.replacesLocationActions && !IsCompleted(a.actionKey))
+                ? values.Where(a => a.replacesLocationActions && !IsCompleted(a.actionKey)) : values;
+        }
+
+        public bool ReplacesLocationActions(string position)
+            => GetDisplayableActions(position).Any(a => a.replacesLocationActions && !IsCompleted(a.actionKey));
+
+        public string GetActionInstanceKey(string position, string actionKey)
+        {
+            var mount = mounts.FirstOrDefault(m => m.position == position && m.action == actionKey);
+            if (mount == null) return null;
+            var action = Get(actionKey);
+            string version = string.IsNullOrEmpty(mount.instanceVersion) ? "mount:" + mount.day : mount.instanceVersion;
+            if (action.type == NarrativeActionType.Daily || action.IsDelivery) version += "/day:" + CurrentDay;
+            return Uri.EscapeDataString(position) + "|" + Uri.EscapeDataString(actionKey) + "|" + Uri.EscapeDataString(version);
+        }
+
+        private bool IsUnseenCandidate(NarrativeActionDefinition action)
+            => !IsCompleted(action.actionKey) && !(dailyExecution.TryGetValue(action.actionKey, out int day) && day == CurrentDay
+                && (action.type == NarrativeActionType.Daily || action.IsDelivery));
+
+        public bool HasUnseenActions(string position)
+            => GetDisplayableActions(position).Any(a => IsUnseenCandidate(a) && !seenActionInstances.Contains(GetActionInstanceKey(position, a.actionKey)));
+
+        /// <summary>Only the actual rendered, unobscured detail page may acknowledge its captured instance token.</summary>
+        public bool ConfirmActionDisplayed(string position, string instanceKey)
+        {
+            if (string.IsNullOrEmpty(instanceKey) || !GetDisplayableActions(position).Any(a => GetActionInstanceKey(position, a.actionKey) == instanceKey)) return false;
+            if (!seenActionInstances.Add(instanceKey)) return false;
+            RefreshMapContent(position);
+            return true;
+        }
+
+        /// <summary>Call after changing map context; source data is evaluated in memory, never reloaded from Excel.</summary>
+        public void RefreshMapContent(string positionKey = null)
+        {
+            foreach (string position in mounts.Select(m => m.position).Distinct().Where(p => positionKey == null || p == positionKey).ToArray())
+            {
+                string signature = string.Join(";", GetDisplayableActions(position).Select(a => GetActionInstanceKey(position, a.actionKey)
+                    + ":" + IsUnseenCandidate(a) + ":" + seenActionInstances.Contains(GetActionInstanceKey(position, a.actionKey))));
+                if (mapContentSignatures.TryGetValue(position, out string previous) && previous == signature) continue;
+                mapContentSignatures[position] = signature;
+                MapContentChanged?.Invoke(position);
+            }
+        }
+
+        public IEnumerable<string> GetBlockingPositions()
+            => mounts.Select(m => m.position).Distinct().Where(position => GetDisplayableActions(position).Any(IsBlockingAction));
+
+        private bool IsBlockingAction(NarrativeActionDefinition action)
+            => action.mustExecute && !IsCompleted(action.actionKey) && action.type != NarrativeActionType.Future
+                && (!dailyExecution.TryGetValue(action.actionKey, out int day) || day != CurrentDay);
+
+        public string PendingFocusPosition => pendingFocusPositions.Count > 0 ? pendingFocusPositions[0] : null;
+        public bool ConsumePendingFocus(string position) => pendingFocusPositions.Remove(position);
+
+        public IEnumerable<string> GetMapPositions() => mounts.Select(m => m.position).Distinct();
 
         public IEnumerable<NarrativeActionDefinition> GetMountedActions(string position)
             => mounts.Where(m => m.position == position).Select(m => Get(m.action)).Where(a => a != null && IsVisible(a.actionKey));
@@ -152,20 +230,14 @@ namespace Spotlight.Narrative
         public bool HasSubmittedToday(string key) => key != null && deliveries.TryGetValue(key, out var value) && value.lastSubmissionDay == CurrentDay;
         public bool HasBlockingActions()
         {
-            foreach (var mount in mounts)
-            {
-                var action = Get(mount.action);
-                if (action != null && action.mustExecute && IsVisible(action.actionKey) && !IsCompleted(action.actionKey) && action.type != NarrativeActionType.Future
-                    && (!dailyExecution.TryGetValue(action.actionKey, out int day) || day != CurrentDay)) return true;
-            }
-            return false;
+            return GetBlockingPositions().Any();
         }
 
         public bool IsAvailable(string actionKey, out List<NarrativeActionCheck> checks)
         {
             checks = new List<NarrativeActionCheck>();
             NarrativeActionDefinition action = Get(actionKey);
-            if (action == null) return false;
+            if (action == null || !narrative.ValuesReady) return false;
             bool eligible = !executing && !narrative.IsEnded && !narrative.IsBusy && IsVisible(actionKey) && !IsCompleted(actionKey) && action.type != NarrativeActionType.Future;
             if (action.IsDelivery && HasSubmittedToday(actionKey)) eligible = false;
             if (action.endDay && HasBlockingActions()) eligible = false;
@@ -208,7 +280,9 @@ namespace Spotlight.Narrative
                     }
                     pendingCompletion = completed;
                     pendingEvents = new Queue<string>();
-                    RecordExecution(action);
+                    // Narrative Once actions are not completed by accepting a click. Commit only
+                    // after every result event succeeds so cancelled mandatory stories remain retryable.
+                    if (!DefersCompletion(action)) RecordExecution(action);
                     if (action.IsDelivery)
                     {
                         var delivery = deliveries[actionKey];
@@ -235,7 +309,7 @@ namespace Spotlight.Narrative
         public void CaptureInto(NarrativeActionStateSnapshot snapshot)
         {
             if (snapshot == null) return;
-            if (committing) throw new InvalidOperationException("Cannot save during action commit.");
+            if (!CanCaptureSnapshot) throw new InvalidOperationException("Cannot save during action commit or an unfinished Once presentation.");
             snapshot.deliveryVersion = 1;
             snapshot.deliveries = deliveries.Values.Select(CloneDelivery).ToList();
             snapshot.day = CurrentDay;
@@ -244,7 +318,9 @@ namespace Spotlight.Narrative
             snapshot.counters = counters.Select(pair => new NarrativeActionCounterValue { key = pair.Key, value = pair.Value }).ToList();
             snapshot.daily = dailyExecution.Select(pair => new NarrativeActionDayValue { key = pair.Key, day = pair.Value }).ToList();
             snapshot.expiry = expiryDays.Select(pair => new NarrativeActionExpiryValue { key = pair.Key, day = pair.Value }).ToList();
-            snapshot.mounts = mounts.Select(m => new NarrativeActionMountValue { position = m.position, action = m.action, day = m.day }).ToList();
+            snapshot.mounts = mounts.Select(m => new NarrativeActionMountValue { position = m.position, action = m.action, day = m.day, instanceVersion = m.instanceVersion }).ToList();
+            snapshot.seenActionInstances = seenActionInstances.ToList();
+            snapshot.pendingFocusPositions = new List<string>(pendingFocusPositions);
             snapshot.retired = retired.ToList();
             snapshot.executingAction = executingAction;
             snapshot.currentEvent = currentEventId;
@@ -258,6 +334,12 @@ namespace Spotlight.Narrative
             if (snapshot == null) return;
             if (executing) throw new InvalidOperationException("Cannot restore action state during action execution.");
             if (snapshot.deliveryVersion < 0 || snapshot.deliveryVersion > 1) throw new FormatException("Unsupported action delivery snapshot version: " + snapshot.deliveryVersion);
+            seenActionInstances.Clear();
+            if (snapshot.seenActionInstances != null) foreach (string key in snapshot.seenActionInstances)
+                if (!string.IsNullOrEmpty(key)) seenActionInstances.Add(key);
+            pendingFocusPositions.Clear();
+            if (snapshot.pendingFocusPositions != null) pendingFocusPositions.AddRange(snapshot.pendingFocusPositions.Where(p => !string.IsNullOrWhiteSpace(p)).Distinct());
+            mapContentSignatures.Clear();
             CurrentDay = Mathf.Max(1, snapshot.day);
             ActionPoints.ResetForDay(Mathf.Max(0, snapshot.actionPointMax));
             ActionPoints.Set(snapshot.actionPoints);
@@ -406,7 +488,7 @@ namespace Spotlight.Narrative
             }
             string eventId = pendingEvents.Dequeue();
             currentEventId = eventId;
-            if (!narrative.QueueEvent(eventId))
+            if (!narrative.QueueMapActionEvent(eventId))
             {
                 // Retain the committed action and refused event for recovery; never declare it completed.
                 pendingEvents = new Queue<string>(new[] { eventId }.Concat(pendingEvents));
@@ -416,10 +498,20 @@ namespace Spotlight.Narrative
             }
         }
 
+        private static bool DefersCompletion(NarrativeActionDefinition action)
+            => action != null && action.type == NarrativeActionType.Once && !action.IsProgress && !action.IsDelivery;
+
         private void ReportFailure()
         {
+            var action = Get(executingAction);
             var callback = pendingCompletion; pendingCompletion = null;
-            ActionFinished?.Invoke(Get(executingAction), false);
+            if (DefersCompletion(action))
+            {
+                // NCS owns cancelling its presentation/epoch. Release only this action's operation.
+                executing = false; executingAction = null; pendingEvents = null; currentEventId = null;
+                CloseOperation();
+            }
+            ActionFinished?.Invoke(action, false);
             StateChanged?.Invoke();
             callback?.Invoke(false);
         }
@@ -434,12 +526,16 @@ namespace Spotlight.Narrative
         private void Finish(bool success)
         {
             NarrativeActionDefinition action = Get(executingAction);
+            if (success && !narrative.IsEnded && DefersCompletion(action)) RecordExecution(action);
             narrative.NotifyConditionsChanged();
             CloseOperation();
             narrative.RunAtSafeBoundary(() =>
             {
                 executing = false; executingAction = null; pendingEvents = null; currentEventId = null;
                 Action<bool> callback = pendingCompletion; pendingCompletion = null;
+                if (success && !narrative.IsEnded && action != null && action.focusLocationOnComplete)
+                    foreach (string position in mounts.Where(m => m.action == action.actionKey).Select(m => m.position).Distinct())
+                        if (!pendingFocusPositions.Contains(position)) pendingFocusPositions.Add(position);
                 ActionFinished?.Invoke(action, success && !narrative.IsEnded);
                 StateChanged?.Invoke();
                 callback?.Invoke(success && !narrative.IsEnded);

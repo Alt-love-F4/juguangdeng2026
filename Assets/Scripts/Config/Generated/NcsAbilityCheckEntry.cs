@@ -27,6 +27,7 @@ public sealed partial class NcsAbilityCheckEntry : Luban.BeanBase
         FailureEventId_Ref = null;
         SuccessResultOwnerId = (string)_obj.GetValue("successResultOwnerId");
         FailureResultOwnerId = (string)_obj.GetValue("failureResultOwnerId");
+        Mode = (string)_obj.GetValue("mode");
     }
 
     public static NcsAbilityCheckEntry DeserializeNcsAbilityCheckEntry(JToken _buf)
@@ -41,6 +42,7 @@ public sealed partial class NcsAbilityCheckEntry : Luban.BeanBase
     public NcsEventEntry FailureEventId_Ref;
     public readonly string SuccessResultOwnerId;
     public readonly string FailureResultOwnerId;
+    public readonly string Mode;
 
 
     public const int __ID__ = 1779740534;
@@ -60,6 +62,7 @@ public sealed partial class NcsAbilityCheckEntry : Luban.BeanBase
         + "failureEventId:" + FailureEventId + ","
         + "successResultOwnerId:" + SuccessResultOwnerId + ","
         + "failureResultOwnerId:" + FailureResultOwnerId + ","
+        + "mode:" + Mode + ","
         + "}";
     }
 }

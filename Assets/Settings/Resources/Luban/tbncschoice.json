@@ -78,5 +78,181 @@
     "resultOwnerId": "MA70.10.06-S1-3.2",
     "seq": 2,
     "checkId": ""
+  },
+  {
+    "choiceId": "rose.1009.s1.choice.p045",
+    "groupKey": "rose.1009.s1.choice.origin",
+    "textKey": "rose.1009.s1.text.p045",
+    "resultOwnerId": "",
+    "seq": 1,
+    "checkId": ""
+  },
+  {
+    "choiceId": "rose.1009.s1.choice.p046",
+    "groupKey": "rose.1009.s1.choice.origin",
+    "textKey": "rose.1009.s1.text.p046",
+    "resultOwnerId": "",
+    "seq": 2,
+    "checkId": ""
+  },
+  {
+    "choiceId": "revolution.1013.s2.c1.1",
+    "groupKey": "revolution.1013.s2.c1",
+    "textKey": "ncs.revolution.1013.s2.p039",
+    "resultOwnerId": "",
+    "seq": 1,
+    "checkId": ""
+  },
+  {
+    "choiceId": "revolution.1013.s2.c1.2",
+    "groupKey": "revolution.1013.s2.c1",
+    "textKey": "ncs.revolution.1013.s2.p040",
+    "resultOwnerId": "",
+    "seq": 2,
+    "checkId": ""
+  },
+  {
+    "choiceId": "revolution.1013.s2.c1.3",
+    "groupKey": "revolution.1013.s2.c1",
+    "textKey": "ncs.revolution.1013.s2.p041",
+    "resultOwnerId": "",
+    "seq": 3,
+    "checkId": ""
+  },
+  {
+    "choiceId": "revolution.1028.s1.c1.1",
+    "groupKey": "revolution.1028.s1.c1",
+    "textKey": "ncs.revolution.1028.s1.p100",
+    "resultOwnerId": "",
+    "seq": 1,
+    "checkId": ""
+  },
+  {
+    "choiceId": "revolution.1028.s1.c1.2",
+    "groupKey": "revolution.1028.s1.c1",
+    "textKey": "ncs.revolution.1028.s1.p101",
+    "resultOwnerId": "",
+    "seq": 2,
+    "checkId": ""
+  },
+  {
+    "choiceId": "revolution.1028.s1.c1.3",
+    "groupKey": "revolution.1028.s1.c1",
+    "textKey": "ncs.revolution.1028.s1.p102",
+    "resultOwnerId": "",
+    "seq": 3,
+    "checkId": ""
+  },
+  {
+    "choiceId": "revolution.1014.s1.c1.1",
+    "groupKey": "revolution.1014.s1.c1",
+    "textKey": "ncs.revolution.1014.s1.p010",
+    "resultOwnerId": "",
+    "seq": 1,
+    "checkId": ""
+  },
+  {
+    "choiceId": "revolution.1014.s1.c1.2",
+    "groupKey": "revolution.1014.s1.c1",
+    "textKey": "ncs.revolution.1014.s1.p011",
+    "resultOwnerId": "",
+    "seq": 2,
+    "checkId": ""
+  },
+  {
+    "choiceId": "revolution.1014.s1.c2.1",
+    "groupKey": "revolution.1014.s1.c2",
+    "textKey": "ncs.revolution.1014.s1.p055",
+    "resultOwnerId": "",
+    "seq": 1,
+    "checkId": ""
+  },
+  {
+    "choiceId": "revolution.1014.s1.c2.2",
+    "groupKey": "revolution.1014.s1.c2",
+    "textKey": "ncs.revolution.1014.s1.p056",
+    "resultOwnerId": "",
+    "seq": 2,
+    "checkId": ""
+  },
+  {
+    "choiceId": "revolution.1014.s1.c2.3",
+    "groupKey": "revolution.1014.s1.c2",
+    "textKey": "ncs.revolution.1014.s1.p057",
+    "resultOwnerId": "",
+    "seq": 3,
+    "checkId": ""
+  },
+  {
+    "choiceId": "revolution.1014.s1.c4.1",
+    "groupKey": "revolution.1014.s1.c4",
+    "textKey": "ncs.revolution.1014.s1.p092",
+    "resultOwnerId": "",
+    "seq": 1,
+    "checkId": ""
+  },
+  {
+    "choiceId": "revolution.1014.s1.c4.2",
+    "groupKey": "revolution.1014.s1.c4",
+    "textKey": "ncs.revolution.1014.s1.p093",
+    "resultOwnerId": "",
+    "seq": 2,
+    "checkId": ""
+  },
+  {
+    "choiceId": "revolution.1014.s1.c4.3",
+    "groupKey": "revolution.1014.s1.c4",
+    "textKey": "ncs.revolution.1014.s1.p094",
+    "resultOwnerId": "",
+    "seq": 3,
+    "checkId": ""
+  },
+  {
+    "choiceId": "revolution.1014.s1.c4.4",
+    "groupKey": "revolution.1014.s1.c4",
+    "textKey": "ncs.revolution.1014.s1.p095",
+    "resultOwnerId": "",
+    "seq": 4,
+    "checkId": ""
+  },
+  {
+    "choiceId": "revolution.1014.s1.c5.1",
+    "groupKey": "revolution.1014.s1.c5",
+    "textKey": "ncs.revolution.1014.s1.p146",
+    "resultOwnerId": "",
+    "seq": 1,
+    "checkId": ""
+  },
+  {
+    "choiceId": "revolution.1014.s1.c5.2",
+    "groupKey": "revolution.1014.s1.c5",
+    "textKey": "ncs.revolution.1014.s1.p147",
+    "resultOwnerId": "",
+    "seq": 2,
+    "checkId": ""
+  },
+  {
+    "choiceId": "revolution.1014.s1.c5.3",
+    "groupKey": "revolution.1014.s1.c5",
+    "textKey": "ncs.revolution.1014.s1.p148",
+    "resultOwnerId": "",
+    "seq": 3,
+    "checkId": ""
+  },
+  {
+    "choiceId": "church.1009.s2.p029",
+    "groupKey": "church.1009.s2.hat.choices",
+    "textKey": "church.1009.s2.p029.text",
+    "resultOwnerId": "",
+    "seq": 1,
+    "checkId": ""
+  },
+  {
+    "choiceId": "church.1009.s2.p030",
+    "groupKey": "church.1009.s2.hat.choices",
+    "textKey": "church.1009.s2.p030.text",
+    "resultOwnerId": "",
+    "seq": 2,
+    "checkId": ""
   }
 ]

@@ -28,6 +28,9 @@ namespace Spotlight.Narrative
         private int displayedCalendarDay = 1;
 
         public Func<bool> CanInteract { get; set; }
+        /// <summary>Formal day-flow owners may provide the request; this scaffold must not advance in parallel.</summary>
+        public Action EndDayRequested { get; set; }
+        public event Action BlockingActionHintRequested;
         private bool AllowsAction => visible && runtime != null && runtime.IsReady && !runtime.BlocksGameplayInput
             && Time.timeScale > 0 && !advancingDay && (CanInteract?.Invoke() ?? true);
 
@@ -128,6 +131,13 @@ namespace Spotlight.Narrative
         private void FinishDay()
         {
             if (!AllowsAction || runtime == null) return;
+            if (runtime.Actions?.HasBlockingActions() ?? false)
+            {
+                if (descriptionText != null) descriptionText.text = "还有事情需要先处理。";
+                BlockingActionHintRequested?.Invoke();
+                return;
+            }
+            if (EndDayRequested != null) { EndDayRequested(); return; }
             advancingDay = true; runtime.BeginTurn(); runtime.EndTurn();
         }
 

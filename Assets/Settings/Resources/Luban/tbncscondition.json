@@ -187,5 +187,194 @@
     "condType": "ACTION_COMPLETED",
     "target": "act_test_delivery_consecutive",
     "value": ""
+  },
+  {
+    "conditionId": "oct07.cafe.s1.day",
+    "ownerType": "action",
+    "ownerId": "oct07.cafe.s1",
+    "groupIndex": 1,
+    "condType": "BAR_BETWEEN",
+    "target": "world.calendar",
+    "value": "2,2"
+  },
+  {
+    "conditionId": "oct07.cafe.s1.incomplete",
+    "ownerType": "action",
+    "ownerId": "oct07.cafe.s1",
+    "groupIndex": 1,
+    "condType": "BOOL_EQ",
+    "target": "story.oct07.s1.completed",
+    "value": "false"
+  },
+  {
+    "conditionId": "oct07.s1.day",
+    "ownerType": "event",
+    "ownerId": "oct07.s1",
+    "groupIndex": 1,
+    "condType": "BAR_BETWEEN",
+    "target": "world.calendar",
+    "value": "2,2"
+  },
+  {
+    "conditionId": "oct07.s1.incomplete",
+    "ownerType": "event",
+    "ownerId": "oct07.s1",
+    "groupIndex": 1,
+    "condType": "BOOL_EQ",
+    "target": "story.oct07.s1.completed",
+    "value": "false"
+  },
+  {
+    "conditionId": "oct07.cafe.s1.map",
+    "ownerType": "action",
+    "ownerId": "oct07.cafe.s1",
+    "groupIndex": 1,
+    "condType": "BOOL_EQ",
+    "target": "world.map.active",
+    "value": "true"
+  },
+  {
+    "conditionId": "oct07.s2.day",
+    "ownerType": "event",
+    "ownerId": "oct07.s2",
+    "groupIndex": 1,
+    "condType": "BAR_BETWEEN",
+    "target": "world.calendar",
+    "value": "2,2"
+  },
+  {
+    "conditionId": "oct07.s2.incomplete",
+    "ownerType": "event",
+    "ownerId": "oct07.s2",
+    "groupIndex": 1,
+    "condType": "BOOL_EQ",
+    "target": "story.oct07.s2.completed",
+    "value": "false"
+  },
+  {
+    "conditionId": "oct07.s2.s1_complete",
+    "ownerType": "event",
+    "ownerId": "oct07.s2",
+    "groupIndex": 1,
+    "condType": "BOOL_EQ",
+    "target": "story.oct07.s1.completed",
+    "value": "true"
+  },
+  {
+    "conditionId": "rose.1009.s1.day",
+    "ownerType": "event",
+    "ownerId": "rose.1009.s1",
+    "groupIndex": 1,
+    "condType": "BAR_BETWEEN",
+    "target": "world.calendar",
+    "value": "4,4"
+  },
+  {
+    "conditionId": "rose.1009.s1.meeting",
+    "ownerType": "event",
+    "ownerId": "rose.1009.s1",
+    "groupIndex": 1,
+    "condType": "BOOL_EQ",
+    "target": "story.oct09.meeting.known",
+    "value": "true"
+  },
+  {
+    "conditionId": "revolution.1013.s2.day",
+    "ownerType": "event",
+    "ownerId": "revolution.1013.s2",
+    "groupIndex": 1,
+    "condType": "BAR_BETWEEN",
+    "target": "world.calendar",
+    "value": "8,8"
+  },
+  {
+    "conditionId": "revolution.1013.s2.incomplete",
+    "ownerType": "event",
+    "ownerId": "revolution.1013.s2",
+    "groupIndex": 1,
+    "condType": "BOOL_EQ",
+    "target": "story.revolution.1013.s2.completed",
+    "value": "false"
+  },
+  {
+    "conditionId": "revolution.1013.s2.first_letter",
+    "ownerType": "event",
+    "ownerId": "revolution.1013.s2",
+    "groupIndex": 1,
+    "condType": "BOOL_EQ",
+    "target": "story.oct07.s2.completed",
+    "value": "true"
+  },
+  {
+    "conditionId": "revolution.1028.s1.day",
+    "ownerType": "event",
+    "ownerId": "revolution.1028.s1",
+    "groupIndex": 1,
+    "condType": "BAR_BETWEEN",
+    "target": "world.calendar",
+    "value": "23,23"
+  },
+  {
+    "conditionId": "revolution.1028.s1.incomplete",
+    "ownerType": "event",
+    "ownerId": "revolution.1028.s1",
+    "groupIndex": 1,
+    "condType": "BOOL_EQ",
+    "target": "story.revolution.1028.s1.completed",
+    "value": "false"
+  },
+  {
+    "conditionId": "revolution.1028.s1.first_letter",
+    "ownerType": "event",
+    "ownerId": "revolution.1028.s1",
+    "groupIndex": 1,
+    "condType": "BOOL_EQ",
+    "target": "story.oct07.s2.completed",
+    "value": "true"
+  },
+  {
+    "conditionId": "revolution.1014.s1.day",
+    "ownerType": "event",
+    "ownerId": "revolution.1014.s1",
+    "groupIndex": 1,
+    "condType": "BAR_BETWEEN",
+    "target": "world.calendar",
+    "value": "9,9"
+  },
+  {
+    "conditionId": "revolution.1014.s1.incomplete",
+    "ownerType": "event",
+    "ownerId": "revolution.1014.s1",
+    "groupIndex": 1,
+    "condType": "BOOL_EQ",
+    "target": "story.revolution.1014.s1.completed",
+    "value": "false"
+  },
+  {
+    "conditionId": "revolution.1014.s1.first_letter",
+    "ownerType": "event",
+    "ownerId": "revolution.1014.s1",
+    "groupIndex": 1,
+    "condType": "BOOL_EQ",
+    "target": "story.oct07.s2.completed",
+    "value": "true"
+  },
+  {
+    "conditionId": "church.1009.s2.day",
+    "ownerType": "event",
+    "ownerId": "church.1009.s2",
+    "groupIndex": 1,
+    "condType": "BAR_BETWEEN",
+    "target": "world.calendar",
+    "value": "4,4"
+  },
+  {
+    "conditionId": "church.1009.s2.incomplete",
+    "ownerType": "event",
+    "ownerId": "church.1009.s2",
+    "groupIndex": 1,
+    "condType": "BOOL_EQ",
+    "target": "story.church.1009.s2.completed",
+    "value": "false"
   }
 ]

@@ -1,7 +1,7 @@
 {
     "name": "Spotlight.GameFlow.Narrative.Tests",
     "rootNamespace": "Spotlight.GameFlow.Tests",
-    "references": ["Spotlight.GameFlow.UI", "Spotlight.GameFlow.Saving", "Spotlight.Narrative", "Spotlight.FreeCafe.Domain", "Spotlight.Config"],
+    "references": ["Spotlight.GameFlow.UI", "Spotlight.GameFlow.Saving", "Spotlight.Narrative", "Spotlight.FreeCafe.Domain", "Spotlight.Config", "YokiFrame.UIKit.Unity"],
     "includePlatforms": ["Editor"],
     "optionalUnityReferences": ["TestAssemblies"],
     "autoReferenced": false

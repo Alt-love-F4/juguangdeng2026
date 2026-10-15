@@ -26,10 +26,16 @@ namespace Spotlight.GameFlow
                     continue;
                 }
                 CharacterProfile profile = NarrativeCharacterResolver.Find(item.speakerKey);
-                Sprite portrait = profile != null ? profile.PortraitFor(item.emote)
-                    : item.portrait != null ? item.portrait : string.IsNullOrWhiteSpace(item.portraitPath) ? null : Resources.Load<Sprite>(item.portraitPath);
-                var character = new DialogueCharacter(item.speakerKey,
-                    profile != null ? profile.displayName : item.speakerName, portrait,
+                string speakerName = !string.IsNullOrWhiteSpace(item.speakerName) ? item.speakerName : profile?.displayName;
+                if (string.Equals(item.side, "none", StringComparison.OrdinalIgnoreCase))
+                {
+                    lines.Add(new DialogueLine(DialogueSpeaker.Offstage, item.text, speakerNameOverride: speakerName,
+                        accentFxKey: item.accentFxKey, accentTargetKey: item.accentTargetKey,
+                        passiveHint: lines.Count == 0 ? passiveHint : null, sfxKey: item.sfxKey, voiceKey: item.voiceKey, source: source));
+                    continue;
+                }
+                Sprite portrait = ResolvePortrait(item, profile);
+                var character = new DialogueCharacter(item.speakerKey, speakerName, portrait,
                     portraitSpecified: !string.IsNullOrWhiteSpace(item.emote));
                 bool isLeft = string.Equals(item.side, "left", StringComparison.OrdinalIgnoreCase);
                 bool isCenter = string.Equals(item.side, "center", StringComparison.OrdinalIgnoreCase);
@@ -47,29 +53,49 @@ namespace Spotlight.GameFlow
                 options.Add(new DialogueOption(option.id, option.text, enabled: option.enabled, requirementHint: option.requirement));
             // Only the first line introduces its speaker. Later characters must not appear early.
             return new DialogueScript(lines, new DialogueCharacter("", null), new DialogueCharacter("", null), data.title,
-                string.IsNullOrEmpty(data.backgroundPath) ? null : Resources.Load<Texture>(data.backgroundPath), options,
-                continuityOwner: data.continuityOwner, continues: data.continues, musicKey: data.bgmOverride);
+                options: options, continuityOwner: data.continuityOwner, continues: data.continues, musicKey: data.bgmOverride,
+                backgroundVisual: NarrativeStageVisuals.Resolve(data.backgroundPath));
+        }
+
+        private static readonly HashSet<string> warnedPortraits = new HashSet<string>(StringComparer.Ordinal);
+        private static Sprite ResolvePortrait(NarrativeConversationPresentationLine item, CharacterProfile profile)
+        {
+            Sprite portrait = profile != null ? profile.PortraitFor(item.emote)
+                : item.portrait != null ? item.portrait : string.IsNullOrWhiteSpace(item.portraitPath) ? null : Resources.Load<Sprite>(item.portraitPath);
+            bool requested = !string.IsNullOrWhiteSpace(item.emote) && !string.Equals(item.emote, "neutral", StringComparison.OrdinalIgnoreCase);
+            bool missing = requested && (profile == null ||
+                !(string.Equals(item.emote, "happy", StringComparison.OrdinalIgnoreCase) && profile.portraitHappy != null)
+                && !(string.Equals(item.emote, "angry", StringComparison.OrdinalIgnoreCase) && profile.portraitAngry != null));
+            if (missing && warnedPortraits.Add(item.speakerKey + "/" + item.emote))
+                Debug.LogWarning("[NCS][PortraitFallback] character=" + item.speakerKey + " emote=" + item.emote
+                    + " line=" + item.lineId + "; using configured base portrait (expression resource missing).");
+            return portrait;
         }
 
         public static bool Play(NarrativeEventRequest request, NarrativeConversationPresentationData data, Action completed)
             => Play(request, data, completed, "character-dialogue", PanelCachePolicy.Reusable);
+
+        public static bool PlayPreview(NarrativeEventRequest request, NarrativeConversationPresentationData data, Action completed)
+            => Play(request, data, completed, "character-dialogue", PanelCachePolicy.Reusable, true);
 
         public static bool Play(NarrativeEventRequest request, NarrativeConversationPresentationData data, Action completed,
             string panelTag, PanelCachePolicy cachePolicy, bool isPreview = false)
         {
             if (data == null || data.lines.Count == 0 && data.options.Count == 0) return false;
             bool notified = false;
-            void Complete() { if (notified) return; notified = true; completed?.Invoke(); }
-            void Cancel() { if (notified) return; notified = true; data.cancelled?.Invoke(); }
-            DialogueScript script = CreateScript(data, request.PassiveHint);
+            DialoguePanel panel = null;
+            void Detach() { if (panel != null) panel.PlaybackInterrupted -= Cancel; }
+            void Complete() { if (notified) return; notified = true; Detach(); completed?.Invoke(); }
+            void Cancel() { if (notified) return; notified = true; Detach(); data.cancelled?.Invoke(); }
+            var script = CreateScript(data, request.PassiveHint);
             if (isPreview) script = script.WithPreviewContext();
-            DialoguePanel panel = DialoguePlayback.Play(script, Complete, Cancel,
-                panelTag, cachePolicy);
-            data.releaseStage = () => DialoguePlayback.ReleaseStage(data.continuityOwner);
+            panel = DialoguePlayback.Play(script, Complete, Cancel, panelTag, cachePolicy);
+            if (!notified) panel.PlaybackInterrupted += Cancel;
+            data.releaseStage = () => { Detach(); DialoguePlayback.ReleaseStage(data.continuityOwner); };
             // Formal first-session guidance owns progression; ESC belongs to the pause menu.
             // Preview playback has no running guide and retains its normal cancellation behavior.
             var dayFlow = UnityEngine.Object.FindFirstObjectByType<DayFlowController>();
-            panel.AllowCancel = dayFlow == null || !dayFlow.IsFirstSessionGuideActive;
+            panel.AllowCancel = isPreview || request.Event?.blocksSave != true && (dayFlow == null || !dayFlow.IsFirstSessionGuideActive);
             panel.OptionSelectionRequested = data.selectChoice;
             return true;
         }

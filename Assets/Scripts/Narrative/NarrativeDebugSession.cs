@@ -158,6 +158,7 @@ namespace Spotlight.Narrative
         public bool SelectChoice(string id) { RequireBaseline(); bool accepted = Controller.SelectChoice(id); log.Add("选择 " + id + " accepted=" + accepted); return accepted; }
         public void CompletePresentation() { RequireBaseline(); var callback = completion; callback?.Invoke(); }
         public NarrativeAbilityCheckSnapshot EvaluateAbilityCheck(string id) { RequireBaseline(); return Controller.EvaluateAbilityCheckForPresentation(id); }
+        public NarrativeAbilityCheckSnapshot EvaluateInlineAbilityCheck(string id) { RequireBaseline(); return Controller.EvaluateInlineAbilityCheckForPresentation(id); }
         public void SubmitDate(int day)
         {
             RequireBaseline(); if (day < 1) throw new ArgumentOutOfRangeException(nameof(day));

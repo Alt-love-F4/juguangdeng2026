@@ -86,5 +86,93 @@
     "avtarPath": "",
     "descText": "",
     "tags": "cafe"
+  },
+  {
+    "objId": "oct07.passerby.a",
+    "objType": "npc",
+    "nameText": "oct07.passerby.a.name",
+    "iconPath": "",
+    "portraitPath": "",
+    "portraitIndoorPath": "",
+    "avtarPath": "",
+    "descText": "",
+    "tags": "oct07,passerby,offstage"
+  },
+  {
+    "objId": "rose.envoy",
+    "objType": "npc",
+    "nameText": "rose.envoy.name",
+    "iconPath": "",
+    "portraitPath": "",
+    "portraitIndoorPath": "",
+    "avtarPath": "",
+    "descText": "",
+    "tags": ""
+  },
+  {
+    "objId": "rose.butake",
+    "objType": "npc",
+    "nameText": "rose.butake.name",
+    "iconPath": "",
+    "portraitPath": "",
+    "portraitIndoorPath": "",
+    "avtarPath": "",
+    "descText": "",
+    "tags": ""
+  },
+  {
+    "objId": "sorel",
+    "objType": "npc",
+    "nameText": "character.sorel.name",
+    "iconPath": "",
+    "portraitPath": "",
+    "portraitIndoorPath": "",
+    "avtarPath": "",
+    "descText": "",
+    "tags": "revolution,C-R04-missing-portrait"
+  },
+  {
+    "objId": "church.broadcast",
+    "objType": "npc",
+    "nameText": "church.broadcast.name",
+    "iconPath": "",
+    "portraitPath": "",
+    "portraitIndoorPath": "",
+    "avtarPath": "",
+    "descText": "",
+    "tags": ""
+  },
+  {
+    "objId": "church.crowd",
+    "objType": "npc",
+    "nameText": "church.crowd.name",
+    "iconPath": "",
+    "portraitPath": "",
+    "portraitIndoorPath": "",
+    "avtarPath": "",
+    "descText": "",
+    "tags": ""
+  },
+  {
+    "objId": "church.duke",
+    "objType": "npc",
+    "nameText": "church.duke.name",
+    "iconPath": "",
+    "portraitPath": "",
+    "portraitIndoorPath": "",
+    "avtarPath": "",
+    "descText": "",
+    "tags": ""
+  },
+  {
+    "objId": "church.man",
+    "objType": "npc",
+    "nameText": "church.man.name",
+    "iconPath": "",
+    "portraitPath": "",
+    "portraitIndoorPath": "",
+    "avtarPath": "",
+    "descText": "",
+    "tags": ""
   }
 ]

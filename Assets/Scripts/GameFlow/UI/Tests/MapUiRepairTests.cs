@@ -25,6 +25,65 @@ namespace Spotlight.GameFlow.Tests
             public void Play(NarrativeEventRequest request, Action completed) => completed?.Invoke();
         }
 
+        private sealed class PendingPresenter : INarrativePresenter
+        {
+            public Action Complete;
+            public void Play(NarrativeEventRequest request, Action completed) => Complete = completed;
+        }
+
+        [TestCase(false)]
+        [TestCase(true)]
+        public void MapActionNarrativeRunsWithoutDayFlowButRespectsHostBlockers(bool openingMap)
+        {
+            var presenter = new PendingPresenter();
+            var config = new NarrativeConfiguration();
+            config.events.Add(new NarrativeEventDefinition { eventId = "map-story" });
+            config.actions.Add(new NarrativeActionDefinition { actionKey = "map-action",
+                type = NarrativeActionType.Once, resultEvents = new System.Collections.Generic.List<string> { "map-story" } });
+            runtime.Initialize(config, presenter);
+            var host = Create("NarrativeHost", root.transform);
+            var flow = host.AddComponent(UiType("Spotlight.GameFlow.GameFlowBootstrap"));
+            var integration = host.AddComponent<NarrativeGameFlowIntegration>();
+            typeof(NarrativeGameFlowIntegration).GetField("runtime", PrivateInstance).SetValue(integration, runtime);
+            flow.GetType().GetField("narrativeIntegration", PrivateInstance).SetValue(flow, integration);
+            var setSession = flow.GetType().GetMethod("SetSessionState", PrivateInstance);
+            var stateType = setSession.GetParameters()[0].ParameterType;
+            setSession.Invoke(flow, new[] { Enum.Parse(stateType, "Playing") });
+            if (openingMap) flow.GetType().GetField("openingMap", PrivateInstance).SetValue(flow, true);
+            else flow.GetType().GetField("mapOverlay", PrivateInstance).SetValue(flow,
+                Create("MapOverlay", root.transform).AddComponent(UiType("Spotlight.GameFlow.MapSceneController")));
+            var canPresent = flow.GetType().GetMethod("CanUseNarrativePresentation", PrivateInstance);
+            Assert.That((bool)canPresent.Invoke(flow, null), Is.False, "An idle map must still suspend unrelated narration.");
+            Assert.That(runtime.Actions.Execute("map-action"), Is.True);
+            Assert.That(runtime.Actions.IsExecuting, Is.True);
+            Assert.That(presenter.Complete, Is.Not.Null);
+            Assert.That((bool)canPresent.Invoke(flow, null), Is.True, "Map result events must progress even through the fallback presenter without DayFlow.");
+            var dayFlow = host.AddComponent(UiType("Spotlight.GameFlow.DayFlowController"));
+            var dayState = dayFlow.GetType().GetProperty("State");
+            dayState.GetSetMethod(true).Invoke(dayFlow, new[] { Enum.Parse(dayState.PropertyType, "CityMapLeisure") });
+            flow.GetType().GetField("dayFlow", PrivateInstance).SetValue(flow, dayFlow);
+            var mapControls = flow.GetType().GetProperty("MapControlsAvailable", PrivateInstance);
+            Assert.That((bool)mapControls.GetValue(flow), Is.False, "An executing action must block map input even without DialoguePanel playback.");
+            foreach (string fieldName in new[] { "paused", "loadingTransitioning" })
+            {
+                var field = flow.GetType().GetField(fieldName, PrivateInstance);
+                field.SetValue(flow, true);
+                Assert.That((bool)canPresent.Invoke(flow, null), Is.False, fieldName);
+                field.SetValue(flow, false);
+            }
+            var detailsField = flow.GetType().GetField("detailsPanel", PrivateInstance);
+            detailsField.SetValue(flow, Create("DetailsBlocker", root.transform).AddComponent(detailsField.FieldType));
+            Assert.That((bool)canPresent.Invoke(flow, null), Is.False, "Details must continue to suspend presentation.");
+            detailsField.SetValue(flow, null);
+            setSession.Invoke(flow, new[] { Enum.Parse(stateType, "Menu") });
+            Assert.That((bool)canPresent.Invoke(flow, null), Is.False, "An action cannot bypass the gameplay session gate.");
+            setSession.Invoke(flow, new[] { Enum.Parse(stateType, "Playing") });
+            presenter.Complete();
+            Assert.That(runtime.Actions.IsExecuting, Is.False);
+            Assert.That((bool)canPresent.Invoke(flow, null), Is.False, "Finishing the action must restore the idle map gate.");
+            Assert.That((bool)mapControls.GetValue(flow), Is.True, "Map controls must recover after the result event completes.");
+        }
+
         [SetUp]
         public void SetUp()
         {
@@ -53,6 +112,73 @@ namespace Spotlight.GameFlow.Tests
                 if (instanceProperty != null)
                     instanceProperty.GetSetMethod(true).Invoke(null, new object[] { previousRuntime });
             }
+        }
+
+        [Test]
+        public void NewActionDotDeclaresAndCreatesRendererBeforeGraphicLifecycle()
+        {
+            var required = UiType("Spotlight.GameFlow.MapActionNewContentDot").GetCustomAttributes(typeof(RequireComponent), false)
+                .Cast<RequireComponent>().ToArray();
+            Assert.That(required.Any(attribute => attribute.m_Type0 == typeof(CanvasRenderer)
+                || attribute.m_Type1 == typeof(CanvasRenderer) || attribute.m_Type2 == typeof(CanvasRenderer)), Is.True,
+                "The custom Graphic must own its renderer dependency, not rely on Graphic's lazy getter.");
+            var dotRoot = Create("NewActionDot", root.transform);
+            var dot = dotRoot.AddComponent(UiType("Spotlight.GameFlow.MapActionNewContentDot"));
+            // Do not access Graphic.canvasRenderer before this assertion: that getter may add
+            // a renderer lazily and would conceal the missing construction-time dependency.
+            Assert.That(dotRoot.GetComponent<CanvasRenderer>(), Is.Not.Null);
+            Assert.That(dotRoot.GetComponents<CanvasRenderer>(), Has.Length.EqualTo(1));
+            Assert.That(dotRoot.GetComponent<Canvas>(), Is.Null);
+        }
+
+        [Test]
+        public void MapBadgeBindingCreatesOneCompleteGraphicAndKeepsItsRenderer()
+        {
+            var config = new NarrativeConfiguration();
+            config.actions.Add(new NarrativeActionDefinition { actionKey = "visible" });
+            runtime.Initialize(config, new ImmediatePresenter()); runtime.Actions.Mount("cafe", "visible");
+            var mapRoot = Create("MapBadgeBinding", root.transform);
+            var map = mapRoot.AddComponent(UiType("Spotlight.GameFlow.MapSceneController")); // Parent stays inactive: no scene services or Awake.
+            var location = Create("Location:cafe", mapRoot.transform);
+            location.AddComponent(UiType("UnityEngine.UI.Image"));
+            var button = location.AddComponent(UiType("UnityEngine.UI.Button"));
+            Invoke(map, "BindNewContentDot", button, "cafe");
+            var dotRoot = location.transform.Find("NewActionDot");
+            Assert.That(dotRoot, Is.Not.Null);
+            var renderer = dotRoot.GetComponent<CanvasRenderer>();
+            Assert.That(renderer, Is.Not.Null);
+            Invoke(map, "BindNewContentDot", button, "cafe");
+            Assert.That(location.GetComponentsInChildren(UiType("Spotlight.GameFlow.MapActionNewContentDot"), true), Has.Length.EqualTo(1));
+            Assert.That(dotRoot.GetComponent<CanvasRenderer>(), Is.SameAs(renderer));
+            Assert.That(dotRoot.GetComponent<Canvas>(), Is.Null);
+        }
+
+        [Test]
+        public void NewActionDotSurvivesMaskClippingAndCanvasRebuildAfterVisibilityChanges()
+        {
+            root.AddComponent<Canvas>(); // Isolated test host only; production uses its existing map Canvas.
+            var viewport = Create("Viewport", root.transform);
+            ((RectTransform)viewport.transform).sizeDelta = new Vector2(100, 100);
+            var mask = viewport.AddComponent(UiType("UnityEngine.UI.RectMask2D"));
+            var dotRoot = Create("NewActionDot", viewport.transform);
+            ((RectTransform)dotRoot.transform).sizeDelta = new Vector2(20, 20);
+            var dot = dotRoot.AddComponent(UiType("Spotlight.GameFlow.MapActionNewContentDot"));
+            var renderer = dotRoot.GetComponent<CanvasRenderer>();
+            Assert.That(renderer, Is.Not.Null, "Renderer must exist before the first Canvas pass.");
+            root.SetActive(true);
+            Assert.That(Get<bool>(dot, "raycastTarget"), Is.False);
+            var clip = mask.GetType().GetMethod("PerformClipping");
+            Assert.That(clip, Is.Not.Null);
+            Assert.DoesNotThrow(() =>
+            {
+                Canvas.ForceUpdateCanvases();
+                clip.Invoke(mask, null);
+                dotRoot.SetActive(false); Canvas.ForceUpdateCanvases();
+                dotRoot.SetActive(true); Canvas.ForceUpdateCanvases();
+                clip.Invoke(mask, null);
+            });
+            Assert.That(dotRoot.GetComponent<CanvasRenderer>(), Is.SameAs(renderer));
+            Assert.That(dotRoot.GetComponents<CanvasRenderer>(), Has.Length.EqualTo(1));
         }
 
         [TestCase(0)]
@@ -187,6 +313,100 @@ namespace Spotlight.GameFlow.Tests
             var content = details.transform.Find("Viewport/ActionList");
             Assert.That(content.Find("EnterCafe"), Is.Not.Null);
             Assert.That(content.Find("Action_act_meet_b"), Is.Not.Null, "Existing cafe actions stay visible.");
+        }
+
+        [Test]
+        public void PopupRequiredSizeIncludesExecuteOverflowBeforeContentBinding()
+        {
+            CreateDetails(null);
+            var template = (RectTransform)details.transform.Find("Viewport/ActionList/ActionCardTemplate");
+            ConfigureAuthoredExecuteOverflow(template);
+            typeof(MapActionDetailsView).GetField("content", PrivateInstance).SetValue(details, null);
+            var required = (Vector2)typeof(MapActionDetailsView).GetMethod("GetRequiredPopupSize", PrivateInstance).Invoke(details, null);
+            Assert.That(required.x, Is.GreaterThanOrEqualTo(937f));
+            Assert.That(required.y, Is.GreaterThanOrEqualTo(626f));
+            Assert.That(template.sizeDelta, Is.EqualTo(new Vector2(796, 414)), "Keep authored card geometry intact.");
+        }
+
+        [Test]
+        public void ActivePageFitsEntireExecuteArtworkWhenPopupIsClamped()
+        {
+            var config = new NarrativeConfiguration(); config.actions.Add(new NarrativeActionDefinition { actionKey = "fit" });
+            runtime.Initialize(config, new ImmediatePresenter()); runtime.Actions.Mount("cafe", "fit");
+            CreateDetails(null);
+            ConfigureAuthoredExecuteOverflow((RectTransform)details.transform.Find("Viewport/ActionList/ActionCardTemplate"));
+            details.Show("cafe", "咖啡馆");
+            ((RectTransform)details.transform).sizeDelta = new Vector2(820, 440);
+            Invoke(details, "FitVisibleCard");
+            var viewport = (RectTransform)details.transform.Find("Viewport");
+            var execute = (RectTransform)details.transform.Find("Viewport/ActionList/Action_fit/Execute");
+            var corners = new Vector3[4]; execute.GetWorldCorners(corners);
+            foreach (Vector3 corner in corners)
+            {
+                Vector3 local = viewport.InverseTransformPoint(corner);
+                Assert.That(local.x, Is.InRange(viewport.rect.xMin - .01f, viewport.rect.xMax + .01f));
+                Assert.That(local.y, Is.InRange(viewport.rect.yMin - .01f, viewport.rect.yMax + .01f));
+            }
+        }
+
+        [Test]
+        public void VisibleTextRegionDoesNotRequireWholeCardAndRejectsTextOutsideMask()
+        {
+            CreateDetails(null);
+            var viewport = (RectTransform)details.transform.Find("Viewport");
+            var area = (RectTransform)Create("ReadableTextArea", viewport).transform;
+            area.anchorMin = area.anchorMax = new Vector2(0, 1); area.pivot = new Vector2(0, 1);
+            area.sizeDelta = new Vector2(544, 64); area.anchoredPosition = new Vector2(20, -20);
+            var method = typeof(MapActionDetailsView).GetMethod("TryGetVisibleTextPoint", PrivateInstance);
+            object[] args = { area, null, Vector2.zero };
+            Assert.That((bool)method.Invoke(details, args), Is.True, "Readable title counts regardless of larger decorative card bounds.");
+            area.anchoredPosition = new Vector2(20, -2000);
+            Assert.That((bool)method.Invoke(details, args), Is.False, "Fully masked text must not count.");
+        }
+
+        private static void ConfigureAuthoredExecuteOverflow(RectTransform template)
+        {
+            var execute = (RectTransform)template.Find("Execute");
+            execute.anchorMin = execute.anchorMax = new Vector2(0, 1); execute.pivot = new Vector2(0, 1);
+            execute.anchoredPosition = new Vector2(538, -332); execute.sizeDelta = new Vector2(367, 160);
+        }
+
+        [Test]
+        public void ReplacingMandatoryActionHidesCafeEntryAndOpeningUnrenderedDetailsDoesNotMarkSeen()
+        {
+            var story = new NarrativeActionDefinition { actionKey = "generic.intro", type = NarrativeActionType.Once, mustExecute = true,
+                replacesLocationActions = true, focusLocationOnComplete = true };
+            var ordinary = new NarrativeActionDefinition { actionKey = "generic.activity", requirements = "ActionPoint(1)" };
+            var config = new NarrativeConfiguration(); config.actions.Add(story); config.actions.Add(ordinary);
+            runtime.Initialize(config, new ImmediatePresenter());
+            runtime.Actions.Mount("cafe", ordinary.actionKey); runtime.Actions.Mount("cafe", story.actionKey);
+            runtime.Actions.ActionPoints.Set(0);
+            int navigation = 0; CreateDetails(() => navigation++); details.Show("cafe", "咖啡馆");
+            var content = details.transform.Find("Viewport/ActionList");
+            Assert.That(content.Find("EnterCafe"), Is.Null);
+            Assert.That(content.Find("Action_generic.activity"), Is.Null);
+            Assert.That(content.Find("Action_generic.intro"), Is.Not.Null);
+            Assert.That(runtime.Actions.HasUnseenActions("cafe"), Is.True, "An inactive hierarchy has never actually displayed the card.");
+            Invoke(details, "OnEnterCafe"); Assert.That(navigation, Is.Zero);
+            Assert.That(runtime.Actions.Execute(story.actionKey), Is.True); details.Refresh();
+            details.Show("cafe", "咖啡馆");
+            Assert.That(content.Find("EnterCafe"), Is.Not.Null);
+            Assert.That(content.Find("Action_generic.activity"), Is.Not.Null);
+            Assert.That(runtime.Actions.PendingFocusPosition, Is.EqualTo("cafe"));
+        }
+
+        [Test]
+        public void MandatoryZeroCostActionDoesNotBecomeTaskButRealAPActivityDoes()
+        {
+            var story = new NarrativeActionDefinition { actionKey = "zero", mustExecute = true };
+            var activity = new NarrativeActionDefinition { actionKey = "activity", requirements = "ActionPoint(1)" };
+            var config = new NarrativeConfiguration(); config.actions.Add(story); config.actions.Add(activity);
+            runtime.Initialize(config, new ImmediatePresenter());
+            Assert.That(MapTaskPanel.ShouldListAction(story), Is.False);
+            Assert.That(MapTaskPanel.ShouldListAction(activity), Is.True);
+            var taskRoot = Create("TaskFilter", root.transform); var tasks = taskRoot.AddComponent<MapTaskPanel>();
+            tasks.SetItems(new[] { new MapTaskItem { id = "zero" }, new MapTaskItem { id = "activity" } });
+            Assert.That(tasks.ItemCount, Is.EqualTo(1));
         }
 
         [Test]

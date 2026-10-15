@@ -36,6 +36,7 @@ namespace Spotlight.Narrative
         public event Action<NarrativeEventRequest> EventQueued;
         public event Action<string, int, int> BarChanged;
         private NarrativeReadingPlayback readingPlayback;
+        private NarrativeLetterPlayback letterPlayback;
         private NarrativeNoticePlayback noticePlayback;
         private NarrativeConversationPlayback conversationPlayback;
         private Func<string, string, string, NarrativeCharacterPresentationData> characterResolver;
@@ -61,6 +62,11 @@ namespace Spotlight.Narrative
             get => readingPlayback;
             set { readingPlayback = value; if (runtimePresenter != null) runtimePresenter.ReadingPlayback = value; }
         }
+        public NarrativeLetterPlayback LetterPlayback
+        {
+            get => letterPlayback;
+            set { letterPlayback = value; if (runtimePresenter != null) runtimePresenter.LetterPlayback = value; }
+        }
         public NarrativeConversationPlayback ConversationPlayback
         {
             get => conversationPlayback;
@@ -74,7 +80,7 @@ namespace Spotlight.Narrative
         public Func<string, string, string, NarrativeCharacterPresentationData> CharacterResolver
         {
             get => characterResolver;
-            set { characterResolver = value; if (runtimePresenter != null) runtimePresenter.CharacterResolver = value; }
+            set { characterResolver = value; if (runtimePresenter != null) runtimePresenter.CharacterResolver = ResolveCharacterForPresentation; }
         }
 
         private void Awake()
@@ -105,12 +111,13 @@ namespace Spotlight.Narrative
             {
                 runtimePresenter = new NarrativePresenter(configuration, ResolveText);
                 runtimePresenter.ReadingPlayback = ReadingPlayback;
+                runtimePresenter.LetterPlayback = LetterPlayback;
                 runtimePresenter.NoticePlayback = NoticePlayback;
                 runtimePresenter.ConversationPlayback = ConversationPlayback;
-                runtimePresenter.CharacterResolver = CharacterResolver;
+                runtimePresenter.CharacterResolver = ResolveCharacterForPresentation;
             }
             controller = new NarrativeController(configuration, injectedPresenter ?? runtimePresenter);
-            if (runtimePresenter != null) runtimePresenter.PageCondition = key => controller.State.GetCondition(key);
+            if (runtimePresenter != null) runtimePresenter.PageCondition = controller.ReadPresentationCondition;
             controller.CafeVisitsCommitted += snapshot => CafeVisitsCommitted?.Invoke(snapshot);
             controller.AbilityReader = AbilityReader;
             controller.TextResolver = ResolveText;
@@ -135,6 +142,7 @@ namespace Spotlight.Narrative
                 runtimePresenter.ChoiceSelected += choiceId => controller.SelectChoice(choiceId);
                 runtimePresenter.ChoiceUnlocked = (id, context) => controller.EvaluateConditions("choice", id, context);
                 runtimePresenter.AbilityCheck = controller.EvaluateAbilityCheckForPresentation;
+                runtimePresenter.InlineAbilityCheck = controller.EvaluateInlineAbilityCheckForPresentation;
             }
             controller.BarChanged += (key, oldValue, newValue) =>
             {
@@ -192,6 +200,15 @@ namespace Spotlight.Narrative
             return SubstitutePlayerName(key);
         }
 
+        private NarrativeCharacterPresentationData ResolveCharacterForPresentation(string key, string displayName, string portraitPath)
+        {
+            var resolved = characterResolver?.Invoke(key, displayName, portraitPath)
+                ?? new NarrativeCharacterPresentationData { key = key, name = displayName, portraitPath = portraitPath };
+            string playerName = key == "player" ? playerNameProvider?.Invoke() : null;
+            return new NarrativeCharacterPresentationData { key = resolved.key, name = string.IsNullOrWhiteSpace(playerName) ? resolved.name : playerName,
+                portraitPath = resolved.portraitPath, portrait = resolved.portrait, avatar = resolved.avatar };
+        }
+
         private string SubstitutePlayerName(string text)
         {
             if (string.IsNullOrEmpty(text) || playerNameProvider == null) return text;
@@ -210,6 +227,9 @@ namespace Spotlight.Narrative
         public void BeginTurn() => controller?.BeginTurn();
         public void EndTurn() => controller?.EndTurn();
         public bool QueueEvent(string eventId) => controller != null && controller.QueueEvent(eventId);
+        public bool QueueMapActionEvent(string eventId) => controller != null && controller.QueueMapActionEvent(eventId);
+        public bool ProcessEntry(NarrativeEntryPoint entry, Action<bool> completed = null) => controller != null && controller.ProcessEntry(entry, completed);
+        public bool BlocksSave => controller != null && controller.BlocksSave;
         public bool AddBar(string barKey, int delta) => controller != null && controller.AddBar(barKey, delta);
         public bool SetBar(string barKey, int value) => controller != null && controller.SetBar(barKey, value);
         public bool SelectChoice(string choiceId) => controller != null && controller.SelectChoice(choiceId);

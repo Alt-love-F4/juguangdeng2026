@@ -225,7 +225,7 @@ namespace Spotlight.Narrative.Tests
             Assert.That(c.State.GetNpcLocation("npc"), Is.EqualTo("cafe")); Assert.That(effects, Is.EqualTo(4));
         }
 
-        [Test] public void AllDateSlotsAreCollectedWithTheirOwnFrozenContext()
+        [Test] public void DateSlotsAreCollectedOnlyAtTheirActualFormalPhase()
         {
             foreach (NarrativeTimeSlot slot in new[] { NarrativeTimeSlot.Morning, NarrativeTimeSlot.Noon, NarrativeTimeSlot.Night })
             {
@@ -234,9 +234,13 @@ namespace Spotlight.Narrative.Tests
                 // Date scheduling retains its time slot without a separate context condition.
             }
             var p = new Presenter(); var c = new NarrativeController(config, p);
-            c.EndTurn(); p.Complete(); p.Complete(); p.Complete();
+            c.SetOfficialDay(1); c.ProcessOfficialDay(1); Assert.That(p.Played, Is.Empty);
+            c.ProcessEntry(NarrativeEntryPoint.MorningBeforeMap); p.Complete();
+            Assert.That(p.Played, Is.EqualTo(new[] { "Morning" }));
+            c.ProcessEntry(NarrativeEntryPoint.AfterBusiness); p.Complete();
+            c.ProcessEntry(NarrativeEntryPoint.BeforeNight); p.Complete();
             Assert.That(p.Played, Is.EqualTo(new[] { "Morning", "Noon", "Night" }));
-            Assert.That(Bar(c, "world.calendar"), Is.EqualTo(2));
+            Assert.That(Bar(c, "world.calendar"), Is.EqualTo(1));
         }
 
         [Test] public void DerivedThresholdChangesAndMalformedStateReadsFailSafely()
@@ -473,13 +477,14 @@ namespace Spotlight.Narrative.Tests
             var p = new Presenter(); var c = new NarrativeController(config, p);
             c.SetOfficialDay(1); Assert.That(p.Played, Is.Empty);
             c.RunAtSafeBoundary(() => Assert.That(c.ProcessOfficialDay(1)));
+            Assert.That(p.Played, Is.Empty); c.ProcessEntry(NarrativeEntryPoint.MorningBeforeMap);
             var snapshot = c.CaptureSnapshot();
             Assert.That(snapshot.officialDayProcessed, Is.EqualTo(1));
             c.RestoreSnapshot(snapshot); c.SetOfficialDay(1); c.ResumePendingEvents(); p.Complete();
             Assert.That(c.ProcessOfficialDay(1), Is.False);
             Assert.That(Bar(c, "a"), Is.EqualTo(1));
             Assert.That(Bar(c, "world.calendar"), Is.EqualTo(1));
-            c.SetOfficialDay(2); Assert.That(c.ProcessOfficialDay(2)); p.Complete();
+            c.SetOfficialDay(2); Assert.That(c.ProcessOfficialDay(2)); c.ProcessEntry(NarrativeEntryPoint.MorningBeforeMap); p.Complete();
             Assert.That(Bar(c, "a"), Is.EqualTo(2));
             Assert.That(Bar(c, "world.calendar"), Is.EqualTo(2));
         }
@@ -492,7 +497,7 @@ namespace Spotlight.Narrative.Tests
             c.RestoreSnapshot(new NarrativeSnapshot { bars = new List<NarrativeBarValue> { new NarrativeBarValue { key = "world.calendar", value = 50 } } });
             c.SetOfficialDay(8);
             Assert.That(c.ProcessOfficialDay(8), Is.False); Assert.That(p.Played, Is.Empty);
-            c.SetOfficialDay(9); Assert.That(c.ProcessOfficialDay(9)); p.Complete();
+            c.SetOfficialDay(9); Assert.That(c.ProcessOfficialDay(9)); c.ProcessEntry(NarrativeEntryPoint.MorningBeforeMap); p.Complete();
             Assert.That(p.Played, Is.EqualTo(new[] { "daily" }));
             Assert.That(Bar(c, "world.calendar"), Is.EqualTo(9));
         }

@@ -38,6 +38,15 @@ namespace Spotlight.GameFlow
         private int ShakeChannel => portraits.Length * 2;
         private int CameraChannel => ShakeChannel + 1;
         private int OverlayChannel => ShakeChannel + 2;
+        private int BackgroundMotionChannel => ShakeChannel + 3;
+        private int BackgroundFadeChannel => ShakeChannel + 4;
+        private readonly RawImage background, previousBackground;
+        private readonly Vector2 backgroundPosition;
+        private readonly Vector3 backgroundScale;
+        private Color backgroundTint = Color.white;
+        private Vector2 backgroundOffset;
+        private float backgroundZoom = 1f;
+        public bool IsBackgroundTransitioning => channels[BackgroundFadeChannel].Active;
         private readonly Vector2 stagePosition;
         private readonly Vector3 stageScale;
         private readonly Color inactiveTint;
@@ -63,7 +72,7 @@ namespace Spotlight.GameFlow
 
         public PresentationEffects(PresentationEffectLibrary library, RectTransform stage, Image overlay,
             Image left, Image leftFrame, Image right, Image rightFrame, Color inactiveTint, float focusSeconds,
-            Image center = null, Image centerFrame = null)
+            Image center = null, Image centerFrame = null, RawImage background = null)
         {
             if (library == null || stage == null || overlay == null || left == null || right == null)
                 throw new ArgumentException("Presentation effects require a library, stage, overlay and two portrait slots.");
@@ -71,11 +80,23 @@ namespace Spotlight.GameFlow
             this.stage = stage;
             this.overlay = overlay;
             this.inactiveTint = inactiveTint;
+            this.background = background;
+            if (background != null)
+            {
+                backgroundPosition = background.rectTransform.anchoredPosition;
+                backgroundScale = background.rectTransform.localScale;
+                var old = new GameObject("BackgroundCrossfade", typeof(RectTransform), typeof(CanvasRenderer), typeof(RawImage));
+                old.transform.SetParent(background.transform, false);
+                previousBackground = old.GetComponent<RawImage>();
+                previousBackground.rectTransform.anchorMin = Vector2.zero; previousBackground.rectTransform.anchorMax = Vector2.one;
+                previousBackground.rectTransform.offsetMin = previousBackground.rectTransform.offsetMax = Vector2.zero;
+                previousBackground.raycastTarget = false; previousBackground.enabled = false;
+            }
             this.focusSeconds = Mathf.Max(.001f, focusSeconds);
             stagePosition = stage.anchoredPosition;
             stageScale = stage.localScale;
             portraits = new Portrait[center != null ? 3 : 2];
-            channels = new Channel[portraits.Length * 2 + 3];
+            channels = new Channel[portraits.Length * 2 + 5];
             for (int i = 0; i < channels.Length; i++) channels[i] = new Channel();
             portraits[0] = Capture(left, leftFrame, -1f);
             portraits[1] = Capture(right, rightFrame, 1f);
@@ -135,6 +156,23 @@ namespace Spotlight.GameFlow
                 case PresentationEffectIds.PortraitFadeOut:
                     if (slot < 0 || slot >= portraits.Length) throw new ArgumentException("Portrait effect requires one occupied slot.");
                     return PortraitMotion(fx, slot, definition, completed);
+                case PresentationEffectIds.PortraitNod:
+                    if (slot < 0 || slot >= portraits.Length) throw new ArgumentException("Nod requires one occupied slot.");
+                    Portrait nod = portraits[slot];
+                    return Start(AccentStart + slot, definition.duration,
+                        t => nod.accent = new Vector2(0f, -definition.strength * Mathf.Sin(t * Mathf.PI)),
+                        () => nod.accent = Vector2.zero, () => { nod.accent = Vector2.zero; completed?.Invoke(); });
+                case PresentationEffectIds.BackgroundPan:
+                    if (background == null) throw new InvalidOperationException("Background pan requires a background layer.");
+                    float width = background.rectTransform.rect.width;
+                    float amount = definition.strength;
+                    return Start(BackgroundMotionChannel, definition.duration, t =>
+                    {
+                        backgroundOffset = new Vector2(width * amount * Mathf.Sin(t * Mathf.PI * 2f), 0f);
+                        float coverage = Mathf.Max(definition.zoom, 1f + 2f * amount);
+                        float edge = Mathf.Abs(Mathf.Sin(t * Mathf.PI * 2f));
+                        backgroundZoom = Mathf.Lerp(1f, coverage, edge);
+                    }, ResetBackgroundMotion, () => { ResetBackgroundMotion(); completed?.Invoke(); });
                 case PresentationEffectIds.AccentShakeStartle:
                     if (slot < 0 || slot >= portraits.Length) throw new ArgumentException("Accent effect requires one occupied slot.");
                     Portrait p = portraits[slot];
@@ -192,9 +230,28 @@ namespace Spotlight.GameFlow
         public PresentationEffectHandle Nod(int slot)
         {
             if (slot < 0 || slot >= portraits.Length) return Rejected();
-            Portrait p = portraits[slot];
-            return Start(AccentStart + slot, .4f, t => p.accent = new Vector2(0f, -12f * Mathf.Sin(t * Mathf.PI * 4f)),
-                () => p.accent = Vector2.zero, () => p.accent = Vector2.zero);
+            return Play(PresentationEffectIds.PortraitNod, slot);
+        }
+        private void ResetBackgroundMotion() { backgroundOffset = Vector2.zero; backgroundZoom = 1f; }
+        public PresentationEffectHandle SetBackground(Texture texture, Color tint, float fadeSeconds = 0f)
+        {
+            EnsureAlive(); ValidateFinite(fadeSeconds, nameof(fadeSeconds), 0f);
+            if (background == null) throw new InvalidOperationException("Presentation has no background layer.");
+            CancelChannel(BackgroundMotionChannel); ResetBackgroundMotion();
+            CancelChannel(BackgroundFadeChannel);
+            bool same = background.texture == texture && backgroundTint == tint;
+            Texture old = background.texture; Color oldTint = backgroundTint;
+            bool wasVisible = background.enabled;
+            background.texture = texture; background.color = tint; backgroundTint = tint; background.enabled = true;
+            if (same || fadeSeconds <= 0f || !wasVisible)
+            {
+                previousBackground.enabled = false; ApplyPose();
+                var done = new PresentationEffectHandle(); done.Finish(true); return done;
+            }
+            previousBackground.texture = old; previousBackground.color = oldTint; previousBackground.enabled = true;
+            return Start(BackgroundFadeChannel, fadeSeconds, t =>
+            { var color = oldTint; color.a *= 1f - Smooth(t); previousBackground.color = color; },
+                () => previousBackground.enabled = false, () => previousBackground.enabled = false);
         }
         public PresentationEffectHandle Camera(float zoom, float shake, float duration, Vector2 focus, Action completed = null)
         {
@@ -267,6 +324,11 @@ namespace Spotlight.GameFlow
             if (stage == null) return;
             stage.anchoredPosition = stagePosition + cameraOffset + screenOffset;
             stage.localScale = stageScale * cameraZoom;
+            if (background != null)
+            {
+                background.rectTransform.anchoredPosition = backgroundPosition + backgroundOffset;
+                background.rectTransform.localScale = backgroundScale * backgroundZoom;
+            }
             for (int i = 0; i < portraits.Length; i++)
             {
                 Portrait p = portraits[i];
@@ -288,6 +350,8 @@ namespace Spotlight.GameFlow
         {
             for (int i = 0; i < channels.Length; i++) CancelChannel(i);
             cameraZoom = 1f; cameraOffset = screenOffset = Vector2.zero; shakePriority = 0;
+            ResetBackgroundMotion();
+            if (previousBackground != null) { previousBackground.enabled = false; previousBackground.texture = null; }
             if (overlay != null) overlay.color = Color.clear;
             foreach (Portrait p in portraits)
             {

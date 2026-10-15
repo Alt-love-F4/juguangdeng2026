@@ -714,6 +714,8 @@ MonoBehaviour:
   optionScroll: {fileID: 8687196733908939169}
   optionTemplate: {fileID: 6961053246111312330}
   optionDimmer: {fileID: 1287260404617022768}
+  scrollThreshold: 100
+  scrollGestureGap: 0.22
   references:
     version: 2
     RefIds:
@@ -753,8 +755,8 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 1, y: 0}
   m_AnchorMax: {x: 1, y: 0}
-  m_AnchoredPosition: {x: -80, y: 24}
-  m_SizeDelta: {x: 450, y: 30}
+  m_AnchoredPosition: {x: -32, y: 24}
+  m_SizeDelta: {x: 500, y: 36}
   m_Pivot: {x: 1, y: 0}
 --- !u!222 &6643743787782176599
 CanvasRenderer:
@@ -811,15 +813,15 @@ MonoBehaviour:
   m_faceColor:
     serializedVersion: 2
     rgba: 4294967295
-  m_fontSize: 21
-  m_fontSizeBase: 21
+  m_fontSize: 24
+  m_fontSizeBase: 24
   m_fontWeight: 400
   m_enableAutoSizing: 0
   m_fontSizeMin: 18
   m_fontSizeMax: 72
   m_fontStyle: 0
   m_HorizontalAlignment: 4
-  m_VerticalAlignment: 512
+  m_VerticalAlignment: 1024
   m_textAlignment: 65535
   m_characterSpacing: 0
   m_characterHorizontalScale: 1

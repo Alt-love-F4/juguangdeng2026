@@ -28,7 +28,7 @@ namespace Spotlight.GameFlow
         public bool OwnsContinuity(object owner) => owner != null && script != null
             && ReferenceEquals(script.ContinuityOwner, owner);
         public PresentationEffects Effects => effects;
-        public bool IsEffectBlocking => blockingEffects > 0 || portraitChange != null;
+        public bool IsEffectBlocking => blockingEffects > 0 || portraitChange != null || effects != null && effects.IsBackgroundTransitioning;
         public bool IsReady => ready && !IsEffectBlocking;
         public RectTransform EffectStage { get; private set; }
         public Image EffectOverlay { get; private set; }
@@ -71,7 +71,7 @@ namespace Spotlight.GameFlow
             EffectOverlay.rectTransform.offsetMin = EffectOverlay.rectTransform.offsetMax = Vector2.zero;
             EffectOverlay.raycastTarget = false;
             effects = new PresentationEffects(effectLibrary, EffectStage, EffectOverlay, leftPortrait,
-                leftPortraitFrame, rightPortrait, rightPortraitFrame, inactiveTint, focusSeconds, centerPortrait, centerPortraitFrame);
+                leftPortraitFrame, rightPortrait, rightPortraitFrame, inactiveTint, focusSeconds, centerPortrait, centerPortraitFrame, background);
         }
         private void EnterVisiblePortraits()
         {
@@ -93,7 +93,9 @@ namespace Spotlight.GameFlow
         {
             if (!IsPlaying) throw new InvalidOperationException("Start a presentation before playing an effect.");
             bool portrait = fx == PresentationEffectIds.EnterShadowWalk || fx == PresentationEffectIds.AccentShakeStartle
-                || fx == PresentationEffectIds.PortraitFadeIn || fx == PresentationEffectIds.PortraitFadeOut;
+                || fx == PresentationEffectIds.PortraitFadeIn || fx == PresentationEffectIds.PortraitFadeOut || fx == PresentationEffectIds.PortraitNod;
+            if (fx == PresentationEffectIds.BackgroundPan && !string.IsNullOrWhiteSpace(targetKey) && targetKey != "background")
+                throw new ArgumentException("Background pan target must be background.");
             int slot = portrait ? ResolveEffectSlot(targetKey) : -1;
             PresentationEffectHandle handle = effects.Play(fx, slot, completed);
             if (blocking && !handle.IsDone) blockingHandles.Add(handle);
@@ -104,7 +106,7 @@ namespace Spotlight.GameFlow
             if (string.IsNullOrWhiteSpace(targetKey) || targetKey == "speaker")
             {
                 DialogueSpeaker who = activeLines[LineIndex].Speaker;
-                if (who == DialogueSpeaker.Narrator) throw new ArgumentException("Narrator has no portrait: supply a target character or side.");
+                if (who == DialogueSpeaker.Narrator || who == DialogueSpeaker.Offstage) throw new ArgumentException("Speaker has no portrait: supply a target character or side.");
                 targetKey = who == DialogueSpeaker.Left ? "left" : who == DialogueSpeaker.Center ? "center" : "right";
             }
             int slot = targetKey == "left" || (left != null && !string.IsNullOrEmpty(left.CharacterKey) && left.CharacterKey == targetKey) ? 0
@@ -127,6 +129,18 @@ namespace Spotlight.GameFlow
             PresentationEffectHandle handle = effects.Fade(type, duration, atBlack, completed);
             blockingHandles.Add(handle);
             return handle;
+        }
+        public RawImage BackgroundLayer => background;
+        private void ApplyBackground(DialogueScript value, bool seamless)
+        {
+            var visual = value.BackgroundVisual;
+            if (visual == null && value.Background == null)
+            {
+                if (!seamless) { effects.SetBackground(null, Color.white); background.enabled = false; }
+                return;
+            }
+            effects.SetBackground(value.Background, visual == null ? Color.white : visual.placeholder ? visual.placeholderColor : visual.tint,
+                seamless ? visual?.fadeSeconds ?? .3f : 0f);
         }
         public void SetBackgroundTint(Color tint) => background.color = tint;
         public void StopEffects()

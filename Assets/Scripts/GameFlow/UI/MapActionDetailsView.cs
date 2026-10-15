@@ -6,6 +6,7 @@ using Spotlight.Narrative;
 using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
+using UnityEngine.EventSystems;
 
 namespace Spotlight.GameFlow
 {
@@ -30,8 +31,18 @@ namespace Spotlight.GameFlow
         private Action endDay, enterCafe;
         private bool busy;
         public bool IsBusy => busy;
-        private float nextRefresh;
         private string signature;
+        private NarrativeActionController subscribedActions;
+        private bool contentDirty = true;
+        private bool cardsDirty = true;
+        private bool lastControlsAvailable;
+        private int pageChangedFrame;
+        private int executionEpoch;
+        private readonly Vector3[] cardCorners = new Vector3[4];
+        private Vector2 fittedViewportSize;
+        private RectTransform fittedCard;
+        private readonly List<RaycastResult> displayHits = new List<RaycastResult>();
+        private PointerEventData displayPointer;
         private ScrollRect scroll;
         private Button previousPageButton;
         private Button nextPageButton;
@@ -71,6 +82,11 @@ namespace Spotlight.GameFlow
         {
             public RectTransform root;
             public NarrativeActionDefinition action;
+            public string instanceKey;
+            public bool displayConfirmed;
+            public TextMeshProUGUI heading, description;
+            public Bounds visualBounds;
+            public bool boundsMeasured;
             public Button button;
             public TextMeshProUGUI type;
             public Image progress;
@@ -84,7 +100,7 @@ namespace Spotlight.GameFlow
             mapController = GetComponentInParent<MapSceneController>();
             var rect = (RectTransform)transform;
             bool authoredLayout = transform.Find("Viewport/ActionList") != null;
-            popupSize.y = Mathf.Max(popupSize.y, GetRequiredPopupHeight());
+            popupSize = Vector2.Max(popupSize, GetRequiredPopupSize());
             if (authoredLayout) rect.sizeDelta = popupSize;
             if (!authoredLayout)
             {
@@ -147,6 +163,7 @@ namespace Spotlight.GameFlow
             if (!Application.isPlaying && showEditorPreview) { gameObject.SetActive(true); return; }
             bool changed = position != positionKey;
             position = positionKey; title.text = locationName;
+            BindActionNotifications();
             bool opening = !gameObject.activeSelf || changed;
             gameObject.SetActive(true); Rebuild();
             revealGroup = GetComponent<CanvasGroup>();
@@ -168,6 +185,8 @@ namespace Spotlight.GameFlow
             float t = Mathf.Clamp01((Time.unscaledTime - revealStarted) / .26f);
             float alpha = Mathf.Clamp01(t * 2);
             if (revealGroup != null && revealGroup.alpha != alpha) revealGroup.alpha = alpha;
+            FitVisibleCard();
+            ConfirmVisibleActionDisplayed();
             if (IsAuthoredLayout) return;
             var rect = (RectTransform)transform;
             float scale = Mathf.Min(1, Mathf.Max(.1f, (parent.rect.width - 64) / popupSize.x));
@@ -178,15 +197,111 @@ namespace Spotlight.GameFlow
             var targetPosition = new Vector2(-offset, initialAnchoredPosition.y);
             if (!rect.anchoredPosition.Equals(targetPosition)) rect.anchoredPosition = targetPosition;
         }
+        private void OnEnable() => BindActionNotifications();
+
+        private void BindActionNotifications()
+        {
+            var actions = NarrativeRuntime.Instance?.Actions;
+            if (actions == subscribedActions) return;
+            UnbindActionNotifications();
+            subscribedActions = actions;
+            if (actions != null)
+            {
+                actions.MapContentChanged += OnMapContentChanged;
+                actions.StateChanged += OnActionStateChanged;
+            }
+            contentDirty = cardsDirty = true;
+        }
+
+        private void UnbindActionNotifications()
+        {
+            if (subscribedActions == null) return;
+            subscribedActions.MapContentChanged -= OnMapContentChanged;
+            subscribedActions.StateChanged -= OnActionStateChanged;
+            subscribedActions = null;
+        }
+
+        private void OnMapContentChanged(string key) { if (key == position) contentDirty = true; }
+        private void OnActionStateChanged() => cardsDirty = true;
+        private string ContentSignature(NarrativeActionController actions)
+            => string.Join(";", actions.GetDisplayableActions(position).Select(a => actions.GetActionInstanceKey(position, a.actionKey)))
+                + "/replace:" + actions.ReplacesLocationActions(position);
+
         private void Update()
         {
-            if (busy || Time.unscaledTime < nextRefresh) return;
-            nextRefresh = Time.unscaledTime + .2f;
-            var actions = NarrativeRuntime.Instance?.Actions;
+            if (busy || content == null) return;
+            BindActionNotifications();
+            bool canControl = controls?.Invoke() ?? true;
+            if (lastControlsAvailable != canControl) { lastControlsAvailable = canControl; cardsDirty = true; }
+            var actions = subscribedActions;
             if (actions == null) return;
-            string next = string.Join("|", actions.GetMountedActions(position).Select(a => a.actionKey));
-            if (next != signature) Rebuild(); else foreach (var card in cards) UpdateCard(card);
+            if (contentDirty)
+            {
+                contentDirty = false;
+                if (ContentSignature(actions) != signature) { Rebuild(); return; }
+            }
+            if (!cardsDirty) return;
+            cardsDirty = false;
+            foreach (var card in cards) UpdateCard(card);
         }
+
+        private void ConfirmVisibleActionDisplayed()
+        {
+            if (!Application.isPlaying || !isActiveAndEnabled || busy || !(controls?.Invoke() ?? true)
+                || Time.frameCount <= pageChangedFrame || (revealGroup != null && revealGroup.alpha < .99f)
+                || currentPage >= cards.Count) return;
+            Card card = cards[currentPage];
+            if (card.action == null || card.displayConfirmed || card.root == null || !card.root.gameObject.activeInHierarchy) return;
+            var canvas = GetComponentInParent<Canvas>();
+            if (canvas == null || !canvas.isActiveAndEnabled) return;
+            foreach (var group in GetComponentsInParent<CanvasGroup>())
+                if (group.alpha < .99f) return;
+            Camera camera = canvas.renderMode == RenderMode.ScreenSpaceOverlay ? null : canvas.worldCamera;
+            // Reading a card is independent from its decorative bounds and execute button.
+            // Both populated text areas must actually be exposed, not merely focused/instantiated.
+            if (!IsTextAreaDisplayed(card.heading, card.root, camera)) return;
+            if (card.description != null && !string.IsNullOrWhiteSpace(card.description.text)
+                && !IsTextAreaDisplayed(card.description, card.root, camera)) return;
+            if (subscribedActions == null) return;
+            subscribedActions.ConfirmActionDisplayed(position, card.instanceKey);
+            // This exact card has been exposed; an already-seen token must not be probed every frame.
+            card.displayConfirmed = true;
+        }
+        private bool IsTextAreaDisplayed(TextMeshProUGUI label, RectTransform card, Camera camera)
+        {
+            if (label == null || !label.isActiveAndEnabled || string.IsNullOrWhiteSpace(label.text)
+                || label.canvasRenderer.cull || label.color.a < .01f || EventSystem.current == null
+                || !TryGetVisibleTextPoint(label.rectTransform, camera, out Vector2 point)) return false;
+            displayPointer ??= new PointerEventData(EventSystem.current);
+            displayPointer.position = point;
+            displayHits.Clear();
+            EventSystem.current.RaycastAll(displayPointer, displayHits);
+            return displayHits.Count > 0 && displayHits[0].gameObject.transform.IsChildOf(card);
+        }
+
+        private bool TryGetVisibleTextPoint(RectTransform area, Camera camera, out Vector2 point)
+        {
+            point = default;
+            if (scroll?.viewport == null || area == null) return false;
+            RectTransform viewport = scroll.viewport;
+            area.GetWorldCorners(cardCorners);
+            Vector2 min = new Vector2(float.PositiveInfinity, float.PositiveInfinity);
+            Vector2 max = new Vector2(float.NegativeInfinity, float.NegativeInfinity);
+            foreach (Vector3 corner in cardCorners)
+            {
+                Vector2 local = viewport.InverseTransformPoint(corner);
+                min = Vector2.Min(min, local); max = Vector2.Max(max, local);
+            }
+            Rect clip = viewport.rect;
+            Vector2 exposedMin = Vector2.Max(min, clip.min), exposedMax = Vector2.Min(max, clip.max);
+            Vector2 exposed = exposedMax - exposedMin;
+            // Ignore a sliver at the mask edge; the point lies inside a meaningful readable area.
+            if (exposed.x < Mathf.Min(64f, (max.x - min.x) * .5f)
+                || exposed.y < Mathf.Min(24f, (max.y - min.y) * .5f) || exposed.x <= 0 || exposed.y <= 0) return false;
+            point = RectTransformUtility.WorldToScreenPoint(camera, viewport.TransformPoint((exposedMin + exposedMax) * .5f));
+            return true;
+        }
+
         private void Rebuild()
         {
             if (!Application.isPlaying && showEditorPreview) { BuildEditorPreview(); return; }
@@ -201,8 +316,9 @@ namespace Spotlight.GameFlow
             }
             cards.Clear();
             var actions = NarrativeRuntime.Instance?.Actions;
-            var values = actions?.GetMountedActions(position).ToList() ?? new List<NarrativeActionDefinition>();
-            signature = string.Join("|", values.Select(a => a.actionKey));
+            var values = actions?.GetDisplayableActions(position).ToList() ?? new List<NarrativeActionDefinition>();
+            signature = actions != null ? ContentSignature(actions) : string.Empty;
+            contentDirty = cardsDirty = false;
             float y = 0;
             foreach (var action in values)
             {
@@ -217,6 +333,7 @@ namespace Spotlight.GameFlow
                 cards.Add(card); UpdateCard(card);
             }
             if (IsCafeEntryPosition(position) && actionCardTemplate != null
+                && !(actions?.ReplacesLocationActions(position) ?? false)
                 && UnityEngine.SceneManagement.SceneManager.GetActiveScene().name != "CoffeeShop")
             {
                 // Entering the cafe is scene navigation, not an NCS action: it never checks or
@@ -282,12 +399,54 @@ namespace Spotlight.GameFlow
             UpdateVisiblePage();
             Canvas.ForceUpdateCanvases();
         }
-        private float GetRequiredPopupHeight()
+        private Vector2 GetRequiredPopupSize()
         {
-            if (actionCardTemplate == null && content != null && content.Find("ActionCardTemplate") is RectTransform template)
-                actionCardTemplate = template;
-            float cardHeight = actionCardTemplate != null ? actionCardTemplate.rect.height : 414f;
-            return cardHeight + 126f;
+            // Initialize calls this before content is bound. Resolve the exact authored child
+            // here, and include artwork (notably ExecutePreview) outside its nominal root rect.
+            if (transform.Find("Viewport/ActionList/ActionCardTemplate") is RectTransform template) actionCardTemplate = template;
+            Vector2 size = actionCardTemplate != null
+                ? (Vector2)MeasureCardBounds(actionCardTemplate).size
+                : new Vector2(796, 414);
+            return size + new Vector2(32, 134); // Existing viewport insets plus four pixels of card padding.
+        }
+
+        private Bounds MeasureCardBounds(RectTransform card)
+        {
+            // Templates stay inactive. Unity's default relative-bounds helper can omit
+            // inactive descendants, including the overflowing authored execute artwork.
+            Vector3 min = Vector3.one * float.PositiveInfinity, max = Vector3.one * float.NegativeInfinity;
+            foreach (RectTransform child in card.GetComponentsInChildren<RectTransform>(true))
+            {
+                child.GetWorldCorners(cardCorners);
+                foreach (Vector3 corner in cardCorners)
+                {
+                    Vector3 local = card.InverseTransformPoint(corner);
+                    min = Vector3.Min(min, local); max = Vector3.Max(max, local);
+                }
+            }
+            var result = new Bounds(); result.SetMinMax(min, max); return result;
+        }
+
+        private void FitVisibleCard()
+        {
+            if (scroll?.viewport == null || content == null || currentPage >= cards.Count) return;
+            Card card = cards[currentPage];
+            if (card.root == null) return;
+            Vector2 size = scroll.viewport.rect.size;
+            if (size.x <= 8 || size.y <= 8 || (fittedCard == card.root && fittedViewportSize == size)) return;
+            if (!card.boundsMeasured)
+            {
+                card.visualBounds = MeasureCardBounds(card.root);
+                card.boundsMeasured = true;
+            }
+            Bounds bounds = card.visualBounds;
+            float scale = Mathf.Min(1f, (size.x - 8) / Mathf.Max(1, bounds.size.x), (size.y - 8) / Mathf.Max(1, bounds.size.y));
+            content.anchorMin = new Vector2(0, 1); content.anchorMax = Vector2.one;
+            content.pivot = new Vector2(.5f, 1); content.anchoredPosition = Vector2.zero; content.sizeDelta = new Vector2(0, size.y);
+            card.root.anchorMin = card.root.anchorMax = new Vector2(0, 1);
+            card.root.localScale = Vector3.one * scale;
+            card.root.anchoredPosition = new Vector2(4 - bounds.min.x * scale, -4 - bounds.max.y * scale);
+            fittedCard = card.root; fittedViewportSize = size;
         }
 
         private void ConfigurePagingLayout()
@@ -350,19 +509,25 @@ namespace Spotlight.GameFlow
         private void UpdateVisiblePage()
         {
             int pageCount = Mathf.Max(1, cards.Count);
+            pageChangedFrame = Time.frameCount;
+            fittedCard = null;
             currentPage = Mathf.Clamp(currentPage, 0, pageCount - 1);
             for (int i = 0; i < cards.Count; i++)
                 if (cards[i].root != null) cards[i].root.gameObject.SetActive(i == currentPage);
             if (pageLabel != null) pageLabel.text = (currentPage + 1) + " / " + pageCount;
             if (previousPageButton != null) previousPageButton.interactable = cards.Count > 1;
             if (nextPageButton != null) nextPageButton.interactable = cards.Count > 1;
+            FitVisibleCard();
         }
 
         private Card BindActionCard(RectTransform root, NarrativeActionDefinition action)
         {
-            var card = new Card { root = root, action = action };
+            var card = new Card { root = root, action = action,
+                instanceKey = NarrativeRuntime.Instance?.Actions?.GetActionInstanceKey(position, action.actionKey) };
             card.type = root.Find("Type")?.GetComponent<TextMeshProUGUI>();
             var description = root.Find("Description")?.GetComponent<TextMeshProUGUI>();
+            card.heading = root.Find("Name")?.GetComponent<TextMeshProUGUI>();
+            card.description = description;
             var sampleRequirement = root.Find("Requirements/Requirement") ?? root.Find("Requirement");
             var execute = root.Find("Execute")?.GetComponent<Button>()
                 ?? root.Find("ExecutePreview")?.GetComponent<Button>()
@@ -404,6 +569,8 @@ namespace Spotlight.GameFlow
         }
         private void OnDisable()
         {
+            executionEpoch++;
+            UnbindActionNotifications();
             StopAllCoroutines(); busy = false;
             foreach (Transform child in transform.root)
                 if (child.name == "ConsumptionEffect") Destroy(child.gameObject);
@@ -450,7 +617,7 @@ namespace Spotlight.GameFlow
                 var buttonLabel = card.button.GetComponentInChildren<TextMeshProUGUI>(true);
                 if (buttonLabel != null) buttonLabel.text = caption;
                 // Preserve the authored button artwork and colors; only update interaction state.
-                card.button.interactable = !busy;
+                card.button.interactable = !busy && (controls?.Invoke() ?? true);
             }
         }
         private static void ConfigureExecuteLabel(TextMeshProUGUI label)
@@ -503,6 +670,7 @@ namespace Spotlight.GameFlow
         private void OnEnterCafe()
         {
             if (busy || !(controls?.Invoke() ?? true)) return;
+            if (NarrativeRuntime.Instance?.Actions?.ReplacesLocationActions(position) ?? false) return;
             // Reuse the map's existing cafe scene entry; no NCS action is executed here.
             enterCafe?.Invoke();
         }
@@ -529,7 +697,8 @@ namespace Spotlight.GameFlow
         private IEnumerator Execute(Card card)
         {
             busy = true;
-            foreach (var c in cards) c.button.interactable = false;
+            int epoch = ++executionEpoch;
+            foreach (var c in cards) if (c.button != null) c.button.interactable = false;
             // Show the costs first; the controller rechecks and consumes them atomically afterwards.
             for (int i = 0; i < card.action.parsedRequirements.Count; i++)
             {
@@ -548,6 +717,7 @@ namespace Spotlight.GameFlow
             bool finished = false;
             bool accepted = NarrativeRuntime.Instance.Actions.Execute(card.action.actionKey, success =>
             {
+                if (this == null || epoch != executionEpoch || !isActiveAndEnabled) return;
                 Spotlight.Audio.GameAudio.Play(success ? Spotlight.Audio.AudioKeys.MapComplete : Spotlight.Audio.AudioKeys.Error);
                 finished = true;
                 if (success && (controls?.Invoke() ?? true) && card.action.endDay) { busy = false; endDay?.Invoke(); }
@@ -555,7 +725,7 @@ namespace Spotlight.GameFlow
             });
             if (!accepted && !finished) { Spotlight.Audio.GameAudio.Play(Spotlight.Audio.AudioKeys.Error); Notice("要求不满足"); finished = true; }
             while (!finished) yield return null;
-            busy = false; inventory.Refresh(); Rebuild();
+            busy = false; inventory?.Refresh(); Rebuild();
         }
         private IEnumerator Fly(RectTransform source, RectTransform target, string text)
         {

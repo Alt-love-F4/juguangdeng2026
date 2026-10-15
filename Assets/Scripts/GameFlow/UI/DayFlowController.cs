@@ -19,7 +19,9 @@ namespace Spotlight.GameFlow
         // Append only: retain numeric IDs of existing save phases.
         IntroLetter,
         FirstDayIntroduction,
-        AvatarSelection
+        AvatarSelection,
+        TutorialBusinessHandoff,
+        NarrativeEntry
     }
 
     /// <summary>
@@ -50,6 +52,10 @@ namespace Spotlight.GameFlow
         private bool newSessionFirstDay;
         private bool firstDayCafeTutorialStarted;
         private bool firstDayCafeTutorialCompleted;
+        private bool tutorialTestSkipSubmitted;
+        private bool awaitingNarrativeEntry;
+        private int narrativeEntryVersion;
+        public bool IsNarrativeEntryActive => awaitingNarrativeEntry;
         private NarrativeRuntime firstDayCheckRuntime;
         private bool waitingForFirstDayPerceptionBranch;
         private GameFlowBootstrap flow;
@@ -71,7 +77,8 @@ namespace Spotlight.GameFlow
             && !firstDayCafeTutorialStarted && !firstDayCafeTutorialCompleted;
         public bool IsCafeTutorialActive => running && day == 1 && firstDayCafeTutorialStarted && !firstDayCafeTutorialCompleted;
         public bool IsFirstSessionGuideActive => running && day == 1 && !firstDayCafeTutorialCompleted;
-        public bool CanSave => !IsFirstSessionGuideActive;
+        public bool CanSave => !IsFirstSessionGuideActive && !awaitingNarrativeEntry
+            && !(NarrativeRuntime.Instance?.Controller?.BlocksSave ?? false);
         // Phase pages remain blocking while they wait for a player confirmation.
         public bool BlocksGameplayInput => running && State != DayFlowState.FreeCafeBusiness && State != DayFlowState.CityMapLeisure;
         public IDayFlowPresentation CurrentPresentation => currentPanel as IDayFlowPresentation;
@@ -113,6 +120,9 @@ namespace Spotlight.GameFlow
         {
             Spotlight.Audio.GameAudio.StopOwner(this);
             running = false;
+            awaitingNarrativeEntry = false;
+            ++narrativeEntryVersion;
+            SetMapAvailability(false);
             UnsubscribeFirstArrival();
             ClosePresentation();
             HideBusinessControls();
@@ -129,6 +139,7 @@ namespace Spotlight.GameFlow
             newSessionFirstDay = true;
             firstDayCafeTutorialStarted = false;
             firstDayCafeTutorialCompleted = false;
+            tutorialTestSkipSubmitted = false;
             UnsubscribeFirstDayPerceptionEvents();
             firstDayIntroductionCompleted = !playIntroduction;
             previousDate = InitialDate;
@@ -261,7 +272,8 @@ namespace Spotlight.GameFlow
                 controller.ProcessOfficialDay(day);
                 controller.RunAtSafeBoundary(() =>
                 {
-                    if (SessionAllowsPlay && running && version == presentationVersion) EnterPreBusiness();
+                    if (SessionAllowsPlay && running && version == presentationVersion)
+                        RunNarrativeEntry(NarrativeEntryPoint.MorningBeforeMap, EnterPreBusiness);
                 });
             });
         }
@@ -438,7 +450,7 @@ namespace Spotlight.GameFlow
             if (!waitingForFirstDayPerceptionBranch) return;
             UnsubscribeFirstDayPerceptionEvents();
             PlayCafeTutorialContent(eventId == FirstDayPerceptionSuccessEventId ? "perception_success" : "perception_failure",
-                version, () => PlayCafeTutorialContent("order_confirmed", version, StartFreeCafeBusiness));
+                version, () => PlayCafeTutorialContent("order_confirmed", version, EnterFirstDayBusinessHandoff));
         }
 
         private void OnFirstDayPerceptionEventFailed(string eventId, string reason)
@@ -454,7 +466,7 @@ namespace Spotlight.GameFlow
             if (!waitingForFirstDayPerceptionBranch || !SessionAllowsPlay || !running
                 || version != presentationVersion || day != 1 || !firstDayCafeTutorialStarted) return;
             UnsubscribeFirstDayPerceptionEvents();
-            PlayCafeTutorialContent("order_confirmed", version, StartFreeCafeBusiness);
+            PlayCafeTutorialContent("order_confirmed", version, EnterFirstDayBusinessHandoff);
         }
 
         private void UnsubscribeFirstDayPerceptionEvents()
@@ -469,12 +481,72 @@ namespace Spotlight.GameFlow
             waitingForFirstDayPerceptionBranch = false;
         }
 
+        private void EnterFirstDayBusinessHandoff()
+        {
+#if UNITY_EDITOR || DEVELOPMENT_BUILD
+            if (!SessionAllowsPlay || !running || day != 1 || tutorialTestSkipSubmitted) return;
+            SetState(DayFlowState.TutorialBusinessHandoff);
+            ShowPresentation<PreBusinessPanel>(StartFreeCafeBusiness,
+                panel => panel.ShowTutorialHandoff(TrySkipTutorialToOctober07));
+#else
+            StartFreeCafeBusiness();
+#endif
+        }
+
+        public bool CanSkipTutorialToOctober07
+        {
+            get
+            {
+#if UNITY_EDITOR || DEVELOPMENT_BUILD
+                var controller = NarrativeRuntime.Instance?.Controller;
+                return SessionAllowsPlay && (flow == null || flow.CanUseTutorialTestSkip)
+                    && running && day == 1 && firstDayCafeTutorialStarted
+                    && !firstDayCafeTutorialCompleted && !tutorialTestSkipSubmitted
+                    && introductionPanel == null && !waitingForFirstDayPerceptionBranch
+                    && (State == DayFlowState.TutorialBusinessHandoff || State == DayFlowState.FreeCafeBusiness)
+                    && controller != null && controller.IsSafeBoundary && !controller.IsBusy;
+#else
+                return false;
+#endif
+            }
+        }
+
+        public bool TrySkipTutorialToOctober07()
+        {
+            if (!CanSkipTutorialToOctober07) return false;
+            tutorialTestSkipSubmitted = true;
+            // Invalidate only this tutorial's callbacks and UI. Never reset NCS/player data.
+            UnsubscribeFirstArrival();
+            UnsubscribeFirstDayPerceptionEvents();
+            ClosePresentation();
+            HideBusinessControls();
+            if (endpointOwner != null && gameplayEndpoint.DayFlowBusinessActive)
+                gameplayEndpoint.EndDayFlowBusiness();
+            endpointOwner = null;
+            gameplayEndpoint = null;
+            firstDayIntroductionCompleted = firstDayCafeTutorialCompleted = true;
+            previousDate = CurrentDate;
+            day = 2;
+            newSessionFirstDay = false;
+            // BeginNewDayFlow owns calendar/AP/day-reset synchronization and date presentation.
+            // This bypass is not EndDay: no settlement, reward or automatic save is performed.
+            BeginNewDayFlow();
+            return true;
+        }
+
         private void StartFreeCafeBusiness()
         {
             if (!SessionAllowsPlay || !running) return;
             IDayFlowGameplayEndpoint endpoint = FindGameplayEndpoint();
             if (endpoint == null)
             {
+#if UNITY_EDITOR || DEVELOPMENT_BUILD
+                if (day == 1 && firstDayCafeTutorialStarted && !firstDayCafeTutorialCompleted)
+                {
+                    EnterFirstDayBusinessHandoff();
+                    return;
+                }
+#endif
                 SetState(DayFlowState.PreBusiness);
                 ShowPresentation<PreBusinessPanel>(EnterBusinessTransition,
                     panel => panel.ShowUnavailable());
@@ -494,7 +566,7 @@ namespace Spotlight.GameFlow
             HideBusinessControls();
             HideGameplayPanel();
             SetState(DayFlowState.PreLeisure);
-            ShowPresentation<BusinessEndPanel>(EnterCityMap);
+            ShowPresentation<BusinessEndPanel>(() => RunNarrativeEntry(NarrativeEntryPoint.AfterBusiness, EnterCityMap));
         }
 
         public bool DebugSkipTutorialToMap(out string message)
@@ -580,8 +652,64 @@ namespace Spotlight.GameFlow
             if (IsFirstDayMapGuideActive) return;
             if (!SessionAllowsPlay || !running || State != DayFlowState.CityMapLeisure) return;
             var actions = Spotlight.Narrative.NarrativeRuntime.Instance?.Actions;
-            if (actions != null && (actions.IsExecuting || actions.HasBlockingActions())) return;
-            EnterPreNight();
+            if (awaitingNarrativeEntry || (NarrativeRuntime.Instance?.Controller?.IsBusy ?? false)) return;
+            if (actions != null && actions.IsExecuting) return;
+            if (actions != null && actions.HasBlockingActions())
+            {
+                var map = FindFirstObjectByType<MapSceneController>();
+                map?.FocusFirstBlockingAction();
+                map?.ShowBlockingActionHint();
+                return;
+            }
+            RunNarrativeEntry(NarrativeEntryPoint.BeforeNight, EnterPreNight);
+        }
+
+        private void RunNarrativeEntry(NarrativeEntryPoint entry, Action next)
+        {
+            if (!SessionAllowsPlay || !running || awaitingNarrativeEntry) return;
+            ClosePresentation();
+            var controller = NarrativeRuntime.Instance?.Controller;
+            if (controller == null) { next(); return; }
+            awaitingNarrativeEntry = true;
+            int token = ++narrativeEntryVersion;
+            SetState(DayFlowState.NarrativeEntry);
+            controller.RunAtSafeBoundary(() =>
+            {
+                if (!SessionAllowsPlay || !running || token != narrativeEntryVersion) return;
+                if (!controller.ProcessEntry(entry, success =>
+                {
+                    if (!SessionAllowsPlay || !running || token != narrativeEntryVersion) return;
+                    awaitingNarrativeEntry = false;
+                    if (success) next();
+                    else RetryNarrativeEntry(entry, next);
+                }))
+                {
+                    awaitingNarrativeEntry = false;
+                    RetryNarrativeEntry(entry, next);
+                }
+            });
+        }
+
+        private void RetryNarrativeEntry(NarrativeEntryPoint entry, Action next)
+        {
+            if (entry == NarrativeEntryPoint.BeforeNight)
+            {
+                EnterCityMap();
+                FindFirstObjectByType<MapSceneController>()?.ShowBlockingActionHint("剧情已中断，请再次结束当天重试。");
+                return;
+            }
+            SetState(DayFlowState.PreBusiness);
+            ShowPresentation<PreBusinessPanel>(() => RunNarrativeEntry(entry, next),
+                panel => panel.ShowNarrativeEntryUnavailable());
+        }
+
+        private void SetMapAvailability(bool available)
+        {
+            var runtime = NarrativeRuntime.Instance;
+            var state = runtime?.Controller?.State;
+            if (state != null && state.TryGetCondition("world.map.active", out bool old) && old != available)
+                state.SetCondition("world.map.active", available);
+            runtime?.Actions?.RefreshMapContent();
         }
 
         private void EnterPreNight()
@@ -681,6 +809,7 @@ namespace Spotlight.GameFlow
         private void SetState(DayFlowState state)
         {
             State = state;
+            SetMapAvailability(running && state == DayFlowState.CityMapLeisure);
             ApplyAudioState();
             Debug.Log("[DayFlow] " + state);
         }
@@ -786,6 +915,8 @@ namespace Spotlight.GameFlow
             if (State != DayFlowState.FreeCafeBusiness) HideGameplayPanel();
             switch (State)
             {
+                case DayFlowState.NarrativeEntry: EnterCityMap(); break;
+                case DayFlowState.TutorialBusinessHandoff: EnterFirstDayBusinessHandoff(); break;
                 case DayFlowState.AvatarSelection: EnterAvatarSelection(); break;
                 case DayFlowState.FirstDayIntroduction: PlayFirstDayIntroduction(); break;
                 case DayFlowState.IntroLetter: ShowPresentation<FirstDayLetterPanel>(EnterAvatarSelection, ConfigureFirstDayLetter); break;
@@ -798,7 +929,7 @@ namespace Spotlight.GameFlow
                     ShowGameplayPanel();
                     ShowBusinessControls();
                     break;
-                case DayFlowState.PreLeisure: ShowPresentation<BusinessEndPanel>(EnterCityMap); break;
+                case DayFlowState.PreLeisure: ShowPresentation<BusinessEndPanel>(() => RunNarrativeEntry(NarrativeEntryPoint.AfterBusiness, EnterCityMap)); break;
                 case DayFlowState.CityMapLeisure: EnterCityMap(); break;
                 case DayFlowState.PreNight: EnterPreNight(); break;
                 case DayFlowState.HomeNight: EnterHomeNight(); break;

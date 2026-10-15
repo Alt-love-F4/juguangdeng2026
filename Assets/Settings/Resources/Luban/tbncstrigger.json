@@ -153,6 +153,6 @@
     "resetOnExit": true,
     "eventId": "EV_REVOLUTION",
     "priority": 60,
-    "enabled": true
+    "enabled": false
   }
 ]

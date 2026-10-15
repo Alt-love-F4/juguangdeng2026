@@ -138,9 +138,11 @@ namespace Spotlight.Narrative.Tests
             config.results.Add(new NarrativeResultDefinition { eventId = "first", resultType = NarrativeResultType.DespawnNpc, target = "obj:npc" });
             var p = new CancellablePresenter(); var c = new NarrativeController(config, p);
             c.QueueEvent("spawn"); p.complete();
-            var fact = Fact(c, "served"); c.SubmitCafeVisitFeedback(fact);
+            var fact = Fact(c, "served"); int completions = 0;
+            c.SubmitCafeVisitFeedback(fact, () => completions++);
             var stale = p.complete;
-            int failures = 0; c.EventFailed += (_, __) => failures++;
+            int failures = 0;
+            c.EventFailed += (_, __) => { failures++; c.CheckEndingsAtSafeBoundary(); };
             p.Cancel("playback_error");
             Assert.That(p.played, Is.EqualTo(new[] { "spawn", "first", "second" }));
             stale();
@@ -148,6 +150,10 @@ namespace Spotlight.Narrative.Tests
             Assert.That(c.State.GetNpcLocation("npc"), Is.EqualTo("cafe"));
             Assert.That(failures, Is.EqualTo(1));
             p.complete(); Assert.That(c.IsCafeVisitFeedbackComplete(fact));
+            Assert.That(completions, Is.EqualTo(1));
+            Assert.That(c.IsBusy, Is.False);
+            Assert.That(c.State.HasHappenedEvent("second"));
+            Assert.That(p.played, Is.EqualTo(new[] { "spawn", "first", "second" }));
         }
 
         [Test] public void DrainCancellationClearsPendingEffectsAndInvalidatesOldCallback()
@@ -163,18 +169,31 @@ namespace Spotlight.Narrative.Tests
             Assert.That(c.State.HasHappenedEvent("spawn")); // The event committed before its extra setup began.
         }
 
-        [Test] public void HostCancellationFinishesFeedbackAndNeverReentersUnavailablePresenter()
+        [Test] public void HostCancellationFinishesFeedbackWithoutPumpingLostQueueAndAllowsExplicitRetry()
         {
             Hook("first", "served", seq: 1); Hook("second", "served", seq: 2);
             var p = new CancellablePresenter(); var c = new NarrativeController(config, p);
             c.QueueEvent("spawn"); p.complete();
-            var fact = Fact(c, "served"); c.SubmitCafeVisitFeedback(fact);
+            var fact = Fact(c, "served"); int completions = 0;
+            c.SubmitCafeVisitFeedback(fact, () => completions++);
+            var stale = p.complete;
+            c.EventFailed += (_, __) => c.CheckEndingsAtSafeBoundary();
             p.Cancel("host_unavailable");
             Assert.That(c.IsBusy, Is.False);
             Assert.That(c.IsCafeVisitFeedbackComplete(fact));
-            Assert.That(c.QueueEvent("move"), Is.False);
-            Assert.That(p.played, Is.EqualTo(new[] { "spawn", "first" }));
+            Assert.That(p.played, Is.EqualTo(new[] { "spawn", "first" }), "Lost-host cancellation must not automatically start the second hook.");
             Assert.That(c.State.HasHappenedEvent("first"), Is.False);
+            Assert.That(c.State.HasHappenedEvent("second"), Is.False);
+            Assert.That(completions, Is.EqualTo(1));
+            Assert.That(c.CaptureSnapshot().cafeFeedback, Is.Empty);
+            stale(); Assert.That(c.IsBusy, Is.False);
+            Assert.That(c.QueueEvent("move"));
+            Assert.That(p.played, Is.EqualTo(new[] { "spawn", "first", "move" }));
+            stale(); Assert.That(c.State.HasHappenedEvent("move"), Is.False);
+            p.complete();
+            Assert.That(c.State.HasHappenedEvent("move"));
+            p.Cancel("disposed");
+            Assert.That(c.QueueEvent("move"), Is.False);
         }
 
         [Test] public void ReservedHookRunsOnceAfterSpawnWithoutRegressingCurrentStage()

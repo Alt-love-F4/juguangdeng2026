@@ -46,13 +46,15 @@ namespace Spotlight.Narrative.Editor
                 if (!c.events.Any(v => v.eventId == x.eventId) && !c.choices.Any(v => (string.IsNullOrWhiteSpace(v.resultOwnerId) ? v.choiceId : v.resultOwnerId) == x.eventId)) e.Add($"Result {x.resultId}: unknown event/choice result owner {x.eventId}.");
                 if ((x.resultType == NarrativeResultType.BarAdd || x.resultType == NarrativeResultType.BarSet || x.resultType == NarrativeResultType.RelAdd) && !int.TryParse(x.value, out _)) e.Add($"Result {x.resultId}: numeric value required.");
             }
+            e.AddRange(LubanNarrativeLoader.ValidateEntryConfiguration(c));
+            e.AddRange(LubanNarrativeLoader.ValidateConversationSteps(c));
             e.AddRange(LubanNarrativeLoader.ValidateConditionConfiguration(c));
             e.AddRange(LubanNarrativeLoader.ValidateValueConfiguration(c));
             var checkIds = new HashSet<string>(StringComparer.Ordinal);
             foreach (var check in c.abilityChecks)
             {
                 if (check == null || string.IsNullOrWhiteSpace(check.checkId) || !checkIds.Add(check.checkId)) e.Add("AbilityCheck: missing or duplicate checkId " + check?.checkId);
-                else if (!c.events.Any(v => v.eventId == check.successEventId) || !c.events.Any(v => v.eventId == check.failureEventId)) e.Add($"AbilityCheck {check.checkId}: success/failure events must exist.");
+                else e.AddRange(LubanNarrativeLoader.ValidateAbilityCheckMode(c, check));
                 if (check != null && !c.abilityCheckConditions.Any(v => v.checkId == check.checkId)) e.Add($"AbilityCheck {check.checkId}: requires conditions.");
             }
             foreach (var condition in c.abilityCheckConditions)

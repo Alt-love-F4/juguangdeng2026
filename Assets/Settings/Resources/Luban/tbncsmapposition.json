@@ -6,7 +6,7 @@
     "posY": 373.4375,
     "isImportant": true,
     "defaultAction": "",
-    "extendedActions": "",
+    "extendedActions": "oct07.cafe.s1",
     "imgPath": "Art/Map/Locations/location_03",
     "enabled": true
   },
@@ -16,7 +16,7 @@
     "posX": -57.8125,
     "posY": 192.1875,
     "isImportant": true,
-    "defaultAction": "act_meet_b",
+    "defaultAction": "",
     "extendedActions": "",
     "imgPath": "Art/Map/Locations/location_05",
     "enabled": true
@@ -38,7 +38,7 @@
     "posX": 300.625,
     "posY": 484.6875,
     "isImportant": false,
-    "defaultAction": "act_c_with_b",
+    "defaultAction": "",
     "extendedActions": "",
     "imgPath": "Art/UI/Avatars/Unknown",
     "enabled": true
