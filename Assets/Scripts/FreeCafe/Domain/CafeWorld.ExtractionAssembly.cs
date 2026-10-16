@@ -42,13 +42,22 @@ namespace Spotlight.FreeCafe
             filter.area = jug.area; filter.x = jug.x + Prep.extractionFilterOffsetX; filter.y = jug.y + Prep.extractionFilterOffsetY;
         }
 
-        /// <summary>Picking up the lower vessel leaves the upper filter at its current position.</summary>
-        public ActionResult PrepareExtractionDrag(string id)
+        public ActionResult CanDragExtractionVessel(string id)
         {
             var item = Find(id);
             if (item == null || Locked(item) || MiniGameUses(item)) return ActionResult.No("器皿正在使用");
             var companion = IsExtractionFilter(item) ? ExtractionJug(item) : ExtractionFilter(item);
-            if (companion != null && (Locked(companion) || MiniGameUses(companion))) return ActionResult.No("组装器皿正在使用");
+            return companion != null && (Locked(companion) || MiniGameUses(companion))
+                ? ActionResult.No("组装器皿正在使用") : ActionResult.Yes("可拿起器皿");
+        }
+
+        /// <summary>Detach only when the lower vessel is used, not for a provisional pointer drag.</summary>
+        public ActionResult PrepareExtractionDrag(string id)
+        {
+            var valid = CanDragExtractionVessel(id);
+            if (!valid.success) return valid;
+            var item = Find(id);
+            var companion = IsExtractionFilter(item) ? ExtractionJug(item) : ExtractionFilter(item);
             if (IsPrecisionExtractor(item) && companion != null)
             { DetachExtractionFilter(companion); Notify(); }
             return ActionResult.Yes("已拿起器皿");

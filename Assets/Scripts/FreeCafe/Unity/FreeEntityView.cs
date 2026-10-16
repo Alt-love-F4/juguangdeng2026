@@ -390,6 +390,9 @@ namespace Spotlight.FreeCafe
             motionInitialized = true;
             pointerMotion = false;
             MovePointer(to);
+            // Only detached previews/consumed items may retire. A registered world
+            // entity must survive even if a caller retained stale preview state.
+            destroyAfter = destroyAfter && (Runtime == null || !Runtime.IsRegisteredView(this));
             destroyOnArrival = destroyAfter;
             retireElapsed = 0;
             motionVelocity = Vector3.zero;

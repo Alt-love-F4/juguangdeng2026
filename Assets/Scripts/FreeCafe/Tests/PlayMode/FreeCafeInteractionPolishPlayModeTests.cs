@@ -87,6 +87,79 @@ namespace Spotlight.FreeCafe.Tests
             return cup;
         }
 
+        [UnityTest] public IEnumerator LostOutputPreviewCannotTurnTheNextVesselIntoMachineOutput()
+        {
+            Assert.That(app.World.TakeAndInteract("s.beans", "m.grinder", AreaId.Counter, 0, 0).success, Is.True);
+            Assert.That(app.World.OperateProduction("m.grinder").success, Is.True);
+            app.World.Tick(app.World.Find("m.grinder").production.remaining + .01f);
+            var grinder=app.World.Find("m.grinder");
+            var pointer=Pointer(grinder.x,grinder.y);
+            MouseAt(pointer.position,true); yield return null;
+            app.BeginDrag(app.View(grinder.id),pointer);
+            Assert.That(app.IsDraggingOutputFrom(grinder.id), Is.True);
+            // Losing a presentation object must also end its uncommitted transaction.
+            Object.Destroy(app.DraggedView.gameObject);
+            yield return null; yield return null;
+            Assert.That(app.World.EmptyProductionMachine(grinder.id).success, Is.True);
+            var heater=app.World.Find("m.heater");
+            var view=app.View(heater.id);
+            pointer=Pointer(heater.x,heater.y);
+            app.BeginDrag(view,pointer);
+            Assert.That(app.DraggedView, Is.SameAs(view));
+            Assert.That(app.IsDraggingOutputFrom(grinder.id), Is.False);
+            app.EndDrag(pointer);
+            Assert.That(app.Hint, Does.Not.Contain("产物已变化"));
+            MouseAt(pointer.position,false);
+            yield return new WaitForSecondsRealtime(.25f);
+            Assert.That(view != null, Is.True, "A surviving world entity must keep its view after release");
+            Assert.That(app.View(heater.id), Is.SameAs(view));
+            Assert.That(view.CanInteract, Is.True);
+            Assert.That(view.body.color.a, Is.EqualTo(1).Within(.001f));
+        }
+
+        [UnityTest] public IEnumerator LowerJugPickupCancelAndReleasePreserveAssemblyAndUnfinishedExtraction()
+        {
+            var jug=app.World.Find("v.extractor");
+            var filter=app.World.ExtractionFilter(jug);
+            Assert.That(filter, Is.Not.Null);
+            var grounds=new WorldEntity { id="drag-regression-grounds", specId="grounds", units=1, area=AreaId.Counter };
+            app.World.State.entities.Add(grounds);
+            Assert.That(app.World.Interact(grounds.id,filter.id).success, Is.True);
+            var heater=app.World.Find("m.heater");
+            heater.contents.Clear();
+            heater.contents.Add(new Portion { specId="water", units=1, milliliters=200, temperature=LiquidTemperature.Boiling });
+            Assert.That(app.World.PourLiquid(heater.id,filter.id,20,.5f).success, Is.True);
+            app.World.FinishPour(filter.id);
+            app.World.Tick(.4f);
+            Assert.That(jug.production.brewStarted, Is.True);
+            Assert.That(jug.production.brewCompleted, Is.False);
+            float volume=app.World.LiquidVolume(jug);
+            float groundsMass=app.World.SolidMass(filter);
+            var view=app.View(jug.id);
+            var pointer=Pointer(jug.x,jug.y);
+            MouseAt(pointer.position,true); yield return null;
+            for(int attempt=0;attempt<3;attempt++)
+            {
+                app.BeginDrag(view,pointer);
+                Assert.That(app.IsDragging, Is.True);
+                var moved=new PointerEventData(EventSystem.current) { position=pointer.position+new Vector2(60,25) };
+                app.MoveDrag(moved);
+                if(attempt==1) app.EndDrag(moved); else app.CancelDrag();
+                Assert.That(app.World.ExtractionFilter(jug), Is.SameAs(filter));
+                Assert.That(app.World.ExtractionJug(filter), Is.SameAs(jug));
+                Assert.That(jug.production.brewCompleted, Is.False, "Moving a vessel must not complete extraction");
+                Assert.That(app.World.LiquidVolume(jug), Is.EqualTo(volume).Within(.001f));
+                Assert.That(app.World.SolidMass(filter), Is.EqualTo(groundsMass).Within(.001f));
+            }
+            MouseAt(pointer.position,false);
+            yield return new WaitForSecondsRealtime(.4f);
+            Assert.That(app.View(jug.id), Is.SameAs(view));
+            Assert.That(view.CanInteract, Is.True);
+            var expected=app.AreaToWorld(filter.area,filter.x,filter.y);
+            Assert.That(Vector3.Distance(app.View(filter.id).transform.position,expected), Is.LessThan(.03f));
+            Assert.That(Vector3.Distance(view.transform.position,app.AreaToWorld(jug.area,jug.x,jug.y)), Is.LessThan(.03f));
+        }
+
         [UnityTest] public IEnumerator SmallEmptyCupReturnsStockExactlyOnceAndItsGhostDisappearsSmoothly()
         {
             yield return CheckMatchedReturn("s.cups.small");
