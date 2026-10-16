@@ -6,7 +6,9 @@
     "seatedVisualPath": "",
     "arrivalDelaySeconds": "",
     "patienceSeconds": "180",
-    "leaveAfterServed": "false"
+    "leaveAfterServed": "false",
+    "orderProductId": "",
+    "requireRealProduction": false
   },
   {
     "visitKey": "demo_cafe_delayed_visit",
@@ -15,6 +17,19 @@
     "seatedVisualPath": "",
     "arrivalDelaySeconds": "30",
     "patienceSeconds": "180",
-    "leaveAfterServed": "true"
+    "leaveAfterServed": "true",
+    "orderProductId": "",
+    "requireRealProduction": false
+  },
+  {
+    "visitKey": "neutral.1018.s1.reporter",
+    "characterId": "neutral.reporter",
+    "preferredSeatId": "",
+    "seatedVisualPath": "",
+    "arrivalDelaySeconds": "150",
+    "patienceSeconds": "180",
+    "leaveAfterServed": "false",
+    "orderProductId": "espresso",
+    "requireRealProduction": true
   }
 ]

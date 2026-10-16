@@ -8,7 +8,7 @@ namespace Spotlight.Narrative
         public string presentationKey, presentationClass, logTag;
     }
 
-    public enum NarrativeConversationStepType { Dialogue, PassiveCheck, LetterReveal, LetterRead }
+    public enum NarrativeConversationStepType { Dialogue, PassiveCheck, LetterReveal, LetterRead, FadeOut, WaitBusiness, WaitNight, Reading, WaitService, LetterHide }
 
     [Serializable] public sealed class NarrativeConversationPageDefinition
     {
@@ -21,6 +21,7 @@ namespace Spotlight.Narrative
     [Serializable] public sealed class NarrativeConversationLineDefinition
     {
         public string lineId, pageId, speakerKey, side, textKey, voiceKey, emote, sfxKey, accentFxKey, accentTargetKey, speakerNameKey;
+        public string stageLeftKey, stageRightKey, stageCenterKey;
         public int seq;
     }
 
@@ -50,9 +51,12 @@ namespace Spotlight.Narrative
         public string backgroundPath;
         public string bgmOverride;
         public readonly List<NarrativeConversationPresentationOption> options = new List<NarrativeConversationPresentationOption>();
+        public NarrativeCharacterPresentationData stageLeft, stageRight, stageCenter;
+        public bool replaceStageLeft, replaceStageRight, replaceStageCenter;
         public Func<string, bool> selectChoice;
         public Action cancelled;
         public Action releaseStage;
+        public Action<float, Action<bool>> fadeStage;
         public readonly List<NarrativeConversationPresentationLine> lines = new List<NarrativeConversationPresentationLine>();
     }
     public sealed class NarrativeConversationPresentationOption
@@ -67,6 +71,8 @@ namespace Spotlight.Narrative
         public int seq;
         public string emote;
         public UnityEngine.Sprite portrait;
+        public NarrativeCharacterPresentationData stageLeft, stageRight, stageCenter;
+        public bool replaceStageLeft, replaceStageRight, replaceStageCenter;
     }
 
     public sealed class NarrativeReadingLinePresentationData
@@ -82,6 +88,7 @@ namespace Spotlight.Narrative
         public string eventId, presentationKey, pageId, readingKey, title, imagePath, envelopePath;
         public string titleKey, readingPageId;
         public bool revealOnly, allowCancel;
+        public Action dismissStage;
         public Action<bool> setSuspended;
         public Action cancelled;
         public Action releaseStage;
@@ -95,6 +102,30 @@ namespace Spotlight.Narrative
     }
 
     public delegate bool NarrativeLetterPlayback(NarrativeEventRequest request, NarrativeLetterPresentationData data, Action completed);
+
+    /// <summary>Resolved ordinary reading inside a conversation; never invokes letter or event settlement logic.</summary>
+    public sealed class NarrativeConversationReadingPresentationData
+    {
+        public object continuityOwner;
+        public string eventId, presentationKey, pageId, readingKey, readingPageId, titleKey, title, imagePath;
+        public bool allowCancel;
+        public Action cancelled;
+        // ReadingPanel notifies Stop before its natural-finish/user-cancel callback. This is not completion.
+        public Action playbackStopped;
+        public Action releaseStage;
+        public Action<bool> setSuspended;
+        public readonly List<NarrativeConversationReadingPresentationLine> lines = new List<NarrativeConversationReadingPresentationLine>();
+    }
+
+    public sealed class NarrativeConversationReadingPresentationLine
+    {
+        public string lineId, textKey, text, mode, speakerKey, speakerName, portraitPath, voiceKey;
+        public int seq;
+        public UnityEngine.Sprite portrait;
+    }
+
+    public delegate bool NarrativeConversationReadingPlayback(NarrativeEventRequest request,
+        NarrativeConversationReadingPresentationData data, Action completed);
 
     public sealed class NarrativeCharacterPresentationData
     {

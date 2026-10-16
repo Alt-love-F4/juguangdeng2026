@@ -88,5 +88,32 @@
     "speakerKey": "",
     "textKey": "ncs.revolution.1014.s1.p017",
     "voiceKey": ""
+  },
+  {
+    "lineId": "rose.1011.s1.p128",
+    "pageId": "rose.1011.s1.card.page",
+    "seq": 1,
+    "mode": "narration",
+    "speakerKey": "",
+    "textKey": "rose.1011.s1.text.p128",
+    "voiceKey": ""
+  },
+  {
+    "lineId": "rose.1011.s1.p129",
+    "pageId": "rose.1011.s1.card.page",
+    "seq": 2,
+    "mode": "narration",
+    "speakerKey": "",
+    "textKey": "rose.1011.s1.text.p129",
+    "voiceKey": ""
+  },
+  {
+    "lineId": "rose.1011.s1.p130",
+    "pageId": "rose.1011.s1.card.page",
+    "seq": 3,
+    "mode": "narration",
+    "speakerKey": "",
+    "textKey": "rose.1011.s1.text.p130",
+    "voiceKey": ""
   }
 ]

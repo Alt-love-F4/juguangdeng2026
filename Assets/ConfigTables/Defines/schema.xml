@@ -184,6 +184,8 @@
     <var name="arrivalDelaySeconds" type="string"/>
     <var name="patienceSeconds" type="string"/>
     <var name="leaveAfterServed" type="string"/>
+    <var name="orderProductId" type="string"/>
+    <var name="requireRealProduction" type="bool"/>
   </bean>
   <table name="TbNcsCafeVisit" value="NcsCafeVisitEntry" mode="map" index="visitKey" input="CafeVisit@Narrative/Narrative.xlsx"/>
   <bean name="NcsCafeVisitHookEntry">
@@ -211,7 +213,7 @@
     <var name="optionGroupKey" type="string"/>
     <var name="bgOverride" type="string"/>
     <var name="bgmOverride" type="string"/>
-    <var name="stepType" type="string#set=,Dialogue,PassiveCheck,LetterReveal,LetterRead"/>
+    <var name="stepType" type="string#set=,Dialogue,PassiveCheck,LetterReveal,LetterRead,FadeOut,WaitBusiness,WaitNight,Reading,WaitService,LetterHide"/>
     <var name="readingKey" type="string#ref=TbNcsPresentationIndex?"/>
     <var name="checkId" type="string#ref=TbNcsAbilityCheck?"/>
   </bean>
@@ -222,11 +224,13 @@
     <var name="pageId" type="string#ref=TbNcsConversationPage"/>
     <var name="seq" type="int"/>
     <var name="speakerKey" type="string#ref=TbNcsObject?"/>
-    <var name="side" type="string#set=left,right,none"/>
+    <var name="side" type="string#set=left,right,center,none"/>
     <var name="textKey" type="string#ref=TbText"/>
     <var name="voiceKey" type="string"/><var name="emote" type="string"/><var name="sfxKey" type="string"/>
     <var name="accentFxKey" type="string"/><var name="accentTargetKey" type="string"/>
     <var name="speakerNameKey" type="string#ref=TbText?"/>
+    <!-- Empty keeps the slot; '-' clears it; other values reference an Object (runtime validated). -->
+    <var name="stageLeftKey" type="string"/><var name="stageRightKey" type="string"/><var name="stageCenterKey" type="string"/>
   </bean>
   <table name="TbNcsConversationLine" value="NcsConversationLineEntry" mode="list" index="lineId" input="ConversationLine@Narrative/Narrative.xlsx"/>
 
@@ -272,10 +276,10 @@
   <table name="TbNcsResult" value="NcsResultEntry" mode="map" index="resultId" input="Result@Narrative/Narrative.xlsx"/>
   <bean name="NcsConditionEntry">
     <var name="conditionId" type="string"/>
-    <var name="ownerType" type="string#set=event,choice,action,ending"/>
+    <var name="ownerType" type="string#set=event,choice,action,ending,result"/>
     <var name="ownerId" type="string"/>
     <var name="groupIndex" type="int"/>
-    <var name="condType" type="string#set=BOOL_EQ,ITEM_GTE,ACTION_PROGRESS_GTE,ACTION_COMPLETED,BAR_GTE,BAR_LTE,BAR_BETWEEN,REL_GTE,EVENT_HAPPENED,EVENT_NOT_HAPPENED"/>
+    <var name="condType" type="string#set=BOOL_EQ,ITEM_GTE,ACTION_PROGRESS_GTE,ACTION_COMPLETED,BAR_GTE,BAR_LTE,BAR_BETWEEN,REL_GTE,EVENT_HAPPENED,EVENT_NOT_HAPPENED,ATTRIBUTE_GTE,PRESENTATION"/>
     <var name="target" type="string"/>
     <var name="value" type="string"/>
   </bean>

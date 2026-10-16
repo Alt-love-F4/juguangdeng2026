@@ -190,6 +190,7 @@ namespace Spotlight.GameFlow
             visualPresenter.AbilityCheck = test.EvaluateAbilityCheck;
             visualPresenter.InlineAbilityCheck = test.Controller.EvaluateInlineAbilityCheckForPresentation;
             visualPresenter.LetterPlayback = LetterEventPlayback.PlayPreview;
+            visualPresenter.ConversationReadingPlayback = ConversationReadingPlayback.PlayPreview;
             visualPresenter.PageCondition = key => test.Controller.State.GetCondition(key);
             visualPresenter.ConversationPlayback = (request, data, completed) =>
             {

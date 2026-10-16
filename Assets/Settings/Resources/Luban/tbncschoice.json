@@ -254,5 +254,461 @@
     "resultOwnerId": "",
     "seq": 2,
     "checkId": ""
+  },
+  {
+    "choiceId": "neutral.1008.s1.choice.q1.a",
+    "groupKey": "neutral.1008.s1.q1",
+    "textKey": "neutral.1008.s1.text.p036",
+    "resultOwnerId": "",
+    "seq": 1,
+    "checkId": ""
+  },
+  {
+    "choiceId": "neutral.1008.s1.choice.q1.b",
+    "groupKey": "neutral.1008.s1.q1",
+    "textKey": "neutral.1008.s1.text.p037",
+    "resultOwnerId": "",
+    "seq": 2,
+    "checkId": ""
+  },
+  {
+    "choiceId": "neutral.1008.s1.choice.q1.c",
+    "groupKey": "neutral.1008.s1.q1",
+    "textKey": "neutral.1008.s1.text.p038",
+    "resultOwnerId": "",
+    "seq": 3,
+    "checkId": ""
+  },
+  {
+    "choiceId": "church.1104.s1.fee.free",
+    "groupKey": "church.1104.s1.fee.choices",
+    "textKey": "church.1104.s1.p041",
+    "resultOwnerId": "",
+    "seq": 1,
+    "checkId": ""
+  },
+  {
+    "choiceId": "church.1104.s1.fee.one",
+    "groupKey": "church.1104.s1.fee.choices",
+    "textKey": "church.1104.s1.p042",
+    "resultOwnerId": "",
+    "seq": 2,
+    "checkId": ""
+  },
+  {
+    "choiceId": "church.1104.s1.fee.quoted",
+    "groupKey": "church.1104.s1.fee.choices",
+    "textKey": "church.1104.s1.p043",
+    "resultOwnerId": "",
+    "seq": 3,
+    "checkId": ""
+  },
+  {
+    "choiceId": "church.1104.s1.route.far",
+    "groupKey": "church.1104.s1.route.choices",
+    "textKey": "church.1104.s1.p075",
+    "resultOwnerId": "",
+    "seq": 1,
+    "checkId": ""
+  },
+  {
+    "choiceId": "church.1104.s1.route.near",
+    "groupKey": "church.1104.s1.route.choices",
+    "textKey": "church.1104.s1.p076",
+    "resultOwnerId": "",
+    "seq": 2,
+    "checkId": ""
+  },
+  {
+    "choiceId": "church.1104.s1.night.wait",
+    "groupKey": "church.1104.s1.night.choices",
+    "textKey": "church.1104.s1.p429",
+    "resultOwnerId": "",
+    "seq": 1,
+    "checkId": ""
+  },
+  {
+    "choiceId": "church.1104.s1.night.ask",
+    "groupKey": "church.1104.s1.night.choices",
+    "textKey": "church.1104.s1.p430",
+    "resultOwnerId": "",
+    "seq": 2,
+    "checkId": ""
+  },
+  {
+    "choiceId": "church.1104.s1.night.hurry",
+    "groupKey": "church.1104.s1.night.choices",
+    "textKey": "church.1104.s1.p431",
+    "resultOwnerId": "",
+    "seq": 3,
+    "checkId": ""
+  },
+  {
+    "choiceId": "neutral.1010.s1.choice.q1.a",
+    "groupKey": "neutral.1010.s1.q1",
+    "textKey": "neutral.1010.s1.text.p034",
+    "resultOwnerId": "",
+    "seq": 1,
+    "checkId": ""
+  },
+  {
+    "choiceId": "neutral.1010.s1.choice.q1.b",
+    "groupKey": "neutral.1010.s1.q1",
+    "textKey": "neutral.1010.s1.text.p035",
+    "resultOwnerId": "",
+    "seq": 2,
+    "checkId": ""
+  },
+  {
+    "choiceId": "neutral.1010.s1.choice.q1.c",
+    "groupKey": "neutral.1010.s1.q1",
+    "textKey": "neutral.1010.s1.text.p036",
+    "resultOwnerId": "",
+    "seq": 3,
+    "checkId": ""
+  },
+  {
+    "choiceId": "neutral.1010.s2.choice.q1.a",
+    "groupKey": "neutral.1010.s2.q1",
+    "textKey": "neutral.1010.s2.text.p016",
+    "resultOwnerId": "",
+    "seq": 1,
+    "checkId": ""
+  },
+  {
+    "choiceId": "neutral.1010.s2.choice.q1.b",
+    "groupKey": "neutral.1010.s2.q1",
+    "textKey": "neutral.1010.s2.text.p017",
+    "resultOwnerId": "",
+    "seq": 2,
+    "checkId": ""
+  },
+  {
+    "choiceId": "neutral.1010.s2.choice.q1.c",
+    "groupKey": "neutral.1010.s2.q1",
+    "textKey": "neutral.1010.s2.text.p018",
+    "resultOwnerId": "",
+    "seq": 3,
+    "checkId": ""
+  },
+  {
+    "choiceId": "neutral.1010.s2.choice.q2.a",
+    "groupKey": "neutral.1010.s2.q2",
+    "textKey": "neutral.1010.s2.text.p059",
+    "resultOwnerId": "",
+    "seq": 1,
+    "checkId": ""
+  },
+  {
+    "choiceId": "neutral.1010.s2.choice.q2.b",
+    "groupKey": "neutral.1010.s2.q2",
+    "textKey": "neutral.1010.s2.text.p060",
+    "resultOwnerId": "",
+    "seq": 2,
+    "checkId": ""
+  },
+  {
+    "choiceId": "neutral.1010.s2.choice.q2.c",
+    "groupKey": "neutral.1010.s2.q2",
+    "textKey": "neutral.1010.s2.text.p061",
+    "resultOwnerId": "",
+    "seq": 3,
+    "checkId": ""
+  },
+  {
+    "choiceId": "neutral.1013.s2.choice.q1.a",
+    "groupKey": "neutral.1013.s2.q1",
+    "textKey": "neutral.1013.s2.text.p037",
+    "resultOwnerId": "",
+    "seq": 1,
+    "checkId": ""
+  },
+  {
+    "choiceId": "neutral.1013.s2.choice.q1.b",
+    "groupKey": "neutral.1013.s2.q1",
+    "textKey": "neutral.1013.s2.text.p038",
+    "resultOwnerId": "",
+    "seq": 2,
+    "checkId": ""
+  },
+  {
+    "choiceId": "neutral.1013.s2.choice.q1.c",
+    "groupKey": "neutral.1013.s2.q1",
+    "textKey": "neutral.1013.s2.text.p039",
+    "resultOwnerId": "",
+    "seq": 3,
+    "checkId": ""
+  },
+  {
+    "choiceId": "neutral.1013.s2.choice.q2.a",
+    "groupKey": "neutral.1013.s2.q2",
+    "textKey": "neutral.1013.s2.text.p100",
+    "resultOwnerId": "",
+    "seq": 1,
+    "checkId": ""
+  },
+  {
+    "choiceId": "neutral.1013.s2.choice.q2.b",
+    "groupKey": "neutral.1013.s2.q2",
+    "textKey": "neutral.1013.s2.text.p101",
+    "resultOwnerId": "",
+    "seq": 2,
+    "checkId": ""
+  },
+  {
+    "choiceId": "neutral.1013.s2.choice.q2.c",
+    "groupKey": "neutral.1013.s2.q2",
+    "textKey": "neutral.1013.s2.text.p102",
+    "resultOwnerId": "",
+    "seq": 3,
+    "checkId": ""
+  },
+  {
+    "choiceId": "neutral.1018.s1.choice.q_ad.yes",
+    "groupKey": "neutral.1018.s1.q_ad",
+    "textKey": "neutral.1018.s1.text.p069",
+    "resultOwnerId": "",
+    "seq": 1,
+    "checkId": ""
+  },
+  {
+    "choiceId": "neutral.1018.s1.choice.q_ad.no",
+    "groupKey": "neutral.1018.s1.q_ad",
+    "textKey": "neutral.1018.s1.text.p078",
+    "resultOwnerId": "",
+    "seq": 2,
+    "checkId": ""
+  },
+  {
+    "choiceId": "rose.1011.s1.choice.p020",
+    "groupKey": "rose.1011.s1.choice.drink",
+    "textKey": "rose.1011.s1.text.p020",
+    "resultOwnerId": "",
+    "seq": 1,
+    "checkId": ""
+  },
+  {
+    "choiceId": "rose.1011.s1.choice.p022",
+    "groupKey": "rose.1011.s1.choice.drink",
+    "textKey": "rose.1011.s1.text.p022",
+    "resultOwnerId": "",
+    "seq": 2,
+    "checkId": ""
+  },
+  {
+    "choiceId": "rose.1011.s1.choice.p024",
+    "groupKey": "rose.1011.s1.choice.drink",
+    "textKey": "rose.1011.s1.text.p024",
+    "resultOwnerId": "",
+    "seq": 3,
+    "checkId": ""
+  },
+  {
+    "choiceId": "rose.1011.s1.choice.p032",
+    "groupKey": "rose.1011.s1.choice.news",
+    "textKey": "rose.1011.s1.text.p032",
+    "resultOwnerId": "",
+    "seq": 1,
+    "checkId": ""
+  },
+  {
+    "choiceId": "rose.1011.s1.choice.p033",
+    "groupKey": "rose.1011.s1.choice.news",
+    "textKey": "rose.1011.s1.text.p033",
+    "resultOwnerId": "",
+    "seq": 2,
+    "checkId": ""
+  },
+  {
+    "choiceId": "church.1014.s2.p037",
+    "groupKey": "church.1014.s2.service.choices",
+    "textKey": "church.1014.s2.p037.text",
+    "resultOwnerId": "",
+    "seq": 1,
+    "checkId": ""
+  },
+  {
+    "choiceId": "church.1014.s2.p038",
+    "groupKey": "church.1014.s2.service.choices",
+    "textKey": "church.1014.s2.p038.text",
+    "resultOwnerId": "",
+    "seq": 2,
+    "checkId": ""
+  },
+  {
+    "choiceId": "church.1014.s2.p039",
+    "groupKey": "church.1014.s2.service.choices",
+    "textKey": "church.1014.s2.p039.text",
+    "resultOwnerId": "",
+    "seq": 3,
+    "checkId": ""
+  },
+  {
+    "choiceId": "church.1014.s2.p050",
+    "groupKey": "church.1014.s2.relief.choices",
+    "textKey": "church.1014.s2.p050.text",
+    "resultOwnerId": "",
+    "seq": 1,
+    "checkId": ""
+  },
+  {
+    "choiceId": "church.1014.s2.p051",
+    "groupKey": "church.1014.s2.relief.choices",
+    "textKey": "church.1014.s2.p051.text",
+    "resultOwnerId": "",
+    "seq": 2,
+    "checkId": ""
+  },
+  {
+    "choiceId": "church.1014.s2.p052",
+    "groupKey": "church.1014.s2.relief.choices",
+    "textKey": "church.1014.s2.p052.text",
+    "resultOwnerId": "",
+    "seq": 3,
+    "checkId": ""
+  },
+  {
+    "choiceId": "church.1020.s1.p020",
+    "groupKey": "church.1020.s1.cooperate.choices",
+    "textKey": "church.1020.s1.p020.text",
+    "resultOwnerId": "",
+    "seq": 1,
+    "checkId": ""
+  },
+  {
+    "choiceId": "church.1020.s1.p021",
+    "groupKey": "church.1020.s1.cooperate.choices",
+    "textKey": "church.1020.s1.p021.text",
+    "resultOwnerId": "",
+    "seq": 2,
+    "checkId": ""
+  },
+  {
+    "choiceId": "church.1020.s1.p022",
+    "groupKey": "church.1020.s1.cooperate.choices",
+    "textKey": "church.1020.s1.p022.text",
+    "resultOwnerId": "",
+    "seq": 3,
+    "checkId": ""
+  },
+  {
+    "choiceId": "church.1020.s1.p044",
+    "groupKey": "church.1020.s1.explain.choices",
+    "textKey": "church.1020.s1.p044.text",
+    "resultOwnerId": "",
+    "seq": 1,
+    "checkId": ""
+  },
+  {
+    "choiceId": "church.1020.s1.p045",
+    "groupKey": "church.1020.s1.explain.choices",
+    "textKey": "church.1020.s1.p045.text",
+    "resultOwnerId": "",
+    "seq": 2,
+    "checkId": ""
+  },
+  {
+    "choiceId": "church.1020.s1.p046",
+    "groupKey": "church.1020.s1.explain.choices",
+    "textKey": "church.1020.s1.p046.text",
+    "resultOwnerId": "",
+    "seq": 3,
+    "checkId": ""
+  },
+  {
+    "choiceId": "church.1020.s1.p047",
+    "groupKey": "church.1020.s1.explain.choices",
+    "textKey": "church.1020.s1.p047.text",
+    "resultOwnerId": "",
+    "seq": 4,
+    "checkId": ""
+  },
+  {
+    "choiceId": "church.1023.s1.p021",
+    "groupKey": "church.1023.s1.release.choices",
+    "textKey": "church.1023.s1.p021.text",
+    "resultOwnerId": "",
+    "seq": 1,
+    "checkId": ""
+  },
+  {
+    "choiceId": "church.1023.s1.p022",
+    "groupKey": "church.1023.s1.release.choices",
+    "textKey": "church.1023.s1.p022.text",
+    "resultOwnerId": "",
+    "seq": 2,
+    "checkId": ""
+  },
+  {
+    "choiceId": "church.1023.s1.p023",
+    "groupKey": "church.1023.s1.release.choices",
+    "textKey": "church.1023.s1.p023.text",
+    "resultOwnerId": "",
+    "seq": 3,
+    "checkId": ""
+  },
+  {
+    "choiceId": "church.1023.s1.retry.bribe",
+    "groupKey": "church.1023.s1.fallback.choices",
+    "textKey": "church.1023.s1.p022.text",
+    "resultOwnerId": "",
+    "seq": 1,
+    "checkId": ""
+  },
+  {
+    "choiceId": "church.1023.s1.retry.wait",
+    "groupKey": "church.1023.s1.fallback.choices",
+    "textKey": "church.1023.s1.p023.text",
+    "resultOwnerId": "",
+    "seq": 2,
+    "checkId": ""
+  },
+  {
+    "choiceId": "rose.1011.s1.choice.p060",
+    "groupKey": "rose.1011.s1.choice.nature",
+    "textKey": "rose.1011.s1.text.p060",
+    "resultOwnerId": "",
+    "seq": 1,
+    "checkId": ""
+  },
+  {
+    "choiceId": "rose.1011.s1.choice.p061",
+    "groupKey": "rose.1011.s1.choice.nature",
+    "textKey": "rose.1011.s1.text.p061",
+    "resultOwnerId": "",
+    "seq": 2,
+    "checkId": ""
+  },
+  {
+    "choiceId": "rose.1011.s1.choice.p062",
+    "groupKey": "rose.1011.s1.choice.nature",
+    "textKey": "rose.1011.s1.text.p062",
+    "resultOwnerId": "",
+    "seq": 3,
+    "checkId": ""
+  },
+  {
+    "choiceId": "rose.1011.s1.choice.p079",
+    "groupKey": "rose.1011.s1.choice.reason",
+    "textKey": "rose.1011.s1.text.p079",
+    "resultOwnerId": "",
+    "seq": 1,
+    "checkId": ""
+  },
+  {
+    "choiceId": "rose.1011.s1.choice.p080",
+    "groupKey": "rose.1011.s1.choice.reason",
+    "textKey": "rose.1011.s1.text.p080",
+    "resultOwnerId": "",
+    "seq": 2,
+    "checkId": ""
+  },
+  {
+    "choiceId": "rose.1011.s1.choice.p081",
+    "groupKey": "rose.1011.s1.choice.reason",
+    "textKey": "rose.1011.s1.text.p081",
+    "resultOwnerId": "",
+    "seq": 3,
+    "checkId": ""
   }
 ]

@@ -44,6 +44,19 @@ namespace Spotlight.GameFlow.Tests
             Assert.That(PresentationPauseRegistry.OwnerCount, Is.EqualTo(baseline));
         }
 
+        [TestCase("entry", "MorningBeforeMap")]
+        [TestCase("ENTRY", "AfterBusiness")]
+        [TestCase("blocksSave", "true")]
+        [TestCase("blockedBy", "construction")]
+        public void SchedulingMetadataAloneDoesNotRequirePresentationButVisualPayloadStillDoes(string property, string value)
+        {
+            var definition = new NarrativeEventDefinition { eventId = "scheduled-result" };
+            definition.eventProperties.Add(new NarrativeEventProperty { property = property, value = value });
+            Assert.That(NarrativePresenter.RequiresPresentation(definition, null), Is.False);
+            definition.eventProperties.Add(new NarrativeEventProperty { property = "bg", value = "cafe" });
+            Assert.That(NarrativePresenter.RequiresPresentation(definition, null), Is.True);
+        }
+
         [Test]
         public void ResultOnlyEventDoesNotRequirePresentationButContentAndAtomicSetupsDo()
         {

@@ -298,7 +298,7 @@
   {
     "setupKey": "rose.1009.s1",
     "tplName": "Tpl_ArrivalConversation",
-    "slotValues": "",
+    "slotValues": "opts=",
     "checkId": "",
     "skipAble": false,
     "autoAdvance": false
@@ -329,6 +329,110 @@
   },
   {
     "setupKey": "church.1009.s2",
+    "tplName": "Tpl_ArrivalConversation",
+    "slotValues": "opts=",
+    "checkId": "",
+    "skipAble": false,
+    "autoAdvance": false
+  },
+  {
+    "setupKey": "neutral.1008.s1",
+    "tplName": "Tpl_ArrivalConversation",
+    "slotValues": "",
+    "checkId": "",
+    "skipAble": false,
+    "autoAdvance": false
+  },
+  {
+    "setupKey": "church.1104.s1",
+    "tplName": "Tpl_ArrivalConversation",
+    "slotValues": "opts=",
+    "checkId": "",
+    "skipAble": false,
+    "autoAdvance": false
+  },
+  {
+    "setupKey": "church.1023.s2",
+    "tplName": "Tpl_ArrivalConversation",
+    "slotValues": "opts=",
+    "checkId": "",
+    "skipAble": false,
+    "autoAdvance": false
+  },
+  {
+    "setupKey": "neutral.1010.s1",
+    "tplName": "Tpl_ArrivalConversation",
+    "slotValues": "",
+    "checkId": "",
+    "skipAble": false,
+    "autoAdvance": false
+  },
+  {
+    "setupKey": "neutral.1010.s2",
+    "tplName": "Tpl_ArrivalConversation",
+    "slotValues": "",
+    "checkId": "",
+    "skipAble": false,
+    "autoAdvance": false
+  },
+  {
+    "setupKey": "neutral.1013.s2",
+    "tplName": "Tpl_ArrivalConversation",
+    "slotValues": "",
+    "checkId": "",
+    "skipAble": false,
+    "autoAdvance": false
+  },
+  {
+    "setupKey": "neutral.1018.s1",
+    "tplName": "Tpl_ArrivalConversation",
+    "slotValues": "",
+    "checkId": "",
+    "skipAble": false,
+    "autoAdvance": false
+  },
+  {
+    "setupKey": "rose.1016.s1",
+    "tplName": "Tpl_ArrivalConversation",
+    "slotValues": "opts=",
+    "checkId": "",
+    "skipAble": false,
+    "autoAdvance": false
+  },
+  {
+    "setupKey": "rose.1012.s1",
+    "tplName": "Tpl_ArrivalConversation",
+    "slotValues": "opts=",
+    "checkId": "",
+    "skipAble": false,
+    "autoAdvance": false
+  },
+  {
+    "setupKey": "rose.1011.s1",
+    "tplName": "Tpl_ArrivalConversation",
+    "slotValues": "opts=",
+    "checkId": "",
+    "skipAble": false,
+    "autoAdvance": false
+  },
+  {
+    "setupKey": "church.1014.s2",
+    "tplName": "Tpl_ArrivalConversation",
+    "slotValues": "opts=",
+    "checkId": "",
+    "skipAble": false,
+    "autoAdvance": false
+  },
+  {
+    "setupKey": "church.1020.s1",
+    "tplName": "Tpl_ArrivalConversation",
+    "slotValues": "opts=",
+    "checkId": "",
+    "skipAble": false,
+    "autoAdvance": false
+  },
+  {
+    "setupKey": "church.1023.s1",
     "tplName": "Tpl_ArrivalConversation",
     "slotValues": "opts=",
     "checkId": "",

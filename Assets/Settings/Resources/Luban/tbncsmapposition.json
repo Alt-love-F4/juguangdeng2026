@@ -17,7 +17,7 @@
     "posY": 192.1875,
     "isImportant": true,
     "defaultAction": "",
-    "extendedActions": "",
+    "extendedActions": "neutral.1008.s1.action",
     "imgPath": "Art/Map/Locations/location_05",
     "enabled": true
   },

@@ -16,6 +16,7 @@ namespace Spotlight.GameFlow
             runtime.NoticePlayback = NarrativeNoticeEventPlayback.Play;
             runtime.ConversationPlayback = NarrativeConversationEventPlayback.Play;
             runtime.LetterPlayback = LetterEventPlayback.Play;
+            runtime.ConversationReadingPlayback = ConversationReadingPlayback.Play;
             runtime.CharacterResolver = NarrativeCharacterResolver.Resolve;
         }
     }

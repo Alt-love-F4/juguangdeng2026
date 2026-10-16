@@ -36,6 +36,9 @@ public sealed partial class NcsConversationLineEntry : Luban.BeanBase
         AccentTargetKey = (string)_obj.GetValue("accentTargetKey");
         SpeakerNameKey = (string)_obj.GetValue("speakerNameKey");
         SpeakerNameKey_Ref = null;
+        StageLeftKey = (string)_obj.GetValue("stageLeftKey");
+        StageRightKey = (string)_obj.GetValue("stageRightKey");
+        StageCenterKey = (string)_obj.GetValue("stageCenterKey");
     }
 
     public static NcsConversationLineEntry DeserializeNcsConversationLineEntry(JToken _buf)
@@ -59,6 +62,9 @@ public sealed partial class NcsConversationLineEntry : Luban.BeanBase
     public readonly string AccentTargetKey;
     public readonly string SpeakerNameKey;
     public TextEntry SpeakerNameKey_Ref;
+    public readonly string StageLeftKey;
+    public readonly string StageRightKey;
+    public readonly string StageCenterKey;
 
 
     public const int __ID__ = -1562519299;
@@ -87,6 +93,9 @@ public sealed partial class NcsConversationLineEntry : Luban.BeanBase
         + "accentFxKey:" + AccentFxKey + ","
         + "accentTargetKey:" + AccentTargetKey + ","
         + "speakerNameKey:" + SpeakerNameKey + ","
+        + "stageLeftKey:" + StageLeftKey + ","
+        + "stageRightKey:" + StageRightKey + ","
+        + "stageCenterKey:" + StageCenterKey + ","
         + "}";
     }
 }

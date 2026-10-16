@@ -9126,17 +9126,17 @@
   },
   {
     "key": "neutral.1010.s1.text.p066",
-    "text": "那就定在两天后，怎么样？",
+    "text": "那就定在三天后，怎么样？",
     "comment": "A-1010.s1-P066; 正文; text staging only, event disabled"
   },
   {
     "key": "neutral.1010.s1.text.p067",
-    "text": "两天后……好！时间应该足够了！",
+    "text": "三天后……好！时间应该足够了！",
     "comment": "A-1010.s1-P067; 正文; text staging only, event disabled"
   },
   {
     "key": "neutral.1010.s1.text.p068",
-    "text": "那今天营业结束后，我们就一起商量一下具体的安排。",
+    "text": "那就先按这个安排准备，今天营业结束后，我们再一起核对一下细节。",
     "comment": "A-1010.s1-P068; 正文; text staging only, event disabled"
   },
   {
@@ -9176,12 +9176,12 @@
   },
   {
     "key": "neutral.1010.s2.text.p003",
-    "text": "清晨的咖啡馆还没有正式营业。",
+    "text": "早间的第一拨客人散去后，咖啡馆迎来了一段短暂的整理时间。",
     "comment": "A-1010.s2-P003; 正文; text staging only, event disabled"
   },
   {
     "key": "neutral.1010.s2.text.p004",
-    "text": "为了准备即将到来的促销活动，我比往常早起了一些。桌椅已经摆放妥当，柜台上堆着几张写了一半的告示，旁边则是昨晚整理好的账簿。",
+    "text": "为了准备即将到来的促销活动，我趁客流稍缓整理了一下店里。桌椅已经摆放妥当，柜台上堆着几张写了一半的告示，旁边则是昨晚整理好的账簿。",
     "comment": "A-1010.s2-P004; 正文; text staging only, event disabled"
   },
   {
@@ -9191,7 +9191,7 @@
   },
   {
     "key": "neutral.1010.s2.text.p007",
-    "text": "早安。请问这里已经开始营业了吗？",
+    "text": "早上好。请问现在方便接待吗？",
     "comment": "A-1010.s2-P007; 正文; text staging only, event disabled"
   },
   {
@@ -9206,12 +9206,12 @@
   },
   {
     "key": "neutral.1010.s2.text.p011",
-    "text": "看来我来得稍早了一些。不过，既然门没有锁上，想必也不至于打扰太久。",
+    "text": "看来我来得不太凑巧。不过，既然门没有锁上，想必也不至于打扰太久。",
     "comment": "A-1010.s2-P011; 正文; text staging only, event disabled"
   },
   {
     "key": "neutral.1010.s2.text.p012",
-    "text": "您好，先生。我们确实还没正式营业。",
+    "text": "您好，先生。我们正在整理店里。",
     "comment": "A-1010.s2-P012; 正文; text staging only, event disabled"
   },
   {
@@ -9251,17 +9251,17 @@
   },
   {
     "key": "neutral.1010.s2.text.p025",
-    "text": "您是第一次来这里吗？虽然还没正式营业，不过咖啡已经准备好了。若是不介意，不妨进来坐坐。",
+    "text": "您是第一次来这里吗？我们正在整理，不过咖啡已经准备好了。若是不介意，不妨进来坐坐。",
     "comment": "A-1010.s2-P025; 正文; text staging only, event disabled"
   },
   {
     "key": "neutral.1010.s2.text.p026",
-    "text": "如此说来，我倒没有拒绝的理由了。能在清晨遇到一位热情的店主，总是件令人愉快的事。",
+    "text": "如此说来，我倒没有拒绝的理由了。能在早间遇到一位热情的店主，总是件令人愉快的事。",
     "comment": "A-1010.s2-P026; 正文; text staging only, event disabled"
   },
   {
     "key": "neutral.1010.s2.text.p030",
-    "text": "您要是愿意的话，也可以先坐一会儿。我们很快就能营业了。",
+    "text": "您要是愿意的话，也可以先坐一会儿。我们很快就能整理好。",
     "comment": "A-1010.s2-P030; 正文; text staging only, event disabled"
   },
   {
@@ -9271,12 +9271,12 @@
   },
   {
     "key": "neutral.1010.s2.text.p034",
-    "text": "抱歉，先生，我们还需要准备一会儿。如果您不介意，可以等正式营业之后再来。",
+    "text": "抱歉，先生，我们还需要整理一会儿。如果您不介意，可以稍后再来。",
     "comment": "A-1010.s2-P034; 正文; text staging only, event disabled"
   },
   {
     "key": "neutral.1010.s2.text.p035",
-    "text": "当然，遵守营业时间也是经营的一部分。既然如此，我便不打扰了。",
+    "text": "当然，先把店里安排妥当也是经营的一部分。既然如此，我便不打扰了。",
     "comment": "A-1010.s2-P035; 正文; text staging only, event disabled"
   },
   {
@@ -9336,7 +9336,7 @@
   },
   {
     "key": "neutral.1010.s2.text.p052",
-    "text": "正是如此。所以我们打算在两天后举办一次促销活动。",
+    "text": "正是如此。所以我们打算在三天后举办一次促销活动。",
     "comment": "A-1010.s2-P052; 正文; text staging only, event disabled"
   },
   {
@@ -9536,7 +9536,7 @@
   },
   {
     "key": "neutral.1010.s2.text.p113",
-    "text": "距离正式营业已经没有多少时间，我收拾好桌上的账簿，将写了一半的促销告示先放到一旁，准备迎接今天的第一批客人。",
+    "text": "短暂的整理告一段落，我收拾好桌上的账簿，将写了一半的促销告示先放到一旁，准备继续招呼今天的客人。",
     "comment": "A-1010.s2-P113; 正文; text staging only, event disabled"
   },
   {
@@ -10478,5 +10478,1830 @@
     "key": "neutral.1018.s1.text.p097",
     "text": "我望了一眼记者方才坐过的位置。桌上除了几枚铜币，就只剩下一圈浅淡的杯痕。",
     "comment": "A-1018.s1-P097; 正文; text staging only, event disabled"
+  },
+  {
+    "key": "church.1014.s2.p004.text",
+    "text": "由于咖啡馆昨天举办了活动，客流量渐渐变大，我和阿黛尔的工作甚至可以用繁忙来形容。这样的热闹延续到了今天，直到中午时分人流量才减少，我们终于可以获得片刻的歇息了。",
+    "comment": "church.1014.s2.P004; church.1014.s2.arrival; Text only, no event/route/result"
+  },
+  {
+    "key": "church.1014.s2.p006.text",
+    "text": "一名中年男人出现，在离我最近的吧台座位坐下",
+    "comment": "church.1014.s2.P006; church.1014.s2.arrival; Text only, no event/route/result"
+  },
+  {
+    "key": "church.1014.s2.p008.text",
+    "text": "「您好，欢迎光临沸点咖啡馆！」",
+    "comment": "church.1014.s2.P008; church.1014.s2.arrival; Text only, no event/route/result"
+  },
+  {
+    "key": "church.1014.s2.p009.text",
+    "text": "「你好。」",
+    "comment": "church.1014.s2.P009; church.1014.s2.arrival; Text only, no event/route/result"
+  },
+  {
+    "key": "church.1014.s2.p010.text",
+    "text": "「先生，请问您想喝点什么呢？店内的咖啡目前广受好评呢。」",
+    "comment": "church.1014.s2.P010; church.1014.s2.arrival; Text only, no event/route/result"
+  },
+  {
+    "key": "church.1014.s2.p011.text",
+    "text": "「是吗，那来一杯经典的无糖黑咖啡。」",
+    "comment": "church.1014.s2.P011; church.1014.s2.arrival; Text only, no event/route/result"
+  },
+  {
+    "key": "church.1014.s2.p012.text",
+    "text": "「好的，请稍等片刻。」",
+    "comment": "church.1014.s2.P012; church.1014.s2.arrival; Text only, no event/route/result"
+  },
+  {
+    "key": "church.1014.s2.p014.text",
+    "text": "「还不错。」",
+    "comment": "church.1014.s2.P014; church.1014.s2.arrival; Text only, no event/route/result"
+  },
+  {
+    "key": "church.1014.s2.p015.text",
+    "text": "「谢谢您的肯定！请慢慢品尝。」",
+    "comment": "church.1014.s2.P015; church.1014.s2.arrival; Text only, no event/route/result"
+  },
+  {
+    "key": "church.1014.s2.p017.text",
+    "text": "暂时没有更多客人了，正好趁闲暇时放松一下吧",
+    "comment": "church.1014.s2.P017; church.1014.s2.notice_pass; Text only, no event/route/result"
+  },
+  {
+    "key": "church.1014.s2.p018.text",
+    "text": "不知道下午客流量怎么样，一旦忙起来就觉得时间过得飞快，不过这也意味着叔叔交给我的咖啡馆逐渐走上正途了。",
+    "comment": "church.1014.s2.P018; church.1014.s2.notice_pass; Text only, no event/route/result"
+  },
+  {
+    "key": "church.1014.s2.p019.text",
+    "text": "说起咖啡馆，没想到背后竟然和一些神秘组织有关系，感觉被牵扯进了很不得了的事件中。",
+    "comment": "church.1014.s2.P019; church.1014.s2.notice_pass; Text only, no event/route/result"
+  },
+  {
+    "key": "church.1014.s2.p020.text",
+    "text": "不知道是不是我的错觉，总觉得这位客人一直在看着我。是对咖啡不满意吗，或者是我今天穿的不对劲？",
+    "comment": "church.1014.s2.P020; church.1014.s2.notice_pass; Text only, no event/route/result"
+  },
+  {
+    "key": "church.1014.s2.p021.text",
+    "text": "他看起来也像是一个工人，今天来的工人怎么这么多，但他应该不会是神秘人那边派来的人吧？好在意，要不问一下吧。",
+    "comment": "church.1014.s2.P021; church.1014.s2.notice_pass; Text only, no event/route/result"
+  },
+  {
+    "key": "church.1014.s2.p023.text",
+    "text": "暂时没有更多客人了，正好趁闲暇时放松一下吧。",
+    "comment": "church.1014.s2.P023; church.1014.s2.notice_fail; Text only, no event/route/result"
+  },
+  {
+    "key": "church.1014.s2.p024.text",
+    "text": "不知道下午客流量怎么样，一旦忙起来就觉得时间过得飞快，不过这也意味着叔叔交给我的咖啡馆逐渐走上正途了。",
+    "comment": "church.1014.s2.P024; church.1014.s2.notice_fail; Text only, no event/route/result"
+  },
+  {
+    "key": "church.1014.s2.p025.text",
+    "text": "说起咖啡馆，没想到其居然和一些说不清的组织有所牵扯，感觉被牵扯进了很不得了的事件中。",
+    "comment": "church.1014.s2.P025; church.1014.s2.notice_fail; Text only, no event/route/result"
+  },
+  {
+    "key": "church.1014.s2.p026.text",
+    "text": "这位客人看起来也像是一个工人，今天的来的工人怎么这么多，但他应该不会是神秘人那边派来的人吧？好在意，要不问一下吧。",
+    "comment": "church.1014.s2.P026; church.1014.s2.notice_fail; Text only, no event/route/result"
+  },
+  {
+    "key": "church.1014.s2.p027.text",
+    "text": "「先生，请问您对咖啡有什么建议吗？咖啡馆重新开业，我们希望能在客人们的建议下进一步提高！如果有想法但是不好意思直接说，也可以通过写信的方式告诉我们，您瞧，我们上午刚收到一封顾客送来的建议信呢。」",
+    "comment": "church.1014.s2.P027; church.1014.s2.letter_question; Text only, no event/route/result"
+  },
+  {
+    "key": "church.1014.s2.p029.text",
+    "text": "我一边出示装着信的信封，一边假装不经意地盯着他",
+    "comment": "church.1014.s2.P029; church.1014.s2.letter_question; Text only, no event/route/result"
+  },
+  {
+    "key": "church.1014.s2.p030.text",
+    "text": "他没有多看信一眼，只是看着我",
+    "comment": "church.1014.s2.P030; church.1014.s2.letter_question; Text only, no event/route/result"
+  },
+  {
+    "key": "church.1014.s2.p031.a.text",
+    "text": "「不，不，没有任何意见。」",
+    "comment": "church.1014.s2.P031; church.1014.s2.letter_question; Text only, no event/route/result"
+  },
+  {
+    "key": "church.1014.s2.p031.b.text",
+    "text": "「店长，我有一个问题想问你。」",
+    "comment": "church.1014.s2.P031; church.1014.s2.letter_question; Text only, no event/route/result"
+  },
+  {
+    "key": "church.1014.s2.p032.text",
+    "text": "「啊，好的，先生，您请问。」",
+    "comment": "church.1014.s2.P032; church.1014.s2.letter_question; Text only, no event/route/result"
+  },
+  {
+    "key": "church.1014.s2.p033.text",
+    "text": "他对信没有任何反应，看来并不是神秘人那边派来的人",
+    "comment": "church.1014.s2.P033; church.1014.s2.letter_question; Text only, no event/route/result"
+  },
+  {
+    "key": "church.1014.s2.p034.text",
+    "text": "或许只是个普通工人吧",
+    "comment": "church.1014.s2.P034; church.1014.s2.letter_question; Text only, no event/route/result"
+  },
+  {
+    "key": "church.1014.s2.p035.text",
+    "text": "「王城中，甚至圣徒街上都并不只有一家咖啡馆，但是它们有些并不向普通平民开放，而我看见各阶层的人民都可以自由进入你们的店中。您是出于怎样的考虑呢？」",
+    "comment": "church.1014.s2.P035; church.1014.s2.letter_question; Text only, no event/route/result"
+  },
+  {
+    "key": "church.1014.s2.p037.text",
+    "text": "「只要能够赚钱就好，我们并不在乎客人的身份。我的叔叔杜瓦尔和前几任店长也是这样做的。将人划分三六九等是政治家的思想，却是和商人无关的。」",
+    "comment": "church.1014.s2.P037; church.1014.s2.letter_question; Text only, no event/route/result"
+  },
+  {
+    "key": "church.1014.s2.p038.text",
+    "text": "「我只是想看见客人喝到我做的咖啡之后露出满意的笑容，这样就已经足够了，别的因素不是我要考虑的。」",
+    "comment": "church.1014.s2.P038; church.1014.s2.letter_question; Text only, no event/route/result"
+  },
+  {
+    "key": "church.1014.s2.p039.text",
+    "text": "「我认为咖啡馆只面向部分人群开放本身就是错误的，其应当是面向普罗大众而存在的，不应以政治地位、经济实力等原因而将部分人拒之门外。我的叔叔杜瓦尔和前几任店长也是这样做的，我延续着他们的精神。」",
+    "comment": "church.1014.s2.P039; church.1014.s2.letter_question; Text only, no event/route/result"
+  },
+  {
+    "key": "church.1014.s2.p041.text",
+    "text": "「好的，我明白了。我之前是一名工人，生活在圣西尔万郊区，但是前段时间不幸在工作中受伤，成为了跛脚。唉，许多工厂都因为这点而排斥我。我近日一直为此感到烦忧，昨日听说圣徒街的沸点咖啡馆重新开业了，味道不错且面向大众开放，我实在感到好奇，所以今日特地前来。」",
+    "comment": "church.1014.s2.P041; church.1014.s2.relief_question; Text only, no event/route/result"
+  },
+  {
+    "key": "church.1014.s2.p042.text",
+    "text": "顺着他的话我不由得认真打量起面前这个男子",
+    "comment": "church.1014.s2.P042; church.1014.s2.relief_question; Text only, no event/route/result"
+  },
+  {
+    "key": "church.1014.s2.p043.text",
+    "text": "眼角周围有淡淡的皱纹，年纪并不小了，身上隐隐传来一阵烟味。或许是最近郁闷时常抽。",
+    "comment": "church.1014.s2.P043; church.1014.s2.relief_question; Text only, no event/route/result"
+  },
+  {
+    "key": "church.1014.s2.p044.text",
+    "text": "但是整体打理得很整齐，眼神也透露出坚毅，看起来是一个对自身和生活有一定追求的人。",
+    "comment": "church.1014.s2.P044; church.1014.s2.relief_question; Text only, no event/route/result"
+  },
+  {
+    "key": "church.1014.s2.p045.text",
+    "text": "「这实在是我们的荣幸，先生。希望这杯咖啡能让您感到些许慰藉。」",
+    "comment": "church.1014.s2.P045; church.1014.s2.relief_question; Text only, no event/route/result"
+  },
+  {
+    "key": "church.1014.s2.p046.text",
+    "text": "「好的。店长，您听闻前几日埃利昂公爵和教会的人在旧城区和圣西尔万郊区救济贫民的事情了吗？」",
+    "comment": "church.1014.s2.P046; church.1014.s2.relief_question; Text only, no event/route/result"
+  },
+  {
+    "key": "church.1014.s2.p047.text",
+    "text": "「有所耳闻。」",
+    "comment": "church.1014.s2.P047; church.1014.s2.relief_question; Text only, no event/route/result"
+  },
+  {
+    "key": "church.1014.s2.p048.text",
+    "text": "「很高兴您有所了解。我那天就在被救济的队伍中，这是我最近感受过的最大的善意了，那粥虽然并不算得上十分美味，但足以饱腹了。虽然当下百姓的生活困难，没想到王庭和教会还是有一些有理想和良心的人为我们这些人而奔走着。」",
+    "comment": "church.1014.s2.P048; church.1014.s2.relief_question; Text only, no event/route/result"
+  },
+  {
+    "key": "church.1014.s2.p050.text",
+    "text": "「很高兴得知这件事，我刚来到此地，没想到上层还有埃利昂公爵这样的人物。」",
+    "comment": "church.1014.s2.P050; church.1014.s2.relief_question; Text only, no event/route/result"
+  },
+  {
+    "key": "church.1014.s2.p051.text",
+    "text": "「很高兴得知这件事，但是我相当怀疑王庭和教会中真的存在这样的人吗？」",
+    "comment": "church.1014.s2.P051; church.1014.s2.relief_question; Text only, no event/route/result"
+  },
+  {
+    "key": "church.1014.s2.p052.text",
+    "text": "「很高兴得知这件事，希望百姓的生活能过得越来越好。」",
+    "comment": "church.1014.s2.P052; church.1014.s2.relief_question; Text only, no event/route/result"
+  },
+  {
+    "key": "church.1014.s2.p054.text",
+    "text": "「正是如此，店长。您不知道昨天的盛况……」",
+    "comment": "church.1014.s2.P054; church.1014.s2.praise; Text only, no event/route/result"
+  },
+  {
+    "key": "church.1014.s2.p057.text",
+    "text": "他突然眯着眼睛打量了我一下",
+    "comment": "church.1014.s2.P057; church.1014.s2.doubt; Text only, no event/route/result"
+  },
+  {
+    "key": "church.1014.s2.p058.text",
+    "text": "「店长，您不相信吗？埃利昂公爵他们施粥是实实在在发生的事。」",
+    "comment": "church.1014.s2.P058; church.1014.s2.doubt; Text only, no event/route/result"
+  },
+  {
+    "key": "church.1014.s2.p059.text",
+    "text": "我感到他的态度冷却了一些",
+    "comment": "church.1014.s2.P059; church.1014.s2.doubt; Text only, no event/route/result"
+  },
+  {
+    "key": "church.1014.s2.p060.text",
+    "text": "「不，先生，我相信这一点。我只是……算了，你当我未曾说过吧。」",
+    "comment": "church.1014.s2.P060; church.1014.s2.doubt; Text only, no event/route/result"
+  },
+  {
+    "key": "church.1014.s2.p061.text",
+    "text": "「好的，您不要紧张，我只是看见您觉得亲切，忍不住多聊了两句。我觉得王庭和教会并非全然糟糕透顶的……」",
+    "comment": "church.1014.s2.P061; church.1014.s2.doubt; Text only, no event/route/result"
+  },
+  {
+    "key": "church.1014.s2.p064.text",
+    "text": "他好像对我的回答并不满意，皱了皱眉",
+    "comment": "church.1014.s2.P064; church.1014.s2.wish; Text only, no event/route/result"
+  },
+  {
+    "key": "church.1014.s2.p065.text",
+    "text": "「好吧……」",
+    "comment": "church.1014.s2.P065; church.1014.s2.wish; Text only, no event/route/result"
+  },
+  {
+    "key": "church.1014.s2.p067.text",
+    "text": "他似乎还想说话，但此时新的客人走近了吧台",
+    "comment": "church.1014.s2.P067; church.1014.s2.depart; Text only, no event/route/result"
+  },
+  {
+    "key": "church.1014.s2.p068.text",
+    "text": "「一不注意，竟然已经这个点了，我还需要去找找有没有我能盛任的工作。感谢您的咖啡，有机会我会再来拜访的。」",
+    "comment": "church.1014.s2.P068; church.1014.s2.depart; Text only, no event/route/result"
+  },
+  {
+    "key": "church.1014.s2.p069.text",
+    "text": "「再见，先生！祝您能早日找到一个满意的工作。」",
+    "comment": "church.1014.s2.P069; church.1014.s2.depart; Text only, no event/route/result"
+  },
+  {
+    "key": "church.1014.s2.p070.text",
+    "text": "他放下咖啡，站起来离开，这时我才发现他的左脚确实行走起来不太便利",
+    "comment": "church.1014.s2.P070; church.1014.s2.depart; Text only, no event/route/result"
+  },
+  {
+    "key": "church.1014.s2.p071.text",
+    "text": "他的身影越来越远，随着咖啡馆的门一开一闭，我便再也看不见他的身影了",
+    "comment": "church.1014.s2.P071; church.1014.s2.depart; Text only, no event/route/result"
+  },
+  {
+    "key": "church.1014.s2.p073.text",
+    "text": "真是不容易",
+    "comment": "church.1014.s2.P073; church.1014.s2.depart; Text only, no event/route/result"
+  },
+  {
+    "key": "church.1014.s2.p074.text",
+    "text": "我在心中叹口气",
+    "comment": "church.1014.s2.P074; church.1014.s2.depart; Text only, no event/route/result"
+  },
+  {
+    "key": "church.1014.s2.p075.text",
+    "text": "然后快速转换思绪，面对客人新的要求，开启了新的工作。",
+    "comment": "church.1014.s2.P075; church.1014.s2.depart; Text only, no event/route/result"
+  },
+  {
+    "key": "church.1020.s1.p003.text",
+    "text": "今天咖啡店的生意也相当不错",
+    "comment": "church.1020.s1.P003; church.1020.s1.raid; Text only, no event/route/result"
+  },
+  {
+    "key": "church.1020.s1.p004.text",
+    "text": "我正在为客人制作咖啡时，突然听见一阵嘈杂的脚步声",
+    "comment": "church.1020.s1.P004; church.1020.s1.raid; Text only, no event/route/result"
+  },
+  {
+    "key": "church.1020.s1.p006.text",
+    "text": "然后是阿黛尔同步响起的惊呼声",
+    "comment": "church.1020.s1.P006; church.1020.s1.raid; Text only, no event/route/result"
+  },
+  {
+    "key": "church.1020.s1.p007.text",
+    "text": "「天呐，教会监察司的人？{playername}店长！{playername}店长！」",
+    "comment": "church.1020.s1.P007; church.1020.s1.raid; Text only, no event/route/result"
+  },
+  {
+    "key": "church.1020.s1.p008.text",
+    "text": "我回过头，看见一群穿着统一制式服装的人",
+    "comment": "church.1020.s1.P008; church.1020.s1.raid; Text only, no event/route/result"
+  },
+  {
+    "key": "church.1020.s1.p009.text",
+    "text": "「教会监察司」，刚才阿黛尔好像这样称呼着他们",
+    "comment": "church.1020.s1.P009; church.1020.s1.raid; Text only, no event/route/result"
+  },
+  {
+    "key": "church.1020.s1.p010.text",
+    "text": "他们站定在咖啡馆中，其中一个看起来像领头的人则缓步站定在我面前",
+    "comment": "church.1020.s1.P010; church.1020.s1.raid; Text only, no event/route/result"
+  },
+  {
+    "key": "church.1020.s1.p012.text",
+    "text": "我面前的客人惊慌失措地在我们之间来回转着，但是不敢有所动静",
+    "comment": "church.1020.s1.P012; church.1020.s1.raid; Text only, no event/route/result"
+  },
+  {
+    "key": "church.1020.s1.p013.text",
+    "text": "「你就是{playername}，沸点咖啡馆的现任店长？」",
+    "comment": "church.1020.s1.P013; church.1020.s1.raid; Text only, no event/route/result"
+  },
+  {
+    "key": "church.1020.s1.p014.text",
+    "text": "「是的。」",
+    "comment": "church.1020.s1.P014; church.1020.s1.raid; Text only, no event/route/result"
+  },
+  {
+    "key": "church.1020.s1.p015.text",
+    "text": "「我们是教会监察司，今日奉命前来圣徒街搜查。我是今日负责带队的监察官，希望你能认真配合调查，不然的话——」",
+    "comment": "church.1020.s1.P015; church.1020.s1.raid; Text only, no event/route/result"
+  },
+  {
+    "key": "church.1020.s1.p016.text",
+    "text": "他未说完，但配合着他凶狠的目光，在场的人都对这未尽的话心知肚明",
+    "comment": "church.1020.s1.P016; church.1020.s1.raid; Text only, no event/route/result"
+  },
+  {
+    "key": "church.1020.s1.p017.text",
+    "text": "我的大脑急速运转着",
+    "comment": "church.1020.s1.P017; church.1020.s1.raid; Text only, no event/route/result"
+  },
+  {
+    "key": "church.1020.s1.p018.text",
+    "text": "教会监察司为什么会来圣徒街搜查？商铺经营不归监察司管吧？哦对了，好像听谁提过前几日街头有人散布修改「王选者」法律的消息……只有这个可能了。不过这和我也没什么大关系，随机应对即可吧。",
+    "comment": "church.1020.s1.P018; church.1020.s1.raid; Text only, no event/route/result"
+  },
+  {
+    "key": "church.1020.s1.p020.text",
+    "text": "「好吧，但是能否请小心对待店中的客人和设备，我们还要继续营业的。」",
+    "comment": "church.1020.s1.P020; church.1020.s1.raid; Text only, no event/route/result"
+  },
+  {
+    "key": "church.1020.s1.p021.text",
+    "text": "「我们咖啡馆正大光明，你们可以随意搜查。但是能否请小心对待店中的客人和设备，我们还要继续营业的。」",
+    "comment": "church.1020.s1.P021; church.1020.s1.raid; Text only, no event/route/result"
+  },
+  {
+    "key": "church.1020.s1.p022.text",
+    "text": "「如果我不同意会怎么样呢？」",
+    "comment": "church.1020.s1.P022; church.1020.s1.raid; Text only, no event/route/result"
+  },
+  {
+    "key": "church.1020.s1.p024.text",
+    "text": "「哼，用不着你来指导工作。」「各人员注意，仔细搜查，不要放过任何一个角落。」",
+    "comment": "church.1020.s1.P024; church.1020.s1.cooperate; Text only, no event/route/result"
+  },
+  {
+    "key": "church.1020.s1.p027.text",
+    "text": "我们隔着吧台看着对方的眼睛对峙，谁也不肯服输，许久他先移开目光并缓慢开口",
+    "comment": "church.1020.s1.P027; church.1020.s1.defy_pass; Text only, no event/route/result"
+  },
+  {
+    "key": "church.1020.s1.p028.text",
+    "text": "「哼，年轻人，我很欣赏你的勇气，但建议你要记得区分勇敢和鲁莽。」「今日是必定要开展检查的。各人员注意，仔细搜查，不要放过任何一个角落。」",
+    "comment": "church.1020.s1.P028; church.1020.s1.defy_pass; Text only, no event/route/result"
+  },
+  {
+    "key": "church.1020.s1.p030.text",
+    "text": "我们隔着吧台看着对方的眼睛对峙，谁也不肯服输，最终我感到他身上的威严压过了我，我率先移开目光",
+    "comment": "church.1020.s1.P030; church.1020.s1.defy_fail; Text only, no event/route/result"
+  },
+  {
+    "key": "church.1020.s1.p031.text",
+    "text": "「年轻人，我想你是刚来到圣诺特，还不太了解情况，我们的搜查不需要你的同意。」「现在碍于你的态度，我可能要采取一些特别措施了，来人。」",
+    "comment": "church.1020.s1.P031; church.1020.s1.defy_fail; Text only, no event/route/result"
+  },
+  {
+    "key": "church.1020.s1.p032.text",
+    "text": "两个穿着制式服装的人从两边走上前来，将我从吧台中推出来，一左一右地扣押着我",
+    "comment": "church.1020.s1.P032; church.1020.s1.defy_fail; Text only, no event/route/result"
+  },
+  {
+    "key": "church.1020.s1.p033.text",
+    "text": "「现在可以配合检查了吧，店长。」「各人员注意，仔细搜查，不要放过任何一个角落。」",
+    "comment": "church.1020.s1.P033; church.1020.s1.defy_fail; Text only, no event/route/result"
+  },
+  {
+    "key": "church.1020.s1.p035.text",
+    "text": "「是。」",
+    "comment": "church.1020.s1.P035; church.1020.s1.letter_found; Text only, no event/route/result"
+  },
+  {
+    "key": "church.1020.s1.p036.text",
+    "text": "他们四下分散开来，我看见他们的身影在大堂中忙碌着，甚至对顾客开展了简短的问询，部分顾客不堪其扰趁乱离开了。",
+    "comment": "church.1020.s1.P036; church.1020.s1.letter_found; Text only, no event/route/result"
+  },
+  {
+    "key": "church.1020.s1.p037.text",
+    "text": "唉，不知道会不会影响以后的生意。",
+    "comment": "church.1020.s1.P037; church.1020.s1.letter_found; Text only, no event/route/result"
+  },
+  {
+    "key": "church.1020.s1.p038.text",
+    "text": "突然想起神秘人给我留下的那封信好像被我顺手放在了吧台的抽屉中，密信他们看不懂应该不要紧……但是我该如何解释呢……",
+    "comment": "church.1020.s1.P038; church.1020.s1.letter_found; Text only, no event/route/result"
+  },
+  {
+    "key": "church.1020.s1.p039.text",
+    "text": "然而怕什么来什么。很快他们便搜查到了吧台区域，在我如鼓擂的心跳声中他们在抽屉中找到了那封信，并递交给了监察官。",
+    "comment": "church.1020.s1.P039; church.1020.s1.letter_found; Text only, no event/route/result"
+  },
+  {
+    "key": "church.1020.s1.p040.text",
+    "text": "监察官打开那封信看了看，然后走到我面前",
+    "comment": "church.1020.s1.P040; church.1020.s1.letter_found; Text only, no event/route/result"
+  },
+  {
+    "key": "church.1020.s1.p041.text",
+    "text": "「解释一下吗，{playername}店长？这封信上写的是什么，告诉我。」",
+    "comment": "church.1020.s1.P041; church.1020.s1.letter_found; Text only, no event/route/result"
+  },
+  {
+    "key": "church.1020.s1.p044.text",
+    "text": "「这是我们内部每日记录进货、出账的账单，为了节省时间而简写为这种形式。」",
+    "comment": "church.1020.s1.P044; church.1020.s1.letter_found; Text only, no event/route/result"
+  },
+  {
+    "key": "church.1020.s1.p045.text",
+    "text": "「这不过我的一封私人信件，监察司奉命搜查商铺，可没有资格逼问一封私人信件写了什么。」",
+    "comment": "church.1020.s1.P045; church.1020.s1.letter_found; Text only, no event/route/result"
+  },
+  {
+    "key": "church.1020.s1.p046.text",
+    "text": "「我想长官你们是来搜查与「王选者」法律相关的吧，这不过一封我的私人信件能有什么关系呢？」",
+    "comment": "church.1020.s1.P046; church.1020.s1.letter_found; Text only, no event/route/result"
+  },
+  {
+    "key": "church.1020.s1.p047.text",
+    "text": "「这不过是一封普通的私人信件，我看不出有什么被怀疑的必要。长官，您不会是早就对我有所怀疑吧？」",
+    "comment": "church.1020.s1.P047; church.1020.s1.letter_found; Text only, no event/route/result"
+  },
+  {
+    "key": "church.1020.s1.p049.text",
+    "text": "「账单？那你详细给我讲讲这个账单的构成。」",
+    "comment": "church.1020.s1.P049; church.1020.s1.language_intro; Text only, no event/route/result"
+  },
+  {
+    "key": "church.1020.s1.p051.text",
+    "text": "我快速回忆了一下信上的数字，然后不疾不徐地开口",
+    "comment": "church.1020.s1.P051; church.1020.s1.language_pass; Text only, no event/route/result"
+  },
+  {
+    "key": "church.1020.s1.p052.text",
+    "text": "「这些数字代表着店里咖啡豆、设备、餐具等物品的购买量、支出金额、每日消耗量、待购买量等数据，我叔叔当店长时就立下了这样的规矩，后面代代传承。」「这本来是我们的商业机密，但是长官你都发问了，我只能悉数奉告了。」",
+    "comment": "church.1020.s1.P052; church.1020.s1.language_pass; Text only, no event/route/result"
+  },
+  {
+    "key": "church.1020.s1.p053.text",
+    "text": "监察官边听着我的讲述边试图理解信上的数字",
+    "comment": "church.1020.s1.P053; church.1020.s1.language_pass; Text only, no event/route/result"
+  },
+  {
+    "key": "church.1020.s1.p054.text",
+    "text": "「哼，听起来倒是有鼻子有眼。」",
+    "comment": "church.1020.s1.P054; church.1020.s1.language_pass; Text only, no event/route/result"
+  },
+  {
+    "key": "church.1020.s1.p055.text",
+    "text": "他低头又看了一遍信纸，眉头紧皱，却没有从中找到能够反驳我的证据，他又盯着我看了片刻，最终将信纸递还给我。",
+    "comment": "church.1020.s1.P055; church.1020.s1.language_pass; Text only, no event/route/result"
+  },
+  {
+    "key": "church.1020.s1.p056.text",
+    "text": "「暂时没有证据证明这封信与我们搜查的东西有关。收好你的东西。」",
+    "comment": "church.1020.s1.P056; church.1020.s1.language_pass; Text only, no event/route/result"
+  },
+  {
+    "key": "church.1020.s1.p057.text",
+    "text": "我接过信纸，尽量平静地点了点头。",
+    "comment": "church.1020.s1.P057; church.1020.s1.language_pass; Text only, no event/route/result"
+  },
+  {
+    "key": "church.1020.s1.p059.text",
+    "text": "我努力组织着语言，试图把信上的内容解释清楚，却发现自己越说越混乱。",
+    "comment": "church.1020.s1.P059; church.1020.s1.language_fail; Text only, no event/route/result"
+  },
+  {
+    "key": "church.1020.s1.p060.text",
+    "text": "「这……这是以前店里留下的账单记录方式，应该是采购……或者别的什么记录，具体内容我也不太清楚。」",
+    "comment": "church.1020.s1.P060; church.1020.s1.language_fail; Text only, no event/route/result"
+  },
+  {
+    "key": "church.1020.s1.p061.text",
+    "text": "监察官的表情逐渐变得严厉",
+    "comment": "church.1020.s1.P061; church.1020.s1.language_fail; Text only, no event/route/result"
+  },
+  {
+    "key": "church.1020.s1.p062.text",
+    "text": "「你自己的店里发现的信，你却连内容都说不清楚？」",
+    "comment": "church.1020.s1.P062; church.1020.s1.language_fail; Text only, no event/route/result"
+  },
+  {
+    "key": "church.1020.s1.p063.text",
+    "text": "我张了张嘴，一时找不到更合适的说辞。",
+    "comment": "church.1020.s1.P063; church.1020.s1.language_fail; Text only, no event/route/result"
+  },
+  {
+    "key": "church.1020.s1.p064.text",
+    "text": "监察官将信纸收了起来，冷冷地看着我。",
+    "comment": "church.1020.s1.P064; church.1020.s1.language_fail; Text only, no event/route/result"
+  },
+  {
+    "key": "church.1020.s1.p065.text",
+    "text": "「你的解释前后矛盾。带走，等候进一步调查。」",
+    "comment": "church.1020.s1.P065; church.1020.s1.language_fail; Text only, no event/route/result"
+  },
+  {
+    "key": "church.1020.s1.p067.text",
+    "text": "「私人信件？我看见的可是写着一串数字的不明信件。」",
+    "comment": "church.1020.s1.P067; church.1020.s1.courage_intro; Text only, no event/route/result"
+  },
+  {
+    "key": "church.1020.s1.p068.text",
+    "text": "我再次对上他探究的眼睛",
+    "comment": "church.1020.s1.P068; church.1020.s1.courage_intro; Text only, no event/route/result"
+  },
+  {
+    "key": "church.1020.s1.p070.text",
+    "text": "我毫不畏惧地直视着他，没有试图争抢那封信，也没有慌张，一字一句地说道",
+    "comment": "church.1020.s1.P070; church.1020.s1.courage_pass; Text only, no event/route/result"
+  },
+  {
+    "key": "church.1020.s1.p071.text",
+    "text": "「您可以搜查，也可以暂时扣下这封信。但在没有证据之前，请不要把无法解读的信件直接说成不法密信。这不过是前任店长给我留下的关于咖啡馆内部账单。」",
+    "comment": "church.1020.s1.P071; church.1020.s1.courage_pass; Text only, no event/route/result"
+  },
+  {
+    "key": "church.1020.s1.p072.text",
+    "text": "咖啡馆内安静了下来，所有人都在看着我们",
+    "comment": "church.1020.s1.P072; church.1020.s1.courage_pass; Text only, no event/route/result"
+  },
+  {
+    "key": "church.1020.s1.p073.text",
+    "text": "我继续说道",
+    "comment": "church.1020.s1.P073; church.1020.s1.courage_pass; Text only, no event/route/result"
+  },
+  {
+    "key": "church.1020.s1.p074.text",
+    "text": "「如果您认为我有问题，可以按照教会的程序调查。我会配合，但不会承认自己没有做过的事。」",
+    "comment": "church.1020.s1.P074; church.1020.s1.courage_pass; Text only, no event/route/result"
+  },
+  {
+    "key": "church.1020.s1.p075.text",
+    "text": "监察官的目光在我脸上停留了许久，像是在判断我究竟是虚张声势，还是确实问心无愧。",
+    "comment": "church.1020.s1.P075; church.1020.s1.courage_pass; Text only, no event/route/result"
+  },
+  {
+    "key": "church.1020.s1.p076.text",
+    "text": "最终他冷哼一声，将信纸拍在桌上。",
+    "comment": "church.1020.s1.P076; church.1020.s1.courage_pass; Text only, no event/route/result"
+  },
+  {
+    "key": "church.1020.s1.p077.text",
+    "text": "「哼，没有证据，我们也不会仅凭一封无从解读的信抓人。收好你的信，但是如果之后我们发现有什么问题，你等着被传唤吧。」",
+    "comment": "church.1020.s1.P077; church.1020.s1.courage_pass; Text only, no event/route/result"
+  },
+  {
+    "key": "church.1020.s1.p078.text",
+    "text": "「我明白。」",
+    "comment": "church.1020.s1.P078; church.1020.s1.courage_pass; Text only, no event/route/result"
+  },
+  {
+    "key": "church.1020.s1.p080.text",
+    "text": "我想要反驳，却被监察官凌厉的目光压得说不出话来。",
+    "comment": "church.1020.s1.P080; church.1020.s1.courage_fail; Text only, no event/route/result"
+  },
+  {
+    "key": "church.1020.s1.p081.text",
+    "text": "「这……这是前任店长给我留下的关于咖啡馆内部账单的信件……但是……我也不知道上面具体是什么意思……」",
+    "comment": "church.1020.s1.P081; church.1020.s1.courage_fail; Text only, no event/route/result"
+  },
+  {
+    "key": "church.1020.s1.p082.text",
+    "text": "「不知道具体意思？那么你怎么知道这是咖啡馆内部账单？」",
+    "comment": "church.1020.s1.P082; church.1020.s1.courage_fail; Text only, no event/route/result"
+  },
+  {
+    "key": "church.1020.s1.p083.text",
+    "text": "我张张嘴又闭上，他充满威严与怀疑的目光刺痛了我，不敢再继续辩解",
+    "comment": "church.1020.s1.P083; church.1020.s1.courage_fail; Text only, no event/route/result"
+  },
+  {
+    "key": "church.1020.s1.p084.text",
+    "text": "监察官看着我的沉默，像是已经得出了自己的判断。",
+    "comment": "church.1020.s1.P084; church.1020.s1.courage_fail; Text only, no event/route/result"
+  },
+  {
+    "key": "church.1020.s1.p085.text",
+    "text": "「那正好，信带走，回去让我们监察司的人好好领会一下你所谓的「私人信件」。至于你，随我们走一趟。」",
+    "comment": "church.1020.s1.P085; church.1020.s1.courage_fail; Text only, no event/route/result"
+  },
+  {
+    "key": "church.1020.s1.p088.text",
+    "text": "「你倒是很清楚我们为何而来。」",
+    "comment": "church.1020.s1.P088; church.1020.s1.wisdom_pass; Text only, no event/route/result"
+  },
+  {
+    "key": "church.1020.s1.p089.text",
+    "text": "我指了指他手中的信纸",
+    "comment": "church.1020.s1.P089; church.1020.s1.wisdom_pass; Text only, no event/route/result"
+  },
+  {
+    "key": "church.1020.s1.p090.text",
+    "text": "「但这只是一封私人信件，是前任店长给我留下的之前店铺的账单，没有提到「王选者」，也没有任何与法律修改相关的内容，只不过是一串普通数字罢了。而且我听闻前几天是在民间宣扬「王选者」，如果对方采取这样隐晦的方式，并不能达到宣传的目的吧。」",
+    "comment": "church.1020.s1.P090; church.1020.s1.wisdom_pass; Text only, no event/route/result"
+  },
+  {
+    "key": "church.1020.s1.p091.text",
+    "text": "监察官听闻多看了我两眼",
+    "comment": "church.1020.s1.P091; church.1020.s1.wisdom_pass; Text only, no event/route/result"
+  },
+  {
+    "key": "church.1020.s1.p092.text",
+    "text": "「你倒是想得挺清楚。不过你说得没错，目前确实没有证据证明这封信与那件事有关。」",
+    "comment": "church.1020.s1.P092; church.1020.s1.wisdom_pass; Text only, no event/route/result"
+  },
+  {
+    "key": "church.1020.s1.p093.text",
+    "text": "他又沉默了片刻，最终选择将信纸递给身旁的监察员，几名监察员低声讨论后也无法确认其中有什么异常。",
+    "comment": "church.1020.s1.P093; church.1020.s1.wisdom_pass; Text only, no event/route/result"
+  },
+  {
+    "key": "church.1020.s1.p094.text",
+    "text": "「信你收好。至于你，继续留在店里接受调查，不得擅自离开圣徒街。」",
+    "comment": "church.1020.s1.P094; church.1020.s1.wisdom_pass; Text only, no event/route/result"
+  },
+  {
+    "key": "church.1020.s1.p096.text",
+    "text": "「你倒是很清楚我们为何而来。」",
+    "comment": "church.1020.s1.P096; church.1020.s1.wisdom_fail; Text only, no event/route/result"
+  },
+  {
+    "key": "church.1020.s1.p097.text",
+    "text": "我试图继续说出一些合理而又道理的理由来摆脱嫌疑，但脑中一片混乱，只能勉强找出几个听起来合理的词。",
+    "comment": "church.1020.s1.P097; church.1020.s1.wisdom_fail; Text only, no event/route/result"
+  },
+  {
+    "key": "church.1020.s1.p098.text",
+    "text": "「这封信……是我与前任店长沟通的私人信件……上面写的东西应该是店铺内部经营状况，可能就是之前他们订购咖啡豆和机器设备的开销……没什么重要的。怎么看都与你们要查的东西无关吧……」",
+    "comment": "church.1020.s1.P098; church.1020.s1.wisdom_fail; Text only, no event/route/result"
+  },
+  {
+    "key": "church.1020.s1.p099.text",
+    "text": "话一出口，我便意识到自己的解释漏洞百出。",
+    "comment": "church.1020.s1.P099; church.1020.s1.wisdom_fail; Text only, no event/route/result"
+  },
+  {
+    "key": "church.1020.s1.p100.text",
+    "text": "「可能？应该？{playername}店长，你连自己要解释什么都不知道。」",
+    "comment": "church.1020.s1.P100; church.1020.s1.wisdom_fail; Text only, no event/route/result"
+  },
+  {
+    "key": "church.1020.s1.p101.text",
+    "text": "我试图继续补充，却只能让事情变得更加糟糕。",
+    "comment": "church.1020.s1.P101; church.1020.s1.wisdom_fail; Text only, no event/route/result"
+  },
+  {
+    "key": "church.1020.s1.p102.text",
+    "text": "「你的说辞无法令人信服。」「先把人带走，信件作为证物收存。」",
+    "comment": "church.1020.s1.P102; church.1020.s1.wisdom_fail; Text only, no event/route/result"
+  },
+  {
+    "key": "church.1020.s1.p104.text",
+    "text": "我注意到监察官虽然拿着信纸，却没有认真揣摩上面的数字含义，反而仔细观察着我的反应",
+    "comment": "church.1020.s1.P104; church.1020.s1.perception_intro; Text only, no event/route/result"
+  },
+  {
+    "key": "church.1020.s1.p106.text",
+    "text": "我看出来了，他并没有读懂信上的内容，他在意的是我是否会因此露出破绽",
+    "comment": "church.1020.s1.P106; church.1020.s1.perception_pass; Text only, no event/route/result"
+  },
+  {
+    "key": "church.1020.s1.p107.text",
+    "text": "我让自己的语气尽量平稳，目光坦荡地对上监察官探究的眼神",
+    "comment": "church.1020.s1.P107; church.1020.s1.perception_pass; Text only, no event/route/result"
+  },
+  {
+    "key": "church.1020.s1.p108.text",
+    "text": "「这不过是前任店长给我留下的店铺内部的账单罢了，这样的单子我这还有很多。不知道长官您要搜查的是什么，但想必是与国家大事相关，我想不会是这种写了一串普通数字的私人信件吧。」",
+    "comment": "church.1020.s1.P108; church.1020.s1.perception_pass; Text only, no event/route/result"
+  },
+  {
+    "key": "church.1020.s1.p109.text",
+    "text": "监察官听了我话又探究地看了信纸两眼",
+    "comment": "church.1020.s1.P109; church.1020.s1.perception_pass; Text only, no event/route/result"
+  },
+  {
+    "key": "church.1020.s1.p110.text",
+    "text": "我趁势说道",
+    "comment": "church.1020.s1.P110; church.1020.s1.perception_pass; Text only, no event/route/result"
+  },
+  {
+    "key": "church.1020.s1.p111.text",
+    "text": "「您可以把它带回去找人辨认。但我相信，无论如何解读，它都只是一张记录店铺经营状况的账单。」",
+    "comment": "church.1020.s1.P111; church.1020.s1.perception_pass; Text only, no event/route/result"
+  },
+  {
+    "key": "church.1020.s1.p112.text",
+    "text": "监察官看向身后的监察员。对方检查了信纸和抽屉，低声说了几句，似乎没有发现新的线索。",
+    "comment": "church.1020.s1.P112; church.1020.s1.perception_pass; Text only, no event/route/result"
+  },
+  {
+    "key": "church.1020.s1.p113.text",
+    "text": "「……暂时按普通信件处理。你继续营业，但近期不要离开圣徒街。」",
+    "comment": "church.1020.s1.P113; church.1020.s1.perception_pass; Text only, no event/route/result"
+  },
+  {
+    "key": "church.1020.s1.p114.text",
+    "text": "「我知道了。」",
+    "comment": "church.1020.s1.P114; church.1020.s1.perception_pass; Text only, no event/route/result"
+  },
+  {
+    "key": "church.1020.s1.p116.text",
+    "text": "我试图观察监察官的脸色以获取更多信息，却没能从他的神情中看出任何端倪。",
+    "comment": "church.1020.s1.P116; church.1020.s1.perception_fail; Text only, no event/route/result"
+  },
+  {
+    "key": "church.1020.s1.p117.text",
+    "text": "「我不知道它是什么……或许是前任店长给我留下的信息吧……前任店长在店里留下了不少东西，我还没有一一检查。」",
+    "comment": "church.1020.s1.P117; church.1020.s1.perception_fail; Text only, no event/route/result"
+  },
+  {
+    "key": "church.1020.s1.p118.text",
+    "text": "「你说自己没有检查过，却在我没有给你出示这封信具体内容的情况下说这是前任店长留下的。显然，你的解释站不住脚。」",
+    "comment": "church.1020.s1.P118; church.1020.s1.perception_fail; Text only, no event/route/result"
+  },
+  {
+    "key": "church.1020.s1.p119.text",
+    "text": "他似笑非笑地看着我",
+    "comment": "church.1020.s1.P119; church.1020.s1.perception_fail; Text only, no event/route/result"
+  },
+  {
+    "key": "church.1020.s1.p120.text",
+    "text": "我这才意识到，自己的话已经被对方抓住了漏洞。",
+    "comment": "church.1020.s1.P120; church.1020.s1.perception_fail; Text only, no event/route/result"
+  },
+  {
+    "key": "church.1020.s1.p121.text",
+    "text": "监察官示意监察员上前，将信纸递交给他，随后监察员将信纸收进一个文件袋中。",
+    "comment": "church.1020.s1.P121; church.1020.s1.perception_fail; Text only, no event/route/result"
+  },
+  {
+    "key": "church.1020.s1.p122.text",
+    "text": "「带走。等你想清楚之后，再向我们解释。」",
+    "comment": "church.1020.s1.P122; church.1020.s1.perception_fail; Text only, no event/route/result"
+  },
+  {
+    "key": "church.1020.s1.p124.text",
+    "text": "很快，教会监察司的人离开了咖啡馆，前往圣徒街其他店铺里搜寻",
+    "comment": "church.1020.s1.P124; church.1020.s1.cleared; Text only, no event/route/result"
+  },
+  {
+    "key": "church.1020.s1.p125.text",
+    "text": "他们离开后，阿黛尔赶紧跑过来关切地询问我",
+    "comment": "church.1020.s1.P125; church.1020.s1.cleared; Text only, no event/route/result"
+  },
+  {
+    "key": "church.1020.s1.p126.text",
+    "text": "「{playername}店长，你刚才真实太厉害了！面对教会监察司的人还能如此镇定地面对！」",
+    "comment": "church.1020.s1.P126; church.1020.s1.cleared; Text only, no event/route/result"
+  },
+  {
+    "key": "church.1020.s1.p127.text",
+    "text": "听完阿黛尔的话我感到一丝无奈，原来刚才的我在她眼里是这样的吗",
+    "comment": "church.1020.s1.P127; church.1020.s1.cleared; Text only, no event/route/result"
+  },
+  {
+    "key": "church.1020.s1.p128.text",
+    "text": "我现在感到一丝后怕，如果刚才没有应对得当，现在的我是会被他们带走审问吗？",
+    "comment": "church.1020.s1.P128; church.1020.s1.cleared; Text only, no event/route/result"
+  },
+  {
+    "key": "church.1020.s1.p129.text",
+    "text": "幸好我事先有想好万一被发现应当如何应对，才逃过这一劫",
+    "comment": "church.1020.s1.P129; church.1020.s1.cleared; Text only, no event/route/result"
+  },
+  {
+    "key": "church.1020.s1.p130.text",
+    "text": "看来以后需要把这些东西隐藏得更加隐蔽才好。不，还是赶紧找个机会把信都给烧掉吧",
+    "comment": "church.1020.s1.P130; church.1020.s1.cleared; Text only, no event/route/result"
+  },
+  {
+    "key": "church.1020.s1.p131.text",
+    "text": "阿黛尔不休的话打断了我的思绪",
+    "comment": "church.1020.s1.P131; church.1020.s1.cleared; Text only, no event/route/result"
+  },
+  {
+    "key": "church.1020.s1.p132.text",
+    "text": "「不过刚才由于监察司的到来，好多顾客都离开了呢……不知道接下来生意会不会受到影响……」",
+    "comment": "church.1020.s1.P132; church.1020.s1.cleared; Text only, no event/route/result"
+  },
+  {
+    "key": "church.1020.s1.p133.text",
+    "text": "这时我才想起刚才被迫停留在我和监察司中间的倒霉顾客",
+    "comment": "church.1020.s1.P133; church.1020.s1.cleared; Text only, no event/route/result"
+  },
+  {
+    "key": "church.1020.s1.p134.text",
+    "text": "目前店里没有发现那位顾客的身影，或许是什么时候趁乱离开了吧",
+    "comment": "church.1020.s1.P134; church.1020.s1.cleared; Text only, no event/route/result"
+  },
+  {
+    "key": "church.1020.s1.p135.text",
+    "text": "店里的设备没有遭到损坏，看来监察司搜查的时候还是有分寸的",
+    "comment": "church.1020.s1.P135; church.1020.s1.cleared; Text only, no event/route/result"
+  },
+  {
+    "key": "church.1020.s1.p136.text",
+    "text": "今天发生了这样的事，未来几天还是低调点吧",
+    "comment": "church.1020.s1.P136; church.1020.s1.cleared; Text only, no event/route/result"
+  },
+  {
+    "key": "church.1020.s1.p137.text",
+    "text": "「希望不会吧。阿黛尔，未来两天我们还是正常营业，但是低调一些。我担心再次引来什么大麻烦。」",
+    "comment": "church.1020.s1.P137; church.1020.s1.cleared; Text only, no event/route/result"
+  },
+  {
+    "key": "church.1020.s1.p138.text",
+    "text": "「我也正有此意呢，店长！」",
+    "comment": "church.1020.s1.P138; church.1020.s1.cleared; Text only, no event/route/result"
+  },
+  {
+    "key": "church.1020.s1.p139.text",
+    "text": "「阿黛尔，振作精神，我们还要准备迎接接下来的客人呢！」",
+    "comment": "church.1020.s1.P139; church.1020.s1.cleared; Text only, no event/route/result"
+  },
+  {
+    "key": "church.1020.s1.p140.text",
+    "text": "「店长，你说得对！那我去门口继续招揽一下客人~」",
+    "comment": "church.1020.s1.P140; church.1020.s1.cleared; Text only, no event/route/result"
+  },
+  {
+    "key": "church.1020.s1.p141.text",
+    "text": "阿黛尔蹦蹦跳跳地离开了",
+    "comment": "church.1020.s1.P141; church.1020.s1.cleared; Text only, no event/route/result"
+  },
+  {
+    "key": "church.1020.s1.p142.text",
+    "text": "我趁机将几封信烧毁，然后若无其事地回到吧台",
+    "comment": "church.1020.s1.P142; church.1020.s1.cleared; Text only, no event/route/result"
+  },
+  {
+    "key": "church.1020.s1.p144.text",
+    "text": "不知道接下来会迎接怎样的挑战和危机呢……",
+    "comment": "church.1020.s1.P144; church.1020.s1.cleared; Text only, no event/route/result"
+  },
+  {
+    "key": "church.1020.s1.p147.text",
+    "text": "我在所有人的注视下被监察司的人带走了，离开咖啡馆前我最后看见的是阿黛尔满是担忧的脸",
+    "comment": "church.1020.s1.P147; church.1020.s1.detained; Text only, no event/route/result"
+  },
+  {
+    "key": "church.1020.s1.p148.text",
+    "text": "他们会如何审问我呢？我要说什么呢？这封信涉及的密文是否会被他们觉察呢？",
+    "comment": "church.1020.s1.P148; church.1020.s1.detained; Text only, no event/route/result"
+  },
+  {
+    "key": "church.1020.s1.p149.text",
+    "text": "带着万千思绪，我被带到了教会看守所中",
+    "comment": "church.1020.s1.P149; church.1020.s1.detained; Text only, no event/route/result"
+  },
+  {
+    "key": "church.1020.s1.p150.text",
+    "text": "啊，从刚毕业的大学生到咖啡馆店长再到在押犯原来只需要一个月吗……",
+    "comment": "church.1020.s1.P150; church.1020.s1.detained; Text only, no event/route/result"
+  },
+  {
+    "key": "church.1020.s1.p151.text",
+    "text": "我被分配进了一个单独的房间，等待监察司的检查结果",
+    "comment": "church.1020.s1.P151; church.1020.s1.detained; Text only, no event/route/result"
+  },
+  {
+    "key": "church.1020.s1.p152.text",
+    "text": "我就此陷入了无尽的等待",
+    "comment": "church.1020.s1.P152; church.1020.s1.detained; Text only, no event/route/result"
+  },
+  {
+    "key": "church.1023.s1.p006.text",
+    "text": "我被带到看守所后，已经见证了第三次日出。",
+    "comment": "church.1023.s1.P006; church.1023.s1.hearing; Text only, no event/route/result"
+  },
+  {
+    "key": "church.1023.s1.p007.text",
+    "text": "在这间狭小的拘押室里，我甚至开始怀念咖啡馆那张吱呀作响的旧椅子。",
+    "comment": "church.1023.s1.P007; church.1023.s1.hearing; Text only, no event/route/result"
+  },
+  {
+    "key": "church.1023.s1.p008.text",
+    "text": "不知道阿黛尔现在怎么样了，咖啡馆有没有正常营业……",
+    "comment": "church.1023.s1.P008; church.1023.s1.hearing; Text only, no event/route/result"
+  },
+  {
+    "key": "church.1023.s1.p010.text",
+    "text": "⌈出来，有人要见你。⌋",
+    "comment": "church.1023.s1.P010; church.1023.s1.hearing; Text only, no event/route/result"
+  },
+  {
+    "key": "church.1023.s1.p013.text",
+    "text": "⌈经过调查，我们没有发现你直接参与非法结社活动的证据。⌋",
+    "comment": "church.1023.s1.P013; church.1023.s1.hearing; Text only, no event/route/result"
+  },
+  {
+    "key": "church.1023.s1.p014.text",
+    "text": "⌈所以我可以离开了？⌋",
+    "comment": "church.1023.s1.P014; church.1023.s1.hearing; Text only, no event/route/result"
+  },
+  {
+    "key": "church.1023.s1.p015.text",
+    "text": "⌈别急。那些密文的来源仍然不明，我们还需要你作出一些保证。⌋",
+    "comment": "church.1023.s1.P015; church.1023.s1.hearing; Text only, no event/route/result"
+  },
+  {
+    "key": "church.1023.s1.p016.text",
+    "text": "⌈如果今后发现任何与乱党有关的情报，你必须向教会报告。⌋",
+    "comment": "church.1023.s1.P016; church.1023.s1.hearing; Text only, no event/route/result"
+  },
+  {
+    "key": "church.1023.s1.p017.text",
+    "text": "⌈……⌋",
+    "comment": "church.1023.s1.P017; church.1023.s1.hearing; Text only, no event/route/result"
+  },
+  {
+    "key": "church.1023.s1.p018.text",
+    "text": "⌈你也可以拒绝。但调查结束前，我们恐怕不能放你走。⌋",
+    "comment": "church.1023.s1.P018; church.1023.s1.hearing; Text only, no event/route/result"
+  },
+  {
+    "key": "church.1023.s1.p019.text",
+    "text": "他看了看桌上的文件，似乎在等待我的回答。",
+    "comment": "church.1023.s1.P019; church.1023.s1.hearing; Text only, no event/route/result"
+  },
+  {
+    "key": "church.1023.s1.p021.text",
+    "text": "⌈既然没有犯罪证据，你们就没有理由继续拘押我。⌋",
+    "comment": "church.1023.s1.P021; church.1023.s1.hearing; Text only, no event/route/result"
+  },
+  {
+    "key": "church.1023.s1.p022.text",
+    "text": "⌈或许我们可以商量一个更方便的解决办法。⌋",
+    "comment": "church.1023.s1.P022; church.1023.s1.hearing; Text only, no event/route/result"
+  },
+  {
+    "key": "church.1023.s1.p023.text",
+    "text": "⌈既然如此，你们就继续调查吧。⌋",
+    "comment": "church.1023.s1.P023; church.1023.s1.hearing; Text only, no event/route/result"
+  },
+  {
+    "key": "church.1023.s1.p025.text",
+    "text": "⌈没有证据就继续拘押一位合法经营的店主，这恐怕也不符合教会的规定吧？⌋",
+    "comment": "church.1023.s1.P025; church.1023.s1.persuade; Text only, no event/route/result"
+  },
+  {
+    "key": "church.1023.s1.p026.text",
+    "text": "⌈你是在质疑监察司的决定？⌋",
+    "comment": "church.1023.s1.P026; church.1023.s1.persuade; Text only, no event/route/result"
+  },
+  {
+    "key": "church.1023.s1.p027.text",
+    "text": "⌈我当然尊重教会的职责，但你刚刚也说了，调查没有发现我参与乱党的证据。⌋",
+    "comment": "church.1023.s1.P027; church.1023.s1.persuade; Text only, no event/route/result"
+  },
+  {
+    "key": "church.1023.s1.p028.text",
+    "text": "⌈况且，沸点咖啡馆在圣徒街经营了那么多年，应该不算一家完全没有人认识的店铺。⌋⌈你们可以向街坊邻居调查，也可以在之后继续观察咖啡馆的经营。但至少现在，没有必要让我继续待在这里。⌋",
+    "comment": "church.1023.s1.P028; church.1023.s1.persuade; Text only, no event/route/result"
+  },
+  {
+    "key": "church.1023.s1.p029.text",
+    "text": "⌈嗯……⌋",
+    "comment": "church.1023.s1.P029; church.1023.s1.persuade; Text only, no event/route/result"
+  },
+  {
+    "key": "church.1023.s1.p032.text",
+    "text": "⌈倒也有些道理。⌋",
+    "comment": "church.1023.s1.P032; church.1023.s1.persuade_pass; Text only, no event/route/result"
+  },
+  {
+    "key": "church.1023.s1.p033.text",
+    "text": "他沉思片刻，在文件上签了字。",
+    "comment": "church.1023.s1.P033; church.1023.s1.persuade_pass; Text only, no event/route/result"
+  },
+  {
+    "key": "church.1023.s1.p034.text",
+    "text": "⌈好吧，你可以走了。但调查还没结束，今后记得配合监察司。⌋",
+    "comment": "church.1023.s1.P034; church.1023.s1.persuade_pass; Text only, no event/route/result"
+  },
+  {
+    "key": "church.1023.s1.p037.text",
+    "text": "⌈是否符合规定，恐怕还轮不到你来判断。带他回去。⌋",
+    "comment": "church.1023.s1.P037; church.1023.s1.persuade_fail; Text only, no event/route/result"
+  },
+  {
+    "key": "church.1023.s1.p040.text",
+    "text": "⌈继续调查既耽误你们的时间，也耽误我的生意。或许有个对双方都方便的办法？⌋",
+    "comment": "church.1023.s1.P040; church.1023.s1.bribe; Text only, no event/route/result"
+  },
+  {
+    "key": "church.1023.s1.p041.text",
+    "text": "我暗示了一下能够支付的金额。",
+    "comment": "church.1023.s1.P041; church.1023.s1.bribe; Text only, no event/route/result"
+  },
+  {
+    "key": "church.1023.s1.p042.text",
+    "text": "监察官抬起头，意味深长地看了我一眼。",
+    "comment": "church.1023.s1.P042; church.1023.s1.bribe; Text only, no event/route/result"
+  },
+  {
+    "key": "church.1023.s1.p043.text",
+    "text": "⌈你是沸点咖啡馆的店长是吧？一会儿我派人跟着你去，把钱打点清楚再说。⌋",
+    "comment": "church.1023.s1.P043; church.1023.s1.bribe; Text only, no event/route/result"
+  },
+  {
+    "key": "church.1023.s1.p044.text",
+    "text": "⌈好的，好的，当然可以。⌋",
+    "comment": "church.1023.s1.P044; church.1023.s1.bribe; Text only, no event/route/result"
+  },
+  {
+    "key": "church.1023.s1.p045.text",
+    "text": "⌈不过我要这个数。⌋",
+    "comment": "church.1023.s1.P045; church.1023.s1.bribe; Text only, no event/route/result"
+  },
+  {
+    "key": "church.1023.s1.p046.text",
+    "text": "⌈抢劫啊？⌋",
+    "comment": "church.1023.s1.P046; church.1023.s1.bribe; Text only, no event/route/result"
+  },
+  {
+    "key": "church.1023.s1.p047.text",
+    "text": "⌈哎，看来你不乐意，那就只好多关几天咯！⌋",
+    "comment": "church.1023.s1.P047; church.1023.s1.bribe; Text only, no event/route/result"
+  },
+  {
+    "key": "church.1023.s1.p048.text",
+    "text": "⌈嘶......看来你是个聪明人。既然没有发现犯罪证据，我们当然没有必要继续浪费时间。⌋",
+    "comment": "church.1023.s1.P048; church.1023.s1.bribe; Text only, no event/route/result"
+  },
+  {
+    "key": "church.1023.s1.p054.text",
+    "text": "看来今天又得在这里过夜了。",
+    "comment": "church.1023.s1.P054; church.1023.s1.rescue; Text only, no event/route/result"
+  },
+  {
+    "key": "church.1023.s1.p055.text",
+    "text": "我靠在墙边，正想着阿黛尔会不会已经把我当成失踪人口，铁门却再次打开了。",
+    "comment": "church.1023.s1.P055; church.1023.s1.rescue; Text only, no event/route/result"
+  },
+  {
+    "key": "church.1023.s1.p057.text",
+    "text": "⌈出来，你可以走了。⌋",
+    "comment": "church.1023.s1.P057; church.1023.s1.rescue; Text only, no event/route/result"
+  },
+  {
+    "key": "church.1023.s1.p058.text",
+    "text": "⌈啊？可是刚刚不是还说……⌋",
+    "comment": "church.1023.s1.P058; church.1023.s1.rescue; Text only, no event/route/result"
+  },
+  {
+    "key": "church.1023.s1.p059.text",
+    "text": "⌈上面送来了新的释放手续。你还想留下来不成？⌋",
+    "comment": "church.1023.s1.P059; church.1023.s1.rescue; Text only, no event/route/result"
+  },
+  {
+    "key": "church.1023.s1.p060.text",
+    "text": "他将一份盖好印章的文件塞进我手中。",
+    "comment": "church.1023.s1.P060; church.1023.s1.rescue; Text only, no event/route/result"
+  },
+  {
+    "key": "church.1023.s1.p061.text",
+    "text": "上面清清楚楚地写着：「证据不足，准予释放。」",
+    "comment": "church.1023.s1.P061; church.1023.s1.rescue; Text only, no event/route/result"
+  },
+  {
+    "key": "church.1023.s1.p062.text",
+    "text": "怎么突然就证据不足了？",
+    "comment": "church.1023.s1.P062; church.1023.s1.rescue; Text only, no event/route/result"
+  },
+  {
+    "key": "church.1023.s1.p063.text",
+    "text": "不过，我当然没有理由拒绝。",
+    "comment": "church.1023.s1.P063; church.1023.s1.rescue; Text only, no event/route/result"
+  },
+  {
+    "key": "church.1023.s1.p065.text",
+    "text": "我看了看那张文件。",
+    "comment": "church.1023.s1.P065; church.1023.s1.record_notice; Text only, no event/route/result"
+  },
+  {
+    "key": "church.1023.s1.p066.text",
+    "text": "上面的印章和其他文书没有什么区别。",
+    "comment": "church.1023.s1.P066; church.1023.s1.record_notice; Text only, no event/route/result"
+  },
+  {
+    "key": "church.1023.s1.p067.text",
+    "text": "不过，在旁边的登记簿上，我的名字似乎被人重新填写过一次。",
+    "comment": "church.1023.s1.P067; church.1023.s1.record_notice; Text only, no event/route/result"
+  },
+  {
+    "key": "church.1023.s1.p068.text",
+    "text": "原本的字迹已经被墨水覆盖，又用另一种笔迹写上了新的处理结果。",
+    "comment": "church.1023.s1.P068; church.1023.s1.record_notice; Text only, no event/route/result"
+  },
+  {
+    "key": "church.1023.s1.p069.text",
+    "text": "而且，记录上标注的释放时间，似乎比我刚刚被带回牢房的时间还要早。",
+    "comment": "church.1023.s1.P069; church.1023.s1.record_notice; Text only, no event/route/result"
+  },
+  {
+    "key": "church.1023.s1.p070.text",
+    "text": "……",
+    "comment": "church.1023.s1.P070; church.1023.s1.record_notice; Text only, no event/route/result"
+  },
+  {
+    "key": "church.1023.s1.p071.text",
+    "text": "有人修改了我的拘押记录？",
+    "comment": "church.1023.s1.P071; church.1023.s1.record_notice; Text only, no event/route/result"
+  },
+  {
+    "key": "church.1023.s1.p073.text",
+    "text": "⌈请问，是谁批准释放我的？⌋",
+    "comment": "church.1023.s1.P073; church.1023.s1.rescue_depart; Text only, no event/route/result"
+  },
+  {
+    "key": "church.1023.s1.p074.text",
+    "text": "⌈登记上写得很清楚，按照规定处理的。⌋",
+    "comment": "church.1023.s1.P074; church.1023.s1.rescue_depart; Text only, no event/route/result"
+  },
+  {
+    "key": "church.1023.s1.p075.text",
+    "text": "⌈我是说，刚刚是谁来办理手续的？⌋",
+    "comment": "church.1023.s1.P075; church.1023.s1.rescue_depart; Text only, no event/route/result"
+  },
+  {
+    "key": "church.1023.s1.p076.text",
+    "text": "⌈我哪知道？今天送过来的文件这么多。⌋",
+    "comment": "church.1023.s1.P076; church.1023.s1.rescue_depart; Text only, no event/route/result"
+  },
+  {
+    "key": "church.1023.s1.p077.text",
+    "text": "⌈话怎么这么多？再问我就和上面说你不服命令，重新把你关进去。⌋",
+    "comment": "church.1023.s1.P077; church.1023.s1.rescue_depart; Text only, no event/route/result"
+  },
+  {
+    "key": "church.1023.s1.p078.text",
+    "text": "⌈……⌋",
+    "comment": "church.1023.s1.P078; church.1023.s1.rescue_depart; Text only, no event/route/result"
+  },
+  {
+    "key": "church.1023.s1.p079.text",
+    "text": "算了。",
+    "comment": "church.1023.s1.P079; church.1023.s1.rescue_depart; Text only, no event/route/result"
+  },
+  {
+    "key": "church.1023.s1.p080.text",
+    "text": "不管究竟是谁帮了我，现在最重要的事情，还是赶紧离开这个地方。",
+    "comment": "church.1023.s1.P080; church.1023.s1.rescue_depart; Text only, no event/route/result"
+  },
+  {
+    "key": "church.1023.s1.p088.text",
+    "text": "⌈我回来了！⌋",
+    "comment": "church.1023.s1.P088; church.1023.s1.home; Text only, no event/route/result"
+  },
+  {
+    "key": "church.1023.s1.p089.text",
+    "text": "⌈……{playername}？⌋",
+    "comment": "church.1023.s1.P089; church.1023.s1.home; Text only, no event/route/result"
+  },
+  {
+    "key": "church.1023.s1.p090.text",
+    "text": "她愣了一下，随即快步走来。",
+    "comment": "church.1023.s1.P090; church.1023.s1.home; Text only, no event/route/result"
+  },
+  {
+    "key": "church.1023.s1.p091.text",
+    "text": "⌈你终于回来了！⌋",
+    "comment": "church.1023.s1.P091; church.1023.s1.home; Text only, no event/route/result"
+  },
+  {
+    "key": "church.1023.s1.p092.text",
+    "text": "⌈他们没有对你怎么样吧？⌋",
+    "comment": "church.1023.s1.P092; church.1023.s1.home; Text only, no event/route/result"
+  },
+  {
+    "key": "church.1023.s1.p093.text",
+    "text": "⌈没有没有，只是被关了几天。⌋",
+    "comment": "church.1023.s1.P093; church.1023.s1.home; Text only, no event/route/result"
+  },
+  {
+    "key": "church.1023.s1.p094.text",
+    "text": "⌈这还叫没什么！我去问了好几次，他们都不肯告诉我什么时候放你回来。⌋",
+    "comment": "church.1023.s1.P094; church.1023.s1.home; Text only, no event/route/result"
+  },
+  {
+    "key": "church.1023.s1.p095.text",
+    "text": "⌈抱歉，让你担心了。⌋",
+    "comment": "church.1023.s1.P095; church.1023.s1.home; Text only, no event/route/result"
+  },
+  {
+    "key": "church.1023.s1.p096.text",
+    "text": "⌈……回来就好。⌋",
+    "comment": "church.1023.s1.P096; church.1023.s1.home; Text only, no event/route/result"
+  },
+  {
+    "key": "church.1023.s1.p097.text",
+    "text": "她替我拉开椅子。",
+    "comment": "church.1023.s1.P097; church.1023.s1.home; Text only, no event/route/result"
+  },
+  {
+    "key": "church.1023.s1.p098.text",
+    "text": "⌈不过，他们怎么突然愿意放人了？⌋",
+    "comment": "church.1023.s1.P098; church.1023.s1.home; Text only, no event/route/result"
+  },
+  {
+    "key": "church.1023.s1.p101.text",
+    "text": "⌈他们本来也没找到犯罪证据，我和监察官讲了讲道理，就把我放了。⌋",
+    "comment": "church.1023.s1.P101; church.1023.s1.home_persuade; Text only, no event/route/result"
+  },
+  {
+    "key": "church.1023.s1.p102.text",
+    "text": "⌈那真是太好了，至少教会的人还愿意讲道理。⌋",
+    "comment": "church.1023.s1.P102; church.1023.s1.home_persuade; Text only, no event/route/result"
+  },
+  {
+    "key": "church.1023.s1.p103.text",
+    "text": "⌈不过，既然他们已经盯上了咖啡馆，以后还是得小心。⌋",
+    "comment": "church.1023.s1.P103; church.1023.s1.home_persuade; Text only, no event/route/result"
+  },
+  {
+    "key": "church.1023.s1.p105.text",
+    "text": "⌈花了点钱，总算让他们同意放人了。⌋",
+    "comment": "church.1023.s1.P105; church.1023.s1.home_bribe; Text only, no event/route/result"
+  },
+  {
+    "key": "church.1023.s1.p106.text",
+    "text": "⌈花钱？你是说……⌋",
+    "comment": "church.1023.s1.P106; church.1023.s1.home_bribe; Text only, no event/route/result"
+  },
+  {
+    "key": "church.1023.s1.p107.text",
+    "text": "⌈嘘！别说出来。⌋",
+    "comment": "church.1023.s1.P107; church.1023.s1.home_bribe; Text only, no event/route/result"
+  },
+  {
+    "key": "church.1023.s1.p108.text",
+    "text": "⌈这些人真是……⌋",
+    "comment": "church.1023.s1.P108; church.1023.s1.home_bribe; Text only, no event/route/result"
+  },
+  {
+    "key": "church.1023.s1.p109.text",
+    "text": "她叹了口气。",
+    "comment": "church.1023.s1.P109; church.1023.s1.home_bribe; Text only, no event/route/result"
+  },
+  {
+    "key": "church.1023.s1.p110.text",
+    "text": "⌈你一会让把钱筹一下送过去。⌋",
+    "comment": "church.1023.s1.P110; church.1023.s1.home_bribe; Text only, no event/route/result"
+  },
+  {
+    "key": "church.1023.s1.p111.text",
+    "text": "⌈我才不做这种事情呢！⌋",
+    "comment": "church.1023.s1.P111; church.1023.s1.home_bribe; Text only, no event/route/result"
+  },
+  {
+    "key": "church.1023.s1.p112.text",
+    "text": "⌈那行，一会儿我去干这脏活累活吧......⌋",
+    "comment": "church.1023.s1.P112; church.1023.s1.home_bribe; Text only, no event/route/result"
+  },
+  {
+    "key": "church.1023.s1.p114.text",
+    "text": "⌈说实话，我也不知道。他们本来还要继续调查，结果突然有人送来文件，说我可以走了。⌋",
+    "comment": "church.1023.s1.P114; church.1023.s1.home_rescue; Text only, no event/route/result"
+  },
+  {
+    "key": "church.1023.s1.p115.text",
+    "text": "⌈突然有人送来文件？⌋",
+    "comment": "church.1023.s1.P115; church.1023.s1.home_rescue; Text only, no event/route/result"
+  },
+  {
+    "key": "church.1023.s1.p116.text",
+    "text": "⌈是啊，连看守都不知道怎么回事。真奇怪。⌋",
+    "comment": "church.1023.s1.P116; church.1023.s1.home_rescue; Text only, no event/route/result"
+  },
+  {
+    "key": "church.1023.s1.p117.text",
+    "text": "阿黛尔似乎想到了什么，沉默了一会儿。",
+    "comment": "church.1023.s1.P117; church.1023.s1.home_rescue; Text only, no event/route/result"
+  },
+  {
+    "key": "church.1023.s1.p118.text",
+    "text": "⌈原来如此......⌋",
+    "comment": "church.1023.s1.P118; church.1023.s1.home_rescue; Text only, no event/route/result"
+  },
+  {
+    "key": "church.1023.s1.p119.text",
+    "text": "⌈你知道些什么？⌋",
+    "comment": "church.1023.s1.P119; church.1023.s1.home_rescue; Text only, no event/route/result"
+  },
+  {
+    "key": "church.1023.s1.p120.text",
+    "text": "⌈啊？没有，我也只是猜测……⌋",
+    "comment": "church.1023.s1.P120; church.1023.s1.home_rescue; Text only, no event/route/result"
+  },
+  {
+    "key": "church.1023.s1.p121.text",
+    "text": "⌈猜测什么？⌋",
+    "comment": "church.1023.s1.P121; church.1023.s1.home_rescue; Text only, no event/route/result"
+  },
+  {
+    "key": "church.1023.s1.p122.text",
+    "text": "⌈以前杜瓦尔先生经营咖啡馆的时候，认识不少人。有些人虽然不方便公开露面，但很重视这家店。⌋",
+    "comment": "church.1023.s1.P122; church.1023.s1.home_rescue; Text only, no event/route/result"
+  },
+  {
+    "key": "church.1023.s1.p123.text",
+    "text": "⌈如果他们知道你被教会带走了，或许不会坐视不管。⌋",
+    "comment": "church.1023.s1.P123; church.1023.s1.home_rescue; Text only, no event/route/result"
+  },
+  {
+    "key": "church.1023.s1.p124.text",
+    "text": "⌈你是说，有人暗中帮了我？⌋",
+    "comment": "church.1023.s1.P124; church.1023.s1.home_rescue; Text only, no event/route/result"
+  },
+  {
+    "key": "church.1023.s1.p125.text",
+    "text": "⌈只是猜测而已，我也不确定。⌋",
+    "comment": "church.1023.s1.P125; church.1023.s1.home_rescue; Text only, no event/route/result"
+  },
+  {
+    "key": "church.1023.s1.p126.text",
+    "text": "她低头整理起桌上的餐具，似乎不打算继续这个话题。",
+    "comment": "church.1023.s1.P126; church.1023.s1.home_rescue; Text only, no event/route/result"
+  },
+  {
+    "key": "church.1023.s1.p127.text",
+    "text": "⌈不过，如果真是他们……看来那些人还没有忘记这里。⌋",
+    "comment": "church.1023.s1.P127; church.1023.s1.home_rescue; Text only, no event/route/result"
+  },
+  {
+    "key": "church.1023.s1.p128.text",
+    "text": "⌈那些人？⌋",
+    "comment": "church.1023.s1.P128; church.1023.s1.home_rescue; Text only, no event/route/result"
+  },
+  {
+    "key": "church.1023.s1.p129.text",
+    "text": "⌈没什么。你才刚回来，先休息吧。⌋",
+    "comment": "church.1023.s1.P129; church.1023.s1.home_rescue; Text only, no event/route/result"
+  },
+  {
+    "key": "church.1023.s1.p131.text",
+    "text": "⌈总之，欢迎回来，店长先生。⌋",
+    "comment": "church.1023.s1.P131; church.1023.s1.home_end; Text only, no event/route/result"
+  },
+  {
+    "key": "church.1023.s1.p132.text",
+    "text": "⌈嗯，我回来了。⌋",
+    "comment": "church.1023.s1.P132; church.1023.s1.home_end; Text only, no event/route/result"
+  },
+  {
+    "key": "church.1023.s1.p133.text",
+    "text": "我靠在椅背上，终于松了口气。",
+    "comment": "church.1023.s1.P133; church.1023.s1.home_end; Text only, no event/route/result"
+  },
+  {
+    "key": "church.1023.s1.p134.text",
+    "text": "咖啡馆似乎什么都没有改变。",
+    "comment": "church.1023.s1.P134; church.1023.s1.home_end; Text only, no event/route/result"
+  },
+  {
+    "key": "church.1023.s1.p135.text",
+    "text": "不过我的心态已经完全不同，",
+    "comment": "church.1023.s1.P135; church.1023.s1.home_end; Text only, no event/route/result"
+  },
+  {
+    "key": "church.1023.s1.p136.text",
+    "text": "在监牢里度过的三天却让我后背发凉。",
+    "comment": "church.1023.s1.P136; church.1023.s1.home_end; Text only, no event/route/result"
+  },
+  {
+    "key": "church.1023.s1.p137.text",
+    "text": "我这次能因信的的事情被抓进去，下一次又会因为什么遭遇不测。",
+    "comment": "church.1023.s1.P137; church.1023.s1.home_end; Text only, no event/route/result"
+  },
+  {
+    "key": "church.1023.s1.p138.text",
+    "text": "三天前，教会监察司的人突然闯进咖啡馆，将我带走。",
+    "comment": "church.1023.s1.P138; church.1023.s1.home_end; Text only, no event/route/result"
+  },
+  {
+    "key": "church.1023.s1.p139.text",
+    "text": "三天后，我终于回到了这里。",
+    "comment": "church.1023.s1.P139; church.1023.s1.home_end; Text only, no event/route/result"
+  },
+  {
+    "key": "church.1023.s1.p140.text",
+    "text": "但那几封密文仍然被扣押在教会手中。",
+    "comment": "church.1023.s1.P140; church.1023.s1.home_end; Text only, no event/route/result"
+  },
+  {
+    "key": "church.1023.s1.p141.text",
+    "text": "而且，在离开看守所之前，他们还专门提醒我：",
+    "comment": "church.1023.s1.P141; church.1023.s1.home_end; Text only, no event/route/result"
+  },
+  {
+    "key": "church.1023.s1.p142.text",
+    "text": "如果发现有关乱党的情报，必须向教会报告。",
+    "comment": "church.1023.s1.P142; church.1023.s1.home_end; Text only, no event/route/result"
+  },
+  {
+    "key": "church.1023.s1.p143.text",
+    "text": "……",
+    "comment": "church.1023.s1.P143; church.1023.s1.home_end; Text only, no event/route/result"
+  },
+  {
+    "key": "church.1023.s1.p144.text",
+    "text": "这算什么意思？",
+    "comment": "church.1023.s1.P144; church.1023.s1.home_end; Text only, no event/route/result"
+  },
+  {
+    "key": "church.1023.s1.p145.text",
+    "text": "今后要是那个神秘人再给我送来几封信，难道我还得主动跑去监察司告诉他们？",
+    "comment": "church.1023.s1.P145; church.1023.s1.home_end; Text only, no event/route/result"
+  },
+  {
+    "key": "church.1023.s1.p146.text",
+    "text": "开什么玩笑。",
+    "comment": "church.1023.s1.P146; church.1023.s1.home_end; Text only, no event/route/result"
+  },
+  {
+    "key": "church.1023.s1.p147.text",
+    "text": "可是，如果不这么做……",
+    "comment": "church.1023.s1.P147; church.1023.s1.home_end; Text only, no event/route/result"
+  },
+  {
+    "key": "church.1023.s1.p148.text",
+    "text": "我抬起头，看向正在厨房里忙碌的阿黛尔。",
+    "comment": "church.1023.s1.P148; church.1023.s1.home_end; Text only, no event/route/result"
+  },
+  {
+    "key": "church.1023.s1.p149.text",
+    "text": "自从来到这家店，怪事就一个接着一个。",
+    "comment": "church.1023.s1.P149; church.1023.s1.home_end; Text only, no event/route/result"
+  },
+  {
+    "key": "church.1023.s1.p150.text",
+    "text": "王都圣诺特的漩涡下面究竟有多少骇人的存在？它们在谋划些什么？为什么我会被卷到这些事情里？我还能保护我和身边的人吗？",
+    "comment": "church.1023.s1.P150; church.1023.s1.home_end; Text only, no event/route/result"
+  },
+  {
+    "key": "church.1023.s1.p151.text",
+    "text": "三日关押积累下来的疲惫与巨大的思考量冲撞着我的思绪，",
+    "comment": "church.1023.s1.P151; church.1023.s1.home_end; Text only, no event/route/result"
+  },
+  {
+    "key": "church.1023.s1.p152.text",
+    "text": "我再也无力去支撑精神，倒在座椅上睡去......",
+    "comment": "church.1023.s1.P152; church.1023.s1.home_end; Text only, no event/route/result"
+  },
+  {
+    "key": "church.1023.s2.p005.text",
+    "text": "距离上次与监察官会面又过了不知多少天",
+    "comment": "church.1023.s2.P005; church.1023.s2.prison; Text only, no event/route/result"
+  },
+  {
+    "key": "church.1023.s2.p006.text",
+    "text": "这段日子里我尝试与外界联系，却都失败了",
+    "comment": "church.1023.s2.P006; church.1023.s2.prison; Text only, no event/route/result"
+  },
+  {
+    "key": "church.1023.s2.p007.text",
+    "text": "我所能接触到的只有这四方墙壁",
+    "comment": "church.1023.s2.P007; church.1023.s2.prison; Text only, no event/route/result"
+  },
+  {
+    "key": "church.1023.s2.p008.text",
+    "text": "不知道今日是何日，不知道咖啡馆怎么样了，不知道阿黛尔怎么样了，不知道我离开之后神秘人是否还在接触咖啡馆……",
+    "comment": "church.1023.s2.P008; church.1023.s2.prison; Text only, no event/route/result"
+  },
+  {
+    "key": "church.1023.s2.p009.text",
+    "text": "不知道……不知道……什么都不知道……",
+    "comment": "church.1023.s2.P009; church.1023.s2.prison; Text only, no event/route/result"
+  },
+  {
+    "key": "church.1023.s2.p010.text",
+    "text": "我的意识在这种日子中渐渐模糊……",
+    "comment": "church.1023.s2.P010; church.1023.s2.prison; Text only, no event/route/result"
+  },
+  {
+    "key": "church.1023.s2.p013.text",
+    "text": "沉寂和单调，是我牢狱生活的全部",
+    "comment": "church.1023.s2.P013; church.1023.s2.execution; Text only, no event/route/result"
+  },
+  {
+    "key": "church.1023.s2.p014.text",
+    "text": "直到某一天我的世界出现了新的声音",
+    "comment": "church.1023.s2.P014; church.1023.s2.execution; Text only, no event/route/result"
+  },
+  {
+    "key": "church.1023.s2.p016.text",
+    "text": "那是几个穿着制服的人，走进了关押我的房间内",
+    "comment": "church.1023.s2.P016; church.1023.s2.execution; Text only, no event/route/result"
+  },
+  {
+    "key": "church.1023.s2.p017.text",
+    "text": "他们对着我说了一串话",
+    "comment": "church.1023.s2.P017; church.1023.s2.execution; Text only, no event/route/result"
+  },
+  {
+    "key": "church.1023.s2.p018.text",
+    "text": "但由于脱离外界太久，意识模糊，我只能隐隐约约辨认出几个词，什么「革命」 「镇压」 「清算」……",
+    "comment": "church.1023.s2.P018; church.1023.s2.execution; Text only, no event/route/result"
+  },
+  {
+    "key": "church.1023.s2.p019.text",
+    "text": "在我还未能理解这些词句的意思时",
+    "comment": "church.1023.s2.P019; church.1023.s2.execution; Text only, no event/route/result"
+  },
+  {
+    "key": "church.1023.s2.p020.text",
+    "text": "我感到我被他们强行从地上拉了起来，被推动着向外走",
+    "comment": "church.1023.s2.P020; church.1023.s2.execution; Text only, no event/route/result"
+  },
+  {
+    "key": "church.1023.s2.p021.text",
+    "text": "方墙以外的世界",
+    "comment": "church.1023.s2.P021; church.1023.s2.execution; Text only, no event/route/result"
+  },
+  {
+    "key": "church.1023.s2.p022.text",
+    "text": "新鲜的空气",
+    "comment": "church.1023.s2.P022; church.1023.s2.execution; Text only, no event/route/result"
+  },
+  {
+    "key": "church.1023.s2.p023.text",
+    "text": "曾经我渴求无数次的东西就这样呈现在我面前",
+    "comment": "church.1023.s2.P023; church.1023.s2.execution; Text only, no event/route/result"
+  },
+  {
+    "key": "church.1023.s2.p024.text",
+    "text": "现下我却无暇顾及",
+    "comment": "church.1023.s2.P024; church.1023.s2.execution; Text only, no event/route/result"
+  },
+  {
+    "key": "church.1023.s2.p025.text",
+    "text": "我不知道我会被他们带往哪里",
+    "comment": "church.1023.s2.P025; church.1023.s2.execution; Text only, no event/route/result"
+  },
+  {
+    "key": "church.1023.s2.p026.text",
+    "text": "就这样走着，走着……",
+    "comment": "church.1023.s2.P026; church.1023.s2.execution; Text only, no event/route/result"
+  },
+  {
+    "key": "church.1023.s2.p027.text",
+    "text": "这里是哪里？",
+    "comment": "church.1023.s2.P027; church.1023.s2.execution; Text only, no event/route/result"
+  },
+  {
+    "key": "church.1023.s2.p028.text",
+    "text": "刑场？",
+    "comment": "church.1023.s2.P028; church.1023.s2.execution; Text only, no event/route/result"
+  },
+  {
+    "key": "church.1023.s2.p029.text",
+    "text": "我要死了吗？",
+    "comment": "church.1023.s2.P029; church.1023.s2.execution; Text only, no event/route/result"
+  },
+  {
+    "key": "church.1023.s2.p030.text",
+    "text": "为什么？",
+    "comment": "church.1023.s2.P030; church.1023.s2.execution; Text only, no event/route/result"
+  },
+  {
+    "key": "church.1023.s2.p031.text",
+    "text": "为什么？为什么？为什么？为什么？为什么？",
+    "comment": "church.1023.s2.P031; church.1023.s2.execution; Text only, no event/route/result"
+  },
+  {
+    "key": "church.1023.s2.p032.text",
+    "text": "带着这样的想法，我迎来了人生的终点。",
+    "comment": "church.1023.s2.P032; church.1023.s2.execution; Text only, no event/route/result"
+  },
+  {
+    "key": "colette.name",
+    "text": "柯莱特·布吕内",
+    "comment": "A01 source identity; blocked construction"
+  },
+  {
+    "key": "neutral.shopkeeper.name",
+    "text": "店主",
+    "comment": "A01 source identity; blocked construction"
+  },
+  {
+    "key": "neutral.unknown.name",
+    "text": "？？？",
+    "comment": "A01 source identity; blocked construction"
+  },
+  {
+    "key": "alienor.name",
+    "text": "阿莉耶诺尔·康多尔",
+    "comment": "E source identity/display alias; no narrative addition"
+  },
+  {
+    "key": "church.1104.s1.alias.alienor.name",
+    "text": "埃莉诺",
+    "comment": "E source identity/display alias; no narrative addition"
+  },
+  {
+    "key": "church.1104.s1.alias.landlord.uncertain.name",
+    "text": "房东？",
+    "comment": "E source identity/display alias; no narrative addition"
+  },
+  {
+    "key": "church.1104.s1.npc.mother.name",
+    "text": "女人",
+    "comment": "E source identity/display alias; no narrative addition"
+  },
+  {
+    "key": "church.1104.s1.npc.vendor.name",
+    "text": "摊主",
+    "comment": "E source identity/display alias; no narrative addition"
+  },
+  {
+    "key": "church.1104.s1.npc.civilian_a.name",
+    "text": "平民A",
+    "comment": "E source identity/display alias; no narrative addition"
+  },
+  {
+    "key": "church.1104.s1.npc.civilian_b.name",
+    "text": "平民B",
+    "comment": "E source identity/display alias; no narrative addition"
+  },
+  {
+    "key": "church.1104.s1.npc.elder_lady.name",
+    "text": "老妇人",
+    "comment": "E source identity/display alias; no narrative addition"
+  },
+  {
+    "key": "church.1104.s1.npc.buyer.name",
+    "text": "男子",
+    "comment": "E source identity/display alias; no narrative addition"
+  },
+  {
+    "key": "church.1104.s1.npc.tenant.name",
+    "text": "男人",
+    "comment": "E source identity/display alias; no narrative addition"
+  },
+  {
+    "key": "church.1104.s1.npc.landlord.name",
+    "text": "房东",
+    "comment": "E source identity/display alias; no narrative addition"
+  },
+  {
+    "key": "neutral.reporter.name",
+    "text": "记者",
+    "comment": "A05 source identity/display"
+  },
+  {
+    "key": "rose.1016.s1.title",
+    "text": "两位访客",
+    "comment": "B source fragment, not a formal chapter"
+  },
+  {
+    "key": "rose.1016.s1.alias.alienor",
+    "text": "埃莉诺",
+    "comment": "B P009/P014 alias; no royal identity disclosure"
+  },
+  {
+    "key": "rose.1012.s1.alias.alienor.name",
+    "text": "埃莉诺",
+    "comment": "B1012 explicit display alias; alienor identity reused"
+  },
+  {
+    "key": "church.thibaut.name",
+    "text": "客人",
+    "comment": "D1014 source guest alias; no hidden identity or portrait substitute"
+  },
+  {
+    "key": "church.inspector.name",
+    "text": "监察官",
+    "comment": "D1020 source speaker identity/alias; no narrative addition"
+  },
+  {
+    "key": "church.inspectors.name",
+    "text": "众监察员",
+    "comment": "D1020 source speaker identity/alias; no narrative addition"
+  },
+  {
+    "key": "church.1020.s1.inspector.uncertain.name",
+    "text": "疑似领头的人",
+    "comment": "D1020 source speaker identity/alias; no narrative addition"
+  },
+  {
+    "key": "church.guard.name",
+    "text": "看守",
+    "comment": "D generic source speaker; no portrait binding"
+  },
+  {
+    "key": "bar.colette.trust_player.name",
+    "text": "柯莱特对玩家的好感",
+    "comment": "User-authorized formal relation label"
+  },
+  {
+    "key": "bar.adele.trust_player.name",
+    "text": "阿黛尔对玩家的好感",
+    "comment": "User-authorized formal relation label"
+  },
+  {
+    "key": "bar.antoine.trust_player.name",
+    "text": "安托万对玩家的好感",
+    "comment": "User-authorized formal relation label"
+  },
+  {
+    "key": "condition.story.rose.1009.s1.completed",
+    "text": "玫瑰线十月九日密见已完成（仅声明，B负责生产）",
+    "comment": "User-authorized A01-A04 flag label; B completion is declared only"
+  },
+  {
+    "key": "condition.story.neutral.1008.s1.completed",
+    "text": "十月八日市场初遇已完成",
+    "comment": "User-authorized A01-A04 flag label; B completion is declared only"
+  },
+  {
+    "key": "condition.story.neutral.1010.s1.completed",
+    "text": "十月十日促销筹备已完成",
+    "comment": "User-authorized A01-A04 flag label; B completion is declared only"
+  },
+  {
+    "key": "condition.story.neutral.1010.s1.frugal_preparation",
+    "text": "本次促销精打细算准备资格（未接账）",
+    "comment": "User-authorized A01-A04 flag label; B completion is declared only"
+  },
+  {
+    "key": "condition.story.neutral.1010.s2.completed",
+    "text": "十月十日安托万到访已完成",
+    "comment": "User-authorized A01-A04 flag label; B completion is declared only"
+  },
+  {
+    "key": "condition.story.neutral.1010.s2.antoine_approval",
+    "text": "安托万赏识（控制十月十三日到场）",
+    "comment": "User-authorized A01-A04 flag label; B completion is declared only"
+  },
+  {
+    "key": "condition.story.neutral.1013.s2.completed",
+    "text": "十月十三日促销已完成",
+    "comment": "User-authorized A01-A04 flag label; B completion is declared only"
+  },
+  {
+    "key": "condition.story.neutral.1013.s2.orderly_service",
+    "text": "本次促销井然有序资格（未接账）",
+    "comment": "User-authorized A01-A04 flag label; B completion is declared only"
+  },
+  {
+    "key": "condition.story.neutral.1013.s2.warm_recommendation",
+    "text": "本次促销热情推介资格（未接账）",
+    "comment": "User-authorized A01-A04 flag label; B completion is declared only"
+  },
+  {
+    "key": "neutral.1008.s1.action.name",
+    "text": "大堂区采购",
+    "comment": "A01 P008 source-backed map action label; no purchase settlement"
+  },
+  {
+    "key": "condition.story.neutral.1018.s1.completed",
+    "text": "记者到访已完成",
+    "comment": "A05 reporter state label"
+  },
+  {
+    "key": "condition.story.neutral.1018.s1.recommendation_requested",
+    "text": "咖啡馆推荐待刊",
+    "comment": "A05 reporter state label"
+  },
+  {
+    "key": "condition.story.neutral.1018.s1.advertisement_requested",
+    "text": "咖啡馆广告待刊",
+    "comment": "A05 reporter state label"
+  },
+  {
+    "key": "condition.story.neutral.1018.s1.printed",
+    "text": "咖啡馆报刊通知已刊出",
+    "comment": "A05 reporter state label"
+  },
+  {
+    "key": "neutral.1018.s1.notice.title",
+    "text": "《圣诺特之声》",
+    "comment": "A05 authorized minimal next-issue Notice; no reward"
+  },
+  {
+    "key": "neutral.1018.s1.notice.recommendation.body",
+    "text": "本期侧栏刊登了沸点咖啡馆的推荐文章。",
+    "comment": "A05 authorized minimal next-issue Notice; no reward"
+  },
+  {
+    "key": "neutral.1018.s1.notice.advertisement.body",
+    "text": "本期商业版刊登了沸点咖啡馆的广告。",
+    "comment": "A05 authorized minimal next-issue Notice; no reward"
   }
 ]

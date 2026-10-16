@@ -318,6 +318,8 @@ namespace Spotlight.FreeCafe.Tests
         {
             foreach(var product in world.Catalog.products)
             {
+                // Each recipe needs two disposable cups; isolate stock so later products still exercise scoring.
+                Setup();
                 var cup=PerfectCup(product.id);var score=world.EvaluateProduction(cup,product);
                 var composition=world.EvaluateProductComposition(cup,product);
                 Assert.That(composition.amountScore,Is.EqualTo(100).Within(.1),product.id);

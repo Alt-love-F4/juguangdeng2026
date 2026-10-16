@@ -34,5 +34,14 @@
     "imageKey": "",
     "pageCondKeys": "",
     "pageBarConds": ""
+  },
+  {
+    "pageId": "rose.1011.s1.card.page",
+    "presentationKey": "rose.1011.s1.card",
+    "seq": 1,
+    "titleKey": "",
+    "imageKey": "",
+    "pageCondKeys": "",
+    "pageBarConds": ""
   }
 ]

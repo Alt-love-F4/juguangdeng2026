@@ -47,6 +47,15 @@ namespace Spotlight.GameFlow
 
         public bool OwnsLetter(object owner) => genericLetterMode && ReferenceEquals(LetterOwner, owner);
 
+        /// <summary>Normally dismiss only this owner's retained reveal without signalling cancellation or completion.</summary>
+        public bool DismissLetterReveal(object owner)
+        {
+            if (!OwnsLetter(owner) || !genericLetter.RevealOnly) return false;
+            genericCancelled = genericCompleted = null;
+            Stop();
+            return true;
+        }
+
         /// <summary>Only copied presentation data enters this mode; no creation draft or NCS access.</summary>
         public void PlayLetter(LetterReadingSnapshot snapshot, Action completed, Action cancelled = null)
         {

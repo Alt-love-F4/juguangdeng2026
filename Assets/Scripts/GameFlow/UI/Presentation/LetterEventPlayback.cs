@@ -54,6 +54,13 @@ namespace Spotlight.GameFlow
                 onCancelled?.Invoke();
             }
             data.releaseStage = () => ReleaseStage(owner);
+            data.dismissStage = () =>
+            {
+                FirstDayLetterPanel current = active;
+                if (current == null || !current.OwnsLetter(owner) || !current.DismissLetterReveal(owner)) return;
+                active = null;
+                UIKit.ClosePanel(current);
+            };
             data.setSuspended = paused => SetSuspended(owner, paused);
             try
             {

@@ -33,5 +33,12 @@
     "trigger": "auto",
     "seq": 1,
     "eventId": "EV_DEMO_CAFE_ENDED"
+  },
+  {
+    "visitKey": "neutral.1018.s1.reporter",
+    "stage": "arrived",
+    "trigger": "auto",
+    "seq": 1,
+    "eventId": "neutral.1018.s1"
   }
 ]

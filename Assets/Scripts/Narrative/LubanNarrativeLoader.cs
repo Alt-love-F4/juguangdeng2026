@@ -75,6 +75,7 @@ namespace Spotlight.Narrative
                 config.cafeVisits.Add(new NarrativeCafeVisitDefinition
                 {
                     visitKey = row.VisitKey, characterId = row.CharacterId,
+                    orderProductId = row.OrderProductId, requireRealProduction = row.RequireRealProduction,
                     preferredSeatId = row.PreferredSeatId, seatedVisualPath = row.SeatedVisualPath,
                     arrivalDelaySeconds = CafeSeconds(row.ArrivalDelaySeconds, row.VisitKey, "arrivalDelaySeconds", false) ?? 0f,
                     patienceSeconds = CafeSeconds(row.PatienceSeconds, row.VisitKey, "patienceSeconds", true),
@@ -193,7 +194,7 @@ namespace Spotlight.Narrative
             foreach (var row in tables.TbNcsConversationPage.DataList)
                 config.presentations.conversationPages.Add(new NarrativeConversationPageDefinition { pageId = row.PageId, presentationKey = row.PresentationKey, seq = row.Seq, pageCondKeys = row.PageCondKeys, pageBarConds = row.PageBarConds, optionGroupKey = row.OptionGroupKey, bgOverride = row.BgOverride, bgmOverride = row.BgmOverride, stepType = ParseConversationStepType(row.StepType), readingKey = row.ReadingKey, checkId = row.CheckId });
             foreach (var row in tables.TbNcsConversationLine.DataList)
-                config.presentations.conversationLines.Add(new NarrativeConversationLineDefinition { lineId = row.LineId, pageId = row.PageId, seq = row.Seq, speakerKey = row.SpeakerKey, side = row.Side, textKey = row.TextKey, voiceKey = row.VoiceKey, emote = row.Emote, sfxKey = row.SfxKey, accentFxKey = row.AccentFxKey, accentTargetKey = row.AccentTargetKey, speakerNameKey = row.SpeakerNameKey });
+                config.presentations.conversationLines.Add(new NarrativeConversationLineDefinition { lineId = row.LineId, pageId = row.PageId, seq = row.Seq, speakerKey = row.SpeakerKey, side = row.Side, textKey = row.TextKey, voiceKey = row.VoiceKey, emote = row.Emote, sfxKey = row.SfxKey, accentFxKey = row.AccentFxKey, accentTargetKey = row.AccentTargetKey, speakerNameKey = row.SpeakerNameKey, stageLeftKey = row.StageLeftKey, stageRightKey = row.StageRightKey, stageCenterKey = row.StageCenterKey });
             foreach (var row in tables.TbNcsNotice.DataList)
                 config.presentations.notices.Add(new NarrativeNoticeDefinition { presentationKey = row.PresentationKey, titleKey = row.TitleKey, timeKey = row.TimeKey, imageKey = row.ImageKey, textKey = row.TextKey, barConds = row.BarConds, noticeBarConds = row.NoticeBarConds });
             foreach (var row in tables.TbNcsReadingPage.DataList)
@@ -275,6 +276,7 @@ namespace Spotlight.Narrative
                     "choice" => c.choices.Any(x => x.choiceId == row.ownerId),
                     "action" => c.actions.Any(x => x.actionKey == row.ownerId),
                     "ending" => endingIds.Contains(row.ownerId),
+                    "result" => c.results.Any(x => x != null && x.resultId == row.ownerId),
                     _ => false
                 };
                 if (!knownOwner || string.IsNullOrWhiteSpace(row.ownerId)) errors.Add(label + "unknown " + owner + " owner " + row.ownerId);
@@ -285,6 +287,15 @@ namespace Spotlight.Narrative
                 string key = target.Contains(":") ? target.Substring(target.IndexOf(':') + 1) : target;
                 switch (type)
                 {
+                    case "PRESENTATION":
+                        if (owner != "result") errors.Add(label + "PRESENTATION requires a result owner.");
+                        if (!bool.TryParse(row.value, out _)) errors.Add(label + "expected true or false.");
+                        if (!IsResultPresentationTarget(c, target)) errors.Add(label + "unknown presentation guard " + target);
+                        break;
+                    case "ATTRIBUTE_GTE":
+                        if (!c.abilityNameKeys.ContainsKey(target)) errors.Add(label + "unknown player attribute " + target);
+                        if (!int.TryParse(row.value, NumberStyles.Integer, CultureInfo.InvariantCulture, out _)) errors.Add(label + "integer value required.");
+                        break;
                     case "BOOL_EQ":
                         if (!keys.ContainsKey(target)) errors.Add(label + "unknown bool key " + target);
                         if (!bool.TryParse(row.value, out _)) errors.Add(label + "expected true or false.");

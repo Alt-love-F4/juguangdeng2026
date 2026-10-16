@@ -7,5 +7,23 @@
     "textKey": "narrative.test.notice.body",
     "barConds": "",
     "noticeBarConds": ""
+  },
+  {
+    "presentationKey": "neutral.1018.s1.notice.recommendation.presentation",
+    "titleKey": "neutral.1018.s1.notice.title",
+    "timeKey": "",
+    "imageKey": "",
+    "textKey": "neutral.1018.s1.notice.recommendation.body",
+    "barConds": "",
+    "noticeBarConds": ""
+  },
+  {
+    "presentationKey": "neutral.1018.s1.notice.advertisement.presentation",
+    "titleKey": "neutral.1018.s1.notice.title",
+    "timeKey": "",
+    "imageKey": "",
+    "textKey": "neutral.1018.s1.notice.advertisement.body",
+    "barConds": "",
+    "noticeBarConds": ""
   }
 ]

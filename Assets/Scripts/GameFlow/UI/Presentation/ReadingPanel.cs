@@ -41,6 +41,24 @@ namespace Spotlight.GameFlow
         private float revealed;
         private int lastInputFrame;
 
+        private bool allowCancel = true;
+        public bool AllowCancel
+        {
+            get => allowCancel;
+            set { allowCancel = value; UpdateButtons(); }
+        }
+        private bool isSuspended;
+        public bool IsSuspended
+        {
+            get => isSuspended;
+            set
+            {
+                if (isSuspended == value) return;
+                isSuspended = value;
+                lastInputFrame = Time.frameCount;
+                UpdateButtons();
+            }
+        }
         public bool IsPlaying { get; private set; }
         public int PageIndex { get; private set; }
         public int LineIndex { get; private set; }
@@ -122,14 +140,14 @@ namespace Spotlight.GameFlow
 
         private bool TakeInput()
         {
-            if (!IsPlaying || !ready || exiting || lastInputFrame == Time.frameCount) return false;
+            if (!IsPlaying || IsSuspended || DialoguePanel.IsExternalInputBlocked || !ready || exiting || lastInputFrame == Time.frameCount) return false;
             lastInputFrame = Time.frameCount;
             return true;
         }
 
         private void Update()
         {
-            if (!IsPlaying || exiting) return;
+            if (!IsPlaying || IsSuspended || DialoguePanel.IsExternalInputBlocked || exiting || lastInputFrame == Time.frameCount) return;
             Keyboard keyboard = Keyboard.current;
             if (keyboard != null && keyboard.escapeKey.wasPressedThisFrame) { Cancel(); return; }
             if (!ready) return;
@@ -208,8 +226,9 @@ namespace Spotlight.GameFlow
 
         private void UpdateButtons()
         {
-            if (backButton != null) backButton.interactable = ready && !exiting && (PageIndex > 0 || LineIndex > 0 || textPage > 1);
-            if (continueButton != null) continueButton.interactable = ready && !exiting;
+            if (backButton != null) backButton.interactable = ready && !exiting && !IsSuspended && (PageIndex > 0 || LineIndex > 0 || textPage > 1);
+            if (continueButton != null) continueButton.interactable = ready && !exiting && !IsSuspended;
+            if (cancelButton != null) cancelButton.interactable = AllowCancel && !IsSuspended && IsPlaying && !exiting;
         }
 
         private void Finish()
@@ -229,7 +248,7 @@ namespace Spotlight.GameFlow
 
         public void Cancel()
         {
-            if (!IsPlaying) return;
+            if (!IsPlaying || !AllowCancel || IsSuspended || DialoguePanel.IsExternalInputBlocked) return;
             Spotlight.Audio.GameAudio.Play(Spotlight.Audio.AudioKeys.Cancel);
             Action callback = cancelled;
             Stop();

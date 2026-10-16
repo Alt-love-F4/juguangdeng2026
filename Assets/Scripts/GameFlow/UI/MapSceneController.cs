@@ -834,6 +834,7 @@ namespace Spotlight.GameFlow
                 runtime = root.AddComponent<NarrativeRuntime>();
             }
             runtime.ConversationPlayback = NarrativeConversationEventPlayback.Play;
+            runtime.ConversationReadingPlayback = ConversationReadingPlayback.Play;
             runtime.ReadingPlayback = ReadingEventPlayback.Play;
             runtime.NoticePlayback = NarrativeNoticeEventPlayback.Play;
             runtime.CharacterResolver = NarrativeCharacterResolver.Resolve;
@@ -975,6 +976,14 @@ namespace Spotlight.GameFlow
                 if (endDayButton != null) endDayButton.interactable = true;
                 if (status != null && status.text == "第一天：新手教程期间只能进入咖啡馆") status.gameObject.SetActive(false);
             }
+        }
+
+        public void FocusNarrativeCheckpointCafe()
+        {
+            if (scenePanelInstance != null) { scenePanelInstance.FocusNarrativeCheckpointCafe(); return; }
+            if (!runtimePositions.TryGetValue("cafe", out var cafe)) return;
+            FocusPosition(cafe);
+            BeginFocusMovement(cafe.position);
         }
 
         private void FocusPosition(NarrativeMapPositionDefinition position)

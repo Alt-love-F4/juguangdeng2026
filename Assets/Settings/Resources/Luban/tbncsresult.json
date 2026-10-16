@@ -637,5 +637,239 @@
     "target": "story.church.1009.s2.completed",
     "value": "true",
     "note": "P050 root completion only; no hat fact/reward"
+  },
+  {
+    "resultId": "neutral.1008.s1.result.q1a.colette",
+    "eventId": "neutral.1008.s1",
+    "seq": 1,
+    "resultType": "REL_ADD",
+    "target": "rel:colette>player",
+    "value": "+2",
+    "note": "User-authorized A01-A04 root-tail settlement; no accounting"
+  },
+  {
+    "resultId": "neutral.1008.s1.result.q1b.colette",
+    "eventId": "neutral.1008.s1",
+    "seq": 2,
+    "resultType": "REL_ADD",
+    "target": "rel:colette>player",
+    "value": "+1",
+    "note": "User-authorized A01-A04 root-tail settlement; no accounting"
+  },
+  {
+    "resultId": "neutral.1010.s1.result.q1a.adele",
+    "eventId": "neutral.1010.s1",
+    "seq": 1,
+    "resultType": "REL_ADD",
+    "target": "rel:adele>player",
+    "value": "+1",
+    "note": "User-authorized A01-A04 root-tail settlement; no accounting"
+  },
+  {
+    "resultId": "neutral.1010.s1.result.q1b.frugal_preparation",
+    "eventId": "neutral.1010.s1",
+    "seq": 2,
+    "resultType": "SET_FLAG",
+    "target": "story.neutral.1010.s1.frugal_preparation",
+    "value": "true",
+    "note": "User-authorized A01-A04 root-tail settlement; no accounting"
+  },
+  {
+    "resultId": "neutral.1010.s1.result.q1c.adele",
+    "eventId": "neutral.1010.s1",
+    "seq": 3,
+    "resultType": "REL_ADD",
+    "target": "rel:adele>player",
+    "value": "+2",
+    "note": "User-authorized A01-A04 root-tail settlement; no accounting"
+  },
+  {
+    "resultId": "neutral.1010.s2.result.q1b.antoine",
+    "eventId": "neutral.1010.s2",
+    "seq": 1,
+    "resultType": "REL_ADD",
+    "target": "rel:antoine>player",
+    "value": "+1",
+    "note": "User-authorized A01-A04 root-tail settlement; no accounting"
+  },
+  {
+    "resultId": "neutral.1010.s2.result.q2a.antoine",
+    "eventId": "neutral.1010.s2",
+    "seq": 2,
+    "resultType": "REL_ADD",
+    "target": "rel:antoine>player",
+    "value": "+2",
+    "note": "User-authorized A01-A04 root-tail settlement; no accounting"
+  },
+  {
+    "resultId": "neutral.1010.s2.result.q2a.antoine_approval",
+    "eventId": "neutral.1010.s2",
+    "seq": 3,
+    "resultType": "SET_FLAG",
+    "target": "story.neutral.1010.s2.antoine_approval",
+    "value": "true",
+    "note": "User-authorized A01-A04 root-tail settlement; no accounting"
+  },
+  {
+    "resultId": "neutral.1013.s2.result.q1a.adele",
+    "eventId": "neutral.1013.s2",
+    "seq": 1,
+    "resultType": "REL_ADD",
+    "target": "rel:adele>player",
+    "value": "+1",
+    "note": "User-authorized A01-A04 root-tail settlement; no accounting"
+  },
+  {
+    "resultId": "neutral.1013.s2.result.q1b.orderly_service",
+    "eventId": "neutral.1013.s2",
+    "seq": 2,
+    "resultType": "SET_FLAG",
+    "target": "story.neutral.1013.s2.orderly_service",
+    "value": "true",
+    "note": "User-authorized A01-A04 root-tail settlement; no accounting"
+  },
+  {
+    "resultId": "neutral.1013.s2.result.q1c.warm_recommendation",
+    "eventId": "neutral.1013.s2",
+    "seq": 3,
+    "resultType": "SET_FLAG",
+    "target": "story.neutral.1013.s2.warm_recommendation",
+    "value": "true",
+    "note": "User-authorized A01-A04 root-tail settlement; no accounting"
+  },
+  {
+    "resultId": "neutral.1013.s2.result.q2a.antoine",
+    "eventId": "neutral.1013.s2",
+    "seq": 4,
+    "resultType": "REL_ADD",
+    "target": "rel:antoine>player",
+    "value": "+2",
+    "note": "User-authorized A01-A04 root-tail settlement; no accounting"
+  },
+  {
+    "resultId": "neutral.1013.s2.result.q2b.antoine",
+    "eventId": "neutral.1013.s2",
+    "seq": 5,
+    "resultType": "REL_ADD",
+    "target": "rel:antoine>player",
+    "value": "+2",
+    "note": "User-authorized A01-A04 root-tail settlement; no accounting"
+  },
+  {
+    "resultId": "neutral.1008.s1.result.completed",
+    "eventId": "neutral.1008.s1",
+    "seq": 3,
+    "resultType": "SET_FLAG",
+    "target": "story.neutral.1008.s1.completed",
+    "value": "true",
+    "note": "User-authorized A01-A04 root-tail settlement; no accounting"
+  },
+  {
+    "resultId": "neutral.1010.s1.result.completed",
+    "eventId": "neutral.1010.s1",
+    "seq": 4,
+    "resultType": "SET_FLAG",
+    "target": "story.neutral.1010.s1.completed",
+    "value": "true",
+    "note": "User-authorized A01-A04 root-tail settlement; no accounting"
+  },
+  {
+    "resultId": "neutral.1010.s2.result.completed",
+    "eventId": "neutral.1010.s2",
+    "seq": 4,
+    "resultType": "SET_FLAG",
+    "target": "story.neutral.1010.s2.completed",
+    "value": "true",
+    "note": "User-authorized A01-A04 root-tail settlement; no accounting"
+  },
+  {
+    "resultId": "neutral.1013.s2.result.completed",
+    "eventId": "neutral.1013.s2",
+    "seq": 6,
+    "resultType": "SET_FLAG",
+    "target": "story.neutral.1013.s2.completed",
+    "value": "true",
+    "note": "User-authorized A01-A04 root-tail settlement; no accounting"
+  },
+  {
+    "resultId": "neutral.1018.s1.schedule.result.reserve",
+    "eventId": "neutral.1018.s1.schedule",
+    "seq": 1,
+    "resultType": "RESERVE_CAFE_VISIT",
+    "target": "obj:neutral.reporter",
+    "value": "visit:neutral.1018.s1.reporter",
+    "note": "A05 reporter: atomic root settlement; no economy multiplier/reward"
+  },
+  {
+    "resultId": "neutral.1018.s1.schedule.result.spawn",
+    "eventId": "neutral.1018.s1.schedule",
+    "seq": 2,
+    "resultType": "SPAWN_NPC",
+    "target": "obj:neutral.reporter",
+    "value": "scene:cafe",
+    "note": "A05 reporter: atomic root settlement; no economy multiplier/reward"
+  },
+  {
+    "resultId": "neutral.1018.s1.result.recommendation",
+    "eventId": "neutral.1018.s1",
+    "seq": 1,
+    "resultType": "SET_FLAG",
+    "target": "story.neutral.1018.s1.recommendation_requested",
+    "value": "true",
+    "note": "A05 reporter: atomic root settlement; no economy multiplier/reward"
+  },
+  {
+    "resultId": "neutral.1018.s1.result.advertisement",
+    "eventId": "neutral.1018.s1",
+    "seq": 2,
+    "resultType": "SET_FLAG",
+    "target": "story.neutral.1018.s1.advertisement_requested",
+    "value": "true",
+    "note": "A05 reporter: atomic root settlement; no economy multiplier/reward"
+  },
+  {
+    "resultId": "neutral.1018.s1.result.payment",
+    "eventId": "neutral.1018.s1",
+    "seq": 3,
+    "resultType": "MONEY_REMOVE",
+    "target": "cafe",
+    "value": "100",
+    "note": "A05 reporter: atomic root settlement; no economy multiplier/reward"
+  },
+  {
+    "resultId": "neutral.1018.s1.result.despawn",
+    "eventId": "neutral.1018.s1",
+    "seq": 4,
+    "resultType": "DESPAWN_NPC",
+    "target": "obj:neutral.reporter",
+    "value": "",
+    "note": "A05 reporter: atomic root settlement; no economy multiplier/reward"
+  },
+  {
+    "resultId": "neutral.1018.s1.result.completed",
+    "eventId": "neutral.1018.s1",
+    "seq": 5,
+    "resultType": "SET_FLAG",
+    "target": "story.neutral.1018.s1.completed",
+    "value": "true",
+    "note": "A05 reporter: atomic root settlement; no economy multiplier/reward"
+  },
+  {
+    "resultId": "neutral.1018.s1.notice.recommendation.result.printed",
+    "eventId": "neutral.1018.s1.notice.recommendation",
+    "seq": 1,
+    "resultType": "SET_FLAG",
+    "target": "story.neutral.1018.s1.printed",
+    "value": "true",
+    "note": "A05 reporter: atomic root settlement; no economy multiplier/reward"
+  },
+  {
+    "resultId": "neutral.1018.s1.notice.advertisement.result.printed",
+    "eventId": "neutral.1018.s1.notice.advertisement",
+    "seq": 1,
+    "resultType": "SET_FLAG",
+    "target": "story.neutral.1018.s1.printed",
+    "value": "true",
+    "note": "A05 reporter: atomic root settlement; no economy multiplier/reward"
   }
 ]

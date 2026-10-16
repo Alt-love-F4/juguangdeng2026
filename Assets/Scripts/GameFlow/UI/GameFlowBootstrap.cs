@@ -161,6 +161,7 @@ namespace Spotlight.GameFlow
                 narrativeIntegration.Runtime.NoticePlayback = NarrativeNoticeEventPlayback.Play;
                 narrativeIntegration.Runtime.ConversationPlayback = NarrativeConversationEventPlayback.Play;
                 narrativeIntegration.Runtime.LetterPlayback = LetterEventPlayback.Play;
+                narrativeIntegration.Runtime.ConversationReadingPlayback = ConversationReadingPlayback.Play;
                 narrativeIntegration.Runtime.CharacterResolver = NarrativeCharacterResolver.Resolve;
                 narrativeIntegration.Runtime.PlayerNameProvider = () => PlayerRuntime.Current?.PlayerName ?? string.Empty;
             }

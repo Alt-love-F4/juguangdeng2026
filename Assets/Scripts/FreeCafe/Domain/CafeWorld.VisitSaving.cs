@@ -21,6 +21,7 @@ namespace Spotlight.FreeCafe
                     || string.IsNullOrWhiteSpace(v.characterId) || !Enum.IsDefined(typeof(CafeVisitStatus), v.status)
                     || !Finite(v.patienceRemaining) || v.patienceRemaining < 0 || !Finite(v.arrivalDelaySeconds) || v.arrivalDelaySeconds < 0)
                     return ActionResult.No("存档来访实例无效");
+                v.serviceReceipt = CafeServiceReceipt.Normalize(v.serviceReceipt);
                 v.emittedStages = v.emittedStages ?? new List<string>();
                 v.diagnostics = v.diagnostics ?? new List<string>();
                 if (AwaitingSeat(v))
@@ -41,6 +42,14 @@ namespace Spotlight.FreeCafe
                 if (v.status != CafeVisitStatus.Ended && !ValidCustomerIdentity(v.identity)) return ActionResult.No("来访人物无效");
                 var order = candidate.requests.Find(r => r.customerId == v.customerId);
                 if ((v.status == CafeVisitStatus.SeatedBeforeServe) != (order != null)) return ActionResult.No("来访阶段与订单不一致");
+                // Older snapshots predate explicit order identity; migrate only from their exact owned seat.
+                if (order != null && string.IsNullOrEmpty(v.orderId)) v.orderId = order.id;
+                if (order != null && (v.orderId != order.id || !string.IsNullOrEmpty(v.orderProductId) && order.productId != v.orderProductId))
+                    return ActionResult.No("来访订单身份不一致");
+                if (v.requireRealProduction && (string.IsNullOrWhiteSpace(v.orderProductId) || Product(v.orderProductId) == null))
+                    return ActionResult.No("真实制作来访产品无效");
+                if (v.serviceReceipt != null && !ValidServiceReceipt(v, v.serviceReceipt)) return ActionResult.No("来访服务回执无效");
+                if (!ValidProductionAttempts(v, order)) return ActionResult.No("来访制作回执无效");
                 if (v.status == CafeVisitStatus.Ended && (!string.IsNullOrEmpty(v.customerId) || !string.IsNullOrEmpty(v.seatId) || v.budgetReserved))
                     return ActionResult.No("已结束来访残留座位");
             }
@@ -54,8 +63,20 @@ namespace Spotlight.FreeCafe
                     || !sequences.Add(f.sequence) || string.IsNullOrEmpty(f.stage)
                     || (!f.isClick && (!v.emittedStages.Contains(f.stage) || !stages.Add(f.visitInstanceId + "\n" + f.stage))))
                     return ActionResult.No("存档来访反馈无效");
+                f.serviceReceipt = CafeServiceReceipt.Normalize(f.serviceReceipt);
+                if (f.serviceReceipt != null && !ValidServiceReceipt(v, f.serviceReceipt)) return ActionResult.No("存档来访服务反馈无效");
+                if (f.stage == "service_completed" && (f.serviceReceipt == null || !ValidServiceReceipt(v, f.serviceReceipt)
+                    || f.orderId != f.serviceReceipt.orderId || f.productId != f.serviceReceipt.productId))
+                    return ActionResult.No("存档来访服务反馈无效");
             }
             return ActionResult.Yes("来访状态有效");
         }
+
+        private bool ValidServiceReceipt(CafeVisitInstance visit, CafeServiceReceipt receipt)
+            => receipt.realProduction && receipt.visitInstanceId == visit.visitInstanceId && receipt.characterId == visit.characterId
+                && !string.IsNullOrWhiteSpace(receipt.orderId) && receipt.orderId == visit.orderId
+                && !string.IsNullOrWhiteSpace(receipt.productId) && Product(receipt.productId) != null
+                && (string.IsNullOrEmpty(visit.orderProductId) || receipt.productId == visit.orderProductId)
+                && !string.IsNullOrWhiteSpace(receipt.cupId) && Finite(receipt.score) && Finite(receipt.minimumScore);
     }
 }

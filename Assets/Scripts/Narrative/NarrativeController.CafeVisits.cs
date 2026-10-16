@@ -29,10 +29,24 @@ namespace Spotlight.Narrative
         /// <summary>Copies and durably queues a fact. Completion means every eligible hook has settled or been skipped.</summary>
         public bool SubmitCafeVisitFeedback(NarrativeCafeVisitFeedback fact, Action completed = null)
         {
-            if (fact == null || fact.sequence < 0 || !ValidCafeStage(fact.stage) ||
+            if (fact == null || fact.sequence < 0 || !(ValidCafeStage(fact.stage) || fact.stage == "service_completed") ||
                 fact.isClick && fact.stage != "before_served" && fact.stage != "served") return false;
             var visit = cafeVisits.Find(v => v.id == fact.visitInstanceId && v.characterId == fact.characterId);
             if (visit == null) return false;
+            if (fact.stage == "service_completed")
+            {
+                if (fact.isClick || !AcceptServiceReceipt(fact)) return false;
+                if (!visit.completedFacts.Contains(CafeFactKey(fact))) visit.completedFacts.Add(CafeFactKey(fact));
+                completed?.Invoke();
+                CheckEndingsAtSafeBoundary();
+                return true;
+            }
+            if (!string.IsNullOrWhiteSpace(fact.orderId) && !string.IsNullOrWhiteSpace(fact.productId)
+                && (string.IsNullOrEmpty(visit.orderProductId) || fact.productId == visit.orderProductId))
+            {
+                if (!string.IsNullOrEmpty(visit.orderId) && visit.orderId != fact.orderId) return false;
+                visit.orderId = fact.orderId; cafeDirty = true;
+            }
             var copy = fact.Copy();
             string key = CafeWaiterKey(copy);
             if (completed != null)
@@ -79,6 +93,7 @@ namespace Spotlight.Narrative
             {
                 id = Guid.NewGuid().ToString("N"), order = ++cafeVisitSequence, characterId = character,
                 visitKey = definition?.visitKey ?? string.Empty, preferredSeatId = definition?.preferredSeatId,
+                orderProductId = definition?.orderProductId, requireRealProduction = definition?.requireRealProduction ?? false,
                 seatedVisualPath = definition?.seatedVisualPath, arrivalAuthorized = arrival,
                 stage = arrival ? "waiting" : "reserved", defaults = definition == null,
                 leaveAfterServed = definition?.leaveAfterServed ?? true
@@ -138,6 +153,7 @@ namespace Spotlight.Narrative
         {
             if (visit.ended) return;
             visit.ended = true; visit.stage = "ended"; visit.endReason = reason; cafeDirty = true;
+            CancelUnservedServiceCheckpoint(visit.id, reason);
             if (cafeLocationOwners.TryGetValue(visit.characterId, out string owner) && owner == visit.id)
             {
                 cafeLocationOwners.Remove(visit.characterId);
@@ -183,6 +199,8 @@ namespace Spotlight.Narrative
                         if (!visit.acceptedFacts.Contains(key)) visit.acceptedFacts.Add(key);
                         if (eligible)
                         {
+                            if (fact.stage == "leaving" || fact.stage == "ended")
+                                CancelUnservedServiceCheckpoint(visit.id, fact.reason ?? "left_unserved");
                             if (fact.stage == "ended") EndCafeVisit(visit, fact.reason ?? "business_closed");
                             else if (!fact.isClick && !visit.ended && CafeStageOrder(fact.stage) >= CafeStageOrder(visit.stage))
                             { visit.stage = fact.stage; cafeDirty = true; }
@@ -198,7 +216,8 @@ namespace Spotlight.Narrative
                         string eventId = work.hooks[work.nextHook++];
                         if (fact.isClick && visit.ended) continue;
                         work.waitingEvent = eventId;
-                        if (!QueueEvent(eventId))
+                        if (!QueueManualEvent(eventId, false, new NarrativeCafeVisitContext
+                        { visitInstanceId = visit.id, characterId = visit.characterId, orderId = fact.orderId, productId = fact.productId }))
                         {
                             work.waitingEvent = null;
                             Debug.Log("[NCS][Cafe][rejected] event=" + eventId + " reason=" + CafeEventRejection(eventId));

@@ -84,7 +84,8 @@ namespace Spotlight.FreeCafe
         }
         private ActionResult ServeProduction(WorldEntity cup, CustomerRequest request)
         {
-            if (!ProductionEnabled || cup == null || request == null || !Spec(cup.specId).Has(Capability.Container))
+            if (!ProductionEnabled || cup == null || request == null || !State.requests.Contains(request)
+                || Find(cup.id) != cup || !Spec(cup.specId).Has(Capability.Container))
                 return ActionResult.No("需要出餐杯和当前显示的订单");
             if (!string.IsNullOrEmpty(State.production.miniGameToken)) return ActionResult.No("请先结束或取消小游戏");
             if (request.id == TutorialOrderId)
@@ -101,15 +102,19 @@ namespace Spotlight.FreeCafe
             var product = Product(request.productId); var score = EvaluateProduction(cup, product);
             var classification=ClassifyCoffee(cup);
             bool correctType=product.evaluation==null || classification.known && classification.productId==product.id;
-            bool satisfied = correctType && score.total >= product.minimumScore
-                && (!Prep.requireLatteArt || !product.requiresLatteArt || cup.latteArt || State.automaticLatteArt);
+            bool latteArtSatisfied = !Prep.requireLatteArt || !product.requiresLatteArt || cup.latteArt || State.automaticLatteArt;
+            bool satisfied = correctType && score.total >= product.minimumScore && latteArtSatisfied;
+            string cupId = cup.id;
             request.lastProductionScore = score.total;
             string detail = "种类："+classification.label+" · "+(product.evaluation!=null ? EvaluateProductComposition(cup,product).description : score.grade + " " + score.total.ToString("0.0") + "分 · 萃取 " + score.extraction.ToString("0")
                 + " / 液体 " + score.liquid.ToString("0") + " / 顺序 " + score.order.ToString("0")
                 + " / 甜度 " + score.sweetness.ToString("0") + " / 浓度 " + score.concentration.ToString("0"));
             int price = satisfied ? SalePrice(cup, product) : 0;
             ConsumeDeliveredContainer(cup);
-            if (!satisfied && request.remakes < product.maxRemakes)
+            bool willRemake = !satisfied && request.remakes < product.maxRemakes;
+            RecordProductionAttempt(request, cupId, classification.productId, score.total, product.minimumScore,
+                correctType, latteArtSatisfied, satisfied, willRemake);
+            if (willRemake)
             {
                 request.remakes++; State.production.lastDelivery = "顾客要求重做（" + request.remakes + "/" + product.maxRemakes + "）· " + detail;
                 Notify(); return ActionResult.Yes(State.production.lastDelivery, CafeFeedbackKind.DeliveryRemake);
@@ -125,6 +130,15 @@ namespace Spotlight.FreeCafe
             {
                 State.todayFailed++; State.reputation--; Charge(Catalog.economy.wrongOrderPenalty);
                 State.production.lastDelivery = "顾客不满意离开 · " + detail;
+            }
+            var visit = VisitForCustomer(request.customerId);
+            if (visit != null && visit.orderId == request.id && visit.serviceReceipt == null)
+            {
+                visit.serviceReceipt = new CafeServiceReceipt { visitInstanceId = visit.visitInstanceId, characterId = visit.characterId,
+                    orderId = request.id, productId = request.productId, cupId = cupId, classifiedProductId = classification.productId,
+                    realProduction = true, satisfied = satisfied, correctType = correctType, latteArtSatisfied = latteArtSatisfied,
+                    score = score.total, minimumScore = product.minimumScore };
+                EmitVisit(visit, "service_completed");
             }
             CompleteCustomerOrder(request, satisfied);
             UpdateFocusedRequest(); Notify();

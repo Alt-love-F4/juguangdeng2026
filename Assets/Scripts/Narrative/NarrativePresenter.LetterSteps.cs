@@ -7,13 +7,14 @@ namespace Spotlight.Narrative
     public sealed partial class NarrativePresenter
     {
         private IEnumerator LetterStep(NarrativeEventDefinition definition, NarrativeConversationPageDefinition step,
-            object stageOwner, List<Action> stageReleases)
+            object stageOwner, List<Action> stageReleases, Action<Action> setDismiss)
         {
             if (LetterPlayback == null) throw new InvalidOperationException("Letter playback is not connected: " + step.pageId);
-            var readingPages = configuration.presentations.readingPages.FindAll(x => x != null && x.presentationKey == step.readingKey);
+            bool propOnly = step.stepType == NarrativeConversationStepType.LetterReveal && string.IsNullOrWhiteSpace(step.readingKey);
+            var readingPages = configuration.presentations.readingPages.FindAll(x => !propOnly && x != null && x.presentationKey == step.readingKey);
             readingPages.Sort((a, b) => a.seq.CompareTo(b.seq));
-            if (readingPages.Count != 1) throw new InvalidOperationException("Letter step requires exactly one reading page: " + step.readingKey);
-            var page = readingPages[0];
+            if (!propOnly && readingPages.Count != 1) throw new InvalidOperationException("Letter step requires exactly one reading page: " + step.readingKey);
+            var page = propOnly ? new NarrativeReadingPageDefinition() : readingPages[0];
             if (!string.IsNullOrWhiteSpace(page.pageBarConds))
                 throw new InvalidOperationException("Unsupported letter page bar conditions: " + page.pageId);
             if (!string.IsNullOrWhiteSpace(page.pageCondKeys))
@@ -30,7 +31,7 @@ namespace Spotlight.Narrative
             if (definition.eventProperties != null)
                 foreach (var property in definition.eventProperties)
                     if (property != null && string.Equals(property.property, "envelope", StringComparison.OrdinalIgnoreCase)) data.envelopePath = property.value;
-            var lines = configuration.presentations.readingLines.FindAll(x => x != null && x.pageId == page.pageId);
+            var lines = configuration.presentations.readingLines.FindAll(x => !propOnly && x != null && x.pageId == page.pageId);
             lines.Sort((a, b) => a.seq.CompareTo(b.seq));
             foreach (var line in lines)
             {
@@ -61,7 +62,21 @@ namespace Spotlight.Narrative
                 ui.Hide();
                 while (!finished && !cancelled) yield return null;
                 if (cancelled) AbortPresentation("playback_cancelled");
-                else if (!data.revealOnly)
+                else if (data.revealOnly)
+                {
+                    // After a normal hide, stale reveal callbacks must not cancel the root.
+                    bool dismissed = false;
+                    var dismiss = data.dismissStage;
+                    setDismiss(() =>
+                    {
+                        if (dismissed) return;
+                        if (dismiss == null) throw new InvalidOperationException("Letter hide adapter unavailable: " + step.pageId);
+                        dismissed = true;
+                        data.revealOnly = false;
+                        dismiss();
+                    });
+                }
+                else
                 {
                     // Resume dialogue on the next frame, never on the key that closed the letter.
                     resumeFrame = UnityEngine.Time.frameCount;

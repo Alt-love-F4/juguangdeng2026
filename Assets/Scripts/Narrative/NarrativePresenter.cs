@@ -5,7 +5,7 @@ using UnityEngine;
 
 namespace Spotlight.Narrative
 {
-    public sealed partial class NarrativePresenter : INarrativePresenter, INarrativePresentationDrain, INarrativePresentationCancellation, IDisposable
+    public sealed partial class NarrativePresenter : INarrativePresenter, INarrativePresentationDrain, INarrativePresentationCancellation, INarrativePresentationCheckpoints, IDisposable
     {
         private readonly NarrativeConfiguration configuration;
         private readonly Func<string, string> resolve;
@@ -19,6 +19,9 @@ namespace Spotlight.Narrative
         private int ownerSceneHandle;
         private long sessionVersion;
         private NarrativeEventRequest request;
+        private string pendingCheckpointPageId;
+        private NarrativeCheckpointWait pendingCheckpointWait;
+        private bool checkpointHandoffPending;
         private bool draining, disposed, skipRequested, allowSkip, choosing;
         private NarrativeReadingPlayback readingPlayback;
         private NarrativeNoticePlayback noticePlayback;
@@ -46,12 +49,14 @@ namespace Spotlight.Narrative
             ui.SetSuspended(paused);
             resources.SetSuspended(paused);
             suspendActiveLetter?.Invoke(paused);
+            suspendActiveReading?.Invoke(paused);
             return paused;
         }
 
-        public bool IsPresenting => completion != null || draining || effects.Count > 0;
+        public bool IsPresenting => completion != null || draining || checkpointHandoffPending || effects.Count > 0;
         public event Action<NarrativeEventRequest> Started;
         public event Action<NarrativeEventRequest> Finished;
+        public event Action<NarrativeEventRequest, string, NarrativeCheckpointWait> CheckpointReached;
         public event Action<string> Cancelled;
         public event Func<string, bool> ChoiceSelected;
         public Func<string, NarrativeConditionContext, bool> ChoiceUnlocked { get; set; }
@@ -60,6 +65,8 @@ namespace Spotlight.Narrative
         public NarrativeLetterPlayback LetterPlayback { get; set; }
         /// <summary>Preview hosts only; null plays the complete formal sequence.</summary>
         public string PreviewStartPageId { get; set; }
+        /// <summary>Preview hosts only; finish the isolated segment at a checkpoint.</summary>
+        public bool PreviewIgnoreCheckpoints { get; set; }
         private Action releaseActiveStage;
         private Action<bool> suspendActiveLetter;
         private bool stageCancellationRequested, stageReleaseInProgress;
@@ -87,6 +94,7 @@ namespace Spotlight.Narrative
         {
             if (disposed || IsPresenting) throw new InvalidOperationException("NCS presenter requires a single live session.");
             request = incoming;
+            pendingCheckpointPageId = null;
             stageCancellationRequested = false;
             completion = completed ?? throw new ArgumentNullException(nameof(completed));
             long version = ++sessionVersion;
@@ -120,6 +128,9 @@ namespace Spotlight.Narrative
             resources.RestoreCamera();
             resources.StopAudio();
             ui.Hide();
+            // Checkpoints leave the event uncommitted. Guarded dispatches the handoff
+            // only after its stack and pause lease have been released.
+            if (pendingCheckpointPageId != null) yield break;
             Finished?.Invoke(currentRequest);
             callback?.Invoke();
         }
@@ -134,7 +145,10 @@ namespace Spotlight.Narrative
                 foreach (string key in definition.contentKeys) if (!string.IsNullOrWhiteSpace(key)) return true;
             if (definition.eventProperties != null)
                 foreach (NarrativeEventProperty property in definition.eventProperties)
-                    if (property != null && !string.IsNullOrWhiteSpace(property.value)) return true;
+                    if (property != null && !string.IsNullOrWhiteSpace(property.value)
+                        && !string.Equals(property.property, "entry", StringComparison.OrdinalIgnoreCase)
+                        && !string.Equals(property.property, "blocksSave", StringComparison.OrdinalIgnoreCase)
+                        && !string.Equals(property.property, "blockedBy", StringComparison.OrdinalIgnoreCase)) return true;
             return false;
         }
 
@@ -150,6 +164,7 @@ namespace Spotlight.Narrative
         {
             IDisposable lease = pauseOwner;
             long version = sessionVersion;
+            NarrativeEventRequest currentRequest = request;
             var stack = new Stack<IEnumerator>();
             stack.Push(root);
             try
@@ -175,6 +190,23 @@ namespace Spotlight.Narrative
                 lease?.Dispose();
                 if (ReferenceEquals(pauseOwner, lease)) pauseOwner = null;
             }
+            if (!disposed && sessionVersion == version && pendingCheckpointPageId != null)
+            {
+                string nextPageId = pendingCheckpointPageId;
+                NarrativeCheckpointWait wait = pendingCheckpointWait;
+                pendingCheckpointPageId = null;
+                // Invalidate stage callbacks before handing control back to the host.
+                // Yield once so StartCoroutine has returned before a subscriber can Play again.
+                long checkpointVersion = ++sessionVersion;
+                yield return null;
+                if (!disposed && sessionVersion == checkpointVersion && checkpointHandoffPending)
+                {
+                    // End ownership immediately before notifying; the host may Play reentrantly.
+                    checkpointHandoffPending = false;
+                    routine = null;
+                    CheckpointReached?.Invoke(currentRequest, nextPageId, wait);
+                }
+            }
         }
 
         /// <summary>GM only: stop visuals after the controller has invalidated pending work.</summary>
@@ -186,15 +218,18 @@ namespace Spotlight.Narrative
 
         private void AbortPresentation(string reason)
         {
-            bool wasActive = completion != null || draining;
+            bool wasActive = completion != null || draining || checkpointHandoffPending;
             sessionVersion++;
             pauseOwner?.Dispose();
             pauseOwner = null;
             completion = drainCompleted = null;
+            pendingCheckpointPageId = null;
+            checkpointHandoffPending = false;
             draining = choosing = false;
             releaseActiveStage?.Invoke();
             releaseActiveStage = null;
             suspendActiveLetter = null;
+            suspendActiveReading = null;
             effects.Clear();
             resources.RestoreCamera();
             resources.StopAudio();
@@ -212,7 +247,7 @@ namespace Spotlight.Narrative
 
         private void OnSceneUnloaded(UnityEngine.SceneManagement.Scene scene)
         {
-            if (pauseOwner == null || scene.handle != ownerSceneHandle) return;
+            if ((pauseOwner == null && !checkpointHandoffPending) || scene.handle != ownerSceneHandle) return;
             InterruptForHost();
         }
 
@@ -293,7 +328,7 @@ namespace Spotlight.Narrative
                         if (isConversation && !string.IsNullOrWhiteSpace(definition.presentationKey))
                         {
                             yield return ConversationPages(definition, resolvedTitle, Get("bg"));
-                            if (completion == null) yield break; // cancelled; never run trailing atoms
+                            if (completion == null || pendingCheckpointPageId != null) yield break; // cancelled or checkpoint; never run trailing atoms
                             ui.Show(resolvedTitle);
                             break;
                         }
@@ -402,11 +437,14 @@ namespace Spotlight.Narrative
                 dialoguePages?.Sort((a, b) => a.seq.CompareTo(b.seq));
                 if (dialoguePages != null && dialoguePages.Count > 0)
                 {
-                    int startPage = string.IsNullOrWhiteSpace(PreviewStartPageId) ? 0 : dialoguePages.FindIndex(p => p.pageId == PreviewStartPageId);
-                    if (startPage < 0) throw new InvalidOperationException("Unknown preview start page: " + PreviewStartPageId);
+                    string startPageId = string.IsNullOrWhiteSpace(request.ResumePageId) ? PreviewStartPageId : request.ResumePageId;
+                    int startPage = string.IsNullOrWhiteSpace(startPageId) ? 0 : dialoguePages.FindIndex(p => p.pageId == startPageId);
+                    if (startPage < 0) throw new InvalidOperationException("Unknown conversation start page: " + startPageId);
                     string inheritedBackground = background;
                     object stageOwner = new object();
                     var stageReleases = new List<Action>();
+                    Action<float, Action<bool>> fadeStage = null;
+                    Action dismissLetter = null;
                     bool stageReleased = false;
                     void ReleaseStage()
                     {
@@ -424,15 +462,59 @@ namespace Spotlight.Narrative
                     releaseActiveStage = releaseStage;
                     try
                     {
-                    foreach (NarrativeConversationPageDefinition page in dialoguePages)
+                    for (int stepIndex = 0; stepIndex < dialoguePages.Count; stepIndex++)
                     {
+                        NarrativeConversationPageDefinition page = dialoguePages[stepIndex];
                         if (disposed || skipRequested) yield break;
+                        // Prior phases may depend on services that no longer exist after resume.
+                        if (stepIndex < startPage) continue;
                         if (!PageVisible(page.pageId, page.pageCondKeys, page.pageBarConds)) continue;
                         if (!string.IsNullOrWhiteSpace(page.bgOverride)) inheritedBackground = page.bgOverride;
-                        if (dialoguePages.IndexOf(page) < startPage) continue;
+                        if (page.stepType == NarrativeConversationStepType.WaitBusiness || page.stepType == NarrativeConversationStepType.WaitNight
+                            || page.stepType == NarrativeConversationStepType.WaitService)
+                        {
+                            if (PreviewIgnoreCheckpoints) yield break;
+                            if (stepIndex + 1 >= dialoguePages.Count)
+                                throw new InvalidOperationException("Checkpoint requires a following page: " + page.pageId);
+                            pendingCheckpointPageId = dialoguePages[stepIndex + 1].pageId;
+                            checkpointHandoffPending = true;
+                            if (page.stepType == NarrativeConversationStepType.WaitService && (request.CafeVisit == null
+                                || string.IsNullOrWhiteSpace(request.CafeVisit.orderId)))
+                                throw new InvalidOperationException("WaitService requires a CafeVisit order hook: " + page.pageId);
+                            pendingCheckpointWait = page.stepType == NarrativeConversationStepType.WaitBusiness
+                                ? NarrativeCheckpointWait.Business : page.stepType == NarrativeConversationStepType.WaitNight
+                                    ? NarrativeCheckpointWait.Night : NarrativeCheckpointWait.Service;
+                            yield break;
+                        }
+                        if (page.stepType == NarrativeConversationStepType.FadeOut)
+                        {
+                            long fadeVersion = sessionVersion;
+                            if (fadeStage == null) throw new InvalidOperationException("Conversation fade adapter unavailable.");
+                            bool fadeDone = false, fadeSucceeded = false;
+                            fadeStage(.3f, success => { if (sessionVersion == fadeVersion) { fadeSucceeded = success; fadeDone = true; } });
+                            while (!fadeDone && !disposed && sessionVersion == fadeVersion) yield return null;
+                            if (disposed || sessionVersion != fadeVersion) yield break;
+                            if (!fadeSucceeded) { AbortPresentation("playback_cancelled"); yield break; }
+                            // Present the fully black overlay before releasing the retained stage.
+                            yield return null;
+                            continue;
+                        }
+                        if (page.stepType == NarrativeConversationStepType.LetterHide)
+                        {
+                            dismissLetter?.Invoke();
+                            dismissLetter = null;
+                            suspendActiveLetter = null;
+                            continue;
+                        }
+                        if (page.stepType == NarrativeConversationStepType.Reading)
+                        {
+                            yield return ReadingStep(definition, page, stageOwner, stageReleases);
+                            if (completion == null) yield break;
+                            continue;
+                        }
                         if (page.stepType == NarrativeConversationStepType.LetterReveal || page.stepType == NarrativeConversationStepType.LetterRead)
                         {
-                            yield return LetterStep(definition, page, stageOwner, stageReleases);
+                            yield return LetterStep(definition, page, stageOwner, stageReleases, dismiss => dismissLetter = dismiss);
                             if (completion == null) yield break;
                             continue;
                         }
@@ -453,26 +535,39 @@ namespace Spotlight.Narrative
                         {
                             NarrativeObjectDefinition speakerObject = configuration.objects.Find(item => item != null && item.objId == line.speakerKey);
                             NarrativeCharacterPresentationData characterData = characterResolver?.Invoke(line.speakerKey, resolve(speakerObject?.nameText), string.IsNullOrWhiteSpace(speakerObject?.portraitPath) ? speakerObject?.iconPath : speakerObject.portraitPath);
+                            NarrativeCharacterPresentationData stageLeft = ResolveStageSnapshot(line.stageLeftKey);
+                            NarrativeCharacterPresentationData stageRight = ResolveStageSnapshot(line.stageRightKey);
+                            NarrativeCharacterPresentationData stageCenter = ResolveStageSnapshot(line.stageCenterKey);
                             conversationData.lines.Add(new NarrativeConversationPresentationLine
                             {
                                 lineId = line.lineId, pageId = line.pageId, seq = line.seq,
                                 speakerKey = line.speakerKey, speakerName = !string.IsNullOrWhiteSpace(line.speakerNameKey) ? resolve(line.speakerNameKey) : characterData?.name ?? resolve(speakerObject?.nameText),
                                 portraitPath = characterData?.portraitPath ?? speakerObject?.iconPath, portrait = characterData?.portrait,
                                 side = line.side, emote = line.emote, sfxKey = line.sfxKey, voiceKey = line.voiceKey,
-                                text = resolve(line.textKey), accentFxKey = line.accentFxKey, accentTargetKey = line.accentTargetKey
+                                text = resolve(line.textKey), accentFxKey = line.accentFxKey, accentTargetKey = line.accentTargetKey,
+                                stageLeft = stageLeft, stageRight = stageRight, stageCenter = stageCenter,
+                                replaceStageLeft = !string.IsNullOrWhiteSpace(line.stageLeftKey),
+                                replaceStageRight = !string.IsNullOrWhiteSpace(line.stageRightKey),
+                                replaceStageCenter = !string.IsNullOrWhiteSpace(line.stageCenterKey)
                             });
                         }
                         if (!string.IsNullOrWhiteSpace(page.optionGroupKey))
                         {
-                            long version = sessionVersion;
-                            conversationData.selectChoice = id => version == sessionVersion && completion != null
-                                && configuration.choices.Exists(c => c.choiceId == id && c.groupKey == page.optionGroupKey)
-                                && (ChoiceSelected?.Invoke(id) ?? false);
                             var choices = configuration.choices.FindAll(c => c.groupKey == page.optionGroupKey);
-                            choices.Sort((a, b) => a.seq.CompareTo(b.seq));
-                            foreach (var choice in choices)
-                                conversationData.options.Add(new NarrativeConversationPresentationOption { id = choice.choiceId, text = resolve(choice.textKey),
-                                    enabled = ChoiceUnlocked?.Invoke(choice.choiceId, request.Context) ?? false, requirement = ChoiceRequirement(choice.choiceId) });
+                            bool alreadySelected = request.SelectedChoices != null
+                                && choices.Exists(choice => Contains(request.SelectedChoices, choice.choiceId));
+                            if (alreadySelected) presentedChoiceGroups.Add(page.optionGroupKey);
+                            else
+                            {
+                                long version = sessionVersion;
+                                conversationData.selectChoice = id => version == sessionVersion && completion != null
+                                    && configuration.choices.Exists(c => c.choiceId == id && c.groupKey == page.optionGroupKey)
+                                    && (ChoiceSelected?.Invoke(id) ?? false);
+                                choices.Sort((a, b) => a.seq.CompareTo(b.seq));
+                                foreach (var choice in choices)
+                                    conversationData.options.Add(new NarrativeConversationPresentationOption { id = choice.choiceId, text = resolve(choice.textKey),
+                                        enabled = ChoiceUnlocked?.Invoke(choice.choiceId, request.Context) ?? false, requirement = ChoiceRequirement(choice.choiceId) });
+                            }
                         }
                     if ((conversationData.lines.Count > 0 || conversationData.options.Count > 0) && conversationPlayback != null)
                     {
@@ -480,10 +575,10 @@ namespace Spotlight.Narrative
                         bool pageCancelled = false;
                         long pageVersion = sessionVersion;
                         conversationData.cancelled = () => { if (!stageReleaseInProgress && sessionVersion == pageVersion) { pageCancelled = true; stageCancellationRequested = true; } };
-                        var stepRequest = new NarrativeEventRequest(request.Event, request.Trigger, request.Depth, request.SelectedChoices, request.Context, request.RequestId, stepHint, candidate: request.Candidate);
+                        var stepRequest = new NarrativeEventRequest(request.Event, request.Trigger, request.Depth, request.SelectedChoices, request.Context, request.RequestId, stepHint, candidate: request.Candidate, cafeVisit: request.CafeVisit);
                         bool handled;
                         try { handled = conversationPlayback(stepRequest, conversationData, () => { if (sessionVersion == pageVersion) pageFinished = true; }); }
-                        finally { if (conversationData.releaseStage != null) stageReleases.Add(conversationData.releaseStage); }
+                        finally { if (conversationData.releaseStage != null) stageReleases.Add(conversationData.releaseStage); if (conversationData.fadeStage != null) fadeStage = conversationData.fadeStage; }
                         if (!handled) throw new InvalidOperationException("Conversation playback rejected page: " + page.pageId);
                         if (handled)
                         {
@@ -498,7 +593,7 @@ namespace Spotlight.Narrative
                         throw new InvalidOperationException("Conversation playback is not connected: " + page.pageId);
                     }
                     }
-                    finally { releaseStage(); suspendActiveLetter = null; if (ReferenceEquals(releaseActiveStage, releaseStage)) releaseActiveStage = null; }
+                    finally { releaseStage(); suspendActiveLetter = null; suspendActiveReading = null; if (ReferenceEquals(releaseActiveStage, releaseStage)) releaseActiveStage = null; }
                     yield break;
                 }
             throw new InvalidOperationException("Missing conversation pages: " + definition.presentationKey);
@@ -550,7 +645,7 @@ namespace Spotlight.Narrative
                     });
                 }
                 var pageRequest = new NarrativeEventRequest(request.Event, request.Trigger, request.Depth, request.SelectedChoices,
-                    request.Context, request.RequestId, request.PassiveHint, readingLines);
+                    request.Context, request.RequestId, request.PassiveHint, readingLines, cafeVisit: request.CafeVisit);
                 bool done = false;
                 string title = string.IsNullOrWhiteSpace(page.titleKey) ? resolvedTitle : resolve(page.titleKey);
                 string body = string.Join("\n", readingLines.ConvertAll(line => line.text));
@@ -566,6 +661,18 @@ namespace Spotlight.Narrative
                 while (!done && !skipRequested && !disposed && sessionVersion == version) yield return null;
                 if (disposed || sessionVersion != version) yield break;
             }
+        }
+
+        private NarrativeCharacterPresentationData ResolveStageSnapshot(string key)
+        {
+            if (string.IsNullOrWhiteSpace(key)) return null;
+            key = key.Trim();
+            if (key == "-") return null;
+            NarrativeObjectDefinition obj = configuration.objects.Find(item => item != null && item.objId == key);
+            if (obj == null || obj.objType == NarrativeObjectType.World)
+                throw new InvalidOperationException("Unknown stage object: " + key);
+            return characterResolver?.Invoke(obj.objId, resolve(obj.nameText), string.IsNullOrWhiteSpace(obj.portraitPath) ? obj.iconPath : obj.portraitPath)
+                ?? new NarrativeCharacterPresentationData { key = obj.objId, name = resolve(obj.nameText), portraitPath = string.IsNullOrWhiteSpace(obj.portraitPath) ? obj.iconPath : obj.portraitPath };
         }
 
         private bool PageVisible(string pageId, string keys, string bars)
@@ -614,6 +721,13 @@ namespace Spotlight.Narrative
             List<string> descriptions = new List<string>();
             foreach (NarrativeConditionDefinition condition in requirements)
             {
+                if (string.Equals(condition.condType?.Trim(), "ATTRIBUTE_GTE", StringComparison.OrdinalIgnoreCase))
+                {
+                    string attributeLabel = configuration.abilityNameKeys.TryGetValue(condition.target ?? string.Empty, out string nameKey)
+                        ? resolve(nameKey) : condition.target;
+                    descriptions.Add(attributeLabel + " ≥ " + condition.value);
+                    continue;
+                }
                 NarrativeBarDefinition bar = configuration.bars.Find(b => b != null && b.barKey == condition.target);
                 string label = bar != null ? resolve(bar.nameText) : condition.target;
                 descriptions.Add(label + " " + condition.op + " " + condition.value);
@@ -776,7 +890,7 @@ namespace Spotlight.Narrative
 
         public void Drain(Action completed)
         {
-            if (disposed || completion != null || draining) throw new InvalidOperationException("NCS drain cannot overlap a presentation.");
+            if (disposed || completion != null || draining || checkpointHandoffPending) throw new InvalidOperationException("NCS drain cannot overlap a presentation.");
             if (effects.Count == 0) { completed?.Invoke(); return; }
             draining = true;
             drainCompleted = completed;

@@ -23,10 +23,24 @@ namespace Spotlight.Narrative
     /// <summary>Owns only independent memory. Never accesses or replaces NarrativeRuntime.Instance.</summary>
     public sealed class NarrativeDebugSession : IDisposable, INarrativeMoneyAccount
     {
-        private sealed class Presenter : INarrativePresenter
+        private sealed class Presenter : INarrativePresenter, INarrativePresentationCheckpoints, INarrativePresentationCancellation
         {
             public NarrativeDebugSession Owner;
             public INarrativePresenter Inner;
+            public event Action<NarrativeEventRequest, string, NarrativeCheckpointWait> CheckpointReached;
+            public event Action<string> Cancelled;
+            public void ForwardCancellation(string reason)
+            {
+                if (Owner.disposed) return;
+                Owner.epoch++; Owner.completion = null; Owner.CurrentRequest = default;
+                Cancelled?.Invoke(reason);
+            }
+            public void ForwardCheckpoint(NarrativeEventRequest request, string page, NarrativeCheckpointWait wait)
+            {
+                if (Owner.disposed || Owner.CurrentRequest.RequestId != request.RequestId) return;
+                Owner.epoch++; Owner.completion = null; Owner.CurrentRequest = default;
+                CheckpointReached?.Invoke(request, page, wait);
+            }
             public void Play(NarrativeEventRequest request, Action completed)
             {
                 Owner.CurrentRequest = request;
@@ -61,6 +75,8 @@ namespace Spotlight.Narrative
         {
             Configuration = configuration ?? LubanNarrativeLoader.Load();
             bridge = new Presenter { Owner = this, Inner = presenter };
+            if (presenter is INarrativePresentationCheckpoints checkpoints) checkpoints.CheckpointReached += bridge.ForwardCheckpoint;
+            if (presenter is INarrativePresentationCancellation cancellation) cancellation.Cancelled += bridge.ForwardCancellation;
             Controller = new NarrativeController(Configuration, bridge);
             Inventory = new NarrativeMapInventory();
             Controller.Inventory = Inventory;
@@ -95,7 +111,11 @@ namespace Spotlight.Narrative
         {
             EnsureAlive();
             if (CurrentRequest.Event != null) throw new InvalidOperationException("先恢复测试起点再替换演出器。");
+            if (bridge.Inner is INarrativePresentationCheckpoints old) old.CheckpointReached -= bridge.ForwardCheckpoint;
+            if (bridge.Inner is INarrativePresentationCancellation cancelled) cancelled.Cancelled -= bridge.ForwardCancellation;
             bridge.Inner = presenter;
+            if (presenter is INarrativePresentationCheckpoints next) next.CheckpointReached += bridge.ForwardCheckpoint;
+            if (presenter is INarrativePresentationCancellation cancellation) cancellation.Cancelled += bridge.ForwardCancellation;
         }
         private void EnsureAlive() { if (disposed) throw new ObjectDisposedException(nameof(NarrativeDebugSession)); }
         private void Edit()
@@ -241,6 +261,6 @@ namespace Spotlight.Narrative
             foreach (string entry in log) text.AppendLine(entry);
             return text.ToString();
         }
-        public void Dispose() { if (disposed) return; disposed = true; epoch++; completion = null; CurrentRequest = default; Controller.UnbindValueProviders(); Actions.StateChanged -= SyncActionValues; }
+        public void Dispose() { if (disposed) return; disposed = true; epoch++; completion = null; CurrentRequest = default; if (bridge.Inner is INarrativePresentationCheckpoints checkpoints) checkpoints.CheckpointReached -= bridge.ForwardCheckpoint; if (bridge.Inner is INarrativePresentationCancellation cancellation) cancellation.Cancelled -= bridge.ForwardCancellation; Controller.UnbindValueProviders(); Actions.StateChanged -= SyncActionValues; }
     }
 }

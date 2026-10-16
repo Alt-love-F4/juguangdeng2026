@@ -10,11 +10,18 @@ using UnityEngine.InputSystem;
 namespace Spotlight.FreeCafe
 {
     /// <summary>Owns domain world and input transaction; never creates the legacy gameplay controller.</summary>
-    public sealed class FreeCafeRuntime : MonoBehaviour, IDayFlowGameplayEndpoint, ICafeTutorialGameplayEndpoint
+    public sealed class FreeCafeRuntime : MonoBehaviour, IDayFlowGameplayEndpoint, ICafeTutorialGameplayEndpoint, IDayFlowBusinessEntryEndpoint
     {
         public const string SaveId="freecafe.world.v1";
         public bool DayFlowBusinessActive => World != null && World.State.businessPhase == BusinessPhase.Open;
         public bool DayFlowBusinessFinished => World != null && World.State.businessPhase == BusinessPhase.Night;
+        public bool NarrativeBusinessEntryReady => isActiveAndEnabled && dayFlow != null && gameFlow != null
+            && gameFlow.SessionState == GameSessionState.Playing && dayFlow.State == DayFlowState.FreeCafeBusiness
+            && !CafeTutorialActive && DayFlowBusinessActive && World.State.open
+            && !pendingBusinessStart && !IsDragging && !InputBlocked && !BusinessSimulationPaused
+            && cafeVisits != null && cafeVisits.Ready && !cafeVisits.HasStageHandoff
+            && (GameSaveParticipantRegistry.PendingRestore == null
+                || !GameSaveParticipantRegistry.PendingRestore.Exists(p => p != null && p.Id == SaveId));
 
         public bool productionMode = true;
         [Tooltip("可选身份适配器，必须实现 ICafeCustomerIdentitySource；不负责启动剧情。") ]

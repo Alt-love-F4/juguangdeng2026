@@ -7,7 +7,8 @@ namespace Spotlight.Narrative
     [Serializable]
     public sealed class NarrativeCafeVisitDefinition
     {
-        public string visitKey, characterId, preferredSeatId, seatedVisualPath;
+        public string visitKey, characterId, preferredSeatId, seatedVisualPath, orderProductId;
+        public bool requireRealProduction;
         public float arrivalDelaySeconds;
         public float? patienceSeconds;
         public bool leaveAfterServed = true;
@@ -23,10 +24,16 @@ namespace Spotlight.Narrative
     [Serializable]
     public sealed class NarrativeCafeVisitFeedback
     {
-        public string visitInstanceId, characterId, stage, reason;
+        public string visitInstanceId, characterId, stage, reason, orderId, productId;
+        public NarrativeCafeServiceReceipt serviceReceipt;
         public long sequence;
         public bool isClick;
-        internal NarrativeCafeVisitFeedback Copy() => (NarrativeCafeVisitFeedback)MemberwiseClone();
+        internal NarrativeCafeVisitFeedback Copy()
+        {
+            var copy = (NarrativeCafeVisitFeedback)MemberwiseClone();
+            copy.serviceReceipt = serviceReceipt?.Copy();
+            return copy;
+        }
     }
 
     // Save DTOs are mutable serialization data; committed API objects below never expose them.
@@ -34,6 +41,9 @@ namespace Spotlight.Narrative
     public sealed class NarrativeCafeVisitSave
     {
         public string id, characterId, visitKey, preferredSeatId, seatedVisualPath, endReason, stage = "reserved";
+        public string orderProductId, orderId;
+        public bool requireRealProduction;
+        public NarrativeCafeServiceReceipt serviceReceipt;
         public float arrivalDelaySeconds, patienceSeconds;
         public bool hasPatience, leaveAfterServed = true, arrivalAuthorized, ended, defaults;
         public long order;
@@ -42,6 +52,7 @@ namespace Spotlight.Narrative
         internal NarrativeCafeVisitSave Copy()
         {
             var copy = (NarrativeCafeVisitSave)MemberwiseClone();
+            copy.serviceReceipt = serviceReceipt?.Copy();
             copy.acceptedFacts = new List<string>(acceptedFacts ?? new List<string>());
             copy.completedFacts = new List<string>(completedFacts ?? new List<string>());
             return copy;
@@ -65,6 +76,9 @@ namespace Spotlight.Narrative
         public string VisitInstanceId { get; }
         public string CharacterId { get; }
         public string VisitKey { get; }
+        public string OrderProductId { get; }
+        public string OrderId { get; }
+        public bool RequireRealProduction { get; }
         public string PreferredSeatId { get; }
         public string SeatedVisualPath { get; }
         public string EndReason { get; }
@@ -79,6 +93,7 @@ namespace Spotlight.Narrative
         internal NarrativeCafeVisit(NarrativeCafeVisitSave v)
         {
             VisitInstanceId = v.id; CharacterId = v.characterId; VisitKey = v.visitKey;
+            OrderProductId = v.orderProductId; OrderId = v.orderId; RequireRealProduction = v.requireRealProduction;
             PreferredSeatId = v.preferredSeatId; SeatedVisualPath = v.seatedVisualPath;
             EndReason = v.endReason; Stage = v.stage; ArrivalDelaySeconds = v.arrivalDelaySeconds;
             PatienceSeconds = v.hasPatience ? v.patienceSeconds : (float?)null;

@@ -16,8 +16,11 @@ namespace Spotlight.FreeCafe
         {
             if (!click && v.emittedStages.Contains(stage)) return;
             if (!click) v.emittedStages.Add(stage);
+            var request = State.requests.Find(r => r.id == v.orderId);
             State.cafeVisitFeedback.Add(new CafeVisitFeedback { visitInstanceId = v.visitInstanceId,
                 characterId = v.characterId, stage = stage, reason = v.endReason,
+                orderId = v.orderId, productId = request?.productId ?? v.serviceReceipt?.productId ?? v.orderProductId,
+                serviceReceipt = stage == "service_completed" ? v.serviceReceipt : null,
                 sequence = ++State.cafeVisitFeedbackSequence, isClick = click });
         }
 
@@ -35,6 +38,7 @@ namespace Spotlight.FreeCafe
                         visitKey = input.visitKey, preferredSeatId = input.preferredSeatId, seatedVisualPath = input.seatedVisualPath,
                         arrivalAuthorized = input.arrivalAuthorized, leaveAfterServed = input.leaveAfterServed,
                         usesDefaultConfiguration = input.usesDefaultConfiguration,
+                        orderProductId = input.orderProductId, requireRealProduction = input.requireRealProduction,
                         arrivalDelaySeconds = Finite(input.arrivalDelaySeconds) && input.arrivalDelaySeconds >= 0 ? input.arrivalDelaySeconds : 0,
                         patienceRemaining = input.hasPatienceOverride && Finite(input.patienceSeconds) && input.patienceSeconds > 0 ? input.patienceSeconds : Catalog.customerPatience };
                     var identity = input.identity;
@@ -44,6 +48,9 @@ namespace Spotlight.FreeCafe
                     State.cafeVisits.Add(v);
                     if (input.isEnded) { FinishVisit(v, input.endReason ?? "ncs_despawn"); continue; }
                     if (!ValidCustomerIdentity(v.identity)) { FinishVisit(v, "configuration_invalid"); continue; }
+                    if (!string.IsNullOrEmpty(v.orderProductId) && Product(v.orderProductId) == null
+                        || v.requireRealProduction && string.IsNullOrWhiteSpace(v.orderProductId))
+                    { VisitDiagnostic(v, "invalid_order_product"); FinishVisit(v, "configuration_invalid"); continue; }
                     if (!Finite(input.arrivalDelaySeconds) || input.arrivalDelaySeconds < 0) VisitDiagnostic(v, "invalid_arrival_delay");
                     if (input.hasPatienceOverride && (!Finite(input.patienceSeconds) || input.patienceSeconds <= 0)) VisitDiagnostic(v, "invalid_patience");
                     if (!string.IsNullOrEmpty(v.preferredSeatId) && SeatIndex(v.preferredSeatId) < 0)
@@ -136,14 +143,16 @@ namespace Spotlight.FreeCafe
                 if (slot < 0) { if (duplicate) VisitDiagnostic(v, "character_already_present"); EmitVisit(v, "waiting"); continue; }
                 var eligible = new List<ProductSpec>();
                 foreach (var p in Catalog.products) if (State.unlockedProducts.Contains(p.id)) eligible.Add(p);
-                if (eligible.Count == 0) continue;
-                var product = eligible[State.requestSequence++ % eligible.Count];
+                if (eligible.Count == 0 && string.IsNullOrEmpty(v.orderProductId)) continue;
+                var product = string.IsNullOrEmpty(v.orderProductId) ? eligible[State.requestSequence++ % eligible.Count] : Product(v.orderProductId);
+                if (product == null) { FinishVisit(v, "configuration_invalid"); continue; }
                 v.seatId = v.customerId = "customer_" + slot;
                 State.entities.Add(new WorldEntity { id = v.customerId, specId = "customer", area = AreaId.Cafe,
                     x = -6 + (slot % 4) * 3.5f, y = .5f - (slot / 4) * 2.5f, person = v.identity });
                 var request = new CustomerRequest { id = Allocate("order_"), customerId = v.customerId, productId = product.id, patience = v.patienceRemaining };
-                if (State.automaticOrders && NextRandom() % 100 < (uint)(Catalog.economy.autoChance * 100)) request.automaticRemaining = Catalog.economy.autoSeconds;
+                if (!v.requireRealProduction && State.automaticOrders && NextRandom() % 100 < (uint)(Catalog.economy.autoChance * 100)) request.automaticRemaining = Catalog.economy.autoSeconds;
                 State.requests.Add(request);
+                v.orderId = request.id;
                 State.todayArrivals++;
                 v.budgetReserved = false;
                 v.status = CafeVisitStatus.SeatedBeforeServe;
@@ -203,10 +212,12 @@ namespace Spotlight.FreeCafe
             v.status = CafeVisitStatus.Ended; v.customerId = null; v.seatId = null; v.budgetReserved = false;
             EmitVisit(v, "ended");
         }
+        private bool RequiresRealProduction(CustomerRequest request) => request != null && VisitForCustomer(request.customerId)?.requireRealProduction == true;
+
         // All final order paths use this after their one economic settlement. Remakes never call it.
         private void CompleteCustomerOrder(CustomerRequest request, bool served)
         {
-            State.requests.Remove(request);
+            if (request == null || !State.requests.Remove(request)) return;
             State.spokenCustomers.Remove(request.customerId);
             var v = VisitForCustomer(request.customerId);
             if (v == null) State.entities.Remove(Find(request.customerId));

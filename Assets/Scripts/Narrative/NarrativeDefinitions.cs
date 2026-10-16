@@ -18,6 +18,7 @@ namespace Spotlight.Narrative
     public enum NarrativeEntryPoint { Immediate, MorningBeforeMap, AfterBusiness, BeforeNight, MapAction }
     public enum NarrativeCandidateSource { Manual, Cross, Hold, Date, Continuation }
     public enum NarrativeRepeatRule { Once, Daily, Weekly, Yearly }
+    public enum NarrativeCheckpointWait { Business, Night, Service }
 
     [Serializable]
     public sealed class NarrativeObjectDefinition
@@ -215,6 +216,24 @@ namespace Spotlight.Narrative
         public List<NarrativeStringValue> npcLocations = new List<NarrativeStringValue>();
         public List<NarrativeResultDefinition> pendingEffects = new List<NarrativeResultDefinition>();
         public NarrativeActionStateSnapshot actionState;
+        public NarrativeCheckpointSave checkpoint;
+    }
+
+    [Serializable] public sealed class NarrativeCheckpointSave
+    {
+        public NarrativePendingValue root;
+        public string resumePageId, token;
+        public int day, stage;
+        public NarrativeCheckpointWait wait;
+        public bool confirmed;
+        public NarrativeCafeVisitContext serviceContext;
+        public NarrativeCafeServiceReceipt serviceReceipt;
+        public bool serviceResumeBlocked;
+        public NarrativeAbilityCheckSnapshot abilityCheck;
+        public string abilityCheckId;
+        public List<NarrativeAbilityCheckSnapshot> inlineChecks = new List<NarrativeAbilityCheckSnapshot>();
+        public List<NarrativeBoolValue> attributeChoices = new List<NarrativeBoolValue>();
+        public List<NarrativeCounterValue> attributeConditions = new List<NarrativeCounterValue>();
     }
 
     [Serializable] public sealed class NarrativeBarValue { public string key; public int value; public bool reverse; }
@@ -229,14 +248,17 @@ namespace Spotlight.Narrative
         public readonly int Depth;
         public readonly string RequestId;
         public readonly string PassiveHint;
+        public readonly string ResumePageId;
+        public readonly long PresentationToken;
         public readonly NarrativeCandidateValue Candidate;
         public readonly IReadOnlyList<NarrativeReadingLinePresentationData> ReadingLines;
         public readonly IReadOnlyList<string> SelectedChoices;
         public readonly NarrativeConditionContext Context;
+        public readonly NarrativeCafeVisitContext CafeVisit;
         public string SelectedChoiceId => SelectedChoices != null && SelectedChoices.Count > 0 ? SelectedChoices[0] : null;
         public NarrativeEventRequest(NarrativeEventDefinition @event, NarrativeTriggerDefinition trigger, int depth, IReadOnlyList<string> selectedChoices = null, NarrativeConditionContext context = null, string requestId = null, string passiveHint = null,
-            IReadOnlyList<NarrativeReadingLinePresentationData> readingLines = null, NarrativeCandidateValue candidate = null)
-        { Candidate = candidate; ReadingLines = readingLines; PassiveHint = passiveHint; Event = @event; Trigger = trigger; Depth = depth; SelectedChoices = selectedChoices; Context = context; RequestId = requestId ?? Guid.NewGuid().ToString("N"); }
+            IReadOnlyList<NarrativeReadingLinePresentationData> readingLines = null, NarrativeCandidateValue candidate = null, string resumePageId = null, long presentationToken = 0, NarrativeCafeVisitContext cafeVisit = null)
+        { CafeVisit = cafeVisit?.Copy(); PresentationToken = presentationToken; Candidate = candidate; ReadingLines = readingLines; PassiveHint = passiveHint; ResumePageId = resumePageId; Event = @event; Trigger = trigger; Depth = depth; SelectedChoices = selectedChoices; Context = context; RequestId = requestId ?? Guid.NewGuid().ToString("N"); }
     }
     // Waiting eligibility is not a playback request and never contributes to IsBusy.
     [Serializable] public sealed class NarrativeCandidateValue
@@ -249,7 +271,7 @@ namespace Spotlight.Narrative
         public NarrativeTimeSlot timeSlot;
         public NarrativeRepeatRule repeatRule;
     }
-    [Serializable] public sealed class NarrativePendingValue { public string eventId, triggerId, requestId, location, passiveHint; public int depth; public NarrativeTimeSlot timeSlot; public NarrativeCandidateValue candidate; public List<string> selectedChoices = new List<string>(); }
+    [Serializable] public sealed class NarrativePendingValue { public string eventId, triggerId, requestId, location, passiveHint, resumePageId; public int depth; public NarrativeTimeSlot timeSlot; public NarrativeCafeVisitContext cafeVisit; public NarrativeCandidateValue candidate; public List<string> selectedChoices = new List<string>(); }
     [Serializable] public sealed class NarrativeBarChange { public string key; public int oldValue, newValue, depth; }
     public sealed class NarrativeEffectNotification { public NarrativeResultDefinition Result; public string Target, Value; }
 
@@ -257,6 +279,11 @@ namespace Spotlight.Narrative
     public interface INarrativePresentationCancellation
     {
         event Action<string> Cancelled;
+    }
+
+    public interface INarrativePresentationCheckpoints
+    {
+        event Action<NarrativeEventRequest, string, NarrativeCheckpointWait> CheckpointReached;
     }
 
     public interface INarrativePresentationDrain

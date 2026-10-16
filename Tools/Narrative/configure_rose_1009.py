@@ -48,7 +48,7 @@ for key,text in [('rose.1009.s1.title','赴约'),('rose.envoy.name','老爷'),('
 for key in ['rose.envoy','rose.butake']:
     append(n,'Object',dict(objId=key,objType='npc',nameText=key+'.name'))
 append(n,'Event',dict(eventId='rose.1009.s1',eventKind='actor',actorId='player',titleText='rose.1009.s1.title',setupType='Tpl_ArrivalConversation',setupKey='rose.1009.s1',onceOnly=True,presentationClass='Conversation',presentationKey='rose.1009.s1.conversation',eventProperty='entry=MapAction;blocksSave=true;blockedBy=B-B01+B-B02;contentBoundary=P071'))
-append(n,'SetupParams',dict(setupKey='rose.1009.s1',tplName='Tpl_ArrivalConversation',skipAble=False,autoAdvance=False))
+append(n,'SetupParams',dict(setupKey='rose.1009.s1',tplName='Tpl_ArrivalConversation',slotValues='opts=',skipAble=False,autoAdvance=False))
 append(n,'PresentationIndex',dict(presentationKey='rose.1009.s1.conversation',presentationClass='Conversation',logTag='B1009 blocked P003-P071'))
 pages=['door','blindfold','reception','origin_letter','origin_uncle','request']
 for seq,page in enumerate(pages,1):
@@ -78,12 +78,18 @@ for seq,number in enumerate([45,46],1):
 # Existing authoritative upstream condition, without inventing a completed flag.
 append(n,'Condition',dict(conditionId='rose.1009.s1.day',ownerType='event',ownerId='rose.1009.s1',groupIndex=1,condType='BAR_BETWEEN',target='world.calendar',value='4,4'))
 append(n,'Condition',dict(conditionId='rose.1009.s1.meeting',ownerType='event',ownerId='rose.1009.s1',groupIndex=1,condType='BOOL_EQ',target='story.oct09.meeting.known',value='true'))
-stamp=datetime.now().strftime('%Y%m%d-%H%M%S')
-out=root/'Library/Locus/tmp/rose-content'/f'{stamp}-1009-wire';out.mkdir(parents=True)
-for p in paths:
-    import shutil
-    shutil.copy2(p,out/(p.stem+'.before.xlsx'))
-    books[p].save(out/p.name)
-assert all(source.digest(p)==initial[p] for p in paths),'Concurrent workbook modification; candidates preserved'
-for p in paths: (out/p.name).replace(p)
+from rose_write_guard import source_write_guard
+with source_write_guard('configure 1009'):
+    assert all(source.digest(p)==initial[p] for p in paths), 'Concurrent workbook modification before backup; rerun from latest source'
+    stamp=datetime.now().strftime('%Y%m%d-%H%M%S-%f')
+    out=root/'Library/Locus/tmp/rose-content'/f'{stamp}-1009-wire';out.mkdir(parents=True)
+    for p in paths:
+        import shutil
+        shutil.copy2(p,out/(p.stem+'.before.xlsx'))
+        assert source.digest(out/(p.stem+'.before.xlsx')) == initial[p], 'Backup race; no source replacement'
+        books[p].save(out/p.name)
+    assert all(source.digest(p)==initial[p] for p in paths),'Concurrent workbook modification; candidates preserved'
+    for p in paths:
+        assert source.digest(p)==initial[p], 'Concurrent workbook modification before replace; candidates preserved'
+        (out/p.name).replace(p)
 print('Configured 6 pages, 62 lines, 2 choices, blocked root with no Action/Date/Result. Backup:',out)
