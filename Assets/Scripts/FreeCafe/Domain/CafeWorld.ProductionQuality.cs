@@ -87,6 +87,17 @@ namespace Spotlight.FreeCafe
             if (!ProductionEnabled || cup == null || request == null || !Spec(cup.specId).Has(Capability.Container))
                 return ActionResult.No("需要出餐杯和当前显示的订单");
             if (!string.IsNullOrEmpty(State.production.miniGameToken)) return ActionResult.No("请先结束或取消小游戏");
+            if (request.id == TutorialOrderId)
+            {
+                var tutorialCoffee = ClassifyCoffee(cup);
+                if (!tutorialCoffee.known || tutorialCoffee.productId != "blackcoffee")
+                    return ActionResult.No("请制作一杯黑咖啡再交付；当前杯子和教程订单已保留");
+                ConsumeDeliveredContainer(cup);
+                CompleteCustomerOrder(request, true);
+                State.production.lastDelivery = "首位客人的黑咖啡已交付，新手教程完成";
+                Notify();
+                return ActionResult.Yes(State.production.lastDelivery, CafeFeedbackKind.DeliverySatisfied);
+            }
             var product = Product(request.productId); var score = EvaluateProduction(cup, product);
             var classification=ClassifyCoffee(cup);
             bool correctType=product.evaluation==null || classification.known && classification.productId==product.id;

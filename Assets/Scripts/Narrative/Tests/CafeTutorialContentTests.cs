@@ -38,5 +38,30 @@ namespace Spotlight.Narrative.Tests
             Assert.That(session.HandoffReady, Is.True);
             Assert.That(notifications, Is.EqualTo(1));
         }
+
+        [Test]
+        public void TutorialCoffeeRequiresWorkstationHandoffAndCompletesOnlyOnce()
+        {
+            var session = new CafeTutorialSession();
+            int notifications = 0;
+            session.StepCompleted += (_, _) => notifications++;
+            Assert.That(session.BeginCoffee(), Is.False);
+            session.Begin();
+            Assert.That(session.NotifyTutorialStepCompleted(CafeTutorialSession.TutorialId, CafeTutorialSession.CoffeeSignal), Is.False);
+            Assert.That(session.NotifyTutorialStepCompleted(CafeTutorialSession.TutorialId, CafeTutorialSession.WorkstationSignal), Is.True);
+            Assert.That(session.NotifyTutorialStepCompleted(CafeTutorialSession.TutorialId, CafeTutorialSession.CoffeeSignal), Is.False);
+            Assert.That(session.BeginCoffee(), Is.True);
+            Assert.That(session.BeginCoffee(), Is.False);
+            Assert.That(session.WaitingForCoffee, Is.True);
+            Assert.That(session.NotifyTutorialStepCompleted("other", CafeTutorialSession.CoffeeSignal), Is.False);
+            Assert.That(session.NotifyTutorialStepCompleted(CafeTutorialSession.TutorialId, CafeTutorialSession.CoffeeSignal), Is.True);
+            Assert.That(session.NotifyTutorialStepCompleted(CafeTutorialSession.TutorialId, CafeTutorialSession.CoffeeSignal), Is.False);
+            session.Begin();
+            Assert.That(session.Completed, Is.True);
+            Assert.That(session.WaitingForWorkstation, Is.False);
+            Assert.That(session.WaitingForCoffee, Is.False);
+            Assert.That(session.CurrentStepId, Is.Empty);
+            Assert.That(notifications, Is.EqualTo(2));
+        }
     }
 }

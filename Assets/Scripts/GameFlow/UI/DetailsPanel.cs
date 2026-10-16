@@ -159,7 +159,11 @@ namespace Spotlight.GameFlow
         {
             base.OnShow();
             Canvas canvas = GetComponent<Canvas>();
-            if (canvas != default) canvas.overrideSorting = true;
+            if (canvas != default)
+            {
+                canvas.overrideSorting = true;
+                canvas.sortingOrder = short.MaxValue - 1;
+            }
             RefreshSpecializationLayout();
         }
 

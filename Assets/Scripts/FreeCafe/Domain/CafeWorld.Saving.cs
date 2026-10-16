@@ -129,7 +129,12 @@ namespace Spotlight.FreeCafe
                 }
             }
 
-            if (candidate.requests.Count > candidate.seats || (!candidate.open && candidate.requests.Count > 0))
+            bool tutorialOrder = candidate.requests.Count == 1
+                && candidate.requests[0].id == TutorialOrderId
+                && candidate.requests[0].customerId == TutorialCustomerId
+                && candidate.requests[0].productId == "blackcoffee"
+                && candidate.businessPhase == BusinessPhase.Preparation;
+            if (candidate.requests.Count > candidate.seats || (!candidate.open && candidate.requests.Count > 0 && !tutorialOrder))
             {
                 return ActionResult.No("订单数量与营业状态不匹配");
             }

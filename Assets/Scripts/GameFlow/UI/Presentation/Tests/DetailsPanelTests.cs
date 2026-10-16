@@ -57,6 +57,25 @@ namespace Spotlight.GameFlow.Tests
         }
 
         [UnityTest]
+        public IEnumerator DetailsRemainsAboveTutorialAndGmAndWorksWhilePaused()
+        {
+            var panel = (DetailsPanel)controller.CurrentPanel;
+            var canvas = panel.GetComponent<Canvas>();
+            Assert.That(canvas.overrideSorting, Is.True);
+            Assert.That(canvas.sortingOrder, Is.EqualTo(short.MaxValue - 1));
+            Time.timeScale = 0;
+            panel.ShowRelationships();
+            yield return new WaitForSecondsRealtime(.2f);
+            Assert.That(panel.CurrentPage, Is.EqualTo(DetailsPanel.Page.Relationships));
+            panel.ShowWorld();
+            yield return new WaitForSecondsRealtime(.2f);
+            Assert.That(panel.CurrentPage, Is.EqualTo(DetailsPanel.Page.World));
+            panel.RequestClose();
+            yield return new WaitForSecondsRealtime(.4f);
+            Assert.That(controller.CurrentPanel, Is.Null);
+        }
+
+        [UnityTest]
         public IEnumerator PlaceholderContentTabsAndScreenshots()
         {
             DetailsPanel panel = controller.CurrentPanel as DetailsPanel;

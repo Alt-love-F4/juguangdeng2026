@@ -9,6 +9,12 @@ namespace Spotlight.FreeCafe.Tests
         [TestCase(true, "essence")]
         public void GuidedRecipeProducesExpectedCoffee(bool extraction, string kind)
         {
+            var world = MakeGuidedCoffee(extraction);
+            Assert.That(world.ServingCup.contents.Find(portion => portion.specId == "coffee")?.coffeeKind, Is.EqualTo(kind));
+        }
+
+        private static CafeWorld MakeGuidedCoffee(bool extraction)
+        {
             var w = new CafeWorld(JsonUtility.FromJson<CafeCatalog>(Resources.Load<TextAsset>("FreeCafe/catalog").text));
             w.EnableProduction(); w.EnterProduction();
             Assert.That(w.TakeAndInteract("s.beans", "m.grinder", AreaId.Counter, 0, 0).success);
@@ -34,7 +40,54 @@ namespace Spotlight.FreeCafe.Tests
             }
             Assert.That(w.SelectServingCup("s.cups.large").success);
             Assert.That(w.PourLiquid(extraction ? "v.extractor" : "m.heater", w.ServingCup.id, 40, 1).success);
-            Assert.That(w.ServingCup.contents.Find(p => p.specId == "coffee")?.coffeeKind, Is.EqualTo(kind));
+            return w;
+        }
+
+        [Test]
+        public void TutorialDeliveryRequiresTrayAndBlackCoffeeWithoutStartingBusinessOrAwardingMoney()
+        {
+            var world = MakeGuidedCoffee(false);
+            Assert.That(world.StartTutorialCustomer().success, Is.True);
+            var cup = world.ServingCup;
+            var tray = world.State.entities.Find(entity => world.Spec(entity.specId).Has(Capability.Delivery));
+            int money = world.State.money, reputation = world.State.reputation, served = world.State.served;
+            cup.x = tray.x + 2;
+            Assert.That(world.DeliverProductionCup().success, Is.False);
+            Assert.That(world.HasTutorialCustomer, Is.True);
+            cup.x = tray.x; cup.y = tray.y;
+            Assert.That(world.HasTutorialCustomer, Is.True);
+            Assert.That(world.State.open, Is.False);
+            var result = world.DeliverProductionCup();
+            Assert.That(result.success, Is.True, result.message);
+            Assert.That(result.feedback, Is.EqualTo(CafeFeedbackKind.DeliverySatisfied));
+            Assert.That(world.Find(cup.id), Is.Null);
+            Assert.That(world.HasTutorialCustomer, Is.False);
+            Assert.That(world.Find(CafeWorld.TutorialCustomerId), Is.Null);
+            Assert.That(world.State.open, Is.False);
+            Assert.That(world.State.businessPhase, Is.EqualTo(BusinessPhase.Preparation));
+            Assert.That(world.State.money, Is.EqualTo(money));
+            Assert.That(world.State.reputation, Is.EqualTo(reputation));
+            Assert.That(world.State.served, Is.EqualTo(served));
+            Assert.That(world.State.todayServed, Is.Zero);
+            Assert.That(world.State.todayRevenue, Is.Zero);
+            Assert.That(world.StartDay().success, Is.True);
+        }
+
+        [Test]
+        public void TutorialRejectsEmptyOrWrongDrinkWithoutConsumingCupOrOrder()
+        {
+            var world = new CafeWorld(JsonUtility.FromJson<CafeCatalog>(Resources.Load<TextAsset>("FreeCafe/catalog").text));
+            world.EnableProduction(); world.EnterProduction();
+            world.StartTutorialCustomer();
+            world.SelectServingCup("s.cups.large");
+            var cup = world.ServingCup;
+            Assert.That(world.DeliverProductionCup().success, Is.False);
+            cup.contents.Add(new Portion { specId = "water", units = 1, milliliters = 200 });
+            Assert.That(world.DeliverProductionCup().success, Is.False);
+            Assert.That(world.ServingCup, Is.SameAs(cup));
+            Assert.That(world.LiquidVolume(cup), Is.EqualTo(200));
+            Assert.That(world.HasTutorialCustomer, Is.True);
+            Assert.That(world.State.todayFailed, Is.Zero);
         }
     }
 }

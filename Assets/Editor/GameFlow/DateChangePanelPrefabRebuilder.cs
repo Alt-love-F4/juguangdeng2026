@@ -8,24 +8,11 @@ using Object = UnityEngine.Object;
 
 namespace Spotlight.GameFlow.Editor
 {
-    /// <summary>显式重建参考图风格的日期切换面板；只作用于 DateChangePanel.prefab。</summary>
-    [InitializeOnLoad]
+    /// <summary>Legacy bootstrap for a missing DateChangePanel prefab. Never replaces an existing asset.</summary>
     public static class DateChangePanelPrefabRebuilder
     {
         private const string PrefabPath = "Assets/Resources/Art/UIPrefab/DateChangePanel.prefab";
         private const string BackgroundPath = "Assets/Resources/Art/Gameplay/DayFlow/phase_date_transition_clock.png";
-        static DateChangePanelPrefabRebuilder()
-        {
-            EditorApplication.delayCall += EnsureReferenceLayout;
-        }
-
-        private static void EnsureReferenceLayout()
-        {
-            if (EditorApplication.isPlayingOrWillChangePlaymode) return;
-            GameObject prefab = AssetDatabase.LoadAssetAtPath<GameObject>(PrefabPath);
-            if (prefab == null || prefab.transform.Find("Content/DayNumber") == null)
-                Rebuild();
-        }
         private static TMP_FontAsset Font => AssetDatabase.LoadAssetAtPath<TMP_FontAsset>(
             "Assets/Resources/Fonts/乐米曲奇方块体 SDF.asset");
 
@@ -39,7 +26,7 @@ namespace Spotlight.GameFlow.Editor
             if (backgroundTexture == null) throw new InvalidOperationException("Missing generated clock background: " + BackgroundPath);
 
             if (AssetDatabase.LoadAssetAtPath<GameObject>(PrefabPath) != null)
-                AssetDatabase.DeleteAsset(PrefabPath);
+                throw new InvalidOperationException("DateChangePanel already exists. Edit the prefab instead of replacing its GUID and artwork.");
 
             GameObject root = new GameObject("DateChangePanel", typeof(RectTransform), typeof(CanvasGroup), typeof(Canvas), typeof(GraphicRaycaster));
             try
