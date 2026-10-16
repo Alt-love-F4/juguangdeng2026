@@ -774,7 +774,7 @@ ScriptedImporter:
     mosaicPosition: {x: 0, y: 0}
     flatten: 0
     isImported: 0
-    isVisible: 1
+    isVisible: 0
   - name: "<\u56FE\u5C42>"
     spriteName: 
     isGroup: 1
@@ -904,7 +904,7 @@ ScriptedImporter:
     mosaicPosition: {x: 0, y: 0}
     flatten: 0
     isImported: 0
-    isVisible: 0
+    isVisible: 1
   - name: "\u56FE\u5C42 4"
     spriteName: 
     isGroup: 1
