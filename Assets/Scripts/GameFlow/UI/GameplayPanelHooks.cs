@@ -2,6 +2,11 @@ using System;
 
 namespace Spotlight.GameFlow
 {
+    public interface IGameplayScenePanelRegistration
+    {
+        void RegisterAsGameplayPanel();
+    }
+
     /// <summary>
     /// 玩法面板打开钩子：玩法程序集注册后，GameFlowBootstrap 用其替代占位面板。
     /// </summary>

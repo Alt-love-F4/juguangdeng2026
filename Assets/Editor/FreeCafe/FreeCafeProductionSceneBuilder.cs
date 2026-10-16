@@ -90,6 +90,7 @@ namespace Spotlight.FreeCafe.Editor
             EditorUtility.SetDirty(hud);EditorUtility.SetDirty(gateway);EditorUtility.SetDirty(runtime);
             FreeCafeHudSceneBuilder.Apply(oldHud,hud);
             EditorSceneManager.MarkSceneDirty(scene);EditorSceneManager.SaveScene(scene);AssetDatabase.SaveAssets();
+            CoffeeBookPanelBuilder.ApplySavedPrefab();
             Debug.Log("[Production] 已更新同一个 CoffeeShop 制作区域；其他楼层、镜头、实体Prefab、DayFlow保持不变。");
         }
         

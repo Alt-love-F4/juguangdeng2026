@@ -49,6 +49,8 @@ namespace Spotlight.GameFlow
             bool visible = Time.timeScale > 0f && (flow == null || flow.GameplayControlsAvailable);
             group.alpha = visible ? 1f : 0f;
             group.interactable = group.blocksRaycasts = visible;
+            if (endBusinessButton != null && flow != null)
+                endBusinessButton.interactable = visible && flow.GetComponent<DayFlowController>()?.CanFinishBusiness == true;
         }
         private void EndBusiness()
         {

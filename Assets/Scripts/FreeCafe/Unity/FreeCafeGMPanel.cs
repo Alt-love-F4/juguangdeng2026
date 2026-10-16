@@ -184,9 +184,26 @@ namespace Spotlight.FreeCafe
 
         private void BuildTutorials()
         {
+            AddSkipAllTutorialsAction();
             AddAction("黑咖啡操作教程", () => StartTutorial(false), "工作台内启动：拖豆、研磨、加水加热、右键倾倒。退出恢复原物品。", false);
             AddAction("精粹炉操作教程", () => StartTutorial(true), "工作台内启动：装粉、热水、控制注水成分、倒出精粹咖啡液。", false);
-            AddAction("结束操作教程", () => { if (runtime != null) runtime.WorkstationTutorial?.Stop(); }, "恢复练习前工作台，不提交剧情教程进度。", false);
+            AddAction("结束操作教程", () =>
+            {
+                if (runtime == null) return;
+                if (runtime.CafeTutorialActive) { SetStatus("请完成首位客人的黑咖啡，或使用「跳过所有教程（首杯完成后）」跳过正式教程。"); return; }
+                runtime.WorkstationTutorial?.Stop();
+            }, "恢复练习前工作台，不提交剧情教程进度。", false);
+        }
+
+        private void AddSkipAllTutorialsAction()
+        {
+            AddAction("跳过所有教程（首杯完成后）", () =>
+            {
+                var dayFlow = FindFirstObjectByType<Spotlight.GameFlow.DayFlowController>();
+                if (dayFlow == null) { SetStatus("请先开始新游戏。"); return; }
+                if (dayFlow.DebugSkipTutorialToCafe(out string message)) SetVisible(false);
+                SetStatus(message);
+            }, "跳过开场、首位客人对话和制作教学；停在首杯交付完成后的准备阶段，不跨天、不自动营业。", false);
         }
 
         private void StartTutorial(bool extraction)
@@ -283,13 +300,14 @@ namespace Spotlight.FreeCafe
 
         private void BuildGlobal()
         {
-            AddAction("强制打开地图（忽略新手教程）", () =>
+            AddSkipAllTutorialsAction();
+            AddAction("打开地图（保留当前场景）", () =>
             {
                 var flow = FindFirstObjectByType<Spotlight.GameFlow.GameFlowBootstrap>();
                 if (flow == null) { SetStatus("请先进入游戏。"); return; }
                 if (flow.DebugForceOpenMap(out string message)) SetVisible(false);
                 SetStatus(message);
-            }, "GM 调试：无视新手教程的地图限制，打开地图并隐藏咖啡店 HUD", false);
+            }, "复用常驻地图面板并置顶；只在地图缺失时补加载，咖啡馆对象和脚本保持运行", false);
             AddAction("跳到教程初次地图", () =>
             {
                 var flow = FindFirstObjectByType<Spotlight.GameFlow.GameFlowBootstrap>();
@@ -301,9 +319,11 @@ namespace Spotlight.FreeCafe
             AddAction("查看场景与时间状态", () => SetStatus("场景：" + UnityEngine.SceneManagement.SceneManager.GetActiveScene().name + " | 时间倍率：" + Time.timeScale.ToString("0.##") + " | 经营系统：" + (runtime != null && runtime.World != null ? "已连接" : "未加载")), "任意场景都可使用", false);
             AddAction("切换到咖啡馆场景", () =>
             {
+                var flow = FindFirstObjectByType<Spotlight.GameFlow.GameFlowBootstrap>();
+                if (flow == null) { SetStatus("请先进入游戏。"); return; }
+                flow.TransitionToGameplayScene("CoffeeShop", null);
                 SetVisible(false);
-                UnityEngine.SceneManagement.SceneManager.LoadScene("CoffeeShop");
-            }, "调试用：直接加载 CoffeeShop 场景", false);
+            }, "调试用：复用常驻 Map，使用短转场进入 CoffeeShop", false);
         }
 
         private void BuildBusiness()

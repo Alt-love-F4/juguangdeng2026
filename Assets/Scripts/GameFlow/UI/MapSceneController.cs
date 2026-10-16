@@ -12,7 +12,7 @@ namespace Spotlight.GameFlow
 {
     /// <summary>Scene-owned city map shell. Art and positions are intentionally data-driven later.</summary>
     [DefaultExecutionOrder(-500)]
-    public sealed class MapSceneController : GameFlowPanel
+    public sealed class MapSceneController : GameFlowPanel, IGameplayScenePanelRegistration
     {
         private const float MapWidth = 2400f;
         private const float MapHeight = 1350f;
@@ -81,6 +81,8 @@ namespace Spotlight.GameFlow
         private NarrativeController subscribedNarrativeController;
         private NarrativeActionController subscribedActions;
         private bool firstDayGuideApplied;
+        private int sceneSortingOrder;
+        private const string CloseMapButtonName = "CloseMapOverlay";
 
         protected override void Awake()
         {
@@ -96,18 +98,16 @@ namespace Spotlight.GameFlow
                 return;
             }
             if (feelConfig == null) feelConfig = Resources.Load<MapFeelConfig>("MapFeelConfig");
+            Canvas sceneCanvas = GetComponent<Canvas>();
+            if (sceneCanvas != null) sceneSortingOrder = sceneCanvas.sortingOrder;
             if (feelConfig == null)
             {
                 Debug.LogError("MapSceneController requires a MapFeelConfig asset.", this);
                 enabled = false;
                 return;
             }
-            if (UnityEngine.SceneManagement.SceneManager.GetActiveScene().name != "CoffeeShop")
-            {
-                GameplayPanelHooks.OpenPanel = OpenPanel;
-                GameplayPanelHooks.PanelType = typeof(MapSceneController);
-                GameplayPanelHooks.IsScenePanel = true;
-            }
+            if (UnityEngine.SceneManagement.SceneManager.GetActiveScene().name == "Map")
+                RegisterAsGameplayPanel();
             // Runtime must preserve authored prefab geometry. BuildUi is reserved for the
             // explicit editor prefab builder; missing authored references are configuration errors.
             if (mapRoot != null && mapContent != null && hud != null && widgets != null)
@@ -152,8 +152,16 @@ namespace Spotlight.GameFlow
         }
 
         internal bool ControlsAvailable => !standaloneLoading && (flow == null || flow.MapControlsAvailable);
+        private bool ViewAvailable => !standaloneLoading && isActiveAndEnabled;
         private bool GuideLocked => IsFirstDay && flow != null && flow.GetComponent<DayFlowController>()?.IsFirstSessionGuideActive == true;
         private bool IsFirstDay => (NarrativeRuntime.Instance?.Actions?.CurrentDay ?? 1) == 1;
+
+        public void RegisterAsGameplayPanel()
+        {
+            GameplayPanelHooks.OpenPanel = OpenPanel;
+            GameplayPanelHooks.PanelType = typeof(MapSceneController);
+            GameplayPanelHooks.IsScenePanel = true;
+        }
 
         internal void OpenOverlay(GameFlowBootstrap owner)
         {
@@ -162,11 +170,19 @@ namespace Spotlight.GameFlow
             SetFlow(owner);
             gameObject.SetActive(true);
             Spotlight.Audio.GameAudio.OverrideMusic(this, Spotlight.Audio.AudioKeys.CityMusic);
-            GetComponent<Canvas>().sortingOrder = 30;
-            HideFocus();
-            if (transform.Find("返回咖啡馆 / M") == null)
+            Canvas canvas = GetComponent<Canvas>();
+            if (canvas != null)
             {
-                Button close = CreateButton("返回咖啡馆 / M", transform, Vector2.zero, new Vector2(230, 48));
+                canvas.overrideSorting = true;
+                canvas.sortingOrder = short.MaxValue;
+            }
+            HideFocus();
+            Transform closeControl = transform.Find(CloseMapButtonName);
+            if (closeControl != null) closeControl.gameObject.SetActive(true);
+            else
+            {
+                Button close = CreateButton("返回当前场景 / M", transform, Vector2.zero, new Vector2(230, 48));
+                close.name = CloseMapButtonName;
                 ((RectTransform)close.transform).SetAnchors(new Vector2(1, 0), new Vector2(1, 0),
                     new Vector2(-155, 110), new Vector2(230, 48));
                 close.onClick.AddListener(owner.CloseMap);
@@ -180,6 +196,10 @@ namespace Spotlight.GameFlow
             flow = owner;
             SetFlow(owner);
             gameObject.SetActive(true);
+            Canvas canvas = GetComponent<Canvas>();
+            if (canvas != null) canvas.sortingOrder = sceneSortingOrder;
+            Transform close = transform.Find(CloseMapButtonName);
+            if (close != null) close.gameObject.SetActive(false);
             return this;
         }
 
@@ -430,13 +450,12 @@ namespace Spotlight.GameFlow
         private void OpenDetails()
         {
             if (flow == null) flow = FindFirstObjectByType<GameFlowBootstrap>();
-            if (!ControlsAvailable || GuideLocked) return;
             flow?.OpenDetails();
         }
 
         private void ToggleInventory()
         {
-            if (!ControlsAvailable || GuideLocked || (actionDetails != null && actionDetails.IsBusy)) return;
+            if (!ViewAvailable || (actionDetails != null && actionDetails.IsBusy)) return;
             var tasks = GetComponentInChildren<MapTaskPanel>(true);
             if (!inventoryView.IsVisible) tasks?.SetVisible(false);
             inventoryView.Toggle();
@@ -444,7 +463,7 @@ namespace Spotlight.GameFlow
 
         private void ToggleTasks()
         {
-            if (!ControlsAvailable || GuideLocked || (actionDetails != null && actionDetails.IsBusy)) return;
+            if (!ViewAvailable || (actionDetails != null && actionDetails.IsBusy)) return;
             var tasks = GetComponentInChildren<MapTaskPanel>(true);
             if (tasks == null) return;
             if (!tasks.IsVisible) inventoryView.SetVisible(false);
@@ -456,7 +475,7 @@ namespace Spotlight.GameFlow
             if (!isActiveAndEnabled) return;
             SubscribePositionEffects();
             Keyboard key = Keyboard.current;
-            if (ControlsAvailable)
+            if (ViewAvailable)
             {
                 if (key != null && key.tabKey.wasPressedThisFrame) OpenDetails();
                 if (key != null && key.bKey.wasPressedThisFrame) ToggleInventory();
@@ -490,15 +509,15 @@ namespace Spotlight.GameFlow
             }
             ApplyFirstDayGuide();
             TryFocusCompletedAction();
-            if (zoomSlider != null) zoomSlider.interactable = ControlsAvailable && !GuideLocked;
-            if (GuideLocked && ControlsAvailable)
+            if (zoomSlider != null) zoomSlider.interactable = ViewAvailable && !GuideLocked;
+            if (GuideLocked)
             {
                 UpdateZoom();
                 UpdateFocusMovement();
                 ApplyMapView();
                 return;
             }
-            if (!ControlsAvailable)
+            if (!ViewAvailable)
             {
                 pointerDragging = dragging = false;
                 panVelocity = Vector2.zero;
@@ -519,7 +538,7 @@ namespace Spotlight.GameFlow
             UpdateZoom();
             UpdateFocusMovement();
             ApplyMapView();
-            bool firstDayGuideActive = flow != null && flow.GetComponent<DayFlowController>()?.IsFirstDayMapGuideActive == true;
+            bool firstDayGuideActive = flow != null && flow.GetComponent<DayFlowController>()?.IsFirstDayCafeMapGuideActive == true;
             bool creationPending = PlayerRuntime.Current?.CreationSubmitted != true;
             if (!firstDayGuideActive && !creationPending && key != null && key.escapeKey.wasPressedThisFrame && (actionDetails == null || !actionDetails.IsBusy))
             {
@@ -757,7 +776,7 @@ namespace Spotlight.GameFlow
                 if (position == null || string.IsNullOrWhiteSpace(position.positionKey)) continue;
                 runtimePositions[position.positionKey] = position;
                 bool visible = position.isImportant || position.enabled;
-                bool cafeGuide = IsFirstDay && flow != null && flow.GetComponent<DayFlowController>()?.IsFirstDayMapGuideActive == true;
+                bool cafeGuide = IsFirstDay && flow != null && flow.GetComponent<DayFlowController>()?.IsFirstDayCafeMapGuideActive == true;
                 BindAuthoredLocation(position);
                 if (locationButtons.TryGetValue(position.positionKey, out Button authoredButton))
                 {
@@ -908,7 +927,7 @@ namespace Spotlight.GameFlow
         {
             if (!ControlsAvailable || (actionDetails != null && actionDetails.IsBusy) || position == null) return;
             DayFlowController dayFlow = flow != null ? flow.GetComponent<DayFlowController>() : null;
-            if (IsFirstDay && dayFlow != null && dayFlow.IsFirstDayMapGuideActive && !MapActionDetailsView.IsCafeEntryPosition(position.positionKey)) return;
+            if (IsFirstDay && dayFlow != null && dayFlow.IsFirstDayCafeMapGuideActive && !MapActionDetailsView.IsCafeEntryPosition(position.positionKey)) return;
             bool hasConfiguredContent = NarrativeRuntime.Instance?.Actions?.GetDisplayableActions(position.positionKey).Any() ?? false;
             if (MapActionDetailsView.IsCafeEntryPosition(position.positionKey) || (!IsFirstDay && hasConfiguredContent))
             {
@@ -930,7 +949,7 @@ namespace Spotlight.GameFlow
         private void ApplyFirstDayGuide()
         {
             DayFlowController dayFlow = flow != null ? flow.GetComponent<DayFlowController>() : null;
-            bool active = IsFirstDay && dayFlow != null && dayFlow.IsFirstDayMapGuideActive;
+            bool active = IsFirstDay && dayFlow != null && dayFlow.IsFirstDayCafeMapGuideActive;
             if (active)
             {
                 foreach (var pair in locationButtons)
@@ -945,7 +964,7 @@ namespace Spotlight.GameFlow
                 if (status != null)
                 {
                     status.gameObject.SetActive(true);
-                    status.text = "第一天：点击咖啡馆开始经营教程";
+                    status.text = "第一天：新手教程期间只能进入咖啡馆";
                 }
             }
             else
@@ -954,7 +973,7 @@ namespace Spotlight.GameFlow
                 foreach (var pair in locationButtons)
                     if (pair.Value != null) pair.Value.interactable = true;
                 if (endDayButton != null) endDayButton.interactable = true;
-                if (status != null && status.text == "第一天：点击咖啡馆开始经营教程") status.gameObject.SetActive(false);
+                if (status != null && status.text == "第一天：新手教程期间只能进入咖啡馆") status.gameObject.SetActive(false);
             }
         }
 
@@ -1207,7 +1226,8 @@ namespace Spotlight.GameFlow
             }
             if (UnityEngine.SceneManagement.SceneManager.GetActiveScene().name == "CoffeeShop")
             {
-                RebuildActionList();
+                if (flow != null) flow.CloseMap();
+                else gameObject.SetActive(false);
                 return;
             }
             CancelFocusMovement();
@@ -1249,7 +1269,16 @@ namespace Spotlight.GameFlow
                 standaloneLoading = false;
                 yield break;
             }
-            AsyncOperation operation = UnityEngine.SceneManagement.SceneManager.LoadSceneAsync("CoffeeShop");
+            gameObject.SetActive(false);
+            AsyncOperation operation = UnityEngine.SceneManagement.SceneManager.LoadSceneAsync(
+                "CoffeeShop", UnityEngine.SceneManagement.LoadSceneMode.Additive);
+            if (operation == null)
+            {
+                gameObject.SetActive(true);
+                standaloneLoading = false;
+                Debug.LogError("Could not load CoffeeShop additively.", this);
+                yield break;
+            }
             operation.allowSceneActivation = false;
             float elapsed = 0f;
             while (operation.progress < .9f || elapsed < .5f)
@@ -1257,10 +1286,12 @@ namespace Spotlight.GameFlow
                 elapsed += Time.unscaledDeltaTime;
                 yield return null;
             }
-            // Single activation destroys this map and its coroutine. The persistent UIKit
-            // panel owns the uncover animation; release the guard only after it finishes.
+            // Keep Map loaded; only activate the new gameplay scene after it is ready.
             operation.completed += _ =>
             {
+                UnityEngine.SceneManagement.Scene destination = UnityEngine.SceneManagement.SceneManager.GetSceneByName("CoffeeShop");
+                if (destination.IsValid() && destination.isLoaded)
+                    UnityEngine.SceneManagement.SceneManager.SetActiveScene(destination);
                 if (panel != null) panel.EndLoading(() =>
                 {
                     if (this != null) standaloneLoading = false;

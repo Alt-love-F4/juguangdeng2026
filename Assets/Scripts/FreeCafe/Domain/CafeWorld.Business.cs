@@ -6,6 +6,9 @@ namespace Spotlight.FreeCafe
     /// <summary>CafeWorld 的经营循环部分：订单匹配、营业结算、顾客生成与各类经济操作。</summary>
     public sealed partial class CafeWorld
     {
+        public const string TutorialOrderId = "tutorial_order";
+        public const string TutorialCustomerId = "customer_0";
+        public bool HasTutorialCustomer => Request(TutorialOrderId) != null;
         /// <summary>判断杯子是否符合餐品配方：杯型、配比、拉花要求都满足才算匹配。</summary>
         public bool Matches(WorldEntity cup, ProductSpec product) => ProductionEnabled
             ? cup != null && product != null && cup == ServingCup && (product.evaluation==null || ClassifyCoffee(cup).productId==product.id) && EvaluateProduction(cup, product).total >= product.minimumScore
@@ -146,6 +149,7 @@ namespace Spotlight.FreeCafe
         /// <summary>开始营业：从夜间开业会进入下一天；重置当日统计并按客流生成首批顾客。</summary>
         public ActionResult StartDay()
         {
+            if (HasTutorialCustomer) return ActionResult.No("请先完成首位客人的黑咖啡教程");
             if (State.open)
             {
                 return ActionResult.No("已经营业");
@@ -186,6 +190,46 @@ namespace Spotlight.FreeCafe
 
             Notify();
             return ActionResult.Yes("开始营业：今日客流 " + State.todayCustomerBudget + "，可自由备料；上餐时验证配方");
+        }
+
+        public ActionResult StartTutorialCustomer()
+        {
+            if (State.open) return ActionResult.No("教程客人不能在营业中生成");
+            if (HasTutorialCustomer) return ActionResult.Yes("教程客人已经在店内");
+            if (Find(TutorialCustomerId) != null || State.requests.Count > 0)
+                return ActionResult.No("教程客人的座位已被占用");
+            if (Product("blackcoffee") == null) return ActionResult.No("教程缺少黑咖啡餐品配置");
+            State.entities.Add(new WorldEntity
+            {
+                id = TutorialCustomerId,
+                specId = "customer",
+                area = AreaId.Cafe,
+                x = -6,
+                y = .5f,
+                person = CreateCustomerIdentity("tutorial_customer", 0)
+            });
+            State.requests.Add(new CustomerRequest
+            {
+                id = TutorialOrderId,
+                customerId = TutorialCustomerId,
+                productId = "blackcoffee",
+                patience = Catalog.customerPatience
+            });
+            State.focusedRequestId = TutorialOrderId;
+            Notify();
+            return ActionResult.Yes("教程客人已入店");
+        }
+
+        public void EndTutorialCustomer()
+        {
+            if (State.open) return;
+            var request = Request(TutorialOrderId);
+            if (request == null) return;
+            State.entities.Remove(Find(request.customerId));
+            State.spokenCustomers.Remove(request.customerId);
+            State.requests.Remove(request);
+            UpdateFocusedRequest();
+            Notify();
         }
 
         /// <summary>打烊结算：未完成的订单算失败，按当日成绩增减声望，并结算技能点里程碑。</summary>

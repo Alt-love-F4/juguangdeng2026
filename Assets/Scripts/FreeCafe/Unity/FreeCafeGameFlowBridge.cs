@@ -1,5 +1,6 @@
 using Spotlight.GameFlow;
 using UnityEngine;
+using UnityEngine.SceneManagement;
 
 namespace Spotlight.FreeCafe
 {
@@ -8,7 +9,7 @@ namespace Spotlight.FreeCafe
     /// The bridge owns registration only; gameplay remains in FreeCafeRuntime.
     /// </summary>
     [DefaultExecutionOrder(-1000)]
-    public sealed class FreeCafeGameFlowBridge : MonoBehaviour
+    public sealed class FreeCafeGameFlowBridge : MonoBehaviour, IGameplayScenePanelRegistration
     {
         [SerializeField] private FreeCafeHud hud;
         private bool registered;
@@ -17,7 +18,7 @@ namespace Spotlight.FreeCafe
         {
             if (hud == null)
                 hud = GetComponentInChildren<FreeCafeHud>(true);
-            Register();
+            RegisterAsGameplayPanel();
         }
 
         private void OnDestroy()
@@ -30,10 +31,15 @@ namespace Spotlight.FreeCafe
                 GameplayPanelHooks.PanelType = null;
                 GameplayPanelHooks.IsScenePanel = false;
             }
+            if (SceneManager.GetActiveScene().name == "Map")
+            {
+                MapSceneController map = FindFirstObjectByType<MapSceneController>(FindObjectsInactive.Include);
+                map?.RegisterAsGameplayPanel();
+            }
             registered = false;
         }
 
-        private void Register()
+        public void RegisterAsGameplayPanel()
         {
             if (hud == null)
             {

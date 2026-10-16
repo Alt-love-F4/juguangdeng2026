@@ -7,16 +7,20 @@ using UnityEngine.UI;
 
 namespace Spotlight.FreeCafe
 {
-    /// <summary>GM-only guided practice. No narrative completion signals or save progression.</summary>
+    /// <summary>Guided workstation practice shared by GM tools and the first-cafe tutorial.</summary>
     public sealed class FreeCafeWorkstationTutorial : MonoBehaviour
     {
-        public enum Stage { Beans, Grind, Grinding, Grounds, Water, Heat, Heating, Extract, Drain, TakeCup, Pour, DeliverCup, Complete }
+        public enum Stage { Beans, Grind, Grinding, Grounds, Water, Heat, Heating, Extract, Drain, TakeCup, Pour, DeliverCup, Complete, SubmitCup }
         [Serializable] private sealed class CounterState { public List<WorldEntity> entities = new List<WorldEntity>(); public string cup; public bool automatic; }
         private FreeCafeRuntime app;
         private string original, checkpoint, beans, grinder, heater, extractor, filter, water, cup, cupSource, delivery;
         private readonly HashSet<string> existingCups = new HashSet<string>();
         private bool rightStarted;
         private bool essence, wasDragging, restoring;
+        private bool restoreOnStop = true;
+        private bool firstCafeTutorial;
+        private bool originalAutomatic;
+        private bool refreshOnEnable;
         private Stage stage;
         private string error;
         private float errorUntil;
@@ -29,6 +33,8 @@ namespace Spotlight.FreeCafe
         private GameObject retry;
         public bool IsRunning { get; private set; }
         public Stage CurrentStage => stage;
+        public bool IsFirstCafeTutorial => IsRunning && firstCafeTutorial;
+        public bool CanSubmitCup => !IsRunning || !firstCafeTutorial || stage == Stage.SubmitCup;
         private CafeWorld W => app.World;
         public void Initialize(FreeCafeRuntime owner) { app = owner; }
 
@@ -36,15 +42,25 @@ namespace Spotlight.FreeCafe
         private string FindSource(string spec) => W.State.entities.Find(e => e.area == AreaId.Counter && W.Spec(e.specId).Has(Capability.Source) && W.Spec(e.specId).sourceItemId == spec)?.id;
         public bool Begin(bool extraction)
         {
+            if (app == null || app.CafeTutorialActive) return false;
+            return BeginGuidance(extraction, false);
+        }
+
+        public bool BeginFirstCafeTutorial() => BeginGuidance(false, true);
+
+        private bool BeginGuidance(bool extraction, bool firstCafe)
+        {
+            if (app == null || !W.ProductionEnabled || W.State.currentArea != AreaId.Counter
+                || (firstCafe ? app.TutorialInputBlocked : app.InputBlocked) || app.IsDragging) return false;
             if (IsRunning) Stop();
-            if (app == null || !W.ProductionEnabled || W.State.currentArea != AreaId.Counter || app.GameplayBlocked || app.IsDragging) return false;
             beans = FindSource("beans"); water = FindSource("water"); grinder = FindSpec("machine.grinder"); heater = FindSpec("machine.heater");
             extractor = W.State.entities.Find(e => e.area == AreaId.Counter && W.IsPrecisionExtractor(e))?.id;
             filter = FindSpec("container.extractor.filter");
             cupSource = FindSource("cup.large") ?? FindSource("cup.small");
             delivery = W.State.entities.Find(e => e.area == AreaId.Counter && W.Spec(e.specId).Has(Capability.Delivery))?.id;
             if (beans == null || water == null || grinder == null || heater == null || cupSource == null || delivery == null || extraction && (extractor == null || filter == null)) return false;
-            original = Capture(); essence = extraction;
+            original = Capture(); essence = extraction; restoreOnStop = true;
+            firstCafeTutorial = firstCafe; originalAutomatic = W.State.automaticMachines;
             W.State.automaticMachines = false;
             // Only practice equipment is reset; the original counter is restored on exit.
             foreach (string id in new[] { grinder, heater, extractor, filter })
@@ -53,7 +69,8 @@ namespace Spotlight.FreeCafe
                 e.contents.Clear(); e.task = null; e.production = new ProductionEntityState();
             }
             W.State.production.activeCupId = null;
-            foreach (string id in new[] { beans, water, cupSource }) W.Find(id).stock = Math.Max(10, W.Find(id).stock);
+            if (!firstCafe)
+                foreach (string id in new[] { beans, water, cupSource }) W.Find(id).stock = Math.Max(10, W.Find(id).stock);
             cup = null;
             if (essence)
             {
@@ -63,6 +80,7 @@ namespace Spotlight.FreeCafe
             if (essence) W.AttachExtractionFilter(filter, extractor);
             IsRunning = true;
             if (canvas == null) BuildUI();
+            panel.exitButton.gameObject.SetActive(!firstCafeTutorial);
             canvas.gameObject.SetActive(true);
             SetStage(Stage.Beans);
             app.DebugRefreshViews();
@@ -74,25 +92,47 @@ namespace Spotlight.FreeCafe
             foreach (var e in W.State.entities) if (e.area == AreaId.Counter) state.entities.Add(e);
             return JsonUtility.ToJson(state);
         }
-        private void Restore(string json)
+        private void Restore(string json, bool refreshViews = true)
         {
             restoring = true;
-            app.CancelDrag();
+            if (refreshViews) app.CancelDrag();
             var state = JsonUtility.FromJson<CounterState>(json);
             W.State.entities.RemoveAll(e => e.area == AreaId.Counter);
             W.State.entities.AddRange(state.entities);
             W.State.production.activeCupId = state.cup;
             W.State.automaticMachines = state.automatic;
-            app.DebugRefreshViews(); wasDragging = false; restoring = false;
+            if (refreshViews) app.DebugRefreshViews();
+            else refreshOnEnable = true;
+            wasDragging = false; restoring = false;
         }
-        public void Stop()
+        public void Stop() => Stop(true);
+
+        private void Stop(bool refreshViews)
         {
             if (!IsRunning) return;
             IsRunning = false;
-            Restore(original);
+            if (restoreOnStop) Restore(original, refreshViews);
+            else
+            {
+                W.State.automaticMachines = originalAutomatic;
+                if (refreshViews) app.DebugRefreshViews();
+                else refreshOnEnable = true;
+            }
             if (canvas != null) canvas.gameObject.SetActive(false);
         }
-        private void OnDisable() { if (app != null && app.World != null) Stop(); }
+
+        public void Finish(bool keepResult)
+        {
+            restoreOnStop = !keepResult;
+            Stop();
+        }
+        private void OnEnable()
+        {
+            if (!refreshOnEnable || app == null) return;
+            refreshOnEnable = false;
+            app.DebugRefreshViews();
+        }
+        private void OnDisable() { if (app != null && app.World != null) Stop(false); }
         private void OnDestroy() { if (canvas != null) Destroy(canvas.gameObject); }
         public void ReportError(string message) { error = message; errorUntil = Time.unscaledTime + 5; }
         private void SetStage(Stage next)
@@ -103,15 +143,16 @@ namespace Spotlight.FreeCafe
                 existingCups.Clear();
                 foreach (var e in W.State.entities) if (W.IsCup(e)) existingCups.Add(e.id);
             }
-            checkpoint = Capture(); retry.SetActive(next == Stage.Complete);
+            checkpoint = Capture(); retry.SetActive(next == Stage.SubmitCup || next == Stage.Complete && !firstCafeTutorial);
         }
         private bool PourStep => stage == Stage.Extract || stage == Stage.Pour;
         private bool DragStep => stage == Stage.Beans || stage == Stage.Grounds || stage == Stage.Water || PourStep || stage == Stage.TakeCup || stage == Stage.DeliverCup;
-        private string Source => stage == Stage.TakeCup ? cupSource : stage == Stage.DeliverCup ? cup : stage == Stage.Beans ? beans : stage == Stage.Grounds || stage == Stage.Grind || stage == Stage.Grinding ? grinder : stage == Stage.Water ? water : stage == Stage.Pour && essence ? extractor : heater;
+        private string Source => stage == Stage.SubmitCup ? delivery : stage == Stage.TakeCup ? cupSource : stage == Stage.DeliverCup ? cup : stage == Stage.Beans ? beans : stage == Stage.Grounds || stage == Stage.Grind || stage == Stage.Grinding ? grinder : stage == Stage.Water ? water : stage == Stage.Pour && essence ? extractor : heater;
         private string Target => stage == Stage.DeliverCup || stage == Stage.TakeCup ? delivery : stage == Stage.Beans ? grinder : stage == Stage.Grounds && essence || stage == Stage.Extract ? filter : stage == Stage.Pour ? cup : heater;
         public bool AllowClick(string id)
         {
             if (!IsRunning || restoring) return true;
+            if (stage == Stage.SubmitCup && id == delivery) return true;
             if ((stage == Stage.Grind || stage == Stage.Grinding) && id == grinder || stage == Stage.Heat && id == heater) return true;
             ReportError(DragStep ? "此步骤需要按住左键拖动，不是单击。" : "请点击提示标记的设备；加工会自动继续。"); return false;
         }
@@ -145,6 +186,7 @@ namespace Spotlight.FreeCafe
         {
             if (!IsRunning) return;
             if (W.State.currentArea != AreaId.Counter) { Stop(); return; }
+            canvas.gameObject.SetActive(!app.TutorialInputBlocked);
             if (!app.InputBlocked)
             {
                 if (stage == Stage.Beans && Has(grinder, "beans")) SetStage(Stage.Grind);
@@ -160,7 +202,8 @@ namespace Spotlight.FreeCafe
                     var taken = W.State.entities.Find(e => W.IsCup(e) && e.area == AreaId.Counter && !existingCups.Contains(e.id));
                     if (taken != null) { cup = taken.id; SetStage(Stage.Pour); }
                 }
-                if (stage == Stage.DeliverCup && W.ServingCup?.id == cup && !app.IsDragging) SetStage(Stage.Complete);
+                if (stage == Stage.DeliverCup && W.ServingCup?.id == cup && !app.IsDragging)
+                    SetStage(firstCafeTutorial ? Stage.SubmitCup : Stage.Complete);
                 var mouse = Mouse.current;
                 if (PourStep && app.IsDragging && mouse != null && mouse.rightButton.isPressed) rightStarted = true;
                 if (PourStep && rightStarted && mouse != null && !mouse.rightButton.isPressed)
@@ -208,7 +251,8 @@ namespace Spotlight.FreeCafe
                     return $"拖动热水壶 → 上层滤杯，按住右键并上下移动控制流量\n粉 {s.groundsGrams:0} g · 注水 {s.injectedHotWaterMl:0}/{s.idealMl:0} ml · 时间 {s.elapsedSeconds:0.0}/{s.idealSeconds:0.0} s\n稳定小角度倾倒；保持右键直到热水倒空，中途松键会重来";
                 case Stage.Drain: return "等待滤杯滴滤完成。下一步拿下层壶，不是上层滤杯";
                 case Stage.TakeCup: return "按住左键，从杯堆拖出一个空杯，放到桌面空处\n先准备接咖啡的杯子，装好咖啡后再放入交付区";
-                case Stage.DeliverCup: return "按住左键，把装满黑咖啡的杯子拖入交付区\n看到目标高亮后松开左键（本教程不提交订单）";
+                case Stage.DeliverCup: return "按住左键，把装满黑咖啡的杯子拖入交付区\n看到目标高亮后松开左键" + (firstCafeTutorial ? "，然后按铃交付" : "（本练习不提交订单）");
+                case Stage.SubmitCup: return "黑咖啡已放入交付区！点击交付区按铃，或点击「交付」按钮\n交给首位客人后完成新手教程；现在尚未正式营业";
                 case Stage.Pour: return (essence ? "拖动精粹炉下层咖啡壶（自动分离滤杯）" : "拖动通用加热炉") + " → 标记杯子\n按住右键，上下移动使壶旋转倾斜；倒空后才能松开！";
                 default: return "制作完成！是否要再来一次？退出后恢复练习前的工作台";
             }
@@ -221,7 +265,13 @@ namespace Spotlight.FreeCafe
             gesture = panel.gesture; retry = panel.retry;
             trail.Clear(); trail.AddRange(panel.trail);
             panel.exitButton.onClick.AddListener(Stop);
-            panel.retryButton.onClick.AddListener(() => { bool mode = essence; Stop(); Begin(mode); });
+            panel.retryButton.onClick.AddListener(() =>
+            {
+                bool mode = essence, firstCafe = firstCafeTutorial;
+                Stop();
+                if (firstCafe) BeginFirstCafeTutorial();
+                else Begin(mode);
+            });
         }
         private Vector2 ScreenPoint(string id)
         {
@@ -230,10 +280,11 @@ namespace Spotlight.FreeCafe
         private void DrawGuide()
         {
             shade.enabled = DragStep && !app.IsDragging;
-            heading.text = (essence ? "精粹咖啡 · 操作练习" : "黑咖啡 · 操作练习") + (PourStep ? "    |    必须倒空 · 松键重来" : "    |    跟随光效操作");
+            heading.text = (firstCafeTutorial ? "黑咖啡 · 新手教程" : essence ? "精粹咖啡 · 操作练习" : "黑咖啡 · 操作练习") + (PourStep ? "    |    必须倒空 · 松键重来" : "    |    跟随光效操作");
             instruction.text = Description();
-            errorText.text = Time.unscaledTime < errorUntil ? error : "练习不会提交订单 · 退出后恢复原工作台";
-            bool showGesture = DragStep || stage == Stage.Grind || stage == Stage.Grinding || stage == Stage.Heat;
+            errorText.text = Time.unscaledTime < errorUntil ? error : firstCafeTutorial
+                ? "完成黑咖啡并交付首位客人后，解锁正常营业" : "练习不会提交订单 · 退出后恢复原工作台";
+            bool showGesture = DragStep || stage == Stage.Grind || stage == Stage.Grinding || stage == Stage.Heat || stage == Stage.SubmitCup;
             gesture.gameObject.SetActive(showGesture);
             panel.SetMouseMode(PourStep && app.IsDragging, PourStep && app.IsDragging);
             gestureText.text = PourStep && app.IsDragging ? "按住右键\n上下移动旋转" : DragStep ? "按住左键\n拖到目标松开" : stage == Stage.Grinding ? "左键连续点击\n加速研磨" : "单击左键";

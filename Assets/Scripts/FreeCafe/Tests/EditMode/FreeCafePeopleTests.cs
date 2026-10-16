@@ -30,6 +30,48 @@ namespace Spotlight.FreeCafe.Tests
             world.State.currentArea=AreaId.Cafe;world.ActivateBusinessControl("business.start");world.EndDay();
             Assert.That(world.ActivateBusinessControl("business.start").success,Is.True);Assert.That(world.State.day,Is.EqualTo(2));
         }
+        [Test] public void TutorialCustomerHasAClosedShopBlackCoffeeOrder()
+        {
+            Assert.That(world.State.open, Is.False);
+            Assert.That(world.StartTutorialCustomer().success, Is.True);
+            Assert.That(world.State.open, Is.False);
+            Assert.That(world.State.focusedRequestId, Is.EqualTo("tutorial_order"));
+            Assert.That(world.State.requests.Count, Is.EqualTo(1));
+            Assert.That(world.State.requests[0].productId, Is.EqualTo("blackcoffee"));
+            Assert.That(world.Find("customer_0"), Is.Not.Null);
+            world.EndTutorialCustomer();
+            Assert.That(world.Find("customer_0"), Is.Null);
+            Assert.That(world.State.requests, Is.Empty);
+        }
+        [Test] public void TutorialCustomerWaitsWithoutBusinessTimersAndCannotBeDuplicated()
+        {
+            world.StartTutorialCustomer();
+            var request = world.Request(CafeWorld.TutorialOrderId);
+            float patience = request.patience, remaining = world.State.timeRemaining;
+            Assert.That(world.StartTutorialCustomer().success, Is.True);
+            Assert.That(world.State.requests.Count, Is.EqualTo(1));
+            Assert.That(world.StartDay().success, Is.False);
+            world.Tick(1000);
+            Assert.That(request.patience, Is.EqualTo(patience));
+            Assert.That(world.State.timeRemaining, Is.EqualTo(remaining));
+            Assert.That(world.State.todayArrivals, Is.Zero);
+            world.EndTutorialCustomer();
+            world.EndTutorialCustomer();
+            Assert.That(world.State.requests, Is.Empty);
+            Assert.That(world.StartDay().success, Is.True);
+        }
+        [Test] public void ClosedShopSnapshotOnlyAllowsTheOwnedTutorialOrder()
+        {
+            world.StartTutorialCustomer();
+            var snapshot = JsonUtility.FromJson<CafeSnapshot>(JsonUtility.ToJson(world.State));
+            Assert.That(world.Restore(snapshot).success, Is.True);
+            var live = world.State;
+            snapshot = JsonUtility.FromJson<CafeSnapshot>(JsonUtility.ToJson(live));
+            snapshot.requests[0].id = "ordinary_order";
+            snapshot.focusedRequestId = "ordinary_order";
+            Assert.That(world.Restore(snapshot).success, Is.False);
+            Assert.That(world.State, Is.SameAs(live));
+        }
         [Test] public void OrdinaryVisitorsHaveIndependentIdentitiesAndOnlyPlaceOrders()
         {
             world.StartDay();var ids=new HashSet<string>();

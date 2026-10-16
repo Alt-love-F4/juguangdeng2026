@@ -16,6 +16,12 @@
 
 ## 扩展约束
 
+- 大厅 HUD 与制作 HUD 的显示节点、按钮和文字均为可选引用：可以移动、改名、隐藏或删除；缺失引用只停用对应显示或入口，不应阻断世界模拟、其他按钮绑定和场景切换。运行期间已销毁的 Unity 对象同样按缺失处理。
+- 订单按钮与文字数组允许为空、长度不一致或包含空槽，不再要求固定三条订单和四个区域按钮。保留的按钮仍按 Inspector 中的数组索引对应订单或区域。
+- 替换为新节点后，将新组件重新拖入对应 Inspector 字段；脚本不会按旧名称重建节点，也不会自动生成被删除按钮的替代入口。请保留经营运行时及 HUD 控制脚本，并为需要使用的功能留下至少一个有效入口。
+- `playerRoot` / `productionRoot` 的显隐仍由大厅、工作台状态控制；布局、图片和字体由场景编辑。咖啡谱独立 Prefab 的内部绑定仍需保持完整，这不属于大厅/制作 HUD 的可选节点约定。
+- PlayMode 回归：`FreeCafeHudPlayModeTests` 中的 `RemovedPlayerHudWidgetsDoNotBlockStartupOrRemainingControls`、`OrderRowsCanBeSparseAndDifferInLengthWithoutLosingTheirClickBindings`、`RemovedProductionHudWidgetsKeepReturnAndWorldSimulationWorking` 和 `AllHudDisplayReferencesCanBeEmptyWithoutLockingGameplay`，均复用实际 `CoffeeShop` 场景。
+
 `FreeCafeHud` 仅管理玩家展示和玩家可用入口；`FreeCafeProductionHud` 仅管理制作订单/萃取/出品卡片；`FreeCafeGMPanel` 承担开发调试和测试传送。世界实体和 `CafeWorld` 仍然是唯一权威状态。
 
 重建现有场景：`Tools > Free Cafe > Rebuild Player HUD`。该菜单实际复用并保存 `Assets/Scenes/CoffeeShop.unity`，不会创建新场景。
