@@ -6,7 +6,7 @@
     "posY": 373.4375,
     "isImportant": true,
     "defaultAction": "",
-    "extendedActions": "oct07.cafe.s1",
+    "extendedActions": "cafe.enter,oct07.cafe.s1",
     "imgPath": "Art/Map/Locations/location_03",
     "enabled": true
   },

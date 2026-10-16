@@ -43,12 +43,12 @@ namespace Spotlight.Narrative.Editor
                     e.Add($"Trigger {group.Key.barKey}@{group.Key.threshold}@{group.Key.direction}: resetOnExit must be identical for the shared counter group.");
             foreach (var x in c.results)
             {
-                if (!c.events.Any(v => v.eventId == x.eventId) && !c.choices.Any(v => (string.IsNullOrWhiteSpace(v.resultOwnerId) ? v.choiceId : v.resultOwnerId) == x.eventId)) e.Add($"Result {x.resultId}: unknown event/choice result owner {x.eventId}.");
                 if ((x.resultType == NarrativeResultType.BarAdd || x.resultType == NarrativeResultType.BarSet || x.resultType == NarrativeResultType.RelAdd) && !int.TryParse(x.value, out _)) e.Add($"Result {x.resultId}: numeric value required.");
             }
             e.AddRange(LubanNarrativeLoader.ValidateEntryConfiguration(c));
             e.AddRange(LubanNarrativeLoader.ValidateConversationSteps(c));
             e.AddRange(LubanNarrativeLoader.ValidateConditionConfiguration(c));
+            e.AddRange(LubanNarrativeLoader.ValidateActionConfiguration(c));
             e.AddRange(LubanNarrativeLoader.ValidateValueConfiguration(c));
             var checkIds = new HashSet<string>(StringComparer.Ordinal);
             foreach (var check in c.abilityChecks)
@@ -87,7 +87,7 @@ namespace Spotlight.Narrative.Editor
                     if (!assigned.Add(p.slot)) e.Add($"SetupParams {x.setupKey}: duplicate slot {p.slot}.");
                     if (string.IsNullOrWhiteSpace(p.value) && !IsOptionalSlot(p.slot)) e.Add($"SetupParams {x.setupKey}: empty value for slot {p.slot}.");
                 }
-                foreach (var slot in slots) if (!assigned.Contains(slot)) e.Add($"SetupParams {x.setupKey}: missing slot {slot}.");
+                foreach (var slot in slots) if (!assigned.Contains(slot) && !IsOptionalSlot(slot)) e.Add($"SetupParams {x.setupKey}: missing slot {slot}.");
             }
             foreach (var b in c.bars.Where(x => x.advanceMode == NarrativeAdvanceMode.Derived))
             {

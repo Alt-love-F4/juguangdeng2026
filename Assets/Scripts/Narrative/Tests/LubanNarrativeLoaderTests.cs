@@ -17,6 +17,7 @@ namespace Spotlight.Narrative.Tests
                 ["tbplayerconfig"] = new JArray(), ["tbplayerattribute"] = new JArray(),
                 ["tbcreationgroup"] = new JArray(), ["tbcreationoption"] = new JArray(), ["tbcreationbonus"] = new JArray(),
                 ["tbncsaction"] = new JArray(), ["tbncsmapposition"] = new JArray(),
+                ["tbncsitem"] = new JArray(),
                 ["tbncsconditionkey"] = new JArray(), ["tbncsending"] = new JArray(), ["tbncsactionmilestone"] = new JArray(),
                 ["tbncspresentationindex"] = JArray.Parse("[{ 'presentationKey':'talk', 'presentationClass':'Conversation', 'logTag':'' }]"),
                 ["tbncsconversationpage"] = new JArray(), ["tbncsconversationline"] = new JArray(),
@@ -46,6 +47,12 @@ namespace Spotlight.Narrative.Tests
             bar["derivedSources"] = ""; bar["derivedWeights"] = ""; bar["derivedFormula"] = "";
             return bar;
         }
+        private static JObject Item(string key) => new JObject
+        {
+            ["itemKey"] = key, ["nameText"] = "title", ["iconPath"] = "", ["descText"] = "title",
+            ["inventoryOwner"] = "MapInventory"
+        };
+
         private static NarrativeConfiguration Adapt(Dictionary<string, JArray> data) => LubanNarrativeLoader.FromTables(new cfg.Tables(name => data[name]));
 
         [TestCase("Once|Timer|Progress", NarrativeActionType.Daily)]
@@ -58,8 +65,16 @@ namespace Spotlight.Narrative.Tests
         {
             var data = Data();
             data["tbncsaction"].Add(new JObject { ["actionKey"]="action", ["type"]=type, ["mustExecute"]=false,
-                ["nameText"]="title", ["descText"]="title", ["requirements"]="", ["resultEvents"]="", ["durationDays"]=2,
-                ["progressTarget"]=type.Contains("Progress") ? 2 : 0, ["nextActionKey"]="", ["deliveryMode"]="None" });
+                ["nameText"]="title", ["descText"]="title", ["requirements"]="", ["resultEvents"]="", ["durationDays"]=type.Equals("EndDay", StringComparison.OrdinalIgnoreCase) ? 0 : 2,
+                ["replacesLocationActions"]=false, ["focusLocationOnComplete"]=false,
+                ["progressTarget"]=type.Contains("Progress") ? 2 : 0, ["nextActionKey"]="", ["deliveryMode"]="None",
+                ["executionKind"]="", ["navigationKey"]="", ["executeTextKey"]="", ["sortOrder"]=0,
+                ["successResultOwnerId"]="", ["onExpireEvents"]="", ["onExpirePolicy"]="", ["notifyNew"]=true });
+            if (expected == NarrativeActionType.Future)
+            {
+                data["tbncsaction"][0]["nextActionKey"] = "next";
+                data["tbncsaction"].Add(Action("next"));
+            }
             var action = Adapt(data).actions[0];
             Assert.That(action.type, Is.EqualTo(expected));
             Assert.That(action.endDay, Is.EqualTo(type == "EndDay"));
@@ -73,8 +88,11 @@ namespace Spotlight.Narrative.Tests
         {
             var data = Data();
             data["tbncsaction"].Add(new JObject { ["actionKey"]="action", ["type"]=type, ["mustExecute"]=false,
-                ["nameText"]="title", ["descText"]="title", ["requirements"]="", ["resultEvents"]="", ["durationDays"]=2,
-                ["progressTarget"]=0, ["nextActionKey"]="", ["deliveryMode"]="None" });
+                ["nameText"]="title", ["descText"]="title", ["requirements"]="", ["resultEvents"]="", ["durationDays"]=type.Equals("EndDay", StringComparison.OrdinalIgnoreCase) ? 0 : 2,
+                ["replacesLocationActions"]=false, ["focusLocationOnComplete"]=false,
+                ["progressTarget"]=0, ["nextActionKey"]="", ["deliveryMode"]="None",
+                ["executionKind"]="", ["navigationKey"]="", ["executeTextKey"]="", ["sortOrder"]=0,
+                ["successResultOwnerId"]="", ["onExpireEvents"]="", ["onExpirePolicy"]="", ["notifyNew"]=true });
             Assert.Throws<FormatException>(() => Adapt(data));
         }
 
@@ -105,6 +123,7 @@ namespace Spotlight.Narrative.Tests
         public void MapsGeneratedTablesWithoutAnAuthoringAsset()
         {
             NarrativeConfiguration config = Adapt(Data());
+            Assert.That(config.items, Is.Empty);
             Assert.That(config.objects[0].objId, Is.EqualTo("world"));
             Assert.That(config.objects[0].objType, Is.EqualTo(NarrativeObjectType.World));
             Assert.That(config.objects[0].iconPath, Is.EqualTo("icon"));
@@ -239,6 +258,7 @@ Assert.That(slots["bg"], Is.EqualTo("night")); Assert.That(slots["fade"], Is.Equ
         public void MapsItemResultsAndRejectsNonPositiveQuantity(string type, NarrativeResultType expected)
         {
             var data = Data(); data["tbncsresult"][0]["resultType"] = type;
+            data["tbncsitem"].Add(Item("medicine"));
             data["tbncsresult"][0]["target"] = "medicine";
             Assert.That(Adapt(data).results[0].resultType, Is.EqualTo(expected));
             data["tbncsresult"][0]["value"] = "0";
@@ -264,6 +284,248 @@ Assert.That(slots["bg"], Is.EqualTo("night")); Assert.That(slots["fade"], Is.Equ
             Assert.That(c.endings, Has.Count.EqualTo(2));
             Assert.That(c.endings.TrueForAll(x => !x.enabled), Is.True);
             Assert.That(c.conditionKeys.Find(x => x.key == "test.delivery.enabled").initialValue, Is.False);
+        }
+
+        private static JObject Action(string key, string type = "Repeat") => new JObject
+        {
+            ["actionKey"] = key, ["type"] = type, ["mustExecute"] = false,
+            ["nameText"] = "title", ["descText"] = "title", ["requirements"] = "", ["resultEvents"] = "",
+            ["durationDays"] = 0, ["progressTarget"] = 0, ["nextActionKey"] = "", ["deliveryMode"] = "None",
+            ["replacesLocationActions"] = false, ["focusLocationOnComplete"] = false,
+            ["executionKind"] = "", ["navigationKey"] = "", ["executeTextKey"] = "", ["sortOrder"] = 0,
+            ["successResultOwnerId"] = "", ["onExpireEvents"] = "", ["onExpirePolicy"] = "", ["notifyNew"] = true
+        };
+
+        [Test]
+        public void AcceptsMoneyCostAndValidFreeCafeNavigation()
+        {
+            var data = Data();
+            var paid = Action("paid"); paid["requirements"] = "Money(12)";
+            var cafe = Action("cafe"); cafe["executionKind"] = "Navigate"; cafe["navigationKey"] = "cafe.enter";
+            data["tbncsaction"].Add(paid); data["tbncsaction"].Add(cafe);
+            var config = Adapt(data);
+            Assert.That(config.actions[0].requirements, Is.EqualTo("Money(12)"));
+            Assert.That(config.actions[1].navigationKey, Is.EqualTo("cafe.enter"));
+        }
+
+        [TestCase("Money(0)")]
+        [TestCase("Money(2147483647);Money(1)")]
+        public void RejectsInvalidOrOverflowingMoneyCosts(string requirements)
+        {
+            var data = Data(); var action = Action("paid"); action["requirements"] = requirements;
+            data["tbncsaction"].Add(action);
+            Assert.Throws<FormatException>(() => Adapt(data));
+        }
+
+        [Test]
+        public void RejectsInvalidNavigationEndDayAndResultOwnerReferences()
+        {
+            var data = Data(); var cafe = Action("cafe"); cafe["executionKind"] = "Navigate"; cafe["navigationKey"] = "scene/path";
+            data["tbncsaction"].Add(cafe);
+            Assert.Throws<FormatException>(() => Adapt(data));
+
+            data = Data(); var endDay = Action("end", "EndDay"); endDay["executionKind"] = "Event"; endDay["requirements"] = "Money(1)";
+            data["tbncsaction"].Add(endDay);
+            Assert.Throws<FormatException>(() => Adapt(data));
+
+            data = Data(); var owner = Action("reward"); owner["successResultOwnerId"] = "missing";
+            data["tbncsaction"].Add(owner);
+            Assert.Throws<FormatException>(() => Adapt(data));
+        }
+
+        [Test]
+        public void ValidatesResultOwnerCyclesAndMustExecuteReachability()
+        {
+            var data = Data();
+            var reward = Action("reward"); reward["successResultOwnerId"] = "event";
+            var first = Action("first"); first["nextActionKey"] = "second";
+            var second = Action("second"); second["nextActionKey"] = "first";
+            var required = Action("required"); required["mustExecute"] = true;
+            data["tbncsaction"].Add(reward); data["tbncsaction"].Add(first); data["tbncsaction"].Add(second); data["tbncsaction"].Add(required);
+            var error = Assert.Throws<FormatException>(() => Adapt(data));
+            Assert.That(error.Message, Does.Contain("nextActionKey cycle").And.Contain("mustExecute has no enabled map position"));
+        }
+
+        [Test]
+        public void ExchangeResultOwnerDoesNotRequirePlaceholderEvent()
+        {
+            var data = Data();
+            data["tbncsitem"].Add(Item("medicine"));
+            var exchange = Action("buy"); exchange["executionKind"] = "Exchange";
+            exchange["requirements"] = "Money(12)"; exchange["successResultOwnerId"] = "buy.reward";
+            data["tbncsaction"].Add(exchange);
+            data["tbncsresult"].Add(new JObject
+            {
+                ["resultId"] = "buy.item", ["eventId"] = "buy.reward", ["seq"] = 1,
+                ["resultType"] = "ITEM_ADD", ["target"] = "medicine", ["value"] = "2", ["note"] = ""
+            });
+            var config = Adapt(data);
+            Assert.That(config.events.Exists(x => x.eventId == "buy.reward"), Is.False);
+            Assert.That(LubanNarrativeLoader.ValidateActionConfiguration(config), Is.Empty);
+            Assert.That(LubanNarrativeLoader.IsKnownResultOwner(config, "buy.reward"), Is.True);
+        }
+
+        [TestCase("missingOwner")]
+        [TestCase("emptyOwner")]
+        [TestCase("eventChain")]
+        [TestCase("unsupportedResult")]
+        public void RejectsUnsupportedExchangeConfiguration(string invalid)
+        {
+            var data = Data();
+            data["tbncsitem"].Add(Item("medicine"));
+            var exchange = Action("buy"); exchange["executionKind"] = "Exchange";
+            exchange["successResultOwnerId"] = "buy.reward";
+            data["tbncsaction"].Add(exchange);
+            if (invalid != "emptyOwner") data["tbncsresult"].Add(new JObject
+            {
+                ["resultId"] = "buy.result", ["eventId"] = "buy.reward", ["seq"] = 1,
+                ["resultType"] = invalid == "unsupportedResult" ? "REL_ADD" : "ITEM_ADD",
+                ["target"] = "medicine", ["value"] = "2", ["note"] = ""
+            });
+            if (invalid == "missingOwner") exchange["successResultOwnerId"] = "";
+            if (invalid == "eventChain") exchange["resultEvents"] = "event";
+            var error = Assert.Throws<FormatException>(() => Adapt(data));
+            Assert.That(error.Message, Does.Contain(invalid == "emptyOwner" ? "has no Result rows" : "Exchange"));
+        }
+
+        [Test]
+        public void RejectsExpiryEventUsingMapActionEntry()
+        {
+            var data = Data();
+            data["tbncseventdate"].Clear();
+            data["tbncsevent"][0]["eventProperty"] = "entry=MapAction";
+            var timed = Action("timed", "TIMED"); timed["durationDays"] = 2;
+            timed["onExpirePolicy"] = "RunEvents"; timed["onExpireEvents"] = "event";
+            data["tbncsaction"].Add(timed);
+            var error = Assert.Throws<FormatException>(() => Adapt(data));
+            Assert.That(error.Message, Does.Contain("expiry event cannot use MapAction entry"));
+        }
+
+        [Test]
+        public void MapsItemCatalogMetadataWithOptionalIcon()
+        {
+            var data = Data();
+            data["tbtext"].Add(new JObject { ["key"] = "item.description", ["text"] = "Item description" });
+            var medicine = Item("medicine");
+            medicine["iconPath"] = "Icons/medicine";
+            medicine["descText"] = "item.description";
+            data["tbncsitem"].Add(medicine);
+            data["tbncsitem"].Add(Item("tea"));
+
+            var config = Adapt(data);
+            Assert.That(config.items, Has.Count.EqualTo(2));
+            var item = config.items[0];
+            Assert.That(item.itemKey, Is.EqualTo("medicine"));
+            Assert.That(item.nameText, Is.EqualTo("title"));
+            Assert.That(item.iconPath, Is.EqualTo("Icons/medicine"));
+            Assert.That(item.descText, Is.EqualTo("item.description"));
+            Assert.That(item.inventoryOwner, Is.EqualTo(NarrativeInventoryOwner.MapInventory));
+            Assert.That(config.items[1].iconPath, Is.Empty);
+        }
+
+        [TestCase("nameText", "missing")]
+        [TestCase("nameText", "")]
+        [TestCase("descText", "missing")]
+        [TestCase("descText", "")]
+        public void RejectsItemMetadataWithoutValidText(string field, string textKey)
+        {
+            var data = Data();
+            var item = Item("medicine"); item[field] = textKey;
+            data["tbncsitem"].Add(item);
+            Assert.Throws<FormatException>(() => Adapt(data));
+        }
+
+        [Test]
+        public void RejectsUnsupportedCafeSupplyItemOwner()
+        {
+            var data = Data();
+            var item = Item("medicine"); item["inventoryOwner"] = "CafeSupply";
+            data["tbncsitem"].Add(item);
+            var error = Assert.Throws<FormatException>(() => Adapt(data));
+            Assert.That(error.Message, Does.Contain("medicine").And.Contain("CafeSupply"));
+        }
+
+        [TestCase("cost", "missing")]
+        [TestCase("ITEM_ADD", "missing")]
+        [TestCase("ITEM_ADD", "item:missing")]
+        [TestCase("ITEM_REMOVE", "missing")]
+        [TestCase("ITEM_REMOVE", "item:missing")]
+        [TestCase("ITEM_GTE", "missing")]
+        [TestCase("ITEM_GTE", "item:missing")]
+        public void RejectsUnknownItemReferences(string source, string target)
+        {
+            var data = Data();
+            data["tbncsitem"].Add(Item("medicine"));
+            if (source == "cost")
+            {
+                var action = Action("paid"); action["requirements"] = "Item(" + target + ",1)";
+                data["tbncsaction"].Add(action);
+            }
+            else if (source == "ITEM_GTE")
+            {
+                data["tbncscondition"][0]["condType"] = source;
+                data["tbncscondition"][0]["target"] = target;
+                data["tbncscondition"][0]["value"] = "1";
+            }
+            else
+            {
+                data["tbncsresult"][0]["resultType"] = source;
+                data["tbncsresult"][0]["target"] = target;
+                data["tbncsresult"][0]["value"] = "1";
+            }
+            var error = Assert.Throws<FormatException>(() => Adapt(data));
+            Assert.That(error.Message, Does.Contain("missing").And.Contain("item"));
+        }
+
+        [TestCase("Item(medicine,1)", "ITEM_REMOVE", "medicine")]
+        [TestCase("Item(medicine,1)", "ITEM_REMOVE", "item:medicine")]
+        [TestCase("Item(medicine,1)", "ITEM_REMOVE", "ITEM:medicine")]
+        [TestCase("Money(12)", "MONEY_REMOVE", "cafe")]
+        public void RejectsRequirementAndResultChargingTheSameCost(string requirements, string resultType, string target)
+        {
+            var data = Data();
+            data["tbncsitem"].Add(Item("medicine"));
+            var action = Action("paid"); action["requirements"] = requirements;
+            action["resultEvents"] = "event";
+            data["tbncsaction"].Add(action);
+            data["tbncsresult"][0]["resultType"] = resultType;
+            data["tbncsresult"][0]["target"] = target;
+            data["tbncsresult"][0]["value"] = "1";
+            var error = Assert.Throws<FormatException>(() => Adapt(data));
+            Assert.That(error.Message, Does.Contain("duplicates a requirements cost"));
+        }
+
+        [Test]
+        public void FiveMergedCostsAndOrOfAndEligibilityUseSixDisplayedItems()
+        {
+            var data = Data();
+            foreach (string key in new[] { "medicine", "tea", "food", "key" })
+                data["tbncsitem"].Add(Item(key));
+            var action = Action("paid");
+            action["requirements"] = "Item(medicine,1);Item(medicine,2);Item(tea,1);Item(food,1);Money(12);Money(3);ActionPoint(1)";
+            data["tbncsaction"].Add(action);
+            foreach (int group in new[] { 1, 2 })
+            {
+                data["tbncscondition"].Add(new JObject
+                {
+                    ["conditionId"] = "eligible.bar." + group, ["ownerType"] = "actionExecute", ["ownerId"] = "paid",
+                    ["groupIndex"] = group, ["condType"] = "BAR_GTE", ["target"] = "bar:world.calendar", ["value"] = group.ToString()
+                });
+                data["tbncscondition"].Add(new JObject
+                {
+                    ["conditionId"] = "eligible.item." + group, ["ownerType"] = "actionExecute", ["ownerId"] = "paid",
+                    ["groupIndex"] = group, ["condType"] = "ITEM_GTE", ["target"] = "item:medicine", ["value"] = group.ToString()
+                });
+            }
+
+            var config = Adapt(data);
+            Assert.That(LubanNarrativeLoader.ValidateActionConfiguration(config), Is.Empty);
+            Assert.That(config.conditions.FindAll(x => x.ownerType == "actionExecute" && x.groupIndex == 1), Has.Count.EqualTo(2));
+            Assert.That(config.conditions.FindAll(x => x.ownerType == "actionExecute" && x.groupIndex == 2), Has.Count.EqualTo(2));
+
+            action["requirements"] = action.Value<string>("requirements") + ";Item(key,1)";
+            var error = Assert.Throws<FormatException>(() => Adapt(data));
+            Assert.That(error.Message, Does.Contain("exceed 6 displayed items"));
         }
 
         [Test]

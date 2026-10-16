@@ -1,0 +1,94 @@
+﻿编号	类别	名称	状态	制作或确认内容	文案依据	现有资源	配置对应	备注
+CG01	CG／插画	繁忙的圣徒街	待补／可与背景合并	开幕进入王都街道的繁忙全景；可与BG08圣徒街日景共用一张基底。	开幕文案.docx P049		开幕文案；NCS oct07.street.day 仍为无图占位	不重复计算为两张；是否增加行人层由美术决定。
+CG02	CG／插画	主角回头／外围邪恶线条	待补	主角回头；外围若隐若现的邪恶线条向画面中央主角指向。建议人物、背景、线条可分层。	开幕文案.docx P114		当前未找到对应专用图及NCS图片引用	需要先统一主角可视外观；文案没有要求整套主角对话立绘。
+CG03	CG／插画	骑士画像指引贵族老爷	待补	老爷站起凝视玫瑰骑士画像，构图表现骑士指引老爷；同场景沙发后是骑士斩断荆棘走出的巨大画像。	新玫瑰/MA10.09-S1.docx P031-P036、P072-P076；故事.xlsx 时间轴-共通线路!D60		rose.1009.s1 的 portrait 页仍用 rose.club.reception 占位	可复用BG12会客室与道具P02画像；总纲有知觉鉴定解锁描述，触发规则另由策划处理。
+CG04	CG／插画	阿黛尔端试饮盘	待补	咖啡馆门外的阿黛尔端试饮托盘，使用促销场景。	新玫瑰/MA70.10.12-S1.docx P018-P019	已有阿黛尔端咖啡杯常规立绘，不等于试饮盘CG。	rose.1012.s1.conversation；当前仍复用咖啡馆预览背景	不把现有端杯立绘列为本项完成。
+CG05	CG／插画	白色信件被火焰吞噬	待补	一封白色的信被火焰吞噬；可交静态插画，若制作燃烧动画需再确认分层。	王庭教会/MA70.10.20-S1.docx P164	通用闭合信封存在，但没有本场焚信插画。	church.1020.s1.conversation；当前未找到对应专用图绑定	原稿只明确一张图，不自动扩成视频。
+CG06	CG／插画	埃利昂在教堂露台祈福	暂定／原稿pending	公爵在教堂露台祈福；双颊环形圣痕放光，可与金色流光效果分层。	王庭教会/MA70.10.09-S2.docx P014-P017	埃利昂常规立绘存在。	church.1009.s2.conversation；church.cathedral.day 是占位	先由策划／美术确认是否制作；不能列作已批准必画。
+BG01	背景	咖啡馆一楼大堂／日景	已有图／风格定稿待确认	统一正式一楼背景，复用所有白天咖啡馆对话及新手教程大堂。	中立/MA70.10.07-S1.docx P003；文案-新手教程.docx P008-P009	Assets/Art/Background/架空咖啡馆背景_01.png；Assets/Art/Background/SCE_一楼大厅场景底图.png	oct07.cafe.day；FirstDayIntroductionVisuals.background 当前用架空咖啡馆背景_01	存在多套风格，不将文件存在当成美术最终验收。
+BG02	背景	咖啡馆清晨光照差分	已有日景代用／待确认差分	索雷尔到访要求清晨，先决定日景是否可直接复用；如需清晨光照则补变体。	革命联合相关事件/MA70.10.14-S1.docx P003	当前使用BG01日景。	revolution.1014.s1 → oct07.cafe.day	不默认必须独立新画一张。
+BG03	背景	咖啡馆傍晚差分	待补／当前空图占位	暖色夕照、营业结束气氛，可在同一楼大堂底图上做光照差分。	中立/MA70.10.13-S2.docx P144；王庭教会/MA70.10.23-S1.docx P103		neutral.cafe.dusk、church.cafe.dusk	两个key对应同一类图，合并制作。
+BG04	背景	咖啡馆夜景差分	已有调色代用／待确认	夜间咖啡馆；决定现有蓝灰叠色是否满足夜景需求，必要时补灯光层。	革命联合相关事件/MA70.10.07-S2.docx P003、MA70.10.13-S2.docx P004、MA70.10.28-S1.docx P003	架空咖啡馆背景_01.png + tint(0.42,0.48,0.62)	oct07.cafe.night	目前没有独立夜景贴图；不能称为已完成专用夜景。
+BG05	背景	一楼大堂促销纸花装饰	待补差分	在一楼基底增加纸花装饰；宜做可开关装饰层。	新玫瑰/MA70.10.12-S1.docx P003、P066	一楼背景已有；未见纸花装饰成品。	rose.1012.s1 当前仍复用 oct07.cafe.day	纯正文提及杯碟不另增美术任务。
+BG06	背景	二楼会客室／教程杂乱状态	已有基底／待补杂乱差分及接线	正常二楼会客室与教程明确要求的杂乱状态。10.16若二楼开放使用二楼，否则回一楼。	文案-新手教程.docx P009；新玫瑰/MA70.10.16-S1.docx P017	Assets/Art/Background/SCE_二楼会客室场景底图.png；二楼背景.png 等草图	rose.1016.s1 的楼层背景待与开放状态接线	正常会客室不是杂乱状态已完成。
+BG07	背景	三楼宿舍／主角房间清晨	已有相关图／构图和光照待确认、待接线	教程三楼与11.04主角房间清晨可优先复用宿舍图，确认是否需要房间近景。	文案-新手教程.docx P009；王庭教会/MA70.11.04-S1.docx P003	Assets/Art/Background/SCE_ 三楼宿舍场景底图.png	church.1104.s1.background.morning.wake 当前仍是空图占位	已见宿舍走廊视角；不能直接断言等于主角卧室。
+BG08	背景	圣徒街日景／咖啡馆所在街道	待补／与CG01共用候选	繁华商业街，含咖啡馆、书商、裁缝等城市特征；预留横向平移边缘。	中立/MA70.10.07-S1.docx P029；王庭教会/MA70.11.04-S1.docx P253、P290；游戏地图.xlsx 圣诺特城!C7		oct07.street.day；church.1104.s1.background.*.street.*（dusk除外）	地图缩略建筑图不是全屏街景。
+BG09	背景	圣徒街夜晚亮灯	待补	同一街道入夜后灯光亮起；需要灯光内容，单纯日图压暗不能覆盖原文。	王庭教会/MA70.11.04-S1.docx P279、P463		church.1104.s1.background.far.street.dusk / near.street.dusk	远线、近线共用一套。
+BG10	背景	咖啡馆门外／店面	部分暂定／待补	正式店面外景供试饮和街边对话；开幕另有萧条状态（原稿明确暂定）。	开幕文案.docx P055；新玫瑰/MA70.10.12-S1.docx P018、P026		开幕店面、rose.1012.s1门外段未见专用图	把“正常门外”与“萧条差分是否做”分别确认。
+BG11	背景	布塔克俱乐部门口	待补	俱乐部入口场景。	新玫瑰/MA10.09-S1.docx P003		rose.club.exterior	当前是无图中性色。
+BG12	背景	布塔克俱乐部会客室	待补	沙发、纱窗、主位及墙上的玫瑰骑士画像；不可默认普通咖啡馆二楼就是俱乐部。	新玫瑰/MA10.09-S1.docx P031-P036		rose.club.reception	画像见P02，老爷剪影见P05，CG03可复用构图。
+BG13	背景	圣地／圣卷大教堂场景	待补／名称待统一	仪式举行地点，露台与群众活动空间；如CG06取消，基础教堂背景仍有需求。	王庭教会/MA70.10.09-S2.docx P003、P022；游戏地图.xlsx 圣诺特城!C13		church.cathedral.day	原稿称圣地大教堂，地图表称圣卷大教堂，先按同类地点候选合并，名称请策划确认。
+BG14	背景	大堂区露天市场／日景	待补	露天大市场，旧民房、食材摊位；10.08外部街区和11.04市场可共享基底，按镜头需要裁切。	中立/MA70.10.08-S1.docx P003、P086；王庭教会/MA70.11.04-S1.docx P089、P414；游戏地图.xlsx 圣诺特城!C11		neutral.market.day；church.1104.s1.background.far.market / near.market	大堂区不是咖啡馆“大堂”；两者不能混用。
+BG15	背景	大堂区杂货铺内部／日景	待补	柯莱特搬箱、交易发生的杂货铺内部。	中立/MA70.10.08-S1.docx P012		neutral.market.shop.day	木箱仅正文动作，未要求额外动画或道具特写。
+BG16	背景	圣西尔万郊区	待补	城外工人大区，低矮密集房屋和贫民生活环境。	王庭教会/MA70.11.04-S1.docx P138、P362；游戏地图.xlsx 圣诺特城!C9		church.1104.s1.background.far.suburb / near.suburb	地图位置图标已存在，但不是演出背景。
+BG17	背景	旧城区街道	待补	狭窄拥挤街道、旧贵族宅邸转租的贫民居住区。	王庭教会/MA70.11.04-S1.docx P190、P299；游戏地图.xlsx 圣诺特城!C5		church.1104.s1.background.far/near.old.intro、perception 等	各分支重复背景key不要求逐key画一张。
+BG18	背景	吕西尼昂旧宅／门前	待补	窄街尽头的旧式宅邸；锈铁门、庭院杂草、褪色Lusignan家徽。	王庭教会/MA70.11.04-S1.docx P204、P313		church.1104.s1.background.far/near.old.house、estate、heirloom、eviction、aftermath	基础宅邸一套，人物剪影分层见P06、P07；是否需要不同镜头再确认。
+BG19	背景	教会看守所／监狱内部与晨昏变体	待补	监狱或拘押室内部基础图；清晨和傍晚光照。10.23两事件共用。	王庭教会/MA70.10.23-S1.docx P008、P014、P065；MA70.10.23-S2.docx P006		church.detention.interior、church.detention.dawn、church.detention.dusk	不默认新增三个独立地点，按一场景+光照差分排量。
+BG20	背景	闭合咖啡馆门／门外蒂博剪影	待补合成图或分层	闭合的店门，门外一道蒂博·卡隆剪影；可复用店面或室内门体。	王庭教会/MA70.10.14-S2.docx P087	已有 Characters/thibaut/neutral.png 可作剪影参考。	church.1014.s2 尾段仍用咖啡馆背景代用	可以门体+人物影分层，不必再设计新角色。
+BG21	背景	吧台／操作台／出餐视角	已有资源／教程构图待确认	教程要求从大堂吧台切到操作台，并突出操作区域。	文案-新手教程.docx P041、P044-P055	Assets/Art/Background/工作台背景.png、出餐台背景.png；Assets/Art/FreeCafe/Backgrounds/production-workstation.png；FreeCafe物件图	CafeTutorialStep、FreeCafe ArtLibrary、教程面板	经营物件不是全数缺图；教程动画另列FX04。
+P01	道具／纸张	信封闭合、打开与信纸	已有／优先复用	开幕来信、10.07革命线来信、10.14索雷尔信、蒂博出示信封共用基础资源；信内容由文本显示。	开幕文案.docx；革命联合相关事件/MA70.10.07-S2.docx P014、P026；MA70.10.14-S1.docx P008；王庭教会/MA70.10.14-S2.docx P035	Assets/Art/Func/信封/信封出现.png、信封自动打开.png、底图.png；信封.psd	FirstDayLetterPanel；LetterReveal/LetterRead；ReadingPage.imageKey均为空	已核到闭合、打开、信纸素材；焚信CG另列CG05。现有装饰英文与各信件风格是否保留需确认。
+P02	道具／画像	玫瑰骑士像／玫瑰王肖像	待补／两用途可共用候选	俱乐部骑士斩荆棘大画像，以及历史讲述的玫瑰王肖像；同一人物视觉需统一。	新玫瑰/MA10.09-S1.docx P031-P034；MA70.10.11-S1.docx P102、P110-P114		rose.history.portrait 为空图占位；rose.club.reception	可一张基础肖像适配两个场景，也可骑士构图与正式肖像各一版，由美术确定；不直接当两张已定。
+P03	道具／纸张	西尔万名片／法语手写标题	待补版式或字体方案	漂亮手写字体，法语为主标题、中文为译注；原稿获得三张名片，按一套设计复用。文字含Sylvain Vallon、Professeur d’histoire、J’enseigne à l’Université des Murs-Gris及中文译注。	新玫瑰/MA70.10.11-S1.docx P127及邻近名片正文		ReadingPage rose.1011.s1.card.page，imageKey为空	当前文本阅读页不等于手写名片美术；可用纸底+排版，不必整图写死文字。
+P04	道具／叠图	十几个国王币	待补／先查可复用货币图	11.04报酬分支画面中出现十几个钱币；可以一个币样复制成一组。	王庭教会/MA70.11.04-S1.docx P070	未见明确国王币专用图；通用金钱UI不能直接认定满足。	church.1104.s1 fee.quoted 演出挂点待接	图中数量不替代尚未确定的报酬数值。
+P05	道具／剪影	新玫瑰会贵族老爷剪影	已有可复用底图／待接线	隔纱窗看不清容貌的嫡系部下，原文允许挪用贝特朗成年黑色剪影。	新玫瑰/MA10.09-S1.docx P009、P036	Assets/Resources/Characters/bertrand/neutral.png	Object rose.envoy.portraitPath 为空	只是复用视觉，不可把老爷身份改成贝特朗。门口男人原文允许无立绘。
+P06	道具／剪影	旧宅门前一高一矮两个人影	待补一组叠层	模糊两人影；建议分开以支持其中一人离开，配BG18。	王庭教会/MA70.11.04-S1.docx P212、P321		11.04 far/near.old.estate 等	两条路线共用，不新增两个专属角色。
+P07	道具／剪影	被驱逐的一家人	待补一组叠层	一个男人、一个抱孩子的女人、一个老人，剪影即可，配BG18。	王庭教会/MA70.11.04-S1.docx P224、P333		11.04 far/near.old.eviction 等	是群像素材组，不扩为四套表情立绘。
+P08	道具／剪影	教会查店队伍	待补群体层／共用通用NPC	一名前排通用教会人员，后方一群人用剪影；前排复用CH33。	王庭教会/MA70.10.20-S1.docx P012		Object church.inspector / church.inspectors；church.1020.s1	前排通用角色只计一次，后排为人群层。
+P09	道具／帽子	宽檐毡帽	暂定／原稿pending	风吹来的漂亮宽檐毡帽，若采用道具贴图方案则做透明素材。	王庭教会/MA70.10.09-S2.docx P026-P027		帽子选择段；尚无对应图片绑定	和王女日常大头饰并非自动同一素材。
+P10	道具／剪影	教堂四组可点击剪影	暂定／有余力才做	四组互动剪影，其中王女须戴宽檐帽；原文允许退回线性对话。	王庭教会/MA70.10.09-S2.docx P008-P013		church.1009.s2；该精细交互不是当前图片已完成	每组人数、构图未定，不能按四个新专属角色下单。
+P11	道具／报纸	圣诺特之声推荐／广告版式	待确认展示方式	10.18记者事件提到下一刊推荐侧栏或商业广告；如要报纸展示，需刊头、栏框、文字版式。	中立/MA70.10.18-S1.docx P057、P080；世界局势设定案（参考，文案里报纸等地方用）.docx	Assets/Art/FreeCafe/Whitebox/future.newspaper.png 是白盒图。	两条 neutral.1018.s1.notice.* 均imageKey为空	当前配置仅文字通知，原文未明确要求独立报纸插画；不列为已批准必画CG。
+FX01	演出效果	淡入淡出、黑幕、震屏、背景平移	已有程序通道／无独立画图量	复用立绘入退场、黑幕、背景平移；供开幕、夜间结束、圣徒街过渡等。	各事件演出说明；中立/MA70.10.07-S1.docx P014	Assets/Resources/Dialogue/PresentationEffectLibrary.asset	accentFxKey、accentTargetKey；rose.club.blindfold、church.execution.black	黑色占位不代表必须画黑色CG；本轮未做运行验收。
+FX02	演出效果	索雷尔眼部强调／阿黛尔遮眼闪回	待核演出效果	索雷尔眼部局部强调；阿黛尔放大且画框遮住眼睛，闪回结束恢复。	革命联合相关事件/MA70.10.14-S1.docx P098；MA70.10.28-S1.docx P096	阿黛尔底图已有，索雷尔底图缺。	各事件 accentFxKey/目标；现有舞台效果接口	优先用现有立绘裁切+遮罩，通常不需另画一张CG。
+FX03	演出效果	教堂金色流光	暂定／原稿pending	公爵祈福时金光洒下；可提供粒子贴图／光束层，与CG06联动。	王庭教会/MA70.10.09-S2.docx P016-P017		教堂祈福段	不是音效；是否独立素材由美术和特效共同确认。
+FX04	演出效果	教程八类操作演示与高亮	已有经营素材／动画覆盖待核	研磨、烧水、冲泡、装杯、基底、调浓度、甜度、出餐；高亮对应可操作区。	文案-新手教程.docx P044、P051、P055	Assets/Art/FreeCafe/Entities/、Assets/Resources/FreeCafe/ArtLibrary.asset 已有物件与状态图	CafeTutorialStep / FreeCafeTutorialPanel	这是八类演示，不等于要求八段新视频；先复用经营动画。
+FX05	演出效果	送餐／蒂博喝咖啡动作	待核动作素材	通用NPC可不做喝咖啡动作，有交互角色需要；蒂博明确要求喝咖啡动画。	文案-新手教程.docx P067；王庭教会/MA70.10.14-S2.docx P017	蒂博常规静态立绘及杯具已有。	church.1014.s2 服务段；教程交付段	是否采用手臂差分／骨骼／Tween由团队确认，静态图不等于动作完成。
+FX06	演出效果	经营评价烟花／金钱／负面emoji	待核特效素材	优秀评价烟花+金钱效果；负面评价丑化emoji铺满屏幕约5秒；中等无动画。	文案-新手教程.docx P070	现有经营UI不等同于此套评价效果。	教程评价演出，需核实实际实现	不把喝彩声音纳入美术清单。
+FX07	演出效果	仅对话框震动	程序演出项	索雷尔拍打时只震对话框，不能全屏重震替代。	革命联合相关事件/MA70.10.14-S1.docx P212		对应 dialogue accentFxKey / target	不新增静态画图量。
+CH01	角色立绘	洛朗·康多尔	待补底图	常规角色立绘；外貌依据：颧骨处一般模样的圣痕，中年，灰发，瘦削，胡须、不怒自威。	人物.xlsx 人物!A3/C3/H3/J3		当前Object表未登记该ID；旧CharacterCatalog或人物设定存在。	
+CH02	角色立绘	克洛维.康多尔	待补底图	常规角色立绘；外貌依据：额头中心太阳形的圣痕，中年，略微肥胖，脸颊光滑，半百黑发，蓝瞳	人物.xlsx 人物!A4/C4/H4/J4		当前Object表未登记该ID；旧CharacterCatalog或人物设定存在。	
+CH03	角色立绘	雷诺.朗特	不列入本期必画	出场无交互（暂不需要立绘）	人物.xlsx 人物!A5/C5/H5/J5		当前Object表未登记该ID；旧CharacterCatalog或人物设定存在。	人物表明确暂不需要立绘；王后剪影仅有余力时考虑。
+CH04	角色立绘	埃利昂.康多尔	已有底图／差分或接线待核	常规角色立绘；外貌依据：双侧脸颊的对称圆环纹样状的圣痕，英俊阳光，壮年，金发，棕瞳	人物.xlsx 人物!A6/C6/H6/J6	Assets/Resources/Characters/elion/neutral.png	当前Object表未登记该ID；旧CharacterCatalog或人物设定存在。	现有elion底图；当前事件Object church.duke未绑定；同一公爵。
+CH05	角色立绘	阿莉耶诺尔.康多尔/埃莉诺【乔装时的假名】	已有宫廷／日常图；乔装差分待补	常规角色立绘；外貌依据：额头中心太阳形的圣痕，黑发蓝瞳；必须补无圣痕平民装。已有indoor是室内装，不能自动视为合格乔装。	人物.xlsx 人物!A7/C7/H7/J7	Assets/Resources/Characters/alienor/indoor.png；Assets/Resources/Characters/alienor/neutral.png	Object alienor；portraitPath=Characters/alienor/neutral；portraitIndoorPath=Characters/alienor/indoor	与埃莉诺为同一身份；11.04当前对话仍用neutral基准图；宽檐帽剪影见P10。
+CH06	角色立绘	王后	不列入本期必画	NPC（暂不需要立绘，若有余力可简要绘制剪影）	人物.xlsx 人物!A8/C8/H8/J8		当前Object表未登记该ID；旧CharacterCatalog或人物设定存在。	人物表明确暂不需要立绘；王后剪影仅有余力时考虑。
+CH07	角色立绘	贝特朗.康多尔	已有底图／差分或接线待核	常规角色立绘；外貌依据：圣痕形似被利剑划过的伤痕，从额头贯穿左眼到脸颊。正太，白发，蓝瞳；成年剪影（保留特殊圣痕）+第一幕末少年显身两形态；两份图已存在。	人物.xlsx 人物!A9/C9/H9/J9	Assets/Resources/Characters/bertrand/neutral.png；Assets/Resources/Characters/bertrand/revealed.png	当前Object表未登记该ID；旧CharacterCatalog或人物设定存在。	
+CH08	角色立绘	萨德	已有底图／差分或接线待核	常规角色立绘；外貌依据：金棕色短发，面色柔和。面相使人有亲近感。	人物.xlsx 人物!A10/C10/H10/J10	Assets/Resources/Characters/sade/neutral.png	Object sade；portraitPath=Characters/sade/neutral；portraitIndoorPath=空	
+CH09	角色立绘	马米翁	待补底图	常规角色立绘；外貌依据：白色微卷发。棕瞳。有轻微皱纹。成熟型。立领服装。衣服总是整洁无皱，扣子紧扣到最后一颗。	人物.xlsx 人物!A11/C11/H11/J11		当前Object表未登记该ID；旧CharacterCatalog或人物设定存在。	
+CH10	角色立绘	吕西安	待补底图	常规角色立绘；外貌依据：青壮年。棕发，绿瞳。银色方形无框眼镜。	人物.xlsx 人物!A12/C12/H12/J12		当前Object表未登记该ID；旧CharacterCatalog或人物设定存在。	
+CH11	角色立绘	勒苏	已有底图／差分或接线待核	常规角色立绘；外貌依据：皱眉，破烂衣服	人物.xlsx 人物!A13/C13/H13/J13	Assets/Resources/Characters/lesou/neutral.png	当前Object表未登记该ID；旧CharacterCatalog或人物设定存在。	
+CH12	角色立绘	西尔万.瓦隆	待补底图	常规角色立绘；外貌依据：金发，蓝瞳。右眼带单边金色眼镜。穿搭较为正式，白色衬衫+礼服领（或许又称多层荷叶边领）+黑色大衣外套。胸口处常有一个鸢尾花胸针。	人物.xlsx 人物!A14/C14/H14/J14		Object sylvain；portraitPath=空；portraitIndoorPath=空	
+CH13	角色立绘	安托万.马尚	已有底图／差分或接线待核	常规角色立绘；外貌依据：深棕色头发，戴眼镜。绿色条纹外套。	人物.xlsx 人物!A15/C15/H15/J15	Assets/Resources/Characters/antoine/neutral.png	Object antoine；portraitPath=Characters/antoine/neutral；portraitIndoorPath=空	
+CH14	角色立绘	勒费弗尔	待补底图	常规角色立绘；外貌依据：身材高大、体格魁梧，常年的剑术操练使他拥有一身结实的肌肉。他面容方正粗犷，鼻梁高挺，下颌留着不甚整齐的短须。深褐色头发向后梳拢，发际已有些许后退，一双灰蓝色的眼睛深陷在眉骨下，平日神色倦怠，审视他人时却显得格外锐利。	人物.xlsx 人物!A16/C16/H16/J16		当前Object表未登记该ID；旧CharacterCatalog或人物设定存在。	
+CH15	角色立绘	杜瓦尔.米尼耶	不列入本期必画	出场无交互（暂不需要立绘）	人物.xlsx 人物!A17/C17/H17/J17		当前Object表未登记该ID；旧CharacterCatalog或人物设定存在。	人物表明确暂不需要立绘；王后剪影仅有余力时考虑。
+CH16	角色立绘	阿黛尔·米尼耶	已有底图／差分或接线待核	常规角色立绘；外貌依据：15岁，红棕色头发，红瞳。	人物.xlsx 人物!A18/C18/H18/J18	Assets/Resources/Characters/adele/neutral.png	Object adele；portraitPath=Characters/adele/neutral；portraitIndoorPath=Characters/adele/neutral	
+CH17	角色立绘	埃马纽埃尔·索雷尔	待补底图	常规角色立绘；外貌依据：中年，保养得当，身材高挑、面容英俊。深栗色微卷中长发。面部干净无须，眼角有浅淡细纹。浅褐色眼睛，目光明亮敏锐，常带温和而自信的笑容。中产阶级装束。；10.14出场为工人装束，与人物表常规中产装有区别，应列服装差分或先确认当前阶段只做工人装。	人物.xlsx 人物!A19/C19/H19/J19		Object sorel；portraitPath=空；portraitIndoorPath=空	当前NCS id=sorel，旧Catalog id=emmanuel；同一人，勿重复绘制。
+CH18	角色立绘	麻雀	待补底图	常规角色立绘；外貌依据：16岁、身高较矮、精瘦灵巧、棕色短发蓬松凌乱，小麦肤色，眉毛浓密、脸颊与鼻梁有些许雀斑。	人物.xlsx 人物!A20/C20/H20/J20		Object sparrow；portraitPath=空；portraitIndoorPath=空	
+CH19	角色立绘	蒂博·卡隆	已有底图／差分或接线待核	常规角色立绘；外貌依据：人物表尚未细写，须参考角色设定。	人物.xlsx 人物!A21/C21/H21/J21	Assets/Resources/Characters/thibaut/neutral.png	Object church.thibaut；portraitPath=空；portraitIndoorPath=空	现有文件目录thibaut；当前NCS角色church.thibaut的portraitPath为空，需绑定；以“客人”显示不等于换角色。
+CH20	角色立绘	奥克塔夫·韦尔内	待补底图	常规角色立绘；外貌依据：人物表尚未细写，须参考角色设定。	人物.xlsx 人物!A22/C22/H22/J22		当前Object表未登记该ID；旧CharacterCatalog或人物设定存在。	
+CH21	角色立绘	欧仁·迪布瓦	已有底图／差分或接线待核	常规角色立绘；外貌依据：人物表尚未细写，须参考角色设定。	人物.xlsx 人物!A23/C23/H23/J23	Assets/Resources/Characters/eugene/default.png；Assets/Resources/Characters/eugene/neutral.png	当前Object表未登记该ID；旧CharacterCatalog或人物设定存在。	
+CH22	角色立绘	柯莱特·布吕内	待补底图	常规角色立绘；外貌依据：18岁、体型偏娇小，浅棕色头发略带自然卷，通常在脑后盘成简单的发髻，额前留几缕碎发；褐色眼睛；腰间系着小布袋，随身携带手帕与笔记簿。	人物.xlsx 人物!A24/C24/H24/J24		Object colette；portraitPath=空；portraitIndoorPath=空	
+CH23	角色立绘	帕斯卡尔·勒鲁	待补底图	常规角色立绘；外貌依据：结实能干的青年，肤色偏深，工装，黑褐短发、琥珀色眼睛。	人物.xlsx 人物!A25/C25/H25/J25		当前Object表未登记该ID；旧CharacterCatalog或人物设定存在。	另有Assets/Art/Gameplay/Characters/角色设计_男革命印刷工_法式线描.png概念图，但无帕斯卡尔身份绑定证据；可先请美术确认是否复用。
+CH24	角色立绘	玛丽·勒费弗尔（真实的女性身份）/雅克·马尚（男性身份）	待补底图	常规角色立绘；外貌依据：身材高挑修长、面容英气十足；神情自信、举止利落；深亚麻色头发、灰绿瞳，脸型偏窄、眉形平直略显锋利，具有中性美。；玛丽真实女性身份／雅克男性身份的造型差异待确认，避免直接当两个角色。	人物.xlsx 人物!A26/C26/H26/J26		当前Object表未登记该ID；旧CharacterCatalog或人物设定存在。	另有角色设计_女咖啡馆店主_法式线描.png概念图，未证实属于玛丽；不能当该角色已完成。
+CH25	角色立绘	客人A	待补底图	通用客人剪影（人物表建议），服饰参考其阵营/角色设定。	人物.xlsx 人物!A27/C27/H27/J27		Object character.guest_a；portraitPath=空；portraitIndoorPath=空	
+CH26	角色立绘	客人B	待补底图	通用客人剪影（人物表建议），服饰参考其阵营/角色设定。	人物.xlsx 人物!A28/C28/H28/J28		Object character.guest_b；portraitPath=空；portraitIndoorPath=空	
+CH27	角色立绘	客人C	待补底图	通用NPC模板；人物表列出，但未给独立差分或每人独立造型要求。	人物.xlsx 人物!A29/C29/H29/J29		Object character.guest_c；portraitPath=空；portraitIndoorPath=空	可按阵营/服饰复用；先确认哪些进入当前剧情，避免八个通用NPC都按专属角色制作。
+CH28	角色立绘	客人D	待补底图	通用NPC模板；人物表列出，但未给独立差分或每人独立造型要求。	人物.xlsx 人物!A30/C30/H30/J30		Object character.guest_d；portraitPath=空；portraitIndoorPath=空	可按阵营/服饰复用；先确认哪些进入当前剧情，避免八个通用NPC都按专属角色制作。
+CH29	角色立绘	军人A	待补底图	通用NPC模板；人物表列出，但未给独立差分或每人独立造型要求。	人物.xlsx 人物!A31/C31/H31/J31		当前Object表未登记该ID；旧CharacterCatalog或人物设定存在。	可按阵营/服饰复用；先确认哪些进入当前剧情，避免八个通用NPC都按专属角色制作。
+CH30	角色立绘	军人B	待补底图	通用NPC模板；人物表列出，但未给独立差分或每人独立造型要求。	人物.xlsx 人物!A32/C32/H32/J32		当前Object表未登记该ID；旧CharacterCatalog或人物设定存在。	可按阵营/服饰复用；先确认哪些进入当前剧情，避免八个通用NPC都按专属角色制作。
+CH31	角色立绘	军人C	待补底图	通用NPC模板；人物表列出，但未给独立差分或每人独立造型要求。	人物.xlsx 人物!A33/C33/H33/J33		当前Object表未登记该ID；旧CharacterCatalog或人物设定存在。	可按阵营/服饰复用；先确认哪些进入当前剧情，避免八个通用NPC都按专属角色制作。
+CH32	角色立绘	军人D	待补底图	通用NPC模板；人物表列出，但未给独立差分或每人独立造型要求。	人物.xlsx 人物!A34/C34/H34/J34		当前Object表未登记该ID；旧CharacterCatalog或人物设定存在。	可按阵营/服饰复用；先确认哪些进入当前剧情，避免八个通用NPC都按专属角色制作。
+CH33	角色立绘	教会人员通用NPC（监察官／看守）	待补通用底图	10.20前排人员、10.23监察官与看守共用教会人员模板；10.23无需专属立绘或表情差分。	王庭教会/MA70.10.20-S1.docx P012；MA70.10.23-S1.docx P006、P012、P015		Object church.inspector / church.guard 均空图	10.20台词有情绪标签，是否增通用差分另确认；不要因此给10.23角色各做一套。
+CH34	角色立绘	记者／通用市民男性	已有简易占位／待替换	10.18通用市民男性；对话立绘与入座营业形象需一致。	中立/MA70.10.18-S1.docx P002、P008	Assets/Resources/Characters/neutral_reporter/placeholder.png（512×512卡通占位）	Object neutral.reporter：portraitPath空，portraitIndoorPath指向占位；CafeVisit seatedVisualPath空	入座占位存在，不等于对话立绘已完成；可复用客人市民模板。
+CH35	角色立绘	教程顾客老太太／黑色剪影	待确认复用通用顾客	衣着普通、记不住脸的老太太（顾客B）；初次进店先黑影立绘。可用同类型老年女性通用底图染黑，不能用男性占位当完成。	文案-新手教程.docx P015-P016、P067	Assets/Art/Gameplay/DayFlow/NPC/npc_placeholder_customer_01.png 等通用占位；已有经营顾客图	OpeningPresentation教程数据共用 FirstDayIntroductionVisuals；该资产目前未见centerPortrait字段	不能用阿黛尔或其他专属角色代替顾客；此项不新增专属角色身份。
+MAP01	地图图标	咖啡馆	已有图标／地点语义待核	地图上的地点图标；不是剧情全屏背景。	Narrative.xlsx MapPosition!第5行	Assets/Resources/Art/Map/Locations/location_03.png	MapPosition cafe → Art/Map/Locations/location_03	cafe和圣徒街当前共用location_03。若是临时测试点，不为它专门画正式地点。
+MAP02	地图图标	集市	已有图标／地点语义待核	地图上的地点图标；不是剧情全屏背景。	Narrative.xlsx MapPosition!第6行	Assets/Resources/Art/Map/Locations/location_05.png	MapPosition market → Art/Map/Locations/location_05	编号图标已存在，但不能仅凭文件名断言地点题材正确。
+MAP03	地图图标	图书馆	未知头像占位／按地点用途确认	地图上的地点图标；不是剧情全屏背景。	Narrative.xlsx MapPosition!第7行	Assets/Resources/Art/UI/Avatars/Unknown.png	MapPosition library → Art/UI/Avatars/Unknown	cafe和圣徒街当前共用location_03。若是临时测试点，不为它专门画正式地点。
+MAP04	地图图标	临时事件	未知头像占位／按地点用途确认	地图上的地点图标；不是剧情全屏背景。	Narrative.xlsx MapPosition!第8行	Assets/Resources/Art/UI/Avatars/Unknown.png	MapPosition temporary → Art/UI/Avatars/Unknown	cafe和圣徒街当前共用location_03。若是临时测试点，不为它专门画正式地点。
+MAP05	地图图标	圣西尔万郊区	已有图标／地点语义待核	地图上的地点图标；不是剧情全屏背景。	Narrative.xlsx MapPosition!第9行	Assets/Resources/Art/Map/Locations/location_02.png	MapPosition 圣西尔万郊区 → Art/Map/Locations/location_02	编号图标已存在，但不能仅凭文件名断言地点题材正确。
+MAP06	地图图标	圣徒街	已有图标／地点语义待核	地图上的地点图标；不是剧情全屏背景。	Narrative.xlsx MapPosition!第10行	Assets/Resources/Art/Map/Locations/location_03.png	MapPosition 圣徒街 → Art/Map/Locations/location_03	cafe和圣徒街当前共用location_03。若是临时测试点，不为它专门画正式地点。
+MAP07	地图图标	首都法院	已有图标／地点语义待核	地图上的地点图标；不是剧情全屏背景。	Narrative.xlsx MapPosition!第11行	Assets/Resources/Art/Map/Locations/location_06.png	MapPosition 首都法院 → Art/Map/Locations/location_06	编号图标已存在，但不能仅凭文件名断言地点题材正确。
+MAP08	地图图标	市政厅	已有图标／地点语义待核	地图上的地点图标；不是剧情全屏背景。	Narrative.xlsx MapPosition!第12行	Assets/Resources/Art/Map/Locations/location_07.png	MapPosition 市政厅 → Art/Map/Locations/location_07	编号图标已存在，但不能仅凭文件名断言地点题材正确。
+MAP09	地图图标	花园区	已有图标／地点语义待核	地图上的地点图标；不是剧情全屏背景。	Narrative.xlsx MapPosition!第13行	Assets/Resources/Art/Map/Locations/location_09.png	MapPosition 花园区 → Art/Map/Locations/location_09	编号图标已存在，但不能仅凭文件名断言地点题材正确。
+MAP10	地图图标	地图设定中尚未完整对应的地点	已有图集／先核映射	旧城区、圣安托万堡垒、大教堂、灰墙学院以及俱乐部入口；对照现有location_00~09判断复用或补图。	游戏地图.xlsx 圣诺特城!C5/D10/C13/C14；新玫瑰/MA10.09-S1.docx P003	Assets/Resources/Art/Map/Locations/location_00.png 至 location_09.png；原始地点图标图集	当前MapPosition只有9行，不能把地图表全部地点认定已配置	圣安托万堡垒等仅设定提及，未明确要求当前事件全屏场景；不自动扩画。
+MAP11	地图图标	圣诺特城总地图	已有图／地点对应待核	沿卢米恩河分北岸、河心岛、南岸；保留现有总地图，核对各地点标牌位置。	游戏地图.xlsx 圣诺特城!B2等	Assets/Art/Map/GeneratedUI/mapBackgroundSprite.png；Assets/Art/Map/新地图系统/地图/	Assets/Resources/MapVisualTheme.asset	旧city_map_placeholder仅流程占位，不能据此说项目没有正式地图。
+REF01	设定参考	五方标志／阵营徽记	文案内已有参考图／导出接入待确认	沸点咖啡馆、奥尔狄亚王庭、圣诺教会、新玫瑰会、革命联合。	势力与派别设定案.xlsx Sheet1!C3-C7	原Excel内嵌5张徽记，见“文案内嵌参考图预览.jpg”。	当前Object及MapPosition没有明确引用这些内嵌图	已见参考图不等于需要重新设计；是否用于UI和是否提供透明源文件待确认。
+REF02	设定参考	故事纲要结局与世界设定插画	尚无明确画面订单	故事、思路、世界局势、圣痕学里的事件或道具描述，不自动转为每段一张CG；以后补到具体演出说明再追加。	故事.xlsx；思路构想.xlsx；世界局势设定案（参考，文案里报纸等地方用）.docx；圣痕学.docx		Ending、旧模板事件、CutScenePanel不等于已有视频需求	两份11.05施工稿只有标题，10.29稿正文为空，没有可据以制作的新画面细节，见逐文件覆盖表。

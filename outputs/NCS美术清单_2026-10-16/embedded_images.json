@@ -1,0 +1,100 @@
+[
+  {
+    "file": "人物.xlsx",
+    "id": "ID_CF676FA0FB984D7A95E813749A444A46",
+    "zip_path": "xl/media/image1.png",
+    "sha256": "f10e8b75df315fe4577a7c5cfb3be440877e964f428b66a29a2ff4277e68fb86",
+    "exact_matches": []
+  },
+  {
+    "file": "人物.xlsx",
+    "id": "ID_D71A55F4B5DD4F9C9C7C6D46D70AF468",
+    "zip_path": "xl/media/image2.png",
+    "sha256": "e64906e6c19e3ee7cc968a305ae42bc71549b12e502bea810d23e6f40ac0f18e",
+    "exact_matches": []
+  },
+  {
+    "file": "人物.xlsx",
+    "id": "ID_2D51C02E68ED4310965493B7DB5799FE",
+    "zip_path": "xl/media/image3.png",
+    "sha256": "a2266ee972081085827cee6e648919e1c1d83fd069d8a78a2e8b14ea38b19009",
+    "exact_matches": []
+  },
+  {
+    "file": "人物.xlsx",
+    "id": "ID_44C8934B024B40C6B6AAD099BBFE948D",
+    "zip_path": "xl/media/image4.png",
+    "sha256": "29e1b93db30b59a5cbcc2bd1ca0bef9e993317970e11d39a7a2b5fefd1fda1a9",
+    "exact_matches": []
+  },
+  {
+    "file": "人物.xlsx",
+    "id": "ID_88B7E2412C314B8E8D3FED07EFF15159",
+    "zip_path": "xl/media/image5.png",
+    "sha256": "141752545a3e53ad12e4a9eb3ca0069a7f66b18187112658becc15e79466324a",
+    "exact_matches": []
+  },
+  {
+    "file": "人物.xlsx",
+    "id": "ID_2C42773FF4C5493D96D0CCBDDA75BFC3",
+    "zip_path": "xl/media/image6.png",
+    "sha256": "cb679ad8694fcd833cd1cc7ef52d7b72ac8e2febdd61ac694ea16279cca95146",
+    "exact_matches": []
+  },
+  {
+    "file": "人物.xlsx",
+    "id": "ID_71B9BA7B14804C89A2D79209F253924F",
+    "zip_path": "xl/media/image7.png",
+    "sha256": "0f79d6a24ccf07c96a1fdae60f506474bfdb28d977194fc9eb329bbec40698f6",
+    "exact_matches": []
+  },
+  {
+    "file": "人物.xlsx",
+    "id": "ID_F29EE44B904D4FA1ADF2B674D43791BE",
+    "zip_path": "xl/media/image8.png",
+    "sha256": "7f4f540041a1101d7f23cd396218e24c517235bcfa008c1167b09c417a7e3de4",
+    "exact_matches": []
+  },
+  {
+    "file": "人物.xlsx",
+    "id": "ID_306F413ADB784FD6A630F2F3A46339CC",
+    "zip_path": "xl/media/image9.png",
+    "sha256": "8711b247d969a6d1be2d3baaa1666917191d578d90a5176bd73bfb30346f743b",
+    "exact_matches": []
+  },
+  {
+    "file": "势力与派别设定案.xlsx",
+    "id": "ID_E62FF0AED1314F07AFC597ADCA70BD3D",
+    "zip_path": "xl/media/image1.jpeg",
+    "sha256": "51cb114426b733939a233473f3a951f47800afcbd3684647ae4b22b76e4e5c6b",
+    "exact_matches": []
+  },
+  {
+    "file": "势力与派别设定案.xlsx",
+    "id": "ID_A3CB36F883324257AF0B2070A66D986A",
+    "zip_path": "xl/media/image2.jpeg",
+    "sha256": "43d9393f5ee87e0a407c09141389930eb5a15fc520b1eeb0ebfe70c675dedeb2",
+    "exact_matches": []
+  },
+  {
+    "file": "势力与派别设定案.xlsx",
+    "id": "ID_AEEC456A62614B479DF8855CB141E3FC",
+    "zip_path": "xl/media/image3.jpeg",
+    "sha256": "b33daa32f28a8443212229d630f356139eb3c5bb62ea7a0210b26508128752b3",
+    "exact_matches": []
+  },
+  {
+    "file": "势力与派别设定案.xlsx",
+    "id": "ID_880A6E711F224C15A2AB6C4CE6E1C762",
+    "zip_path": "xl/media/image4.png",
+    "sha256": "d981c26a1b86352532cf795135d876f1f62dd443e8c8ba609a9b147ae9d19aee",
+    "exact_matches": []
+  },
+  {
+    "file": "势力与派别设定案.xlsx",
+    "id": "ID_D739342BD2F04ACFBE42CDFC005CBD2B",
+    "zip_path": "xl/media/image5.jpeg",
+    "sha256": "4cd3f7746022f720dd4da21580f2a065f4ff2488fdc393d9dfe0f7ddfbc7aacc",
+    "exact_matches": []
+  }
+]

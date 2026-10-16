@@ -33,6 +33,13 @@ namespace Spotlight.Narrative
         public void NotifyChanged() => Changed?.Invoke();
     }
 
+    /// <summary>Optional notification batching for a money account; state changes still apply immediately.</summary>
+    public interface INarrativeMoneyNotificationScope
+    {
+        /// <summary>Coalesces change notifications until the last nested scope is disposed; does not roll back changes.</summary>
+        IDisposable DeferNotifications();
+    }
+
     /// <summary>Atomic strict balance commit, verified against the preflight balance.</summary>
     public interface INarrativeMoneyAccount
     {

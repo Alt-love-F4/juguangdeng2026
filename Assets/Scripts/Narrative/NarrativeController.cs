@@ -884,19 +884,64 @@ namespace Spotlight.Narrative
             {
                 // Freeze eligibility before any result mutates formal state; Inline guards only read visited snapshots.
                 batch.RemoveAll(result => !EvaluateConditions("result", result.resultId, request.Context));
-                PreflightResults(batch, out var boolValues, out var itemCounts, out int? moneyBefore, out int? moneyAfter);
-                BeginOperation();
-                if (moneyBefore.HasValue && !MoneyAccount.TryCommit(moneyBefore.Value, moneyAfter.Value, out string moneyError))
-                    throw new InvalidOperationException("Money batch rejected: " + moneyError);
-                // Both stores expose only the completed bool/item batch to change listeners.
-                using (inventory?.DeferNotifications())
+                NarrativeActionRootCommit actionCommit = ActionRootCommit?.Invoke(request.Event.eventId);
+                long actionPoints = 0;
+                if (actionCommit != null)
                 {
+                    if (!(actionCommit.canCommit?.Invoke() ?? true)) throw new InvalidOperationException("Action eligibility changed during presentation.");
+                    actionPoints = actionCommit.costs.Where(c => c.type == NarrativeActionRequirementType.ActionPoint).Sum(c => (long)c.value);
+                    if (actionCommit.points == null || actionPoints > actionCommit.points.Current)
+                        throw new InvalidOperationException("Insufficient action points at root commit.");
+                    batch.InsertRange(0, ActionCostResults(actionCommit.costs));
+                    if (!string.IsNullOrWhiteSpace(actionCommit.resultOwner))
+                    {
+                        if (!resultsByEvent.TryGetValue(actionCommit.resultOwner, out var actionResults))
+                            throw new InvalidOperationException("Unknown action success result owner: " + actionCommit.resultOwner);
+                        foreach (var result in actionResults)
+                            if (!batch.Contains(result) && EvaluateConditions("result", result.resultId, request.Context)) batch.Add(result);
+                    }
+                }
+                PreflightResults(batch, out var boolValues, out var itemCounts, out int? moneyBefore, out int? moneyAfter);
+                if (actionCommit != null && moneyBefore.HasValue && !(MoneyAccount is INarrativeMoneyNotificationScope))
+                    throw new InvalidOperationException("Money provider cannot defer action transaction notifications.");
+                int actionPointsBefore = actionCommit?.points?.Current ?? 0;
+                bool rootCommitted = false;
+                BeginOperation();
+                try
+                {
+                using ((MoneyAccount as INarrativeMoneyNotificationScope)?.DeferNotifications())
+                using (inventory?.DeferNotifications())
+                using (actionCommit?.points?.DeferNotifications())
+                using (state.DeferConditionNotifications())
+                {
+                    if (moneyBefore.HasValue && !MoneyAccount.TryCommit(moneyBefore.Value, moneyAfter.Value, out string moneyError))
+                        throw new InvalidOperationException("Money batch rejected: " + moneyError);
+                    if (actionCommit != null && actionCommit.points.Current < actionPoints)
+                    {
+                        if (moneyBefore.HasValue && !MoneyAccount.TryCommit(moneyAfter.Value, moneyBefore.Value, out string restoreError))
+                            throw new InvalidOperationException("Cannot restore rejected action wallet: " + restoreError);
+                        actionCommit.points.Set(actionPointsBefore);
+                        throw new InvalidOperationException("Action points changed during wallet commit.");
+                    }
                     if (itemCounts.Count > 0 && !inventory.TryApplyCounts(itemCounts)) throw new InvalidOperationException("Inventory rejected validated result batch.");
                     state.CommitConditions(boolValues);
+                    foreach (var result in batch) ApplyResult(result);
+                    state.MarkEventHappened(request.Event.eventId);
+                    CommitCandidate(request);
+                    if (actionCommit != null)
+                    {
+                        actionCommit.points.TryConsume((int)actionPoints);
+                        actionCommit.committed?.Invoke();
+                    }
+                    rootCommitted = true;
                 }
-                foreach (var result in batch) ApplyResult(result);
-                state.MarkEventHappened(request.Event.eventId);
-                CommitCandidate(request);
+                }
+                catch (Exception notificationError) when (rootCommitted)
+                {
+                    // Payment, results and root cursor already committed; observer failures
+                    // cannot report a failed root and replay its effects on retry.
+                    Debug.LogException(notificationError);
+                }
                 if (IsCheckpointRoot(request)) { checkpoint = null; checkpointResuming = false; }
                 activePresentation = false;
                 activeAbilityCheck = null;
@@ -910,6 +955,9 @@ namespace Spotlight.Narrative
             }
             catch (Exception error)
             {
+                // Release this root's transaction before an action failure handler closes its
+                // outer operation. Otherwise that handler closes the wrong nested operation.
+                while (operationDepth > entryOperationDepth) EndOperation();
                 Debug.LogError($"[NCS] Event {request.Event.eventId} result transaction failed: {error.Message}");
                 try { EventFailed?.Invoke(request.Event.eventId, error.Message); }
                 catch (Exception listenerError) { Debug.LogException(listenerError); }

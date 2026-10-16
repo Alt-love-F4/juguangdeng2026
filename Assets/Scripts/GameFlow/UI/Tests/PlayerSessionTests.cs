@@ -82,7 +82,10 @@ namespace Spotlight.GameFlow.Tests
             Assert.That(narrative.Controller.AbilityReader, Is.Not.Null);
             Assert.That(narrative.Controller.AbilityReader("perception"), Is.EqualTo((true, 2)));
 
+            var previousController = narrative.Controller;
             narrative.ResetSession();
+            Assert.That(narrative.Controller, Is.Not.SameAs(previousController));
+            Assert.That(narrative.Presenter, Is.Null, "Reset must keep the injected presenter instead of creating runtime UI.");
             coordinator.Bind(narrative, world, days);
             narrative.SetBar("player.perception", 7);
             Assert.That(narrative.Controller.AbilityReader("perception"), Is.EqualTo((true, 7)));

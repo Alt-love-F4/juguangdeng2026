@@ -22,6 +22,7 @@ namespace Spotlight.Narrative
         public List<NarrativeTextDefinition> texts = new List<NarrativeTextDefinition>();
         public List<NarrativeEventDateDefinition> eventDates = new List<NarrativeEventDateDefinition>();
         public List<NarrativeObjectDefinition> objects = new List<NarrativeObjectDefinition>();
+        public List<NarrativeItemDefinition> items = new List<NarrativeItemDefinition>();
         public List<NarrativeBarDefinition> bars = new List<NarrativeBarDefinition>();
         public List<NarrativeTriggerDefinition> triggers = new List<NarrativeTriggerDefinition>();
         public List<NarrativeEventDefinition> events = new List<NarrativeEventDefinition>();

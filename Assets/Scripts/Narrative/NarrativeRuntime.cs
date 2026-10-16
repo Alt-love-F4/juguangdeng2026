@@ -164,7 +164,7 @@ namespace Spotlight.Narrative
         {
             runtimePresenter?.Dispose();
             runtimePresenter = null;
-            injectedPresenter = null;
+            // Keep the caller-owned presentation dependency when rebuilding session state.
             controller?.UnbindValueProviders();
             controller = null;
             actionController = null;

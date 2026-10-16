@@ -95,6 +95,14 @@
     <var name="tags" type="string"/>
   </bean>
   <table name="TbNcsObject" value="NcsObjectEntry" mode="map" index="objId" input="Object@Narrative/Narrative.xlsx"/>
+  <bean name="NcsItemEntry">
+    <var name="itemKey" type="string"/>
+    <var name="nameText" type="string#ref=TbText?"/>
+    <var name="iconPath" type="string"/>
+    <var name="descText" type="string#ref=TbText?"/>
+    <var name="inventoryOwner" type="string#set=MapInventory,CafeSupply"/>
+  </bean>
+  <table name="TbNcsItem" value="NcsItemEntry" mode="map" index="itemKey" input="Item@Narrative/Narrative.xlsx"/>
   <bean name="NcsActionEntry">
     <var name="actionKey" type="string"/>
     <var name="type" type="string#set=REPEAT,DAILY,ONCE,TIMED,PROGRESS,FUTURE"/>
@@ -109,6 +117,14 @@
     <var name="deliveryMode" type="string#set=None,Cumulative,Consecutive"/>
     <var name="replacesLocationActions" type="bool"/>
     <var name="focusLocationOnComplete" type="bool"/>
+    <var name="executionKind" type="string#set=Event,Navigate,Exchange,Delivery,EndDay"/>
+    <var name="navigationKey" type="string"/>
+    <var name="executeTextKey" type="string#ref=TbText?"/>
+    <var name="sortOrder" type="int"/>
+    <var name="successResultOwnerId" type="string"/>
+    <var name="onExpireEvents" type="string"/>
+    <var name="onExpirePolicy" type="string#set=Remove,RunEvents"/>
+    <var name="notifyNew" type="bool"/>
   </bean>
   <table name="TbNcsAction" value="NcsActionEntry" mode="map" index="actionKey" input="Action@Narrative/Narrative.xlsx"/>
   <bean name="NcsMapPositionEntry">
@@ -276,7 +292,7 @@
   <table name="TbNcsResult" value="NcsResultEntry" mode="map" index="resultId" input="Result@Narrative/Narrative.xlsx"/>
   <bean name="NcsConditionEntry">
     <var name="conditionId" type="string"/>
-    <var name="ownerType" type="string#set=event,choice,action,ending,result"/>
+    <var name="ownerType" type="string#set=event,choice,action,actionExecute,ending,result"/>
     <var name="ownerId" type="string"/>
     <var name="groupIndex" type="int"/>
     <var name="condType" type="string#set=BOOL_EQ,ITEM_GTE,ACTION_PROGRESS_GTE,ACTION_COMPLETED,BAR_GTE,BAR_LTE,BAR_BETWEEN,REL_GTE,EVENT_HAPPENED,EVENT_NOT_HAPPENED,ATTRIBUTE_GTE,PRESENTATION"/>

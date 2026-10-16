@@ -7,14 +7,23 @@ using UnityEngine;
 namespace Spotlight.Narrative
 {
     public enum NarrativeActionType { Repeat, Daily, Once, Timed, Progress, Future }
+    public enum NarrativeActionExecutionKind { Event, Navigate, Exchange, Delivery, EndDay }
     public enum NarrativeDeliveryMode { None, Cumulative, Consecutive }
-    public enum NarrativeActionRequirementType { Item, Bar, Condition, NotCondition, ActionPoint }
+    public enum NarrativeActionRequirementType { Item, Bar, Condition, NotCondition, ActionPoint, Money }
 
     [Serializable]
     public sealed class NarrativeActionDefinition
     {
         public string actionKey;
         public NarrativeActionType type = NarrativeActionType.Repeat;
+        public NarrativeActionExecutionKind executionKind = NarrativeActionExecutionKind.Event;
+        public string navigationKey;
+        public string executeTextKey;
+        public int sortOrder;
+        public string successResultOwnerId;
+        public List<string> onExpireEvents = new List<string>();
+        public string onExpirePolicy = "Remove";
+        public bool notifyNew = true;
         public NarrativeDeliveryMode deliveryMode;
         public List<NarrativeActionMilestoneDefinition> milestones = new List<NarrativeActionMilestoneDefinition>();
         public bool IsDelivery => deliveryMode != NarrativeDeliveryMode.None;
@@ -71,6 +80,7 @@ namespace Spotlight.Narrative
             NarrativeActionRequirementType.Bar => "Bar(" + key + "," + op + "," + value + ")",
             NarrativeActionRequirementType.Condition => "Cond(" + key + ")",
             NarrativeActionRequirementType.NotCondition => "NotCond(" + key + ")",
+            NarrativeActionRequirementType.Money => "Money(" + value + ")",
             _ => "ActionPoint(" + value + ")"
         };
     }
@@ -84,6 +94,8 @@ namespace Spotlight.Narrative
         public string currentValue;
         public string requiredValue;
     }
+
+    public enum NarrativeActionOperationState { Idle, Checking, Presenting, Committing, Committed, Failed, Cancelled }
 
     [Serializable]
     public sealed class NarrativeActionStateSnapshot
@@ -100,11 +112,29 @@ namespace Spotlight.Narrative
         public List<string> retired = new List<string>();
         public List<NarrativeActionCounterValue> items = new List<NarrativeActionCounterValue>();
         public string executingAction;
+        public bool rootCostCommitted;
+        public bool submissionRecorded;
+        public bool successResultsCommitted;
+        public string activeOperationId;
         public string currentEvent;
         public List<string> pendingEvents = new List<string>();
         public List<string> dueActions = new List<string>();
+        public string expiryAction;
+        public string currentExpiryEvent;
+        public List<string> pendingExpiryEvents = new List<string>();
         public List<string> seenActionInstances = new List<string>();
         public List<string> pendingFocusPositions = new List<string>();
+        public long operationSequence;
+        public List<NarrativeActionReceipt> receipts = new List<NarrativeActionReceipt>();
+    }
+
+    [Serializable]
+    public sealed class NarrativeActionReceipt
+    {
+        public string operationId;
+        public string actionKey;
+        public int day;
+        public bool submissionOnly;
     }
 
     [Serializable] public sealed class NarrativeActionMountValue
@@ -139,6 +169,26 @@ namespace Spotlight.Narrative
         public int Current { get; private set; }
         public int Max { get; private set; }
         public event Action<int, int> Changed;
+        private int notificationDepth;
+        private int notificationStart;
+
+        internal IDisposable DeferNotifications()
+        {
+            if (notificationDepth++ == 0) notificationStart = Current;
+            return new PointNotificationScope(this);
+        }
+        private sealed class PointNotificationScope : IDisposable
+        {
+            private NarrativeActionPoints owner;
+            public PointNotificationScope(NarrativeActionPoints owner) { this.owner = owner; }
+            public void Dispose()
+            {
+                if (owner == null) return;
+                var target = owner; owner = null;
+                if (--target.notificationDepth == 0 && target.notificationStart != target.Current)
+                    target.Changed?.Invoke(target.notificationStart, target.Current);
+            }
+        }
 
         public NarrativeActionPoints(int max = 5)
         {
@@ -167,7 +217,7 @@ namespace Spotlight.Narrative
             if (next == Current) return;
             int old = Current;
             Current = next;
-            Changed?.Invoke(old, next);
+            if (notificationDepth == 0) Changed?.Invoke(old, next);
         }
     }
 
@@ -196,10 +246,13 @@ namespace Spotlight.Narrative
                     case "NotCond":
                         throw new FormatException("Read-only action requirements must use Condition rows with ownerType=action: " + token);
                     case "ActionPoint": Exact(args, 1, token); result.Add(new NarrativeActionRequirement { type = NarrativeActionRequirementType.ActionPoint, value = PositiveInt(args[0], token) }); break;
+                    case "Money": Exact(args, 1, token); result.Add(new NarrativeActionRequirement { type = NarrativeActionRequirementType.Money, value = PositiveInt(args[0], token) }); break;
                     default: throw new FormatException("Unknown action requirement: " + name);
                 }
             }
-            if (result.Count > 6) throw new FormatException("An action cannot have more than 6 requirements.");
+            var displayed = new HashSet<string>(StringComparer.Ordinal);
+            foreach (var requirement in result) displayed.Add(requirement.type + ":" + (requirement.type == NarrativeActionRequirementType.Item ? requirement.key : string.Empty));
+            if (displayed.Count > 6) throw new FormatException("An action cannot have more than 6 requirements.");
             return result;
         }
 

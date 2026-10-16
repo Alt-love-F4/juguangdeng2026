@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using NUnit.Framework;
 using UnityEngine;
 using UnityEngine.TestTools;
@@ -109,7 +110,7 @@ namespace Spotlight.Narrative.Tests
             Assert.That(p.Played, Is.EqualTo(new[] { "hold", "once", "hold" }));
         }
 
-        [Test] public void ConditionsFreezeAtEnqueueAndDuplicateCallbacksSettleOnce()
+        [Test] public void IndependentConditionsRecheckAtStartAndDuplicateCallbacksSettleOnce()
         {
             Event("first", priority: 10); Event("second");
             Condition("second", "BAR_GTE", "bar:b", "1");
@@ -118,9 +119,13 @@ namespace Spotlight.Narrative.Tests
             var p = new Presenter(); var c = new NarrativeController(config, p);
             c.SetBar("b", 1); c.SetBar("a", 1); c.EndTurn();
             Action first = p.Callbacks[0]; first(); first();
+            Assert.That(p.Played, Is.EqualTo(new[] { "first" }), "A captured Cross does not bypass an independent prerequisite invalidated by the preceding root.");
+            Assert.That(Bar(c, "b"), Is.Zero);
+            Assert.That(c.WaitingCandidates.Any(candidate => candidate.eventId == "second"), Is.True, "The earned Cross remains retryable.");
+            c.SetBar("b", 1); c.ResumePendingEvents();
             Assert.That(p.Played, Is.EqualTo(new[] { "first", "second" }));
             p.Complete(); p.Complete();
-            Assert.That(Bar(c, "b"), Is.EqualTo(2)); Assert.That(Bar(c, "world.calendar"), Is.EqualTo(2));
+            Assert.That(Bar(c, "b"), Is.EqualTo(3)); Assert.That(Bar(c, "world.calendar"), Is.EqualTo(2));
         }
 
         [Test] public void SameEventIsDeduplicatedAcrossSameTurnAndChain()

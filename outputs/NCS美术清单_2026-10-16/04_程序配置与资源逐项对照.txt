@@ -1,0 +1,667 @@
+﻿NCS配置与现有资源逐项对照（2026-10-16）
+源表：Assets/ConfigTables/Data/Narrative/Narrative.xlsx；文本表：Assets/ConfigTables/Data/Shared/Text.xlsx
+生成配置：Assets/Settings/Resources/Luban/*.json
+美术字段Excel/JSON对照：本次检查0处差异。读取覆盖详见excel_art_rows.json与excel_json_differences.json。
+此为静态文件/绑定核对，不代表Unity运行通过或图片最终验收。
+
+一、全部43个ConversationPage背景值（同图重复key已列明）
+
+KEY: Art/Gameplay/DayFlow/city_map_placeholder
+  直接Resources路径：Assets/Resources/Art/Gameplay/DayFlow/city_map_placeholder.png
+  引用页：arrival.start.street；arrival.start.cafe
+
+KEY: Art/Gameplay/DayFlow/phase_pre_business
+  直接Resources路径：Assets/Resources/Art/Gameplay/DayFlow/phase_pre_business.png
+  引用页：arrival.reply.1.page；arrival.reply.2.page；arrival.agent.page；arrival.insight.page；arrival.request.page；arrival.decision.page；arrival.refuse.page；arrival.accept.welcome
+
+KEY: Art/Gameplay/DayFlow/phase_night_choice
+  直接Resources路径：Assets/Resources/Art/Gameplay/DayFlow/phase_night_choice.png
+  引用页：arrival.accept.malice
+
+KEY: oct07.cafe.day
+  登记状态：placeholder=0；贴图=Assets/Art/Background/架空咖啡馆背景_01.png；tint={'r': 1, 'g': 1, 'b': 1, 'a': 1}
+  引用页：oct07.s1.cafe；revolution.1014.s1.opening；revolution.1014.s1.before_letter；revolution.1014.s1.visitor；revolution.1014.s1.cafe_plain；revolution.1014.s1.cafe_strange；revolution.1014.s1.wisdom4；revolution.1014.s1.political_lead；revolution.1014.s1.stance_neutral；revolution.1014.s1.stance_rose；revolution.1014.s1.stance_revolution_a；revolution.1014.s1.perception6；revolution.1014.s1.stance_revolution_b；revolution.1014.s1.stance_church；revolution.1014.s1.protection_lead；revolution.1014.s1.protect；revolution.1014.s1.balance；revolution.1014.s1.cooperate；revolution.1014.s1.wisdom5；revolution.1014.s1.reciprocity；revolution.1014.s1.closing；revolution.1014.s1.after_exit；revolution.1014.s1.envelope；revolution.1014.s1.read_letter；church.1104.s1.morning.cafe；church.1104.s1.morning.perception.pass；church.1104.s1.morning.perception.fail；church.1104.s1.morning.invite；church.1104.s1.fee.free；church.1104.s1.fee.one；church.1104.s1.fee.quoted；church.1104.s1.tour.depart；revolution.1014.s1.opening_choice；neutral.1010.s1.open；neutral.1010.s1.agree；neutral.1010.s1.cost_pass；neutral.1010.s1.cost_fail；neutral.1010.s1.praise_pass；neutral.1010.s1.praise_fail；neutral.1010.s1.join；neutral.1010.s2.arrival；neutral.1010.s2.accept；neutral.1010.s2.invite_pass；neutral.1010.s2.invite_fail；neutral.1010.s2.refuse；neutral.1010.s2.serve；neutral.1010.s2.plan_pass；neutral.1010.s2.plan_fail；neutral.1010.s2.price；neutral.1010.s2.honest；neutral.1010.s2.serve_tail；neutral.1010.s2.refuse_tail；neutral.1010.s2.common_end；neutral.1013.s2.morning；neutral.1013.s2.cooperate；neutral.1013.s2.organize_pass；neutral.1013.s2.organize_fail；neutral.1013.s2.promote_pass；neutral.1013.s2.promote_fail；neutral.1013.s2.afternoon；neutral.1013.s2.visit；neutral.1013.s2.longterm_pass；neutral.1013.s2.longterm_fail；neutral.1013.s2.accounts_pass；neutral.1013.s2.accounts_fail；neutral.1013.s2.present；neutral.1013.s2.visit_tail；neutral.1018.s1.arrival；neutral.1018.s1.serve；neutral.1018.s1.taste_pass；neutral.1018.s1.taste_fail；neutral.1018.s1.identity；neutral.1018.s1.recommend；neutral.1018.s1.advert_offer；neutral.1018.s1.advert_yes；neutral.1018.s1.advert_no；neutral.1018.s1.closing；rose.1016.s1.arrival；rose.1011.s1.arrival；rose.1011.s1.sparrow_perception；rose.1011.s1.drink_choice；rose.1011.s1.drink_black；rose.1011.s1.drink_rich；rose.1011.s1.drink_milk；rose.1011.s1.news_choice；rose.1011.s1.news_known；rose.1011.s1.news_unknown；rose.1011.s1.sylvain_arrives；church.1014.s2.arrival；church.1014.s2.notice_pass；church.1014.s2.notice_fail；church.1014.s2.letter_question；church.1014.s2.relief_question；church.1014.s2.praise；church.1014.s2.doubt；church.1014.s2.wish；church.1014.s2.depart；church.1020.s1.raid；church.1020.s1.cooperate；church.1020.s1.defy_pass；church.1020.s1.defy_fail；church.1020.s1.letter_found；church.1020.s1.language_intro；church.1020.s1.language_pass；church.1020.s1.language_fail；church.1020.s1.courage_intro；church.1020.s1.courage_pass；church.1020.s1.courage_fail；church.1020.s1.wisdom_pass；church.1020.s1.wisdom_fail；church.1020.s1.perception_intro；church.1020.s1.perception_pass；church.1020.s1.perception_fail；church.1020.s1.cleared；church.1020.s1.detained；rose.1011.s1.brew_low；rose.1011.s1.history_return；church.1014.s2.letter_intro；church.1014.s2.envelope；church.1014.s2.envelope_hide
+
+KEY: oct07.street.day
+  登记状态：placeholder=1；贴图=空；tint={'r': 1, 'g': 1, 'b': 1, 'a': 1}
+  引用页：oct07.s1.street；church.1104.s1.far.street.intro；church.1104.s1.near.street
+
+KEY: oct07.cafe.night
+  登记状态：placeholder=0；贴图=Assets/Art/Background/架空咖啡馆背景_01.png；tint={'r': 0.42, 'g': 0.48, 'b': 0.62, 'a': 1}
+  引用页：oct07.s2.opening；oct07.s2.envelope；oct07.s2.watch；oct07.s2.perception；oct07.s2.before_letter；oct07.s2.read_letter；oct07.s2.after_letter；revolution.1013.s2.opening；revolution.1013.s2.reply1；revolution.1013.s2.reply2；revolution.1013.s2.reply3；revolution.1013.s2.closing；revolution.1013.s2.after_exit；revolution.1028.s1.ledger；revolution.1028.s1.history；revolution.1028.s1.family；revolution.1028.s1.flashback；revolution.1028.s1.comfort；revolution.1028.s1.ask_father；revolution.1028.s1.self；revolution.1028.s1.closing；revolution.1028.s1.after_exit；revolution.1028.s1.choice1；church.1104.s1.night.return；church.1104.s1.night.private；church.1104.s1.night.question；church.1104.s1.night.nonrevolution；church.1104.s1.night.revolution
+
+KEY: rose.club.exterior
+  登记状态：placeholder=1；贴图=空；tint={'r': 1, 'g': 1, 'b': 1, 'a': 1}
+  引用页：rose.1009.s1.door
+
+KEY: rose.club.blindfold
+  登记状态：placeholder=1；贴图=空；tint={'r': 1, 'g': 1, 'b': 1, 'a': 1}
+  用途：黑幕，通常无需美术另画纯黑图。
+  引用页：rose.1009.s1.blindfold
+
+KEY: rose.club.reception
+  登记状态：placeholder=1；贴图=空；tint={'r': 1, 'g': 1, 'b': 1, 'a': 1}
+  引用页：rose.1009.s1.reception；rose.1009.s1.portrait
+
+KEY: church.cathedral.day
+  登记状态：placeholder=1；贴图=空；tint={'r': 1, 'g': 1, 'b': 1, 'a': 1}
+  引用页：church.1009.s2.ceremony；church.1009.s2.pick；church.1009.s2.ignore；church.1009.s2.return
+
+KEY: neutral.market.day
+  登记状态：placeholder=1；贴图=空；tint={'r': 1, 'g': 1, 'b': 1, 'a': 1}
+  引用页：neutral.1008.s1.market；neutral.1008.s1.outro
+
+KEY: neutral.market.shop.day
+  登记状态：placeholder=1；贴图=空；tint={'r': 1, 'g': 1, 'b': 1, 'a': 1}
+  引用页：neutral.1008.s1.shop
+
+KEY: church.1104.s1.background.morning.wake
+  登记状态：placeholder=1；贴图=空；tint={'r': 1, 'g': 1, 'b': 1, 'a': 1}
+  引用页：church.1104.s1.morning.wake
+
+KEY: church.1104.s1.background.far.market
+  登记状态：placeholder=1；贴图=空；tint={'r': 1, 'g': 1, 'b': 1, 'a': 1}
+  引用页：church.1104.s1.far.market
+
+KEY: church.1104.s1.background.far.suburb
+  登记状态：placeholder=1；贴图=空；tint={'r': 1, 'g': 1, 'b': 1, 'a': 1}
+  引用页：church.1104.s1.far.suburb
+
+KEY: church.1104.s1.background.far.old.intro
+  登记状态：placeholder=1；贴图=空；tint={'r': 1, 'g': 1, 'b': 1, 'a': 1}
+  引用页：church.1104.s1.far.old.intro
+
+KEY: church.1104.s1.background.far.old.perception
+  登记状态：placeholder=1；贴图=空；tint={'r': 1, 'g': 1, 'b': 1, 'a': 1}
+  引用页：church.1104.s1.far.old.perception
+
+KEY: church.1104.s1.background.far.old.house
+  登记状态：placeholder=1；贴图=空；tint={'r': 1, 'g': 1, 'b': 1, 'a': 1}
+  引用页：church.1104.s1.far.old.house
+
+KEY: church.1104.s1.background.far.old.estate
+  登记状态：placeholder=1；贴图=空；tint={'r': 1, 'g': 1, 'b': 1, 'a': 1}
+  引用页：church.1104.s1.far.old.estate
+
+KEY: church.1104.s1.background.far.old.heirloom
+  登记状态：placeholder=1；贴图=空；tint={'r': 1, 'g': 1, 'b': 1, 'a': 1}
+  引用页：church.1104.s1.far.old.heirloom
+
+KEY: church.1104.s1.background.far.old.eviction
+  登记状态：placeholder=1；贴图=空；tint={'r': 1, 'g': 1, 'b': 1, 'a': 1}
+  引用页：church.1104.s1.far.old.eviction
+
+KEY: church.1104.s1.background.far.old.aftermath
+  登记状态：placeholder=1；贴图=空；tint={'r': 1, 'g': 1, 'b': 1, 'a': 1}
+  引用页：church.1104.s1.far.old.aftermath
+
+KEY: church.1104.s1.background.far.street.wisdom.pass
+  登记状态：placeholder=1；贴图=空；tint={'r': 1, 'g': 1, 'b': 1, 'a': 1}
+  引用页：church.1104.s1.far.street.wisdom.pass
+
+KEY: church.1104.s1.background.far.street.wisdom.fail
+  登记状态：placeholder=1；贴图=空；tint={'r': 1, 'g': 1, 'b': 1, 'a': 1}
+  引用页：church.1104.s1.far.street.wisdom.fail
+
+KEY: church.1104.s1.background.far.street.merge
+  登记状态：placeholder=1；贴图=空；tint={'r': 1, 'g': 1, 'b': 1, 'a': 1}
+  引用页：church.1104.s1.far.street.merge
+
+KEY: church.1104.s1.background.far.street.dusk
+  登记状态：placeholder=1；贴图=空；tint={'r': 1, 'g': 1, 'b': 1, 'a': 1}
+  引用页：church.1104.s1.far.street.dusk
+
+KEY: church.1104.s1.background.near.old.intro
+  登记状态：placeholder=1；贴图=空；tint={'r': 1, 'g': 1, 'b': 1, 'a': 1}
+  引用页：church.1104.s1.near.old.intro
+
+KEY: church.1104.s1.background.near.old.perception
+  登记状态：placeholder=1；贴图=空；tint={'r': 1, 'g': 1, 'b': 1, 'a': 1}
+  引用页：church.1104.s1.near.old.perception
+
+KEY: church.1104.s1.background.near.old.house
+  登记状态：placeholder=1；贴图=空；tint={'r': 1, 'g': 1, 'b': 1, 'a': 1}
+  引用页：church.1104.s1.near.old.house
+
+KEY: church.1104.s1.background.near.old.estate
+  登记状态：placeholder=1；贴图=空；tint={'r': 1, 'g': 1, 'b': 1, 'a': 1}
+  引用页：church.1104.s1.near.old.estate
+
+KEY: church.1104.s1.background.near.old.heirloom
+  登记状态：placeholder=1；贴图=空；tint={'r': 1, 'g': 1, 'b': 1, 'a': 1}
+  引用页：church.1104.s1.near.old.heirloom
+
+KEY: church.1104.s1.background.near.old.eviction
+  登记状态：placeholder=1；贴图=空；tint={'r': 1, 'g': 1, 'b': 1, 'a': 1}
+  引用页：church.1104.s1.near.old.eviction
+
+KEY: church.1104.s1.background.near.old.aftermath
+  登记状态：placeholder=1；贴图=空；tint={'r': 1, 'g': 1, 'b': 1, 'a': 1}
+  引用页：church.1104.s1.near.old.aftermath
+
+KEY: church.1104.s1.background.near.suburb
+  登记状态：placeholder=1；贴图=空；tint={'r': 1, 'g': 1, 'b': 1, 'a': 1}
+  引用页：church.1104.s1.near.suburb
+
+KEY: church.1104.s1.background.near.market
+  登记状态：placeholder=1；贴图=空；tint={'r': 1, 'g': 1, 'b': 1, 'a': 1}
+  引用页：church.1104.s1.near.market
+
+KEY: church.1104.s1.background.near.street.dusk
+  登记状态：placeholder=1；贴图=空；tint={'r': 1, 'g': 1, 'b': 1, 'a': 1}
+  引用页：church.1104.s1.near.street.dusk
+
+KEY: church.detention.interior
+  登记状态：placeholder=1；贴图=空；tint={'r': 1, 'g': 1, 'b': 1, 'a': 1}
+  引用页：church.1023.s2.prison；church.1020.s1.detained.interior；church.1023.s1.hearing；church.1023.s1.persuade；church.1023.s1.persuade_pass；church.1023.s1.persuade_fail；church.1023.s1.bribe
+
+KEY: church.execution.black
+  登记状态：placeholder=1；贴图=空；tint={'r': 1, 'g': 1, 'b': 1, 'a': 1}
+  用途：黑幕，通常无需美术另画纯黑图。
+  引用页：church.1023.s2.execution
+
+KEY: neutral.cafe.dusk
+  登记状态：placeholder=1；贴图=空；tint={'r': 1, 'g': 1, 'b': 1, 'a': 1}
+  引用页：neutral.1013.s2.closing
+
+KEY: church.detention.dawn
+  登记状态：placeholder=1；贴图=空；tint={'r': 1, 'g': 1, 'b': 1, 'a': 1}
+  引用页：church.1023.s1.hearing_dawn
+
+KEY: church.detention.dusk
+  登记状态：placeholder=1；贴图=空；tint={'r': 1, 'g': 1, 'b': 1, 'a': 1}
+  引用页：church.1023.s1.rescue；church.1023.s1.record_notice；church.1023.s1.rescue_depart
+
+KEY: church.cafe.dusk
+  登记状态：placeholder=1；贴图=空；tint={'r': 1, 'g': 1, 'b': 1, 'a': 1}
+  引用页：church.1023.s1.home；church.1023.s1.home_persuade；church.1023.s1.home_bribe；church.1023.s1.home_rescue；church.1023.s1.home_end
+
+KEY: rose.history.portrait
+  登记状态：placeholder=1；贴图=空；tint={'r': 1, 'g': 1, 'b': 1, 'a': 1}
+  引用页：rose.1011.s1.history_lecture
+
+二、全部42个Object美术字段（空字段不自动等于要新增立绘）
+当前运行角色源为Object表；旧CharacterCatalog.asset中有图不代表该Object已绑定。
+
+npc_a / 艾德里安 / npc
+  portraitPath = 空
+  portraitIndoorPath = 空
+  avtarPath = 空
+  iconPath = 空
+  当前对话使用：2行；示例：test_conv_line_02；test_conv_line_03
+  旧示例角色/模板引用，旧Catalog用Unknown头像；不混入当前文案正式角色交图量。
+
+npc_b / 塞西莉亚 / npc
+  portraitPath = 空
+  portraitIndoorPath = 空
+  avtarPath = 空
+  iconPath = 空
+  当前对话使用：0行；示例：
+  旧示例角色/模板引用，旧Catalog用Unknown头像；不混入当前文案正式角色交图量。
+
+npc_c / 朱利安 / npc
+  portraitPath = 空
+  portraitIndoorPath = 空
+  avtarPath = 空
+  iconPath = 空
+  当前对话使用：0行；示例：
+  旧示例角色/模板引用，旧Catalog用Unknown头像；不混入当前文案正式角色交图量。
+
+npc_d / 老伯爵瓦尔蒙 / npc
+  portraitPath = 空
+  portraitIndoorPath = 空
+  avtarPath = 空
+  iconPath = 空
+  当前对话使用：0行；示例：
+  旧示例角色/模板引用，旧Catalog用Unknown头像；不混入当前文案正式角色交图量。
+
+player / 你 / player
+  portraitPath = 空
+  portraitIndoorPath = 空
+  avtarPath = 空
+  iconPath = 空
+  当前对话使用：359行；示例：test_conv_line_01；arrival.start.02.06；arrival.start.02.07；arrival.start.02.09
+  文案未要求此ID各自专属立绘；世界对象/主角/旁白/匿名/群像需按实际演出处理。
+
+world / 奥尔狄亚王国 / world
+  portraitPath = 空
+  portraitIndoorPath = 空
+  avtarPath = 空
+  iconPath = 空
+  当前对话使用：0行；示例：
+  文案未要求此ID各自专属立绘；世界对象/主角/旁白/匿名/群像需按实际演出处理。
+
+adele / 阿黛尔·米尼耶 / npc
+  portraitPath = Characters/adele/neutral
+  portraitIndoorPath = Characters/adele/neutral
+  avtarPath = Characters/adele/neutral
+  iconPath = Characters/adele/neutral
+  当前对话使用：249行；示例：DEMO_CAFE_BEFORE_LINE；DEMO_CAFE_SERVED_LINE；DEMO_CAFE_CHAT_LINE；arrival.start.02.08
+
+cafe / 共用资金 / world
+  portraitPath = 空
+  portraitIndoorPath = 空
+  avtarPath = 空
+  iconPath = 空
+  当前对话使用：0行；示例：
+  文案未要求此ID各自专属立绘；世界对象/主角/旁白/匿名/群像需按实际演出处理。
+
+oct07.passerby.a / 路人A / npc
+  portraitPath = 空
+  portraitIndoorPath = 空
+  avtarPath = 空
+  iconPath = 空
+  当前对话使用：3行；示例：oct07.s1.p036；oct07.s1.p038；oct07.s1.p041
+  文案未要求此ID各自专属立绘；世界对象/主角/旁白/匿名/群像需按实际演出处理。
+
+rose.envoy / 老爷 / npc
+  portraitPath = 空
+  portraitIndoorPath = 空
+  avtarPath = 空
+  iconPath = 空
+  当前对话使用：11行；示例：rose.1009.s1.p038.a；rose.1009.s1.p038.c；rose.1009.s1.p041；rose.1009.s1.p043.a
+
+rose.butake / 男人 / npc
+  portraitPath = 空
+  portraitIndoorPath = 空
+  avtarPath = 空
+  iconPath = 空
+  当前对话使用：6行；示例：rose.1009.s1.p010；rose.1009.s1.p012；rose.1009.s1.p015；rose.1009.s1.p018
+  文案未要求此ID各自专属立绘；世界对象/主角/旁白/匿名/群像需按实际演出处理。
+
+sorel / 索雷尔 / npc
+  portraitPath = 空
+  portraitIndoorPath = 空
+  avtarPath = 空
+  iconPath = 空
+  当前对话使用：69行；示例：revolution.1014.s1.p026；revolution.1014.s1.p028；revolution.1014.s1.p032；revolution.1014.s1.p037
+
+church.broadcast / 广播 / npc
+  portraitPath = 空
+  portraitIndoorPath = 空
+  avtarPath = 空
+  iconPath = 空
+  当前对话使用：1行；示例：church.1009.s2.p006
+  文案未要求此ID各自专属立绘；世界对象/主角/旁白/匿名/群像需按实际演出处理。
+
+church.crowd / 人群 / npc
+  portraitPath = 空
+  portraitIndoorPath = 空
+  avtarPath = 空
+  iconPath = 空
+  当前对话使用：3行；示例：church.1009.s2.p009；church.1009.s2.p010；church.1009.s2.p011
+
+church.duke / 埃利昂公爵 / npc
+  portraitPath = 空
+  portraitIndoorPath = 空
+  avtarPath = 空
+  iconPath = 空
+  当前对话使用：2行；示例：church.1009.s2.p015；church.1009.s2.p019
+
+church.man / 男人 / npc
+  portraitPath = 空
+  portraitIndoorPath = 空
+  avtarPath = 空
+  iconPath = 空
+  当前对话使用：1行；示例：church.1009.s2.p034
+
+colette / 柯莱特·布吕内 / npc
+  portraitPath = 空
+  portraitIndoorPath = 空
+  avtarPath = 空
+  iconPath = 空
+  当前对话使用：24行；示例：neutral.1008.s1.line.p018；neutral.1008.s1.line.p020；neutral.1008.s1.line.p023；neutral.1008.s1.line.p025
+
+neutral.shopkeeper / 店主 / npc
+  portraitPath = 空
+  portraitIndoorPath = 空
+  avtarPath = 空
+  iconPath = 空
+  当前对话使用：5行；示例：neutral.1008.s1.line.p015；neutral.1008.s1.line.p017；neutral.1008.s1.line.p028；neutral.1008.s1.line.p030
+  文案未要求此ID各自专属立绘；世界对象/主角/旁白/匿名/群像需按实际演出处理。
+
+alienor / 阿莉耶诺尔·康多尔 / npc
+  portraitPath = Characters/alienor/neutral
+  portraitIndoorPath = Characters/alienor/indoor
+  avtarPath = 空
+  iconPath = 空
+  当前对话使用：93行；示例：church.1104.s1.p015；church.1104.s1.p016；church.1104.s1.p027；church.1104.s1.p034
+
+church.1104.s1.npc.mother / 女人 / npc
+  portraitPath = 空
+  portraitIndoorPath = 空
+  avtarPath = 空
+  iconPath = 空
+  当前对话使用：4行；示例：church.1104.s1.p093；church.1104.s1.p096；church.1104.s1.p377；church.1104.s1.p380
+  文案未要求此ID各自专属立绘；世界对象/主角/旁白/匿名/群像需按实际演出处理。
+
+church.1104.s1.npc.vendor / 摊主 / npc
+  portraitPath = 空
+  portraitIndoorPath = 空
+  avtarPath = 空
+  iconPath = 空
+  当前对话使用：4行；示例：church.1104.s1.p095；church.1104.s1.p097；church.1104.s1.p379；church.1104.s1.p381
+  文案未要求此ID各自专属立绘；世界对象/主角/旁白/匿名/群像需按实际演出处理。
+
+church.1104.s1.npc.civilian_a / 平民A / npc
+  portraitPath = 空
+  portraitIndoorPath = 空
+  avtarPath = 空
+  iconPath = 空
+  当前对话使用：8行；示例：church.1104.s1.p137；church.1104.s1.p139；church.1104.s1.p141；church.1104.s1.p143
+  文案未要求此ID各自专属立绘；世界对象/主角/旁白/匿名/群像需按实际演出处理。
+
+church.1104.s1.npc.civilian_b / 平民B / npc
+  portraitPath = 空
+  portraitIndoorPath = 空
+  avtarPath = 空
+  iconPath = 空
+  当前对话使用：6行；示例：church.1104.s1.p138；church.1104.s1.p142；church.1104.s1.p144；church.1104.s1.p339
+  文案未要求此ID各自专属立绘；世界对象/主角/旁白/匿名/群像需按实际演出处理。
+
+church.1104.s1.npc.elder_lady / 老妇人 / npc
+  portraitPath = 空
+  portraitIndoorPath = 空
+  avtarPath = 空
+  iconPath = 空
+  当前对话使用：2行；示例：church.1104.s1.p183；church.1104.s1.p283
+  文案未要求此ID各自专属立绘；世界对象/主角/旁白/匿名/群像需按实际演出处理。
+
+church.1104.s1.npc.buyer / 男子 / npc
+  portraitPath = 空
+  portraitIndoorPath = 空
+  avtarPath = 空
+  iconPath = 空
+  当前对话使用：2行；示例：church.1104.s1.p184；church.1104.s1.p284
+  文案未要求此ID各自专属立绘；世界对象/主角/旁白/匿名/群像需按实际演出处理。
+
+church.1104.s1.npc.tenant / 男人 / npc
+  portraitPath = 空
+  portraitIndoorPath = 空
+  avtarPath = 空
+  iconPath = 空
+  当前对话使用：4行；示例：church.1104.s1.p197；church.1104.s1.p201；church.1104.s1.p297；church.1104.s1.p301
+  文案未要求此ID各自专属立绘；世界对象/主角/旁白/匿名/群像需按实际演出处理。
+
+church.1104.s1.npc.landlord / 房东 / npc
+  portraitPath = 空
+  portraitIndoorPath = 空
+  avtarPath = 空
+  iconPath = 空
+  当前对话使用：4行；示例：church.1104.s1.p196；church.1104.s1.p198；church.1104.s1.p296；church.1104.s1.p298
+  文案未要求此ID各自专属立绘；世界对象/主角/旁白/匿名/群像需按实际演出处理。
+
+antoine / 安托万·马尚 / npc
+  portraitPath = Characters/antoine/neutral
+  portraitIndoorPath = 空
+  avtarPath = 空
+  iconPath = 空
+  当前对话使用：43行；示例：neutral.1010.s2.line.p011；neutral.1010.s2.line.p013；neutral.1010.s2.line.p021；neutral.1010.s2.line.p026
+
+unknown / ？？？ / npc
+  portraitPath = 空
+  portraitIndoorPath = 空
+  avtarPath = 空
+  iconPath = 空
+  当前对话使用：0行；示例：
+  文案未要求此ID各自专属立绘；世界对象/主角/旁白/匿名/群像需按实际演出处理。
+
+neutral.reporter / 记者 / npc
+  portraitPath = 空
+  portraitIndoorPath = Characters/neutral_reporter/placeholder
+  avtarPath = 空
+  iconPath = 空
+  当前对话使用：22行；示例：neutral.1018.s1.line.p038；neutral.1018.s1.line.p039；neutral.1018.s1.line.p042；neutral.1018.s1.line.p044
+
+character.guest_a / 客人A / npc
+  portraitPath = 空
+  portraitIndoorPath = 空
+  avtarPath = 空
+  iconPath = 空
+  当前对话使用：11行；示例：neutral.1010.s1.line.p010；neutral.1010.s1.line.p012；neutral.1013.s2.line.p013；neutral.1013.s2.line.p015
+
+character.guest_b / 客人B / npc
+  portraitPath = 空
+  portraitIndoorPath = 空
+  avtarPath = 空
+  iconPath = 空
+  当前对话使用：6行；示例：neutral.1010.s1.line.p015；neutral.1010.s1.line.p017；neutral.1010.s1.line.p019；neutral.1013.s2.line.p028
+
+character.guest_c / 客人C / npc
+  portraitPath = 空
+  portraitIndoorPath = 空
+  avtarPath = 空
+  iconPath = 空
+  当前对话使用：4行；示例：neutral.1010.s1.line.p016；neutral.1010.s1.line.p018；neutral.1013.s2.line.p029；neutral.1013.s2.line.p063
+
+character.guest_d / 客人D / npc
+  portraitPath = 空
+  portraitIndoorPath = 空
+  avtarPath = 空
+  iconPath = 空
+  当前对话使用：1行；示例：neutral.1010.s1.line.p071
+
+neutral.unknown / ？？？ / npc
+  portraitPath = 空
+  portraitIndoorPath = 空
+  avtarPath = 空
+  iconPath = 空
+  当前对话使用：11行；示例：neutral.1010.s2.line.p007；neutral.1018.s1.line.p009；neutral.1018.s1.line.p018；neutral.1018.s1.line.p021
+  文案未要求此ID各自专属立绘；世界对象/主角/旁白/匿名/群像需按实际演出处理。
+
+sade / 萨德 / npc
+  portraitPath = Characters/sade/neutral
+  portraitIndoorPath = 空
+  avtarPath = 空
+  iconPath = 空
+  当前对话使用：2行；示例：rose.1016.s1.p008；rose.1016.s1.p015
+
+sparrow / 麻雀 / npc
+  portraitPath = 空
+  portraitIndoorPath = 空
+  avtarPath = 空
+  iconPath = 空
+  当前对话使用：20行；示例：rose.1011.s1.p003；rose.1011.s1.p004；rose.1011.s1.p013；rose.1011.s1.p021
+
+sylvain / 西尔万·瓦隆 / npc
+  portraitPath = 空
+  portraitIndoorPath = 空
+  avtarPath = 空
+  iconPath = 空
+  当前对话使用：30行；示例：rose.1011.s1.p043；rose.1011.s1.p050；rose.1011.s1.p052.a；rose.1011.s1.p052.c
+
+church.thibaut / 客人 / npc
+  portraitPath = 空
+  portraitIndoorPath = 空
+  avtarPath = 空
+  iconPath = 空
+  当前对话使用：14行；示例：church.1014.s2.p009；church.1014.s2.p011；church.1014.s2.p014；church.1014.s2.p031.a
+
+church.inspector / 监察官 / npc
+  portraitPath = 空
+  portraitIndoorPath = 空
+  avtarPath = 空
+  iconPath = 空
+  当前对话使用：38行；示例：church.1020.s1.p013；church.1020.s1.p015；church.1020.s1.p024；church.1020.s1.p028
+
+church.inspectors / 众监察员 / npc
+  portraitPath = 空
+  portraitIndoorPath = 空
+  avtarPath = 空
+  iconPath = 空
+  当前对话使用：1行；示例：church.1020.s1.p035
+
+church.guard / 看守 / npc
+  portraitPath = 空
+  portraitIndoorPath = 空
+  avtarPath = 空
+  iconPath = 空
+  当前对话使用：6行；示例：church.1023.s1.p010；church.1023.s1.p057；church.1023.s1.p059；church.1023.s1.p074
+
+三、全部非空图片引用去重（排除背景，已在上一节展开）
+
+tbncsmapposition.imgPath: Art/Map/Locations/location_03
+  文件：Assets/Resources/Art/Map/Locations/location_03.png
+  使用者：cafe；圣徒街
+
+tbncsmapposition.imgPath: Art/Map/Locations/location_05
+  文件：Assets/Resources/Art/Map/Locations/location_05.png
+  使用者：market
+
+tbncsmapposition.imgPath: Art/UI/Avatars/Unknown
+  文件：Assets/Resources/Art/UI/Avatars/Unknown.png
+  使用者：library；temporary
+
+tbncsmapposition.imgPath: Art/Map/Locations/location_02
+  文件：Assets/Resources/Art/Map/Locations/location_02.png
+  使用者：圣西尔万郊区
+
+tbncsmapposition.imgPath: Art/Map/Locations/location_06
+  文件：Assets/Resources/Art/Map/Locations/location_06.png
+  使用者：首都法院
+
+tbncsmapposition.imgPath: Art/Map/Locations/location_07
+  文件：Assets/Resources/Art/Map/Locations/location_07.png
+  使用者：市政厅
+
+tbncsmapposition.imgPath: Art/Map/Locations/location_09
+  文件：Assets/Resources/Art/Map/Locations/location_09.png
+  使用者：花园区
+
+tbncsobject.iconPath: Characters/adele/neutral
+  文件：Assets/Resources/Characters/adele/neutral.png
+  使用者：adele
+
+tbncsobject.portraitPath: Characters/adele/neutral
+  文件：Assets/Resources/Characters/adele/neutral.png
+  使用者：adele
+
+tbncsobject.portraitIndoorPath: Characters/adele/neutral
+  文件：Assets/Resources/Characters/adele/neutral.png
+  使用者：adele
+
+tbncsobject.avtarPath: Characters/adele/neutral
+  文件：Assets/Resources/Characters/adele/neutral.png
+  使用者：adele
+
+tbncsobject.portraitPath: Characters/alienor/neutral
+  文件：Assets/Resources/Characters/alienor/neutral.png
+  使用者：alienor
+
+tbncsobject.portraitIndoorPath: Characters/alienor/indoor
+  文件：Assets/Resources/Characters/alienor/indoor.png
+  使用者：alienor
+
+tbncsobject.portraitPath: Characters/antoine/neutral
+  文件：Assets/Resources/Characters/antoine/neutral.png
+  使用者：antoine
+
+tbncsobject.portraitIndoorPath: Characters/neutral_reporter/placeholder
+  文件：Assets/Resources/Characters/neutral_reporter/placeholder.png
+  使用者：neutral.reporter
+
+tbncsobject.portraitPath: Characters/sade/neutral
+  文件：Assets/Resources/Characters/sade/neutral.png
+  使用者：sade
+
+tbopeningpresentation.visualsResource: Dialogue/FirstDayIntroductionVisuals
+  文件：Assets/Resources/Dialogue/FirstDayIntroductionVisuals.asset
+  使用者：first_day_cafe；cafe_tutorial.customer_arrives；cafe_tutorial.perception_success；cafe_tutorial.perception_failure；cafe_tutorial.order_confirmed；cafe_tutorial.workstation_open；cafe_tutorial.make_coffee_base；cafe_tutorial.pour_into_cup；cafe_tutorial.adjust_strength；cafe_tutorial.adjust_sweetness；cafe_tutorial.demo_grind；cafe_tutorial.demo_boil；cafe_tutorial.demo_brew；cafe_tutorial.demo_cup；cafe_tutorial.demo_base；cafe_tutorial.demo_strength；cafe_tutorial.demo_sweetness；cafe_tutorial.demo_serve；cafe_tutorial.serve_customer；cafe_tutorial.result_excellent；cafe_tutorial.result_good；cafe_tutorial.result_average；cafe_tutorial.result_bad；cafe_tutorial.result_refund；cafe_tutorial.ending
+
+四、阅读、通知、入座和Opening数据
+
+ReadingPage
+  pageId=test_read_page_01 | presentationKey=TEST_READING | imageKey=空
+  pageId=test_read_page_02 | presentationKey=TEST_READING | imageKey=空
+  pageId=oct07.s2.letter.page | presentationKey=oct07.s2.letter | imageKey=空
+  pageId=revolution.1014.s1.letter.page | presentationKey=revolution.1014.s1.letter | imageKey=空
+  pageId=rose.1011.s1.card.page | presentationKey=rose.1011.s1.card | imageKey=空
+
+Notice
+  presentationKey=TEST_NOTICE | imageKey=空
+  presentationKey=neutral.1018.s1.notice.recommendation.presentation | imageKey=空
+  presentationKey=neutral.1018.s1.notice.advertisement.presentation | imageKey=空
+
+CafeVisit
+  visitKey=demo_cafe_visit | characterId=adele | seatedVisualPath=空
+  visitKey=demo_cafe_delayed_visit | characterId=adele | seatedVisualPath=空
+  visitKey=neutral.1018.s1.reporter | characterId=neutral.reporter | seatedVisualPath=空
+
+OpeningPresentation
+  presentationId=first_day_cafe | visualsResource=Dialogue/FirstDayIntroductionVisuals
+  presentationId=cafe_tutorial.customer_arrives | visualsResource=Dialogue/FirstDayIntroductionVisuals
+  presentationId=cafe_tutorial.perception_success | visualsResource=Dialogue/FirstDayIntroductionVisuals
+  presentationId=cafe_tutorial.perception_failure | visualsResource=Dialogue/FirstDayIntroductionVisuals
+  presentationId=cafe_tutorial.order_confirmed | visualsResource=Dialogue/FirstDayIntroductionVisuals
+  presentationId=cafe_tutorial.workstation_open | visualsResource=Dialogue/FirstDayIntroductionVisuals
+  presentationId=cafe_tutorial.make_coffee_base | visualsResource=Dialogue/FirstDayIntroductionVisuals
+  presentationId=cafe_tutorial.pour_into_cup | visualsResource=Dialogue/FirstDayIntroductionVisuals
+  presentationId=cafe_tutorial.adjust_strength | visualsResource=Dialogue/FirstDayIntroductionVisuals
+  presentationId=cafe_tutorial.adjust_sweetness | visualsResource=Dialogue/FirstDayIntroductionVisuals
+  presentationId=cafe_tutorial.demo_grind | visualsResource=Dialogue/FirstDayIntroductionVisuals
+  presentationId=cafe_tutorial.demo_boil | visualsResource=Dialogue/FirstDayIntroductionVisuals
+  presentationId=cafe_tutorial.demo_brew | visualsResource=Dialogue/FirstDayIntroductionVisuals
+  presentationId=cafe_tutorial.demo_cup | visualsResource=Dialogue/FirstDayIntroductionVisuals
+  presentationId=cafe_tutorial.demo_base | visualsResource=Dialogue/FirstDayIntroductionVisuals
+  presentationId=cafe_tutorial.demo_strength | visualsResource=Dialogue/FirstDayIntroductionVisuals
+  presentationId=cafe_tutorial.demo_sweetness | visualsResource=Dialogue/FirstDayIntroductionVisuals
+  presentationId=cafe_tutorial.demo_serve | visualsResource=Dialogue/FirstDayIntroductionVisuals
+  presentationId=cafe_tutorial.serve_customer | visualsResource=Dialogue/FirstDayIntroductionVisuals
+  presentationId=cafe_tutorial.result_excellent | visualsResource=Dialogue/FirstDayIntroductionVisuals
+  presentationId=cafe_tutorial.result_good | visualsResource=Dialogue/FirstDayIntroductionVisuals
+  presentationId=cafe_tutorial.result_average | visualsResource=Dialogue/FirstDayIntroductionVisuals
+  presentationId=cafe_tutorial.result_bad | visualsResource=Dialogue/FirstDayIntroductionVisuals
+  presentationId=cafe_tutorial.result_refund | visualsResource=Dialogue/FirstDayIntroductionVisuals
+  presentationId=cafe_tutorial.ending | visualsResource=Dialogue/FirstDayIntroductionVisuals
+
+5个ReadingPage和3个Notice的imageKey均为空：2个测试阅读页、1个测试通知不形成正式画图订单；其余信件/名片见主清单。
+3个CafeVisit的seatedVisualPath均为空：从CharacterProfile的室内/基准资源回退，记者室内图是简易占位。
+25条OpeningPresentation共用Dialogue/FirstDayIntroductionVisuals：当前左立绘为空、右立绘为阿黛尔、背景为架空咖啡馆_01；序列化未见centerPortrait。教程人物名字在表中不代表已配顾客图。
+
+五、旧Catalog与已有角色目录（身份核对用，不能代替Object）
+npc_a / 艾德里安 → Assets/Resources/Art/UI/Avatars/Unknown.png；happy=空；angry=空
+npc_b / 塞西莉亚 → Assets/Resources/Art/UI/Avatars/Unknown.png；happy=空；angry=空
+npc_c / 朱利安 → Assets/Resources/Art/UI/Avatars/Unknown.png；happy=空；angry=空
+npc_d / 老伯爵瓦尔蒙 → Assets/Resources/Art/UI/Avatars/Unknown.png；happy=空；angry=空
+player / 你 → 无立绘；happy=空；angry=空
+laurent / 洛朗·迪蒙 → 无立绘；happy=空；angry=空
+clovis / 克洛维·康多尔 → 无立绘；happy=空；angry=空
+renaud / 雷诺·康多尔 → 无立绘；happy=空；angry=空
+elion / 埃利昂·康多尔 → Assets/Resources/Characters/elion/neutral.png；happy=空；angry=空
+alienor / 阿莉耶诺尔·康多尔 → Assets/Resources/Characters/alienor/neutral.png；happy=空；angry=空
+queen / 王后 → 无立绘；happy=空；angry=空
+bertrand / 贝特朗·康多尔 → Assets/Resources/Characters/bertrand/neutral.png；happy=空；angry=空
+sade / 萨德 → Assets/Resources/Characters/sade/neutral.png；happy=空；angry=空
+mamion / 马米翁 → 无立绘；happy=空；angry=空
+lucien / 吕西安 → 无立绘；happy=空；angry=空
+lesou / 勒苏 → Assets/Resources/Characters/lesou/neutral.png；happy=空；angry=空
+sylvain / 西尔万·瓦隆 → 无立绘；happy=空；angry=空
+antoine / 安托万·马尚 → Assets/Resources/Characters/antoine/neutral.png；happy=空；angry=空
+lefebvre / 勒费弗尔 → 无立绘；happy=空；angry=空
+duval / 杜瓦尔·米尼耶 → 无立绘；happy=空；angry=空
+adele / 阿黛尔·米尼耶 → Assets/Resources/Characters/adele/neutral.png；happy=空；angry=空
+emmanuel / 埃马纽埃尔·索雷尔 → 无立绘；happy=空；angry=空
+sparrow / 麻雀 → 无立绘；happy=空；angry=空
+thibaut / 蒂博·卡隆 → Assets/Resources/Characters/thibaut/neutral.png；happy=空；angry=空
+octave / 奥克塔夫·韦尔内 → 无立绘；happy=空；angry=空
+eugene / 欧仁·迪布瓦 → Assets/Resources/Characters/eugene/neutral.png；happy=空；angry=空
+colette / 柯莱特·布吕内 → 无立绘；happy=空；angry=空
+pascal / 帕斯卡尔·勒鲁 → 无立绘；happy=空；angry=空
+marie / 雅克·马尚 → 无立绘；happy=空；angry=空
+guest_a / 客人A → 无立绘；happy=空；angry=空
+guest_b / 客人B → 无立绘；happy=空；angry=空
+guest_c / 客人C → 无立绘；happy=空；angry=空
+guest_d / 客人D → 无立绘；happy=空；angry=空
+soldier_a / 军人A → 无立绘；happy=空；angry=空
+soldier_b / 军人B → 无立绘；happy=空；angry=空
+soldier_c / 军人C → 无立绘；happy=空；angry=空
+soldier_d / 军人D → 无立绘；happy=空；angry=空
+
+六、对照中应保留的区别
+1. 任意图片文件存在 ≠ 已有美术定稿 ≠ 当前NCS已绑定。
+2. 角色Object.portraitIndoorPath对应营业形象回退，不自动改变剧情服装；不能把alienor/indoor当成11.04乔装已合格。
+3. 所有43个背景值均有资源或背景登记可静态定位；40个登记项中38个显式占位；两黑幕用途不计缺画。
+4. 当前图片引用没有发现指向不存在文件的非空路径；主要缺口是空字段、占位底色、错误服装/差分和未接线。
+5. 多路线同地点优先复用；共40个背景key不能折算成40张背景订单。
+6. 模板SetupParams/旧CutScene事件与CutScenePanel入口不构成源文案已要求某个具体视频。
+7. 本轮不改动任何配置、代码、Prefab或源文案。

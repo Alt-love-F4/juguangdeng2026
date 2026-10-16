@@ -1,0 +1,4286 @@
+[
+  {
+    "path": "Assets/Art/Background/SCE_ 三楼宿舍场景底图.png",
+    "size": 6313636,
+    "sha256": "70819d21c9fddcb51b86dfa02199478ae60137bd7899d8308274dc8f1c06fa91",
+    "width": 4096,
+    "height": 2304
+  },
+  {
+    "path": "Assets/Art/Background/SCE_一楼大厅场景底图.png",
+    "size": 4197045,
+    "sha256": "b179e8a05b359c09b244ea5d0f9ef2d8ffd7ef231a85eddda573b9bca22ba686",
+    "width": 4096,
+    "height": 2304
+  },
+  {
+    "path": "Assets/Art/Background/SCE_二楼会客室场景底图.png",
+    "size": 4778493,
+    "sha256": "9b107f79642f61b3d01a5e04f2ee8e8fe46e1e7b4c04c126846b5388a39ee549",
+    "width": 4096,
+    "height": 2304
+  },
+  {
+    "path": "Assets/Art/Background/一楼背景.png",
+    "size": 273413,
+    "sha256": "c053363241d5b41e4b1978db92bcdb10a6eef7bbee11b0507019967c7a4d533b",
+    "width": 1117,
+    "height": 629
+  },
+  {
+    "path": "Assets/Art/Background/二楼背景.png",
+    "size": 348116,
+    "sha256": "910ae3bc06e594f0fd0873258f3174206a0eeeabe6021809e3143ac34da03485",
+    "width": 1057,
+    "height": 596
+  },
+  {
+    "path": "Assets/Art/Background/出餐台背景.png",
+    "size": 269546,
+    "sha256": "2d9e9105ea48c099bdc627e8d3f4f86db84692950202cbfc3d7dcbd06b9ba1d0",
+    "width": 1103,
+    "height": 621
+  },
+  {
+    "path": "Assets/Art/Background/地下室背景.png",
+    "size": 378349,
+    "sha256": "dd2320f1115005c007de96ec4118316a038a4ac762d7ce91dbf402e412eaf678",
+    "width": 1143,
+    "height": 640
+  },
+  {
+    "path": "Assets/Art/Background/工作台背景.png",
+    "size": 798936,
+    "sha256": "f1f64fe90c31eef159c53f23a73ae15022ea91b8e495ae8c64ecb3727ebf7bf1",
+    "width": 1138,
+    "height": 640
+  },
+  {
+    "path": "Assets/Art/Background/拉花背景.png",
+    "size": 181266,
+    "sha256": "d37bce0e9c166412b4a92ee5e35c08172d48c724874272bfa9bba6ef9df62b03",
+    "width": 1056,
+    "height": 597
+  },
+  {
+    "path": "Assets/Art/Background/架空咖啡馆背景_01.png",
+    "size": 2030251,
+    "sha256": "9ff98e3a780b2dd353de913a63860be2289d7ca98a37a3255d6c6ff3a0db6071",
+    "width": 1662,
+    "height": 946
+  },
+  {
+    "path": "Assets/Art/Background/架空咖啡馆背景_02.png",
+    "size": 1940045,
+    "sha256": "8bdc3e6d168ce6988afc7ae2ac826a56f225b71c7f2e4609b870506e7f607adf",
+    "width": 1673,
+    "height": 940
+  },
+  {
+    "path": "Assets/Art/Background/架空咖啡馆背景_03.png",
+    "size": 2029973,
+    "sha256": "af1a87d7b6a7948098527fc578c1c5c0a52c12c2f51f334e8713b946c98878b5",
+    "width": 1665,
+    "height": 945
+  },
+  {
+    "path": "Assets/Art/Background/World/一楼背景.png",
+    "size": 187947,
+    "sha256": "34a46b3c03f2970df9a5aced6ea975e02ab163e2dc6d90c0db8d4ac62cc248b2",
+    "width": 1117,
+    "height": 408
+  },
+  {
+    "path": "Assets/Art/Background/World/二楼背景.png",
+    "size": 206000,
+    "sha256": "e3b2f7308947960d9edae44d73ae6432afd08d8b93b97e9069b125cd74a14430",
+    "width": 1057,
+    "height": 383
+  },
+  {
+    "path": "Assets/Art/Background/World/地下室背景.png",
+    "size": 224929,
+    "sha256": "f075b65ff271581d8d44610636416fc141e5de33bfb737bcbab2796c7814037a",
+    "width": 1143,
+    "height": 416
+  },
+  {
+    "path": "Assets/Art/FreeCafe/Backgrounds/production-workstation.png",
+    "size": 1932881,
+    "sha256": "a394865b32845dce2de4e4ab34028a5235a156ef4873980bd1d4a36e64d45abe",
+    "width": 1536,
+    "height": 1024
+  },
+  {
+    "path": "Assets/Art/FreeCafe/Entities/beans/default.png",
+    "size": 1655676,
+    "sha256": "2470d8bef540ecd2535448da472942f19fc19ebe6ceb823720493df3ec7481ea",
+    "width": 1404,
+    "height": 887
+  },
+  {
+    "path": "Assets/Art/FreeCafe/Entities/cocoa.drink/default.png",
+    "size": 906227,
+    "sha256": "60e94d5bfcb095874b8c7032570a834d0bb65663103b3036563b07c260e581a4",
+    "width": 1106,
+    "height": 924
+  },
+  {
+    "path": "Assets/Art/FreeCafe/Entities/cocoa.powder/default.png",
+    "size": 1043435,
+    "sha256": "ec8bcb6f1fca32a8ea5f376da287251474d6b097de24e5c8400d1ece0ac594b9",
+    "width": 1375,
+    "height": 687
+  },
+  {
+    "path": "Assets/Art/FreeCafe/Entities/coffee/default.png",
+    "size": 1020800,
+    "sha256": "d530fb78a1f6d933b7fbd50643a9636e1b1be12c78cdd202c12e3001e8307c56",
+    "width": 1164,
+    "height": 934
+  },
+  {
+    "path": "Assets/Art/FreeCafe/Entities/container.extractor/default.png",
+    "size": 451917,
+    "sha256": "eb3268608992ee42b653accac2450eefd5762c88575a9b9848b1083a2e1cab5a",
+    "width": 592,
+    "height": 538
+  },
+  {
+    "path": "Assets/Art/FreeCafe/Entities/container.extractor.filter/default.png",
+    "size": 242950,
+    "sha256": "399353d1d25c133aa4223e930e74491280ee804dca58607602b16c53040e8194",
+    "width": 552,
+    "height": 398
+  },
+  {
+    "path": "Assets/Art/FreeCafe/Entities/container.extractor.lid/default.png",
+    "size": 98271,
+    "sha256": "402b3cb913d85654a55e570190c51b051a3facec6ff9fd00349756c596946c51",
+    "width": 342,
+    "height": 197
+  },
+  {
+    "path": "Assets/Art/FreeCafe/Entities/container.milk-pitcher/empty.png",
+    "size": 1685146,
+    "sha256": "13c3ea8a740977ecceede4de73a2a86cd2ebceddb2b69d2c75acc4775b8a33b5",
+    "width": 1024,
+    "height": 1024
+  },
+  {
+    "path": "Assets/Art/FreeCafe/Entities/container.milk-pitcher/sprite.png",
+    "size": 1662485,
+    "sha256": "5c08f610eec43e5ce3f400ce07b82f1802b73131954a5b775a9f97acb21f1887",
+    "width": 1024,
+    "height": 1024
+  },
+  {
+    "path": "Assets/Art/FreeCafe/Entities/cup.large/coffee.png",
+    "size": 981684,
+    "sha256": "cbd1164289f8dd3dd173e21d279080642a4ee3df82c69755849962c8412ed1db",
+    "width": 1208,
+    "height": 1142
+  },
+  {
+    "path": "Assets/Art/FreeCafe/Entities/cup.large/empty.png",
+    "size": 1077535,
+    "sha256": "ff47b86d3cb8f4c0baa74984f2b8a52d65b6d604917d8a8fabdc11edc6880e50",
+    "width": 1219,
+    "height": 1162
+  },
+  {
+    "path": "Assets/Art/FreeCafe/Entities/cup.large/full.png",
+    "size": 1265586,
+    "sha256": "c57e020d3c109cd7c3fbc9a76574a45d2eb26d36b3a79cd28ecefd252000895f",
+    "width": 1263,
+    "height": 1325
+  },
+  {
+    "path": "Assets/Art/FreeCafe/Entities/cup.large/milk.png",
+    "size": 993908,
+    "sha256": "7d6d7b20336c15ce7e1be90292f637f8d8a18676a6327e3e80303a0ced61a3a8",
+    "width": 1238,
+    "height": 1160
+  },
+  {
+    "path": "Assets/Art/FreeCafe/Entities/cup.large/mixed.png",
+    "size": 1105984,
+    "sha256": "f7206b04724fc5c1c36c98224611f67541cf758136d761a9f1beb92059807f56",
+    "width": 1244,
+    "height": 1147
+  },
+  {
+    "path": "Assets/Art/FreeCafe/Entities/cup.small/coffee.png",
+    "size": 831635,
+    "sha256": "59b95ba8b367bed834da2d66053e03e30e3e3eca59687bf7bc94a8f2e95727e7",
+    "width": 1717,
+    "height": 1516
+  },
+  {
+    "path": "Assets/Art/FreeCafe/Entities/cup.small/empty.png",
+    "size": 1148394,
+    "sha256": "0acef50252042f188166fda46e49ad51108d4aa558763eb1437a4901eeb13b6e",
+    "width": 1331,
+    "height": 1123
+  },
+  {
+    "path": "Assets/Art/FreeCafe/Entities/cup.small/full.png",
+    "size": 1578779,
+    "sha256": "f9e639600074e2236a666e6b3e883dd2054cc9811d08509acce9218cd6276b5d",
+    "width": 1445,
+    "height": 1236
+  },
+  {
+    "path": "Assets/Art/FreeCafe/Entities/cup.small/milk.png",
+    "size": 1250523,
+    "sha256": "613a85ccaad79020c6cb490e00656c44a6ad7c175a2486698ca0f137f3758b97",
+    "width": 1359,
+    "height": 1126
+  },
+  {
+    "path": "Assets/Art/FreeCafe/Entities/cup.small/mixed.png",
+    "size": 1203072,
+    "sha256": "1743889b012503d138153b97bada64b0ff6ddd074e53513c57f5f649cac4f8b1",
+    "width": 1390,
+    "height": 1119
+  },
+  {
+    "path": "Assets/Art/FreeCafe/Entities/delivery/default.png",
+    "size": 1001266,
+    "sha256": "41cb320a82638d6a785aac0bba1946d491d2f3b55a5e12576181cee0d77922f1",
+    "width": 1761,
+    "height": 750
+  },
+  {
+    "path": "Assets/Art/FreeCafe/Entities/equipment.grinder.drawer/default.png",
+    "size": 517921,
+    "sha256": "4e855613d628b0945ad8b39d0fd9e743a46e9ea4a45045ffbfd321da4ff5486d",
+    "width": 659,
+    "height": 558
+  },
+  {
+    "path": "Assets/Art/FreeCafe/Entities/equipment.kettle/default.png",
+    "size": 611846,
+    "sha256": "b4e35fd5841fef3b69510099420c662c7426f4b6cde2beaf42e07a9f9486f13d",
+    "width": 672,
+    "height": 638
+  },
+  {
+    "path": "Assets/Art/FreeCafe/Entities/grounds/default.png",
+    "size": 1110788,
+    "sha256": "b05edf792c853f8a4e2c7468e76bdee11413c04e94e771917365d9f478b9f61f",
+    "width": 1313,
+    "height": 990
+  },
+  {
+    "path": "Assets/Art/FreeCafe/Entities/honey/default.png",
+    "size": 1226949,
+    "sha256": "8899d95e158b7030e5f312924f823f8a6a70545b020053a452b31839fec5c7b8",
+    "width": 1197,
+    "height": 1239
+  },
+  {
+    "path": "Assets/Art/FreeCafe/Entities/hotmilk/default.png",
+    "size": 1267408,
+    "sha256": "27a1c9a940555d8ef4bc87e38158a200502079aaee044f60c1711a61e56b82c4",
+    "width": 1134,
+    "height": 1508
+  },
+  {
+    "path": "Assets/Art/FreeCafe/Entities/machine.brewer/empty.png",
+    "size": 1369193,
+    "sha256": "895864c9f5adbf4e805c07e849991a86dfea0e8efa6f32194be7f10b93a4d3ca",
+    "width": 995,
+    "height": 1449
+  },
+  {
+    "path": "Assets/Art/FreeCafe/Entities/machine.brewer/loaded.png",
+    "size": 1524937,
+    "sha256": "72fd9d6b936750f6fdd7afb4ede84aed6529bd3ba3e716bb3f3b700c40c67474",
+    "width": 1003,
+    "height": 1455
+  },
+  {
+    "path": "Assets/Art/FreeCafe/Entities/machine.brewer/ready.png",
+    "size": 1573764,
+    "sha256": "0ce56cac28309f37519d6679f245a8b49886b8e470734994565271840f1f964e",
+    "width": 1007,
+    "height": 1452
+  },
+  {
+    "path": "Assets/Art/FreeCafe/Entities/machine.grinder/empty.png",
+    "size": 1463410,
+    "sha256": "2902111a9d1faa0cad0445262f50d18141f1e7b42f176499eb8481cb5d02af5d",
+    "width": 1044,
+    "height": 1472
+  },
+  {
+    "path": "Assets/Art/FreeCafe/Entities/machine.grinder/loaded.png",
+    "size": 1463410,
+    "sha256": "2902111a9d1faa0cad0445262f50d18141f1e7b42f176499eb8481cb5d02af5d",
+    "width": 1044,
+    "height": 1472
+  },
+  {
+    "path": "Assets/Art/FreeCafe/Entities/machine.grinder/processing.png",
+    "size": 1611466,
+    "sha256": "f03a11c560eff5fa93a0e59843fa5e259dbf784fe9dc18b61696b79e8a9c9348",
+    "width": 1102,
+    "height": 1526
+  },
+  {
+    "path": "Assets/Art/FreeCafe/Entities/machine.grinder/ready.png",
+    "size": 1866604,
+    "sha256": "8714493cf5cfb4548a7e071304e4cccce38a96cd0da942991ace54b8fd37897f",
+    "width": 1194,
+    "height": 1575
+  },
+  {
+    "path": "Assets/Art/FreeCafe/Entities/machine.heater/boiling.png",
+    "size": 1598647,
+    "sha256": "0a3ef40849907cfbc1fb29147a8c9c7f97942f7d95617373eff74cc2969f5fe7",
+    "width": 1341,
+    "height": 1540
+  },
+  {
+    "path": "Assets/Art/FreeCafe/Entities/machine.heater/empty.png",
+    "size": 881123,
+    "sha256": "362809d04458c3137d8cbc73d600b5a103749bedbf72fba7ed2bcb6d5ae0c5b2",
+    "width": 1329,
+    "height": 948
+  },
+  {
+    "path": "Assets/Art/FreeCafe/Entities/machine.heater/loaded.png",
+    "size": 995223,
+    "sha256": "0c29f802d0ff5a8b5d1dc43cdb71452146cbfeaae0614fb2df54e5b14d29e1ef",
+    "width": 1389,
+    "height": 947
+  },
+  {
+    "path": "Assets/Art/FreeCafe/Entities/machine.heater/processing.png",
+    "size": 995223,
+    "sha256": "0c29f802d0ff5a8b5d1dc43cdb71452146cbfeaae0614fb2df54e5b14d29e1ef",
+    "width": 1389,
+    "height": 947
+  },
+  {
+    "path": "Assets/Art/FreeCafe/Entities/machine.heater/room.png",
+    "size": 995223,
+    "sha256": "0c29f802d0ff5a8b5d1dc43cdb71452146cbfeaae0614fb2df54e5b14d29e1ef",
+    "width": 1389,
+    "height": 947
+  },
+  {
+    "path": "Assets/Art/FreeCafe/Entities/machine.heater/warm.png",
+    "size": 1043312,
+    "sha256": "f4e779b2576089544a1dc47dbac6aa2216b4482a254af43672604d0ed3fd729d",
+    "width": 1364,
+    "height": 1026
+  },
+  {
+    "path": "Assets/Art/FreeCafe/Entities/machine.mixer/empty.png",
+    "size": 999658,
+    "sha256": "2ba976af66c7ad117946b8da3dcf6ea1181b9e75bc3ade17332d6823ffd901e0",
+    "width": 809,
+    "height": 1349
+  },
+  {
+    "path": "Assets/Art/FreeCafe/Entities/machine.mixer/loaded.png",
+    "size": 1182498,
+    "sha256": "8edc4d423f75f9d5c700c3757fe9b4e6b59b486136e390e264889d63e6344ab8",
+    "width": 803,
+    "height": 1332
+  },
+  {
+    "path": "Assets/Art/FreeCafe/Entities/machine.mixer/processing.png",
+    "size": 1200446,
+    "sha256": "9a1b20ec17bbb2e39be25d3f2f0e3f18453c68378991c22866b6d1204e74c256",
+    "width": 821,
+    "height": 1356
+  },
+  {
+    "path": "Assets/Art/FreeCafe/Entities/machine.mixer/ready.png",
+    "size": 1101036,
+    "sha256": "eeba676959a9a0c10a1c109c599bdaf3c845c572b48ce6b6587fda63612908c3",
+    "width": 803,
+    "height": 1352
+  },
+  {
+    "path": "Assets/Art/FreeCafe/Entities/machine.stove/default.png",
+    "size": 593346,
+    "sha256": "cce94c4b00defc7acaffe5f2f12c5cac2be13abe97f256fd41f94552a0a49443",
+    "width": 626,
+    "height": 540
+  },
+  {
+    "path": "Assets/Art/FreeCafe/Entities/matcha.drink/default.png",
+    "size": 1107344,
+    "sha256": "7670f0f57a4bc845328b76ba17c42329a70865a01ab4556c7c5eed23e4bf42f6",
+    "width": 1168,
+    "height": 930
+  },
+  {
+    "path": "Assets/Art/FreeCafe/Entities/matcha.powder/default.png",
+    "size": 870434,
+    "sha256": "9c60eea8697310092d59417ddc37559fe82fe19774e15e04b57856a3c2490b33",
+    "width": 1252,
+    "height": 769
+  },
+  {
+    "path": "Assets/Art/FreeCafe/Entities/milk/default.png",
+    "size": 1133829,
+    "sha256": "d3ed742b24510804feb0820895ce141291b8b20f5ef6fd44c389eabeff542634",
+    "width": 1110,
+    "height": 1144
+  },
+  {
+    "path": "Assets/Art/FreeCafe/Entities/source.beans/default.png",
+    "size": 2192621,
+    "sha256": "5e693d2f78181f80b4a3d669c660caa54a935855257f1f9352a31849c54854db",
+    "width": 1306,
+    "height": 1307
+  },
+  {
+    "path": "Assets/Art/FreeCafe/Entities/source.cocoa/default.png",
+    "size": 838650,
+    "sha256": "9b49c818aab04a9352f9596143a3ebac6fa8f257d02184b89226e80cb3f6b74f",
+    "width": 915,
+    "height": 1284
+  },
+  {
+    "path": "Assets/Art/FreeCafe/Entities/source.cups.large/default.png",
+    "size": 1277912,
+    "sha256": "491706789a1dcf4222ddb1a41663e864e09a50cbbfd4773a411fe3267c7adcef",
+    "width": 1044,
+    "height": 1506
+  },
+  {
+    "path": "Assets/Art/FreeCafe/Entities/source.cups.small/default.png",
+    "size": 1549895,
+    "sha256": "ce88cb57167f0d94c37aa669c95aa28743354d49f954519d2f1ba5f446e0a17d",
+    "width": 1077,
+    "height": 1548
+  },
+  {
+    "path": "Assets/Art/FreeCafe/Entities/source.honey/default.png",
+    "size": 1213965,
+    "sha256": "67ee5aff929990811f85a62da9966ad48d8a13ec3f015cf5909fab367b4894dc",
+    "width": 1071,
+    "height": 1433
+  },
+  {
+    "path": "Assets/Art/FreeCafe/Entities/source.matcha/default.png",
+    "size": 1213279,
+    "sha256": "ab7e3cd8254f404536bf58cb6db99b5f59c818ff3deb192dfa3db2cd9053f5a3",
+    "width": 896,
+    "height": 1346
+  },
+  {
+    "path": "Assets/Art/FreeCafe/Entities/source.milk/default.png",
+    "size": 954991,
+    "sha256": "f9502fdfddd42d27355962b90548551010b720989f2f80436a4254e691a3039d",
+    "width": 632,
+    "height": 1394
+  },
+  {
+    "path": "Assets/Art/FreeCafe/Entities/sugar/default.png",
+    "size": 1713952,
+    "sha256": "f5cdbec4b7ec839fa0e82bdca36332d8c59f03aa420298f259e3ca23eeac7aad",
+    "width": 1419,
+    "height": 1170
+  },
+  {
+    "path": "Assets/Art/FreeCafe/Entities/tool.latte-art/default.png",
+    "size": 1496200,
+    "sha256": "8e86f867316471921a1c966a5f66a069403b48867f392335cd170371cc912b9e",
+    "width": 1227,
+    "height": 1118
+  },
+  {
+    "path": "Assets/Art/FreeCafe/Entities/trash/default.png",
+    "size": 986789,
+    "sha256": "90ebed36f8038c6456a607618a6e659db99bc240848f8acde9d57fabe5615c3e",
+    "width": 922,
+    "height": 1057
+  },
+  {
+    "path": "Assets/Art/FreeCafe/Entities/water/default.png",
+    "size": 1586346,
+    "sha256": "ee89653c0714ac9aa51754fe46a52bc151826db9d7ecdfd41cfaee1b758ebca1",
+    "width": 1173,
+    "height": 1235
+  },
+  {
+    "path": "Assets/Art/FreeCafe/Geometry/delivery-bell.png",
+    "size": 724,
+    "sha256": "3ca50c4f8943c9bbc69eb55bf7360e929289301b786153dc0a43258776bf1856",
+    "width": 128,
+    "height": 96
+  },
+  {
+    "path": "Assets/Art/FreeCafe/Geometry/delivery-zone-pixel.png",
+    "size": 68,
+    "sha256": "2c5aaf41bb79b35d23604986f34bcac5674f30be3d718990fa8b02e8f8935b19",
+    "width": 1,
+    "height": 1
+  },
+  {
+    "path": "Assets/Art/FreeCafe/Whitebox/area.basement.png",
+    "size": 3014,
+    "sha256": "de7eb3a5e69490e4ac24471d95896f099643a8a19eab41767bbbce1e99e24a2d",
+    "width": 900,
+    "height": 500
+  },
+  {
+    "path": "Assets/Art/FreeCafe/Whitebox/area.cafe.png",
+    "size": 3049,
+    "sha256": "838af0d6bb93c9c32588d0266191a496d9368c432bd97a3cfd2a9276cadd2412",
+    "width": 900,
+    "height": 500
+  },
+  {
+    "path": "Assets/Art/FreeCafe/Whitebox/area.counter.png",
+    "size": 2953,
+    "sha256": "9b2109eb803e9efe32b3487a9dc101e64b62c78e6e0436d1a65c570b1299994e",
+    "width": 900,
+    "height": 500
+  },
+  {
+    "path": "Assets/Art/FreeCafe/Whitebox/area.top.png",
+    "size": 3009,
+    "sha256": "442a53a2a0a3cacf4d50f95f849e632c563963562cef7dd8df6d9a5f61724f57",
+    "width": 900,
+    "height": 500
+  },
+  {
+    "path": "Assets/Art/FreeCafe/Whitebox/beans.png",
+    "size": 1928,
+    "sha256": "a054c509589abaa87fad089aade3d577372cdf1ee827fea46a636f701982d912",
+    "width": 256,
+    "height": 256
+  },
+  {
+    "path": "Assets/Art/FreeCafe/Whitebox/cocoa.drink.png",
+    "size": 1004,
+    "sha256": "5e94350bdd32a4bb0ae56cc31100f68ae6e659b11d72bb03a027654fafd0da5f",
+    "width": 256,
+    "height": 256
+  },
+  {
+    "path": "Assets/Art/FreeCafe/Whitebox/cocoa.powder.png",
+    "size": 1004,
+    "sha256": "5e94350bdd32a4bb0ae56cc31100f68ae6e659b11d72bb03a027654fafd0da5f",
+    "width": 256,
+    "height": 256
+  },
+  {
+    "path": "Assets/Art/FreeCafe/Whitebox/coffee.png",
+    "size": 1004,
+    "sha256": "5e94350bdd32a4bb0ae56cc31100f68ae6e659b11d72bb03a027654fafd0da5f",
+    "width": 256,
+    "height": 256
+  },
+  {
+    "path": "Assets/Art/FreeCafe/Whitebox/cup.large.png",
+    "size": 1554,
+    "sha256": "9c1d77a7396944d86d455d47651cbd39524061b965bb3f460fb0d0db18f78d38",
+    "width": 256,
+    "height": 256
+  },
+  {
+    "path": "Assets/Art/FreeCafe/Whitebox/cup.small.png",
+    "size": 1554,
+    "sha256": "9c1d77a7396944d86d455d47651cbd39524061b965bb3f460fb0d0db18f78d38",
+    "width": 256,
+    "height": 256
+  },
+  {
+    "path": "Assets/Art/FreeCafe/Whitebox/customer.png",
+    "size": 1957,
+    "sha256": "61bdf65c150e99dd1e135b3f7ee883368cf7be4102312faaeb80a8036729776b",
+    "width": 256,
+    "height": 256
+  },
+  {
+    "path": "Assets/Art/FreeCafe/Whitebox/delivery.png",
+    "size": 1160,
+    "sha256": "39256712b02820ea535097e4f9b7eeca0b343d439aca29fa6f377246b02b21f5",
+    "width": 256,
+    "height": 256
+  },
+  {
+    "path": "Assets/Art/FreeCafe/Whitebox/future.newspaper.png",
+    "size": 1004,
+    "sha256": "5e94350bdd32a4bb0ae56cc31100f68ae6e659b11d72bb03a027654fafd0da5f",
+    "width": 256,
+    "height": 256
+  },
+  {
+    "path": "Assets/Art/FreeCafe/Whitebox/future.press.png",
+    "size": 1004,
+    "sha256": "5e94350bdd32a4bb0ae56cc31100f68ae6e659b11d72bb03a027654fafd0da5f",
+    "width": 256,
+    "height": 256
+  },
+  {
+    "path": "Assets/Art/FreeCafe/Whitebox/future.topic.png",
+    "size": 1004,
+    "sha256": "5e94350bdd32a4bb0ae56cc31100f68ae6e659b11d72bb03a027654fafd0da5f",
+    "width": 256,
+    "height": 256
+  },
+  {
+    "path": "Assets/Art/FreeCafe/Whitebox/grounds.png",
+    "size": 1004,
+    "sha256": "5e94350bdd32a4bb0ae56cc31100f68ae6e659b11d72bb03a027654fafd0da5f",
+    "width": 256,
+    "height": 256
+  },
+  {
+    "path": "Assets/Art/FreeCafe/Whitebox/honey.png",
+    "size": 1004,
+    "sha256": "5e94350bdd32a4bb0ae56cc31100f68ae6e659b11d72bb03a027654fafd0da5f",
+    "width": 256,
+    "height": 256
+  },
+  {
+    "path": "Assets/Art/FreeCafe/Whitebox/hotmilk.png",
+    "size": 1004,
+    "sha256": "5e94350bdd32a4bb0ae56cc31100f68ae6e659b11d72bb03a027654fafd0da5f",
+    "width": 256,
+    "height": 256
+  },
+  {
+    "path": "Assets/Art/FreeCafe/Whitebox/machine.brewer.png",
+    "size": 1049,
+    "sha256": "f84f171a23c3c1035b17676b902254be79880439ac0b51a379badbd57f091d6b",
+    "width": 256,
+    "height": 256
+  },
+  {
+    "path": "Assets/Art/FreeCafe/Whitebox/machine.grinder.png",
+    "size": 1049,
+    "sha256": "f84f171a23c3c1035b17676b902254be79880439ac0b51a379badbd57f091d6b",
+    "width": 256,
+    "height": 256
+  },
+  {
+    "path": "Assets/Art/FreeCafe/Whitebox/machine.heater.png",
+    "size": 1049,
+    "sha256": "f84f171a23c3c1035b17676b902254be79880439ac0b51a379badbd57f091d6b",
+    "width": 256,
+    "height": 256
+  },
+  {
+    "path": "Assets/Art/FreeCafe/Whitebox/machine.mixer.png",
+    "size": 1049,
+    "sha256": "f84f171a23c3c1035b17676b902254be79880439ac0b51a379badbd57f091d6b",
+    "width": 256,
+    "height": 256
+  },
+  {
+    "path": "Assets/Art/FreeCafe/Whitebox/matcha.drink.png",
+    "size": 1004,
+    "sha256": "5e94350bdd32a4bb0ae56cc31100f68ae6e659b11d72bb03a027654fafd0da5f",
+    "width": 256,
+    "height": 256
+  },
+  {
+    "path": "Assets/Art/FreeCafe/Whitebox/matcha.powder.png",
+    "size": 1004,
+    "sha256": "5e94350bdd32a4bb0ae56cc31100f68ae6e659b11d72bb03a027654fafd0da5f",
+    "width": 256,
+    "height": 256
+  },
+  {
+    "path": "Assets/Art/FreeCafe/Whitebox/milk.png",
+    "size": 1004,
+    "sha256": "5e94350bdd32a4bb0ae56cc31100f68ae6e659b11d72bb03a027654fafd0da5f",
+    "width": 256,
+    "height": 256
+  },
+  {
+    "path": "Assets/Art/FreeCafe/Whitebox/source.beans.png",
+    "size": 1151,
+    "sha256": "9601f3cc48bef6cb375f997de379ce19ea24251ea1432f3d3a367a205ecdcf8f",
+    "width": 256,
+    "height": 256
+  },
+  {
+    "path": "Assets/Art/FreeCafe/Whitebox/source.cocoa.png",
+    "size": 1151,
+    "sha256": "9601f3cc48bef6cb375f997de379ce19ea24251ea1432f3d3a367a205ecdcf8f",
+    "width": 256,
+    "height": 256
+  },
+  {
+    "path": "Assets/Art/FreeCafe/Whitebox/source.cups.large.png",
+    "size": 1151,
+    "sha256": "9601f3cc48bef6cb375f997de379ce19ea24251ea1432f3d3a367a205ecdcf8f",
+    "width": 256,
+    "height": 256
+  },
+  {
+    "path": "Assets/Art/FreeCafe/Whitebox/source.cups.small.png",
+    "size": 1151,
+    "sha256": "9601f3cc48bef6cb375f997de379ce19ea24251ea1432f3d3a367a205ecdcf8f",
+    "width": 256,
+    "height": 256
+  },
+  {
+    "path": "Assets/Art/FreeCafe/Whitebox/source.honey.png",
+    "size": 1151,
+    "sha256": "9601f3cc48bef6cb375f997de379ce19ea24251ea1432f3d3a367a205ecdcf8f",
+    "width": 256,
+    "height": 256
+  },
+  {
+    "path": "Assets/Art/FreeCafe/Whitebox/source.matcha.png",
+    "size": 1151,
+    "sha256": "9601f3cc48bef6cb375f997de379ce19ea24251ea1432f3d3a367a205ecdcf8f",
+    "width": 256,
+    "height": 256
+  },
+  {
+    "path": "Assets/Art/FreeCafe/Whitebox/source.milk.png",
+    "size": 1151,
+    "sha256": "9601f3cc48bef6cb375f997de379ce19ea24251ea1432f3d3a367a205ecdcf8f",
+    "width": 256,
+    "height": 256
+  },
+  {
+    "path": "Assets/Art/FreeCafe/Whitebox/trash.png",
+    "size": 776,
+    "sha256": "6b26b8a96bbaf90947bf23c98cec96f32cd7d620ceae9643357a6ff860ef7618",
+    "width": 256,
+    "height": 256
+  },
+  {
+    "path": "Assets/Art/FreeCafe/Whitebox/ui.button.png",
+    "size": 1004,
+    "sha256": "5e94350bdd32a4bb0ae56cc31100f68ae6e659b11d72bb03a027654fafd0da5f",
+    "width": 256,
+    "height": 256
+  },
+  {
+    "path": "Assets/Art/FreeCafe/Whitebox/ui.panel.png",
+    "size": 1004,
+    "sha256": "5e94350bdd32a4bb0ae56cc31100f68ae6e659b11d72bb03a027654fafd0da5f",
+    "width": 256,
+    "height": 256
+  },
+  {
+    "path": "Assets/Art/FreeCafe/Whitebox/ui.portal.png",
+    "size": 1180,
+    "sha256": "94378fe8ee88b0b9e7590d4f51bca74d55188b0206ce29697d8758ba8d9e7473",
+    "width": 256,
+    "height": 256
+  },
+  {
+    "path": "Assets/Art/FreeCafe/Whitebox/ui.progress.png",
+    "size": 1004,
+    "sha256": "5e94350bdd32a4bb0ae56cc31100f68ae6e659b11d72bb03a027654fafd0da5f",
+    "width": 256,
+    "height": 256
+  },
+  {
+    "path": "Assets/Art/FreeCafe/Whitebox/ui.selection.png",
+    "size": 1004,
+    "sha256": "5e94350bdd32a4bb0ae56cc31100f68ae6e659b11d72bb03a027654fafd0da5f",
+    "width": 256,
+    "height": 256
+  },
+  {
+    "path": "Assets/Art/Func/世界情况.psd",
+    "size": 47451380,
+    "sha256": "73856cbee05ed13b6e31857ccccfe357cffefca2c8c9a7f8fb379bacb7b23f2a",
+    "width": 4096,
+    "height": 2304
+  },
+  {
+    "path": "Assets/Art/Func/主界面.psd",
+    "size": 40972184,
+    "sha256": "13884c2b9dbda9bceed23431000e246cf20c8fc05b92dca3c14f9455396bb678",
+    "width": 4096,
+    "height": 2304
+  },
+  {
+    "path": "Assets/Art/Func/人物信息.psd",
+    "size": 52703609,
+    "sha256": "5269256af13b3a62c21c3c2378cd460234115c7bd0d382cd4129aa36554a11d3",
+    "width": 4096,
+    "height": 2304
+  },
+  {
+    "path": "Assets/Art/Func/例图.png",
+    "size": 904781,
+    "sha256": "878140d606c51d1086ed974db59938b8c8e0a37d07e90533079b9d503477b2d1",
+    "width": 1876,
+    "height": 788
+  },
+  {
+    "path": "Assets/Art/Func/信封.psd",
+    "size": 58653238,
+    "sha256": "2a584679e53a380b97712308ea0573f672cf1372b99df726a2edbe11bc20708b",
+    "width": 4096,
+    "height": 2304
+  },
+  {
+    "path": "Assets/Art/Func/存档管理.psd",
+    "size": 70087485,
+    "sha256": "122c293a0ad9732e8e47cac2d094ef263ae055575c842b5c03243f80026ae694",
+    "width": 4096,
+    "height": 2304
+  },
+  {
+    "path": "Assets/Art/Func/我的信息.psd",
+    "size": 47477216,
+    "sha256": "88329a80a507e6e0367a70511ab2b8034bd14c08f3499a6c3e4d3809cf1ed2c0",
+    "width": 4096,
+    "height": 2304
+  },
+  {
+    "path": "Assets/Art/Func/暂停和设置_ (1).psd",
+    "size": 65643478,
+    "sha256": "d53c3d7c55a9d5b9f1b8c3ed8d7f3ba8630d7c144c6b6a8bda6c5bf0b750dc7c",
+    "width": 4096,
+    "height": 2304
+  },
+  {
+    "path": "Assets/Art/Func/暂停和设置_.psd",
+    "size": 84568423,
+    "sha256": "8498a277a2948a1d38aa343cb34244d66b6fed4e9debe533d7b0dbcb0d0701c8",
+    "width": 4096,
+    "height": 2304
+  },
+  {
+    "path": "Assets/Art/Func/UGUI/DetailsIdleTab.png",
+    "size": 10138,
+    "sha256": "a7a735138bf55a0bd9ea2f5c5505214aac5e72eaf268f46ffa068c8e802e30b9",
+    "width": 239,
+    "height": 193
+  },
+  {
+    "path": "Assets/Art/Func/UGUI/WorldIdleButton.png",
+    "size": 18293,
+    "sha256": "2762c1903e758b9d991b4afbe5814739ae425d19c083751b0e2075b0bd8e49fa",
+    "width": 509,
+    "height": 214
+  },
+  {
+    "path": "Assets/Art/Func/UI/CoffeeVolumeHandle.png",
+    "size": 12685,
+    "sha256": "f21ff10b91e1d26791e59aa0f4609bcd6696ea4f063fe54006f865275a380310",
+    "width": 82,
+    "height": 90
+  },
+  {
+    "path": "Assets/Art/Func/世界情况/其他位置图钉.png",
+    "size": 9465897,
+    "sha256": "b3e4b68b60ce6ee7c8ec53e284bc06a7a6331c644a215bd7afdb40106ce664a8",
+    "width": 4096,
+    "height": 2304
+  },
+  {
+    "path": "Assets/Art/Func/世界情况/图层 3 副本 2.png",
+    "size": 226689,
+    "sha256": "b1f5e87ec77529b0ea57adc40c5181b1e28de692f0cc356e808b3c55694c1801",
+    "width": 3099,
+    "height": 1658
+  },
+  {
+    "path": "Assets/Art/Func/世界情况/按键（未选中）.png",
+    "size": 72307,
+    "sha256": "a4642cd16d0098819022f4e8201dec9c5d2488934bfa9e35e8632b7c7c2a2cca",
+    "width": 509,
+    "height": 760
+  },
+  {
+    "path": "Assets/Art/Func/世界情况/文字装饰框.png",
+    "size": 27965,
+    "sha256": "947287b1bf2dac673be4592a395583affd001c9c61db5e35186be81c81e8aebe",
+    "width": 1776,
+    "height": 43
+  },
+  {
+    "path": "Assets/Art/Func/世界情况/柱子 副本 2.png",
+    "size": 2904456,
+    "sha256": "e2347ad155ab2daecda484e316dcf992c72dd06635654ab17ccbb21462f785ff",
+    "width": 3768,
+    "height": 1889
+  },
+  {
+    "path": "Assets/Art/Func/世界情况/滑动条.png",
+    "size": 8234,
+    "sha256": "6f99c6a21c5a88f2f14a0a8bd5e45415c453f0f35acf18e5eb495791babb594e",
+    "width": 22,
+    "height": 1163
+  },
+  {
+    "path": "Assets/Art/Func/世界情况/滑动条底图.png",
+    "size": 21977,
+    "sha256": "881c3388b0c148412b78f5f49a867bfcf1be4af6c79699d59e067a57b0144fd2",
+    "width": 22,
+    "height": 1091
+  },
+  {
+    "path": "Assets/Art/Func/世界情况/点击查看相关信息.png",
+    "size": 78405,
+    "sha256": "b1e7ee6443e64afd7a56247eebc54acc6e7a0dc3be3ec1240912b0dae90070be",
+    "width": 2358,
+    "height": 868
+  },
+  {
+    "path": "Assets/Art/Func/世界情况/进度条-槽.png",
+    "size": 4397,
+    "sha256": "260a1ae5920986a206ef9ecdfb101bc078cbe94d84dbf2e77df544768aa47b4f",
+    "width": 1751,
+    "height": 32
+  },
+  {
+    "path": "Assets/Art/Func/世界情况/进度条高亮.png",
+    "size": 2980,
+    "sha256": "be97d2f725c70226e4032ea4125cf4c7f1ce521fb5bec28caf66af0e7aa75a14",
+    "width": 1751,
+    "height": 32
+  },
+  {
+    "path": "Assets/Art/Func/世界情况/退出按键 副本.png",
+    "size": 20414,
+    "sha256": "6a16d7d2d41df0772325992495542229b1742403507f93c2b87b62878013fe0f",
+    "width": 171,
+    "height": 237
+  },
+  {
+    "path": "Assets/Art/Func/世界情况/选中按键.png",
+    "size": 28245,
+    "sha256": "0f08aa73e33bd6742ec8a86255382476a0d59c161dc77802c6b7bfb616c456af",
+    "width": 509,
+    "height": 214
+  },
+  {
+    "path": "Assets/Art/Func/世界情况/页签底（选中） 副本 2.png",
+    "size": 34603,
+    "sha256": "3634e90f9d69afb6426934a317eb913119dd3effebdda050414d56588f5eafc5",
+    "width": 239,
+    "height": 340
+  },
+  {
+    "path": "Assets/Art/Func/世界情况/页签（未选中） 副本.png",
+    "size": 20615,
+    "sha256": "f6bd968518028c25c1b7c62601a6810d97201efb7da16f3cdfb358baf60a8bbf",
+    "width": 490,
+    "height": 201
+  },
+  {
+    "path": "Assets/Art/Func/人物信息/人物底图.png",
+    "size": 679440,
+    "sha256": "9038d6e09088bfe71835a1f9d2b5d740f62318ad4ad8795469db4135bfefdbae",
+    "width": 1937,
+    "height": 1271
+  },
+  {
+    "path": "Assets/Art/Func/人物信息/咖啡底图 副本.png",
+    "size": 3292282,
+    "sha256": "85c5898b451e6bacb0304bce3467eb4cd96b9af3d0150c969b35abc87513bad6",
+    "width": 3658,
+    "height": 2757
+  },
+  {
+    "path": "Assets/Art/Func/人物信息/图层 3 副本.png",
+    "size": 226689,
+    "sha256": "b1f5e87ec77529b0ea57adc40c5181b1e28de692f0cc356e808b3c55694c1801",
+    "width": 3099,
+    "height": 1658
+  },
+  {
+    "path": "Assets/Art/Func/人物信息/大头像显示处.png",
+    "size": 188310,
+    "sha256": "fbdc51a0f99e138cd1518eeeb21fb62f43007afc436736a60005d3faef30c0bf",
+    "width": 327,
+    "height": 414
+  },
+  {
+    "path": "Assets/Art/Func/人物信息/头像显示底框.png",
+    "size": 153973,
+    "sha256": "6ae8a84c42e13bf71508df852a50e2fdcfa9e9aaf181cc5e07a1b04ff2c3747a",
+    "width": 660,
+    "height": 676
+  },
+  {
+    "path": "Assets/Art/Func/人物信息/悬浮显示框 副本.png",
+    "size": 167141,
+    "sha256": "e7dc7258319422941a0beac7ff75d8466e6bd316cac82b1bb2fc0a3a22ce7fd0",
+    "width": 555,
+    "height": 798
+  },
+  {
+    "path": "Assets/Art/Func/人物信息/文字 副本.png",
+    "size": 121747,
+    "sha256": "e462c20f9d6a878f629bcea7dd72e4d622f6e1f1e8a69706a1785a07332e1037",
+    "width": 2516,
+    "height": 1507
+  },
+  {
+    "path": "Assets/Art/Func/人物信息/文字.png",
+    "size": 7600,
+    "sha256": "abe43f5ae3076b35177e1eb616e97f14453d359611080acd45c998708de6b154",
+    "width": 46,
+    "height": 1464
+  },
+  {
+    "path": "Assets/Art/Func/人物信息/组 3.png",
+    "size": 9465897,
+    "sha256": "b3e4b68b60ce6ee7c8ec53e284bc06a7a6331c644a215bd7afdb40106ce664a8",
+    "width": 4096,
+    "height": 2304
+  },
+  {
+    "path": "Assets/Art/Func/人物信息/进度.png",
+    "size": 21997,
+    "sha256": "c56b657864fe5253b7f57400873abdc041ca77dc3ee4bd190a50ae9279dc96ea",
+    "width": 22,
+    "height": 1163
+  },
+  {
+    "path": "Assets/Art/Func/人物信息/进度条.png",
+    "size": 76552,
+    "sha256": "08f487c36a2a6286c9b30dc009cac6db852ecd4ffb41215f76748f3b17ee8072",
+    "width": 174,
+    "height": 1309
+  },
+  {
+    "path": "Assets/Art/Func/人物信息/退出按键.png",
+    "size": 20414,
+    "sha256": "6a16d7d2d41df0772325992495542229b1742403507f93c2b87b62878013fe0f",
+    "width": 171,
+    "height": 237
+  },
+  {
+    "path": "Assets/Art/Func/人物信息/问号.png",
+    "size": 20630,
+    "sha256": "bb57de99bd764121e790c67d06bba882ef3ca8a129d7f27eb2a8cb2386ad148d",
+    "width": 149,
+    "height": 237
+  },
+  {
+    "path": "Assets/Art/Func/人物信息/页签底（选中） 副本.png",
+    "size": 34603,
+    "sha256": "3634e90f9d69afb6426934a317eb913119dd3effebdda050414d56588f5eafc5",
+    "width": 239,
+    "height": 340
+  },
+  {
+    "path": "Assets/Art/Func/人物信息/页签（未选中） 副本.png",
+    "size": 14727,
+    "sha256": "835fa70818f8f5b5ace8d768e4584d301c0bd8293668d255cf95160bd4a08085",
+    "width": 487,
+    "height": 192
+  },
+  {
+    "path": "Assets/Art/Func/信封/信封出现.png",
+    "size": 4535436,
+    "sha256": "e5c62cd77550fc54a95fd3b71b4c0f5c90f01fc9174e1f8e4b7189a96c0839ac",
+    "width": 2475,
+    "height": 1370
+  },
+  {
+    "path": "Assets/Art/Func/信封/信封按钮背景 1.png",
+    "size": 50155,
+    "sha256": "fbf9e9dd839190027a62aac0cf97f783f796cced5e5310c26f192bb282ab2aca",
+    "width": 4096,
+    "height": 2304
+  },
+  {
+    "path": "Assets/Art/Func/信封/信封自动打开.png",
+    "size": 3727642,
+    "sha256": "df2f2c00cc49d50ad01fe247ae6e5150983e0682ef85be0944171d8db8f8d31b",
+    "width": 2166,
+    "height": 1563
+  },
+  {
+    "path": "Assets/Art/Func/信封/底图.png",
+    "size": 8465820,
+    "sha256": "f7c7b272d7a272f65e999fe90b390fce55829b28fb0ac46e52d91f6621a86b25",
+    "width": 3203,
+    "height": 2169
+  },
+  {
+    "path": "Assets/Art/Func/信封/背景.png",
+    "size": 171286,
+    "sha256": "29410467a7af80b850adba4f489f6bf74818ca4e176bff4ebfaf4abc1ea1712a",
+    "width": 4096,
+    "height": 2304
+  },
+  {
+    "path": "Assets/Art/Func/我的信息/-悬停查看相关属性-.png",
+    "size": 176653,
+    "sha256": "df96fe3f96f268e6a8f4bf1674029e1fbaef791c332135f82198719dd4b2c3db",
+    "width": 2247,
+    "height": 1330
+  },
+  {
+    "path": "Assets/Art/Func/我的信息/图层 2.png",
+    "size": 41634,
+    "sha256": "3901ea8c1b05fec04bf5d0621330b90d89f86236444aec68c2175715dac45418",
+    "width": 1275,
+    "height": 106
+  },
+  {
+    "path": "Assets/Art/Func/我的信息/图层 3.png",
+    "size": 226689,
+    "sha256": "b1f5e87ec77529b0ea57adc40c5181b1e28de692f0cc356e808b3c55694c1801",
+    "width": 3099,
+    "height": 1658
+  },
+  {
+    "path": "Assets/Art/Func/我的信息/底图.png",
+    "size": 2942612,
+    "sha256": "19f91d737a961dc62dea7ddae2ec759210f53a94910cae907ccec6324927b4b3",
+    "width": 3630,
+    "height": 1889
+  },
+  {
+    "path": "Assets/Art/Func/我的信息/底框 副本.png",
+    "size": 342471,
+    "sha256": "cdadf55a589b094a9a35550f4bf13b72507247e1b05a5d8949ec2e56939c6ce4",
+    "width": 2195,
+    "height": 1153
+  },
+  {
+    "path": "Assets/Art/Func/我的信息/悬浮显示框.png",
+    "size": 61125,
+    "sha256": "959387c2803b7b8f80bf7ceef7e6224ea7dfaf61025ebd637de498da226fefe8",
+    "width": 419,
+    "height": 596
+  },
+  {
+    "path": "Assets/Art/Func/我的信息/文本.png",
+    "size": 8263,
+    "sha256": "52ef86f058027c0aeda02a1b4f6af5da2db3874fa5e73aed710812b1684e1f1f",
+    "width": 320,
+    "height": 220
+  },
+  {
+    "path": "Assets/Art/Func/我的信息/照片底.png",
+    "size": 72928,
+    "sha256": "20464825059e4ed1f2f3daf2dd464a09051b0eb3f6c1a5de879234f286189de6",
+    "width": 488,
+    "height": 593
+  },
+  {
+    "path": "Assets/Art/Func/我的信息/组 3.png",
+    "size": 9465897,
+    "sha256": "b3e4b68b60ce6ee7c8ec53e284bc06a7a6331c644a215bd7afdb40106ce664a8",
+    "width": 4096,
+    "height": 2304
+  },
+  {
+    "path": "Assets/Art/Func/我的信息/退出按键.png",
+    "size": 20414,
+    "sha256": "6a16d7d2d41df0772325992495542229b1742403507f93c2b87b62878013fe0f",
+    "width": 171,
+    "height": 237
+  },
+  {
+    "path": "Assets/Art/Func/我的信息/页签底（选中）.png",
+    "size": 34603,
+    "sha256": "3634e90f9d69afb6426934a317eb913119dd3effebdda050414d56588f5eafc5",
+    "width": 239,
+    "height": 340
+  },
+  {
+    "path": "Assets/Art/Func/我的信息/页签（未选中）.png",
+    "size": 17137,
+    "sha256": "5c1cc7b036c8093b18f85d86e267376e93825b0529e5bfff172c66caa20a5554",
+    "width": 738,
+    "height": 193
+  },
+  {
+    "path": "Assets/Art/Func/暂停和设置_ (1)/1280X1024.png",
+    "size": 18296,
+    "sha256": "eab446129950245537fa139badadd365f137a9aecd1ede4cbc2665794c34d7f8",
+    "width": 561,
+    "height": 77
+  },
+  {
+    "path": "Assets/Art/Func/暂停和设置_ (1)/1600X1024.png",
+    "size": 18054,
+    "sha256": "2ee21869bf9e6c64004c55142f8f2bebf4f84af615f59ee8bccb2ea9b63e211a",
+    "width": 562,
+    "height": 76
+  },
+  {
+    "path": "Assets/Art/Func/暂停和设置_ (1)/1680X1050.png",
+    "size": 17862,
+    "sha256": "4086993f05595424f859e1f6f9cdb67778e3035c046e23cfcfca54cfe48a3114",
+    "width": 558,
+    "height": 75
+  },
+  {
+    "path": "Assets/Art/Func/暂停和设置_ (1)/_矩形_.png",
+    "size": 3933,
+    "sha256": "e06468783b746ade163838bb7ef94bca513e2908810a4bd001e6fb859141f38f",
+    "width": 821,
+    "height": 148
+  },
+  {
+    "path": "Assets/Art/Func/暂停和设置_ (1)/_矩形__2.png",
+    "size": 3914,
+    "sha256": "e4730acd253b9d62c099230eec5d9dda5778e1dc4245e1f40dbfdea9604d9eea",
+    "width": 821,
+    "height": 147
+  },
+  {
+    "path": "Assets/Art/Func/暂停和设置_ (1)/_矩形__3.png",
+    "size": 3930,
+    "sha256": "294799033b89598be706f85468d3c66e124f771668f0b709597d18eefad82cf1",
+    "width": 819,
+    "height": 150
+  },
+  {
+    "path": "Assets/Art/Func/暂停和设置_ (1)/_矩形__4.png",
+    "size": 3889,
+    "sha256": "779b2cbc00bcb85a4cee3279f83903c7d75748c8cb21d4a893da5a856456ded1",
+    "width": 819,
+    "height": 150
+  },
+  {
+    "path": "Assets/Art/Func/暂停和设置_ (1)/_矩形__5.png",
+    "size": 4092,
+    "sha256": "7bd8627d696861ed47695089e9494180745014b1586481be19c95ea7a85cdbd4",
+    "width": 819,
+    "height": 150
+  },
+  {
+    "path": "Assets/Art/Func/暂停和设置_ (1)/原色进度条.png",
+    "size": 21513,
+    "sha256": "1474c24fc154b97f9368b25ff46d691ee03309f67667d22f6803358f34e54e0e",
+    "width": 888,
+    "height": 418
+  },
+  {
+    "path": "Assets/Art/Func/暂停和设置_ (1)/变色进度条.png",
+    "size": 44724,
+    "sha256": "dca79476016c01b0619e5307b4ee4ebec852a6f62fa98de61f2746b4ff48158d",
+    "width": 888,
+    "height": 418
+  },
+  {
+    "path": "Assets/Art/Func/暂停和设置_ (1)/图层 1 副本 2.png",
+    "size": 21349,
+    "sha256": "dfb6f3168a747f8adb612d8c738d16ae4b960cb4987e0894614c57efbb60ba7e",
+    "width": 778,
+    "height": 310
+  },
+  {
+    "path": "Assets/Art/Func/暂停和设置_ (1)/图层 1 副本 3.png",
+    "size": 21534,
+    "sha256": "f8b1d6e4e796c3d12f465b8f7ee00c120cb2f8581a98c39f3c787c5861e03698",
+    "width": 778,
+    "height": 310
+  },
+  {
+    "path": "Assets/Art/Func/暂停和设置_ (1)/图层 1 副本 4.png",
+    "size": 21085,
+    "sha256": "9936ec9034c04e86a48b4a3751a2cdc8cd7757329a8e526f7e017f0b4c16edb7",
+    "width": 778,
+    "height": 310
+  },
+  {
+    "path": "Assets/Art/Func/暂停和设置_ (1)/图层 1 副本 5.png",
+    "size": 21085,
+    "sha256": "9936ec9034c04e86a48b4a3751a2cdc8cd7757329a8e526f7e017f0b4c16edb7",
+    "width": 778,
+    "height": 310
+  },
+  {
+    "path": "Assets/Art/Func/暂停和设置_ (1)/图层 1 副本 6.png",
+    "size": 22584,
+    "sha256": "a8d03cb23b021e7440bca4ac1911a4022bc95c942cf095bac4ae8d1e30f05ad8",
+    "width": 778,
+    "height": 310
+  },
+  {
+    "path": "Assets/Art/Func/暂停和设置_ (1)/图层 1 副本.png",
+    "size": 21032,
+    "sha256": "cb1efd707f53dab60df2d1c442fdf037c09dd1a6df8585585c17754791f226de",
+    "width": 778,
+    "height": 310
+  },
+  {
+    "path": "Assets/Art/Func/暂停和设置_ (1)/图层 2.png",
+    "size": 171294,
+    "sha256": "5eb93d308f43b814fba0a7e9a4d7bf614c78ec7ecc0ea0c79bb65aa1809e0fb9",
+    "width": 4096,
+    "height": 2304
+  },
+  {
+    "path": "Assets/Art/Func/暂停和设置_ (1)/小咖啡音量标.png",
+    "size": 74960,
+    "sha256": "ae1792d92bef57d322ea58b324dbbd20fd4cb2e5b47fba1e8e032170aa82ded0",
+    "width": 362,
+    "height": 522
+  },
+  {
+    "path": "Assets/Art/Func/暂停和设置_ (1)/底图 副本.png",
+    "size": 4832440,
+    "sha256": "76eddcbdf7bcecc7c1fed2f5824417171c4a516c4cb88c9d95c414d0f0b60651",
+    "width": 4096,
+    "height": 2304
+  },
+  {
+    "path": "Assets/Art/Func/暂停和设置_ (1)/底框.png",
+    "size": 42371,
+    "sha256": "e9ee0358e863e99e6cc6ed8863ba9731e89df905672821e8545e6169ff5e72de",
+    "width": 821,
+    "height": 335
+  },
+  {
+    "path": "Assets/Art/Func/暂停和设置_ (1)/按键文字.png",
+    "size": 228304,
+    "sha256": "c4f333c37d8b51dc8b4b4c0d80bd9030dbd261d1a58f2f79021af5cf1918c7d6",
+    "width": 484,
+    "height": 1218
+  },
+  {
+    "path": "Assets/Art/Func/暂停和设置_ (1)/文字.png",
+    "size": 72351,
+    "sha256": "b72210524adfb5831a1250145edaa9cdf9ccc94765598de48203a9a4535149ee",
+    "width": 928,
+    "height": 557
+  },
+  {
+    "path": "Assets/Art/Func/暂停和设置_ (1)/文本.png",
+    "size": 115992,
+    "sha256": "2231a6522600b9d8e9fedab783ba03311fc1f7dc4f4ce4dd28f504c75b7bfc91",
+    "width": 541,
+    "height": 852
+  },
+  {
+    "path": "Assets/Art/Func/暂停和设置_ (1)/无边框.png",
+    "size": 11971,
+    "sha256": "953b1ad3a084265be3622238475de462ccdea9aa7dda07e6cd000edb265ba072",
+    "width": 277,
+    "height": 80
+  },
+  {
+    "path": "Assets/Art/Func/暂停和设置_ (1)/游戏暂停.png",
+    "size": 31546,
+    "sha256": "4a66f46bd3b6a7d2f535b142e6087b1f9cd007087cc879577da227a6e5735a59",
+    "width": 746,
+    "height": 178
+  },
+  {
+    "path": "Assets/Art/Func/暂停和设置_ (1)/窗口.png",
+    "size": 7667,
+    "sha256": "91a80e1abce17f538fe5b01ed9644af3d9de8b8c9218910bc577ab07125bae95",
+    "width": 166,
+    "height": 97
+  },
+  {
+    "path": "Assets/Art/Func/暂停和设置_ (1)/背景 副本.png",
+    "size": 2952196,
+    "sha256": "d0f3601ef632e88ae18983778568ee7f2d2d2c3ab1d2e778dcd5fc41a76e27c8",
+    "width": 4096,
+    "height": 2304
+  },
+  {
+    "path": "Assets/Art/Func/暂停和设置_ (1)/进度条效果图.png",
+    "size": 37759,
+    "sha256": "df0ab71db479802d4cb85c6fb229c06006a4bf4b69248210484c93bd44b4820a",
+    "width": 712,
+    "height": 419
+  },
+  {
+    "path": "Assets/Art/Gameplay/人物-常规色.psd",
+    "size": 21959185,
+    "sha256": "e2cfb6b871aa1f30f2b455d6f094f742a6abd7f06e10577c2a7446cc1dbb0313",
+    "width": 14000,
+    "height": 2304
+  },
+  {
+    "path": "Assets/Art/Gameplay/对话框ui.psd",
+    "size": 52021932,
+    "sha256": "cc4bef0f9fe010c18559c406c96ea3908c7e1683201d160d50e1da2aff17f2c3",
+    "width": 4096,
+    "height": 2304
+  },
+  {
+    "path": "Assets/Art/Gameplay/报纸通知（改后）.psd",
+    "size": 46534928,
+    "sha256": "23136583cfca14b606c1d8e7d09929d4c5b9432b8192e55eeea54cb9d0d45856",
+    "width": 4096,
+    "height": 2304
+  },
+  {
+    "path": "Assets/Art/Gameplay/AI/bg_coffee_shop.jpg",
+    "size": 293033,
+    "sha256": "6677bfdc94e85aa3afd28c54b1c82e05a51b0f71ca2a2246f7f36064dbe34ccc",
+    "width": 2560,
+    "height": 1440
+  },
+  {
+    "path": "Assets/Art/Gameplay/AI/bg_coffee_shop.png",
+    "size": 1254728,
+    "sha256": "563d4f2875ff3a737de8e8cc921efb465bf78084d14172f20b1f73fbac072788",
+    "width": 2560,
+    "height": 1440
+  },
+  {
+    "path": "Assets/Art/Gameplay/AI/cup_empty.jpg",
+    "size": 178731,
+    "sha256": "d1e1bd8f9b9a832bfc4f41506e9f2a310ad3afb8cb6b8d89f8f4c15dd64ae011",
+    "width": 1920,
+    "height": 1920
+  },
+  {
+    "path": "Assets/Art/Gameplay/AI/cup_empty.png",
+    "size": 589317,
+    "sha256": "8cde457fc518663aaae4cb78c48e387131642fac271a6f5dce191aa0759e6b93",
+    "width": 1920,
+    "height": 1920
+  },
+  {
+    "path": "Assets/Art/Gameplay/AI/cup_latte.jpg",
+    "size": 221734,
+    "sha256": "80c04fbd0e2801f646757b3e4a2a8efcb219e4ba91fad6e7b57c000d5c981e20",
+    "width": 1920,
+    "height": 1920
+  },
+  {
+    "path": "Assets/Art/Gameplay/AI/cup_latte.png",
+    "size": 853843,
+    "sha256": "d969a687b13120ffead61d9bdb4a8a1490edb2baac9664a672c63e39925c6764",
+    "width": 1920,
+    "height": 1920
+  },
+  {
+    "path": "Assets/Art/Gameplay/AI/cup_small.jpg",
+    "size": 156460,
+    "sha256": "762a6eed99a88fbc555ba0247059ea3a751869b569901ea9938390833906bbe2",
+    "width": 1920,
+    "height": 1920
+  },
+  {
+    "path": "Assets/Art/Gameplay/AI/customer_1.jpg",
+    "size": 236056,
+    "sha256": "fcbcf88e7b58e59b14fc716e05e3902691564b9f15ca22f1eed4d9bc3f6c074e",
+    "width": 1920,
+    "height": 1920
+  },
+  {
+    "path": "Assets/Art/Gameplay/AI/customer_1.png",
+    "size": 997907,
+    "sha256": "db8f479b28ad49e691d03c6acf0602d8478e3c5b1b7aba9eb80147dac89500b2",
+    "width": 1920,
+    "height": 1920
+  },
+  {
+    "path": "Assets/Art/Gameplay/AI/customer_2.jpg",
+    "size": 334582,
+    "sha256": "547da56a3352a1b722b77a2bba87bca052865286ea2bb72423ebf0ce6f6b4f6a",
+    "width": 1920,
+    "height": 1920
+  },
+  {
+    "path": "Assets/Art/Gameplay/AI/customer_2.png",
+    "size": 1650545,
+    "sha256": "d811baddb18526861dc7360ebf7916ecd29c8c84e6421902749b1a76572f0f6f",
+    "width": 1920,
+    "height": 1920
+  },
+  {
+    "path": "Assets/Art/Gameplay/AI/customer_3.jpg",
+    "size": 270058,
+    "sha256": "3ed7d022b29ec563ae150ae206f256650c380af9c2ff0db86005e0fcfab9e68f",
+    "width": 1920,
+    "height": 1920
+  },
+  {
+    "path": "Assets/Art/Gameplay/AI/customer_3.png",
+    "size": 1166207,
+    "sha256": "b5a391f30d743481df473eadc46ff4791e47fe19d350841903dd840a985fd901",
+    "width": 1920,
+    "height": 1920
+  },
+  {
+    "path": "Assets/Art/Gameplay/AI/ing_chocolate.jpg",
+    "size": 260126,
+    "sha256": "0ca8e7963287b63fa15b3ca49828ec2d24bf50b6e74e8b14ddf4a767d2c75121",
+    "width": 1920,
+    "height": 1920
+  },
+  {
+    "path": "Assets/Art/Gameplay/AI/ing_coffee_beans.jpg",
+    "size": 370851,
+    "sha256": "4ffe5ff6250bf2f5b84dbc523315328f3c0d5da307676c478ca974dc48773da7",
+    "width": 1920,
+    "height": 1920
+  },
+  {
+    "path": "Assets/Art/Gameplay/AI/ing_cream.jpg",
+    "size": 124249,
+    "sha256": "0902a4a7c08c85f502b0b9a882729f8cbf4a87ac6c3234ce7d34f9f4d46b837c",
+    "width": 1920,
+    "height": 1920
+  },
+  {
+    "path": "Assets/Art/Gameplay/AI/ing_honey.jpg",
+    "size": 226585,
+    "sha256": "8dc9128f46d4f33d34edad9dec04a3e30a146dca2cd89a9c9b601b26d0043fa5",
+    "width": 1920,
+    "height": 1920
+  },
+  {
+    "path": "Assets/Art/Gameplay/AI/ing_matcha.jpg",
+    "size": 185487,
+    "sha256": "5036bc617facbb4e3d5dce1ae3e951b880f15d81f255072120fa7776d819ed91",
+    "width": 1920,
+    "height": 1920
+  },
+  {
+    "path": "Assets/Art/Gameplay/AI/ing_milk.jpg",
+    "size": 170978,
+    "sha256": "f87f589a79fa0d190e58d08e57c2fb0005d0bc24f5f3f4a4bdbe9c192975a75a",
+    "width": 1920,
+    "height": 1920
+  },
+  {
+    "path": "Assets/Art/Gameplay/AI/machine_cocoa_pot.jpg",
+    "size": 184969,
+    "sha256": "2d7ee5a4dfb89322a9a0e20abeb3d4330efc2225d86324691d40f44e7673da71",
+    "width": 1920,
+    "height": 1920
+  },
+  {
+    "path": "Assets/Art/Gameplay/AI/machine_espresso.jpg",
+    "size": 198370,
+    "sha256": "23d783323f9f1c5e4ba1d026e730147ea81fc2d064a5292c52a7020f7c498feb",
+    "width": 1920,
+    "height": 1920
+  },
+  {
+    "path": "Assets/Art/Gameplay/AI/machine_espresso.png",
+    "size": 859476,
+    "sha256": "5dcff2a508d509143b1ca91e54fd9006bff2937c56c5dfeb9ac0e3c73979580c",
+    "width": 1920,
+    "height": 1920
+  },
+  {
+    "path": "Assets/Art/Gameplay/AI/machine_grinder.jpg",
+    "size": 183708,
+    "sha256": "f810494bfec7beda50b901b7dae80affb30bba007a443424b457b4db449f52cb",
+    "width": 1920,
+    "height": 1920
+  },
+  {
+    "path": "Assets/Art/Gameplay/AI/machine_grinder.png",
+    "size": 676070,
+    "sha256": "13e730dbbecd20d1bfdbf6e4fbb982bb4ec2ba8592edf3dcce6e540eb68a1392",
+    "width": 1920,
+    "height": 1920
+  },
+  {
+    "path": "Assets/Art/Gameplay/AI/machine_matcha_grinder.jpg",
+    "size": 320087,
+    "sha256": "a9ca21774cc49a6f1d54fd3afc498732ec7a40b455e86756973506d509354833",
+    "width": 1920,
+    "height": 1920
+  },
+  {
+    "path": "Assets/Art/Gameplay/AI/machine_milk_pot.jpg",
+    "size": 145220,
+    "sha256": "1b8c0ca681223658fd4a6f0de6eec47b2c159cd39f04e59ef61ed3437424e732",
+    "width": 1920,
+    "height": 1920
+  },
+  {
+    "path": "Assets/Art/Gameplay/AI/serve_window.jpg",
+    "size": 181744,
+    "sha256": "c394254abd346f527dd1b9477f5a23d864c2b2043ba99b96ad8449943b3ddf48",
+    "width": 1920,
+    "height": 1920
+  },
+  {
+    "path": "Assets/Art/Gameplay/Characters/角色设计_女咖啡馆店主_法式线描.png",
+    "size": 1818721,
+    "sha256": "325fcd3d3e60a2778678570d75aad4b7c1c8bf865574de3b4881785ed75629aa",
+    "width": 1024,
+    "height": 1536
+  },
+  {
+    "path": "Assets/Art/Gameplay/Characters/角色设计_男革命印刷工_法式线描.png",
+    "size": 2101014,
+    "sha256": "2632bede79f6b1d1954d8da72090c8057f851b18602c02773df7640c37fefef5",
+    "width": 1024,
+    "height": 1536
+  },
+  {
+    "path": "Assets/Art/Gameplay/DayFlow/city_map_locked_area.png",
+    "size": 81576,
+    "sha256": "2c1e4322dad3acec5a908981d526061a230b5d811393ad480ff42c4370c7a6e3",
+    "width": 1920,
+    "height": 1080
+  },
+  {
+    "path": "Assets/Art/Gameplay/DayFlow/city_map_placeholder.png",
+    "size": 87487,
+    "sha256": "af45218e3f72da2a600e67a272153fa01135008d761d0f5619d7ef53fdb13ccf",
+    "width": 1920,
+    "height": 1080
+  },
+  {
+    "path": "Assets/Art/Gameplay/DayFlow/day_end_transition.png",
+    "size": 84113,
+    "sha256": "b17bc6ad83ae4163cf7d3af4b38ca7989a13bbf50825c9379fad74cc78ed57e2",
+    "width": 1920,
+    "height": 1080
+  },
+  {
+    "path": "Assets/Art/Gameplay/DayFlow/home_exterior_night.png",
+    "size": 77308,
+    "sha256": "b006c23800f3dc3778dd8d6f6d055d7a25b3558d3cba3eedc451502e3362f08f",
+    "width": 1920,
+    "height": 1080
+  },
+  {
+    "path": "Assets/Art/Gameplay/DayFlow/phase_business_transition.png",
+    "size": 72357,
+    "sha256": "aa259f97f2cd0c65b0b4559f788e4d4db78da76932dfec0ffb69f3e6698c8132",
+    "width": 1920,
+    "height": 1080
+  },
+  {
+    "path": "Assets/Art/Gameplay/DayFlow/phase_date_transition.png",
+    "size": 54271,
+    "sha256": "8e4bd9ab2a12eccf29deed6b20a83b795a7c709f8aa15a9b1bc072fae97646a6",
+    "width": 1920,
+    "height": 1080
+  },
+  {
+    "path": "Assets/Art/Gameplay/DayFlow/phase_night_choice.png",
+    "size": 104000,
+    "sha256": "34cd9cd9daabb6ed2c8ba2229f26e78e3342be30d6f453cdabf74ed6c037bfd2",
+    "width": 1920,
+    "height": 1080
+  },
+  {
+    "path": "Assets/Art/Gameplay/DayFlow/phase_pre_business.png",
+    "size": 85832,
+    "sha256": "309bb81104709a91bb667d0f89b66b242f923a9b5701395a11cf1b5d922d5838",
+    "width": 1920,
+    "height": 1080
+  },
+  {
+    "path": "Assets/Art/Gameplay/DayFlow/phase_pre_leisure.png",
+    "size": 64517,
+    "sha256": "c0cb2ff59f2a339659dcf105d9b82028ea823ba92efef379b1665bc1a84e73c2",
+    "width": 1920,
+    "height": 1080
+  },
+  {
+    "path": "Assets/Art/Gameplay/DayFlow/phase_pre_night.png",
+    "size": 94287,
+    "sha256": "5a58284d4cee5f681e21151e812b2b144fad04d00f0ce6ff7f7e1802b87b33b3",
+    "width": 1920,
+    "height": 1080
+  },
+  {
+    "path": "Assets/Art/Gameplay/DayFlow/Icons/city_location_cafe.png",
+    "size": 5768,
+    "sha256": "454e42dfa42e39c3e55c142e7ac52e71fcfc7ce47e137a44983358fd33c4b8d2",
+    "width": 256,
+    "height": 256
+  },
+  {
+    "path": "Assets/Art/Gameplay/DayFlow/Icons/city_location_locked.png",
+    "size": 2677,
+    "sha256": "baa3fa5e45c5e7d9d53074771d24a35466fc4e892a282ae4b20991359d40cb0a",
+    "width": 256,
+    "height": 256
+  },
+  {
+    "path": "Assets/Art/Gameplay/DayFlow/Icons/city_location_market.png",
+    "size": 2934,
+    "sha256": "fbf689a571220c0f9ca1711d8a00e251ebf3abc5445992f8e291f41abcee9ebb",
+    "width": 256,
+    "height": 256
+  },
+  {
+    "path": "Assets/Art/Gameplay/DayFlow/Icons/city_location_noble.png",
+    "size": 3149,
+    "sha256": "e3ec5d9c1e579c926f8973f57212376e36d82e5e157ab707cb9dbdeaaaadc5dc",
+    "width": 256,
+    "height": 256
+  },
+  {
+    "path": "Assets/Art/Gameplay/DayFlow/Icons/city_location_oldtown.png",
+    "size": 3386,
+    "sha256": "c0f4a7ee6d6ed9d87d50016e813535081638f3a7a113160c7621a5886f25cdd3",
+    "width": 256,
+    "height": 256
+  },
+  {
+    "path": "Assets/Art/Gameplay/DayFlow/Icons/city_location_residential.png",
+    "size": 4143,
+    "sha256": "d46a73e450b4e28156caa2d7454ff2d8177781ee6ed4ed7632bee519b7b915c6",
+    "width": 256,
+    "height": 256
+  },
+  {
+    "path": "Assets/Art/Gameplay/DayFlow/Icons/city_location_special_event.png",
+    "size": 5037,
+    "sha256": "e6a053626a2124a43ab82b3cb8e3be531b9c784376f048c8d11189b4adb666b5",
+    "width": 256,
+    "height": 256
+  },
+  {
+    "path": "Assets/Art/Gameplay/DayFlow/Icons/night_activity_clues.png",
+    "size": 4393,
+    "sha256": "f15c947913e29f590f1b58227083cc08734be5a389f647614b6e5818c2295adb",
+    "width": 256,
+    "height": 256
+  },
+  {
+    "path": "Assets/Art/Gameplay/DayFlow/Icons/night_activity_letter.png",
+    "size": 4455,
+    "sha256": "b06d523f7aaa920869cc27d4a787a2d6be42fc6f7ad3599c35344353b2b8cfea",
+    "width": 256,
+    "height": 256
+  },
+  {
+    "path": "Assets/Art/Gameplay/DayFlow/Icons/night_activity_outside.png",
+    "size": 3354,
+    "sha256": "7415f36b8bf4167f15a860e23e532ab57b7288e3f05f40844c9f4721e4656f87",
+    "width": 256,
+    "height": 256
+  },
+  {
+    "path": "Assets/Art/Gameplay/DayFlow/Icons/night_activity_prepare.png",
+    "size": 4704,
+    "sha256": "8425dab17d36a85fe5bf664516d8db580e7cb358d3a9e306a5b9c097d5b023dd",
+    "width": 256,
+    "height": 256
+  },
+  {
+    "path": "Assets/Art/Gameplay/DayFlow/Icons/night_activity_read.png",
+    "size": 4344,
+    "sha256": "18ed681f248d8532223589b579fe2471eb32548d7df89bfe330b46d5f7c25571",
+    "width": 256,
+    "height": 256
+  },
+  {
+    "path": "Assets/Art/Gameplay/DayFlow/Icons/night_activity_rest.png",
+    "size": 4195,
+    "sha256": "3ce064ae1fcfe92ad7fb962543c1eac4ec40777cbf20836f8cb0f2b39c481653",
+    "width": 256,
+    "height": 256
+  },
+  {
+    "path": "Assets/Art/Gameplay/DayFlow/MapLocations/location_01.png",
+    "size": 71673,
+    "sha256": "8654a09d8c4948310be3e5ee7985c8701d8482ebc5848fe8620b10d39f512c6b",
+    "width": 406,
+    "height": 377
+  },
+  {
+    "path": "Assets/Art/Gameplay/DayFlow/MapLocations/location_02.png",
+    "size": 45843,
+    "sha256": "701aa53eb04cfa499a5484c62ba3981a57d7f2afdb51ba8dd12773aa4b7e5aec",
+    "width": 382,
+    "height": 466
+  },
+  {
+    "path": "Assets/Art/Gameplay/DayFlow/MapLocations/location_03.png",
+    "size": 66085,
+    "sha256": "fc5da1c055617f13a9ba375d187fa11131bc51f7f22e72e609724abee936c8f6",
+    "width": 413,
+    "height": 443
+  },
+  {
+    "path": "Assets/Art/Gameplay/DayFlow/MapLocations/location_04.png",
+    "size": 50400,
+    "sha256": "d7f12a541a03e4d0c8394f6f79ebe0c78faa0c2e5531a11759d12735730b233a",
+    "width": 370,
+    "height": 475
+  },
+  {
+    "path": "Assets/Art/Gameplay/DayFlow/MapLocations/location_05.png",
+    "size": 76243,
+    "sha256": "5e2397b8cb8b188777502e38ea5d3970a1a347b98375c72451d4e60f5be6986b",
+    "width": 411,
+    "height": 499
+  },
+  {
+    "path": "Assets/Art/Gameplay/DayFlow/MapLocations/location_06.png",
+    "size": 67577,
+    "sha256": "9dd7f280501c18ad29b2ec4a0b42ef8893d97ddbc659bf30b136969ba09484c6",
+    "width": 480,
+    "height": 582
+  },
+  {
+    "path": "Assets/Art/Gameplay/DayFlow/MapLocations/location_07.png",
+    "size": 68479,
+    "sha256": "e4295a3d225287c13b85db6419613975ad7d1b7e34c2b366a13d353cf3e85a88",
+    "width": 377,
+    "height": 527
+  },
+  {
+    "path": "Assets/Art/Gameplay/DayFlow/MapLocations/location_08.png",
+    "size": 71048,
+    "sha256": "0fe8358a9d2ece365055dfecdda6d295cbea9cc89f0c990159ec985469c9c895",
+    "width": 588,
+    "height": 511
+  },
+  {
+    "path": "Assets/Art/Gameplay/DayFlow/MapLocations/location_09.png",
+    "size": 45013,
+    "sha256": "a8c490fd3c5dee3bdf1f94de9f775e4136272391298ad417df95fa2f023daff0",
+    "width": 393,
+    "height": 415
+  },
+  {
+    "path": "Assets/Art/Gameplay/DayFlow/NPC/npc_placeholder_customer_01.png",
+    "size": 10526,
+    "sha256": "4049a040b70bd01e66df61a2387d67f03256bbd3def650beebfe72d4371e2157",
+    "width": 512,
+    "height": 512
+  },
+  {
+    "path": "Assets/Art/Gameplay/DayFlow/NPC/npc_placeholder_customer_02.png",
+    "size": 11233,
+    "sha256": "0514e5aa243ca9b65158c2b882629ea96a0f3447b115ee8be87405aa5d363cf5",
+    "width": 512,
+    "height": 512
+  },
+  {
+    "path": "Assets/Art/Gameplay/DayFlow/NPC/npc_placeholder_customer_03.png",
+    "size": 11744,
+    "sha256": "1c305ef04b7461994849d56406f8b198ad41783db5cc12620c2329880b2b3336",
+    "width": 512,
+    "height": 512
+  },
+  {
+    "path": "Assets/Art/Gameplay/DayFlow/NPC/npc_placeholder_noble_01.png",
+    "size": 12400,
+    "sha256": "9d2a68ce5b901e3989c9f3aa1f2538efc7d1bac9deb0765f063e6721e146fb9a",
+    "width": 512,
+    "height": 512
+  },
+  {
+    "path": "Assets/Art/Gameplay/DayFlow/NPC/npc_placeholder_resident_01.png",
+    "size": 13165,
+    "sha256": "3fdcca291ceaafcbbba863a0668d0ed8b64c39505bf7ac350b782f12418d139c",
+    "width": 512,
+    "height": 512
+  },
+  {
+    "path": "Assets/Art/Gameplay/DayFlow/NPC/npc_placeholder_staff_01.png",
+    "size": 12078,
+    "sha256": "cc28f223e784bfc0733cd3b6cd9ecaaa0af327044b445d496c68143c17da3f7f",
+    "width": 512,
+    "height": 512
+  },
+  {
+    "path": "Assets/Art/Gameplay/loadingUI/UI_加载背景.psd",
+    "size": 38535285,
+    "sha256": "a5ff94ef62572eb2ca88862e2f964591a97429f75cc3981081d088e8f858b39c",
+    "width": 4096,
+    "height": 2304
+  },
+  {
+    "path": "Assets/Art/Gameplay/loadingUI/单独咖啡杯.png",
+    "size": 1927270,
+    "sha256": "3933df12ae98753c93b495ed6a2c103ca9adbef91fe4c6c3e277908a430db748",
+    "width": 4096,
+    "height": 2304
+  },
+  {
+    "path": "Assets/Art/Gameplay/loadingUI/UI_加载背景/咖啡logo-大.png",
+    "size": 265955,
+    "sha256": "6c049bdadf05f839791b3b6f0cd86ce1d0cd5b75bea054a69c618f1792ae00a3",
+    "width": 753,
+    "height": 518
+  },
+  {
+    "path": "Assets/Art/Gameplay/loadingUI/UI_加载背景/图层 2.png",
+    "size": 3978319,
+    "sha256": "8633b4dca6d3acf9edd3d93da9fc71d92ebc9fd20f8c0f29052759154671b7f8",
+    "width": 4096,
+    "height": 2304
+  },
+  {
+    "path": "Assets/Art/Gameplay/loadingUI/UI_加载背景/水平摆放.png",
+    "size": 1410944,
+    "sha256": "0ee982550f45e8478b5778fbbb82efc09b842556e47a95c36631d724ff5ecc54",
+    "width": 3948,
+    "height": 2085
+  },
+  {
+    "path": "Assets/Art/Gameplay/人物-常规色/勒苏.png",
+    "size": 1023595,
+    "sha256": "305132d0898fdea3b87e22fab3c4075ebd18c3cf0f86f5f86b88a839eed93de7",
+    "width": 956,
+    "height": 2223
+  },
+  {
+    "path": "Assets/Art/Gameplay/人物-常规色/埃利昂.康多尔.png",
+    "size": 559371,
+    "sha256": "b5c8f7d70863a35931b235d6fba5115f9019aa607afe3a55ead08ad49668c3c9",
+    "width": 1026,
+    "height": 2203
+  },
+  {
+    "path": "Assets/Art/Gameplay/人物-常规色/安托万富商.png",
+    "size": 577635,
+    "sha256": "d4d5ecbd4329bf88bc818f750944f7c775243c15c9c7cef21fde82f68d5f5f1f",
+    "width": 1183,
+    "height": 2169
+  },
+  {
+    "path": "Assets/Art/Gameplay/人物-常规色/欧仁.png",
+    "size": 739056,
+    "sha256": "3ac78e4d54bdba271706262808b5786f76015ad9228458b26446f21378918d2e",
+    "width": 1026,
+    "height": 2126
+  },
+  {
+    "path": "Assets/Art/Gameplay/人物-常规色/背景.png",
+    "size": 621654,
+    "sha256": "c4be4566180cc85a710a9c63bf8626c6b510a1d137467b9c5f4d9c16895e2c2b",
+    "width": 15358,
+    "height": 2304
+  },
+  {
+    "path": "Assets/Art/Gameplay/人物-常规色/萨德神父.png",
+    "size": 432877,
+    "sha256": "fd7e83b253b5b1a68d0c70cac2e1114e8cfc2d343eab32d0bbb7edcbe1c3d85a",
+    "width": 1033,
+    "height": 2206
+  },
+  {
+    "path": "Assets/Art/Gameplay/人物-常规色/蒂博·卡隆.png",
+    "size": 425253,
+    "sha256": "55d8e43ca15af4d546abca938e621f428f8e47f1feb6872c9dbd18e3337f850c",
+    "width": 994,
+    "height": 2209
+  },
+  {
+    "path": "Assets/Art/Gameplay/人物-常规色/贝特朗.png",
+    "size": 568685,
+    "sha256": "3b0f760cb28c49bbc9995fef2972196f80461ec24867302ec5f983e3e2ed3cab",
+    "width": 743,
+    "height": 1721
+  },
+  {
+    "path": "Assets/Art/Gameplay/人物-常规色/贝特朗（剪影.png",
+    "size": 178574,
+    "sha256": "ae2ab109451a0a8b9459d7cca9cc3e731cb0d14c4a9d8fe62f9ce9158e1cf27c",
+    "width": 1111,
+    "height": 2272
+  },
+  {
+    "path": "Assets/Art/Gameplay/人物-常规色/阿莉耶诺尔(公主.png",
+    "size": 988315,
+    "sha256": "569544ba5559c5e24d767577d473292c266b7002f73b75706960062bb63cf459",
+    "width": 1432,
+    "height": 2258
+  },
+  {
+    "path": "Assets/Art/Gameplay/人物-常规色/阿莉耶诺尔(日常.png",
+    "size": 533972,
+    "sha256": "4c9286b946730e62b05bc96b5e3afe9dda2b3c72d7b35087fd9e4528e11bf16d",
+    "width": 1238,
+    "height": 1989
+  },
+  {
+    "path": "Assets/Art/Gameplay/人物-常规色/阿黛尔.png",
+    "size": 449994,
+    "sha256": "f76a4165dda755c839352d23ab60fd47e491f6a1bf3bc39197bd4822d68a7459",
+    "width": 860,
+    "height": 1945
+  },
+  {
+    "path": "Assets/Art/Gameplay/咖啡馆/台面道具.psd",
+    "size": 36944911,
+    "sha256": "dd8d6572905400b72f540045336856ea99f22f89c8b6ee9daa36f3a698641a37",
+    "width": 4096,
+    "height": 2304
+  },
+  {
+    "path": "Assets/Art/Gameplay/咖啡馆/咖啡谱ui.psd",
+    "size": 51796878,
+    "sha256": "1a20c17e9880ceb1ce50449d904a77852260526fe4e1f487290dff9c698f9c28",
+    "width": 4096,
+    "height": 2304
+  },
+  {
+    "path": "Assets/Art/Gameplay/咖啡馆/Sliced/Entities/container.extractor/default.png",
+    "size": 167244,
+    "sha256": "2e7f3dc984b89f501cd52b01837fa072b61e693ce84f64f42d828cd1cf3950dd",
+    "width": 650,
+    "height": 430
+  },
+  {
+    "path": "Assets/Art/Gameplay/咖啡馆/Sliced/Entities/container.extractor.filter/default.png",
+    "size": 126094,
+    "sha256": "6f95477bc61249e218876ddf67b7e1086a0009b9d17cd0cbe75454510d250f7f",
+    "width": 254,
+    "height": 525
+  },
+  {
+    "path": "Assets/Art/Gameplay/咖啡馆/Sliced/Entities/cup.large/default.png",
+    "size": 254053,
+    "sha256": "f41a0dd25d147b282018a7975cb132bffcb5e5d4799eb1885bd46c8eae2abc7d",
+    "width": 439,
+    "height": 404
+  },
+  {
+    "path": "Assets/Art/Gameplay/咖啡馆/Sliced/Entities/cup.large/nested.png",
+    "size": 183344,
+    "sha256": "a1af268e8f74fa2226dc18806377961db44e2aa40cc10c6530773684f6477415",
+    "width": 439,
+    "height": 404
+  },
+  {
+    "path": "Assets/Art/Gameplay/咖啡馆/Sliced/Entities/cup.small/default.png",
+    "size": 134083,
+    "sha256": "7ff66be3ee62544d916d7a7fc172bc13c029fb0cf1ffd126a43558e12e66826d",
+    "width": 367,
+    "height": 257
+  },
+  {
+    "path": "Assets/Art/Gameplay/咖啡馆/Sliced/Entities/cup.small/nested.png",
+    "size": 85050,
+    "sha256": "eaf689ea24f595af0a62fac19ecbdb5e6943423db982848b4697f11ea85fcdbc",
+    "width": 367,
+    "height": 257
+  },
+  {
+    "path": "Assets/Art/Gameplay/咖啡馆/Sliced/Entities/machine.grinder/default.png",
+    "size": 259971,
+    "sha256": "ab89241e3bdb9474c882328a3689a607258ea6cb50828395e4c95c21e404878d",
+    "width": 485,
+    "height": 730
+  },
+  {
+    "path": "Assets/Art/Gameplay/咖啡馆/Sliced/Entities/machine.heater/default.png",
+    "size": 335519,
+    "sha256": "969da9818e2cc0622f098c9553621ac7f881e04b6abdf798bfb53d6365d7db90",
+    "width": 467,
+    "height": 776
+  },
+  {
+    "path": "Assets/Art/Gameplay/咖啡馆/Sliced/Entities/source.beans/default.png",
+    "size": 250163,
+    "sha256": "24113e2a1a4ae16e72be5ead93c541aa4949095ebdd17bbaacdc042c2dc0aec5",
+    "width": 478,
+    "height": 635
+  },
+  {
+    "path": "Assets/Art/Gameplay/咖啡馆/Sliced/Entities/source.cocoa/default.png",
+    "size": 192072,
+    "sha256": "1631fbaee45c44b5c66952eae5c1670a3e2ef0d16cda39384551ffb236f4a556",
+    "width": 475,
+    "height": 300
+  },
+  {
+    "path": "Assets/Art/Gameplay/咖啡馆/Sliced/Entities/source.cream/default.png",
+    "size": 76379,
+    "sha256": "89e9d1ffc5b1d5525a3b842c43801a4156a38a1452ecac3118b5d3befdfc5ed8",
+    "width": 427,
+    "height": 259
+  },
+  {
+    "path": "Assets/Art/Gameplay/咖啡馆/Sliced/Entities/source.honey/default.png",
+    "size": 87016,
+    "sha256": "6c70eadaefbb1bb0866ab26da605b019a3e33df4c7a0e7a60f4d051ecfad1357",
+    "width": 376,
+    "height": 389
+  },
+  {
+    "path": "Assets/Art/Gameplay/咖啡馆/Sliced/Entities/source.matcha/default.png",
+    "size": 137014,
+    "sha256": "c0206a6d0250df804db5b1c93994694a5fea53a4bdef74504e5db358ea364163",
+    "width": 237,
+    "height": 423
+  },
+  {
+    "path": "Assets/Art/Gameplay/咖啡馆/Sliced/Entities/source.milk/default.png",
+    "size": 148803,
+    "sha256": "07168bfb08fac206e1c985774e3846abefc5698eabd33d4ede3d93f96917e0b8",
+    "width": 370,
+    "height": 435
+  },
+  {
+    "path": "Assets/Art/Gameplay/咖啡馆/Sliced/Entities/source.sugar/default.png",
+    "size": 115398,
+    "sha256": "2d6994e78541e0c809bdf280a8183250c5fa8d946372db2eb4fb4d02c6c3a7a0",
+    "width": 400,
+    "height": 232
+  },
+  {
+    "path": "Assets/Art/Gameplay/咖啡馆/Sliced/Environment/counter.png",
+    "size": 9872197,
+    "sha256": "37bc7826949cae3198181a4f1e14416f42c15823d190e9509618ccb682fcbddb",
+    "width": 4096,
+    "height": 2304
+  },
+  {
+    "path": "Assets/Art/Gameplay/咖啡馆/台面道具/图层 1.png",
+    "size": 304048,
+    "sha256": "12458d0af1982b7fa6e6bd03637f5ccd5dc7f693911c5b35dd424396c0d7a914",
+    "width": 4066,
+    "height": 1696
+  },
+  {
+    "path": "Assets/Art/Gameplay/咖啡馆/台面道具/图层 7 副本.png",
+    "size": 2992633,
+    "sha256": "0a187ebde3e7223e473d55d5604a68f7c3d2c48b82dad9dab3d9dcacd169ffe2",
+    "width": 3654,
+    "height": 2334
+  },
+  {
+    "path": "Assets/Art/Gameplay/咖啡馆/台面道具/备用物体.png",
+    "size": 248539,
+    "sha256": "4d4d2e2cd897d793e9d99efee6dafcfdb49e26c1ff2006c3d4bbb1cedfdd9536",
+    "width": 491,
+    "height": 705
+  },
+  {
+    "path": "Assets/Art/Gameplay/咖啡馆/台面道具/投影.png",
+    "size": 161632,
+    "sha256": "3becc0a6705ef525a9809f769515572d1fb9e9e28c894de03a1b6d1c389492e4",
+    "width": 3682,
+    "height": 859
+  },
+  {
+    "path": "Assets/Art/Gameplay/咖啡馆/台面道具/杯子重叠（下）.png",
+    "size": 366246,
+    "sha256": "4fa617ef34401d0d0bec91bf9e3265f42af65ea39d2e20eeddeaa9bd574c33fb",
+    "width": 826,
+    "height": 366
+  },
+  {
+    "path": "Assets/Art/Gameplay/咖啡馆/台面道具/组 1.png",
+    "size": 11670929,
+    "sha256": "82662ff0001965f8bc52d1525eb2a04c2fc0ae82cdf7ce0512065f090ded159f",
+    "width": 4117,
+    "height": 2660
+  },
+  {
+    "path": "Assets/Art/Gameplay/咖啡馆/咖啡谱ui/咖啡icon.png",
+    "size": 38463,
+    "sha256": "d727418996c2cfaece2ed22f2e001648f60787fdb2a2f233c72c3402ab5d1f60",
+    "width": 228,
+    "height": 371
+  },
+  {
+    "path": "Assets/Art/Gameplay/咖啡馆/咖啡谱ui/图层 1.png",
+    "size": 11758293,
+    "sha256": "abfbace123a6b113fbea25daee86a809ffcd40797141f8c1919006ed73ccdc51",
+    "width": 4117,
+    "height": 2660
+  },
+  {
+    "path": "Assets/Art/Gameplay/咖啡馆/咖啡谱ui/图层 5.png",
+    "size": 5976979,
+    "sha256": "460dd5af19ae6196eb992a7945acf320a1aaaaff3f2ba1af1ba7f0433699d57c",
+    "width": 3668,
+    "height": 1499
+  },
+  {
+    "path": "Assets/Art/Gameplay/咖啡馆/咖啡谱ui/图层 8.png",
+    "size": 1749986,
+    "sha256": "4660e0b2c8b60b27113e446d56dd6b2c08cfdf9428dd0070680684c3121ceaa4",
+    "width": 559,
+    "height": 1066
+  },
+  {
+    "path": "Assets/Art/Gameplay/咖啡馆/咖啡谱ui/标题底图.png",
+    "size": 313843,
+    "sha256": "fbccb7bda5eda6a858d707bf1760bc5b8d3660c7203aa6bb29ca0d7c51e3e3c7",
+    "width": 1144,
+    "height": 142
+  },
+  {
+    "path": "Assets/Art/Gameplay/咖啡馆/咖啡谱ui/精粹咖啡.png",
+    "size": 199516,
+    "sha256": "7dd064a118e30851d82d18c868d4dc1cdf4a53c79c755aa200742d2f1e77eb2c",
+    "width": 2657,
+    "height": 1267
+  },
+  {
+    "path": "Assets/Art/Gameplay/咖啡馆/咖啡谱ui/进度条.png",
+    "size": 140489,
+    "sha256": "8e1dd1bcc60544134952acff42b22b68fb1e6a1ba632c8bba44c257eba491d2d",
+    "width": 258,
+    "height": 2170
+  },
+  {
+    "path": "Assets/Art/Gameplay/咖啡馆/咖啡谱ui/进度条蒙版.png",
+    "size": 537349,
+    "sha256": "6ade820e2b77ea7f1d4504af78c808ed41ff97fb1c0296a78df8c38f4efc1151",
+    "width": 325,
+    "height": 1072
+  },
+  {
+    "path": "Assets/Art/Gameplay/咖啡馆/咖啡谱ui/选中标.png",
+    "size": 79051,
+    "sha256": "193f3433ea6dcb6c3db637174d0f0f54fce7baca323d3a364a45ac3a6adf5b6d",
+    "width": 190,
+    "height": 190
+  },
+  {
+    "path": "Assets/Art/Gameplay/咖啡馆/咖啡谱ui/选项底图.png",
+    "size": 68046,
+    "sha256": "f0abeee1f1f52a04a668f7daea8725dff33ebebf893f48b1dfa925f75576dbbf",
+    "width": 168,
+    "height": 168
+  },
+  {
+    "path": "Assets/Art/Gameplay/对话框ui/skip.png",
+    "size": 3335,
+    "sha256": "a27156ad15b01490936acc78127995877d632b7547fbe0845faa40b612cc0554",
+    "width": 123,
+    "height": 40
+  },
+  {
+    "path": "Assets/Art/Gameplay/对话框ui/skip底.png",
+    "size": 4248,
+    "sha256": "69e09931986533a35b0d3df05e225afead3ac3d0e47fff46b35c7adec055f5f9",
+    "width": 201,
+    "height": 124
+  },
+  {
+    "path": "Assets/Art/Gameplay/对话框ui/不可选选项框.png",
+    "size": 70671,
+    "sha256": "a6bd1097d208129a3af6ca2955fc95eb45f5d12bdc610c927b186d2b0d8b703b",
+    "width": 1288,
+    "height": 141
+  },
+  {
+    "path": "Assets/Art/Gameplay/对话框ui/人物-咖啡馆.png",
+    "size": 481718,
+    "sha256": "2f92b57d470d19ce517782ed625851afb14f9b13827b53042b4eea3a77a8f6c5",
+    "width": 860,
+    "height": 1945
+  },
+  {
+    "path": "Assets/Art/Gameplay/对话框ui/从选区.png",
+    "size": 170071,
+    "sha256": "db98b7d3ad7e7ed8fbfc48afd8acbbb9d67735c736ddb3175038ad0c44a82a90",
+    "width": 2848,
+    "height": 857
+  },
+  {
+    "path": "Assets/Art/Gameplay/对话框ui/图层 10.png",
+    "size": 165757,
+    "sha256": "f13ccb7ae0fa890117e2a78a35e99eda109c55abaa2210fd21a296123374c98e",
+    "width": 3859,
+    "height": 520
+  },
+  {
+    "path": "Assets/Art/Gameplay/对话框ui/图层 12.png",
+    "size": 136688,
+    "sha256": "3337b9a4a46b13d33a57d6b8add0172ff4632744bb774731f8c78927f8d3c1f3",
+    "width": 2884,
+    "height": 1690
+  },
+  {
+    "path": "Assets/Art/Gameplay/对话框ui/图层 13.png",
+    "size": 3312993,
+    "sha256": "aa1bcbcfc29c4825eb70885bba5db8c91a587da8563a66d5339fec5bc502ec1a",
+    "width": 4096,
+    "height": 1764
+  },
+  {
+    "path": "Assets/Art/Gameplay/对话框ui/图层 14.png",
+    "size": 72198,
+    "sha256": "88c6d2197f0d1fc9e16abf3199eb0654b359fa5a5f54bc3f1276cd66e12f2eed",
+    "width": 2065,
+    "height": 486
+  },
+  {
+    "path": "Assets/Art/Gameplay/对话框ui/图层 16.png",
+    "size": 147445,
+    "sha256": "ffeedfc8ad41895c38458efc3f1c48deaf80a75d481c195a02e89bd53e1bd1cf",
+    "width": 3035,
+    "height": 1092
+  },
+  {
+    "path": "Assets/Art/Gameplay/对话框ui/图层 17.png",
+    "size": 8524754,
+    "sha256": "5415e4a9c8ceb76a3a2e61f72fd13f84d97bc33fe20f7ef29487bc32a6a5ec46",
+    "width": 4096,
+    "height": 1365
+  },
+  {
+    "path": "Assets/Art/Gameplay/对话框ui/图层 18.png",
+    "size": 552072,
+    "sha256": "c476c51ffccf335a5bd51fe48b71903c3aed777158d97a5370b110729dc35b13",
+    "width": 3556,
+    "height": 755
+  },
+  {
+    "path": "Assets/Art/Gameplay/对话框ui/图层 19.png",
+    "size": 142077,
+    "sha256": "40d8619e8d153ba6b74a36c5008457cd502ce3635d1b3fd21e927f562caa245f",
+    "width": 4096,
+    "height": 411
+  },
+  {
+    "path": "Assets/Art/Gameplay/对话框ui/图层 7.png",
+    "size": 171291,
+    "sha256": "a87addf8b0a64c0d3c517d6a3447a1483b8c8876870390838696ff048c8e77ec",
+    "width": 4096,
+    "height": 2304
+  },
+  {
+    "path": "Assets/Art/Gameplay/对话框ui/图层 8.png",
+    "size": 428951,
+    "sha256": "695e4f8170952c983d9900d9aa4b85b7298b0fcfd251b7da811dbfcd6f8c0265",
+    "width": 3563,
+    "height": 942
+  },
+  {
+    "path": "Assets/Art/Gameplay/对话框ui/图层 9.png",
+    "size": 6376914,
+    "sha256": "30d1b276e1aa401d1336434f77300c7ac17196d68b8ae7a8fca00fb5b4ae76b6",
+    "width": 4096,
+    "height": 2304
+  },
+  {
+    "path": "Assets/Art/Gameplay/对话框ui/姓名框.png",
+    "size": 28826,
+    "sha256": "d1583551bc6bc8c79d97c591b009c789a966b0f8c5cd1af2573f8321e42a394e",
+    "width": 450,
+    "height": 141
+  },
+  {
+    "path": "Assets/Art/Gameplay/对话框ui/对话框.png",
+    "size": 407010,
+    "sha256": "0999d99d16e16bffba4ab741dadb661b2c6ddcd5702ad89cd3068db6b7173a9e",
+    "width": 1985,
+    "height": 537
+  },
+  {
+    "path": "Assets/Art/Gameplay/对话框ui/翻页键.png",
+    "size": 9647,
+    "sha256": "d22a888534cd9860e6ec04d8792eec7361386f38054b97d47fca749fdabef191",
+    "width": 118,
+    "height": 73
+  },
+  {
+    "path": "Assets/Art/Gameplay/对话框ui/选项框.png",
+    "size": 70549,
+    "sha256": "c3be0ed988b9cd8e3fb8e81b0b2eb9e220326975e9d3315c2f0912adf6a2ade4",
+    "width": 1288,
+    "height": 141
+  },
+  {
+    "path": "Assets/Art/Gameplay/报纸通知（改后）/图层 1 副本 2.png",
+    "size": 77995,
+    "sha256": "cb7218a41d1e31bc7d15317e8d15506b61e943eb79e1edf41bbdb3b77be202a7",
+    "width": 1680,
+    "height": 2220
+  },
+  {
+    "path": "Assets/Art/Gameplay/报纸通知（改后）/图层 1 副本 3.png",
+    "size": 231311,
+    "sha256": "5d5c30056afbb221e07ab949de660da80f4760cb74d2a089f63ab7894eb574fd",
+    "width": 5354,
+    "height": 2226
+  },
+  {
+    "path": "Assets/Art/Gameplay/报纸通知（改后）/图层 1.png",
+    "size": 323386,
+    "sha256": "eb4a11e7641051a8ac26ad07683b488c2b9176bb328d1eb9fe59b911209d7640",
+    "width": 4091,
+    "height": 1698
+  },
+  {
+    "path": "Assets/Art/Gameplay/报纸通知（改后）/图层 2.png",
+    "size": 171293,
+    "sha256": "cc34efb620a2caef8e38cdbe246adb2015ac34d8bf540e8d53d24fb4cc653bba",
+    "width": 4096,
+    "height": 2304
+  },
+  {
+    "path": "Assets/Art/Gameplay/报纸通知（改后）/图层 5 副本 3.png",
+    "size": 5959912,
+    "sha256": "166a3320d260250a857c34bc965aa700a0a602650a8862da1cea8b3ef1c3d163",
+    "width": 5261,
+    "height": 1893
+  },
+  {
+    "path": "Assets/Art/Gameplay/报纸通知（改后）/夜空.png",
+    "size": 10448027,
+    "sha256": "cef20095822537c6b940a2ec6c9f332782b13aa1c826562c81dd668674c2de42",
+    "width": 4096,
+    "height": 2304
+  },
+  {
+    "path": "Assets/Art/Gameplay/报纸通知（改后）/大标题 副本 2.png",
+    "size": 114336,
+    "sha256": "91b199190259cb2995874e1a72d1b73b032c9abc1d5e53048da5f13abde79a07",
+    "width": 4854,
+    "height": 232
+  },
+  {
+    "path": "Assets/Art/Gameplay/报纸通知（改后）/开始一天 (常态).png",
+    "size": 15954,
+    "sha256": "eeaf8ba5368c41b852875830059c45cf10f02e77ad2457e8c797f26d201c3918",
+    "width": 287,
+    "height": 66
+  },
+  {
+    "path": "Assets/Art/Gameplay/报纸通知（改后）/开始一天（高亮）.png",
+    "size": 10411,
+    "sha256": "a7f40861b3b51825b0bed4edb6b027801d0296a4fbbfeac3af2d7956960bdac6",
+    "width": 287,
+    "height": 66
+  },
+  {
+    "path": "Assets/Art/Gameplay/报纸通知（改后）/星期三，xxxx年x月x日 副本.png",
+    "size": 38888,
+    "sha256": "cc982889c11097b8d10c63ea1abb6768079491265f67661277483569ed70b3dc",
+    "width": 4026,
+    "height": 65
+  },
+  {
+    "path": "Assets/Art/Gameplay/报纸通知（改后）/背景.png",
+    "size": 171286,
+    "sha256": "29410467a7af80b850adba4f489f6bf74818ca4e176bff4ebfaf4abc1ea1712a",
+    "width": 4096,
+    "height": 2304
+  },
+  {
+    "path": "Assets/Art/Gameplay/报纸通知（改后）/都来喝拿铁，沸点咖啡馆 开始营业了！字号：60.png",
+    "size": 26026,
+    "sha256": "2a1ea463b52879b5557aaafd223830ca2fee840302169013f3868e3e86afe814",
+    "width": 705,
+    "height": 168
+  },
+  {
+    "path": "Assets/Art/Gameplay/报纸通知（改后）/都来喝拿铁，沸点咖啡馆开始.png",
+    "size": 13651,
+    "sha256": "56f4203dda68dd7b8914420dca0c7fb398d1299b9c28278bbadd6a94a1a0f0fd",
+    "width": 603,
+    "height": 73
+  },
+  {
+    "path": "Assets/Art/Gameplay/报纸通知（改后）/都来喝拿铁，沸点咖啡馆开始营 业了！字号：60字色：634336.png",
+    "size": 34751,
+    "sha256": "2bc7e1d0d37f412998aaa04a2cdb05f083d0b46f5453500d3a938d6e67a4330f",
+    "width": 899,
+    "height": 172
+  },
+  {
+    "path": "Assets/Art/Map/1212.png",
+    "size": 6517039,
+    "sha256": "674b0edb61a9022003d79717b2bd6c8e9c92cefb493ea298543265bd4f88041b",
+    "width": 4096,
+    "height": 2304
+  },
+  {
+    "path": "Assets/Art/Map/地图.psd",
+    "size": 45451564,
+    "sha256": "dc4e19b2bb97e10543af5fef33cf48ff1cb7bfd6733c19730d11831f020285d8",
+    "width": 3840,
+    "height": 2160
+  },
+  {
+    "path": "Assets/Art/Map/地图说明.png",
+    "size": 7278435,
+    "sha256": "3dd2dd820f71165c5d40ef0db68ad1056a1736206f0526c1ef2b291340682dd9",
+    "width": 2956,
+    "height": 4287
+  },
+  {
+    "path": "Assets/Art/Map/屏幕截图 2026-10-10 201210.png",
+    "size": 326031,
+    "sha256": "00f6c6c8ea5600cb867557e2c1a5c13baa9b85d2794a292ec441e14a3e1aa6e0",
+    "width": 616,
+    "height": 609
+  },
+  {
+    "path": "Assets/Art/Map/GeneratedUI/actionCard.png",
+    "size": 174271,
+    "sha256": "5b2a5fcfc295f6c5b6f636fe80d5fa41f45b52303eb7878556030c56154a5418",
+    "width": 1067,
+    "height": 554
+  },
+  {
+    "path": "Assets/Art/Map/GeneratedUI/actionDivider.png",
+    "size": 8834,
+    "sha256": "50a7bc3d2630540b97b56897c8a39ad09301e213bdf96b71b3649f6be6c6d934",
+    "width": 830,
+    "height": 16
+  },
+  {
+    "path": "Assets/Art/Map/GeneratedUI/actionEmblem.png",
+    "size": 14997,
+    "sha256": "36b43a8a566af706714212e470a532bb832366e820e3b4cdd3b0318d56c39dc9",
+    "width": 150,
+    "height": 136
+  },
+  {
+    "path": "Assets/Art/Map/GeneratedUI/bag.png",
+    "size": 39004,
+    "sha256": "ef2b0fde637191351fc1cb9ae1025169578d7ccd711590f4b8a2d74a6a34d354",
+    "width": 179,
+    "height": 161
+  },
+  {
+    "path": "Assets/Art/Map/GeneratedUI/cityTitleSprite.png",
+    "size": 54109,
+    "sha256": "7a184282df79e1f8f20c70fd146872e3c838832032ec837e2add4e5dd91c3a47",
+    "width": 664,
+    "height": 238
+  },
+  {
+    "path": "Assets/Art/Map/GeneratedUI/compassSprite.png",
+    "size": 67269,
+    "sha256": "166a2e557bc6f68bdc1691b208d4a2fd5a31a49089484512d48a9e7170a7dbe2",
+    "width": 216,
+    "height": 241
+  },
+  {
+    "path": "Assets/Art/Map/GeneratedUI/dateFrame.png",
+    "size": 76024,
+    "sha256": "e84ac9b06391ef5f95f67b914de57dee296f5c950d3de24f295e968cc018443c",
+    "width": 462,
+    "height": 229
+  },
+  {
+    "path": "Assets/Art/Map/GeneratedUI/details.png",
+    "size": 37454,
+    "sha256": "34005661fa3a6f26c268fbb5673bb8e89ffe2762bb58a8ff6f9b5eb69841aa74",
+    "width": 176,
+    "height": 161
+  },
+  {
+    "path": "Assets/Art/Map/GeneratedUI/execute.png",
+    "size": 29227,
+    "sha256": "1897c3f438d3968f3618bb27270307b2443e567d8fbcc1f39e7e206c521e16ba",
+    "width": 492,
+    "height": 212
+  },
+  {
+    "path": "Assets/Art/Map/GeneratedUI/inventoryTitle.png",
+    "size": 38567,
+    "sha256": "e46ab8980fcc72d266d52aa07ee15ca157c1b0c1ac7a6ee41360a0af9d750d5b",
+    "width": 488,
+    "height": 130
+  },
+  {
+    "path": "Assets/Art/Map/GeneratedUI/location0.png",
+    "size": 50143,
+    "sha256": "cd59f669060eae262e3f86598a0f995be6cd09439a46ab0035d2ce5f072fbd31",
+    "width": 191,
+    "height": 186
+  },
+  {
+    "path": "Assets/Art/Map/GeneratedUI/location1.png",
+    "size": 42935,
+    "sha256": "4b02f004952aabff35fb540cfb80ff78070dcf85910dce6b01a8f6f102d12780",
+    "width": 178,
+    "height": 221
+  },
+  {
+    "path": "Assets/Art/Map/GeneratedUI/location2.png",
+    "size": 62151,
+    "sha256": "456313d08723f43e0d2ecf9559fd2780900513ea86d3f609ab1ee32fd22b286d",
+    "width": 205,
+    "height": 209
+  },
+  {
+    "path": "Assets/Art/Map/GeneratedUI/location3.png",
+    "size": 68569,
+    "sha256": "9eb8cfb3565197eb25c4418a5c95ce99ed2829e6f2d0f54a281220b642700ba8",
+    "width": 214,
+    "height": 224
+  },
+  {
+    "path": "Assets/Art/Map/GeneratedUI/location4.png",
+    "size": 52266,
+    "sha256": "b4d6a6a92a380f9a9b6293f40c5df9ed5baf9d7ebebfcf57bcc4e5781e6492b4",
+    "width": 193,
+    "height": 238
+  },
+  {
+    "path": "Assets/Art/Map/GeneratedUI/location5.png",
+    "size": 57848,
+    "sha256": "5baefb510cfb13ce4f640433437fcf6372b86a83284659141f459b9b70821c87",
+    "width": 229,
+    "height": 282
+  },
+  {
+    "path": "Assets/Art/Map/GeneratedUI/location6.png",
+    "size": 57168,
+    "sha256": "9ec655132856cfc1d5cd01e1d6e243c9a85109682133e8baedfd9073de6efd6f",
+    "width": 176,
+    "height": 252
+  },
+  {
+    "path": "Assets/Art/Map/GeneratedUI/location7.png",
+    "size": 60274,
+    "sha256": "bc29d47f960ddbf96124c55c85c79d8e97ff8a75817a6e7ea9d18a04837a549e",
+    "width": 284,
+    "height": 244
+  },
+  {
+    "path": "Assets/Art/Map/GeneratedUI/location8.png",
+    "size": 43412,
+    "sha256": "c17f74c9350986c323bb02cc4cdf4457a0034f71a38df16cbaed094c0eeb5e12",
+    "width": 184,
+    "height": 205
+  },
+  {
+    "path": "Assets/Art/Map/GeneratedUI/location9.png",
+    "size": 49503,
+    "sha256": "66424830f7206b51ec45bd51186f7c494790e01213af4e3e5dc61062b4ffb431",
+    "width": 183,
+    "height": 226
+  },
+  {
+    "path": "Assets/Art/Map/GeneratedUI/locationHighlight.png",
+    "size": 25155,
+    "sha256": "af599737caa81208b0bb3f945d631ef8672aa6f100b397a6e625a4bffa0c911e",
+    "width": 158,
+    "height": 288
+  },
+  {
+    "path": "Assets/Art/Map/GeneratedUI/locationNamesSprite.png",
+    "size": 202159,
+    "sha256": "0600996f518e042acb7e8493dd3a75bbf8701b343f603923d7e697e9f89cb9b2",
+    "width": 2048,
+    "height": 878
+  },
+  {
+    "path": "Assets/Art/Map/GeneratedUI/locationSignsSprite.png",
+    "size": 271634,
+    "sha256": "c8c4c4b4241bec4589487bec555ef556b83a41fb541bd4ea0cc7a5ae0b874478",
+    "width": 2047,
+    "height": 855
+  },
+  {
+    "path": "Assets/Art/Map/GeneratedUI/mapBackgroundSprite.png",
+    "size": 2618229,
+    "sha256": "61a995fbda9a34c57a7a59af23294408adf83da0f152f8f60992061c95a62c49",
+    "width": 2048,
+    "height": 1152
+  },
+  {
+    "path": "Assets/Art/Map/GeneratedUI/panel.png",
+    "size": 190542,
+    "sha256": "2487b7be278fa9a84ae602cad98259f8510f185649749da700750548de291938",
+    "width": 946,
+    "height": 1696
+  },
+  {
+    "path": "Assets/Art/Map/GeneratedUI/pinSprite.png",
+    "size": 67924,
+    "sha256": "bf721927616c59e35b4fcbe1c35c7deb7c71ccd9572e40c2cf3d62fde5da0227",
+    "width": 248,
+    "height": 312
+  },
+  {
+    "path": "Assets/Art/Map/GeneratedUI/pointsBase.png",
+    "size": 9615,
+    "sha256": "06ebb77c912a1a21ebc0553d70fbfe7e72fd26628d7353bb1862dd3e8848debd",
+    "width": 971,
+    "height": 193
+  },
+  {
+    "path": "Assets/Art/Map/GeneratedUI/pointSegment0.png",
+    "size": 3852,
+    "sha256": "53c60f56783e66405239c0d31f4e66d581c8ce5daac1f6f548a68a5b14ac5d24",
+    "width": 357,
+    "height": 193
+  },
+  {
+    "path": "Assets/Art/Map/GeneratedUI/pointSegment1.png",
+    "size": 2219,
+    "sha256": "41c7346c8929a81957afe0cefe1e05eb894803360d03cbffb5be94f647355a59",
+    "width": 153,
+    "height": 193
+  },
+  {
+    "path": "Assets/Art/Map/GeneratedUI/pointSegment2.png",
+    "size": 2219,
+    "sha256": "18decb260fec1d97c5413a33904c28b567ea86883eacd00a242851edc5c05b34",
+    "width": 153,
+    "height": 193
+  },
+  {
+    "path": "Assets/Art/Map/GeneratedUI/pointSegment3.png",
+    "size": 2219,
+    "sha256": "15f78743e5995d11545b376d88dfaae011ce1b29a613b482d7dc5a947a7f63ed",
+    "width": 153,
+    "height": 193
+  },
+  {
+    "path": "Assets/Art/Map/GeneratedUI/pointSegment4.png",
+    "size": 2267,
+    "sha256": "6a7c4f1c939bfba94a69530b22c0eac69a52197ffee0e2f0cc7dd1d758dc0314",
+    "width": 155,
+    "height": 193
+  },
+  {
+    "path": "Assets/Art/Map/GeneratedUI/pointsLabel.png",
+    "size": 8652,
+    "sha256": "6e91cb4c82fd1c3ac9e38e1327a362b42343c6ad06bce6b7515e9431e7fe746d",
+    "width": 203,
+    "height": 58
+  },
+  {
+    "path": "Assets/Art/Map/GeneratedUI/pointsOutline.png",
+    "size": 36526,
+    "sha256": "e16c00807f608e5a393f45222356aa6a4879c3f72358927c14bfc326bd0b0b6c",
+    "width": 972,
+    "height": 193
+  },
+  {
+    "path": "Assets/Art/Map/GeneratedUI/progress.png",
+    "size": 466,
+    "sha256": "eb22958d104e96d79a32df469a6bb10910e2d258d55ed7334fb50210c5723de0",
+    "width": 551,
+    "height": 26
+  },
+  {
+    "path": "Assets/Art/Map/GeneratedUI/requirement.png",
+    "size": 14714,
+    "sha256": "43133c391e60eabd390593e388a927a5c84da712f45745ca67a2a5eb94c85883",
+    "width": 121,
+    "height": 110
+  },
+  {
+    "path": "Assets/Art/Map/GeneratedUI/shortcuts.png",
+    "size": 2817,
+    "sha256": "103e3b60dd957618387b0a2942f1345b6c3cb719da7609e082042bb05fcd8abe",
+    "width": 536,
+    "height": 70
+  },
+  {
+    "path": "Assets/Art/Map/GeneratedUI/taskCard.png",
+    "size": 129550,
+    "sha256": "4f6211e229112d944f20c009c40b2a2b34f1eacb26152f95e23d12339a24dc68",
+    "width": 827,
+    "height": 327
+  },
+  {
+    "path": "Assets/Art/Map/GeneratedUI/tasks.png",
+    "size": 38991,
+    "sha256": "a030f26565fd5baaf330a65cb77e761182cea42f79cebe11f61cc58159ade706",
+    "width": 176,
+    "height": 161
+  },
+  {
+    "path": "Assets/Art/Map/GeneratedUI/taskTitle.png",
+    "size": 43198,
+    "sha256": "c9b01062116dd3cf8a861d19b22ccbbddf65627f50c28bb4f372e15d250a6712",
+    "width": 586,
+    "height": 144
+  },
+  {
+    "path": "Assets/Art/Map/GeneratedUI/timer.png",
+    "size": 5695,
+    "sha256": "f733f59b5cc3fdb7a57db3c3932666eea299d648c6e2c7e198b93b952f8bc9fe",
+    "width": 51,
+    "height": 50
+  },
+  {
+    "path": "Assets/Art/Map/GeneratedUI/tracking.png",
+    "size": 18329,
+    "sha256": "f037f53a1803e212cb58a57a9e3fb91bfe2f4351daea80a69c38658469497aae",
+    "width": 783,
+    "height": 53
+  },
+  {
+    "path": "Assets/Art/Map/GeneratedUI/zoomBar.png",
+    "size": 16913,
+    "sha256": "417970556b5e8200e7a71cefff67c3c1f1e8d5a0681f4305fbab91ca70bfe29a",
+    "width": 734,
+    "height": 94
+  },
+  {
+    "path": "Assets/Art/Map/GeneratedUI/zoomHandle.png",
+    "size": 165,
+    "sha256": "cc2fa2c7b65bdb219e1ce4c52b9f1c3099d65405277b86166121ff11b8b7c666",
+    "width": 25,
+    "height": 69
+  },
+  {
+    "path": "Assets/Art/Map/地图 (1)/10-09.png",
+    "size": 6408,
+    "sha256": "6e8674da899307fd59d0635b5ce1c567952e155396a04e057f815a2dd9b4a24d",
+    "width": 385,
+    "height": 108
+  },
+  {
+    "path": "Assets/Art/Map/地图 (1)/任务.png",
+    "size": 38506,
+    "sha256": "b1701c99db1a6561a1df557670a070dee59ba579a8f29ab58b870dc377fafea0",
+    "width": 176,
+    "height": 161
+  },
+  {
+    "path": "Assets/Art/Map/地图 (1)/任务名字.png",
+    "size": 41044,
+    "sha256": "ac980b7a3c1f6d6fbaca9c7eb8ac17ecbb067326c8a0bd592dd200a514a36cfd",
+    "width": 717,
+    "height": 247
+  },
+  {
+    "path": "Assets/Art/Map/地图 (1)/任务框.png",
+    "size": 105010,
+    "sha256": "99735e8f20dc4eed4fa40641b57ac580afd7a54cb362de3f57d5bdb8fc814a18",
+    "width": 827,
+    "height": 327
+  },
+  {
+    "path": "Assets/Art/Map/地图 (1)/其他位置图钉.png",
+    "size": 62753,
+    "sha256": "b7a65af44b90609c3c1306d691165ca047bc24a6db37d3a3cd2cfde6d2c8afad",
+    "width": 248,
+    "height": 312
+  },
+  {
+    "path": "Assets/Art/Map/地图 (1)/可重复动作.png",
+    "size": 2455,
+    "sha256": "6ce519debaadf40e3c2f6c152cdeafcaf0fd664465040082ab558d85f920d712",
+    "width": 147,
+    "height": 28
+  },
+  {
+    "path": "Assets/Art/Map/地图 (1)/图层 1.png",
+    "size": 2831,
+    "sha256": "2f1feffaf6e6e0252a61a9c64a9edb205ee14890cef64325fb4395b3aee4c920",
+    "width": 536,
+    "height": 70
+  },
+  {
+    "path": "Assets/Art/Map/地图 (1)/圣西尔万郊区.png",
+    "size": 37018,
+    "sha256": "155334bb63458186b1974eeaa2a3b7fb702beac7fc5eb31bf222a8a3bacd060b",
+    "width": 684,
+    "height": 226
+  },
+  {
+    "path": "Assets/Art/Map/地图 (1)/圣诺特城.png",
+    "size": 54099,
+    "sha256": "57c4adcdee9a1771bc585fc5e3591df0bfbedad6d21976105428f3927df4a688",
+    "width": 664,
+    "height": 238
+  },
+  {
+    "path": "Assets/Art/Map/地图 (1)/地区介绍.png",
+    "size": 147493,
+    "sha256": "b66f1c0258901440a98ccf3e72ba010d3ce7e1b1db8e92729406f25f913d9d7a",
+    "width": 1067,
+    "height": 554
+  },
+  {
+    "path": "Assets/Art/Map/地图 (1)/地点名称.png",
+    "size": 170361,
+    "sha256": "0df08fb0c284dd41a3b7d78e71a6a9fbf9b7462c48cd582e84dd407f25fefe92",
+    "width": 3158,
+    "height": 1355
+  },
+  {
+    "path": "Assets/Art/Map/地图 (1)/地点图标.png",
+    "size": 1538166,
+    "sha256": "6ac2a2ed172e562206ebaa0e68e6a7fe4a51e47cb5dc008181b76c4755236d06",
+    "width": 3309,
+    "height": 1608
+  },
+  {
+    "path": "Assets/Art/Map/地图 (1)/地点高亮.png",
+    "size": 25161,
+    "sha256": "1fb080ae9cf8f57f6070fb8459291502cce4b46c3a665facb780d58ff7151679",
+    "width": 158,
+    "height": 288
+  },
+  {
+    "path": "Assets/Art/Map/地图 (1)/底色 副本.png",
+    "size": 188752,
+    "sha256": "4be37e87f653c91fb9d63f35262cdf1432964eb5c406f69a2ee4d35647ff8df4",
+    "width": 946,
+    "height": 1696
+  },
+  {
+    "path": "Assets/Art/Map/地图 (1)/底色.png",
+    "size": 188752,
+    "sha256": "4be37e87f653c91fb9d63f35262cdf1432964eb5c406f69a2ee4d35647ff8df4",
+    "width": 946,
+    "height": 1696
+  },
+  {
+    "path": "Assets/Art/Map/地图 (1)/待办事宜标题.png",
+    "size": 36378,
+    "sha256": "1607560c6299fa949dd02ed2a9b387a7a8fcabc435ebfc291e2c4914341e80d5",
+    "width": 586,
+    "height": 144
+  },
+  {
+    "path": "Assets/Art/Map/地图 (1)/执行.png",
+    "size": 2115,
+    "sha256": "f4ee814757bb4b7e5842d59d95551dfa2cd092022c2bdd17ae2a0a7840fd5371",
+    "width": 105,
+    "height": 51
+  },
+  {
+    "path": "Assets/Art/Map/地图 (1)/指北针.png",
+    "size": 50985,
+    "sha256": "38fe7790a281ee620c9500362888968c9f21d01fbe42c379a6e986faebf2d95c",
+    "width": 216,
+    "height": 241
+  },
+  {
+    "path": "Assets/Art/Map/地图 (1)/无法执行底色.png",
+    "size": 8334,
+    "sha256": "98a1de10d9a360f0a7d3b346bb55df76364f19e27335f4425518348ab2eaded9",
+    "width": 439,
+    "height": 196
+  },
+  {
+    "path": "Assets/Art/Map/地图 (1)/时间牌.png",
+    "size": 94631,
+    "sha256": "8a5d0b5f7aa5ef06d63a91540975679bb632ee1ed7fe28e71f24a80dda32cc92",
+    "width": 550,
+    "height": 229
+  },
+  {
+    "path": "Assets/Art/Map/地图 (1)/时限图标.png",
+    "size": 5367,
+    "sha256": "739f9c0c0fe6834a246da0e9e7c27e3fc2fb242ed7a19402d13d330611f0638e",
+    "width": 51,
+    "height": 50
+  },
+  {
+    "path": "Assets/Art/Map/地图 (1)/条件框.png",
+    "size": 13310,
+    "sha256": "7385dfc65c41f14441ca2eb6963a7e89b2b6cebc085bd6069b455c84ba8183ea",
+    "width": 121,
+    "height": 110
+  },
+  {
+    "path": "Assets/Art/Map/地图 (1)/标牌.png",
+    "size": 363303,
+    "sha256": "9d364c0900b83a534825ffc3c8c646ad704cc5dc4b150e868eb217d207faa6e0",
+    "width": 3348,
+    "height": 1397
+  },
+  {
+    "path": "Assets/Art/Map/地图 (1)/游戏详情.png",
+    "size": 37011,
+    "sha256": "70c48f91e0f8ee39fafe6c3834e6cf3b779e298908d5fe8acfcbfb1782897c27",
+    "width": 176,
+    "height": 161
+  },
+  {
+    "path": "Assets/Art/Map/地图 (1)/物品栏标题.png",
+    "size": 32456,
+    "sha256": "f76d1005df2cea07c0f85d32ea0f05c7e1c2d8901029e4a14e00bcd5a05a631b",
+    "width": 488,
+    "height": 130
+  },
+  {
+    "path": "Assets/Art/Map/地图 (1)/物品框.png",
+    "size": 120890,
+    "sha256": "369660ffe01495c4bb86791da32ada782feb6fca03aad4c27c0272f907a1b862",
+    "width": 828,
+    "height": 503
+  },
+  {
+    "path": "Assets/Art/Map/地图 (1)/组 1.png",
+    "size": 8508260,
+    "sha256": "7e0c3c9cc5689c324d7a5c92b9474c58fc9576687809293ddeaacb2101a2ae3d",
+    "width": 4096,
+    "height": 2304
+  },
+  {
+    "path": "Assets/Art/Map/地图 (1)/缩放底.png",
+    "size": 12050,
+    "sha256": "d76eb017ea7ae6419516a8cec981fc505bcea3fa23c32899feaa6915317f576d",
+    "width": 734,
+    "height": 94
+  },
+  {
+    "path": "Assets/Art/Map/地图 (1)/缩放针.png",
+    "size": 165,
+    "sha256": "cc2fa2c7b65bdb219e1ce4c52b9f1c3099d65405277b86166121ff11b8b7c666",
+    "width": 25,
+    "height": 69
+  },
+  {
+    "path": "Assets/Art/Map/地图 (1)/背包.png",
+    "size": 38293,
+    "sha256": "2bbc910a2f31266147a137c0de16b70c7ecb5a9ad60ae41109282f4cf9d7d665",
+    "width": 179,
+    "height": 161
+  },
+  {
+    "path": "Assets/Art/Map/地图 (1)/行动点.png",
+    "size": 4850,
+    "sha256": "c153813b6c3354fa183fb3b14fc6b5d9923f7c18cb190deceb6e297bfcbebcb9",
+    "width": 203,
+    "height": 58
+  },
+  {
+    "path": "Assets/Art/Map/地图 (1)/行动点底色.png",
+    "size": 9117,
+    "sha256": "00e59d594132b501596f8c1cd6ea496ced87a5b41f642e90dcef72954afa4862",
+    "width": 971,
+    "height": 193
+  },
+  {
+    "path": "Assets/Art/Map/地图 (1)/行动点线稿.png",
+    "size": 22986,
+    "sha256": "3a7119a8025dceb9009ef411237a480771de8145426c4e0372cc6457adcb6cf9",
+    "width": 972,
+    "height": 193
+  },
+  {
+    "path": "Assets/Art/Map/地图 (1)/进度.png",
+    "size": 466,
+    "sha256": "eb22958d104e96d79a32df469a6bb10910e2d258d55ed7334fb50210c5723de0",
+    "width": 551,
+    "height": 26
+  },
+  {
+    "path": "Assets/Art/Map/地图 (1)/追踪框.png",
+    "size": 18884,
+    "sha256": "9be6fdb712dda950f9ae0f59912f8b17b05cb12cf0b8dc8e673c6907409ca60e",
+    "width": 783,
+    "height": 53
+  },
+  {
+    "path": "Assets/Art/Map/地图 (1)/需要.png",
+    "size": 1094,
+    "sha256": "a48a01f5ae17857165bc12a7884b4507d52aa79fbfe252c389d676036dfc99da",
+    "width": 57,
+    "height": 27
+  },
+  {
+    "path": "Assets/Art/Map/新地图系统/地图.psd",
+    "size": 49937824,
+    "sha256": "ecd21bcc9a9bec902320e582436a7f2d7771e6d6e794a3f6fe57fb2982f85a38",
+    "width": 4096,
+    "height": 2304
+  },
+  {
+    "path": "Assets/Art/Map/新地图系统/地图/10-09.png",
+    "size": 6408,
+    "sha256": "6e8674da899307fd59d0635b5ce1c567952e155396a04e057f815a2dd9b4a24d",
+    "width": 385,
+    "height": 108
+  },
+  {
+    "path": "Assets/Art/Map/新地图系统/地图/任务.png",
+    "size": 38506,
+    "sha256": "b1701c99db1a6561a1df557670a070dee59ba579a8f29ab58b870dc377fafea0",
+    "width": 176,
+    "height": 161
+  },
+  {
+    "path": "Assets/Art/Map/新地图系统/地图/任务名字.png",
+    "size": 41044,
+    "sha256": "ac980b7a3c1f6d6fbaca9c7eb8ac17ecbb067326c8a0bd592dd200a514a36cfd",
+    "width": 717,
+    "height": 247
+  },
+  {
+    "path": "Assets/Art/Map/新地图系统/地图/任务框.png",
+    "size": 105010,
+    "sha256": "99735e8f20dc4eed4fa40641b57ac580afd7a54cb362de3f57d5bdb8fc814a18",
+    "width": 827,
+    "height": 327
+  },
+  {
+    "path": "Assets/Art/Map/新地图系统/地图/其他位置图钉.png",
+    "size": 62753,
+    "sha256": "b7a65af44b90609c3c1306d691165ca047bc24a6db37d3a3cd2cfde6d2c8afad",
+    "width": 248,
+    "height": 312
+  },
+  {
+    "path": "Assets/Art/Map/新地图系统/地图/可重复动作.png",
+    "size": 2455,
+    "sha256": "6ce519debaadf40e3c2f6c152cdeafcaf0fd664465040082ab558d85f920d712",
+    "width": 147,
+    "height": 28
+  },
+  {
+    "path": "Assets/Art/Map/新地图系统/地图/图层 1.png",
+    "size": 2831,
+    "sha256": "2f1feffaf6e6e0252a61a9c64a9edb205ee14890cef64325fb4395b3aee4c920",
+    "width": 536,
+    "height": 70
+  },
+  {
+    "path": "Assets/Art/Map/新地图系统/地图/圣西尔万郊区.png",
+    "size": 37018,
+    "sha256": "155334bb63458186b1974eeaa2a3b7fb702beac7fc5eb31bf222a8a3bacd060b",
+    "width": 684,
+    "height": 226
+  },
+  {
+    "path": "Assets/Art/Map/新地图系统/地图/圣诺特城.png",
+    "size": 54099,
+    "sha256": "57c4adcdee9a1771bc585fc5e3591df0bfbedad6d21976105428f3927df4a688",
+    "width": 664,
+    "height": 238
+  },
+  {
+    "path": "Assets/Art/Map/新地图系统/地图/地区介绍.png",
+    "size": 147493,
+    "sha256": "b66f1c0258901440a98ccf3e72ba010d3ce7e1b1db8e92729406f25f913d9d7a",
+    "width": 1067,
+    "height": 554
+  },
+  {
+    "path": "Assets/Art/Map/新地图系统/地图/地点名称.png",
+    "size": 170361,
+    "sha256": "0df08fb0c284dd41a3b7d78e71a6a9fbf9b7462c48cd582e84dd407f25fefe92",
+    "width": 3158,
+    "height": 1355
+  },
+  {
+    "path": "Assets/Art/Map/新地图系统/地图/地点图标.png",
+    "size": 1538166,
+    "sha256": "6ac2a2ed172e562206ebaa0e68e6a7fe4a51e47cb5dc008181b76c4755236d06",
+    "width": 3309,
+    "height": 1608
+  },
+  {
+    "path": "Assets/Art/Map/新地图系统/地图/地点高亮.png",
+    "size": 25161,
+    "sha256": "1fb080ae9cf8f57f6070fb8459291502cce4b46c3a665facb780d58ff7151679",
+    "width": 158,
+    "height": 288
+  },
+  {
+    "path": "Assets/Art/Map/新地图系统/地图/底色 副本.png",
+    "size": 188752,
+    "sha256": "4be37e87f653c91fb9d63f35262cdf1432964eb5c406f69a2ee4d35647ff8df4",
+    "width": 946,
+    "height": 1696
+  },
+  {
+    "path": "Assets/Art/Map/新地图系统/地图/底色.png",
+    "size": 188752,
+    "sha256": "4be37e87f653c91fb9d63f35262cdf1432964eb5c406f69a2ee4d35647ff8df4",
+    "width": 946,
+    "height": 1696
+  },
+  {
+    "path": "Assets/Art/Map/新地图系统/地图/待办事宜标题.png",
+    "size": 36378,
+    "sha256": "1607560c6299fa949dd02ed2a9b387a7a8fcabc435ebfc291e2c4914341e80d5",
+    "width": 586,
+    "height": 144
+  },
+  {
+    "path": "Assets/Art/Map/新地图系统/地图/执行.png",
+    "size": 2115,
+    "sha256": "f4ee814757bb4b7e5842d59d95551dfa2cd092022c2bdd17ae2a0a7840fd5371",
+    "width": 105,
+    "height": 51
+  },
+  {
+    "path": "Assets/Art/Map/新地图系统/地图/指北针.png",
+    "size": 50985,
+    "sha256": "38fe7790a281ee620c9500362888968c9f21d01fbe42c379a6e986faebf2d95c",
+    "width": 216,
+    "height": 241
+  },
+  {
+    "path": "Assets/Art/Map/新地图系统/地图/无法执行底色.png",
+    "size": 8334,
+    "sha256": "98a1de10d9a360f0a7d3b346bb55df76364f19e27335f4425518348ab2eaded9",
+    "width": 439,
+    "height": 196
+  },
+  {
+    "path": "Assets/Art/Map/新地图系统/地图/时间牌.png",
+    "size": 94631,
+    "sha256": "8a5d0b5f7aa5ef06d63a91540975679bb632ee1ed7fe28e71f24a80dda32cc92",
+    "width": 550,
+    "height": 229
+  },
+  {
+    "path": "Assets/Art/Map/新地图系统/地图/时限图标.png",
+    "size": 5367,
+    "sha256": "739f9c0c0fe6834a246da0e9e7c27e3fc2fb242ed7a19402d13d330611f0638e",
+    "width": 51,
+    "height": 50
+  },
+  {
+    "path": "Assets/Art/Map/新地图系统/地图/条件框.png",
+    "size": 13310,
+    "sha256": "7385dfc65c41f14441ca2eb6963a7e89b2b6cebc085bd6069b455c84ba8183ea",
+    "width": 121,
+    "height": 110
+  },
+  {
+    "path": "Assets/Art/Map/新地图系统/地图/标牌.png",
+    "size": 363303,
+    "sha256": "9d364c0900b83a534825ffc3c8c646ad704cc5dc4b150e868eb217d207faa6e0",
+    "width": 3348,
+    "height": 1397
+  },
+  {
+    "path": "Assets/Art/Map/新地图系统/地图/游戏详情.png",
+    "size": 37011,
+    "sha256": "70c48f91e0f8ee39fafe6c3834e6cf3b779e298908d5fe8acfcbfb1782897c27",
+    "width": 176,
+    "height": 161
+  },
+  {
+    "path": "Assets/Art/Map/新地图系统/地图/物品栏标题.png",
+    "size": 32456,
+    "sha256": "f76d1005df2cea07c0f85d32ea0f05c7e1c2d8901029e4a14e00bcd5a05a631b",
+    "width": 488,
+    "height": 130
+  },
+  {
+    "path": "Assets/Art/Map/新地图系统/地图/物品框.png",
+    "size": 120890,
+    "sha256": "369660ffe01495c4bb86791da32ada782feb6fca03aad4c27c0272f907a1b862",
+    "width": 828,
+    "height": 503
+  },
+  {
+    "path": "Assets/Art/Map/新地图系统/地图/组 1.png",
+    "size": 8508260,
+    "sha256": "7e0c3c9cc5689c324d7a5c92b9474c58fc9576687809293ddeaacb2101a2ae3d",
+    "width": 4096,
+    "height": 2304
+  },
+  {
+    "path": "Assets/Art/Map/新地图系统/地图/缩放底.png",
+    "size": 12050,
+    "sha256": "d76eb017ea7ae6419516a8cec981fc505bcea3fa23c32899feaa6915317f576d",
+    "width": 734,
+    "height": 94
+  },
+  {
+    "path": "Assets/Art/Map/新地图系统/地图/缩放针.png",
+    "size": 165,
+    "sha256": "cc2fa2c7b65bdb219e1ce4c52b9f1c3099d65405277b86166121ff11b8b7c666",
+    "width": 25,
+    "height": 69
+  },
+  {
+    "path": "Assets/Art/Map/新地图系统/地图/背包.png",
+    "size": 38293,
+    "sha256": "2bbc910a2f31266147a137c0de16b70c7ecb5a9ad60ae41109282f4cf9d7d665",
+    "width": 179,
+    "height": 161
+  },
+  {
+    "path": "Assets/Art/Map/新地图系统/地图/行动点.png",
+    "size": 4850,
+    "sha256": "c153813b6c3354fa183fb3b14fc6b5d9923f7c18cb190deceb6e297bfcbebcb9",
+    "width": 203,
+    "height": 58
+  },
+  {
+    "path": "Assets/Art/Map/新地图系统/地图/行动点底色.png",
+    "size": 9117,
+    "sha256": "00e59d594132b501596f8c1cd6ea496ced87a5b41f642e90dcef72954afa4862",
+    "width": 971,
+    "height": 193
+  },
+  {
+    "path": "Assets/Art/Map/新地图系统/地图/行动点线稿.png",
+    "size": 22986,
+    "sha256": "3a7119a8025dceb9009ef411237a480771de8145426c4e0372cc6457adcb6cf9",
+    "width": 972,
+    "height": 193
+  },
+  {
+    "path": "Assets/Art/Map/新地图系统/地图/进度.png",
+    "size": 466,
+    "sha256": "eb22958d104e96d79a32df469a6bb10910e2d258d55ed7334fb50210c5723de0",
+    "width": 551,
+    "height": 26
+  },
+  {
+    "path": "Assets/Art/Map/新地图系统/地图/追踪框.png",
+    "size": 18884,
+    "sha256": "9be6fdb712dda950f9ae0f59912f8b17b05cb12cf0b8dc8e673c6907409ca60e",
+    "width": 783,
+    "height": 53
+  },
+  {
+    "path": "Assets/Art/Map/新地图系统/地图/需要.png",
+    "size": 1094,
+    "sha256": "a48a01f5ae17857165bc12a7884b4507d52aa79fbfe252c389d676036dfc99da",
+    "width": 57,
+    "height": 27
+  },
+  {
+    "path": "Assets/Art/UI/SaveActions/SaveActionBean.png",
+    "size": 2889,
+    "sha256": "e6fd489fd9745a04d7a11b4df91ebf067adacae36f1dec5d238c931d40980d37",
+    "width": 90,
+    "height": 85
+  },
+  {
+    "path": "Assets/ConfigTables/Art/Gameplay/bg_coffee_shop.png",
+    "size": 176626,
+    "sha256": "e330cd023298a812503e10a067a3f88e1cbc094f37f6fd2a88fdb6799495b37e",
+    "width": 1832,
+    "height": 1832
+  },
+  {
+    "path": "Assets/ConfigTables/Art/Gameplay/cup_large.png",
+    "size": 176626,
+    "sha256": "e330cd023298a812503e10a067a3f88e1cbc094f37f6fd2a88fdb6799495b37e",
+    "width": 1832,
+    "height": 1832
+  },
+  {
+    "path": "Assets/ConfigTables/Art/Gameplay/cup_small.png",
+    "size": 176626,
+    "sha256": "e330cd023298a812503e10a067a3f88e1cbc094f37f6fd2a88fdb6799495b37e",
+    "width": 1832,
+    "height": 1832
+  },
+  {
+    "path": "Assets/ConfigTables/Art/Gameplay/customer_1.png",
+    "size": 176626,
+    "sha256": "e330cd023298a812503e10a067a3f88e1cbc094f37f6fd2a88fdb6799495b37e",
+    "width": 1832,
+    "height": 1832
+  },
+  {
+    "path": "Assets/ConfigTables/Art/Gameplay/customer_2.png",
+    "size": 176626,
+    "sha256": "e330cd023298a812503e10a067a3f88e1cbc094f37f6fd2a88fdb6799495b37e",
+    "width": 1832,
+    "height": 1832
+  },
+  {
+    "path": "Assets/ConfigTables/Art/Gameplay/customer_3.png",
+    "size": 176626,
+    "sha256": "e330cd023298a812503e10a067a3f88e1cbc094f37f6fd2a88fdb6799495b37e",
+    "width": 1832,
+    "height": 1832
+  },
+  {
+    "path": "Assets/ConfigTables/Art/Gameplay/icon_cocoa_pot.png",
+    "size": 176626,
+    "sha256": "e330cd023298a812503e10a067a3f88e1cbc094f37f6fd2a88fdb6799495b37e",
+    "width": 1832,
+    "height": 1832
+  },
+  {
+    "path": "Assets/ConfigTables/Art/Gameplay/icon_grinder.png",
+    "size": 176626,
+    "sha256": "e330cd023298a812503e10a067a3f88e1cbc094f37f6fd2a88fdb6799495b37e",
+    "width": 1832,
+    "height": 1832
+  },
+  {
+    "path": "Assets/ConfigTables/Art/Gameplay/icon_matcha_bowl.png",
+    "size": 176626,
+    "sha256": "e330cd023298a812503e10a067a3f88e1cbc094f37f6fd2a88fdb6799495b37e",
+    "width": 1832,
+    "height": 1832
+  },
+  {
+    "path": "Assets/ConfigTables/Art/Gameplay/icon_milk_cup.png",
+    "size": 176626,
+    "sha256": "e330cd023298a812503e10a067a3f88e1cbc094f37f6fd2a88fdb6799495b37e",
+    "width": 1832,
+    "height": 1832
+  },
+  {
+    "path": "Assets/ConfigTables/Art/Gameplay/icon_moka_pot.png",
+    "size": 176626,
+    "sha256": "e330cd023298a812503e10a067a3f88e1cbc094f37f6fd2a88fdb6799495b37e",
+    "width": 1832,
+    "height": 1832
+  },
+  {
+    "path": "Assets/ConfigTables/Art/Gameplay/ing_chocolate.png",
+    "size": 176626,
+    "sha256": "e330cd023298a812503e10a067a3f88e1cbc094f37f6fd2a88fdb6799495b37e",
+    "width": 1832,
+    "height": 1832
+  },
+  {
+    "path": "Assets/ConfigTables/Art/Gameplay/ing_coffee_bean.png",
+    "size": 176626,
+    "sha256": "e330cd023298a812503e10a067a3f88e1cbc094f37f6fd2a88fdb6799495b37e",
+    "width": 1832,
+    "height": 1832
+  },
+  {
+    "path": "Assets/ConfigTables/Art/Gameplay/ing_cream.png",
+    "size": 176626,
+    "sha256": "e330cd023298a812503e10a067a3f88e1cbc094f37f6fd2a88fdb6799495b37e",
+    "width": 1832,
+    "height": 1832
+  },
+  {
+    "path": "Assets/ConfigTables/Art/Gameplay/ing_honey.png",
+    "size": 176626,
+    "sha256": "e330cd023298a812503e10a067a3f88e1cbc094f37f6fd2a88fdb6799495b37e",
+    "width": 1832,
+    "height": 1832
+  },
+  {
+    "path": "Assets/ConfigTables/Art/Gameplay/ing_matcha.png",
+    "size": 176626,
+    "sha256": "e330cd023298a812503e10a067a3f88e1cbc094f37f6fd2a88fdb6799495b37e",
+    "width": 1832,
+    "height": 1832
+  },
+  {
+    "path": "Assets/ConfigTables/Art/Gameplay/ing_milk.png",
+    "size": 176626,
+    "sha256": "e330cd023298a812503e10a067a3f88e1cbc094f37f6fd2a88fdb6799495b37e",
+    "width": 1832,
+    "height": 1832
+  },
+  {
+    "path": "Assets/Resources/Art/Gameplay/DayFlow/city_map_locked_area.png",
+    "size": 81576,
+    "sha256": "2c1e4322dad3acec5a908981d526061a230b5d811393ad480ff42c4370c7a6e3",
+    "width": 1920,
+    "height": 1080
+  },
+  {
+    "path": "Assets/Resources/Art/Gameplay/DayFlow/city_map_placeholder.png",
+    "size": 87487,
+    "sha256": "af45218e3f72da2a600e67a272153fa01135008d761d0f5619d7ef53fdb13ccf",
+    "width": 1920,
+    "height": 1080
+  },
+  {
+    "path": "Assets/Resources/Art/Gameplay/DayFlow/date_celestial_disc.png",
+    "size": 2876,
+    "sha256": "7380cc1ec1fd2b20b8ebafdf299aac7ba7916ed04c46dae5e7402886b1e6c2b9",
+    "width": 128,
+    "height": 128
+  },
+  {
+    "path": "Assets/Resources/Art/Gameplay/DayFlow/date_dial_ring.png",
+    "size": 74250,
+    "sha256": "d509faaf35afaf9251da32badca664bade528cf8091f6ba263387a1bef65c6c5",
+    "width": 1024,
+    "height": 1024
+  },
+  {
+    "path": "Assets/Resources/Art/Gameplay/DayFlow/date_window_backdrop.png",
+    "size": 615238,
+    "sha256": "f98f138bf754f9d4e47d98e82e242883ff3c769938f3206596b75a9f069b80f0",
+    "width": 1920,
+    "height": 1080
+  },
+  {
+    "path": "Assets/Resources/Art/Gameplay/DayFlow/day_end_transition.png",
+    "size": 84113,
+    "sha256": "b17bc6ad83ae4163cf7d3af4b38ca7989a13bbf50825c9379fad74cc78ed57e2",
+    "width": 1920,
+    "height": 1080
+  },
+  {
+    "path": "Assets/Resources/Art/Gameplay/DayFlow/home_exterior_night.png",
+    "size": 77308,
+    "sha256": "b006c23800f3dc3778dd8d6f6d055d7a25b3558d3cba3eedc451502e3362f08f",
+    "width": 1920,
+    "height": 1080
+  },
+  {
+    "path": "Assets/Resources/Art/Gameplay/DayFlow/phase_business_transition.png",
+    "size": 72357,
+    "sha256": "aa259f97f2cd0c65b0b4559f788e4d4db78da76932dfec0ffb69f3e6698c8132",
+    "width": 1920,
+    "height": 1080
+  },
+  {
+    "path": "Assets/Resources/Art/Gameplay/DayFlow/phase_date_transition.png",
+    "size": 54271,
+    "sha256": "8e4bd9ab2a12eccf29deed6b20a83b795a7c709f8aa15a9b1bc072fae97646a6",
+    "width": 1920,
+    "height": 1080
+  },
+  {
+    "path": "Assets/Resources/Art/Gameplay/DayFlow/phase_date_transition_clock.png",
+    "size": 1050958,
+    "sha256": "af2ed15969cb3c25da069f0c761e5caa9cb16b13ef8f04e07f99b316aed33290",
+    "width": 1920,
+    "height": 1080
+  },
+  {
+    "path": "Assets/Resources/Art/Gameplay/DayFlow/phase_night_choice.png",
+    "size": 104000,
+    "sha256": "34cd9cd9daabb6ed2c8ba2229f26e78e3342be30d6f453cdabf74ed6c037bfd2",
+    "width": 1920,
+    "height": 1080
+  },
+  {
+    "path": "Assets/Resources/Art/Gameplay/DayFlow/phase_pre_business.png",
+    "size": 85832,
+    "sha256": "309bb81104709a91bb667d0f89b66b242f923a9b5701395a11cf1b5d922d5838",
+    "width": 1920,
+    "height": 1080
+  },
+  {
+    "path": "Assets/Resources/Art/Gameplay/DayFlow/phase_pre_leisure.png",
+    "size": 64517,
+    "sha256": "c0cb2ff59f2a339659dcf105d9b82028ea823ba92efef379b1665bc1a84e73c2",
+    "width": 1920,
+    "height": 1080
+  },
+  {
+    "path": "Assets/Resources/Art/Gameplay/DayFlow/phase_pre_night.png",
+    "size": 94287,
+    "sha256": "5a58284d4cee5f681e21151e812b2b144fad04d00f0ce6ff7f7e1802b87b33b3",
+    "width": 1920,
+    "height": 1080
+  },
+  {
+    "path": "Assets/Resources/Art/Map/Locations/location_00.png",
+    "size": 50143,
+    "sha256": "cd59f669060eae262e3f86598a0f995be6cd09439a46ab0035d2ce5f072fbd31",
+    "width": 191,
+    "height": 186
+  },
+  {
+    "path": "Assets/Resources/Art/Map/Locations/location_01.png",
+    "size": 42935,
+    "sha256": "4b02f004952aabff35fb540cfb80ff78070dcf85910dce6b01a8f6f102d12780",
+    "width": 178,
+    "height": 221
+  },
+  {
+    "path": "Assets/Resources/Art/Map/Locations/location_02.png",
+    "size": 62151,
+    "sha256": "456313d08723f43e0d2ecf9559fd2780900513ea86d3f609ab1ee32fd22b286d",
+    "width": 205,
+    "height": 209
+  },
+  {
+    "path": "Assets/Resources/Art/Map/Locations/location_03.png",
+    "size": 68569,
+    "sha256": "9eb8cfb3565197eb25c4418a5c95ce99ed2829e6f2d0f54a281220b642700ba8",
+    "width": 214,
+    "height": 224
+  },
+  {
+    "path": "Assets/Resources/Art/Map/Locations/location_04.png",
+    "size": 52266,
+    "sha256": "b4d6a6a92a380f9a9b6293f40c5df9ed5baf9d7ebebfcf57bcc4e5781e6492b4",
+    "width": 193,
+    "height": 238
+  },
+  {
+    "path": "Assets/Resources/Art/Map/Locations/location_05.png",
+    "size": 57848,
+    "sha256": "5baefb510cfb13ce4f640433437fcf6372b86a83284659141f459b9b70821c87",
+    "width": 229,
+    "height": 282
+  },
+  {
+    "path": "Assets/Resources/Art/Map/Locations/location_06.png",
+    "size": 57168,
+    "sha256": "9ec655132856cfc1d5cd01e1d6e243c9a85109682133e8baedfd9073de6efd6f",
+    "width": 176,
+    "height": 252
+  },
+  {
+    "path": "Assets/Resources/Art/Map/Locations/location_07.png",
+    "size": 60274,
+    "sha256": "bc29d47f960ddbf96124c55c85c79d8e97ff8a75817a6e7ea9d18a04837a549e",
+    "width": 284,
+    "height": 244
+  },
+  {
+    "path": "Assets/Resources/Art/Map/Locations/location_08.png",
+    "size": 43412,
+    "sha256": "c17f74c9350986c323bb02cc4cdf4457a0034f71a38df16cbaed094c0eeb5e12",
+    "width": 184,
+    "height": 205
+  },
+  {
+    "path": "Assets/Resources/Art/Map/Locations/location_09.png",
+    "size": 49503,
+    "sha256": "66424830f7206b51ec45bd51186f7c494790e01213af4e3e5dc61062b4ffb431",
+    "width": 183,
+    "height": 226
+  },
+  {
+    "path": "Assets/Resources/Art/Map/Locations/location_pin.png",
+    "size": 67924,
+    "sha256": "bf721927616c59e35b4fcbe1c35c7deb7c71ccd9572e40c2cf3d62fde5da0227",
+    "width": 248,
+    "height": 312
+  },
+  {
+    "path": "Assets/Resources/Art/UI/Avatars/Female.png",
+    "size": 1501,
+    "sha256": "42f5c1759ad623ad8302411dbbc5379399eaf5ff9725be44f5c18bd523fea319",
+    "width": 256,
+    "height": 256
+  },
+  {
+    "path": "Assets/Resources/Art/UI/Avatars/Male.png",
+    "size": 1474,
+    "sha256": "860e302e9251ce3fa7a88d45778205bb77b17b78181d70476937a1eef779531d",
+    "width": 256,
+    "height": 256
+  },
+  {
+    "path": "Assets/Resources/Art/UI/Avatars/Unknown.png",
+    "size": 2793,
+    "sha256": "47587364257b28a95244d1e3ab716daf58b08505a959e844970ea1c50f79ecae",
+    "width": 256,
+    "height": 256
+  },
+  {
+    "path": "Assets/Resources/Art/UI/Backgrounds/bg_dim_overlay.png",
+    "size": 2417,
+    "sha256": "0115e9ebafa270138a874df0bd14681788d0b806f1ec5bdd88595c65aa0a67f5",
+    "width": 320,
+    "height": 180
+  },
+  {
+    "path": "Assets/Resources/Art/UI/Backgrounds/bg_loading.png",
+    "size": 8869,
+    "sha256": "d371d51ef8d862d1dc5fd494a3dcafcd12771e4418caa86d883546b9599d228b",
+    "width": 320,
+    "height": 180
+  },
+  {
+    "path": "Assets/Resources/Art/UI/Backgrounds/bg_main_menu.png",
+    "size": 11881,
+    "sha256": "6e6ddb9e9a343c3bb47f600c0f14f39e8c68afa9a4436b57c47b9f77e97526e6",
+    "width": 320,
+    "height": 180
+  },
+  {
+    "path": "Assets/Resources/Art/UI/Backgrounds/bg_menu_generic.png",
+    "size": 12800,
+    "sha256": "a8bcc618dee31d625643f3be6ab39b8a6238ee42a0a9cd030032775dc70e51df",
+    "width": 320,
+    "height": 180
+  },
+  {
+    "path": "Assets/Resources/Art/UI/Buttons/btn_accent_disabled.png",
+    "size": 166,
+    "sha256": "d93383c8e419947a73a1b28b89c2cc015b81378d86bdecd58150a36aa07b01bd",
+    "width": 64,
+    "height": 28
+  },
+  {
+    "path": "Assets/Resources/Art/UI/Buttons/btn_accent_hover.png",
+    "size": 165,
+    "sha256": "dfeef7a6a6b8fb66368d90ad84d6aea9ae437a95a1c9c3fa93e6cb387b33988d",
+    "width": 64,
+    "height": 28
+  },
+  {
+    "path": "Assets/Resources/Art/UI/Buttons/btn_accent_normal.png",
+    "size": 172,
+    "sha256": "1754e8f5bec719d32da1160e742af081cddb791f27d8d17302ef788d4e99ab44",
+    "width": 64,
+    "height": 28
+  },
+  {
+    "path": "Assets/Resources/Art/UI/Buttons/btn_accent_pressed.png",
+    "size": 172,
+    "sha256": "7a05674f1f5274c96b77b070707140d2138337af6db17797d7affcb1a10d98ff",
+    "width": 64,
+    "height": 28
+  },
+  {
+    "path": "Assets/Resources/Art/UI/Buttons/btn_danger_hover.png",
+    "size": 167,
+    "sha256": "fd14a4c909658d187b1c0b83a707762d93a636b70caece0001c4950e053a797e",
+    "width": 64,
+    "height": 28
+  },
+  {
+    "path": "Assets/Resources/Art/UI/Buttons/btn_danger_normal.png",
+    "size": 182,
+    "sha256": "074daffd797d0c36ba848445163327692c2bd89c3c43ec8b955695fbefb310b9",
+    "width": 64,
+    "height": 28
+  },
+  {
+    "path": "Assets/Resources/Art/UI/Buttons/btn_danger_pressed.png",
+    "size": 165,
+    "sha256": "4e6efd901ca83c3d88678c31f8810e36f67b642ba5097378f6361051722c349c",
+    "width": 64,
+    "height": 28
+  },
+  {
+    "path": "Assets/Resources/Art/UI/Buttons/btn_disabled.png",
+    "size": 173,
+    "sha256": "e4c76cd52b259731dd87dc54615a7dd845120361803551d376cd8698ed1306f9",
+    "width": 64,
+    "height": 28
+  },
+  {
+    "path": "Assets/Resources/Art/UI/Buttons/btn_hover.png",
+    "size": 183,
+    "sha256": "7ef06f30da79b716d2c1a3a6b753c0501756815eec6ae06b5b61be6dd970d564",
+    "width": 64,
+    "height": 28
+  },
+  {
+    "path": "Assets/Resources/Art/UI/Buttons/btn_normal.png",
+    "size": 180,
+    "sha256": "7bbf86fd643074510a1749800665c020d7e69334fb21b5497e07b79457e78615",
+    "width": 64,
+    "height": 28
+  },
+  {
+    "path": "Assets/Resources/Art/UI/Buttons/btn_pressed.png",
+    "size": 162,
+    "sha256": "2eb227e3d35ec54260c087b9355c2070b9534587126e5168a2a41728c7e1e3fa",
+    "width": 64,
+    "height": 28
+  },
+  {
+    "path": "Assets/Resources/Art/UI/Buttons/btn_small_hover.png",
+    "size": 168,
+    "sha256": "c4553a34d32a15ec6e589ecac4e5b768f4b4914fdb2cdf60362f8fa162d7b22e",
+    "width": 52,
+    "height": 24
+  },
+  {
+    "path": "Assets/Resources/Art/UI/Buttons/btn_small_normal.png",
+    "size": 169,
+    "sha256": "7380726e4baf3fc3a5bbf8b669ae69ea7c594489db3f6dd77678c950ec253ddb",
+    "width": 52,
+    "height": 24
+  },
+  {
+    "path": "Assets/Resources/Art/UI/Buttons/btn_small_pressed.png",
+    "size": 153,
+    "sha256": "8d342af28a08fc5ee9b7d2a40dd504885135ffe57111b7f0e29a42147c28e7c0",
+    "width": 52,
+    "height": 24
+  },
+  {
+    "path": "Assets/Resources/Art/UI/Icons/ic_archive.png",
+    "size": 256,
+    "sha256": "00e6a4bf95a10d2f401f871925b9c016e78d417bf4b325c4d20a3e2e0a10b8e4",
+    "width": 32,
+    "height": 32
+  },
+  {
+    "path": "Assets/Resources/Art/UI/Icons/ic_arrow_left.png",
+    "size": 293,
+    "sha256": "0bc3ee3ccdfd827ea234ca3e0b7ad188edc24f95611381eb422c3d4b38dbd404",
+    "width": 32,
+    "height": 32
+  },
+  {
+    "path": "Assets/Resources/Art/UI/Icons/ic_arrow_right.png",
+    "size": 297,
+    "sha256": "cafe8a7c204d30378fd533b3229141cd6b0706f6564df6009e97e65d17fb90b3",
+    "width": 32,
+    "height": 32
+  },
+  {
+    "path": "Assets/Resources/Art/UI/Icons/ic_autosave.png",
+    "size": 433,
+    "sha256": "3b4614abde28ed50c47cf47885393867fdff476bf1afed2ab6caa7a09ccc9ac7",
+    "width": 32,
+    "height": 32
+  },
+  {
+    "path": "Assets/Resources/Art/UI/Icons/ic_back.png",
+    "size": 293,
+    "sha256": "0bc3ee3ccdfd827ea234ca3e0b7ad188edc24f95611381eb422c3d4b38dbd404",
+    "width": 32,
+    "height": 32
+  },
+  {
+    "path": "Assets/Resources/Art/UI/Icons/ic_borderless.png",
+    "size": 211,
+    "sha256": "3ddfccf70e3cebfdb67b5ed4a0875126dd2dd38f6e38e8423fee142a559f3d82",
+    "width": 32,
+    "height": 32
+  },
+  {
+    "path": "Assets/Resources/Art/UI/Icons/ic_check.png",
+    "size": 316,
+    "sha256": "b78e85dadf097876b548a0dcc1489fb57fdab9286cd8936c95813bbcd0516c8e",
+    "width": 32,
+    "height": 32
+  },
+  {
+    "path": "Assets/Resources/Art/UI/Icons/ic_clock.png",
+    "size": 472,
+    "sha256": "65978decdf5e3a707286f7bf1f2bbde35f83251cb5af9d23b12315c96b940842",
+    "width": 32,
+    "height": 32
+  },
+  {
+    "path": "Assets/Resources/Art/UI/Icons/ic_continue.png",
+    "size": 270,
+    "sha256": "d06c825379c2ab7115372d56f9a1911d953b3fe5d828999dca032326c9dda2e7",
+    "width": 32,
+    "height": 32
+  },
+  {
+    "path": "Assets/Resources/Art/UI/Icons/ic_continue_dark.png",
+    "size": 276,
+    "sha256": "ffe755d1602c85cb101146933e7534f9c995f7034e7ba7a754b37c3f7b4eedd6",
+    "width": 32,
+    "height": 32
+  },
+  {
+    "path": "Assets/Resources/Art/UI/Icons/ic_cross.png",
+    "size": 432,
+    "sha256": "b10ed6ff34d11b82366cc74fb9e48ea41223bf9310979e7c3da2bf3a0f4e7c56",
+    "width": 32,
+    "height": 32
+  },
+  {
+    "path": "Assets/Resources/Art/UI/Icons/ic_delete.png",
+    "size": 290,
+    "sha256": "a63856a7bef4cc30af95e91698431c22907f99c17119a37273fe4bff54c510ca",
+    "width": 32,
+    "height": 32
+  },
+  {
+    "path": "Assets/Resources/Art/UI/Icons/ic_display.png",
+    "size": 303,
+    "sha256": "dd993f2a190d8323f3e7397cb940f1744e51e441ff828600c61141f0ef05d618",
+    "width": 32,
+    "height": 32
+  },
+  {
+    "path": "Assets/Resources/Art/UI/Icons/ic_exit.png",
+    "size": 341,
+    "sha256": "38b769534eb53981e156f4bd649e9cd73ef8583727cafb660d12b299a706aa7a",
+    "width": 32,
+    "height": 32
+  },
+  {
+    "path": "Assets/Resources/Art/UI/Icons/ic_fullscreen.png",
+    "size": 263,
+    "sha256": "beaf4bc9a807387d37920a68e1f4974a021cc8b3d94e842a680396ab2b0823fb",
+    "width": 32,
+    "height": 32
+  },
+  {
+    "path": "Assets/Resources/Art/UI/Icons/ic_load.png",
+    "size": 207,
+    "sha256": "5c05dbf27f817bbee8016c521c4e1583610a2b94e8bfa08218d7ffbfaa83b627",
+    "width": 32,
+    "height": 32
+  },
+  {
+    "path": "Assets/Resources/Art/UI/Icons/ic_music.png",
+    "size": 328,
+    "sha256": "d5bf560691088daafbe0b20e3bd27bc2a2fbd5235fcbbbc7b5d14364d9d3aad1",
+    "width": 32,
+    "height": 32
+  },
+  {
+    "path": "Assets/Resources/Art/UI/Icons/ic_new_game.png",
+    "size": 570,
+    "sha256": "4c409e40ab75406bbced5420c60f055733196e4457d5546ca30d2c63fd8efc5f",
+    "width": 32,
+    "height": 32
+  },
+  {
+    "path": "Assets/Resources/Art/UI/Icons/ic_new_game_dark.png",
+    "size": 527,
+    "sha256": "fd1774694a9380f659684e685744bcf86056737a24f7c3f9e80dddbabf605f3d",
+    "width": 32,
+    "height": 32
+  },
+  {
+    "path": "Assets/Resources/Art/UI/Icons/ic_resolution.png",
+    "size": 392,
+    "sha256": "f632e6c521d0f3e5a89a7115e9d85e26218555c71d0ba6235845dfc5ee579f19",
+    "width": 32,
+    "height": 32
+  },
+  {
+    "path": "Assets/Resources/Art/UI/Icons/ic_save.png",
+    "size": 233,
+    "sha256": "a4da0bc94c57a5cb514bb1f726f049930c4f301199c26f4544f66d2eef493ced",
+    "width": 32,
+    "height": 32
+  },
+  {
+    "path": "Assets/Resources/Art/UI/Icons/ic_settings.png",
+    "size": 476,
+    "sha256": "4f5bfb82f7bd0f537a8fb0709a533b062bc48871571ca9dc5ed6288cf5ad860b",
+    "width": 32,
+    "height": 32
+  },
+  {
+    "path": "Assets/Resources/Art/UI/Icons/ic_sfx.png",
+    "size": 404,
+    "sha256": "f50b05a2478b4e5b4b90e6cf3248602317868e6a3f072acd6e823ed310f4f34d",
+    "width": 32,
+    "height": 32
+  },
+  {
+    "path": "Assets/Resources/Art/UI/Icons/ic_star.png",
+    "size": 402,
+    "sha256": "69fd11863150fd71bceae91b81a994f6dc7350faf1425bf81bfa0b9ddb4e532e",
+    "width": 32,
+    "height": 32
+  },
+  {
+    "path": "Assets/Resources/Art/UI/Icons/ic_volume.png",
+    "size": 296,
+    "sha256": "263e9818b4f90eb54345b4a037d63ee450252e30442289c00272050caa32b3a5",
+    "width": 32,
+    "height": 32
+  },
+  {
+    "path": "Assets/Resources/Art/UI/Icons/ic_windowed.png",
+    "size": 205,
+    "sha256": "3bf75e637ce5d5c4f7f217b81a8f1fcc429cddda0d6895cfb3402af823f314d7",
+    "width": 32,
+    "height": 32
+  },
+  {
+    "path": "Assets/Resources/Art/UI/Logo/loading_logo_00.png",
+    "size": 2782,
+    "sha256": "19d0451e7cac5229bd4b968be525398da6d9eabff530ebd1b030b788e5f30206",
+    "width": 64,
+    "height": 64
+  },
+  {
+    "path": "Assets/Resources/Art/UI/Logo/loading_logo_01.png",
+    "size": 3023,
+    "sha256": "d34b8d09972233a204011ab8449b12cb6888ef7cc1721d7a78f006fa1557f086",
+    "width": 64,
+    "height": 64
+  },
+  {
+    "path": "Assets/Resources/Art/UI/Logo/loading_logo_02.png",
+    "size": 3099,
+    "sha256": "3009c087335c946cbabc4d7a09670d010c656492acbb630abc551f9e118ab307",
+    "width": 64,
+    "height": 64
+  },
+  {
+    "path": "Assets/Resources/Art/UI/Logo/loading_logo_03.png",
+    "size": 2992,
+    "sha256": "cf072b6c2aba6447df59f7a94c1c2d38d763fcedac3f216eb3e31a520f574288",
+    "width": 64,
+    "height": 64
+  },
+  {
+    "path": "Assets/Resources/Art/UI/Logo/loading_logo_04.png",
+    "size": 2792,
+    "sha256": "68e7e85f9aa2a71872539066a1cbcb22b823ffddbc4e0faf136f8f53e491b7b6",
+    "width": 64,
+    "height": 64
+  },
+  {
+    "path": "Assets/Resources/Art/UI/Logo/loading_logo_05.png",
+    "size": 2580,
+    "sha256": "4cabc6c69015d492e1268384491b512173e54e5dd9d5d6448039c70f6a667d2d",
+    "width": 64,
+    "height": 64
+  },
+  {
+    "path": "Assets/Resources/Art/UI/Logo/loading_logo_06.png",
+    "size": 2523,
+    "sha256": "eea672390df7b43fb12c6b136395c3a65c8ec67637d4b94123f7d11ccb45928e",
+    "width": 64,
+    "height": 64
+  },
+  {
+    "path": "Assets/Resources/Art/UI/Logo/loading_logo_07.png",
+    "size": 2569,
+    "sha256": "19bb55b22730f681d4b0f3d40abc081a9ff75015422de243a3b18f1ba6c4601f",
+    "width": 64,
+    "height": 64
+  },
+  {
+    "path": "Assets/Resources/Art/UI/Logo/loading_logo_sheet.png",
+    "size": 12924,
+    "sha256": "d5c8ce3c43b8c69a3227eca47ebda45772d97f71baeb6719d978d72b6a8ed0fd",
+    "width": 512,
+    "height": 64
+  },
+  {
+    "path": "Assets/Resources/Art/UI/Logo/logo_subtitle.png",
+    "size": 1191,
+    "sha256": "5dab70230a032a9a33acf819a247dfc4a072fb598141cd179e791dfb3b2707b5",
+    "width": 119,
+    "height": 30
+  },
+  {
+    "path": "Assets/Resources/Art/UI/Logo/logo_title.png",
+    "size": 1678,
+    "sha256": "35bc78a0a5ca808a7f4172dd3d3e837adc87d0db2ff07e61c8210061e5c75f38",
+    "width": 153,
+    "height": 56
+  },
+  {
+    "path": "Assets/Resources/Art/UI/Panels/panel_dialog.png",
+    "size": 283,
+    "sha256": "2a7ff20e7c3fa85a2f2e4b954b9b8fbd977d1966c49f3c48af62d0fb48a142db",
+    "width": 48,
+    "height": 48
+  },
+  {
+    "path": "Assets/Resources/Art/UI/Panels/panel_large.png",
+    "size": 373,
+    "sha256": "eaf8dd284f566058981a27ac036561c49203756aa87521339663629549894b8f",
+    "width": 72,
+    "height": 72
+  },
+  {
+    "path": "Assets/Resources/Art/UI/Panels/panel_medium.png",
+    "size": 292,
+    "sha256": "fc3530f8795179a90969665f547859f40af2b826b5e28b07b48918b7525c7f32",
+    "width": 48,
+    "height": 48
+  },
+  {
+    "path": "Assets/Resources/Art/UI/Slots/slot_autosave.png",
+    "size": 247,
+    "sha256": "71fd28989ec3fc9811db39e0a9a93e43c6e54cc36928b2dbf019f21916f6be77",
+    "width": 72,
+    "height": 44
+  },
+  {
+    "path": "Assets/Resources/Art/UI/Slots/slot_empty.png",
+    "size": 259,
+    "sha256": "bccf90ebd0a9247cf8cb1ed6d674fa985797ced03e76429e23d0349cda9fa931",
+    "width": 72,
+    "height": 44
+  },
+  {
+    "path": "Assets/Resources/Art/UI/Slots/slot_hover.png",
+    "size": 234,
+    "sha256": "48f22df308e35cea73a4440d9af79c20cec236080b63cb0e57bec8066c6a5076",
+    "width": 72,
+    "height": 44
+  },
+  {
+    "path": "Assets/Resources/Art/UI/Slots/slot_normal.png",
+    "size": 235,
+    "sha256": "ca3eb412eb8a1443763e6d2ca79df2e498f1675035278ce3f71fea36123da051",
+    "width": 72,
+    "height": 44
+  },
+  {
+    "path": "Assets/Resources/Art/UI/Slots/slot_selected.png",
+    "size": 246,
+    "sha256": "7420199c47046565e101dcc45702aaf85304b0964af3ccd7a6bcb533f290d56e",
+    "width": 72,
+    "height": 44
+  },
+  {
+    "path": "Assets/Resources/Art/UI/Widgets/checkbox_off.png",
+    "size": 141,
+    "sha256": "8dafad9449a0902c6969cd10e4b3e7c5b814d38daf7b2a8977382e162621fb98",
+    "width": 22,
+    "height": 22
+  },
+  {
+    "path": "Assets/Resources/Art/UI/Widgets/checkbox_on.png",
+    "size": 327,
+    "sha256": "9ac4b846fa4b925f715e8e273c0c6d9e1957f0357b378d8bdf118e559b8a47a5",
+    "width": 22,
+    "height": 22
+  },
+  {
+    "path": "Assets/Resources/Art/UI/Widgets/dropdown_arrow.png",
+    "size": 158,
+    "sha256": "4cd314b2e302836142095c49ff5a49eea210447aa8013b318ef398943a63b740",
+    "width": 16,
+    "height": 16
+  },
+  {
+    "path": "Assets/Resources/Art/UI/Widgets/dropdown_hover.png",
+    "size": 213,
+    "sha256": "ca126aeb0ead28e0a12107c66603f40e63ca875e17ab87a5d7c10e1e0088aeff",
+    "width": 72,
+    "height": 28
+  },
+  {
+    "path": "Assets/Resources/Art/UI/Widgets/dropdown_normal.png",
+    "size": 210,
+    "sha256": "c5396e692827900acd48e853882b4623a0afff6c716b1a9ed7bca8e425d0d373",
+    "width": 72,
+    "height": 28
+  },
+  {
+    "path": "Assets/Resources/Art/UI/Widgets/progress_fill.png",
+    "size": 117,
+    "sha256": "8c50a712ff7233cad4e02a5eb8c1d8669ef111846cba66650d17a40320e32f37",
+    "width": 16,
+    "height": 14
+  },
+  {
+    "path": "Assets/Resources/Art/UI/Widgets/progress_track.png",
+    "size": 160,
+    "sha256": "27ffb03cfdbe76efdd645ff8230850c4700e6ad9e4e50a23d6c907f8f86dafc8",
+    "width": 96,
+    "height": 14
+  },
+  {
+    "path": "Assets/Resources/Art/UI/Widgets/slider_fill.png",
+    "size": 131,
+    "sha256": "dfcf07741c6a08657189a49ed20c627fe7e5e924981a5434b28e34d81fafce50",
+    "width": 8,
+    "height": 10
+  },
+  {
+    "path": "Assets/Resources/Art/UI/Widgets/slider_knob.png",
+    "size": 281,
+    "sha256": "f786e2cdd3a8ccedac55eee66c1f5a05b8363b4954f86c4d8f21dcace1f2e838",
+    "width": 18,
+    "height": 18
+  },
+  {
+    "path": "Assets/Resources/Art/UI/Widgets/slider_track.png",
+    "size": 118,
+    "sha256": "c924e6ba1216e4152788c34f79ce981d725dddd87d1ffb526bcc67dfc3c60e28",
+    "width": 64,
+    "height": 10
+  },
+  {
+    "path": "Assets/Resources/Characters/adele/neutral.png",
+    "size": 449994,
+    "sha256": "f76a4165dda755c839352d23ab60fd47e491f6a1bf3bc39197bd4822d68a7459",
+    "width": 860,
+    "height": 1945
+  },
+  {
+    "path": "Assets/Resources/Characters/alienor/indoor.png",
+    "size": 533972,
+    "sha256": "4c9286b946730e62b05bc96b5e3afe9dda2b3c72d7b35087fd9e4528e11bf16d",
+    "width": 1238,
+    "height": 1989
+  },
+  {
+    "path": "Assets/Resources/Characters/alienor/neutral.png",
+    "size": 988315,
+    "sha256": "569544ba5559c5e24d767577d473292c266b7002f73b75706960062bb63cf459",
+    "width": 1432,
+    "height": 2258
+  },
+  {
+    "path": "Assets/Resources/Characters/antoine/neutral.png",
+    "size": 577635,
+    "sha256": "d4d5ecbd4329bf88bc818f750944f7c775243c15c9c7cef21fde82f68d5f5f1f",
+    "width": 1183,
+    "height": 2169
+  },
+  {
+    "path": "Assets/Resources/Characters/bertrand/neutral.png",
+    "size": 178574,
+    "sha256": "ae2ab109451a0a8b9459d7cca9cc3e731cb0d14c4a9d8fe62f9ce9158e1cf27c",
+    "width": 1111,
+    "height": 2272
+  },
+  {
+    "path": "Assets/Resources/Characters/bertrand/revealed.png",
+    "size": 568685,
+    "sha256": "3b0f760cb28c49bbc9995fef2972196f80461ec24867302ec5f983e3e2ed3cab",
+    "width": 743,
+    "height": 1721
+  },
+  {
+    "path": "Assets/Resources/Characters/elion/neutral.png",
+    "size": 559371,
+    "sha256": "b5c8f7d70863a35931b235d6fba5115f9019aa607afe3a55ead08ad49668c3c9",
+    "width": 1026,
+    "height": 2203
+  },
+  {
+    "path": "Assets/Resources/Characters/eugene/default.png",
+    "size": 739056,
+    "sha256": "3ac78e4d54bdba271706262808b5786f76015ad9228458b26446f21378918d2e",
+    "width": 1026,
+    "height": 2126
+  },
+  {
+    "path": "Assets/Resources/Characters/eugene/neutral.png",
+    "size": 739056,
+    "sha256": "3ac78e4d54bdba271706262808b5786f76015ad9228458b26446f21378918d2e",
+    "width": 1026,
+    "height": 2126
+  },
+  {
+    "path": "Assets/Resources/Characters/lesou/neutral.png",
+    "size": 1023595,
+    "sha256": "305132d0898fdea3b87e22fab3c4075ebd18c3cf0f86f5f86b88a839eed93de7",
+    "width": 956,
+    "height": 2223
+  },
+  {
+    "path": "Assets/Resources/Characters/neutral_reporter/placeholder.png",
+    "size": 10526,
+    "sha256": "4049a040b70bd01e66df61a2387d67f03256bbd3def650beebfe72d4371e2157",
+    "width": 512,
+    "height": 512
+  },
+  {
+    "path": "Assets/Resources/Characters/sade/neutral.png",
+    "size": 432877,
+    "sha256": "fd7e83b253b5b1a68d0c70cac2e1114e8cfc2d343eab32d0bbb7edcbe1c3d85a",
+    "width": 1033,
+    "height": 2206
+  },
+  {
+    "path": "Assets/Resources/Characters/thibaut/neutral.png",
+    "size": 425253,
+    "sha256": "55d8e43ca15af4d546abca938e621f428f8e47f1feb6872c9dbd18e3337f850c",
+    "width": 994,
+    "height": 2209
+  },
+  {
+    "path": "Assets/Screenshots/coffeeshop_full.png",
+    "size": 160214,
+    "sha256": "33882a602ced8add587a95ac9cdcd2aff5212785d91ba6e1d8fee397b63f6f6b",
+    "width": 1213,
+    "height": 426
+  },
+  {
+    "path": "Assets/Screenshots/coffeeshop_layout.png",
+    "size": 588316,
+    "sha256": "e61ba919a0f0cf70f05322e43ca9d68d1d5be41488d4167ef4792752fae39267",
+    "width": 1213,
+    "height": 426
+  },
+  {
+    "path": "Assets/Screenshots/freecafe-counter-preview.png",
+    "size": 248952,
+    "sha256": "939f82c8170c88ba8ae58aca8dc42fc5baebd7df7b33e2fe52c32cc4ba53d4d7",
+    "width": 2560,
+    "height": 1440
+  },
+  {
+    "path": "Assets/Screenshots/freecafe_sceneview.png",
+    "size": 2304418,
+    "sha256": "e6de6e6b5091a82aceb4b0e894f56f2e26853f9e4506b25d85e653cfe7d608a0",
+    "width": 1920,
+    "height": 1080
+  },
+  {
+    "path": "Assets/Screenshots/freecafe_verify.png",
+    "size": 2304418,
+    "sha256": "e6de6e6b5091a82aceb4b0e894f56f2e26853f9e4506b25d85e653cfe7d608a0",
+    "width": 1920,
+    "height": 1080
+  }
+]

@@ -108,7 +108,10 @@ namespace Spotlight.Narrative.Tests
                 session.SubmitBar("score", 2); Assert.That(session.CurrentRequest.Event, Is.Null);
                 session.SubmitBar("score", 3); Assert.That(session.CurrentRequest.Event.eventId, Is.EqualTo("threshold"));
                 session.RestoreBaseline();
-                session.SubmitDate(2); Assert.That(session.CurrentRequest.Event.eventId, Is.EqualTo("date"));
+                session.SubmitDate(2);
+                Assert.That(session.CurrentRequest.Event, Is.Null, "Formal dates wait for their declared phase.");
+                Assert.That(session.Controller.ProcessEntry(NarrativeEntryPoint.MorningBeforeMap), Is.True);
+                Assert.That(session.CurrentRequest.Event.eventId, Is.EqualTo("date"));
             }
         }
 

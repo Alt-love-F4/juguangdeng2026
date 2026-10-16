@@ -230,7 +230,8 @@ namespace Spotlight.GameFlow
             inventoryView.Initialize(headerLabel);
             var pointsView = GetComponentInChildren<MapActionPointsView>(true);
             if (pointsView != null) pointsView.Initialize(headerLabel, inventoryView.PointsFill, inventoryView.DateLabel, inventoryView.PointsSegments);
-            actionDetails.Initialize(inventoryView, () => ControlsAvailable, EndDay, StartCafe);
+            actionDetails.Initialize(inventoryView, () => ControlsAvailable, EndDay, null);
+            actionDetails.SetNavigationHandler(TryStartCafe, reason => { if (status != null) { status.gameObject.SetActive(true); status.text = reason; } });
             foreach (var button in GetComponentsInChildren<Button>(true))
             {
                 switch (button.name)
@@ -323,7 +324,8 @@ namespace Spotlight.GameFlow
             inventoryObject.transform.SetParent(widgets, false);
             focusPanel.transform.SetParent(widgets, false);
             BuildArtworkHud(hud, header, detail);
-            actionDetails.Initialize(inventoryView, () => ControlsAvailable, EndDay, StartCafe);
+            actionDetails.Initialize(inventoryView, () => ControlsAvailable, EndDay, null);
+            actionDetails.SetNavigationHandler(TryStartCafe, reason => { if (status != null) { status.gameObject.SetActive(true); status.text = reason; } });
             BuildTaskPanel(widgets);
             Button endDay = CreateButton("结束当天", root, new Vector2(-110, 46), new Vector2(180, 52));
             endDayButton = endDay;
@@ -930,14 +932,13 @@ namespace Spotlight.GameFlow
             DayFlowController dayFlow = flow != null ? flow.GetComponent<DayFlowController>() : null;
             if (IsFirstDay && dayFlow != null && dayFlow.IsFirstDayCafeMapGuideActive && !MapActionDetailsView.IsCafeEntryPosition(position.positionKey)) return;
             bool hasConfiguredContent = NarrativeRuntime.Instance?.Actions?.GetDisplayableActions(position.positionKey).Any() ?? false;
-            if (MapActionDetailsView.IsCafeEntryPosition(position.positionKey) || (!IsFirstDay && hasConfiguredContent))
+            if (MapActionDetailsView.IsCafeEntryPosition(position.positionKey) || (!GuideLocked && hasConfiguredContent))
             {
                 FocusPosition(position);
             }
             else
             {
-                // Locations without an enabled feature still move the camera, but they must not
-                // open the action popup or run their configured NCS actions yet.
+                // Locations without displayable content still keep camera focus.
                 focusedPosition = position;
                 if (focusPanel != null) focusPanel.SetActive(false);
             }
@@ -1064,14 +1065,6 @@ namespace Spotlight.GameFlow
             if (focusedPosition.extendedActions != null) keys.AddRange(focusedPosition.extendedActions);
             NarrativeActionController actions = NarrativeRuntime.Instance?.Actions;
             int row = 0;
-            if (focusedPosition.positionKey == "cafe"
-                && UnityEngine.SceneManagement.SceneManager.GetActiveScene().name != "CoffeeShop")
-            {
-                Button enter = CreateButton("进入咖啡馆", actionList,
-                    Vector2.zero, new Vector2(260, 48));
-                enter.onClick.AddListener(StartCafe);
-                row++;
-            }
             foreach (string key in keys.Distinct())
             {
                 NarrativeActionDefinition action = actions?.Get(key);
@@ -1226,28 +1219,37 @@ namespace Spotlight.GameFlow
             BeginFocusMovement(position.position);
         }
 
-        private void StartCafe()
+        private bool TryStartCafe()
         {
-            if (!ControlsAvailable) return;
-            if (NarrativeRuntime.Instance?.Actions?.ReplacesLocationActions(MapActionDetailsView.CafePositionKey) ?? false)
+            if (!ControlsAvailable || standaloneLoading) return false;
+            var actions = NarrativeRuntime.Instance?.Actions;
+            if (actions == null || !actions.GetDisplayableActions(MapActionDetailsView.CafePositionKey)
+                .Any(action => action.executionKind == NarrativeActionExecutionKind.Navigate
+                    && action.navigationKey == "cafe.enter")) return false;
+            if (actions.ReplacesLocationActions(MapActionDetailsView.CafePositionKey))
             {
-                FocusFirstBlockingAction(); ShowBlockingActionHint(); return;
+                FocusFirstBlockingAction(); ShowBlockingActionHint(); return false;
             }
             if (UnityEngine.SceneManagement.SceneManager.GetActiveScene().name == "CoffeeShop")
             {
                 if (flow != null) flow.CloseMap();
                 else gameObject.SetActive(false);
-                return;
+                return true;
             }
             CancelFocusMovement();
             DayFlowController dayFlow = flow != null ? flow.GetComponent<DayFlowController>() : null;
             if (dayFlow != null)
             {
                 dayFlow.StartCafeFromMap();
-                return;
+                return flow != null && !ControlsAvailable;
             }
-            if (flow != null) flow.TransitionToGameplayScene("CoffeeShop", null);
-            else StartCoroutine(LoadCafeStandalone());
+            if (flow != null)
+            {
+                flow.TransitionToGameplayScene("CoffeeShop", null);
+                return !ControlsAvailable;
+            }
+            StartCoroutine(LoadCafeStandalone());
+            return true;
         }
         private System.Collections.IEnumerator LoadCafeStandalone()
         {
@@ -1264,28 +1266,38 @@ namespace Spotlight.GameFlow
             {
                 Debug.LogException(error, this);
                 standaloneLoading = false;
+                actionDetails?.NotifyNavigationFailure("无法打开咖啡馆加载界面，请稍后重试。");
                 yield break;
             }
             if (panel == null)
             {
                 Debug.LogError("Could not open ShortLoadingPanel.", this);
                 standaloneLoading = false;
+                actionDetails?.NotifyNavigationFailure("无法打开咖啡馆加载界面，请稍后重试。");
                 yield break;
             }
             while (panel != null && !panel.IsCovered) yield return null;
             if (panel == null)
             {
                 standaloneLoading = false;
+                actionDetails?.NotifyNavigationFailure("咖啡馆加载已取消，请稍后重试。");
                 yield break;
             }
-            gameObject.SetActive(false);
-            AsyncOperation operation = UnityEngine.SceneManagement.SceneManager.LoadSceneAsync(
-                "CoffeeShop", UnityEngine.SceneManagement.LoadSceneMode.Additive);
+            AsyncOperation operation = null;
+            try
+            {
+                operation = UnityEngine.SceneManagement.SceneManager.LoadSceneAsync(
+                    "CoffeeShop", UnityEngine.SceneManagement.LoadSceneMode.Additive);
+            }
+            catch (Exception error)
+            {
+                Debug.LogWarning("[Map] Could not load CoffeeShop: " + error.Message, this);
+            }
             if (operation == null)
             {
-                gameObject.SetActive(true);
                 standaloneLoading = false;
-                Debug.LogError("Could not load CoffeeShop additively.", this);
+                panel.EndLoading();
+                actionDetails?.NotifyNavigationFailure("咖啡馆场景加载失败，请稍后重试。");
                 yield break;
             }
             operation.allowSceneActivation = false;
@@ -1300,7 +1312,15 @@ namespace Spotlight.GameFlow
             {
                 UnityEngine.SceneManagement.Scene destination = UnityEngine.SceneManagement.SceneManager.GetSceneByName("CoffeeShop");
                 if (destination.IsValid() && destination.isLoaded)
+                {
                     UnityEngine.SceneManagement.SceneManager.SetActiveScene(destination);
+                    gameObject.SetActive(false);
+                }
+                else
+                {
+                    standaloneLoading = false;
+                    actionDetails?.NotifyNavigationFailure("咖啡馆场景加载失败，请稍后重试。");
+                }
                 if (panel != null) panel.EndLoading(() =>
                 {
                     if (this != null) standaloneLoading = false;

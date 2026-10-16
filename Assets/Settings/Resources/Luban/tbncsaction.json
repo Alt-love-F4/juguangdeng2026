@@ -12,7 +12,15 @@
     "nextActionKey": "",
     "deliveryMode": "None",
     "replacesLocationActions": false,
-    "focusLocationOnComplete": false
+    "focusLocationOnComplete": false,
+    "executionKind": "Event",
+    "navigationKey": "",
+    "executeTextKey": "",
+    "sortOrder": 0,
+    "successResultOwnerId": "",
+    "onExpireEvents": "",
+    "onExpirePolicy": "Remove",
+    "notifyNew": true
   },
   {
     "actionKey": "act_peer",
@@ -27,7 +35,15 @@
     "nextActionKey": "",
     "deliveryMode": "None",
     "replacesLocationActions": false,
-    "focusLocationOnComplete": false
+    "focusLocationOnComplete": false,
+    "executionKind": "Event",
+    "navigationKey": "",
+    "executeTextKey": "",
+    "sortOrder": 0,
+    "successResultOwnerId": "",
+    "onExpireEvents": "",
+    "onExpirePolicy": "Remove",
+    "notifyNew": true
   },
   {
     "actionKey": "act_test_delivery_cumulative",
@@ -42,7 +58,15 @@
     "nextActionKey": "",
     "deliveryMode": "Cumulative",
     "replacesLocationActions": false,
-    "focusLocationOnComplete": false
+    "focusLocationOnComplete": false,
+    "executionKind": "Delivery",
+    "navigationKey": "",
+    "executeTextKey": "",
+    "sortOrder": 0,
+    "successResultOwnerId": "",
+    "onExpireEvents": "",
+    "onExpirePolicy": "Remove",
+    "notifyNew": true
   },
   {
     "actionKey": "act_test_delivery_consecutive",
@@ -57,7 +81,15 @@
     "nextActionKey": "",
     "deliveryMode": "Consecutive",
     "replacesLocationActions": false,
-    "focusLocationOnComplete": false
+    "focusLocationOnComplete": false,
+    "executionKind": "Delivery",
+    "navigationKey": "",
+    "executeTextKey": "",
+    "sortOrder": 0,
+    "successResultOwnerId": "",
+    "onExpireEvents": "",
+    "onExpirePolicy": "Remove",
+    "notifyNew": true
   },
   {
     "actionKey": "oct07.cafe.s1",
@@ -72,7 +104,15 @@
     "nextActionKey": "",
     "deliveryMode": "None",
     "replacesLocationActions": true,
-    "focusLocationOnComplete": true
+    "focusLocationOnComplete": true,
+    "executionKind": "Event",
+    "navigationKey": "",
+    "executeTextKey": "",
+    "sortOrder": 0,
+    "successResultOwnerId": "",
+    "onExpireEvents": "",
+    "onExpirePolicy": "Remove",
+    "notifyNew": true
   },
   {
     "actionKey": "neutral.1008.s1.action",
@@ -87,6 +127,37 @@
     "nextActionKey": "",
     "deliveryMode": "None",
     "replacesLocationActions": false,
-    "focusLocationOnComplete": false
+    "focusLocationOnComplete": false,
+    "executionKind": "Event",
+    "navigationKey": "",
+    "executeTextKey": "",
+    "sortOrder": 0,
+    "successResultOwnerId": "",
+    "onExpireEvents": "",
+    "onExpirePolicy": "Remove",
+    "notifyNew": true
+  },
+  {
+    "actionKey": "cafe.enter",
+    "type": "REPEAT",
+    "mustExecute": false,
+    "nameText": "action.cafe.enter.name",
+    "descText": "action.cafe.enter.desc",
+    "requirements": "",
+    "resultEvents": "",
+    "durationDays": 0,
+    "progressTarget": 0,
+    "nextActionKey": "",
+    "deliveryMode": "None",
+    "replacesLocationActions": false,
+    "focusLocationOnComplete": false,
+    "executionKind": "Navigate",
+    "navigationKey": "cafe.enter",
+    "executeTextKey": "action.cafe.enter.button",
+    "sortOrder": 0,
+    "successResultOwnerId": "",
+    "onExpireEvents": "",
+    "onExpirePolicy": "Remove",
+    "notifyNew": false
   }
 ]

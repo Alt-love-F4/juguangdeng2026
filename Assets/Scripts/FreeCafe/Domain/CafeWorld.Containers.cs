@@ -164,11 +164,13 @@ namespace Spotlight.FreeCafe
             EnsureCoffeeProvenance(incoming);
             MergeComposition(target, incoming, fraction);
             float volume = incoming.milliliters * fraction, mass = incoming.grams * fraction;
-            float priorWeight = IsLiquid(target.specId) ? target.milliliters : target.grams;
-            float addedWeight = IsLiquid(incoming.specId) ? volume : mass;
-            float weight = priorWeight + addedWeight;
+            double priorWeight = IsLiquid(target.specId) ? target.milliliters : target.grams;
+            double addedWeight = IsLiquid(incoming.specId) ? volume : mass;
+            double weight = priorWeight + addedWeight;
             if (weight > 0)
-                target.productionScore = (target.productionScore * priorWeight + incoming.productionScore * addedWeight) / weight;
+                // Interpolate in double precision so identical scores stay exact through fractional pours.
+                target.productionScore = (float)(target.productionScore
+                    + ((double)incoming.productionScore - target.productionScore) * (addedWeight / weight));
             SetTemperature(target, mixedTemperature);
             target.quality = Math.Min(target.quality, incoming.quality); // SalePrice uses the lowest ingredient quality.
             target.extracted |= incoming.extracted;

@@ -32,11 +32,17 @@ namespace Spotlight.Narrative
                     portraitIndoorPath = row.PortraitIndoorPath, avtarPath = row.AvtarPath,
                     descText = row.DescText, tags = row.Tags
                 });
+            foreach (var row in tables.TbNcsItem.DataList)
+                config.items.Add(new NarrativeItemDefinition { itemKey = row.ItemKey, nameText = row.NameText, iconPath = row.IconPath,
+                    descText = row.DescText, inventoryOwner = NarrativeItemCatalog.ParseOwner(row.InventoryOwner, row.ItemKey) });
             foreach (var row in tables.TbNcsAction.DataList)
                 config.actions.Add(new NarrativeActionDefinition
                 {
                     actionKey = row.ActionKey, type = ActionType(row.Type), mustExecute = row.MustExecute,
-                    replacesLocationActions = row.ReplacesLocationActions, focusLocationOnComplete = row.FocusLocationOnComplete,
+                    executionKind = ParseExecutionKind(row.ExecutionKind, row.DeliveryMode, row.Type), navigationKey = row.NavigationKey,
+                    executeTextKey = row.ExecuteTextKey, sortOrder = row.SortOrder, successResultOwnerId = row.SuccessResultOwnerId,
+                    onExpireEvents = Strings(row.OnExpireEvents), onExpirePolicy = string.IsNullOrWhiteSpace(row.OnExpirePolicy) ? "Remove" : row.OnExpirePolicy,
+                    notifyNew = row.NotifyNew, replacesLocationActions = row.ReplacesLocationActions, focusLocationOnComplete = row.FocusLocationOnComplete,
                     nameText = row.NameText, descText = row.DescText, requirements = row.Requirements,
                     resultEvents = Strings(row.ResultEvents), durationDays = row.DurationDays,
                     progressTarget = row.ProgressTarget, nextActionKey = row.NextActionKey, deliveryMode = DeliveryMode(row.DeliveryMode),
@@ -203,6 +209,7 @@ namespace Spotlight.Narrative
                 config.presentations.readingLines.Add(new NarrativeReadingLineDefinition { lineId = row.LineId, pageId = row.PageId, seq = row.Seq, mode = row.Mode, speakerKey = row.SpeakerKey, textKey = row.TextKey, voiceKey = row.VoiceKey });
             ValidateLinks(config);
             List<string> errors = ValidateConditionConfiguration(config);
+            errors.AddRange(ValidateActionConfiguration(config));
             errors.AddRange(ValidateEntryConfiguration(config));
             errors.AddRange(ValidateConversationSteps(config));
             errors.AddRange(ValidateAbilityCheckConfiguration(config, tables));
@@ -275,6 +282,7 @@ namespace Spotlight.Narrative
                     "event" => c.events.Any(x => (string.IsNullOrWhiteSpace(x.conditionOwnerId) ? x.eventId : x.conditionOwnerId) == row.ownerId),
                     "choice" => c.choices.Any(x => x.choiceId == row.ownerId),
                     "action" => c.actions.Any(x => x.actionKey == row.ownerId),
+                    "actionexecute" => c.actions.Any(x => x.actionKey == row.ownerId),
                     "ending" => endingIds.Contains(row.ownerId),
                     "result" => c.results.Any(x => x != null && x.resultId == row.ownerId),
                     _ => false
@@ -362,11 +370,21 @@ namespace Spotlight.Narrative
                 try
                 {
                     var requirements = NarrativeActionRequirementParser.Parse(action.requirements);
-                    if (requirements.Any(x => x.type != NarrativeActionRequirementType.Item && x.type != NarrativeActionRequirementType.ActionPoint)) errors.Add(label + "read-only requirements must migrate to Condition rows.");
+                    if (requirements.Any(x => x.type != NarrativeActionRequirementType.Item && x.type != NarrativeActionRequirementType.ActionPoint && x.type != NarrativeActionRequirementType.Money)) errors.Add(label + "read-only requirements must migrate to Condition rows.");
                 }
                 catch (FormatException ex) { errors.Add(label + ex.Message); }
                 foreach (string eventId in action.resultEvents)
                     if (!c.events.Any(x => x.eventId == eventId)) errors.Add(label + "unknown result event " + eventId);
+                foreach (string eventId in action.onExpireEvents)
+                {
+                    var expiryEvent = c.events.Find(x => x.eventId == eventId);
+                    if (expiryEvent == null) errors.Add(label + "unknown expiry event " + eventId);
+                    else if (expiryEvent.entry == NarrativeEntryPoint.MapAction) errors.Add(label + "expiry event cannot use MapAction entry: " + eventId);
+                }
+                if (!string.Equals(action.onExpirePolicy, "Remove", StringComparison.OrdinalIgnoreCase) && !string.Equals(action.onExpirePolicy, "RunEvents", StringComparison.OrdinalIgnoreCase))
+                    errors.Add(label + "onExpirePolicy must be Remove or RunEvents.");
+                if (string.Equals(action.onExpirePolicy, "RunEvents", StringComparison.OrdinalIgnoreCase) && action.onExpireEvents.Count == 0)
+                    errors.Add(label + "RunEvents expiry policy requires onExpireEvents.");
                 if (!string.IsNullOrWhiteSpace(action.nextActionKey) && !c.actions.Any(x => x.actionKey == action.nextActionKey)) errors.Add(label + "unknown next action " + action.nextActionKey);
                 foreach (var milestone in action.milestones)
                 {
@@ -378,6 +396,114 @@ namespace Spotlight.Narrative
                 }
             }
             return errors;
+        }
+
+        private static string ItemKey(string target) => target != null && target.StartsWith("item:", StringComparison.OrdinalIgnoreCase) ? target.Substring(5) : target;
+
+        public static List<string> ValidateActionConfiguration(NarrativeConfiguration c)
+        {
+            var errors = new List<string>();
+            var actionIds = new HashSet<string>(StringComparer.Ordinal);
+            var links = new Dictionary<string, string>(StringComparer.Ordinal);
+            try
+            {
+                var itemReferences = c.actions.Where(a => a != null)
+                    .SelectMany(a => NarrativeActionRequirementParser.Parse(a.requirements)).Where(r => r.type == NarrativeActionRequirementType.Item).Select(r => r.key)
+                    .Concat(c.results.Where(r => r != null && (r.resultType == NarrativeResultType.ItemAdd || r.resultType == NarrativeResultType.ItemRemove)).Select(r => ItemKey(r.target)))
+                    .Concat(c.conditions.Where(x => x != null && x.condType == "ITEM_GTE").Select(x => ItemKey(x.target)));
+                NarrativeItemCatalog.Validate(c.items, itemReferences);
+                foreach (var item in c.items)
+                    if (string.IsNullOrWhiteSpace(item.nameText) || !c.texts.Any(t => t.key == item.nameText)
+                        || string.IsNullOrWhiteSpace(item.descText) || !c.texts.Any(t => t.key == item.descText))
+                        errors.Add("Item " + item.itemKey + ": nameText and descText must reference existing Text keys.");
+            }
+            catch (FormatException error) { errors.Add(error.Message); }
+            foreach (var result in c.results.Where(x => x != null))
+                if (!IsKnownResultOwner(c, result.eventId)) errors.Add("Result " + result.resultId + ": unknown event/choice/action result owner " + result.eventId);
+
+            foreach (var action in c.actions)
+            {
+                if (action == null) { errors.Add("Action: null definition."); continue; }
+                string label = "Action " + action.actionKey + ": ";
+                if (string.IsNullOrWhiteSpace(action.actionKey) || !actionIds.Add(action.actionKey)) errors.Add(label + "missing or duplicate ID.");
+                if (!string.IsNullOrWhiteSpace(action.nextActionKey))
+                {
+                    if (c.actions.Any(x => x != null && x.actionKey == action.nextActionKey)) links[action.actionKey] = action.nextActionKey;
+                }
+                if (action.executionKind == NarrativeActionExecutionKind.Navigate)
+                {
+                    if (action.navigationKey != "cafe.enter") errors.Add(label + "Navigate navigationKey must be cafe.enter.");
+                    if (!string.IsNullOrWhiteSpace(action.requirements) || action.resultEvents.Count > 0 || action.onExpireEvents.Count > 0 || !string.IsNullOrWhiteSpace(action.successResultOwnerId))
+                        errors.Add(label + "free navigation cannot have costs or results.");
+                    if (action.endDay) errors.Add(label + "Navigate cannot be EndDay.");
+                }
+                else if (!string.IsNullOrWhiteSpace(action.navigationKey)) errors.Add(label + "navigationKey is only valid for Navigate.");
+                if (action.endDay && (action.executionKind != NarrativeActionExecutionKind.EndDay || action.IsTimed || action.IsProgress || action.type == NarrativeActionType.Future || !string.IsNullOrWhiteSpace(action.requirements)))
+                    errors.Add(label + "EndDay cannot have cost, timer, progress or Future type and requires executionKind EndDay.");
+                if (action.executionKind == NarrativeActionExecutionKind.EndDay && !action.endDay)
+                    errors.Add(label + "executionKind EndDay requires EndDay action type.");
+                if (action.mustExecute && (action.type == NarrativeActionType.Future || action.IsTimed)) errors.Add(label + "mustExecute cannot be Future or expire during the day.");
+                if (!string.IsNullOrWhiteSpace(action.successResultOwnerId) && !c.results.Any(r => r != null && r.eventId == action.successResultOwnerId))
+                    errors.Add(label + "successResultOwnerId has no Result rows: " + action.successResultOwnerId);
+                if (action.executionKind == NarrativeActionExecutionKind.Exchange)
+                {
+                    if (string.IsNullOrWhiteSpace(action.successResultOwnerId)) errors.Add(label + "Exchange requires successResultOwnerId.");
+                    if (action.resultEvents.Count > 0) errors.Add(label + "Exchange cannot have resultEvents; event chains after Exchange are not supported.");
+                    foreach (var result in c.results.Where(r => r != null && !string.IsNullOrWhiteSpace(action.successResultOwnerId) && r.eventId == action.successResultOwnerId))
+                        if (result.resultType != NarrativeResultType.ItemAdd && result.resultType != NarrativeResultType.ItemRemove
+                            && result.resultType != NarrativeResultType.MoneyAdd && result.resultType != NarrativeResultType.MoneyRemove)
+                            errors.Add(label + "Exchange Result " + result.resultId + ": only ItemAdd/ItemRemove/MoneyAdd/MoneyRemove are supported.");
+                }
+                try
+                {
+                    var costs = NarrativeActionRequirementParser.Parse(action.requirements);
+                    int executeConditions = c.conditions.Any(x => x != null && string.Equals(x.ownerType, "actionExecute", StringComparison.OrdinalIgnoreCase) && x.ownerId == action.actionKey) ? 1 : 0;
+                    var mergedCosts = costs.GroupBy(x => x.type == NarrativeActionRequirementType.Item ? "Item:" + x.key : x.type.ToString()).ToList();
+                    if (mergedCosts.Count + executeConditions > 6) errors.Add(label + "execution requirements and actionExecute conditions exceed 6 displayed items.");
+                    foreach (var group in mergedCosts)
+                        if (group.Sum(x => (long)x.value) > int.MaxValue) errors.Add(label + "merged cost overflows Int32: " + group.Key);
+                    var owners = new HashSet<string>(action.resultEvents ?? new List<string>(), StringComparer.Ordinal);
+                    if (!string.IsNullOrWhiteSpace(action.successResultOwnerId)) owners.Add(action.successResultOwnerId);
+                    foreach (var result in c.results.Where(r => r != null && owners.Contains(r.eventId)))
+                    {
+                        string target = result.target ?? string.Empty;
+                        if (target.StartsWith("item:", StringComparison.OrdinalIgnoreCase)) target = target.Substring(5);
+                        if (result.resultType == NarrativeResultType.ItemRemove && costs.Any(x => x.type == NarrativeActionRequirementType.Item && x.key == target)
+                            || result.resultType == NarrativeResultType.MoneyRemove && costs.Any(x => x.type == NarrativeActionRequirementType.Money))
+                            errors.Add(label + "Result " + result.resultId + " duplicates a requirements cost.");
+                    }
+                    if (action.resultEvents.Count == 0 && !string.IsNullOrWhiteSpace(action.successResultOwnerId))
+                        foreach (var result in c.results.Where(r => r != null && r.eventId == action.successResultOwnerId))
+                            if (result.resultType != NarrativeResultType.ItemAdd && result.resultType != NarrativeResultType.ItemRemove
+                                && result.resultType != NarrativeResultType.MoneyAdd && result.resultType != NarrativeResultType.MoneyRemove)
+                                errors.Add(label + "owner-only settlement requires inventory/money results; use a real resultEvents root for other effects.");
+                }
+                catch (FormatException ex) { errors.Add(label + ex.Message); }
+            }
+            foreach (var action in c.actions.Where(x => x != null && x.type == NarrativeActionType.Future))
+            {
+                if (action.durationDays <= 0) errors.Add("Action " + action.actionKey + ": Future requires positive durationDays.");
+                if (string.IsNullOrWhiteSpace(action.nextActionKey)) errors.Add("Action " + action.actionKey + ": Future requires nextActionKey.");
+            }
+            foreach (string start in links.Keys)
+            {
+                var seen = new HashSet<string>(StringComparer.Ordinal);
+                string current = start;
+                while (links.TryGetValue(current, out current))
+                    if (!seen.Add(current)) { errors.Add("Action " + start + ": nextActionKey cycle detected."); break; }
+            }
+            foreach (var action in c.actions.Where(x => x != null && x.mustExecute))
+                if (!c.mapPositions.Any(p => p != null && p.enabled && (p.defaultAction == action.actionKey || p.extendedActions.Contains(action.actionKey))))
+                    errors.Add("Action " + action.actionKey + ": mustExecute has no enabled map position.");
+            return errors;
+        }
+
+        public static bool IsKnownResultOwner(NarrativeConfiguration c, string ownerId)
+        {
+            return !string.IsNullOrWhiteSpace(ownerId) && (
+                c.events.Any(x => x != null && x.eventId == ownerId)
+                || c.choices.Any(x => x != null && (string.IsNullOrWhiteSpace(x.resultOwnerId) ? x.choiceId : x.resultOwnerId) == ownerId)
+                || c.actions.Any(x => x != null && x.successResultOwnerId == ownerId));
         }
 
         private static bool IsInternalKey(string key) => key != null && (key.StartsWith("event.locked.", StringComparison.Ordinal) || key.StartsWith("trigger.once.", StringComparison.Ordinal) || key.StartsWith("date.once.", StringComparison.Ordinal) || key.StartsWith("event.once.", StringComparison.Ordinal) || key.StartsWith("achievement.", StringComparison.Ordinal));
@@ -638,6 +764,24 @@ namespace Spotlight.Narrative
         {
             "once" => NarrativeOnceType.Once, "repeat" => NarrativeOnceType.Repeat, _ => throw Unknown("onceType", value)
         };
+        private static NarrativeActionExecutionKind ParseExecutionKind(string value, string deliveryMode, string type)
+        {
+            if (!string.IsNullOrWhiteSpace(value))
+                return value switch
+                {
+                    "Event" => NarrativeActionExecutionKind.Event,
+                    "Navigate" => NarrativeActionExecutionKind.Navigate,
+                    "Exchange" => NarrativeActionExecutionKind.Exchange,
+                    "Delivery" => NarrativeActionExecutionKind.Delivery,
+                    "EndDay" => NarrativeActionExecutionKind.EndDay,
+                    _ => throw Unknown("executionKind", value)
+                };
+            if (!string.IsNullOrWhiteSpace(deliveryMode) && deliveryMode != "None") return NarrativeActionExecutionKind.Delivery;
+            if ((type ?? string.Empty).Split(new[] { '|', '+', ',', ';' }, StringSplitOptions.RemoveEmptyEntries).Any(p => p.Trim().Equals("EndDay", StringComparison.OrdinalIgnoreCase)))
+                return NarrativeActionExecutionKind.EndDay;
+            return NarrativeActionExecutionKind.Event;
+        }
+
         private static NarrativeActionType ActionType(string value)
         {
             string[] parts = (value ?? string.Empty).Split(new[] { '|', '+', ',', ';' }, StringSplitOptions.RemoveEmptyEntries);

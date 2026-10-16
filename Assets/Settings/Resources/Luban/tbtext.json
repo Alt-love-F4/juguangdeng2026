@@ -12303,5 +12303,50 @@
     "key": "neutral.1018.s1.notice.advertisement.body",
     "text": "本期商业版刊登了沸点咖啡馆的广告。",
     "comment": "A05 authorized minimal next-issue Notice; no reward"
+  },
+  {
+    "key": "action.cafe.enter.name",
+    "text": "咖啡馆",
+    "comment": "配置化免费导航行动"
+  },
+  {
+    "key": "action.cafe.enter.desc",
+    "text": "进入咖啡馆，开始今天的经营。",
+    "comment": "配置化免费导航行动"
+  },
+  {
+    "key": "action.cafe.enter.button",
+    "text": "进入咖啡馆",
+    "comment": "配置化免费导航按钮"
+  },
+  {
+    "key": "test.item.medicine.name",
+    "text": "验收用药品",
+    "comment": "TEST_ONLY：交付隔离夹具物品元数据"
+  },
+  {
+    "key": "test.item.medicine.desc",
+    "text": "仅用于隔离交付验收，不代表正式商品。",
+    "comment": "TEST_ONLY：交付隔离夹具物品元数据"
+  },
+  {
+    "key": "test.item.food.name",
+    "text": "验收用食品",
+    "comment": "TEST_ONLY：交付隔离夹具物品元数据"
+  },
+  {
+    "key": "test.item.food.desc",
+    "text": "仅用于隔离交付验收，不代表正式商品。",
+    "comment": "TEST_ONLY：交付隔离夹具物品元数据"
+  },
+  {
+    "key": "test.item.delivery_receipt.name",
+    "text": "交付验收回执",
+    "comment": "TEST_ONLY：交付隔离夹具物品元数据"
+  },
+  {
+    "key": "test.item.delivery_receipt.desc",
+    "text": "仅用于隔离交付验收，不代表正式商品。",
+    "comment": "TEST_ONLY：交付隔离夹具物品元数据"
   }
 ]

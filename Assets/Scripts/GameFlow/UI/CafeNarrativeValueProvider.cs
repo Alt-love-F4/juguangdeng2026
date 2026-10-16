@@ -3,7 +3,7 @@ using Spotlight.FreeCafe;
 
 namespace Spotlight.Narrative
 {
-    public sealed class CafeNarrativeValueProvider : INarrativeValueProvider, INarrativeMoneyAccount, IDisposable
+    public sealed class CafeNarrativeValueProvider : INarrativeValueProvider, INarrativeMoneyAccount, INarrativeMoneyNotificationScope, IDisposable
     {
         private CafeWorld world;
         public string ProviderId => "cafe";
@@ -27,6 +27,11 @@ namespace Spotlight.Narrative
         {
             if (world == null) { error = "Cafe provider disposed."; return false; }
             return world.TryCommitMoney(expectedBalance, finalBalance, out error);
+        }
+        public IDisposable DeferNotifications()
+        {
+            if (world == null) throw new ObjectDisposedException(nameof(CafeNarrativeValueProvider));
+            return world.DeferNotifications();
         }
         public void Dispose()
         {

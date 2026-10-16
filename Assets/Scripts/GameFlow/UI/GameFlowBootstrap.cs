@@ -369,6 +369,10 @@ namespace Spotlight.GameFlow
 
         private IEnumerator TransitionGameplaySceneRoutine(string sceneName, Action completed)
         {
+            if (loadingTransitioning) yield break;
+            Scene sourceScene = SceneManager.GetActiveScene();
+            MapSceneController sourceMap = FindMapPanel(SceneManager.GetSceneByName(MapSceneName));
+            bool sourceMapVisible = sourceMap != null && sourceMap.gameObject.activeSelf;
             int version = ++loadingVersion;
             SetSessionState(GameSessionState.Loading);
             CloseDetails();
@@ -387,10 +391,13 @@ namespace Spotlight.GameFlow
             Scene destination = SceneManager.GetSceneByName(sceneName);
             if (!destination.IsValid() || !destination.isLoaded)
             {
-                AsyncOperation load = SceneManager.LoadSceneAsync(sceneName, LoadSceneMode.Additive);
+                AsyncOperation load = null;
+                try { load = SceneManager.LoadSceneAsync(sceneName, LoadSceneMode.Additive); }
+                catch (Exception error) { Debug.LogException(error, this); }
                 if (load == null)
                 {
                     Debug.LogError("无法加载游戏场景：" + sceneName, this);
+                    RestoreFailedGameplayTransition(sourceScene, sourceMap, sourceMapVisible);
                     FinishGameplaySceneTransition(version, shortLoadingPanel);
                     yield break;
                 }
@@ -398,15 +405,17 @@ namespace Spotlight.GameFlow
                 destination = SceneManager.GetSceneByName(sceneName);
             }
 
-            if (version != loadingVersion || !destination.IsValid() || !destination.isLoaded)
+            if (version != loadingVersion) yield break;
+            if (!destination.IsValid() || !destination.isLoaded)
+            {
+                RestoreFailedGameplayTransition(sourceScene, sourceMap, sourceMapVisible);
+                FinishGameplaySceneTransition(version, shortLoadingPanel);
                 yield break;
+            }
 
             Scene previous = SceneManager.GetActiveScene();
             if (destination != previous)
                 SceneManager.SetActiveScene(destination);
-
-            if (sceneName != MapSceneName)
-                yield return UnloadGameplaySceneExcept(MapSceneName, sceneName);
 
             if (sceneName == MapSceneName)
             {
@@ -414,6 +423,7 @@ namespace Spotlight.GameFlow
                 if (map == null)
                 {
                     Debug.LogError("Map 场景未找到地图面板。", this);
+                    RestoreFailedGameplayTransition(sourceScene, sourceMap, sourceMapVisible);
                     FinishGameplaySceneTransition(version, shortLoadingPanel);
                     yield break;
                 }
@@ -431,17 +441,32 @@ namespace Spotlight.GameFlow
                 if (panel == null)
                 {
                     Debug.LogError("场景未注册玩法面板：" + sceneName, this);
+                    RestoreFailedGameplayTransition(sourceScene, sourceMap, sourceMapVisible);
                     FinishGameplaySceneTransition(version, shortLoadingPanel);
                     yield break;
                 }
                 gameplayScenePanel = panel;
             }
 
+            if (sceneName != MapSceneName)
+                yield return UnloadGameplaySceneExcept(MapSceneName, sceneName);
             CompletePendingPlayerCreation();
             SetSessionState(GameSessionState.Playing);
             narrativeIntegration?.SetGameplayVisible(true);
             completed?.Invoke();
             FinishGameplaySceneTransition(version, shortLoadingPanel);
+        }
+
+        private void RestoreFailedGameplayTransition(Scene sourceScene, MapSceneController sourceMap, bool sourceMapVisible)
+        {
+            if (sourceScene.IsValid() && sourceScene.isLoaded) SceneManager.SetActiveScene(sourceScene);
+            SetSessionState(GameSessionState.Playing);
+            narrativeIntegration?.SetGameplayVisible(true);
+            if (sourceMap != null && sourceMapVisible)
+            {
+                sourceMap.gameObject.SetActive(true);
+                sourceMap.GetComponentInChildren<MapActionDetailsView>(true)?.NotifyNavigationFailure("进入失败，请重试。");
+            }
         }
 
         private static MapSceneController FindMapPanel(Scene scene)

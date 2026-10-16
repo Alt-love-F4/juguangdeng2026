@@ -18,6 +18,7 @@ namespace Spotlight.Narrative.Tests
             return new JObject
             {
                 ["visitKey"] = "fixture_invalid", ["characterId"] = "npc",
+                ["orderProductId"] = "", ["requireRealProduction"] = false,
                 ["preferredSeatId"] = "missing_seat", ["seatedVisualPath"] = "missing/visual",
                 ["arrivalDelaySeconds"] = delay, ["patienceSeconds"] = patience,
                 ["leaveAfterServed"] = leave

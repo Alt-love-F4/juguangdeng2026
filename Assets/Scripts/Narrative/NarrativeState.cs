@@ -30,6 +30,30 @@ namespace Spotlight.Narrative
         private readonly Dictionary<string, bool> conditions = new Dictionary<string, bool>(StringComparer.Ordinal);
         public IReadOnlyDictionary<string, bool> Conditions => conditions;
         public event Action ConditionsChanged;
+        private int conditionNotificationDepth;
+        private bool conditionNotificationPending;
+        internal IDisposable DeferConditionNotifications()
+        {
+            conditionNotificationDepth++;
+            return new ConditionNotificationScope(this);
+        }
+        private sealed class ConditionNotificationScope : IDisposable
+        {
+            private NarrativeState owner;
+            public ConditionNotificationScope(NarrativeState owner) { this.owner = owner; }
+            public void Dispose()
+            {
+                if (owner == null) return;
+                var target = owner; owner = null;
+                if (--target.conditionNotificationDepth == 0 && target.conditionNotificationPending)
+                { target.conditionNotificationPending = false; target.ConditionsChanged?.Invoke(); }
+            }
+        }
+        private void NotifyConditionsChanged()
+        {
+            if (conditionNotificationDepth > 0) conditionNotificationPending = true;
+            else ConditionsChanged?.Invoke();
+        }
 
         public bool TryGetCondition(string key, out bool value)
         {
@@ -54,7 +78,7 @@ namespace Spotlight.Narrative
             ValidateConditionWrite(key, value);
             if (conditions[key] == value) return false;
             conditions[key] = value;
-            ConditionsChanged?.Invoke();
+            NotifyConditionsChanged();
             return true;
         }
 
@@ -67,7 +91,7 @@ namespace Spotlight.Narrative
                 conditions[pair.Key] = pair.Value;
                 changed = true;
             }
-            if (changed) ConditionsChanged?.Invoke();
+            if (changed) NotifyConditionsChanged();
         }
 
         public IReadOnlyDictionary<string, int> Bars
@@ -215,7 +239,7 @@ namespace Spotlight.Narrative
         public void IncrementCounter(string key) => SetCounter(key, GetCounter(key) + 1);
         public void ResetCounter(string key) => counters.Remove(key);
         public void MarkTriggerFired(string key) => firedTriggers.Add(key);
-        public void MarkEventHappened(string key) { if (happenedEvents.Add(key)) ConditionsChanged?.Invoke(); }
+        public void MarkEventHappened(string key) { if (happenedEvents.Add(key)) NotifyConditionsChanged(); }
         // Internal scheduling/display bookkeeping only. Public story facts use SetCondition.
         public void SetFlag(string key, bool value)
         {
