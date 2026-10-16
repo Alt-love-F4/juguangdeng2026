@@ -37,7 +37,7 @@ RectTransform:
   m_AnchorMin: {x: 0.5, y: 0.5}
   m_AnchorMax: {x: 0.5, y: 0.5}
   m_AnchoredPosition: {x: 0, y: 0}
-  m_SizeDelta: {x: 1, y: 1.2}
+  m_SizeDelta: {x: 6.72, y: 6.38}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!222 &520196102510728147
 CanvasRenderer:
@@ -95,8 +95,11 @@ MonoBehaviour:
   surfaceColor: {r: 0.571, g: 0.49124998, b: 0.46374997, a: 0.94}
   surfaceWidth: 0.008
   textureInfluence: 0
-  wallThickness: 0.02
-  wallColor: {r: 0.72, g: 0.92, b: 1, a: 0.82}
+  containerMask: {fileID: 2800000, guid: 19c403cd34dd5b04e87af41882fd8b15, type: 3}
+  maskIsDistanceField: 1
+  maskDistanceRange: 0.125
+  wallThickness: 0.018
+  wallColor: {r: 0.16, g: 0.11, b: 0.07, a: 0.65}
   allowSpilling: 0
   spillRate: 0.8
   gravity: {x: 0, y: -9.81}
@@ -132,6 +135,14 @@ MonoBehaviour:
   matcha: {r: 0.34, g: 0.48, b: 0.12, a: 0.94}
   cocoa: {r: 0.32, g: 0.14, b: 0.06, a: 0.94}
   glass: {r: 0.72, g: 0.92, b: 1, a: 0.82}
+  silhouetteOutline: {r: 0.16, g: 0.11, b: 0.07, a: 0.65}
+  coffeeColorWeight: 3
+  milkColorWeight: 1
+  milkFoamColorWeight: 0.1
+  waterColorWeight: 1
+  matchaColorWeight: 1
+  cocoaColorWeight: 1
+  otherColorWeight: 1
 --- !u!1 &1156972450980117556
 GameObject:
   m_ObjectHideFlags: 0
@@ -520,7 +531,7 @@ Transform:
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
   m_LocalPosition: {x: 0, y: 0, z: 0}
-  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_LocalScale: {x: 0.21577382, y: 0.21577382, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children:
   - {fileID: 7041721345747219974}
@@ -706,7 +717,7 @@ Canvas:
   m_AdditionalShaderChannelsFlag: 1
   m_UpdateRectTransformForStandalone: 0
   m_SortingLayerID: 0
-  m_SortingOrder: 130
+  m_SortingOrder: 131
   m_TargetDisplay: 0
 --- !u!1 &5654976073983782295
 GameObject:
@@ -1113,6 +1124,7 @@ GameObject:
   - component: {fileID: 4771286933848243718}
   - component: {fileID: 2674263020061534411}
   - component: {fileID: 4059795844178861901}
+  - component: {fileID: 7057502315141339741}
   m_Layer: 0
   m_Name: FreeEntity_machine_brewer
   m_TagString: Untagged
@@ -1162,10 +1174,19 @@ MonoBehaviour:
   liquidRoot: {fileID: 2122039641880500919}
   pourOrigin: {fileID: 4255085955096801237}
   liquidPresenter: {fileID: 832012717923019901}
+  liquidContainerMask: {fileID: 2800000, guid: 19c403cd34dd5b04e87af41882fd8b15, type: 3}
+  liquidMaskIsDistanceField: 1
+  liquidMaskDistanceRange: 0.125
+  liquidWallThickness: 0.018
   body: {fileID: 8622992544801080132}
   label: {fileID: 4034130782218819959}
   workspaceCaption: {fileID: 2681403520911051440}
   hitbox: {fileID: 4059795844178861901}
+  dragSmoothTime: 0.055
+  releaseSmoothTime: 0.18
+  maxDragLean: 14
+  leanPerSpeed: 1.6
+  leanSmoothTime: 0.09
 --- !u!61 &4059795844178861901
 BoxCollider2D:
   m_ObjectHideFlags: 0
@@ -1212,3 +1233,18 @@ BoxCollider2D:
   m_AutoTiling: 0
   m_Size: {x: 1.45, y: 1.6}
   m_EdgeRadius: 0
+--- !u!114 &7057502315141339741
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 7013012251573708908}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 896018e200479ab41bf54282980c0219, type: 3}
+  m_Name:
+  m_EditorClassIdentifier: Spotlight.FreeCafe.Unity::Spotlight.FreeCafe.FreeCafeBoilingVisual
+  steamOriginUV: {x: 0.055, y: 0.73}
+  steamSizeUV: {x: 0.24, y: 0.29}
+  vibrationHeight: 0.0012

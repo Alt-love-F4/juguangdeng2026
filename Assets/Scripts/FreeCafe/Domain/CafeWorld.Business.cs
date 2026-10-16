@@ -85,7 +85,6 @@ namespace Spotlight.FreeCafe
         {
             var request = RequestForTarget(target);
             if (ProductionEnabled) return ServeProduction(cup, request);
-            if (RequiresRealProduction(request)) return ActionResult.No("此来访必须使用真实制作出品");
             var product = Product(request.productId);
             bool correct = Matches(cup, product);
             int price = correct ? SalePrice(cup, product) : 0;
@@ -388,7 +387,7 @@ namespace Spotlight.FreeCafe
                     r.patience -= seconds;
 
                     // 自动点单到期：顾客自行完成，直接结算
-                    if (r.automaticRemaining >= 0 && !RequiresRealProduction(r))
+                    if (r.automaticRemaining >= 0)
                     {
                         r.automaticRemaining -= seconds;
                         if (r.automaticRemaining <= 0)

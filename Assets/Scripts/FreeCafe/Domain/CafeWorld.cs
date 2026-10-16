@@ -15,8 +15,6 @@ namespace Spotlight.FreeCafe
         private readonly Dictionary<string, ProductSpec> products = new Dictionary<string, ProductSpec>();
         private readonly Dictionary<string, RecipeSpec> recipes = new Dictionary<string, RecipeSpec>();
         private readonly ICafeCustomerIdentitySource customerIdentities;
-        private int notificationDeferralDepth;
-        private bool notificationPending;
 
         /// <summary>完整配置目录：实体、工序、餐品、配方、布局、区域与经济参数。</summary>
         public CafeCatalog Catalog { get; }
@@ -669,51 +667,7 @@ namespace Spotlight.FreeCafe
         /// <summary>排除 NaN / Infinity，避免坏数据污染世界状态。</summary>
         private static bool Finite(float value) => !float.IsNaN(value) && !float.IsInfinity(value);
 
-        /// <summary>Defers Changed until the last nested scope is disposed; mutations are not rolled back.</summary>
-        public IDisposable DeferNotifications()
-        {
-            var scope = new NotificationScope(this);
-            notificationDeferralDepth++;
-            return scope;
-        }
-
-        private void EndNotificationDeferral()
-        {
-            notificationDeferralDepth--;
-            if (notificationDeferralDepth == 0 && notificationPending)
-            {
-                // Clear before publishing so reentrant mutations start a fresh notification cycle.
-                notificationPending = false;
-                Notify();
-            }
-        }
-
-        private sealed class NotificationScope : IDisposable
-        {
-            private CafeWorld world;
-
-            public NotificationScope(CafeWorld world) => this.world = world;
-
-            public void Dispose()
-            {
-                var owner = world;
-                if (owner == null) return;
-                world = null;
-                owner.EndNotificationDeferral();
-            }
-        }
-
         /// <summary>通知视图刷新。</summary>
-        private void Notify()
-        {
-            // Keep derived state consistent for subsequent operations even while observers are deferred.
-            RefreshCupStacks();
-            if (notificationDeferralDepth > 0)
-            {
-                notificationPending = true;
-                return;
-            }
-            Changed?.Invoke();
-        }
+        private void Notify() { RefreshCupStacks(); Changed?.Invoke(); }
     }
 }

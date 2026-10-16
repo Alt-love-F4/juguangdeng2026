@@ -28,11 +28,10 @@ namespace Spotlight.Narrative
         public IReadOnlyList<string> PendingEventIds => queue.Select(r => r.Event.eventId).ToArray();
         public bool BlocksSave => activePresentation && activeRequest.Event.blocksSave || queue.Any(r => r.Event.blocksSave) || pendingEffects.Count > 0 && activeRequest.Event != null && activeRequest.Event.blocksSave;
 
-        private string GetEventRejection(string eventId, bool mapAction = false, NarrativeCafeVisitContext cafeVisit = null)
+        private string GetEventRejection(string eventId, bool mapAction = false)
         {
             if (string.IsNullOrWhiteSpace(eventId) || !events.TryGetValue(eventId, out var definition)) return "事件不存在";
             if (!string.IsNullOrWhiteSpace(ConstructionBlocker(definition))) return "施工阻塞：" + ConstructionBlocker(definition);
-            if (EventRequiresServiceContext(definition) && !ValidServiceContext(cafeVisit)) return "WaitService需要指定来访订单hook上下文";
             if (presenterUnavailable) return "演出器不可用";
             if (valueRestore || !valueBaselineReady) return "数值未就绪";
             if (IsEnded) return "会话已结束";
@@ -78,7 +77,6 @@ namespace Spotlight.Narrative
             string key = StripPrefix(c.target, "bar:", "rel:", "event:", "item:", "action:");
             switch (c.condType?.Trim().ToUpperInvariant())
             {
-                case "ATTRIBUTE_GTE": return ReadConditionAttribute(c).ToString();
                 case "BOOL_EQ": return state.GetCondition(c.target).ToString();
                 case "ITEM_GTE": return inventory.GetCount(key).ToString();
                 case "ACTION_PROGRESS_GTE": return ActionProgressReader?.Invoke(key)?.ToString();

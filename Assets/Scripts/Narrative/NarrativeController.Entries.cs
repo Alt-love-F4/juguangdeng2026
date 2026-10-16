@@ -23,11 +23,6 @@ namespace Spotlight.Narrative
         {
             if (entry == NarrativeEntryPoint.MapAction || !Enum.IsDefined(typeof(NarrativeEntryPoint), entry)
                 || activeEntry.HasValue || IsEnded || presenterUnavailable || !IsSafeBoundary || IsBusy) return false;
-            bool resumeCheckpoint = CheckpointMatchesEntry(entry);
-            if (resumeCheckpoint && !CheckpointCanResume()) return false;
-            if (checkpoint != null && !checkpointResuming && !resumeCheckpoint
-                && (entry == NarrativeEntryPoint.AfterBusiness && checkpoint.wait == NarrativeCheckpointWait.Business
-                    || entry == NarrativeEntryPoint.BeforeNight)) return false;
             int day = GetDay();
             if (entry == NarrativeEntryPoint.MorningBeforeMap && morningEntryProcessedDay == day)
             {
@@ -36,13 +31,9 @@ namespace Spotlight.Narrative
             }
             activeEntry = entry; activeEntryDay = day; entryFailed = false; entryCompleted = completed;
             if (entry != NarrativeEntryPoint.Immediate) TimeSlot = EntryTimeSlot(entry);
-            pendingEvents.Clear(); RetainCheckpointPending();
+            pendingEvents.Clear();
             settling = true;
-            try
-            {
-                if (resumeCheckpoint) EnqueueCheckpoint();
-                EvaluateBoundary(0, true);
-            }
+            try { EvaluateBoundary(0, true); }
             catch
             {
                 activeEntry = null; entryCompleted = null; entryFailed = false;
@@ -56,9 +47,9 @@ namespace Spotlight.Narrative
         public bool QueueMapActionEvent(string eventId) => QueueManualEvent(eventId, true);
         public NarrativeEventDiagnostic ExplainMapActionEvent(string eventId) => ExplainEventAtEntry(eventId, true);
 
-        private bool QueueManualEvent(string eventId, bool mapAction, NarrativeCafeVisitContext cafeVisit = null)
+        private bool QueueManualEvent(string eventId, bool mapAction)
         {
-            if (activeEntry.HasValue || checkpoint?.root.eventId == eventId || GetEventRejection(eventId, mapAction, cafeVisit) != null) return false;
+            if (activeEntry.HasValue || GetEventRejection(eventId, mapAction) != null) return false;
             var definition = events[eventId];
             if (!turnOpen) BeginTurn();
             // Collect current Hold/Cross eligibility without bypassing the explicit MapAction entrance.
@@ -74,7 +65,7 @@ namespace Spotlight.Narrative
                     source = NarrativeCandidateSource.Manual, day = GetDay(), sequence = ++candidateSequence };
                 candidates.Add(candidate);
             }
-            EnqueueCandidate(candidate, cafeVisit);
+            EnqueueCandidate(candidate);
             ProcessQueue();
             return true;
         }
@@ -106,23 +97,9 @@ namespace Spotlight.Narrative
         /// <summary>Read-only guards for the active root; never exports transient choices as world facts.</summary>
         public bool ReadPresentationCondition(string key)
         {
-            if (key == "service:passed")
-            {
-                if (!TryReadServiceResultGuard(key, out bool passed))
-                    throw new InvalidOperationException("Service receipt unavailable for this presentation.");
-                return passed;
-            }
-            if (key.StartsWith("checkpointStage:", StringComparison.Ordinal))
-            {
-                if (!int.TryParse(key.Substring(16), out int stage) || stage < 0)
-                    throw new InvalidOperationException("Invalid checkpoint stage condition: " + key);
-                return CurrentCheckpointStage == stage;
-            }
             if (key.StartsWith("choice:", StringComparison.Ordinal)) return selectedChoices.Contains(key.Substring(7));
             if (key.StartsWith("anyChoice:", StringComparison.Ordinal)) return key.Substring(10).Split(';').Any(selectedChoices.Contains);
             if (key.StartsWith("not:", StringComparison.Ordinal)) return !ReadPresentationCondition(key.Substring(4));
-            if (key.StartsWith("check:", StringComparison.Ordinal)) return EvaluateInlineAbilityCheckForPresentation(key.Substring(6)).passed;
-            if (key.StartsWith("selectedCheck:", StringComparison.Ordinal)) return ReadSelectedCheckCondition(key.Substring(14));
             if (key.StartsWith("dependency:", StringComparison.Ordinal)) throw new InvalidOperationException("Unresolved presentation dependency: " + key);
             if (!state.TryGetCondition(key, out bool value)) throw new InvalidOperationException("Unknown presentation condition: " + key);
             return value;
@@ -189,18 +166,17 @@ namespace Spotlight.Narrative
             {
                 bool allowed = candidate.entry == NarrativeEntryPoint.Immediate || activeEntry == candidate.entry
                     || !officialDayManaged && !activeEntry.HasValue && candidate.source == NarrativeCandidateSource.Date && candidate.timeSlot == TimeSlot;
-                if (!allowed || pendingEvents.Contains(candidate.eventId) || !CanStartCandidate(candidate)
-                    || EventRequiresServiceContext(events[candidate.eventId])) continue;
+                if (!allowed || pendingEvents.Contains(candidate.eventId) || !CanStartCandidate(candidate)) continue;
                 EnqueueCandidate(candidate);
             }
         }
 
-        private void EnqueueCandidate(NarrativeCandidateValue candidate, NarrativeCafeVisitContext cafeVisit = null)
+        private void EnqueueCandidate(NarrativeCandidateValue candidate)
         {
             var definition = events[candidate.eventId];
             var trigger = configuration.triggers.Find(t => t != null && t.triggerId == candidate.triggerId);
             pendingEvents.Add(candidate.eventId);
-            var request = new NarrativeEventRequest(definition, trigger, candidate.depth, context: Context(definition), candidate: candidate, cafeVisit: cafeVisit);
+            var request = new NarrativeEventRequest(definition, trigger, candidate.depth, context: Context(definition), candidate: candidate);
             queue.Enqueue(request);
             try { EventQueued?.Invoke(request); }
             catch (Exception error) { UnityEngine.Debug.LogException(error); }
@@ -238,7 +214,7 @@ namespace Spotlight.Narrative
             if (!activeEntry.HasValue) return;
             entryFailed = true;
             // Eligibility stays in candidates; no failure consumes the entrance or a once marker.
-            queue.Clear(); pendingEvents.Clear(); RetainCheckpointPending();
+            queue.Clear(); pendingEvents.Clear();
         }
 
         private void PrependContinuation(NarrativeEventRequest request)

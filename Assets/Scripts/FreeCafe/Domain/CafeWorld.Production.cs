@@ -111,6 +111,18 @@ namespace Spotlight.FreeCafe
             }
         }
 
+        /// <summary>Read-only machine progress, including stove-owned vessels and speed upgrades.</summary>
+        public CafeMachineProgress MachineProgress(WorldEntity entity)
+        {
+            if(entity==null || !ProductionEnabled) return default;
+            var source=entity.specId=="machine.stove" ? Find(entity.production?.heatingVesselId) : entity;
+            if(source?.production==null) return default;
+            float duration=source.specId=="machine.grinder" ? MachineDuration(source.specId,Prep.grindSeconds)
+                : IsContainer(source) ? Prep.heatSeconds : MachineDuration(source.specId,Prep.heatSeconds);
+            return new CafeMachineProgress(source.production.phase==ProductionPhase.Processing,
+                Math.Max(0,source.production.remaining),Math.Max(.001f,duration));
+        }
+
         public CafeLiquidSnapshot LiquidSnapshot(WorldEntity entity)
         {
             float coffee = 0, milk = 0, water = 0, matcha = 0, cocoa = 0, other = 0, milkFoam = 0;

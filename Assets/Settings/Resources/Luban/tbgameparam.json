@@ -78,20 +78,5 @@
     "key": "starting_gold",
     "value": "80",
     "comment": "初始周转资金；补货由玩家主动操作"
-  },
-  {
-    "key": "neutral.promotion.preparation_cost_multiplier",
-    "value": "0.8",
-    "comment": "User authorized adjustable placeholder; NOT connected to accounting; no Money result."
-  },
-  {
-    "key": "neutral.promotion.revenue_multiplier",
-    "value": "1.2",
-    "comment": "User authorized adjustable placeholder; NOT connected to accounting; no Money result."
-  },
-  {
-    "key": "neutral.reporter.advertisement_fee",
-    "value": "100",
-    "comment": "User authorized provisional A05 fee; parent-owned consumer must synchronize balance guard/payment before generation."
   }
 ]

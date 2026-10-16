@@ -13,19 +13,22 @@ namespace Spotlight.GameFlow
     /// <summary>Scrollable action cards. Unavailable buttons remain clickable to explain rejected requirements.</summary>
     public sealed class MapActionDetailsView : MonoBehaviour
     {
-        /// <summary>Only the configured cafe position exposes the cafe navigation action.</summary>
+        /// <summary>Only these locations expose the cafe navigation card instead of an NCS action card.</summary>
         internal const string CafePositionKey = "cafe";
+        private const string CafeLobbyPositionKey = "大堂区";
+        private const string CafeEntryNodeName = "EnterCafe";
+        private const string CafeEntryLabel = "进入咖啡馆";
+        private const string CafeEntryDescription = "推门进入咖啡馆，开始今天的经营。";
+        /// <summary>The cafe (and its authored lobby alias) navigates to the cafe scene instead of running an NCS action.</summary>
         internal static bool IsCafeEntryPosition(string positionKey)
-            => positionKey == CafePositionKey;
+            => positionKey == CafePositionKey || positionKey == CafeLobbyPositionKey;
         private RectTransform content;
         private TextMeshProUGUI title;
         private MapSceneController mapController;
         private MapActionInventoryView inventory;
         private string position;
         private Func<bool> controls;
-        private Action endDay;
-        private Func<bool> tryEnterCafe;
-        private Action<string> navigationFailed;
+        private Action endDay, enterCafe;
         private bool busy;
         public bool IsBusy => busy;
         private string signature;
@@ -46,7 +49,6 @@ namespace Spotlight.GameFlow
         private TextMeshProUGUI pageLabel;
         private int currentPage;
         private float revealStarted = float.NegativeInfinity;
-        private float nextProjectionRefresh;
         private CanvasGroup revealGroup;
         [Header("Popup Layout")]
         [SerializeField] private Vector2 popupSize = new Vector2(820, 540);
@@ -80,7 +82,6 @@ namespace Spotlight.GameFlow
         {
             public RectTransform root;
             public NarrativeActionDefinition action;
-            public NarrativeActionController owner;
             public string instanceKey;
             public bool displayConfirmed;
             public TextMeshProUGUI heading, description;
@@ -92,24 +93,10 @@ namespace Spotlight.GameFlow
             public RectTransform repeats;
             public int repeatCount = -1;
             public readonly List<TextMeshProUGUI> requirements = new List<TextMeshProUGUI>();
-            public readonly List<RectTransform> requirementSlots = new List<RectTransform>();
-            public readonly List<RequirementProjection> projection = new List<RequirementProjection>();
-            public RectTransform requirementTemplate;
-            public TextMeshProUGUI gains;
-            public string layoutSignature;
-        }
-        private sealed class RequirementProjection
-        {
-            public NarrativeActionRequirementType? costType;
-            public string key, text;
-            public long amount;
-            public bool satisfied, ready = true;
         }
         public void Initialize(MapActionInventoryView inventoryView, Func<bool> canControl, Action finishDay, Action cafe)
         {
-            inventory = inventoryView; controls = canControl; endDay = finishDay;
-            tryEnterCafe = cafe == null ? null : () => { cafe(); return true; };
-            navigationFailed = null;
+            inventory = inventoryView; controls = canControl; endDay = finishDay; enterCafe = cafe;
             mapController = GetComponentInParent<MapSceneController>();
             var rect = (RectTransform)transform;
             bool authoredLayout = transform.Find("Viewport/ActionList") != null;
@@ -170,21 +157,6 @@ namespace Spotlight.GameFlow
             ConfigurePagingLayout();
             close.transform.SetAsLastSibling();
         }
-        internal void SetNavigationHandler(Func<bool> accepted, Action<string> failed)
-        {
-            tryEnterCafe = accepted;
-            navigationFailed = failed;
-        }
-
-        internal void NotifyNavigationFailure(string reason)
-        {
-            busy = false;
-            string message = string.IsNullOrWhiteSpace(reason) ? "无法进入咖啡馆，请稍后重试。" : reason;
-            navigationFailed?.Invoke(message);
-            Notice(message);
-            foreach (var card in cards) UpdateCard(card);
-        }
-
         public void Show(string positionKey, string locationName)
         {
             if (busy) return;
@@ -268,8 +240,6 @@ namespace Spotlight.GameFlow
                 contentDirty = false;
                 if (ContentSignature(actions) != signature) { Rebuild(); return; }
             }
-            // Wallet providers need not emit an Action StateChanged notification.
-            if (Time.unscaledTime >= nextProjectionRefresh) { nextProjectionRefresh = Time.unscaledTime + .2f; cardsDirty = true; }
             if (!cardsDirty) return;
             cardsDirty = false;
             foreach (var card in cards) UpdateCard(card);
@@ -357,14 +327,50 @@ namespace Spotlight.GameFlow
                 root.gameObject.name = "Action_" + action.actionKey;
                 root.gameObject.SetActive(true);
                 var card = BindActionCard(root, action);
-                if (action.executionKind == NarrativeActionExecutionKind.Navigate)
-                    BindNavigationAction(card);
                 float height = Mathf.Max(1, root.rect.height);
                 if (!IsAuthoredLayout) Top(root, 12, -y, CardWidth, height);
                 y += height + cardSpacing;
                 cards.Add(card); UpdateCard(card);
             }
-            if (values.Count == 0 && actionCardTemplate != null)
+            if (IsCafeEntryPosition(position) && actionCardTemplate != null
+                && !(actions?.ReplacesLocationActions(position) ?? false)
+                && UnityEngine.SceneManagement.SceneManager.GetActiveScene().name != "CoffeeShop")
+            {
+                // Entering the cafe is scene navigation, not an NCS action: it never checks or
+                // spends action points, items or action results. Reuse the authored card artwork.
+                var entry = Instantiate(actionCardTemplate, content, false);
+                entry.gameObject.name = CafeEntryNodeName;
+                entry.gameObject.SetActive(true);
+                var heading = entry.Find("Name")?.GetComponent<TextMeshProUGUI>();
+                if (heading != null) heading.text = title != null ? title.text : CafeEntryLabel;
+                var description = entry.Find("Description")?.GetComponent<TextMeshProUGUI>();
+                if (description != null) description.text = CafeEntryDescription;
+                // Navigation costs nothing, so the authored requirement slot must stay hidden.
+                var requirement = entry.Find("Requirements/Requirement") ?? entry.Find("Requirement");
+                if (requirement != null) requirement.gameObject.SetActive(false);
+                var execute = entry.Find("Execute")?.GetComponent<Button>()
+                    ?? entry.Find("ExecutePreview")?.GetComponent<Button>()
+                    ?? entry.GetComponentInChildren<Button>(true);
+                if (execute == null)
+                {
+                    Debug.LogError("MapActionDetailsView action card template needs an authored execute button.", this);
+                    if (Application.isPlaying) Destroy(entry.gameObject); else DestroyImmediate(entry.gameObject);
+                }
+                else
+                {
+                    execute.gameObject.SetActive(true);
+                    execute.onClick.RemoveAllListeners();
+                    execute.onClick.AddListener(OnEnterCafe);
+                    Spotlight.Audio.UIButtonAudio.Configure(execute);
+                    var label = execute.GetComponentInChildren<TextMeshProUGUI>(true);
+                    if (label != null) label.text = CafeEntryLabel;
+                    var card = new Card { root = entry, button = execute };
+                    if (!IsAuthoredLayout) Top(entry, 12, -y, CardWidth, Mathf.Max(1, entry.rect.height));
+                    y += Mathf.Max(414, entry.rect.height) + cardSpacing;
+                    cards.Add(card);
+                }
+            }
+            else if (values.Count == 0 && actionCardTemplate != null)
             {
                 // Never repurpose the authored template as an empty-state card: later actions
                 // must clone the untouched Prefab artwork and serialized child structure.
@@ -411,9 +417,6 @@ namespace Spotlight.GameFlow
             Vector3 min = Vector3.one * float.PositiveInfinity, max = Vector3.one * float.NegativeInfinity;
             foreach (RectTransform child in card.GetComponentsInChildren<RectTransform>(true))
             {
-                // Include inactive authored templates when measuring the template itself, but
-                // exclude hidden optional regions from a live card's scroll bounds.
-                if (card != actionCardTemplate && child != card && !child.gameObject.activeSelf) continue;
                 child.GetWorldCorners(cardCorners);
                 foreach (Vector3 corner in cardCorners)
                 {
@@ -437,20 +440,13 @@ namespace Spotlight.GameFlow
                 card.boundsMeasured = true;
             }
             Bounds bounds = card.visualBounds;
-            // Fit width and scroll height so long Chinese requirements keep a readable size.
-            float scale = Mathf.Min(1f, (size.x - 8) / Mathf.Max(1, bounds.size.x));
-            bool sameCard = fittedCard == card.root;
-            float scrollPosition = sameCard ? scroll.verticalNormalizedPosition : 1;
-            float height = Mathf.Max(size.y, bounds.size.y * scale + 8);
+            float scale = Mathf.Min(1f, (size.x - 8) / Mathf.Max(1, bounds.size.x), (size.y - 8) / Mathf.Max(1, bounds.size.y));
             content.anchorMin = new Vector2(0, 1); content.anchorMax = Vector2.one;
-            content.pivot = new Vector2(.5f, 1); content.anchoredPosition = Vector2.zero; content.sizeDelta = new Vector2(0, height);
-            scroll.enabled = true; scroll.horizontal = false; scroll.vertical = height > size.y + 1;
-            scroll.scrollSensitivity = 32;
+            content.pivot = new Vector2(.5f, 1); content.anchoredPosition = Vector2.zero; content.sizeDelta = new Vector2(0, size.y);
             card.root.anchorMin = card.root.anchorMax = new Vector2(0, 1);
             card.root.localScale = Vector3.one * scale;
             card.root.anchoredPosition = new Vector2(4 - bounds.min.x * scale, -4 - bounds.max.y * scale);
             fittedCard = card.root; fittedViewportSize = size;
-            scroll.verticalNormalizedPosition = scrollPosition;
         }
 
         private void ConfigurePagingLayout()
@@ -526,7 +522,7 @@ namespace Spotlight.GameFlow
 
         private Card BindActionCard(RectTransform root, NarrativeActionDefinition action)
         {
-            var card = new Card { root = root, action = action, owner = NarrativeRuntime.Instance?.Actions,
+            var card = new Card { root = root, action = action,
                 instanceKey = NarrativeRuntime.Instance?.Actions?.GetActionInstanceKey(position, action.actionKey) };
             card.type = root.Find("Type")?.GetComponent<TextMeshProUGUI>();
             var description = root.Find("Description")?.GetComponent<TextMeshProUGUI>();
@@ -537,35 +533,32 @@ namespace Spotlight.GameFlow
                 ?? root.Find("ExecutePreview")?.GetComponent<Button>()
                 ?? root.GetComponentInChildren<Button>(true);
             card.button = execute;
-            if (description != null)
-            {
-                description.textWrappingMode = TextWrappingModes.Normal;
-                description.text = Text(action.descText, "暂无行动描述");
-            }
-            // The authored preview caption has a fixed position; dynamic costs carry their own heading.
-            var previewRequirementCaption = root.Find("需要shortcuts");
-            if (previewRequirementCaption != null) previewRequirementCaption.gameObject.SetActive(false);
+            if (description != null) description.text = Text(action.descText, string.IsNullOrEmpty(action.descText) ? "暂无行动描述" : action.descText);
             if (execute != null)
             {
                 execute.onClick.RemoveAllListeners();
                 execute.onClick.AddListener(() => OnExecute(card));
                 Spotlight.Audio.UIButtonAudio.Configure(execute, string.Empty);
             }
-            if (card.type != null) card.type.text = action.executionKind == NarrativeActionExecutionKind.Navigate ? "地点导航" : action.type.ToString();
-            card.requirementTemplate = sampleRequirement as RectTransform;
-            if (sampleRequirement != null) sampleRequirement.gameObject.SetActive(false);
-            if (action.executionKind == NarrativeActionExecutionKind.Exchange && description != null)
+            var requirements = action.parsedRequirements;
+            if (card.type != null) card.type.text = action.type.ToString();
+            if (sampleRequirement != null)
             {
-                card.gains = Instantiate(description, root, false);
-                card.gains.name = "ExchangeOutcome";
-                card.gains.text = string.Empty;
-                card.gains.gameObject.SetActive(false);
+                // Use the authored requirement slot. Duplicate or synthesized slot UI is not
+                // allowed: art must author the required number of slots explicitly.
+                if (requirements.Count > 0)
+                {
+                    sampleRequirement.gameObject.SetActive(true);
+                    var label = sampleRequirement.GetComponentInChildren<TextMeshProUGUI>(true);
+                    if (label != null) card.requirements.Add(label);
+                }
+                else sampleRequirement.gameObject.SetActive(false);
             }
             var progress = root.Find("ProgressTrack/Fill")?.GetComponent<Image>();
             card.progress = progress;
             card.repeats = root.Find("RepeatSegments") as RectTransform;
             var heading = root.Find("Name")?.GetComponent<TextMeshProUGUI>();
-            if (heading != null) heading.text = Text(action.nameText, "未命名行动");
+            if (heading != null) heading.text = Text(action.nameText, action.actionKey);
             return card;
         }
         private void BuildEditorPreview()
@@ -582,32 +575,14 @@ namespace Spotlight.GameFlow
             foreach (Transform child in transform.root)
                 if (child.name == "ConsumptionEffect") Destroy(child.gameObject);
         }
-        private void BindNavigationAction(Card card)
-        {
-            var requirement = card.root.Find("Requirements/Requirement") ?? card.root.Find("Requirement");
-            if (requirement != null) requirement.gameObject.SetActive(false);
-            if (card.button == null) return;
-            card.button.onClick.RemoveAllListeners();
-            card.button.onClick.AddListener(() => OnNavigate(card));
-            Spotlight.Audio.UIButtonAudio.Configure(card.button);
-            var label = card.button.GetComponentInChildren<TextMeshProUGUI>(true);
-            if (label != null) label.text = Text(card.action.executeTextKey, "进入咖啡馆");
-        }
-
         private void UpdateCard(Card card)
         {
             var actions = NarrativeRuntime.Instance?.Actions;
             if (actions == null) return;
+            // The cafe navigation card carries no NCS action and needs no per-frame refresh.
             if (card.action == null) return;
-            if (card.action.executionKind == NarrativeActionExecutionKind.Navigate)
-            {
-                if (card.button != null) card.button.interactable = !busy && (controls?.Invoke() ?? true) && IsCurrentNavigation(card);
-                return;
-            }
             var action = card.action;
-            bool available;
-            try { available = actions.IsAvailable(action.actionKey, out _); }
-            catch (Exception) { available = false; }
+            bool available = actions.IsAvailable(action.actionKey, out var checks);
             string type = action.type switch
             {
                 NarrativeActionType.Daily => "每天行动", NarrativeActionType.Once => "一次性行动",
@@ -628,14 +603,15 @@ namespace Spotlight.GameFlow
             if (card.progress != null) card.progress.fillAmount = action.progressTarget > 0
                 ? Mathf.Clamp01((float)actions.GetProgress(action.actionKey) / action.progressTarget) : 0;
             UpdateRepeatSegments(card, actions);
-            UpdateRequirements(card);
-            bool projectionReady = NarrativeRuntime.Instance?.Controller?.ValuesReady == true && card.projection.All(p => p.ready);
-            if (!projectionReady && card.type != null) card.type.text += " · 暂不可用";
-            string caption = actions.HasPendingExecution(action.actionKey) ? "继续未完成行动" :
-                action.IsDelivery && actions.IsCompleted(action.actionKey) ? "已完成" :
+            if (card.requirements.Count > 0)
+            {
+                card.requirements[0].text = (action.IsDelivery ? "每次交付\n" : string.Empty) + string.Join("\n", action.parsedRequirements.Select(RequirementName));
+                bool allSatisfied = checks.Count >= action.parsedRequirements.Count && checks.All(check => check.satisfied);
+                card.requirements[0].color = allSatisfied ? MapVisualTheme.Ink : new Color(.65f, .23f, .14f);
+            }
+            string caption = action.IsDelivery && actions.IsCompleted(action.actionKey) ? "已完成" :
                 action.IsDelivery && actions.HasSubmittedToday(action.actionKey) ? "今日已交付" : action.endDay && actions.HasBlockingActions() ? "有需要进行的行动" :
-                action.type == NarrativeActionType.Future ? "等待开放" : !projectionReady ? "暂不可用" : available
-                    ? Text(action.executeTextKey, action.endDay ? "结束一天" : action.executionKind == NarrativeActionExecutionKind.Exchange ? "确认交易" : action.IsDelivery ? "交付" : "执行") : "查看需求";
+                action.type == NarrativeActionType.Future ? "等待开放" : available ? (action.endDay ? "结束一天" : "执行") : "查看需求";
             if (card.button != null)
             {
                 var buttonLabel = card.button.GetComponentInChildren<TextMeshProUGUI>(true);
@@ -660,21 +636,14 @@ namespace Spotlight.GameFlow
         {
             // Repeat artwork is optional; never synthesize UI if the authored card omits it.
             if (card.repeats == null) return;
-            int count = card.action.IsProgress ? Mathf.Max(0, card.action.progressTarget - actions.GetProgress(card.action.actionKey)) : int.MaxValue;
-            if (card.action.IsDelivery)
-            {
-                try { count = actions.IsAvailable(card.action.actionKey, out _) ? 1 : 0; }
-                catch (Exception) { count = 0; }
-            }
+            int count = card.action.IsDelivery ? (actions.IsAvailable(card.action.actionKey, out _) ? 1 : 0) : card.action.IsProgress ? Mathf.Max(0, card.action.progressTarget - actions.GetProgress(card.action.actionKey)) : int.MaxValue;
             foreach (var costs in card.action.parsedRequirements
-                .Where(r => r.type == NarrativeActionRequirementType.Item || r.type == NarrativeActionRequirementType.ActionPoint || r.type == NarrativeActionRequirementType.Money)
-                .GroupBy(r => (r.type, key: r.type == NarrativeActionRequirementType.Item ? r.key : string.Empty)))
+                .Where(r => r.type == NarrativeActionRequirementType.Item || r.type == NarrativeActionRequirementType.ActionPoint)
+                .GroupBy(r => (r.type, r.key)))
             {
                 long cost = costs.Sum(r => (long)Mathf.Max(0, r.value));
                 if (cost == 0) continue;
-                int stock = costs.Key.type == NarrativeActionRequirementType.ActionPoint ? actions.ActionPoints.Current
-                    : costs.Key.type == NarrativeActionRequirementType.Money ? (MapActionInventoryView.TryReadMoney(out int balance) ? balance : 0)
-                    : NarrativeRuntime.Instance.MapInventory.GetCount(costs.Key.key);
+                int stock = costs.Key.type == NarrativeActionRequirementType.ActionPoint ? actions.ActionPoints.Current : NarrativeRuntime.Instance.MapInventory.GetCount(costs.Key.key);
                 count = Mathf.Min(count, (int)(stock / cost));
             }
             if (count == card.repeatCount) return;
@@ -690,284 +659,20 @@ namespace Spotlight.GameFlow
             // The repeat segments are authored. Runtime no longer constructs replacement art.
         }
 
-        private void UpdateRequirements(Card card)
+        private string RequirementName(NarrativeActionRequirement r) => r.type switch
         {
-            var runtime = NarrativeRuntime.Instance;
-            card.projection.Clear();
-            bool costsCommitted = HasCommittedPendingCosts(runtime?.Actions, card.action);
-            foreach (var cost in (card.action.parsedRequirements ?? new List<NarrativeActionRequirement>())
-                .GroupBy(r => (r.type, key: r.type == NarrativeActionRequirementType.Item ? r.key : string.Empty)))
-            {
-                long amount = cost.Sum(r => (long)r.value);
-                long current = 0;
-                bool ready = amount > 0 && amount <= int.MaxValue;
-                string name;
-                switch (cost.Key.type)
-                {
-                    case NarrativeActionRequirementType.Item:
-                        name = MapActionInventoryView.ItemName(cost.Key.key);
-                        ready &= runtime?.Controller?.ValuesReady == true && runtime.MapInventory != null;
-                        current = runtime?.MapInventory?.GetCount(cost.Key.key) ?? 0;
-                        break;
-                    case NarrativeActionRequirementType.ActionPoint:
-                        name = "行动点";
-                        ready &= runtime?.Controller?.ValuesReady == true && runtime.Actions != null;
-                        current = runtime?.Actions?.ActionPoints.Current ?? 0;
-                        break;
-                    case NarrativeActionRequirementType.Money:
-                        name = "金币";
-                        ready &= MapActionInventoryView.TryReadMoney(out int balance) && runtime?.Controller?.ValuesReady == true;
-                        current = balance;
-                        break;
-                    default: name = "需求"; ready = false; break;
-                }
-                bool satisfied = costsCommitted || (ready && current >= amount);
-                card.projection.Add(new RequirementProjection { costType = cost.Key.type, key = cost.Key.key,
-                    amount = amount, ready = costsCommitted || ready, satisfied = satisfied,
-                    text = costsCommitted ? "已支付 · " + name + " × " + amount :
-                        (card.action.IsDelivery ? "每次交付 · " : "消耗 · ") + name + "\n"
-                        + (ready ? current + " / " + amount + (satisfied ? " · 满足" : " · 不足") : "暂不可用") });
-            }
-            var diagnostics = runtime?.Controller?.ExplainConditions("actionExecute", card.action.actionKey);
-            if (diagnostics != null && diagnostics.Count > 0)
-            {
-                var groups = diagnostics.GroupBy(d => d.GroupIndex).ToList();
-                // Each alternative is a conjunction. Keep every alternative in one eligibility
-                // slot so neither the per-slot state nor its heading suggests OR means AND.
-                bool ready = runtime.Controller.ValuesReady && diagnostics.All(d => string.IsNullOrEmpty(d.Error)
-                    && !string.IsNullOrEmpty(d.Current) && d.Current != "不可用");
-                bool satisfied = groups.Any(g => g.All(d => d.Passed && string.IsNullOrEmpty(d.Error)));
-                string alternatives = string.Join("\n或\n", groups.Select(g => "（" + string.Join("\n且 ", g.Select(ConditionText)) + "）"));
-                card.projection.Add(new RequirementProjection { ready = ready, satisfied = satisfied,
-                    text = "资格 · " + (groups.Count > 1 ? "任一组满足" : "全部满足")
-                        + " · " + (!ready ? "暂不可用" : satisfied ? "满足" : "未满足") + "\n" + alternatives });
-            }
-            // The loader rejects more than six display entries. Fail visibly for a malformed
-            // injected snapshot as well; never silently omit a seventh payable requirement.
-            if (card.projection.Count > 6)
-            {
-                card.projection.Clear();
-                card.projection.Add(new RequirementProjection { ready = false, text = "需求暂不可用" });
-            }
-            if (card.requirementTemplate == null && card.projection.Count > 0)
-            {
-                foreach (var entry in card.projection) entry.ready = false;
-                return;
-            }
-            while (card.requirementSlots.Count < card.projection.Count)
-            {
-                var slot = Instantiate(card.requirementTemplate, card.root, false);
-                slot.name = "Requirement_" + card.requirementSlots.Count;
-                card.requirementSlots.Add(slot);
-                var label = slot.GetComponentInChildren<TextMeshProUGUI>(true);
-                card.requirements.Add(label);
-                if (label != null)
-                {
-                    label.enableAutoSizing = false; label.fontSize = 20;
-                    label.textWrappingMode = TextWrappingModes.Normal;
-                    label.alignment = TextAlignmentOptions.TopLeft;
-                    label.overflowMode = TextOverflowModes.Overflow;
-                    Stretch(label.rectTransform, 10);
-                }
-            }
-            for (int i = 0; i < card.requirementSlots.Count; i++)
-            {
-                bool active = i < card.projection.Count;
-                card.requirementSlots[i].gameObject.SetActive(active);
-                if (!active || card.requirements[i] == null) continue;
-                card.requirements[i].text = card.projection[i].text;
-                card.requirements[i].color = card.projection[i].satisfied ? MapVisualTheme.Ink : new Color(.65f, .23f, .14f);
-            }
-            string gains = ExchangeOutcome(card.action);
-            if (card.gains != null)
-            {
-                card.gains.text = gains;
-                card.gains.gameObject.SetActive(!string.IsNullOrEmpty(gains));
-            }
-            string layout = string.Join("|", card.projection.Select(p => p.text)) + gains;
-            if (layout == card.layoutSignature) return;
-            card.layoutSignature = layout;
-            LayoutRequirements(card);
-        }
-
-        private string ConditionText(NarrativeConditionDiagnostic diagnostic)
-        {
-            var config = NarrativeRuntime.Instance?.Configuration;
-            var definition = config?.conditions.Find(c => c != null && c.conditionId == diagnostic.ConditionId);
-            string key = diagnostic.Target ?? string.Empty;
-            foreach (string prefix in new[] { "bar:", "rel:", "event:", "item:", "action:" })
-                if (key.StartsWith(prefix, StringComparison.Ordinal)) { key = key.Substring(prefix.Length); break; }
-            string type = diagnostic.Type?.Trim().ToUpperInvariant();
-            string name;
-            switch (type)
-            {
-                case "ITEM_GTE": name = MapActionInventoryView.ItemName(key); break;
-                case "ATTRIBUTE_GTE":
-                    name = config != null && config.abilityNameKeys.TryGetValue(key, out string nameKey) ? Text(nameKey, "属性") : "属性";
-                    break;
-                case "BOOL_EQ": name = Text(config?.conditionKeys.Find(c => c != null && c.key == key)?.nameText, "状态条件"); break;
-                case "EVENT_HAPPENED": case "EVENT_NOT_HAPPENED":
-                    name = Text(config?.events.Find(e => e != null && e.eventId == key)?.titleText, "前置事件"); break;
-                case "ACTION_PROGRESS_GTE": case "ACTION_COMPLETED":
-                    name = Text(config?.actions.Find(a => a != null && a.actionKey == key)?.nameText, "前置行动"); break;
-                default: name = Text(config?.bars.Find(b => b != null && b.barKey == key)?.nameText, "属性条件"); break;
-            }
-            if (!string.IsNullOrEmpty(diagnostic.Error) || definition == null) return name + " · 暂不可用";
-            string current = diagnostic.Current;
-            string required = diagnostic.Required;
-            string op = type == "BAR_LTE" ? "≤ " : type == "BAR_BETWEEN" ? "范围 " : "≥ ";
-            if (type == "BOOL_EQ") op = "= ";
-            if (type == "ACTION_COMPLETED" || type == "EVENT_HAPPENED" || type == "EVENT_NOT_HAPPENED")
-            {
-                op = ""; required = type == "EVENT_NOT_HAPPENED" ? "未发生" : type == "EVENT_HAPPENED" ? "已发生" : "已完成";
-            }
-            if (bool.TryParse(current, out bool flag)) current = flag ? "是" : "否";
-            if (bool.TryParse(required, out bool expected)) required = expected ? "是" : "否";
-            if (string.IsNullOrEmpty(current) || current == "不可用") return name + " · 暂不可用";
-            // Numeric thresholds and known booleans are safe display values; arbitrary config
-            // identifiers never become a fallback label in the player-facing card.
-            if (type != "BOOL_EQ" && type != "ACTION_COMPLETED" && type != "EVENT_HAPPENED" && type != "EVENT_NOT_HAPPENED"
-                && !(required ?? string.Empty).All(c => char.IsDigit(c) || char.IsWhiteSpace(c) || ".,+-".Contains(c)))
-                return name + " · 暂不可用";
-            return name + " " + current + " / " + op + required + (diagnostic.Passed ? " · 满足" : " · 未满足");
-        }
-
-        private string ExchangeOutcome(NarrativeActionDefinition action)
-        {
-            if (action.executionKind != NarrativeActionExecutionKind.Exchange) return string.Empty;
-            var controller = NarrativeRuntime.Instance?.Controller;
-            if (controller == null) return "获得 · 暂不可用";
-            var results = controller.GetActionResults(action.successResultOwnerId);
-            if (results.Count == 0) return "获得 · 暂不可用";
-            var lines = new List<string>();
-            try
-            {
-                foreach (var group in results.Where(r => controller.EvaluateConditions("result", r.resultId))
-                    .GroupBy(r => (r.resultType, r.target)))
-                {
-                    long amount = 0;
-                    foreach (var result in group)
-                    {
-                        if (!int.TryParse(result.value, out int value) || value <= 0) return "获得 · 暂不可用";
-                        amount += value;
-                    }
-                    if (amount > int.MaxValue) return "获得 · 暂不可用";
-                    switch (group.Key.resultType)
-                    {
-                        case NarrativeResultType.ItemAdd: lines.Add("获得 · " + MapActionInventoryView.ItemName(group.Key.target) + " × " + amount); break;
-                        case NarrativeResultType.MoneyAdd: lines.Add("获得 · 金币 + " + amount); break;
-                        case NarrativeResultType.ItemRemove: lines.Add("另消耗 · " + MapActionInventoryView.ItemName(group.Key.target) + " × " + amount); break;
-                        case NarrativeResultType.MoneyRemove: lines.Add("另消耗 · 金币 − " + amount); break;
-                        default: return "获得 · 暂不可用";
-                    }
-                }
-            }
-            catch (Exception) { return "获得 · 暂不可用"; }
-            return lines.Count > 0 ? string.Join("\n", lines) : "当前无可获得内容";
-        }
-
-        private static float PreferredHeight(TextMeshProUGUI label, string text, float width)
-        {
-            // Inactive/headless authored templates can have no TMP material until first render.
-            // Estimate wrapped Chinese lines until the font is ready instead of forcing a mesh.
-            if (label.font != null && label.fontSharedMaterial != null)
-            {
-                try { return label.GetPreferredValues(text, width, 0).y; }
-                catch (NullReferenceException) { /* A font asset can also be awaiting glyph-table initialization. */ }
-            }
-            float fontSize = Mathf.Max(1, label.fontSize);
-            int columns = Mathf.Max(1, Mathf.FloorToInt(width / fontSize));
-            int lines = (text ?? string.Empty).Split('\n').Sum(line => Mathf.Max(1, Mathf.CeilToInt((float)line.Length / columns)));
-            return lines * fontSize * 1.4f;
-        }
-
-        private void LayoutRequirements(Card card)
-        {
-            float width = Mathf.Max(320, card.root.rect.width);
-            float availableWidth = width - 72;
-            float top = 148;
-            if (card.description != null)
-            {
-                card.description.enableAutoSizing = false;
-                card.description.fontSize = 22;
-                float height = Mathf.Max(64, PreferredHeight(card.description, card.description.text, availableWidth) + 12);
-                Top(card.description.rectTransform, 36, -top, availableWidth, height);
-                top += height + 16;
-            }
-            float slotWidth = (availableWidth - 12) / 2;
-            for (int i = 0; i < card.projection.Count; i += 2)
-            {
-                float height = 84;
-                for (int j = i; j < Mathf.Min(i + 2, card.projection.Count); j++)
-                    if (card.requirements[j] != null) height = Mathf.Max(height, PreferredHeight(card.requirements[j], card.projection[j].text, slotWidth - 20) + 24);
-                for (int j = i; j < Mathf.Min(i + 2, card.projection.Count); j++)
-                    Top(card.requirementSlots[j], 36 + (j % 2) * (slotWidth + 12), -top, slotWidth, height);
-                top += height + 12;
-            }
-            if (card.gains != null && card.gains.gameObject.activeSelf)
-            {
-                card.gains.enableAutoSizing = false; card.gains.fontSize = 22;
-                float height = PreferredHeight(card.gains, card.gains.text, availableWidth) + 16;
-                Top(card.gains.rectTransform, 36, -top, availableWidth, height);
-                top += height + 12;
-            }
-            if (card.button != null)
-            {
-                var button = (RectTransform)card.button.transform;
-                Top(button, Mathf.Max(36, width - button.rect.width), -top, button.rect.width, button.rect.height);
-                top += button.rect.height;
-            }
-            card.root.SetSizeWithCurrentAnchors(RectTransform.Axis.Vertical, Mathf.Max(414, top + 16));
-            card.boundsMeasured = false;
-            if (fittedCard == card.root) fittedViewportSize = Vector2.zero;
-        }
-        private bool IsCurrentNavigation(Card card)
-        {
-            var actions = NarrativeRuntime.Instance?.Actions;
-            if (card?.action == null || actions == null || card.owner != actions || !cards.Contains(card) || !IsCafeEntryPosition(position)
-                || card.action.executionKind != NarrativeActionExecutionKind.Navigate
-                || card.action.navigationKey != "cafe.enter" || string.IsNullOrEmpty(card.instanceKey)) return false;
-            return actions.GetDisplayableActions(position).Any(action => action.actionKey == card.action.actionKey
-                && action.executionKind == NarrativeActionExecutionKind.Navigate
-                && action.navigationKey == "cafe.enter"
-                && actions.GetActionInstanceKey(position, action.actionKey) == card.instanceKey);
-        }
-
-        private void OnNavigate(Card card)
+            NarrativeActionRequirementType.Item => Text("item." + r.key + ".name", r.key) + "\n× " + r.value,
+            NarrativeActionRequirementType.Bar => Text("bar." + r.key + ".name", r.key) + "\n" + r.op + " " + r.value,
+            NarrativeActionRequirementType.Condition => "拥有条件：" + Text(r.key, r.key),
+            NarrativeActionRequirementType.NotCondition => "不能拥有：" + Text(r.key, r.key),
+            _ => "行动点\n× " + r.value
+        };
+        private void OnEnterCafe()
         {
             if (busy || !(controls?.Invoke() ?? true)) return;
-            if (!IsCurrentNavigation(card))
-            {
-                NotifyNavigationFailure("该导航已失效，请重新打开地点详情。");
-                return;
-            }
-            var actions = NarrativeRuntime.Instance?.Actions;
-            if (actions == null || !actions.IsAvailable(card.action.actionKey, out _))
-            {
-                NotifyNavigationFailure("进入条件尚未满足或当前有其他行动进行中，请稍后重试。");
-                return;
-            }
-            if (tryEnterCafe == null)
-            {
-                NotifyNavigationFailure("咖啡馆入口暂不可用，请稍后重试。");
-                return;
-            }
-            busy = true;
-            UpdateCards();
-            try
-            {
-                if (!tryEnterCafe()) NotifyNavigationFailure("无法进入咖啡馆，请稍后重试。");
-            }
-            catch (Exception error)
-            {
-                Debug.LogWarning("[Map] Cafe navigation rejected: " + error.Message, this);
-                NotifyNavigationFailure("咖啡馆加载失败，请稍后重试。");
-            }
-        }
-
-        private void UpdateCards()
-        {
-            foreach (var card in cards) UpdateCard(card);
+            if (NarrativeRuntime.Instance?.Actions?.ReplacesLocationActions(position) ?? false) return;
+            // Reuse the map's existing cafe scene entry; no NCS action is executed here.
+            enterCafe?.Invoke();
         }
 
         private void OnExecute(Card card)
@@ -975,120 +680,53 @@ namespace Spotlight.GameFlow
             if (busy || !(controls?.Invoke() ?? true)) return;
             var actions = NarrativeRuntime.Instance?.Actions;
             if (actions == null) return;
-            UpdateRequirements(card);
-            if (NarrativeRuntime.Instance?.Controller?.ValuesReady != true
-                || (!actions.HasPendingExecution(card.action.actionKey) && card.projection.Any(p => !p.ready)))
-            {
-                Notice("需求数据暂不可用，请稍后重试。");
-                return;
-            }
-            bool available;
-            List<NarrativeActionCheck> checks;
-            try { available = actions.IsAvailable(card.action.actionKey, out checks); }
-            catch (Exception) { Notice("需求数据暂不可用，请稍后重试。"); return; }
-            if (!available)
+            if (!actions.IsAvailable(card.action.actionKey, out var checks))
             {
                 Spotlight.Audio.GameAudio.Play(Spotlight.Audio.AudioKeys.Error);
-                Notice(actions.HasPendingExecution(card.action.actionKey) ? "未完成行动暂时无法继续，请稍后重试。" :
-                    card.action.IsDelivery && actions.IsCompleted(card.action.actionKey) ? "交付已完成" :
+                Notice(card.action.IsDelivery && actions.IsCompleted(card.action.actionKey) ? "交付已完成" :
                     card.action.IsDelivery && actions.HasSubmittedToday(card.action.actionKey) ? "今日已交付，每天只能提交一份" :
                     card.action.endDay && actions.HasBlockingActions() ? "有需要进行的行动" :
                     checks.Any(c => c.messageKey == "action.condition.missing") ? "行动前置条件不满足" : "所需物品或行动点不足");
-                for (int i = 0; i < card.projection.Count && i < card.requirementSlots.Count; i++)
-                    if (!card.projection[i].satisfied) StartCoroutine(Shake(card.requirementSlots[i]));
+                if (card.requirements.Count > 0 && checks.Any(check => !check.satisfied))
+                    StartCoroutine(Shake((RectTransform)card.requirements[0].transform.parent));
                 if (checks.All(c => c.satisfied)) StartCoroutine(Shake((RectTransform)card.button.transform));
                 return;
             }
             StartCoroutine(Execute(card));
         }
-        private static bool HasCommittedPendingCosts(NarrativeActionController actions, NarrativeActionDefinition action)
-        {
-            if (actions == null || !actions.HasPendingExecution(action.actionKey)) return false;
-            if (action.IsDelivery) return true;
-            var snapshot = new NarrativeActionStateSnapshot();
-            actions.CaptureInto(snapshot);
-            return snapshot.rootCostCommitted;
-        }
-
-        private IEnumerator AnimateCosts(Card card)
-        {
-            // A pending cursor may already have paid at an earlier event's commit.
-            if (HasCommittedPendingCosts(NarrativeRuntime.Instance?.Actions, card.action)) yield break;
-            for (int i = 0; i < card.projection.Count && i < card.requirementSlots.Count; i++)
-            {
-                var requirement = card.projection[i];
-                if (inventory == null || !requirement.costType.HasValue) continue;
-                var target = card.requirementSlots[i];
-                if (requirement.costType == NarrativeActionRequirementType.Item)
-                {
-                    yield return inventory.Reveal(requirement.key);
-                    yield return Fly(inventory.FindSlot(requirement.key), target, MapActionInventoryView.ItemName(requirement.key) + "\n−" + requirement.amount);
-                }
-                else if (requirement.costType == NarrativeActionRequirementType.Money)
-                {
-                    yield return inventory.RevealMoney();
-                    yield return Fly(inventory.MoneyRect, target, "金币\n−" + requirement.amount);
-                }
-                else if (requirement.costType == NarrativeActionRequirementType.ActionPoint)
-                    yield return Fly(inventory.PointsRect, target, "行动点\n−" + requirement.amount);
-            }
-        }
-
         private IEnumerator Execute(Card card)
         {
             busy = true;
             int epoch = ++executionEpoch;
             foreach (var c in cards) if (c.button != null) c.button.interactable = false;
-            yield return AnimateCosts(card);
-            if (this == null || epoch != executionEpoch || !isActiveAndEnabled) yield break;
+            // Show the costs first; the controller rechecks and consumes them atomically afterwards.
+            for (int i = 0; i < card.action.parsedRequirements.Count; i++)
+            {
+                var requirement = card.action.parsedRequirements[i];
+                if (requirement.type == NarrativeActionRequirementType.Item)
+                {
+                    yield return inventory.Reveal(requirement.key);
+                    if (card.requirements.Count > 0)
+                        yield return Fly(inventory.FindSlot(requirement.key), (RectTransform)card.requirements[0].transform.parent, "×" + requirement.value);
+                }
+                else if (requirement.type == NarrativeActionRequirementType.ActionPoint)
+                    if (card.requirements.Count > 0)
+                        yield return Fly(inventory.PointsRect, (RectTransform)card.requirements[0].transform.parent, "−" + requirement.value + " 行动点");
+            }
             if (!(controls?.Invoke() ?? true)) { busy = false; yield break; }
-            var runtime = NarrativeRuntime.Instance;
-            var actions = runtime?.Actions;
-            if (actions == null || card.owner != actions) { busy = false; yield break; }
-            bool exchange = card.action.executionKind == NarrativeActionExecutionKind.Exchange;
-            // Capture immediately before Execute, using the same authoritative providers afterwards.
-            var itemInventory = runtime.MapInventory;
-            var moneyAccount = runtime.Controller?.MoneyAccount;
-            var itemsBefore = exchange && itemInventory != null
-                ? itemInventory.Items.ToDictionary(p => p.Key, p => p.Value, StringComparer.Ordinal) : null;
-            int moneyBefore = 0;
-            bool moneyReady = exchange && moneyAccount != null && moneyAccount.TryRead(out moneyBefore);
-            int pointsBefore = actions.ActionPoints.Current;
             bool finished = false;
-            bool accepted = actions.Execute(card.action.actionKey, success =>
+            bool accepted = NarrativeRuntime.Instance.Actions.Execute(card.action.actionKey, success =>
             {
                 if (this == null || epoch != executionEpoch || !isActiveAndEnabled) return;
                 Spotlight.Audio.GameAudio.Play(success ? Spotlight.Audio.AudioKeys.MapComplete : Spotlight.Audio.AudioKeys.Error);
                 finished = true;
-                if (success && exchange)
-                {
-                    var changes = new List<string>();
-                    if (moneyReady && moneyAccount.TryRead(out int moneyAfter))
-                        AddActualChange(changes, "金币", (long)moneyAfter - moneyBefore);
-                    else if (moneyAccount != null) changes.Add("金币变化暂不可用");
-                    if (itemsBefore != null)
-                        foreach (string key in itemsBefore.Keys.Union(itemInventory.Items.Keys, StringComparer.Ordinal).OrderBy(k => k, StringComparer.Ordinal))
-                        {
-                            itemsBefore.TryGetValue(key, out int before);
-                            AddActualChange(changes, MapActionInventoryView.ItemName(key), (long)itemInventory.GetCount(key) - before);
-                        }
-                    else changes.Add("物品变化暂不可用");
-                    AddActualChange(changes, "行动点", (long)actions.ActionPoints.Current - pointsBefore);
-                    Notice("交易成功 · 实际变化\n" + (changes.Count > 0 ? string.Join("\n", changes) : "物品、金币与行动点数量无变化"), 6);
-                }
                 if (success && (controls?.Invoke() ?? true) && card.action.endDay) { busy = false; endDay?.Invoke(); }
                 if (!success) Notice("行动事件未能执行");
             });
             if (!accepted && !finished) { Spotlight.Audio.GameAudio.Play(Spotlight.Audio.AudioKeys.Error); Notice("要求不满足"); finished = true; }
             while (!finished) yield return null;
-            if (this == null || epoch != executionEpoch || !isActiveAndEnabled) yield break;
             busy = false; inventory?.Refresh(); Rebuild();
         }
-        private static void AddActualChange(List<string> changes, string name, long delta)
-        {
-            if (delta != 0) changes.Add(name + (delta > 0 ? " 增加 " : " 减少 ") + Math.Abs(delta));
-        }
-
         private IEnumerator Fly(RectTransform source, RectTransform target, string text)
         {
             if (source == null || target == null) yield break;
@@ -1096,7 +734,8 @@ namespace Spotlight.GameFlow
             effect.sizeDelta = new Vector2(124, 70);
             var background = effect.gameObject.AddComponent<Image>();
             background.color = new Color(.12f, .32f, .22f, .98f); background.raycastTarget = false;
-            var label = Label("Label", effect, text, 20);
+            var itemLabel = source.GetComponentInChildren<TextMeshProUGUI>();
+            var label = Label("Label", effect, source == inventory.PointsRect ? text : (itemLabel?.text.Split('\n')[0] ?? "物品") + "\n" + text, 20);
             label.alignment = TextAlignmentOptions.Center;
             label.color = new Color(.82f, 1, .7f);
             Stretch(label.rectTransform, 4);
@@ -1109,7 +748,6 @@ namespace Spotlight.GameFlow
             }
             Destroy(effect.gameObject);
             var image = target.GetComponent<Image>();
-            if (image == null) yield break;
             Color original = image.color; image.color = new Color(.23f, .48f, .3f);
             yield return new WaitForSecondsRealtime(.12f);
             if (image != null) image.color = original;
@@ -1126,15 +764,15 @@ namespace Spotlight.GameFlow
             }
             if (target != null) target.anchoredPosition = origin;
         }
-        private void Notice(string message, float duration = 2)
+        private void Notice(string message)
         {
             var root = Rect("RequirementNotice", transform.root);
             root.anchorMin = root.anchorMax = new Vector2(.5f, .5f);
+            root.sizeDelta = new Vector2(380, 120);
             root.gameObject.AddComponent<Image>().color = new Color(.16f, .07f, .07f, .98f);
             var label = Label("Message", root, message, 24); Stretch(label.rectTransform, 16);
             label.alignment = TextAlignmentOptions.Center;
-            root.sizeDelta = new Vector2(380, Mathf.Max(120, PreferredHeight(label, message, 348) + 32));
-            if (Application.isPlaying) Destroy(root.gameObject, duration);
+            Destroy(root.gameObject, 2);
         }
         internal static string Text(string key, string fallback)
         {

@@ -120,8 +120,8 @@ namespace Spotlight.FreeCafe.Tests
             Assert.That(world.ExtractionJug(filter), Is.SameAs(jug));
             app.ContainerPanels.Inspect(filter.id);
             yield return new WaitForSecondsRealtime(.3f);
-            AssertGauge("TimeGauge", "时间");
-            AssertGauge("WaterGauge", "热水");
+            foreach (var label in app.ContainerPanels.GetComponentsInChildren<TMP_Text>())
+                Assert.That(label.transform.parent.name, Is.Not.EqualTo("TimeGauge").And.Not.EqualTo("WaterGauge"), "Judgment bars appear once extraction starts");
 
             var heater = world.Find("m.heater");
             Assert.That(heater, Is.Not.Null);
@@ -133,6 +133,9 @@ namespace Spotlight.FreeCafe.Tests
             heater.production.phase = ProductionPhase.Room;
             Assert.That(world.PourLiquid(heater.id, filter.id, 100, 3.75f).success, Is.True);
             world.Tick(3.75f);
+            yield return new WaitForSecondsRealtime(.3f);
+            AssertGauge("TimeGauge", "时间");
+            AssertGauge("WaterGauge", "热水");
             Assert.That(world.LiquidVolume(jug), Is.EqualTo(100).Within(.01f));
             Assert.That(jug.contents.Exists(portion => portion.specId == "coffee" && portion.milliliters > 0), Is.True,
                 "Hot water poured into the untouched upper filter must produce coffee in the lower jug.");

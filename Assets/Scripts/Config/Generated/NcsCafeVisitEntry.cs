@@ -28,8 +28,6 @@ public sealed partial class NcsCafeVisitEntry : Luban.BeanBase
         ArrivalDelaySeconds = (string)_obj.GetValue("arrivalDelaySeconds");
         PatienceSeconds = (string)_obj.GetValue("patienceSeconds");
         LeaveAfterServed = (string)_obj.GetValue("leaveAfterServed");
-        OrderProductId = (string)_obj.GetValue("orderProductId");
-        RequireRealProduction = (bool)_obj.GetValue("requireRealProduction");
     }
 
     public static NcsCafeVisitEntry DeserializeNcsCafeVisitEntry(JToken _buf)
@@ -45,8 +43,6 @@ public sealed partial class NcsCafeVisitEntry : Luban.BeanBase
     public readonly string ArrivalDelaySeconds;
     public readonly string PatienceSeconds;
     public readonly string LeaveAfterServed;
-    public readonly string OrderProductId;
-    public readonly bool RequireRealProduction;
 
 
     public const int __ID__ = 2142507074;
@@ -67,8 +63,6 @@ public sealed partial class NcsCafeVisitEntry : Luban.BeanBase
         + "arrivalDelaySeconds:" + ArrivalDelaySeconds + ","
         + "patienceSeconds:" + PatienceSeconds + ","
         + "leaveAfterServed:" + LeaveAfterServed + ","
-        + "orderProductId:" + OrderProductId + ","
-        + "requireRealProduction:" + RequireRealProduction + ","
         + "}";
     }
 }

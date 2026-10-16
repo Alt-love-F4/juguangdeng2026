@@ -57,7 +57,6 @@ namespace Spotlight.FreeCafe
                     {
                         visitInstanceId = entry.VisitInstanceId, characterId = entry.CharacterId, visitKey = entry.VisitKey,
                         arrivalAuthorized = entry.ArrivalAuthorized, isEnded = entry.IsEnded,
-                        orderProductId = entry.OrderProductId, requireRealProduction = entry.RequireRealProduction,
                         endReason = entry.EndReason, preferredSeatId = entry.PreferredSeatId,
                         seatedVisualPath = entry.SeatedVisualPath, arrivalDelaySeconds = entry.ArrivalDelaySeconds,
                         hasPatienceOverride = entry.PatienceSeconds.HasValue, patienceSeconds = entry.PatienceSeconds ?? 0,
@@ -84,16 +83,7 @@ namespace Spotlight.FreeCafe
                 foreach (var fact in owner.World.State.cafeVisitFeedback.ToArray())
                 {
                     var dto = new NarrativeCafeVisitFeedback { visitInstanceId = fact.visitInstanceId, characterId = fact.characterId,
-                        stage = fact.stage, reason = fact.reason, sequence = fact.sequence, isClick = fact.isClick,
-                        orderId = fact.orderId, productId = fact.productId,
-                        serviceReceipt = fact.serviceReceipt == null ? null : new NarrativeCafeServiceReceipt
-                        {
-                            visitInstanceId = fact.serviceReceipt.visitInstanceId, characterId = fact.serviceReceipt.characterId,
-                            orderId = fact.serviceReceipt.orderId, productId = fact.serviceReceipt.productId, cupId = fact.serviceReceipt.cupId,
-                            classifiedProductId = fact.serviceReceipt.classifiedProductId, realProduction = fact.serviceReceipt.realProduction,
-                            satisfied = fact.serviceReceipt.satisfied, correctType = fact.serviceReceipt.correctType,
-                            latteArtSatisfied = fact.serviceReceipt.latteArtSatisfied, score = fact.serviceReceipt.score, minimumScore = fact.serviceReceipt.minimumScore
-                        } };
+                        stage = fact.stage, reason = fact.reason, sequence = fact.sequence, isClick = fact.isClick };
                     bool known = snapshot.Visits.Any(v => v.VisitInstanceId == fact.visitInstanceId && v.CharacterId == fact.characterId);
                     if (!known) { owner.World.AcknowledgeCafeVisitFeedback(fact.sequence); continue; }
                     runtime.SubmitCafeVisitFeedback(dto);

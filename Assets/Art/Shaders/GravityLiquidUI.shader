@@ -7,7 +7,11 @@ Shader "Spotlight/UI/Gravity Liquid"
         _LiquidColor ("Liquid", Color) = (0.12,0.65,0.9,0.9)
         _DeepColor ("Deep Liquid", Color) = (0.03,0.25,0.55,0.98)
         _SurfaceColor ("Surface Highlight", Color) = (0.65,0.96,1,1)
-        _WallColor ("Three Cup Walls", Color) = (0.7,0.9,1,0.65)
+        _ContainerMask ("Container Mask (Alpha; Optional SDF in R)", 2D) = "white" {}
+        _UseContainerMask ("Use Container Mask", Float) = 0
+        _MaskIsSDF ("Mask R Contains Signed Distance", Float) = 0
+        _MaskDistanceRange ("SDF Range Relative To Height", Float) = 0.125
+        _WallColor ("Container Outline", Color) = (0.7,0.9,1,0.65)
         _ContainerRect ("Drawing Rect (Center XY, Size ZW)", Vector) = (0,0,100,100)
         _LiquidBounds ("Inner Bounds (Min XY, Max ZW)", Vector) = (-0.48,-0.48,0.48,0.5)
         _SurfacePlane ("Surface (Normal XY, Offset Z, Fill W)", Vector) = (0,1,0.1,0.6)
@@ -62,10 +66,13 @@ Shader "Spotlight/UI/Gravity Liquid"
             };
             TEXTURE2D(_MainTex);
             SAMPLER(sampler_MainTex);
+            TEXTURE2D(_ContainerMask);
+            SAMPLER(sampler_ContainerMask);
             CBUFFER_START(UnityPerMaterial)
                 half4 _Color, _LiquidColor, _DeepColor, _SurfaceColor, _WallColor;
                 float4 _ContainerRect, _LiquidBounds, _SurfacePlane, _Wave;
                 float _WallThickness, _TextureInfluence;
+                float _UseContainerMask, _MaskIsSDF, _MaskDistanceRange;
             CBUFFER_END
             // CanvasRenderer supplies these UI properties, including RectMask2D softness.
             float4 _TextureSampleAdd;
@@ -87,6 +94,36 @@ Shader "Spotlight/UI/Gravity Liquid"
                 return output;
             }
 
+            float ContainerAlpha(float2 uv)
+            {
+                float inRect = step(0, uv.x) * step(uv.x, 1) * step(0, uv.y) * step(uv.y, 1);
+                return SAMPLE_TEXTURE2D_LOD(_ContainerMask, sampler_ContainerMask, uv, 0).a * inRect;
+            }
+
+            float MaskInterior(float2 uv, float aspect, float aa)
+            {
+                float interior = 1;
+                if (_MaskIsSDF > 0.5)
+                {
+                    float distance = (SAMPLE_TEXTURE2D_LOD(_ContainerMask, sampler_ContainerMask, uv, 0).r - 0.5)
+                        * (2 * _MaskDistanceRange);
+                    interior = smoothstep(_WallThickness - aa, _WallThickness + aa, distance);
+                }
+                else
+                {
+                    // Erode alpha in height units; center scaling would make sloping walls uneven.
+                    interior = ContainerAlpha(uv);
+                    [unroll] for (int i = 0; i < 8; i++)
+                    {
+                        float angle = i * PI * 0.25;
+                        float2 delta = float2(cos(angle) / max(aspect, 0.001), sin(angle)) * _WallThickness;
+                        interior = min(interior, ContainerAlpha(uv + delta));
+                        interior = min(interior, ContainerAlpha(uv + delta * 0.5));
+                    }
+                }
+                return interior;
+            }
+
             half4 Frag(Varyings input) : SV_Target
             {
                 float height = max(_ContainerRect.w, 0.001);
@@ -99,6 +136,13 @@ Shader "Spotlight/UI/Gravity Liquid"
                 float side = min(p.x - _LiquidBounds.x, _LiquidBounds.z - p.x);
                 float bottom = p.y - _LiquidBounds.y;
                 float interior = smoothstep(-aa, aa, min(side, bottom));
+                if (_UseContainerMask > 0.5)
+                {
+                    float aspect = _ContainerRect.z / height;
+                    float2 maskUV = p / float2(aspect, 1) + 0.5;
+                    outerMask *= ContainerAlpha(maskUV);
+                    interior = MaskInterior(maskUV, aspect, aa);
+                }
                 float u = saturate((p.x - _LiquidBounds.x) / max(_LiquidBounds.z - _LiquidBounds.x, 0.001));
                 // Wave is pinned at the two walls; large-scale orientation comes from gravity.
                 float wave = _Wave.x * sin(u * PI) *
@@ -111,7 +155,7 @@ Shader "Spotlight/UI/Gravity Liquid"
                 half4 liquid = lerp(_LiquidColor, _DeepColor, depth);
                 float surface = (1 - smoothstep(0, max(_Wave.w, aa * 2), abs(signedDepth))) * water;
                 liquid = lerp(liquid, _SurfaceColor, surface * _SurfaceColor.a);
-                // Only three walls. There is intentionally no upper rim/background rectangle.
+                // Unmasked Images retain the open-top three walls; masks supply their own complete outline.
                 float wall = (1 - interior) * step(0.00001, _WallThickness);
                 float waterAlpha = liquid.a * water;
                 float wallAlpha = _WallColor.a * wall;

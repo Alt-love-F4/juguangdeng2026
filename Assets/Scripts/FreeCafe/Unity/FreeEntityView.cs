@@ -18,6 +18,11 @@ namespace Spotlight.FreeCafe
         [Header("Presentation extension anchors (local world units)")]
         public Transform effectsRoot, liquidRoot, pourOrigin;
         public MonoBehaviour liquidPresenter;
+        [Header("Liquid container silhouette")]
+        [SerializeField] private Texture2D liquidContainerMask;
+        [SerializeField] private bool liquidMaskIsDistanceField;
+        [SerializeField, Min(.001f)] private float liquidMaskDistanceRange = .125f;
+        [SerializeField, Range(0f, .15f)] private float liquidWallThickness = .018f;
         public SpriteRenderer body;
         public TMP_Text label;
         public TMP_Text workspaceCaption;
@@ -51,7 +56,8 @@ namespace Spotlight.FreeCafe
         private float retireElapsed;
         public Vector3 DragPosition => transform.parent != null ? transform.parent.TransformPoint(motionTarget) : motionTarget;
         private Coroutine rejectionAnimation;
-        private Vector3 bodyOrigin;
+        private Coroutine pickupReveal;
+        private Vector3 pickupBodyScale;
         private OrthographicGlassCupPresenter glassCup;
         private Canvas glassCanvas;
         private bool pourVisual, receivingPour;
@@ -62,7 +68,6 @@ namespace Spotlight.FreeCafe
         {
             EnsureFillIndicator();
             EnsureGlassCup();
-            if(body!=null) bodyOrigin=body.transform.localPosition;
         }
         private void EnsureFillIndicator()
         {
@@ -108,9 +113,18 @@ namespace Spotlight.FreeCafe
             EnsureGlassCup();
         }
 
+        public void ConfigureLiquidContainerMask(Texture2D mask, bool signedDistance, float distanceRange, float inset)
+        {
+            liquidContainerMask = mask;
+            liquidMaskIsDistanceField = signedDistance;
+            liquidMaskDistanceRange = Mathf.Max(.001f, distanceRange);
+            liquidWallThickness = Mathf.Clamp(inset, 0f, .15f);
+            EnsureGlassCup();
+        }
+
         private void EnsureGlassCup()
         {
-            if (prefabSpecId != "cup.small" && prefabSpecId != "cup.large" && prefabSpecId != "machine.heater" && prefabSpecId != "machine.brewer" && prefabSpecId != "container.extractor" && prefabSpecId != "container.milk-pitcher") return;
+            if (prefabSpecId != "cup.small" && prefabSpecId != "cup.large" && prefabSpecId != "machine.heater" && prefabSpecId != "machine.brewer" && prefabSpecId != "container.extractor" && prefabSpecId != "container.milk-pitcher" && prefabSpecId != "container.extractor.filter" && liquidContainerMask == null) return;
             if (liquidPresenter != null && !(liquidPresenter is OrthographicGlassCupPresenter)) return;
             if (glassCup == null)
             {
@@ -138,12 +152,16 @@ namespace Spotlight.FreeCafe
                 }
                 liquidPresenter = glassCup;
             }
-            glassCup.ConfigureSize(prefabSpecId != "cup.small");
-            if(prefabSpecId=="container.milk-pitcher")glassCup.ConfigureSize(new Vector2(.82f,1.02f));
-            if (prefabSpecId == "container.extractor")
+            glassCup.ConfigureContainerMask(liquidContainerMask, liquidMaskIsDistanceField, liquidMaskDistanceRange, liquidWallThickness);
+            if (liquidContainerMask == null)
             {
-                glassCup.ConfigureSize(new Vector2(.84f, .89f));
-                glassCanvas.transform.localPosition = new Vector3(-.17f, -.04f, -.01f);
+                glassCup.ConfigureSize(prefabSpecId != "cup.small");
+                if(prefabSpecId=="container.milk-pitcher") glassCup.ConfigureSize(new Vector2(.82f,1.02f));
+                if (prefabSpecId == "container.extractor")
+                {
+                    glassCup.ConfigureSize(new Vector2(.84f, .89f));
+                    glassCanvas.transform.localPosition = new Vector3(-.17f, -.04f, -.01f);
+                }
             }
             glassCup.ConfigureMotionSpace(transform.parent);
             if (body != null)
@@ -153,9 +171,10 @@ namespace Spotlight.FreeCafe
                 if (glassCanvas != null)
                 {
                     glassCanvas.sortingLayerID = body.sortingLayerID;
-                    glassCanvas.sortingOrder = body.sortingOrder;
+                    glassCanvas.sortingOrder = body.sortingOrder + (liquidContainerMask != null ? 1 : 0);
                 }
             }
+            UpdateGlassTransform();
         }
 
         /// <summary>编辑器和运行时共用同一个 Prefab；这里只设置初始外观，不创建世界或扣库存。</summary>
@@ -187,6 +206,7 @@ namespace Spotlight.FreeCafe
             if(runtime==null || entity==null) throw new System.ArgumentNullException("实体绑定缺少 runtime 或实体");
             if(!string.IsNullOrEmpty(prefabSpecId) && prefabSpecId!=entity.specId)
                 throw new System.InvalidOperationException("Prefab 规格不匹配："+prefabSpecId+" / "+entity.specId);
+            StopPickupReveal();
             Runtime=runtime; EntityId=entity.id; preview=isPreview;
             if((Runtime.World.IsPrecisionExtractor(entity) || Runtime.World.IsExtractionFilter(entity)) && GetComponent<FreeCafeExtractorVisual>()==null)
                 gameObject.AddComponent<FreeCafeExtractorVisual>();
@@ -304,6 +324,42 @@ namespace Spotlight.FreeCafe
             transform.position = worldPosition;
             motionVelocity = Vector3.zero;
         }
+        public void TeleportPresentation(Vector3 worldPosition)
+        {
+            transform.position = worldPosition;
+            motionTarget = transform.localPosition;
+            motionVelocity = Vector3.zero;
+            motionInitialized = true;
+        }
+        public void PlayPickupReveal()
+        {
+            StopPickupReveal();
+            if(body==null || !isActiveAndEnabled) return;
+            pickupBodyScale=body.transform.localScale;
+            pickupReveal=StartCoroutine(PickupRevealRoutine());
+        }
+        private IEnumerator PickupRevealRoutine()
+        {
+            float elapsed=0;
+            while(elapsed<.14f && body!=null)
+            {
+                float t=Mathf.Clamp01(elapsed/.14f)-1;
+                float eased=1+2.70158f*t*t*t+1.70158f*t*t;
+                float scale=Mathf.LerpUnclamped(.78f,1,eased);
+                body.transform.localScale=Vector3.Scale(pickupBodyScale,new Vector3(scale,scale,1));
+                yield return null;
+                elapsed+=Time.unscaledDeltaTime;
+            }
+            if(body!=null) body.transform.localScale=pickupBodyScale;
+            pickupReveal=null;
+        }
+        private void StopPickupReveal()
+        {
+            if(pickupReveal==null) return;
+            StopCoroutine(pickupReveal);
+            pickupReveal=null;
+            if(body!=null) body.transform.localScale=pickupBodyScale;
+        }
         public void BeginPointerMotion()
         {
             pointerMotion = true;
@@ -357,15 +413,8 @@ namespace Spotlight.FreeCafe
                 ? Mathf.Clamp(motionVelocity.x * Mathf.Min(leanPerSpeed, .7f), -Mathf.Min(maxDragLean, 6), Mathf.Min(maxDragLean, 6)) : 0f;
             dragLean = Mathf.SmoothDampAngle(dragLean, targetLean, ref leanVelocity,
                 Mathf.Max(.01f, leanSmoothTime), Mathf.Infinity, dt);
-            float machineShake = 0f;
-            if (Runtime != null && Runtime.World != null && !preview && !pointerMotion && specId == "machine.grinder")
-            {
-                var entity = Runtime.World.Find(EntityId);
-                if (entity != null && entity.specId == "machine.grinder" && entity.production.phase == ProductionPhase.Processing)
-                    machineShake = Mathf.Sin(Time.time * (entity.production.clickCooldown > 0 ? 38 : 14)) * 4;
-            }
             if (body != null) body.transform.localRotation = Quaternion.Euler(0, 0,
-                pourVisual ? pourRotation : baseRotation + dragLean + machineShake);
+                pourVisual ? pourRotation : baseRotation + dragLean);
             UpdateGlassTransform();
             if ((transform.localPosition - motionTarget).sqrMagnitude < .000001f && motionVelocity.sqrMagnitude < .0001f)
             {
@@ -385,17 +434,10 @@ namespace Spotlight.FreeCafe
         }
         private void OnDisable()
         {
+            StopPickupReveal();
             if(rejectionAnimation!=null) StopCoroutine(rejectionAnimation);
             rejectionAnimation=null;invalidDrop=false;
         }
-        private void Update()
-        {
-            if(Runtime==null || Runtime.World==null || !Runtime.World.ProductionEnabled || preview || body==null) return;
-            var entity=Runtime.World.Find(EntityId);if(entity==null) return;
-            if(entity.specId=="machine.heater")
-                body.transform.localPosition=bodyOrigin+Vector3.up*(entity.production.phase==ProductionPhase.Boiling ? Mathf.Sin(Time.time*20)*.025f : 0);
-        }
-
         private bool WorldVessel(WorldEntity entity) => Runtime.World.IsProductionVessel(entity);
         public void PresentPour(float tilt,bool pouring)
         {
@@ -432,7 +474,26 @@ namespace Spotlight.FreeCafe
         {
             if (glassCup == null || body == null) return;
             liquidRoot.localRotation = body.transform.localRotation;
-            if (glassCanvas != null) glassCanvas.sortingOrder = body.sortingOrder;
+            if (liquidContainerMask != null && body.sprite != null)
+            {
+                liquidRoot.localPosition = body.transform.localPosition;
+                var scale = body.transform.localScale;
+                if (body.flipX) scale.x = -scale.x;
+                if (body.flipY) scale.y = -scale.y;
+                liquidRoot.localScale = scale;
+                if (glassCanvas != null)
+                {
+                    glassCanvas.transform.localPosition = new Vector3(0, 0, -.01f);
+                    glassCanvas.transform.localRotation = Quaternion.identity;
+                    glassCanvas.transform.localScale = Vector3.one;
+                }
+                glassCup.FitSprite(body.sprite);
+            }
+            if (glassCanvas != null)
+            {
+                glassCanvas.sortingLayerID = body.sortingLayerID;
+                glassCanvas.sortingOrder = body.sortingOrder + (liquidContainerMask != null ? 1 : 0);
+            }
         }
         private void UpdateProductionFill(WorldEntity entity,CafeLiquidSnapshot snapshot)
         {

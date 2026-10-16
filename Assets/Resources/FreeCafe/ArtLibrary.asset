@@ -85,7 +85,7 @@ MonoBehaviour:
     whitebox: {fileID: 21300000, guid: c1d2495d389e3ae4a91babc5cd272264, type: 3}
     variants:
     - state: default
-      sprite: {fileID: 21300000, guid: be9b5a5ac7edd4a4984a4f39e96f2ff0, type: 3}
+      sprite: {fileID: 21300000, guid: 985d4b4da5bbd4c469fcf36b303fe909, type: 3}
   - brief:
       id: grounds
       label: "\u5496\u5561\u7C89"
@@ -106,7 +106,7 @@ MonoBehaviour:
     whitebox: {fileID: 21300000, guid: c1d2495d389e3ae4a91babc5cd272264, type: 3}
     variants:
     - state: default
-      sprite: {fileID: 21300000, guid: 7e0e281151700a346828377669146bbd, type: 3}
+      sprite: {fileID: 21300000, guid: b5fd97428b0eae0438165119414b725b, type: 3}
   - brief:
       id: coffee
       label: "\u5496\u5561\u6DB2"
@@ -444,7 +444,7 @@ MonoBehaviour:
     whitebox: {fileID: 21300000, guid: 0faddad22f22abf469e40d6924242b48, type: 3}
     variants:
     - state: default
-      sprite: {fileID: 21300000, guid: 8acaa70a0feb32648a52da2dfefc2bfb, type: 3}
+      sprite: {fileID: 21300000, guid: 2e229d3727c3e894b8ef99727f0273b5, type: 3}
   - brief:
       id: machine.brewer
       label: "\u5496\u5561\u58F6"
@@ -1019,7 +1019,7 @@ MonoBehaviour:
     whitebox: {fileID: 21300000, guid: a8abadfc3e798a843b0f2e8484ed4ec9, type: 3}
     variants:
     - state: default
-      sprite: {fileID: 21300000, guid: a8abadfc3e798a843b0f2e8484ed4ec9, type: 3}
+      sprite: {fileID: 21300000, guid: b5fd97428b0eae0438165119414b725b, type: 3}
   - brief:
       id: container.milk-pitcher
       label: "\u6253\u5976\u58F6"

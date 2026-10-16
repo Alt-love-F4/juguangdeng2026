@@ -312,9 +312,9 @@ namespace Spotlight.GameFlow.Tests
         public IEnumerator DateCompletesAutomaticallyAndOnlyItsOwnCallbackUpdatesStatus()
         {
             controller.PlayDateChange();
-            float deadline = Time.realtimeSinceStartup + 8f;
-            while (controller.CurrentPanel != null && Time.realtimeSinceStartup < deadline) yield return null;
-            Assert.That(controller.CurrentPanel, Is.Null, "The authored date animation must finish without input.");
+            // Almanac transition: ~4.6s sequence (incl. 1.1s hold) + 0.3s fade-out.
+            yield return new WaitForSecondsRealtime(5.4f);
+            Assert.That(controller.CurrentPanel, Is.Null);
             controller.PlayDateChange();
             yield return null;
             controller.PlayLetter();

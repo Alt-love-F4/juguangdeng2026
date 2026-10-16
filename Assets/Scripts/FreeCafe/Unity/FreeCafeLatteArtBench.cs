@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Collections;
 using System.Collections.Generic;
 using TMPro;
@@ -12,7 +12,8 @@ namespace Spotlight.FreeCafe
     public sealed class FreeCafeLatteArtBench : MonoBehaviour, ICafeMiniGamePresenter, ICafeLatteArtResultPresenter, IPointerClickHandler
     {
         public FreeCafeSubSceneDock dock;
-        [Tooltip("为空时使用爱心、X、A、郁金香、树叶五个内置模板；可在 Inspector 传入自己的预览图和模板类型。")]
+        public Sprite woodBackground;
+        [Tooltip("为空时使用王冠、爱心、X、A、郁金香、树叶六个内置模板；可在 Inspector 传入自己的预览图和模板类型。")]
         public LatteArtPatternPreset[] patternPresets;
         public string LastPatternId { get; private set; }
         [Header("Latte presentation")]
@@ -205,12 +206,12 @@ namespace Spotlight.FreeCafe
             patternFits.Clear();
             if (effect is ILatteArtFeedbackSurface feedback) feedback.GetPatternFits(activePresets, patternFits);
             bestFitId = null;
-            float best = 0;
+            float best = -1;
             for (int i = 0; i < fitLabels.Count; i++)
             {
                 float score = i < patternFits.Count ? patternFits[i].confidence : 0;
                 fitLabels[i].text = "拟合 " + (score * 100f).ToString("0") + "%";
-                if (score > best) { best = score; bestFitId = activePresets[i].id; }
+                if (effect != null && effect.StrokePointCount >= 5 && score > best) { best = score; bestFitId = activePresets[i].id; }
             }
             RefreshPresetHighlights();
         }
@@ -246,6 +247,7 @@ namespace Spotlight.FreeCafe
             AddBuiltin("a", "A 形", LatteArtTemplateKind.A);
             AddBuiltin("tulip", "郁金香", LatteArtTemplateKind.Tulip);
             AddBuiltin("rosetta", "树叶", LatteArtTemplateKind.Rosetta);
+            AddBuiltin("crown", "王冠", LatteArtTemplateKind.Crown);
         }
         private void AddBuiltin(string id, string label, LatteArtTemplateKind template) => activePresets.Add(new LatteArtPatternPreset { id = id, displayName = label, template = template });
 
@@ -309,15 +311,16 @@ namespace Spotlight.FreeCafe
                 go.transform.localPosition = new Vector3(0, 0, 1);
                 backdrop = go.AddComponent<SpriteRenderer>();
                 backdropSprite = Sprite.Create(Texture2D.whiteTexture, new Rect(0, 0, 1, 1), Vector2.one * .5f, 1);
-                backdrop.sprite = backdropSprite;
-                backdrop.color = new Color(.46f, .29f, .24f);
+                backdrop.sprite = woodBackground != null ? woodBackground : backdropSprite;
+                backdrop.color = woodBackground != null ? Color.white : new Color(.46f, .29f, .24f);
                 backdrop.sortingLayerID = background.sortingLayerID;
                 backdrop.sortingOrder = background.sortingOrder - 1;
             }
             backdrop.gameObject.SetActive(true);
             var scale = layoutRoot.lossyScale;
-            backdrop.transform.localScale = new Vector3(height * camera.aspect / Mathf.Abs(scale.x) * 1.01f,
-                height / Mathf.Abs(scale.y) * 1.01f, 1);
+            var spriteSize=backdrop.sprite.bounds.size;
+            backdrop.transform.localScale = new Vector3(height * camera.aspect / Mathf.Abs(scale.x) / spriteSize.x * 1.01f,
+                height / Mathf.Abs(scale.y) / spriteSize.y * 1.01f, 1);
         }
         private void OnDestroy()
         {
@@ -345,7 +348,7 @@ namespace Spotlight.FreeCafe
             var subtitle = MakeText(panel.transform, "Subtitle", "选参考 · 慢慢画 · 完成后提交", 15, new Color(.78f, .69f, .62f));
             SetRect(subtitle.rectTransform, new Vector2(.09f, .815f), new Vector2(.91f, .855f)); subtitle.alignment = TextAlignmentOptions.Left;
             foamUsage = MakeText(content.transform, "FoamUsage", "已用奶泡 0.0 ml", 20, Cream);
-            SetRect(foamUsage.rectTransform, new Vector2(.32f, .10f), new Vector2(.94f, .18f)); foamUsage.alignment = TextAlignmentOptions.Center;
+            SetRect(foamUsage.rectTransform, new Vector2(.34f, .12f), new Vector2(.71f, .18f)); foamUsage.alignment = TextAlignmentOptions.Center;
             UpdateFoamUsage();
             var referenceLabel = MakeText(panel.transform, "ReferenceLabel", "选择参考图案", 14, new Color(.82f, .63f, .43f));
             SetRect(referenceLabel.rectTransform, new Vector2(.09f, .765f), new Vector2(.91f, .805f)); referenceLabel.alignment = TextAlignmentOptions.Left;
@@ -353,10 +356,19 @@ namespace Spotlight.FreeCafe
             SetRect(listObject.GetComponent<RectTransform>(), new Vector2(.09f, .345f), new Vector2(.91f, .76f));
             var list = listObject.AddComponent<VerticalLayoutGroup>(); list.spacing = 8; list.childControlHeight = true;
             list.childControlWidth = true; list.childForceExpandHeight = true;
+            var hint=MakeImage(content.transform,"PatternMeaning",new Color(.96f,.88f,.72f));
+            hint.raycastTarget=false;
+            var hintRect=hint.rectTransform;hintRect.anchorMin=hintRect.anchorMax=new Vector2(.5f,.5f);
+            hintRect.pivot=new Vector2(0,1);hintRect.sizeDelta=new Vector2(310,170);
+            var hintTitle=MakeText(hint.transform,"PatternName","",22,new Color(.28f,.16f,.10f));
+            SetRect(hintTitle.rectTransform,new Vector2(.07f,.68f),new Vector2(.93f,.94f));
+            var hintBody=MakeText(hint.transform,"Meaning","",18,new Color(.28f,.16f,.10f));
+            SetRect(hintBody.rectTransform,new Vector2(.07f,.08f),new Vector2(.93f,.68f));
+            hint.gameObject.SetActive(false);
             foreach (var preset in activePresets)
             {
                 var buttonImage = MakeImage(list.transform, preset.id + "Button", new Color(.24f, .16f, .13f));
-                buttonImage.gameObject.AddComponent<LayoutElement>().preferredHeight = 64;
+                buttonImage.gameObject.AddComponent<LayoutElement>().preferredHeight = 54;
                 presetButtons.Add(buttonImage);
                 var button = buttonImage.gameObject.AddComponent<Button>();
                 ConfigureButton(button);
@@ -375,22 +387,42 @@ namespace Spotlight.FreeCafe
                 var raw = preview.GetComponent<RawImage>(); raw.texture = preset.preview != null ? preset.preview : CreatePreview(preset.template);
                 raw.color = new Color(1, 1, 1, .9f);
                 raw.raycastTarget = false;
-                SetRect(preview.GetComponent<RectTransform>(), new Vector2(.025f, .08f), new Vector2(.27f, .92f));
-                var fitter = preview.AddComponent<AspectRatioFitter>(); fitter.aspectMode = AspectRatioFitter.AspectMode.FitInParent; fitter.aspectRatio = 1;
+                var previewRect=preview.GetComponent<RectTransform>();
+                previewRect.anchorMin=previewRect.anchorMax=new Vector2(.15f,.5f);
+                previewRect.sizeDelta=new Vector2(46,46);previewRect.anchoredPosition=Vector2.zero;
                 button.onClick.AddListener(() => SelectReference(preset.id));
+                var hover=buttonImage.gameObject.AddComponent<CafeLattePatternHint>();
+                hover.panel=hintRect;hover.heading=hintTitle;hover.body=hintBody;hover.patternName=preset.displayName;
+                hover.meaning=string.IsNullOrWhiteSpace(preset.meaning)
+                    ? preset.id=="crown" ? "王冠象征保皇派。\n占位说明，待正式文案确认。" : preset.displayName+"的寓意将在正式文案中补充。\n当前为占位图案，可自由尝试。"
+                    : preset.meaning;
             }
             var statusCard = MakeImage(panel.transform, "StatusCard", new Color(.22f, .14f, .11f));
             SetRect(statusCard.rectTransform, new Vector2(.09f, .205f), new Vector2(.91f, .325f));
             status = MakeText(statusCard.transform, "Status", "准备好后，在杯面上慢慢画出图案", 16, new Color(.92f, .82f, .72f));
             Stretch(status.rectTransform); status.rectTransform.offsetMin = new Vector2(16, 10); status.rectTransform.offsetMax = new Vector2(-16, -10); status.alignment = TextAlignmentOptions.Center;
-            submitButton = MakeButton(panel.transform, "Submit", "完成拉花  ·  提交作品", new Vector2(.09f, .105f), new Vector2(.91f, .185f), Finish, true);
+            submitButton = MakeButton(content.transform, "Submit", "提交拉花", new Vector2(.76f, .115f), new Vector2(.96f, .185f), Finish, true);
             submitButton.interactable = false;
-            MakeButton(panel.transform, "Reset", "重新绘制", new Vector2(.09f, .035f), new Vector2(.48f, .085f), ResetDrawing, false);
+            MakeButton(content.transform, "Reset", "删除拉花 · 重画", new Vector2(.76f, .035f), new Vector2(.96f, .095f), ResetDrawing, false);
             MakeButton(panel.transform, "Cancel", "返回吧台", new Vector2(.52f, .035f), new Vector2(.91f, .085f), () => completion?.Invoke(activeToken, false, 0), false);
             var help = MakeText(content.transform, "DrawingHint", "按住左键绘制   ·   松手可分笔   ·   滚轮调整线宽", 18, new Color(.96f, .89f, .80f));
-            SetRect(help.rectTransform, new Vector2(.32f, .035f), new Vector2(.94f, .09f)); help.alignment = TextAlignmentOptions.Center;
+            SetRect(help.rectTransform, new Vector2(.32f, .025f), new Vector2(.73f, .09f)); help.alignment = TextAlignmentOptions.Center;
             var badge = MakeText(content.transform, "CanvasBadge", "LATTE ART", 14, new Color(1, 1, 1, .65f));
             SetRect(badge.rectTransform, new Vector2(.82f, .91f), new Vector2(.95f, .95f)); badge.alignment = TextAlignmentOptions.Right;
+            var vessels=MakeImage(content.transform,"OverheadVessels",new Color(.16f,.10f,.08f,.94f));
+            SetRect(vessels.rectTransform,new Vector2(.80f,.64f),new Vector2(.97f,.90f));
+            var cup=runtime!=null ? runtime.World.Find(runtime.World.State.production.miniGameCupId) : null;
+            for(int i=0;i<3;i++)
+            {
+                var icon=new GameObject("Vessel"+i,typeof(RectTransform),typeof(CafeTopDownVesselGraphic));
+                icon.transform.SetParent(vessels.transform,false);
+                var graphic=icon.GetComponent<CafeTopDownVesselGraphic>();graphic.vessel=(CafeTopDownVesselGraphic.Vessel)i;
+                graphic.selected=i==2 || cup!=null && (i==0 ? cup.specId=="cup.small" : i==1 && cup.specId=="cup.large");
+                graphic.raycastTarget=false;
+                SetRect((RectTransform)icon.transform,new Vector2(.03f,.70f-i*.30f),new Vector2(.43f,.99f-i*.30f));
+                var label=MakeText(vessels.transform,"VesselName"+i,i==0 ? "小杯 · 俯视" : i==1 ? "大杯 · 俯视" : "拉花杯 · 俯视",17,Cream);
+                SetRect(label.rectTransform,new Vector2(.43f,.73f-i*.30f),new Vector2(.96f,.97f-i*.30f));
+            }
             SelectReference(activePresets.Count > 0 ? activePresets[0].id : null);
             curtain = MakeImage(overlayRoot.transform, "TransitionCurtain", new Color(.15f, .075f, .045f, 0)); Stretch(curtain.rectTransform);
         }
@@ -480,7 +512,7 @@ namespace Spotlight.FreeCafe
         }
         public void OnPointerClick(PointerEventData eventData) { /* 背景点击不再取消，玩家可自由在 Plane 上绘制。 */ }
         private static Image MakeImage(Transform parent, string name, Color color) { var go = new GameObject(name, typeof(RectTransform), typeof(Image)); go.transform.SetParent(parent, false); var image = go.GetComponent<Image>(); image.color = color; return image; }
-        private TMP_Text MakeText(Transform parent, string name, string value, float size, Color color) { var go = new GameObject(name, typeof(RectTransform), typeof(TextMeshProUGUI)); go.transform.SetParent(parent, false); var text = go.GetComponent<TextMeshProUGUI>(); text.text = value; text.font = TMP_Settings.defaultFontAsset; text.fontSize = size; text.color = color; text.raycastTarget = false; text.textWrappingMode = TextWrappingModes.Normal; return text; }
+        private TMP_Text MakeText(Transform parent, string name, string value, float size, Color color) { var go = new GameObject(name, typeof(RectTransform), typeof(TextMeshProUGUI)); go.transform.SetParent(parent, false); var text = go.GetComponent<TextMeshProUGUI>(); text.text = value; text.font = Resources.Load<TMP_FontAsset>("Fonts/SimHei SDF") ?? TMP_Settings.defaultFontAsset; text.fontSize = size; text.color = color; text.raycastTarget = false; text.textWrappingMode = TextWrappingModes.Normal; return text; }
         private static void Stretch(RectTransform rect) { rect.anchorMin = Vector2.zero; rect.anchorMax = Vector2.one; rect.offsetMin = rect.offsetMax = Vector2.zero; }
         private static void SetRect(RectTransform rect, Vector2 min, Vector2 max) { rect.anchorMin = min; rect.anchorMax = max; rect.offsetMin = rect.offsetMax = Vector2.zero; }
     }

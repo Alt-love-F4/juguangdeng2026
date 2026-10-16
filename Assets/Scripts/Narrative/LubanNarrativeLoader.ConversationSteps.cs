@@ -45,10 +45,6 @@ namespace Spotlight.Narrative
         {
             var errors = new List<string>();
             var pages = c.presentations.conversationPages;
-            foreach (var line in c.presentations.conversationLines)
-                foreach (string key in new[] { line.stageLeftKey, line.stageRightKey, line.stageCenterKey })
-                    if (!string.IsNullOrWhiteSpace(key) && key != "-" && !c.objects.Any(o => o.objId == key))
-                        errors.Add("ConversationLine " + line.lineId + ": unknown stage Object " + key);
             foreach (var group in pages.GroupBy(p => p.presentationKey))
                 if (group.Select(p => p.seq).Distinct().Count() != group.Count())
                     errors.Add("Conversation " + group.Key + ": duplicate step sequence.");
@@ -59,37 +55,6 @@ namespace Spotlight.Narrative
                 if (page.seq < 1) errors.Add(label + "sequence must be positive.");
                 bool letter = page.stepType == NarrativeConversationStepType.LetterReveal || page.stepType == NarrativeConversationStepType.LetterRead;
                 if (!Enum.IsDefined(typeof(NarrativeConversationStepType), page.stepType)) errors.Add(label + "invalid stepType.");
-                if (page.stepType == NarrativeConversationStepType.WaitBusiness || page.stepType == NarrativeConversationStepType.WaitNight
-                    || page.stepType == NarrativeConversationStepType.WaitService)
-                {
-                    if (lines.Count > 0 || !string.IsNullOrWhiteSpace(page.optionGroupKey)) errors.Add(label + "checkpoint cannot contain dialogue or choices.");
-                    if (!string.IsNullOrWhiteSpace(page.checkId) || !string.IsNullOrWhiteSpace(page.readingKey)) errors.Add(label + "checkpoint cannot reference a check or reading.");
-                    if (!pages.Any(p => p.presentationKey == page.presentationKey && p.seq > page.seq && !string.IsNullOrWhiteSpace(p.pageId))) errors.Add(label + "checkpoint requires a following page.");
-                    if (page.stepType == NarrativeConversationStepType.WaitService)
-                    {
-                        var owners = c.events.Where(e => e != null && e.presentationKey == page.presentationKey).ToArray();
-                        if (owners.Length == 0 || owners.Any(e => !c.cafeVisitHooks.Any(h => h != null && h.eventId == e.eventId
-                            && (h.stage == "arrived" && h.trigger == "auto" || h.stage == "before_served" && h.trigger == "click")
-                            && c.cafeVisits.Any(v => v != null && v.visitKey == h.visitKey && v.requireRealProduction
-                                && !string.IsNullOrWhiteSpace(v.orderProductId)))))
-                            errors.Add(label + "WaitService requires an arrived/auto or before_served/click hook with an explicit real-production product.");
-                    }
-                    continue;
-                }
-                if (page.stepType == NarrativeConversationStepType.LetterHide)
-                {
-                    if (lines.Count > 0 || !string.IsNullOrWhiteSpace(page.optionGroupKey)
-                        || !string.IsNullOrWhiteSpace(page.checkId) || !string.IsNullOrWhiteSpace(page.readingKey))
-                        errors.Add(label + "LetterHide cannot contain dialogue, choices, a check or reading.");
-                    continue;
-                }
-                if (page.stepType == NarrativeConversationStepType.FadeOut)
-                {
-                    if (lines.Count > 0 || !string.IsNullOrWhiteSpace(page.optionGroupKey)) errors.Add(label + "FadeOut cannot contain dialogue or choices.");
-                    if (!string.IsNullOrWhiteSpace(page.checkId) || !string.IsNullOrWhiteSpace(page.readingKey)) errors.Add(label + "FadeOut cannot reference a check or reading.");
-                    if (pages.Any(p => p.presentationKey == page.presentationKey && p.seq > page.seq)) errors.Add(label + "FadeOut must be the final step.");
-                    continue;
-                }
                 if (page.stepType == NarrativeConversationStepType.PassiveCheck)
                 {
                     var check = c.abilityChecks.Find(x => x != null && x.checkId == page.checkId);
@@ -98,19 +63,12 @@ namespace Spotlight.Narrative
                     if (lines.Count == 0) errors.Add(label + "PassiveCheck requires success content.");
                 }
                 else if (!string.IsNullOrWhiteSpace(page.checkId)) errors.Add(label + "checkId requires PassiveCheck.");
-                if (page.stepType == NarrativeConversationStepType.Reading)
-                {
-                    ValidateOrdinaryReadingStep(c, page, lines.Count, errors);
-                    continue;
-                }
                 if (!letter)
                 {
-                    if (!string.IsNullOrWhiteSpace(page.readingKey)) errors.Add(label + "readingKey requires a letter or Reading step.");
+                    if (!string.IsNullOrWhiteSpace(page.readingKey)) errors.Add(label + "readingKey requires a letter step.");
                     continue;
                 }
                 if (lines.Count > 0 || !string.IsNullOrWhiteSpace(page.optionGroupKey)) errors.Add(label + "letter steps cannot contain dialogue or choices.");
-                // A closed prop needs no authored letter body. LetterRead remains strict.
-                if (page.stepType == NarrativeConversationStepType.LetterReveal && string.IsNullOrWhiteSpace(page.readingKey)) continue;
                 var index = c.presentations.index.Find(x => x != null && x.presentationKey == page.readingKey);
                 if (index == null || !string.Equals(index.presentationClass, "Reading", StringComparison.OrdinalIgnoreCase)) errors.Add(label + "readingKey must reference a Reading presentation.");
                 var readingPages = c.presentations.readingPages.FindAll(x => x != null && x.presentationKey == page.readingKey);
@@ -124,29 +82,6 @@ namespace Spotlight.Narrative
                     if (!c.texts.Any(x => x.key == line.textKey)) errors.Add(label + "unknown reading text " + line.textKey);
             }
             return errors;
-        }
-
-        private static void ValidateOrdinaryReadingStep(NarrativeConfiguration c, NarrativeConversationPageDefinition step,
-            int dialogueLineCount, List<string> errors)
-        {
-            string label = "ConversationPage " + step.pageId + ": ";
-            if (dialogueLineCount > 0 || !string.IsNullOrWhiteSpace(step.optionGroupKey))
-                errors.Add(label + "Reading cannot contain dialogue or choices.");
-            var index = c.presentations.index.Find(x => x != null && x.presentationKey == step.readingKey);
-            if (string.IsNullOrWhiteSpace(step.readingKey) || index == null
-                || !string.Equals(index.presentationClass, "Reading", StringComparison.OrdinalIgnoreCase))
-                errors.Add(label + "readingKey must reference a Reading presentation.");
-            var pages = c.presentations.readingPages.FindAll(x => x != null && x.presentationKey == step.readingKey);
-            if (pages.Count != 1) { errors.Add(label + "Reading requires exactly one reading page."); return; }
-            var page = pages[0];
-            if (!string.IsNullOrWhiteSpace(page.titleKey) && !c.texts.Any(x => x.key == page.titleKey))
-                errors.Add(label + "unknown reading title text.");
-            var lines = c.presentations.readingLines.FindAll(x => x != null && x.pageId == page.pageId);
-            if (lines.Count == 0) errors.Add(label + "Reading requires reading lines.");
-            if (lines.Any(x => x.seq < 1) || lines.Select(x => x.seq).Distinct().Count() != lines.Count)
-                errors.Add(label + "invalid reading line sequence.");
-            foreach (var line in lines)
-                if (!c.texts.Any(x => x.key == line.textKey)) errors.Add(label + "unknown reading text " + line.textKey);
         }
     }
 }

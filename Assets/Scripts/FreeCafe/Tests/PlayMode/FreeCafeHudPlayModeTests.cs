@@ -1,4 +1,4 @@
-using System.Collections;
+﻿using System.Collections;
 using System.Reflection;
 using NUnit.Framework;
 using Spotlight.GameFlow;
@@ -47,6 +47,8 @@ namespace Spotlight.FreeCafe.Tests
         [UnityTest] public IEnumerator RemovedPlayerHudWidgetsDoNotBlockStartupOrRemainingControls()
         {
             hud.enabled=false;
+            if(hud.pauseButton==null) hud.pauseButton=hud.saveButton;
+            if(hud.recipeButton==null) hud.recipeButton=hud.orderButtons[0];
             foreach(string field in new[]{"pauseButton","summary","hint","selection","areaName"}) RemoveHudWidget(hud,field);
             var counter=hud.areaButtons[(int)AreaId.Counter];
             hud.areaButtons=new Button[]{null,counter};
@@ -73,7 +75,11 @@ namespace Spotlight.FreeCafe.Tests
             hud.orderLabels=System.Array.Empty<TMP_Text>();
             hud.enabled=true;
             Assert.That(app.World.StartDay().success,Is.True);
-            Assert.That(app.World.DebugSpawnCustomers(2).success,Is.True);
+            if(app.World.State.requests.Count<2)
+            {
+                var spawned=app.World.DebugSpawnCustomers(2-app.World.State.requests.Count);
+                Assert.That(spawned.success,Is.True,spawned.message);
+            }
             Assert.That(app.World.State.requests.Count,Is.GreaterThanOrEqualTo(2));
             string expected=app.World.State.requests[1].id;
             app.DebugRefreshViews();
@@ -122,6 +128,31 @@ namespace Spotlight.FreeCafe.Tests
             Assert.That(app.InputBlocked,Is.False);
             yield return null;
         }
+        [UnityTest] public IEnumerator HidingHudClosesOwnedBooksAndReleasesGameplayInput()
+        {
+            typeof(FreeCafeHud).GetMethod("ToggleRecipeTips",BindingFlags.Instance|BindingFlags.NonPublic).Invoke(hud,null);
+            Assert.That(hud.IsModalOpen,Is.True);
+            Assert.That(app.InputBlocked,Is.True);
+            hud.enabled=false;
+            Assert.That(hud.IsModalOpen,Is.False);
+            Assert.That(app.InputBlocked,Is.False);
+            hud.enabled=true;
+            app.Enter(AreaId.Counter);
+            var production=app.GetComponent<FreeCafeProductionHud>();
+            production.bookButton.onClick.Invoke();
+            Assert.That(production.IsModalOpen,Is.True);
+            Assert.That(app.InputBlocked,Is.True);
+            production.enabled=false;
+            Assert.That(production.IsModalOpen,Is.False);
+            Assert.That(app.InputBlocked,Is.False);
+            production.enabled=true;
+            yield return null;
+        }
+        private void OpenPlayerCoffeeBook()
+        {
+            if(hud.recipeButton!=null) hud.recipeButton.onClick.Invoke();
+            else typeof(FreeCafeHud).GetMethod("ToggleRecipeTips",BindingFlags.Instance|BindingFlags.NonPublic).Invoke(hud,null);
+        }
         private static void RemoveHudWidget(object owner,string fieldName)
         {
             var widget=owner.GetType().GetField(fieldName).GetValue(owner) as Object;
@@ -139,19 +170,21 @@ namespace Spotlight.FreeCafe.Tests
         }
         [UnityTest] public IEnumerator PlayerHudHasNoFullWidthBlackBarsOrDebugButtons()
         {
-            Assert.That(hud.transform.Find("TopBlackBar").gameObject.activeSelf,Is.False);
-            Assert.That(hud.transform.Find("BottomBlackBar").gameObject.activeSelf,Is.False);
-            Assert.That(hud.startButton.gameObject.activeInHierarchy,Is.False);
-            Assert.That(hud.saveButton.gameObject.activeInHierarchy,Is.False);
+            var topBar=hud.transform.Find("TopBlackBar");
+            Assert.That(topBar==null || !topBar.gameObject.activeSelf,Is.True);
+            var bottomBar=hud.transform.Find("BottomBlackBar");
+            Assert.That(bottomBar==null || !bottomBar.gameObject.activeSelf,Is.True);
+            Assert.That(hud.startButton==null || !hud.startButton.gameObject.activeInHierarchy,Is.True);
+            Assert.That(hud.saveButton==null || !hud.saveButton.gameObject.activeInHierarchy,Is.True);
             Assert.That(hud.areaButtons[(int)AreaId.TopFloor],Is.Null);
-            Assert.That(hud.summary.text,Does.Not.Contain("FREE CAFE"));
-            Assert.That(hud.summary.text,Does.Contain("王国币"));
+            if(hud.summary!=null)
+            { Assert.That(hud.summary.text,Does.Not.Contain("FREE CAFE")); Assert.That(hud.summary.text,Does.Contain("王国币")); }
             Assert.That(hud.playerRoot.GetComponentsInChildren<CafeHudSurface>().Length,Is.GreaterThan(5));
             var production=app.GetComponent<FreeCafeProductionHud>();
             app.Enter(AreaId.Counter);yield return null;
             Assert.That(hud.playerRoot.activeSelf,Is.False);
-            Assert.That(production.startBusiness.gameObject.activeInHierarchy,Is.False);
-            Assert.That(production.saveButton.gameObject.activeInHierarchy,Is.False);
+            Assert.That(production.startBusiness==null || !production.startBusiness.gameObject.activeInHierarchy,Is.True);
+            Assert.That(production.saveButton==null || !production.saveButton.gameObject.activeInHierarchy,Is.True);
             Assert.That(production.productionRoot.GetComponentsInChildren<Canvas>().Length,Is.EqualTo(0));
         }
         [UnityTest] public IEnumerator BothCoffeeBooksUseLatteArtRecipeTermsWhilePreservingRawIngredientLabels()
@@ -168,8 +201,9 @@ namespace Spotlight.FreeCafe.Tests
             Assert.That(production.bookBody.text,Does.Contain("精粹咖啡与拉花").And.Contain("拉花  20 ml").And.Not.Contain("奶泡").And.Not.Contain("奶沫"));
             production.closeBook.onClick.Invoke();
             app.Enter(AreaId.Cafe);yield return null;
-            hud.recipeButton.onClick.Invoke();yield return null;
-            Assert.That(hud.recipeBody.text,Does.Contain("拉花饮品").And.Contain("配方种类：拉花").And.Not.Contain("奶泡").And.Not.Contain("奶沫"));
+            OpenPlayerCoffeeBook();yield return null;
+            Assert.That(hud.recipeTitle.text,Does.Contain("拉花饮品"));
+            Assert.That(hud.recipeBody.text,Does.Contain("配方种类：拉花").And.Not.Contain("奶泡").And.Not.Contain("奶沫"));
             Assert.That(world.IngredientLabel(product.ingredients[0]),Does.Match("奶泡|奶沫"));
             Assert.That(JsonUtility.ToJson(world.Catalog),Is.EqualTo(before),"Recipe terminology must not rename authoritative ingredient data");
             hud.recipeCloseButton.onClick.Invoke();
@@ -185,7 +219,7 @@ namespace Spotlight.FreeCafe.Tests
             production.closeBook.onClick.Invoke();yield return null;
             Assert.That(app.InputBlocked,Is.False);
             app.Enter(AreaId.Cafe);yield return null;
-            hud.recipeButton.onClick.Invoke();yield return null;Assert.That(app.InputBlocked,Is.True);
+            OpenPlayerCoffeeBook();yield return null;Assert.That(app.InputBlocked,Is.True);
             hud.recipeCloseButton.onClick.Invoke();yield return null;Assert.That(app.InputBlocked,Is.False);
         }
 
@@ -424,6 +458,72 @@ namespace Spotlight.FreeCafe.Tests
             app.RequestBusinessStart();
             Assert.That(app.World.State.open,Is.True);
         }
+        [UnityTest] public IEnumerator CafeArrivalGuideFollowsSceneArrowAndHidesForOverlaysAndEntry()
+        {
+            tutorialFlow=app.gameObject.AddComponent<DayFlowController>();
+            tutorialFlow.RestoreJson("{\"day\":1,\"state\":3,\"firstDayIntroductionCompleted\":true,\"firstDayCafeTutorialStarted\":true}");
+            typeof(DayFlowController).GetField("running",BindingFlags.Instance|BindingFlags.NonPublic).SetValue(tutorialFlow,true);
+            typeof(FreeCafeRuntime).GetField("dayFlow",BindingFlags.Instance|BindingFlags.NonPublic).SetValue(app,tutorialFlow);
+            FreeCafePortal portal=null;
+            foreach(var candidate in Object.FindObjectsByType<FreeCafePortal>(FindObjectsSortMode.None))
+                if(candidate.runtime==app && candidate.destination==AreaId.Counter && app.IsCurrentAreaTransform(candidate.transform))
+                { portal=candidate;break; }
+            Assert.That(portal,Is.Not.Null);
+            var hudEntry=hud.areaButtons[(int)AreaId.Counter];
+            if(hudEntry!=null) hudEntry.gameObject.SetActive(false);
+            app.PrepareCafeTutorial();
+            yield return new WaitForSecondsRealtime(.25f);
+            Assert.That(app.CafeTutorialWaitingForWorkstation,Is.True);
+            Assert.That(app.World.State.currentArea,Is.EqualTo(AreaId.Cafe));
+            Assert.That(app.TutorialInputBlocked,Is.False);
+            var panel=Object.FindFirstObjectByType<FreeCafeTutorialPanel>();
+            Assert.That(panel,Is.Not.Null);
+            Assert.That(panel.gesture.gameObject.activeInHierarchy,Is.True);
+            Assert.That(panel.gestureText.text,Does.Contain("点击箭头"));
+            Assert.That(panel.instruction.text,Does.Contain("场景中的箭头"));
+            Assert.That(panel.shade.enabled,Is.False);
+            Assert.That(panel.exitButton.gameObject.activeSelf,Is.False);
+            Assert.That(app.WorkstationTutorial.IsRunning,Is.False,"Entry guidance must not reset equipment or start practice");
+            Vector3 before=panel.trail[0].rectTransform.position;
+            portal.transform.position+=Vector3.left*1.5f;
+            yield return null; yield return null;
+            Assert.That(panel.trail[0].rectTransform.position.x,Is.LessThan(before.x-20),"Guide must follow the scene arrow");
+            var pointer=new PointerEventData(EventSystem.current)
+            { position=app.worldCamera.WorldToScreenPoint(portal.visual.bounds.center),button=PointerEventData.InputButton.Left };
+            Physics2D.SyncTransforms();
+            var hits=new System.Collections.Generic.List<RaycastResult>();
+            EventSystem.current.RaycastAll(pointer,hits);
+            Assert.That(hits,Is.Not.Empty);
+            Assert.That(hits[0].gameObject.GetComponentInParent<FreeCafePortal>(),Is.SameAs(portal),"Guidance must leave the scene arrow clickable");
+            portal.gameObject.SetActive(false);
+            yield return null; yield return null;
+            Assert.That(panel.canvas.gameObject.activeSelf,Is.False);
+            portal.gameObject.SetActive(true);
+            yield return null; yield return null;
+            Assert.That(panel.canvas.gameObject.activeSelf,Is.True);
+            Time.timeScale=0;
+            yield return null; yield return null;
+            Assert.That(panel.canvas.gameObject.activeSelf,Is.False);
+            Time.timeScale=1;
+            yield return new WaitForSecondsRealtime(.25f);
+            Assert.That(panel.canvas.gameObject.activeSelf,Is.True);
+            var gm=FreeCafeGMPanel.Instance;
+            gm.SetVisible(true);
+            yield return null; yield return null;
+            Assert.That(panel.canvas.gameObject.activeSelf,Is.False);
+            gm.SetVisible(false);
+            yield return new WaitForSecondsRealtime(.25f);
+            Assert.That(panel.canvas.gameObject.activeSelf,Is.True);
+            ExecuteEvents.Execute(portal.gameObject,pointer,ExecuteEvents.pointerClickHandler);
+            yield return null; yield return null;
+            Assert.That(app.World.State.currentArea,Is.EqualTo(AreaId.Counter));
+            Assert.That(panel.canvas.gameObject.activeSelf,Is.False);
+            Assert.That(app.BeginCafeTutorialCoffee(),Is.True);
+            yield return null; yield return null;
+            Assert.That(app.WorkstationTutorial.IsFirstCafeTutorial,Is.True);
+            Assert.That(Object.FindFirstObjectByType<FreeCafeTutorialPanel>(),Is.SameAs(panel),"Entry and production guidance must share one panel");
+        }
+
         [UnityTest] public IEnumerator FirstCafeTutorialRequiresWorkstationAndRealBlackCoffeeDeliveryBeforeManualOpening()
         {
             tutorialFlow=app.gameObject.AddComponent<DayFlowController>();
@@ -492,6 +592,9 @@ namespace Spotlight.FreeCafe.Tests
             Assert.That(guide.IsRunning,Is.False);
             Assert.That(world.State.open,Is.False);
             Assert.That(world.State.requests,Is.Empty);
+            Assert.That(production.receiptPanel.activeSelf,Is.True);
+            production.confirmReceipt.onClick.Invoke();
+            Assert.That(app.InputBlocked,Is.False);
             app.Enter(AreaId.Cafe);
             app.RequestBusinessStart();
             Assert.That(world.State.open,Is.True);

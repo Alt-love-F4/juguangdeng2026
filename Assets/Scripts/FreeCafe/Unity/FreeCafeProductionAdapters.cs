@@ -34,6 +34,7 @@ namespace Spotlight.FreeCafe
         {
             switch (id)
             {
+                case "crown": return "王冠";
                 case "heart": return "爱心";
                 case "rosetta": return "树叶";
                 case "tulip": return "郁金香";

@@ -199,7 +199,7 @@ namespace Spotlight.FreeCafe.Tests
             Assert.That(stack.body.color.g, Is.GreaterThan(.5f), "Rejection highlight must clear after its feedback interval");
         }
 
-        [UnityTest] public IEnumerator LatteOverlayHasFivePreviewsResetClearsDrawingAndSubmitRequiresAStroke()
+        [UnityTest] public IEnumerator LatteOverlayHasSixPreviewsResetClearsDrawingAndSubmitRequiresAStroke()
         {
             Assert.That(app.World.SelectServingCup("s.cups.small").success, Is.True);
             var cup = app.World.ServingCup;
@@ -209,7 +209,7 @@ namespace Spotlight.FreeCafe.Tests
             Assert.That(overlay, Is.Not.Null);
             var panel = overlay.transform.Find("Content/PresetPanel");
             var list = panel.Find("PresetList");
-            Assert.That(list.childCount, Is.EqualTo(5));
+            Assert.That(list.childCount, Is.EqualTo(6));
             foreach (Transform preset in list)
             {
                 Assert.That(preset.GetComponent<Button>(), Is.Not.Null);
@@ -223,7 +223,7 @@ namespace Spotlight.FreeCafe.Tests
             }
             var surface = FindSurface();
             var effect = (ILatteArtSurface)surface;
-            var submit = panel.Find("Submit").GetComponent<Button>();
+            var submit = panel.parent.Find("Submit").GetComponent<Button>();
             string token = app.World.State.production.miniGameToken;
             Assert.That(effect.StrokePointCount, Is.Zero);
             Assert.That(submit.interactable, Is.False);
@@ -233,7 +233,7 @@ namespace Spotlight.FreeCafe.Tests
             Assert.That(effect.StrokePointCount, Is.Zero, "Selecting a preview must not draw or stamp a template");
             yield return DrawStroke(surface);
             yield return WaitUntil(() => submit.interactable, "Submit must become available after a real pointer stroke");
-            panel.Find("Reset").GetComponent<Button>().onClick.Invoke();
+            panel.parent.Find("Reset").GetComponent<Button>().onClick.Invoke();
             Assert.That(effect.StrokePointCount, Is.Zero);
             Assert.That(submit.interactable, Is.False);
             Assert.That(bench.LastPatternId, Is.Null);

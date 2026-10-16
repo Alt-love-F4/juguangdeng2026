@@ -11,17 +11,30 @@ namespace Spotlight.FreeCafe
     public sealed class FreeCafeProductionHud : MonoBehaviour
     {
         public FreeCafeRuntime runtime;
-        public bool IsModalOpen => bookPanel!=null && bookPanel.activeInHierarchy;
-        public void CloseOverlays() { if(bookPanel!=null) bookPanel.SetActive(false); }
+        public bool IsModalOpen => bookPanel!=null && bookPanel.activeInHierarchy || receiptPanel!=null && receiptPanel.activeInHierarchy;
+        public void CloseOverlays() { if(bookPanel!=null) bookPanel.SetActive(false); if(receiptPanel!=null) receiptPanel.SetActive(false); }
         private static readonly Color Ink=new Color(.25f,.15f,.095f);
         public GameObject productionRoot, legacyTop, legacyBottom, bookPanel, miniGamePanel;
         public TMP_Text timeCaption, volumeCaption;
         public TMP_Text orderTitle, customerName, orderDescription, cupStatus, instruction, result, machineStatus, bookTitle, bookBody, bookNote;
         public Image customerAvatar, bookIcon;
+        public Sprite customerAvatarFallback;
         public Button previousOrder, nextOrder, smallCup, largeCup, deliver, discard, returnButton, bookButton, closeBook,
             previousRecipe, nextRecipe, miniGameButton, cancelMiniGame, startBusiness, pauseButton, saveButton, clearMachine;
         public Slider timeGauge, volumeGauge;
         public Image timeGreen, timeGold, volumeGreen, volumeGold;
+        [Header("Workstation HUD")]
+        public Button orderRecipe, confirmReceipt;
+        public GameObject[] stackedOrderSheets;
+        public GameObject receiptPanel;
+        public TMP_Text receiptGrade, receiptProduct, receiptDetails, receiptRewards;
+        public CafeReceiptFace receiptFace;
+        [Header("Order ticket and status (optional)")]
+        public TMP_Text orderProduct, orderIndex, patienceText, moneyText, reputationText;
+        public Image patienceFill;
+        public GameObject deliveryPanel;
+        public Color patienceCalm=new Color(.42f,.55f,.30f), patienceWarn=new Color(.86f,.58f,.18f), patienceLow=new Color(.70f,.20f,.12f);
+        private readonly System.Collections.Generic.Dictionary<string,float> patienceMax=new System.Collections.Generic.Dictionary<string,float>();
         private int recipeIndex;
         private bool bound;
         private CoffeeBookPanelView bookView;
@@ -31,7 +44,7 @@ namespace Spotlight.FreeCafe
         private void Bind()
         {
             if(bound || runtime==null) return;
-            bound=true; runtime.ViewChanged+=Refresh;
+            bound=true; runtime.ViewChanged+=Refresh; runtime.CupDelivered+=ShowReceipt;
             bookView = bookPanel==null ? null : bookPanel.GetComponent<CoffeeBookPanelView>();
             if(bookView != null) bookView.RecipeSelected += SelectRecipe;
             BindControls(true);
@@ -43,10 +56,11 @@ namespace Spotlight.FreeCafe
         }
         private void OnDisable()
         {
+            if(Application.isPlaying) CloseOverlays();
             if(completionFeedback!=null) { StopCoroutine(completionFeedback); completionFeedback=null; if(result!=null) result.color=Ink; }
             if(!bound) return; bound=false;
             if(bookView != null) bookView.RecipeSelected -= SelectRecipe;
-            if(runtime!=null) runtime.ViewChanged-=Refresh;
+            if(runtime!=null) { runtime.ViewChanged-=Refresh; runtime.CupDelivered-=ShowReceipt; }
             BindControls(false);
         }
         private void BindControls(bool listening)
@@ -57,6 +71,7 @@ namespace Spotlight.FreeCafe
             SetListener(returnButton,ReturnFromProduction,listening); SetListener(bookButton,OpenBook,listening);
             SetListener(closeBook,CloseBook,listening); SetListener(previousRecipe,PreviousRecipe,listening);
             SetListener(nextRecipe,NextRecipe,listening); SetListener(cancelMiniGame,CancelMiniGame,listening);
+            SetListener(orderRecipe,OpenOrderRecipe,listening); SetListener(confirmReceipt,CloseReceipt,listening);
             SetListener(pauseButton,OpenPlayerMenu,listening); SetListener(clearMachine,ClearMachine,listening);
         }
         private static void SetListener(Button button,UnityAction action,bool listening)
@@ -100,6 +115,38 @@ namespace Spotlight.FreeCafe
         {
             var session=runtime.World.State.production;
             Execute(runtime.World.ResolveProductionMiniGame(session.miniGameToken,false,0));
+        }
+        private void CloseReceipt() { if(receiptPanel!=null) receiptPanel.SetActive(false); Refresh(); }
+        private void ShowReceipt(CafeDeliveryReceipt receipt)
+        {
+            if(receiptPanel==null) return;
+            runtime.CancelDrag();
+            if(receiptGrade!=null) receiptGrade.text=receipt.GradeLabel+"  ·  "+receipt.quality.total.ToString("0")+" 分";
+            if(receiptProduct!=null) receiptProduct.text=receipt.customer+" 的 "+receipt.product;
+            if(receiptDetails!=null) receiptDetails.text=receipt.message;
+            if(receiptRewards!=null) receiptRewards.text="王国币 "+Signed(receipt.money)+"     声望 "+Signed(receipt.reputation);
+            if(receiptFace!=null) { receiptFace.grade=receipt.Grade; receiptFace.SetVerticesDirty(); }
+            receiptPanel.SetActive(true);
+            receiptPanel.transform.SetAsLastSibling();
+            Refresh();
+        }
+        private static string Signed(int value) => value>=0 ? "+"+value : value.ToString();
+        public void OpenOrderRecipe()
+        {
+            if(runtime==null || runtime.InputBlocked) return;
+            var request=runtime.World.Request(runtime.World.State.focusedRequestId);
+            if(request!=null) recipeIndex=Mathf.Max(0,runtime.World.State.unlockedProducts.IndexOf(request.productId));
+            OpenBook();
+        }
+        public bool HasDeliveryCup()
+        {
+            if(runtime==null || runtime.World==null) return false;
+            var world=runtime.World; var cup=world.ServingCup;
+            if(cup==null || world.CupAbove(cup)!=null || !string.IsNullOrEmpty(cup.cupStackBelowId)) return false;
+            foreach(var entity in world.State.entities)
+                if(world.Spec(entity.specId).Has(Capability.Delivery) && entity.area==cup.area
+                    && Mathf.Abs(entity.x-cup.x)<=.1f && Mathf.Abs(entity.y-cup.y)<=.1f) return true;
+            return false;
         }
         private void OpenBook() { if(bookPanel==null || runtime.InputBlocked) return; runtime.CancelDrag(); bookPanel.SetActive(true); RefreshBook(); }
         private void CloseBook() { if(bookPanel!=null) bookPanel.SetActive(false); }
@@ -153,22 +200,26 @@ namespace Spotlight.FreeCafe
             if(!visible)
             {
                 if(bookPanel!=null) bookPanel.SetActive(false);
+                if(receiptPanel!=null) receiptPanel.SetActive(false);
                 if(miniGamePanel!=null) miniGamePanel.SetActive(false);
                 return;
             }
+            if(stackedOrderSheets!=null)
+                for(int i=0;i<stackedOrderSheets.Length;i++)
+                    if(stackedOrderSheets[i]!=null) stackedOrderSheets[i].SetActive(state.requests.Count>i+1);
             bool blocked=runtime.InputBlocked;
             bool guided=runtime.WorkstationTutorial!=null && runtime.WorkstationTutorial.IsFirstCafeTutorial;
             var request=world.Request(state.focusedRequestId);
             bool tutorialOrder=request!=null && request.id==CafeWorld.TutorialOrderId;
             var product=request==null ? null : world.Product(request.productId);
-            if(orderTitle!=null) orderTitle.text="交付此订单  ·  "+(request==null ? "暂无订单" : (state.requests.IndexOf(request)+1)+" / "+state.requests.Count);
+            int requestNumber=request==null ? 0 : state.requests.IndexOf(request)+1;
+            bool splitTicket=orderProduct!=null;
+            if(orderTitle!=null) orderTitle.text=splitTicket ? (tutorialOrder ? "教程订单" : "当前订单") : "交付此订单  ·  "+(request==null ? "暂无订单" : requestNumber+" / "+state.requests.Count);
+            if(orderIndex!=null) orderIndex.text=request==null ? "0 / 0" : requestNumber+" / "+state.requests.Count;
             var customer=request==null ? null : world.Find(request.customerId);
-            string name="等待顾客";
-            if(customer!=null)
-            {
-                name=world.PersonName(customer);
-            }
-            if(customerName!=null) customerName.text=name+(tutorialOrder ? "  ·  教程客人 · 尚未营业" : request==null ? "" : "  ·  耐心 "+request.patience.ToString("0")+"s");
+            string name=request==null ? "暂无客人" : "等待顾客";
+            if(customer!=null) name=world.PersonName(customer);
+            if(customerName!=null) customerName.text=splitTicket ? name : name+(tutorialOrder ? "  ·  教程客人 · 尚未营业" : request==null ? "" : "  ·  耐心 "+request.patience.ToString("0")+"s");
             string customerArt=customer==null ? "customer" : world.Spec(customer.specId).artId;
             if(customer!=null && customer.person!=null && !string.IsNullOrEmpty(customer.person.visualId) && runtime.artLibrary.Find(customer.person.visualId)!=null)
                 customerArt=customer.person.visualId;
@@ -176,9 +227,19 @@ namespace Spotlight.FreeCafe
             if(customerAvatar!=null)
             {
                 customerAvatar.sprite=character!=null && character.avatar!=null ? character.avatar : runtime.artLibrary.Resolve(customerArt);
-                customerAvatar.gameObject.SetActive(customerAvatar.sprite!=null);
+                if(customerAvatar.sprite==null) customerAvatar.sprite=customerAvatarFallback;
+                customerAvatar.gameObject.SetActive(request!=null && customerAvatar.sprite!=null);
+                FrameAvatar(customerAvatar);
             }
-            if(orderDescription!=null) orderDescription.text=product==null ? "尚无订单，可先准备原料。" : tutorialOrder ? "首杯黑咖啡\n跟随指引制作黑咖啡，放入交付区后按铃交给客人。" : FreeCafeProductionText.Recipe(product.label)+"  ·  "+FreeCafeProductionText.Recipe(product.description)+"\n满意要求 ≥ "+product.minimumScore.ToString("0")+"分"+(request.remakes>0 ? "  ·  正在重做" : "");
+            if(splitTicket)
+            {
+                orderProduct.text=product==null ? "尚无订单" : FreeCafeProductionText.Recipe(product.label);
+                if(orderDescription!=null) orderDescription.text=product==null ? "可以先准备原料" : tutorialOrder ? "教程首杯 · 完成后放入出餐口" : "满意 ≥ "+product.minimumScore.ToString("0")+" 分"+(request.remakes>0 ? " · 重做中" : "");
+            }
+            else if(orderDescription!=null) orderDescription.text=product==null ? "尚无订单，可先准备原料。" : FreeCafeProductionText.Recipe(product.label)+"\n"+(tutorialOrder ? "教程首杯 · 完成后放入出餐口" : "满意要求 ≥ "+product.minimumScore.ToString("0")+" 分"+(request.remakes>0 ? " · 正在重做" : ""));
+            RefreshPatience(request,tutorialOrder);
+            if(moneyText!=null) moneyText.text=state.money.ToString();
+            if(reputationText!=null) reputationText.text=state.reputation.ToString();
             if(previousOrder!=null) previousOrder.interactable=!blocked && state.requests.Count>1;
             if(nextOrder!=null) nextOrder.interactable=!blocked && state.requests.Count>1;
             var cup=world.ServingCup;
@@ -186,15 +247,23 @@ namespace Spotlight.FreeCafe
             bool canChange=!blocked && !guided && (cup==null || cup.contents.Count==0);
             if(smallCup!=null) smallCup.interactable=canChange;
             if(largeCup!=null) largeCup.interactable=canChange;
-            if(deliver!=null) deliver.interactable=!blocked && (runtime.WorkstationTutorial==null || runtime.WorkstationTutorial.CanSubmitCup);
+            bool onTray=HasDeliveryCup();
+            if(deliveryPanel!=null) deliveryPanel.SetActive(onTray);
+            if(deliver!=null) deliver.interactable=!blocked && onTray && request!=null && (runtime.WorkstationTutorial==null || runtime.WorkstationTutorial.CanSubmitCup);
             if(discard!=null) discard.interactable=!blocked && !guided && cup!=null;
             if(returnButton!=null) returnButton.interactable=!blocked && !guided;
             if(bookButton!=null) bookButton.interactable=!blocked;
+            if(orderRecipe!=null) orderRecipe.interactable=!blocked && request!=null;
             if(pauseButton!=null) pauseButton.interactable=string.IsNullOrEmpty(state.production.miniGameToken) && !(FreeCafeGMPanel.Instance!=null && FreeCafeGMPanel.Instance.IsVisible);
             var selected=world.Find(runtime.SelectedId);
-            if(clearMachine!=null) clearMachine.interactable=!blocked && !guided && selected!=null && (world.IsContainer(selected) || world.Spec(selected.specId).Has(Capability.Processor)) && selected.contents.Count>0;
+            if(clearMachine!=null)
+            {
+                clearMachine.interactable=!blocked && !guided && selected!=null && (world.IsContainer(selected) || world.Spec(selected.specId).Has(Capability.Processor)) && selected.contents.Count>0;
+                // The split layout only shows this utility while it can act on the selected vessel.
+                if(splitTicket) clearMachine.gameObject.SetActive(clearMachine.interactable);
+            }
             if(instruction!=null) instruction.text=runtime.Hint;
-            if(result!=null) result.text=string.IsNullOrEmpty(state.production.lastDelivery) ? "王国币 "+state.money+"  ·  声望 "+state.reputation+"  ·  可提前备料" : state.production.lastDelivery;
+            if(result!=null) result.text=moneyText!=null ? state.production.lastDelivery ?? "" : string.IsNullOrEmpty(state.production.lastDelivery) ? "王国币 "+state.money+"  ·  声望 "+state.reputation+"  ·  可提前备料" : state.production.lastDelivery;
             // Container-anchored cards own heating/extraction presentation. Keep the
             // old serialized references for scene compatibility, but never show the
             // fixed brewer gauges (the brewer is not the precision extractor).
@@ -205,6 +274,44 @@ namespace Spotlight.FreeCafe
             if(machineStatus!=null) machineStatus.text="自由调配 · 悬停容器查看成分 · 加热与萃取进度显示在容器旁";
             if(miniGamePanel!=null) miniGamePanel.SetActive(!string.IsNullOrEmpty(state.production.miniGameToken) && (runtime.GetComponent<FreeCafeMiniGameGateway>()==null || !runtime.GetComponent<FreeCafeMiniGameGateway>().HasPresenter));
             if(bookPanel!=null && bookPanel.activeSelf) RefreshBook();
+        }
+        private void Update()
+        {
+            // Patience drains continuously; the full refresh only runs on world changes.
+            if(patienceFill==null && patienceText==null || runtime==null || runtime.World==null) return;
+            if(productionRoot!=null && !productionRoot.activeInHierarchy) return;
+            var world=runtime.World; var request=world.Request(world.State.focusedRequestId);
+            RefreshPatience(request,request!=null && request.id==CafeWorld.TutorialOrderId);
+        }
+        private void RefreshPatience(CustomerRequest request,bool tutorialOrder)
+        {
+            if(patienceFill==null && patienceText==null) return;
+            float fraction=1; string caption="—";
+            if(request!=null && !tutorialOrder)
+            {
+                if(!patienceMax.TryGetValue(request.id,out float max) || request.patience>max)
+                    patienceMax[request.id]=max=Mathf.Max(request.patience,runtime.World.Catalog.customerPatience);
+                fraction=max>0 ? Mathf.Clamp01(request.patience/max) : 0;
+                caption=Mathf.CeilToInt(Mathf.Max(0,request.patience))+" 秒";
+            }
+            else if(tutorialOrder) caption="不限时";
+            if(patienceText!=null && patienceText.text!=caption) patienceText.text=caption;
+            if(patienceFill==null) return;
+            var rect=patienceFill.rectTransform;
+            rect.anchorMin=Vector2.zero; rect.anchorMax=new Vector2(fraction,1); rect.offsetMin=rect.offsetMax=Vector2.zero;
+            patienceFill.color=fraction>.5f ? patienceCalm : fraction>.25f ? patienceWarn : patienceLow;
+        }
+        // Full-body customer art is cropped to head and shoulders; square avatars fill the frame.
+        private static void FrameAvatar(Image avatar)
+        {
+            var frame=avatar.rectTransform.parent as RectTransform;
+            if(frame==null || avatar.sprite==null || frame.GetComponent<RectMask2D>()==null) return;
+            var rect=avatar.rectTransform; var size=frame.rect.size; var art=avatar.sprite.rect.size;
+            float aspect=art.y/Mathf.Max(1,art.x);
+            avatar.preserveAspect=true;
+            rect.anchorMin=rect.anchorMax=rect.pivot=new Vector2(.5f,1);
+            if(aspect>1.45f) { float width=size.x*1.6f; rect.sizeDelta=new Vector2(width,width*aspect); rect.anchoredPosition=new Vector2(0,width*aspect*.02f); }
+            else { rect.sizeDelta=size; rect.anchoredPosition=Vector2.zero; }
         }
     }
 }

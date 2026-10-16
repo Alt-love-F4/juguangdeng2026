@@ -22,7 +22,6 @@ public partial class Tables
     public TbRecipeStep TbRecipeStep {get; }
     public TbNpc TbNpc {get; }
     public TbNcsObject TbNcsObject {get; }
-    public TbNcsItem TbNcsItem {get; }
     public TbNcsAction TbNcsAction {get; }
     public TbNcsMapPosition TbNcsMapPosition {get; }
     public TbNcsBar TbNcsBar {get; }
@@ -68,7 +67,6 @@ public partial class Tables
         TbRecipeStep = new TbRecipeStep(loader("tbrecipestep"));
         TbNpc = new TbNpc(loader("tbnpc"));
         TbNcsObject = new TbNcsObject(loader("tbncsobject"));
-        TbNcsItem = new TbNcsItem(loader("tbncsitem"));
         TbNcsAction = new TbNcsAction(loader("tbncsaction"));
         TbNcsMapPosition = new TbNcsMapPosition(loader("tbncsmapposition"));
         TbNcsBar = new TbNcsBar(loader("tbncsbar"));
@@ -115,7 +113,6 @@ public partial class Tables
         TbRecipeStep.ResolveRef(this);
         TbNpc.ResolveRef(this);
         TbNcsObject.ResolveRef(this);
-        TbNcsItem.ResolveRef(this);
         TbNcsAction.ResolveRef(this);
         TbNcsMapPosition.ResolveRef(this);
         TbNcsBar.ResolveRef(this);

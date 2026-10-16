@@ -30,9 +30,7 @@ namespace Spotlight.GameFlow
             public float enterDirection;
         }
         private readonly PresentationEffectLibrary library;
-        private readonly RectTransform stage, dialogueBox;
-        private readonly Vector2 dialoguePosition;
-        private Vector2 dialogueOffset;
+        private readonly RectTransform stage;
         private readonly Image overlay;
         private readonly Portrait[] portraits;
         private readonly Channel[] channels;
@@ -42,7 +40,6 @@ namespace Spotlight.GameFlow
         private int OverlayChannel => ShakeChannel + 2;
         private int BackgroundMotionChannel => ShakeChannel + 3;
         private int BackgroundFadeChannel => ShakeChannel + 4;
-        private int DialogueShakeChannel => ShakeChannel + 5;
         private readonly RawImage background, previousBackground;
         private readonly Vector2 backgroundPosition;
         private readonly Vector3 backgroundScale;
@@ -75,14 +72,12 @@ namespace Spotlight.GameFlow
 
         public PresentationEffects(PresentationEffectLibrary library, RectTransform stage, Image overlay,
             Image left, Image leftFrame, Image right, Image rightFrame, Color inactiveTint, float focusSeconds,
-            Image center = null, Image centerFrame = null, RawImage background = null, RectTransform dialogueBox = null)
+            Image center = null, Image centerFrame = null, RawImage background = null)
         {
             if (library == null || stage == null || overlay == null || left == null || right == null)
                 throw new ArgumentException("Presentation effects require a library, stage, overlay and two portrait slots.");
             this.library = library;
             this.stage = stage;
-            this.dialogueBox = dialogueBox;
-            if (dialogueBox != null) dialoguePosition = dialogueBox.anchoredPosition;
             this.overlay = overlay;
             this.inactiveTint = inactiveTint;
             this.background = background;
@@ -101,7 +96,7 @@ namespace Spotlight.GameFlow
             stagePosition = stage.anchoredPosition;
             stageScale = stage.localScale;
             portraits = new Portrait[center != null ? 3 : 2];
-            channels = new Channel[portraits.Length * 2 + 6];
+            channels = new Channel[portraits.Length * 2 + 5];
             for (int i = 0; i < channels.Length; i++) channels[i] = new Channel();
             portraits[0] = Capture(left, leftFrame, -1f);
             portraits[1] = Capture(right, rightFrame, 1f);
@@ -178,16 +173,6 @@ namespace Spotlight.GameFlow
                         float edge = Mathf.Abs(Mathf.Sin(t * Mathf.PI * 2f));
                         backgroundZoom = Mathf.Lerp(1f, coverage, edge);
                     }, ResetBackgroundMotion, () => { ResetBackgroundMotion(); completed?.Invoke(); });
-                case PresentationEffectIds.BackgroundPanLeftToRight:
-                    if (background == null) throw new InvalidOperationException("Background pan requires a background layer.");
-                    float travel = background.rectTransform.rect.width * definition.strength;
-                    float panZoom = Mathf.Max(definition.zoom, 1f + 2f * definition.strength);
-                    return Start(BackgroundMotionChannel, definition.duration, t =>
-                    {
-                        // Cover both edges before moving, then travel once from left to right.
-                        backgroundZoom = panZoom;
-                        backgroundOffset = new Vector2(Mathf.Lerp(-travel, travel, Smooth(t)), 0f);
-                    }, ResetBackgroundMotion, () => { ResetBackgroundMotion(); completed?.Invoke(); });
                 case PresentationEffectIds.AccentShakeStartle:
                     if (slot < 0 || slot >= portraits.Length) throw new ArgumentException("Accent effect requires one occupied slot.");
                     Portrait p = portraits[slot];
@@ -195,13 +180,6 @@ namespace Spotlight.GameFlow
                         t => p.accent = new Vector2(Mathf.Sin(t * Mathf.PI * 16f) * definition.strength * (1f-t) * (1f-t), 0f),
                         () => p.accent = Vector2.zero,
                         () => { p.accent = Vector2.zero; completed?.Invoke(); });
-                case PresentationEffectIds.DialogueShake:
-                    if (dialogueBox == null) throw new InvalidOperationException("Dialogue shake requires a dialogue box.");
-                    return Start(DialogueShakeChannel, definition.duration,
-                        t => dialogueOffset = new Vector2(Mathf.Sin(t * Mathf.PI * 24f), Mathf.Sin(t * Mathf.PI * 31f) * .45f)
-                            * definition.strength * (1f-t) * (1f-t),
-                        () => dialogueOffset = Vector2.zero,
-                        () => { dialogueOffset = Vector2.zero; dialogueBox.anchoredPosition = dialoguePosition; completed?.Invoke(); });
                 case PresentationEffectIds.ShakeLight:
                 case PresentationEffectIds.ShakeHeavy:
                     if (channels[ShakeChannel].Active && shakePriority > definition.priority) return Rejected();
@@ -346,8 +324,6 @@ namespace Spotlight.GameFlow
             if (stage == null) return;
             stage.anchoredPosition = stagePosition + cameraOffset + screenOffset;
             stage.localScale = stageScale * cameraZoom;
-            if (dialogueBox != null && channels[DialogueShakeChannel].Active)
-                dialogueBox.anchoredPosition = dialoguePosition + dialogueOffset;
             if (background != null)
             {
                 background.rectTransform.anchoredPosition = backgroundPosition + backgroundOffset;
@@ -373,9 +349,8 @@ namespace Spotlight.GameFlow
         public void Reset()
         {
             for (int i = 0; i < channels.Length; i++) CancelChannel(i);
-            cameraZoom = 1f; cameraOffset = screenOffset = dialogueOffset = Vector2.zero; shakePriority = 0;
+            cameraZoom = 1f; cameraOffset = screenOffset = Vector2.zero; shakePriority = 0;
             ResetBackgroundMotion();
-            if (dialogueBox != null) dialogueBox.anchoredPosition = dialoguePosition;
             if (previousBackground != null) { previousBackground.enabled = false; previousBackground.texture = null; }
             if (overlay != null) overlay.color = Color.clear;
             foreach (Portrait p in portraits)

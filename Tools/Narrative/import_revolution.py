@@ -146,10 +146,6 @@ def run(chapter):
             text('character.sorel.anonymous2','？？','C14-P026 anonymous display')
             text('character.sorel.anonymous3','？？？','C14-P028-P045 anonymous display')
             add('Object',objId='sorel',objType='npc',nameText='character.sorel.name',tags='revolution,C-R04-missing-portrait')
-    # The unlock reads a real AbilityReader value and shares its snapshot with selection.
-    if chapter == 'C14':
-        add('Condition', conditionId=root+'.c2.3.courage6', ownerType='choice', ownerId=root+'.c2.3', groupIndex=1,
-            condType='ATTRIBUTE_GTE', target='courage', value='6')
     # No fake numeric key, zero result, or partial completion result is emitted for a blocked root.
     for i,p in enumerate(paths):
         tmp=backup/(p.stem+'.new.xlsx'); books[i].save(tmp)

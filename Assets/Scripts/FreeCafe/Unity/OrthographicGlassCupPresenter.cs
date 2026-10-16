@@ -18,6 +18,8 @@ namespace Spotlight.FreeCafe
         [SerializeField] private Color cocoa = new Color(0.32f, 0.14f, 0.06f, 0.94f);
         [SerializeField] private Color glass = new Color(0.72f, 0.92f, 1f, 0.82f);
 
+        [SerializeField] private Color silhouetteOutline = new Color(0.16f, 0.11f, 0.07f, 0.65f);
+
         [Header("Color weights (volume × weight; do not affect inventory)")]
         [SerializeField, Min(0.01f)] private float coffeeColorWeight = 3f;
         [SerializeField, Min(0.01f)] private float milkColorWeight = 1f;
@@ -108,6 +110,29 @@ namespace Spotlight.FreeCafe
             liquid.RefreshVisual();
         }
 
+        public void ConfigureContainerMask(Texture2D mask, bool signedDistance, float distanceRange, float inset)
+        {
+            Ensure();
+            bool changed = liquid.ContainerMask != mask;
+            liquid.ConfigureContainerMask(mask, signedDistance, distanceRange, inset);
+            if (changed) SetColor(MixedColor);
+        }
+
+        public void FitSprite(Sprite sprite)
+        {
+            if (sprite == null) return;
+            Ensure();
+            Vector2 size = sprite.bounds.size;
+            Vector2 pivot = sprite.pivot / sprite.rect.size;
+            bool changed = rect.sizeDelta != size || rect.pivot != pivot;
+            rect.pivot = pivot;
+            rect.sizeDelta = size;
+            rect.anchoredPosition3D = Vector3.zero;
+            rect.localRotation = Quaternion.identity;
+            rect.localScale = Vector3.one;
+            if (changed) liquid.RefreshVisual();
+        }
+
         public void SetTint(Color tint)
         {
             Ensure();
@@ -154,7 +179,7 @@ namespace Spotlight.FreeCafe
             Color surface = Color.Lerp(color, Color.white, 0.45f);
             surface.a = color.a;
             LiquidSurfaceColor = surface;
-            liquid.ConfigureAppearance(color, deep, surface, glass);
+            liquid.ConfigureAppearance(color, deep, surface, liquid.ContainerMask != null ? silhouetteOutline : glass);
         }
 
         private void Update()

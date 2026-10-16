@@ -4,7 +4,7 @@ using UnityEngine;
 
 namespace Spotlight.FreeCafe
 {
-    public enum LatteArtTemplateKind { None, Heart, Rosetta, X, A, Tulip }
+    public enum LatteArtTemplateKind { None, Heart, Rosetta, X, A, Tulip, Crown }
 
     public readonly struct LatteArtRecognitionResult
     {
@@ -26,6 +26,7 @@ namespace Spotlight.FreeCafe
         public string displayName = "爱心";
         public LatteArtTemplateKind template = LatteArtTemplateKind.Heart;
         public Texture2D preview;
+        [TextArea] public string meaning;
     }
 
     public interface ILatteArtFeedbackSurface
@@ -43,6 +44,7 @@ namespace Spotlight.FreeCafe
         private static readonly Vector2 Break = new Vector2(float.NaN, float.NaN);
         private static readonly Dictionary<LatteArtTemplateKind, Vector2[]> Templates = new Dictionary<LatteArtTemplateKind, Vector2[]>
         {
+            { LatteArtTemplateKind.Crown, new[] { new Vector2(.2f,.25f), new Vector2(.15f,.72f), new Vector2(.35f,.5f), new Vector2(.5f,.85f), new Vector2(.65f,.5f), new Vector2(.85f,.72f), new Vector2(.8f,.25f), new Vector2(.2f,.25f) } },
             { LatteArtTemplateKind.Heart, new[] { new Vector2(.5f,.16f), new Vector2(.22f,.42f), new Vector2(.2f,.65f), new Vector2(.34f,.82f), new Vector2(.5f,.68f), new Vector2(.66f,.82f), new Vector2(.8f,.65f), new Vector2(.78f,.42f), new Vector2(.5f,.16f) } },
             { LatteArtTemplateKind.Rosetta, new[] { new Vector2(.5f,.18f), new Vector2(.5f,.82f), new Vector2(.25f,.48f), new Vector2(.75f,.42f), new Vector2(.28f,.35f), new Vector2(.72f,.29f), new Vector2(.4f,.22f), new Vector2(.6f,.18f) } },
             { LatteArtTemplateKind.X, new[] { new Vector2(.2f,.2f), new Vector2(.8f,.8f), Break, new Vector2(.8f,.2f), new Vector2(.2f,.8f) } },

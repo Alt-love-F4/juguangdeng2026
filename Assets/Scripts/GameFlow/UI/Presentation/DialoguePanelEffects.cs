@@ -71,7 +71,7 @@ namespace Spotlight.GameFlow
             EffectOverlay.rectTransform.offsetMin = EffectOverlay.rectTransform.offsetMax = Vector2.zero;
             EffectOverlay.raycastTarget = false;
             effects = new PresentationEffects(effectLibrary, EffectStage, EffectOverlay, leftPortrait,
-                leftPortraitFrame, rightPortrait, rightPortraitFrame, inactiveTint, focusSeconds, centerPortrait, centerPortraitFrame, background, dialogueBox);
+                leftPortraitFrame, rightPortrait, rightPortraitFrame, inactiveTint, focusSeconds, centerPortrait, centerPortraitFrame, background);
         }
         private void EnterVisiblePortraits()
         {
@@ -94,8 +94,7 @@ namespace Spotlight.GameFlow
             if (!IsPlaying) throw new InvalidOperationException("Start a presentation before playing an effect.");
             bool portrait = fx == PresentationEffectIds.EnterShadowWalk || fx == PresentationEffectIds.AccentShakeStartle
                 || fx == PresentationEffectIds.PortraitFadeIn || fx == PresentationEffectIds.PortraitFadeOut || fx == PresentationEffectIds.PortraitNod;
-            if ((fx == PresentationEffectIds.BackgroundPan || fx == PresentationEffectIds.BackgroundPanLeftToRight)
-                && !string.IsNullOrWhiteSpace(targetKey) && targetKey != "background")
+            if (fx == PresentationEffectIds.BackgroundPan && !string.IsNullOrWhiteSpace(targetKey) && targetKey != "background")
                 throw new ArgumentException("Background pan target must be background.");
             int slot = portrait ? ResolveEffectSlot(targetKey) : -1;
             PresentationEffectHandle handle = effects.Play(fx, slot, completed);
@@ -126,7 +125,7 @@ namespace Spotlight.GameFlow
         }
         public PresentationEffectHandle PlayFade(string type, float duration = .3f, Action atBlack = null, Action completed = null)
         {
-            if (!IsPlaying && !SeamlessChoicePending) throw new InvalidOperationException("Start a presentation before fading.");
+            if (!IsPlaying) throw new InvalidOperationException("Start a presentation before fading.");
             PresentationEffectHandle handle = effects.Fade(type, duration, atBlack, completed);
             blockingHandles.Add(handle);
             return handle;

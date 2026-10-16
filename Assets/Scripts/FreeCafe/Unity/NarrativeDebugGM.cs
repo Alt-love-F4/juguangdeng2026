@@ -29,17 +29,14 @@ namespace Spotlight.GameFlow
         private bool branchVisual;
         private bool optionsRequested;
         private Transform content;
-        private TMP_InputField report, actionReport;
-        private string actionQuery = "", actionKey, actionPosition, itemKey = "", itemCount = "0";
-        private int actionPage;
-        private float nextRefresh, nextActionRefresh;
+        private TMP_InputField report;
+        private float nextRefresh;
         private const int PageSize = 8;
 
         private void Awake()
         {
             shell = GetComponent<FreeCafeGMPanel>();
             shell.RegisterCategory("叙事调试", Build);
-            shell.RegisterCategory("地图行动检查", panel => { tab = "行动检查"; Build(panel); });
             SceneManager.sceneUnloaded += OnSceneUnloaded;
         }
         private void OnDestroy() { SceneManager.sceneUnloaded -= OnSceneUnloaded; ExitTest(); }
@@ -53,8 +50,6 @@ namespace Spotlight.GameFlow
             }
             if (report != null && shell.IsVisible && Time.unscaledTime >= nextRefresh)
             { nextRefresh = Time.unscaledTime + .25f; report.SetTextWithoutNotify(LocationReport()); }
-            if (actionReport != null && shell.IsVisible && Time.unscaledTime >= nextActionRefresh)
-            { nextActionRefresh = Time.unscaledTime + .25f; actionReport.SetTextWithoutNotify(ActionReadout()); }
         }
         private void Run(Action action, bool rebuild = true)
         {
@@ -83,9 +78,7 @@ namespace Spotlight.GameFlow
             // A page refresh replaces only our own view, preserving the shell heading.
             var old = panel.ContentRoot.Find("NarrativeDebugContent");
             if (old != null) { old.gameObject.SetActive(false); Destroy(old.gameObject); }
-            report = null; actionReport = null;
             content = MakeScroll(panel.ContentRoot);
-            Button("地图行动检查（独立会话）", () => Switch("行动检查"));
             Row("内容查找", () => Switch("内容查找"), "播放控制", () => Switch("播放控制"), "测试条件", () => Switch("测试条件"), "状态与诊断", () => Switch("状态与诊断"));
             Label("当前：" + (branchVisual ? "独立分支测试 · 真实演出与核心" : preview != null && preview.IsPlaying ? "演出预览 · 只看演出，不结算" : test != null && test.HasBaseline ? "独立分支测试" : "正式只读 / 配置浏览"));
             if (!string.IsNullOrEmpty(error)) Label("错误：" + error);
@@ -95,7 +88,6 @@ namespace Spotlight.GameFlow
             if (tab == "内容查找") BuildSearch();
             else if (tab == "播放控制") BuildPlayback();
             else if (tab == "测试条件") BuildConditions();
-            else if (tab == "行动检查") BuildActions();
             else BuildDiagnostics();
         }
         private void Switch(string value) { tab = value; Build(shell); }
@@ -115,7 +107,7 @@ namespace Spotlight.GameFlow
         }
         private void BuildPlayback()
         {
-            Label("只看演出，不结算；不代表正式入口验收。Conversation按源段落展示，条件不作判定；选项禁用并指向真实分支测试。定位输入为本段0起始快照行索引，源行ID/seq见诊断。");
+            Label("只看演出，不结算。Conversation按源段落展示，条件不作判定；选项禁用并指向真实分支测试。定位输入为本段0起始快照行索引，源行ID/seq见诊断。");
             Row("10/7 S1 完整预览", () => Run(() => PlayChapter("oct07.s1", 2)), "S2 知觉1", () => Run(() => PlayChapter("oct07.s2", 1)), "S2 知觉2", () => Run(() => PlayChapter("oct07.s2", 2)));
             Row("S2 知觉节点", () => Run(() => PlayChapter("oct07.s2", 2, "oct07.s2.perception")), "S2 信纸节点", () => Run(() => PlayChapter("oct07.s2", 2, "oct07.s2.read_letter")));
             if (selected != null && selected.Kind == "Event")
@@ -198,7 +190,6 @@ namespace Spotlight.GameFlow
             visualPresenter.AbilityCheck = test.EvaluateAbilityCheck;
             visualPresenter.InlineAbilityCheck = test.Controller.EvaluateInlineAbilityCheckForPresentation;
             visualPresenter.LetterPlayback = LetterEventPlayback.PlayPreview;
-            visualPresenter.ConversationReadingPlayback = ConversationReadingPlayback.PlayPreview;
             visualPresenter.PageCondition = key => test.Controller.State.GetCondition(key);
             visualPresenter.ConversationPlayback = (request, data, completed) =>
             {
@@ -232,61 +223,6 @@ namespace Spotlight.GameFlow
             Button("直接请求选中事件", () => Run(RequestSelected));
             Button("恢复起点并重测事件", () => Run(() => { RequireSafeBoundary(); RestoreTest(); RequestSelected(); }));
             Button("结束测试回合（非正式结束当天）", () => Run(() => { RequireSafeBoundary(); StartVisualTest(); test.EndTurn(); shell.SetVisible(false); }));
-        }
-        private void BuildActions()
-        {
-            Label("仅独立 NarrativeDebugSession；从生成配置读取真实行动，不写玩家存档。先准备日期/余额/物品，再挂载配置地点并建立起点。日期准备只改起点；推进日期才处理到期。事件直接预览/核心提交均不代表正式地图入口验收。");
-            Row("挂载配置并建立起点", () => Run(() => { RequireSafeBoundary(); test.PrepareActionMounts(); test.EstablishBaseline(); }),
-                "重置样例到测试起点", () => Run(() => { RequireSafeBoundary(); RestoreTest(); }));
-            Label("起点=" + test.HasBaseline + "；修改条件后须重新建立起点。共享同一 actionKey 的多个地点共享进度。");
-            ValueEditor("准备行动日期 day", value => test.SetDate(ParseInt(value)));
-            ValueEditor("准备独立金币余额", value => test.SetMoney(ParseInt(value)));
-            Input("准备物品 itemKey（仅独立地图库存，非经营原料）", itemKey, value => itemKey = value);
-            Input("物品最终数量（>=0）", itemCount, value => itemCount = value);
-            Button("应用独立物品数量", () => Run(() => { RequireSafeBoundary(); if (visualPresenter != null) RestoreTest(); test.SetItem(itemKey, ParseInt(itemCount)); }));
-            Row("建立当前测试起点", () => Run(() => { RequireSafeBoundary(); test.EstablishBaseline(); }), "测试条件/资格设置", () => Switch("测试条件"));
-            ValueEditor("推进行动日期（到期/每日刷新）", value => test.SubmitActionDay(ParseInt(value)), false);
-            Input("搜索 actionKey / 标题 / 地点 ID", actionQuery, value => actionQuery = value);
-            Button("搜索行动", () => { actionPage = 0; Build(shell); });
-            var matches = test.Actions.Actions.Where(a => string.IsNullOrWhiteSpace(actionQuery)
-                || a.actionKey.IndexOf(actionQuery, StringComparison.OrdinalIgnoreCase) >= 0
-                || test.ResolveText(a.nameText).IndexOf(actionQuery, StringComparison.OrdinalIgnoreCase) >= 0
-                || ActionPositions(a.actionKey).Any(p => p.IndexOf(actionQuery, StringComparison.OrdinalIgnoreCase) >= 0)).ToList();
-            actionPage = Mathf.Clamp(actionPage, 0, Math.Max(0, (matches.Count - 1) / PageSize));
-            Label($"{matches.Count} 个配置行动；第 {actionPage + 1}/{Math.Max(1, (matches.Count + PageSize - 1) / PageSize)} 页");
-            foreach (var action in matches.Skip(actionPage * PageSize).Take(PageSize))
-            {
-                string key = action.actionKey;
-                var positions = ActionPositions(key).ToArray();
-                Button(test.ResolveText(action.nameText) + " [" + key + "] 地点=" + (positions.Length == 0 ? "无配置挂载" : string.Join(",", positions)),
-                    () => { actionKey = key; actionPosition = positions.FirstOrDefault(); Build(shell); });
-            }
-            Row("上一页行动", () => { actionPage--; Build(shell); }, "下一页行动", () => { actionPage++; Build(shell); });
-            if (actionKey == null) return;
-            foreach (string position in ActionPositions(actionKey))
-            {
-                string captured = position;
-                Button("检查地点 " + position + (position == actionPosition ? "（当前）" : ""), () => { actionPosition = captured; Build(shell); });
-            }
-            actionReport = Input("行动检查（只读，可复制）", ActionReadout(), null, 500);
-            actionReport.readOnly = true;
-            Row("复制行动检查", () => GUIUtility.systemCopyBuffer = ActionReadout(), "刷新行动检查", () => Build(shell));
-            Label("提交走现有 Actions.Execute。导航/日结只检查，不调用正式宿主。失败注入仅拒绝下一次独立资金 TryCommit；无资金提交不会触发，重置起点会清除。");
-            Row("提交/重试所选行动", () => Run(() => { RequireSafeBoundary(); if (!test.ExecuteAction(actionKey, actionPosition)) throw new InvalidOperationException("行动提交被拒绝；查看检查结果与会话日志。"); }),
-                "恢复已提交行动的待办", () => Run(() => { RequireSafeBoundary(); test.RetryPendingActions(); }));
-            Button("模拟下一次资金提交失败", () => Run(() => { RequireSafeBoundary(); test.ArmMoneyCommitFailure(); }));
-            if (!branchVisual) Button("手动确认测试演出完成（仅核心）", () => Run(() => { RequireSafeBoundary(); test.CompletePresentation(); }));
-            Row("查看会话日志/选项", () => Switch("状态与诊断"), "退出测试会话", () => Run(ExitTest));
-        }
-        private string ActionReadout()
-        {
-            try { return test?.GetActionReport(actionKey, actionPosition) ?? "会话已退出，请刷新。"; }
-            catch (Exception ex) { return "独立行动检查暂不可用：" + ex.Message + "\n请准备有效条件并建立起点，或退出测试会话后重试。"; }
-        }
-        private IEnumerable<string> ActionPositions(string key)
-        {
-            return test.Configuration.mapPositions.Where(p => p != null && (p.defaultAction == key || p.extendedActions.Contains(key))).Select(p => p.positionKey)
-                .Concat(test.Actions.GetMapPositions().Where(p => test.Actions.GetMountedActions(p).Any(a => a.actionKey == key))).Distinct();
         }
         private static int ParseInt(string value) => int.Parse(value);
         private void ValueEditor(string label, Action<string> setter, bool restore = true)

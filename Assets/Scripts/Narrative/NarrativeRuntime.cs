@@ -30,7 +30,6 @@ namespace Spotlight.Narrative
         public NarrativeCafeVisitSnapshot GetCommittedCafeVisits() => controller?.GetCommittedCafeVisits();
         public bool SubmitCafeVisitFeedback(NarrativeCafeVisitFeedback fact, Action completed = null) => controller != null && controller.SubmitCafeVisitFeedback(fact, completed);
         public bool IsCafeVisitFeedbackComplete(NarrativeCafeVisitFeedback fact) => controller != null && controller.IsCafeVisitFeedbackComplete(fact);
-        public bool ResumeServiceCheckpoint() => controller != null && controller.ResumeServiceCheckpoint();
         public event Action TurnCompleted;
         public event Action<NarrativeEventRequest> EventPresented;
         public event Action<NarrativeEventRequest> EventFinished;
@@ -38,7 +37,6 @@ namespace Spotlight.Narrative
         public event Action<string, int, int> BarChanged;
         private NarrativeReadingPlayback readingPlayback;
         private NarrativeLetterPlayback letterPlayback;
-        private NarrativeConversationReadingPlayback conversationReadingPlayback;
         private NarrativeNoticePlayback noticePlayback;
         private NarrativeConversationPlayback conversationPlayback;
         private Func<string, string, string, NarrativeCharacterPresentationData> characterResolver;
@@ -63,11 +61,6 @@ namespace Spotlight.Narrative
         {
             get => readingPlayback;
             set { readingPlayback = value; if (runtimePresenter != null) runtimePresenter.ReadingPlayback = value; }
-        }
-        public NarrativeConversationReadingPlayback ConversationReadingPlayback
-        {
-            get => conversationReadingPlayback;
-            set { conversationReadingPlayback = value; if (runtimePresenter != null) runtimePresenter.ConversationReadingPlayback = value; }
         }
         public NarrativeLetterPlayback LetterPlayback
         {
@@ -119,7 +112,6 @@ namespace Spotlight.Narrative
                 runtimePresenter = new NarrativePresenter(configuration, ResolveText);
                 runtimePresenter.ReadingPlayback = ReadingPlayback;
                 runtimePresenter.LetterPlayback = LetterPlayback;
-                runtimePresenter.ConversationReadingPlayback = ConversationReadingPlayback;
                 runtimePresenter.NoticePlayback = NoticePlayback;
                 runtimePresenter.ConversationPlayback = ConversationPlayback;
                 runtimePresenter.CharacterResolver = ResolveCharacterForPresentation;
@@ -164,7 +156,7 @@ namespace Spotlight.Narrative
         {
             runtimePresenter?.Dispose();
             runtimePresenter = null;
-            // Keep the caller-owned presentation dependency when rebuilding session state.
+            injectedPresenter = null;
             controller?.UnbindValueProviders();
             controller = null;
             actionController = null;

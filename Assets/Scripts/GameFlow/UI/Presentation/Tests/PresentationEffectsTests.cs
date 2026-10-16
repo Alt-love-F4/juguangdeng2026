@@ -215,26 +215,6 @@ namespace Spotlight.GameFlow.Tests
             yield return null;
         }
         [UnityTest]
-        public IEnumerator DialogueShakeOnlyMovesDialogueBoxAndStopRestoresIt()
-        {
-            var field = typeof(DialoguePanel).GetField("dialogueBox", System.Reflection.BindingFlags.Instance | System.Reflection.BindingFlags.NonPublic);
-            var box = (RectTransform)field.GetValue(panel);
-            Vector2 boxBase = box.anchoredPosition;
-            Vector2 stageBase = panel.EffectStage.anchoredPosition;
-            var handle = panel.PlayEffect(PresentationEffectIds.DialogueShake);
-            panel.Effects.Tick(.02f);
-            Assert.That(Vector2.Distance(box.anchoredPosition, boxBase), Is.GreaterThan(.1f));
-            Assert.That(panel.EffectStage.anchoredPosition, Is.EqualTo(stageBase));
-            handle = panel.PlayEffect(PresentationEffectIds.DialogueShake);
-            panel.Effects.Tick(.02f);
-            panel.StopEffects();
-            Assert.That(handle.Status, Is.EqualTo(PresentationEffectStatus.Cancelled));
-            Assert.That(box.anchoredPosition, Is.EqualTo(boxBase));
-            Assert.That(panel.EffectStage.anchoredPosition, Is.EqualTo(stageBase));
-            yield return null;
-        }
-
-        [UnityTest]
         public IEnumerator HeavyShakeRejectsLightAndSamePriorityReplacesWithoutOldCallback()
         {
             int oldCallbacks = 0;

@@ -16,8 +16,6 @@ namespace Spotlight.GameFlow
         private GridLayoutGroup grid;
         private TextMeshProUGUI emptyHint;
         private TextMeshProUGUI points;
-        private RectTransform moneySlot;
-        public RectTransform MoneyRect => moneySlot;
         private readonly Dictionary<string, RectTransform> slots = new Dictionary<string, RectTransform>();
         private string signature = "__uninitialized";
         private float nextRefresh;
@@ -31,7 +29,7 @@ namespace Spotlight.GameFlow
         public TextMeshProUGUI DateLabel;
         public RectTransform PointsRect => PointsSegments != null && PointsSegments.Length > 0 && PointsSegments[0] != null
             ? PointsSegments[0].transform.parent as RectTransform
-            : PointsFill != null ? PointsFill.rectTransform : points != null ? points.rectTransform : null;
+            : PointsFill != null ? PointsFill.rectTransform : points.rectTransform;
         public bool IsVisible => sidebar != null && sidebar.IsVisible;
         public void Toggle() => SetVisible(!IsVisible);
         public void SetVisible(bool value)
@@ -127,9 +125,7 @@ namespace Spotlight.GameFlow
             var runtime = NarrativeRuntime.Instance;
             // The fixed HUD is refreshed by MapActionPointsView even when this panel is hidden.
             var items = runtime?.MapInventory?.Items;
-            bool moneyReady = TryReadMoney(out int balance);
-            string next = (items != null ? string.Join("|", items.Where(p => p.Value > 0).OrderBy(p => p.Key).Select(p => p.Key + ":" + p.Value)) : "empty")
-                + "/money:" + (moneyReady ? balance.ToString() : "unavailable");
+            string next = items != null ? string.Join("|", items.Select(p => p.Key + ":" + p.Value)) : "empty";
             if (itemSlotTemplate == null && content.Find("ItemSlotTemplate") is RectTransform authoredItem) itemSlotTemplate = authoredItem;
             if (emptySlotTemplate == null && content.Find("EmptySlot_0") is RectTransform authoredEmpty) emptySlotTemplate = authoredEmpty;
             if (signature == next && initialized) return;
@@ -160,42 +156,16 @@ namespace Spotlight.GameFlow
                 child.SetActive(false);
                 if (Application.isPlaying) Destroy(child); else DestroyImmediate(child);
             }
-            slots.Clear(); int index = 1;
+            slots.Clear(); int index = 0;
             emptyHint = null;
-            moneySlot = itemSlotTemplate != null ? Instantiate(itemSlotTemplate, content, false) : CreateEditorFallbackSlot();
-            moneySlot.name = "MoneyBalance";
-            moneySlot.gameObject.SetActive(true);
-            var moneyLabel = moneySlot.GetComponentInChildren<TextMeshProUGUI>(true);
-            if (moneyLabel != null) moneyLabel.text = "金币\n" + (moneyReady ? balance.ToString() : "暂不可用");
-            foreach (var item in (items ?? new Dictionary<string, int>()).Where(p => p.Value > 0).OrderBy(p => p.Key))
+            foreach (var item in items ?? new Dictionary<string, int>())
             {
                 RectTransform slot;
                 if (itemSlotTemplate != null) slot = Instantiate(itemSlotTemplate, content, false);
                 else slot = CreateEditorFallbackSlot();
                 slot.gameObject.SetActive(true); slot.name = "Item_" + item.Key;
                 var label = slot.GetComponentInChildren<TextMeshProUGUI>(true);
-                string summary = ItemName(item.Key) + "\n× " + item.Value;
-                if (label != null) label.text = summary;
-                var metadata = ItemMetadata(item.Key);
-                var icon = slot.Find("Icon")?.GetComponent<Image>();
-                if (icon != null)
-                {
-                    icon.sprite = string.IsNullOrWhiteSpace(metadata?.iconPath) ? null : Resources.Load<Sprite>(metadata.iconPath);
-                    icon.gameObject.SetActive(true);
-                    if (icon.sprite == null)
-                    {
-                        // Keep an explicit generic marker when an approved item has no artwork.
-                        icon.color = new Color(.67f, .55f, .34f, .75f);
-                        var placeholder = MapActionDetailsView.Label("MissingItemIcon", icon.transform, "物", 22);
-                        MapActionDetailsView.Stretch(placeholder.rectTransform, 2);
-                        placeholder.alignment = TextAlignmentOptions.Center;
-                        placeholder.raycastTarget = false;
-                    }
-                }
-                var inspect = slot.GetComponent<Button>() ?? slot.gameObject.AddComponent<Button>();
-                inspect.onClick.RemoveAllListeners();
-                string description = MapActionDetailsView.Text(metadata?.descText, "暂无物品说明");
-                inspect.onClick.AddListener(() => { if (label != null) label.text = label.text == summary ? ItemName(item.Key) + "\n" + description : summary; });
+                if (label != null) label.text = MapActionDetailsView.Text("item." + item.Key + ".name", item.Key) + "\n× " + item.Value;
                 index++;
                 slots[item.Key] = slot;
             }
@@ -267,26 +237,8 @@ namespace Spotlight.GameFlow
                 hintRect.sizeDelta = new Vector2(0, 60);
             }
         }
-        internal static bool TryReadMoney(out int balance)
-        {
-            balance = 0;
-            var account = NarrativeRuntime.Instance?.Controller?.MoneyAccount;
-            return account != null && account.TryRead(out balance) && balance >= 0;
-        }
-
-        internal static NarrativeItemDefinition ItemMetadata(string key)
-            => NarrativeRuntime.Instance?.Configuration?.items.Find(item => item != null && item.itemKey == key);
-
-        internal static string ItemName(string key)
-        {
-            var metadata = ItemMetadata(key);
-            return MapActionDetailsView.Text(metadata?.nameText, MapActionDetailsView.Text("item." + key + ".name", "未命名物品"));
-        }
-
         public RectTransform FindSlot(string key) => slots.TryGetValue(key, out var slot) ? slot : null;
-        public IEnumerator Reveal(string key) => RevealSlot(key, false);
-        public IEnumerator RevealMoney() => RevealSlot(null, true);
-        private IEnumerator RevealSlot(string key, bool money)
+        public IEnumerator Reveal(string key)
         {
             if (!IsVisible)
             {
@@ -296,7 +248,7 @@ namespace Spotlight.GameFlow
             }
             Refresh(); Canvas.ForceUpdateCanvases();
             LayoutRebuilder.ForceRebuildLayoutImmediate(content);
-            var slot = money ? MoneyRect : FindSlot(key); if (slot == null) yield break;
+            var slot = FindSlot(key); if (slot == null) yield break;
             scroll.StopMovement();
             float max = Mathf.Max(0, content.rect.height - scroll.viewport.rect.height);
             float top = content.InverseTransformPoint(slot.TransformPoint(new Vector3(0, slot.rect.yMax, 0))).y;

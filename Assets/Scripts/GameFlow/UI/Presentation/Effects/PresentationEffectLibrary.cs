@@ -22,10 +22,6 @@ namespace Spotlight.GameFlow
         [SerializeField] private PresentationEffectDefinition[] definitions = CreateDefaults();
         public PresentationEffectDefinition Find(string fx)
         {
-            // Dialogue-only shake shares the configured light-shake preset without migrating shared assets.
-            if (fx == PresentationEffectIds.DialogueShake) fx = PresentationEffectIds.ShakeLight;
-            // Directional pan shares BackgroundPan tuning and validation without changing existing assets.
-            if (fx == PresentationEffectIds.BackgroundPanLeftToRight) fx = PresentationEffectIds.BackgroundPan;
             if (definitions == null) throw new InvalidOperationException("Presentation effect library is not configured.");
             foreach (PresentationEffectDefinition definition in definitions)
                 if (definition != null && string.Equals(definition.fx, fx, StringComparison.Ordinal))

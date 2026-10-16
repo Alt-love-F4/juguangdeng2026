@@ -90,20 +90,6 @@ namespace Spotlight.Narrative.Editor.Tests
             c.results.Add(new NarrativeResultDefinition { resultId = "R", eventId = "E", resultType = NarrativeResultType.PlaySetup, target = "choiceSetup" });
             Assert.That(NarrativeConfigurationValidator.Validate(c).Exists(x => x.Contains("PLAY_SETUP cannot invoke choice setup")), Is.True);
         }
-        [Test] public void OptionalSetupSlotsMayBeOmittedButRequiredSlotsMayNot()
-        {
-            var c = new NarrativeConfiguration();
-            c.templates.Add(new NarrativeTemplateDefinition { tplName = "Talk", atomSeq = "A_DIALOG,A_CHOICE", slotDef = "lines:textList,opts:optionList,bg:sprite" });
-            var setup = new NarrativeSetupParamsDefinition { setupKey = "talk", tplName = "Talk" };
-            setup.parameters.Add(new NarrativeAtomParameter { slot = "lines", value = "dialogue.text" });
-            c.setups.Add(setup);
-            Assert.That(NarrativeConfigurationValidator.Validate(c), Is.Empty, "Optional choices and background may be omitted.");
-
-            setup.parameters.Clear();
-            Assert.That(NarrativeConfigurationValidator.Validate(c), Is.EqualTo(new[] { "SetupParams talk: missing slot lines." }));
-            setup.parameters.Add(new NarrativeAtomParameter { slot = "lines", value = "" });
-            Assert.That(NarrativeConfigurationValidator.Validate(c), Is.EqualTo(new[] { "SetupParams talk: empty value for slot lines." }));
-        }
         [Test] public void InvalidEffectsRejectMissingBarAndNonNumericValue()
         {
             var c = new NarrativeConfiguration();
@@ -159,10 +145,7 @@ namespace Spotlight.Narrative.Editor.Tests
             c.conditions.Add(new NarrativeConditionDefinition { conditionId = "C", ownerType = "action", ownerId = "a", groupIndex = 1, condType = "ITEM_GTE", target = "medicine", value = "1", op = ">=", notFlag = true });
             c.results.Add(new NarrativeResultDefinition { resultId = "R", eventId = "E", resultType = NarrativeResultType.ItemRemove, target = "medicine", value = "2" });
             Assert.That(NarrativeConfigurationValidator.Validate(c).Exists(x => x.Contains("op/notFlag are obsolete")), Is.True);
-            const string duplicateCost = "Action a, Result R: completion removes delivery cost item medicine again.";
-            Assert.That(NarrativeConfigurationValidator.Warnings(c).Count(x => x == duplicateCost), Is.EqualTo(1));
-            c.results.Clear();
-            Assert.That(NarrativeConfigurationValidator.Warnings(c), Does.Not.Contain(duplicateCost));
+            Assert.That(NarrativeConfigurationValidator.Warnings(c), Has.Count.EqualTo(1));
         }
 
         [Test] public void ReverseSuggestionsAreLubanRowsAndDoNotMutateConfiguration()

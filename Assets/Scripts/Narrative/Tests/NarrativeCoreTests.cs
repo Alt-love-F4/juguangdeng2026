@@ -1,6 +1,5 @@
 using System;
 using System.Collections.Generic;
-using System.Linq;
 using NUnit.Framework;
 using UnityEngine;
 using UnityEngine.TestTools;
@@ -110,7 +109,7 @@ namespace Spotlight.Narrative.Tests
             Assert.That(p.Played, Is.EqualTo(new[] { "hold", "once", "hold" }));
         }
 
-        [Test] public void IndependentConditionsRecheckAtStartAndDuplicateCallbacksSettleOnce()
+        [Test] public void ConditionsFreezeAtEnqueueAndDuplicateCallbacksSettleOnce()
         {
             Event("first", priority: 10); Event("second");
             Condition("second", "BAR_GTE", "bar:b", "1");
@@ -119,13 +118,9 @@ namespace Spotlight.Narrative.Tests
             var p = new Presenter(); var c = new NarrativeController(config, p);
             c.SetBar("b", 1); c.SetBar("a", 1); c.EndTurn();
             Action first = p.Callbacks[0]; first(); first();
-            Assert.That(p.Played, Is.EqualTo(new[] { "first" }), "A captured Cross does not bypass an independent prerequisite invalidated by the preceding root.");
-            Assert.That(Bar(c, "b"), Is.Zero);
-            Assert.That(c.WaitingCandidates.Any(candidate => candidate.eventId == "second"), Is.True, "The earned Cross remains retryable.");
-            c.SetBar("b", 1); c.ResumePendingEvents();
             Assert.That(p.Played, Is.EqualTo(new[] { "first", "second" }));
             p.Complete(); p.Complete();
-            Assert.That(Bar(c, "b"), Is.EqualTo(3)); Assert.That(Bar(c, "world.calendar"), Is.EqualTo(2));
+            Assert.That(Bar(c, "b"), Is.EqualTo(2)); Assert.That(Bar(c, "world.calendar"), Is.EqualTo(2));
         }
 
         [Test] public void SameEventIsDeduplicatedAcrossSameTurnAndChain()
@@ -305,54 +300,6 @@ namespace Spotlight.Narrative.Tests
             var c = new NarrativeController(config);
             Assert.Throws<InvalidOperationException>(() => c.EvaluateCondition(new NarrativeConditionDefinition { condType = "BOOL_EQ", target = "typo", value = "false" }));
             Assert.Throws<InvalidOperationException>(() => c.EvaluateCondition(new NarrativeConditionDefinition { condType = "BOOL_EQ", target = "known", value = "false", notFlag = true }));
-        }
-
-        [TestCase(5, false)]
-        [TestCase(6, true)]
-        public void AttributeChoiceUsesOneSnapshotUntilRootCompletes(int courage, bool passed)
-        {
-            config.abilityNameKeys.Add("courage", "attribute.courage");
-            config.events.Add(new NarrativeEventDefinition { eventId = "root" });
-            config.choices.Add(new NarrativeChoiceDefinition { choiceId = "c2.3", groupKey = "g" });
-            Condition("c2.3", "ATTRIBUTE_GTE", "courage", "6", group: 1, ownerType: "choice");
-            var p = new Presenter(); var c = new NarrativeController(config, p);
-            int reads = 0;
-            c.AbilityReader = id => { Assert.That(id, Is.EqualTo("courage")); reads++; return (true, courage); };
-            Assert.That(c.QueueEvent("root"));
-            Assert.That(c.EvaluateConditions("choice", "c2.3"), Is.EqualTo(passed));
-            courage = passed ? 5 : 6;
-            Assert.That(c.EvaluateConditions("choice", "c2.3"), Is.EqualTo(passed));
-            Assert.That(c.SelectChoice("c2.3"), Is.EqualTo(passed));
-            Assert.That(c.ExplainConditions("choice", "c2.3")[0].Current, Is.EqualTo(passed ? "6" : "5"));
-            Assert.That(reads, Is.EqualTo(1));
-            p.Complete();
-            Assert.That(c.QueueEvent("root"));
-            Assert.That(c.EvaluateConditions("choice", "c2.3"), Is.EqualTo(!passed));
-            Assert.That(reads, Is.EqualTo(2));
-        }
-
-        [Test] public void AttributeConditionsRejectUnknownUnavailableAndMalformedValues()
-        {
-            config.abilityNameKeys.Add("courage", "attribute.courage");
-            var c = new NarrativeController(config);
-            var condition = new NarrativeConditionDefinition { condType = "ATTRIBUTE_GTE", target = "courage", value = "6" };
-            Assert.Throws<InvalidOperationException>(() => c.EvaluateCondition(condition));
-            c.AbilityReader = _ => (false, 100);
-            Assert.Throws<InvalidOperationException>(() => c.EvaluateCondition(condition));
-            c.AbilityReader = _ => (true, 6);
-            Assert.That(c.EvaluateCondition(condition));
-            condition.target = "typo";
-            Assert.Throws<InvalidOperationException>(() => c.EvaluateCondition(condition));
-            condition.target = "courage"; condition.value = "6.5";
-            Assert.Throws<InvalidOperationException>(() => c.EvaluateCondition(condition));
-            config.events.Add(new NarrativeEventDefinition { eventId = "root" });
-            condition.ownerType = "event"; condition.ownerId = "root"; condition.groupIndex = 1;
-            config.conditions.Add(condition);
-            Assert.That(LubanNarrativeLoader.ValidateConditionConfiguration(config), Has.Some.Contains("integer value required"));
-            condition.value = "6"; condition.target = "typo";
-            Assert.That(LubanNarrativeLoader.ValidateConditionConfiguration(config), Has.Some.Contains("unknown player attribute"));
-            condition.target = "courage";
-            Assert.That(LubanNarrativeLoader.ValidateConditionConfiguration(config), Is.Empty);
         }
 
         [Test] public void AbilityCheckOwnerResultsJoinActiveEventTransaction()

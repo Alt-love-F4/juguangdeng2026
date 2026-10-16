@@ -12,6 +12,7 @@ GameObject:
   - component: {fileID: 4991575393350997607}
   - component: {fileID: 6030689886090883218}
   - component: {fileID: 9027324904615619053}
+  - component: {fileID: 2405047684006248972}
   m_Layer: 0
   m_Name: FreeEntity_container_extractor_filter
   m_TagString: Untagged
@@ -52,14 +53,18 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: ffdd571bfd622f0498a8bec2db5f792a, type: 3}
-  m_Name: 
+  m_Name:
   m_EditorClassIdentifier: Spotlight.FreeCafe.Unity::Spotlight.FreeCafe.FreeEntityView
   prefabSpecId: container.extractor.filter
   authoringEntityId: 
   effectsRoot: {fileID: 8417098189958223478}
   liquidRoot: {fileID: 6816666143474691262}
   pourOrigin: {fileID: 9156151225881076743}
-  liquidPresenter: {fileID: 0}
+  liquidPresenter: {fileID: 6327660844879201440}
+  liquidContainerMask: {fileID: 2800000, guid: ee0444fb54fef34459e1df58b46f8c37, type: 3}
+  liquidMaskIsDistanceField: 1
+  liquidMaskDistanceRange: 0.125
+  liquidWallThickness: 0.018
   body: {fileID: 3982994806821350133}
   label: {fileID: 7283270835906791905}
   workspaceCaption: {fileID: 0}
@@ -125,9 +130,24 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: dafe879e1865c9d47adebe58a987a4c7, type: 3}
-  m_Name: 
+  m_Name:
   m_EditorClassIdentifier: Spotlight.FreeCafe.Unity::Spotlight.FreeCafe.FreeCafeExtractorVisual
   staticArtwork: 1
+--- !u!114 &2405047684006248972
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 3322420021003697943}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 896018e200479ab41bf54282980c0219, type: 3}
+  m_Name:
+  m_EditorClassIdentifier: Spotlight.FreeCafe.Unity::Spotlight.FreeCafe.FreeCafeBoilingVisual
+  steamOriginUV: {x: 0.5, y: 0.84}
+  steamSizeUV: {x: 0.46, y: 0.22}
+  vibrationHeight: 0.0012
 --- !u!1 &3621018386554635313
 GameObject:
   m_ObjectHideFlags: 0
@@ -224,7 +244,7 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 9541d86e2fd84c1d9990edf0852d74ab, type: 3}
-  m_Name: 
+  m_Name:
   m_EditorClassIdentifier: Unity.TextMeshPro::TMPro.TextMeshPro
   m_Material: {fileID: 0}
   m_Color: {r: 1, g: 1, b: 1, a: 1}
@@ -400,6 +420,209 @@ SpriteRenderer:
   m_SpriteTileMode: 0
   m_WasSpriteAssigned: 1
   m_SpriteSortPoint: 0
+--- !u!1 &4600286789012040258
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 2779875098182196988}
+  - component: {fileID: 6975362074705784504}
+  - component: {fileID: 1499377889698929956}
+  - component: {fileID: 2946651791365591995}
+  - component: {fileID: 6327660844879201440}
+  m_Layer: 0
+  m_Name: GlassSurface
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 0
+--- !u!224 &2779875098182196988
+RectTransform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 4600286789012040258}
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 3405765820655114996}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+  m_AnchorMin: {x: 0.5, y: 0.5}
+  m_AnchorMax: {x: 0.5, y: 0.5}
+  m_AnchoredPosition: {x: 0, y: 0}
+  m_SizeDelta: {x: 2.54, y: 5.25}
+  m_Pivot: {x: 0.5, y: 0.5}
+--- !u!222 &6975362074705784504
+CanvasRenderer:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 4600286789012040258}
+  m_CullTransparentMesh: 1
+--- !u!114 &1499377889698929956
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 4600286789012040258}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: fe87c0e1cc204ed48ad3b37840f39efc, type: 3}
+  m_Name:
+  m_EditorClassIdentifier: UnityEngine.UI::UnityEngine.UI.Image
+  m_Material: {fileID: 0}
+  m_Color: {r: 1, g: 1, b: 1, a: 1}
+  m_RaycastTarget: 0
+  m_RaycastPadding: {x: 0, y: 0, z: 0, w: 0}
+  m_Maskable: 1
+  m_OnCullStateChanged:
+    m_PersistentCalls:
+      m_Calls: []
+  m_Sprite: {fileID: 0}
+  m_Type: 0
+  m_PreserveAspect: 0
+  m_FillCenter: 1
+  m_FillMethod: 4
+  m_FillAmount: 1
+  m_FillClockwise: 1
+  m_FillOrigin: 0
+  m_UseSpriteMesh: 0
+  m_PixelsPerUnitMultiplier: 1
+--- !u!114 &2946651791365591995
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 4600286789012040258}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 51301e918489454b9885e508f2709f36, type: 3}
+  m_Name:
+  m_EditorClassIdentifier: Spotlight.GameFlow.UI::Spotlight.GameFlow.GravityLiquidImage
+  fillAmount: 0
+  liquidColor: {r: 0.22, g: 0.075, b: 0.025, a: 0.94}
+  deepColor: {r: 0.143, g: 0.048750002, b: 0.016250001, a: 0.94}
+  surfaceColor: {r: 0.571, g: 0.49124998, b: 0.46374997, a: 0.94}
+  surfaceWidth: 0.008
+  textureInfluence: 0
+  containerMask: {fileID: 2800000, guid: ee0444fb54fef34459e1df58b46f8c37, type: 3}
+  maskIsDistanceField: 1
+  maskDistanceRange: 0.125
+  wallThickness: 0.018
+  wallColor: {r: 0.16, g: 0.11, b: 0.07, a: 0.65}
+  allowSpilling: 0
+  spillRate: 0.8
+  gravity: {x: 0, y: -9.81}
+  motionInfluence: 0.7
+  motionSpace: {fileID: 0}
+  rotationInfluence: 0.18
+  springFrequency: 2.2
+  dampingRatio: 0.45
+  maxSloshAngle: 35
+  useUnscaledTime: 1
+  maxWaveAmplitude: 0.025
+  idleWaveAmplitude: 0
+  waveCycles: 2
+  waveSpeed: 3
+--- !u!114 &6327660844879201440
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 4600286789012040258}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 94a122f8394f9cf44a1be6e077c0f2e6, type: 3}
+  m_Name:
+  m_EditorClassIdentifier: Spotlight.FreeCafe.Unity::Spotlight.FreeCafe.OrthographicGlassCupPresenter
+  smallSize: {x: 0.8, y: 1}
+  largeSize: {x: 1, y: 1.2}
+  fillResponse: 12
+  coffee: {r: 0.22, g: 0.075, b: 0.025, a: 0.94}
+  milk: {r: 0.96, g: 0.92, b: 0.82, a: 0.94}
+  water: {r: 0.62, g: 0.85, b: 0.92, a: 0.36}
+  matcha: {r: 0.34, g: 0.48, b: 0.12, a: 0.94}
+  cocoa: {r: 0.32, g: 0.14, b: 0.06, a: 0.94}
+  glass: {r: 0.72, g: 0.92, b: 1, a: 0.82}
+  silhouetteOutline: {r: 0.16, g: 0.11, b: 0.07, a: 0.65}
+  coffeeColorWeight: 3
+  milkColorWeight: 1
+  milkFoamColorWeight: 0.1
+  waterColorWeight: 1
+  matchaColorWeight: 1
+  cocoaColorWeight: 1
+  otherColorWeight: 1
+--- !u!1 &4739335864606401443
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 3405765820655114996}
+  - component: {fileID: 5043473569985136730}
+  m_Layer: 0
+  m_Name: GlassCupCanvas
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!224 &3405765820655114996
+RectTransform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 4739335864606401443}
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: -0.01}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children:
+  - {fileID: 2779875098182196988}
+  m_Father: {fileID: 6816666143474691262}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+  m_AnchorMin: {x: 0.5, y: 0.5}
+  m_AnchorMax: {x: 0.5, y: 0.5}
+  m_AnchoredPosition: {x: 0, y: 0}
+  m_SizeDelta: {x: 100, y: 100}
+  m_Pivot: {x: 0.5, y: 0.5}
+--- !u!223 &5043473569985136730
+Canvas:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 4739335864606401443}
+  m_Enabled: 1
+  serializedVersion: 3
+  m_RenderMode: 2
+  m_Camera: {fileID: 0}
+  m_PlaneDistance: 100
+  m_PixelPerfect: 0
+  m_ReceivesEvents: 1
+  m_OverrideSorting: 0
+  m_OverridePixelPerfect: 0
+  m_SortingBucketNormalizedSize: 0
+  m_VertexColorAlwaysGammaSpace: 0
+  m_AdditionalShaderChannelsFlag: 1
+  m_UpdateRectTransformForStandalone: 0
+  m_SortingLayerID: 0
+  m_SortingOrder: 131
+  m_TargetDisplay: 0
 --- !u!1 &4795221500503701345
 GameObject:
   m_ObjectHideFlags: 0
@@ -740,7 +963,7 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 9541d86e2fd84c1d9990edf0852d74ab, type: 3}
-  m_Name: 
+  m_Name:
   m_EditorClassIdentifier: Unity.TextMeshPro::TMPro.TextMeshPro
   m_Material: {fileID: 0}
   m_Color: {r: 1, g: 1, b: 1, a: 1}
@@ -851,8 +1074,9 @@ Transform:
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
   m_LocalPosition: {x: 0, y: 0, z: 0}
-  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_LocalScale: {x: 0.5381929, y: 0.5381929, z: 1}
   m_ConstrainProportionsScale: 0
-  m_Children: []
+  m_Children:
+  - {fileID: 3405765820655114996}
   m_Father: {fileID: 7751472638634481253}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}

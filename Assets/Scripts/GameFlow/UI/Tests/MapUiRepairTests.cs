@@ -92,9 +92,7 @@ namespace Spotlight.GameFlow.Tests
             runtimeObject = new GameObject("MapUiRepairRuntime");
             runtimeObject.SetActive(false); // Prevent Awake/Luban loading/DontDestroyOnLoad.
             runtime = runtimeObject.AddComponent<NarrativeRuntime>();
-            var config = new NarrativeConfiguration(); AddCafeNavigation(config);
-            runtime.Initialize(config, new ImmediatePresenter());
-            runtime.Actions.Mount("cafe", "cafe.enter");
+            runtime.Initialize(new NarrativeConfiguration(), new ImmediatePresenter());
             instanceProperty.GetSetMethod(true).Invoke(null, new object[] { runtime });
             root = new GameObject("MapUiRepairRoot", typeof(RectTransform));
             root.SetActive(false); // No TMP rendering, Update polling or coroutines.
@@ -198,13 +196,12 @@ namespace Spotlight.GameFlow.Tests
             Assert.That(Get<int>(grid, "constraintCount"), Is.EqualTo(3));
             Assert.That(Get<object>(grid, "constraint").ToString(), Is.EqualTo("FixedColumnCount"));
             var slots = content.Cast<Transform>().Where(t => t.name != "Empty").ToArray();
-            Assert.That(slots.Length, Is.EqualTo(Math.Max(6, itemCount + 1)), "The authoritative wallet occupies one slot without creating an inventory item.");
-            Assert.That(content.Find("MoneyBalance"), Is.Not.Null);
+            Assert.That(slots.Length, Is.EqualTo(Math.Max(6, itemCount)));
             Assert.That(slots.Count(t => t.name.StartsWith("Item_", StringComparison.Ordinal)), Is.EqualTo(itemCount));
             for (int i = 0; i < itemCount; i++)
                 Assert.That(inventory.FindSlot("item" + i), Is.Not.Null);
             var hint = content.Find("Empty");
-            Assert.That(hint, Is.Null, "The wallet projection keeps the panel populated even with no physical items.");
+            Assert.That(hint != null, Is.EqualTo(itemCount == 0));
             if (hint != null)
             {
                 Assert.That(Get<bool>(Widget(hint, "UnityEngine.UI.LayoutElement"), "ignoreLayout"), Is.True);
@@ -235,9 +232,8 @@ namespace Spotlight.GameFlow.Tests
             Assert.That(inventory.FindSlot("beans"), Is.Null);
             Assert.That(content.Find("Item_beans"), Is.Null);
             Assert.That(content.Cast<Transform>().Count(child => child.gameObject.activeSelf), Is.EqualTo(6), "Six visible slots; editor-only hint and authored template stay hidden.");
-            Assert.That(content.Find("Empty"), Is.Null);
-            Assert.That(content.Find("MoneyBalance"), Is.Not.Null);
-            Assert.That(runtime.MapInventory.GetCount("gold"), Is.Zero);
+            Assert.That(content.Find("Empty"), Is.Not.Null);
+            Assert.That(content.Find("Empty").gameObject.activeSelf, Is.False);
         }
 
         [TestCase(550f)]
@@ -257,17 +253,18 @@ namespace Spotlight.GameFlow.Tests
             Assert.That(cell.x * 3 + gap.x * 2, Is.EqualTo(Mathf.Max(1, viewport.rect.width)).Within(.001f));
         }
 
-        [Test]
-        public void CafeLocationExposesConfiguredNavigationAction()
+        [TestCase("大堂区")]
+        [TestCase("cafe")]
+        public void CafeLocationsExposeEnterCafeAndInvokeSuppliedNavigation(string position)
         {
             int calls = 0;
             CreateDetails(() => calls++);
-            details.Show("cafe", "咖啡馆");
+            details.Show(position, "大堂区");
             var content = details.transform.Find("Viewport/ActionList");
-            var enter = content.Find("Action_cafe.enter");
+            var enter = content.Find("EnterCafe");
             Assert.That(enter, Is.Not.Null, "The cafe detail must offer the scene entry.");
             Assert.That(content.Find("EmptyActionState"), Is.Null, "The cafe card replaces the empty action state.");
-            Assert.That(Get<string>(Widget(enter.Find("Name"), "TMPro.TextMeshProUGUI"), "text"), Is.EqualTo("咖啡馆"));
+            Assert.That(Get<string>(Widget(enter.Find("Name"), "TMPro.TextMeshProUGUI"), "text"), Is.EqualTo("大堂区"));
             Assert.That(Get<string>(Widget(enter.Find("Execute/Label"), "TMPro.TextMeshProUGUI"), "text"), Is.EqualTo("进入咖啡馆"));
             Assert.That(enter.Find("Execute").gameObject.activeSelf, Is.True);
             var requirement = enter.Find("Requirements/Requirement") ?? enter.Find("Requirement");
@@ -275,17 +272,15 @@ namespace Spotlight.GameFlow.Tests
                 "Scene navigation must not present NCS requirements.");
             var button = Widget(enter.Find("Execute"), "UnityEngine.UI.Button");
             Get<object>(button, "onClick").GetType().GetMethod("Invoke").Invoke(Get<object>(button, "onClick"), null);
-            Get<object>(button, "onClick").GetType().GetMethod("Invoke").Invoke(Get<object>(button, "onClick"), null);
-            Assert.That(calls, Is.EqualTo(1), "Navigation callback must not run twice while the transition is accepted.");
+            Assert.That(calls, Is.EqualTo(1));
         }
 
         [Test]
         public void CafeEntryConsumesNoActionPointsItemsOrNarrativeActions()
         {
             var beans = new NarrativeActionDefinition { actionKey = "cafe_beans", nameText = "咖啡豆特饮", requirements = "Item(beans,2);ActionPoint(1)" };
-            var config = new NarrativeConfiguration(); config.actions.Add(beans); AddCafeNavigation(config);
+            var config = new NarrativeConfiguration(); config.actions.Add(beans);
             runtime.Initialize(config, new ImmediatePresenter());
-            runtime.Actions.Mount("cafe", "cafe.enter");
             runtime.MapInventory.TryAdd("beans", 5);
             runtime.Actions.ActionPoints.Set(3);
             runtime.Actions.Mount("cafe", beans.actionKey);
@@ -294,7 +289,7 @@ namespace Spotlight.GameFlow.Tests
             int navigations = 0;
             CreateDetails(() => navigations++);
             details.Show("cafe", "咖啡馆");
-            var entry = details.transform.Find("Viewport/ActionList/Action_cafe.enter");
+            var entry = details.transform.Find("Viewport/ActionList/EnterCafe");
             Assert.That(entry, Is.Not.Null);
             var button = Widget(entry.Find("Execute"), "UnityEngine.UI.Button");
             var click = Get<object>(button, "onClick");
@@ -306,133 +301,17 @@ namespace Spotlight.GameFlow.Tests
         }
 
         [Test]
-        public void CafeNavigationWorksWithZeroPointsAndEmptyInventoryWithoutSettling()
-        {
-            runtime.Actions.ActionPoints.Set(0);
-            int navigations = 0, started = 0, settled = 0;
-            runtime.Actions.ActionStarted += _ => started++;
-            runtime.Actions.ActionFinished += (_, __) => settled++;
-            CreateDetails(() => navigations++);
-            details.Show("cafe", "咖啡馆");
-            ClickNavigation();
-            Assert.That(navigations, Is.EqualTo(1));
-            Assert.That(started, Is.Zero);
-            Assert.That(settled, Is.Zero);
-            Assert.That(runtime.Actions.GetProgress("cafe.enter"), Is.Zero);
-            Assert.That(runtime.Actions.ActionPoints.Current, Is.Zero);
-            Assert.That(runtime.MapInventory.GetCount("beans"), Is.Zero);
-            Assert.That(runtime.Actions.CurrentDay, Is.EqualTo(1));
-        }
-
-        [TestCase(false)]
-        [TestCase(true)]
-        public void CafeWithoutConfiguredOrMountedNavigationHasNoEntry(bool configured)
-        {
-            var config = new NarrativeConfiguration();
-            if (configured) AddCafeNavigation(config);
-            runtime.Initialize(config, new ImmediatePresenter());
-            CreateDetails(null);
-            details.Show("cafe", "咖啡馆");
-            Assert.That(details.transform.Find("Viewport/ActionList/Action_cafe.enter"), Is.Null);
-            Assert.That(details.transform.Find("Viewport/ActionList/EmptyActionState"), Is.Not.Null);
-        }
-
-        [TestCase("action")]
-        [TestCase("actionExecute")]
-        public void NavigationRechecksChangedConditionsBeforeCallingHost(string scope)
-        {
-            var config = new NarrativeConfiguration(); AddCafeNavigation(config);
-            config.conditionKeys.Add(new NarrativeConditionKeyDefinition { key = "entry.ready", initialValue = true });
-            config.conditions.Add(new NarrativeConditionDefinition { conditionId = "entry.condition", ownerType = scope,
-                ownerId = "cafe.enter", groupIndex = 1, condType = "BOOL_EQ", target = "entry.ready", value = "true" });
-            runtime.Initialize(config, new ImmediatePresenter()); runtime.Actions.Mount("cafe", "cafe.enter");
-            int navigations = 0; CreateDetails(() => navigations++); details.Show("cafe", "咖啡馆");
-            runtime.Controller.State.SetCondition("entry.ready", false);
-            ClickNavigation();
-            Assert.That(navigations, Is.Zero);
-            Assert.That(details.IsBusy, Is.False);
-        }
-
-        [TestCase(false)]
-        [TestCase(true)]
-        public void NavigationRejectsStaleInstanceOrNewLocationReplacement(bool replacement)
-        {
-            var config = new NarrativeConfiguration(); AddCafeNavigation(config);
-            config.actions.Add(new NarrativeActionDefinition { actionKey = "replacement", replacesLocationActions = true });
-            runtime.Initialize(config, new ImmediatePresenter()); runtime.Actions.Mount("cafe", "cafe.enter", "v1");
-            int navigations = 0; CreateDetails(() => navigations++); details.Show("cafe", "咖啡馆");
-            if (replacement) runtime.Actions.Mount("cafe", "replacement");
-            else runtime.Actions.Mount("cafe", "cafe.enter", "v2");
-            ClickNavigation();
-            Assert.That(navigations, Is.Zero);
-            Assert.That(details.IsBusy, Is.False);
-        }
-
-        [Test]
-        public void RejectedNavigationReportsReasonAndCanBeRetried()
-        {
-            CreateDetails(null);
-            int attempts = 0; string reason = null;
-            Invoke(details, "SetNavigationHandler", new Func<bool>(() => ++attempts > 1), new Action<string>(message => reason = message));
-            details.Show("cafe", "咖啡馆");
-            ClickNavigation();
-            Assert.That(details.IsBusy, Is.False);
-            Assert.That(reason, Is.Not.Null.And.Not.Empty);
-            ClickNavigation(); ClickNavigation();
-            Assert.That(attempts, Is.EqualTo(2));
-            Assert.That(details.IsBusy, Is.True);
-        }
-
-        [Test]
-        public void NavigationChecksHostControlsAndCallbackAvailability()
-        {
-            bool controlsAvailable = false; int calls = 0;
-            CreateDetails(() => calls++);
-            details.Initialize(null, () => controlsAvailable, null, () => calls++);
-            details.Show("cafe", "咖啡馆");
-            ClickNavigation(); Assert.That(calls, Is.Zero);
-            controlsAvailable = true;
-            Invoke(details, "SetNavigationHandler", null, null);
-            ClickNavigation();
-            Assert.That(calls, Is.Zero); Assert.That(details.IsBusy, Is.False);
-            Invoke(details, "SetNavigationHandler", new Func<bool>(() => { calls++; controlsAvailable = false; return true; }), null);
-            ClickNavigation(); ClickNavigation();
-            Assert.That(calls, Is.EqualTo(1));
-        }
-
-        [Test]
-        public void NavigationRejectsUnknownCommandAndRuntimeReplacement()
-        {
-            int calls = 0; CreateDetails(() => calls++); details.Show("cafe", "咖啡馆");
-            runtime.Actions.Get("cafe.enter").navigationKey = "unknown.command";
-            ClickNavigation(); Assert.That(calls, Is.Zero);
-            runtime.Actions.Get("cafe.enter").navigationKey = "cafe.enter";
-            var config = new NarrativeConfiguration(); AddCafeNavigation(config);
-            runtime.Initialize(config, new ImmediatePresenter()); runtime.Actions.Mount("cafe", "cafe.enter");
-            ClickNavigation(); Assert.That(calls, Is.Zero, "An old card cannot authorize navigation in a replacement runtime.");
-        }
-
-        private void ClickNavigation()
-        {
-            var entry = details.transform.Find("Viewport/ActionList/Action_cafe.enter");
-            Assert.That(entry, Is.Not.Null);
-            var click = Get<object>(Widget(entry.Find("Execute"), "UnityEngine.UI.Button"), "onClick");
-            click.GetType().GetMethod("Invoke").Invoke(click, null);
-        }
-
-        [Test]
         public void CafeDetailKeepsConfiguredActionsAlongsideTheEntry()
         {
             var action = new NarrativeActionDefinition { actionKey = "act_meet_b", nameText = "市场行动", requirements = "ActionPoint(1)" };
-            var config = new NarrativeConfiguration(); config.actions.Add(action); AddCafeNavigation(config);
+            var config = new NarrativeConfiguration(); config.actions.Add(action);
             runtime.Initialize(config, new ImmediatePresenter());
-            runtime.Actions.Mount("cafe", "cafe.enter");
             runtime.Actions.ActionPoints.Set(2);
             runtime.Actions.Mount("cafe", action.actionKey);
             CreateDetails(null);
             details.Show("cafe", "咖啡馆");
             var content = details.transform.Find("Viewport/ActionList");
-            Assert.That(content.Find("Action_cafe.enter"), Is.Not.Null);
+            Assert.That(content.Find("EnterCafe"), Is.Not.Null);
             Assert.That(content.Find("Action_act_meet_b"), Is.Not.Null, "Existing cafe actions stay visible.");
         }
 
@@ -450,7 +329,7 @@ namespace Spotlight.GameFlow.Tests
         }
 
         [Test]
-        public void ClampedPopupKeepsExecuteWidthVisibleAndScrollableToBottom()
+        public void ActivePageFitsEntireExecuteArtworkWhenPopupIsClamped()
         {
             var config = new NarrativeConfiguration(); config.actions.Add(new NarrativeActionDefinition { actionKey = "fit" });
             runtime.Initialize(config, new ImmediatePresenter()); runtime.Actions.Mount("cafe", "fit");
@@ -460,11 +339,6 @@ namespace Spotlight.GameFlow.Tests
             ((RectTransform)details.transform).sizeDelta = new Vector2(820, 440);
             Invoke(details, "FitVisibleCard");
             var viewport = (RectTransform)details.transform.Find("Viewport");
-            var scroll = details.GetComponentInChildren<UnityEngine.UI.ScrollRect>(true);
-            Assert.That(scroll, Is.Not.Null);
-            Assert.That(scroll.vertical, Is.True, "A clamped long card retains readable scale and can scroll.");
-            scroll.verticalNormalizedPosition = 0;
-            Canvas.ForceUpdateCanvases();
             var execute = (RectTransform)details.transform.Find("Viewport/ActionList/Action_fit/Execute");
             var corners = new Vector3[4]; execute.GetWorldCorners(corners);
             foreach (Vector3 corner in corners)
@@ -498,25 +372,25 @@ namespace Spotlight.GameFlow.Tests
         }
 
         [Test]
-        public void ReplacingMandatoryActionHidesCafeEntryUntilStoryCompletesAndOpeningUnrenderedDetailsDoesNotMarkSeen()
+        public void ReplacingMandatoryActionHidesCafeEntryAndOpeningUnrenderedDetailsDoesNotMarkSeen()
         {
             var story = new NarrativeActionDefinition { actionKey = "generic.intro", type = NarrativeActionType.Once, mustExecute = true,
                 replacesLocationActions = true, focusLocationOnComplete = true };
             var ordinary = new NarrativeActionDefinition { actionKey = "generic.activity", requirements = "ActionPoint(1)" };
-            var config = new NarrativeConfiguration(); config.actions.Add(story); config.actions.Add(ordinary); AddCafeNavigation(config);
+            var config = new NarrativeConfiguration(); config.actions.Add(story); config.actions.Add(ordinary);
             runtime.Initialize(config, new ImmediatePresenter());
-            runtime.Actions.Mount("cafe", "cafe.enter");
             runtime.Actions.Mount("cafe", ordinary.actionKey); runtime.Actions.Mount("cafe", story.actionKey);
             runtime.Actions.ActionPoints.Set(0);
             int navigation = 0; CreateDetails(() => navigation++); details.Show("cafe", "咖啡馆");
             var content = details.transform.Find("Viewport/ActionList");
-            Assert.That(content.Find("Action_cafe.enter"), Is.Null);
+            Assert.That(content.Find("EnterCafe"), Is.Null);
             Assert.That(content.Find("Action_generic.activity"), Is.Null);
             Assert.That(content.Find("Action_generic.intro"), Is.Not.Null);
             Assert.That(runtime.Actions.HasUnseenActions("cafe"), Is.True, "An inactive hierarchy has never actually displayed the card.");
+            Invoke(details, "OnEnterCafe"); Assert.That(navigation, Is.Zero);
             Assert.That(runtime.Actions.Execute(story.actionKey), Is.True); details.Refresh();
             details.Show("cafe", "咖啡馆");
-            Assert.That(content.Find("Action_cafe.enter"), Is.Not.Null);
+            Assert.That(content.Find("EnterCafe"), Is.Not.Null);
             Assert.That(content.Find("Action_generic.activity"), Is.Not.Null);
             Assert.That(runtime.Actions.PendingFocusPosition, Is.EqualTo("cafe"));
         }
@@ -536,20 +410,12 @@ namespace Spotlight.GameFlow.Tests
         }
 
         [Test]
-        public void OtherLocationsDoNotExposeCafeNavigationAction()
+        public void OtherLocationsDoNotExposeEnterCafe()
         {
             CreateDetails(null);
             details.Show("library", "图书馆");
-            Assert.That(details.transform.Find("Viewport/ActionList/Action_cafe.enter"), Is.Null);
+            Assert.That(details.transform.Find("Viewport/ActionList/EnterCafe"), Is.Null);
             Assert.That(details.transform.Find("Viewport/ActionList/EmptyActionState"), Is.Not.Null);
-        }
-
-        [Test]
-        public void MarketDisplayNameDoesNotMakeItCafe()
-        {
-            CreateDetails(null);
-            details.Show("market", "大堂区");
-            Assert.That(details.transform.Find("Viewport/ActionList/Action_cafe.enter"), Is.Null);
         }
 
         [Test]
@@ -663,46 +529,6 @@ namespace Spotlight.GameFlow.Tests
             Assert.That(segments.childCount, Is.Zero, "Unbounded counts do not synthesize replacement artwork.");
         }
 
-        [Test]
-        public void SixLongRequirementsOverrideNoWrapTemplateAndKeepExecuteBelowContent()
-        {
-            var config = new NarrativeConfiguration();
-            var action = new NarrativeActionDefinition { actionKey = "layout", executionKind = NarrativeActionExecutionKind.Exchange,
-                nameText = "layout.name", descText = "layout.desc", requirements = "Item(first,1);Item(second,1);Item(third,1);Money(1);ActionPoint(1)",
-                successResultOwnerId = "layout.reward" };
-            config.actions.Add(action);
-            config.texts.Add(new NarrativeTextDefinition { key = action.nameText, content = "排版验收" });
-            config.texts.Add(new NarrativeTextDefinition { key = action.descText, content = new string('长', 180) });
-            foreach (var key in new[] { "first", "second", "third" })
-            {
-                config.items.Add(new NarrativeItemDefinition { itemKey = key, nameText = key + ".name" });
-                config.texts.Add(new NarrativeTextDefinition { key = key + ".name", content = new string('物', 60) });
-            }
-            config.conditions.Add(new NarrativeConditionDefinition { conditionId = "layout.eligibility", ownerType = "actionExecute",
-                ownerId = action.actionKey, groupIndex = 1, condType = "ITEM_GTE", target = "first", value = "1" });
-            config.results.Add(new NarrativeResultDefinition { resultId = "layout.gain", eventId = action.successResultOwnerId,
-                resultType = NarrativeResultType.ItemAdd, target = "first", value = "1" });
-            runtime.Initialize(config, new ImmediatePresenter()); runtime.Actions.Mount("test", action.actionKey);
-            CreateDetails(null);
-            var template = details.transform.Find("Viewport/ActionList/ActionCardTemplate");
-            foreach (var label in template.GetComponentsInChildren(UiType("TMPro.TextMeshProUGUI"), true))
-            {
-                var property = label.GetType().GetProperty("textWrappingMode");
-                property.SetValue(label, Enum.Parse(property.PropertyType, "NoWrap"));
-            }
-            AddText("需要shortcuts", template, "需要");
-            details.Show("test", "排版验收");
-            var card = details.transform.Find("Viewport/ActionList/Action_layout");
-            var slots = card.Cast<Transform>().Where(child => child.name.StartsWith("Requirement_")).ToArray();
-            Assert.That(slots.Length, Is.EqualTo(6));
-            foreach (var area in slots.Select(slot => slot.GetChild(0)).Concat(new[] { card.Find("Description"), card.Find("ExchangeOutcome") }))
-                Assert.That(Get<object>(Widget(area, "TMPro.TextMeshProUGUI"), "textWrappingMode").ToString(), Is.EqualTo("Normal"));
-            Assert.That(card.Find("需要shortcuts").gameObject.activeSelf, Is.False);
-            Assert.That(((RectTransform)slots[0]).rect.height, Is.GreaterThan(84));
-            var execute = (RectTransform)card.Find("Execute");
-            Assert.That(-execute.anchoredPosition.y, Is.GreaterThan(-((RectTransform)slots[5]).anchoredPosition.y + ((RectTransform)slots[5]).rect.height));
-        }
-
         [TestCase(1600f, 1200f, 550f, 850f)]
         [TestCase(90f, 200f, 34f, 140f)]
         public void SidebarInitializationSizesInactivePanelAndDisablesInteraction(float width, float height, float expectedWidth, float expectedHeight)
@@ -730,16 +556,6 @@ namespace Spotlight.GameFlow.Tests
             typeof(MapActionInventoryView).GetField("showEditorPreview", PrivateInstance).SetValue(view, false);
             typeof(MapActionInventoryView).GetMethod("Initialize").Invoke(view, new object[] { null });
             return view;
-        }
-
-        private static void AddCafeNavigation(NarrativeConfiguration config)
-        {
-            if (config.actions.Any(action => action.actionKey == "cafe.enter")) return;
-            config.actions.Add(new NarrativeActionDefinition { actionKey = "cafe.enter", executionKind = NarrativeActionExecutionKind.Navigate,
-                navigationKey = "cafe.enter", nameText = "test.cafe.name", descText = "test.cafe.desc", executeTextKey = "test.cafe.execute", notifyNew = false });
-            config.texts.Add(new NarrativeTextDefinition { key = "test.cafe.name", content = "咖啡馆" });
-            config.texts.Add(new NarrativeTextDefinition { key = "test.cafe.desc", content = "进入咖啡馆" });
-            config.texts.Add(new NarrativeTextDefinition { key = "test.cafe.execute", content = "进入咖啡馆" });
         }
 
         private void CreateDetails(Action cafe)

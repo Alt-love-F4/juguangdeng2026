@@ -35,15 +35,6 @@ public sealed partial class NcsActionEntry : Luban.BeanBase
         DeliveryMode = (string)_obj.GetValue("deliveryMode");
         ReplacesLocationActions = (bool)_obj.GetValue("replacesLocationActions");
         FocusLocationOnComplete = (bool)_obj.GetValue("focusLocationOnComplete");
-        ExecutionKind = (string)_obj.GetValue("executionKind");
-        NavigationKey = (string)_obj.GetValue("navigationKey");
-        ExecuteTextKey = (string)_obj.GetValue("executeTextKey");
-        ExecuteTextKey_Ref = null;
-        SortOrder = (int)_obj.GetValue("sortOrder");
-        SuccessResultOwnerId = (string)_obj.GetValue("successResultOwnerId");
-        OnExpireEvents = (string)_obj.GetValue("onExpireEvents");
-        OnExpirePolicy = (string)_obj.GetValue("onExpirePolicy");
-        NotifyNew = (bool)_obj.GetValue("notifyNew");
     }
 
     public static NcsActionEntry DeserializeNcsActionEntry(JToken _buf)
@@ -66,15 +57,6 @@ public sealed partial class NcsActionEntry : Luban.BeanBase
     public readonly string DeliveryMode;
     public readonly bool ReplacesLocationActions;
     public readonly bool FocusLocationOnComplete;
-    public readonly string ExecutionKind;
-    public readonly string NavigationKey;
-    public readonly string ExecuteTextKey;
-    public TextEntry ExecuteTextKey_Ref;
-    public readonly int SortOrder;
-    public readonly string SuccessResultOwnerId;
-    public readonly string OnExpireEvents;
-    public readonly string OnExpirePolicy;
-    public readonly bool NotifyNew;
 
 
     public const int __ID__ = 1131081662;
@@ -84,7 +66,6 @@ public sealed partial class NcsActionEntry : Luban.BeanBase
     {
         NameText_Ref = tables.TbText.GetOrDefault(NameText);
         DescText_Ref = tables.TbText.GetOrDefault(DescText);
-        ExecuteTextKey_Ref = tables.TbText.GetOrDefault(ExecuteTextKey);
     }
 
     public override string ToString()
@@ -103,14 +84,6 @@ public sealed partial class NcsActionEntry : Luban.BeanBase
         + "deliveryMode:" + DeliveryMode + ","
         + "replacesLocationActions:" + ReplacesLocationActions + ","
         + "focusLocationOnComplete:" + FocusLocationOnComplete + ","
-        + "executionKind:" + ExecutionKind + ","
-        + "navigationKey:" + NavigationKey + ","
-        + "executeTextKey:" + ExecuteTextKey + ","
-        + "sortOrder:" + SortOrder + ","
-        + "successResultOwnerId:" + SuccessResultOwnerId + ","
-        + "onExpireEvents:" + OnExpireEvents + ","
-        + "onExpirePolicy:" + OnExpirePolicy + ","
-        + "notifyNew:" + NotifyNew + ","
         + "}";
     }
 }

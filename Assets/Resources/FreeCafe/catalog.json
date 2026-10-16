@@ -49,7 +49,7 @@
       "label": "咖啡豆",
       "artId": "beans",
       "capabilities": 5,
-      "width": 0.65,
+      "width": 0.9,
       "height": 0.65
     },
     {
@@ -57,8 +57,8 @@
       "label": "咖啡粉",
       "artId": "grounds",
       "capabilities": 5,
-      "width": 0.65,
-      "height": 0.65
+      "width": 1.35,
+      "height": 0.8
     },
     {
       "id": "coffee",

@@ -2,6 +2,7 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using NUnit.Framework;
+using TMPro;
 using UnityEngine;
 using UnityEngine.TestTools;
 using UnityEngine.UI;
@@ -72,6 +73,28 @@ namespace Spotlight.GameFlow.Tests
             panel.Continue();
             yield return null;
             Assert.That(completions, Is.EqualTo(1));
+        }
+
+        [UnityTest]
+        public IEnumerator DateChangeTearsOffYesterdayAndShowsOnlyCalendarDate()
+        {
+            DateChangePanel panel = Open<DateChangePanel>();
+            panel.SetDates("王国纪元 670年12月31日", "王国纪元 671年1月1日");
+            TMP_Text Text(string path) => panel.transform.Find("Content/Calendar/" + path).GetComponent<TMP_Text>();
+            Assert.That(Text("OldPage/Day").text, Is.EqualTo("31"));
+            Assert.That(Text("OldPage/Month").text, Is.EqualTo("十二月"));
+            Assert.That(Text("NewPage/Day").text, Is.EqualTo("1"));
+            Assert.That(Text("NewPage/Month").text, Is.EqualTo("一月"));
+            Assert.That(Text("NewPage/MonthLatin").text, Is.EqualTo("JANVIER"));
+
+            panel.Play(null);
+            yield return null;
+            // The year plate starts on yesterday's year and flips mid-transition.
+            Assert.That(Text("Header").text, Is.EqualTo("王国纪元 670年"));
+            yield return WaitFor(() => !panel.IsPlaying);
+            Assert.That(Text("Header").text, Is.EqualTo("王国纪元 671年"));
+            foreach (TMP_Text text in panel.GetComponentsInChildren<TMP_Text>(true))
+                Assert.That(text.text, Does.Not.Contain(":"), "Date transition must not show clock time: " + text.name);
         }
 
         [UnityTest]

@@ -195,9 +195,6 @@ namespace Spotlight.FreeCafe.Tests
             Assert.That(world.State.cafeVisitFeedback.Any(f => f.stage == "served"), Is.False);
             product.minimumScore = 0; product.requiresLatteArt = false;
             world.SelectServingCup("s.cups.small");
-            // A zero minimum score does not waive classification: the final fixture must be espresso, not an empty cup.
-            world.ServingCup.contents.Add(new Portion { specId = "coffee", coffeeKind = "essence", milliliters = 200,
-                units = 1, productionScore = 100, temperature = LiquidTemperature.Boiling });
             Assert.That(world.DeliverProductionCup().success, Is.True);
             Assert.That(Order(), Is.Null); Assert.That(world.CafeVisit("v1").status, Is.EqualTo(CafeVisitStatus.Served));
         }

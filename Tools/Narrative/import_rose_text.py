@@ -176,7 +176,4 @@ def stage(event):
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument('--event', choices=SOURCES, required=True)
-    from rose_write_guard import source_write_guard
-    event = parser.parse_args().event
-    with source_write_guard('import Text ' + event):
-        stage(event)
+    stage(parser.parse_args().event)

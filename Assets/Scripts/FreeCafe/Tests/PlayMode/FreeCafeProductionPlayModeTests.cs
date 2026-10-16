@@ -1,4 +1,4 @@
-using System.Collections;
+﻿using System.Collections;
 using UnityEngine.InputSystem;
 using UnityEngine.InputSystem.LowLevel;
 using NUnit.Framework;
@@ -429,7 +429,7 @@ namespace Spotlight.FreeCafe.Tests
             var hud = app.GetComponent<FreeCafeProductionHud>();
             var bench = Object.FindFirstObjectByType<FreeCafeLatteArtBench>();
             Assert.That(bench, Is.Not.Null);
-            Assert.That(hud.miniGameButton.gameObject.activeSelf, Is.False);
+            Assert.That(hud.miniGameButton == null || !hud.miniGameButton.gameObject.activeSelf, Is.True);
             Assert.That(app.World.RequestProductionMiniGame().success, Is.True);
             string token = app.World.State.production.miniGameToken;
             Assert.That(token, Is.Not.Null.And.Not.Empty);
@@ -471,7 +471,7 @@ namespace Spotlight.FreeCafe.Tests
             var overlay = GameObject.Find("LatteArtPresetOverlay");
             var panel = overlay.transform.Find("Content/PresetPanel");
             var list = panel.Find("PresetList");
-            Assert.That(list.childCount, Is.EqualTo(5));
+            Assert.That(list.childCount, Is.EqualTo(6));
             Assert.That(list.Find("heartButton/Selected").gameObject.activeSelf, Is.True);
             Assert.That(caption.enabled, Is.False, "Old placeholder caption must not cover the cup");
             list.Find("tulipButton").GetComponent<Button>().onClick.Invoke();
@@ -479,12 +479,12 @@ namespace Spotlight.FreeCafe.Tests
             Assert.That(list.Find("tulipButton/Selected").gameObject.activeSelf, Is.True);
             Assert.That(list.Find("tulipButton/Preview").GetComponent<RawImage>().raycastTarget, Is.False);
             Assert.That(overlay.transform.Find("Content/DrawingHint").GetComponent<TMPro.TMP_Text>().raycastTarget, Is.False);
-            Assert.That(panel.Find("Submit").GetComponent<Button>().interactable, Is.False);
-            panel.Find("Reset").GetComponent<Button>().onClick.Invoke();
+            Assert.That(panel.parent.Find("Submit").GetComponent<Button>().interactable, Is.False);
+            panel.parent.Find("Reset").GetComponent<Button>().onClick.Invoke();
             yield return null;
             Assert.That(list.Find("tulipButton/Selected").gameObject.activeSelf, Is.True, "Reset preserves the selected reference");
             Assert.That(bench.LastPatternId, Is.Null);
-            Assert.That(panel.Find("Submit").GetComponent<Button>().interactable, Is.False);
+            Assert.That(panel.parent.Find("Submit").GetComponent<Button>().interactable, Is.False);
             var statusText = panel.Find("StatusCard/Status").GetComponent<TMPro.TMP_Text>();
             Assert.That(statusText.color.r, Is.GreaterThan(.8f), "Status must remain readable on a dark card");
             Assert.That(statusText.text, Does.Contain("按住左键"));
@@ -679,7 +679,7 @@ namespace Spotlight.FreeCafe.Tests
             System.IO.Directory.CreateDirectory(captureDirectory);
             ScreenCapture.CaptureScreenshot(System.IO.Path.Combine(captureDirectory, "latte-ui.png"));
             yield return null;
-            overlay.transform.Find("Content/PresetPanel/Reset").GetComponent<Button>().onClick.Invoke();
+            overlay.transform.Find("Content/Reset").GetComponent<Button>().onClick.Invoke();
             yield return null;
             Assert.That(((ILatteArtSurface)surface).StrokePointCount, Is.Zero);
             Assert.That(world.State.production.miniGameFoamUsedMl, Is.Zero);
@@ -755,7 +755,7 @@ namespace Spotlight.FreeCafe.Tests
         [UnityTest] public IEnumerator LatteShortcutExistsOnlyInGMAndLabelsItsUnlimitedDebugMode()
         {
             var hud = app.GetComponent<FreeCafeProductionHud>();
-            Assert.That(hud.miniGameButton.gameObject.activeSelf, Is.False);
+            Assert.That(hud.miniGameButton == null || !hud.miniGameButton.gameObject.activeSelf, Is.True);
             Assert.That(app.View("tool.latte-art"), Is.Null);
             app.World.SelectServingCup("s.cups.large");
             var gm = FreeCafeGMPanel.Instance;

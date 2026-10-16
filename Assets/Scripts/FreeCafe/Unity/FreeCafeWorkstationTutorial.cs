@@ -31,12 +31,25 @@ namespace Spotlight.FreeCafe
         private FreeCafeTutorialPanel panel;
         private readonly List<Image> trail = new List<Image>();
         private GameObject retry;
+        private FreeCafePortal entryPortal;
+        private Collider2D entryHitbox;
+        private bool showingWorkstationEntry;
         public bool IsRunning { get; private set; }
         public Stage CurrentStage => stage;
         public bool IsFirstCafeTutorial => IsRunning && firstCafeTutorial;
         public bool CanSubmitCup => !IsRunning || !firstCafeTutorial || stage == Stage.SubmitCup;
         private CafeWorld W => app.World;
-        public void Initialize(FreeCafeRuntime owner) { app = owner; }
+        public void Initialize(FreeCafeRuntime owner)
+        {
+            app = owner;
+            foreach (var portal in app.areaRoots[(int)AreaId.Cafe].GetComponentsInChildren<FreeCafePortal>(true))
+            {
+                if (portal.runtime != app || portal.destination != AreaId.Counter) continue;
+                entryPortal = portal;
+                entryHitbox = portal.GetComponent<Collider2D>();
+                break;
+            }
+        }
 
         private string FindSpec(string spec) => W.State.entities.Find(e => e.area == AreaId.Counter && e.specId == spec)?.id;
         private string FindSource(string spec) => W.State.entities.Find(e => e.area == AreaId.Counter && W.Spec(e.specId).Has(Capability.Source) && W.Spec(e.specId).sourceItemId == spec)?.id;
@@ -78,6 +91,7 @@ namespace Spotlight.FreeCafe
                 if (cup == null) { Restore(original); return false; }
             }
             if (essence) W.AttachExtractionFilter(filter, extractor);
+            showingWorkstationEntry = false;
             IsRunning = true;
             if (canvas == null) BuildUI();
             panel.exitButton.gameObject.SetActive(!firstCafeTutorial);
@@ -109,7 +123,7 @@ namespace Spotlight.FreeCafe
 
         private void Stop(bool refreshViews)
         {
-            if (!IsRunning) return;
+            if (!IsRunning) { HideWorkstationEntry(); return; }
             IsRunning = false;
             if (restoreOnStop) Restore(original, refreshViews);
             else
@@ -184,7 +198,7 @@ namespace Spotlight.FreeCafe
         private bool Has(string id, string spec) => W.Find(id)?.contents.Exists(p => p.specId == spec) == true;
         private void LateUpdate()
         {
-            if (!IsRunning) return;
+            if (!IsRunning) { DrawWorkstationEntry(); return; }
             if (W.State.currentArea != AreaId.Counter) { Stop(); return; }
             canvas.gameObject.SetActive(!app.TutorialInputBlocked);
             if (!app.InputBlocked)
@@ -273,6 +287,84 @@ namespace Spotlight.FreeCafe
                 else Begin(mode);
             });
         }
+        private void HideWorkstationEntry()
+        {
+            if (!showingWorkstationEntry) return;
+            showingWorkstationEntry = false;
+            if (canvas != null) canvas.gameObject.SetActive(false);
+        }
+
+        private void DrawWorkstationEntry()
+        {
+            if (app == null || W == null || !app.CafeTutorialWaitingForWorkstation
+                || W.State.currentArea != AreaId.Cafe || app.TutorialInputBlocked)
+            {
+                HideWorkstationEntry();
+                return;
+            }
+            if (entryPortal == null || !entryPortal.isActiveAndEnabled
+                || entryPortal.visual == null || !entryPortal.visual.enabled || !entryPortal.visual.gameObject.activeInHierarchy
+                || entryHitbox == null || !entryHitbox.isActiveAndEnabled
+                || app.worldCamera == null || !app.worldCamera.isActiveAndEnabled
+                || !app.IsCurrentAreaTransform(entryPortal.transform) || !app.CanEnterArea(AreaId.Counter))
+            {
+                HideWorkstationEntry();
+                return;
+            }
+            if (canvas == null) BuildUI();
+            showingWorkstationEntry = true;
+            canvas.gameObject.SetActive(true);
+            shade.enabled = false;
+            retry.SetActive(false);
+            panel.exitButton.gameObject.SetActive(false);
+            heading.text = "咖啡馆 · 新手教程";
+            instruction.text = "点击场景中的箭头标志，进入工作台为首位客人制作黑咖啡";
+            errorText.text = "跟随鼠标光标提示进入工作台 · 完成教程后才能正式营业";
+            gesture.gameObject.SetActive(true);
+            gestureText.text = "点击箭头\n进入工作台";
+            panel.SetMouseMode(false, false);
+
+            var bounds = entryPortal.visual.bounds;
+            Vector3 screenCenter = app.worldCamera.WorldToScreenPoint(bounds.center);
+            if (screenCenter.z <= 0 || screenCenter.x < 0 || screenCenter.x > Screen.width
+                || screenCenter.y < 0 || screenCenter.y > Screen.height)
+            {
+                HideWorkstationEntry();
+                return;
+            }
+            Vector2 min = new Vector2(float.PositiveInfinity, float.PositiveInfinity);
+            Vector2 max = new Vector2(float.NegativeInfinity, float.NegativeInfinity);
+            for (int i = 0; i < 4; i++)
+            {
+                Vector3 corner = new Vector3((i & 1) == 0 ? bounds.min.x : bounds.max.x,
+                    (i & 2) == 0 ? bounds.min.y : bounds.max.y, bounds.center.z);
+                Vector2 screen = app.worldCamera.WorldToScreenPoint(corner);
+                min = Vector2.Min(min, screen);
+                max = Vector2.Max(max, screen);
+            }
+            Vector2 center = screenCenter;
+            float scale = canvas.scaleFactor;
+            float badgeX = min.x - 145 * scale;
+            if (badgeX < 165 * scale) badgeX = max.x + 145 * scale;
+            gesture.position = new Vector2(
+                Mathf.Clamp(badgeX, 165 * scale, Mathf.Max(165 * scale, Screen.width - 165 * scale)),
+                Mathf.Clamp(center.y, 80 * scale, Mathf.Max(80 * scale, Screen.height - 80 * scale)));
+            float pulse = Mathf.Repeat(Time.unscaledTime * .8f, 1);
+            Vector2 radius = (max - min) * .5f + Vector2.one * ((12 + pulse * 14) * scale);
+            for (int i = 0; i < trail.Count; i++)
+            {
+                var dot = trail[i];
+                dot.enabled = true;
+                float angle = i * Mathf.PI * 2 / trail.Count;
+                dot.rectTransform.position = center + new Vector2(Mathf.Cos(angle) * radius.x, Mathf.Sin(angle) * radius.y);
+                dot.rectTransform.sizeDelta = Vector2.one * (i == 0 ? panel.trailHeadSize : panel.trailSize);
+                dot.rectTransform.localRotation = Quaternion.Euler(0, 0, 45);
+                var tint = panel.trailColor;
+                tint.a *= 1 - pulse * .7f;
+                dot.color = tint;
+            }
+        }
+
         private Vector2 ScreenPoint(string id)
         {
             var view = app.View(id); return view != null ? (Vector2)app.worldCamera.WorldToScreenPoint(view.transform.position) : new Vector2(Screen.width * .5f, Screen.height * .5f);

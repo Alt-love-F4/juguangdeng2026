@@ -3,7 +3,7 @@ using UnityEngine.UI;
 
 namespace Spotlight.GameFlow
 {
-    /// <summary>One Image, three cup walls and a gravity-aligned, damped liquid surface.</summary>
+    /// <summary>Gravity-aligned liquid in a container silhouette, with an adjustable inward outline.</summary>
     [ExecuteAlways, DisallowMultipleComponent, RequireComponent(typeof(Image))]
     [AddComponentMenu("Spotlight/UI/Gravity Liquid Image")]
     public sealed class GravityLiquidImage : BaseMeshEffect
@@ -20,8 +20,15 @@ namespace Spotlight.GameFlow
         [Tooltip("Sprite alpha always clips the result. Set this above zero to also use its RGB.")]
         [SerializeField, Range(0f, 1f)] private float textureInfluence;
 
-        [Header("Three walls / open top")]
-        [Tooltip("Thickness relative to the Image's height. Left, right and bottom only.")]
+        [Header("Container silhouette (optional)")]
+        [Tooltip("Alpha defines the vessel cavity, excluding handles/stands. Enable Read/Write for area-correct fill.")]
+        [SerializeField] private Texture2D containerMask;
+        [Tooltip("Generated masks store signed distance in R; turn off for a regular alpha mask.")]
+        [SerializeField] private bool maskIsDistanceField;
+        [SerializeField, Min(0.001f)] private float maskDistanceRange = 0.125f;
+
+        [Header("Container outline / fallback three walls")]
+        [Tooltip("Inward distance relative to Image height. Follows mask edges; unmasked Images use three walls.")]
         [SerializeField, Range(0f, 0.15f)] private float wallThickness = 0.02f;
         [SerializeField] private Color wallColor = new Color(0.7f, 0.9f, 1f, 0.65f);
         [Tooltip("Runtime only: lose liquid when the flat surface exceeds the lower mouth corner. No droplets simulation.")]
@@ -55,6 +62,7 @@ namespace Spotlight.GameFlow
         private Vector2 previousPosition, previousVelocity;
         private float previousRotation;
         private bool missingMaterialReported;
+        private readonly LiquidMaskGeometry maskGeometry = new LiquidMaskGeometry();
 
         private static readonly int RectId = Shader.PropertyToID("_ContainerRect");
         private static readonly int BoundsId = Shader.PropertyToID("_LiquidBounds");
@@ -66,6 +74,26 @@ namespace Spotlight.GameFlow
         private static readonly int SurfaceId = Shader.PropertyToID("_SurfaceColor");
         private static readonly int WallColorId = Shader.PropertyToID("_WallColor");
         private static readonly int TextureId = Shader.PropertyToID("_TextureInfluence");
+
+        private static readonly int MaskId = Shader.PropertyToID("_ContainerMask");
+        private static readonly int UseMaskId = Shader.PropertyToID("_UseContainerMask");
+        private static readonly int MaskSdfId = Shader.PropertyToID("_MaskIsSDF");
+        private static readonly int MaskRangeId = Shader.PropertyToID("_MaskDistanceRange");
+
+        public Texture2D ContainerMask => containerMask;
+        public float WallThickness => wallThickness;
+        public void ConfigureContainerMask(Texture2D mask, bool signedDistance, float distanceRange, float inset)
+        {
+            inset = Mathf.Clamp(inset, 0f, 0.15f);
+            distanceRange = Mathf.Max(0.001f, distanceRange);
+            if (containerMask == mask && maskIsDistanceField == signedDistance &&
+                Mathf.Approximately(maskDistanceRange, distanceRange) && Mathf.Approximately(wallThickness, inset)) return;
+            containerMask = mask;
+            maskIsDistanceField = signedDistance;
+            maskDistanceRange = distanceRange;
+            wallThickness = inset;
+            if (isActiveAndEnabled) RefreshVisual();
+        }
 
         public float FillAmount
         {
@@ -296,6 +324,8 @@ namespace Spotlight.GameFlow
             float aspect = Mathf.Max(rect.width, 0.001f) / Mathf.Max(rect.height, 0.001f);
             float wall = Mathf.Clamp(wallThickness, 0f, Mathf.Min(aspect * 0.49f, 0.49f));
             InnerBounds = Rect.MinMaxRect(-aspect * 0.5f + wall, -0.5f + wall, aspect * 0.5f - wall, 0.5f);
+            bool shaped = containerMask != null && maskGeometry.Configure(containerMask, maskIsDistanceField, maskDistanceRange, wall, aspect);
+            if (shaped) InnerBounds = maskGeometry.Bounds;
             Vector2 worldUp = new Vector2(Mathf.Sin(surfaceAngle), Mathf.Cos(surfaceAngle));
             // Covector transformation accounts for non-uniform scaling and mirrored transforms, not just Z rotation.
             Vector3 basisX = transform.TransformVector(Vector3.right);
@@ -304,10 +334,12 @@ namespace Spotlight.GameFlow
             SurfaceNormal = normal.sqrMagnitude > 0.000001f ? normal.normalized : Vector2.up;
             if (Application.isPlaying && allowSpilling && spillDeltaTime > 0f)
             {
-                float capacity = LiquidContainerMath.OpenTopCapacity(InnerBounds, SurfaceNormal);
+                float capacity = shaped ? maskGeometry.OpenTopCapacity(SurfaceNormal)
+                    : LiquidContainerMath.OpenTopCapacity(InnerBounds, SurfaceNormal);
                 if (currentFill > capacity) currentFill = Mathf.MoveTowards(currentFill, capacity, spillRate * spillDeltaTime);
             }
-            SurfaceOffset = LiquidContainerMath.SolveSurfaceOffset(InnerBounds, SurfaceNormal, currentFill);
+            SurfaceOffset = shaped ? maskGeometry.SolveSurfaceOffset(SurfaceNormal, currentFill)
+                : LiquidContainerMath.SolveSurfaceOffset(InnerBounds, SurfaceNormal, currentFill);
             Vector4 drawing = new Vector4(rect.center.x, rect.center.y, rect.width, rect.height);
             Vector4 bounds = new Vector4(InnerBounds.xMin, InnerBounds.yMin, InnerBounds.xMax, InnerBounds.yMax);
             Vector4 plane = new Vector4(SurfaceNormal.x, SurfaceNormal.y, SurfaceOffset, currentFill);
@@ -331,6 +363,10 @@ namespace Spotlight.GameFlow
             material.SetColor(SurfaceId, surfaceColor);
             material.SetColor(WallColorId, wallColor);
             material.SetFloat(TextureId, textureInfluence);
+            material.SetTexture(MaskId, containerMask != null ? containerMask : Texture2D.whiteTexture);
+            material.SetFloat(UseMaskId, containerMask != null ? 1f : 0f);
+            material.SetFloat(MaskSdfId, maskIsDistanceField ? 1f : 0f);
+            material.SetFloat(MaskRangeId, maskDistanceRange);
         }
     }
 }

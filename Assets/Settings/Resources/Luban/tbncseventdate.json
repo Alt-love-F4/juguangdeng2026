@@ -19,47 +19,5 @@
     "timeSlot": "morning",
     "repeatRule": "once",
     "priority": 0
-  },
-  {
-    "eventId": "neutral.1010.s1",
-    "day": 5,
-    "timeSlot": "morning",
-    "repeatRule": "once",
-    "priority": 100
-  },
-  {
-    "eventId": "neutral.1010.s2",
-    "day": 5,
-    "timeSlot": "morning",
-    "repeatRule": "once",
-    "priority": 90
-  },
-  {
-    "eventId": "neutral.1013.s2",
-    "day": 8,
-    "timeSlot": "morning",
-    "repeatRule": "once",
-    "priority": 100
-  },
-  {
-    "eventId": "neutral.1018.s1.schedule",
-    "day": 13,
-    "timeSlot": "morning",
-    "repeatRule": "once",
-    "priority": 100
-  },
-  {
-    "eventId": "neutral.1018.s1.notice.recommendation",
-    "day": 14,
-    "timeSlot": "morning",
-    "repeatRule": "once",
-    "priority": 100
-  },
-  {
-    "eventId": "neutral.1018.s1.notice.advertisement",
-    "day": 14,
-    "timeSlot": "morning",
-    "repeatRule": "once",
-    "priority": 100
   }
 ]

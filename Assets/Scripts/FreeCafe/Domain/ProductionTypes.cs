@@ -152,6 +152,15 @@ namespace Spotlight.FreeCafe
         }
     }
 
+    public readonly struct CafeMachineProgress
+    {
+        public readonly bool active;
+        public readonly float remaining, duration;
+        public float Fraction => duration > 0 ? Math.Max(0, Math.Min(1, 1 - remaining / duration)) : 0;
+        public CafeMachineProgress(bool active, float remaining, float duration)
+        { this.active=active; this.remaining=remaining; this.duration=duration; }
+    }
+
     public readonly struct ProductionQuality
     {
         public readonly float extraction, liquid, order, sweetness, concentration, total;

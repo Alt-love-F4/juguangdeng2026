@@ -10,18 +10,11 @@ using UnityEngine.InputSystem;
 namespace Spotlight.FreeCafe
 {
     /// <summary>Owns domain world and input transaction; never creates the legacy gameplay controller.</summary>
-    public sealed class FreeCafeRuntime : MonoBehaviour, IDayFlowGameplayEndpoint, ICafeTutorialGameplayEndpoint, IDayFlowBusinessEntryEndpoint
+    public sealed class FreeCafeRuntime : MonoBehaviour, IDayFlowGameplayEndpoint, ICafeTutorialGameplayEndpoint
     {
         public const string SaveId="freecafe.world.v1";
         public bool DayFlowBusinessActive => World != null && World.State.businessPhase == BusinessPhase.Open;
         public bool DayFlowBusinessFinished => World != null && World.State.businessPhase == BusinessPhase.Night;
-        public bool NarrativeBusinessEntryReady => isActiveAndEnabled && dayFlow != null && gameFlow != null
-            && gameFlow.SessionState == GameSessionState.Playing && dayFlow.State == DayFlowState.FreeCafeBusiness
-            && !CafeTutorialActive && DayFlowBusinessActive && World.State.open
-            && !pendingBusinessStart && !IsDragging && !InputBlocked && !BusinessSimulationPaused
-            && cafeVisits != null && cafeVisits.Ready && !cafeVisits.HasStageHandoff
-            && (GameSaveParticipantRegistry.PendingRestore == null
-                || !GameSaveParticipantRegistry.PendingRestore.Exists(p => p != null && p.Id == SaveId));
 
         public bool productionMode = true;
         [Tooltip("可选身份适配器，必须实现 ICafeCustomerIdentitySource；不负责启动剧情。") ]
@@ -44,6 +37,7 @@ namespace Spotlight.FreeCafe
         public bool ShowAssetIds { get; set; }
         public bool IsDragging => draggedView!=null;
         public FreeEntityView DraggedView => draggedView;
+        public bool IsDraggingOutputFrom(string entityId) => draggedView != null && dragMachineId == entityId;
         public FreeCafeWorkstationTutorial WorkstationTutorial { get; private set; }
         public bool PracticeTutorialActive => WorkstationTutorial != null && WorkstationTutorial.IsRunning;
         private CafeTutorialSession cafeTutorial;
@@ -63,6 +57,7 @@ namespace Spotlight.FreeCafe
         private DayFlowController dayFlow;
         private GameFlowBootstrap gameFlow;
         public event Action ViewChanged;
+        public event Action<CafeDeliveryReceipt> CupDelivered;
         private readonly Dictionary<string,FreeEntityView> views=new Dictionary<string,FreeEntityView>();
         private readonly HashSet<string> inactiveAuthoredIds=new HashSet<string>();
         private FreeCafeSpawnScale spawnScale;
@@ -327,6 +322,14 @@ namespace Spotlight.FreeCafe
                 return ActionResult.No("请先按照教程完成黑咖啡，并把杯子放入交付区");
             bool tutorialOrder = CafeTutorialActive && cafeTutorial != null && cafeTutorial.WaitingForCoffee
                 && World.State.focusedRequestId == CafeWorld.TutorialOrderId;
+            var request = World.Request(World.State.focusedRequestId);
+            var cup = World.ServingCup;
+            var product = request == null ? null : World.Product(request.productId);
+            var quality = cup != null && product != null ? World.EvaluateProduction(cup, product) : default;
+            string productName = product == null ? "咖啡" : FreeCafeProductionText.Recipe(product.label);
+            var customer = request == null ? null : World.Find(request.customerId);
+            string customerName = customer == null ? "顾客" : World.PersonName(customer);
+            int moneyBefore = World.State.money, reputationBefore = World.State.reputation;
             var result=World.DeliverProductionCup();
             Report(result);
             if (tutorialOrder && result.success && result.feedback == CafeFeedbackKind.DeliverySatisfied)
@@ -335,6 +338,10 @@ namespace Spotlight.FreeCafe
                 NotifyTutorialStepCompleted(CafeTutorialSession.TutorialId, CafeTutorialSession.CoffeeSignal);
                 ShowHint("首位客人的黑咖啡已交付！新手教程结束，现在可以点击「启动营业」并进入正常流程。");
             }
+            if (result.success)
+                CupDelivered?.Invoke(new CafeDeliveryReceipt(productName, customerName, quality,
+                    World.State.money - moneyBefore, World.State.reputation - reputationBefore,
+                    result.feedback, result.message));
             return result;
         }
         public void Inspect(string id)
@@ -344,7 +351,7 @@ namespace Spotlight.FreeCafe
             var entity=World.Find(id); if(entity==null) return;
             var spec=World.Spec(entity.specId);
             string info=spec.label;
-            if(World.ProductionEnabled && (World.IsProductionVessel(entity) || spec.Has(Capability.Container)))
+            if(World.ProductionEnabled && (World.IsProductionVessel(entity) || spec.Has(Capability.Container) || spec.Has(Capability.Processor)))
             {
                 var liquid=World.LiquidSnapshot(entity);
                 ContainerPanels?.Inspect(id);
@@ -479,6 +486,13 @@ namespace Spotlight.FreeCafe
                 dragSourceId=entity.id;
                 draggedView=CreateEntityView(spec.sourceItemId,World.State.currentArea); draggedView.name="UncommittedPickup";
                 draggedView.Bind(this,new WorldEntity { specId=spec.sourceItemId,area=entity.area,x=entity.x,y=entity.y },true);
+                if(entity.specId=="source.beans" && view.body!=null && view.body.sprite!=null)
+                {
+                    var bagBounds=view.body.sprite.bounds;
+                    var bagMouth=bagBounds.center+Vector3.up*(bagBounds.size.y*.22f);
+                    draggedView.TeleportPresentation(view.body.transform.TransformPoint(bagMouth));
+                    draggedView.PlayPickupReveal();
+                }
                 if(World.ProductionEnabled && World.Spec(spec.sourceItemId).Has(Capability.Container))
                 {
                     // A cup-stack pickup is still provisional until release, but it
@@ -496,14 +510,9 @@ namespace Spotlight.FreeCafe
                 draggedView.Bind(this,output,true);
                 if (entity.specId == "machine.grinder")
                 {
-                    var drawer = artLibrary.Resolve("equipment.grinder.drawer", "default");
-                    if (drawer != null)
-                    {
-                        draggedView.body.sprite = drawer;
-                        var size = drawer.bounds.size;
-                        float fit = Mathf.Min(.85f / size.x, .65f / size.y);
-                        draggedView.body.transform.localScale = new Vector3(fit, fit, 1);
-                    }
+                    // Grounds use the same filled-drawer artwork in flight and after placement.
+                    var grinderVisual = view.GetComponent<FreeCafeGrinderVisual>();
+                    if (grinderVisual != null) draggedView.TeleportPresentation(grinderVisual.DrawerWorldPosition);
                 }
             }
             else if(spec.Has(Capability.Movable)) { dragItemId=entity.id; draggedView=view; SelectedId=entity.id; }

@@ -29,8 +29,6 @@ namespace Spotlight.Narrative
         private readonly List<string> selectedChoices = new List<string>();
         private NarrativeAbilityCheckSnapshot activeAbilityCheck;
         private string activeAbilityCheckId;
-        private readonly Dictionary<string, bool> attributeChoiceResults = new Dictionary<string, bool>(StringComparer.Ordinal);
-        private readonly Dictionary<NarrativeConditionDefinition, int> attributeConditionValues = new Dictionary<NarrativeConditionDefinition, int>();
         private bool resumeActiveAbilityCheck;
         private readonly Dictionary<NarrativeTriggerDefinition, int> triggerRows = new Dictionary<NarrativeTriggerDefinition, int>();
         private uint randomSeed = 0x6D2B79F5;
@@ -61,7 +59,6 @@ namespace Spotlight.Narrative
         {
             CompleteEntryAtSafeBoundary();
             PumpCafeBoundary();
-            PumpServiceCheckpoint();
             if (dispatchingSafeCallbacks) return;
             dispatchingSafeCallbacks = true;
             try
@@ -176,7 +173,7 @@ namespace Spotlight.Narrative
                 throw new InvalidOperationException("Synchronize the official day before scheduling it.");
             if (!IsSafeBoundary || IsBusy) throw new InvalidOperationException("Schedule the official day after pending narrative operations finish.");
             // A formal day is a fresh scheduling boundary. Existing queued requests have drained.
-            pendingEvents.Clear(); RetainCheckpointPending();
+            pendingEvents.Clear();
             turnOpen = true;
             turnEnding = resumeBoundary = false;
             transactionDepth = 0;
@@ -204,7 +201,6 @@ namespace Spotlight.Narrative
             state.ConditionsChanged += OnStoreChanged;
             this.presenter = presenter ?? new ImmediateNarrativePresenter();
             if (this.presenter is INarrativePresentationCancellation cancellation) cancellation.Cancelled += OnPresentationCancelled;
-            if (this.presenter is INarrativePresentationCheckpoints checkpoints) checkpoints.CheckpointReached += OnCheckpointReached;
             BuildIndexes();
             valueBaselineReady = !configuration.bars.Any(b => b.sourceMode == NarrativeSourceMode.External);
         }
@@ -216,7 +212,7 @@ namespace Spotlight.Narrative
             if (IsEnded || turnOpen || IsBusy) return;
             turnOpen = true;
             transactionDepth = 0;
-            pendingEvents.Clear(); RetainCheckpointPending();
+            pendingEvents.Clear();
         }
 
         public void EndTurn()
@@ -278,14 +274,9 @@ namespace Spotlight.Narrative
             if (condition.notFlag || !string.IsNullOrWhiteSpace(condition.op) || string.IsNullOrWhiteSpace(target)) throw Invalid();
             switch (type)
             {
-                case "PRESENTATION":
-                    return EvaluateResultPresentationCondition(condition);
                 case "BOOL_EQ":
                     if (!state.TryGetCondition(condition.target, out bool fact) || !bool.TryParse(condition.value, out bool expected)) throw Invalid();
                     return fact == expected;
-                case "ATTRIBUTE_GTE":
-                    if (!int.TryParse(condition.value, System.Globalization.NumberStyles.Integer, System.Globalization.CultureInfo.InvariantCulture, out int attributeThreshold)) throw Invalid();
-                    return ReadConditionAttribute(condition) >= attributeThreshold;
                 case "ITEM_GTE":
                     if (inventory == null || !int.TryParse(condition.value, out int count) || count < 0) throw Invalid();
                     return inventory.GetCount(target) >= count;
@@ -315,23 +306,6 @@ namespace Spotlight.Narrative
             }
         }
 
-        private bool IsActiveAttributeChoice(string ownerType, string ownerId) => activePresentation
-            && string.Equals(ownerType, "choice", StringComparison.OrdinalIgnoreCase)
-            && configuration.choices.Exists(c => c != null && c.choiceId == ownerId && ChoiceBelongsToActiveSetup(c));
-
-        private int ReadConditionAttribute(NarrativeConditionDefinition condition)
-        {
-            bool cache = IsActiveAttributeChoice(condition.ownerType, condition.ownerId);
-            if (cache && attributeConditionValues.TryGetValue(condition, out int cached)) return cached;
-            if (!configuration.abilityNameKeys.ContainsKey(condition.target ?? string.Empty))
-                throw new InvalidOperationException("Unknown player attribute: " + condition.target);
-            if (AbilityReader == null) throw new InvalidOperationException("Player attribute reader is unavailable.");
-            var value = AbilityReader(condition.target);
-            if (!value.ready) throw new InvalidOperationException("Player attribute is unavailable: " + condition.target);
-            if (cache) attributeConditionValues.Add(condition, value.value);
-            return value.value;
-        }
-
         public bool EvaluateConditions(string ownerType, string ownerId, NarrativeConditionContext context = null)
         {
             if (!conditionsByOwner.TryGetValue(OwnerKey(ownerType, ownerId), out List<NarrativeConditionDefinition> conditions))
@@ -339,20 +313,13 @@ namespace Spotlight.Narrative
                 if (string.Equals(ownerType, "ending", StringComparison.OrdinalIgnoreCase)) throw new InvalidOperationException("Ending has no conditions: " + ownerId);
                 return true;
             }
-            if (string.Equals(ownerType, "result", StringComparison.OrdinalIgnoreCase))
-                return EvaluateResultConditions(conditions, context);
-            bool cache = IsActiveAttributeChoice(ownerType, ownerId)
-                && conditions.Exists(c => string.Equals(c.condType?.Trim(), "ATTRIBUTE_GTE", StringComparison.OrdinalIgnoreCase));
-            if (cache && attributeChoiceResults.TryGetValue(ownerId, out bool cached)) return cached;
             var groups = new Dictionary<int, bool>();
             foreach (NarrativeConditionDefinition condition in conditions)
             {
                 bool value = EvaluateCondition(condition, context);
                 groups[condition.groupIndex] = groups.TryGetValue(condition.groupIndex, out bool previous) ? previous && value : value;
             }
-            bool passed = groups.Values.Any(value => value);
-            if (cache) attributeChoiceResults.Add(ownerId, passed);
-            return passed;
+            return groups.Values.Any(value => value);
         }
 
         public bool SelectChoice(string choiceId)
@@ -470,7 +437,6 @@ namespace Spotlight.Narrative
             if (!CanCaptureSnapshot && !safeDraft) throw new InvalidOperationException("NCS snapshots cannot be captured during an atomic result transaction; save after EventCompleted.");
             NarrativeSnapshot snapshot = state.Capture();
             CaptureCafeVisits(snapshot);
-            snapshot.checkpoint = CaptureCheckpoint();
             snapshot.selectedEndingId = SelectedEndingId;
             snapshot.officialDayVersion = migrateOfficialDay ? 0 : 1;
             snapshot.officialDayProcessed = officialDayProcessed;
@@ -522,7 +488,7 @@ namespace Spotlight.Narrative
             entryCompleted = null; entryFailed = false;
             presentationEpoch++;
             queue.Clear(); pendingEvents.Clear(); changes.Clear(); selectedChoices.Clear(); pendingEffects.Clear(); safeCallbacks.Clear(); draining = false;
-            inlineAbilityChecks.Clear(); attributeChoiceResults.Clear(); attributeConditionValues.Clear();
+            inlineAbilityChecks.Clear();
             activeAbilityCheck = CloneAbilityCheck(snapshot.activeAbilityCheck);
             activeAbilityCheckId = snapshot.activeAbilityCheckId ?? activeAbilityCheck?.checkId;
             resumeActiveAbilityCheck = snapshot.active != null && activeAbilityCheck != null;
@@ -535,12 +501,8 @@ namespace Spotlight.Narrative
             randomSeed = snapshot.randomSeed == 0 ? 0x6D2B79F5 : snapshot.randomSeed;
             turnOpen = snapshot.turnOpen; turnEnding = snapshot.turnEnding;
             if (snapshot.turnEvents != null) foreach (string id in snapshot.turnEvents) if (!string.IsNullOrEmpty(id)) pendingEvents.Add(id);
-            RestoreCheckpoint(snapshot.checkpoint);
-            bool checkpointWasActive = checkpoint != null && snapshot.active?.requestId == checkpoint.root.requestId;
-            if (checkpointWasActive) { activeEntry = null; entryCompleted = null; ClearPresentationCaches(); }
-            if (snapshot.active != null && !checkpointWasActive) RestoreRequest(snapshot.active, true);
-            if (snapshot.pending != null) foreach (NarrativePendingValue saved in snapshot.pending)
-                if (checkpoint == null || saved?.requestId != checkpoint.root.requestId) RestoreRequest(saved, false);
+            if (snapshot.active != null) RestoreRequest(snapshot.active, true);
+            if (snapshot.pending != null) foreach (NarrativePendingValue saved in snapshot.pending) RestoreRequest(saved, false);
             if (snapshot.changes != null) foreach (NarrativeBarChange change in snapshot.changes) if (change != null && state.GetDefinition(state.ResolveRelation(change.key) ?? change.key) != null) changes.Add(change);
             if (snapshot.pendingEffects != null) foreach (NarrativeResultDefinition effect in snapshot.pendingEffects)
                 if (effect != null && effect.resultType == NarrativeResultType.PlaySetup) { pendingEffects.Add(CloneEffect(effect)); NotifyEffect(effect); }
@@ -550,7 +512,7 @@ namespace Spotlight.Narrative
 
         private NarrativePendingValue ToSaved(NarrativeEventRequest request)
         {
-            var saved = new NarrativePendingValue { eventId = request.Event.eventId, triggerId = request.Trigger?.triggerId, requestId = request.RequestId, passiveHint = request.PassiveHint, resumePageId = request.ResumePageId, depth = request.Depth, timeSlot = request.Context?.TimeSlot ?? TimeSlot, location = request.Context?.Location ?? Location, candidate = CloneCandidate(request.Candidate), cafeVisit = request.CafeVisit?.Copy() };
+            var saved = new NarrativePendingValue { eventId = request.Event.eventId, triggerId = request.Trigger?.triggerId, requestId = request.RequestId, passiveHint = request.PassiveHint, depth = request.Depth, timeSlot = request.Context?.TimeSlot ?? TimeSlot, location = request.Context?.Location ?? Location, candidate = CloneCandidate(request.Candidate) };
             if (request.SelectedChoices != null) saved.selectedChoices.AddRange(request.SelectedChoices);
             return saved;
         }
@@ -559,7 +521,7 @@ namespace Spotlight.Narrative
             if (saved == null || saved.depth < 0 || saved.depth > 3 || !events.TryGetValue(saved.eventId ?? string.Empty, out NarrativeEventDefinition definition)) return;
             NarrativeTriggerDefinition trigger = configuration.triggers.Find(t => t != null && t.triggerId == saved.triggerId);
             var context = Context(definition); context.TimeSlot = saved.timeSlot; context.Location = saved.location ?? Location;
-            queue.Enqueue(new NarrativeEventRequest(definition, trigger, saved.depth, saved.selectedChoices == null ? null : saved.selectedChoices.ToArray(), context, saved.requestId, saved.passiveHint, candidate: CloneCandidate(saved.candidate), resumePageId: saved.resumePageId, cafeVisit: saved.cafeVisit));
+            queue.Enqueue(new NarrativeEventRequest(definition, trigger, saved.depth, saved.selectedChoices == null ? null : saved.selectedChoices.ToArray(), context, saved.requestId, saved.passiveHint, candidate: CloneCandidate(saved.candidate)));
             pendingEvents.Add(definition.eventId);
         }
         private static string OwnerKey(string type, string id) => (string.IsNullOrWhiteSpace(type) ? "event" : type.Trim().ToLowerInvariant()) + ":" + id;
@@ -715,7 +677,6 @@ namespace Spotlight.Narrative
             queue.Clear(); pendingEvents.Clear(); pendingEffects.Clear(); safeCallbacks.Clear();
             selectedChoices.Clear();
             activeRequest = default;
-            checkpoint = null; checkpointResuming = false;
             activeAbilityCheck = null;
             activeAbilityCheckId = null;
             processing = activePresentation = draining = false;
@@ -735,10 +696,7 @@ namespace Spotlight.Narrative
             {
                 presentationEpoch++;
                 // Manual requests are retryable by a NEW explicit request, not by automatic promotion.
-                bool retainedRoot = IsCheckpointContinuation(activeRequest);
-                if (retainedRoot) { PreserveCheckpointSegment(); checkpoint.serviceResumeBlocked = true; }
-                long failedCandidate = retainedRoot ? -1 : activeRequest.Candidate?.sequence ?? 0;
-                checkpointResuming = false;
+                long failedCandidate = activeRequest.Candidate?.sequence ?? 0;
                 candidates.RemoveAll(c => c.source == NarrativeCandidateSource.Manual &&
                     (c.sequence == failedCandidate || (terminal || hostUnavailable) && queue.Any(r => r.Candidate?.sequence == c.sequence)));
                 FailEntryBatch();
@@ -746,7 +704,7 @@ namespace Spotlight.Narrative
                 activeRequest = default;
                 activeAbilityCheck = null;
                 activeAbilityCheckId = null;
-                inlineAbilityChecks.Clear(); attributeChoiceResults.Clear(); attributeConditionValues.Clear();
+                inlineAbilityChecks.Clear();
                 selectedChoices.Clear(); pendingEffects.Clear();
                 if (terminal) presenterUnavailable = true;
                 if (terminal || hostUnavailable)
@@ -760,13 +718,12 @@ namespace Spotlight.Narrative
                 if (!string.IsNullOrEmpty(failedEvent))
                 {
                     pendingEvents.Remove(failedEvent);
-                    RetainCheckpointPending();
                     CompleteCafeHook(failedEvent);
                     try { EventFailed?.Invoke(failedEvent, "presentation_cancelled: " + reason); }
                     catch (Exception error) { Debug.LogException(error); }
                 }
             }
-            finally { RetainCheckpointPending(); pumping = wasPumping; }
+            finally { pumping = wasPumping; }
             // During Play's synchronous callback the outer pump owns continuation.
             if (!pumping && !settling) ProcessQueue();
         }
@@ -808,14 +765,10 @@ namespace Spotlight.Narrative
                 {
                     activeRequest = queue.Dequeue();
                     // Eligibility never bypasses fresh locks, completion, Hold values or date/phase constraints.
-                    bool checkpointContinuation = IsCheckpointContinuation(activeRequest);
-                    if (checkpointContinuation ? !CheckpointCanResume()
-                        : !EventCanStart(activeRequest.Event) || activeRequest.Candidate != null && !CanStartCandidate(activeRequest.Candidate)
-                            || EventRequiresServiceContext(activeRequest.Event) && !ValidServiceContext(activeRequest.CafeVisit))
+                    if (!EventCanStart(activeRequest.Event) || activeRequest.Candidate != null && !CanStartCandidate(activeRequest.Candidate))
                     {
                         var rejected = activeRequest;
                         pendingEvents.Remove(rejected.Event.eventId);
-                        if (checkpointContinuation) { checkpointResuming = false; FailEntryBatch(); RetainCheckpointPending(); }
                         if (rejected.Event.entry == NarrativeEntryPoint.MapAction || rejected.Candidate?.source == NarrativeCandidateSource.Manual || rejected.Candidate?.source == NarrativeCandidateSource.Continuation)
                         {
                             if (rejected.Candidate?.source == NarrativeCandidateSource.Continuation) FailEntryBatch();
@@ -825,18 +778,17 @@ namespace Spotlight.Narrative
                         continue;
                     }
                     selectedChoices.Clear();
-                    if (checkpointContinuation) RestoreCheckpointCaches();
-                    if (!checkpointContinuation && !resumeActiveAbilityCheck && (activeRequest.SelectedChoices == null || activeRequest.SelectedChoices.Count == 0))
+                    if (!resumeActiveAbilityCheck && (activeRequest.SelectedChoices == null || activeRequest.SelectedChoices.Count == 0))
                     {
                         activeAbilityCheck = null;
                         activeAbilityCheckId = null;
-                        inlineAbilityChecks.Clear(); attributeChoiceResults.Clear(); attributeConditionValues.Clear();
+                        inlineAbilityChecks.Clear();
                     }
                     resumeActiveAbilityCheck = false;
                     if (activeRequest.SelectedChoices != null) selectedChoices.AddRange(activeRequest.SelectedChoices);
                     activePresentation = true;
-                    long epoch = activePresentationToken = ++presentationEpoch;
-                    NarrativeEventRequest request = new NarrativeEventRequest(activeRequest.Event, activeRequest.Trigger, activeRequest.Depth, selectedChoices.ToArray(), activeRequest.Context, activeRequest.RequestId, activeRequest.PassiveHint, candidate: activeRequest.Candidate, resumePageId: activeRequest.ResumePageId, presentationToken: epoch, cafeVisit: activeRequest.CafeVisit);
+                    long epoch = ++presentationEpoch;
+                    NarrativeEventRequest request = new NarrativeEventRequest(activeRequest.Event, activeRequest.Trigger, activeRequest.Depth, selectedChoices.ToArray(), activeRequest.Context, activeRequest.RequestId, activeRequest.PassiveHint, candidate: activeRequest.Candidate);
                     // A broken presenter is not treated as successful: its active request remains saveable.
                     try { presenter.Play(request, () => { if (epoch == presentationEpoch && activePresentation) CompleteEvent(request); }); }
                     catch (Exception error)
@@ -882,71 +834,23 @@ namespace Spotlight.Narrative
             }
             try
             {
-                // Freeze eligibility before any result mutates formal state; Inline guards only read visited snapshots.
-                batch.RemoveAll(result => !EvaluateConditions("result", result.resultId, request.Context));
-                NarrativeActionRootCommit actionCommit = ActionRootCommit?.Invoke(request.Event.eventId);
-                long actionPoints = 0;
-                if (actionCommit != null)
-                {
-                    if (!(actionCommit.canCommit?.Invoke() ?? true)) throw new InvalidOperationException("Action eligibility changed during presentation.");
-                    actionPoints = actionCommit.costs.Where(c => c.type == NarrativeActionRequirementType.ActionPoint).Sum(c => (long)c.value);
-                    if (actionCommit.points == null || actionPoints > actionCommit.points.Current)
-                        throw new InvalidOperationException("Insufficient action points at root commit.");
-                    batch.InsertRange(0, ActionCostResults(actionCommit.costs));
-                    if (!string.IsNullOrWhiteSpace(actionCommit.resultOwner))
-                    {
-                        if (!resultsByEvent.TryGetValue(actionCommit.resultOwner, out var actionResults))
-                            throw new InvalidOperationException("Unknown action success result owner: " + actionCommit.resultOwner);
-                        foreach (var result in actionResults)
-                            if (!batch.Contains(result) && EvaluateConditions("result", result.resultId, request.Context)) batch.Add(result);
-                    }
-                }
                 PreflightResults(batch, out var boolValues, out var itemCounts, out int? moneyBefore, out int? moneyAfter);
-                if (actionCommit != null && moneyBefore.HasValue && !(MoneyAccount is INarrativeMoneyNotificationScope))
-                    throw new InvalidOperationException("Money provider cannot defer action transaction notifications.");
-                int actionPointsBefore = actionCommit?.points?.Current ?? 0;
-                bool rootCommitted = false;
                 BeginOperation();
-                try
-                {
-                using ((MoneyAccount as INarrativeMoneyNotificationScope)?.DeferNotifications())
+                if (moneyBefore.HasValue && !MoneyAccount.TryCommit(moneyBefore.Value, moneyAfter.Value, out string moneyError))
+                    throw new InvalidOperationException("Money batch rejected: " + moneyError);
+                // Both stores expose only the completed bool/item batch to change listeners.
                 using (inventory?.DeferNotifications())
-                using (actionCommit?.points?.DeferNotifications())
-                using (state.DeferConditionNotifications())
                 {
-                    if (moneyBefore.HasValue && !MoneyAccount.TryCommit(moneyBefore.Value, moneyAfter.Value, out string moneyError))
-                        throw new InvalidOperationException("Money batch rejected: " + moneyError);
-                    if (actionCommit != null && actionCommit.points.Current < actionPoints)
-                    {
-                        if (moneyBefore.HasValue && !MoneyAccount.TryCommit(moneyAfter.Value, moneyBefore.Value, out string restoreError))
-                            throw new InvalidOperationException("Cannot restore rejected action wallet: " + restoreError);
-                        actionCommit.points.Set(actionPointsBefore);
-                        throw new InvalidOperationException("Action points changed during wallet commit.");
-                    }
                     if (itemCounts.Count > 0 && !inventory.TryApplyCounts(itemCounts)) throw new InvalidOperationException("Inventory rejected validated result batch.");
                     state.CommitConditions(boolValues);
-                    foreach (var result in batch) ApplyResult(result);
-                    state.MarkEventHappened(request.Event.eventId);
-                    CommitCandidate(request);
-                    if (actionCommit != null)
-                    {
-                        actionCommit.points.TryConsume((int)actionPoints);
-                        actionCommit.committed?.Invoke();
-                    }
-                    rootCommitted = true;
                 }
-                }
-                catch (Exception notificationError) when (rootCommitted)
-                {
-                    // Payment, results and root cursor already committed; observer failures
-                    // cannot report a failed root and replay its effects on retry.
-                    Debug.LogException(notificationError);
-                }
-                if (IsCheckpointRoot(request)) { checkpoint = null; checkpointResuming = false; }
+                foreach (var result in batch) ApplyResult(result);
+                state.MarkEventHappened(request.Event.eventId);
+                CommitCandidate(request);
                 activePresentation = false;
                 activeAbilityCheck = null;
                 activeAbilityCheckId = null;
-                inlineAbilityChecks.Clear(); attributeChoiceResults.Clear(); attributeConditionValues.Clear();
+                inlineAbilityChecks.Clear();
                 selectedChoices.Clear();
                 EndOperation();
                 DrainSettledValueChanges();
@@ -955,22 +859,15 @@ namespace Spotlight.Narrative
             }
             catch (Exception error)
             {
-                // Release this root's transaction before an action failure handler closes its
-                // outer operation. Otherwise that handler closes the wrong nested operation.
-                while (operationDepth > entryOperationDepth) EndOperation();
                 Debug.LogError($"[NCS] Event {request.Event.eventId} result transaction failed: {error.Message}");
                 try { EventFailed?.Invoke(request.Event.eventId, error.Message); }
                 catch (Exception listenerError) { Debug.LogException(listenerError); }
                 if (activeEntry.HasValue || request.Event.entry != NarrativeEntryPoint.Immediate)
                 {
-                    PreserveCheckpointSegment();
                     FailEntryBatch();
                     presentationEpoch++; activePresentation = processing = false;
                     pendingEvents.Remove(request.Event.eventId);
-                    checkpointResuming = false;
-                    if (checkpoint != null) checkpoint.serviceResumeBlocked = true;
-                    RetainCheckpointPending();
-                    activeAbilityCheck = null; activeAbilityCheckId = null; inlineAbilityChecks.Clear(); attributeChoiceResults.Clear(); attributeConditionValues.Clear(); selectedChoices.Clear();
+                    activeAbilityCheck = null; activeAbilityCheckId = null; inlineAbilityChecks.Clear(); selectedChoices.Clear();
                 }
                 else return; // Preserve legacy transaction-failure inspection/recovery.
             }

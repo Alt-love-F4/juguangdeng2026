@@ -55,8 +55,6 @@ namespace Spotlight.GameFlow
         private bool tutorialTestSkipSubmitted;
         private bool awaitingNarrativeEntry;
         private int narrativeEntryVersion;
-        private bool hasNarrativeRetry;
-        private NarrativeEntryPoint narrativeRetryEntry;
         public bool IsNarrativeEntryActive => awaitingNarrativeEntry;
         private NarrativeRuntime firstDayCheckRuntime;
         private bool waitingForFirstDayPerceptionBranch;
@@ -142,11 +140,8 @@ namespace Spotlight.GameFlow
         {
             if (!SessionAllowsPlay) return;
             HideForMainMenu();
-            roseBusinessEntry.Reset();
             // The GameFlow session owns identity; reopening this flow must not reset it.
             day = 1;
-            narrativeBusinessToken = null;
-            hasNarrativeRetry = false;
             newSessionFirstDay = true;
             firstDayCafeTutorialStarted = false;
             firstDayCafeTutorialCompleted = false;
@@ -289,31 +284,11 @@ namespace Spotlight.GameFlow
             });
         }
 
-        private readonly RoseBusinessEntry roseBusinessEntry = new RoseBusinessEntry();
-
-        private bool RoseBusinessReady => SessionAllowsPlay && running && State == DayFlowState.FreeCafeBusiness
-            && day == 7 && Time.timeScale > 0f && endpointOwner != null && endpointOwner.isActiveAndEnabled
-            && gameplayEndpoint is IDayFlowBusinessEntryEndpoint businessEntry
-            && gameplayEndpoint.DayFlowBusinessActive && businessEntry.NarrativeBusinessEntryReady
-            && !PresentationPauseRegistry.IsPaused && !DialoguePanel.IsAnyPlaying;
-
-        /// <summary>Explicit retry after an interrupted chapter; never auto-replays on the next frame.</summary>
-        public bool TryRetryRoseBusinessEntry()
-        {
-            var controller = NarrativeRuntime.Instance?.Controller;
-            if (!RoseBusinessReady || controller == null || !controller.IsSafeBoundary || controller.IsBusy) return false;
-            return roseBusinessEntry.TryRetry(controller, day, true);
-        }
-
         private void Update()
         {
             if (!SessionAllowsPlay || Time.timeScale == 0f || !running || State != DayFlowState.FreeCafeBusiness) return;
-            if (RoseBusinessReady) roseBusinessEntry.TryRequest(NarrativeRuntime.Instance?.Controller, day, true);
             // Do not let an endpoint's old state bypass an unfinished presentation.
-            if (endpointOwner != null && gameplayEndpoint.DayFlowBusinessActive)
-                narrativeBusinessObservedOpen = true;
-            if (endpointOwner != null && gameplayEndpoint.DayFlowBusinessFinished
-                && (string.IsNullOrEmpty(narrativeBusinessToken) || narrativeBusinessObservedOpen))
+            if (endpointOwner != null && gameplayEndpoint.DayFlowBusinessFinished)
                 FinishBusiness();
         }
 
@@ -645,19 +620,10 @@ namespace Spotlight.GameFlow
             message = "已跳过所有教程，进入首杯黑咖啡交付完成后的准备阶段；可打开地图或手动开始营业，日期不变。";
             return true;
         }
-        private string narrativeBusinessToken;
-        private bool narrativeBusinessObservedOpen;
-        private MonoBehaviour narrativeBusinessOwner;
 
         private void StartFreeCafeBusiness()
         {
             if (!SessionAllowsPlay || !running) return;
-            var narrativeController = NarrativeRuntime.Instance?.Controller;
-            if (narrativeController?.BusinessCheckpointConfirmed == true)
-            {
-                RunNarrativeEntry(NarrativeEntryPoint.AfterBusiness, EnterCityMap);
-                return;
-            }
             IDayFlowGameplayEndpoint endpoint = FindGameplayEndpoint();
             if (endpoint == null)
             {
@@ -673,17 +639,9 @@ namespace Spotlight.GameFlow
                     panel => panel.ShowUnavailable());
                 return;
             }
-            if (narrativeController?.HasPendingBusinessCheckpoint == true)
-            {
-                if (!narrativeController.TryBeginCheckpointBusiness(day, out narrativeBusinessToken)) return;
-            }
-            else narrativeBusinessToken = null;
             SetState(DayFlowState.FreeCafeBusiness);
             ShowGameplayPanel();
-            narrativeBusinessOwner = string.IsNullOrEmpty(narrativeBusinessToken) ? null : endpointOwner;
-            narrativeBusinessObservedOpen = false;
             endpoint.StartDayFlowBusiness();
-            narrativeBusinessObservedOpen = endpoint.DayFlowBusinessActive;
             if (IsCafeTutorialActive)
             {
                 PlayCafeTutorialContent(CafeTutorialSession.WorkstationStep, presentationVersion, null);
@@ -695,24 +653,7 @@ namespace Spotlight.GameFlow
         {
             if (!SessionAllowsPlay || !CanFinishBusiness) return;
             IDayFlowGameplayEndpoint endpoint = FindGameplayEndpoint();
-            // A chapter receipt requires an observed real Open cycle; stale Night or a
-            // deferred start is not a completed business. Manual close may end an open cycle.
-            if (!string.IsNullOrEmpty(narrativeBusinessToken)
-                && (endpoint == null || !narrativeBusinessObservedOpen
-                    || narrativeBusinessOwner == null || narrativeBusinessOwner != endpointOwner)) return;
-            if (string.IsNullOrEmpty(narrativeBusinessToken) || !endpoint.DayFlowBusinessFinished)
-                endpoint?.EndDayFlowBusiness();
-            if (!string.IsNullOrEmpty(narrativeBusinessToken) && !endpoint.DayFlowBusinessFinished) return;
-            if (!string.IsNullOrEmpty(narrativeBusinessToken))
-            {
-                if (NarrativeRuntime.Instance?.Controller?.ConfirmCheckpointBusiness(day, narrativeBusinessToken) != true)
-                {
-                    Debug.LogError("[DayFlow] Business receipt rejected; chapter checkpoint remains blocked.", this);
-                    return;
-                }
-                narrativeBusinessToken = null;
-                narrativeBusinessOwner = null;
-            }
+            endpoint?.EndDayFlowBusiness();
             HideBusinessControls();
             HideGameplayPanel();
             SetState(DayFlowState.PreLeisure);
@@ -807,18 +748,6 @@ namespace Spotlight.GameFlow
             var actions = Spotlight.Narrative.NarrativeRuntime.Instance?.Actions;
             if (awaitingNarrativeEntry || (NarrativeRuntime.Instance?.Controller?.IsBusy ?? false)) return;
             if (actions != null && actions.IsExecuting) return;
-            if (NarrativeRuntime.Instance?.Controller?.BusinessCheckpointConfirmed == true)
-            {
-                RunNarrativeEntry(NarrativeEntryPoint.AfterBusiness, EnterCityMap);
-                return;
-            }
-            if (NarrativeRuntime.Instance?.Controller?.HasPendingBusinessCheckpoint == true)
-            {
-                var map = FindFirstObjectByType<MapSceneController>();
-                map?.FocusNarrativeCheckpointCafe();
-                map?.ShowBlockingActionHint("请先前往咖啡馆完成今天的经营，剧情将在经营后继续。");
-                return;
-            }
             if (actions != null && actions.HasBlockingActions())
             {
                 var map = FindFirstObjectByType<MapSceneController>();
@@ -845,7 +774,7 @@ namespace Spotlight.GameFlow
                 {
                     if (!SessionAllowsPlay || !running || token != narrativeEntryVersion) return;
                     awaitingNarrativeEntry = false;
-                    if (success) { hasNarrativeRetry = false; next(); }
+                    if (success) next();
                     else RetryNarrativeEntry(entry, next);
                 }))
                 {
@@ -857,8 +786,6 @@ namespace Spotlight.GameFlow
 
         private void RetryNarrativeEntry(NarrativeEntryPoint entry, Action next)
         {
-            hasNarrativeRetry = true;
-            narrativeRetryEntry = entry;
             if (entry == NarrativeEntryPoint.BeforeNight)
             {
                 EnterCityMap();
@@ -1047,10 +974,6 @@ namespace Spotlight.GameFlow
             public int day = 1;
             public string previousDate = InitialDate;
             public DayFlowState state = DayFlowState.DateTransition;
-            public string narrativeBusinessToken;
-            public bool narrativeBusinessObservedOpen;
-            public bool hasNarrativeRetry;
-            public NarrativeEntryPoint narrativeRetryEntry;
             public bool firstDayIntroductionCompleted;
             public bool firstDayCafeTutorialStarted;
             public bool firstDayCafeTutorialCompleted;
@@ -1058,9 +981,7 @@ namespace Spotlight.GameFlow
 
         public string CaptureJson() => JsonUtility.ToJson(new SaveState
         {
-            day = day, previousDate = previousDate, state = State, narrativeBusinessToken = narrativeBusinessToken,
-            narrativeBusinessObservedOpen = narrativeBusinessObservedOpen,
-            hasNarrativeRetry = hasNarrativeRetry, narrativeRetryEntry = narrativeRetryEntry,
+            day = day, previousDate = previousDate, state = State,
             firstDayIntroductionCompleted = firstDayIntroductionCompleted,
             firstDayCafeTutorialStarted = firstDayCafeTutorialStarted,
             firstDayCafeTutorialCompleted = firstDayCafeTutorialCompleted
@@ -1071,14 +992,7 @@ namespace Spotlight.GameFlow
             SaveState saved = JsonUtility.FromJson<SaveState>(json);
             if (saved == null) return;
             HideForMainMenu();
-            roseBusinessEntry.Reset();
             day = Mathf.Max(1, saved.day);
-            narrativeBusinessToken = saved.narrativeBusinessToken;
-            narrativeBusinessObservedOpen = saved.narrativeBusinessObservedOpen;
-            narrativeRetryEntry = saved.narrativeRetryEntry;
-            hasNarrativeRetry = saved.hasNarrativeRetry && (narrativeRetryEntry == NarrativeEntryPoint.MorningBeforeMap
-                || narrativeRetryEntry == NarrativeEntryPoint.AfterBusiness || narrativeRetryEntry == NarrativeEntryPoint.BeforeNight);
-            narrativeBusinessOwner = null;
             previousDate = string.IsNullOrEmpty(saved.previousDate) ? InitialDate : saved.previousDate;
             State = Enum.IsDefined(typeof(DayFlowState), saved.state) ? saved.state : DayFlowState.PreBusiness;
             newSessionFirstDay = false;
@@ -1105,8 +1019,6 @@ namespace Spotlight.GameFlow
             {
                 // Missing day-flow data must not inherit the previous session's date.
                 day = 1;
-                narrativeBusinessToken = null;
-                hasNarrativeRetry = false;
                 previousDate = InitialDate;
                 firstDayIntroductionCompleted = true;
                 newSessionFirstDay = false;
@@ -1127,36 +1039,16 @@ namespace Spotlight.GameFlow
             if (State != DayFlowState.FreeCafeBusiness) HideGameplayPanel();
             switch (State)
             {
-                case DayFlowState.NarrativeEntry:
-                    if (NarrativeRuntime.Instance?.Controller?.BusinessCheckpointConfirmed == true)
-                        RunNarrativeEntry(NarrativeEntryPoint.AfterBusiness, EnterCityMap);
-                    else EnterCityMap();
-                    break;
+                case DayFlowState.NarrativeEntry: EnterCityMap(); break;
                 case DayFlowState.TutorialBusinessHandoff: EnterFirstDayBusinessHandoff(); break;
                 case DayFlowState.AvatarSelection: EnterAvatarSelection(); break;
                 case DayFlowState.FirstDayIntroduction: PlayFirstDayIntroduction(); break;
                 case DayFlowState.IntroLetter: ShowPresentation<FirstDayLetterPanel>(EnterAvatarSelection, ConfigureFirstDayLetter); break;
                 case DayFlowState.DateTransition: BeginNewDayFlow(); break;
-                case DayFlowState.PreBusiness:
-                    if (hasNarrativeRetry)
-                        RunNarrativeEntry(narrativeRetryEntry, narrativeRetryEntry == NarrativeEntryPoint.BeforeNight
-                            ? (Action)EnterPreNight : narrativeRetryEntry == NarrativeEntryPoint.MorningBeforeMap ? EnterPreBusiness : EnterCityMap);
-                    else if (NarrativeRuntime.Instance?.Controller?.BusinessCheckpointConfirmed == true)
-                        RunNarrativeEntry(NarrativeEntryPoint.AfterBusiness, EnterCityMap);
-                    else EnterCityMap();
-                    break;
+                case DayFlowState.PreBusiness: EnterCityMap(); break;
                 case DayFlowState.BusinessTransition: EnterBusinessTransition(); break;
                 case DayFlowState.FreeCafeBusiness:
                     FindGameplayEndpoint();
-                    if (!string.IsNullOrEmpty(narrativeBusinessToken))
-                    {
-                        narrativeBusinessOwner = endpointOwner;
-                        // Recover an issued but deferred start after loading. An observed
-                        // Open or settled Night is retained; never open a second business.
-                        if (!narrativeBusinessObservedOpen && gameplayEndpoint != null && !gameplayEndpoint.DayFlowBusinessActive)
-                            gameplayEndpoint.StartDayFlowBusiness();
-                        if (gameplayEndpoint?.DayFlowBusinessActive == true) narrativeBusinessObservedOpen = true;
-                    }
                     ClosePresentation();
                     ShowGameplayPanel();
                     ShowBusinessControls();

@@ -21,6 +21,10 @@ namespace Spotlight.FreeCafe
         public GameObject recipePanel;
         public TMP_Text recipeTitle,recipeBody;
         public Button recipeCloseButton;
+        [Header("Split ledger (optional)")]
+        public TMP_Text dayLabel, statusLabel, moneyLabel, reputationLabel, stockLabel;
+        [Tooltip("Ticket backgrounds for the focused / waiting guest order.")]
+        public Sprite orderFocusSprite, orderIdleSprite;
         private string[] requestIds=Array.Empty<string>();
         private Button[] boundOrderButtons=Array.Empty<Button>();
         private UnityAction[] orderActions=Array.Empty<UnityAction>();
@@ -66,6 +70,7 @@ namespace Spotlight.FreeCafe
         }
         private void OnDisable()
         {
+            if(Application.isPlaying) CloseRecipeTips();
             if(!bound) return;
             bound=false;
             if(bookView != null)
@@ -211,6 +216,15 @@ namespace Spotlight.FreeCafe
                 var beans=runtime.World.Find("s.beans");var milk=runtime.World.Find("s.milk");
                 summary.text+="\n咖啡豆 "+(beans==null ? "—" : beans.stock.ToString())+"  ·  牛奶 "+(milk==null ? "—" : milk.stock.ToString());
             }
+            if(dayLabel!=null) dayLabel.text="第 "+state.day+" 天";
+            if(statusLabel!=null) statusLabel.text=state.open ? "营业中 · 剩余 "+state.timeRemaining.ToString("0")+" 秒 · 顾客 "+state.requests.Count+" 位" : state.businessPhase==BusinessPhase.Night ? "已打烊 · 点击立牌开始新一天" : "准备营业 · 点击大厅立牌开店";
+            if(moneyLabel!=null) moneyLabel.text=state.money.ToString();
+            if(reputationLabel!=null) reputationLabel.text=state.reputation.ToString();
+            if(stockLabel!=null)
+            {
+                var beans=runtime.World.Find("s.beans");var milk=runtime.World.Find("s.milk");
+                stockLabel.text="咖啡豆 "+(beans==null ? "—" : beans.stock.ToString())+"   牛奶 "+(milk==null ? "—" : milk.stock.ToString());
+            }
             if(playerRoot!=null) playerRoot.SetActive(!runtime.World.ProductionEnabled || state.currentArea!=AreaId.Counter);
             if(hint!=null) hint.text=runtime.Hint;
             var selected=runtime.World.Find(runtime.SelectedId);
@@ -233,7 +247,7 @@ namespace Spotlight.FreeCafe
                 {
                     requestIds[index]=null;
                     if(label!=null) label.text="座位 "+(index+1)+"\n等待顾客入座";
-                    if(button!=null) button.interactable=false;
+                    if(button!=null) { button.interactable=false; SetTicket(button,false); }
                     continue;
                 }
                 var request=state.requests[index]; requestIds[index]=request.id; var product=runtime.World.Product(request.productId);
@@ -242,13 +256,19 @@ namespace Spotlight.FreeCafe
                     foreach(var npc in runtime.World.Catalog.npcs) if(npc.id==customer.npcId) name=npc.name;
                 string recipe=(request.id==state.focusedRequestId ? "● " : "")+name+"  ·  "+request.patience.ToString("0")+" 秒\n"+FreeCafeProductionText.Recipe(product.label)+"  /  "+product.price+" 王国币";
                 if(label!=null) label.text=recipe;
-                if(button!=null) button.interactable=!runtime.InputBlocked;
+                if(button!=null) { button.interactable=!runtime.InputBlocked; SetTicket(button,request.id==state.focusedRequestId); }
             }
             if(pauseButton!=null) pauseButton.interactable=string.IsNullOrEmpty(state.production.miniGameToken) && !(FreeCafeGMPanel.Instance!=null && FreeCafeGMPanel.Instance.IsVisible);
             if(mapButton!=null) mapButton.interactable=Flow != null && Flow.CanOpenMap;
             if(recipeButton!=null) recipeButton.interactable=!runtime.InputBlocked || IsModalOpen;
 
             if(recipePanel!=null && recipePanel.activeSelf) RefreshRecipeTips();
+        }
+        private void SetTicket(Button button,bool focused)
+        {
+            var image=button.targetGraphic as Image;
+            var sprite=focused ? orderFocusSprite : orderIdleSprite;
+            if(image!=null && sprite!=null && image.sprite!=sprite) image.sprite=sprite;
         }
     }
 }

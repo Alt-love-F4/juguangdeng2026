@@ -74,6 +74,6 @@
 
 - 已配置（源表）：`revolution.1013.s2`、`revolution.1028.s1`、`revolution.1014.s1` 已按 `C-revolution/source-map.md` 追加到现有 Narrative/Text 工作簿。回读计数为 C13 68 段/52 条对白行/3 选择，C28 157 段/144 条对白行/3 选择，C14 219 段/171 条对白行/12 选择。C14 的 Reading 页面、匿名索雷尔显示名字段及 wisdom4/perception6/wisdom5 Inline 配置已写入源表。
 - 已配置（阻塞保留）：三个根均 `onceOnly=true`、`blocksSave=true`，均没有伪造完成结果、好感/派系/信任数值或合作事实。C28 闪回条件只引用 `story.revolution.1013.s2.completed`；历史学专精仍为 C-B06 阻塞。C14 P191 作用域/读数时点、正式数值 key、B 的真实赴约完成事实和演出资源仍为阻塞。
-- 官方生成：初次未通过。2026-10-16 02:45:52，`Assets/ConfigTables/GenerateAll.bat` 的 Player semantic validation 通过，但 Luban 因工作树中既有 `rose.1009.s1.eventKind=narrative` 不在 schema 允许的 `actor,world` 集合而退出 1；并行 B 窗随后修为 `actor`。本批于 03:01:23 重跑通过，并在 C14 映射补丁后于 03:12:49 再次通过；Player semantic 与 Luban strict 均通过，生成物已强制导入 Unity。
-- Unity/运行：本批生成物已导入 Unity，并在 `Assets/Scenes/PresentationDebugScene.unity` 完成 C13/C28/C14 的隔离正文矩阵、取消与重试检查。C13 最终生成物下三分支均到 P065、FadeOut 后 pause=0；C28 12 路历史/完成夹具矩阵和 C14 高/低属性矩阵均通过。正式入口、一次性、存档、日程和奖励仍受依赖阻塞，故本批 0 个事件正式放行。C29 空稿仅登记，未创建事件、完成态、合作或结局。
-- 后续放行：补齐 C-B01/C-B02/C-B03/C-B04/C-B05/C-B06 及对应真实剧情、数值和演出资源后，才能执行完整 V13/V28/V14 并开放正式入口。续做全量比对已完成：849 个目标行、7,456 个导出字段与 386 条正文 Text 均无差异；P188 局部对话框震动也已实现并定点验证，精确声音和其余演出仍待完成。详见 C 批独立验收报告；旧的 59/59 证据仍只属于 oct07 批次。
+- 官方生成：未通过。2026-10-16 02:45:52，`Assets/ConfigTables/GenerateAll.bat` 的 Player semantic validation 通过，但 Luban 因工作树中既有 `rose.1009.s1.eventKind=narrative` 不在 schema 允许的 `actor,world` 集合而退出 1。该既有行未由本批修改；失败过程中写出的部分 JSON 不能作为本批生成完成证据。
+- Unity/运行：编辑器当前 `editing`、bridge ready；本批尚未完成 Unity 导入、`Assets/Scenes/PresentationDebugScene.unity` 共享场景预览，或分支/取消/一次性/存档/日程实跑。故本批 0 个事件可正式放行。C29 空稿仅登记，未创建事件、完成态、合作或结局。
+- 后续放行：先在不覆盖其他 Agent 改动的前提下修复/确认上述既有生成阻塞，再重新官方生成并导入；之后严格按 C13 → C28 → C14 执行共享场景和 V13/V28/V14 验收。旧的 59/59 证据仍只属于 oct07 批次。

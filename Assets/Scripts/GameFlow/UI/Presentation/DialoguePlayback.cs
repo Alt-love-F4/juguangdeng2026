@@ -56,15 +56,6 @@ namespace Spotlight.GameFlow
             return Play(script.RebuildAt(0), onFinished, onCancelled);
         }
 
-        /// <summary>Fade the retained stage of this event through its existing fullscreen overlay.</summary>
-        public static PresentationEffectHandle FadeStage(object owner, float duration = .3f)
-        {
-            var panel = UIKit.GetPanel<DialoguePanel>();
-            if (panel == null || !panel.OwnsContinuity(owner) || !panel.SeamlessChoicePending)
-                throw new InvalidOperationException("FadeOut requires this conversation's retained dialogue stage.");
-            return panel.PlayFade("out", duration);
-        }
-
         /// <summary>Release only the stage belonging to this completed/cancelled event.</summary>
         public static void ReleaseStage(object owner)
         {

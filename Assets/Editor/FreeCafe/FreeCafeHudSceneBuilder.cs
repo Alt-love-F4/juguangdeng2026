@@ -72,7 +72,7 @@ namespace Spotlight.FreeCafe.Editor
             if(production!=null)
             {
                 production.legacyTop=null;production.legacyBottom=null;
-                ApplyProduction(production);
+                FreeCafeWorkstationHudBuilder.Apply(hud,production);
             }
         }
         private static void ApplyProduction(FreeCafeProductionHud hud)
