@@ -18,6 +18,8 @@
 
 咖啡馆内普通新对话在 `ConversationPage.bgOverride` 填 `scene.cafe`。下表图片稳定 key 用于图片型演出；店外仍按实际地点填写，无需把原图搬进 Resources，也无需逐事件修改代码。
 
+店内特殊叙事图片同样允许显示：例如闭门蒂博剪影填 `cafe.door.thibaut`，兼容旧 key `church.cafe.thibaut.departure`。不要因剧情发生在咖啡馆而将这类图片替换为实景；特殊画面结束后显式恢复 `scene.cafe`。该图和注册未删除，但截至 2026-10-17，`church.1014.s2` 尚未录入正式源表，具体接入锚点和状态见 `Docs/NcsCafeSceneBackground.md` 的“店内特殊画面例外”。
+
 同一地点可以继续使用剧情命名空间，例如：
 
 ```text

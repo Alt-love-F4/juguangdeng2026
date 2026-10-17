@@ -75,6 +75,7 @@ Assets/ConfigTables/GenerateAll.bat
 - `Narrative.xlsx / ConversationPage.bgOverride`：店内普通对话填 `scene.cafe`，关闭对话背景层并使用实际 `CoffeeShop` 场景。空值仍表示继承，不能用于取消背景。
 - `Assets/Art/Background/game/SCE_一楼大厅场景底图.png`、`SCE_二楼会客室场景底图.png`、`SCE_ 三楼宿舍场景底图.png` 是经营场景底图，不得填入对话背景；需要图片型对话时使用对应的完整“对话场景”资源。
 - 店外填原有图片 key（如 `oct07.street.day`）；同一事件从街道进店/出店要在对应页显式切换，不要批量清空整场事件。
+- 店内特殊叙事画面可显式覆盖实景：闭门蒂博剪影填 `cafe.door.thibaut`，也兼容旧 key `church.cafe.thibaut.departure`；回到普通店内对话时再填 `scene.cafe`。不要仅按地点将特殊插图改为实景。该图已登记，但截至 2026-10-17，`church.1014.s2` 尚无正式源表页面，不能误报已接线。
 - `OpeningPresentation.visualsResource`：`first_day_cafe` 与 `cafe_tutorial.*` 使用 `Dialogue/CafeSceneVisuals`，不要恢复为默认叠图资源。
 - 只改第 5 行之后的数据；表头和 schema 不变。保存源 Excel 后运行官方生成流程，不能仅编辑 JSON。详见项目根 `AGENTS.md` 和 `Docs/NcsCafeSceneBackground.md`。
 

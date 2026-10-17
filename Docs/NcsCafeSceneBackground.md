@@ -23,6 +23,17 @@
 
 店内时间与灯光使用游戏当前状态。标记不修改时间、不替换为清晨/夜景图片、不解锁或自动切换楼层。需要二楼、三楼或操作区域镜头时，应接现有玩法的楼层/镜头入口，不能靠图片背景伪装完成。
 
+## 店内特殊画面例外（2026-10-17）
+
+实景只替代普通店内对话背景，不替代剧本指定的特写、剪影合成图或其他特殊叙事图片。明确填写的特殊图片 key 必须保留，不能按咖啡馆地点批量改成 `scene.cafe`。
+
+- 闭门蒂博剪影使用 `cafe.door.thibaut`，对应 `Assets/Art/Background/game/SCE_咖啡馆闭门场景蒂博剪影.png`；策划旧 key `church.cafe.thibaut.departure` 已作为别名映射到同一资源。
+- 显示顺序为普通店内 `scene.cafe` → 特殊画面 `cafe.door.thibaut` → 普通店内 `scene.cafe`。回到普通对话时必须显式恢复；留空会继承上一张特殊图片。
+- 当前图片、Texture 注册及原有文件名别名均未删除。核对源 Excel、生成 JSON 及实景迁移前版本，均没有 `church.1014.s2` 正式页面或此图的页面引用；本次没有为补图而新建事件、伪造台词或修改生成 JSON。
+- 后续接入 `church.1014.s2` 时，按 `Docs/superpowers/specs/2026-10-16-content-batches/D-church/source-map.md` 的 P072 演出锚点（P071 后/P073 前；需求清单使用 P087 编号）切到此图，不应从告别段开头就显示已闭合的门。将相应后半段拆为独立页面后在 `ConversationPage.bgOverride` 填图片 key；返回营业场景的页面显式恢复 `scene.cafe`，再通过官方 Luban 管线生成。
+
+本次只补资源别名和交接规则，未改配表或运行时代码，未执行 Unity 编译及 Play Mode。
+
 ## 本次源表修改范围
 
 - `ConversationPage`：47 个原 `oct07.cafe.day/night` 的店内页面改为 `scene.cafe`。涉及 `oct07.s1` 的店内页、`oct07.s2`、`revolution.1013.s2`、`revolution.1014.s1`、`revolution.1028.s1`；信件前后背景继承也使用相同标记。
