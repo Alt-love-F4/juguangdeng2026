@@ -1,4 +1,4 @@
-using System.Collections;
+﻿using System.Collections;
 using System.Reflection;
 using NUnit.Framework;
 using Spotlight.GameFlow;
@@ -44,6 +44,74 @@ namespace Spotlight.FreeCafe.Tests
             if(FreeCafeGMPanel.Instance!=null) FreeCafeGMPanel.Instance.SetVisible(false);
             Time.timeScale=1;yield return null;
         }
+        [UnityTest] public IEnumerator LobbyArtworkHudShowsLiveResourcesAndPagesRealOrders()
+        {
+            var art=hud.playerRoot.transform.Find("CafeLobbyHud");
+            Assert.That(art,Is.Not.Null);
+            Assert.That(art.GetComponentsInChildren<SpriteRenderer>(true),Is.Empty);
+            Assert.That(art.GetComponentsInChildren<Canvas>(true),Is.Empty);
+            Assert.That(hud.playerRoot.transform.Find("CafeLedger"),Is.Null);
+            Assert.That(hud.playerRoot.transform.Find("GuestTickets"),Is.Null);
+            foreach(var image in art.GetComponentsInChildren<Image>(true))
+            {
+                Assert.That(image.name,Does.Not.Contain("行动点"));
+                Assert.That(image.name,Is.Not.EqualTo("图层 1"));
+            }
+            Assert.That(hud.orderPage.text,Is.EqualTo("暂无订单"));
+            Assert.That(hud.previousOrder.interactable,Is.False);
+            Assert.That(hud.nextOrder.interactable,Is.False);
+            Assert.That(hud.moneyLabel.text,Is.EqualTo(app.World.State.money.ToString()));
+            Assert.That(hud.reputationLabel.text,Is.EqualTo(app.World.State.reputation.ToString()));
+            Assert.That(app.World.StartDay().success,Is.True);
+            if(app.World.State.requests.Count<2) app.World.DebugSpawnCustomers(2-app.World.State.requests.Count);
+            Assert.That(app.World.State.requests.Count,Is.GreaterThanOrEqualTo(2));
+            app.World.DebugAddMoney(17);
+            app.World.DebugAddReputation(3);
+            app.DebugRefreshViews();
+            yield return null;
+            Assert.That(hud.moneyLabel.text,Is.EqualTo(app.World.State.money.ToString()));
+            Assert.That(hud.reputationLabel.text,Is.EqualTo(app.World.State.reputation.ToString()));
+            Assert.That(hud.orderPage.text,Does.StartWith("01 /"));
+            ClickHudButton(hud.nextOrder);
+            Assert.That(hud.orderPage.text,Does.StartWith("02 /"));
+            ClickHudButton(hud.orderButtons[0]);
+            Assert.That(app.World.State.focusedRequestId,Is.EqualTo(app.World.State.requests[1].id));
+            ClickHudButton(hud.previousOrder);
+            ClickHudButton(hud.orderButtons[0]);
+            Assert.That(app.World.State.focusedRequestId,Is.EqualTo(app.World.State.requests[0].id));
+            yield return new WaitForEndOfFrame();
+            var screenshot=ScreenCapture.CaptureScreenshotAsTexture();
+            var directory=System.IO.Path.Combine(Application.dataPath,"../Logs/GameplayHud");
+            System.IO.Directory.CreateDirectory(directory);
+            System.IO.File.WriteAllBytes(System.IO.Path.Combine(directory,"cafe-lobby-artwork-orders.png"),screenshot.EncodeToPNG());
+            Object.Destroy(screenshot);
+            app.World.State.requests.Clear();
+            app.DebugRefreshViews();
+            Assert.That(hud.orderPage.text,Is.EqualTo("暂无订单"));
+            Assert.That(hud.orderButtons[0].interactable,Is.False);
+            Assert.That(hud.nextOrder.interactable,Is.False);
+            app.Enter(AreaId.Counter);
+            yield return null;
+            Assert.That(hud.playerRoot.activeSelf,Is.False);
+            Assert.That(GameplayHudPanel.Instance.IsVisible,Is.True);
+            app.Enter(AreaId.Cafe);
+            yield return null;
+            Assert.That(hud.playerRoot.activeSelf,Is.True);
+        }
+
+        private static void ClickHudButton(Button button)
+        {
+            Canvas.ForceUpdateCanvases();
+            var rect=(RectTransform)button.transform;
+            var point=RectTransformUtility.WorldToScreenPoint(null,rect.TransformPoint(rect.rect.center));
+            var pointer=new PointerEventData(EventSystem.current) {position=point,button=PointerEventData.InputButton.Left};
+            var hits=new System.Collections.Generic.List<RaycastResult>();
+            EventSystem.current.RaycastAll(pointer,hits);
+            Assert.That(hits,Is.Not.Empty);
+            Assert.That(ExecuteEvents.GetEventHandler<IPointerClickHandler>(hits[0].gameObject),Is.EqualTo(button.gameObject),button.name);
+            ExecuteEvents.Execute(button.gameObject,pointer,ExecuteEvents.pointerClickHandler);
+        }
+
         [UnityTest] public IEnumerator RemovedPlayerHudWidgetsDoNotBlockStartupOrRemainingControls()
         {
             hud.enabled=false;
@@ -179,7 +247,10 @@ namespace Spotlight.FreeCafe.Tests
             Assert.That(hud.areaButtons[(int)AreaId.TopFloor],Is.Null);
             if(hud.summary!=null)
             { Assert.That(hud.summary.text,Does.Not.Contain("FREE CAFE")); Assert.That(hud.summary.text,Does.Contain("王国币")); }
-            Assert.That(hud.playerRoot.GetComponentsInChildren<CafeHudSurface>().Length,Is.GreaterThan(5));
+            Assert.That(hud.playerRoot.GetComponentsInChildren<CafeHudSurface>().Length,Is.GreaterThan(0));
+            var lobbyArt=hud.playerRoot.transform.Find("CafeLobbyHud");
+            Assert.That(lobbyArt,Is.Not.Null);
+            Assert.That(System.Array.FindAll(lobbyArt.GetComponentsInChildren<Image>(true),image=>image.sprite!=null).Length,Is.GreaterThanOrEqualTo(5));
             var production=app.GetComponent<FreeCafeProductionHud>();
             app.Enter(AreaId.Counter);yield return null;
             Assert.That(hud.playerRoot.activeSelf,Is.False);
@@ -318,7 +389,7 @@ namespace Spotlight.FreeCafe.Tests
                 var map=(MapSceneController)typeof(GameFlowBootstrap).GetField("mapOverlay",flags).GetValue(owner);
                 residentMap=map;
                 Assert.That(map,Is.Not.Null);
-                Assert.That(map.GetComponent<Canvas>().sortingOrder,Is.EqualTo(short.MaxValue));
+                Assert.That(map.GetComponent<Canvas>().sortingOrder,Is.EqualTo(GameplayHudPanel.SortingOrder-10));
                 Assert.That(SceneManager.GetActiveScene().name,Is.EqualTo("CoffeeShop"));
                 Assert.That(SceneManager.GetSceneByName("Map").isLoaded,Is.True);
                 Assert.That(app.enabled,Is.True);

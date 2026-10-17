@@ -71,10 +71,19 @@ namespace Spotlight.GameFlow.Tests
                 Assert.That((bool)canPresent.Invoke(flow, null), Is.False, fieldName);
                 field.SetValue(flow, false);
             }
-            var detailsField = flow.GetType().GetField("detailsPanel", PrivateInstance);
-            detailsField.SetValue(flow, Create("DetailsBlocker", root.transform).AddComponent(detailsField.FieldType));
-            Assert.That((bool)canPresent.Invoke(flow, null), Is.False, "Details must continue to suspend presentation.");
-            detailsField.SetValue(flow, null);
+            var hudType = UiType("Spotlight.GameFlow.GameplayHudPanel");
+            var hudInstance = hudType.GetProperty("Instance");
+            var previousHud = hudInstance.GetValue(null);
+            var hud = Create("SharedHud", root.transform).AddComponent(hudType);
+            var detailsField = hudType.GetField("details", PrivateInstance);
+            hudInstance.GetSetMethod(true).Invoke(null, new object[] { hud });
+            try
+            {
+                detailsField.SetValue(hud, Create("DetailsBlocker", root.transform).AddComponent(detailsField.FieldType));
+                Assert.That((bool)canPresent.Invoke(flow, null), Is.False, "Details must continue to suspend presentation.");
+                detailsField.SetValue(hud, null);
+            }
+            finally { hudInstance.GetSetMethod(true).Invoke(null, new[] { previousHud }); }
             setSession.Invoke(flow, new[] { Enum.Parse(stateType, "Menu") });
             Assert.That((bool)canPresent.Invoke(flow, null), Is.False, "An action cannot bypass the gameplay session gate.");
             setSession.Invoke(flow, new[] { Enum.Parse(stateType, "Playing") });

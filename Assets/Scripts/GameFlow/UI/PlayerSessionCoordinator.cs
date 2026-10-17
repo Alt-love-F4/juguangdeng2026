@@ -16,10 +16,11 @@ namespace Spotlight.GameFlow
         private DelegateNarrativeValueProvider actions, calendar;
         private Action<int, int> pointChanged;
         public bool IsBound => runtime != null && world != null;
+        public bool IsBoundTo(NarrativeRuntime target, CafeWorld owner) => IsBound && runtime == target && world == owner;
 
         public void Bind(NarrativeRuntime target, CafeWorld owner, DayFlowController days)
         {
-            if (target == null || target.Controller == null || owner == null || days == null)
+            if (target == null || target.Controller == null || owner == null)
                 throw new InvalidOperationException("Player owners are not ready.");
             Dispose();
             runtime = target; world = owner; dayFlow = days;
@@ -29,7 +30,7 @@ namespace Spotlight.GameFlow
             controller.UnbindValueProviders();
             cafe = new CafeNarrativeValueProvider(world);
             actions = new DelegateNarrativeValueProvider("actions", key => key == "current" ? runtime.Actions.ActionPoints.Current : key == "max" ? runtime.Actions.ActionPoints.Max : (int?)null);
-            calendar = new DelegateNarrativeValueProvider("dayflow", key => key == "day" ? dayFlow.CurrentDay : (int?)null);
+            calendar = new DelegateNarrativeValueProvider("dayflow", key => key == "day" ? (dayFlow != null ? dayFlow.CurrentDay : runtime.Actions.CurrentDay) : (int?)null);
             controller.BindValueProvider(cafe);
             controller.BindValueProvider(actions);
             controller.BindValueProvider(calendar);

@@ -18,6 +18,9 @@ namespace Spotlight.FreeCafe
         public Button startButton,pauseButton,saveButton,recipeButton;
         public Button[] areaButtons,orderButtons;
         public TMP_Text[] orderLabels;
+        public Button previousOrder, nextOrder;
+        public TMP_Text orderPage;
+        private int orderOffset;
         public GameObject recipePanel;
         public TMP_Text recipeTitle,recipeBody;
         public Button recipeCloseButton;
@@ -29,6 +32,23 @@ namespace Spotlight.FreeCafe
         private Button[] boundOrderButtons=Array.Empty<Button>();
         private UnityAction[] orderActions=Array.Empty<UnityAction>();
         private bool bound;
+        private RectTransform sharedHudContent;
+        private Vector2 authoredContentTop;
+
+        private void LateUpdate()
+        {
+            if (playerRoot == null) return;
+            if (sharedHudContent == null)
+            {
+                sharedHudContent = playerRoot.transform as RectTransform;
+                if (sharedHudContent == null) return;
+                authoredContentTop = sharedHudContent.offsetMax;
+            }
+            var hud = GameplayHudPanel.Instance;
+            float inset = hud != null && hud.IsVisible ? GameplayHudPanel.HeaderHeight : 0f;
+            sharedHudContent.offsetMax = authoredContentTop - new Vector2(0f, inset);
+        }
+
         private CoffeeBookPanelView bookView;
         private int recipeIndex;
         protected override void Awake()
@@ -57,6 +77,8 @@ namespace Spotlight.FreeCafe
             if(pauseButton!=null) pauseButton.onClick.AddListener(OpenPlayerMenu);
             if(recipeButton!=null) recipeButton.onClick.AddListener(ToggleRecipeTips);
             if(recipeCloseButton!=null) recipeCloseButton.onClick.AddListener(CloseRecipeTips);
+            if(previousOrder!=null) previousOrder.onClick.AddListener(PreviousOrder);
+            if(nextOrder!=null) nextOrder.onClick.AddListener(NextOrder);
             if(areaButtons!=null && areaButtons.Length>0 && areaButtons[0]!=null) areaButtons[0].onClick.AddListener(Cafe);
             if(areaButtons!=null && areaButtons.Length>1 && areaButtons[1]!=null) areaButtons[1].onClick.AddListener(Counter);
             boundOrderButtons=orderButtons==null ? Array.Empty<Button>() : (Button[])orderButtons.Clone();
@@ -84,6 +106,8 @@ namespace Spotlight.FreeCafe
             if(pauseButton!=null) pauseButton.onClick.RemoveListener(OpenPlayerMenu);
             if(recipeButton!=null) recipeButton.onClick.RemoveListener(ToggleRecipeTips);
             if(recipeCloseButton!=null) recipeCloseButton.onClick.RemoveListener(CloseRecipeTips);
+            if(previousOrder!=null) previousOrder.onClick.RemoveListener(PreviousOrder);
+            if(nextOrder!=null) nextOrder.onClick.RemoveListener(NextOrder);
             if(areaButtons!=null && areaButtons.Length>0 && areaButtons[0]!=null) areaButtons[0].onClick.RemoveListener(Cafe);
             if(areaButtons!=null && areaButtons.Length>1 && areaButtons[1]!=null) areaButtons[1].onClick.RemoveListener(Counter);
             for(int index=0;index<boundOrderButtons.Length;index++)
@@ -92,6 +116,19 @@ namespace Spotlight.FreeCafe
             orderActions=Array.Empty<UnityAction>();
         }
         private void Cafe()=>runtime.Enter(AreaId.Cafe); private void Counter()=>runtime.Enter(AreaId.Counter);
+
+        private void PreviousOrder() => ChangeOrderPage(-1);
+        private void NextOrder() => ChangeOrderPage(1);
+        private void ChangeOrderPage(int direction)
+        {
+            if(runtime==null || runtime.World==null || runtime.InputBlocked) return;
+            int slots=Math.Max(1, Math.Max(orderButtons?.Length ?? 0, orderLabels?.Length ?? 0));
+            int pages=(runtime.World.State.requests.Count+slots-1)/slots;
+            if(pages<2) return;
+            orderOffset=((orderOffset/slots+direction+pages)%pages)*slots;
+            Spotlight.Audio.GameAudio.Play(Spotlight.Audio.AudioKeys.Page);
+            Refresh();
+        }
 
         private void Focus(int index)
         {
@@ -238,19 +275,26 @@ namespace Spotlight.FreeCafe
                 for(int index=0;index<areaButtons.Length;index++)
                     if(areaButtons[index]!=null) areaButtons[index].interactable=runtime.CanEnterArea((AreaId)index) && index!=(int)state.currentArea;
             int orderCount=Math.Max(orderButtons==null ? 0 : orderButtons.Length,orderLabels==null ? 0 : orderLabels.Length);
+            int slots=Math.Max(1,orderCount);
+            int pages=(state.requests.Count+slots-1)/slots;
+            orderOffset=previousOrder==null && nextOrder==null ? 0 : Mathf.Clamp(orderOffset/slots,0,Math.Max(0,pages-1))*slots;
+            if(previousOrder!=null) previousOrder.interactable=pages>1 && !runtime.InputBlocked;
+            if(nextOrder!=null) nextOrder.interactable=pages>1 && !runtime.InputBlocked;
+            if(orderPage!=null) orderPage.text=pages==0 ? "暂无订单" : (orderOffset/slots+1).ToString("00")+" / "+pages.ToString("00");
             if(requestIds.Length!=orderCount) Array.Resize(ref requestIds,orderCount);
             for(int index=0;index<orderCount;index++)
             {
                 var button=orderButtons!=null && index<orderButtons.Length ? orderButtons[index] : null;
                 var label=orderLabels!=null && index<orderLabels.Length ? orderLabels[index] : null;
-                if(index>=state.requests.Count)
+                int requestIndex=orderOffset+index;
+                if(requestIndex>=state.requests.Count)
                 {
                     requestIds[index]=null;
-                    if(label!=null) label.text="座位 "+(index+1)+"\n等待顾客入座";
+                    if(label!=null) label.text="等待顾客入座";
                     if(button!=null) { button.interactable=false; SetTicket(button,false); }
                     continue;
                 }
-                var request=state.requests[index]; requestIds[index]=request.id; var product=runtime.World.Product(request.productId);
+                var request=state.requests[requestIndex]; requestIds[index]=request.id; var product=runtime.World.Product(request.productId);
                 var customer=runtime.World.Find(request.customerId);string name="顾客";
                 if(customer!=null && runtime.World.Catalog.npcs!=null)
                     foreach(var npc in runtime.World.Catalog.npcs) if(npc.id==customer.npcId) name=npc.name;

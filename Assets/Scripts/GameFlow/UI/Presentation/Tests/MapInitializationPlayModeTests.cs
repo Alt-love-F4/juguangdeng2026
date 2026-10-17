@@ -1,4 +1,4 @@
-#if UNITY_EDITOR
+﻿#if UNITY_EDITOR
 using System;
 using System.Collections;
 using System.Reflection;
@@ -6,6 +6,8 @@ using NUnit.Framework;
 using Spotlight.Narrative;
 using UnityEngine;
 using UnityEngine.TestTools;
+using UnityEngine.SceneManagement;
+using UnityEditor.SceneManagement;
 using UnityEngine.UI;
 using Object = UnityEngine.Object;
 
@@ -22,6 +24,7 @@ namespace Spotlight.GameFlow.Tests
         private bool previousScenePanel;
         private PropertyInfo instance;
         private float previousTimeScale;
+        private Scene debugScene;
 
         private sealed class ImmediatePresenter : INarrativePresenter
         {
@@ -36,6 +39,10 @@ namespace Spotlight.GameFlow.Tests
             previousOpenPanel = GameplayPanelHooks.OpenPanel;
             previousPanelType = GameplayPanelHooks.PanelType;
             previousScenePanel = GameplayPanelHooks.IsScenePanel;
+            debugScene = EditorSceneManager.LoadSceneInPlayMode(PresentationDebugSceneController.ScenePath,
+                new LoadSceneParameters(LoadSceneMode.Additive));
+            yield return null;
+            SceneManager.SetActiveScene(debugScene);
             previousRuntime = NarrativeRuntime.Instance;
             instance = typeof(NarrativeRuntime).GetProperty(nameof(NarrativeRuntime.Instance));
 
@@ -45,12 +52,15 @@ namespace Spotlight.GameFlow.Tests
             runtime.Initialize(LubanNarrativeLoader.Load(), new ImmediatePresenter());
             instance.GetSetMethod(true).Invoke(null, new object[] { runtime });
 
+            YokiFrame.UIKit.ClosePanel<GameplayHudPanel>();
+            YokiFrame.UIKit.UnloadPanel<GameplayHudPanel>();
+            yield return null;
             host = new GameObject("MapInitializationTestHost");
             host.SetActive(false);
             var prefab = Resources.Load<GameObject>("Art/UIPrefab/MapPanel");
             Assert.That(prefab, Is.Not.Null);
             map = Object.Instantiate(prefab, host.transform, false);
-            map.GetComponent<Canvas>().sortingOrder = 700;
+            map.GetComponent<Canvas>().sortingOrder = 500;
             // Activate only after creating all nested widgets, exactly as a scene load does.
             map.SetActive(true);
             host.SetActive(true);
@@ -64,31 +74,34 @@ namespace Spotlight.GameFlow.Tests
         public IEnumerator TearDown()
         {
             if (host != null) Object.Destroy(host);
+            YokiFrame.UIKit.ClosePanel<GameplayHudPanel>();
+            YokiFrame.UIKit.UnloadPanel<GameplayHudPanel>();
             if (runtimeObject != null) Object.Destroy(runtimeObject);
             yield return null;
             if (instance != null) instance.GetSetMethod(true).Invoke(null, new object[] { previousRuntime });
             GameplayPanelHooks.OpenPanel = previousOpenPanel;
             GameplayPanelHooks.PanelType = previousPanelType;
             GameplayPanelHooks.IsScenePanel = previousScenePanel;
+            if (debugScene.IsValid() && debugScene.isLoaded) yield return SceneManager.UnloadSceneAsync(debugScene);
             Time.timeScale = previousTimeScale;
         }
 
         [UnityTest]
         public IEnumerator AuthoredPopupWithoutCloseDoesNotInterruptZoomOrSidebarBindings()
         {
-            var inventory = map.GetComponentInChildren<MapActionInventoryView>(true);
-            var tasks = map.GetComponentInChildren<MapTaskPanel>(true);
+            var inventory = GameplayHudPanel.Instance.Inventory;
+            var tasks = GameplayHudPanel.Instance.Tasks;
             var popup = map.GetComponentInChildren<MapActionDetailsView>(true);
             Assert.That(popup.gameObject.activeSelf, Is.False);
             Assert.That(inventory.IsVisible, Is.False);
             Assert.That(tasks.IsVisible, Is.False);
 
-            map.transform.Find("HUD/ArtworkHud/InventoryToggle").GetComponent<Button>().onClick.Invoke();
+            GameplayHudPanel.Instance.transform.Find("ArtworkHud/InventoryToggle").GetComponent<Button>().onClick.Invoke();
             yield return new WaitForSecondsRealtime(.3f);
             Assert.That(inventory.IsVisible, Is.True);
             Assert.That(inventory.GetComponent<CanvasGroup>().blocksRaycasts, Is.True);
 
-            map.transform.Find("HUD/ArtworkHud/TasksToggle").GetComponent<Button>().onClick.Invoke();
+            GameplayHudPanel.Instance.transform.Find("ArtworkHud/TasksToggle").GetComponent<Button>().onClick.Invoke();
             yield return new WaitForSecondsRealtime(.3f);
             Assert.That(tasks.IsVisible, Is.True);
             Assert.That(inventory.IsVisible, Is.False);
@@ -141,7 +154,7 @@ namespace Spotlight.GameFlow.Tests
             int navigations = 0;
             // Swap only the scene-navigation callback so the authored panel is exercised
             // end to end without loading the cafe scene from a test.
-            popup.Initialize(map.GetComponentInChildren<MapActionInventoryView>(true), () => true, null, () => navigations++);
+            popup.Initialize(GameplayHudPanel.Instance.Inventory, () => true, null, () => navigations++);
 
             map.transform.Find("MapViewport/MapContent/Entities/Location:cafe").GetComponent<Button>().onClick.Invoke();
             yield return null;

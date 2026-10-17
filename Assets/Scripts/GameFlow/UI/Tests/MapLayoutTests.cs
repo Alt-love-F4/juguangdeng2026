@@ -8,7 +8,7 @@ namespace Spotlight.GameFlow.Tests
 {
     public sealed class MapLayoutTests
     {
-        private GameObject prefab;
+        private GameObject prefab, shared;
         private const string Path = "Assets/Resources/Art/UIPrefab/MapPanel.prefab";
 
         [SetUp]
@@ -16,18 +16,24 @@ namespace Spotlight.GameFlow.Tests
         {
             prefab = AssetDatabase.LoadAssetAtPath<GameObject>(Path);
             Assert.That(prefab, Is.Not.Null);
+            shared = AssetDatabase.LoadAssetAtPath<GameObject>("Assets/Resources/Art/UIPrefab/GameplayHudPanel.prefab");
+            Assert.That(shared, Is.Not.Null);
         }
 
         [Test]
         public void FixedControlsStayOutsideZoomedMap()
         {
             var map = prefab.transform.Find("MapViewport/MapContent");
-            foreach (var name in new[] { "Title", "Compass", "ArtworkHud", "ZoomControl" })
+            foreach (var name in new[] { "Title", "Compass", "ZoomControl" })
             {
                 var control = prefab.transform.Find("HUD/" + name);
                 Assert.That(control, Is.Not.Null, name);
                 Assert.That(control.IsChildOf(map), Is.False, name);
             }
+            Assert.That(prefab.transform.Find("HUD/ArtworkHud"), Is.Null, "Gameplay chrome belongs to the shared prefab.");
+            Assert.That(shared.transform.Find("ArtworkHud"), Is.Not.Null);
+            Assert.That(shared.transform.localScale, Is.EqualTo(Vector3.one));
+            Assert.That(((RectTransform)shared.transform).anchorMax, Is.EqualTo(Vector2.one));
             var title = (RectTransform)prefab.transform.Find("HUD/Title");
             Assert.That(title.anchorMin, Is.EqualTo(Vector2.zero));
             var compass = (RectTransform)prefab.transform.Find("HUD/Compass");
@@ -37,8 +43,8 @@ namespace Spotlight.GameFlow.Tests
         [Test]
         public void BothSidebarsStartHiddenWithIdenticalRightDock()
         {
-            var inventory = (RectTransform)prefab.transform.Find("Widgets/InventoryBar");
-            var tasks = (RectTransform)prefab.transform.Find("Widgets/TaskPanel");
+            var inventory = (RectTransform)shared.transform.Find("InventoryBar");
+            var tasks = (RectTransform)shared.transform.Find("TaskPanel");
             foreach (var sidebar in new[] { inventory, tasks })
             {
                 Assert.That(sidebar.gameObject.activeSelf, Is.False);
@@ -52,8 +58,8 @@ namespace Spotlight.GameFlow.Tests
         [Test]
         public void SidebarsScrollContentWithoutScrollingHeaders()
         {
-            var inventory = prefab.transform.Find("Widgets/InventoryBar");
-            var tasks = prefab.transform.Find("Widgets/TaskPanel");
+            var inventory = shared.transform.Find("InventoryBar");
+            var tasks = shared.transform.Find("TaskPanel");
             Assert.That(inventory.Find("InventoryTitle").IsChildOf(inventory.Find("Viewport")), Is.False);
             Assert.That(tasks.Find("TaskTitle").IsChildOf(tasks.Find("TaskBody/TaskViewport")), Is.False);
             foreach (var content in new[] { inventory.Find("Viewport/Items"), tasks.Find("TaskBody/TaskViewport/TaskContent") })

@@ -75,7 +75,6 @@ namespace Spotlight.GameFlow
         [SerializeField] private TextMeshProUGUI headerLabel;
         private NarrativeConfiguration narrativeConfiguration;
         private NarrativeMapPositionDefinition focusedPosition;
-        private RectTransform artworkHudRect;
         private TextMeshProUGUI endDayLabel;
         private Image endDayImage;
         private NarrativeController subscribedNarrativeController;
@@ -112,6 +111,10 @@ namespace Spotlight.GameFlow
             // explicit editor prefab builder; missing authored references are configuration errors.
             if (mapRoot != null && mapContent != null && hud != null && widgets != null)
             {
+                var sharedHud = GameplayHudPanel.Ensure();
+                inventoryView = sharedHud.Inventory;
+                endDayButton = sharedHud.EndDayButton;
+                sharedHud.BindMap(this);
                 if (actionDetails == null) actionDetails = GetComponentInChildren<MapActionDetailsView>(true);
                 if (inventoryView == null) inventoryView = GetComponentInChildren<MapActionInventoryView>(true);
                 if (actionDetails == null || inventoryView == null)
@@ -131,7 +134,6 @@ namespace Spotlight.GameFlow
                 enabled = false;
                 return;
             }
-            artworkHudRect = hud != null ? hud.Find("ArtworkHud") as RectTransform : null;
             if (endDayButton != null)
             {
                 endDayLabel = endDayButton.transform.Find("Label")?.GetComponent<TextMeshProUGUI>();
@@ -151,8 +153,8 @@ namespace Spotlight.GameFlow
             }
         }
 
-        internal bool ControlsAvailable => !standaloneLoading && (flow == null || flow.MapControlsAvailable);
-        private bool ViewAvailable => !standaloneLoading && isActiveAndEnabled;
+        internal bool ControlsAvailable => !standaloneLoading && !GameplayHudPanel.BlocksWorldInput && (flow == null || flow.MapControlsAvailable);
+        private bool ViewAvailable => !standaloneLoading && !GameplayHudPanel.BlocksWorldInput && isActiveAndEnabled;
         private bool GuideLocked => IsFirstDay && flow != null && flow.GetComponent<DayFlowController>()?.IsFirstSessionGuideActive == true;
         private bool IsFirstDay => (NarrativeRuntime.Instance?.Actions?.CurrentDay ?? 1) == 1;
 
@@ -174,7 +176,7 @@ namespace Spotlight.GameFlow
             if (canvas != null)
             {
                 canvas.overrideSorting = true;
-                canvas.sortingOrder = short.MaxValue;
+                canvas.sortingOrder = GameplayHudPanel.SortingOrder - 10;
             }
             HideFocus();
             Transform closeControl = transform.Find(CloseMapButtonName);
@@ -227,9 +229,6 @@ namespace Spotlight.GameFlow
 
         private void BindExistingUi()
         {
-            inventoryView.Initialize(headerLabel);
-            var pointsView = GetComponentInChildren<MapActionPointsView>(true);
-            if (pointsView != null) pointsView.Initialize(headerLabel, inventoryView.PointsFill, inventoryView.DateLabel, inventoryView.PointsSegments);
             actionDetails.Initialize(inventoryView, () => ControlsAvailable, EndDay, StartCafe);
             foreach (var button in GetComponentsInChildren<Button>(true))
             {
@@ -248,7 +247,6 @@ namespace Spotlight.GameFlow
             if (zoomSlider != null) zoomSlider.onValueChanged.AddListener(value => { targetZoom = value; focusZooming = false; });
             if (endDayButton != null && UnityEngine.SceneManagement.SceneManager.GetActiveScene().name == "CoffeeShop") endDayButton.gameObject.SetActive(false);
             BindConfiguredLocations();
-            GetComponentInChildren<MapTaskPanel>(true)?.Initialize();
         }
 
         private void BuildUi()
@@ -449,43 +447,17 @@ namespace Spotlight.GameFlow
 
         private void OpenDetails()
         {
-            if (flow == null) flow = FindFirstObjectByType<GameFlowBootstrap>();
-            flow?.OpenDetails();
+            GameplayHudPanel.Ensure().OpenDetails();
         }
 
-        private void ToggleInventory()
-        {
-            if (!ViewAvailable || (actionDetails != null && actionDetails.IsBusy)) return;
-            var tasks = GetComponentInChildren<MapTaskPanel>(true);
-            if (!inventoryView.IsVisible) tasks?.SetVisible(false);
-            inventoryView.Toggle();
-        }
-
-        private void ToggleTasks()
-        {
-            if (!ViewAvailable || (actionDetails != null && actionDetails.IsBusy)) return;
-            var tasks = GetComponentInChildren<MapTaskPanel>(true);
-            if (tasks == null) return;
-            if (!tasks.IsVisible) inventoryView.SetVisible(false);
-            tasks.Toggle();
-        }
+        private void ToggleInventory() => GameplayHudPanel.Ensure().ToggleInventory();
+        private void ToggleTasks() => GameplayHudPanel.Ensure().ToggleTasks();
 
         private void Update()
         {
             if (!isActiveAndEnabled) return;
             SubscribePositionEffects();
             Keyboard key = Keyboard.current;
-            if (ViewAvailable)
-            {
-                if (key != null && key.tabKey.wasPressedThisFrame) OpenDetails();
-                if (key != null && key.bKey.wasPressedThisFrame) ToggleInventory();
-                if (key != null && key.tKey.wasPressedThisFrame) ToggleTasks();
-            }
-            if (artworkHudRect != null)
-            {
-                Vector3 hudScale = Vector3.one * Mathf.Min(1, Mathf.Max(0.1f, (hud.rect.width - 64) / 1380));
-                if (!artworkHudRect.localScale.Equals(hudScale)) artworkHudRect.localScale = hudScale;
-            }
             if (zoomSlider != null)
             {
                 float minZoom = MinimumZoom;
@@ -543,7 +515,7 @@ namespace Spotlight.GameFlow
             if (!firstDayGuideActive && !creationPending && key != null && key.escapeKey.wasPressedThisFrame && (actionDetails == null || !actionDetails.IsBusy))
             {
                 inventoryView.SetVisible(false);
-                GetComponentInChildren<MapTaskPanel>(true)?.SetVisible(false);
+                GameplayHudPanel.Instance?.CloseSidebars();
                 HideFocus();
             }
             if (!firstDayGuideActive && !creationPending && Mouse.current != null && Mouse.current.rightButton.wasPressedThisFrame
@@ -1152,6 +1124,8 @@ namespace Spotlight.GameFlow
             label.fontSize = size;
         }
 
+        public void FinishDayFromHud() => EndDay();
+
         private void EndDay()
         {
             if (!ControlsAvailable || GuideLocked || (actionDetails != null && actionDetails.IsBusy)) return;
@@ -1269,6 +1243,7 @@ namespace Spotlight.GameFlow
                 standaloneLoading = false;
                 yield break;
             }
+            GameSaveParticipantRegistry.PendingRestore = GameSaveParticipantRegistry.CaptureAll();
             // This object owns the coroutine, so keep it active until scene activation completes.
             AsyncOperation operation = UnityEngine.SceneManagement.SceneManager.LoadSceneAsync(
                 "CoffeeShop", UnityEngine.SceneManagement.LoadSceneMode.Additive);

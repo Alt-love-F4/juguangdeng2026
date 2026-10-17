@@ -75,12 +75,14 @@ namespace Spotlight.GameFlow
         private bool loadingSavedSession;
         private bool pendingDefaultCreation;
         private DayFlowController dayFlow;
-        private DetailsPanel detailsPanel;
+        private DetailsPanel detailsPanel => GameplayHudPanel.Instance != null ? GameplayHudPanel.Instance.OpenDetailsPanel : null;
         private MapSceneController mapOverlay;
         private bool openingMap;
         private GameFlowPanel gameplayScenePanel;
         public bool IsMapOpen => mapOverlay != null || openingMap;
         public bool IsDetailsOpen => detailsPanel != null;
+        internal bool SharedHudControlsAvailable => gameplay && !paused && !loadingTransitioning && !openingMap
+            && !saving && (dayFlow == null || !dayFlow.BlocksGameplayInput);
         public bool CanOpenMap => CanOpenMapFromGameplayScene() && !IsMapOpen
             && SceneManager.GetActiveScene().name != MapSceneName;
         internal bool MapControlsAvailable => gameplay && !paused && !loadingTransitioning && detailsPanel == null
@@ -89,7 +91,6 @@ namespace Spotlight.GameFlow
                 || !DialoguePanel.IsAnyPlaying && (dayFlow == null || !dayFlow.BlocksGameplayInput))
             && (PlayerRuntime.Current?.CreationSubmitted == true || dayFlow != null && dayFlow.State == DayFlowState.CityMapLeisure);
         private int detailsClosedFrame = -1;
-        private NarrativeRuntime detailsRuntime;
         private EventSystem persistentEventSystem;
         private bool saving;
         private Action pendingSaveCompletion;
@@ -124,6 +125,7 @@ namespace Spotlight.GameFlow
                 return;
             }
             instance = this;
+            GameplayHudPanel.ReleaseStandaloneSession();
             SetSessionState(GameSessionState.Menu);
             DontDestroyOnLoad(transform.root.gameObject);
             persistentEventSystem = EventSystem.current;
@@ -498,7 +500,17 @@ namespace Spotlight.GameFlow
 
         private void CompletePendingPlayerCreation()
         {
-            if (PlayerRuntime.Current?.CreationSubmitted == true) return;
+            if (PlayerRuntime.Current?.CreationSubmitted == true)
+            {
+                var runtime = narrativeIntegration?.Runtime;
+                if (!playerSession.IsBoundTo(runtime, PlayerCafeOwner.Current))
+                {
+                    playerSession.Bind(runtime, PlayerCafeOwner.Current, dayFlow);
+                    runtime.Controller.CompleteValueRestore(evaluateInitial: false);
+                    PlayerRuntime.Current.NotifyOwnersChanged();
+                }
+                return;
+            }
             if (!TrySubmitPlayerCreation(pendingDefaultCreation ? null : PlayerRuntime.Current?.RestoreDraft()))
                 throw new InvalidOperationException("无法完成角色创建，请检查玩家与咖啡馆运行时初始化状态。");
         }
@@ -903,7 +915,7 @@ namespace Spotlight.GameFlow
             if (SessionState == GameSessionState.GameOver || saving || openingPause) return;
             bool tutorialPause = dayFlow != null && (dayFlow.IsFirstSessionGuideActive || dayFlow.IsNarrativeEntryActive)
                 || (narrativeIntegration?.Runtime?.Controller?.BlocksSave ?? false);
-            if (detailsPanel != null || detailsClosedFrame == Time.frameCount || DialoguePanel.BlocksEscapeThisFrame && !tutorialPause) return;
+            if (detailsPanel != null || GameplayHudPanel.IsHandlingEscape || detailsClosedFrame == Time.frameCount || DialoguePanel.BlocksEscapeThisFrame && !tutorialPause) return;
             if (IsMapOpen && !paused) { CloseMap(); return; }
             if (tutorialPause && gameplay && !paused)
             {
@@ -931,24 +943,8 @@ namespace Spotlight.GameFlow
 
         public void OpenDetails()
         {
-            if (!gameplay || loadingTransitioning || openingMap) return;
-            if (IsMapOpen) CloseMap();
-            if (detailsPanel != null) return;
-            detailsPanel = UIKit.OpenPanel<DetailsPanel>(UILevel.Pop, DetailsGameDataAdapter.Create(), cachePolicy: PanelCachePolicy.Reusable);
-            DetailsPanel opened = detailsPanel;
-            detailsRuntime = NarrativeRuntime.Instance;
-            if (detailsRuntime != null) detailsRuntime.TurnCompleted += RefreshDetails;
-            if (PlayerRuntime.Current != null) PlayerRuntime.Current.Changed += RefreshDetails;
-            opened.Preview(() =>
-            {
-                if (detailsPanel != opened) return;
-                if (detailsRuntime != null) detailsRuntime.TurnCompleted -= RefreshDetails;
-                if (PlayerRuntime.Current != null) PlayerRuntime.Current.Changed -= RefreshDetails;
-                detailsRuntime = null;
-                detailsPanel = null;
-                detailsClosedFrame = Time.frameCount;
-            });
-            StartCoroutine(PushPanelWhenReady(opened, false));
+            if (!SharedHudControlsAvailable) return;
+            GameplayHudPanel.Ensure().OpenDetails();
         }
 
         public bool TrySubmitPlayerCreation(FirstDayLetterDraft draft)
@@ -967,7 +963,7 @@ namespace Spotlight.GameFlow
                     PlayerCafeOwner.Bind(new Spotlight.FreeCafe.CafeWorld(
                         JsonUtility.FromJson<Spotlight.FreeCafe.CafeCatalog>(catalogAsset.text)));
                 }
-                if (!playerSession.IsBound)
+                if (!playerSession.IsBoundTo(narrativeIntegration?.Runtime, PlayerCafeOwner.Current))
                     playerSession.Bind(narrativeIntegration?.Runtime, PlayerCafeOwner.Current, dayFlow);
                 if (!playerSession.Submit(draft)) return false;
                 CompleteNarrativeRestore(false);
@@ -984,16 +980,12 @@ namespace Spotlight.GameFlow
 
         public void RefreshDetails()
         {
-            if (detailsPanel != null) detailsPanel.Refresh(DetailsGameDataAdapter.Create());
+            if (GameplayHudPanel.Instance != null) GameplayHudPanel.Instance.RefreshDetails();
         }
 
         private void CloseDetails()
         {
-            if (PlayerRuntime.Current != null) PlayerRuntime.Current.Changed -= RefreshDetails;
-            if (detailsRuntime != null) detailsRuntime.TurnCompleted -= RefreshDetails;
-            detailsRuntime = null;
-            if (detailsPanel != null) UIKit.ClosePanel(detailsPanel);
-            detailsPanel = null;
+            if (GameplayHudPanel.Instance != null) GameplayHudPanel.Instance.CloseWindows();
             detailsClosedFrame = Time.frameCount;
         }
 
@@ -1104,7 +1096,7 @@ namespace Spotlight.GameFlow
             if (runtime?.Controller == null) throw new InvalidOperationException("Narrative session failed to initialize.");
             if (PlayerRuntime.Current?.CreationSubmitted != true) return;
             if (PlayerCafeOwner.Current == null) return;
-            if (!playerSession.IsBound) playerSession.Bind(runtime, PlayerCafeOwner.Current, dayFlow);
+            if (!playerSession.IsBoundTo(runtime, PlayerCafeOwner.Current)) playerSession.Bind(runtime, PlayerCafeOwner.Current, dayFlow);
             runtime.Actions.RefreshForDay(dayFlow?.CurrentDay ?? 1);
             runtime.Controller.SetOfficialDay(dayFlow?.CurrentDay ?? 1);
             if (runtime.Controller.IsEnded)

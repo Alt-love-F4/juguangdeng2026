@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
 using Spotlight.Narrative;
@@ -17,7 +17,7 @@ namespace Spotlight.GameFlow
         public string name;
         public string description;
         public bool completed;
-            public string currentTask;
+        public string currentTask;
 
         public int remainingDays;
         public string location;
@@ -51,6 +51,8 @@ namespace Spotlight.GameFlow
             => action != null && (action.parsedRequirements != null && action.parsedRequirements.Count > 0
                 ? action.parsedRequirements : NarrativeActionRequirementParser.Parse(action.requirements))
                 .Any(r => r.type == NarrativeActionRequirementType.ActionPoint && r.value > 0);
+
+        public void RefreshSource() => BindActions();
 
         private void BindActions()
         {
@@ -176,7 +178,6 @@ namespace Spotlight.GameFlow
             if (sidebar == null) Initialize();
             if (Application.isPlaying) BindActions();
             expanded = value;
-            Refresh();
             sidebar.SetVisible(value);
         }
 
@@ -269,13 +270,13 @@ namespace Spotlight.GameFlow
                 Top(row, 0, -y, Width - 64, height); y += height + 14;
                 if (expandedId != item.id) continue;
                 if (item.previousTasks != null)
-                    foreach (string task in item.previousTasks) y += AddDetailText("已进行：" + task, y);
+                    foreach (string task in item.previousTasks) y += AddDetailText("已进行：" + task, y, "PreviousTask");
                 if (!item.completed)
-                    y += AddDetailText("当前任务：" + (string.IsNullOrEmpty(item.currentTask) ? "暂无" : item.currentTask), y);
-                else y += AddDetailText("事项已完成", y);
+                    y += AddDetailText("当前任务：" + (string.IsNullOrEmpty(item.currentTask) ? "暂无" : item.currentTask), y, "CurrentTask");
+                else y += AddDetailText("事项已完成", y, "CompletedStatus");
                 if (trackButtonTemplate != null)
                 {
-                    var trackRect = Instantiate(trackButtonTemplate, content, false); trackRect.gameObject.SetActive(true);
+                    var trackRect = Instantiate(trackButtonTemplate, content, false); trackRect.gameObject.SetActive(true); trackRect.name = "Track_" + item.id;
                     var track = trackRect.GetComponent<Button>();
                     var label = trackRect.GetComponentInChildren<TextMeshProUGUI>(true);
                     if (label != null) label.text = trackedId == item.id ? "取消追踪" : "追踪此事件";
@@ -284,7 +285,7 @@ namespace Spotlight.GameFlow
                     Top(trackRect, 8, -y, Width - 64, trackRect.sizeDelta.y); y += trackRect.sizeDelta.y + 8;
                 }
             }
-            if (count == 0) y += AddDetailText(showCompleted ? "暂无已完成事项" : "暂无进行中事项", y);
+            if (count == 0) y += AddDetailText(showCompleted ? "暂无已完成事项" : "暂无进行中事项", y, "Empty");
             bool showPreview = !Application.isPlaying && showEditorPreview;
             if (taskRowTemplate != null) taskRowTemplate.gameObject.SetActive(showPreview);
             var previewDetail = content.Find("PreviewDetailText"); if (previewDetail != null) previewDetail.gameObject.SetActive(showPreview);
@@ -322,10 +323,10 @@ namespace Spotlight.GameFlow
             }
         }
 
-        private float AddDetailText(string text, float y)
+        private float AddDetailText(string text, float y, string name)
         {
             if (detailTextTemplate == null) return 0;
-            var rect = Instantiate(detailTextTemplate, content, false); rect.gameObject.SetActive(true);
+            var rect = Instantiate(detailTextTemplate, content, false); rect.gameObject.SetActive(true); rect.name = name;
             var label = rect.GetComponent<TextMeshProUGUI>(); if (label != null) label.text = text;
             Top(rect, 12, -y, Width - 72, rect.sizeDelta.y); return rect.sizeDelta.y + 4;
         }

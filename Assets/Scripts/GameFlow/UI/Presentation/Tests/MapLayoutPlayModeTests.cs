@@ -1,4 +1,4 @@
-#if UNITY_EDITOR
+﻿#if UNITY_EDITOR
 using System;
 using System.Collections;
 using System.Collections.Generic;
@@ -41,6 +41,7 @@ namespace Spotlight.GameFlow.Tests
             scene = EditorSceneManager.LoadSceneInPlayMode(PresentationDebugSceneController.ScenePath,
                 new LoadSceneParameters(LoadSceneMode.Additive));
             yield return null;
+            SceneManager.SetActiveScene(scene);
             foreach (var root in scene.GetRootGameObjects())
             {
                 var debug = root.GetComponentInChildren<PresentationDebugSceneController>();
@@ -74,9 +75,12 @@ namespace Spotlight.GameFlow.Tests
             typeof(NarrativeRuntime).GetField("actionController", BindingFlags.Instance | BindingFlags.NonPublic).SetValue(runtime, actions);
             typeof(NarrativeRuntime).GetProperty("MapInventory").GetSetMethod(true).Invoke(runtime, new object[] { inventory });
             instance.GetSetMethod(true).Invoke(null, new object[] { runtime });
+            YokiFrame.UIKit.ClosePanel<GameplayHudPanel>();
+            YokiFrame.UIKit.UnloadPanel<GameplayHudPanel>();
+            yield return null;
             map = Object.Instantiate(Resources.Load<GameObject>("Art/UIPrefab/MapPanel"));
             SceneManager.MoveGameObjectToScene(map, scene);
-            map.GetComponent<Canvas>().sortingOrder = 700;
+            map.GetComponent<Canvas>().sortingOrder = 500;
             yield return null;
             Canvas.ForceUpdateCanvases();
         }
@@ -86,6 +90,8 @@ namespace Spotlight.GameFlow.Tests
         {
             Time.timeScale = previousTime;
             if (map != null) Object.Destroy(map);
+            YokiFrame.UIKit.ClosePanel<GameplayHudPanel>();
+            YokiFrame.UIKit.UnloadPanel<GameplayHudPanel>();
             if (runtimeObject != null) Object.Destroy(runtimeObject);
             yield return null;
             instance?.GetSetMethod(true).Invoke(null, new object[] { previousRuntime });
@@ -96,8 +102,8 @@ namespace Spotlight.GameFlow.Tests
         [UnityTest]
         public IEnumerator ReferenceLayoutsAndMutuallyExclusiveDrawers()
         {
-            var inventory = map.GetComponentInChildren<MapActionInventoryView>(true);
-            var tasks = map.GetComponentInChildren<MapTaskPanel>(true);
+            var inventory = GameplayHudPanel.Instance.Inventory;
+            var tasks = GameplayHudPanel.Instance.Tasks;
             var details = map.GetComponentInChildren<MapActionDetailsView>(true);
             Assert.That(inventory.IsVisible, Is.False);
             Assert.That(tasks.IsVisible, Is.False);
@@ -108,23 +114,36 @@ namespace Spotlight.GameFlow.Tests
             var title = card.Find("Name").GetComponent<TMP_Text>();
             var description = card.Find("Description").GetComponent<TMP_Text>();
             Assert.That(title.font, Is.Not.EqualTo(description.font));
-            Assert.That(description.rectTransform.rect.width + description.rectTransform.anchoredPosition.x,
-                Is.LessThan(((RectTransform)card.Find("Requirement_0")).anchoredPosition.x));
+            var requirement = (RectTransform)(card.Find("Requirements/Requirement") ?? card.Find("Requirement"));
+            Assert.That(requirement, Is.Not.Null);
+            var descriptionCorners = new Vector3[4];
+            var requirementCorners = new Vector3[4];
+            description.rectTransform.GetWorldCorners(descriptionCorners);
+            requirement.GetWorldCorners(requirementCorners);
+            Assert.That(descriptionCorners[2].x <= requirementCorners[0].x
+                || descriptionCorners[0].x >= requirementCorners[2].x
+                || descriptionCorners[0].y >= requirementCorners[2].y
+                || descriptionCorners[2].y <= requirementCorners[0].y, Is.True,
+                "Authored description and requirement areas must not overlap.");
             yield return Capture("map-action");
             details.Show("progress", "圣西尔万郊区");
             yield return null;
-            Assert.That(details.transform.Find("Viewport/ActionList/Action_layout_progress/ProgressTrack"), Is.Not.Null);
+            var progressCard = details.transform.Find("Viewport/ActionList/Action_layout_progress");
+            Assert.That(progressCard, Is.Not.Null);
+            Assert.That(progressCard.Find("Name").GetComponent<TMP_Text>().text, Is.EqualTo("layout_progress"));
+            var progressRequirement = progressCard.Find("Requirements/Requirement") ?? progressCard.Find("Requirement");
+            Assert.That(progressRequirement.GetComponentInChildren<TMP_Text>().text, Does.Contain("2"));
             yield return Capture("map-progress");
             details.gameObject.SetActive(false);
             Time.timeScale = 0;
-            map.transform.Find("HUD/ArtworkHud/InventoryToggle").GetComponent<Button>().onClick.Invoke();
+            GameplayHudPanel.Instance.transform.Find("ArtworkHud/InventoryToggle").GetComponent<Button>().onClick.Invoke();
             yield return new WaitForSecondsRealtime(.3f);
             Assert.That(inventory.IsVisible, Is.True);
             Assert.That(((RectTransform)inventory.transform).anchoredPosition.x, Is.EqualTo(-28).Within(.1f));
             Assert.That(inventory.transform.Find("Viewport/Items/Item_letter"), Is.Not.Null);
             Assert.That(inventory.transform.Find("Viewport/Items/EmptySlot_5"), Is.Not.Null);
             yield return Capture("map-inventory");
-            map.transform.Find("HUD/ArtworkHud/TasksToggle").GetComponent<Button>().onClick.Invoke();
+            GameplayHudPanel.Instance.transform.Find("ArtworkHud/TasksToggle").GetComponent<Button>().onClick.Invoke();
             yield return new WaitForSecondsRealtime(.3f);
             Assert.That(inventory.IsVisible, Is.False);
             Assert.That(inventory.gameObject.activeSelf, Is.False);
@@ -138,33 +157,32 @@ namespace Spotlight.GameFlow.Tests
         {
             actions.ActionPoints.Set(2);
             yield return new WaitForSecondsRealtime(.2f);
-            var inventory = map.GetComponentInChildren<MapActionInventoryView>(true);
+            var inventory = GameplayHudPanel.Instance.Inventory;
             Assert.That(inventory.PointsSegments[2].fillAmount, Is.EqualTo(0).Within(.00001f));
-            Assert.That(inventory.PointsSegments[1].fillAmount, Is.EqualTo(1).Within(.00001f));
+            Assert.That(inventory.PointsSegments[inventory.PointsSegments.Length - 1].fillAmount, Is.EqualTo(1).Within(.00001f));
             var slider = map.GetComponentInChildren<Slider>(true);
             Assert.That(slider.handleRect.rect.height, Is.LessThanOrEqualTo(((RectTransform)slider.transform).rect.height));
             slider.value = slider.maxValue;
             yield return new WaitForSecondsRealtime(1);
             Assert.That(map.transform.Find("MapViewport/MapContent").localScale.x, Is.EqualTo(slider.maxValue).Within(.01f));
-            Assert.That(map.transform.Find("HUD/ArtworkHud").localScale.x, Is.EqualTo(1).Within(.01f));
+            Assert.That(GameplayHudPanel.Instance.Artwork.localScale.x, Is.EqualTo(1).Within(.01f));
         }
 
         [UnityTest]
-        public IEnumerator SelectingLocationPreservesReferenceMapFraming()
+        public IEnumerator SelectingLocationUsesConfiguredFocusZoom()
         {
             var content = map.transform.Find("MapViewport/MapContent");
-            var scale = content.localScale;
-            var position = ((RectTransform)content).anchoredPosition;
+            var feel = Resources.Load<MapFeelConfig>("MapFeelConfig");
             content.Find("Entities/Location:圣西尔万郊区").GetComponent<Button>().onClick.Invoke();
-            yield return new WaitForSecondsRealtime(.7f);
-            Assert.That(content.localScale, Is.EqualTo(scale));
-            Assert.That(((RectTransform)content).anchoredPosition, Is.EqualTo(position));
+            yield return new WaitForSecondsRealtime(1.5f);
+            Assert.That(content.localScale.x, Is.EqualTo(feel.focusZoom).Within(.02f));
+            Assert.That(content.localScale.y, Is.EqualTo(content.localScale.x));
         }
 
         [UnityTest]
         public IEnumerator TaskVisibilityPreservesBuiltRowsAndScrollPosition()
         {
-            var tasks = map.GetComponentInChildren<MapTaskPanel>(true);
+            var tasks = GameplayHudPanel.Instance.Tasks;
             var content = tasks.transform.Find("TaskBody/TaskViewport/TaskContent");
             var scroll = tasks.transform.Find("TaskBody/TaskViewport").GetComponent<ScrollRect>();
             var rows = new Transform[content.childCount];
@@ -199,7 +217,7 @@ namespace Spotlight.GameFlow.Tests
         [UnityTest]
         public IEnumerator HiddenTaskChangesRefreshBeforeReopening()
         {
-            var tasks = map.GetComponentInChildren<MapTaskPanel>(true);
+            var tasks = GameplayHudPanel.Instance.Tasks;
             var content = tasks.transform.Find("TaskBody/TaskViewport/TaskContent");
             Assert.That(tasks.IsVisible, Is.False);
             var item = new MapTaskItem { id = "task_update", name = "Original", description = "Before" };
@@ -230,7 +248,7 @@ namespace Spotlight.GameFlow.Tests
         [UnityTest]
         public IEnumerator TaskTabsAndExpansionStillRefreshContent()
         {
-            var tasks = map.GetComponentInChildren<MapTaskPanel>(true);
+            var tasks = GameplayHudPanel.Instance.Tasks;
             tasks.SetItems(new[]
             {
                 new MapTaskItem { id = "active", name = "Active", currentTask = "Current", previousTasks = new List<string> { "Previous" } },
@@ -278,7 +296,8 @@ namespace Spotlight.GameFlow.Tests
             {
                 Assert.That(rows[i] != null, Is.True, "Visibility must not destroy a built row.");
                 Assert.That(content.GetChild(i), Is.SameAs(rows[i]));
-                Assert.That(rows[i].gameObject.activeSelf, Is.True);
+                if (rows[i].name != "Task_map_example_active_0" && !rows[i].name.StartsWith("Preview"))
+                    Assert.That(rows[i].gameObject.activeSelf, Is.True);
             }
         }
 

@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using Spotlight.FreeCafe;
 using TMPro;
 using UnityEditor;
@@ -69,6 +69,7 @@ namespace Spotlight.FreeCafe.Editor
             }
             if(hud.startButton!=null) hud.startButton.gameObject.SetActive(false);
             if(hud.saveButton!=null) hud.saveButton.gameObject.SetActive(false);
+            CafeLobbyHudPrefabBuilder.Apply(hud);
             if(production!=null)
             {
                 production.legacyTop=null;production.legacyBottom=null;

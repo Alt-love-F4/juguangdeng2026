@@ -46,7 +46,7 @@ namespace Spotlight.FreeCafe
         private NarrativeConfiguration tutorialConfiguration;
         public bool CafeTutorialActive => dayFlow != null && dayFlow.IsCafeTutorialActive;
         public bool CafeTutorialWaitingForWorkstation => CafeTutorialActive && cafeTutorial != null && cafeTutorial.WaitingForWorkstation;
-        private bool PresentationInputBlocked => (miniGameGateway != null && miniGameGateway.BlocksInput) || (gameFlow != null && (gameFlow.IsMapOpen || gameFlow.IsDetailsOpen)) || (World != null && World.ProductionEnabled && !string.IsNullOrEmpty(World.State.production.miniGameToken)) || Time.timeScale<=0 || DialoguePanel.IsAnyPlaying || (dayFlow != null && dayFlow.BlocksGameplayInput);
+        private bool PresentationInputBlocked => GameplayHudPanel.BlocksWorldInput || (miniGameGateway != null && miniGameGateway.BlocksInput) || (gameFlow != null && (gameFlow.IsMapOpen || gameFlow.IsDetailsOpen)) || (World != null && World.ProductionEnabled && !string.IsNullOrEmpty(World.State.production.miniGameToken)) || Time.timeScale<=0 || DialoguePanel.IsAnyPlaying || (dayFlow != null && dayFlow.BlocksGameplayInput);
         public bool GameplayBlocked => PresentationInputBlocked || CafeTutorialWaitingForWorkstation
             || (CafeTutorialActive && cafeTutorial != null && cafeTutorial.HandoffReady);
         private CafeVisitBridge cafeVisits;

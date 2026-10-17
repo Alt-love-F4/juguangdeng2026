@@ -266,6 +266,7 @@ namespace Spotlight.GameFlow.Editor
                 }
                 // Freeze editor-generated structure; activation in play only binds callbacks and runtime data.
                 root.SetActive(true);
+                GameplayHudPrefabBuilder.Extract(root);
                 var result=PrefabUtility.SaveAsPrefabAsset(root,panelPath);
                 AssetDatabase.SaveAssets();
                 Debug.Log("Generated "+panelPath+" and "+themePath+". Source prefab and scenes were not modified.");
