@@ -22,26 +22,26 @@
 - [x] Task 4: Verify the availability and versions of Unity 6000.3.5f2, the official Luban tool, Python/openpyxl, .NET, and the project test/build entry points; record exact blockers if unavailable.
 - [x] Task 5: Verify that `Assets/Scenes/PresentationDebugScene.unity`, its builder, controller, shared prefabs, and debug input bindings are present and loadable.
 - [x] Task 6: Trace the current formal NCS runtime path from trigger selection through `NarrativeController`, `NarrativePresenter`, DayFlow, map actions, and presentation panels before changing code.
-- [ ] Task 7: Inventory the real presentation resources, scene background keys, character assets, reading assets, and known placeholders for every formal story root.
-- [ ] Task 8: Establish and verify the invariant that Revolution source rows, content, results, and reports remain present while `EV_REVOLUTION` and `T_CAL_D60` remain disabled.
-- [ ] Task 9: Establish and verify the invariant that no `npc_a` through `npc_d` test narrative is restored, copied, or used as a formal trigger; remove nothing beyond explicitly identified test junk.
-- [ ] Task 10: Build a per-event verification matrix covering trigger, prerequisites, presentation, cancellation, retry, save/restore, completion result, and downstream unlock for all formal roots and continuations.
-- [ ] Task 11: Define evidence locations and naming for generation logs, Unity compile/test results, shared-scene captures, map captures, build reports, and blocker notes without touching user save slots.
-- [ ] Task 12: Review existing save, DayFlow, map bootstrap, loading, and presentation ownership contracts and document the smallest integration surface for formal NCS flow.
+- [x] Task 7: Inventory the real presentation resources, scene background keys, character assets, reading assets, and known placeholders for every formal story root.
+- [x] Task 8: Establish and verify the invariant that Revolution source rows, content, results, and reports remain present while `EV_REVOLUTION` and `T_CAL_D60` remain disabled.
+- [x] Task 9: Establish and verify the invariant that no `npc_a` through `npc_d` test narrative is restored, copied, or used as a formal trigger; remove nothing beyond explicitly identified test junk.
+- [x] Task 10: Build a per-event verification matrix covering trigger, prerequisites, presentation, cancellation, retry, save/restore, completion result, and downstream unlock for all formal roots and continuations.
+- [x] Task 11: Define evidence locations and naming for generation logs, Unity compile/test results, shared-scene captures, map captures, build reports, and blocker notes without touching user save slots.
+- [x] Task 12: Review existing save, DayFlow, map bootstrap, loading, and presentation ownership contracts and document the smallest integration surface for formal NCS flow.
 
 ### Phase 2: Source and Configuration Validation
-- [ ] Task 13: Run the official `Assets/ConfigTables/GenerateAll.bat` against the current authoritative workbooks and capture its exit code and complete output.
-- [ ] Task 14: Confirm that Player semantic validation passes for the unchanged or intentionally changed source workbooks.
-- [ ] Task 15: Confirm that Luban strict validation and code/data generation complete successfully without hand-editing generated JSON.
-- [ ] Task 16: Compare generated JSON and generated C# outputs against the source/schema inputs and record any stale, missing, or unexpected generated files.
-- [ ] Task 17: Reconcile the generated event inventory, report count, and `NcsIntegrationQueue.csv` rows so every formal root has one authoritative status.
-- [ ] Task 18: Validate the formal root set and explicitly classify demo, delivery-test, arrival-chain, and formal story events without deleting Revolution content.
-- [ ] Task 19: Validate each formal event's declared entry type, source trigger, and phase handoff against the actual NCS runtime enum and queue behavior.
-- [ ] Task 20: Validate all date/time/once conditions for day 2, day 3, day 4, day 6, day 8, day 9, and day 23 against the configured DayFlow phases.
-- [ ] Task 21: Validate map-action names, venue/mount identifiers, map-active requirements, and action availability for `oct07.s1`, `neutral.1008.s1`, and `rose.1009.s1`.
-- [ ] Task 22: Validate cross-event prerequisites use real `completed` facts and do not substitute known, seen, reserved, or merely opened state for completion.
-- [ ] Task 23: Validate `onceOnly`, `blocksSave`, busy ownership, and candidate consumption semantics for every formal root and continuation.
-- [ ] Task 24: Validate page/line/choice/check ordering, sequence continuity, required text keys, and absence of accidental empty or raw-key display text.
+- [x] Task 13: Run the official `Assets/ConfigTables/GenerateAll.bat` against the current authoritative workbooks and capture its exit code and complete output.
+- [x] Task 14: Confirm that Player semantic validation passes for the unchanged or intentionally changed source workbooks.
+- [x] Task 15: Confirm that Luban strict validation and code/data generation complete successfully without hand-editing generated JSON.
+- [x] Task 16: Compare generated JSON and generated C# outputs against the source/schema inputs and record any stale, missing, or unexpected generated files.
+- [x] Task 17: Reconcile the generated event inventory, report count, and `NcsIntegrationQueue.csv` rows so every formal root has one authoritative status.
+- [x] Task 18: Validate the formal root set and explicitly classify demo, delivery-test, arrival-chain, and formal story events without deleting Revolution content.
+- [x] Task 19: Validate each formal event's declared entry type, source trigger, and phase handoff against the actual NCS runtime enum and queue behavior.
+- [x] Task 20: Validate all date/time/once conditions for day 2, day 3, day 4, day 6, day 8, day 9, and day 23 against the configured DayFlow phases.
+- [x] Task 21: Validate map-action names, venue/mount identifiers, map-active requirements, and action availability for `oct07.s1`, `neutral.1008.s1`, and `rose.1009.s1`.
+- [x] Task 22: Validate cross-event prerequisites use real `completed` facts and do not substitute known, seen, reserved, or merely opened state for completion.
+- [x] Task 23: Validate `onceOnly`, `blocksSave`, busy ownership, and candidate consumption semantics for every formal root and continuation.
+- [x] Task 24: Validate page/line/choice/check ordering, sequence continuity, required text keys, and absence of accidental empty or raw-key display text.
 - [ ] Task 25: Validate `PresentationIndex`, visuals resources, reading resources, portrait bindings, effect presets, and fallback behavior for every configured presentation.
 - [ ] Task 26: Validate the `scene.cafe` real-scene convention, explicit special cafe image keys, and restoration to `scene.cafe` after special composite shots.
 - [ ] Task 27: Validate that the first-, second-, and third-floor operating base images are not used as dialogue backgrounds or `DialogueVisualsAsset.background` textures.

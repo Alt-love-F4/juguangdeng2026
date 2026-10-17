@@ -151,3 +151,437 @@
 ### Current Status
 - Total Tasks: 95
 - Completed: 6/95 (6%)
+
+## Session 4 (Executor) - Task 7 continuation - 2026-10-18
+
+### Accomplished
+- Completed Task 7: added `presentation-resource-inventory-2026-10-18.md` with the real background registry, aliases/context overrides, formal-root page/line counts, reading resources, runtime character bindings, and known placeholder/missing-portrait boundaries.
+- Verified through the connected Unity `6000.3.5f2` Editor that `Dialogue/NarrativeStageVisuals` loads, all formal background keys resolve, `scene.cafe` remains a real-scene marker, the `revolution.1014.s1` dawn context override resolves, and `rose.club.blindfold` / `rose.club.knight_guidance` retain their explicit solid/placeholder semantics.
+- Verified runtime table character loading for every formal speaker ID. Real portrait/avatar/world sprites exist for `adele`, `colette`, `sparrow`, and `sylvain`; missing portrait paths for Sorel and offstage speakers remain documented rather than receiving borrowed or fabricated art.
+- Reconfirmed `Spotlight.Narrative.Tests.NarrativeEntryTests`: 14 passed, 0 failed, 0 skipped.
+
+### Issues Encountered
+- The focused `NarrativeBackgroundAssetsTests` run was not usable as evidence because the Editor entered Play Mode and a separate test job ran concurrently. The concurrent job reported three unrelated existing MainMenu failures; no MainMenu or presentation asset changes were made by this task.
+- The existing Unity test harness produced/preserved temporary `InitTestScene*` and screenshot artifacts in the already-dirty worktree. They were not deleted or overwritten.
+
+### Notes
+- `rose.club.knight_guidance` is the only explicit background placeholder used by a current formal root. `rose.club.blindfold` is intentional solid black, not missing art.
+- `rose.1011.s1` has real portraits in the runtime catalog, but its authored conversation rows currently use `side=none`; this is a data/presentation integration gap for later acceptance, not evidence to alter source rows in this task.
+- `revolution.1014.s1` authors `oct07.cafe.day`, but its context override selects the real `cafe.dawn` texture for the root context. The requested key remains in the resolved snapshot by design.
+
+### Next Session Should
+- Continue with Task 8: establish and verify the Revolution source/content/result/report invariant while `EV_REVOLUTION` and `T_CAL_D60` remain disabled.
+- Preserve the documented presentation gaps and the current worktree boundary. Do not add substitute portraits or replace explicit placeholders without authoritative source/art requirements.
+
+### Current Status
+- Total Tasks: 95
+- Completed: 7/95 (7%)
+
+## Session 5 (Executor) - Task 8 continuation - 2026-10-18
+
+### Accomplished
+- Completed Task 8: added `revolution-invariant-2026-10-18.md` documenting the retained Revolution source rows, text, presentation data, results, queue row, dependency report, and integration report while the legacy trigger remains disabled.
+- Verified source Excel rows: `T_CAL_D60` points to `EV_REVOLUTION` with `enabled=false`; `EV_REVOLUTION` retains `ev.rev.title`, `ev.rev.p1`, `ev.rev.p2`, `ev.rev.p3`, and its `SET_FLAG revolution=true` plus `BAR_ADD bar:world.stability=-3` results.
+- Verified the three dated Revolution roots remain configured at day 8/Noon, day 9/Morning, and day 23/Night, with their authored pages, lines, choices, C14 inline checks, reading step, completion results, and generated text keys.
+- Verified the current Luban outputs parse and retain the same state: 38 events, 33 result rows, one disabled `T_CAL_D60` trigger, no `EV_REVOLUTION` EventDate row, and all three dated roots present.
+- Ran `Spotlight.Narrative.Editor.Tests.NarrativeConfigurationValidatorTests.ActualGeneratedLubanDataLoadsAndValidates`: 1 passed, 0 failed, 0 skipped.
+- Evaluated the connected Unity integration report: 38 events, 0 errors, 0 warnings; `triggerEnabled=False`; `EV_REVOLUTION` results are `SetFlag -> revolution` and `BarAdd -> bar:world.stability`; all three dated roots are `static_pass`.
+- Reconciled the suspected report mismatch against `NarrativeIntegrationReport.Build`: result association is exact by `eventId`, and the mismatch is not reproducible in the current report or `HEAD`; no project report rewrite was performed.
+
+### Issues Encountered
+- The Editor was in Play Mode at session start; it was stopped before the focused EditMode test and remains outside Play Mode after verification.
+- An initial direct `eval` used the wrong namespace for `LubanNarrativeLoader`; the corrected runtime evaluation succeeded. No project files were affected by the failed evaluation.
+- Existing unrelated MainMenu test failures and temporary test artifacts remain part of the pre-existing dirty worktree boundary; they were not touched by Task 8.
+
+### Notes
+- This task proves configuration/source/generated/report retention and disabled-trigger state only. It does not claim real map/DayFlow, loading, cancellation, retry, save/restore, or exactly-once acceptance.
+- `EV_REVOLUTION` remains in the generated event/result/report inventory, while `T_CAL_D60` remains disabled and has no generated EventDate route.
+
+### Next Session Should
+- Continue with Task 9: verify that no `npc_a` through `npc_d` test narrative is restored, copied, or used as a formal trigger, without deleting unrelated test artifacts.
+
+### Current Status
+- Total Tasks: 95
+- Completed: 8/95 (8%)
+
+## Session 5 (Executor) - Task 9 continuation - 2026-10-18
+
+### Accomplished
+- Completed Task 9: added `npc-test-boundary-2026-10-18.md` with source, generated-data, runtime-loader, formal-trigger, and legacy-asset boundary evidence.
+- Verified both authoritative workbooks contain zero `npc_a` through `npc_d` references.
+- Verified generated `tbncsobject.json`, `tbncsevent.json`, `tbncstrigger.json`, and the wider narrative JSON tree contain no `npc_a` through `npc_d` definitions or formal references.
+- Evaluated the connected Unity configuration: `objects=45;npcObjects=0;npcEvents=0;npcTriggers=0;npcSpeakers=0;events=38;triggers=1`.
+- Confirmed `CharacterCatalog.LoadFromTables()` builds the runtime catalog from Luban tables, so the tracked manual `CharacterCatalog.asset` and `DetailsDisplayConfig.asset` remain non-authoritative legacy snapshots rather than restored narrative content.
+- Confirmed no exact `npc_a` through `npc_d` references exist in `Assets/Scripts`; the unrelated `npc_chen.trust` fixture remains untouched.
+
+### Issues Encountered
+- `Docs/RuntimeCharacters.md` and two tracked manual assets retain historical NPC test-data references. They are documented as non-authoritative and were intentionally preserved; no explicit cleanup request identifies them as removable project junk.
+- No formal NPC event, trigger, speaker, prerequisite, or generated definition was found. No deletion was necessary.
+
+### Notes
+- The task boundary is based on authoritative source and runtime data, not on purging every historical mention from documentation or legacy snapshots.
+- Existing unrelated user/Locus changes and untracked test artifacts remain preserved.
+
+### Next Session Should
+- Continue with Task 10: build the per-event verification matrix for formal roots and continuations, covering trigger, prerequisites, presentation, cancellation, retry, save/restore, completion result, and downstream unlock.
+
+### Current Status
+- Total Tasks: 95
+- Completed: 9/95 (9%)
+
+## Session 5 (Executor) - Task 10 continuation - 2026-10-18
+
+### Accomplished
+- Completed Task 10: added `formal-event-verification-matrix-2026-10-18.md` covering all 9 formal story roots and all 12 arrival continuation events.
+- Recorded per-event trigger/route, prerequisites, presentation shape, cancellation, retry, save/restore, completion/result, downstream unlock, and evidence status.
+- Added explicit evidence keys separating static/configuration evidence, traced lifecycle code contracts, historical October 7 acceptance, and runtime acceptance still pending.
+- Preserved the distinction between continuation `QueueEvent` route edges and formal root completion flags; no continuation was given a fabricated completion result.
+
+### Issues Encountered
+- The matrix confirms that only the October 7 path has historical real-map evidence, and that it is not a current full Unity Test Framework pass. All other formal roots and the arrival chain remain runtime-acceptance pending.
+- `rose.1009.s1` has no separate generated own-completion-false condition; the matrix records that source-specific caveat rather than adding an unsourced condition.
+
+### Notes
+- Shared cancellation/retry/save/restore/settlement codes refer to the runtime path trace and remain static/code evidence until each event is exercised through its real route.
+- No project source, workbook, generated data, scene, or runtime asset was changed by Task 10.
+
+### Next Session Should
+- Continue with Task 11: define evidence locations and naming for generation logs, Unity compile/test results, shared-scene captures, map captures, build reports, and blocker notes without touching user save slots.
+
+### Current Status
+- Total Tasks: 95
+- Completed: 10/95 (10%)
+
+## Session 5 (Executor) - Task 11 continuation - 2026-10-18
+
+### Accomplished
+- Completed Task 11: added `evidence-conventions-2026-10-18.md` defining evidence roots and ASCII naming for official generation logs, Unity compile/test results, shared presentation captures, real map captures, runtime diagnostics, isolated temporary save slots, build reports, and blocker notes.
+- Defined a single run id that pairs logs, screenshots, state snapshots, temporary save slots, and the audit note.
+- Defined the save-slot isolation rule using `Library/Locus/tmp/ncs-formal-integration-overnight/<run-id>/save-slots/`, with restoration of the original save service required before a run can count as acceptance evidence.
+- Reconfirmed the shared `Assets/Scenes/PresentationDebugScene.unity` rule and the exclusion of that scene from formal Build Settings.
+- Documented that no user save slot, new scene, Canvas, input system, screenshot, build output, or project asset was created by Task 11.
+
+### Issues Encountered
+- Existing historical evidence uses `Library/Locus/tmp/oct07-acceptance/`; it is retained as historical evidence and will not be reused for new acceptance runs.
+- No save-slot or evidence-path implementation change was required for this documentation task.
+
+### Notes
+- Future runtime tasks must attach exact console/test/build status and cleanup proof to the same run id; static or historical evidence must not be labeled current acceptance.
+
+### Next Session Should
+- Continue with Task 12: review save, DayFlow, map bootstrap, loading, and presentation ownership contracts and document the smallest integration surface for formal NCS flow.
+
+### Current Status
+- Total Tasks: 95
+- Completed: 11/95 (11%)
+
+## Session 5 (Executor) - Task 12 continuation - 2026-10-18
+
+### Accomplished
+- Completed Task 12: added `formal-integration-surface-2026-10-18.md` documenting the smallest supported integration surface and ownership contracts for runtime creation, DayFlow, map actions, scene loading, presentation, settlement, save gating, restore, and isolated save storage.
+- Confirmed `NarrativeGameFlowIntegration`, `NarrativeController`, `DayFlowController`, `NarrativeActionController`, `MapActionDetailsView`, `NarrativeConversationEventPlayback`, `NarrativePresenter`, `GameFlowBootstrap`, `NarrativeRuntime`, `NarrativeSaveBridge`, and `GameSaveService` remain the existing owners; no parallel scheduler or result system is required.
+- Recorded formal cafe scene loading through `TransitionToGameplayScene("CoffeeShop", ...)`, preview isolation, scene/version/epoch guards, and the safe save/restore boundaries.
+- Documented the DayFlow phase map and the prohibited bypasses that later lifecycle tasks must not introduce.
+
+### Issues Encountered
+- No ownership conflict or missing boundary required a code change. Real event-specific loading, cancellation, retry, save/restore, and exactly-once acceptance remain later tasks.
+
+### Notes
+- The smallest safe integration surface is existing controller/DayFlow/map/presenter/save APIs plus focused tests and diagnostics; formal results remain owned by `NarrativeController.CompleteEvent`.
+- No project source, workbook, generated data, scene, prefab, save slot, or runtime asset was changed by Task 12.
+
+### Next Session Should
+- Continue with Task 13: run the official `Assets/ConfigTables/GenerateAll.bat`, capture its complete output and exit code, and preserve the current authoritative source boundary.
+
+### Current Status
+- Total Tasks: 95
+- Completed: 12/95 (12%)
+
+## Session 5 (Executor) - Task 13 continuation - 2026-10-18
+
+### Accomplished
+- Completed Task 13: ran the official `Assets/ConfigTables/GenerateAll.bat` and added `generation-run-2026-10-18.md`.
+- Captured complete batch stdout/stderr in `generation-20261018-051832.log`; the executor reported `exitCode=0`.
+- Confirmed Player semantic validation passed and Luban strict validation/data generation completed with the batch-selected official Luban 5.1.0/.NET 8 paths.
+- Confirmed the saved Narrative/Text workbooks were used directly, no split merge ran, and no generated C# file changed.
+- Confirmed the expected tracked generated JSON diff is limited to `tbncscondition.json`, `tbncsevent.json`, `tbncseventdate.json`, and `tbncsresult.json`; no scene, report, queue, presentation asset, or save slot was changed by the batch.
+- Confirmed connected Unity `6000.3.5f2` remained stopped and reported `recompile_status=completed`, `failed=false`, and `compilationFailed=false` after generation.
+
+### Issues Encountered
+- None. The batch completed successfully with no `ERROR` output.
+
+### Notes
+- Generation success is recorded separately from strict semantic reconciliation, Unity tests, and real runtime acceptance.
+- The authoritative workbook was already dirty before this task and remains within the preservation boundary.
+
+### Next Session Should
+- Continue with Task 14: confirm Player semantic validation passes for the unchanged or intentionally changed source workbooks, using the captured generation result and a direct validation check if needed.
+
+### Current Status
+- Total Tasks: 95
+- Completed: 13/95 (13%)
+
+## Session 5 (Executor) - Task 14 continuation - 2026-10-18
+
+### Accomplished
+- Completed Task 14: ran `python Assets/ConfigTables/validate_player.py` directly and added `player-semantic-validation-2026-10-18.md`.
+- Captured the complete direct validator output in `player-validation-20261018-052000.log`; exit code was `0` and output was `Player semantic validation passed.`
+- Confirmed the authoritative Narrative/Text workbook hashes remain unchanged from the source inventory.
+- Confirmed the same Player semantic validation also passed inside the official Task 13 generation run.
+
+### Issues Encountered
+- None. The direct validator completed successfully without modifying source workbooks or generated files.
+
+### Notes
+- Player semantic validation is now evidenced separately from the official batch wrapper and remains separate from Luban strict validation and Unity runtime acceptance.
+
+### Next Session Should
+- Continue with Task 15: confirm Luban strict validation and code/data generation complete successfully without hand-editing generated JSON.
+
+### Current Status
+- Total Tasks: 95
+- Completed: 14/95 (14%)
+
+## Session 6 (Executor) - Task 15 continuation - 2026-10-18
+
+### Accomplished
+- Completed Task 15: added `luban-strict-validation-2026-10-18.md`.
+- Recorded the direct official Luban strict invocation, working directory, configured schema/data inputs, generated C# and JSON outputs, complete log path, and process exit code `0`.
+- Confirmed the strict run completed schema loading, data loading, `cs-newtonsoft-json` code generation, strict validation, and JSON data generation without validation errors.
+- Confirmed no generated C# file changed and no hand edit was applied to generated JSON after the strict run; the expected JSON diff remains reserved for Task 16 reconciliation.
+- Rechecked the connected Unity Editor after import: Unity `6000.3.5f2`, stopped, compile-complete, `compilationFailed=false`, and current console ground truth of `0` errors and `0` warnings.
+
+### Issues Encountered
+- None. The direct strict invocation completed successfully and the post-import Editor check was clean.
+
+### Notes
+- The official batch wrapper already captured the same strict generation path for Task 13; this task preserves a separate direct Luban log and evidence record so strict validation is not inferred from the wrapper alone.
+- Generation evidence does not claim real map/DayFlow, loading, cancellation, retry, save/restore, or exactly-once runtime acceptance.
+
+### Next Session Should
+- Continue with Task 16: compare generated JSON and generated C# outputs against the source/schema inputs and record stale, missing, or unexpected generated files.
+- Preserve the expected four-file generated JSON diff and do not hand-edit generated outputs.
+
+### Current Status
+- Total Tasks: 95
+- Completed: 15/95 (15%)
+
+## Session 6 (Executor) - Task 16 continuation - 2026-10-18
+
+### Accomplished
+- Completed Task 16: added `generated-output-reconciliation-2026-10-18.md`.
+- Parsed `schema.xml` and confirmed 41 table definitions and 41 bean definitions map exactly to 41 generated JSON files and 83 generated C# files.
+- Confirmed there are no missing or unexpected generated JSON/C# files, every configured source file and sheet exists, and every source data-row count matches its generated JSON record count.
+- Compared schema field sets against generated JSON fields and generated C# constructor bindings for all tables; no missing or extra fields were found.
+- Confirmed the current generated diff is limited to the four expected narrative JSON files and contains no generated C# changes or untracked generated outputs.
+
+### Issues Encountered
+- The first read-only comparison attempt needed a parser adjustment for legacy schema inputs without an `@Sheet@Workbook` qualifier; the corrected comparison passed across all 41 tables.
+
+### Notes
+- `tbncsnotice.json` is intentionally empty because its source sheet contains only Luban header rows; its generated entry class still matches all schema fields.
+- This task establishes artifact completeness and structural consistency only. Event inventory/report/queue status is the next task.
+
+### Next Session Should
+- Continue with Task 17: reconcile generated event inventory, integration report count, and `NcsIntegrationQueue.csv` so every formal root has one authoritative status.
+
+### Current Status
+- Total Tasks: 95
+- Completed: 16/95 (16%)
+
+## Session 6 (Executor) - Task 17 continuation - 2026-10-18
+
+### Accomplished
+- Completed Task 17: added `event-inventory-reconciliation-2026-10-18.md`.
+- Reconciled generated `tbncsevent.json`, `Docs/NcsIntegrationReport.md`, and `NcsIntegrationQueue.csv`: all contain 38 unique event IDs with no missing, extra, or duplicate entries.
+- Confirmed the queue has one `config_pass` row per event and the report has one `static_pass` section per event; these are configuration/static layers and do not claim runtime acceptance.
+- Confirmed all 9 formal roots have exactly one generated definition, queue row, report section, and appropriate map-action or dated route.
+- Preserved the documented partition of 12 arrival continuations, 9 cafe demos, 4 delivery tests, 3 first-day helpers, and the retained disabled-trigger Revolution event.
+
+### Issues Encountered
+- None. The only status-label difference is the intentional `config_pass` versus `static_pass` distinction between queue and report.
+
+### Notes
+- `EV_REVOLUTION` remains in the inventory while `T_CAL_D60` remains disabled; it is not counted as a formal dated root.
+- Six formal roots are date-dispatched and three are map-action roots; their absence/presence in `tbncseventdate.json` matches their declared entry source.
+
+### Next Session Should
+- Continue with Task 18: validate the formal root set and explicitly classify demo, delivery-test, arrival-chain, and formal story events without deleting Revolution content.
+
+### Current Status
+- Total Tasks: 95
+- Completed: 17/95 (17%)
+
+## Session 6 (Executor) - Task 18 continuation - 2026-10-18
+
+### Accomplished
+- Completed Task 18: added `formal-root-classification-2026-10-18.md`.
+- Validated an exhaustive, disjoint partition of all 38 source/generated events: 9 formal roots, 12 arrival continuations, 9 cafe demos, 4 delivery tests, 3 first-day helpers, and 1 retained Revolution legacy event.
+- Confirmed the formal root set is present in the authoritative workbook and generated event table, with every root `onceOnly=true`, `presentationClass=Conversation`, and a configured presentation key.
+- Preserved `EV_REVOLUTION` and its authored content/results as retained legacy content; no event was removed, copied, or promoted into a parallel formal system.
+
+### Issues Encountered
+- None. The classification produced zero unclassified or multiply classified events.
+
+### Notes
+- `rose.1009.s1` and `rose.1011.s1` use `Tpl_ArrivalConversation` presentation setup but remain formal roots because their IDs, triggers, and queue rows are formal story entries rather than `arrival.*` continuations.
+
+### Next Session Should
+- Continue with Task 19: validate each formal event's declared entry type, source trigger, and phase handoff against the actual NCS runtime enum and queue behavior.
+
+### Current Status
+- Total Tasks: 95
+- Completed: 18/95 (18%)
+
+## Session 6 (Executor) - Task 19 continuation - 2026-10-18
+
+### Accomplished
+- Completed Task 19: added `formal-entry-phase-validation-2026-10-18.md`.
+- Verified the actual runtime `NarrativeEntryPoint` enum and loader parser: `Immediate`, `MorningBeforeMap`, `AfterBusiness`, `BeforeNight`, and `MapAction`; generated configuration validation returned `0` errors.
+- Traced the phase handoff from date slots to runtime entries and from DayFlow's morning, after-business, and before-night boundaries to `ProcessEntry`.
+- Verified the three formal map-action roots resolve through authored actions mounted at cafe, market, and the Saints Street position, then queue through `QueueMapActionEvent`.
+- Verified all six dated formal roots have the expected day/time/once rows and pass the runtime's `Immediate`-or-derived-phase compatibility rule; read-only route assertions passed `9/9`.
+
+### Issues Encountered
+- None. The Saints Street map key is rendered with the project's existing non-ASCII encoding artifact in generated JSON, but its authored `extendedActions` value and action route are intact and matched exactly.
+
+### Notes
+- `Immediate` on `church.1009.s2` and `revolution.1013.s2` is not a bypass: the date candidate derives `BeforeNight`/`AfterBusiness`, and the runtime explicitly allows `Immediate` as the legacy declaration for dated events.
+- No new entry type, scheduler, trigger alias, or parallel handoff was introduced.
+
+### Next Session Should
+- Continue with Task 20: validate all date/time/once conditions for day 2, day 3, day 4, day 6, day 8, day 9, and day 23 against configured DayFlow phases.
+
+### Current Status
+- Total Tasks: 95
+- Completed: 19/95 (19%)
+
+## Session 6 (Executor) - Task 20 continuation - 2026-10-18
+
+### Accomplished
+- Completed Task 20: added `date-phase-condition-validation-2026-10-18.md`.
+- Reconciled the six generated/source `EventDate` rows with the actual DayFlow/NCS phase mapping: day 2 Night, day 4 Night, day 6 Morning, day 8 Noon, day 9 Morning, and day 23 Night; all are `once`.
+- Confirmed the connected runtime loader returns the same six rows and no extra date routes.
+- Verified day 3 is intentionally a market `MapAction`, and day 4 preserves both the Church night date route and the separate Rose Saints Street map action without inventing a date condition.
+- Verified all dated roots use the exact derived phase or the supported legacy `Immediate` compatibility rule.
+
+### Issues Encountered
+- None. The date/phase assertions passed against both source/generated data and the runtime-loaded configuration.
+
+### Notes
+- The game calendar starts at day 1 = `670-10-06`; the dates in this evidence are in-game day numbers and phase slots, not current real-world dates.
+- `oct07.s1` is the cafe map action prerequisite and has no `EventDate` row by design.
+
+### Next Session Should
+- Continue with Task 21: validate map-action names, venue/mount identifiers, map-active requirements, and action availability for `oct07.s1`, `neutral.1008.s1`, and `rose.1009.s1`.
+
+### Current Status
+- Total Tasks: 95
+- Completed: 20/95 (20%)
+
+## Session 6 (Executor) - Task 21 continuation - 2026-10-18
+
+### Accomplished
+- Completed Task 21: added `map-action-route-validation-2026-10-18.md`.
+- Verified the authored action keys, result-event links, map mounts, action types, costs, and availability conditions for `oct07.s1`, `neutral.1008.s1`, and `rose.1009.s1`.
+- Confirmed cafe and market routes explicitly require `world.map.active=true`; confirmed the Rose action has no separate authored map-active condition and recorded that distinction without inventing a condition.
+- Traced the runtime route from authored map positions through `MapSceneController`, `NarrativeActionController.IsAvailable/Execute`, and `QueueMapActionEvent`.
+- Ran the focused EditMode selection covering configuration and map-content behavior: `32/32` passed, `0` failed, `0` skipped.
+
+### Issues Encountered
+- The current source/generated Rose map-position key is displayed with an existing non-ASCII encoding artifact, but the authored `extendedActions=rose.1009.s1.action` mount is intact.
+- Rose lacks a separate `world.map.active` condition in its action/event source. This is documented as a runtime acceptance boundary; no generated/source change was made because the task was validation and the map UI route is already authored.
+
+### Notes
+- `oct07.cafe.s1` is zero-cost but mandatory and replaces other cafe location actions; completion is still deferred until its result event succeeds.
+- `rose.1009.s1` correctly consumes `ActionPoint(1)` and remains gated by `story.oct09.meeting.known=true` and day 4.
+
+### Next Session Should
+- Continue with Task 22: validate cross-event prerequisites use real `completed` facts and do not substitute known, seen, reserved, or merely opened state for completion.
+
+### Current Status
+- Total Tasks: 95
+- Completed: 21/95 (21%)
+
+## Session 7 (Executor) - Task 22 continuation - 2026-10-18
+
+### Accomplished
+- Completed Task 22: added `cross-event-prerequisite-validation-2026-10-18.md`.
+- Corrected the authoritative `Narrative.xlsx` Condition rows for `rose.1009.s1.meeting` and `rose.1009.s1.action.meeting` so both require `story.oct07.s2.completed=true` rather than `story.oct09.meeting.known=true`.
+- Re-ran the official `Assets/ConfigTables/GenerateAll.bat` successfully, refreshed Unity's generated TextAssets, and regenerated `Docs/NcsIntegrationReport.md` plus `NcsIntegrationQueue.csv` through `Spotlight/Narrative/Validate Luban`.
+- Verified the generated report remains at 38 events, 0 errors, and 0 warnings; the queue remains at 38 rows; and Rose 1009 now lists the completed prerequisite in both artifacts.
+- Preserved the separate authoritative `oct07.s2.meeting_known` result that writes `story.oct09.meeting.known=true` after `oct07.s2` completes.
+- Audited all formal event/action BOOL conditions: zero cross-event prerequisites use `known`, `seen`, `reserved`, or `opened` without a `.completed` suffix.
+- Re-ran focused Unity tests after the source/generation change: `Spotlight.Narrative.Editor.Tests` passed 28/28 and `Spotlight.Narrative.Core.Tests` passed 195/195, with no failures or skips.
+
+### Issues Encountered
+- The first Unity report regeneration read the old imported TextAsset cache after the external batch completed, leaving the old Rose prerequisite in the report temporarily. A forced AssetDatabase refresh followed by the same official validation menu corrected the artifacts; no additional source edit was needed.
+- Unity retains one existing `[NCS] No guaranteed anchor events` advisory warning; it is unrelated to the prerequisite audit. Compile ground truth remains `compilationFailed=false` and `compiling=false`.
+
+### Notes
+- The generated data and report are authoritative only after the workbook, official Luban generation, Unity import refresh, and report/queue regeneration sequence is complete.
+- `story.oct09.meeting.known` remains a valid downstream authored fact, but it no longer proves the completion of `oct07.s2` or Rose 1009.
+- Existing unrelated user/Locus changes and untracked paths remain untouched.
+
+### Next Session Should
+- Continue with Task 23: validate `onceOnly`, `blocksSave`, busy ownership, and candidate consumption semantics for every formal root and continuation.
+- Keep the current source/generation/report evidence and preservation boundary intact.
+
+### Current Status
+- Total Tasks: 95
+- Completed: 22/95 (22%)
+
+## Session 7 (Executor) - Task 23 continuation - 2026-10-18
+
+### Accomplished
+- Completed Task 23: added `once-busy-candidate-validation-2026-10-18.md`.
+- Parsed all nine formal roots and twelve `arrival.*` continuations from generated data: formal roots are uniformly `onceOnly=true; blocksSave=true`; continuations are uniformly repeatable with no independent save block.
+- Verified all three formal map actions are `ONCE`, `mustExecute=true`, and defer completion until their result event chain succeeds.
+- Traced `NarrativeController.IsBusy`, `BlocksSave`, candidate eligibility/freeze, successful `CommitCandidate`, cancellation epoch invalidation, continuation queue ordering, and `NarrativeActionController` deferred completion against the current source.
+- Ran six focused lifecycle/action tests individually; each passed 1/1. The full `Spotlight.Narrative.Core.Tests` narrative suite remains 195/195 passed with no failures or skips.
+- Cleared expected negative-test diagnostic logs and confirmed final Unity console ground truth: 0 errors, 0 warnings, `compilationFailed=false`, `compiling=false`.
+
+### Issues Encountered
+- A multi-name test filter API call matched no tests and returned a synthetic zero-test pass; it was not used as evidence. The tests were rerun individually with exact name filters and all six passed.
+- Negative transaction tests intentionally emit error-level diagnostics for rejected result batches. Those logs were inspected as expected behavior and cleared from the ephemeral Unity console; no compile or test failure was found.
+- Continuation events intentionally have no independent `blocksSave` property. Their active/queued work is still covered by NCS `IsBusy`; the question of save behavior across a complete continuation chain remains assigned to later runtime acceptance tasks and was not changed here.
+
+### Notes
+- Candidate once/date/trigger consumption occurs only after the complete result transaction succeeds. Cancellation, stale callbacks, and failed mandatory map-action result chains leave formal completion retryable.
+- Existing unrelated user/Locus modifications and untracked files remain preserved.
+
+### Next Session Should
+- Continue with Task 24: validate page/line/choice/check ordering, sequence continuity, required text keys, and absence of accidental empty or raw-key display text.
+- Preserve the Task 22 and Task 23 source, generation, report, queue, and lifecycle evidence.
+
+### Current Status
+- Total Tasks: 95
+- Completed: 23/95 (23%)
+
+## Session 8 (Executor) - Task 24 continuation - 2026-10-18
+
+### Accomplished
+- Completed Task 24: added `presentation-sequence-text-validation-2026-10-18.md`.
+- Re-ran the generated-data audit with explicit UTF-8 decoding and corrected reading-line matching by `readingPage.pageId`.
+- Verified 970 referenced presentation text usages / 832 unique keys with 0 missing, 0 empty, and 0 raw-key values.
+- Verified contiguous positive sequences for conversation pages, conversation lines, reading pages, reading lines, choices, and ability-check conditions; all six group audits reported zero violations.
+- Validated all 46 generated page-condition expressions against the existing runtime grammar: 32 `choice:`, 3 `anyChoice:`, 5 `check:`, 2 `dependency:` (one known and one fail-closed unknown), and 4 plain authored condition keys, with zero invalid references.
+- Corrected the reading audit counts to 7 lines for `oct07.s2.letter`, 1 for `revolution.1014.s1.letter`, and 3 for `rose.1011.s1.card`; recorded corrected formal-root page/line counts.
+- Ran `Spotlight.Narrative.Editor.Tests.NarrativeConfigurationValidatorTests` plus `Spotlight.Narrative.Tests.InlineChoiceResultTests`: 35/35 passed, 0 failed, 0 skipped.
+- Cleared expected negative-test and direct-smoke diagnostics. Final Unity ground truth is `compilationFailed=false`, `compiling=false`, `consoleErrors=0`, `consoleWarnings=0`.
+
+### Issues Encountered
+- The dedicated `Spotlight.GameFlow.Presentation.Tests` assembly is compiled and reflection-visible, but the current Unity Test Runner discovery returns a synthetic 0/0 result for that assembly and its class filters. No assembly or test source was changed.
+- Direct invocation of the S1 presentation class exposed an existing later-scope mismatch at `October07S1PresentationTests.cs:88`: the test expects `oct07.cafe.day` to be a scene-background marker while the current registry defines it as approved artwork. A second direct invocation also lacked the test runner's UI/effect harness. This remains a presentation/background follow-up for Tasks 25-27 and 75-80.
+
+### Notes
+- Prefixed page-condition expressions were not incorrectly looked up as literal `tbncsconditionkey.json` rows. The existing `NarrativeController.ReadPresentationCondition` parser and its fail-closed dependency behavior were used as the authority.
+- No source workbook, generated JSON/C#, project runtime code, scene, prefab, registry asset, or user save slot was modified in this session.
+
+### Next Session Should
+- Continue with Task 25: validate `PresentationIndex`, visuals resources, reading resources, portrait bindings, effect presets, and fallback behavior for every configured presentation.
+- Carry forward the dedicated presentation Test Runner discovery issue and the `oct07.cafe.day` background expectation mismatch as explicit later-scope evidence.
+
+### Current Status
+- Total Tasks: 95
+- Completed: 24/95 (25%)
