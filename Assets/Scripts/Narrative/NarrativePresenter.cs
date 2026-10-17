@@ -428,10 +428,10 @@ namespace Spotlight.Narrative
                     {
                         if (disposed || skipRequested) yield break;
                         if (!PageVisible(page.pageId, page.pageCondKeys, page.pageBarConds)) continue;
-                        if (!string.IsNullOrWhiteSpace(page.bgOverride)) inheritedBackground = page.bgOverride;
                         if (dialoguePages.IndexOf(page) < startPage) continue;
                         if (page.stepType == NarrativeConversationStepType.LetterReveal || page.stepType == NarrativeConversationStepType.LetterRead)
                         {
+                            if (!string.IsNullOrWhiteSpace(page.bgOverride)) inheritedBackground = page.bgOverride;
                             yield return LetterStep(definition, page, stageOwner, stageReleases);
                             if (completion == null) yield break;
                             continue;
@@ -444,6 +444,7 @@ namespace Spotlight.Narrative
                             if (!check.passed) continue;
                             stepHint = PassiveCheckPresentationConfig.Hint(check);
                         }
+                        if (!string.IsNullOrWhiteSpace(page.bgOverride)) inheritedBackground = page.bgOverride;
                         var conversationData = new NarrativeConversationPresentationData { title = resolvedTitle, backgroundPath = inheritedBackground, bgmOverride = page.bgmOverride,
                             eventId = definition.eventId, presentationKey = definition.presentationKey, continuityOwner = stageOwner,
                             continues = dialoguePages.IndexOf(page) < dialoguePages.Count - 1 };

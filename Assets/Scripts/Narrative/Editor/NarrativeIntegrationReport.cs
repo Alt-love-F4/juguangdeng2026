@@ -49,6 +49,11 @@ namespace Spotlight.Narrative.Editor
                 Entry = definition.entry,
                 Presentation = FormatPresentation(definition)
             };
+            foreach (string blocker in (definition.eventProperties ?? new List<NarrativeEventProperty>())
+                .Where(property => property != null && string.Equals(property.property, "blockedBy", StringComparison.OrdinalIgnoreCase))
+                .SelectMany(property => (property.value ?? string.Empty).Split(new[] { ',', '+', ';' }, StringSplitOptions.RemoveEmptyEntries))
+                .Select(value => value.Trim()).Where(value => value.Length > 0).Distinct(StringComparer.Ordinal))
+                result.Errors.Add("Construction blocker: " + blocker);
             var eventDates = c.eventDates.Where(item => item != null && item.eventId == definition.eventId).OrderBy(item => item.rowIndex).ToList();
             var triggers = c.triggers.Where(item => item != null && item.eventId == definition.eventId).ToList();
             var actions = c.actions.Where(item => item != null && ((item.resultEvents ?? new List<string>()).Contains(definition.eventId)
@@ -137,6 +142,8 @@ namespace Spotlight.Narrative.Editor
                 RequireText(c, line.textKey, "Line " + line.lineId, result);
                 if (!string.IsNullOrWhiteSpace(line.speakerKey) && !c.objects.Any(item => item != null && item.objId == line.speakerKey))
                     result.Errors.Add("Line " + line.lineId + " references unknown speaker: " + line.speakerKey);
+                if (!string.IsNullOrWhiteSpace(line.speakerNameKey))
+                    RequireText(c, line.speakerNameKey, "Speaker name " + line.lineId, result);
             }
             if (!string.IsNullOrWhiteSpace(definition.titleText)) RequireText(c, definition.titleText, "Event title", result);
             foreach (string key in definition.contentKeys ?? new List<string>()) RequireText(c, key, "Event content", result);

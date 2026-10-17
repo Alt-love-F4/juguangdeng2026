@@ -78,6 +78,66 @@ namespace Spotlight.Narrative.Editor.Tests
             Assert.That(s2.Errors[0], Does.Contain("Invalid background registry entry"));
         }
 
+        [Test] public void IntegrationReportTreatsConstructionBlockersAsErrors()
+        {
+            var report = NarrativeIntegrationReport.Build(LubanNarrativeLoader.Load());
+            foreach (string eventId in new[]
+            {
+                "rose.1009.s1", "revolution.1013.s2", "revolution.1014.s1",
+                "revolution.1028.s1", "church.1009.s2"
+            })
+            {
+                var item = report.Find(eventId);
+                Assert.That(item, Is.Not.Null, eventId);
+                Assert.That(item.Status, Is.EqualTo("blocked"), eventId);
+                Assert.That(item.Errors.Exists(error => error.StartsWith("Construction blocker:", StringComparison.Ordinal)), Is.True, eventId);
+            }
+        }
+
+        [Test] public void IntegrationReportChecksSpeakerNameKeysAndResolvedC14Anonymity()
+        {
+            var configuration = LubanNarrativeLoader.Load();
+            var report = NarrativeIntegrationReport.Build(configuration);
+            var c14 = report.Find("revolution.1014.s1");
+            Assert.That(c14, Is.Not.Null);
+            Assert.That(c14.Errors.Exists(error => error.Contains("C-G05")), Is.False);
+            var namedLines = configuration.presentations.conversationLines
+                .Where(line => line.pageId.StartsWith("revolution.1014.s1.", StringComparison.Ordinal)
+                    && !string.IsNullOrWhiteSpace(line.speakerNameKey)).ToList();
+            Assert.That(namedLines, Has.Count.EqualTo(6));
+            Assert.That(namedLines.All(line => configuration.texts.Any(text => text.key == line.speakerNameKey)), Is.True);
+            Assert.That(c14.Status, Is.EqualTo("blocked"));
+            Assert.That(c14.Errors.Exists(error => error.Contains("C-B03")), Is.True);
+            Assert.That(c14.Errors.Exists(error => error.Contains("C-B04")), Is.True);
+            Assert.That(c14.Errors.Exists(error => error.Contains("C-B05")), Is.True);
+        }
+
+        [Test] public void IntegrationReportVerifiesRose1009PerceptionTailAndTemporaryCg()
+        {
+            var configuration = LubanNarrativeLoader.Load();
+            var report = NarrativeIntegrationReport.Build(configuration);
+            var rose = report.Find("rose.1009.s1");
+            Assert.That(rose, Is.Not.Null);
+            Assert.That(rose.Errors.Exists(error => error.Contains("B-B01")), Is.False);
+            Assert.That(rose.Errors.Exists(error => error.Contains("B-R004")), Is.False);
+            Assert.That(rose.Status, Is.EqualTo("static_pass"));
+            Assert.That(rose.Checks, Does.Contain("rose.1009.s1.perception"));
+
+            var check = configuration.abilityChecks.Single(value => value.checkId == "rose.1009.s1.perception");
+            Assert.That(configuration.abilityCheckConditions.Single(value => value.checkId == check.checkId).threshold, Is.EqualTo(5));
+            var pages = configuration.presentations.conversationPages
+                .Where(page => page.presentationKey == "rose.1009.s1.conversation").OrderBy(page => page.seq).ToList();
+            Assert.That(pages, Has.Count.EqualTo(9));
+            Assert.That(pages[6].stepType, Is.EqualTo(NarrativeConversationStepType.PassiveCheck));
+            Assert.That(pages[6].checkId, Is.EqualTo(check.checkId));
+            Assert.That(pages[6].bgOverride, Is.EqualTo("rose.club.knight_guidance"));
+            Assert.That(pages[7].pageCondKeys, Is.EqualTo("not:check:" + check.checkId));
+            Assert.That(configuration.presentations.conversationLines.Count(line => line.textKey == "rose.1009.s1.text.p073"), Is.EqualTo(2));
+            Assert.That(Enumerable.Range(74, 3).All(number => configuration.presentations.conversationLines
+                .Count(line => line.lineId == "rose.1009.s1.p" + number.ToString("000")) == 1), Is.True);
+            Assert.That(rose.ExpectedResults.Exists(value => value.Contains("story.rose.1009.s1.completed")), Is.True);
+        }
+
         [Test] public void IntegrationQueueSyncPreservesOctoberSeventhStatusAndNotes()
         {
             var configuration = LubanNarrativeLoader.Load();

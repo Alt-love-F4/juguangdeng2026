@@ -2,7 +2,7 @@
 
 - Filter: (all)
 - Events: 57
-- Errors: 0
+- Errors: 14
 - Warnings: 0
 
 ## EV_AB_SWEAR [static_pass]
@@ -544,7 +544,7 @@
 - Checks: (none)
 - Results: (none)
 
-## church.1009.s2 [static_pass]
+## church.1009.s2 [blocked]
 
 - Entry: Immediate
 - Sources: Immediate / continuation or code-owned entrance
@@ -554,6 +554,9 @@
 - Letter/reading: 0/0 pages / 0 lines
 - Checks: (none)
 - Results: SetFlag -> story.church.1009.s2.completed
+### Errors
+- Construction blocker: D-B03-rose-real-completion
+
 
 ## neutral.1008.s1 [static_pass]
 
@@ -588,7 +591,7 @@
 - Checks: oct07.s2.perception
 - Results: SetFlag -> story.oct07.s2.completed; SetFlag -> story.oct09.meeting.known
 
-## revolution.1013.s2 [static_pass]
+## revolution.1013.s2 [blocked]
 
 - Entry: Immediate
 - Sources: Immediate / continuation or code-owned entrance
@@ -598,8 +601,14 @@
 - Letter/reading: 0/0 pages / 0 lines
 - Checks: (none)
 - Results: SetFlag -> story.revolution.1013.s2.completed
+### Errors
+- Construction blocker: C-B01
+- Construction blocker: C-B02
+- Construction blocker: C-B05
+- Construction blocker: C-G04
 
-## revolution.1014.s1 [static_pass]
+
+## revolution.1014.s1 [blocked]
 
 - Entry: MorningBeforeMap
 - Sources: Date: day 9 / Morning / Once
@@ -609,8 +618,16 @@
 - Letter/reading: 2/1 pages / 1 lines
 - Checks: revolution.1014.s1.wisdom4, revolution.1014.s1.perception6, revolution.1014.s1.wisdom5
 - Results: SetFlag -> story.revolution.1014.s1.completed
+### Errors
+- Construction blocker: C-B03
+- Construction blocker: C-B04
+- Construction blocker: C-B05
+- Construction blocker: B-real-completion
+- Construction blocker: C-G02
+- Construction blocker: C-G07
 
-## revolution.1028.s1 [static_pass]
+
+## revolution.1028.s1 [blocked]
 
 - Entry: BeforeNight
 - Sources: Date: day 23 / Night / Once
@@ -620,6 +637,11 @@
 - Letter/reading: 0/0 pages / 0 lines
 - Checks: (none)
 - Results: SetFlag -> story.revolution.1028.s1.completed
+### Errors
+- Construction blocker: C-B05
+- Construction blocker: C-B06
+- Construction blocker: C-G07
+
 
 ## rose.1009.s1 [static_pass]
 
@@ -627,8 +649,8 @@
 - Sources: Action: rose.1009.s1.action @ 圣徒街
 - Conditions: G1: BAR_BETWEEN(world.calendar, 4,4); G1: BOOL_EQ(story.oct09.meeting.known, true)
 - Presentation: Conversation/rose.1009.s1.conversation setup=rose.1009.s1
-- Pages/lines/options: 6/62/2
+- Pages/lines/options: 9/67/2
 - Letter/reading: 0/0 pages / 0 lines
-- Checks: (none)
+- Checks: rose.1009.s1.perception
 - Results: SetFlag -> story.rose.1009.s1.completed
 

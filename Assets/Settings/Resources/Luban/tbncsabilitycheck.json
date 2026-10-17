@@ -54,5 +54,13 @@
     "successResultOwnerId": "",
     "failureResultOwnerId": "",
     "mode": "Inline"
+  },
+  {
+    "checkId": "rose.1009.s1.perception",
+    "successEventId": "",
+    "failureEventId": "",
+    "successResultOwnerId": "",
+    "failureResultOwnerId": "",
+    "mode": "Inline"
   }
 ]

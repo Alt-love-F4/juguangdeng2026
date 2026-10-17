@@ -1077,5 +1077,44 @@
     "stepType": "",
     "readingKey": "",
     "checkId": ""
+  },
+  {
+    "pageId": "rose.1009.s1.portrait_cg",
+    "presentationKey": "rose.1009.s1.conversation",
+    "seq": 7,
+    "pageCondKeys": "",
+    "pageBarConds": "",
+    "optionGroupKey": "",
+    "bgOverride": "rose.club.knight_guidance",
+    "bgmOverride": "",
+    "stepType": "PassiveCheck",
+    "readingKey": "",
+    "checkId": "rose.1009.s1.perception"
+  },
+  {
+    "pageId": "rose.1009.s1.portrait_no_cg",
+    "presentationKey": "rose.1009.s1.conversation",
+    "seq": 8,
+    "pageCondKeys": "not:check:rose.1009.s1.perception",
+    "pageBarConds": "",
+    "optionGroupKey": "",
+    "bgOverride": "",
+    "bgmOverride": "",
+    "stepType": "",
+    "readingKey": "",
+    "checkId": ""
+  },
+  {
+    "pageId": "rose.1009.s1.portrait_tail",
+    "presentationKey": "rose.1009.s1.conversation",
+    "seq": 9,
+    "pageCondKeys": "",
+    "pageBarConds": "",
+    "optionGroupKey": "",
+    "bgOverride": "",
+    "bgmOverride": "",
+    "stepType": "",
+    "readingKey": "",
+    "checkId": ""
   }
 ]
