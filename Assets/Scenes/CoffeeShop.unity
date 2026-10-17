@@ -2523,9 +2523,31 @@ MonoBehaviour:
   - {fileID: 931882029}
   - {fileID: 531809273}
   suppliedCustomer: {fileID: 21300000, guid: f73701e5be0de6b428b472bf427fb25a, type: 3}
+  silhouetteCustomer: {fileID: 21300000, guid: 871b513983634b9d9254ddd84d496308, type: 3}
   suppliedGuestName: "\u4F69\u6756\u7EC5\u58EB"
-  useSuppliedGuestForFirstSeat: 1
-  characterArt: []
+  useSuppliedGuestForFirstSeat: 0
+  characterArt:
+  - characterId: elion
+    sprite: {fileID: 21300000, guid: c340031f6a63489dbe4d341062e8801f, type: 3}
+    artworkOffset: {x: 0, y: 0}
+  - characterId: alienor
+    sprite: {fileID: 21300000, guid: 115d234a8ecd4b779fa2f3d89151bbba, type: 3}
+    artworkOffset: {x: 0, y: 0}
+  - characterId: thibaut
+    sprite: {fileID: 21300000, guid: d9cd10bdb51e4ef09bd5488b9bdc261a, type: 3}
+    artworkOffset: {x: 0, y: 0}
+  - characterId: adele
+    sprite: {fileID: 21300000, guid: 3995caae57794569b1ad0596f09425e9, type: 3}
+    artworkOffset: {x: 0, y: 0}
+  - characterId: lesou
+    sprite: {fileID: 21300000, guid: d702e6c642214a5abb655cb0fb86f4f7, type: 3}
+    artworkOffset: {x: 0, y: 0}
+  - characterId: bertrand
+    sprite: {fileID: 21300000, guid: 9730e7b713784f47b7da4a67d6777d01, type: 3}
+    artworkOffset: {x: 0, y: 0}
+  - characterId: antoine
+    sprite: {fileID: 21300000, guid: fc74447fad0846258fe71a6e0f1cb91a, type: 3}
+    artworkOffset: {x: 0, y: 0}
 --- !u!1001 &519034351
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -3287,7 +3309,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 8319929853800583575, guid: 071953334286ba54c9cc9c7c3421b622, type: 3}
       propertyPath: m_Enabled
-      value: 1
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 8319929853800583575, guid: 071953334286ba54c9cc9c7c3421b622, type: 3}
       propertyPath: m_SortingOrder
@@ -12518,7 +12540,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 8319929853800583575, guid: 071953334286ba54c9cc9c7c3421b622, type: 3}
       propertyPath: m_Enabled
-      value: 1
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 8319929853800583575, guid: 071953334286ba54c9cc9c7c3421b622, type: 3}
       propertyPath: m_SortingOrder
@@ -12971,7 +12993,7 @@ Transform:
   m_GameObject: {fileID: 2048616691}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalPosition: {x: 0.111, y: -0.076, z: 0}
   m_LocalScale: {x: 1.3356, y: 1.3356, z: 1.3356}
   m_ConstrainProportionsScale: 1
   m_Children: []

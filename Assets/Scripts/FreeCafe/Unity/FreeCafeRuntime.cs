@@ -101,6 +101,8 @@ namespace Spotlight.FreeCafe
         private string lockedPourTargetId, lastPourError;
         private FreeEntityView receivingView;
         public string LockedPourTargetId => lockedPourTargetId;
+        public string CurrentPourTargetId => !IsDragging || !draggingVessel ? null
+            : vesselTiltMode ? lockedPourTargetId : ResolvePourTarget()?.id;
         private void Awake()
         {
             // A session owner may already have a save entry before this scene loads.
@@ -869,11 +871,13 @@ namespace Spotlight.FreeCafe
             if(vesselPointer==null) vesselPointer=new PointerEventData(EventSystem.current);
             vesselPointer.position=pointerScreen;
             FindReceiver(vesselPointer);
+            var target=ResolvePourTarget();
+            // Reject a tutorial misclick before freezing the vessel or owning a pour attempt.
+            if (WorkstationTutorial != null && !WorkstationTutorial.AllowPour(dragItemId, target?.id)) return;
             vesselTiltMode=true;
             vesselWasTilted=true;
             vesselTiltPointerOrigin=pointerScreen;
             vesselTilt=0;
-            var target=ResolvePourTarget();
             draggedView.FreezePointerMotion();
             lockedPourTargetId=target?.id;
             lastPourError=null;
@@ -1181,7 +1185,8 @@ namespace Spotlight.FreeCafe
                 }, seatIndex, allowDuplicate, replaceExisting);
             var character = Character(characterId);
             if (character == null) return ActionResult.No("找不到角色：" + characterId);
-            if (character.worldSprite == null) return ActionResult.No(character.displayName + " 尚未配置店内素材");
+            if (character.worldSprite == null && (seating == null || !seating.CanPresentCustomer(characterId)))
+                return ActionResult.No(character.displayName + " 尚未配置店内素材或默认黑影");
             return World.DebugSummonCustomer(new CafePersonIdentity
             {
                 personId = character.characterId, characterId = character.characterId,

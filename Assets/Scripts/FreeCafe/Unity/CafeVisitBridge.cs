@@ -51,7 +51,8 @@ namespace Spotlight.FreeCafe
                 foreach (var entry in snapshot.Visits)
                 {
                     var character = owner.Character(entry.CharacterId);
-                    bool invalid = character == null || character.worldSprite == null;
+                    bool invalid = character == null || (character.worldSprite == null
+                        && (owner.seating == null || !owner.seating.CanPresentCustomer(entry.CharacterId)));
                     if (invalid && !entry.IsEnded) Warn(entry.VisitInstanceId + ":identity", entry.CharacterId + " 无有效世界资源，拒绝来访 configuration_invalid。");
                     intents.Add(new CafeVisitIntent
                     {

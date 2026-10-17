@@ -130,7 +130,7 @@ namespace Spotlight.FreeCafe
             W.State.automaticMachines = state.automatic;
             if (refreshViews) app.DebugRefreshViews();
             else refreshOnEnable = true;
-            wasDragging = false; restoring = false;
+            wasDragging = false; rightStarted = false; restoring = false;
         }
         public void Stop() => Stop(true);
 
@@ -191,7 +191,12 @@ namespace Spotlight.FreeCafe
         }
         public bool AllowDrop(string id, bool placeOnly)
         {
-            if (!IsRunning || restoring || !DragStep || PourStep) return true;
+            if (!IsRunning || restoring || !DragStep) return true;
+            if (PourStep)
+            {
+                ReportError("容器已放回。请按第 1 步，重新按住左键拖到目标上方。");
+                return false;
+            }
             if (stage == Stage.TakeCup)
             {
                 if (id == null) return true;
@@ -203,11 +208,13 @@ namespace Spotlight.FreeCafe
         public bool AllowPour(string source, string target)
         {
             if (!IsRunning || restoring) return true;
-            bool valid = PourStep && source == Source && (target == Target || stage == Stage.Extract && target == extractor);
+            bool valid = PourStep && source == Source && IsPourTarget(target);
             if (valid) rightStarted = true;
-            if (!valid) ReportError("倾倒目标不对：先松开右键，移到标记容器上方，再按住右键上下移动。");
+            if (!valid) ReportError("还没有对准目标。请先松开右键，按住左键将容器拖到标记目标上方。");
             return valid;
         }
+        private bool IsPourTarget(string target) => target != null && (target == Target || stage == Stage.Extract && target == extractor);
+        private bool ReadyToPour => PourStep && app.IsDragging && IsPourTarget(app.CurrentPourTargetId);
         private bool Has(string id, string spec) => W.Find(id)?.contents.Exists(p => p.specId == spec) == true;
         private void LateUpdate()
         {
@@ -236,7 +243,6 @@ namespace Spotlight.FreeCafe
                 if (stage == Stage.DeliverCup && W.ServingCup?.id == cup && !app.IsDragging)
                     SetStage(Stage.SubmitCup);
                 var mouse = Mouse.current;
-                if (PourStep && app.IsDragging && mouse != null && mouse.rightButton.isPressed) rightStarted = true;
                 if (PourStep && rightStarted && mouse != null && !mouse.rightButton.isPressed)
                 {
                     FinishPourAttempt();
@@ -256,12 +262,15 @@ namespace Spotlight.FreeCafe
         }
         private void FinishPourAttempt()
         {
+            // Consume the attempt before cancellation/restoration can notify other systems.
+            // A failed water pour must not restore the same checkpoint every subsequent frame.
+            rightStarted = false;
             if (stage == Stage.Water)
             {
                 bool enough = W.LiquidVolume(W.Find(heater)) >= WaterTargetMl - .01f;
                 app.CancelDrag();
                 if (enough) SetStage(Stage.Heat);
-                else { Restore(checkpoint); ReportError("注水不足，本步已恢复。拿起右上角清水壶，对准加热炉，按住右键倾倒至 200 ml。"); }
+                else { Restore(checkpoint); ReportError("注水未完成，本步已恢复。请跟随第 1 步，按住左键重新拖动清水壶。"); }
                 return;
             }
             bool empty = W.LiquidVolume(W.Find(Source)) <= .01f;
@@ -270,8 +279,8 @@ namespace Spotlight.FreeCafe
             if (success) SetStage(stage == Stage.Extract ? Stage.Drain : Stage.DeliverCup);
             else
             {
-                Restore(checkpoint); rightStarted = false;
-                ReportError(empty ? "本次萃取未完成，已重置本步。请对准滤杯，保持稳定流量。" : "还没倒完就松开右键了！本步液体已复原，请重新拿起，持续按住右键直到倒空。");
+                Restore(checkpoint);
+                ReportError(empty ? "本次萃取未完成，已重置本步。请对准滤杯，保持稳定流量。" : "倾倒未完成，本步液体已复原。请跟随第 1 步，按住左键重新拖到目标上方。");
             }
         }
         private string Description()
@@ -282,17 +291,22 @@ namespace Spotlight.FreeCafe
                 case Stage.Grind: return "点击研磨机，开始研磨";
                 case Stage.Grinding: return "连续点击研磨机加速！圆圈会反复提示点击；不点击也会自动磨完";
                 case Stage.Grounds: return essence ? "拖出研磨机抽屉里的咖啡粉 → 精粹炉上层滤杯" : "拖出研磨机抽屉里的咖啡粉 → 通用加热炉";
-                case Stage.Water: return $"拿起右上角清水壶，对准旁边的加热炉\n按住右键倾倒：{W.LiquidVolume(W.Find(heater)):0}/{WaterTargetMl:0} ml · 达标后水壶自动归位";
+                case Stage.Water: return ReadyToPour
+                    ? $"第 2 步：已对准加热炉，按住右键，上下移动鼠标使水壶倾斜\n注水：{W.LiquidVolume(W.Find(heater)):0}/{WaterTargetMl:0} ml · 达标后水壶自动归位"
+                    : "第 1 步：按住左键，将右上角清水壶拖到加热炉上方\n保持左键，跟随光效对准目标；对准后显示倾倒提示";
                 case Stage.Heat: return "点击通用加热炉加热（加热不需要连续点击）";
                 case Stage.Heating: return "正在自动加热，请等待；不用重做上一步";
                 case Stage.Extract:
+                    if (!ReadyToPour) return "第 1 步：按住左键，将热水壶拖到精粹炉上层滤杯上方\n保持左键，跟随光效对准滤杯；对准后显示倾倒提示";
                     var s = W.ExtractionSnapshot(extractor);
-                    return $"拖动热水壶 → 上层滤杯，按住右键并上下移动控制流量\n粉 {s.groundsGrams:0} g · 注水 {s.injectedHotWaterMl:0}/{s.idealMl:0} ml · 时间 {s.elapsedSeconds:0.0}/{s.idealSeconds:0.0} s\n稳定小角度倾倒；保持右键直到热水倒空，中途松键会重来";
+                    return $"第 2 步：已对准滤杯，按住右键，上下移动鼠标控制流量\n粉 {s.groundsGrams:0} g · 注水 {s.injectedHotWaterMl:0}/{s.idealMl:0} ml · 时间 {s.elapsedSeconds:0.0}/{s.idealSeconds:0.0} s\n稳定小角度倾倒；保持右键直到热水倒空，中途松键会重来";
                 case Stage.Drain: return "等待滤杯滴滤完成。下一步拿下层壶，不是上层滤杯";
                 case Stage.TakeCup: return "按住左键，从杯堆拖出一个空杯，放到桌面空处\n先准备接咖啡的杯子，装好咖啡后再放到案板上的盘子里";
                 case Stage.DeliverCup: return "按住左键，把装好咖啡的杯子拖到案板上的盘子里\n看到盘子高亮后松开左键，然后点击右下角按铃";
                 case Stage.SubmitCup: return "咖啡已放到盘子里！点击工作台右下角的按铃完成交付\n" + (firstCafeTutorial ? "按铃交给首位客人后，新手教程才会结束" : "练习也要按铃才算完成；本次不结算正式订单");
-                case Stage.Pour: return (essence ? "拖动精粹炉下层咖啡壶（自动分离滤杯）" : "拖动通用加热炉") + " → 标记杯子\n按住右键，上下移动使壶旋转倾斜；倒空后才能松开！";
+                case Stage.Pour: return ReadyToPour
+                    ? "第 2 步：已对准杯子，按住右键，上下移动鼠标使壶倾斜\n持续倾倒，壶中咖啡倒空后再松开右键"
+                    : "第 1 步：按住左键，将" + (essence ? "精粹炉下层咖啡壶（自动分离滤杯）" : "通用加热炉") + "拖到标记杯子上方\n保持左键，跟随光效对准杯子；对准后显示倾倒提示";
                 default: return "制作完成！是否要再来一次？退出后恢复练习前的工作台";
             }
         }
@@ -415,15 +429,17 @@ namespace Spotlight.FreeCafe
         private void DrawGuide()
         {
             shade.enabled = DragStep && !app.IsDragging;
-            heading.text = (firstCafeTutorial ? "黑咖啡 · 新手教程" : essence ? "精粹咖啡 · 操作练习" : "黑咖啡 · 操作练习") + (stage == Stage.Water ? "    |    持续供水 · 注水 200 ml" : PourStep ? "    |    必须倒空 · 松键重来" : "    |    跟随光效操作");
+            bool readyToPour = ReadyToPour;
+            heading.text = (firstCafeTutorial ? "黑咖啡 · 新手教程" : essence ? "精粹咖啡 · 操作练习" : "黑咖啡 · 操作练习") + (PourStep ? readyToPour ? "    |    第 2 步 · 右键倾倒" : "    |    第 1 步 · 左键拖到目标上方" : "    |    跟随光效操作");
             instruction.text = Description();
             errorText.text = Time.unscaledTime < errorUntil ? error : firstCafeTutorial
                 ? "完成黑咖啡并交付首位客人后，解锁正常营业 · 随时点上方重来" : "练习不结算订单 · 废弃桶在左下角 · 随时点上方重来，恢复初始练习";
             bool showGesture = DragStep || stage == Stage.Grind || stage == Stage.Grinding || stage == Stage.Heat || stage == Stage.SubmitCup;
             gesture.gameObject.SetActive(showGesture);
-            panel.SetMouseMode(PourStep && app.IsDragging, PourStep && app.IsDragging);
-            gestureText.text = PourStep && app.IsDragging ? "按住右键\n上下移动旋转" : stage == Stage.Water ? "左键拿起水壶\n右键倾倒注水" : DragStep ? "按住左键\n拖到目标松开" : stage == Stage.Grinding ? "左键连续点击\n加速研磨" : stage == Stage.SubmitCup ? "点击右下角按铃\n完成交付" : "单击左键";
+            panel.SetMouseMode(readyToPour, readyToPour);
+            gestureText.text = PourStep ? readyToPour ? "按住右键\n上下移动倾倒" : "按住左键\n拖到目标上方" : DragStep ? "按住左键\n拖到目标松开" : stage == Stage.Grinding ? "左键连续点击\n加速研磨" : stage == Stage.SubmitCup ? "点击右下角按铃\n完成交付" : "单击左键";
             Vector2 start = ScreenPoint(Source), end = ScreenPoint(Target);
+            if (PourStep) end += Vector2.up * (55 * canvas.scaleFactor);
             if (app.IsDragging && Mouse.current != null) start = Mouse.current.position.ReadValue();
             if (stage == Stage.TakeCup) end = new Vector2(Screen.width * .5f, Screen.height * .48f);
             float scale = canvas.scaleFactor;
@@ -435,7 +451,7 @@ namespace Spotlight.FreeCafe
             {
                 var dot = trail[i]; dot.enabled = stage != Stage.Complete;
                 float t = Mathf.Repeat(Time.unscaledTime * .65f - i * .035f, 1);
-                Vector2 position = DragStep ? Vector2.Lerp(start, end, t) : start + new Vector2(Mathf.Cos(i * Mathf.PI * .2f), Mathf.Sin(i * Mathf.PI * .2f)) * (24 + t * 40);
+                Vector2 position = DragStep && !readyToPour ? Vector2.Lerp(start, end, t) : (readyToPour ? end : start) + new Vector2(Mathf.Cos(i * Mathf.PI * .2f), Mathf.Sin(i * Mathf.PI * .2f)) * (24 + t * 40);
                 dot.rectTransform.position = position;
                 dot.rectTransform.sizeDelta = Vector2.one * (i == 0 ? panel.trailHeadSize : panel.trailSize);
                 dot.rectTransform.localRotation = Quaternion.Euler(0, 0, 45);
