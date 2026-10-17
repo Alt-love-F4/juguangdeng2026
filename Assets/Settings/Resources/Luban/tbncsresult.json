@@ -637,5 +637,50 @@
     "target": "story.church.1009.s2.completed",
     "value": "true",
     "note": "P050 root completion only; no hat fact/reward"
+  },
+  {
+    "resultId": "neutral.1008.s1.complete",
+    "eventId": "neutral.1008.s1",
+    "seq": 1,
+    "resultType": "SET_FLAG",
+    "target": "story.neutral.1008.s1.completed",
+    "value": "true",
+    "note": "A01 root completion; relation deltas await A-B010."
+  },
+  {
+    "resultId": "rose.1009.s1.complete",
+    "eventId": "rose.1009.s1",
+    "seq": 1,
+    "resultType": "SET_FLAG",
+    "target": "story.rose.1009.s1.completed",
+    "value": "true",
+    "note": "完成 B-1009 赴约剧情后记录；不重复触发。"
+  },
+  {
+    "resultId": "revolution.1013.s2.complete",
+    "eventId": "revolution.1013.s2",
+    "seq": 1,
+    "resultType": "SET_FLAG",
+    "target": "story.revolution.1013.s2.completed",
+    "value": "true",
+    "note": "C13 对话完整结束后记录剧情完成。"
+  },
+  {
+    "resultId": "revolution.1014.s1.complete",
+    "eventId": "revolution.1014.s1",
+    "seq": 1,
+    "resultType": "SET_FLAG",
+    "target": "story.revolution.1014.s1.completed",
+    "value": "true",
+    "note": "C14 对话完整结束后记录剧情完成。"
+  },
+  {
+    "resultId": "revolution.1028.s1.complete",
+    "eventId": "revolution.1028.s1",
+    "seq": 1,
+    "resultType": "SET_FLAG",
+    "target": "story.revolution.1028.s1.completed",
+    "value": "true",
+    "note": "C28 对话完整结束后记录剧情完成。"
   }
 ]

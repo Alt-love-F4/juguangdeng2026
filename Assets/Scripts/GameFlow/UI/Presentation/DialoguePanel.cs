@@ -174,6 +174,9 @@ namespace Spotlight.GameFlow
             ApplyBackground(value, false);
             }
             if (psdBackground != null) psdBackground.SetActive(false);
+            // With a CG stage: keep the panel opaque so the cup aperture, not a whole-panel
+            // fade, decides what is visible; otherwise the scene behind would leak through.
+            bool revealInitialBackground = !seamless && value.Background != null;
             if (titleText != null) titleText.text = string.IsNullOrEmpty(value.Title) ? "角色对话" : value.Title;
             finished = onFinished;
             cancelled = onCancelled;
@@ -181,7 +184,7 @@ namespace Spotlight.GameFlow
             active = this;
             IsPlaying = true;
             lastAdvanceFrame = Time.frameCount;
-            canvasGroup.alpha = seamless ? 1f : 0f;
+            canvasGroup.alpha = seamless || revealInitialBackground ? 1f : 0f;
             canvasGroup.blocksRaycasts = canvasGroup.interactable = true;
             continueButton.interactable = false;
             if (!seamless) leftPortrait.color = rightPortrait.color = centerPortrait.color = Color.white;
@@ -200,13 +203,25 @@ namespace Spotlight.GameFlow
             dialogueBox.anchoredPosition = boxPosition + new Vector2(0f, -32f);
             EnterVisiblePortraits();
             transition = Sequence();
-            transition.Append(DOTween.To(() => canvasGroup.alpha, v => canvasGroup.alpha = v, 1f, enterSeconds));
-            transition.Join(Move(dialogueBox, boxPosition, enterSeconds).SetEase(Ease.OutCubic));
+            if (revealInitialBackground)
+            {
+                // Start synchronously so the aperture is closed in the same frame the panel opens.
+                entranceComplete = false;
+                RevealInitialBackground(.65f);
+                transition.AppendInterval(.65f);
+                transition.Append(Move(dialogueBox, boxPosition, enterSeconds).SetEase(Ease.OutCubic));
+            }
+            else
+            {
+                transition.Append(DOTween.To(() => canvasGroup.alpha, v => canvasGroup.alpha = v, 1f, enterSeconds));
+                transition.Join(Move(dialogueBox, boxPosition, enterSeconds).SetEase(Ease.OutCubic));
+            }
 
             transition.OnComplete(() =>
             {
                 transition = null;
                 entranceComplete = true;
+                CoffeeCupScreenTransition.TryBeginReveal(.65f);
             });
             }
             catch { Stop(); throw; }
@@ -475,12 +490,17 @@ namespace Spotlight.GameFlow
             effects.Play(PresentationEffectIds.PortraitFadeOut, 1);
             if (centerPortrait.enabled) effects.Play(PresentationEffectIds.PortraitFadeOut, 2);
             transition = Sequence();
-            transition.Append(DOTween.To(() => canvasGroup.alpha, v => canvasGroup.alpha = v, 0f, exitSeconds));
-            transition.Join(Move(dialogueBox, boxPosition + new Vector2(0f, -24f), exitSeconds));
+            bool curtainExit = background.enabled;
+            const float curtainExitSeconds = .5f;
+            if (curtainExit) transition.AppendCallback(() => effects.CloseBackground(curtainExitSeconds));
+            transition.AppendInterval(curtainExit ? curtainExitSeconds : 0f);
+            if (!curtainExit) transition.Append(DOTween.To(() => canvasGroup.alpha, v => canvasGroup.alpha = v, 0f, exitSeconds));
+            transition.Join(Move(dialogueBox, boxPosition + new Vector2(0f, -24f), curtainExit ? .3f : exitSeconds));
             transition.OnComplete(() =>
             {
                 transition = null;
                 Action callback = finished;
+                effects.HideBackgroundBacking();
                 Stop(completed: true);
                 callback?.Invoke();
             });
@@ -571,7 +591,7 @@ namespace Spotlight.GameFlow
                 dialogueBox.anchoredPosition = boxPosition;
                 if (adaptDialogueHeight) dialogueBox.SetSizeWithCurrentAnchors(RectTransform.Axis.Vertical, dialogueMinHeight);
             }
-            if (effects != null) effects.Reset();
+            if (effects != null) { effects.Reset(); effects.HideBackgroundBacking(); }
             stopped?.Invoke();
             interruption?.Invoke();
         }

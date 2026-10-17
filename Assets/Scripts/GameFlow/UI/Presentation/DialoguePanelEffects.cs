@@ -71,7 +71,7 @@ namespace Spotlight.GameFlow
             EffectOverlay.rectTransform.offsetMin = EffectOverlay.rectTransform.offsetMax = Vector2.zero;
             EffectOverlay.raycastTarget = false;
             effects = new PresentationEffects(effectLibrary, EffectStage, EffectOverlay, leftPortrait,
-                leftPortraitFrame, rightPortrait, rightPortraitFrame, inactiveTint, focusSeconds, centerPortrait, centerPortraitFrame, background);
+                leftPortraitFrame, rightPortrait, rightPortraitFrame, inactiveTint, focusSeconds, centerPortrait, centerPortraitFrame, background, dialogueBox);
         }
         private void EnterVisiblePortraits()
         {
@@ -136,19 +136,24 @@ namespace Spotlight.GameFlow
             var visual = value.BackgroundVisual;
             if (visual != null && visual.useSceneBackground)
             {
+                // Scene-backed dialogue must expose the live gameplay scene, including its authored background.
+                // SetBackground(null) enables the transition backing, so hide that backing as well as the RawImage.
                 effects.SetBackground(null, Color.white);
                 background.enabled = false;
+                effects.HideBackgroundBacking();
                 return;
             }
             if (visual == null && value.Background == null)
             {
-                if (!seamless) { effects.SetBackground(null, Color.white); background.enabled = false; }
+                if (!seamless) { effects.SetBackground(null, Color.white); background.enabled = false; effects.HideBackgroundBacking(); }
                 return;
             }
             effects.SetBackground(value.Background, visual == null ? Color.white : visual.placeholder ? visual.placeholderColor : visual.tint,
                 seamless ? visual?.fadeSeconds ?? .3f : 0f);
         }
         public void SetBackgroundTint(Color tint) => background.color = tint;
+        internal PresentationEffectHandle RevealInitialBackground(float seconds) => effects.RevealBackground(seconds);
+        internal void HideBackgroundBacking() => effects.HideBackgroundBacking();
         public void StopEffects()
         {
             if (effects != null) effects.Reset();

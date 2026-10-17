@@ -515,5 +515,27 @@
     "avtarPath": "Characters/soldier_d/avatar",
     "descText": "character.soldier_d.desc",
     "tags": "new_rose,generic"
+  },
+  {
+    "objId": "neutral.1008.shopkeeper",
+    "objType": "npc",
+    "nameText": "character.market.shopkeeper.name",
+    "iconPath": "",
+    "portraitPath": "",
+    "portraitIndoorPath": "",
+    "avtarPath": "",
+    "descText": "character.market.shopkeeper.desc",
+    "tags": "neutral,a01,shopkeeper"
+  },
+  {
+    "objId": "neutral.1008.unknown",
+    "objType": "npc",
+    "nameText": "character.neutral.1008.unknown.name",
+    "iconPath": "",
+    "portraitPath": "",
+    "portraitIndoorPath": "",
+    "avtarPath": "",
+    "descText": "character.neutral.1008.unknown.desc",
+    "tags": "neutral,a01,anonymous"
   }
 ]

@@ -73,5 +73,35 @@
     "deliveryMode": "None",
     "replacesLocationActions": true,
     "focusLocationOnComplete": true
+  },
+  {
+    "actionKey": "neutral.1008.s1.action",
+    "type": "ONCE",
+    "mustExecute": true,
+    "nameText": "action.neutral.1008.s1.name",
+    "descText": "action.neutral.1008.s1.desc",
+    "requirements": "",
+    "resultEvents": "neutral.1008.s1",
+    "durationDays": 0,
+    "progressTarget": 0,
+    "nextActionKey": "",
+    "deliveryMode": "None",
+    "replacesLocationActions": false,
+    "focusLocationOnComplete": false
+  },
+  {
+    "actionKey": "rose.1009.s1.action",
+    "type": "ONCE",
+    "mustExecute": true,
+    "nameText": "action.rose.1009.s1.name",
+    "descText": "action.rose.1009.s1.desc",
+    "requirements": "ActionPoint(1)",
+    "resultEvents": "rose.1009.s1",
+    "durationDays": 0,
+    "progressTarget": 0,
+    "nextActionKey": "",
+    "deliveryMode": "None",
+    "replacesLocationActions": false,
+    "focusLocationOnComplete": true
   }
 ]

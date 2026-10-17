@@ -14,9 +14,8 @@ namespace Spotlight.Narrative
             var definition = configuration.abilityChecks.Find(x => x != null && x.checkId == checkId);
             if (definition == null || definition.mode != NarrativeAbilityCheckMode.Inline)
                 throw new InvalidOperationException("Inline step requires an Inline ability check: " + checkId);
-            if (!string.IsNullOrWhiteSpace(definition.successEventId) || !string.IsNullOrWhiteSpace(definition.failureEventId)
-                || !string.IsNullOrWhiteSpace(definition.successResultOwnerId) || !string.IsNullOrWhiteSpace(definition.failureResultOwnerId))
-                throw new InvalidOperationException("Inline check cannot own branch events/results: " + checkId);
+            if (!string.IsNullOrWhiteSpace(definition.successEventId) || !string.IsNullOrWhiteSpace(definition.failureEventId))
+                throw new InvalidOperationException("Inline check cannot own branch events: " + checkId);
             if (!inlineAbilityChecks.TryGetValue(checkId, out var snapshot))
             {
                 snapshot = EvaluateAbilityCheck(checkId);

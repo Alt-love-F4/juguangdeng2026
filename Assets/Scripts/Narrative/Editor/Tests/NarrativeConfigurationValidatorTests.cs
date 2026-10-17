@@ -1,4 +1,5 @@
 using System;
+using System.IO;
 using System.Linq;
 using NUnit.Framework;
 using Spotlight.Narrative;
@@ -49,6 +50,61 @@ namespace Spotlight.Narrative.Editor.Tests
             Assert.That(c.mapPositions.Exists(x => x.defaultAction == "act_meet_b" || x.defaultAction == "act_c_with_b"), Is.False);
             Assert.That(c.mapPositions.Exists(x => x.positionKey == "cafe" && x.extendedActions.Contains("oct07.cafe.s1")), Is.True);
         }
+
+        [Test] public void IntegrationReportRecognizesOctoberSeventhRoutesAndPresentation()
+        {
+            var configuration = LubanNarrativeLoader.Load();
+            var report = NarrativeIntegrationReport.Build(configuration);
+            var s1 = report.Find("oct07.s1");
+            var s2 = report.Find("oct07.s2");
+
+            Assert.That(s1, Is.Not.Null);
+            Assert.That(s1.Entry, Is.EqualTo(NarrativeEntryPoint.MapAction));
+            Assert.That(s1.Sources.Exists(value => value.Contains("Action: oct07.cafe.s1") && value.Contains("cafe")), Is.True);
+            Assert.That(s1.PageCount, Is.EqualTo(2));
+            Assert.That(s1.LineCount, Is.EqualTo(40));
+            Assert.That(s1.ExpectedResults.Exists(value => value.Contains("story.oct07.s1.completed")), Is.True);
+            Assert.That(s1.Errors.FindAll(value => value.Contains("oct07.cafe.day")).Count, Is.EqualTo(1));
+            Assert.That(s1.Errors[0], Does.Contain("Invalid background registry entry"));
+
+            Assert.That(s2, Is.Not.Null);
+            Assert.That(s2.Entry, Is.EqualTo(NarrativeEntryPoint.BeforeNight));
+            Assert.That(s2.Sources.Exists(value => value.Contains("day 2 / Night")), Is.True);
+            Assert.That(s2.PageCount, Is.EqualTo(7));
+            Assert.That(s2.LineCount, Is.EqualTo(34));
+            Assert.That(s2.Checks, Does.Contain("oct07.s2.perception"));
+            Assert.That(s2.ExpectedResults.Exists(value => value.Contains("story.oct07.s2.completed")), Is.True);
+            Assert.That(s2.Errors.FindAll(value => value.Contains("oct07.cafe.night")).Count, Is.EqualTo(1));
+            Assert.That(s2.Errors[0], Does.Contain("Invalid background registry entry"));
+        }
+
+        [Test] public void IntegrationQueueSyncPreservesOctoberSeventhStatusAndNotes()
+        {
+            var configuration = LubanNarrativeLoader.Load();
+            var report = NarrativeIntegrationReport.Build(configuration);
+            string path = Path.Combine(Path.GetTempPath(), "NcsIntegrationQueue-" + Guid.NewGuid().ToString("N") + ".csv");
+            string header = "chapterId,eventId,entry,source,day,timeSlot,prerequisites,presentation,checks,expectedResults,status,notes";
+            string s1 = string.Join(",", new[] { "oct07", "oct07.s1", "", "", "", "", "", "", "", "", "playtest_verified", "S1 QA confirmed; Background resource check failed for oct07.cafe.day: Missing narrative background texture: oct07.cafe.day" });
+            string s2 = string.Join(",", new[] { "oct07", "oct07.s2", "", "", "", "", "", "", "", "", "writer_review", "S2 awaiting review; Background resource check failed for oct07.cafe.night: Missing narrative background texture: oct07.cafe.night" });
+            try
+            {
+                File.WriteAllText(path, header + "\n" + s1 + "\n" + s2 + "\n");
+                NarrativeIntegrationTools.SyncQueue(configuration, report, path);
+                string[] lines = File.ReadAllLines(path);
+                string row1 = lines.Single(line => line.Contains(",oct07.s1,"));
+                string row2 = lines.Single(line => line.Contains(",oct07.s2,"));
+                Assert.That(row1, Does.EndWith(",playtest_verified,S1 QA confirmed; Invalid background registry entry for oct07.cafe.day: Missing narrative background texture: oct07.cafe.day"));
+                Assert.That(row1, Does.Not.Contain("Background resource check failed"));
+                Assert.That(row2, Does.Contain("oct07.s2.perception"));
+                Assert.That(row2, Does.EndWith(",writer_review,S2 awaiting review; Invalid background registry entry for oct07.cafe.night: Missing narrative background texture: oct07.cafe.night"));
+                Assert.That(row2, Does.Not.Contain("Background resource check failed"));
+            }
+            finally
+            {
+                if (File.Exists(path)) File.Delete(path);
+            }
+        }
+
         [Test] public void RetiredDemoMountsInOldSavesDoNotRestoreToFormalMap()
         {
             var c = LubanNarrativeLoader.Load();
@@ -145,7 +201,7 @@ namespace Spotlight.Narrative.Editor.Tests
             c.conditions.Add(new NarrativeConditionDefinition { conditionId = "C", ownerType = "action", ownerId = "a", groupIndex = 1, condType = "ITEM_GTE", target = "medicine", value = "1", op = ">=", notFlag = true });
             c.results.Add(new NarrativeResultDefinition { resultId = "R", eventId = "E", resultType = NarrativeResultType.ItemRemove, target = "medicine", value = "2" });
             Assert.That(NarrativeConfigurationValidator.Validate(c).Exists(x => x.Contains("op/notFlag are obsolete")), Is.True);
-            Assert.That(NarrativeConfigurationValidator.Warnings(c), Has.Count.EqualTo(1));
+            Assert.That(NarrativeConfigurationValidator.Warnings(c).Exists(x => x.Contains("Action a, Result R: completion removes delivery cost item medicine again.")), Is.True);
         }
 
         [Test] public void ReverseSuggestionsAreLubanRowsAndDoNotMutateConfiguration()

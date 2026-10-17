@@ -894,5 +894,21 @@
     "setupKey": "church.1009.s2",
     "onceOnly": true,
     "logTag": "D1009"
+  },
+  {
+    "eventId": "neutral.1008.s1",
+    "eventKind": "actor",
+    "presentationClass": "Conversation",
+    "presentationKey": "neutral.1008.s1",
+    "presentationLogTag": "NEUTRAL_1008_S1",
+    "eventProperty": "entry=MapAction;blocksSave=true",
+    "actorId": "player",
+    "targetId": "neutral.1008.shopkeeper",
+    "titleText": "neutral.1008.s1.title",
+    "contentKey": "",
+    "setupType": "",
+    "setupKey": "",
+    "onceOnly": true,
+    "logTag": "NEUTRAL_1008_S1"
   }
 ]

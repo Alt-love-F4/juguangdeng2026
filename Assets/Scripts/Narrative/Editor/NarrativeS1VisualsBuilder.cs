@@ -27,6 +27,7 @@ namespace Spotlight.Narrative.Editor
                 AssetDatabase.CreateAsset(registry, RegistryPath);
             }
             Undo.RecordObject(registry, "Update S1 background artwork");
+            SetSceneMarker(registry, NarrativeBackgroundKeys.CafeScene);
             SetBackground(registry, "oct07.cafe.day", CafeSourcePath);
             SetBackground(registry, "oct07.street.day", "Assets/Art/Background/game/SCE_圣徒街场景1.png");
             SetBackground(registry, "oct07.cafe.night", "Assets/Art/Background/game/SCE_一楼大厅场景夜晚.png");
@@ -57,6 +58,17 @@ namespace Spotlight.Narrative.Editor
             EditorUtility.SetDirty(effects);
             AssetDatabase.SaveAssets();
             Debug.Log("[NCS] S1 resources ready: approved game cafe day/night and street artwork; shared presets and background catalog preserved.");
+        }
+        private static void SetSceneMarker(NarrativeStageVisuals registry, string key)
+        {
+            var entry = registry.Find(key) ?? new NarrativeStageVisuals.Entry { key = key };
+            entry.texture = null;
+            entry.tint = Color.white;
+            entry.placeholder = false;
+            entry.solidColor = false;
+            entry.useSceneBackground = true;
+            entry.fadeSeconds = .3f;
+            registry.SetEntry(entry);
         }
         private static void SetBackground(NarrativeStageVisuals registry, string key, string path)
         {

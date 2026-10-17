@@ -123,6 +123,7 @@ namespace Spotlight.GameFlow
 
         public void HideForMainMenu()
         {
+            CoffeeCupScreenTransition.Clear();
             Spotlight.Audio.GameAudio.StopOwner(this);
             running = false;
             awaitingNarrativeEntry = false;
@@ -188,13 +189,21 @@ namespace Spotlight.GameFlow
             {
                 newSessionFirstDay = false;
                 SetState(DayFlowState.DateTransition);
-                ShowPresentation<DateChangePanel>(CompleteFirstArrivalDateTransition, panel => panel.SetDates(previousDate, CurrentDate));
+                ShowPresentation<DateChangePanel>(CompleteFirstArrivalDateTransition, panel =>
+                {
+                    panel.SetDates(previousDate, CurrentDate);
+                    panel.UseCoffeeCupExit = true;
+                });
                 return;
             }
             SetState(DayFlowState.DateTransition);
             newSessionFirstDay = false;
             ShowPresentation<DateChangePanel>(CompleteDateTransition,
-                panel => panel.SetDates(previousDate, CurrentDate));
+                panel =>
+                {
+                    panel.SetDates(previousDate, CurrentDate);
+                    panel.UseCoffeeCupExit = day == 1 && !firstDayIntroductionCompleted;
+                });
         }
 
         private void CompleteFirstArrivalDateTransition()
@@ -249,6 +258,7 @@ namespace Spotlight.GameFlow
 
         private void ShowFirstArrivalRetry(string eventId)
         {
+            CoffeeCupScreenTransition.Clear();
             UnsubscribeFirstArrival();
             // Retry the failed event only: previous arrival choices/results have already committed.
             ShowPresentation<PreBusinessPanel>(() => PlayFirstArrivalEvent(eventId),
@@ -744,7 +754,36 @@ namespace Spotlight.GameFlow
                 map?.ShowBlockingActionHint();
                 return;
             }
-            RunNarrativeEntry(NarrativeEntryPoint.BeforeNight, EnterPreNight);
+            RunNarrativeEntry(NarrativeEntryPoint.BeforeNight, CompleteDay);
+        }
+
+        /// <summary>
+        /// Temporary direct day-end shortcut from the third-floor dormitory.
+        /// Mandatory-story checks will be added here when the night gate is finalized.
+        /// </summary>
+        public void EndDayFromDormitory()
+        {
+            if (!SessionAllowsPlay || !running || awaitingNarrativeEntry) return;
+            if (NarrativeRuntime.Instance?.Controller?.IsBusy ?? false) return;
+            var actions = NarrativeRuntime.Instance?.Actions;
+            if (actions != null && actions.IsExecuting) return;
+            if (State != DayFlowState.FreeCafeBusiness && State != DayFlowState.CityMapLeisure
+                && State != DayFlowState.PreLeisure) return;
+
+            if (State == DayFlowState.FreeCafeBusiness)
+            {
+                if (IsCafeTutorialActive)
+                {
+                    firstDayCafeTutorialStarted = true;
+                    firstDayCafeTutorialCompleted = true;
+                    cafeTutorialEndpoint?.FinishCafeTutorial();
+                }
+                FindGameplayEndpoint()?.EndDayFlowBusiness();
+            }
+            HideGameplayPanel();
+            // Temporary dormitory shortcut: deliberately skips the current mandatory-story gate.
+            // Add the future night eligibility check here before calling CompleteDay.
+            CompleteDay();
         }
 
         private void RunNarrativeEntry(NarrativeEntryPoint entry, Action next)
@@ -795,26 +834,18 @@ namespace Spotlight.GameFlow
             runtime?.Actions?.RefreshMapContent();
         }
 
-        private void EnterPreNight()
-        {
-            SetState(DayFlowState.PreNight);
-            ShowPresentation<PreNightPanel>(EnterHomeNight);
-        }
-
-        private void EnterHomeNight()
-        {
-            SetState(DayFlowState.HomeNight);
-            ShowPresentation<HomeNightPanel>(CompleteDay);
-        }
-
+        /// <summary>
+        /// Completes the current day and immediately starts the night-to-morning calendar transition.
+        /// The old leisure confirmation panels are intentionally no longer part of gameplay.
+        /// </summary>
         private void CompleteDay()
         {
             if (!SessionAllowsPlay || !running) return;
-            SetState(DayFlowState.DayComplete);
+            SetState(DayFlowState.DateTransition);
             previousDate = CurrentDate;
             day++;
             if (flow != null && !flow.TryAutoSave(out string error)) Debug.LogWarning("日结自动存档失败：" + error, this);
-            ShowPresentation<DayEndPanel>(BeginNewDayFlow);
+            BeginNewDayFlow();
         }
 
         private void ShowPresentation<T>(Action onFinished, Action<T> configure = null)
@@ -915,9 +946,16 @@ namespace Spotlight.GameFlow
         private void ApplyAudioState()
         {
             bool city = State == DayFlowState.CityMapLeisure || State == DayFlowState.PreLeisure;
-            bool night = State == DayFlowState.PreNight || State == DayFlowState.HomeNight || State == DayFlowState.DayComplete;
+            bool night = State == DayFlowState.DateTransition || State == DayFlowState.PreNight
+                || State == DayFlowState.HomeNight || State == DayFlowState.DayComplete;
             Spotlight.Audio.GameAudio.Music(night ? Spotlight.Audio.AudioKeys.NightMusic : city ? Spotlight.Audio.AudioKeys.CityMusic : Spotlight.Audio.AudioKeys.CafeMusic);
             Spotlight.Audio.GameAudio.SetLoop(this, "ambience", city ? "ambience.city" : Spotlight.Audio.AudioKeys.CafeAmbience, !night);
+        }
+
+        private void HideBusinessControls()
+        {
+            var panel = FindFirstObjectByType<BusinessControlsPanel>(FindObjectsInactive.Include);
+            if (panel != null) panel.gameObject.SetActive(false);
         }
 
         private void HideGameplayPanel()
@@ -1027,9 +1065,11 @@ namespace Spotlight.GameFlow
                     break;
                 case DayFlowState.PreLeisure: ShowPresentation<BusinessEndPanel>(() => RunNarrativeEntry(NarrativeEntryPoint.AfterBusiness, EnterCityMap)); break;
                 case DayFlowState.CityMapLeisure: EnterCityMap(); break;
-                case DayFlowState.PreNight: EnterPreNight(); break;
-                case DayFlowState.HomeNight: EnterHomeNight(); break;
-                case DayFlowState.DayComplete: ShowPresentation<DayEndPanel>(BeginNewDayFlow); break;
+                // Legacy saves may still contain the removed leisure phases. Finish them
+                // immediately and continue with the current night-to-calendar flow.
+                case DayFlowState.PreNight:
+                case DayFlowState.HomeNight: CompleteDay(); break;
+                case DayFlowState.DayComplete: BeginNewDayFlow(); break;
             }
         }
     }

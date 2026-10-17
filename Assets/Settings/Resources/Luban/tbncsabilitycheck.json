@@ -46,5 +46,13 @@
     "successResultOwnerId": "",
     "failureResultOwnerId": "",
     "mode": "Inline"
+  },
+  {
+    "checkId": "neutral.1008.s1.q1b",
+    "successEventId": "",
+    "failureEventId": "",
+    "successResultOwnerId": "",
+    "failureResultOwnerId": "",
+    "mode": "Inline"
   }
 ]

@@ -46,6 +46,7 @@ namespace Spotlight.Narrative.Editor
             {
                 var config = LubanNarrativeLoader.Load();
                 var errors = NarrativeConfigurationValidator.Validate(config);
+                ExportIntegrationArtifacts(config);
                 if (errors.Count > 0) { Debug.LogError("[NCS] Luban validation failed:\n" + string.Join("\n", errors)); return; }
                 foreach (string warning in NarrativeConfigurationValidator.Warnings(config)) Debug.LogWarning("[NCS] " + warning);
                 int count = config.events.Count;
@@ -56,6 +57,23 @@ namespace Spotlight.Narrative.Editor
                 else if (ratio > 0.4f) Debug.LogWarning("[NCS] Anchors exceed 40%: confirm a mostly linear narrative is intended.");
             }
             catch (Exception ex) { Debug.LogError("[NCS] Luban load/validation failed:\n" + ex); }
+        }
+
+        private static void ExportIntegrationArtifacts(NarrativeConfiguration configuration = null)
+        {
+            try
+            {
+                var config = configuration ?? LubanNarrativeLoader.Load();
+                var report = NarrativeIntegrationReport.Build(config);
+                string reportPath = NarrativeIntegrationTools.ExportReport(report);
+                string queuePath = NarrativeIntegrationTools.SyncQueue(config, report);
+                AssetDatabase.Refresh();
+                Debug.Log($"[NCS] Integration artifacts updated: {queuePath}, {reportPath}. Events={report.Events.Count}, errors={report.ErrorCount}, warnings={report.WarningCount}.");
+            }
+            catch (Exception error)
+            {
+                Debug.LogError("[NCS] Integration artifact export failed:\n" + error);
+            }
         }
     }
 }

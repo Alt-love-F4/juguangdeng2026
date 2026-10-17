@@ -99,6 +99,14 @@ namespace Spotlight.Narrative
         {
             if (key.StartsWith("choice:", StringComparison.Ordinal)) return selectedChoices.Contains(key.Substring(7));
             if (key.StartsWith("anyChoice:", StringComparison.Ordinal)) return key.Substring(10).Split(';').Any(selectedChoices.Contains);
+            if (key.StartsWith("check:", StringComparison.Ordinal))
+            {
+                string checkId = key.Substring(6);
+                if (string.IsNullOrWhiteSpace(checkId)) throw new InvalidOperationException("Empty presentation ability check condition.");
+                if (!inlineAbilityChecks.TryGetValue(checkId, out NarrativeAbilityCheckSnapshot snapshot))
+                    throw new InvalidOperationException("Presentation ability check has not been evaluated: " + checkId);
+                return snapshot.passed;
+            }
             if (key.StartsWith("not:", StringComparison.Ordinal)) return !ReadPresentationCondition(key.Substring(4));
             if (key.StartsWith("dependency:", StringComparison.Ordinal)) throw new InvalidOperationException("Unresolved presentation dependency: " + key);
             if (!state.TryGetCondition(key, out bool value)) throw new InvalidOperationException("Unknown presentation condition: " + key);

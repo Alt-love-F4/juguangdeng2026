@@ -26,10 +26,13 @@ namespace Spotlight.Narrative
             if (check == null) return errors;
             if (check.mode == NarrativeAbilityCheckMode.Inline)
             {
-                if (new[] { check.successEventId, check.failureEventId, check.successResultOwnerId, check.failureResultOwnerId }.Any(v => !string.IsNullOrWhiteSpace(v)))
-                    errors.Add("AbilityCheck " + check.checkId + ": Inline forbids branch events and result owners.");
-                if (c.choices.Any(x => x != null && x.checkId == check.checkId) || c.setups.Any(x => x != null && x.checkId == check.checkId))
-                    errors.Add("AbilityCheck " + check.checkId + ": Inline is only supported by a PassiveCheck conversation step.");
+                if (new[] { check.successEventId, check.failureEventId }.Any(v => !string.IsNullOrWhiteSpace(v)))
+                    errors.Add("AbilityCheck " + check.checkId + ": Inline forbids branch events.");
+                if (c.setups.Any(x => x != null && x.checkId == check.checkId))
+                    errors.Add("AbilityCheck " + check.checkId + ": Inline cannot be referenced by SetupParams.");
+                if (c.presentations.conversationPages.Any(x => x != null && x.stepType == NarrativeConversationStepType.PassiveCheck && x.checkId == check.checkId)
+                    && (c.choices.Any(x => x != null && x.checkId == check.checkId)))
+                    errors.Add("AbilityCheck " + check.checkId + ": Inline cannot be used by both a Choice and a PassiveCheck page.");
             }
             else if (check.mode == NarrativeAbilityCheckMode.Branch)
             {

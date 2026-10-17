@@ -376,5 +376,86 @@
     "condType": "BOOL_EQ",
     "target": "story.church.1009.s2.completed",
     "value": "false"
+  },
+  {
+    "conditionId": "neutral.1008.s1.day",
+    "ownerType": "event",
+    "ownerId": "neutral.1008.s1",
+    "groupIndex": 1,
+    "condType": "BAR_BETWEEN",
+    "target": "world.calendar",
+    "value": "3,3"
+  },
+  {
+    "conditionId": "neutral.1008.s1.map",
+    "ownerType": "event",
+    "ownerId": "neutral.1008.s1",
+    "groupIndex": 1,
+    "condType": "BOOL_EQ",
+    "target": "world.map.active",
+    "value": "true"
+  },
+  {
+    "conditionId": "neutral.1008.s1.incomplete",
+    "ownerType": "event",
+    "ownerId": "neutral.1008.s1",
+    "groupIndex": 1,
+    "condType": "BOOL_EQ",
+    "target": "story.neutral.1008.s1.completed",
+    "value": "false"
+  },
+  {
+    "conditionId": "neutral.1008.s1.action.day",
+    "ownerType": "action",
+    "ownerId": "neutral.1008.s1.action",
+    "groupIndex": 1,
+    "condType": "BAR_BETWEEN",
+    "target": "world.calendar",
+    "value": "3,3"
+  },
+  {
+    "conditionId": "neutral.1008.s1.action.map",
+    "ownerType": "action",
+    "ownerId": "neutral.1008.s1.action",
+    "groupIndex": 1,
+    "condType": "BOOL_EQ",
+    "target": "world.map.active",
+    "value": "true"
+  },
+  {
+    "conditionId": "neutral.1008.s1.action.incomplete",
+    "ownerType": "action",
+    "ownerId": "neutral.1008.s1.action",
+    "groupIndex": 1,
+    "condType": "BOOL_EQ",
+    "target": "story.neutral.1008.s1.completed",
+    "value": "false"
+  },
+  {
+    "conditionId": "rose.1009.s1.action.day",
+    "ownerType": "action",
+    "ownerId": "rose.1009.s1.action",
+    "groupIndex": 1,
+    "condType": "BAR_BETWEEN",
+    "target": "world.calendar",
+    "value": "4,4"
+  },
+  {
+    "conditionId": "rose.1009.s1.action.meeting",
+    "ownerType": "action",
+    "ownerId": "rose.1009.s1.action",
+    "groupIndex": 1,
+    "condType": "BOOL_EQ",
+    "target": "story.oct09.meeting.known",
+    "value": "true"
+  },
+  {
+    "conditionId": "rose.1009.s1.action.incomplete",
+    "ownerType": "action",
+    "ownerId": "rose.1009.s1.action",
+    "groupIndex": 1,
+    "condType": "BOOL_EQ",
+    "target": "story.rose.1009.s1.completed",
+    "value": "false"
   }
 ]

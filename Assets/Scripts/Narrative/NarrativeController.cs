@@ -333,15 +333,24 @@ namespace Spotlight.Narrative
             selectedChoices.Add(choiceId);
             if (!string.IsNullOrWhiteSpace(choice.checkId))
             {
-                if (activeAbilityCheck != null)
+                NarrativeAbilityCheckDefinition definition = configuration.abilityChecks.Find(x => x != null && x.checkId == choice.checkId);
+                if (definition == null) throw new InvalidOperationException("Unknown ability check: " + choice.checkId);
+                if (definition.mode == NarrativeAbilityCheckMode.Inline)
                 {
-                    if (activeAbilityCheckId == choice.checkId) return true;
-                    throw new InvalidOperationException("Only one active ability check is supported per event presentation.");
+                    EvaluateInlineAbilityCheckForPresentation(choice.checkId);
                 }
-                activeAbilityCheckId = choice.checkId;
-                activeAbilityCheck = EvaluateAbilityCheck(choice.checkId);
-                AbilityCheckEvaluated?.Invoke(activeAbilityCheck);
-                QueueAbilityBranch(choice.checkId, activeAbilityCheck);
+                else
+                {
+                    if (activeAbilityCheck != null)
+                    {
+                        if (activeAbilityCheckId == choice.checkId) return true;
+                        throw new InvalidOperationException("Only one active ability check is supported per event presentation.");
+                    }
+                    activeAbilityCheckId = choice.checkId;
+                    activeAbilityCheck = EvaluateAbilityCheck(choice.checkId);
+                    AbilityCheckEvaluated?.Invoke(activeAbilityCheck);
+                    QueueAbilityBranch(choice.checkId, activeAbilityCheck);
+                }
             }
             return true;
         }
@@ -454,6 +463,9 @@ namespace Spotlight.Narrative
             if (activePresentation) { snapshot.active = ToSaved(activeRequest); snapshot.active.selectedChoices.Clear(); snapshot.active.selectedChoices.AddRange(selectedChoices); }
             snapshot.activeAbilityCheck = CloneAbilityCheck(activeAbilityCheck);
             snapshot.activeAbilityCheckId = activeAbilityCheckId;
+            if (inlineAbilityChecks != null)
+                foreach (NarrativeAbilityCheckSnapshot check in inlineAbilityChecks.Values)
+                    snapshot.inlineAbilityChecks.Add(CloneAbilityCheck(check));
             foreach (NarrativeBarChange change in changes) snapshot.changes.Add(new NarrativeBarChange { key = change.key, oldValue = change.oldValue, newValue = change.newValue, depth = change.depth });
             if (operationDepth > 0 && operationValues != null)
             {
@@ -489,6 +501,9 @@ namespace Spotlight.Narrative
             presentationEpoch++;
             queue.Clear(); pendingEvents.Clear(); changes.Clear(); selectedChoices.Clear(); pendingEffects.Clear(); safeCallbacks.Clear(); draining = false;
             inlineAbilityChecks.Clear();
+            if (snapshot.inlineAbilityChecks != null)
+                foreach (NarrativeAbilityCheckSnapshot check in snapshot.inlineAbilityChecks)
+                    if (check != null && !string.IsNullOrWhiteSpace(check.checkId)) inlineAbilityChecks[check.checkId] = CloneAbilityCheck(check);
             activeAbilityCheck = CloneAbilityCheck(snapshot.activeAbilityCheck);
             activeAbilityCheckId = snapshot.activeAbilityCheckId ?? activeAbilityCheck?.checkId;
             resumeActiveAbilityCheck = snapshot.active != null && activeAbilityCheck != null;
@@ -831,6 +846,14 @@ namespace Spotlight.Narrative
                 string branchEventId = check == null ? null : activeAbilityCheck.passed ? check.successEventId : check.failureEventId;
                 if (!string.IsNullOrWhiteSpace(owner) && owner != branchEventId
                     && resultsByEvent.TryGetValue(owner, out var checkResults)) batch.AddRange(checkResults);
+            }
+            foreach (KeyValuePair<string, NarrativeAbilityCheckSnapshot> pair in inlineAbilityChecks)
+            {
+                NarrativeAbilityCheckDefinition check = configuration.abilityChecks.Find(x => x != null && x.checkId == pair.Key);
+                if (check == null) continue;
+                string owner = pair.Value.passed ? check.successResultOwnerId : check.failureResultOwnerId;
+                if (!string.IsNullOrWhiteSpace(owner) && resultsByEvent.TryGetValue(owner, out var checkResults))
+                    batch.AddRange(checkResults);
             }
             try
             {

@@ -87,7 +87,7 @@ namespace Spotlight.Narrative.Editor
                     if (!assigned.Add(p.slot)) e.Add($"SetupParams {x.setupKey}: duplicate slot {p.slot}.");
                     if (string.IsNullOrWhiteSpace(p.value) && !IsOptionalSlot(p.slot)) e.Add($"SetupParams {x.setupKey}: empty value for slot {p.slot}.");
                 }
-                foreach (var slot in slots) if (!assigned.Contains(slot)) e.Add($"SetupParams {x.setupKey}: missing slot {slot}.");
+                foreach (var slot in slots) if (!assigned.Contains(slot) && !IsOptionalSlot(slot)) e.Add($"SetupParams {x.setupKey}: missing slot {slot}.");
             }
             foreach (var b in c.bars.Where(x => x.advanceMode == NarrativeAdvanceMode.Derived))
             {

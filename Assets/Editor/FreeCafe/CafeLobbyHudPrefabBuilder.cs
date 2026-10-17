@@ -105,6 +105,8 @@ namespace Spotlight.FreeCafe.Editor
                     button.colors = colors;
                     Text(slot, "Label", floorNames[index], Vector2.zero, new Vector2(148, 32), 19, TextAlignmentOptions.Center);
                 }
+                FreeCafeHudKit.Plaque(root.transform, "EndDayButton", "结束这一天",
+                    new Vector2(1, 0), new Vector2(-110, 198), new Vector2(220, 52), true, 20);
                 PrefabUtility.SaveAsPrefabAsset(root, PrefabPath);
             }
             finally { UnityEngine.Object.DestroyImmediate(root); }
@@ -131,6 +133,7 @@ namespace Spotlight.FreeCafe.Editor
             hud.areaButtons[0] = instance.transform.Find("FloorSwitcher/Floor1").GetComponent<Button>();
             hud.areaButtons[2] = instance.transform.Find("FloorSwitcher/Floor2").GetComponent<Button>();
             hud.areaButtons[3] = instance.transform.Find("FloorSwitcher/Floor3").GetComponent<Button>();
+            hud.endDayButton = instance.transform.Find("EndDayButton").GetComponent<Button>();
             hud.floorCurrentSprite = hud.areaButtons[0].GetComponent<Image>().sprite;
             hud.floorIdleSprite = hud.areaButtons[2].GetComponent<Image>().sprite;
             hud.mapButton = hud.pauseButton = hud.recipeButton = null;

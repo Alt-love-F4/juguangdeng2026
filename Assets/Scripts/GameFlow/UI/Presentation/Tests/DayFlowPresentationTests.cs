@@ -190,17 +190,11 @@ namespace Spotlight.GameFlow.Tests
             Assert.That(flow.CurrentPresentation, Is.Null);
             Assert.That(flow.BlocksGameplayInput, Is.False);
             flow.EndDayFromMap();
-            Assert.That(flow.State, Is.EqualTo(DayFlowState.PreNight));
-            Assert.That(flow.CurrentPresentation, Is.TypeOf<PreNightPanel>());
-            yield return Submit((DayFlowPresentationPanel)flow.CurrentPresentation);
-            yield return WaitFor(() => flow.State == DayFlowState.HomeNight);
-            Assert.That(flow.CurrentPresentation, Is.TypeOf<HomeNightPanel>());
-            yield return Submit((DayFlowPresentationPanel)flow.CurrentPresentation);
-            yield return WaitFor(() => flow.State == DayFlowState.DayComplete);
-            Assert.That(flow.CurrentPresentation, Is.TypeOf<DayEndPanel>());
+            Assert.That(flow.State, Is.EqualTo(DayFlowState.DateTransition));
+            Assert.That(flow.CurrentPresentation, Is.TypeOf<DateChangePanel>());
             StringAssert.Contains("10月7日", flow.CurrentDate);
-            yield return Submit((DayFlowPresentationPanel)flow.CurrentPresentation);
-            yield return WaitFor(() => flow.State == DayFlowState.DateTransition);
+            yield return new WaitForSecondsRealtime(4.5f);
+            yield return WaitFor(() => flow.State == DayFlowState.CityMapLeisure);
             flow.HideForMainMenu();
             Assert.That(flow.CurrentPresentation, Is.Null);
             Assert.That(flow.BlocksGameplayInput, Is.False);
@@ -219,9 +213,9 @@ namespace Spotlight.GameFlow.Tests
                     Json = "{\"day\":5,\"previousDate\":\"昨日\",\"state\":6}" }
             };
             flow.RestoreSavedDayFlow();
-            Assert.That(flow.State, Is.EqualTo(DayFlowState.PreNight));
-            Assert.That(flow.CurrentPresentation, Is.TypeOf<PreNightPanel>());
-            StringAssert.Contains("10月10日", flow.CurrentDate);
+            Assert.That(flow.State, Is.EqualTo(DayFlowState.DateTransition));
+            Assert.That(flow.CurrentPresentation, Is.TypeOf<DateChangePanel>());
+            StringAssert.Contains("10月11日", flow.CurrentDate);
             Assert.That(GameSaveParticipantRegistry.TakePending(DayFlowController.SaveId), Is.Null);
             Assert.That(session.Submit(null), Is.True);
             flow.BeginNewSession(playLetter: false, playIntroduction: false);

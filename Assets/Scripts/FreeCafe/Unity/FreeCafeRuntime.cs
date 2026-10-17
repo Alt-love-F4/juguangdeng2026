@@ -1160,7 +1160,11 @@ namespace Spotlight.FreeCafe
             }
             ShowHint("准备就绪，点击大厅的「启动营业」立牌开始正式营业。");
         }
-        public void EndDayFlowBusiness() => EndBusiness();
+        public void EndDayFlowBusiness()
+        {
+            if (World != null && World.State.open)
+                Report(World.EndDay());
+        }
         public void RefillSources() { if(!InputBlocked) Report(World.Refill()); }
         public void RotateSelected() { if(!InputBlocked) World.Rotate(SelectedId); }
         public void DebugRefreshViews() { SyncViews(); ShowHint("经营视图已刷新"); }

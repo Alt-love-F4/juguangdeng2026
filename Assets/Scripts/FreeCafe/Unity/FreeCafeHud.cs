@@ -16,6 +16,7 @@ namespace Spotlight.FreeCafe
         public TMP_Text summary,hint,selection,areaName;
         public Button mapButton;
         public Button startButton,pauseButton,saveButton,recipeButton;
+        public Button endDayButton;
         public Button[] areaButtons,orderButtons;
         public TMP_Text[] orderLabels;
         public Button previousOrder, nextOrder;
@@ -45,6 +46,7 @@ namespace Spotlight.FreeCafe
         private RectTransform headerDock;
         private Transform currencyDock, floorSwitcher, productionMenus;
         private FreeCafeMiniGameGateway miniGameGateway;
+        private DayFlowController dayFlow;
         public bool IsWorkstation => runtime!=null && runtime.World!=null && runtime.World.ProductionEnabled && runtime.World.State.currentArea==AreaId.Counter;
 
         private void LateUpdate()
@@ -72,6 +74,9 @@ namespace Spotlight.FreeCafe
                 return;
             bound=true;
             miniGameGateway=runtime.GetComponent<FreeCafeMiniGameGateway>();
+            dayFlow = FindFirstObjectByType<DayFlowController>();
+            if (endDayButton == null && playerRoot != null)
+                endDayButton = playerRoot.transform.Find("CafeLobbyHud/EndDayButton")?.GetComponent<Button>();
             bookView = recipePanel == null ? null : recipePanel.GetComponent<CoffeeBookPanelView>();
             if(bookView != null)
             {
@@ -83,6 +88,7 @@ namespace Spotlight.FreeCafe
             if(mapButton!=null) mapButton.onClick.AddListener(OpenMap);
             if(pauseButton!=null) pauseButton.onClick.AddListener(OpenPlayerMenu);
             if(recipeButton!=null) recipeButton.onClick.AddListener(ToggleRecipeTips);
+            if(endDayButton!=null) endDayButton.onClick.AddListener(EndDayFromDormitory);
             if(recipeCloseButton!=null) recipeCloseButton.onClick.AddListener(CloseRecipeTips);
             if(previousOrder!=null) previousOrder.onClick.AddListener(PreviousOrder);
             if(nextOrder!=null) nextOrder.onClick.AddListener(NextOrder);
@@ -202,6 +208,7 @@ namespace Spotlight.FreeCafe
             if(mapButton!=null) mapButton.onClick.RemoveListener(OpenMap);
             if(pauseButton!=null) pauseButton.onClick.RemoveListener(OpenPlayerMenu);
             if(recipeButton!=null) recipeButton.onClick.RemoveListener(ToggleRecipeTips);
+            if(endDayButton!=null) endDayButton.onClick.RemoveListener(EndDayFromDormitory);
             if(recipeCloseButton!=null) recipeCloseButton.onClick.RemoveListener(CloseRecipeTips);
             if(previousOrder!=null) previousOrder.onClick.RemoveListener(PreviousOrder);
             if(nextOrder!=null) nextOrder.onClick.RemoveListener(NextOrder);
@@ -217,6 +224,12 @@ namespace Spotlight.FreeCafe
         private void Cafe()=>runtime.Enter(AreaId.Cafe); private void Counter()=>runtime.Enter(AreaId.Counter);
         private void SecondFloor()=>runtime.Enter(AreaId.TopFloor);
         private void ThirdFloor()=>runtime.Enter(AreaId.Basement);
+        private void EndDayFromDormitory()
+        {
+            if (runtime == null || runtime.World == null || runtime.World.State.currentArea != AreaId.Basement) return;
+            if (dayFlow == null) dayFlow = FindFirstObjectByType<DayFlowController>();
+            dayFlow?.EndDayFromDormitory();
+        }
 
         private void PreviousOrder() => ChangeOrderPage(-1);
         private void NextOrder() => ChangeOrderPage(1);
@@ -360,7 +373,14 @@ namespace Spotlight.FreeCafe
                 for(int index=0;index<orderAvatars.Length;index++) SetOrderAvatar(index,null);
                 return;
             }
+            if (dayFlow == null) dayFlow = FindFirstObjectByType<DayFlowController>();
             var state=runtime.World.State;
+            if (endDayButton != null)
+            {
+                bool dormitory = state.currentArea == AreaId.Basement;
+                endDayButton.gameObject.SetActive(dormitory);
+                endDayButton.interactable = dormitory && dayFlow != null;
+            }
             if(summary!=null)
             {
                 summary.text="第 "+state.day+" 天    王国币 "+state.money+"    声望 "+state.reputation+"\n"+(state.open ? "营业中 · 剩余 "+state.timeRemaining.ToString("0")+" 秒" : state.businessPhase==BusinessPhase.Night ? "已打烊 · 点击立牌开始新一天" : "准备营业 · 点击大厅立牌开店")+"    顾客 "+state.requests.Count+" 位";

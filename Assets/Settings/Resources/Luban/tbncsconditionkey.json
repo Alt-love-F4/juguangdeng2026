@@ -172,5 +172,17 @@
     "nameText": "condition.story.church.1009.s2.completed",
     "initialValue": false,
     "onlySetTrue": true
+  },
+  {
+    "key": "story.neutral.1008.s1.completed",
+    "nameText": "condition.story.neutral.1008.s1.completed",
+    "initialValue": false,
+    "onlySetTrue": true
+  },
+  {
+    "key": "story.rose.1009.s1.completed",
+    "nameText": "condition.story.rose.1009.s1.completed",
+    "initialValue": false,
+    "onlySetTrue": true
   }
 ]

@@ -118,5 +118,10 @@
     "presentationKey": "church.1009.s2.conversation",
     "presentationClass": "Conversation",
     "logTag": "D1009"
+  },
+  {
+    "presentationKey": "neutral.1008.s1",
+    "presentationClass": "Conversation",
+    "logTag": "NEUTRAL_1008_S1"
   }
 ]

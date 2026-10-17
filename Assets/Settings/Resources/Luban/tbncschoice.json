@@ -254,5 +254,29 @@
     "resultOwnerId": "",
     "seq": 2,
     "checkId": ""
+  },
+  {
+    "choiceId": "neutral.1008.s1.choice.q1.a",
+    "groupKey": "neutral.1008.s1.q1",
+    "textKey": "neutral.1008.s1.text.p036",
+    "resultOwnerId": "",
+    "seq": 1,
+    "checkId": ""
+  },
+  {
+    "choiceId": "neutral.1008.s1.choice.q1.b",
+    "groupKey": "neutral.1008.s1.q1",
+    "textKey": "neutral.1008.s1.text.p037",
+    "resultOwnerId": "",
+    "seq": 2,
+    "checkId": "neutral.1008.s1.q1b"
+  },
+  {
+    "choiceId": "neutral.1008.s1.choice.q1.c",
+    "groupKey": "neutral.1008.s1.q1",
+    "textKey": "neutral.1008.s1.text.p038",
+    "resultOwnerId": "",
+    "seq": 3,
+    "checkId": ""
   }
 ]

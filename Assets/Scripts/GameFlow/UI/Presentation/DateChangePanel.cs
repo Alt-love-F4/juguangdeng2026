@@ -65,6 +65,8 @@ namespace Spotlight.GameFlow
         private string newHeader = string.Empty;
 
         protected override bool CompletesAutomatically => true;
+        public bool UseCoffeeCupExit { get; set; }
+        protected override bool UsesCoffeeCupExit => UseCoffeeCupExit;
 
         protected override void OnInit(IUIData data = null)
         {

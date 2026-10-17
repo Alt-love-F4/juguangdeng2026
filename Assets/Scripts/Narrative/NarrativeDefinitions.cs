@@ -211,6 +211,7 @@ namespace Spotlight.Narrative
         public NarrativePendingValue active;
         public NarrativeAbilityCheckSnapshot activeAbilityCheck;
         public string activeAbilityCheckId;
+        public List<NarrativeAbilityCheckSnapshot> inlineAbilityChecks = new List<NarrativeAbilityCheckSnapshot>();
         public List<NarrativeBarChange> changes = new List<NarrativeBarChange>();
         public List<NarrativeStringValue> npcLocations = new List<NarrativeStringValue>();
         public List<NarrativeResultDefinition> pendingEffects = new List<NarrativeResultDefinition>();

@@ -40,11 +40,14 @@ namespace Spotlight.GameFlow
                     if (!panel.SeamlessChoicePending) UIKit.ClosePanel(panel);
                     onFinished?.Invoke();
                 }, onCancelled);
+                // The first-day calendar handoff is released by DialoguePanel after its entrance
+                // is fully visible, so the aperture never exposes the scene behind a fading panel.
                 if (!string.IsNullOrWhiteSpace(script.MusicKey)) Spotlight.Audio.GameAudio.OverrideMusic(panel, script.MusicKey);
                 return panel;
             }
             catch
             {
+                CoffeeCupScreenTransition.Clear();
                 UIKit.ClosePanel(panel);
                 throw;
             }

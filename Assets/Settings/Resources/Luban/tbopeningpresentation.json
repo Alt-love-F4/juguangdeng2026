@@ -4,7 +4,7 @@
     "titleKey": "opening.title",
     "leftNameKey": "opening.player.name",
     "rightNameKey": "opening.adele.name",
-    "visualsResource": "Dialogue/CafeSceneVisuals",
+    "visualsResource": "Dialogue/FirstDayIntroductionVisuals",
     "centerNameKey": "cafe.tutorial.customer.name"
   },
   {
@@ -12,7 +12,7 @@
     "titleKey": "cafe.tutorial.customer_arrives.title",
     "leftNameKey": "opening.player.name",
     "rightNameKey": "opening.adele.name",
-    "visualsResource": "Dialogue/CafeSceneVisuals",
+    "visualsResource": "Dialogue/FirstDayIntroductionVisuals",
     "centerNameKey": "cafe.tutorial.customer.name"
   },
   {
@@ -20,7 +20,7 @@
     "titleKey": "cafe.tutorial.perception_success.title",
     "leftNameKey": "opening.player.name",
     "rightNameKey": "opening.adele.name",
-    "visualsResource": "Dialogue/CafeSceneVisuals",
+    "visualsResource": "Dialogue/FirstDayIntroductionVisuals",
     "centerNameKey": "cafe.tutorial.customer.name"
   },
   {
@@ -28,7 +28,7 @@
     "titleKey": "cafe.tutorial.perception_failure.title",
     "leftNameKey": "opening.player.name",
     "rightNameKey": "opening.adele.name",
-    "visualsResource": "Dialogue/CafeSceneVisuals",
+    "visualsResource": "Dialogue/FirstDayIntroductionVisuals",
     "centerNameKey": "cafe.tutorial.customer.name"
   },
   {
@@ -36,7 +36,7 @@
     "titleKey": "cafe.tutorial.order_confirmed.title",
     "leftNameKey": "opening.player.name",
     "rightNameKey": "opening.adele.name",
-    "visualsResource": "Dialogue/CafeSceneVisuals",
+    "visualsResource": "Dialogue/FirstDayIntroductionVisuals",
     "centerNameKey": "cafe.tutorial.customer.name"
   },
   {
@@ -44,7 +44,7 @@
     "titleKey": "cafe.tutorial.workstation_open.title",
     "leftNameKey": "opening.player.name",
     "rightNameKey": "opening.adele.name",
-    "visualsResource": "Dialogue/CafeSceneVisuals",
+    "visualsResource": "Dialogue/FirstDayIntroductionVisuals",
     "centerNameKey": "cafe.tutorial.customer.name"
   },
   {
@@ -52,7 +52,7 @@
     "titleKey": "cafe.tutorial.make_coffee_base.title",
     "leftNameKey": "opening.player.name",
     "rightNameKey": "opening.adele.name",
-    "visualsResource": "Dialogue/CafeSceneVisuals",
+    "visualsResource": "Dialogue/FirstDayIntroductionVisuals",
     "centerNameKey": "cafe.tutorial.customer.name"
   },
   {
@@ -60,7 +60,7 @@
     "titleKey": "cafe.tutorial.pour_into_cup.title",
     "leftNameKey": "opening.player.name",
     "rightNameKey": "opening.adele.name",
-    "visualsResource": "Dialogue/CafeSceneVisuals",
+    "visualsResource": "Dialogue/FirstDayIntroductionVisuals",
     "centerNameKey": "cafe.tutorial.customer.name"
   },
   {
@@ -68,7 +68,7 @@
     "titleKey": "cafe.tutorial.adjust_strength.title",
     "leftNameKey": "opening.player.name",
     "rightNameKey": "opening.adele.name",
-    "visualsResource": "Dialogue/CafeSceneVisuals",
+    "visualsResource": "Dialogue/FirstDayIntroductionVisuals",
     "centerNameKey": "cafe.tutorial.customer.name"
   },
   {
@@ -76,7 +76,7 @@
     "titleKey": "cafe.tutorial.adjust_sweetness.title",
     "leftNameKey": "opening.player.name",
     "rightNameKey": "opening.adele.name",
-    "visualsResource": "Dialogue/CafeSceneVisuals",
+    "visualsResource": "Dialogue/FirstDayIntroductionVisuals",
     "centerNameKey": "cafe.tutorial.customer.name"
   },
   {
@@ -84,7 +84,7 @@
     "titleKey": "cafe.tutorial.demo_grind.title",
     "leftNameKey": "opening.player.name",
     "rightNameKey": "opening.adele.name",
-    "visualsResource": "Dialogue/CafeSceneVisuals",
+    "visualsResource": "Dialogue/FirstDayIntroductionVisuals",
     "centerNameKey": "cafe.tutorial.customer.name"
   },
   {
@@ -92,7 +92,7 @@
     "titleKey": "cafe.tutorial.demo_boil.title",
     "leftNameKey": "opening.player.name",
     "rightNameKey": "opening.adele.name",
-    "visualsResource": "Dialogue/CafeSceneVisuals",
+    "visualsResource": "Dialogue/FirstDayIntroductionVisuals",
     "centerNameKey": "cafe.tutorial.customer.name"
   },
   {
@@ -100,7 +100,7 @@
     "titleKey": "cafe.tutorial.demo_brew.title",
     "leftNameKey": "opening.player.name",
     "rightNameKey": "opening.adele.name",
-    "visualsResource": "Dialogue/CafeSceneVisuals",
+    "visualsResource": "Dialogue/FirstDayIntroductionVisuals",
     "centerNameKey": "cafe.tutorial.customer.name"
   },
   {
@@ -108,7 +108,7 @@
     "titleKey": "cafe.tutorial.demo_cup.title",
     "leftNameKey": "opening.player.name",
     "rightNameKey": "opening.adele.name",
-    "visualsResource": "Dialogue/CafeSceneVisuals",
+    "visualsResource": "Dialogue/FirstDayIntroductionVisuals",
     "centerNameKey": "cafe.tutorial.customer.name"
   },
   {
@@ -116,7 +116,7 @@
     "titleKey": "cafe.tutorial.demo_base.title",
     "leftNameKey": "opening.player.name",
     "rightNameKey": "opening.adele.name",
-    "visualsResource": "Dialogue/CafeSceneVisuals",
+    "visualsResource": "Dialogue/FirstDayIntroductionVisuals",
     "centerNameKey": "cafe.tutorial.customer.name"
   },
   {
@@ -124,7 +124,7 @@
     "titleKey": "cafe.tutorial.demo_strength.title",
     "leftNameKey": "opening.player.name",
     "rightNameKey": "opening.adele.name",
-    "visualsResource": "Dialogue/CafeSceneVisuals",
+    "visualsResource": "Dialogue/FirstDayIntroductionVisuals",
     "centerNameKey": "cafe.tutorial.customer.name"
   },
   {
@@ -132,7 +132,7 @@
     "titleKey": "cafe.tutorial.demo_sweetness.title",
     "leftNameKey": "opening.player.name",
     "rightNameKey": "opening.adele.name",
-    "visualsResource": "Dialogue/CafeSceneVisuals",
+    "visualsResource": "Dialogue/FirstDayIntroductionVisuals",
     "centerNameKey": "cafe.tutorial.customer.name"
   },
   {
@@ -140,7 +140,7 @@
     "titleKey": "cafe.tutorial.demo_serve.title",
     "leftNameKey": "opening.player.name",
     "rightNameKey": "opening.adele.name",
-    "visualsResource": "Dialogue/CafeSceneVisuals",
+    "visualsResource": "Dialogue/FirstDayIntroductionVisuals",
     "centerNameKey": "cafe.tutorial.customer.name"
   },
   {
@@ -148,7 +148,7 @@
     "titleKey": "cafe.tutorial.serve_customer.title",
     "leftNameKey": "opening.player.name",
     "rightNameKey": "opening.adele.name",
-    "visualsResource": "Dialogue/CafeSceneVisuals",
+    "visualsResource": "Dialogue/FirstDayIntroductionVisuals",
     "centerNameKey": "cafe.tutorial.customer.name"
   },
   {
@@ -156,7 +156,7 @@
     "titleKey": "cafe.tutorial.result_excellent.title",
     "leftNameKey": "opening.player.name",
     "rightNameKey": "opening.adele.name",
-    "visualsResource": "Dialogue/CafeSceneVisuals",
+    "visualsResource": "Dialogue/FirstDayIntroductionVisuals",
     "centerNameKey": "cafe.tutorial.customer.name"
   },
   {
@@ -164,7 +164,7 @@
     "titleKey": "cafe.tutorial.result_good.title",
     "leftNameKey": "opening.player.name",
     "rightNameKey": "opening.adele.name",
-    "visualsResource": "Dialogue/CafeSceneVisuals",
+    "visualsResource": "Dialogue/FirstDayIntroductionVisuals",
     "centerNameKey": "cafe.tutorial.customer.name"
   },
   {
@@ -172,7 +172,7 @@
     "titleKey": "cafe.tutorial.result_average.title",
     "leftNameKey": "opening.player.name",
     "rightNameKey": "opening.adele.name",
-    "visualsResource": "Dialogue/CafeSceneVisuals",
+    "visualsResource": "Dialogue/FirstDayIntroductionVisuals",
     "centerNameKey": "cafe.tutorial.customer.name"
   },
   {
@@ -180,7 +180,7 @@
     "titleKey": "cafe.tutorial.result_bad.title",
     "leftNameKey": "opening.player.name",
     "rightNameKey": "opening.adele.name",
-    "visualsResource": "Dialogue/CafeSceneVisuals",
+    "visualsResource": "Dialogue/FirstDayIntroductionVisuals",
     "centerNameKey": "cafe.tutorial.customer.name"
   },
   {
@@ -188,7 +188,7 @@
     "titleKey": "cafe.tutorial.result_refund.title",
     "leftNameKey": "opening.player.name",
     "rightNameKey": "opening.adele.name",
-    "visualsResource": "Dialogue/CafeSceneVisuals",
+    "visualsResource": "Dialogue/FirstDayIntroductionVisuals",
     "centerNameKey": "cafe.tutorial.customer.name"
   },
   {
@@ -196,7 +196,7 @@
     "titleKey": "cafe.tutorial.ending.title",
     "leftNameKey": "opening.player.name",
     "rightNameKey": "opening.adele.name",
-    "visualsResource": "Dialogue/CafeSceneVisuals",
+    "visualsResource": "Dialogue/FirstDayIntroductionVisuals",
     "centerNameKey": "cafe.tutorial.customer.name"
   }
 ]

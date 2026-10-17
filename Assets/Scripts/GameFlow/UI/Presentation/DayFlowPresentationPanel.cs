@@ -43,6 +43,7 @@ namespace Spotlight.GameFlow
         protected TMP_Text DetailText => detailText;
         protected float EnterSeconds => enterSeconds;
         protected virtual bool CompletesAutomatically => false;
+        protected virtual bool UsesCoffeeCupExit => false;
 
         protected override void OnInit(IUIData data = null)
         {
@@ -115,6 +116,11 @@ namespace Spotlight.GameFlow
             continueButton.interactable = false;
             animation?.Kill(false);
             animation = DOTween.Sequence().SetUpdate(true).SetLink(gameObject, LinkBehaviour.KillOnDestroy);
+            if (UsesCoffeeCupExit)
+            {
+                animation.AppendCallback(() => CoffeeCupScreenTransition.BeginClose(.45f));
+                animation.AppendInterval(.45f);
+            }
             animation.Append(DOTween.To(() => canvasGroup.alpha, value => canvasGroup.alpha = value, 0f, exitSeconds));
             animation.OnComplete(() =>
             {

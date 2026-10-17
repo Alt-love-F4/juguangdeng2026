@@ -9,6 +9,7 @@ namespace Spotlight.GameFlow
         public const string EnterShadowWalk = "fx_enter_shadow_walk";
         public const string AccentShakeStartle = "fx_accent_shake_startle";
         public const string ShakeLight = "fx_shake_light";
+        public const string DialogueShake = "fx_dialogue_shake";
         public const string ShakeHeavy = "fx_shake_heavy";
         public const string FlashWhite = "fx_flash_white";
         public const string TransitionBlack = "fx_transition_black";
@@ -16,6 +17,7 @@ namespace Spotlight.GameFlow
         public const string PortraitFadeIn = "fx_portrait_fade_in";
         public const string PortraitNod = "fx_portrait_nod";
         public const string BackgroundPan = "fx_background_pan";
+        public const string BackgroundPanLeftToRight = "fx_background_pan_left_to_right";
     }
 
     public enum PresentationEffectStatus { Playing, Completed, Cancelled }
