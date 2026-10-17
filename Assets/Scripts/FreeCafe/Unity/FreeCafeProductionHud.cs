@@ -276,9 +276,9 @@ namespace Spotlight.FreeCafe
             var selected=world.Find(runtime.SelectedId);
             if(clearMachine!=null)
             {
-                clearMachine.interactable=!blocked && !guided && selected!=null && (world.IsContainer(selected) || world.Spec(selected.specId).Has(Capability.Processor)) && selected.contents.Count>0;
+                clearMachine.interactable=!blocked && !guided && selected!=null && !world.IsInfiniteLiquidContainer(selected) && (world.IsContainer(selected) || world.Spec(selected.specId).Has(Capability.Processor)) && selected.contents.Count>0;
                 // The split layout only shows this utility while it can act on the selected vessel.
-                if(splitTicket) clearMachine.gameObject.SetActive(clearMachine.interactable);
+                if(splitTicket || clearMachine.transform.parent.name=="SecondaryMenus") clearMachine.gameObject.SetActive(clearMachine.interactable);
             }
             if(instruction!=null) instruction.text=runtime.Hint;
             if(result!=null) result.text=moneyText!=null ? state.production.lastDelivery ?? "" : string.IsNullOrEmpty(state.production.lastDelivery) ? "王国币 "+state.money+"  ·  声望 "+state.reputation+"  ·  可提前备料" : state.production.lastDelivery;

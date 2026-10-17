@@ -158,6 +158,7 @@ namespace Spotlight.FreeCafe
         public ActionResult EmptyProductionMachine(string id)
         {
             var machine = Find(id);
+            if (IsInfiniteLiquidContainer(machine)) return ActionResult.No("清水壶持续供水，无需清空");
             if (MiniGameUses(machine)) return ActionResult.No("请先结束拉花，再清空容器");
             var filter = ExtractionFilter(machine);
             if ((!IsProductionMachine(machine) && !IsContainer(machine)) || machine.contents.Count == 0 && (filter == null || filter.contents.Count == 0))

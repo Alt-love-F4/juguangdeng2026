@@ -21,7 +21,7 @@ namespace Spotlight.FreeCafe.Tests
             for(int i=0;i<3;i++)
             {
                 if(app.World.State.requests.Count==0){app.World.EndDay();app.World.StartDay();}
-                app.World.TakeAndInteract("s.water",vessel.id,AreaId.Counter,0,0);
+                app.World.PourLiquid("s.water", vessel.id, 200, 1);
                 Assert.That(app.World.Interact(vessel.id,"service").success,Is.True);
                 yield return new WaitForSecondsRealtime(.8f);
                 Assert.That(app.DeliverCup().success,Is.True);

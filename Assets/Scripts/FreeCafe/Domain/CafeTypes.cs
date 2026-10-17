@@ -64,6 +64,7 @@ namespace Spotlight.FreeCafe
         public string artId;        // 美术资源 id
         public string sourceItemId; // 来源可取出的物品规格 id（仅 Source 使用）
         public Capability capabilities; // 能力标记
+        public string infiniteLiquidId; // 可持续补充的纯液体；空值为普通有限容器
         public float capacityMl;    // 制作模式的液体容量；份数容量保留给旧模式
         public int capacity;        // 容器容量（份数）
         public int initialStock;    // 来源的初始/满库存

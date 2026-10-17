@@ -16,7 +16,7 @@ namespace Spotlight.FreeCafe.Editor
             {"source.cups.small","杯具"}, {"source.beans","原料 · 每次一份"}, {"source.honey","小料"},
             {"machine.grinder","研磨 · 点击加速"}, {"machine.brewer","滴滤咖啡 · 注水萃取"},
             {"machine.heater","加热 · 4 秒"}, {"machine.mixer","抹茶加工"}, {"delivery","出餐托盘"},
-            {"source.water","清水"}, {"source.sugar","方糖"}
+            {"source.water","清水壶"}, {"source.sugar","方糖"}
         };
         private static readonly Dictionary<string,string> LegacyOwners=new Dictionary<string,string>
         {

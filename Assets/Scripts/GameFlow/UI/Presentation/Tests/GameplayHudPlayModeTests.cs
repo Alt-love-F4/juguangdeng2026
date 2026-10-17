@@ -1,4 +1,4 @@
-﻿#if UNITY_EDITOR
+#if UNITY_EDITOR
 using System;
 using System.Collections;
 using System.Collections.Generic;
@@ -72,6 +72,7 @@ namespace Spotlight.GameFlow.Tests
             var runtime = NarrativeRuntime.Instance;
             var player = PlayerRuntime.Current;
             var hud = GameplayHudPanel.Instance;
+            Assert.That(hud.Artwork.localScale.x, Is.EqualTo(.75f).Within(.01f));
             int day = runtime.Actions.CurrentDay;
             runtime.Actions.ActionPoints.Set(2);
             yield return new WaitForSecondsRealtime(.15f);
@@ -172,6 +173,7 @@ namespace Spotlight.GameFlow.Tests
             Assert.That(flow.DebugForceOpenMap(out string error), Is.True, error);
             yield return WaitFor(() => flow.IsMapOpen && !LoadingVisible(), "Resident map overlay");
             yield return new WaitForSecondsRealtime(.2f);
+            Assert.That(hud.Artwork.localScale.x, Is.EqualTo(1f).Within(.01f), "Opening the resident map restores its original header size.");
             Assert.That(hud.GetComponent<Canvas>().sortingOrder, Is.GreaterThan(GameplayHudPanel.SortingOrder - 10));
             Click(hud.Artwork.Find("详情面板").GetComponent<Button>());
             yield return null;

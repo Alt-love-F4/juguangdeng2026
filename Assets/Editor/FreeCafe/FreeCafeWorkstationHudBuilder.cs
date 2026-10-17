@@ -103,6 +103,7 @@ namespace Spotlight.FreeCafe.Editor
                 bench.woodBackground=AssetDatabase.LoadAssetAtPath<Sprite>(woodPath);
                 EditorUtility.SetDirty(bench);
             }
+            CafeLobbyHudPrefabBuilder.BindWorkstation(player,hud);
             root.gameObject.SetActive(false);
             EditorUtility.SetDirty(hud);EditorUtility.SetDirty(panels);
         }

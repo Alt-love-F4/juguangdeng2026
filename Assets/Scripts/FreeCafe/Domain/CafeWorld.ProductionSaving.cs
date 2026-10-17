@@ -14,8 +14,11 @@ namespace Spotlight.FreeCafe
             foreach (float value in new[] { p.grindSeconds, p.grindClickAdvance, p.grindClickCooldown, p.heatSeconds, p.boilingSeconds,
                 p.warmSeconds, p.portionMl, p.pourRateMl, p.brewIdealSeconds, p.brewGoldSeconds, p.brewGreenSeconds,
                 p.brewIdealMl, p.brewGoldMl, p.brewGreenMl, p.kettleCapacityMl, p.brewReferenceGroundsGrams,
-                p.filterDrainMlPerSecond, p.filterResidenceSeconds, p.extractionFilterOffsetY })
+                p.filterDrainMlPerSecond, p.filterResidenceSeconds, p.extractionFilterOffsetY,
+                p.extractionAssemblySnapDistance })
                 if (!Finite(value) || value <= 0) throw new ArgumentException("制作参数必须为有限正数");
+            if (!Finite(p.extractionAssemblySnapDistance) || p.extractionAssemblySnapDistance < 0)
+                throw new ArgumentException("精粹壶组合吸附距离必须为有限非负数");
             foreach (float value in new[] { p.ambientTemperatureCelsius, p.warmTemperatureCelsius, p.boilingTemperatureCelsius,
                 p.hotThresholdCelsius, p.boilingThresholdCelsius, p.heatingTargetCelsius })
                 if (!Finite(value) || value < 0 || value > 100) throw new ArgumentException("温度参数必须在 0 到 100 摄氏度之间");

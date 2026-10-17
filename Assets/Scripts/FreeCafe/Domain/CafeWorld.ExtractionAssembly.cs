@@ -16,23 +16,65 @@ namespace Spotlight.FreeCafe
             var jugs = State.entities.FindAll(IsPrecisionExtractor);
             foreach (var jug in jugs)
             {
-                if (jug.production.extractionAssemblyInitialized) continue;
-                var filter = Find(jug.id + ".filter");
+                if (jug.production.brewCompleted) continue;
+                var filter = Find(jug.production.extractionFilterId);
+                if (filter == null || !IsExtractionFilter(filter)
+                    || filter.production.extractionJugId != jug.id || filter.area != jug.area)
+                    filter = Find(jug.id + ".filter");
+                if (filter == null || !IsExtractionFilter(filter)
+                    || filter.production.extractionJugId != jug.id || filter.area != jug.area)
+                    filter = FindNearbyUnlinkedFilter(jug);
                 if (filter == null)
                 {
                     filter = new WorldEntity { id = jug.id + ".filter", specId = "container.extractor.filter",
                         area = jug.area, x = jug.x + .9f, y = jug.y - .8f };
                     State.entities.Add(filter);
                 }
+                if (filter.production.extractionJugId != jug.id || jug.production.extractionFilterId != filter.id)
+                {
+                    if (!CanAutoAttachExtractionFilter(filter, jug)) continue;
+                    jug.production.extractionFilterId = filter.id;
+                    filter.production.extractionJugId = jug.id;
+                    ResetExtraction(jug);
+                }
                 jug.production.extractionAssemblyInitialized = true;
-                if (jug.production.brewCompleted) continue;
-                jug.production.extractionFilterId = filter.id;
-                filter.production.extractionJugId = jug.id;
                 PositionExtractionFilter(jug);
                 for (int index = jug.contents.Count - 1; index >= 0; index--)
                     if (jug.contents[index].specId == "grounds")
                     { filter.contents.Add(jug.contents[index]); jug.contents.RemoveAt(index); }
             }
+        }
+
+        private WorldEntity FindNearbyUnlinkedFilter(WorldEntity jug)
+        {
+            WorldEntity nearest = null;
+            float best = float.MaxValue;
+            float maxDistance = Math.Max(0, Prep.extractionAssemblySnapDistance);
+            float expectedX = jug.x + Prep.extractionFilterOffsetX;
+            float expectedY = jug.y + Prep.extractionFilterOffsetY;
+            foreach (var candidate in State.entities)
+            {
+                if (!IsExtractionFilter(candidate) || candidate.area != jug.area
+                    || !string.IsNullOrEmpty(candidate.production.extractionJugId)) continue;
+                float dx = candidate.x - expectedX, dy = candidate.y - expectedY;
+                float distanceSquared = dx * dx + dy * dy;
+                if (distanceSquared <= maxDistance * maxDistance && distanceSquared < best)
+                { nearest = candidate; best = distanceSquared; }
+            }
+            return nearest;
+        }
+
+        private bool CanAutoAttachExtractionFilter(WorldEntity filter, WorldEntity jug)
+        {
+            if (filter == null || jug == null || !IsExtractionFilter(filter) || !IsPrecisionExtractor(jug)
+                || filter.area != jug.area || !string.IsNullOrEmpty(filter.production.extractionJugId)
+                || filter.production.filterSpent && filter.contents.Count > 0
+                || LiquidVolume(jug) > .001f || jug.production.brewStarted && !jug.production.brewCompleted)
+                return false;
+            float dx = filter.x - (jug.x + Prep.extractionFilterOffsetX);
+            float dy = filter.y - (jug.y + Prep.extractionFilterOffsetY);
+            float maxDistance = Math.Max(0, Prep.extractionAssemblySnapDistance);
+            return dx * dx + dy * dy <= maxDistance * maxDistance;
         }
 
         private void PositionExtractionFilter(WorldEntity jug)

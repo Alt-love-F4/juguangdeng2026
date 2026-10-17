@@ -32,21 +32,18 @@ namespace Spotlight.FreeCafe
         private Button[] boundOrderButtons=Array.Empty<Button>();
         private UnityAction[] orderActions=Array.Empty<UnityAction>();
         private bool bound;
-        private RectTransform sharedHudContent;
-        private Vector2 authoredContentTop;
+        public Sprite floorCurrentSprite, floorIdleSprite;
+        private RectTransform headerDock;
+        private Transform currencyDock, floorSwitcher, productionMenus;
+        private FreeCafeMiniGameGateway miniGameGateway;
+        public bool IsWorkstation => runtime!=null && runtime.World!=null && runtime.World.ProductionEnabled && runtime.World.State.currentArea==AreaId.Counter;
 
         private void LateUpdate()
         {
             if (playerRoot == null) return;
-            if (sharedHudContent == null)
-            {
-                sharedHudContent = playerRoot.transform as RectTransform;
-                if (sharedHudContent == null) return;
-                authoredContentTop = sharedHudContent.offsetMax;
-            }
-            var hud = GameplayHudPanel.Instance;
-            float inset = hud != null && hud.IsVisible ? GameplayHudPanel.HeaderHeight : 0f;
-            sharedHudContent.offsetMax = authoredContentTop - new Vector2(0f, inset);
+            if (headerDock == null) headerDock = playerRoot.transform.Find("CafeLobbyHud/HeaderDock") as RectTransform;
+            if (headerDock != null && playerRoot.transform is RectTransform content)
+                headerDock.localScale = Vector3.one * Mathf.Min(1f, content.rect.width / 1920f);
         }
 
         private CoffeeBookPanelView bookView;
@@ -65,6 +62,7 @@ namespace Spotlight.FreeCafe
             if(bound || runtime==null)
                 return;
             bound=true;
+            miniGameGateway=runtime.GetComponent<FreeCafeMiniGameGateway>();
             bookView = recipePanel == null ? null : recipePanel.GetComponent<CoffeeBookPanelView>();
             if(bookView != null)
             {
@@ -81,6 +79,8 @@ namespace Spotlight.FreeCafe
             if(nextOrder!=null) nextOrder.onClick.AddListener(NextOrder);
             if(areaButtons!=null && areaButtons.Length>0 && areaButtons[0]!=null) areaButtons[0].onClick.AddListener(Cafe);
             if(areaButtons!=null && areaButtons.Length>1 && areaButtons[1]!=null) areaButtons[1].onClick.AddListener(Counter);
+            if(areaButtons!=null && areaButtons.Length>2 && areaButtons[2]!=null) areaButtons[2].onClick.AddListener(SecondFloor);
+            if(areaButtons!=null && areaButtons.Length>3 && areaButtons[3]!=null) areaButtons[3].onClick.AddListener(ThirdFloor);
             boundOrderButtons=orderButtons==null ? Array.Empty<Button>() : (Button[])orderButtons.Clone();
             orderActions=new UnityAction[boundOrderButtons.Length];
             for(int index=0;index<boundOrderButtons.Length;index++)
@@ -110,18 +110,31 @@ namespace Spotlight.FreeCafe
             if(nextOrder!=null) nextOrder.onClick.RemoveListener(NextOrder);
             if(areaButtons!=null && areaButtons.Length>0 && areaButtons[0]!=null) areaButtons[0].onClick.RemoveListener(Cafe);
             if(areaButtons!=null && areaButtons.Length>1 && areaButtons[1]!=null) areaButtons[1].onClick.RemoveListener(Counter);
+            if(areaButtons!=null && areaButtons.Length>2 && areaButtons[2]!=null) areaButtons[2].onClick.RemoveListener(SecondFloor);
+            if(areaButtons!=null && areaButtons.Length>3 && areaButtons[3]!=null) areaButtons[3].onClick.RemoveListener(ThirdFloor);
             for(int index=0;index<boundOrderButtons.Length;index++)
                 if(boundOrderButtons[index]!=null) boundOrderButtons[index].onClick.RemoveListener(orderActions[index]);
             boundOrderButtons=Array.Empty<Button>();
             orderActions=Array.Empty<UnityAction>();
         }
         private void Cafe()=>runtime.Enter(AreaId.Cafe); private void Counter()=>runtime.Enter(AreaId.Counter);
+        private void SecondFloor()=>runtime.Enter(AreaId.TopFloor);
+        private void ThirdFloor()=>runtime.Enter(AreaId.Basement);
 
         private void PreviousOrder() => ChangeOrderPage(-1);
         private void NextOrder() => ChangeOrderPage(1);
         private void ChangeOrderPage(int direction)
         {
             if(runtime==null || runtime.World==null || runtime.InputBlocked) return;
+            if(IsWorkstation)
+            {
+                string previous=runtime.World.State.focusedRequestId;
+                var result=runtime.World.PageProductionOrder(direction);
+                if(result.success && previous!=runtime.World.State.focusedRequestId)
+                    Spotlight.Audio.GameAudio.Play(Spotlight.Audio.AudioKeys.Page);
+                runtime.Report(result);
+                return;
+            }
             int slots=Math.Max(1, Math.Max(orderButtons?.Length ?? 0, orderLabels?.Length ?? 0));
             int pages=(runtime.World.State.requests.Count+slots-1)/slots;
             if(pages<2) return;
@@ -262,7 +275,18 @@ namespace Spotlight.FreeCafe
                 var beans=runtime.World.Find("s.beans");var milk=runtime.World.Find("s.milk");
                 stockLabel.text="咖啡豆 "+(beans==null ? "—" : beans.stock.ToString())+"   牛奶 "+(milk==null ? "—" : milk.stock.ToString());
             }
-            if(playerRoot!=null) playerRoot.SetActive(!runtime.World.ProductionEnabled || state.currentArea!=AreaId.Counter);
+            bool workstation=IsWorkstation;
+            if(playerRoot!=null)
+            {
+                playerRoot.SetActive(!(workstation && miniGameGateway!=null && miniGameGateway.HasPresenter && miniGameGateway.BlocksInput));
+                if(headerDock==null) headerDock=playerRoot.transform.Find("CafeLobbyHud/HeaderDock") as RectTransform;
+                if(currencyDock==null) currencyDock=playerRoot.transform.Find("CafeLobbyHud/HeaderDock/Resources");
+                if(floorSwitcher==null) floorSwitcher=playerRoot.transform.Find("CafeLobbyHud/FloorSwitcher");
+                if(productionMenus==null) productionMenus=playerRoot.transform.Find("CafeLobbyHud/HeaderDock/SecondaryMenus");
+                if(currencyDock!=null) currencyDock.gameObject.SetActive(!workstation);
+                if(floorSwitcher!=null) floorSwitcher.gameObject.SetActive(!workstation);
+                if(productionMenus!=null) productionMenus.gameObject.SetActive(workstation);
+            }
             if(hint!=null) hint.text=runtime.Hint;
             var selected=runtime.World.Find(runtime.SelectedId);
             string text=selected==null ? "点击顾客查看需求；前往制作台调配饮品。" : "选中："+runtime.World.Spec(selected.specId).label+"";
@@ -273,10 +297,24 @@ namespace Spotlight.FreeCafe
             if(areaName!=null) areaName.text=runtime.World.Area(state.currentArea).label;
             if(areaButtons!=null)
                 for(int index=0;index<areaButtons.Length;index++)
-                    if(areaButtons[index]!=null) areaButtons[index].interactable=runtime.CanEnterArea((AreaId)index) && index!=(int)state.currentArea;
+                    if(areaButtons[index]!=null)
+                    {
+                        bool current=index==(int)state.currentArea;
+                        var button=areaButtons[index];
+                        button.interactable=runtime.CanEnterArea((AreaId)index) && !current;
+                        if(index!=(int)AreaId.Counter && button.targetGraphic is Image image && floorCurrentSprite!=null && floorIdleSprite!=null)
+                            image.sprite=current ? floorCurrentSprite : floorIdleSprite;
+                    }
             int orderCount=Math.Max(orderButtons==null ? 0 : orderButtons.Length,orderLabels==null ? 0 : orderLabels.Length);
             int slots=Math.Max(1,orderCount);
             int pages=(state.requests.Count+slots-1)/slots;
+            if(workstation)
+            {
+                int focused=0;
+                for(int index=0;index<state.requests.Count;index++)
+                    if(state.requests[index].id==state.focusedRequestId) { focused=index;break; }
+                orderOffset=focused/slots*slots;
+            }
             orderOffset=previousOrder==null && nextOrder==null ? 0 : Mathf.Clamp(orderOffset/slots,0,Math.Max(0,pages-1))*slots;
             if(previousOrder!=null) previousOrder.interactable=pages>1 && !runtime.InputBlocked;
             if(nextOrder!=null) nextOrder.interactable=pages>1 && !runtime.InputBlocked;
@@ -296,9 +334,9 @@ namespace Spotlight.FreeCafe
                 }
                 var request=state.requests[requestIndex]; requestIds[index]=request.id; var product=runtime.World.Product(request.productId);
                 var customer=runtime.World.Find(request.customerId);string name="顾客";
-                if(customer!=null && runtime.World.Catalog.npcs!=null)
-                    foreach(var npc in runtime.World.Catalog.npcs) if(npc.id==customer.npcId) name=npc.name;
-                string recipe=(request.id==state.focusedRequestId ? "● " : "")+name+"  ·  "+request.patience.ToString("0")+" 秒\n"+FreeCafeProductionText.Recipe(product.label)+"  /  "+product.price+" 王国币";
+                if(customer!=null) name=runtime.World.PersonName(customer);
+                string status=request.id==CafeWorld.TutorialOrderId ? "教程订单 · 尚未营业" : name+"  ·  "+request.patience.ToString("0")+" 秒";
+                string recipe=(request.id==state.focusedRequestId ? "● " : "")+status+"\n"+FreeCafeProductionText.Recipe(product.label)+"  /  "+product.price+" 王国币";
                 if(label!=null) label.text=recipe;
                 if(button!=null) { button.interactable=!runtime.InputBlocked; SetTicket(button,request.id==state.focusedRequestId); }
             }

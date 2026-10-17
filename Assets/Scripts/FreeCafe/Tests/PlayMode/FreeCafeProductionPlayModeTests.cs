@@ -374,7 +374,7 @@ namespace Spotlight.FreeCafe.Tests
         {
             app.World.TakeAndInteract("s.beans","m.grinder",AreaId.Counter,0,0);app.World.Operate("m.grinder");app.World.Tick(12);
             var grounds=app.World.DragOutputPreview("m.grinder");app.World.TakeMachineOutput("m.grinder",grounds.id,"m.brewer",AreaId.Counter,-3.3f,.2f);
-            app.World.TakeAndInteract("s.water","m.heater",AreaId.Counter,0,0);app.World.Operate("m.heater");app.World.Tick(4);
+            app.World.PourLiquid("s.water", "m.heater", 200, 1);app.World.Operate("m.heater");app.World.Tick(4);
             var kettle=app.World.Find("m.heater");var brewer=app.World.Find("m.brewer");
             var view=app.View(kettle.id);var origin=view.transform.position;
             var start=Pointer(kettle.x,kettle.y);

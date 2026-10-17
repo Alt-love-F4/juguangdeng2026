@@ -31,7 +31,7 @@ namespace Spotlight.FreeCafe.Tests
 
         [UnityTest] public IEnumerator ActualKettleDropReturnsHomeAndClickHeatsItsContents()
         {
-            Assert.That(app.World.TakeAndInteract("s.water", "m.heater", AreaId.Counter, 0, 0).success, Is.True);
+            Assert.That(app.World.PourLiquid("s.water", "m.heater", 200, 1).success, Is.True);
             var kettle = app.World.Find("m.heater"); var stove = app.World.Find("m.stove");
             float homeX = kettle.x, homeY = kettle.y;
             Physics2D.SyncTransforms(); app.BeginDrag(app.View(kettle.id), Pointer(kettle)); app.EndDrag(Pointer(stove));
@@ -74,7 +74,7 @@ namespace Spotlight.FreeCafe.Tests
         [UnityTest] public IEnumerator CaptureIllustratedWorkstationWithOriginalCupAndActualHud()
         {
             app.World.SelectServingCup("s.cups.large");
-            app.World.TakeAndInteract("s.water", "m.brewer", AreaId.Counter, 0, 0);
+            app.World.PourLiquid("s.water", "m.brewer", 200, 1);
             app.ShowHint("自由加入原料 · 粉与水混合是冷萃 · 容器放到炉台后点击加热 · 悬停看容量");
             yield return new WaitForSecondsRealtime(.5f);
             string folder = Path.GetFullPath("output/production-redesign"); Directory.CreateDirectory(folder);

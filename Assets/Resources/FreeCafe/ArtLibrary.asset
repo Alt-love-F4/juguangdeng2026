@@ -1097,3 +1097,41 @@ MonoBehaviour:
     variants:
     - state: default
       sprite: {fileID: 21300000, guid: 6dca08a788c8a6b4cb247df700fc6a5e, type: 3}
+  - brief:
+      id: waste.pail
+      label: "\u5E9F\u5F03\u6876"
+      category: entity
+      pivot:
+      outputFolder: Assets/Art/FreeCafe/Entities/waste.pail
+      prompt:
+      negativePrompt:
+      width: 0
+      height: 0
+      transparent: 1
+      worldWidth: 1.9
+      worldHeight: 1.8
+      states:
+      - default
+    whitebox: {fileID: 21300000, guid: 86c6840aa890e254ba8240f48f6db56b, type: 3}
+    variants:
+    - state: default
+      sprite: {fileID: 21300000, guid: 86c6840aa890e254ba8240f48f6db56b, type: 3}
+  - brief:
+      id: container.water
+      label: "\u6E05\u6C34\u58F6"
+      category: entity
+      pivot:
+      outputFolder: Assets/Art/FreeCafe/Entities/container.water
+      prompt:
+      negativePrompt:
+      width: 0
+      height: 0
+      transparent: 1
+      worldWidth: 1.4
+      worldHeight: 1.8
+      states:
+      - default
+    whitebox: {fileID: 21300000, guid: bb2090f5b494a0f449ed35cc6329faf5, type: 3}
+    variants:
+    - state: default
+      sprite: {fileID: 21300000, guid: bb2090f5b494a0f449ed35cc6329faf5, type: 3}

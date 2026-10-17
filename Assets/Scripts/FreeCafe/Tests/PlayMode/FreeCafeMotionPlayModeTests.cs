@@ -245,7 +245,7 @@ namespace Spotlight.FreeCafe.Tests
         [UnityTest] public IEnumerator QueuedLeftMouseReturnsKettleHomeAfterStoveDropWithoutEnteringTiltMode()
         {
             Assert.That(app.World.EnterProduction().success, Is.True);
-            Assert.That(app.World.TakeAndInteract("s.water", "m.heater", AreaId.Counter, 0, 0).success, Is.True);
+            Assert.That(app.World.PourLiquid("s.water", "m.heater", 200, 1).success, Is.True);
             var kettle = app.World.Find("m.heater"); var stove = app.World.Find("m.stove"); var view = app.View(kettle.id);
             float homeX = kettle.x, homeY = kettle.y;
             Physics2D.SyncTransforms();
@@ -272,7 +272,7 @@ namespace Spotlight.FreeCafe.Tests
         [UnityTest] public IEnumerator ReusableKettleReturnsHomeOnReleaseAndClickSelfHeatsTheSameView()
         {
             Assert.That(app.World.EnterProduction().success, Is.True);
-            Assert.That(app.World.TakeAndInteract("s.water", "m.heater", AreaId.Counter, 0, 0).success, Is.True);
+            Assert.That(app.World.PourLiquid("s.water", "m.heater", 200, 1).success, Is.True);
             var kettle = app.World.Find("m.heater"); var stove = app.World.Find("m.stove"); var view = app.View(kettle.id);
             float homeX = kettle.x, homeY = kettle.y;
             Vector3 visible = view.transform.position;

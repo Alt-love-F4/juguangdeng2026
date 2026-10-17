@@ -102,6 +102,9 @@ namespace Spotlight.FreeCafe
             // 来源类实体必须能对应到一个可取出的物品规格
             foreach (var spec in Catalog.entities)
             {
+                if (!string.IsNullOrEmpty(spec.infiniteLiquidId) && (!spec.Has(Capability.Container)
+                    || !IsLiquid(spec.infiniteLiquidId) || spec.capacityMl <= 0))
+                    throw new ArgumentException("Invalid infinite liquid container " + spec.id);
                 if (spec.Has(Capability.Source) && Spec(spec.sourceItemId) == null)
                 {
                     throw new ArgumentException("Invalid source " + spec.id);
@@ -437,6 +440,8 @@ namespace Spotlight.FreeCafe
                 return ActionResult.No("无效物品");
             }
 
+            if (IsInfiniteLiquidContainer(item) && (receiver.Has(Capability.Delivery) || receiver.Has(Capability.Customer)))
+                return ActionResult.No("清水壶仅供水，请使用杯子交付饮品");
             if (CupAbove(item) != null) return ActionResult.No("请先取走最上面的杯子");
             if (IsCupSource(receiver)) return PreviewCupReturn(item, target);
             if (IsIngredientSource(receiver)) return PreviewIngredientReturn(item, target);
@@ -446,6 +451,7 @@ namespace Spotlight.FreeCafe
 
             if (receiver.Has(Capability.Discard))
             {
+                if (IsInfiniteLiquidContainer(item)) return ActionResult.No("清水壶会自动归位，无需丢弃");
                 return ActionResult.Yes("丢弃 · 扣除 " + Catalog.economy.wastePenalty + " 金币");
             }
 

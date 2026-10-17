@@ -41,6 +41,8 @@ namespace Spotlight.FreeCafe
         public float kettleCapacityMl = 400;
         public float extractionFilterOffsetX = -.22f;
         public float extractionFilterOffsetY = .91f;
+        // Position tolerance used when repairing an unlinked filter near its extractor.
+        public float extractionAssemblySnapDistance = .35f;
     }
 
     /// <summary>道具实例状态。所有液体仍在 WorldEntity.contents，不建立第二份液体库存。</summary>

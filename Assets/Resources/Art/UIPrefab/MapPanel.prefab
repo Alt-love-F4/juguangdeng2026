@@ -3136,7 +3136,7 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 4e29b1a8efbd4b44bb3f3716e73f07ff, type: 3}
-  m_Name:
+  m_Name: 
   m_EditorClassIdentifier: UnityEngine.UI::UnityEngine.UI.Button
   m_Navigation:
     m_Mode: 3
@@ -3180,7 +3180,7 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: fdd97db3e9a5bc843ab8904223babd06, type: 3}
-  m_Name:
+  m_Name: 
   m_EditorClassIdentifier: Spotlight.GameFlow.UI::Spotlight.GameFlow.MapLocationHover
 --- !u!1 &7077779925243400751
 GameObject:
@@ -3698,7 +3698,7 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: fdd97db3e9a5bc843ab8904223babd06, type: 3}
-  m_Name:
+  m_Name: 
   m_EditorClassIdentifier: Spotlight.GameFlow.UI::Spotlight.GameFlow.MapLocationHover
 --- !u!1 &8602227461597274933
 GameObject:
@@ -4395,13 +4395,64 @@ PrefabInstance:
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
-    m_AddedComponents: []
+    m_AddedComponents:
+    - targetCorrespondingSourceObject: {fileID: 4225136109465672607, guid: 0498f4a9562d34e47a16c1280610d1c3, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: -3358648940708313617}
+    - targetCorrespondingSourceObject: {fileID: 4225136109465672607, guid: 0498f4a9562d34e47a16c1280610d1c3, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: -4519907397052851120}
   m_SourcePrefab: {fileID: 100100000, guid: 0498f4a9562d34e47a16c1280610d1c3, type: 3}
 --- !u!224 &1216441763444234322 stripped
 RectTransform:
   m_CorrespondingSourceObject: {fileID: 7092364830849086852, guid: 0498f4a9562d34e47a16c1280610d1c3, type: 3}
   m_PrefabInstance: {fileID: 8254129903972167126}
   m_PrefabAsset: {fileID: 0}
+--- !u!1 &5201162298618558025 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 4225136109465672607, guid: 0498f4a9562d34e47a16c1280610d1c3, type: 3}
+  m_PrefabInstance: {fileID: 8254129903972167126}
+  m_PrefabAsset: {fileID: 0}
+--- !u!223 &-3358648940708313617
+Canvas:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 5201162298618558025}
+  m_Enabled: 1
+  serializedVersion: 3
+  m_RenderMode: 0
+  m_Camera: {fileID: 0}
+  m_PlaneDistance: 100
+  m_PixelPerfect: 0
+  m_ReceivesEvents: 1
+  m_OverrideSorting: 1
+  m_OverridePixelPerfect: 0
+  m_SortingBucketNormalizedSize: 0
+  m_VertexColorAlwaysGammaSpace: 0
+  m_AdditionalShaderChannelsFlag: 0
+  m_UpdateRectTransformForStandalone: 0
+  m_SortingLayerID: 0
+  m_SortingOrder: 661
+  m_TargetDisplay: 0
+--- !u!114 &-4519907397052851120
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 5201162298618558025}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: dc42784cf147c0c48a680349fa168899, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: UnityEngine.UI::UnityEngine.UI.GraphicRaycaster
+  m_IgnoreReversedGraphics: 1
+  m_BlockingObjects: 0
+  m_BlockingMask:
+    serializedVersion: 2
+    m_Bits: 4294967295
 --- !u!224 &9160827548672507167 stripped
 RectTransform:
   m_CorrespondingSourceObject: {fileID: 985518062567166153, guid: 0498f4a9562d34e47a16c1280610d1c3, type: 3}

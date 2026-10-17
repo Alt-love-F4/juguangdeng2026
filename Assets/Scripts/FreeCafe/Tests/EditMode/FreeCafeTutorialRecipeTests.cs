@@ -23,7 +23,7 @@ namespace Spotlight.FreeCafe.Tests
             var output = w.DragOutputPreview("m.grinder");
             Assert.That(output, Is.Not.Null);
             Assert.That(w.TakeMachineOutput("m.grinder", output.id, extraction ? "v.extractor.filter" : "m.heater", AreaId.Counter, 0, 0).success);
-            Assert.That(w.TakeAndInteract("s.water", "m.heater", AreaId.Counter, 0, 0).success);
+            Assert.That(w.PourLiquid("s.water", "m.heater", 200, 1).success);
             Assert.That(w.OperateProduction("m.heater").success);
             w.Tick(4.1f);
             if (extraction)

@@ -956,7 +956,10 @@ namespace Spotlight.FreeCafe
             if(!World.CanPour(source)) { StopVesselPour(); return; }
             if(pouredThisDrag && lastPourTarget!=targetId) StopVesselPour();
             if(!IsDragging) return;
-            var result=World.PourLiquid(dragItemId,targetId,World.Catalog.production.pourRateMl*Mathf.Max(.1f,pourRateMultiplier)*tilt*Time.deltaTime,Time.deltaTime);
+            float amount = World.Catalog.production.pourRateMl*Mathf.Max(.1f,pourRateMultiplier)*tilt*Time.deltaTime;
+            if (WorkstationTutorial != null) amount = WorkstationTutorial.LimitPourAmount(dragItemId, amount);
+            if (amount <= 0) { StopVesselPour(); return; }
+            var result=World.PourLiquid(dragItemId,targetId,amount,Time.deltaTime);
             if(result.success)
             {
                 pouredThisDrag=true; lastPourTarget=targetId;
@@ -1037,12 +1040,15 @@ namespace Spotlight.FreeCafe
             var audioPresenter = GetComponent<FreeCafeAudioPresenter>();
             if (audioPresenter != null) audioPresenter.ResetObservation();
             var candidate=CafeSaveMigration.Prepare(JsonUtility.FromJson<CafeSnapshot>(json));
-            // Sources cannot be moved by gameplay. Old catalog/session snapshots
-            // must restore their stock, not overwrite the scene-authored PSD layout.
+            // Supply stations and discard targets return to their scene-authored homes.
+            // Restore their contents/stock without reapplying an old workstation layout.
             if(candidate?.entities!=null)
                 foreach(var entity in candidate.entities)
                 {
-                    if(entity==null || World.Spec(entity.specId)?.Has(Capability.Source)!=true) continue;
+                    if(entity==null) continue;
+                    var spec=World.Spec(entity.specId);
+                    if(spec==null || !(spec.Has(Capability.Source) || spec.Has(Capability.Discard)
+                        || World.IsInfiniteLiquidContainer(entity))) continue;
                     var initial=Array.Find(World.Catalog.layout, entry => entry.id==entity.id && entry.specId==entity.specId);
                     if(initial==null) continue;
                     entity.area=initial.area; entity.x=initial.x; entity.y=initial.y;

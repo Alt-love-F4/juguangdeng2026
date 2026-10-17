@@ -39,6 +39,7 @@ namespace Spotlight.GameFlow
         private StandaloneGameplaySession standalone;
         private IDisposable detailsPause;
         private bool visible;
+        private Vector2 authoredArtworkPosition;
         public MapActionInventoryView Inventory => inventory;
         public MapTaskPanel Tasks => tasks;
         public Button EndDayButton => endDayButton;
@@ -82,6 +83,7 @@ namespace Spotlight.GameFlow
             base.Awake();
             Instance = this;
             visibility = GetComponent<CanvasGroup>();
+            authoredArtworkPosition = artwork.anchoredPosition;
             inventory.PointsFill = pointsFill;
             inventory.DateLabel = dateLabel;
             inventory.PointsSegments = pointsSegments;
@@ -123,7 +125,10 @@ namespace Spotlight.GameFlow
             }
             else if (standalone != null) ReleaseStandaloneSession();
             BindSources();
-            bool show = gameplayScene && (flow == null || flow.SessionState == GameSessionState.Playing);
+            var cafe=PlayerCafeOwner.Current;
+            bool workstation=active.name=="CoffeeShop" && cafe!=null && cafe.ProductionEnabled
+                && cafe.State.currentArea==Spotlight.FreeCafe.AreaId.Counter && !(map!=null && map.isActiveAndEnabled);
+            bool show = gameplayScene && !workstation && (flow == null || flow.SessionState == GameSessionState.Playing);
             if (visible != show)
             {
                 visible = show;
@@ -134,7 +139,13 @@ namespace Spotlight.GameFlow
             visibility.alpha = show ? 1f : 0f;
             visibility.interactable = visibility.blocksRaycasts = show && canInteract;
             if (artwork != null && transform is RectTransform root)
-                artwork.localScale = Vector3.one * Mathf.Min(1f, Mathf.Max(.1f, (root.rect.width - 64f) / 1380f));
+            {
+                bool cafeLayout = active.name == "CoffeeShop" && !(map != null && map.isActiveAndEnabled);
+                float cafeFit = Mathf.Min(1f, root.rect.width / 1920f);
+                artwork.localScale = Vector3.one * (cafeLayout ? .75f * cafeFit
+                    : Mathf.Min(1f, Mathf.Max(.1f, (root.rect.width - 64f) / 1380f)));
+                artwork.anchoredPosition = cafeLayout ? new Vector2(-6f, -85f * cafeFit) : authoredArtworkPosition;
+            }
             if (!show || !canInteract || IsTyping()) return;
             Keyboard key = Keyboard.current;
             if (key == null) return;

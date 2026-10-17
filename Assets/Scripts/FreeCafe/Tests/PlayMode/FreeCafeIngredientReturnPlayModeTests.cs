@@ -99,9 +99,9 @@ namespace Spotlight.FreeCafe.Tests
             }
         }
 
-        [UnityTest] public IEnumerator PlacedBeansWaterAndCocoaReturnTheirUnitsExactlyOnce()
+        [UnityTest] public IEnumerator PlacedBeansSugarAndCocoaReturnTheirUnitsExactlyOnce()
         {
-            foreach (string sourceId in new[] { "s.beans", "s.water", "s.cocoa" })
+            foreach (string sourceId in new[] { "s.beans", "s.sugar", "s.cocoa" })
             {
                 var source = app.World.Find(sourceId);
                 int originalCount = app.World.State.entities.Count;
@@ -136,7 +136,7 @@ namespace Spotlight.FreeCafe.Tests
 
         [UnityTest] public IEnumerator SourcePreviewReleasedOnItsOwnStackIsSuccessfulWithoutStockOrViewLeaks()
         {
-            foreach (string sourceId in new[] { "s.beans", "s.water", "s.cocoa" })
+            foreach (string sourceId in new[] { "s.beans", "s.sugar", "s.cocoa" })
             {
                 var source = app.World.Find(sourceId);
                 int stock = source.stock, count = app.World.State.entities.Count;

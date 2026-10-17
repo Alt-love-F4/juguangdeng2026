@@ -29,6 +29,8 @@ namespace Spotlight.FreeCafe
         public BoxCollider2D hitbox;
         public string EntityId { get; private set; }
         public FreeCafeRuntime Runtime { get; private set; }
+        private bool hasAuthoredPresentation;
+        private Vector3 authoredArtworkSize, authoredArtworkScale;
         private Sprite lastCharacterSprite;
         private string specId,lastState,lastArtId;
         private FreeCafePersonView personView;
@@ -206,6 +208,13 @@ namespace Spotlight.FreeCafe
             if(runtime==null || entity==null) throw new System.ArgumentNullException("实体绑定缺少 runtime 或实体");
             if(!string.IsNullOrEmpty(prefabSpecId) && prefabSpecId!=entity.specId)
                 throw new System.InvalidOperationException("Prefab 规格不匹配："+prefabSpecId+" / "+entity.specId);
+            // Capture scene edits before the first runtime refresh can fit art to catalog dimensions.
+            if (Runtime == null && !string.IsNullOrEmpty(authoringEntityId) && body != null && body.sprite != null)
+            {
+                hasAuthoredPresentation = true;
+                authoredArtworkScale = body.transform.localScale;
+                authoredArtworkSize = Vector3.Scale(body.sprite.bounds.size, authoredArtworkScale);
+            }
             StopPickupReveal();
             Runtime=runtime; EntityId=entity.id; preview=isPreview;
             if((Runtime.World.IsPrecisionExtractor(entity) || Runtime.World.IsExtractionFilter(entity)) && GetComponent<FreeCafeExtractorVisual>()==null)
@@ -237,15 +246,20 @@ namespace Spotlight.FreeCafe
                     var plate = GetComponent<FreeCafeDeliveryZone>();
                     var artworkSize = plate != null ? plate.ArtworkSize : new Vector2(spec.width, spec.height);
                     float fit=Mathf.Min(artworkSize.x/size.x,artworkSize.y/size.y);
-                    body.transform.localScale=new Vector3(fit,fit,1);
-                    if (plate != null) { body.transform.localPosition = plate.ArtworkOffset; body.enabled = true; }
+                    body.transform.localScale = hasAuthoredPresentation
+                        ? new Vector3(authoredArtworkSize.x / size.x, authoredArtworkSize.y / size.y, authoredArtworkScale.z)
+                        : new Vector3(fit,fit,1);
+                    if (!hasAuthoredPresentation && plate != null) { body.transform.localPosition = plate.ArtworkOffset; body.enabled = true; }
                 }
                 var deliveryZone = GetComponent<FreeCafeDeliveryZone>();
-                hitbox.size=deliveryZone!=null ? deliveryZone.HitboxSize : new Vector2(spec.width,spec.height);
-                if (deliveryZone != null) hitbox.offset = deliveryZone.ArtworkOffset;
-                label.transform.localPosition=deliveryZone!=null
-                    ? new Vector3(0,deliveryZone.ArtworkOffset.y-deliveryZone.ArtworkSize.y*.5f-.2f,-.1f)
-                    : spec.Has(Capability.BusinessControl) ? new Vector3(0,.3f,-.1f) : new Vector3(0,-spec.height*.5f-.18f,-.1f);
+                if (!hasAuthoredPresentation)
+                {
+                    hitbox.size=deliveryZone!=null ? deliveryZone.HitboxSize : new Vector2(spec.width,spec.height);
+                    if (deliveryZone != null) hitbox.offset = deliveryZone.ArtworkOffset;
+                    label.transform.localPosition=deliveryZone!=null
+                        ? new Vector3(0,deliveryZone.ArtworkOffset.y-deliveryZone.ArtworkSize.y*.5f-.2f,-.1f)
+                        : spec.Has(Capability.BusinessControl) ? new Vector3(0,.3f,-.1f) : new Vector3(0,-spec.height*.5f-.18f,-.1f);
+                }
             }
             if (!motionInitialized)
             {

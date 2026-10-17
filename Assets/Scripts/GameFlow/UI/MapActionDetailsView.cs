@@ -19,6 +19,7 @@ namespace Spotlight.GameFlow
         private const string CafeEntryNodeName = "EnterCafe";
         private const string CafeEntryLabel = "进入咖啡馆";
         private const string CafeEntryDescription = "推门进入咖啡馆，开始今天的经营。";
+        private const int PopupSortingOrder = GameplayHudPanel.SortingOrder + 1;
         /// <summary>The cafe (and its authored lobby alias) navigates to the cafe scene instead of running an NCS action.</summary>
         internal static bool IsCafeEntryPosition(string positionKey)
             => positionKey == CafePositionKey || positionKey == CafeLobbyPositionKey;
@@ -97,6 +98,7 @@ namespace Spotlight.GameFlow
         public void Initialize(MapActionInventoryView inventoryView, Func<bool> canControl, Action finishDay, Action cafe)
         {
             inventory = inventoryView; controls = canControl; endDay = finishDay; enterCafe = cafe;
+            ConfigurePopupCanvas();
             mapController = GetComponentInParent<MapSceneController>();
             var rect = (RectTransform)transform;
             bool authoredLayout = transform.Find("Viewport/ActionList") != null;
@@ -157,6 +159,17 @@ namespace Spotlight.GameFlow
             ConfigurePagingLayout();
             close.transform.SetAsLastSibling();
         }
+        private void ConfigurePopupCanvas()
+        {
+            Canvas canvas = GetComponent<Canvas>();
+            if (canvas == null) canvas = gameObject.AddComponent<Canvas>();
+            canvas.overrideSorting = true;
+            canvas.sortingOrder = PopupSortingOrder;
+            GraphicRaycaster raycaster = GetComponent<GraphicRaycaster>();
+            if (raycaster == null) raycaster = gameObject.AddComponent<GraphicRaycaster>();
+            raycaster.enabled = true;
+        }
+
         public void Show(string positionKey, string locationName)
         {
             if (busy) return;

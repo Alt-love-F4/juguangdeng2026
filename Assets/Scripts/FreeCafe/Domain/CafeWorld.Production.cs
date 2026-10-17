@@ -370,6 +370,8 @@ namespace Spotlight.FreeCafe
             if (source == target || target != null && (source.area != target.area || !IsContainer(target))) return ActionResult.No("目标无效");
             if (MiniGameUses(source) || MiniGameUses(target))
                 return ActionResult.No("小游戏期间不能改变内容");
+            if (IsInfiniteLiquidContainer(target)) return ActionResult.No("清水壶不接收其他液体");
+            RefillInfiniteLiquid(source, requestedMl);
             float total = LiquidVolume(source);
             float amount = Math.Min(requestedMl, total);
             if (target != null && ExtractionJug(target) == source) return ActionResult.No("不能把下壶倒回自己的滤杯");
@@ -406,6 +408,7 @@ namespace Spotlight.FreeCafe
             if (source.contents.Count == 0 && !IsPrecisionExtractor(source) && !IsExtractionFilter(source))
                 source.production = new ProductionEntityState { spilledMl = source.production.spilledMl };
             else if(source.contents.Count==0 && IsContainer(source))source.production.phase=ProductionPhase.Empty;
+            RefillInfiniteLiquid(source);
             return ActionResult.Yes(accepted > 0 ? "已注入 " + accepted.ToString("0") + " ml" : "液体洒出（不返还）");
         }
         public ActionResult FinishPour(string targetId)

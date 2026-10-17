@@ -25,7 +25,7 @@ Transform:
   m_GameObject: {fileID: 1805376488790002626}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0.4, y: 0.22000001, z: 0}
+  m_LocalPosition: {x: -0.602, y: 0.648, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -91,10 +91,19 @@ MonoBehaviour:
   liquidRoot: {fileID: 2030856868029086733}
   pourOrigin: {fileID: 580015185665494245}
   liquidPresenter: {fileID: 0}
+  liquidContainerMask: {fileID: 0}
+  liquidMaskIsDistanceField: 0
+  liquidMaskDistanceRange: 0.125
+  liquidWallThickness: 0.018
   body: {fileID: 8061933382284308089}
   label: {fileID: 8708503896674592403}
   workspaceCaption: {fileID: 3886830782318052603}
   hitbox: {fileID: 5432288861176659441}
+  dragSmoothTime: 0.055
+  releaseSmoothTime: 0.18
+  maxDragLean: 14
+  leanPerSpeed: 1.6
+  leanSmoothTime: 0.09
 --- !u!61 &5432288861176659441
 BoxCollider2D:
   m_ObjectHideFlags: 0
@@ -139,7 +148,7 @@ BoxCollider2D:
     drawMode: 0
     adaptiveTiling: 0
   m_AutoTiling: 0
-  m_Size: {x: 1, y: 1.1}
+  m_Size: {x: 1.4, y: 1.8}
   m_EdgeRadius: 0
 --- !u!1 &3023305694371339873
 GameObject:
@@ -168,7 +177,7 @@ Transform:
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
   m_LocalPosition: {x: 0, y: 0, z: 0}
-  m_LocalScale: {x: 0.085251495, y: 0.085251495, z: 1}
+  m_LocalScale: {x: 0.2074074, y: 0.2074074, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 2450962718104996045}
@@ -220,9 +229,9 @@ SpriteRenderer:
   m_GlobalIlluminationMeshLod: 0
   m_SortingLayerID: 0
   m_SortingLayer: 0
-  m_SortingOrder: 100
+  m_SortingOrder: 130
   m_MaskInteraction: 0
-  m_Sprite: {fileID: 21300000, guid: 8e1588359a76e9f4780c0acd4c83ed50, type: 3}
+  m_Sprite: {fileID: 21300000, guid: bb2090f5b494a0f449ed35cc6329faf5, type: 3}
   m_Color: {r: 1, g: 1, b: 1, a: 1}
   m_FlipX: 0
   m_FlipY: 0
@@ -388,7 +397,7 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0.5, y: 0.5}
   m_AnchorMax: {x: 0.5, y: 0.5}
-  m_AnchoredPosition: {x: 0, y: -0.73}
+  m_AnchoredPosition: {x: 0, y: -1.0799999}
   m_SizeDelta: {x: 3.3, y: 0.7}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!23 &7739404620632778314
@@ -437,7 +446,7 @@ MeshRenderer:
   m_GlobalIlluminationMeshLod: 0
   m_SortingLayerID: 0
   m_SortingLayer: 0
-  m_SortingOrder: 101
+  m_SortingOrder: 131
   m_MaskInteraction: 0
   m_AdditionalVertexStreams: {fileID: 0}
 --- !u!114 &8708503896674592403
@@ -460,7 +469,7 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_text: "\u6E05\u6C34\u74F6"
+  m_text: "\u6E05\u6C34\u58F6"
   m_isRightToLeft: 0
   m_fontAsset: {fileID: 11400000, guid: deafa00ea26fb5945ada4150d6615468, type: 2}
   m_sharedMaterial: {fileID: 1574795732, guid: deafa00ea26fb5945ada4150d6615468, type: 2}
@@ -618,7 +627,7 @@ MeshRenderer:
   m_GlobalIlluminationMeshLod: 0
   m_SortingLayerID: 0
   m_SortingLayer: 0
-  m_SortingOrder: 102
+  m_SortingOrder: 132
   m_MaskInteraction: 0
   m_AdditionalVertexStreams: {fileID: 0}
 --- !u!114 &3886830782318052603

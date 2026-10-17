@@ -21,7 +21,7 @@ namespace Spotlight.FreeCafe.Tests
             for(int i=0;i<3;i++)
             {
                 if(world.State.requests.Count==0) {world.EndDay();world.StartDay();}
-                Assert.That(world.TakeAndInteract("s.water",id,AreaId.Counter,0,0).success,Is.True);
+                Assert.That(world.PourLiquid("s.water", id, 200, 1).success,Is.True);
                 vessel.latteArt=true;vessel.latteArtScore=88;vessel.latteArtPattern="heart";
                 world.Find("m.stove").production.heatingVesselId=id;
                 Assert.That(world.Interact(id,"service").success,Is.True);
@@ -41,7 +41,7 @@ namespace Spotlight.FreeCafe.Tests
         public void DiscardClearsContentsRatherThanDeletingReusableEquipment(string id,bool onTray)
         {
             var vessel=world.Find(id);
-            world.TakeAndInteract("s.water",id,AreaId.Counter,0,0);
+            world.PourLiquid("s.water", id, 200, 1);
             if(onTray) {world.Interact(id,"service");Assert.That(world.DiscardProductionCup().success,Is.True);}
             else Assert.That(world.Interact(id,"waste").success,Is.True);
             Assert.That(world.Find(id),Is.SameAs(vessel));Assert.That(vessel.contents,Is.Empty);

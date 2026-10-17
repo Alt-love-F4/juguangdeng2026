@@ -11,7 +11,7 @@ namespace Spotlight.FreeCafe.Tests
             world=new CafeWorld(JsonUtility.FromJson<CafeCatalog>(Resources.Load<TextAsset>("FreeCafe/catalog").text));
             world.EnableProduction(); world.EnterProduction();
         }
-        private void Load(string source,string machine) => Assert.That(world.TakeAndInteract(source,machine,AreaId.Counter,0,0).success,Is.True);
+        private void Load(string source,string machine) => Assert.That((source == "s.water" ? world.PourLiquid(source,machine,200,1) : world.TakeAndInteract(source,machine,AreaId.Counter,0,0)).success,Is.True);
         private void Heat(string source="s.water",string machine="m.heater") { Load(source,machine);world.Interact(machine,"m.stove");world.OperateProduction("m.stove");world.Tick(4); }
         private void Grounds()
         {

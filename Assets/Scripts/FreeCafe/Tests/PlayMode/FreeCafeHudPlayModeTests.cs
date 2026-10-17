@@ -1,4 +1,4 @@
-﻿using System.Collections;
+using System.Collections;
 using System.Reflection;
 using NUnit.Framework;
 using Spotlight.GameFlow;
@@ -92,8 +92,8 @@ namespace Spotlight.FreeCafe.Tests
             Assert.That(hud.nextOrder.interactable,Is.False);
             app.Enter(AreaId.Counter);
             yield return null;
-            Assert.That(hud.playerRoot.activeSelf,Is.False);
-            Assert.That(GameplayHudPanel.Instance.IsVisible,Is.True);
+            Assert.That(hud.playerRoot.activeSelf,Is.True);
+            Assert.That(GameplayHudPanel.Instance.IsVisible,Is.False);
             app.Enter(AreaId.Cafe);
             yield return null;
             Assert.That(hud.playerRoot.activeSelf,Is.True);
@@ -112,14 +112,120 @@ namespace Spotlight.FreeCafe.Tests
             ExecuteEvents.Execute(button.gameObject,pointer,ExecuteEvents.pointerClickHandler);
         }
 
+        [UnityTest] public IEnumerator WorkstationReusesOrderPanelAndOnlyShowsProductionMenus()
+        {
+            Assert.That(app.World.StartDay().success,Is.True);
+            if(app.World.State.requests.Count<2) app.World.DebugSpawnCustomers(2-app.World.State.requests.Count);
+            app.DebugRefreshViews();
+            var panel=hud.playerRoot.transform.Find("CafeLobbyHud");
+            var order=hud.orderButtons[0];
+            ClickHudButton(hud.nextOrder);
+            ClickHudButton(order);
+            string focused=app.World.State.focusedRequestId;
+            ClickWorkstationPortal();
+            yield return null;yield return null;
+            var production=app.GetComponent<FreeCafeProductionHud>();
+            Assert.That(hud.playerRoot.activeSelf,Is.True);
+            Assert.That(hud.playerRoot.transform.Find("CafeLobbyHud"),Is.SameAs(panel));
+            Assert.That(hud.orderButtons[0],Is.SameAs(order));
+            Assert.That(app.World.State.focusedRequestId,Is.EqualTo(focused));
+            Assert.That(GameplayHudPanel.Instance.IsVisible,Is.False);
+            Assert.That(panel.Find("HeaderDock/Resources").gameObject.activeSelf,Is.False);
+            Assert.That(panel.Find("FloorSwitcher").gameObject.activeSelf,Is.False);
+            Assert.That(panel.Find("HeaderDock/SecondaryMenus").gameObject.activeSelf,Is.True);
+            Assert.That(production.productionRoot.transform.Find("ProductionHeader/OrderTicket"),Is.Null);
+            Assert.That(production.previousOrder,Is.Null);
+            Assert.That(production.nextOrder,Is.Null);
+            int next=(app.World.State.requests.FindIndex(request=>request.id==focused)+1)%app.World.State.requests.Count;
+            ClickHudButton(hud.nextOrder);
+            Assert.That(app.World.State.focusedRequestId,Is.EqualTo(app.World.State.requests[next].id),"The shared arrows must select the actual delivery order in production.");
+            Assert.That(hud.orderPage.text,Does.StartWith((next+1).ToString("00")+" /"));
+            ClickHudButton(production.orderRecipe);
+            yield return null;
+            Assert.That(production.IsModalOpen,Is.True);
+            production.closeBook.onClick.Invoke();
+            yield return null;
+            yield return new WaitForEndOfFrame();
+            var screenshot=ScreenCapture.CaptureScreenshotAsTexture();
+            var directory=System.IO.Path.Combine(Application.dataPath,"../Logs/GameplayHud");
+            System.IO.Directory.CreateDirectory(directory);
+            System.IO.File.WriteAllBytes(System.IO.Path.Combine(directory,"cafe-workstation-shared-orders.png"),screenshot.EncodeToPNG());
+            Object.Destroy(screenshot);
+            ClickHudButton(production.returnButton);
+            yield return null;yield return null;
+            Assert.That(app.World.State.currentArea,Is.EqualTo(AreaId.Cafe));
+            Assert.That(GameplayHudPanel.Instance.IsVisible,Is.True);
+            Assert.That(panel.Find("HeaderDock/Resources").gameObject.activeSelf,Is.True);
+            Assert.That(panel.Find("FloorSwitcher").gameObject.activeSelf,Is.True);
+            Assert.That(panel.Find("HeaderDock/SecondaryMenus").gameObject.activeSelf,Is.False);
+        }
+
+        private void ClickWorkstationPortal()
+        {
+            foreach(var portal in Object.FindObjectsByType<FreeCafePortal>(FindObjectsSortMode.None))
+                if(portal.runtime==app && portal.destination==AreaId.Counter && app.IsCurrentAreaTransform(portal.transform))
+                {
+                    portal.OnPointerClick(new PointerEventData(EventSystem.current){button=PointerEventData.InputButton.Left});
+                    return;
+                }
+            Assert.Fail("The scene must retain its workstation entry after removing the old HUD.");
+        }
+
+        [UnityTest] public IEnumerator LobbyHeaderFitsTopSpaceAndFloorButtonsNavigateTheExistingWorld()
+        {
+            yield return null;
+            var shared=GameplayHudPanel.Instance;
+            Assert.That(shared,Is.Not.Null);
+            Assert.That(shared.Artwork.localScale.x,Is.EqualTo(.75f).Within(.01f));
+            var art=hud.playerRoot.transform.Find("CafeLobbyHud");
+            foreach(string old in new[]{"PlayerNavigation","PlayerTools","CafeTools","CafeNote","OpenCityMap"})
+                Assert.That(hud.playerRoot.transform.Find(old),Is.Null,old);
+            Assert.That(hud.mapButton,Is.Null);
+            var orders=(RectTransform)art.Find("HeaderDock/Orders");
+            var resources=(RectTransform)art.Find("HeaderDock/Resources");
+            Canvas.ForceUpdateCanvases();
+            var orderCorners=new Vector3[4];var headerCorners=new Vector3[4];var resourceCorners=new Vector3[4];
+            orders.GetWorldCorners(orderCorners);shared.Artwork.GetWorldCorners(headerCorners);resources.GetWorldCorners(resourceCorners);
+            Assert.That(orderCorners[2].x,Is.LessThan(headerCorners[0].x),"Order paper must not overlap the shared header");
+            Assert.That(headerCorners[2].x,Is.LessThan(resourceCorners[0].x),"Currency must not overlap the shared header");
+            Assert.That(orderCorners[0].y,Is.GreaterThan(Screen.height*.8f));
+            Assert.That(resourceCorners[0].y,Is.GreaterThan(Screen.height*.8f));
+            var world=app.World;int sceneHandle=app.gameObject.scene.handle;
+            var first=hud.areaButtons[(int)AreaId.Cafe];var second=hud.areaButtons[(int)AreaId.TopFloor];var third=hud.areaButtons[(int)AreaId.Basement];
+            Assert.That(first.interactable,Is.False);
+            Assert.That(((Image)first.targetGraphic).sprite,Is.SameAs(hud.floorCurrentSprite));
+            ClickHudButton(second);
+            yield return null;
+            Assert.That(world.State.currentArea,Is.EqualTo(AreaId.TopFloor));
+            Assert.That(app.areaManager.CurrentArea,Is.EqualTo(AreaId.TopFloor));
+            Assert.That(app.worldCamera.transform.position.y,Is.EqualTo(app.areaManager.Find(AreaId.TopFloor).cameraAnchor.position.y+app.areaManager.cameraOffset.y).Within(.01f));
+            Assert.That(second.interactable,Is.False);
+            Assert.That(((Image)second.targetGraphic).sprite,Is.SameAs(hud.floorCurrentSprite));
+            Time.timeScale=0;
+            ClickHudButton(third);
+            Assert.That(world.State.currentArea,Is.EqualTo(AreaId.TopFloor),"Floor navigation must respect the existing pause gate");
+            Time.timeScale=1;app.DebugRefreshViews();
+            ClickHudButton(third);
+            yield return null;
+            Assert.That(world.State.currentArea,Is.EqualTo(AreaId.Basement));
+            Assert.That(app.areaManager.CurrentArea,Is.EqualTo(AreaId.Basement));
+            ClickHudButton(first);
+            yield return null;
+            Assert.That(world.State.currentArea,Is.EqualTo(AreaId.Cafe));
+            Assert.That(app.World,Is.SameAs(world));
+            Assert.That((int)app.gameObject.scene.handle,Is.EqualTo(sceneHandle));
+            ClickWorkstationPortal();
+            Assert.That(world.State.currentArea,Is.EqualTo(AreaId.Counter));
+        }
+
         [UnityTest] public IEnumerator RemovedPlayerHudWidgetsDoNotBlockStartupOrRemainingControls()
         {
             hud.enabled=false;
             if(hud.pauseButton==null) hud.pauseButton=hud.saveButton;
             if(hud.recipeButton==null) hud.recipeButton=hud.orderButtons[0];
             foreach(string field in new[]{"pauseButton","summary","hint","selection","areaName"}) RemoveHudWidget(hud,field);
-            var counter=hud.areaButtons[(int)AreaId.Counter];
-            hud.areaButtons=new Button[]{null,counter};
+            var secondFloor=hud.areaButtons[(int)AreaId.TopFloor];
+            hud.areaButtons=new Button[]{null,null,secondFloor};
             hud.orderButtons=new Button[6];
             hud.orderLabels=new TMP_Text[1];
             for(int attempt=0;attempt<2;attempt++) { hud.enabled=true;hud.enabled=false; }
@@ -128,7 +234,10 @@ namespace Spotlight.FreeCafe.Tests
             hud.recipeButton.onClick.Invoke();
             Assert.That(hud.IsModalOpen,Is.True,"Removing pause and text widgets must not disable remaining recipe bindings");
             hud.CloseRecipeTips();
-            counter.onClick.Invoke();
+            secondFloor.onClick.Invoke();
+            Assert.That(app.World.State.currentArea,Is.EqualTo(AreaId.TopFloor));
+            app.Enter(AreaId.Cafe);
+            ClickWorkstationPortal();
             Assert.That(app.World.State.currentArea,Is.EqualTo(AreaId.Counter));
             Assert.That(app.World.TakeAndInteract("s.beans","m.grinder",AreaId.Counter,0,0).success,Is.True);
             app.DebugRefreshViews();
@@ -244,16 +353,16 @@ namespace Spotlight.FreeCafe.Tests
             Assert.That(bottomBar==null || !bottomBar.gameObject.activeSelf,Is.True);
             Assert.That(hud.startButton==null || !hud.startButton.gameObject.activeInHierarchy,Is.True);
             Assert.That(hud.saveButton==null || !hud.saveButton.gameObject.activeInHierarchy,Is.True);
-            Assert.That(hud.areaButtons[(int)AreaId.TopFloor],Is.Null);
+            Assert.That(hud.areaButtons[(int)AreaId.TopFloor],Is.Not.Null);
             if(hud.summary!=null)
             { Assert.That(hud.summary.text,Does.Not.Contain("FREE CAFE")); Assert.That(hud.summary.text,Does.Contain("王国币")); }
-            Assert.That(hud.playerRoot.GetComponentsInChildren<CafeHudSurface>().Length,Is.GreaterThan(0));
+            Assert.That(hud.playerRoot.GetComponentsInChildren<CafeHudSurface>().Length,Is.EqualTo(0));
             var lobbyArt=hud.playerRoot.transform.Find("CafeLobbyHud");
             Assert.That(lobbyArt,Is.Not.Null);
             Assert.That(System.Array.FindAll(lobbyArt.GetComponentsInChildren<Image>(true),image=>image.sprite!=null).Length,Is.GreaterThanOrEqualTo(5));
             var production=app.GetComponent<FreeCafeProductionHud>();
             app.Enter(AreaId.Counter);yield return null;
-            Assert.That(hud.playerRoot.activeSelf,Is.False);
+            Assert.That(hud.playerRoot.activeSelf,Is.True);
             Assert.That(production.startBusiness==null || !production.startBusiness.gameObject.activeInHierarchy,Is.True);
             Assert.That(production.saveButton==null || !production.saveButton.gameObject.activeInHierarchy,Is.True);
             Assert.That(production.productionRoot.GetComponentsInChildren<Canvas>().Length,Is.EqualTo(0));
@@ -607,11 +716,11 @@ namespace Spotlight.FreeCafe.Tests
             Assert.That(app.World.State.open,Is.False);
             Assert.That(app.World.State.requests.Count,Is.EqualTo(1));
             Assert.That(app.CafeTutorialWaitingForWorkstation,Is.True);
-            Assert.That(hud.areaButtons[(int)AreaId.Counter].interactable,Is.True);
+            Assert.That(app.CanEnterArea(AreaId.Counter),Is.True);
             Assert.That(app.CanEnterArea(AreaId.Cafe),Is.False);
             app.RequestBusinessStart();
             Assert.That(app.World.State.open,Is.False);
-            hud.areaButtons[(int)AreaId.Counter].onClick.Invoke();
+            ClickWorkstationPortal();
             Assert.That(app.World.State.currentArea,Is.EqualTo(AreaId.Counter));
             Assert.That(app.BeginCafeTutorialCoffee(),Is.True);
             yield return null; yield return null;
@@ -630,6 +739,15 @@ namespace Spotlight.FreeCafe.Tests
             yield return null;
             Assert.That(guide.CurrentStage,Is.EqualTo(FreeCafeWorkstationTutorial.Stage.Beans));
             var world=app.World;
+            var tutorialPanel=Object.FindFirstObjectByType<FreeCafeTutorialPanel>();
+            Assert.That(tutorialPanel.retry.activeInHierarchy,Is.True);
+            int beforeRestart=world.State.money;
+            tutorialPanel.retryButton.onClick.Invoke(); yield return null;
+            Assert.That(guide.CurrentStage,Is.EqualTo(FreeCafeWorkstationTutorial.Stage.Beans));
+            Assert.That(guide.IsFirstCafeTutorial,Is.True);
+            Assert.That(world.HasTutorialCustomer,Is.True);
+            Assert.That(world.State.money,Is.EqualTo(beforeRestart));
+            Assert.That(tutorialFlow.IsCafeTutorialActive,Is.True);
             Assert.That(world.TakeAndInteract("s.beans","m.grinder",AreaId.Counter,0,0).success,Is.True);
             yield return null;
             Assert.That(world.OperateProduction("m.grinder").success,Is.True);
@@ -638,7 +756,7 @@ namespace Spotlight.FreeCafe.Tests
             var output=world.DragOutputPreview("m.grinder");
             Assert.That(world.TakeMachineOutput("m.grinder",output.id,"m.heater",AreaId.Counter,0,0).success,Is.True);
             yield return null;
-            Assert.That(world.TakeAndInteract("s.water","m.heater",AreaId.Counter,0,0).success,Is.True);
+            Assert.That(world.PourLiquid("s.water", "m.heater", 200, 1).success,Is.True);
             yield return null;
             Assert.That(world.OperateProduction("m.heater").success,Is.True);
             yield return null;

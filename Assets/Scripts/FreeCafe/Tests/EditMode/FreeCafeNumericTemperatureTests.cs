@@ -281,7 +281,7 @@ namespace Spotlight.FreeCafe.Tests
             Assert.That(world.Take("s.milk", AreaId.Counter, 0, -2, out var roomMilk).success, Is.True);
             Assert.That(world.Interact(roomMilk.id, Cup.id).success, Is.True);
             Assert.That(Cup.contents[0].temperatureCelsius, Is.EqualTo(25));
-            Assert.That(world.Take("s.water", AreaId.Counter, 0, -2, out var hotMilk).success, Is.True);
+            Assert.That(world.Take("s.milk", AreaId.Counter, 0, -2, out var hotMilk).success, Is.True);
             hotMilk.specId = "hotmilk";
             Assert.That(world.Interact(hotMilk.id, Cup.id).success, Is.True);
             Assert.That(world.TemperatureCelsius(Cup), Is.EqualTo((200 * 25 + 200 * 98f) / 400).Within(.0001f));

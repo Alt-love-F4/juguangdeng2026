@@ -42,12 +42,12 @@ namespace Spotlight.FreeCafe.Tests
         }
         [UnityTest] public IEnumerator SourceDragGhostUsesTheSourceItemPrefabAndCancelsWithoutStockLoss()
         {
-            var source=app.World.Find("s.water");int stock=source.stock;
+            var source=app.World.Find("s.sugar");int stock=source.stock;
             Physics2D.SyncTransforms();var pointer=new PointerEventData(EventSystem.current)
             { position=app.worldCamera.WorldToScreenPoint(app.View(source.id).transform.position) };
             app.BeginDrag(app.View(source.id),pointer);Assert.That(app.IsDragging,Is.True);
             var ghost=GameObject.Find("UncommittedPickup").GetComponent<FreeEntityView>();
-            Assert.That(ghost.PrefabSpecId,Is.EqualTo("water"));Assert.That(ghost.AuthoringEntityId,Is.Empty);
+            Assert.That(ghost.PrefabSpecId,Is.EqualTo("sugar"));Assert.That(ghost.AuthoringEntityId,Is.Empty);
             app.CancelDrag();yield return null;Assert.That(source.stock,Is.EqualTo(stock));
         }
         [UnityTest] public IEnumerator SaveRestoreKeepsTheAuthoredMachineIdentityAndNewCupsUseDedicatedPrefabs()

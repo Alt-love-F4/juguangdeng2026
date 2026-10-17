@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Linq;
 using Spotlight.FreeCafe;
 using TMPro;
@@ -52,28 +52,59 @@ namespace Spotlight.FreeCafe.Editor
             Stretch((RectTransform)root.transform);
             try
             {
-                var orders = Rect(root.transform, "Orders", new Vector2(0, 1), new Vector2(28, -24), new Vector2(528, 216));
+                var dock = Rect(root.transform, "HeaderDock", new Vector2(.5f, 1), Vector2.zero, new Vector2(1920, 210));
+                dock.pivot = new Vector2(.5f, 1);
+                var orders = Rect(dock, "Orders", new Vector2(0, 1), new Vector2(28, -22), new Vector2(416, 166));
                 orders.pivot = new Vector2(0, 1);
-                Picture(orders, "图层 3", Art("图层 3"), new Vector2(0, 0), new Vector2(528, 216));
+                Picture(orders, "图层 3", Art("图层 3"), new Vector2(0, 0), new Vector2(416, 166));
                 orders.Find("图层 3").GetComponent<Image>().raycastTarget = true;
-                Picture(orders, "任务框 副本 2", Art("任务框 副本 2"), new Vector2(0, 0), new Vector2(516, 204));
-                Text(orders, "Heading", "来客订单", new Vector2(0, 72), new Vector2(450, 34), 25, TextAlignmentOptions.Center);
-                var order = Rect(orders, "Order0", new Vector2(.5f, .5f), new Vector2(0, -5), new Vector2(448, 94));
+                Picture(orders, "任务框 副本 2", Art("任务框 副本 2"), new Vector2(0, 0), new Vector2(406, 158));
+                Text(orders, "Heading", "来客订单", new Vector2(0, 54), new Vector2(350, 28), 20, TextAlignmentOptions.Center);
+                var order = Rect(orders, "Order0", new Vector2(.5f, .5f), new Vector2(0, -3), new Vector2(350, 72));
                 ClickArea(order);
-                Text(order, "Label", "等待顾客入座", Vector2.zero, new Vector2(436, 90), 22, TextAlignmentOptions.Center);
-                Picture(orders, "左右切换按键 副本", Art("左右切换按键 副本"), new Vector2(0, -76), new Vector2(476, 44));
-                ClickArea(Rect(orders, "PreviousOrder", new Vector2(.5f, .5f), new Vector2(-228, -76), new Vector2(56, 48)));
-                ClickArea(Rect(orders, "NextOrder", new Vector2(.5f, .5f), new Vector2(228, -76), new Vector2(56, 48)));
-                Text(orders, "Page", "暂无订单", new Vector2(0, -76), new Vector2(180, 28), 18, TextAlignmentOptions.Center);
+                Text(order, "Label", "等待顾客入座", Vector2.zero, new Vector2(340, 70), 19, TextAlignmentOptions.Center);
+                Picture(orders, "左右切换按键 副本", Art("左右切换按键 副本"), new Vector2(0, -58), new Vector2(375, 35));
+                ClickArea(Rect(orders, "PreviousOrder", new Vector2(.5f, .5f), new Vector2(-179, -58), new Vector2(44, 38)));
+                ClickArea(Rect(orders, "NextOrder", new Vector2(.5f, .5f), new Vector2(179, -58), new Vector2(44, 38)));
+                Text(orders, "Page", "暂无订单", new Vector2(0, -58), new Vector2(180, 24), 15, TextAlignmentOptions.Center);
 
-                var resources = Rect(root.transform, "Resources", new Vector2(1, 1), new Vector2(-28, -24), new Vector2(460, 124));
+                var resources = Rect(dock, "Resources", new Vector2(1, 1), new Vector2(-48, -28), new Vector2(460, 124));
                 resources.pivot = new Vector2(1, 1);
+                resources.localScale = Vector3.one * .65f;
                 Picture(resources, "花纹 副本", Art("花纹 副本"), new Vector2(0, -19), new Vector2(438, 116));
                 Picture(resources, "icon 副本", Art("icon 副本"), new Vector2(-55, 12), new Vector2(280, 98));
                 Text(resources, "MoneyTitle", "金币", new Vector2(-60, 35), new Vector2(80, 28), 17, TextAlignmentOptions.Left).color = Cream;
                 Text(resources, "ReputationTitle", "声望", new Vector2(120, 35), new Vector2(80, 28), 17, TextAlignmentOptions.Left).color = Cream;
                 Text(resources, "Money", "500", new Vector2(-60, 4), new Vector2(80, 39), 28, TextAlignmentOptions.Left).color = Cream;
                 Text(resources, "Reputation", "0", new Vector2(120, 4), new Vector2(80, 39), 28, TextAlignmentOptions.Left).color = Cream;
+                var menus = Rect(dock, "SecondaryMenus", new Vector2(1, 1), new Vector2(-48, -28), new Vector2(660, 132));
+                menus.pivot = new Vector2(1, 1);
+                string[] menuNames = { "OrderRecipe", "CoffeeBook", "ReturnToCafe", "PlayerMenu", "EmptySelectedMachine" };
+                string[] menuLabels = { "当前配方", "咖啡谱", "返回大厅", "菜单", "清空所选容器" };
+                for(int index=0;index<menuNames.Length;index++)
+                {
+                    var slot=Rect(menus,menuNames[index],new Vector2(.5f,.5f),index<4 ? new Vector2(-246+164*index,28) : new Vector2(0,-28),new Vector2(index<4 ? 154 : 252,44));
+                    var button=ClickArea(slot);
+                    var image=(Image)button.targetGraphic;
+                    image.sprite=Art("二楼");image.color=Color.white;
+                    Text(slot,"Label",menuLabels[index],Vector2.zero,new Vector2(index<4 ? 146 : 244,38),22,TextAlignmentOptions.Center);
+                }
+                menus.gameObject.SetActive(false);
+                var floors = Rect(root.transform, "FloorSwitcher", new Vector2(1, 0), new Vector2(-110, 32), new Vector2(156, 132));
+                floors.pivot = new Vector2(1, 0);
+                string[] floorNames = { "一楼大堂", "二楼会客室", "三楼宿舍" };
+                for (int index = 0; index < floorNames.Length; index++)
+                {
+                    var slot = Rect(floors, "Floor" + (index + 1), new Vector2(.5f, .5f), new Vector2(0, -44 + 44 * index), new Vector2(156, 38));
+                    var button = ClickArea(slot);
+                    var image = (Image)button.targetGraphic;
+                    image.sprite = Art(index == 0 ? "当前楼层" : index == 1 ? "二楼" : "三楼");
+                    image.color = Color.white;
+                    var colors = button.colors;
+                    colors.disabledColor = Color.white;
+                    button.colors = colors;
+                    Text(slot, "Label", floorNames[index], Vector2.zero, new Vector2(148, 32), 19, TextAlignmentOptions.Center);
+                }
                 PrefabUtility.SaveAsPrefabAsset(root, PrefabPath);
             }
             finally { UnityEngine.Object.DestroyImmediate(root); }
@@ -86,7 +117,7 @@ namespace Spotlight.FreeCafe.Editor
             if (prefab == null) { BuildPrefab(); prefab = AssetDatabase.LoadAssetAtPath<GameObject>(PrefabPath); }
             Undo.RecordObject(hud, "Bind lobby PSD HUD");
             var parent = hud.playerRoot.transform;
-            foreach (string name in new[] { "CafeLedger", "GuestTickets", "CafeLobbyHud", "CurrentArea" })
+            foreach (string name in new[] { "CafeLedger", "GuestTickets", "CafeLobbyHud", "CurrentArea", "PlayerNavigation", "PlayerTools", "CafeTools", "CafeNote", "OpenCityMap" })
             {
                 var old = parent.Find(name);
                 if (old != null) Undo.DestroyObjectImmediate(old.gameObject);
@@ -95,18 +126,59 @@ namespace Spotlight.FreeCafe.Editor
             instance.name = "CafeLobbyHud";
             Undo.RegisterCreatedObjectUndo(instance, "Install lobby PSD HUD");
             Stretch((RectTransform)instance.transform);
-            var orders = instance.transform.Find("Orders");
+            var orders = instance.transform.Find("HeaderDock/Orders");
+            hud.areaButtons = new Button[4];
+            hud.areaButtons[0] = instance.transform.Find("FloorSwitcher/Floor1").GetComponent<Button>();
+            hud.areaButtons[2] = instance.transform.Find("FloorSwitcher/Floor2").GetComponent<Button>();
+            hud.areaButtons[3] = instance.transform.Find("FloorSwitcher/Floor3").GetComponent<Button>();
+            hud.floorCurrentSprite = hud.areaButtons[0].GetComponent<Image>().sprite;
+            hud.floorIdleSprite = hud.areaButtons[2].GetComponent<Image>().sprite;
+            hud.mapButton = hud.pauseButton = hud.recipeButton = null;
+            hud.hint = hud.selection = null;
+            if (hud.runtime != null && hud.runtime.worldCamera != null)
+            {
+                Undo.RecordObject(hud.runtime.worldCamera, "Cafe letterbox palette");
+                hud.runtime.worldCamera.backgroundColor = new Color(.60f, .51f, .43f, 1f);
+                EditorUtility.SetDirty(hud.runtime.worldCamera);
+            }
             hud.orderButtons = new[] { orders.Find("Order0").GetComponent<Button>() };
             hud.orderLabels = new TMP_Text[] { orders.Find("Order0/Label").GetComponent<TMP_Text>() };
             hud.previousOrder = orders.Find("PreviousOrder").GetComponent<Button>();
             hud.nextOrder = orders.Find("NextOrder").GetComponent<Button>();
             hud.orderPage = orders.Find("Page").GetComponent<TMP_Text>();
-            hud.moneyLabel = instance.transform.Find("Resources/Money").GetComponent<TMP_Text>();
-            hud.reputationLabel = instance.transform.Find("Resources/Reputation").GetComponent<TMP_Text>();
+            hud.moneyLabel = instance.transform.Find("HeaderDock/Resources/Money").GetComponent<TMP_Text>();
+            hud.reputationLabel = instance.transform.Find("HeaderDock/Resources/Reputation").GetComponent<TMP_Text>();
             hud.summary = hud.dayLabel = hud.statusLabel = hud.stockLabel = hud.areaName = null;
             hud.orderFocusSprite = hud.orderIdleSprite = null;
+            if(hud.runtime!=null) BindWorkstation(hud,hud.runtime.GetComponent<FreeCafeProductionHud>());
             EditorUtility.SetDirty(hud);
             PrefabUtility.RecordPrefabInstancePropertyModifications(hud);
+        }
+
+        public static void BindWorkstation(FreeCafeHud player, FreeCafeProductionHud production)
+        {
+            if(production==null || player.playerRoot==null) return;
+            var menus=player.playerRoot.transform.Find("CafeLobbyHud/HeaderDock/SecondaryMenus");
+            if(menus==null) throw new InvalidOperationException("Rebuild the shared cafe HUD before binding workstation menus.");
+            Undo.RecordObject(production,"Reuse shared cafe order panel");
+            if(production.productionRoot!=null)
+                foreach(string path in new[]{"ProductionHeader/OrderTicket","ProductionHeader/StackedOrder0","ProductionHeader/StackedOrder1","ProductionHeader/CafeTools","ProductionHeader/MachineHint","ProductionFooter/ReturnToCafe","ProductionFooter/EmptySelectedMachine","ProductionFooter/Instruction","ProductionFooter/LastResult"})
+                {
+                    var old=production.productionRoot.transform.Find(path);
+                    if(old!=null) Undo.DestroyObjectImmediate(old.gameObject);
+                }
+            production.orderTitle=production.customerName=production.orderDescription=production.orderProduct=production.orderIndex=production.patienceText=null;
+            production.customerAvatar=production.patienceFill=null;
+            production.stackedOrderSheets=Array.Empty<GameObject>();
+            production.previousOrder=production.nextOrder=null;
+            production.instruction=production.result=production.machineStatus=null;
+            production.moneyText=production.reputationText=null;
+            production.orderRecipe=menus.Find("OrderRecipe").GetComponent<Button>();
+            production.bookButton=menus.Find("CoffeeBook").GetComponent<Button>();
+            production.returnButton=menus.Find("ReturnToCafe").GetComponent<Button>();
+            production.pauseButton=menus.Find("PlayerMenu").GetComponent<Button>();
+            production.clearMachine=menus.Find("EmptySelectedMachine").GetComponent<Button>();
+            EditorUtility.SetDirty(production);
         }
 
         private static RectTransform Rect(Transform parent, string name, Vector2 anchor, Vector2 position, Vector2 size)

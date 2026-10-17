@@ -15,7 +15,7 @@ namespace Spotlight.FreeCafe.Tests
         { Assert.That(world.Take(source, AreaId.Counter, 0, -1, out var cup).success, Is.True); return cup; }
         [Test] public void SilverKettleHeatsItsOwnContentsWithoutStoveAndRetainsThem()
         {
-            world.TakeAndInteract("s.water", "m.heater", AreaId.Counter, 0, 0);
+            world.PourLiquid("s.water", "m.heater", 200, 1);
             var kettle = world.Find("m.heater"); float volume = world.LiquidVolume(kettle);
             Assert.That(world.OperateProduction(kettle.id).success, Is.True);
             world.Tick(2); Assert.That(world.TemperatureCelsius(kettle), Is.InRange(59.9f, 60.1f));
@@ -28,19 +28,45 @@ namespace Spotlight.FreeCafe.Tests
         [Test] public void EmptyKettleDoesNotStartAndLiftingStopsHeat()
         {
             Assert.That(world.StartSelfHeating("m.heater").success, Is.False);
-            world.TakeAndInteract("s.water", "m.heater", AreaId.Counter, 0, 0); world.StartSelfHeating("m.heater");
+            world.PourLiquid("s.water", "m.heater", 200, 1); world.StartSelfHeating("m.heater");
             world.Tick(1); world.SuspendContainerHeating("m.heater"); float t = world.TemperatureCelsius(world.Find("m.heater"));
             world.Tick(10); Assert.That(world.TemperatureCelsius(world.Find("m.heater")), Is.EqualTo(t));
         }
         [TestCase("m.heater")][TestCase("m.brewer")][TestCase("tool.milk-pitcher")][TestCase("v.extractor")]
         public void ReusableVesselsReturnWithoutLosingContents(string id)
         {
-            var vessel = world.Find(id); world.TakeAndInteract("s.water", id, AreaId.Counter, 0, 0);
+            var vessel = world.Find(id); world.PourLiquid("s.water", id, 200, 1);
             float volume = world.LiquidVolume(vessel); world.Move(id, AreaId.Counter, 0, -1);
             Assert.That(world.ReturnVesselHome(id).success, Is.True);
             var home = System.Array.Find(world.Catalog.layout, e => e.id == id);
             Assert.That(vessel.x, Is.EqualTo(home.x)); Assert.That(vessel.y, Is.EqualTo(home.y));
             Assert.That(world.LiquidVolume(vessel), Is.EqualTo(volume));
+        }
+        [Test] public void NearbyUnlinkedFilterIsReassembledWhenVesselReturnsHome()
+        {
+            var jug = world.Find("v.extractor");
+            var filter = world.ExtractionFilter(jug);
+            Assert.That(world.Move(jug.id, AreaId.Counter, 0, -1).success, Is.True);
+            var home = System.Array.Find(world.Catalog.layout, e => e.id == jug.id);
+            filter.x = home.x + world.Catalog.production.extractionFilterOffsetX + .2f;
+            filter.y = home.y + world.Catalog.production.extractionFilterOffsetY - .1f;
+            jug.production.extractionAssemblyInitialized = true;
+            Assert.That(world.ReturnVesselHome(jug.id).success, Is.True);
+            Assert.That(world.ExtractionFilter(jug), Is.SameAs(filter));
+            Assert.That(filter.x, Is.EqualTo(jug.x + world.Catalog.production.extractionFilterOffsetX).Within(.0001f));
+            Assert.That(filter.y, Is.EqualTo(jug.y + world.Catalog.production.extractionFilterOffsetY).Within(.0001f));
+        }
+
+        [Test] public void DistantUnlinkedFilterIsNotAutoAttached()
+        {
+            var jug = world.Find("v.extractor");
+            var filter = world.ExtractionFilter(jug);
+            Assert.That(world.Move(jug.id, AreaId.Counter, 0, -1).success, Is.True);
+            var home = System.Array.Find(world.Catalog.layout, e => e.id == jug.id);
+            filter.x = home.x + world.Catalog.production.extractionFilterOffsetX + 2f;
+            filter.y = home.y + world.Catalog.production.extractionFilterOffsetY;
+            Assert.That(world.ReturnVesselHome(jug.id).success, Is.True);
+            Assert.That(world.ExtractionFilter(jug), Is.Null);
         }
         [Test] public void DetachedTowerParksSeparatelyAndCanReassemble()
         {

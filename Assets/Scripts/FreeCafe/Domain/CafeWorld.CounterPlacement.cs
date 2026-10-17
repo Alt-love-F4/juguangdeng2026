@@ -50,7 +50,11 @@ namespace Spotlight.FreeCafe
                         { vessel.x = entry.x + Spec(entry.specId).width * .6f; vessel.y = entry.y; break; }
                 }
             }
-            if (IsPrecisionExtractor(vessel)) PositionExtractionFilter(vessel);
+            if (IsPrecisionExtractor(vessel))
+            {
+                PositionExtractionFilter(vessel);
+                InitializeExtractionAssemblies();
+            }
             Notify(); return ActionResult.Yes("器皿已回到原位，保留内容物");
         }
         private ActionResult PreviewCupStack(WorldEntity cup, WorldEntity target)

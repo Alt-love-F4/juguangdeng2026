@@ -6,6 +6,19 @@ namespace Spotlight.FreeCafe
 {
     public sealed partial class CafeWorld
     {
+        public bool IsInfiniteLiquidContainer(WorldEntity entity) => IsContainer(entity)
+            && !string.IsNullOrEmpty(Spec(entity.specId).infiniteLiquidId);
+
+        private void RefillInfiniteLiquid(WorldEntity entity, float minimumMl = 0)
+        {
+            if (!IsInfiniteLiquidContainer(entity)) return;
+            entity.contents.Clear();
+            entity.production = new ProductionEntityState { spilledMl = entity.production.spilledMl };
+            entity.contents.Add(new Portion { specId = Spec(entity.specId).infiniteLiquidId, units = 1,
+                milliliters = Math.Max(LiquidCapacity(entity), minimumMl) });
+            SetContainerTemperature(entity, Prep.ambientTemperatureCelsius);
+        }
+
         private void RestoreContainerDefaults()
         {
             if (!ProductionEnabled) return;
@@ -24,6 +37,7 @@ namespace Spotlight.FreeCafe
             InitializeExtractionAssemblies();
             foreach (var entity in State.entities)
             {
+                RefillInfiniteLiquid(entity);
                 var temperature = TemperatureCelsius(entity);
                 SetContainerTemperature(entity, temperature);
                 // Migrate old free residues only after their thermal contribution has mixed.
@@ -109,6 +123,7 @@ namespace Spotlight.FreeCafe
         public string ContainerDescription(WorldEntity entity)
         {
             if (!IsContainer(entity)) return ProductionCaption(entity);
+            if (IsInfiniteLiquidContainer(entity)) return "清水 · 持续供水";
             if (Catalog.ingredientRules!=null) return CompositionName(entity);
             float volume = LiquidVolume(entity);
             float grounds = 0;
@@ -131,6 +146,7 @@ namespace Spotlight.FreeCafe
 
         public string ContainerInspection(WorldEntity entity)
         {
+            if (IsInfiniteLiquidContainer(entity)) return "清水壶 · 持续供水 · 拿起后按住右键倾倒，松开停止";
             var text = new StringBuilder(ContainerDescription(entity));
             text.Append(" · ").Append(LiquidVolume(entity).ToString("0")).Append("/").Append(LiquidCapacity(entity).ToString("0")).Append(" ml");
             text.Append(" · ").Append(SolidMass(entity).ToString("0.0")).Append(" g · ").Append(TemperatureCelsius(entity).ToString("0.0")).Append(" °C");
@@ -265,6 +281,7 @@ namespace Spotlight.FreeCafe
 
         private ActionResult PreviewContainer(WorldEntity item, WorldEntity target)
         {
+            if (IsInfiniteLiquidContainer(target)) return ActionResult.No("清水壶仅用于供水，请倒入其他容器");
             if (IsCup(target) && (CupAbove(target) != null || !string.IsNullOrEmpty(target.cupStackBelowId)))
                 return ActionResult.No("请先从杯堆取出杯子再加入原料");
             if (IsMilkPitcher(item) && MilkFoamVolume(item) > 0 && IsLatteArtCup(target))
@@ -338,6 +355,7 @@ namespace Spotlight.FreeCafe
 
         private ActionResult DockOnStove(WorldEntity vessel, WorldEntity stove)
         {
+            if (IsInfiniteLiquidContainer(vessel)) return ActionResult.No("清水壶仅供常温水，请倒入加热炉加热");
             if (!IsContainer(vessel)) return ActionResult.No("把容器放在炉台上，再点击炉台加热");
             var prior = Find(stove.production.heatingVesselId);
             if (prior != null && prior != vessel && Math.Abs(prior.x - stove.x) < .8f && Math.Abs(prior.y - stove.y) < 1.6f)

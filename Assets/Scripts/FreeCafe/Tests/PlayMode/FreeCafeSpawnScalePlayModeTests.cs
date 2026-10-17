@@ -22,9 +22,9 @@ namespace Spotlight.FreeCafe.Tests
         private PointerEventData Pointer(FreeEntityView view) => new PointerEventData(EventSystem.current)
             {position=app.worldCamera.WorldToScreenPoint(view.transform.position)};
         private static void SameScale(Vector3 actual,Vector3 expected) => Assert.That(Vector3.Distance(actual,expected),Is.LessThan(.001f));
-        [UnityTest] public IEnumerator MilkAndWaterDragGhostsUseTheScaledSourcePresentationAndCancelWithoutCost()
+        [UnityTest] public IEnumerator MilkAndSugarDragGhostsUseTheScaledSourcePresentationAndCancelWithoutCost()
         {
-            foreach(string sourceId in new[]{"s.milk","s.water"})
+            foreach(string sourceId in new[]{"s.milk","s.sugar"})
             {
                 var source=app.View(sourceId);var record=app.World.Find(sourceId);int stock=record.stock;
                 string itemSpec=app.World.Spec(record.specId).sourceItemId;

@@ -25,7 +25,7 @@ namespace Spotlight.FreeCafe.Tests
         [Test]
         public void AllUnusedIngredientsReturnExactlyOnce(
             [Values(false, true)] bool production,
-            [Values("beans", "milk", "matcha.powder", "cocoa.powder", "cream", "honey", "water", "sugar")] string ingredient)
+            [Values("beans", "milk", "matcha.powder", "cocoa.powder", "cream", "honey", "sugar")] string ingredient)
         {
             if (production) world.EnableProduction();
             var source = Source(ingredient);
@@ -101,7 +101,7 @@ namespace Spotlight.FreeCafe.Tests
         [Test]
         public void SameSourceDropIsANetNoOp(
             [Values(false, true)] bool production,
-            [Values("beans", "milk", "matcha.powder", "cocoa.powder", "cream", "honey", "water", "sugar")] string ingredient,
+            [Values("beans", "milk", "matcha.powder", "cocoa.powder", "cream", "honey", "sugar")] string ingredient,
             [Values(1, int.MaxValue)] int stock)
         {
             if (production) world.EnableProduction();
@@ -138,7 +138,7 @@ namespace Spotlight.FreeCafe.Tests
         [Test]
         public void UnusedIngredientAndReturnedExcessStockSurviveSaveRoundtrip(
             [Values(false, true)] bool production,
-            [Values("beans", "milk", "matcha.powder", "cocoa.powder", "cream", "honey", "water", "sugar")] string ingredient)
+            [Values("beans", "milk", "matcha.powder", "cocoa.powder", "cream", "honey", "sugar")] string ingredient)
         {
             if (production) world.EnableProduction();
             var source = Source(ingredient);

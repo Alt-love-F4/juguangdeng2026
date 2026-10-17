@@ -70,7 +70,7 @@ namespace Spotlight.FreeCafe.Tests
             var group=app.ContainerPanels.GetComponentInChildren<CanvasGroup>();Assert.That(group.blocksRaycasts,Is.False);
             Assert.That(app.View(w.ExtractionFilter(e).id).body.enabled,Is.True);
             Assert.That(view.transform.Find("FillStatus").gameObject.activeSelf,Is.False);
-            Assert.That(w.TakeAndInteract("s.water","m.heater",AreaId.Counter,0,0).success,Is.True);
+            Assert.That(w.PourLiquid("s.water", "m.heater", 200, 1).success,Is.True);
             Assert.That(w.OperateProduction("m.heater").success,Is.True);
             app.ContainerPanels.ClearInspection(e.id);yield return new WaitForSecondsRealtime(.2f);
             bool heating=false;foreach(var text in app.ContainerPanels.GetComponentsInChildren<TMP_Text>())if(text.text.Contains("加热中"))heating=true;

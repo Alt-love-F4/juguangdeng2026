@@ -52,7 +52,7 @@ namespace Spotlight.FreeCafe.Tests
         }
         [UnityTest] public IEnumerator ClickingSilverKettleStartsTheExistingHeatingPipeline()
         {
-            app.World.TakeAndInteract("s.water", "m.heater", AreaId.Counter, 0, 0);
+            app.World.PourLiquid("s.water", "m.heater", 200, 1);
             app.Click(app.View("m.heater"));
             Assert.That(app.World.Find("m.heater").production.phase, Is.EqualTo(ProductionPhase.Processing));
             app.World.Tick(4); yield return null;
