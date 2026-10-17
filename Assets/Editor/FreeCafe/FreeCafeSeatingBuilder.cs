@@ -75,7 +75,13 @@ namespace Spotlight.FreeCafe.Editor
             background.sprite = ImportSprite("Assets/Art/Background/game/SCE_一楼大厅场景底图_无椅.png", new Vector2(.5f,.5f), false);
             seating.suppliedCustomer = ImportSprite(ArtRoot + "customer_seated.png", new Vector2(.42f,.29f), true);
             seating.suppliedGuestName = "佩杖绅士";
-            seating.useSuppliedGuestForFirstSeat = true;
+            seating.useSuppliedGuestForFirstSeat = false;
+            seating.silhouetteCustomer = AssetDatabase.LoadAssetAtPath<Sprite>(ArtRoot + "Characters/silhouette_seated.png");
+            var seatedIds = new[] { "elion", "alienor", "thibaut", "adele", "lesou", "bertrand", "antoine" };
+            seating.characterArt = new CafeSeatedArtwork[seatedIds.Length];
+            for (int index = 0; index < seatedIds.Length; index++)
+                seating.characterArt[index] = new CafeSeatedArtwork { characterId = seatedIds[index],
+                    sprite = AssetDatabase.LoadAssetAtPath<Sprite>(ArtRoot + "Characters/" + seatedIds[index] + "_seated.png") };
             var canonical = ImportSprite(ArtRoot + "chair_left.png", new Vector2(.5f,.36f), true);
             var template = new GameObject("CafeChair", typeof(SpriteRenderer));
             var templateRenderer = template.GetComponent<SpriteRenderer>();

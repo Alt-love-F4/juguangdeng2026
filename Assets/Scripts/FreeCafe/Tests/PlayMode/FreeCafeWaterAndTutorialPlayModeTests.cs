@@ -1,9 +1,12 @@
 using System.Collections;
+using System.Collections.Generic;
 using System.IO;
 using System.Reflection;
 using NUnit.Framework;
 using UnityEngine;
 using UnityEngine.EventSystems;
+using UnityEngine.InputSystem;
+using UnityEngine.InputSystem.LowLevel;
 using UnityEngine.SceneManagement;
 using UnityEngine.TestTools;
 
@@ -12,6 +15,10 @@ namespace Spotlight.FreeCafe.Tests
     public sealed class FreeCafeWaterAndTutorialPlayModeTests
     {
         private FreeCafeRuntime app;
+        private Mouse mouse;
+        private InputSettings.EditorInputBehaviorInPlayMode previousEditorInputBehavior;
+        private InputSettings.BackgroundBehavior previousBackgroundBehavior;
+        private readonly List<BaseInputModule> disabledModules = new List<BaseInputModule>();
         [UnitySetUp] public IEnumerator Setup()
         {
             Time.timeScale = 1;
@@ -23,7 +30,17 @@ namespace Spotlight.FreeCafe.Tests
         }
         [UnityTearDown] public IEnumerator Cleanup()
         {
-            app.WorkstationTutorial.Stop(); app.CancelDrag(); Time.timeScale = 1; yield return null;
+            app.WorkstationTutorial.Stop(); app.CancelDrag(); Time.timeScale = 1;
+            if (mouse != null)
+            {
+                if (mouse.added) InputSystem.RemoveDevice(mouse);
+                mouse = null;
+                InputSystem.settings.editorInputBehaviorInPlayMode = previousEditorInputBehavior;
+                InputSystem.settings.backgroundBehavior = previousBackgroundBehavior;
+            }
+            foreach (var module in disabledModules) if (module != null) module.enabled = true;
+            disabledModules.Clear();
+            yield return null;
         }
         private static IEnumerator Capture(string name)
         {
@@ -153,6 +170,157 @@ namespace Spotlight.FreeCafe.Tests
             Assert.That(panel.retry.activeInHierarchy, Is.True);
             panel.retryButton.onClick.Invoke(); yield return null;
             Assert.That(guide.CurrentStage, Is.EqualTo(FreeCafeWorkstationTutorial.Stage.Beans));
+        }
+
+        private void UseTutorialMouse()
+        {
+            previousEditorInputBehavior = InputSystem.settings.editorInputBehaviorInPlayMode;
+            previousBackgroundBehavior = InputSystem.settings.backgroundBehavior;
+            InputSystem.settings.editorInputBehaviorInPlayMode = InputSettings.EditorInputBehaviorInPlayMode.AllDeviceInputAlwaysGoesToGameView;
+            InputSystem.settings.backgroundBehavior = InputSettings.BackgroundBehavior.IgnoreFocus;
+            mouse = InputSystem.AddDevice<Mouse>("TutorialPourRegressionMouse");
+            // Dispatch the drag directly, while retaining the real scene and its raycasters.
+            foreach (var module in EventSystem.current.GetComponents<BaseInputModule>())
+                if (module.enabled) { disabledModules.Add(module); module.enabled = false; }
+        }
+        private void MouseAt(Vector2 position, bool left, bool right = false)
+        {
+            var state = new MouseState { position = position };
+            if (left) state = state.WithButton(MouseButton.Left);
+            if (right) state = state.WithButton(MouseButton.Right);
+            InputSystem.QueueStateEvent(mouse, state);
+        }
+        private void SetTutorialStage(FreeCafeWorkstationTutorial.Stage next) =>
+            typeof(FreeCafeWorkstationTutorial).GetMethod("SetStage", BindingFlags.Instance | BindingFlags.NonPublic)
+                .Invoke(app.WorkstationTutorial, new object[] { next });
+        private PointerEventData PointerAt(string id, float above = 0)
+        {
+            var entity = app.World.Find(id);
+            return new PointerEventData(EventSystem.current)
+            {
+                position = app.worldCamera.WorldToScreenPoint(app.AreaToWorld(AreaId.Counter, entity.x, entity.y + above))
+            };
+        }
+        private IEnumerator BeginTutorialVesselDrag(string source)
+        {
+            var pointer = PointerAt(source);
+            MouseAt(pointer.position, true); yield return null;
+            Physics2D.SyncTransforms(); app.BeginDrag(app.View(source), pointer);
+            Assert.That(app.IsDragging, Is.True);
+            yield return null;
+        }
+        private IEnumerator AlignTutorialVessel(string source, string target)
+        {
+            var pointer = PointerAt(target, .8f);
+            MouseAt(pointer.position, true);
+            app.MoveDrag(pointer);
+            // Let the authored vessel presentation settle before locking its visible pose.
+            yield return new WaitForSecondsRealtime(.4f);
+            Physics2D.SyncTransforms(); app.MoveDrag(pointer); yield return null;
+            Assert.That(app.CurrentPourTargetId, Is.EqualTo(target), source + " should be over the actual receiver");
+        }
+        [UnityTest] public IEnumerator MisplacedRightClickCanReturnWaterAndRetryThroughTheHeatStep()
+        {
+            UseTutorialMouse();
+            var guide = app.WorkstationTutorial;
+            Assert.That(guide.Begin(false), Is.True);
+            SetTutorialStage(FreeCafeWorkstationTutorial.Stage.Water);
+            yield return BeginTutorialVesselDrag("s.water");
+            var panel = Object.FindFirstObjectByType<FreeCafeTutorialPanel>();
+            StringAssert.Contains("第 1 步", panel.instruction.text);
+            Assert.That(panel.rotationArrow.activeSelf, Is.False);
+            var home = PointerAt("s.water");
+            MouseAt(home.position, true, true); yield return null; yield return null;
+            Assert.That(app.LockedPourTargetId, Is.Null, "A misplaced right-click must not lock or freeze an invalid receiver");
+            MouseAt(home.position, false); yield return null; yield return null;
+            Assert.That(app.IsDragging, Is.False);
+            Assert.That(guide.CurrentStage, Is.EqualTo(FreeCafeWorkstationTutorial.Stage.Water));
+            var restoredWater = app.World.Find("s.water");
+            yield return null; yield return null; yield return null;
+            Assert.That(app.World.Find("s.water"), Is.SameAs(restoredWater), "The failed attempt must restore once, not replace entities every frame");
+
+            yield return BeginTutorialVesselDrag("s.water");
+            yield return AlignTutorialVessel("s.water", "m.heater");
+            StringAssert.Contains("第 2 步", panel.instruction.text);
+            Assert.That(panel.rotationArrow.activeSelf, Is.True);
+            var target = PointerAt("m.heater", .8f);
+            MouseAt(target.position, true, true); yield return null;
+            Assert.That(app.LockedPourTargetId, Is.EqualTo("m.heater"));
+            MouseAt(target.position + Vector2.up * 160, false, true);
+            float deadline = Time.realtimeSinceStartup + 12;
+            while (guide.CurrentStage == FreeCafeWorkstationTutorial.Stage.Water && Time.realtimeSinceStartup < deadline)
+                yield return null;
+            MouseAt(target.position, false);
+            Assert.That(guide.CurrentStage, Is.EqualTo(FreeCafeWorkstationTutorial.Stage.Heat), "Retry must accept real right-button pouring and advance");
+            Assert.That(app.IsDragging, Is.False);
+            Assert.That(app.World.LiquidVolume(app.World.Find("m.heater")), Is.EqualTo(app.World.Catalog.production.portionMl).Within(.01f));
+            yield return Capture("tutorial-water-retry-completed");
+        }
+        [UnityTest] public IEnumerator EarlyRightReleaseRestoresWaterOnlyOnceAndLeavesItDraggable()
+        {
+            UseTutorialMouse();
+            var guide = app.WorkstationTutorial;
+            Assert.That(guide.BeginFirstCafeTutorial(), Is.True);
+            SetTutorialStage(FreeCafeWorkstationTutorial.Stage.Water);
+            yield return BeginTutorialVesselDrag("s.water");
+            yield return AlignTutorialVessel("s.water", "m.heater");
+            var target = PointerAt("m.heater", .8f);
+            MouseAt(target.position, true, true); yield return null;
+            Assert.That(app.LockedPourTargetId, Is.EqualTo("m.heater"));
+            Assert.That(app.World.PourLiquid("s.water", "m.heater", 50, 1).success, Is.True);
+            MouseAt(target.position, false); yield return null; yield return null;
+            Assert.That(app.World.LiquidVolume(app.World.Find("m.heater")), Is.Zero, "A partial pour should reset the current water checkpoint");
+            var restoredWater = app.World.Find("s.water");
+            Assert.That(app.IsDragging, Is.False);
+            Assert.That(guide.CurrentStage, Is.EqualTo(FreeCafeWorkstationTutorial.Stage.Water));
+            yield return null; yield return null; yield return null;
+            Assert.That(app.World.Find("s.water"), Is.SameAs(restoredWater));
+            yield return BeginTutorialVesselDrag("s.water");
+            Assert.That(app.IsDragging, Is.True, "Early right release must not cancel every subsequent pickup");
+            yield return Capture("tutorial-water-left-drag-prompt");
+        }
+        [UnityTest] public IEnumerator BlackCoffeeAndEssencePourHintsSwitchOnlyAfterAlignmentAndResetOnCancel()
+        {
+            UseTutorialMouse();
+            var guide = app.WorkstationTutorial;
+            foreach (var scenario in new[] { (false, FreeCafeWorkstationTutorial.Stage.Pour), (true, FreeCafeWorkstationTutorial.Stage.Extract), (true, FreeCafeWorkstationTutorial.Stage.Pour) })
+            {
+                bool essence = scenario.Item1;
+                var step = scenario.Item2;
+                Assert.That(guide.Begin(essence), Is.True);
+                string target;
+                if (step == FreeCafeWorkstationTutorial.Stage.Extract)
+                    target = app.World.State.entities.Find(e => e.specId == "container.extractor.filter").id;
+                else
+                {
+                    if (!essence) Assert.That(app.World.SelectServingCup("s.cups.large").success, Is.True);
+                    target = app.World.ServingCup.id;
+                    typeof(FreeCafeWorkstationTutorial).GetField("cup", BindingFlags.Instance | BindingFlags.NonPublic).SetValue(guide, target);
+                }
+                SetTutorialStage(step);
+                var panel = Object.FindFirstObjectByType<FreeCafeTutorialPanel>();
+                yield return null;
+                StringAssert.Contains("第 1 步", panel.instruction.text);
+                Assert.That(panel.rotationArrow.activeSelf, Is.False);
+                string source = step == FreeCafeWorkstationTutorial.Stage.Pour && essence
+                    ? app.World.State.entities.Find(e => app.World.IsPrecisionExtractor(e)).id : "m.heater";
+                yield return BeginTutorialVesselDrag(source);
+                StringAssert.Contains("第 1 步", panel.instruction.text, "Picking up alone must not show the right-button prompt");
+                yield return AlignTutorialVessel(source, target);
+                StringAssert.Contains("第 2 步", panel.instruction.text);
+                Assert.That(panel.rightButton.color, Is.EqualTo(panel.activeButtonColor));
+                Assert.That(panel.rotationArrow.activeSelf, Is.True);
+                var away = PointerAt(source);
+                MouseAt(away.position, true); app.MoveDrag(away); yield return null; yield return null;
+                StringAssert.Contains("第 1 步", panel.instruction.text, "Moving away must return to positioning guidance");
+                Assert.That(panel.rotationArrow.activeSelf, Is.False);
+                yield return AlignTutorialVessel(source, target);
+                yield return Capture("tutorial-" + (essence ? "essence-" : "black-") + step + "-right-prompt");
+                app.CancelDrag(); MouseAt(Vector2.zero, false); yield return null; yield return null;
+                StringAssert.Contains("第 1 步", panel.instruction.text);
+                Assert.That(panel.rotationArrow.activeSelf, Is.False);
+                guide.Stop();
+            }
         }
     }
 }

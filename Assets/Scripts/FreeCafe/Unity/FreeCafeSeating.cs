@@ -30,6 +30,7 @@ namespace Spotlight.FreeCafe
     {
         public string characterId;
         public Sprite sprite;
+        public Vector2 artworkOffset;
     }
 
     [Serializable]
@@ -50,9 +51,20 @@ namespace Spotlight.FreeCafe
         public SpriteRenderer[] seatChairs;
         public SpriteRenderer[] tableOccluders;
         public Sprite suppliedCustomer;
+        [Tooltip("没有专用坐姿的顾客统一使用此黑影；不影响来客身份、订单或剧情。")]
+        public Sprite silhouetteCustomer;
         public string suppliedGuestName = "佩杖绅士";
         public bool useSuppliedGuestForFirstSeat = true;
         public CafeSeatedArtwork[] characterArt = Array.Empty<CafeSeatedArtwork>();
+
+        public bool CanPresentCustomer(string characterId) => silhouetteCustomer != null || HasCharacterArt(characterId);
+
+        public bool HasCharacterArt(string characterId)
+        {
+            foreach (var entry in characterArt)
+                if (entry != null && entry.characterId == characterId && entry.sprite != null) return true;
+            return false;
+        }
 
         public Vector3 PixelToArea(Vector2 pixel)
         {
@@ -117,13 +129,14 @@ namespace Spotlight.FreeCafe
             }
         }
 
-        public Sprite Artwork(WorldEntity entity)
+        public Sprite Artwork(WorldEntity entity, Sprite visitSprite = null)
         {
-            if (entity.person == null) return null;
+            if (entity.specId != "customer") return null;
+            if (entity.person == null) return visitSprite != null ? visitSprite : silhouetteCustomer;
             if (entity.person.personId == AcceptancePersonId || entity.person.visualId == "supplied.seated.guest") return suppliedCustomer;
             foreach (var entry in characterArt)
-                if (entry.characterId == entity.person.characterId && entry.sprite != null) return entry.sprite;
-            return null;
+                if (entry != null && entry.characterId == entity.person.characterId && entry.sprite != null) return entry.sprite;
+            return visitSprite != null ? visitSprite : silhouetteCustomer;
         }
 
         public Vector3 ArtworkScale(float perspectiveScale)
@@ -155,14 +168,23 @@ namespace Spotlight.FreeCafe
                     area.InverseTransformVector(chair.transform.TransformVector(Vector3.up)).magnitude, 1);
                 mirrored = chair.flipX != (chair.transform.lossyScale.x < 0);
             }
-            float fit = sprite == suppliedCustomer || Array.Exists(characterArt, entry => entry.sprite == sprite)
+            bool seatedArtwork = sprite == suppliedCustomer || sprite == silhouetteCustomer
+                || Array.Exists(characterArt, entry => entry != null && entry.sprite == sprite);
+            float fit = seatedArtwork
                 ? 1f : 5.68f / Mathf.Max(.01f, sprite.bounds.size.y);
             scale.x *= fit;
             scale.y *= fit;
             view.body.transform.localScale = scale;
             view.body.flipX = mirrored;
-            view.body.transform.localPosition = Artwork(entity) != null || sprite == suppliedCustomer
+            view.body.transform.localPosition = seatedArtwork
                 ? Vector3.zero : new Vector3(0, sprite.bounds.size.y * scale.y * .21f, 0);
+            foreach (var entry in characterArt)
+                if (entry != null && entry.sprite == sprite && entity.person != null && entry.characterId == entity.person.characterId)
+                {
+                    view.body.transform.localPosition = new Vector3(entry.artworkOffset.x * scale.x * (mirrored ? -1 : 1),
+                        entry.artworkOffset.y * scale.y, 0);
+                    break;
+                }
             view.body.sortingOrder = table.sortingOrder + 1;
             view.label.GetComponent<MeshRenderer>().sortingOrder = table.sortingOrder + 4;
             var size = Vector3.Scale(sprite.bounds.size, scale);

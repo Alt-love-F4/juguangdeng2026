@@ -452,7 +452,9 @@ namespace Spotlight.FreeCafe
                         AddCustomer("supplied_seated_guest", runtime.seating.suppliedGuestName, true);
                     if (runtime.characterCatalog != null)
                         foreach (var character in runtime.characterCatalog.Characters)
-                            if (character != null) AddCustomer(character.characterId, character.displayName, character.worldSprite != null);
+                            if (character != null)
+                                AddCustomer(character.characterId, character.displayName,
+                                    runtime.seating != null && runtime.seating.CanPresentCustomer(character.characterId) || character.worldSprite != null);
                 }
                 if (count == 0)
                 {

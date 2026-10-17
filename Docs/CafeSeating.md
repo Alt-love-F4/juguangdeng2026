@@ -37,14 +37,18 @@
 
 ## 角色
 
-用户提供的坐姿图保留原有绘制，去白底、裁切后保存为 `Assets/Art/FreeCafe/Seating/customer_seated.png`，包括手杖，不包含椅子。未指定剧情角色身份，故首个普通顾客暂名“佩杖绅士”，使用独立普通客人身份，不冒用 NCS 角色；显式注入的顾客身份源仍优先。可关闭 `useSuppliedGuestForFirstSeat`，或在 `characterArt` 为已经确认身份的角色配置专用坐姿图；其他角色仍使用原有占位资源。正式 NCS 来访仍按既有调度与专属素材优先级处理。
+`Assets/Art/Gameplay/坐姿 (1).prefab` 导出的具名角色已接入 `FreeCafeSeating.characterArt`：埃利昂（elion）、阿利耶诺尔（alienor）、蒂博（thibaut）、阿黛尔（adele）、勒苏（lesou）、贝特朗（bertrand）、安托万（antoine）。游戏资源位于 `Assets/Art/FreeCafe/Seating/Characters/`，保留原绘制和 PSD 中的共同坐姿对齐点，以 100 PPU 的独立透明 Sprite 接到现有椅子锚点。埃利昂图下方远离人物的独立杯碟未带入角色。
+
+未配置专用坐姿时统一使用同一 PSD 的黑影（`silhouetteCustomer`），不再显示旧的彩色占位人物。显示优先级是角色专用坐姿、剧情显式指定的专用坐姿、默认黑影。普通来客、剧情来访和 GM 均不按是否有正式坐姿限制到店；普通来客仍沿用既有 `cafe_customer` 名单和到店调度。GM 可召唤原角色目录中的所有角色，没有坐姿或世界图片也可使用黑影。角色身份、名字和订单与黑影外观独立。
+
+最初用户提供的 `customer_seated.png` 仍保留给 GM“佩杖绅士”与素材预览，默认不再强制替换第一桌客人（`useSuppliedGuestForFirstSeat=false`）。后续为 `characterArt` 的某个角色绑定专用坐姿即可替换该角色的黑影。配置素材不会重建或移动场景中的椅子。
 
 ## 验收
 
 - GM 面板（`~`）→「时间与顾客」→「召唤指定顾客…」：按姓名或角色 ID 搜索并点击召唤，列表首项提供“佩杖绅士”新坐姿素材。点击“召唤位置”在自动分配和已开放座位间切换，显示桌号、左右侧和当前客人。“允许重复召唤”默认开启，每个副本有独立人物实例和订单；“挤掉指定位置原客人”开启后，清理该位置旧客人、订单和已占用/专属预留的剧情来访；剧情来访通过既有离店反馈结束，普通客人替换不计订单失败。替换复用该座位的到店预算，连续换人不会耗尽客流。仍需先营业，不自动开业；召唤本身不创建剧情预约。复用原有桌椅镜像、缩放和经营存档。
 
-- 正常打开 CoffeeShop 点击 Play，再点击“启动营业”，第一桌普通顾客使用新素材。
+- 正常打开 CoffeeShop 点击 Play，再点击“启动营业”，已配角色显示正式坐姿，未配角色显示黑影。GM 可按角色 ID 召唤并指定位置验收两种外观。
 - 菜单 `Tools > Free Cafe > Preview Supplied Seated Customer`：在同一场景生成一个独立验收顾客，复用黑咖啡教程订单；退出 Play 即清除，不触发 NCS、不自动写档。已开业时不会强行清场。
 - 菜单 `Tools > Free Cafe > Apply Cafe Seating Art`：保存当前场景后重建同一场景的桌椅节点。会先备份 CoffeeShop 到 `output/seating-backup/`；不要用此菜单覆盖已手动精调的桌椅参数。
 
-本次只做 Unity 编译和一次共享 CoffeeShop 画面检查，未运行全量测试或剧情演出回归。
+本轮完成运行层与 Editor 编译，核对 Unity 中七个正式坐姿的实际 Sprite 引用、默认黑影回退和未配坐姿角色的召唤结果；Console 无 Error。未运行全量测试或剧情演出回归。

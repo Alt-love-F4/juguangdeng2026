@@ -14,7 +14,7 @@ namespace Spotlight.FreeCafe
             catalog.Validate();
             catalogFallback = catalog.Find("guest_a");
             foreach (var profile in catalog.Characters)
-                if (profile.cafeCustomer && profile.worldSprite != null) profiles.Add(profile);
+                if (profile.cafeCustomer) profiles.Add(profile);
         }
         public CafePersonIdentity CreateIdentity(string visitId, int seatIndex)
             => CreateIdentity(visitId, seatIndex, new System.Collections.Generic.HashSet<string>());
