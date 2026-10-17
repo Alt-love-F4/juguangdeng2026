@@ -45,7 +45,7 @@
 - [x] Task 25: Validate `PresentationIndex`, visuals resources, reading resources, portrait bindings, effect presets, and fallback behavior for every configured presentation.
 - [x] Task 26: Validate the `scene.cafe` real-scene convention, explicit special cafe image keys, and restoration to `scene.cafe` after special composite shots.
 - [x] Task 27: Validate that the first-, second-, and third-floor operating base images are not used as dialogue backgrounds or `DialogueVisualsAsset.background` textures.
-- [ ] Task 28: Validate inline ability checks, branch checks, and unknown dependency fallback behavior; unknown values must hide or block safely with diagnostics rather than inventing success.
+- [x] Task 28: Validate inline ability checks, branch checks, and unknown dependency fallback behavior; unknown values must hide or block safely with diagnostics rather than inventing success.
 - [ ] Task 29: Validate that formal results, relationship/bar changes, money changes, production facts, and completion flags are written only from authoritative configured results.
 - [ ] Task 30: Validate incomplete, blocked, or partial source content remains isolated from formal completion and does not gain a fabricated ending or trigger.
 - [ ] Task 31: Recheck the Revolution trigger guard after any generation or configuration change and prove the disabled `T_CAL_D60` state is preserved.

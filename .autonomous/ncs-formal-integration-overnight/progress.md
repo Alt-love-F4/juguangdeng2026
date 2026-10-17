@@ -663,3 +663,26 @@
 ### Current Status
 - Total Tasks: 95
 - Completed: 27/95 (28%)
+## Session 12 (Executor) - Task 28 continuation - 2026-10-18
+
+### Accomplished
+- Completed Task 28: added `inline-condition-fail-closed-validation-2026-10-18.md`.
+- Audited the generated condition inventory: 42 conditional pages with 32 `choice:`, 3 `anyChoice:`, 5 `check:`, 2 `dependency:`, and 4 plain condition usages; all authored choice/check references resolve.
+- Confirmed the generated ability-check table has 9 inline checks with no branch events and 2 existing branch-mode checks. The validator rejects inline checks used as branch events, SetupParams checks, or both Choice and PassiveCheck consumers.
+- Verified controller behavior: unevaluated checks and unknown plain conditions throw; known dependencies follow the existing condition; unknown dependencies return false with a diagnostic and hide only the dependent page.
+- Ran the focused inline/dependency selection: 4/4 passed. Ran the full `Spotlight.Narrative.Core.Tests`: 195/195 passed, 0 failed, 0 skipped.
+- Inspected expected negative-test diagnostics and cleared the Unity console afterward.
+
+### Issues Encountered
+- None in the condition contract. The full suite emits expected warning/error diagnostics for negative tests; these were not failures and were cleared after inspection.
+
+### Notes
+- No source workbook, generated JSON, runtime code, scene, save slot, or result configuration was changed by this task.
+- Unknown dependency fallback is intentionally fail-closed. This is static/controller evidence, not real-map acceptance evidence.
+
+### Next Session Should
+- Continue with Task 29: validate that formal results, relationship/bar changes, money changes, production facts, and completion flags are written only from authoritative configured results.
+
+### Current Status
+- Total Tasks: 95
+- Completed: 28/95 (29%)
