@@ -21,6 +21,34 @@ namespace Spotlight.Narrative.Tests
         }
 
         [Test]
+        public void TutorialSpokenLinesArePlayerDialogueNotProductionDirections()
+        {
+            var config = LubanNarrativeLoader.Load();
+            var texts = config.texts.ToDictionary(text => text.key, text => text.content ?? "");
+            var lines = config.openingLines.Where(line => line.presentationId.StartsWith("cafe_tutorial.")).ToArray();
+            foreach (var line in lines)
+            {
+                string text = texts[line.textKey];
+                Assert.That(text, Does.Not.Contain("演出说明"), line.textKey);
+                Assert.That(text, Does.Not.Contain("配料表"), line.textKey);
+                Assert.That(text, Does.Not.Contain("老太太"), line.textKey);
+                Assert.That(text, Does.Not.Contain("太太"), line.textKey);
+                Assert.That(text, Does.Not.Contain("→"), line.textKey);
+                if (line.speaker == "right")
+                {
+                    Assert.That(text, Does.Not.Match(@"[\[\]#]|鼠标|左键|右键|高亮"), line.textKey);
+                    Assert.That(text.Length, Is.LessThan(110), "Adele introduces the goal; workstation hints own detailed controls: " + line.textKey);
+                }
+            }
+            Assert.That(texts["cafe.tutorial.customer_arrives.01"], Does.Contain("男人"));
+            Assert.That(texts["cafe.tutorial.order_confirmed.02"], Does.Contain("大杯").And.Contain("不加糖"));
+            Assert.That(texts["cafe.tutorial.make_coffee_base.02"], Does.Contain("研磨").And.Contain("装入杯中"));
+            Assert.That(config.texts.Any(text => text.key.StartsWith("cafe.tutorial.source.")
+                && text.content != null && text.content.Contains("演出说明")), Is.True, "Keep the manuscript archive, but do not play it.");
+            Assert.That(lines.Any(line => line.textKey.StartsWith("cafe.tutorial.source.")), Is.False);
+        }
+
+        [Test]
         public void TutorialSessionAcceptsOnlyCurrentWorkstationSignalOnce()
         {
             var session = new CafeTutorialSession();

@@ -45,6 +45,16 @@ namespace Spotlight.GameFlow.Tests
             Assert.That(prefab.GetComponent<OpeningProloguePanel>().BeatCount, Is.EqualTo(8));
         }
 
+        [Test]
+        public void EveryBeatExceptTheFinalLineEndsOnComicPanels()
+        {
+            OpeningProloguePanel prefab = Resources.Load<GameObject>("Art/UIPrefab/OpeningProloguePanel").GetComponent<OpeningProloguePanel>();
+            for (int i = 0; i < prefab.BeatCount - 1; i++)
+                Assert.That(prefab.BeatHasArt(i), Is.True, $"Beat {i + 1} should end on a comic panel.");
+            Assert.That(prefab.BeatHasArt(prefab.BeatCount - 1), Is.False, "The final line has no art.");
+            Assert.That(prefab.GetComponentsInChildren<ProloguePanelArt>(true).Length, Is.EqualTo(14));
+        }
+
         [UnityTest]
         public IEnumerator NormalPlaybackRequiresOneAdvancePerBeatAndCompletesOnce()
         {
@@ -52,9 +62,9 @@ namespace Spotlight.GameFlow.Tests
             SetTiming(panel, .01f, .01f, 0f);
             int completions = 0;
             panel.Play(() => completions++);
-            yield return WaitFor(() => panel.CanAdvance);
             for (int i = 0; i < 8; i++)
             {
+                yield return RevealCurrentBeat(panel);
                 int before = panel.CurrentBeatIndex;
                 panel.Continue();
                 Assert.That(completions, Is.Zero);
@@ -62,13 +72,35 @@ namespace Spotlight.GameFlow.Tests
                 {
                     yield return WaitFor(() => panel.CurrentBeatIndex > before || !panel.IsPlaying);
                     Assert.That(completions, Is.Zero);
-                    yield return WaitFor(() => panel.CanAdvance);
                 }
             }
             yield return WaitFor(() => !panel.IsPlaying);
             panel.Continue();
             panel.Skip();
             Assert.That(completions, Is.EqualTo(1));
+        }
+
+        [UnityTest]
+        public IEnumerator FirstInputCompletesRevealAndOnlyNextInputAdvances()
+        {
+            OpeningProloguePanel panel = Open();
+            SetTiming(panel, .01f, .01f, 0f);
+            panel.Play(() => { });
+            yield return null;
+            Assert.That(panel.IsRevealing, Is.True, "Beat 1 starts by revealing text and art.");
+            CanvasGroup beatArt = BeatArt(panel, 0);
+            panel.Continue();
+            yield return WaitFor(() => panel.CanAdvance);
+            Assert.That(panel.CurrentBeatIndex, Is.Zero, "Completing the reveal must not turn the page.");
+            Assert.That(beatArt.gameObject.activeSelf, Is.True);
+            foreach (ProloguePanelArt art in beatArt.GetComponentsInChildren<ProloguePanelArt>())
+                Assert.That(art.GetComponent<CanvasGroup>().alpha, Is.EqualTo(1f).Within(.001f), art.name + " fully shown after reveal.");
+            panel.Continue();
+            yield return WaitFor(() => panel.CurrentBeatIndex == 1);
+            Assert.That(beatArt.gameObject.activeSelf, Is.False, "Previous beat art is cleared on page turn.");
+            Assert.That(BeatArt(panel, 1).gameObject.activeSelf, Is.True);
+            panel.Skip();
+            Assert.That(BeatArt(panel, 1).gameObject.activeSelf, Is.False, "Skip hides every panel.");
         }
 
         [UnityTest]
@@ -98,7 +130,7 @@ namespace Spotlight.GameFlow.Tests
             Time.timeScale = 0f;
             int completions = 0;
             panel.Play(() => completions++);
-            yield return WaitFor(() => panel.CanAdvance);
+            yield return RevealCurrentBeat(panel);
             Assert.That(Time.timeScale, Is.Zero);
             panel.Continue();
             Assert.That(completions, Is.Zero);
@@ -133,6 +165,20 @@ namespace Spotlight.GameFlow.Tests
             type.GetField("defaultFadeInSeconds", BindingFlags.NonPublic | BindingFlags.Instance).SetValue(panel, fadeIn);
             type.GetField("defaultFadeOutSeconds", BindingFlags.NonPublic | BindingFlags.Instance).SetValue(panel, fadeOut);
             type.GetField("finalBlackHoldSeconds", BindingFlags.NonPublic | BindingFlags.Instance).SetValue(panel, hold);
+        }
+
+        private static IEnumerator RevealCurrentBeat(OpeningProloguePanel panel)
+        {
+            yield return WaitFor(() => panel.IsRevealing || panel.CanAdvance || !panel.IsPlaying);
+            if (panel.IsRevealing) panel.Continue();
+            yield return WaitFor(() => panel.CanAdvance || !panel.IsPlaying);
+            yield return null; // Continue ignores a second press in the frame that fast-forwarded.
+        }
+
+        private static CanvasGroup BeatArt(OpeningProloguePanel panel, int index)
+        {
+            var beats = (OpeningProloguePanel.Beat[])typeof(OpeningProloguePanel).GetField("beats", BindingFlags.NonPublic | BindingFlags.Instance).GetValue(panel);
+            return beats[index].art;
         }
 
         private static IEnumerator WaitFor(Func<bool> condition)

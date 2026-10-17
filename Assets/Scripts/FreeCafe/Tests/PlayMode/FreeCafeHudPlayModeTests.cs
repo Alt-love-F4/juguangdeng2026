@@ -143,8 +143,7 @@ namespace Spotlight.FreeCafe.Tests
             ClickHudButton(production.orderRecipe);
             yield return null;
             Assert.That(production.IsModalOpen,Is.True);
-            production.closeBook.onClick.Invoke();
-            yield return null;
+            yield return CloseBook(Compendium(production.bookPanel));
             yield return new WaitForEndOfFrame();
             var screenshot=ScreenCapture.CaptureScreenshotAsTexture();
             var directory=System.IO.Path.Combine(Application.dataPath,"../Logs/GameplayHud");
@@ -367,6 +366,26 @@ namespace Spotlight.FreeCafe.Tests
             Assert.That(production.saveButton==null || !production.saveButton.gameObject.activeInHierarchy,Is.True);
             Assert.That(production.productionRoot.GetComponentsInChildren<Canvas>().Length,Is.EqualTo(0));
         }
+        private static CoffeeCompendiumPanel Compendium(GameObject panel) => panel == null ? null : panel.GetComponent<CoffeeCompendiumPanel>();
+        private static IEnumerator WaitForBook(CoffeeCompendiumPanel book)
+        {
+            float deadline = Time.realtimeSinceStartup + 5f;
+            while (book.IsAnimating && Time.realtimeSinceStartup < deadline) yield return null;
+            yield return null;
+        }
+        private static string BookText(CoffeeCompendiumPanel book)
+        {
+            var text = new System.Text.StringBuilder();
+            foreach (var label in book.GetComponentsInChildren<TMP_Text>()) text.AppendLine(label.text);
+            return text.ToString();
+        }
+        private static IEnumerator CloseBook(CoffeeCompendiumPanel book)
+        {
+            book.closeButton.onClick.Invoke();
+            float deadline = Time.realtimeSinceStartup + 5f;
+            while (book.IsOpen && Time.realtimeSinceStartup < deadline) yield return null;
+            Assert.That(book.IsOpen, Is.False);
+        }
         [UnityTest] public IEnumerator BothCoffeeBooksUseLatteArtRecipeTermsWhilePreservingRawIngredientLabels()
         {
             var world=app.World;
@@ -376,17 +395,20 @@ namespace Spotlight.FreeCafe.Tests
             world.State.unlockedProducts.Clear();world.State.unlockedProducts.Add(product.id);
             string before=JsonUtility.ToJson(world.Catalog);
             app.Enter(AreaId.Counter);yield return null;
-            var production=app.GetComponent<FreeCafeProductionHud>();production.bookButton.onClick.Invoke();yield return null;
-            Assert.That(production.bookTitle.text,Does.Contain("拉花饮品"));
-            Assert.That(production.bookBody.text,Does.Contain("精粹咖啡与拉花").And.Contain("拉花  20 ml").And.Not.Contain("奶泡").And.Not.Contain("奶沫"));
-            production.closeBook.onClick.Invoke();
+            var production=app.GetComponent<FreeCafeProductionHud>();production.bookButton.onClick.Invoke();
+            var book=Compendium(production.bookPanel);yield return WaitForBook(book);
+            book.ShowRecipe(System.Linq.Enumerable.ToList(book.ProductOrder).IndexOf(product.id));yield return WaitForBook(book);
+            string text=BookText(book);
+            Assert.That(text,Does.Contain("拉花饮品"));
+            Assert.That(text,Does.Contain("拉花").And.Contain("20 ml").And.Not.Contain("奶泡").And.Not.Contain("奶沫"));
+            yield return CloseBook(book);
             app.Enter(AreaId.Cafe);yield return null;
-            OpenPlayerCoffeeBook();yield return null;
-            Assert.That(hud.recipeTitle.text,Does.Contain("拉花饮品"));
-            Assert.That(hud.recipeBody.text,Does.Contain("配方种类：拉花").And.Not.Contain("奶泡").And.Not.Contain("奶沫"));
+            OpenPlayerCoffeeBook();
+            var lobbyBook=Compendium(hud.recipePanel);yield return WaitForBook(lobbyBook);
+            Assert.That(BookText(lobbyBook),Does.Contain("拉花饮品").And.Not.Contain("奶泡").And.Not.Contain("奶沫"));
             Assert.That(world.IngredientLabel(product.ingredients[0]),Does.Match("奶泡|奶沫"));
             Assert.That(JsonUtility.ToJson(world.Catalog),Is.EqualTo(before),"Recipe terminology must not rename authoritative ingredient data");
-            hud.recipeCloseButton.onClick.Invoke();
+            yield return CloseBook(lobbyBook);
         }
 
         [UnityTest] public IEnumerator CoffeeBookBlocksEntityInputAndClosingRestoresIt()
@@ -396,54 +418,52 @@ namespace Spotlight.FreeCafe.Tests
             Assert.That(app.InputBlocked,Is.True);Assert.That(production.bookPanel.activeSelf,Is.True);
             var beans=app.World.Find("s.beans");int stock=beans.stock;
             app.Click(app.View(beans.id));Assert.That(beans.stock,Is.EqualTo(stock));
-            production.closeBook.onClick.Invoke();yield return null;
+            yield return CloseBook(Compendium(production.bookPanel));
             Assert.That(app.InputBlocked,Is.False);
             app.Enter(AreaId.Cafe);yield return null;
             OpenPlayerCoffeeBook();yield return null;Assert.That(app.InputBlocked,Is.True);
-            hud.recipeCloseButton.onClick.Invoke();yield return null;Assert.That(app.InputBlocked,Is.False);
+            yield return CloseBook(Compendium(hud.recipePanel));Assert.That(app.InputBlocked,Is.False);
         }
 
-        [UnityTest] public IEnumerator CoffeeBooksKeepPsdLayersAndUseOnlyUguiAndTmp()
+        [UnityTest] public IEnumerator CoffeeCompendiumReplacesTheOldBookAndUsesOnlyUguiAndTmp()
         {
             app.Enter(AreaId.Counter);yield return null;
             var production=app.GetComponent<FreeCafeProductionHud>();
-            var view=production.bookPanel.GetComponent<CoffeeBookPanelView>();
-            Assert.That(view,Is.Not.Null);
-            Assert.That(production.bookPanel.GetComponentsInChildren<SpriteRenderer>(true),Is.Empty);
-            Assert.That(production.bookPanel.GetComponentsInChildren<UnityEngine.UI.Text>(true),Is.Empty);
-            Assert.That(production.bookPanel.GetComponentsInChildren<Canvas>(true),Is.Empty);
-            foreach(string name in new[]{"图层 1","图层 5","进度条蒙版","进度条","标题底图","选中标","选项底图","咖啡icon","图层 8","精粹咖啡"})
-                Assert.That(view.artRoot.Find(name),Is.Not.Null,name);
-            Assert.That(view.artRoot.Find("精粹咖啡").GetComponent<Image>().enabled,Is.False,"Rasterized PSD text must be replaced by TMP");
-            Assert.That(view.title,Is.TypeOf<TextMeshProUGUI>());
-            Assert.That(view.bodyScroll.content,Is.EqualTo(view.body.rectTransform));
-            Assert.That(hud.recipePanel.GetComponent<CoffeeBookPanelView>(),Is.Not.Null);
+            foreach(var panel in new[]{production.bookPanel,hud.recipePanel})
+            {
+                Assert.That(Compendium(panel),Is.Not.Null,panel.name);
+                Assert.That(panel.GetComponent<CoffeeBookPanelView>(),Is.Null,"The PSD coffee book is no longer used in CoffeeShop.");
+                Assert.That(panel.GetComponentsInChildren<SpriteRenderer>(true),Is.Empty);
+                Assert.That(panel.GetComponentsInChildren<UnityEngine.UI.Text>(true),Is.Empty);
+                Assert.That(panel.GetComponentsInChildren<Canvas>(true),Is.Empty);
+            }
+            Assert.That(Object.FindObjectsByType<CoffeeBookPanelView>(FindObjectsInactive.Include,FindObjectsSortMode.None),Is.Empty);
         }
 
-        [UnityTest] public IEnumerator CoffeeBookSidebarChangesRecipeAndEmptyListClearsSelection()
+        [UnityTest] public IEnumerator CoffeeBookListsEveryRecipeAndMarksLockedOnes()
         {
             var world=app.World;
             Assert.That(world.Catalog.products.Length,Is.GreaterThan(1));
             world.State.unlockedProducts.Clear();
             world.State.unlockedProducts.Add(world.Catalog.products[0].id);
-            world.State.unlockedProducts.Add(world.Catalog.products[1].id);
             app.Enter(AreaId.Counter);yield return null;
             var production=app.GetComponent<FreeCafeProductionHud>();
-            production.bookButton.onClick.Invoke();yield return null;
-            var view=production.bookPanel.GetComponent<CoffeeBookPanelView>();
-            view.entries[1].onClick.Invoke();yield return null;
-            Assert.That(view.title.text,Is.EqualTo(FreeCafeProductionText.Recipe(world.Catalog.products[1].label)));
-            Assert.That(view.page.text,Is.EqualTo("02 / 02"));
-            production.closeBook.onClick.Invoke();
-            world.State.unlockedProducts.Clear();
-            production.bookButton.onClick.Invoke();yield return null;
-            Assert.That(view.body.text,Does.Contain("尚未学会咖啡"));
-            Assert.That(view.marker.gameObject.activeSelf,Is.False);
-            Assert.That(view.previous.interactable,Is.False);
-            Assert.That(view.next.interactable,Is.False);
-            foreach(var entry in view.entries) Assert.That(entry.interactable,Is.False);
-            production.closeBook.onClick.Invoke();
+            production.bookButton.onClick.Invoke();
+            var book=Compendium(production.bookPanel);yield return WaitForBook(book);
+            Assert.That(book.CurrentTab,Is.EqualTo(CoffeeCompendiumPanel.Tab.Recipes));
+            Assert.That(book.RecipeIndex,Is.EqualTo(-1),"Opening without an order shows the table of contents.");
+            Assert.That(book.ProductOrder.Count,Is.EqualTo(world.Catalog.products.Length));
+            string contents=BookText(book);
+            foreach(var product in world.Catalog.products) Assert.That(contents,Does.Contain(FreeCafeProductionText.Recipe(product.label)),product.id);
+            Assert.That(contents,Does.Contain("已掌握").And.Contain("未解锁"));
+            var locked=System.Array.Find(world.Catalog.products,product=>product.id!=world.Catalog.products[0].id);
+            book.ShowRecipe(System.Linq.Enumerable.ToList(book.ProductOrder).IndexOf(locked.id));yield return WaitForBook(book);
+            Assert.That(BookText(book),Does.Contain("尚未解锁").And.Contain("制作方式"));
+            book.ShowContents();yield return WaitForBook(book);
+            Assert.That(book.RecipeIndex,Is.EqualTo(-1));
+            yield return CloseBook(book);
         }
+
         [UnityTest] public IEnumerator GmActionsWorkWhileUnderlyingWorldInputIsBlocked()
         {
             var gm=FreeCafeGMPanel.Instance;gm.SetVisible(true);gm.SelectCategory("经营流程");yield return null;

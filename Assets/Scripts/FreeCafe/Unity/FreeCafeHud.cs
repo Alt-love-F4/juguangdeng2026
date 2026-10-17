@@ -289,10 +289,17 @@ namespace Spotlight.FreeCafe
         private void ToggleRecipeTips()
         {
             if(recipePanel==null || runtime==null || (runtime.InputBlocked && !IsModalOpen)) return;
+            var compendium=recipePanel.GetComponent<CoffeeCompendiumPanel>();
+            if(compendium!=null) { if(compendium.IsOpen) compendium.Close(); else compendium.Open(runtime); return; }
             runtime.CancelDrag(); recipePanel.SetActive(!recipePanel.activeSelf);
             if(recipePanel.activeSelf) RefreshRecipeTips();
         }
-        public void CloseRecipeTips() { if(recipePanel!=null) recipePanel.SetActive(false); }
+        public void CloseRecipeTips()
+        {
+            if(recipePanel==null) return;
+            var compendium=recipePanel.GetComponent<CoffeeCompendiumPanel>();
+            if(compendium!=null) compendium.CloseImmediate(); else recipePanel.SetActive(false);
+        }
         private void PreviousRecipe() => SelectRecipe(recipeIndex - 1);
         private void NextRecipe() => SelectRecipe(recipeIndex + 1);
         private void SelectRecipe(int index)
@@ -307,6 +314,7 @@ namespace Spotlight.FreeCafe
         }
         private void RefreshRecipeTips()
         {
+            if(recipePanel!=null && recipePanel.GetComponent<CoffeeCompendiumPanel>()!=null) return; // 咖啡宝典自行刷新
             if(runtime==null || runtime.World==null) return;
             if(bookView != null && runtime.World.ProductionEnabled)
             {
@@ -460,7 +468,7 @@ namespace Spotlight.FreeCafe
                 var character=customer!=null && customer.person!=null ? runtime.Character(customer.person.characterId) : null;
                 SetOrderAvatar(index,character?.avatar);
                 string status=request.id==CafeWorld.TutorialOrderId ? "教程订单 · 尚未营业" : name+"  ·  "+request.patience.ToString("0")+" 秒";
-                string recipe=(request.id==state.focusedRequestId ? "● " : "")+status+"\n"+FreeCafeProductionText.Recipe(product.label)+"  /  "+product.price+" 王国币";
+                string recipe=(request.id==state.focusedRequestId ? "● " : "")+status+"\n"+FreeCafeProductionText.Recipe(product.label)+" · "+runtime.World.Spec(runtime.World.RequiredCupSpecId(request)).label+"  /  "+product.price+" 王国币";
                 if(label!=null) label.text=recipe;
                 if(button!=null) { button.interactable=!runtime.InputBlocked; SetTicket(button,request.id==state.focusedRequestId); }
             }
@@ -468,7 +476,7 @@ namespace Spotlight.FreeCafe
             if(mapButton!=null) mapButton.interactable=Flow != null && Flow.CanOpenMap;
             if(recipeButton!=null) recipeButton.interactable=!runtime.InputBlocked || IsModalOpen;
 
-            if(recipePanel!=null && recipePanel.activeSelf) RefreshRecipeTips();
+            if(recipePanel!=null && recipePanel.activeSelf && recipePanel.GetComponent<CoffeeCompendiumPanel>()==null) RefreshRecipeTips();
         }
         private void SetTicket(Button button,bool focused)
         {

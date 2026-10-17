@@ -219,6 +219,35 @@ namespace Spotlight.FreeCafe.Tests
             Physics2D.SyncTransforms(); app.MoveDrag(pointer); yield return null;
             Assert.That(app.CurrentPourTargetId, Is.EqualTo(target), source + " should be over the actual receiver");
         }
+        [UnityTest] public IEnumerator TutorialExplainsPurposeAndNamedControlsBeforeVisualHints()
+        {
+            Assert.That(app.WorkstationTutorial.Begin(false), Is.True);
+            yield return null;
+            var panel = Object.FindFirstObjectByType<FreeCafeTutorialPanel>();
+            Assert.That(panel.heading.text, Does.Contain("放入咖啡豆"));
+            Assert.That(panel.instruction.text, Does.Contain("磨成粉").And.Contain("按住鼠标左键").And.Contain("研磨机").And.Contain("松开"));
+            Assert.That(panel.gestureText.text, Does.Contain("咖啡豆袋").And.Contain("研磨机"));
+            Assert.That(app.WorkstationTutorial.AllowDrag("s.water"), Is.False);
+            yield return null;
+            Assert.That(panel.errorText.text, Does.Contain("咖啡豆袋"));
+            SetTutorialStage(FreeCafeWorkstationTutorial.Stage.Grounds); yield return null;
+            Assert.That(panel.instruction.text, Does.Contain("咖啡粉").And.Contain("煮咖啡").And.Contain("研磨机抽屉"));
+            SetTutorialStage(FreeCafeWorkstationTutorial.Stage.Water); yield return null;
+            Assert.That(panel.instruction.text, Does.Contain("清水").And.Contain("加热").And.Contain("第 1 步").And.Contain("先别松开左键"));
+            Assert.That(panel.instruction.text, Does.Not.Contain("高亮").And.Not.Contain("光效"));
+            Assert.That(panel.rotationArrow.activeSelf, Is.False);
+            SetTutorialStage(FreeCafeWorkstationTutorial.Stage.Heat); yield return null;
+            Assert.That(panel.instruction.text, Does.Contain("煮成黑咖啡").And.Contain("不需要连续点击"));
+            SetTutorialStage(FreeCafeWorkstationTutorial.Stage.TakeCup); yield return null;
+            Assert.That(panel.instruction.text, Does.Contain("接咖啡").And.Contain("空杯").And.Contain("桌面空处"));
+            SetTutorialStage(FreeCafeWorkstationTutorial.Stage.DeliverCup);
+            // Render this hint directly: an unprepared fixture has no cup and would auto-advance.
+            typeof(FreeCafeWorkstationTutorial).GetMethod("DrawGuide", BindingFlags.Instance | BindingFlags.NonPublic)
+                .Invoke(app.WorkstationTutorial, null);
+            Assert.That(panel.instruction.text, Does.Contain("交给客人").And.Contain("盘子").And.Contain("松开左键"));
+            SetTutorialStage(FreeCafeWorkstationTutorial.Stage.SubmitCup); yield return null;
+            Assert.That(panel.instruction.text, Does.Contain("按铃").And.Contain("完成交付"));
+        }
         [UnityTest] public IEnumerator MisplacedRightClickCanReturnWaterAndRetryThroughTheHeatStep()
         {
             UseTutorialMouse();

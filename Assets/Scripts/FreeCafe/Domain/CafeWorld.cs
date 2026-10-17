@@ -285,7 +285,7 @@ namespace Spotlight.FreeCafe
         }
 
         /// <summary>是否被设备占用（ownerId 非空表示材料正锁在设备里，不能搬动）。</summary>
-        public bool Locked(WorldEntity item) => item != null && (!string.IsNullOrEmpty(item.ownerId) || MiniGameUses(item));
+        public bool Locked(WorldEntity item) => item != null && (!IsEquipmentAvailable(item) || !string.IsNullOrEmpty(item.ownerId) || MiniGameUses(item));
 
         /// <summary>从来源（豆仓、牛奶柜等）取出一件物品放到指定位置。</summary>
         public ActionResult Take(string sourceId, AreaId area, float x, float y, out WorldEntity item)
@@ -500,7 +500,7 @@ namespace Spotlight.FreeCafe
                 // 交付前先告诉玩家配方是否正确，失败会有扣款
                 var product = Product(request.productId);
                 return ActionResult.Yes("确认上餐：" + product.label
-                    + (Matches(item, product) ? " · 配方正确" : " · 配方不符，交付会失败并扣款"));
+                    + (MatchesOrder(item, request) ? " · 配方正确" : " · 配方不符，交付会失败并扣款"));
             }
 
             return ActionResult.No("不支持这种操作；Shift 只摆放");
@@ -555,7 +555,7 @@ namespace Spotlight.FreeCafe
                     return ActionResult.Yes("壶中内容已丢弃，空壶已归位");
                 }
                 Charge(Catalog.economy.wastePenalty);
-                State.entities.Remove(item);
+                RemoveCupAndRefundStock(item);
                 Notify();
                 return ActionResult.Yes("已丢弃 " + Spec(item.specId).label + "，扣除 " + Catalog.economy.wastePenalty + " 金币");
             }

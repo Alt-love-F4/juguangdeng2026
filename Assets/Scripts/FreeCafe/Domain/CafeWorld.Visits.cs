@@ -143,14 +143,14 @@ namespace Spotlight.FreeCafe
                 int slot = duplicate ? -1 : AvailableSeat(v);
                 if (slot < 0) { if (duplicate) VisitDiagnostic(v, "character_already_present"); EmitVisit(v, "waiting"); continue; }
                 var eligible = new List<ProductSpec>();
-                foreach (var p in Catalog.products) if (State.unlockedProducts.Contains(p.id)) eligible.Add(p);
+                foreach (var p in Catalog.products) if (State.unlockedProducts.Contains(p.id) && CanOfferProduct(p)) eligible.Add(p);
                 if (eligible.Count == 0) continue;
                 var product = eligible[State.requestSequence++ % eligible.Count];
                 v.seatId = v.customerId = "customer_" + slot;
                 var customer = new WorldEntity { id = v.customerId, specId = "customer", area = AreaId.Cafe, person = v.identity };
                 PlaceCustomerAtSeat(customer, slot, string.IsNullOrEmpty(v.preferredSeatId));
                 State.entities.Add(customer);
-                var request = new CustomerRequest { id = Allocate("order_"), customerId = v.customerId, productId = product.id, patience = v.patienceRemaining };
+                var request = new CustomerRequest { id = Allocate("order_"), customerId = v.customerId, productId = product.id, cupSpecId = NextRandom() % 2 == 0 ? "cup.small" : "cup.large", patience = v.patienceRemaining };
                 if (State.automaticOrders && NextRandom() % 100 < (uint)(Catalog.economy.autoChance * 100)) request.automaticRemaining = Catalog.economy.autoSeconds;
                 State.requests.Add(request);
                 State.todayArrivals++;

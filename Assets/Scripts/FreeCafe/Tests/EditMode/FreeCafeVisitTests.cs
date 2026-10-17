@@ -35,7 +35,7 @@ namespace Spotlight.FreeCafe.Tests
         private WorldEntity CorrectCup(CustomerRequest order)
         {
             var product = world.Product(order.productId);
-            var cup = new WorldEntity { id = "free_999", specId = product.cupSpecId, area = AreaId.Counter, latteArt = true };
+            var cup = new WorldEntity { id = "free_999", specId = world.RequiredCupSpecId(order), area = AreaId.Counter, latteArt = true };
             foreach (var ingredient in product.ingredients) cup.contents.Add(new Portion { specId = ingredient.specId, units = ingredient.units });
             world.State.entities.Add(cup);
             return cup;
@@ -188,14 +188,19 @@ namespace Spotlight.FreeCafe.Tests
             Sync(Intent()); world.StartDay(); world.EnableProduction(); world.EnterProduction();
             var order = Order(); world.Focus(order.id); var product = world.Product(order.productId);
             product.minimumScore = 101; product.maxRemakes = 1;
-            world.SelectServingCup("s.cups.small");
+            world.SelectServingCup(world.RequiredCupSpecId(order) == "cup.small" ? "s.cups.small" : "s.cups.large");
             Assert.That(world.DeliverProductionCup().success, Is.True);
             Assert.That(Order(), Is.SameAs(order)); Assert.That(order.remakes, Is.EqualTo(1));
             Assert.That(world.CafeVisit("v1").status, Is.EqualTo(CafeVisitStatus.SeatedBeforeServe));
             Assert.That(world.State.cafeVisitFeedback.Any(f => f.stage == "served"), Is.False);
             product.minimumScore = 0; product.requiresLatteArt = false;
-            world.SelectServingCup("s.cups.small");
-            Assert.That(world.DeliverProductionCup().success, Is.True);
+            world.SelectServingCup(world.RequiredCupSpecId(order) == "cup.small" ? "s.cups.small" : "s.cups.large");
+            var cup = world.ServingCup;
+            foreach (var amount in product.evaluation.amounts)
+                cup.contents.Add(new Portion { specId = amount.ingredientId, coffeeKind = amount.coffeeKind, units = 1,
+                    milliliters = amount.idealMl * world.OrderPortionScale(order), grams = amount.idealGrams * world.OrderPortionScale(order),
+                    temperatureCelsius = amount.coffeeKind == "cold_brew" ? 22 : 95, productionScore = 100 });
+            Assert.That(world.DeliverProductionCup().feedback, Is.EqualTo(CafeFeedbackKind.DeliverySatisfied));
             Assert.That(Order(), Is.Null); Assert.That(world.CafeVisit("v1").status, Is.EqualTo(CafeVisitStatus.Served));
         }
         [Test] public void AutomaticDeliveryUsesSameServedHandoff()

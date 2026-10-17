@@ -40,6 +40,9 @@ namespace Spotlight.FreeCafe
         public FreeEntityView DraggedView => draggedView;
         public bool IsDraggingOutputFrom(string entityId) => draggedView != null && dragMachineId == entityId;
         public FreeCafeWorkstationTutorial WorkstationTutorial { get; private set; }
+        public bool IsSandboxMode { get; private set; }
+        private FreeCafeEquipmentPanel equipmentPanel;
+        private bool pendingDailyCupRefresh = true;
         public bool PracticeTutorialActive => WorkstationTutorial != null && WorkstationTutorial.IsRunning;
         private CafeTutorialSession cafeTutorial;
         private bool pendingTutorialCoffee;
@@ -68,7 +71,7 @@ namespace Spotlight.FreeCafe
         public float pourRateMultiplier = 2f;
         public FreeCafeContainerPanels ContainerPanels { get; private set; }
         private FreeCafeMiniGameGateway miniGameGateway;
-        private bool ModalInputBlocked => (FreeCafeGMPanel.Instance!=null && FreeCafeGMPanel.Instance.IsVisible) ||
+        private bool ModalInputBlocked => (equipmentPanel != null && equipmentPanel.IsOpen) || (FreeCafeGMPanel.Instance!=null && FreeCafeGMPanel.Instance.IsVisible) ||
             (playerHud!=null && playerHud.IsModalOpen) || (productionHud!=null && productionHud.IsModalOpen);
         public bool TutorialInputBlocked => PresentationInputBlocked || ModalInputBlocked;
         public bool InputBlocked => GameplayBlocked || ModalInputBlocked;
@@ -150,10 +153,12 @@ namespace Spotlight.FreeCafe
             catalog.layout = FreeCafeSceneLayout.Capture(this, authored);
             FreeCafeSceneLayout.FitAuthoredBounds(this, catalog, authored);
             characterCatalog=Spotlight.Narrative.CharacterCatalog.LoadFromTables();
+            // Resolve the entry before any scene-owned narrative fallback is created.
+            IsSandboxMode = FindFirstObjectByType<GameFlowBootstrap>() == null;
             var identities = customerIdentitySource as ICafeCustomerIdentitySource;
             if(identities==null && characterCatalog!=null && characterCatalog.Characters.Count>0)
                 identities=new CatalogCustomerIdentitySource(characterCatalog);
-            if(customerIdentitySource==null && seating!=null) identities=seating.WithSuppliedGuest(identities);
+            if(customerIdentitySource==null && seating!=null && !IsSandboxMode) identities=seating.WithSuppliedGuest(identities);
             World=new CafeWorld(catalog,identities);
             if(prefabLibrary==null) throw new InvalidOperationException("请配置 EntityPrefabLibrary");
             prefabLibrary.Validate(World.Catalog);
@@ -176,6 +181,12 @@ namespace Spotlight.FreeCafe
             playerHud=FindFirstObjectByType<FreeCafeHud>(); productionHud=GetComponent<FreeCafeProductionHud>();
             string pending=GameSaveParticipantRegistry.TakePending(SaveId);
             if(!string.IsNullOrEmpty(pending)) RestoreJson(pending); else SyncViews();
+            World.ConfigureEquipmentProgression(IsSandboxMode);
+            // Formal saves restore their calendar after scene Start. Wait for Playing
+            // before choosing a date key, or a day-3 save could be refilled as day 1.
+            if (IsSandboxMode) { RefreshDailyCups(); pendingDailyCupRefresh = false; }
+            equipmentPanel = gameObject.AddComponent<FreeCafeEquipmentPanel>();
+            equipmentPanel.Initialize(this, playerHud);
             if (FreeCafeGMPanel.Instance != null) FreeCafeGMPanel.Instance.Initialize(this);
             if(World.State.currentArea==AreaId.Cafe)
                 ShowHint("点击大厅的「启动营业」立牌开始接单；点击客人查看订单，或前往制作台备料。");
@@ -221,11 +232,15 @@ namespace Spotlight.FreeCafe
             bool sessionReady = gameFlow == null || gameFlow.SessionState == GameSessionState.Playing;
             if (sessionReady)
             {
-                if (cafeVisits == null) cafeVisits = new CafeVisitBridge(this);
-                cafeVisits.Pump();
+                if (pendingDailyCupRefresh) { RefreshDailyCups(); pendingDailyCupRefresh = false; }
+                if (!IsSandboxMode)
+                {
+                    if (cafeVisits == null) cafeVisits = new CafeVisitBridge(this);
+                    cafeVisits.Pump();
+                }
                 if (pendingBusinessStart) TryStartBusiness();
-                if (!BusinessSimulationPaused && (Spotlight.Narrative.NarrativeRuntime.Instance == null || cafeVisits.Ready)) World.Tick(Time.deltaTime);
-                cafeVisits.Pump();
+                if (!BusinessSimulationPaused && (IsSandboxMode || Spotlight.Narrative.NarrativeRuntime.Instance == null || cafeVisits != null && cafeVisits.Ready)) World.Tick(Time.deltaTime);
+                if (!IsSandboxMode) cafeVisits?.Pump();
             }
             if(IsDragging && draggingVessel && !InputBlocked) UpdateVesselInput();
             // GameFlowBootstrap owns the global Escape/pause flow. FreeCafe only
@@ -1067,7 +1082,10 @@ namespace Spotlight.FreeCafe
                     entity.area=initial.area; entity.x=initial.x; entity.y=initial.y;
                 }
             var result=World.Restore(candidate);
-            if(!result.success) throw new FormatException(result.message); SelectedId=null; if(productionMode && !World.ProductionEnabled) World.EnableProduction(); SyncViews();
+            if(!result.success) throw new FormatException(result.message); SelectedId=null; if(productionMode && !World.ProductionEnabled) World.EnableProduction();
+            World.ConfigureEquipmentProgression(IsSandboxMode);
+            pendingDailyCupRefresh = true;
+            SyncViews();
             // 读档后镜头瞬间就位，不做区域切换的平滑平移
             areaManager.SnapNow();
 
@@ -1111,6 +1129,8 @@ namespace Spotlight.FreeCafe
         {
             if (dayFlow == null) dayFlow = FindFirstObjectByType<DayFlowController>();
             if (!CafeTutorialActive) return;
+            World.ConfigureEquipmentProgression(false);
+            RefreshDailyCups();
             cafeTutorial ??= new CafeTutorialSession();
             var result = World.StartTutorialCustomer();
             if (!result.success) { Report(result); return; }
@@ -1139,12 +1159,15 @@ namespace Spotlight.FreeCafe
         {
             if (World == null || World.State.open) { pendingBusinessStart = false; return; }
             if (GameplayBlocked || CafeTutorialActive || PracticeTutorialActive) return;
-            if (cafeVisits == null) cafeVisits = new CafeVisitBridge(this);
-            var ncs = Spotlight.Narrative.NarrativeRuntime.Instance;
-            if (ncs != null && (!cafeVisits.Pump() || !ncs.Controller.CanCaptureSnapshot || ncs.Controller.IsBusy || cafeVisits.HasStageHandoff)) return;
+            if (!IsSandboxMode)
+            {
+                if (cafeVisits == null) cafeVisits = new CafeVisitBridge(this);
+                var ncs = Spotlight.Narrative.NarrativeRuntime.Instance;
+                if (ncs != null && (!cafeVisits.Pump() || !ncs.Controller.CanCaptureSnapshot || ncs.Controller.IsBusy || cafeVisits.HasStageHandoff)) return;
+            }
             pendingBusinessStart = false;
             Report(World.StartDay());
-            cafeVisits.Pump();
+            if (!IsSandboxMode) cafeVisits?.Pump();
         }
         public bool CanEndBusiness => World != null && World.State.open && !InputBlocked && !IsDragging
             && !CafeTutorialActive && !PracticeTutorialActive;
@@ -1155,8 +1178,14 @@ namespace Spotlight.FreeCafe
             else EndBusiness();
         }
         public void EndBusiness() { if(!InputBlocked) Report(World.EndDay()); }
+        private void RefreshDailyCups()
+        {
+            int day = dayFlow != null ? dayFlow.CurrentDay : World.State.day;
+            World.RefreshDailyCupStock((IsSandboxMode ? "sandbox:" : "story:") + day);
+        }
         public void StartDayFlowBusiness()
         {
+            RefreshDailyCups();
             if (CafeTutorialActive)
             {
                 PrepareCafeTutorial();

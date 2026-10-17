@@ -281,7 +281,7 @@ namespace Spotlight.FreeCafe
                 if(cupStack==null) cupStack=gameObject.AddComponent<FreeCafeCupStackVisual>();
                 cupStack.Present(spec,Runtime.World.Catalog,Runtime.artLibrary,entity.stock,Runtime.World.CupAbove(entity)!=null);
             }
-            bool visible=string.IsNullOrEmpty(entity.ownerId);
+            bool visible=string.IsNullOrEmpty(entity.ownerId) && Runtime.World.IsEquipmentAvailable(entity);
             gameObject.SetActive(visible);
             hitbox.enabled=CanInteract && !pointerMotion && visible && entity.area==Runtime.World.State.currentArea;
             string caption=spec.label;

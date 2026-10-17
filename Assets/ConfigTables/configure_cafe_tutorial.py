@@ -1,6 +1,7 @@
-"""Import the approved cafe manuscript into source workbooks; run GenerateAll.bat afterwards.
+"""Import the cafe manuscript, then apply player-facing tutorial corrections.
 Paragraph indices are zero-based document body paragraphs, including blank paragraphs.
-No prose correction or gameplay implementation is performed here.
+Original manuscript directions remain under cafe.tutorial.source.* for traceability;
+only OpeningLine-linked text is presented to players. Run GenerateAll.bat afterwards.
 """
 from pathlib import Path
 import re
@@ -10,6 +11,52 @@ import openpyxl
 
 ROOT = Path(__file__).resolve().parent
 NS = {'w': 'http://schemas.openxmlformats.org/wordprocessingml/2006/main'}
+
+def apply_player_facing_content(narrative, text):
+    """Idempotent source-table corrections, also applied after a manuscript re-import."""
+    corrections = {
+        'customer.name': '顾客',
+        'customer_arrives.01': '进来的是一位衣着普通的男人，看起来是附近的居民。',
+        'customer_arrives.06': '他看了我一眼，我回以微笑。',
+        'perception_success.06': '阿黛尔，你和这位先生说说这两天你做了什么。',
+        'perception_failure.01': '不知怎么，总感觉他身上的气息突然变了。',
+        'perception_failure.02': '我没心思琢磨这位客人在想些什么。',
+        'perception_failure.03': '还好他把视线收了回去。',
+        'order_confirmed.01': '看出这位先生想点餐，阿黛尔递给他一张亲手绘制的餐单。',
+        'order_confirmed.02': '大杯黑咖啡，不加糖，就这样。',
+        'order_confirmed.03': '这位先生是重新开张的沸点咖啡馆的第一位客人。',
+        'workstation_open.01': '接下来去工作台制作客人的咖啡。点击大堂中的箭头标志，进入工作台。',
+        'make_coffee_base.01': '别紧张，店长，我会陪着你的。客人要的是大杯无糖黑咖啡，我们就从磨豆开始吧。',
+        'make_coffee_base.02': '制作目标：研磨咖啡豆，用热水煮成黑咖啡，再装入杯中。不需要加糖。',
+        'make_coffee_base.03': '工作台会一步步提示你。先学会取放原料，再试着启动设备。',
+        'pour_into_cup.01': '咖啡做好了。准备一个空杯，把壶里的咖啡倒进去，就可以出餐啦。',
+        'adjust_strength.01': '加清水会让咖啡变淡。这次先按当前配方完成黑咖啡，不必额外调浓度。',
+        'adjust_sweetness.01': '客人要无糖黑咖啡，这次不需要加糖。',
+    }
+    for key, title in {
+        'customer_arrives': '第一位客人', 'perception_success': '熟悉的老客人',
+        'perception_failure': '难以捉摸的客人', 'order_confirmed': '确认订单',
+        'workstation_open': '前往工作台', 'make_coffee_base': '制作黑咖啡',
+        'pour_into_cup': '装杯', 'adjust_strength': '认识浓度',
+        'adjust_sweetness': '确认甜度', 'serve_customer': '交付咖啡', 'ending': '新的开始',
+    }.items():
+        corrections[key + '.title'] = title
+    rows = {row[1].value: row for row in text['Text'].iter_rows(min_row=5)}
+    for suffix, value in corrections.items():
+        key = 'cafe.tutorial.' + suffix
+        if key not in rows:
+            raise ValueError('Missing tutorial text key: ' + key)
+        rows[key][2].value = value
+        rows[key][3].value = '玩家教程修订；原稿保留在 cafe.tutorial.source.*；按键细节由工作台指引负责'
+    customer_segments = {'customer_arrives', 'perception_success', 'perception_failure', 'order_confirmed'}
+    for row in narrative['OpeningPresentation'].iter_rows(min_row=5):
+        pid = str(row[1].value or '')
+        if pid != 'first_day_cafe' and not pid.startswith('cafe_tutorial.'):
+            continue
+        row[5].value = 'Dialogue/CafeSceneVisuals' if pid == 'first_day_cafe' else 'Dialogue/CafeTutorialVisuals'
+        segment = pid.removeprefix('cafe_tutorial.')
+        row[6].value = 'cafe.tutorial.customer.name' if segment in customer_segments or segment.startswith('result_') else None
+
 
 def configure():
     with zipfile.ZipFile(ROOT.parent / '文案-新手教程.docx') as archive:
@@ -106,6 +153,7 @@ def configure():
             row[6].value = None
     for row in narrative['SetupParams'].iter_rows(min_row=5):
         if row[1].value in ('first_day_perception_success','first_day_perception_failure'): row[3].value = None
+    apply_player_facing_content(narrative, text)
     narrative.save(ROOT / 'Data/Narrative/Narrative.xlsx')
     text.save(ROOT / 'Data/Shared/Text.xlsx')
     print(f'Configured {len(steps)} tutorial segments; manuscript archive preserved.')

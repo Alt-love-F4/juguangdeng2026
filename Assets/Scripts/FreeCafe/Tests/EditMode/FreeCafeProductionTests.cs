@@ -64,13 +64,16 @@ namespace Spotlight.FreeCafe.Tests
             Assert.That(snapshot.composition.coffeeMl, Is.EqualTo(120));
             Assert.That(cup.contents[0].milliliters, Is.Zero);
         }
-        private WorldEntity PerfectCup(string productId)
+        private WorldEntity PerfectCup(string productId, CustomerRequest request = null)
         {
-            var product=world.Product(productId);world.SelectServingCup(product.cupSpecId=="cup.small" ? "s.cups.small" : "s.cups.large");
+            var product=world.Product(productId);
+            string cupSpecId=request==null ? product.cupSpecId : world.RequiredCupSpecId(request);
+            float scale=request==null ? 1 : world.OrderPortionScale(request);
+            world.SelectServingCup(cupSpecId=="cup.small" ? "s.cups.small" : "s.cups.large");
             var cup=world.ServingCup;int seq=0;
             Assert.That(product.evaluation, Is.Not.Null, productId);
             foreach(var need in product.evaluation.amounts) cup.contents.Add(new Portion { specId=need.ingredientId,units=1,
-                milliliters=need.idealMl,grams=need.idealGrams,coffeeKind=need.coffeeKind,
+                milliliters=need.idealMl*scale,grams=need.idealGrams*scale,coffeeKind=need.coffeeKind,
                 productionScore=100,temperature=product.requiredTemperature,addedSequence=++seq });
             cup.production.additionSequence=seq;
             cup.latteArt=System.Array.Exists(product.evaluation.amounts, need=>need.ingredientId=="milkfoam");
@@ -348,24 +351,24 @@ namespace Spotlight.FreeCafe.Tests
             Assert.That(world.EvaluateProduction(cup,product).total,Is.EqualTo(composition.total).Within(.001f));
             Assert.That(composition.total,Is.LessThan(score));
         }
-        [Test] public void EmptyCupCanBeDeliveredForRemakeWithoutRefundOrRemovingOrder()
+        [Test] public void EmptyCupCanBeDeliveredForRemakeWithCupReturnedAndOrderPreserved()
         {
             world.StartDay();world.SelectServingCup("s.cups.small");var request=world.Request(world.State.focusedRequestId);int stock=world.Find("s.cups.small").stock;
             Assert.That(world.DeliverProductionCup().success,Is.True);Assert.That(world.ServingCup,Is.Null);
-            Assert.That(world.Request(request.id),Is.SameAs(request));Assert.That(request.remakes,Is.EqualTo(1));Assert.That(world.Find("s.cups.small").stock,Is.EqualTo(stock));
+            Assert.That(world.Request(request.id),Is.SameAs(request));Assert.That(request.remakes,Is.EqualTo(1));Assert.That(world.Find("s.cups.small").stock,Is.EqualTo(stock+1));
             world.SelectServingCup("s.cups.small");world.DeliverProductionCup();Assert.That(world.Request(request.id),Is.Null);
         }
         [Test] public void PagingChangesActualDeliveryTargetAndSuccessfulOrderIsRemovedOnlyOnce()
         {
             world.StartDay();var first=world.Request(world.State.focusedRequestId);world.PageProductionOrder(1);var selected=world.Request(world.State.focusedRequestId);
-            Assert.That(selected,Is.Not.SameAs(first));PerfectCup(selected.productId);int money=world.State.money;
+            Assert.That(selected,Is.Not.SameAs(first));PerfectCup(selected.productId,selected);int money=world.State.money;
             Assert.That(world.DeliverProductionCup().success,Is.True);Assert.That(world.Request(selected.id),Is.Null);Assert.That(world.Request(first.id),Is.Not.Null);
             Assert.That(world.State.money,Is.GreaterThan(money));Assert.That(world.DeliverProductionCup().success,Is.False);
         }
-        [Test] public void DiscardConsumesCupAndResourcesWithoutRefund()
+        [Test] public void DiscardReturnsCupWithoutRefundingIngredients()
         {
             world.SelectServingCup("s.cups.small");Load("s.honey",world.ServingCup.id);int cups=world.Find("s.cups.small").stock,honey=world.Find("s.honey").stock;
-            world.DiscardProductionCup();Assert.That(world.ServingCup,Is.Null);Assert.That(world.Find("s.cups.small").stock,Is.EqualTo(cups));Assert.That(world.Find("s.honey").stock,Is.EqualTo(honey));
+            world.DiscardProductionCup();Assert.That(world.ServingCup,Is.Null);Assert.That(world.Find("s.cups.small").stock,Is.EqualTo(cups+1));Assert.That(world.Find("s.honey").stock,Is.EqualTo(honey));
         }
         [Test] public void MiniGameStartsWithAnyServingCupAndRejectsStaleOrDuplicateCallbacks()
         {
