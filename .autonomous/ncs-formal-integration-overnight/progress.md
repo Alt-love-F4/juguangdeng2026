@@ -709,3 +709,28 @@
 ### Current Status
 - Total Tasks: 95
 - Completed: 29/95 (31%)
+
+## Session 14 (Executor) - Task 30 continuation - 2026-10-18
+
+### Accomplished
+- Completed Task 30: added `incomplete-content-boundary-2026-10-18.md`.
+- Audited incomplete and blocked source boundaries for `rose.1016.s1`, `revolution.1029.s1` / `MA70.10.29-S1`, `MA70.11.05-S1`, `MA70.11.05-S2`, and the unconnected `church.1014.s2` key. None appears in generated `Event`, `EventDate`, `Result`, or `NcsIntegrationQueue.csv` as a formal route; Rose 1016's 9 generated text keys are explicitly staging-only/disabled.
+- Verified `ending_test_cumulative` and `ending_test_consecutive` remain `enabled=false`, retain only their required action-completed conditions, and have no result rows or formal triggers.
+- Verified `test.delivery.enabled` has initial value `false`, both delivery test actions have `mustExecute=false`, and the four delivery-test events remain outside the nine formal roots.
+- Verified `rose.1011.s1` formal pages and its separate preview page are isolated (`27` formal pages versus `1` preview page, with no overlapping page IDs), so preview material cannot create a formal completion path.
+- Reconfirmed the Revolution and NPC preservation invariants: `EV_REVOLUTION` and its results remain, `T_CAL_D60` is disabled, and no `npc_a` through `npc_d` event or trigger is present.
+- Ran the assertion-based read-only audit successfully. Unity EditMode configuration checks passed: `ActualGeneratedLubanDataLoadsAndValidates` `1/1` and `FormalNarrativeFlowConfigurationTests` `3/3`; no failures or skips.
+
+### Issues Encountered
+- None for Task 30. The current formal event table does not carry legacy `blockedBy` metadata; unresolved blockers remain documented outside the formal event set and were not converted into fabricated runtime facts, endings, or triggers.
+
+### Notes
+- The source/generated event inventory remains exactly 38 events, with 9 formal roots and no new incomplete-content route. This is configuration/static evidence; real map, DayFlow, cancellation, retry, save/restore, and exactly-once acceptance remain later tasks.
+- No workbook, generated JSON, runtime source, scene, prefab, save slot, or formal result was changed by this task.
+
+### Next Session Should
+- Continue with Task 31: recheck the Revolution trigger guard after the configuration changes and prove `T_CAL_D60` remains disabled.
+
+### Current Status
+- Total Tasks: 95
+- Completed: 30/95 (32%)

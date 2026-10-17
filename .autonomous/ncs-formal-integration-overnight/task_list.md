@@ -47,7 +47,7 @@
 - [x] Task 27: Validate that the first-, second-, and third-floor operating base images are not used as dialogue backgrounds or `DialogueVisualsAsset.background` textures.
 - [x] Task 28: Validate inline ability checks, branch checks, and unknown dependency fallback behavior; unknown values must hide or block safely with diagnostics rather than inventing success.
 - [x] Task 29: Validate that formal results, relationship/bar changes, money changes, production facts, and completion flags are written only from authoritative configured results.
-- [ ] Task 30: Validate incomplete, blocked, or partial source content remains isolated from formal completion and does not gain a fabricated ending or trigger.
+- [x] Task 30: Validate incomplete, blocked, or partial source content remains isolated from formal completion and does not gain a fabricated ending or trigger.
 - [ ] Task 31: Recheck the Revolution trigger guard after any generation or configuration change and prove the disabled `T_CAL_D60` state is preserved.
 - [ ] Task 32: Recheck the NPC test-junk boundary after generation and prove no deleted `npc_a` through `npc_d` definitions or formal references reappear.
 
