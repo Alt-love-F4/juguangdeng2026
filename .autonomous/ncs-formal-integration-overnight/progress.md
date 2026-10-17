@@ -585,3 +585,58 @@
 ### Current Status
 - Total Tasks: 95
 - Completed: 24/95 (25%)
+
+## Session 9 (Executor) - Task 25 continuation - 2026-10-18
+
+### Accomplished
+- Completed Task 25: added `presentation-index-resource-validation-2026-10-18.md` with PresentationIndex, background, reading, portrait, effect, prefab, fallback, and adapter evidence.
+- Found and corrected the authoritative `OpeningPresentation.visualsResource` rows in `Narrative.xlsx`: `first_day_cafe` plus all 24 `cafe_tutorial.*` rows now use `Dialogue/CafeSceneVisuals`, preserving `FirstDayIntroductionVisuals.asset`.
+- Ran the official `Assets/ConfigTables/GenerateAll.bat` after the source edit. Player semantic validation and Luban generation passed with exit code `0`; only `tbopeningpresentation.json` changed and generated C# remained unchanged.
+- Refreshed the connected Unity `6000.3.5f2` Editor and verified 25 opening resources, the `scene.cafe` marker, 25 unique PresentationIndex entries, 112 conversation pages, 3 reading pages, 109 resolved background usages, required effect presets, and all three presentation prefabs.
+- Verified all ordinary conversation pages that are supposed to build through `NarrativeConversationEventPlayback`; the six excluded pages are intentional letter/production handoffs.
+- Ran `Spotlight.Narrative.Editor.Tests`: 28/28 passed, 0 failed, 0 skipped. Unity console read after validation contains 0 error and 0 warning entries.
+
+### Issues Encountered
+- `Spotlight.GameFlow.Presentation.Tests` still returns a synthetic `0/0` result from the connected Unity Test Runner, although reflection sees the compiled assembly and 269 test methods. An attempted `testAssemblies` declaration did not change discovery and was removed, leaving the pre-existing asmdef diff untouched.
+- Known portrait gaps remain for the arrival-chain `player` references and formal C14 `sorel` lines. The resolver's existing base-portrait fallback remains active for missing expression sprites; no substitute art was added.
+- `October07S1PresentationTests` still contains the known contradictory expectation that `oct07.cafe.day` is artwork and `useSceneBackground=true`. This is carried into Task 26, which owns the `scene.cafe` convention decision.
+
+### Notes
+- No scene, Canvas, input system, save slot, portrait/background asset, generated C# file, or unrelated user/Locus path was changed.
+- The source/generation correction is authoritative; generated JSON was not hand-edited.
+
+### Next Session Should
+- Continue with Task 26: validate the `scene.cafe` real-scene convention, explicit cafe special-image keys, and restoration to `scene.cafe` after special composite shots.
+
+### Current Status
+- Total Tasks: 95
+- Completed: 25/95 (26%)
+
+## Session 10 (Executor) - Task 26 continuation - 2026-10-18
+
+### Accomplished
+- Completed Task 26: added `scene-cafe-convention-validation-2026-10-18.md` with source, generated-data, registry, alias, restoration, and test evidence.
+- Audited the authoritative `ConversationPage` sheet and reconciled 48 legacy cafe overrides: 1 `oct07.s1` page, 7 `oct07.s2` pages, 6 `revolution.1013.s2` pages, 10 `revolution.1028.s1` pages, 23 `revolution.1014.s1` pages, and the in-cafe `rose.1011.s1.arrival` page. All 48 were changed to `scene.cafe` in `Narrative.xlsx`.
+- Ran the official `Assets/ConfigTables/GenerateAll.bat` successfully with exit code `0`; Player semantic validation and Luban strict generation passed, generated C# stayed unchanged, and `tbncsconversationpage.json` regenerated without hand edits.
+- Refreshed the connected Unity `6000.3.5f2` Editor and verified 112 generated conversation pages contain 48 `scene.cafe` pages, zero legacy cafe overrides, zero operating-floor base-image keys, and zero current special-composite pages.
+- Verified `scene.cafe` is a pure scene marker, `cafe.door.thibaut` is real artwork, and `church.cafe.thibaut.departure` remains an alias to the same artwork. Direct in-editor script construction verified that explicit `scene.cafe` restoration suppresses stale special artwork.
+- Refreshed the NCS report/queue through existing integration tools: 38 events, 0 errors, 0 warnings.
+- Ran `Spotlight.Narrative.Editor.Tests`: 28/28 passed, 0 failed, 0 skipped.
+
+### Issues Encountered
+- `Spotlight.GameFlow.Presentation.Tests` remains undiscoverable by the connected Unity Test Runner: the exact cafe background test returned the known synthetic `0/0` result. It was not counted as a pass; direct Editor contract checks are recorded instead.
+- The project documentation still contains the earlier 47-row historical note. The current evidence explicitly records why the authoritative workbook has 48 rows, including `rose.1011.s1.arrival`; no whole-file documentation rewrite was attempted after the Windows patch helper rejected UTF-8 stdin.
+- Existing unrelated dirty worktree paths remain preserved. No user save slot, scene, Canvas, input system, or operating-floor base image was modified.
+
+### Notes
+- Legacy `oct07.cafe.day/night` registry entries remain available for scoped preview/compatibility and were not deleted.
+- No `church.1014.s2` event or page was invented. The special composite key and alias remain reserved for the future authored sequence; current source has no special-page restoration chain to claim as formally wired.
+- This task establishes source/config/resource convention evidence only. It does not claim real map/DayFlow, loading, cancellation, retry, save/restore, or exactly-once runtime acceptance.
+
+### Next Session Should
+- Continue with Task 27: validate that the first-, second-, and third-floor operating base images are not used as dialogue backgrounds or `DialogueVisualsAsset.background` textures.
+- Preserve the exact 48-page cafe-scene result, special-key registry boundary, and the synthetic presentation-test discovery limitation.
+
+### Current Status
+- Total Tasks: 95
+- Completed: 26/95 (27%)
