@@ -734,3 +734,27 @@
 ### Current Status
 - Total Tasks: 95
 - Completed: 30/95 (32%)
+
+## Session 15 (Executor) - 2026-10-18 07:36 +08:00
+
+### Accomplished
+- Completed Task 31: added `revolution-trigger-guard-recheck-2026-10-18.md` with a fresh check against the current workbook, generated Luban JSON, queue, reports, Unity-imported TextAssets, and runtime guard code.
+- Verified the sole `T_CAL_D60` source/generated row still targets `EV_REVOLUTION` at `world.calendar` 60 with `enabled=false`; `EV_REVOLUTION` remains in the event/report/queue/result inventory with its two authored results.
+- Verified all three formal dated Revolution roots remain at day 8/Noon, day 9/Morning, and day 23/Night, each once-only, with no `EV_REVOLUTION` EventDate row.
+- Ran `Spotlight.Narrative.Editor.Tests.NarrativeConfigurationValidatorTests.ActualGeneratedLubanDataLoadsAndValidates`: 1 passed, 0 failed, 0 skipped. Post-test Unity state: compile complete, `compilationFailed=false`, current console errors/warnings both 0.
+- Confirmed runtime trigger evaluation and candidate eligibility explicitly skip or reject disabled triggers.
+- Made no project/configuration changes. The current Narrative workbook hash is recorded in the evidence; it differs from the earlier Task 8 snapshot because intervening source configuration work occurred.
+
+### Issues Encountered
+- Windows PowerShell's default text decoding caused `ConvertFrom-Json` to fail on the generated result JSON's CJK note text. Re-parsing with Python's explicit UTF-8 JSON reader succeeded and all content assertions passed; this was a shell decoding issue, not a generated-data failure.
+
+### Notes
+- This is current configuration and loaded-data evidence only. It does not claim real DayFlow, map, loading, cancellation, retry, save/restore, exactly-once settlement, or Player acceptance.
+- The worktree remains intentionally dirty with user/Locus changes documented by the original preservation boundary. No unrelated paths were staged or changed.
+
+### Next Session Should
+- Continue with Task 32: recheck after generation that no deleted `npc_a` through `npc_d` definitions or formal references have reappeared.
+
+### Current Status
+- Total Tasks: 95
+- Completed: 31/95 (33%)
