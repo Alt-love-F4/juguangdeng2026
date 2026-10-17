@@ -686,3 +686,26 @@
 ### Current Status
 - Total Tasks: 95
 - Completed: 28/95 (29%)
+## Session 13 (Executor) - Task 29 continuation - 2026-10-18
+
+### Accomplished
+- Completed Task 29: added `authoritative-result-ownership-validation-2026-10-18.md`.
+- Audited all 33 generated result rows and all nine formal roots. Every formal root has exactly one configured `story.<eventId>.completed=true` result; `oct07.s2` additionally owns its explicit `story.oct09.meeting.known=true` fact.
+- Confirmed no formal root currently writes relationship, bar, money, item, NPC, or production facts. No result was fabricated for missing source content.
+- Preserved `EV_REVOLUTION`'s authored `revolution=true` and `bar:world.stability=-3` rows while keeping its disabled trigger invariant intact.
+- Traced `NarrativeController.CompleteEvent`, `PreflightResults`, and `ApplyResult`: configured root/choice/check result owners are the only settlement inputs, preflight precedes mutation, and failed transactions do not raise `EventCompleted`.
+- Current narrative suites remain green: `Spotlight.Narrative.Core.Tests` 195/195 and the preceding Editor configuration run 28/28.
+
+### Issues Encountered
+- None for result ownership. Formal roots intentionally have no unsourced economic, relationship, or production result rows; those gaps remain source/acceptance boundaries rather than reasons to invent values.
+
+### Notes
+- This task is static/configuration and controller-transaction evidence. It does not claim real-map, loading, cancellation, retry, save/restore, or exactly-once runtime acceptance.
+- Existing queue/report files remain dirty from earlier autonomous/source reconciliation and were not reset or overwritten.
+
+### Next Session Should
+- Continue with Task 30: validate incomplete, blocked, or partial source content remains isolated from formal completion and does not gain a fabricated ending or trigger.
+
+### Current Status
+- Total Tasks: 95
+- Completed: 29/95 (31%)
