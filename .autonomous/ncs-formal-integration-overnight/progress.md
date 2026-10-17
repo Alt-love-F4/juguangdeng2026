@@ -640,3 +640,26 @@
 ### Current Status
 - Total Tasks: 95
 - Completed: 26/95 (27%)
+## Session 11 (Executor) - Task 27 continuation - 2026-10-18
+
+### Accomplished
+- Completed Task 27: added `operating-floor-background-boundary-2026-10-18.md`.
+- Verified the three operating-floor base-image GUIDs remain in the CoffeeShop operating scene and are not used by authored narrative pages or opening data.
+- Audited the authoritative workbook and generated JSON: zero forbidden base-image references in narrative cells, zero `ConversationPage.bgOverride` matches, and zero generated opening-data matches.
+- Audited all 3 `DialogueVisualsAsset` assets. The 2 texture backgrounds point to `phase_business_transition.png` and the complete first-floor dialogue scene; `CafeSceneVisuals` uses `backgroundKey=scene.cafe` with no texture background.
+- Verified the existing registry aliases for first-, second-, and third-floor base filenames resolve to the complete dialogue-scene textures, not the operating-floor base images.
+- Direct Unity contract result: `conversationPages=112;forbiddenConversationPages=0;dialogueVisualsAssets=3;dialogueBackgrounds=2`, with all resolved paths recorded in the Task 27 evidence.
+
+### Issues Encountered
+- None for the Task 27 boundary. The existing documentation and test fixtures mention the forbidden filenames to assert the prohibition; those references are not runtime dialogue texture assignments.
+
+### Notes
+- No source workbook, generated data, scene, Canvas, input system, dialogue texture, or user save slot was changed by this task.
+- The operating-floor base images remain available for CoffeeShop scene assembly. Complete dialogue-scene textures remain the only static dialogue artwork for those locations.
+
+### Next Session Should
+- Continue with Task 28: validate inline ability checks, branch checks, and unknown dependency fallback behavior; unknown values must hide or block safely with diagnostics rather than inventing success.
+
+### Current Status
+- Total Tasks: 95
+- Completed: 27/95 (28%)
