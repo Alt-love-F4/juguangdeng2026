@@ -33,7 +33,7 @@ presentation.Play(() =>
 | HomeNightPanel | 夜晚活动占位页面 | 结束夜晚按钮 |
 | DayEndPanel | 一天结束文字显现 | 进入下一天按钮 |
 
-另外 `BusinessControlsPanel` 是营业期间的常驻控制面板，不实现演出接口。
+营业操作复用 `CoffeeShop` 场景内的 `business.start` 营业立牌与 `FreeEntityView` 点击链路：未营业时点击开始营业，营业中显示“结束营业”，点击后通过 `RequestBusinessEnd()` 进入现有打烊流程。`BusinessControlsPanel` 已不再由日程打开。
 地图和夜晚仍然是可等待确认的阶段页面，并未变成自动播完的短片；后续可以在各自预制体中加入实际交互。
 
 ## 自由修改每种表现

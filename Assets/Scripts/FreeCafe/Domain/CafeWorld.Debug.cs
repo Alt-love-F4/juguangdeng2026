@@ -100,7 +100,6 @@ namespace Spotlight.FreeCafe
             int reserved = ReservedVisitBudget();
             foreach (var visit in displacedVisits)
                 if (AwaitingSeat(visit) && visit.budgetReserved) reserved--;
-            // Replacing a seated guest reuses that arrival; repeated swaps do not exhaust the daily budget.
             bool reuseArrival = target != null;
             int requiredBudget = State.todayArrivals + reserved + (reuseArrival ? 0 : 1);
             if (requiredBudget > Math.Max(Catalog.economy.maxCustomers, State.cafeVisitBudgetMinimum))
@@ -117,7 +116,7 @@ namespace Spotlight.FreeCafe
                 personId = identity.personId + ":gm:" + Allocate("person_"), characterId = identity.characterId,
                 narrativeCharacterId = identity.narrativeCharacterId, displayName = identity.displayName,
                 visualId = identity.visualId, role = CafePersonRole.Customer
-            }, slot);
+            }, slot, seatIndex < 0);
             UpdateFocusedRequest();
             Notify();
             return ActionResult.Yes("已召唤 " + identity.displayName + " 到位置 " + (slot + 1)

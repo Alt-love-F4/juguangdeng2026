@@ -15,8 +15,8 @@ namespace Spotlight.FreeCafe
         public void Present(bool highlighted = false)
         {
             var state = entityView.Runtime.World.State;
-            entityView.label.text = state.open ? "营业中" : state.businessPhase == BusinessPhase.Night ? "开始新一天" : "启动营业";
-            statusCaption.text = state.open ? "正在接单 · " + state.requests.Count + " 位客人"
+            entityView.label.text = state.open ? "结束营业" : state.businessPhase == BusinessPhase.Night ? "开始新一天" : "启动营业";
+            statusCaption.text = state.open ? "点击打烊 · 当前 " + state.requests.Count + " 位客人"
                 : entityView.Runtime.CafeTutorialActive ? "完成首杯黑咖啡教程后营业" : "点击开店 · 欢迎光临";
             if (tint == null) tint = new MaterialPropertyBlock();
             var color = state.open ? new Color(.81f,.89f,.74f) : new Color(.98f,.91f,.72f);

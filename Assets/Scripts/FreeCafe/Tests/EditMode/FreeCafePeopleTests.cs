@@ -163,6 +163,41 @@ namespace Spotlight.FreeCafe.Tests
             Assert.That(world.DebugSummonCustomer(identity).success, Is.False);
             Assert.That(world.Find("customer_0"), Is.Null);
         }
+        [Test] public void DebugSummonCanReplaceSeatsAndDuplicateTheSameCharacter()
+        {
+            world.StartDay();
+            var identity = new CafePersonIdentity { personId = "gm_guest", characterId = "gm_guest",
+                displayName = "指定顾客", role = CafePersonRole.Customer };
+            string oldOrderId = world.State.requests.Find(order => order.customerId == "customer_0").id;
+            int arrivals = world.State.todayArrivals;
+            Assert.That(world.DebugSummonCustomer(identity, 0, true, false).success, Is.False);
+            Assert.That(world.Request(oldOrderId), Is.Not.Null);
+            Assert.That(world.DebugSummonCustomer(identity, 0, true, true).success, Is.True);
+            Assert.That(world.Request(oldOrderId), Is.Null);
+            string firstPerson = world.Find("customer_0").person.personId;
+            Assert.That(world.DebugSummonCustomer(identity, 1, false, true).success, Is.False);
+            Assert.That(world.DebugSummonCustomer(identity, 1, true, true).success, Is.True);
+            Assert.That(world.Find("customer_1").person.characterId, Is.EqualTo("gm_guest"));
+            Assert.That(world.Find("customer_1").person.personId, Is.Not.EqualTo(firstPerson));
+            Assert.That(world.State.todayArrivals, Is.EqualTo(arrivals));
+            Assert.That(world.Restore(JsonUtility.FromJson<CafeSnapshot>(JsonUtility.ToJson(world.State))).success, Is.True);
+        }
+        [Test] public void DebugSummonCanReplaceNarrativeSeatWithoutLeavingAnOrphanOrder()
+        {
+            var identity = new CafePersonIdentity { personId = "ncs_guest", characterId = "ncs_guest",
+                displayName = "剧情顾客", role = CafePersonRole.Customer };
+            world.SyncCafeVisits(new[] { new CafeVisitIntent { visitInstanceId = "gm_replace_visit",
+                characterId = "ncs_guest", preferredSeatId = "customer_0", arrivalAuthorized = true, identity = identity } });
+            world.StartDay();
+            var replacement = new CafePersonIdentity { personId = "gm_guest", characterId = "gm_guest",
+                displayName = "指定顾客", role = CafePersonRole.Customer };
+            Assert.That(world.DebugSummonCustomer(replacement, 0, true, true).success, Is.True);
+            Assert.That(world.CafeVisit("gm_replace_visit").status, Is.EqualTo(CafeVisitStatus.Ended));
+            Assert.That(world.CafeVisit("gm_replace_visit").endReason, Is.EqualTo("gm_replaced"));
+            Assert.That(world.State.requests.FindAll(order => order.customerId == "customer_0").Count, Is.EqualTo(1));
+            Assert.That(world.Find("customer_0").person.characterId, Is.EqualTo("gm_guest"));
+            Assert.That(world.Restore(JsonUtility.FromJson<CafeSnapshot>(JsonUtility.ToJson(world.State))).success, Is.True);
+        }
         private sealed class IdentitySource : ICafeCustomerIdentitySource
         {
             public int calls;

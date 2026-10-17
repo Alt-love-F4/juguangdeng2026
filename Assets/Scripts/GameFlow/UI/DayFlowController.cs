@@ -60,7 +60,6 @@ namespace Spotlight.GameFlow
         private bool waitingForFirstDayPerceptionBranch;
         private GameFlowBootstrap flow;
         private UIPanel currentPanel;
-        private BusinessControlsPanel businessControls;
         private MonoBehaviour endpointOwner;
         private IDayFlowGameplayEndpoint gameplayEndpoint;
         private ICafeTutorialGameplayEndpoint cafeTutorialEndpoint;
@@ -131,7 +130,6 @@ namespace Spotlight.GameFlow
             SetMapAvailability(false);
             UnsubscribeFirstArrival();
             ClosePresentation();
-            HideBusinessControls();
             endpointOwner = null;
             UnsubscribeGameplayEndpoint();
         }
@@ -155,7 +153,6 @@ namespace Spotlight.GameFlow
                 return;
             }
             running = true;
-            HideBusinessControls();
             ShowGameplayPanel();
             SetState(DayFlowState.IntroLetter);
             ShowPresentation<FirstDayLetterPanel>(EnterAvatarSelection, ConfigureFirstDayLetter);
@@ -175,7 +172,6 @@ namespace Spotlight.GameFlow
             if (!SessionAllowsPlay) return;
             if (!initialized) Initialize(flow);
             running = true;
-            HideBusinessControls();
             HideGameplayPanel();
             var runtime = NarrativeRuntime.Instance;
             var actions = runtime?.Actions;
@@ -358,7 +354,6 @@ namespace Spotlight.GameFlow
         private void PlayFirstDayIntroduction()
         {
             ClosePresentation();
-            HideBusinessControls();
             ShowGameplayPanel();
             SetState(DayFlowState.FirstDayIntroduction);
             int version = presentationVersion;
@@ -535,7 +530,6 @@ namespace Spotlight.GameFlow
             UnsubscribeFirstArrival();
             UnsubscribeFirstDayPerceptionEvents();
             ClosePresentation();
-            HideBusinessControls();
             cafeTutorialEndpoint?.FinishCafeTutorial();
             if (endpointOwner != null && gameplayEndpoint.DayFlowBusinessActive)
                 gameplayEndpoint.EndDayFlowBusiness();
@@ -594,7 +588,6 @@ namespace Spotlight.GameFlow
             narrative?.Presenter?.DebugStopPresentation();
             ClosePresentation();
             DialoguePlayback.Stop();
-            HideBusinessControls();
             FindGameplayEndpoint();
             cafeTutorialEndpoint?.FinishCafeTutorial();
             tutorialTestSkipSubmitted = true;
@@ -646,7 +639,6 @@ namespace Spotlight.GameFlow
             {
                 PlayCafeTutorialContent(CafeTutorialSession.WorkstationStep, presentationVersion, null);
             }
-            else ShowBusinessControls();
         }
 
         public void FinishBusiness()
@@ -654,7 +646,6 @@ namespace Spotlight.GameFlow
             if (!SessionAllowsPlay || !CanFinishBusiness) return;
             IDayFlowGameplayEndpoint endpoint = FindGameplayEndpoint();
             endpoint?.EndDayFlowBusiness();
-            HideBusinessControls();
             HideGameplayPanel();
             SetState(DayFlowState.PreLeisure);
             ShowPresentation<BusinessEndPanel>(() => RunNarrativeEntry(NarrativeEntryPoint.AfterBusiness, EnterCityMap));
@@ -700,7 +691,6 @@ namespace Spotlight.GameFlow
             if (!SessionAllowsPlay) return;
             SetState(DayFlowState.CityMapLeisure);
             ClosePresentation();
-            HideBusinessControls();
             if (flow != null && UnityEngine.SceneManagement.SceneManager.GetActiveScene().name != "Map")
             {
                 flow.TransitionToGameplayScene("Map", EnterCityMap);
@@ -737,7 +727,6 @@ namespace Spotlight.GameFlow
             firstDayCafeTutorialCompleted = true;
             cafeTutorialEndpoint?.FinishCafeTutorial();
             ShowGameplayPanel();
-            ShowBusinessControls();
             Debug.Log("[DayFlow] First-day cafe tutorial completed; free business remains active.", this);
         }
 
@@ -869,21 +858,6 @@ namespace Spotlight.GameFlow
             if (panel == null) return;
             ((IDayFlowPresentation)panel).Stop();
             UIKit.ClosePanel(panel);
-        }
-
-        private void ShowBusinessControls()
-        {
-            HideBusinessControls();
-            businessControls = UIKit.OpenPanel<BusinessControlsPanel>(UILevel.Pop,
-                tag: PresentationTag, cachePolicy: PanelCachePolicy.Reusable);
-            businessControls.Bind(FinishBusiness, flow);
-        }
-
-        private void HideBusinessControls()
-        {
-            if (businessControls == null) return;
-            UIKit.ClosePanel(businessControls);
-            businessControls = null;
         }
 
         private IDayFlowGameplayEndpoint FindGameplayEndpoint()
@@ -1035,7 +1009,6 @@ namespace Spotlight.GameFlow
             if (!SessionAllowsPlay) return;
             ApplyAudioState();
             running = true;
-            HideBusinessControls();
             if (State != DayFlowState.FreeCafeBusiness) HideGameplayPanel();
             switch (State)
             {
@@ -1051,7 +1024,6 @@ namespace Spotlight.GameFlow
                     FindGameplayEndpoint();
                     ClosePresentation();
                     ShowGameplayPanel();
-                    ShowBusinessControls();
                     break;
                 case DayFlowState.PreLeisure: ShowPresentation<BusinessEndPanel>(() => RunNarrativeEntry(NarrativeEntryPoint.AfterBusiness, EnterCityMap)); break;
                 case DayFlowState.CityMapLeisure: EnterCityMap(); break;

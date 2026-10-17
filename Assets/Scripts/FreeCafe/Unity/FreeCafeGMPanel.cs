@@ -364,7 +364,8 @@ namespace Spotlight.FreeCafe
                 child.gameObject.SetActive(false);
                 Destroy(child.gameObject);
             }
-            AddAction("← 返回时间与顾客", () => ShowCategory(activeCategory), "需要已营业、有空座；不自动开业、不触发剧情预约", false);
+            if (runtime != null && runtime.World != null && summonSeatIndex >= runtime.World.State.seats) summonSeatIndex = -1;
+            AddAction("← 返回时间与顾客", () => ShowCategory(activeCategory), "需已营业；可指定座位、重复召唤和强制挤位", false);
             AddAction("召唤位置：" + SummonSeatLabel() + "（点击切换）", CycleSummonSeat,
                 "自动分配或选择已开放的座位；显示桌号、左右侧和占用者");
             AddAction("允许重复召唤：" + (summonAllowDuplicate ? "开启" : "关闭"), () =>
@@ -434,7 +435,7 @@ namespace Spotlight.FreeCafe
                         && name.IndexOf(filter, StringComparison.OrdinalIgnoreCase) < 0) return;
                     count++;
                     var button = CreateButton(content.transform, name + "  [" + id + "]\n<size=14>"
-                        + (hasArtwork ? "点击召唤到店并自动入座" : "未配置店内素材，无法召唤") + "</size>", 20);
+                        + (hasArtwork ? "点击按上方设置召唤到店" : "未配置店内素材，无法召唤") + "</size>", 20);
                     button.GetComponent<LayoutElement>().preferredHeight = 64;
                     button.interactable = hasArtwork;
                     button.onClick.AddListener(() =>
@@ -470,7 +471,7 @@ namespace Spotlight.FreeCafe
             if (summonSeatIndex < 0) return "自动分配";
             string label = "位置 " + (summonSeatIndex + 1);
             if (runtime == null || runtime.World == null) return label;
-            if (runtime.seating != null && runtime.seating.TrySeat("customer_" + summonSeatIndex, out _, out var table, out bool right))
+            if (runtime.seating != null && runtime.seating.TrySeat("customer_" + summonSeatIndex, out _, out _, out bool right))
             {
                 int tableIndex = summonSeatIndex % runtime.seating.tables.Length;
                 label += " / 桌 " + (tableIndex + 1) + (right ? " 右侧" : " 左侧");

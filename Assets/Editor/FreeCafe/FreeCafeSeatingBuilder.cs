@@ -64,11 +64,13 @@ namespace Spotlight.FreeCafe.Editor
             seating.background = background;
             seating.tables = new[]
             {
-                Table("front_left", 955, 1535, 1f, false, 200),
+                Table("front_left", 955, 1535, 1f, false, 150),
                 Table("back_left", 1360, 1405, .86f, true, 100),
                 Table("back_right", 2120, 1405, .86f, false, 100),
-                Table("front_right", 2560, 1535, 1f, true, 200)
+                Table("front_right", 2560, 1535, 1f, true, 150)
             };
+            seating.tables[1].rightSeatAdjustmentPixels = new Vector2(-70, 0);
+            seating.tables[2].leftSeatAdjustmentPixels = new Vector2(70, 0);
             Undo.RecordObject(background, "Use chair-free background");
             background.sprite = ImportSprite("Assets/Art/Background/game/SCE_一楼大厅场景底图_无椅.png", new Vector2(.5f,.5f), false);
             seating.suppliedCustomer = ImportSprite(ArtRoot + "customer_seated.png", new Vector2(.42f,.29f), true);

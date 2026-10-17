@@ -7,11 +7,21 @@ namespace Spotlight.FreeCafe
     public sealed class CafeTablePlacement
     {
         public string id;
+        [Tooltip("原图左上角为原点的桌面中心像素；X 向右，Y 向下。不会移动底图中的桌子。")]
         public Vector2 tabletopPixel;
+        [Tooltip("该桌顾客和座椅的透视缩放，也影响座椅相对桌面的偏移。")]
         public float perspectiveScale = 1f;
+        [Tooltip("左右座位距离桌面中心的水平像素偏移，越大越远离桌子。")]
         public float seatOffsetPixels = 308f;
+        [Tooltip("座位相对桌面中心向下的像素偏移，越大越靠近画面下方。")]
         public float seatDropPixels = 154f;
+        [Tooltip("左侧座位单独修正，原图像素；X 向右，Y 向下，受透视缩放影响。")]
+        public Vector2 leftSeatAdjustmentPixels;
+        [Tooltip("右侧座位单独修正，原图像素；X 向右，Y 向下，受透视缩放影响。")]
+        public Vector2 rightSeatAdjustmentPixels;
+        [Tooltip("首个座位是否在桌子右侧；另一侧座位与其相反。")]
         public bool firstSeatOnRight;
+        [Tooltip("桌椅排序基准；工作台为 200，此值应小于 195。后排默认 100，前排默认 150。")]
         public int sortingOrder = 100;
     }
 
@@ -68,16 +78,31 @@ namespace Spotlight.FreeCafe
 
         public Vector3 SeatPosition(int index)
         {
+            var chair = SeatChair(index);
+            if (chair != null)
+                return runtime.areaRoots[(int)AreaId.Cafe].InverseTransformPoint(chair.transform.position);
+            return CalculatedSeatPosition(index);
+        }
+
+        private SpriteRenderer SeatChair(int index)
+        {
+            return seatChairs != null && index >= 0 && index < seatChairs.Length ? seatChairs[index] : null;
+        }
+
+        private Vector3 CalculatedSeatPosition(int index)
+        {
             var table = tables[index % tables.Length];
             bool mirrored = table.firstSeatOnRight != (index >= tables.Length);
             return PixelToArea(table.tabletopPixel + new Vector2((mirrored ? 1 : -1) * table.seatOffsetPixels,
-                table.seatDropPixels) * table.perspectiveScale);
+                table.seatDropPixels) * table.perspectiveScale
+                + (mirrored ? table.rightSeatAdjustmentPixels : table.leftSeatAdjustmentPixels) * table.perspectiveScale);
         }
 
         public void Configure(CafeCatalog catalog)
         {
             if (tables == null || tables.Length == 0 || background == null || background.sprite == null) return;
             catalog.customerSeats = new CafeSeatPosition[tables.Length * 2];
+            catalog.customerTableCount = tables.Length;
             catalog.economy.initialSeats = tables.Length;
             var bounds = Array.Find(catalog.areas, area => area.id == AreaId.Cafe);
             for (int index = 0; index < catalog.customerSeats.Length; index++)
@@ -112,11 +137,24 @@ namespace Spotlight.FreeCafe
         {
             if (entity.area != AreaId.Cafe || entity.specId != "customer"
                 || !TrySeat(entity.id, out int index, out var table, out bool mirrored)) return false;
+            if (entity.alternateSeatSide)
+            {
+                index = (index + tables.Length) % (tables.Length * 2);
+                mirrored = !mirrored;
+            }
             view.transform.localScale = Vector3.one;
             view.TeleportPresentation(runtime.AreaToWorld(AreaId.Cafe, SeatPosition(index).x, SeatPosition(index).y));
             var sprite = view.body.sprite;
             if (sprite == null) return false;
             var scale = ArtworkScale(table.perspectiveScale);
+            var chair = SeatChair(index);
+            if (chair != null)
+            {
+                var area = runtime.areaRoots[(int)AreaId.Cafe];
+                scale = new Vector3(area.InverseTransformVector(chair.transform.TransformVector(Vector3.right)).magnitude,
+                    area.InverseTransformVector(chair.transform.TransformVector(Vector3.up)).magnitude, 1);
+                mirrored = chair.flipX != (chair.transform.lossyScale.x < 0);
+            }
             float fit = sprite == suppliedCustomer || Array.Exists(characterArt, entry => entry.sprite == sprite)
                 ? 1f : 5.68f / Mathf.Max(.01f, sprite.bounds.size.y);
             scale.x *= fit;
@@ -149,16 +187,68 @@ namespace Spotlight.FreeCafe
             {
                 bool occupied = runtime.World.Find("customer_" + chair.tableIndex) != null
                     || runtime.World.Find("customer_" + (chair.tableIndex + tables.Length)) != null;
-                if (chair.renderer != null) chair.renderer.enabled = !occupied;
+                if (chair.renderer != null)
+                {
+                    chair.renderer.sortingOrder = tables[chair.tableIndex].sortingOrder;
+                    chair.renderer.enabled = !occupied;
+                }
             }
             for (int index = 0; index < seatChairs.Length; index++)
             {
                 int tableIndex = index % tables.Length;
                 bool occupied = runtime.World.Find("customer_" + tableIndex) != null
                     || runtime.World.Find("customer_" + (tableIndex + tables.Length)) != null;
-                if (seatChairs[index] != null) seatChairs[index].enabled = occupied;
+                if (seatChairs[index] != null)
+                {
+                    seatChairs[index].sortingOrder = tables[tableIndex].sortingOrder;
+                    seatChairs[index].enabled = occupied;
+                }
                 if (tableOccluders != null && tableIndex < tableOccluders.Length && tableOccluders[tableIndex] != null)
+                {
+                    tableOccluders[tableIndex].sortingOrder = tables[tableIndex].sortingOrder + 3;
                     tableOccluders[tableIndex].enabled = occupied;
+                }
+            }
+        }
+
+        [ContextMenu("Reset Seat Chairs From Table Parameters")]
+        public void RefreshSeatChairLayout()
+        {
+            if (runtime == null || background == null || background.sprite == null
+                || tables == null || tables.Length == 0 || seatChairs == null) return;
+            for (int index = 0; index < seatChairs.Length && index < tables.Length * 2; index++)
+            {
+                var chair = seatChairs[index];
+                if (chair == null) continue;
+                var table = tables[index % tables.Length];
+                var point = CalculatedSeatPosition(index);
+#if UNITY_EDITOR
+                if (!Application.isPlaying)
+                    UnityEditor.Undo.RecordObjects(new UnityEngine.Object[] { chair.transform, chair }, "Reset cafe seat chair");
+#endif
+                chair.transform.position = runtime.AreaToWorld(AreaId.Cafe, point.x, point.y);
+                chair.transform.localScale = ArtworkScale(table.perspectiveScale);
+                chair.flipX = table.firstSeatOnRight != (index >= tables.Length);
+                chair.sortingOrder = table.sortingOrder;
+#if UNITY_EDITOR
+                if (!Application.isPlaying)
+                {
+                    UnityEditor.PrefabUtility.RecordPrefabInstancePropertyModifications(chair.transform);
+                    UnityEditor.PrefabUtility.RecordPrefabInstancePropertyModifications(chair);
+                }
+#endif
+            }
+        }
+
+        private void OnDrawGizmosSelected()
+        {
+            if (runtime == null || background == null || background.sprite == null
+                || tables == null || tables.Length == 0) return;
+            for (int index = 0; index < tables.Length * 2; index++)
+            {
+                var point = SeatPosition(index);
+                Gizmos.color = index < tables.Length ? Color.cyan : Color.yellow;
+                Gizmos.DrawWireSphere(runtime.AreaToWorld(AreaId.Cafe, point.x, point.y), .2f);
             }
         }
 

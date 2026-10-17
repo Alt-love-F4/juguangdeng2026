@@ -280,7 +280,7 @@ namespace Spotlight.FreeCafe
         }
 
         /// <summary>生成一位顾客：占用一个空卡座、挑一道已解锁餐品下单，并决定 NPC 是否出场。</summary>
-        private void SpawnCustomer(CafePersonIdentity identity = null, int forcedSeatIndex = -1)
+        private void SpawnCustomer(CafePersonIdentity identity = null, int forcedSeatIndex = -1, bool randomizeForcedSide = false)
         {
             if (forcedSeatIndex < 0) ProcessVisitArrivals();
             if (State.todayArrivals + ReservedVisitBudget() >= State.todayCustomerBudget)
@@ -324,6 +324,7 @@ namespace Spotlight.FreeCafe
             };
             // 普通客人只下单。未来角色身份由显式注入的适配器提供，不自动触发 NCS。
             customer.person = identity ?? CreateCustomerIdentity(request.id, slot);
+            PlaceCustomerAtSeat(customer, slot, forcedSeatIndex < 0 || randomizeForcedSide);
             State.entities.Add(customer);
 
             // 招募「自动点单」店员后，有一定概率顾客自己完成点单

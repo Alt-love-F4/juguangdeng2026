@@ -244,6 +244,7 @@ namespace Spotlight.FreeCafe
         public RecipeSpec[] recipes;         // 制作流程（可选）
         public InitialEntity[] layout;       // 初始布局
         public CafeSeatPosition[] customerSeats;
+        public int customerTableCount;
         public AreaSpec[] areas;             // 区域配置
         public NpcSpec[] npcs;               // NPC 配置（可选）
         public IngredientRuleSpec[] ingredientRules;
@@ -276,6 +277,7 @@ namespace Spotlight.FreeCafe
         public string ownerId; // 若材料被锁在设备内，这里是设备 id
         public string npcId;  // 旧版 NPC 数据兼容；不等同于 NCS 角色标识
         public CafePersonIdentity person; // 人物身份，与座位 / 订单 / GameObject 生命周期分离
+        public bool alternateSeatSide;
         public AreaId area;   // 所在区域
         public float x;       // 坐标 x
         public float y;       // 坐标 y

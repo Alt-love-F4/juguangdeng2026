@@ -86,6 +86,13 @@ namespace Spotlight.FreeCafe
             }
             for (int i = 0; i < State.seats; i++)
             {
+                int tableCount = Catalog.customerTableCount;
+                if (tableCount > 0)
+                {
+                    if (requestedIndex < 0 && i >= tableCount && (applicant == null || string.IsNullOrEmpty(applicant.preferredSeatId))) continue;
+                    int other = (i + tableCount) % (tableCount * 2);
+                    if (Find("customer_" + other) != null) continue;
+                }
                 string seat = "customer_" + i;
                 if (applicant != null && !string.IsNullOrEmpty(applicant.preferredSeatId) && applicant.preferredSeatId != seat) continue;
                 if (Find(seat) != null) continue;
@@ -93,12 +100,12 @@ namespace Spotlight.FreeCafe
                 foreach (var v in State.cafeVisits)
                 {
                     if (v == applicant) break;
-                    if (v.status != CafeVisitStatus.Ended && (v.preferredSeatId == seat || v.seatId == seat)) { reserved = true; break; }
+                    if (v.status != CafeVisitStatus.Ended && (SameCustomerTable(v.preferredSeatId, seat) || SameCustomerTable(v.seatId, seat))) { reserved = true; break; }
                 }
                 // Ordinary visitors must respect all reservations; generic applicants respect later dedicated seats too.
                 if (!reserved && (applicant == null || string.IsNullOrEmpty(applicant.preferredSeatId)))
                     foreach (var v in State.cafeVisits)
-                        if (v != applicant && v.status != CafeVisitStatus.Ended && v.preferredSeatId == seat) { reserved = true; break; }
+                        if (v != applicant && v.status != CafeVisitStatus.Ended && SameCustomerTable(v.preferredSeatId, seat)) { reserved = true; break; }
                 if (!reserved)
                 {
                     if ((applicant == null || string.IsNullOrEmpty(applicant.preferredSeatId)) && genericReservations-- > 0) continue;
@@ -140,8 +147,9 @@ namespace Spotlight.FreeCafe
                 if (eligible.Count == 0) continue;
                 var product = eligible[State.requestSequence++ % eligible.Count];
                 v.seatId = v.customerId = "customer_" + slot;
-                State.entities.Add(new WorldEntity { id = v.customerId, specId = "customer", area = AreaId.Cafe,
-                    x = CustomerSeat(slot).x, y = CustomerSeat(slot).y, person = v.identity });
+                var customer = new WorldEntity { id = v.customerId, specId = "customer", area = AreaId.Cafe, person = v.identity };
+                PlaceCustomerAtSeat(customer, slot, string.IsNullOrEmpty(v.preferredSeatId));
+                State.entities.Add(customer);
                 var request = new CustomerRequest { id = Allocate("order_"), customerId = v.customerId, productId = product.id, patience = v.patienceRemaining };
                 if (State.automaticOrders && NextRandom() % 100 < (uint)(Catalog.economy.autoChance * 100)) request.automaticRemaining = Catalog.economy.autoSeconds;
                 State.requests.Add(request);

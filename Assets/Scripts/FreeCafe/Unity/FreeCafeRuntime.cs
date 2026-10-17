@@ -397,7 +397,12 @@ namespace Spotlight.FreeCafe
             if (cafeTutorial != null && cafeTutorial.WaitingForWorkstation) return;
             if (WorkstationTutorial != null && !WorkstationTutorial.AllowClick(entity.id)) return;
             var spec=World.Spec(entity.specId);
-            if(spec.Has(Capability.BusinessControl)) { StartBusiness(); return; }
+            if(spec.Has(Capability.BusinessControl))
+            {
+                if (World.State.open) RequestBusinessEnd();
+                else StartBusiness();
+                return;
+            }
             if(World.ProductionEnabled && spec.Has(Capability.Delivery))
             { ShowHint("把饮品放到案板上的盘子里，再点击工作台右下角按铃交付"); return; }
             if(World.ProductionEnabled && entity.specId=="tool.latte-art") { Report(World.RequestProductionMiniGame()); return; }
@@ -1119,10 +1124,16 @@ namespace Spotlight.FreeCafe
             SyncViews();
         }
 
-        public void StartBusiness() { if(!InputBlocked && !CafeTutorialActive) RequestBusinessStart(); }
+        public void StartBusiness()
+        {
+            if (World == null || InputBlocked || CafeTutorialActive) return;
+            if (World.State.open) RequestBusinessEnd();
+            else RequestBusinessStart();
+        }
         public void RequestBusinessStart() { if (!GameplayBlocked && !CafeTutorialActive && !PracticeTutorialActive) { pendingBusinessStart = true; TryStartBusiness(); } }
         private void TryStartBusiness()
         {
+            if (World == null || World.State.open) { pendingBusinessStart = false; return; }
             if (GameplayBlocked || CafeTutorialActive || PracticeTutorialActive) return;
             if (cafeVisits == null) cafeVisits = new CafeVisitBridge(this);
             var ncs = Spotlight.Narrative.NarrativeRuntime.Instance;
@@ -1130,6 +1141,14 @@ namespace Spotlight.FreeCafe
             pendingBusinessStart = false;
             Report(World.StartDay());
             cafeVisits.Pump();
+        }
+        public bool CanEndBusiness => World != null && World.State.open && !InputBlocked && !IsDragging
+            && !CafeTutorialActive && !PracticeTutorialActive;
+        public void RequestBusinessEnd()
+        {
+            if (!CanEndBusiness) return;
+            if (dayFlow != null && dayFlow.CanFinishBusiness) dayFlow.FinishBusiness();
+            else EndBusiness();
         }
         public void EndBusiness() { if(!InputBlocked) Report(World.EndDay()); }
         public void StartDayFlowBusiness()
