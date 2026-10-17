@@ -16,12 +16,12 @@
 ## Tasks
 
 ### Phase 1: Foundation
-- [ ] Task 1: Record the current git status, changed paths, and untracked paths as the preservation boundary before making any project edits.
-- [ ] Task 2: Read and reconcile `Docs/NcsIntegrationReport.md`, `Docs/NcsFormalDependencies.md`, `Assets/ConfigTables/Data/Narrative/NcsIntegrationQueue.csv`, and the latest NCS handoff reports into one event inventory.
-- [ ] Task 3: Inventory the authoritative Narrative/Text Excel sources, schema, Luban configuration, generated C# files, and generated JSON timestamps or hashes.
-- [ ] Task 4: Verify the availability and versions of Unity 6000.3.5f2, the official Luban tool, Python/openpyxl, .NET, and the project test/build entry points; record exact blockers if unavailable.
-- [ ] Task 5: Verify that `Assets/Scenes/PresentationDebugScene.unity`, its builder, controller, shared prefabs, and debug input bindings are present and loadable.
-- [ ] Task 6: Trace the current formal NCS runtime path from trigger selection through `NarrativeController`, `NarrativePresenter`, DayFlow, map actions, and presentation panels before changing code.
+- [x] Task 1: Record the current git status, changed paths, and untracked paths as the preservation boundary before making any project edits.
+- [x] Task 2: Read and reconcile `Docs/NcsIntegrationReport.md`, `Docs/NcsFormalDependencies.md`, `Assets/ConfigTables/Data/Narrative/NcsIntegrationQueue.csv`, and the latest NCS handoff reports into one event inventory.
+- [x] Task 3: Inventory the authoritative Narrative/Text Excel sources, schema, Luban configuration, generated C# files, and generated JSON timestamps or hashes.
+- [x] Task 4: Verify the availability and versions of Unity 6000.3.5f2, the official Luban tool, Python/openpyxl, .NET, and the project test/build entry points; record exact blockers if unavailable.
+- [x] Task 5: Verify that `Assets/Scenes/PresentationDebugScene.unity`, its builder, controller, shared prefabs, and debug input bindings are present and loadable.
+- [x] Task 6: Trace the current formal NCS runtime path from trigger selection through `NarrativeController`, `NarrativePresenter`, DayFlow, map actions, and presentation panels before changing code.
 - [ ] Task 7: Inventory the real presentation resources, scene background keys, character assets, reading assets, and known placeholders for every formal story root.
 - [ ] Task 8: Establish and verify the invariant that Revolution source rows, content, results, and reports remain present while `EV_REVOLUTION` and `T_CAL_D60` remain disabled.
 - [ ] Task 9: Establish and verify the invariant that no `npc_a` through `npc_d` test narrative is restored, copied, or used as a formal trigger; remove nothing beyond explicitly identified test junk.
