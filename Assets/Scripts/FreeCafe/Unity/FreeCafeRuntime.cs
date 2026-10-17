@@ -26,6 +26,7 @@ namespace Spotlight.FreeCafe
         public CafeArtLibrary artLibrary;
         public FreeEntityView entityPrefab;
         public FreeCafeEntityPrefabLibrary prefabLibrary;
+        public FreeCafeSeating seating;
         public Camera worldCamera;
         public FreeCafeAreaManager areaManager;
         public Transform[] areaRoots;
@@ -141,6 +142,7 @@ namespace Spotlight.FreeCafe
                 if(!view.gameObject.activeInHierarchy) inactiveAuthoredIds.Add(view.AuthoringEntityId);
             authored.RemoveAll(view => inactiveAuthoredIds.Contains(view.AuthoringEntityId));
             var catalog = JsonUtility.FromJson<CafeCatalog>(catalogAsset.text);
+            if (seating != null) seating.Configure(catalog);
             var extractionConfig=GetComponent<FreeCafeExtractionConfig>();
             if(extractionConfig!=null) extractionConfig.Apply(catalog.production);
             catalog.layout = FreeCafeSceneLayout.Capture(this, authored);
@@ -149,6 +151,7 @@ namespace Spotlight.FreeCafe
             var identities = customerIdentitySource as ICafeCustomerIdentitySource;
             if(identities==null && characterCatalog!=null && characterCatalog.Characters.Count>0)
                 identities=new CatalogCustomerIdentitySource(characterCatalog);
+            if(customerIdentitySource==null && seating!=null) identities=seating.WithSuppliedGuest(identities);
             World=new CafeWorld(catalog,identities);
             if(prefabLibrary==null) throw new InvalidOperationException("请配置 EntityPrefabLibrary");
             prefabLibrary.Validate(World.Catalog);
@@ -272,6 +275,7 @@ namespace Spotlight.FreeCafe
             }
             if (draggedView != null && !IsRegisteredView(dragEventOwner)) CancelDrag();
             areaManager.Focus(World.State.currentArea);
+            if (seating != null) seating.RefreshChairs();
             if(SelectedId!=null && World.Find(SelectedId)==null) SelectedId=null;
             ViewChanged?.Invoke();
         }
@@ -1141,5 +1145,26 @@ namespace Spotlight.FreeCafe
         public void RefillSources() { if(!InputBlocked) Report(World.Refill()); }
         public void RotateSelected() { if(!InputBlocked) World.Rotate(SelectedId); }
         public void DebugRefreshViews() { SyncViews(); ShowHint("经营视图已刷新"); }
+        public ActionResult DebugSummonCustomer(string characterId, int seatIndex = -1,
+            bool allowDuplicate = true, bool replaceExisting = false)
+        {
+            if (World == null) return ActionResult.No("当前场景未加载经营系统");
+            if (CafeTutorialActive || PracticeTutorialActive) return ActionResult.No("请先完成或跳过咖啡馆教程");
+            if (characterId == "supplied_seated_guest" && seating != null && seating.suppliedCustomer != null)
+                return World.DebugSummonCustomer(new CafePersonIdentity
+                {
+                    personId = characterId, displayName = seating.suppliedGuestName,
+                    visualId = "supplied.seated.guest", role = CafePersonRole.Customer
+                }, seatIndex, allowDuplicate, replaceExisting);
+            var character = Character(characterId);
+            if (character == null) return ActionResult.No("找不到角色：" + characterId);
+            if (character.worldSprite == null) return ActionResult.No(character.displayName + " 尚未配置店内素材");
+            return World.DebugSummonCustomer(new CafePersonIdentity
+            {
+                personId = character.characterId, characterId = character.characterId,
+                narrativeCharacterId = character.characterId, displayName = character.displayName,
+                visualId = "customer", role = CafePersonRole.Customer
+            }, seatIndex, allowDuplicate, replaceExisting);
+        }
     }
 }

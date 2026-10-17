@@ -1,0 +1,108 @@
+{
+  "sourceSize": [
+    4096,
+    2304
+  ],
+  "placements": [
+    {
+      "sprite": "chair_left",
+      "rect": [
+        497,
+        1387,
+        796,
+        1860
+      ],
+      "table": 0
+    },
+    {
+      "sprite": "chair_idle_1",
+      "rect": [
+        1077,
+        1344,
+        1296,
+        1751
+      ],
+      "table": 1
+    },
+    {
+      "sprite": "chair_idle_2",
+      "rect": [
+        1203,
+        1346,
+        1496,
+        1801
+      ],
+      "table": 1
+    },
+    {
+      "sprite": "chair_idle_3",
+      "rect": [
+        1457,
+        1282,
+        1637,
+        1660
+      ],
+      "table": 1
+    },
+    {
+      "sprite": "chair_idle_4",
+      "rect": [
+        1798,
+        1284,
+        2030,
+        1678
+      ],
+      "table": 2
+    },
+    {
+      "sprite": "table_front_0",
+      "rect": [
+        722,
+        1501,
+        1188,
+        1901
+      ],
+      "table": 0
+    },
+    {
+      "sprite": "table_front_1",
+      "rect": [
+        1147,
+        1371,
+        1573,
+        1706
+      ],
+      "table": 1
+    },
+    {
+      "sprite": "table_front_2",
+      "rect": [
+        1915,
+        1371,
+        2326,
+        1711
+      ],
+      "table": 2
+    },
+    {
+      "sprite": "table_front_3",
+      "rect": [
+        2322,
+        1501,
+        2798,
+        1894
+      ],
+      "table": 3
+    }
+  ],
+  "customerSourceRect": [
+    420,
+    1294,
+    871,
+    1862
+  ],
+  "customerSize": [
+    451,
+    568
+  ]
+}

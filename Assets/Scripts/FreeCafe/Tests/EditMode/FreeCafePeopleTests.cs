@@ -106,6 +106,63 @@ namespace Spotlight.FreeCafe.Tests
             copy.entities.Find(e=>e.id=="customer_0").person.displayName="";
             Assert.That(world.Restore(copy).success,Is.False);Assert.That(world.State,Is.SameAs(live));
         }
+        [Test] public void DebugSummonUsesSelectedIdentityAndExistingSeatAndOrderFlow()
+        {
+            world.StartDay();
+            var oldOrder = world.State.requests[0];
+            string seat = oldOrder.customerId;
+            world.State.entities.Remove(world.Find(seat));
+            world.State.requests.Remove(oldOrder);
+            world.State.focusedRequestId = null;
+            world.State.todayCustomerBudget = world.State.todayArrivals;
+            var identity = new CafePersonIdentity { personId = "gm_guest", characterId = "gm_guest",
+                narrativeCharacterId = "gm_guest", displayName = "指定顾客", role = CafePersonRole.Customer, visualId = "customer" };
+            int arrivals = world.State.todayArrivals;
+            Assert.That(world.DebugSummonCustomer(identity).success, Is.True);
+            var customer = world.Find(seat);
+            Assert.That(customer.person.characterId, Is.EqualTo("gm_guest"));
+            Assert.That(customer.person, Is.Not.SameAs(identity));
+            Assert.That(world.State.requests.Find(order => order.customerId == seat), Is.Not.Null);
+            Assert.That(world.State.todayArrivals, Is.EqualTo(arrivals + 1));
+            Assert.That(world.State.cafeVisits, Is.Empty);
+            Assert.That(world.State.cafeVisitFeedback, Is.Empty);
+            Assert.That(world.DebugSummonCustomer(identity).success, Is.False);
+            Assert.That(world.State.todayArrivals, Is.EqualTo(arrivals + 1));
+            Assert.That(world.Restore(JsonUtility.FromJson<CafeSnapshot>(JsonUtility.ToJson(world.State))).success, Is.True);
+        }
+        [Test] public void DebugSummonRejectsClosedShopAndFullSeatsWithoutChangingBudget()
+        {
+            var identity = new CafePersonIdentity { personId = "gm_guest", displayName = "指定顾客", role = CafePersonRole.Customer };
+            Assert.That(world.DebugSummonCustomer(identity).success, Is.False);
+            Assert.That(world.State.entities.Exists(entity => entity.person?.personId == "gm_guest"), Is.False);
+            world.StartDay();
+            int budget = world.State.todayCustomerBudget, arrivals = world.State.todayArrivals;
+            Assert.That(world.DebugSummonCustomer(identity).success, Is.False);
+            Assert.That(world.State.todayCustomerBudget, Is.EqualTo(budget));
+            Assert.That(world.State.todayArrivals, Is.EqualTo(arrivals));
+        }
+        [Test] public void DebugSummonRespectsNarrativeReservationsAndCustomerBudgetLimit()
+        {
+            world.State.seats = 1;
+            world.StartDay();
+            world.State.entities.Remove(world.Find("customer_0"));
+            world.State.requests.Clear();
+            world.State.focusedRequestId = null;
+            var identity = new CafePersonIdentity { personId = "gm_guest", characterId = "gm_guest",
+                displayName = "指定顾客", role = CafePersonRole.Customer };
+            Assert.That(world.SyncCafeVisits(new[] { new CafeVisitIntent { visitInstanceId = "reserved_guest",
+                characterId = "ncs_guest", preferredSeatId = "customer_0",
+                identity = new CafePersonIdentity { personId = "ncs_guest", displayName = "剧情顾客", role = CafePersonRole.Customer } } }).success, Is.True);
+            Assert.That(world.DebugSummonCustomer(identity).success, Is.False);
+            Assert.That(world.Find("customer_0"), Is.Null);
+            identity.characterId = "ncs_guest";
+            Assert.That(world.DebugSummonCustomer(identity).success, Is.False);
+            world.EndCafeVisit("reserved_guest", "reservation_cancelled");
+            identity.characterId = "gm_guest";
+            world.State.todayCustomerBudget = world.State.todayArrivals = catalog.economy.maxCustomers;
+            Assert.That(world.DebugSummonCustomer(identity).success, Is.False);
+            Assert.That(world.Find("customer_0"), Is.Null);
+        }
         private sealed class IdentitySource : ICafeCustomerIdentitySource
         {
             public int calls;

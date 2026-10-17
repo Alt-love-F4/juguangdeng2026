@@ -6,6 +6,14 @@ namespace Spotlight.FreeCafe.Tests
 {
     public sealed class RuntimeCharacterTests
     {
+        private static readonly string[] FormalCharacterIds =
+        {
+            "laurent", "clovis", "renaud", "elion", "alienor", "queen", "bertrand", "sade",
+            "mamion", "lucien", "lesou", "sylvain", "antoine", "lefebvre", "duval", "adele",
+            "emmanuel", "sparrow", "thibaut", "octave", "eugene", "colette", "pascal", "marie",
+            "guest_a", "guest_b", "guest_c", "guest_d", "soldier_a", "soldier_b", "soldier_c", "soldier_d"
+        };
+
         [Test]
         public void CatalogRejectsDuplicateIds()
         {
@@ -21,21 +29,72 @@ namespace Spotlight.FreeCafe.Tests
         }
 
         [Test]
-        public void ObjectResourcesAndIndoorFallbackMatchDesign()
+        public void FormalCharacterResourcesMatchDesign()
         {
             var configuration=LubanNarrativeLoader.Load();
             var catalog=CharacterCatalog.LoadFromTables();
-            Assert.That(configuration.objects.Count,Is.EqualTo(38));
-            Assert.That(catalog.Find("adele").cafeCustomer,Is.False);
-            Assert.That(catalog.Find("eugene").cafeCustomer,Is.True);
-            foreach(var obj in configuration.objects)
+            try
             {
-                foreach(var path in new[]{obj.portraitPath,obj.portraitIndoorPath,obj.avtarPath})
-                    if(!string.IsNullOrWhiteSpace(path)) Assert.That(Resources.Load<Sprite>(path),Is.Not.Null,obj.objId+":"+path);
-                if(obj.objType==NarrativeObjectType.Npc && !string.IsNullOrWhiteSpace(obj.portraitPath) && string.IsNullOrWhiteSpace(obj.portraitIndoorPath))
-                    Assert.That(catalog.Find(obj.objId).worldSprite,Is.EqualTo(catalog.Find(obj.objId).portrait));
+                Assert.That(FormalCharacterIds.Length,Is.EqualTo(32));
+                Assert.That(FormalCharacterIds,Is.Unique);
+                foreach(var id in FormalCharacterIds)
+                {
+                    var obj=configuration.objects.Find(row=>row.objId==id);
+                    Assert.That(obj,Is.Not.Null,id+": Object row");
+                    Assert.That(obj.portraitPath,Is.EqualTo("Characters/"+id+"/neutral"),id);
+                    Assert.That(obj.avtarPath,Is.EqualTo("Characters/"+id+"/avatar"),id);
+                    Assert.That(obj.portraitIndoorPath,Is.EqualTo("Characters/"+id+"/seated_placeholder"),id);
+
+                    var profile=catalog.Find(id);
+                    Assert.That(profile,Is.Not.Null,id+": catalog profile");
+                    Assert.That(profile.portrait,Is.Not.Null,id+": portrait");
+                    Assert.That(profile.avatar,Is.Not.Null,id+": avatar");
+                    Assert.That(profile.worldSprite,Is.Not.Null,id+": worldSprite");
+                    Assert.That(profile.portrait,Is.SameAs(Resources.Load<Sprite>(obj.portraitPath)),id);
+                    Assert.That(profile.avatar,Is.SameAs(Resources.Load<Sprite>(obj.avtarPath)),id);
+                    Assert.That(profile.worldSprite,Is.SameAs(Resources.Load<Sprite>(obj.portraitIndoorPath)),id);
+                    Assert.That(profile.avatar.rect.width,Is.EqualTo(512f),id+": avatar width");
+                    Assert.That(profile.avatar.rect.height,Is.EqualTo(512f),id+": avatar height");
+                    Assert.That(profile.worldSprite.name,Is.EqualTo("seated_placeholder"),id);
+                    Assert.That(profile.worldSprite,Is.Not.SameAs(profile.portrait),id);
+                }
+                Assert.That(catalog.Find("adele").cafeCustomer,Is.False);
+                Assert.That(catalog.Find("eugene").cafeCustomer,Is.True);
             }
-            Object.DestroyImmediate(catalog);
+            finally { Object.DestroyImmediate(catalog); }
+        }
+
+        [Test]
+        public void AllNonEmptyObjectResourcePathsLoadSuccessfully()
+        {
+            var configuration=LubanNarrativeLoader.Load();
+            foreach(var obj in configuration.objects)
+                foreach(var path in new[]{obj.iconPath,obj.portraitPath,obj.portraitIndoorPath,obj.avtarPath})
+                    if(!string.IsNullOrWhiteSpace(path)) Assert.That(Resources.Load<Sprite>(path),Is.Not.Null,obj.objId+":"+path);
+        }
+
+        [Test]
+        public void NonFormalRowsWithMissingIndoorUsePortraitFallback()
+        {
+            var configuration=LubanNarrativeLoader.Load();
+            var formalIds=new System.Collections.Generic.HashSet<string>(FormalCharacterIds);
+            var catalog=CharacterCatalog.LoadFromTables();
+            try
+            {
+                // Formal characters always have seated_placeholder; this compatibility rule only
+                // applies if a non-formal NPC row actually omits its indoor resource.
+                // Do not assert that the current table contains any such fallback row.
+                foreach(var obj in configuration.objects)
+                {
+                    if(formalIds.Contains(obj.objId) || obj.objType!=NarrativeObjectType.Npc ||
+                        string.IsNullOrWhiteSpace(obj.portraitPath) || !string.IsNullOrWhiteSpace(obj.portraitIndoorPath)) continue;
+                    var profile=catalog.Find(obj.objId);
+                    Assert.That(profile,Is.Not.Null,obj.objId);
+                    Assert.That(profile.portrait,Is.Not.Null,obj.objId);
+                    Assert.That(profile.worldSprite,Is.SameAs(profile.portrait),obj.objId);
+                }
+            }
+            finally { Object.DestroyImmediate(catalog); }
         }
 
         [Test]

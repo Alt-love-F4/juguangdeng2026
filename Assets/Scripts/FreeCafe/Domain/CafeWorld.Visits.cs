@@ -76,7 +76,7 @@ namespace Spotlight.FreeCafe
             foreach (var v in State.cafeVisits) if (AwaitingSeat(v) && v.budgetReserved) count++;
             return count;
         }
-        private int AvailableSeat(CafeVisitInstance applicant = null)
+        private int AvailableSeat(CafeVisitInstance applicant = null, int requestedIndex = -1)
         {
             int genericReservations = 0;
             foreach (var earlier in State.cafeVisits)
@@ -102,6 +102,7 @@ namespace Spotlight.FreeCafe
                 if (!reserved)
                 {
                     if ((applicant == null || string.IsNullOrEmpty(applicant.preferredSeatId)) && genericReservations-- > 0) continue;
+                    if (requestedIndex >= 0 && i != requestedIndex) continue;
                     return i;
                 }
             }
@@ -140,7 +141,7 @@ namespace Spotlight.FreeCafe
                 var product = eligible[State.requestSequence++ % eligible.Count];
                 v.seatId = v.customerId = "customer_" + slot;
                 State.entities.Add(new WorldEntity { id = v.customerId, specId = "customer", area = AreaId.Cafe,
-                    x = -6 + (slot % 4) * 3.5f, y = .5f - (slot / 4) * 2.5f, person = v.identity });
+                    x = CustomerSeat(slot).x, y = CustomerSeat(slot).y, person = v.identity });
                 var request = new CustomerRequest { id = Allocate("order_"), customerId = v.customerId, productId = product.id, patience = v.patienceRemaining };
                 if (State.automaticOrders && NextRandom() % 100 < (uint)(Catalog.economy.autoChance * 100)) request.automaticRemaining = Catalog.economy.autoSeconds;
                 State.requests.Add(request);

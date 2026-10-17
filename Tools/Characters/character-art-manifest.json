@@ -1,0 +1,434 @@
+[
+  {
+    "id": "laurent",
+    "name": "洛朗·迪蒙",
+    "source": "Assets/Art/Gameplay/人物2-常规色 (2)/洛朗.png",
+    "portraitPlaceholder": false,
+    "avatarCrop": [
+      0.24,
+      0,
+      0.5
+    ],
+    "portraitPath": "Characters/laurent/neutral",
+    "avtarPath": "Characters/laurent/avatar",
+    "portraitIndoorPath": "Characters/laurent/seated_placeholder",
+    "seatedPlaceholder": true
+  },
+  {
+    "id": "clovis",
+    "name": "克洛维.康多尔",
+    "source": "Assets/Art/Gameplay/人物2-常规色 (2)/克洛维·康多尔 皇帝.png",
+    "portraitPlaceholder": false,
+    "avatarCrop": [
+      0.2,
+      0,
+      0.6
+    ],
+    "portraitPath": "Characters/clovis/neutral",
+    "avtarPath": "Characters/clovis/avatar",
+    "portraitIndoorPath": "Characters/clovis/seated_placeholder",
+    "seatedPlaceholder": true
+  },
+  {
+    "id": "renaud",
+    "name": "雷诺.康多尔",
+    "source": null,
+    "portraitPlaceholder": true,
+    "avatarCrop": null,
+    "portraitPath": "Characters/renaud/neutral",
+    "avtarPath": "Characters/renaud/avatar",
+    "portraitIndoorPath": "Characters/renaud/seated_placeholder",
+    "seatedPlaceholder": true
+  },
+  {
+    "id": "elion",
+    "name": "埃利昂.康多尔",
+    "source": "Assets/Art/Gameplay/人物-常规色/埃利昂.康多尔.png",
+    "portraitPlaceholder": false,
+    "avatarCrop": [
+      0.2,
+      0,
+      0.6
+    ],
+    "portraitPath": "Characters/elion/neutral",
+    "avtarPath": "Characters/elion/avatar",
+    "portraitIndoorPath": "Characters/elion/seated_placeholder",
+    "seatedPlaceholder": true
+  },
+  {
+    "id": "alienor",
+    "name": "阿莉耶诺尔.康多尔",
+    "source": "Assets/Art/Gameplay/人物-常规色/阿莉耶诺尔(公主.png",
+    "portraitPlaceholder": false,
+    "avatarCrop": [
+      0.27,
+      0.1,
+      0.6
+    ],
+    "portraitPath": "Characters/alienor/neutral",
+    "avtarPath": "Characters/alienor/avatar",
+    "portraitIndoorPath": "Characters/alienor/seated_placeholder",
+    "seatedPlaceholder": true
+  },
+  {
+    "id": "queen",
+    "name": "王后",
+    "source": null,
+    "portraitPlaceholder": true,
+    "avatarCrop": null,
+    "portraitPath": "Characters/queen/neutral",
+    "avtarPath": "Characters/queen/avatar",
+    "portraitIndoorPath": "Characters/queen/seated_placeholder",
+    "seatedPlaceholder": true
+  },
+  {
+    "id": "bertrand",
+    "name": "贝特朗.康多尔",
+    "source": "Assets/Art/Gameplay/人物-常规色/贝特朗（剪影.png",
+    "portraitPlaceholder": false,
+    "avatarCrop": [
+      0.39,
+      0,
+      0.49
+    ],
+    "portraitPath": "Characters/bertrand/neutral",
+    "avtarPath": "Characters/bertrand/avatar",
+    "portraitIndoorPath": "Characters/bertrand/seated_placeholder",
+    "seatedPlaceholder": true
+  },
+  {
+    "id": "sade",
+    "name": "萨德",
+    "source": "Assets/Art/Gameplay/人物-常规色/萨德神父.png",
+    "portraitPlaceholder": false,
+    "avatarCrop": [
+      0.18,
+      0,
+      0.65
+    ],
+    "portraitPath": "Characters/sade/neutral",
+    "avtarPath": "Characters/sade/avatar",
+    "portraitIndoorPath": "Characters/sade/seated_placeholder",
+    "seatedPlaceholder": true
+  },
+  {
+    "id": "mamion",
+    "name": "马米翁",
+    "source": "Assets/Art/Gameplay/人物2-常规色 (2)/马米翁 大主教.png",
+    "portraitPlaceholder": false,
+    "avatarCrop": [
+      0.24,
+      0,
+      0.52
+    ],
+    "portraitPath": "Characters/mamion/neutral",
+    "avtarPath": "Characters/mamion/avatar",
+    "portraitIndoorPath": "Characters/mamion/seated_placeholder",
+    "seatedPlaceholder": true
+  },
+  {
+    "id": "lucien",
+    "name": "吕西安",
+    "source": "Assets/Art/Gameplay/人物2-常规色 (2)/吕西安 神父.png",
+    "portraitPlaceholder": false,
+    "avatarCrop": [
+      0.03,
+      0,
+      0.97
+    ],
+    "portraitPath": "Characters/lucien/neutral",
+    "avtarPath": "Characters/lucien/avatar",
+    "portraitIndoorPath": "Characters/lucien/seated_placeholder",
+    "seatedPlaceholder": true
+  },
+  {
+    "id": "lesou",
+    "name": "勒苏",
+    "source": "Assets/Art/Gameplay/人物-常规色/勒苏.png",
+    "portraitPlaceholder": false,
+    "avatarCrop": [
+      0.12,
+      0,
+      0.83
+    ],
+    "portraitPath": "Characters/lesou/neutral",
+    "avtarPath": "Characters/lesou/avatar",
+    "portraitIndoorPath": "Characters/lesou/seated_placeholder",
+    "seatedPlaceholder": true
+  },
+  {
+    "id": "sylvain",
+    "name": "西尔万.瓦隆",
+    "source": "Assets/Art/Gameplay/人物2-常规色 (2)/西尔万.瓦隆 教授.png",
+    "portraitPlaceholder": false,
+    "avatarCrop": [
+      0.18,
+      0,
+      0.64
+    ],
+    "portraitPath": "Characters/sylvain/neutral",
+    "avtarPath": "Characters/sylvain/avatar",
+    "portraitIndoorPath": "Characters/sylvain/seated_placeholder",
+    "seatedPlaceholder": true
+  },
+  {
+    "id": "antoine",
+    "name": "安托万.马尚",
+    "source": "Assets/Art/Gameplay/人物-常规色/安托万富商.png",
+    "portraitPlaceholder": false,
+    "avatarCrop": [
+      0.27,
+      0,
+      0.6
+    ],
+    "portraitPath": "Characters/antoine/neutral",
+    "avtarPath": "Characters/antoine/avatar",
+    "portraitIndoorPath": "Characters/antoine/seated_placeholder",
+    "seatedPlaceholder": true
+  },
+  {
+    "id": "lefebvre",
+    "name": "勒费弗尔",
+    "source": "Assets/Art/Gameplay/人物2-常规色 (2)/勒费弗尔.png",
+    "portraitPlaceholder": false,
+    "avatarCrop": [
+      0.18,
+      0,
+      0.53
+    ],
+    "portraitPath": "Characters/lefebvre/neutral",
+    "avtarPath": "Characters/lefebvre/avatar",
+    "portraitIndoorPath": "Characters/lefebvre/seated_placeholder",
+    "seatedPlaceholder": true
+  },
+  {
+    "id": "duval",
+    "name": "杜瓦尔.米尼耶",
+    "source": null,
+    "portraitPlaceholder": true,
+    "avatarCrop": null,
+    "portraitPath": "Characters/duval/neutral",
+    "avtarPath": "Characters/duval/avatar",
+    "portraitIndoorPath": "Characters/duval/seated_placeholder",
+    "seatedPlaceholder": true
+  },
+  {
+    "id": "adele",
+    "name": "阿黛尔·米尼耶",
+    "source": "Assets/Art/Gameplay/人物-常规色/阿黛尔.png",
+    "portraitPlaceholder": false,
+    "avatarCrop": [
+      0.12,
+      0,
+      0.78
+    ],
+    "portraitPath": "Characters/adele/neutral",
+    "avtarPath": "Characters/adele/avatar",
+    "portraitIndoorPath": "Characters/adele/seated_placeholder",
+    "seatedPlaceholder": true
+  },
+  {
+    "id": "emmanuel",
+    "name": "埃马纽埃尔·索雷尔",
+    "source": "Assets/Art/Gameplay/人物2-常规色 (2)/埃马纽埃尔·索雷尔医生.png",
+    "portraitPlaceholder": false,
+    "avatarCrop": [
+      0.2,
+      0,
+      0.65
+    ],
+    "portraitPath": "Characters/emmanuel/neutral",
+    "avtarPath": "Characters/emmanuel/avatar",
+    "portraitIndoorPath": "Characters/emmanuel/seated_placeholder",
+    "seatedPlaceholder": true
+  },
+  {
+    "id": "sparrow",
+    "name": "麻雀",
+    "source": "Assets/Art/Gameplay/人物2-常规色 (2)/麻雀.png",
+    "portraitPlaceholder": false,
+    "avatarCrop": [
+      0.05,
+      0,
+      0.9
+    ],
+    "portraitPath": "Characters/sparrow/neutral",
+    "avtarPath": "Characters/sparrow/avatar",
+    "portraitIndoorPath": "Characters/sparrow/seated_placeholder",
+    "seatedPlaceholder": true
+  },
+  {
+    "id": "thibaut",
+    "name": "蒂博·卡隆",
+    "source": "Assets/Art/Gameplay/人物-常规色/蒂博·卡隆.png",
+    "portraitPlaceholder": false,
+    "avatarCrop": [
+      0.1,
+      0,
+      0.8
+    ],
+    "portraitPath": "Characters/thibaut/neutral",
+    "avtarPath": "Characters/thibaut/avatar",
+    "portraitIndoorPath": "Characters/thibaut/seated_placeholder",
+    "seatedPlaceholder": true
+  },
+  {
+    "id": "octave",
+    "name": "奥克塔夫·韦尔内",
+    "source": null,
+    "portraitPlaceholder": true,
+    "avatarCrop": null,
+    "portraitPath": "Characters/octave/neutral",
+    "avtarPath": "Characters/octave/avatar",
+    "portraitIndoorPath": "Characters/octave/seated_placeholder",
+    "seatedPlaceholder": true
+  },
+  {
+    "id": "eugene",
+    "name": "欧仁·迪布瓦",
+    "source": "Assets/Art/Gameplay/人物-常规色/欧仁.png",
+    "portraitPlaceholder": false,
+    "avatarCrop": [
+      0.05,
+      0,
+      0.9
+    ],
+    "portraitPath": "Characters/eugene/neutral",
+    "avtarPath": "Characters/eugene/avatar",
+    "portraitIndoorPath": "Characters/eugene/seated_placeholder",
+    "seatedPlaceholder": true
+  },
+  {
+    "id": "colette",
+    "name": "柯莱特·布吕内",
+    "source": "Assets/Art/Gameplay/人物2-常规色 (2)/柯莱特·布吕内.png",
+    "portraitPlaceholder": false,
+    "avatarCrop": [
+      0,
+      0,
+      1
+    ],
+    "portraitPath": "Characters/colette/neutral",
+    "avtarPath": "Characters/colette/avatar",
+    "portraitIndoorPath": "Characters/colette/seated_placeholder",
+    "seatedPlaceholder": true
+  },
+  {
+    "id": "pascal",
+    "name": "帕斯卡尔·勒鲁",
+    "source": "Assets/Art/Gameplay/人物2-常规色 (2)/帕斯卡尔·勒鲁.png",
+    "portraitPlaceholder": false,
+    "avatarCrop": [
+      0.2,
+      0,
+      0.55
+    ],
+    "portraitPath": "Characters/pascal/neutral",
+    "avtarPath": "Characters/pascal/avatar",
+    "portraitIndoorPath": "Characters/pascal/seated_placeholder",
+    "seatedPlaceholder": true
+  },
+  {
+    "id": "marie",
+    "name": "雅克·马尚",
+    "source": "Assets/Art/Gameplay/人物2-常规色 (2)/玛丽 女扮男.png",
+    "portraitPlaceholder": false,
+    "avatarCrop": [
+      0.12,
+      0,
+      0.78
+    ],
+    "portraitPath": "Characters/marie/neutral",
+    "avtarPath": "Characters/marie/avatar",
+    "portraitIndoorPath": "Characters/marie/seated_placeholder",
+    "seatedPlaceholder": true
+  },
+  {
+    "id": "guest_a",
+    "name": "客人A",
+    "source": null,
+    "portraitPlaceholder": true,
+    "avatarCrop": null,
+    "portraitPath": "Characters/guest_a/neutral",
+    "avtarPath": "Characters/guest_a/avatar",
+    "portraitIndoorPath": "Characters/guest_a/seated_placeholder",
+    "seatedPlaceholder": true
+  },
+  {
+    "id": "guest_b",
+    "name": "客人B",
+    "source": null,
+    "portraitPlaceholder": true,
+    "avatarCrop": null,
+    "portraitPath": "Characters/guest_b/neutral",
+    "avtarPath": "Characters/guest_b/avatar",
+    "portraitIndoorPath": "Characters/guest_b/seated_placeholder",
+    "seatedPlaceholder": true
+  },
+  {
+    "id": "guest_c",
+    "name": "客人C",
+    "source": null,
+    "portraitPlaceholder": true,
+    "avatarCrop": null,
+    "portraitPath": "Characters/guest_c/neutral",
+    "avtarPath": "Characters/guest_c/avatar",
+    "portraitIndoorPath": "Characters/guest_c/seated_placeholder",
+    "seatedPlaceholder": true
+  },
+  {
+    "id": "guest_d",
+    "name": "客人D",
+    "source": null,
+    "portraitPlaceholder": true,
+    "avatarCrop": null,
+    "portraitPath": "Characters/guest_d/neutral",
+    "avtarPath": "Characters/guest_d/avatar",
+    "portraitIndoorPath": "Characters/guest_d/seated_placeholder",
+    "seatedPlaceholder": true
+  },
+  {
+    "id": "soldier_a",
+    "name": "军人A",
+    "source": null,
+    "portraitPlaceholder": true,
+    "avatarCrop": null,
+    "portraitPath": "Characters/soldier_a/neutral",
+    "avtarPath": "Characters/soldier_a/avatar",
+    "portraitIndoorPath": "Characters/soldier_a/seated_placeholder",
+    "seatedPlaceholder": true
+  },
+  {
+    "id": "soldier_b",
+    "name": "军人B",
+    "source": null,
+    "portraitPlaceholder": true,
+    "avatarCrop": null,
+    "portraitPath": "Characters/soldier_b/neutral",
+    "avtarPath": "Characters/soldier_b/avatar",
+    "portraitIndoorPath": "Characters/soldier_b/seated_placeholder",
+    "seatedPlaceholder": true
+  },
+  {
+    "id": "soldier_c",
+    "name": "军人C",
+    "source": null,
+    "portraitPlaceholder": true,
+    "avatarCrop": null,
+    "portraitPath": "Characters/soldier_c/neutral",
+    "avtarPath": "Characters/soldier_c/avatar",
+    "portraitIndoorPath": "Characters/soldier_c/seated_placeholder",
+    "seatedPlaceholder": true
+  },
+  {
+    "id": "soldier_d",
+    "name": "军人D",
+    "source": null,
+    "portraitPlaceholder": true,
+    "avatarCrop": null,
+    "portraitPath": "Characters/soldier_d/neutral",
+    "avtarPath": "Characters/soldier_d/avatar",
+    "portraitIndoorPath": "Characters/soldier_d/seated_placeholder",
+    "seatedPlaceholder": true
+  }
+]

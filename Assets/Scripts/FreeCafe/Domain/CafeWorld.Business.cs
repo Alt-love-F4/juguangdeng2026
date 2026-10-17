@@ -204,8 +204,8 @@ namespace Spotlight.FreeCafe
                 id = TutorialCustomerId,
                 specId = "customer",
                 area = AreaId.Cafe,
-                x = -6,
-                y = .5f,
+                x = CustomerSeat(0).x,
+                y = CustomerSeat(0).y,
                 person = CreateCustomerIdentity("tutorial_customer", 0)
             });
             State.requests.Add(new CustomerRequest
@@ -280,16 +280,17 @@ namespace Spotlight.FreeCafe
         }
 
         /// <summary>生成一位顾客：占用一个空卡座、挑一道已解锁餐品下单，并决定 NPC 是否出场。</summary>
-        private void SpawnCustomer()
+        private void SpawnCustomer(CafePersonIdentity identity = null, int forcedSeatIndex = -1)
         {
-            ProcessVisitArrivals();
+            if (forcedSeatIndex < 0) ProcessVisitArrivals();
             if (State.todayArrivals + ReservedVisitBudget() >= State.todayCustomerBudget)
             {
                 return;
             }
 
-            int slot = AvailableSeat();
+            int slot = forcedSeatIndex >= 0 ? forcedSeatIndex : AvailableSeat();
             if (slot < 0) return;
+            if (slot >= State.seats || Find("customer_" + slot) != null) return;
             State.todayArrivals++;
 
             // 从已解锁餐品里按订单序号轮换，保证品类分布均匀
@@ -310,8 +311,8 @@ namespace Spotlight.FreeCafe
                 id = "customer_" + slot,
                 specId = "customer",
                 area = AreaId.Cafe,
-                x = -6 + (slot % 4) * 3.5f,
-                y = .5f - (slot / 4) * 2.5f
+                x = CustomerSeat(slot).x,
+                y = CustomerSeat(slot).y
             };
 
             var request = new CustomerRequest
@@ -322,7 +323,7 @@ namespace Spotlight.FreeCafe
                 patience = Catalog.customerPatience
             };
             // 普通客人只下单。未来角色身份由显式注入的适配器提供，不自动触发 NCS。
-            customer.person = CreateCustomerIdentity(request.id, slot);
+            customer.person = identity ?? CreateCustomerIdentity(request.id, slot);
             State.entities.Add(customer);
 
             // 招募「自动点单」店员后，有一定概率顾客自己完成点单

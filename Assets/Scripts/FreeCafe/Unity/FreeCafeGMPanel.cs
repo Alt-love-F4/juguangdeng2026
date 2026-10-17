@@ -29,6 +29,10 @@ namespace Spotlight.FreeCafe
         private RectTransform windowRect;
         private RectTransform canvasRect;
         private Transform sidebarTransform;
+        private string customerSearch = string.Empty;
+        private int summonSeatIndex = -1;
+        private bool summonAllowDuplicate = true;
+        private bool summonReplaceExisting;
 
         public static FreeCafeGMPanel Instance { get; private set; }
         public bool IsVisible => root!=null && root.activeSelf;
@@ -346,10 +350,141 @@ namespace Spotlight.FreeCafe
 
         private void BuildTimeAndCustomers()
         {
+            AddAction("召唤指定顾客…", BuildCustomerSummon, "按角色名字或 ID 搜索；点击角色即可召唤到空座");
             AddAction("剩余时间设为 60 秒", () => Report(runtime.World.DebugSetTime(60)), "仅修改营业倒计时");
             AddAction("剩余时间设为 10 秒", () => Report(runtime.World.DebugSetTime(10)), "用于测试倒计时结算");
             AddAction("生成 1 位顾客", () => Report(runtime.World.DebugSpawnCustomers(1)), "需要营业且有空卡座");
             AddAction("生成 5 位顾客", () => Report(runtime.World.DebugSpawnCustomers(5)), "需要营业且有空卡座");
+        }
+
+        private void BuildCustomerSummon()
+        {
+            foreach (Transform child in body.transform)
+            {
+                child.gameObject.SetActive(false);
+                Destroy(child.gameObject);
+            }
+            AddAction("← 返回时间与顾客", () => ShowCategory(activeCategory), "需要已营业、有空座；不自动开业、不触发剧情预约", false);
+            AddAction("召唤位置：" + SummonSeatLabel() + "（点击切换）", CycleSummonSeat,
+                "自动分配或选择已开放的座位；显示桌号、左右侧和占用者");
+            AddAction("允许重复召唤：" + (summonAllowDuplicate ? "开启" : "关闭"), () =>
+            {
+                summonAllowDuplicate = !summonAllowDuplicate;
+                BuildCustomerSummon();
+            }, "开启后同一角色可以同时出现在多个座位");
+            AddAction("挤掉指定位置原客人：" + (summonReplaceExisting ? "开启" : "关闭"), () =>
+            {
+                summonReplaceExisting = !summonReplaceExisting;
+                BuildCustomerSummon();
+            }, "仅作用于指定座位；移除旧顾客和订单，剧情来访按离店流程结束");
+            var searchBox = CreateImage(body.transform, "CustomerSearch", new Color(.14f, .17f, .2f));
+            searchBox.gameObject.AddComponent<LayoutElement>().preferredHeight = 46;
+            var textArea = new GameObject("TextArea", typeof(RectTransform), typeof(RectMask2D));
+            textArea.transform.SetParent(searchBox.transform, false);
+            Stretch((RectTransform)textArea.transform);
+            var searchText = CreateText(textArea.transform, "Text", "", 20, Color.white);
+            Stretch(searchText.rectTransform);
+            searchText.margin = new Vector4(12, 6, 12, 6);
+            searchText.richText = false;
+            var placeholder = CreateText(textArea.transform, "Placeholder", "搜索角色名字 / ID（留空显示全部）", 20, Color.gray);
+            Stretch(placeholder.rectTransform);
+            placeholder.margin = searchText.margin;
+            var input = searchBox.gameObject.AddComponent<TMP_InputField>();
+            input.textViewport = (RectTransform)textArea.transform;
+            input.textComponent = (TextMeshProUGUI)searchText;
+            input.placeholder = placeholder;
+            input.fontAsset = font;
+            input.lineType = TMP_InputField.LineType.SingleLine;
+            input.SetTextWithoutNotify(customerSearch);
+            var viewport = CreateImage(body.transform, "CustomerList", new Color(.08f, .1f, .12f));
+            viewport.gameObject.AddComponent<LayoutElement>().flexibleHeight = 1;
+            viewport.gameObject.AddComponent<RectMask2D>();
+            var content = new GameObject("Customers", typeof(RectTransform), typeof(VerticalLayoutGroup), typeof(ContentSizeFitter));
+            content.transform.SetParent(viewport.transform, false);
+            var contentRect = (RectTransform)content.transform;
+            contentRect.anchorMin = new Vector2(0, 1);
+            contentRect.anchorMax = Vector2.one;
+            contentRect.pivot = new Vector2(.5f, 1);
+            contentRect.sizeDelta = Vector2.zero;
+            var layout = content.GetComponent<VerticalLayoutGroup>();
+            layout.spacing = 8;
+            layout.padding = new RectOffset(8, 8, 8, 8);
+            layout.childForceExpandWidth = true;
+            layout.childForceExpandHeight = false;
+            content.GetComponent<ContentSizeFitter>().verticalFit = ContentSizeFitter.FitMode.PreferredSize;
+            var scroll = viewport.gameObject.AddComponent<ScrollRect>();
+            scroll.viewport = viewport.rectTransform;
+            scroll.content = contentRect;
+            scroll.horizontal = false;
+            scroll.movementType = ScrollRect.MovementType.Clamped;
+            scroll.scrollSensitivity = 36;
+            void RefreshList(string query)
+            {
+                customerSearch = query;
+                foreach (Transform child in content.transform)
+                {
+                    child.gameObject.SetActive(false);
+                    Destroy(child.gameObject);
+                }
+                int count = 0;
+                string filter = query.Trim();
+                void AddCustomer(string id, string name, bool hasArtwork)
+                {
+                    if (!string.IsNullOrEmpty(filter) && id.IndexOf(filter, StringComparison.OrdinalIgnoreCase) < 0
+                        && name.IndexOf(filter, StringComparison.OrdinalIgnoreCase) < 0) return;
+                    count++;
+                    var button = CreateButton(content.transform, name + "  [" + id + "]\n<size=14>"
+                        + (hasArtwork ? "点击召唤到店并自动入座" : "未配置店内素材，无法召唤") + "</size>", 20);
+                    button.GetComponent<LayoutElement>().preferredHeight = 64;
+                    button.interactable = hasArtwork;
+                    button.onClick.AddListener(() =>
+                    {
+                        if (runtime == null || !runtime.isActiveAndEnabled || runtime.World == null)
+                        { SetStatus("请先进入 CoffeeShop"); return; }
+                        Report(runtime.DebugSummonCustomer(id, summonSeatIndex, summonAllowDuplicate, summonReplaceExisting));
+                        BuildCustomerSummon();
+                    });
+                }
+                if (runtime != null)
+                {
+                    if (runtime.seating != null && runtime.seating.suppliedCustomer != null)
+                        AddCustomer("supplied_seated_guest", runtime.seating.suppliedGuestName, true);
+                    if (runtime.characterCatalog != null)
+                        foreach (var character in runtime.characterCatalog.Characters)
+                            if (character != null) AddCustomer(character.characterId, character.displayName, character.worldSprite != null);
+                }
+                if (count == 0)
+                {
+                    var empty = CreateText(content.transform, "Empty", "没有匹配角色；可清空搜索，或进入 CoffeeShop 后重开列表。", 20, Color.gray);
+                    empty.gameObject.AddComponent<LayoutElement>().preferredHeight = 64;
+                }
+                Canvas.ForceUpdateCanvases();
+                scroll.verticalNormalizedPosition = 1;
+            }
+            input.onValueChanged.AddListener(RefreshList);
+            RefreshList(customerSearch);
+        }
+
+        private string SummonSeatLabel()
+        {
+            if (summonSeatIndex < 0) return "自动分配";
+            string label = "位置 " + (summonSeatIndex + 1);
+            if (runtime == null || runtime.World == null) return label;
+            if (runtime.seating != null && runtime.seating.TrySeat("customer_" + summonSeatIndex, out _, out var table, out bool right))
+            {
+                int tableIndex = summonSeatIndex % runtime.seating.tables.Length;
+                label += " / 桌 " + (tableIndex + 1) + (right ? " 右侧" : " 左侧");
+            }
+            var occupant = runtime.World.Find("customer_" + summonSeatIndex);
+            return label + (occupant != null ? "（" + runtime.World.PersonName(occupant) + "）" : "（空）");
+        }
+
+        private void CycleSummonSeat()
+        {
+            int seatCount = runtime != null && runtime.World != null ? runtime.World.State.seats : 8;
+            summonSeatIndex++;
+            if (summonSeatIndex >= seatCount) summonSeatIndex = -1;
+            BuildCustomerSummon();
         }
 
         private void BuildDiagnostics()

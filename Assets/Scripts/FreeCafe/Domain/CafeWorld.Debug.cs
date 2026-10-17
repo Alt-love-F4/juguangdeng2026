@@ -63,5 +63,70 @@ namespace Spotlight.FreeCafe
             if (!State.open) return ActionResult.No("当前没有营业");
             return EndDay();
         }
+
+        public ActionResult DebugSummonCustomer(CafePersonIdentity identity, int seatIndex = -1,
+            bool allowDuplicate = true, bool replaceExisting = false)
+        {
+            if (!ValidCustomerIdentity(identity)) return ActionResult.No("顾客身份无效");
+            if (!State.open) return ActionResult.No("请先开始营业，再召唤指定顾客");
+            if (seatIndex < -1 || seatIndex >= State.seats) return ActionResult.No("指定座位无效");
+            if (!Array.Exists(Catalog.products, product => State.unlockedProducts.Contains(product.id)))
+                return ActionResult.No("尚无已解锁餐品，无法生成订单");
+
+            int slot = seatIndex >= 0 ? seatIndex : AvailableSeat();
+            if (slot < 0) return ActionResult.No("没有空座，请选择指定位置并开启挤位");
+            string targetId = "customer_" + slot;
+            var target = Find(targetId);
+            bool force = seatIndex >= 0 && replaceExisting;
+            if (!force && AvailableSeat(null, slot) < 0)
+                return ActionResult.No("指定位置已有顾客或剧情预留，请开启“挤掉原客人”");
+
+            var displacedVisits = new System.Collections.Generic.List<CafeVisitInstance>();
+            foreach (var visit in State.cafeVisits)
+                if (force && visit.status != CafeVisitStatus.Ended
+                    && (visit.customerId == targetId || visit.preferredSeatId == targetId && AwaitingSeat(visit)))
+                    displacedVisits.Add(visit);
+            if (!allowDuplicate)
+            {
+                foreach (var entity in State.entities)
+                    if (entity != target && SameDebugCustomer(entity.person, identity))
+                        return ActionResult.No(identity.displayName + " 已经在店里；请开启“允许重复召唤”");
+                foreach (var visit in State.cafeVisits)
+                    if (visit.status != CafeVisitStatus.Ended && !displacedVisits.Contains(visit)
+                        && SameDebugCustomer(visit.identity, identity))
+                        return ActionResult.No(identity.displayName + " 已有剧情来访预约；请开启“允许重复召唤”");
+            }
+
+            int reserved = ReservedVisitBudget();
+            foreach (var visit in displacedVisits)
+                if (AwaitingSeat(visit) && visit.budgetReserved) reserved--;
+            // Replacing a seated guest reuses that arrival; repeated swaps do not exhaust the daily budget.
+            bool reuseArrival = target != null;
+            int requiredBudget = State.todayArrivals + reserved + (reuseArrival ? 0 : 1);
+            if (requiredBudget > Math.Max(Catalog.economy.maxCustomers, State.cafeVisitBudgetMinimum))
+                return ActionResult.No("今日客流已达上限，请下一营业日再召唤");
+
+            foreach (var visit in displacedVisits) FinishVisit(visit, "gm_replaced");
+            State.requests.RemoveAll(request => request.customerId == targetId);
+            State.spokenCustomers.Remove(targetId);
+            if (target != null) State.entities.Remove(target);
+            if (reuseArrival) State.todayArrivals--;
+            State.todayCustomerBudget = Math.Max(State.todayCustomerBudget, requiredBudget);
+            SpawnCustomer(new CafePersonIdentity
+            {
+                personId = identity.personId + ":gm:" + Allocate("person_"), characterId = identity.characterId,
+                narrativeCharacterId = identity.narrativeCharacterId, displayName = identity.displayName,
+                visualId = identity.visualId, role = CafePersonRole.Customer
+            }, slot);
+            UpdateFocusedRequest();
+            Notify();
+            return ActionResult.Yes("已召唤 " + identity.displayName + " 到位置 " + (slot + 1)
+                + (target != null ? "，已替换 " + (target.person?.displayName ?? "原客人") : ""));
+        }
+
+        private static bool SameDebugCustomer(CafePersonIdentity candidate, CafePersonIdentity identity) => candidate != null
+            && (candidate.personId == identity.personId
+                || candidate.personId != null && candidate.personId.StartsWith(identity.personId + ":gm:", StringComparison.Ordinal)
+                || !string.IsNullOrEmpty(identity.characterId) && candidate.characterId == identity.characterId);
     }
 }

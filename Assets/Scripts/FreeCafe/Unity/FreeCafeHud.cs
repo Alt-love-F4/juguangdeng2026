@@ -31,6 +31,15 @@ namespace Spotlight.FreeCafe
         private string[] requestIds=Array.Empty<string>();
         private Button[] boundOrderButtons=Array.Empty<Button>();
         private UnityAction[] orderActions=Array.Empty<UnityAction>();
+        private Image[] orderAvatars=Array.Empty<Image>();
+        private OrderLabelLayout[] orderLabelLayouts=Array.Empty<OrderLabelLayout>();
+        private readonly System.Collections.Generic.List<Image> createdOrderAvatars=new System.Collections.Generic.List<Image>();
+        private struct OrderLabelLayout
+        {
+            public RectTransform rect;
+            public Vector2 offsetMin,offsetMax;
+            public float avatarInset;
+        }
         private bool bound;
         public Sprite floorCurrentSprite, floorIdleSprite;
         private RectTransform headerDock;
@@ -55,7 +64,7 @@ namespace Spotlight.FreeCafe
             if(recipePanel!=null) recipePanel.SetActive(false);
             TryBind();
         }
-        private void OnEnable() => TryBind();
+        private void OnEnable() { TryBind(); Refresh(); }
         private void Start() { TryBind(); Refresh(); }
         private void TryBind()
         {
@@ -81,6 +90,7 @@ namespace Spotlight.FreeCafe
             if(areaButtons!=null && areaButtons.Length>1 && areaButtons[1]!=null) areaButtons[1].onClick.AddListener(Counter);
             if(areaButtons!=null && areaButtons.Length>2 && areaButtons[2]!=null) areaButtons[2].onClick.AddListener(SecondFloor);
             if(areaButtons!=null && areaButtons.Length>3 && areaButtons[3]!=null) areaButtons[3].onClick.AddListener(ThirdFloor);
+            BindOrderAvatars();
             boundOrderButtons=orderButtons==null ? Array.Empty<Button>() : (Button[])orderButtons.Clone();
             orderActions=new UnityAction[boundOrderButtons.Length];
             for(int index=0;index<boundOrderButtons.Length;index++)
@@ -90,8 +100,95 @@ namespace Spotlight.FreeCafe
                 if(boundOrderButtons[index]!=null) boundOrderButtons[index].onClick.AddListener(orderActions[index]);
             }
         }
+        private void BindOrderAvatars()
+        {
+            ClearOrderAvatars();
+            if(!Application.isPlaying) return;
+            int count=Math.Max(orderButtons?.Length ?? 0,orderLabels?.Length ?? 0);
+            orderAvatars=new Image[count];
+            orderLabelLayouts=new OrderLabelLayout[count];
+            for(int index=0;index<count;index++)
+            {
+                var button=orderButtons!=null && index<orderButtons.Length ? orderButtons[index] : null;
+                var label=orderLabels!=null && index<orderLabels.Length ? orderLabels[index] : null;
+                var textRect=label!=null ? label.rectTransform : null;
+                // Use each row's own text parent, not the shared card, so multiple slots stay independent.
+                var parent=textRect!=null ? textRect.parent : button!=null ? button.transform : null;
+                if(parent==null) continue;
+                float size=64f;
+                if(textRect!=null)
+                {
+                    size=Mathf.Min(size,Mathf.Max(0,textRect.rect.height),Mathf.Max(0,textRect.rect.width*.3f));
+                    orderLabelLayouts[index]=new OrderLabelLayout {
+                        rect=textRect,offsetMin=textRect.offsetMin,offsetMax=textRect.offsetMax,avatarInset=size+8f
+                    };
+                }
+                var child=parent.Find("CharacterAvatar");
+                if(child==null)
+                {
+                    var owner=new GameObject("CharacterAvatar",typeof(RectTransform),typeof(Image));
+                    owner.layer=parent.gameObject.layer;
+                    owner.transform.SetParent(parent,false);
+                    child=owner.transform;
+                    createdOrderAvatars.Add(owner.GetComponent<Image>());
+                }
+                var avatar=child.GetComponent<Image>();
+                if(avatar==null) avatar=child.gameObject.AddComponent<Image>();
+                orderAvatars[index]=avatar;
+                avatar.raycastTarget=false;
+                avatar.preserveAspect=true;
+                var rect=avatar.rectTransform;
+                rect.localRotation=Quaternion.identity;
+                rect.localScale=Vector3.one;
+                rect.pivot=new Vector2(.5f,.5f);
+                if(textRect!=null)
+                {
+                    rect.anchorMin=rect.anchorMax=new Vector2(textRect.anchorMin.x,Mathf.Lerp(textRect.anchorMin.y,textRect.anchorMax.y,textRect.pivot.y));
+                    rect.anchoredPosition=new Vector2(textRect.offsetMin.x+size*.5f,textRect.anchoredPosition.y+textRect.rect.center.y);
+                }
+                else
+                {
+                    rect.anchorMin=rect.anchorMax=new Vector2(0,.5f);
+                    rect.anchoredPosition=new Vector2(8f+size*.5f,0);
+                }
+                rect.sizeDelta=new Vector2(size,size);
+                avatar.sprite=null;
+                avatar.gameObject.SetActive(false);
+            }
+        }
+        private void SetOrderAvatar(int index,Sprite sprite)
+        {
+            if(index<0 || index>=orderAvatars.Length) return;
+            var avatar=orderAvatars[index];
+            bool visible=avatar!=null && sprite!=null;
+            if(avatar!=null)
+            {
+                avatar.sprite=sprite;
+                avatar.gameObject.SetActive(visible);
+            }
+            var layout=orderLabelLayouts[index];
+            if(layout.rect==null) return;
+            // Leave anchors, pivot, vertical placement and the right edge exactly as authored.
+            layout.rect.offsetMin=layout.offsetMin+(visible ? new Vector2(layout.avatarInset,0) : Vector2.zero);
+            layout.rect.offsetMax=layout.offsetMax;
+        }
+        private void ClearOrderAvatars()
+        {
+            for(int index=0;index<orderAvatars.Length;index++) SetOrderAvatar(index,null);
+            orderAvatars=Array.Empty<Image>();
+            orderLabelLayouts=Array.Empty<OrderLabelLayout>();
+        }
+        protected override void OnBeforeDestroy()
+        {
+            ClearOrderAvatars();
+            foreach(var avatar in createdOrderAvatars)
+                if(avatar!=null) Destroy(avatar.gameObject);
+            createdOrderAvatars.Clear();
+            base.OnBeforeDestroy();
+        }
         private void OnDisable()
         {
+            ClearOrderAvatars();
             if(Application.isPlaying) CloseRecipeTips();
             if(!bound) return;
             bound=false;
@@ -258,7 +355,11 @@ namespace Spotlight.FreeCafe
         }
         private void Refresh()
         {
-            if(runtime==null || runtime.World==null) return;
+            if(runtime==null || runtime.World==null)
+            {
+                for(int index=0;index<orderAvatars.Length;index++) SetOrderAvatar(index,null);
+                return;
+            }
             var state=runtime.World.State;
             if(summary!=null)
             {
@@ -328,6 +429,7 @@ namespace Spotlight.FreeCafe
                 if(requestIndex>=state.requests.Count)
                 {
                     requestIds[index]=null;
+                    SetOrderAvatar(index,null);
                     if(label!=null) label.text="等待顾客入座";
                     if(button!=null) { button.interactable=false; SetTicket(button,false); }
                     continue;
@@ -335,6 +437,8 @@ namespace Spotlight.FreeCafe
                 var request=state.requests[requestIndex]; requestIds[index]=request.id; var product=runtime.World.Product(request.productId);
                 var customer=runtime.World.Find(request.customerId);string name="顾客";
                 if(customer!=null) name=runtime.World.PersonName(customer);
+                var character=customer!=null && customer.person!=null ? runtime.Character(customer.person.characterId) : null;
+                SetOrderAvatar(index,character?.avatar);
                 string status=request.id==CafeWorld.TutorialOrderId ? "教程订单 · 尚未营业" : name+"  ·  "+request.patience.ToString("0")+" 秒";
                 string recipe=(request.id==state.focusedRequestId ? "● " : "")+status+"\n"+FreeCafeProductionText.Recipe(product.label)+"  /  "+product.price+" 王国币";
                 if(label!=null) label.text=recipe;

@@ -243,6 +243,7 @@ namespace Spotlight.FreeCafe
         public ProductSpec[] products;       // 全部餐品规格
         public RecipeSpec[] recipes;         // 制作流程（可选）
         public InitialEntity[] layout;       // 初始布局
+        public CafeSeatPosition[] customerSeats;
         public AreaSpec[] areas;             // 区域配置
         public NpcSpec[] npcs;               // NPC 配置（可选）
         public IngredientRuleSpec[] ingredientRules;

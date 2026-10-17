@@ -24,6 +24,12 @@ namespace Spotlight.FreeCafe
             if (active != null)
                 orderCaption.text = "想要 " + FreeCafeProductionText.Recipe(world.Product(active.productId).label) + "\n" + active.patience.ToString("0") + " 秒 · 点击查看";
             orderCaption.GetComponent<MeshRenderer>().sortingOrder = entityView.body.sortingOrder + 2;
+            if (entityView.Runtime.seating != null && entityView.Runtime.seating.TrySeat(entity.id, out _, out _, out _))
+            {
+                orderCaption.gameObject.SetActive(active != null && (entityView.IsHovered || entityView.Runtime.SelectedId == entity.id));
+                orderAnchor.localPosition = new Vector3(0, 5.8f, -.1f);
+                orderCaption.fontSize = 2.2f;
+            }
         }
     }
 }
