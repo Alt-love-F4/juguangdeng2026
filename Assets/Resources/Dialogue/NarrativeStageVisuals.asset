@@ -13,21 +13,678 @@ MonoBehaviour:
   m_Name: NarrativeStageVisuals
   m_EditorClassIdentifier: Spotlight.GameFlow.UI::Spotlight.GameFlow.NarrativeStageVisuals
   entries:
-  - key: oct07.cafe.day
-    texture: {fileID: 2800000, guid: e4a7b244758a8fb48ac12e953d3a6d58, type: 3}
-    tint: {r: 1, g: 1, b: 1, a: 1}
-    placeholderColor: {r: 0.23, g: 0.25, b: 0.28, a: 1}
-    placeholder: 0
-    fadeSeconds: 0.3
-  - key: oct07.street.day
+  - key: scene.cafe
     texture: {fileID: 0}
     tint: {r: 1, g: 1, b: 1, a: 1}
     placeholderColor: {r: 0.23, g: 0.25, b: 0.28, a: 1}
-    placeholder: 1
-    fadeSeconds: 0.3
-  - key: oct07.cafe.night
-    texture: {fileID: 2800000, guid: e4a7b244758a8fb48ac12e953d3a6d58, type: 3}
-    tint: {r: 0.42, g: 0.48, b: 0.62, a: 1}
+    placeholder: 0
+    solidColor: 0
+    useSceneBackground: 1
+    fadeSeconds: 0
+  - key: cafe.day
+    texture: {fileID: 2800000, guid: f5310e2e38350b94b9dc9c4ab2bf457b, type: 3}
+    tint: {r: 1, g: 1, b: 1, a: 1}
     placeholderColor: {r: 0.23, g: 0.25, b: 0.28, a: 1}
     placeholder: 0
+    solidColor: 0
     fadeSeconds: 0.3
+  - key: cafe.dawn
+    texture: {fileID: 2800000, guid: dabb202205f96f442b7abf11a035eb30, type: 3}
+    tint: {r: 1, g: 1, b: 1, a: 1}
+    placeholderColor: {r: 0.23, g: 0.25, b: 0.28, a: 1}
+    placeholder: 0
+    solidColor: 0
+    fadeSeconds: 0.3
+  - key: cafe.dusk
+    texture: {fileID: 2800000, guid: 22c66623379426d4d8711030a2855b9a, type: 3}
+    tint: {r: 1, g: 1, b: 1, a: 1}
+    placeholderColor: {r: 0.23, g: 0.25, b: 0.28, a: 1}
+    placeholder: 0
+    solidColor: 0
+    fadeSeconds: 0.3
+  - key: cafe.night
+    texture: {fileID: 2800000, guid: 74161a754f6823a459291c6a3007480f, type: 3}
+    tint: {r: 1, g: 1, b: 1, a: 1}
+    placeholderColor: {r: 0.23, g: 0.25, b: 0.28, a: 1}
+    placeholder: 0
+    solidColor: 0
+    fadeSeconds: 0.3
+  - key: cafe.paper_flowers
+    texture: {fileID: 2800000, guid: 927931236ab102d4e8be41d9646f4a42, type: 3}
+    tint: {r: 1, g: 1, b: 1, a: 1}
+    placeholderColor: {r: 0.23, g: 0.25, b: 0.28, a: 1}
+    placeholder: 0
+    solidColor: 0
+    fadeSeconds: 0.3
+  - key: cafe.second_floor.day
+    texture: {fileID: 2800000, guid: 5dd9202a2950f01459c4ffb56cc53af8, type: 3}
+    tint: {r: 1, g: 1, b: 1, a: 1}
+    placeholderColor: {r: 0.23, g: 0.25, b: 0.28, a: 1}
+    placeholder: 0
+    solidColor: 0
+    fadeSeconds: 0.3
+  - key: cafe.second_floor.cluttered
+    texture: {fileID: 2800000, guid: 26c13017c9be8c94e9f9d04ee682cc61, type: 3}
+    tint: {r: 1, g: 1, b: 1, a: 1}
+    placeholderColor: {r: 0.23, g: 0.25, b: 0.28, a: 1}
+    placeholder: 0
+    solidColor: 0
+    fadeSeconds: 0.3
+  - key: cafe.dormitory.day
+    texture: {fileID: 2800000, guid: a1ac270efa0d4cacad8d05f36af4a710, type: 3}
+    tint: {r: 1, g: 1, b: 1, a: 1}
+    placeholderColor: {r: 0.23, g: 0.25, b: 0.28, a: 1}
+    placeholder: 0
+    solidColor: 0
+    fadeSeconds: 0.3
+  - key: cafe.bedroom.dawn
+    texture: {fileID: 2800000, guid: 28de4767b403a524fb37a353ea2b3348, type: 3}
+    tint: {r: 1, g: 1, b: 1, a: 1}
+    placeholderColor: {r: 0.23, g: 0.25, b: 0.28, a: 1}
+    placeholder: 0
+    solidColor: 0
+    fadeSeconds: 0.3
+  - key: street.day
+    texture: {fileID: 2800000, guid: c5d5e8417302c5242b66d559abbea882, type: 3}
+    tint: {r: 1, g: 1, b: 1, a: 1}
+    placeholderColor: {r: 0.23, g: 0.25, b: 0.28, a: 1}
+    placeholder: 0
+    solidColor: 0
+    fadeSeconds: 0.3
+  - key: street.night
+    texture: {fileID: 2800000, guid: 41297103d9b3b13469934bf575f44298, type: 3}
+    tint: {r: 1, g: 1, b: 1, a: 1}
+    placeholderColor: {r: 0.23, g: 0.25, b: 0.28, a: 1}
+    placeholder: 0
+    solidColor: 0
+    fadeSeconds: 0.3
+  - key: cafe.exterior.day
+    texture: {fileID: 2800000, guid: fcafc0c783aa63f429733c8184f9aedf, type: 3}
+    tint: {r: 1, g: 1, b: 1, a: 1}
+    placeholderColor: {r: 0.23, g: 0.25, b: 0.28, a: 1}
+    placeholder: 0
+    solidColor: 0
+    fadeSeconds: 0.3
+  - key: cafe.exterior.declining
+    texture: {fileID: 2800000, guid: e24880deefc15cd409fe9a171173c6a0, type: 3}
+    tint: {r: 1, g: 1, b: 1, a: 1}
+    placeholderColor: {r: 0.23, g: 0.25, b: 0.28, a: 1}
+    placeholder: 0
+    solidColor: 0
+    fadeSeconds: 0.3
+  - key: club.exterior
+    texture: {fileID: 2800000, guid: bf368a0fb29426d438c2b370c18a69be, type: 3}
+    tint: {r: 1, g: 1, b: 1, a: 1}
+    placeholderColor: {r: 0.23, g: 0.25, b: 0.28, a: 1}
+    placeholder: 0
+    solidColor: 0
+    fadeSeconds: 0.3
+  - key: club.reception
+    texture: {fileID: 2800000, guid: d74619a0aafca06448798c0726259507, type: 3}
+    tint: {r: 1, g: 1, b: 1, a: 1}
+    placeholderColor: {r: 0.23, g: 0.25, b: 0.28, a: 1}
+    placeholder: 0
+    solidColor: 0
+    fadeSeconds: 0.3
+  - key: cathedral.day
+    texture: {fileID: 2800000, guid: ce5653e42dc87414d8bccc35b0d4d6b4, type: 3}
+    tint: {r: 1, g: 1, b: 1, a: 1}
+    placeholderColor: {r: 0.23, g: 0.25, b: 0.28, a: 1}
+    placeholder: 0
+    solidColor: 0
+    fadeSeconds: 0.3
+  - key: market.day
+    texture: {fileID: 2800000, guid: d3643b3631de2bc4abd1c29b8a68f191, type: 3}
+    tint: {r: 1, g: 1, b: 1, a: 1}
+    placeholderColor: {r: 0.23, g: 0.25, b: 0.28, a: 1}
+    placeholder: 0
+    solidColor: 0
+    fadeSeconds: 0.3
+  - key: market.shop.day
+    texture: {fileID: 2800000, guid: 23dc6b834dd306443bdbf115ed90354d, type: 3}
+    tint: {r: 1, g: 1, b: 1, a: 1}
+    placeholderColor: {r: 0.23, g: 0.25, b: 0.28, a: 1}
+    placeholder: 0
+    solidColor: 0
+    fadeSeconds: 0.3
+  - key: suburb.day
+    texture: {fileID: 2800000, guid: 8ccb650b1a59b924085a52229eb84af3, type: 3}
+    tint: {r: 1, g: 1, b: 1, a: 1}
+    placeholderColor: {r: 0.23, g: 0.25, b: 0.28, a: 1}
+    placeholder: 0
+    solidColor: 0
+    fadeSeconds: 0.3
+  - key: old.street.day
+    texture: {fileID: 2800000, guid: cd5e8674d2a47644f889b374f954562e, type: 3}
+    tint: {r: 1, g: 1, b: 1, a: 1}
+    placeholderColor: {r: 0.23, g: 0.25, b: 0.28, a: 1}
+    placeholder: 0
+    solidColor: 0
+    fadeSeconds: 0.3
+  - key: old.house.day
+    texture: {fileID: 2800000, guid: bc17b59b7d464db48aec25004e3e68e5, type: 3}
+    tint: {r: 1, g: 1, b: 1, a: 1}
+    placeholderColor: {r: 0.23, g: 0.25, b: 0.28, a: 1}
+    placeholder: 0
+    solidColor: 0
+    fadeSeconds: 0.3
+  - key: detention.interior
+    texture: {fileID: 2800000, guid: b3093578a2c55f0458bda081cde1dbec, type: 3}
+    tint: {r: 1, g: 1, b: 1, a: 1}
+    placeholderColor: {r: 0.23, g: 0.25, b: 0.28, a: 1}
+    placeholder: 0
+    solidColor: 0
+    fadeSeconds: 0.3
+  - key: detention.dawn
+    texture: {fileID: 2800000, guid: a0b862d3959dd6645969ddd2b28b79c8, type: 3}
+    tint: {r: 1, g: 1, b: 1, a: 1}
+    placeholderColor: {r: 0.23, g: 0.25, b: 0.28, a: 1}
+    placeholder: 0
+    solidColor: 0
+    fadeSeconds: 0.3
+  - key: detention.dusk
+    texture: {fileID: 2800000, guid: 1fe0259b455e20445af9d5319ccc8d6c, type: 3}
+    tint: {r: 1, g: 1, b: 1, a: 1}
+    placeholderColor: {r: 0.23, g: 0.25, b: 0.28, a: 1}
+    placeholder: 0
+    solidColor: 0
+    fadeSeconds: 0.3
+  - key: cafe.door.thibaut
+    texture: {fileID: 2800000, guid: 5cf2048869beba64c8bdb35b29b4ba36, type: 3}
+    tint: {r: 1, g: 1, b: 1, a: 1}
+    placeholderColor: {r: 0.23, g: 0.25, b: 0.28, a: 1}
+    placeholder: 0
+    solidColor: 0
+    fadeSeconds: 0.3
+  - key: cafe.bar.day
+    texture: {fileID: 2800000, guid: aadee848e11071843a7f6986db6039d6, type: 3}
+    tint: {r: 1, g: 1, b: 1, a: 1}
+    placeholderColor: {r: 0.23, g: 0.25, b: 0.28, a: 1}
+    placeholder: 0
+    solidColor: 0
+    fadeSeconds: 0.3
+  - key: cafe.workstation.day
+    texture: {fileID: 2800000, guid: 7ab41336a91658e4cb118c2078e477ad, type: 3}
+    tint: {r: 1, g: 1, b: 1, a: 1}
+    placeholderColor: {r: 0.23, g: 0.25, b: 0.28, a: 1}
+    placeholder: 0
+    solidColor: 0
+    fadeSeconds: 0.3
+  - key: cafe.serving.day
+    texture: {fileID: 2800000, guid: 01d8544e38eeabc4eb37677754edc689, type: 3}
+    tint: {r: 1, g: 1, b: 1, a: 1}
+    placeholderColor: {r: 0.23, g: 0.25, b: 0.28, a: 1}
+    placeholder: 0
+    solidColor: 0
+    fadeSeconds: 0.3
+  - key: oct07.cafe.day
+    texture: {fileID: 2800000, guid: f5310e2e38350b94b9dc9c4ab2bf457b, type: 3}
+    tint: {r: 1, g: 1, b: 1, a: 1}
+    placeholderColor: {r: 0.23, g: 0.25, b: 0.28, a: 1}
+    placeholder: 0
+    solidColor: 0
+    fadeSeconds: 0.3
+  - key: oct07.cafe.night
+    texture: {fileID: 2800000, guid: 74161a754f6823a459291c6a3007480f, type: 3}
+    tint: {r: 1, g: 1, b: 1, a: 1}
+    placeholderColor: {r: 0.23, g: 0.25, b: 0.28, a: 1}
+    placeholder: 0
+    solidColor: 0
+    fadeSeconds: 0.3
+  - key: oct07.street.day
+    texture: {fileID: 2800000, guid: c5d5e8417302c5242b66d559abbea882, type: 3}
+    tint: {r: 1, g: 1, b: 1, a: 1}
+    placeholderColor: {r: 0.23, g: 0.25, b: 0.28, a: 1}
+    placeholder: 0
+    solidColor: 0
+    fadeSeconds: 0.3
+  - key: rose.club.blindfold
+    texture: {fileID: 0}
+    tint: {r: 0, g: 0, b: 0, a: 1}
+    placeholderColor: {r: 0, g: 0, b: 0, a: 1}
+    placeholder: 0
+    solidColor: 1
+    fadeSeconds: 0.3
+  - key: church.execution.black
+    texture: {fileID: 0}
+    tint: {r: 0, g: 0, b: 0, a: 1}
+    placeholderColor: {r: 0, g: 0, b: 0, a: 1}
+    placeholder: 0
+    solidColor: 1
+    fadeSeconds: 0.3
+  aliases:
+  - pattern: SCE_一楼大厅场景底图
+    targetKey: cafe.day
+  - pattern: SCE_一楼大厅场景底图.png
+    targetKey: cafe.day
+  - pattern: Assets/Art/Background/game/SCE_一楼大厅场景底图.png
+    targetKey: cafe.day
+  - pattern: SCE_一楼大厅对话场景日景
+    targetKey: cafe.day
+  - pattern: SCE_一楼大厅对话场景日景.png
+    targetKey: cafe.day
+  - pattern: Assets/Art/Background/game/SCE_一楼大厅对话场景日景.png
+    targetKey: cafe.day
+  - pattern: SCE_一楼大厅场景清晨
+    targetKey: cafe.dawn
+  - pattern: SCE_一楼大厅场景清晨.png
+    targetKey: cafe.dawn
+  - pattern: Assets/Art/Background/game/SCE_一楼大厅场景清晨.png
+    targetKey: cafe.dawn
+  - pattern: SCE_一楼大厅场景傍晚
+    targetKey: cafe.dusk
+  - pattern: SCE_一楼大厅场景傍晚.png
+    targetKey: cafe.dusk
+  - pattern: Assets/Art/Background/game/SCE_一楼大厅场景傍晚.png
+    targetKey: cafe.dusk
+  - pattern: SCE_一楼大厅场景夜晚
+    targetKey: cafe.night
+  - pattern: SCE_一楼大厅场景夜晚.png
+    targetKey: cafe.night
+  - pattern: Assets/Art/Background/game/SCE_一楼大厅场景夜晚.png
+    targetKey: cafe.night
+  - pattern: SCE_一楼大厅场景纸花装饰
+    targetKey: cafe.paper_flowers
+  - pattern: SCE_一楼大厅场景纸花装饰.png
+    targetKey: cafe.paper_flowers
+  - pattern: Assets/Art/Background/game/SCE_一楼大厅场景纸花装饰.png
+    targetKey: cafe.paper_flowers
+  - pattern: SCE_二楼会客室场景底图
+    targetKey: cafe.second_floor.day
+  - pattern: SCE_二楼会客室场景底图.png
+    targetKey: cafe.second_floor.day
+  - pattern: Assets/Art/Background/game/SCE_二楼会客室场景底图.png
+    targetKey: cafe.second_floor.day
+  - pattern: SCE_二楼会客室对话场景日景
+    targetKey: cafe.second_floor.day
+  - pattern: SCE_二楼会客室对话场景日景.png
+    targetKey: cafe.second_floor.day
+  - pattern: Assets/Art/Background/game/SCE_二楼会客室对话场景日景.png
+    targetKey: cafe.second_floor.day
+  - pattern: SCE_二楼会客室场景杂乱
+    targetKey: cafe.second_floor.cluttered
+  - pattern: SCE_二楼会客室场景杂乱.png
+    targetKey: cafe.second_floor.cluttered
+  - pattern: Assets/Art/Background/game/SCE_二楼会客室场景杂乱.png
+    targetKey: cafe.second_floor.cluttered
+  - pattern: SCE_ 三楼宿舍场景底图
+    targetKey: cafe.dormitory.day
+  - pattern: SCE_ 三楼宿舍场景底图.png
+    targetKey: cafe.dormitory.day
+  - pattern: Assets/Art/Background/game/SCE_ 三楼宿舍场景底图.png
+    targetKey: cafe.dormitory.day
+  - pattern: SCE_三楼宿舍对话场景日景
+    targetKey: cafe.dormitory.day
+  - pattern: SCE_三楼宿舍对话场景日景.png
+    targetKey: cafe.dormitory.day
+  - pattern: Assets/Art/Background/game/SCE_三楼宿舍对话场景日景.png
+    targetKey: cafe.dormitory.day
+  - pattern: SCE_三楼主角房间场景清晨
+    targetKey: cafe.bedroom.dawn
+  - pattern: SCE_三楼主角房间场景清晨.png
+    targetKey: cafe.bedroom.dawn
+  - pattern: Assets/Art/Background/game/SCE_三楼主角房间场景清晨.png
+    targetKey: cafe.bedroom.dawn
+  - pattern: SCE_圣徒街场景1
+    targetKey: street.day
+  - pattern: SCE_圣徒街场景1.png
+    targetKey: street.day
+  - pattern: Assets/Art/Background/game/SCE_圣徒街场景1.png
+    targetKey: street.day
+  - pattern: SCE_圣徒街场景夜晚
+    targetKey: street.night
+  - pattern: SCE_圣徒街场景夜晚.png
+    targetKey: street.night
+  - pattern: Assets/Art/Background/game/SCE_圣徒街场景夜晚.png
+    targetKey: street.night
+  - pattern: SCE_沸点咖啡馆店面场景日景
+    targetKey: cafe.exterior.day
+  - pattern: SCE_沸点咖啡馆店面场景日景.png
+    targetKey: cafe.exterior.day
+  - pattern: Assets/Art/Background/game/SCE_沸点咖啡馆店面场景日景.png
+    targetKey: cafe.exterior.day
+  - pattern: SCE_沸点咖啡馆店面场景萧条
+    targetKey: cafe.exterior.declining
+  - pattern: SCE_沸点咖啡馆店面场景萧条.png
+    targetKey: cafe.exterior.declining
+  - pattern: Assets/Art/Background/game/SCE_沸点咖啡馆店面场景萧条.png
+    targetKey: cafe.exterior.declining
+  - pattern: SCE_布塔克俱乐部门口场景底图
+    targetKey: club.exterior
+  - pattern: SCE_布塔克俱乐部门口场景底图.png
+    targetKey: club.exterior
+  - pattern: Assets/Art/Background/game/SCE_布塔克俱乐部门口场景底图.png
+    targetKey: club.exterior
+  - pattern: SCE_布塔克俱乐部会客室场景底图
+    targetKey: club.reception
+  - pattern: SCE_布塔克俱乐部会客室场景底图.png
+    targetKey: club.reception
+  - pattern: Assets/Art/Background/game/SCE_布塔克俱乐部会客室场景底图.png
+    targetKey: club.reception
+  - pattern: SCE_圣卷大教堂场景日景
+    targetKey: cathedral.day
+  - pattern: SCE_圣卷大教堂场景日景.png
+    targetKey: cathedral.day
+  - pattern: Assets/Art/Background/game/SCE_圣卷大教堂场景日景.png
+    targetKey: cathedral.day
+  - pattern: SCE_大堂区露天市场场景日景
+    targetKey: market.day
+  - pattern: SCE_大堂区露天市场场景日景.png
+    targetKey: market.day
+  - pattern: Assets/Art/Background/game/SCE_大堂区露天市场场景日景.png
+    targetKey: market.day
+  - pattern: SCE_大堂区杂货铺内部场景日景
+    targetKey: market.shop.day
+  - pattern: SCE_大堂区杂货铺内部场景日景.png
+    targetKey: market.shop.day
+  - pattern: Assets/Art/Background/game/SCE_大堂区杂货铺内部场景日景.png
+    targetKey: market.shop.day
+  - pattern: SCE_圣西尔万郊区场景日景
+    targetKey: suburb.day
+  - pattern: SCE_圣西尔万郊区场景日景.png
+    targetKey: suburb.day
+  - pattern: Assets/Art/Background/game/SCE_圣西尔万郊区场景日景.png
+    targetKey: suburb.day
+  - pattern: SCE_旧城区街道场景日景
+    targetKey: old.street.day
+  - pattern: SCE_旧城区街道场景日景.png
+    targetKey: old.street.day
+  - pattern: Assets/Art/Background/game/SCE_旧城区街道场景日景.png
+    targetKey: old.street.day
+  - pattern: SCE_吕西尼昂旧宅门前场景底图
+    targetKey: old.house.day
+  - pattern: SCE_吕西尼昂旧宅门前场景底图.png
+    targetKey: old.house.day
+  - pattern: Assets/Art/Background/game/SCE_吕西尼昂旧宅门前场景底图.png
+    targetKey: old.house.day
+  - pattern: SCE_教会看守所内部场景底图
+    targetKey: detention.interior
+  - pattern: SCE_教会看守所内部场景底图.png
+    targetKey: detention.interior
+  - pattern: Assets/Art/Background/game/SCE_教会看守所内部场景底图.png
+    targetKey: detention.interior
+  - pattern: SCE_教会看守所内部场景清晨
+    targetKey: detention.dawn
+  - pattern: SCE_教会看守所内部场景清晨.png
+    targetKey: detention.dawn
+  - pattern: Assets/Art/Background/game/SCE_教会看守所内部场景清晨.png
+    targetKey: detention.dawn
+  - pattern: SCE_教会看守所内部场景傍晚
+    targetKey: detention.dusk
+  - pattern: SCE_教会看守所内部场景傍晚.png
+    targetKey: detention.dusk
+  - pattern: Assets/Art/Background/game/SCE_教会看守所内部场景傍晚.png
+    targetKey: detention.dusk
+  - pattern: SCE_咖啡馆闭门场景蒂博剪影
+    targetKey: cafe.door.thibaut
+  - pattern: SCE_咖啡馆闭门场景蒂博剪影.png
+    targetKey: cafe.door.thibaut
+  - pattern: Assets/Art/Background/game/SCE_咖啡馆闭门场景蒂博剪影.png
+    targetKey: cafe.door.thibaut
+  - pattern: SCE_咖啡馆吧台场景底图
+    targetKey: cafe.bar.day
+  - pattern: SCE_咖啡馆吧台场景底图.png
+    targetKey: cafe.bar.day
+  - pattern: Assets/Art/Background/game/SCE_咖啡馆吧台场景底图.png
+    targetKey: cafe.bar.day
+  - pattern: SCE_咖啡馆操作台场景底图
+    targetKey: cafe.workstation.day
+  - pattern: SCE_咖啡馆操作台场景底图.png
+    targetKey: cafe.workstation.day
+  - pattern: Assets/Art/Background/game/SCE_咖啡馆操作台场景底图.png
+    targetKey: cafe.workstation.day
+  - pattern: SCE_咖啡馆出餐台场景底图
+    targetKey: cafe.serving.day
+  - pattern: SCE_咖啡馆出餐台场景底图.png
+    targetKey: cafe.serving.day
+  - pattern: Assets/Art/Background/game/SCE_咖啡馆出餐台场景底图.png
+    targetKey: cafe.serving.day
+  - pattern: Art/Gameplay/DayFlow/phase_pre_business
+    targetKey: cafe.day
+  - pattern: Art/Gameplay/DayFlow/phase_night_choice
+    targetKey: cafe.night
+  - pattern: '*.cafe.day'
+    targetKey: cafe.day
+  - pattern: '*.cafe.dawn'
+    targetKey: cafe.dawn
+  - pattern: '*.cafe.dusk'
+    targetKey: cafe.dusk
+  - pattern: '*.cafe.night'
+    targetKey: cafe.night
+  - pattern: '*.cafe.paper_flowers'
+    targetKey: cafe.paper_flowers
+  - pattern: '*.cafe.second_floor.day'
+    targetKey: cafe.second_floor.day
+  - pattern: '*.cafe.second_floor.cluttered'
+    targetKey: cafe.second_floor.cluttered
+  - pattern: '*.cafe.dormitory.day'
+    targetKey: cafe.dormitory.day
+  - pattern: '*.cafe.bedroom.dawn'
+    targetKey: cafe.bedroom.dawn
+  - pattern: '*.old.street.day'
+    targetKey: old.street.day
+  - pattern: '*.old.street'
+    targetKey: old.street.day
+  - pattern: '*.street.day'
+    targetKey: street.day
+  - pattern: '*.street.night'
+    targetKey: street.night
+  - pattern: '*.cafe.exterior.day'
+    targetKey: cafe.exterior.day
+  - pattern: '*.cafe.exterior.declining'
+    targetKey: cafe.exterior.declining
+  - pattern: '*.club.exterior'
+    targetKey: club.exterior
+  - pattern: '*.club.reception'
+    targetKey: club.reception
+  - pattern: '*.cathedral.day'
+    targetKey: cathedral.day
+  - pattern: '*.market.day'
+    targetKey: market.day
+  - pattern: '*.market.shop.day'
+    targetKey: market.shop.day
+  - pattern: '*.suburb.day'
+    targetKey: suburb.day
+  - pattern: '*.old.house.day'
+    targetKey: old.house.day
+  - pattern: '*.detention.interior'
+    targetKey: detention.interior
+  - pattern: '*.detention.dawn'
+    targetKey: detention.dawn
+  - pattern: '*.detention.dusk'
+    targetKey: detention.dusk
+  - pattern: '*.cafe.door.thibaut'
+    targetKey: cafe.door.thibaut
+  - pattern: '*.cafe.bar.day'
+    targetKey: cafe.bar.day
+  - pattern: '*.cafe.workstation.day'
+    targetKey: cafe.workstation.day
+  - pattern: '*.cafe.serving.day'
+    targetKey: cafe.serving.day
+  - pattern: '*.cafe.morning'
+    targetKey: cafe.dawn
+  - pattern: '*.cafe.evening'
+    targetKey: cafe.dusk
+  - pattern: '*.cafe.paperflowers'
+    targetKey: cafe.paper_flowers
+  - pattern: '*.cafe.decorated'
+    targetKey: cafe.paper_flowers
+  - pattern: '*.cafe.second_floor'
+    targetKey: cafe.second_floor.day
+  - pattern: '*.cafe.dormitory'
+    targetKey: cafe.dormitory.day
+  - pattern: '*.cafe.bedroom.morning'
+    targetKey: cafe.bedroom.dawn
+  - pattern: '*.morning.wake'
+    targetKey: cafe.bedroom.dawn
+  - pattern: '*.street.dusk'
+    targetKey: street.night
+  - pattern: '*.street.evening'
+    targetKey: street.night
+  - pattern: '*.street.wisdom.pass'
+    targetKey: street.day
+  - pattern: '*.street.wisdom.fail'
+    targetKey: street.day
+  - pattern: '*.street.merge'
+    targetKey: street.day
+  - pattern: '*.street'
+    targetKey: street.day
+  - pattern: '*.market.shop'
+    targetKey: market.shop.day
+  - pattern: '*.market'
+    targetKey: market.day
+  - pattern: '*.suburb'
+    targetKey: suburb.day
+  - pattern: '*.old.intro'
+    targetKey: old.street.day
+  - pattern: '*.old.perception'
+    targetKey: old.street.day
+  - pattern: '*.old.house'
+    targetKey: old.house.day
+  - pattern: '*.old.estate'
+    targetKey: old.house.day
+  - pattern: '*.old.heirloom'
+    targetKey: old.house.day
+  - pattern: '*.old.eviction'
+    targetKey: old.house.day
+  - pattern: '*.old.aftermath'
+    targetKey: old.house.day
+  - pattern: '*.detention.morning'
+    targetKey: detention.dawn
+  - pattern: '*.detention.evening'
+    targetKey: detention.dusk
+  - pattern: '*.cafe.exterior'
+    targetKey: cafe.exterior.day
+  - pattern: '*.cafe.bar'
+    targetKey: cafe.bar.day
+  - pattern: '*.cafe.workstation'
+    targetKey: cafe.workstation.day
+  - pattern: '*.cafe.serving'
+    targetKey: cafe.serving.day
+  - pattern: cafe.morning
+    targetKey: cafe.dawn
+  - pattern: street.dusk
+    targetKey: street.night
+  - pattern: morning.wake
+    targetKey: cafe.bedroom.dawn
+  contextOverrides:
+  - contextPrefix: arrival.start.street
+    sourceKey: Art/Gameplay/DayFlow/city_map_placeholder
+    targetKey: street.day
+  - contextPrefix: arrival.start.cafe
+    sourceKey: Art/Gameplay/DayFlow/city_map_placeholder
+    targetKey: cafe.exterior.declining
+  - contextPrefix: revolution.1014.s1
+    sourceKey: oct07.cafe.day
+    targetKey: cafe.dawn
+  - contextPrefix: rose.1012.s1.preparation
+    sourceKey: oct07.cafe.day
+    targetKey: cafe.paper_flowers
+  - contextPrefix: rose.1012.s1.inside
+    sourceKey: oct07.cafe.day
+    targetKey: cafe.paper_flowers
+  - contextPrefix: rose.1012.s1.hat_helped
+    sourceKey: oct07.cafe.day
+    targetKey: cafe.paper_flowers
+  - contextPrefix: rose.1012.s1.hat_not_helped
+    sourceKey: oct07.cafe.day
+    targetKey: cafe.paper_flowers
+  - contextPrefix: rose.1012.s1.full_end
+    sourceKey: oct07.cafe.day
+    targetKey: cafe.paper_flowers
+  - contextPrefix: rose.1012.s1.sampling_adele
+    sourceKey: oct07.cafe.day
+    targetKey: cafe.exterior.day
+  - contextPrefix: rose.1012.s1.sampling_player
+    sourceKey: oct07.cafe.day
+    targetKey: cafe.exterior.day
+  - contextPrefix: rose.1012.s1.hat_memory
+    sourceKey: oct07.cafe.day
+    targetKey: cafe.exterior.day
+  - contextPrefix: rose.1012.s1.route
+    sourceKey: oct07.cafe.day
+    targetKey: cafe.exterior.day
+  - contextPrefix: rose.1012.s1.visit_brief
+    sourceKey: oct07.cafe.day
+    targetKey: cafe.exterior.day
+  - contextPrefix: rose.1012.s1.visit_referred
+    sourceKey: oct07.cafe.day
+    targetKey: cafe.exterior.day
+  - contextPrefix: rose.1012.s1.brew
+    sourceKey: oct07.cafe.day
+    targetKey: cafe.workstation.day
+  - contextPrefix: rose.1012.s1.brew_pass
+    sourceKey: oct07.cafe.day
+    targetKey: cafe.workstation.day
+  - contextPrefix: rose.1012.s1.brew_retry
+    sourceKey: oct07.cafe.day
+    targetKey: cafe.workstation.day
+  - contextPrefix: cafe_tutorial.customer_arrives
+    sourceKey: cafe.day
+    targetKey: cafe.bar.day
+  - contextPrefix: cafe_tutorial.perception_success
+    sourceKey: cafe.day
+    targetKey: cafe.bar.day
+  - contextPrefix: cafe_tutorial.perception_failure
+    sourceKey: cafe.day
+    targetKey: cafe.bar.day
+  - contextPrefix: cafe_tutorial.order_confirmed
+    sourceKey: cafe.day
+    targetKey: cafe.bar.day
+  - contextPrefix: cafe_tutorial.workstation_open
+    sourceKey: cafe.day
+    targetKey: cafe.workstation.day
+  - contextPrefix: cafe_tutorial.make_coffee_base
+    sourceKey: cafe.day
+    targetKey: cafe.workstation.day
+  - contextPrefix: cafe_tutorial.pour_into_cup
+    sourceKey: cafe.day
+    targetKey: cafe.workstation.day
+  - contextPrefix: cafe_tutorial.adjust_strength
+    sourceKey: cafe.day
+    targetKey: cafe.workstation.day
+  - contextPrefix: cafe_tutorial.adjust_sweetness
+    sourceKey: cafe.day
+    targetKey: cafe.workstation.day
+  - contextPrefix: cafe_tutorial.demo_grind
+    sourceKey: cafe.day
+    targetKey: cafe.workstation.day
+  - contextPrefix: cafe_tutorial.demo_boil
+    sourceKey: cafe.day
+    targetKey: cafe.workstation.day
+  - contextPrefix: cafe_tutorial.demo_brew
+    sourceKey: cafe.day
+    targetKey: cafe.workstation.day
+  - contextPrefix: cafe_tutorial.demo_cup
+    sourceKey: cafe.day
+    targetKey: cafe.workstation.day
+  - contextPrefix: cafe_tutorial.demo_base
+    sourceKey: cafe.day
+    targetKey: cafe.workstation.day
+  - contextPrefix: cafe_tutorial.demo_strength
+    sourceKey: cafe.day
+    targetKey: cafe.workstation.day
+  - contextPrefix: cafe_tutorial.demo_sweetness
+    sourceKey: cafe.day
+    targetKey: cafe.workstation.day
+  - contextPrefix: cafe_tutorial.demo_serve
+    sourceKey: cafe.day
+    targetKey: cafe.serving.day
+  - contextPrefix: cafe_tutorial.serve_customer
+    sourceKey: cafe.day
+    targetKey: cafe.serving.day
+  - contextPrefix: cafe_tutorial.result_excellent
+    sourceKey: cafe.day
+    targetKey: cafe.serving.day
+  - contextPrefix: cafe_tutorial.result_good
+    sourceKey: cafe.day
+    targetKey: cafe.serving.day
+  - contextPrefix: cafe_tutorial.result_average
+    sourceKey: cafe.day
+    targetKey: cafe.serving.day
+  - contextPrefix: cafe_tutorial.result_bad
+    sourceKey: cafe.day
+    targetKey: cafe.serving.day
+  - contextPrefix: cafe_tutorial.result_refund
+    sourceKey: cafe.day
+    targetKey: cafe.serving.day

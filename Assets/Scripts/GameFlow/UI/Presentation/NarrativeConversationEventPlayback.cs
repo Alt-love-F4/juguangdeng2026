@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using Spotlight.Narrative;
 using UnityEngine;
+using UnityEngine.SceneManagement;
 using YokiFrame;
 
 namespace Spotlight.GameFlow
@@ -54,7 +55,9 @@ namespace Spotlight.GameFlow
             // Only the first line introduces its speaker. Later characters must not appear early.
             return new DialogueScript(lines, new DialogueCharacter("", null), new DialogueCharacter("", null), data.title,
                 options: options, continuityOwner: data.continuityOwner, continues: data.continues, musicKey: data.bgmOverride,
-                backgroundVisual: NarrativeStageVisuals.Resolve(data.backgroundPath));
+                backgroundVisual: NarrativeStageVisuals.Resolve(data.backgroundPath,
+                    data.lines.Count > 0 && !string.IsNullOrWhiteSpace(data.lines[0].pageId)
+                        ? data.lines[0].pageId : data.presentationKey));
         }
 
         private static readonly HashSet<string> warnedPortraits = new HashSet<string>(StringComparer.Ordinal);
@@ -89,14 +92,24 @@ namespace Spotlight.GameFlow
             void Cancel() { if (notified) return; notified = true; Detach(); data.cancelled?.Invoke(); }
             var script = CreateScript(data, request.PassiveHint);
             if (isPreview) script = script.WithPreviewContext();
-            panel = DialoguePlayback.Play(script, Complete, Cancel, panelTag, cachePolicy);
-            if (!notified) panel.PlaybackInterrupted += Cancel;
-            data.releaseStage = () => { Detach(); DialoguePlayback.ReleaseStage(data.continuityOwner); };
-            // Formal first-session guidance owns progression; ESC belongs to the pause menu.
-            // Preview playback has no running guide and retains its normal cancellation behavior.
-            var dayFlow = UnityEngine.Object.FindFirstObjectByType<DayFlowController>();
-            panel.AllowCancel = isPreview || request.Event?.blocksSave != true && (dayFlow == null || !dayFlow.IsFirstSessionGuideActive);
-            panel.OptionSelectionRequested = data.selectChoice;
+            void BeginPlayback()
+            {
+                if (notified) return;
+                panel = DialoguePlayback.Play(script, Complete, Cancel, panelTag, cachePolicy);
+                if (!notified) panel.PlaybackInterrupted += Cancel;
+                // Formal first-session guidance owns progression; ESC belongs to the pause menu.
+                // Preview playback has no running guide and retains its normal cancellation behavior.
+                var dayFlow = UnityEngine.Object.FindFirstObjectByType<DayFlowController>();
+                panel.AllowCancel = isPreview || request.Event?.blocksSave != true && (dayFlow == null || !dayFlow.IsFirstSessionGuideActive);
+                panel.OptionSelectionRequested = data.selectChoice;
+            }
+            data.releaseStage = () => { notified = true; Detach(); DialoguePlayback.ReleaseStage(data.continuityOwner); };
+            var flow = !isPreview && script.BackgroundVisual?.useSceneBackground == true
+                && SceneManager.GetActiveScene().name != "CoffeeShop"
+                ? UnityEngine.Object.FindFirstObjectByType<GameFlowBootstrap>() : null;
+            if (flow != null && flow.SessionState == GameSessionState.Playing)
+                flow.TransitionToGameplayScene("CoffeeShop", BeginPlayback);
+            else BeginPlayback();
             return true;
         }
     }

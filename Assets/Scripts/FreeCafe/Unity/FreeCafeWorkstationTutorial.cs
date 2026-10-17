@@ -32,12 +32,22 @@ namespace Spotlight.FreeCafe
         private readonly List<Image> trail = new List<Image>();
         private GameObject retry;
         private FreeCafePortal entryPortal;
+        private FreeCafeDeliveryBell deliveryBell;
         private Collider2D entryHitbox;
         private bool showingWorkstationEntry;
         public bool IsRunning { get; private set; }
         public Stage CurrentStage => stage;
         public bool IsFirstCafeTutorial => IsRunning && firstCafeTutorial;
-        public bool CanSubmitCup => !IsRunning || !firstCafeTutorial || stage == Stage.SubmitCup;
+        public bool CanSubmitCup => !IsRunning || stage == Stage.SubmitCup;
+        public ActionResult RingPracticeBell()
+        {
+            if (!IsRunning || firstCafeTutorial || stage != Stage.SubmitCup)
+                return ActionResult.No("先完成咖啡并放到案板上的盘子里，再按铃");
+            if (W.ServingCup == null || W.ServingCup.id != cup)
+                return ActionResult.No("盘子里没有本次练习的咖啡，请重新放好杯子");
+            SetStage(Stage.Complete);
+            return ActionResult.Yes("按铃完成！操作练习结束，本次不结算正式订单");
+        }
         private CafeWorld W => app.World;
         public void Initialize(FreeCafeRuntime owner)
         {
@@ -72,6 +82,9 @@ namespace Spotlight.FreeCafe
             cupSource = FindSource("cup.large") ?? FindSource("cup.small");
             delivery = W.State.entities.Find(e => e.area == AreaId.Counter && W.Spec(e.specId).Has(Capability.Delivery))?.id;
             if (beans == null || water == null || grinder == null || heater == null || cupSource == null || delivery == null || extraction && (extractor == null || filter == null)) return false;
+            var deliveryView = app.View(delivery);
+            deliveryBell = deliveryView != null ? deliveryView.GetComponentInChildren<FreeCafeDeliveryBell>(true) : null;
+            if (deliveryBell == null) return false;
             original = Capture(); essence = extraction; restoreOnStop = true;
             firstCafeTutorial = firstCafe; originalAutomatic = W.State.automaticMachines;
             W.State.automaticMachines = false;
@@ -166,7 +179,7 @@ namespace Spotlight.FreeCafe
         public bool AllowClick(string id)
         {
             if (!IsRunning || restoring) return true;
-            if (stage == Stage.SubmitCup && id == delivery) return true;
+            if (stage == Stage.SubmitCup) { ReportError("请点击工作台右下角的按铃交付，不是点击盘子。"); return false; }
             if ((stage == Stage.Grind || stage == Stage.Grinding) && id == grinder || stage == Stage.Heat && id == heater) return true;
             ReportError(DragStep ? "此步骤需要按住左键拖动，不是单击。" : "请点击提示标记的设备；加工会自动继续。"); return false;
         }
@@ -217,7 +230,7 @@ namespace Spotlight.FreeCafe
                     if (taken != null) { cup = taken.id; SetStage(Stage.Pour); }
                 }
                 if (stage == Stage.DeliverCup && W.ServingCup?.id == cup && !app.IsDragging)
-                    SetStage(firstCafeTutorial ? Stage.SubmitCup : Stage.Complete);
+                    SetStage(Stage.SubmitCup);
                 var mouse = Mouse.current;
                 if (PourStep && app.IsDragging && mouse != null && mouse.rightButton.isPressed) rightStarted = true;
                 if (PourStep && rightStarted && mouse != null && !mouse.rightButton.isPressed)
@@ -242,7 +255,7 @@ namespace Spotlight.FreeCafe
             bool empty = W.LiquidVolume(W.Find(Source)) <= .01f;
             app.CancelDrag(); // Finalizes extraction and returns the vessel before checkpointing.
             bool success = empty && (stage == Stage.Extract ? W.ExtractionSnapshot(extractor).completed : Has(cup, "coffee"));
-            if (success) SetStage(stage == Stage.Extract ? Stage.Drain : essence ? Stage.Complete : Stage.DeliverCup);
+            if (success) SetStage(stage == Stage.Extract ? Stage.Drain : Stage.DeliverCup);
             else
             {
                 Restore(checkpoint); rightStarted = false;
@@ -264,9 +277,9 @@ namespace Spotlight.FreeCafe
                     var s = W.ExtractionSnapshot(extractor);
                     return $"拖动热水壶 → 上层滤杯，按住右键并上下移动控制流量\n粉 {s.groundsGrams:0} g · 注水 {s.injectedHotWaterMl:0}/{s.idealMl:0} ml · 时间 {s.elapsedSeconds:0.0}/{s.idealSeconds:0.0} s\n稳定小角度倾倒；保持右键直到热水倒空，中途松键会重来";
                 case Stage.Drain: return "等待滤杯滴滤完成。下一步拿下层壶，不是上层滤杯";
-                case Stage.TakeCup: return "按住左键，从杯堆拖出一个空杯，放到桌面空处\n先准备接咖啡的杯子，装好咖啡后再放入交付区";
-                case Stage.DeliverCup: return "按住左键，把装满黑咖啡的杯子拖入交付区\n看到目标高亮后松开左键" + (firstCafeTutorial ? "，然后按铃交付" : "（本练习不提交订单）");
-                case Stage.SubmitCup: return "黑咖啡已放入交付区！点击交付区按铃，或点击「交付」按钮\n交给首位客人后完成新手教程；现在尚未正式营业";
+                case Stage.TakeCup: return "按住左键，从杯堆拖出一个空杯，放到桌面空处\n先准备接咖啡的杯子，装好咖啡后再放到案板上的盘子里";
+                case Stage.DeliverCup: return "按住左键，把装好咖啡的杯子拖到案板上的盘子里\n看到盘子高亮后松开左键，然后点击右下角按铃";
+                case Stage.SubmitCup: return "咖啡已放到盘子里！点击工作台右下角的按铃完成交付\n" + (firstCafeTutorial ? "按铃交给首位客人后，新手教程才会结束" : "练习也要按铃才算完成；本次不结算正式订单");
                 case Stage.Pour: return (essence ? "拖动精粹炉下层咖啡壶（自动分离滤杯）" : "拖动通用加热炉") + " → 标记杯子\n按住右键，上下移动使壶旋转倾斜；倒空后才能松开！";
                 default: return "制作完成！是否要再来一次？退出后恢复练习前的工作台";
             }
@@ -367,7 +380,13 @@ namespace Spotlight.FreeCafe
 
         private Vector2 ScreenPoint(string id)
         {
-            var view = app.View(id); return view != null ? (Vector2)app.worldCamera.WorldToScreenPoint(view.transform.position) : new Vector2(Screen.width * .5f, Screen.height * .5f);
+            if (stage == Stage.SubmitCup && deliveryBell != null)
+                return app.worldCamera.WorldToScreenPoint(deliveryBell.TutorialAnchor.position);
+            var view = app.View(id);
+            if (view == null) return new Vector2(Screen.width * .5f, Screen.height * .5f);
+            var plate = view.GetComponent<FreeCafeDeliveryZone>();
+            var position = plate != null ? view.transform.TransformPoint(plate.ArtworkOffset) : view.transform.position;
+            return app.worldCamera.WorldToScreenPoint(position);
         }
         private void DrawGuide()
         {
@@ -375,11 +394,11 @@ namespace Spotlight.FreeCafe
             heading.text = (firstCafeTutorial ? "黑咖啡 · 新手教程" : essence ? "精粹咖啡 · 操作练习" : "黑咖啡 · 操作练习") + (PourStep ? "    |    必须倒空 · 松键重来" : "    |    跟随光效操作");
             instruction.text = Description();
             errorText.text = Time.unscaledTime < errorUntil ? error : firstCafeTutorial
-                ? "完成黑咖啡并交付首位客人后，解锁正常营业" : "练习不会提交订单 · 退出后恢复原工作台";
+                ? "完成黑咖啡并交付首位客人后，解锁正常营业" : "把咖啡放到盘子里并按铃才算完成 · 练习不结算订单，退出后恢复原工作台";
             bool showGesture = DragStep || stage == Stage.Grind || stage == Stage.Grinding || stage == Stage.Heat || stage == Stage.SubmitCup;
             gesture.gameObject.SetActive(showGesture);
             panel.SetMouseMode(PourStep && app.IsDragging, PourStep && app.IsDragging);
-            gestureText.text = PourStep && app.IsDragging ? "按住右键\n上下移动旋转" : DragStep ? "按住左键\n拖到目标松开" : stage == Stage.Grinding ? "左键连续点击\n加速研磨" : "单击左键";
+            gestureText.text = PourStep && app.IsDragging ? "按住右键\n上下移动旋转" : DragStep ? "按住左键\n拖到目标松开" : stage == Stage.Grinding ? "左键连续点击\n加速研磨" : stage == Stage.SubmitCup ? "点击右下角按铃\n完成交付" : "单击左键";
             Vector2 start = ScreenPoint(Source), end = ScreenPoint(Target);
             if (app.IsDragging && Mouse.current != null) start = Mouse.current.position.ReadValue();
             if (stage == Stage.TakeCup) end = new Vector2(Screen.width * .5f, Screen.height * .48f);

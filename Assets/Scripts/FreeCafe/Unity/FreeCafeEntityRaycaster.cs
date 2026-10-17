@@ -21,12 +21,13 @@ namespace Spotlight.FreeCafe
                 var hit = results[i];
                 var view = hit.gameObject != null ? hit.gameObject.GetComponentInParent<FreeEntityView>() : null;
                 if (view == null) continue;
-                if (!view.CanInteract)
+                var bell = hit.gameObject.GetComponentInParent<FreeCafeDeliveryBell>();
+                if (!view.CanInteract || bell != null && !bell.CanInteract)
                 {
                     results.RemoveAt(i);
                     continue;
                 }
-                var body = view.body;
+                var body = bell != null ? bell.Visual : view.body;
                 if (body == null) continue;
                 hit.sortingLayer = body.sortingLayerID;
                 hit.sortingOrder = body.sortingOrder;

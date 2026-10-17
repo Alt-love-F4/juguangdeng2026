@@ -58,7 +58,7 @@ namespace Spotlight.GameFlow.Tests
             Assert.That(DialoguePreviewDialogue.Create().Count, Is.EqualTo(7));
             Assert.That(script.Title, Is.EqualTo("初来乍到 · 沸点咖啡馆"));
             Assert.That(new LubanOpeningDialogueSource().CreateScript().Count, Is.EqualTo(13));
-            Assert.That(typeof(DialogueVisualsAsset).GetFields(BindingFlags.NonPublic | BindingFlags.Instance).Length, Is.EqualTo(3));
+            Assert.That(typeof(DialogueVisualsAsset).GetFields(BindingFlags.NonPublic | BindingFlags.Instance).Length, Is.EqualTo(5));
             Assert.That((int)DayFlowState.FreeCafeBusiness, Is.EqualTo(3));
             Assert.That((int)DayFlowState.IntroLetter, Is.EqualTo(9));
             Assert.That((int)DayFlowState.FirstDayIntroduction, Is.EqualTo(10));

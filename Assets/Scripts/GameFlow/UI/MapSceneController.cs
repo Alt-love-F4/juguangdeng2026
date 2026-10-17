@@ -1269,12 +1269,12 @@ namespace Spotlight.GameFlow
                 standaloneLoading = false;
                 yield break;
             }
-            gameObject.SetActive(false);
+            // This object owns the coroutine, so keep it active until scene activation completes.
             AsyncOperation operation = UnityEngine.SceneManagement.SceneManager.LoadSceneAsync(
                 "CoffeeShop", UnityEngine.SceneManagement.LoadSceneMode.Additive);
             if (operation == null)
             {
-                gameObject.SetActive(true);
+                panel.EndLoading();
                 standaloneLoading = false;
                 Debug.LogError("Could not load CoffeeShop additively.", this);
                 yield break;
@@ -1292,6 +1292,7 @@ namespace Spotlight.GameFlow
                 UnityEngine.SceneManagement.Scene destination = UnityEngine.SceneManagement.SceneManager.GetSceneByName("CoffeeShop");
                 if (destination.IsValid() && destination.isLoaded)
                     UnityEngine.SceneManagement.SceneManager.SetActiveScene(destination);
+                if (this != null) gameObject.SetActive(false);
                 if (panel != null) panel.EndLoading(() =>
                 {
                     if (this != null) standaloneLoading = false;

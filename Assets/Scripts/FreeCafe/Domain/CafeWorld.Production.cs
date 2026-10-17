@@ -203,7 +203,7 @@ namespace Spotlight.FreeCafe
             if (receiver.Has(Capability.Delivery))
             {
                 if(input.Has(Capability.Container))
-                    result = ServingCup!=null && ServingCup!=item ? ActionResult.No("交付区已有杯子，请先交付、移走或丢弃") : ActionResult.Yes("放置出餐杯；按铃或点击 UI 交付按钮提交");
+                    result = ServingCup!=null && ServingCup!=item ? ActionResult.No("交付区已有杯子，请先交付、移走或丢弃") : ActionResult.Yes("咖啡已放到盘子里；点击工作台右下角按铃交付");
                 else result = ServingCup == null ? ActionResult.No("交付区没有杯子，请先拖入杯子") : Preview(item, ServingCup);
                 return true;
             }

@@ -69,6 +69,7 @@ namespace Spotlight.FreeCafe.Editor
             hud.cupStatus=Text(bottom,"ServingCupStatus","出餐托盘 · 未选杯",new Vector2(-302,-12),new Vector2(390,42),21);
             hud.deliver=Button(bottom,"DeliverCurrentOrder","出品",new Vector2(-20,-11),new Vector2(125,48));
             hud.discard=Button(bottom,"DiscardCup","丢弃杯",new Vector2(125,-11),new Vector2(135,48));
+            hud.HideSceneReplacedControls();
             hud.miniGameButton=Button(bottom,"LatteArtEntry","拉花入口",new Vector2(300,-11),new Vector2(175,48));
             hud.clearMachine=Button(bottom,"ClearSelectedMachine","清空选中设备",new Vector2(531,-11),new Vector2(225,48));
             hud.pauseButton=Button(bottom,"PauseProduction","暂停 / 继续",new Vector2(780,-11),new Vector2(205,48));

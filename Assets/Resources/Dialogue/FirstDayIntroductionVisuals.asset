@@ -14,4 +14,4 @@ MonoBehaviour:
   m_EditorClassIdentifier: Spotlight.GameFlow.UI::Spotlight.GameFlow.DialogueVisualsAsset
   leftPortrait: {fileID: 0}
   rightPortrait: {fileID: -5580901551210181490, guid: 702084c7b8ffbab4580ffabc27dd4bae, type: 3}
-  background: {fileID: 2800000, guid: e4a7b244758a8fb48ac12e953d3a6d58, type: 3}
+  background: {fileID: 2800000, guid: f5310e2e38350b94b9dc9c4ab2bf457b, type: 3}

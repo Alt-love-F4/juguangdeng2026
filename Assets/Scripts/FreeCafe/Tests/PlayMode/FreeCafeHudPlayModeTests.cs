@@ -1,4 +1,4 @@
-﻿using System.Collections;
+using System.Collections;
 using System.Reflection;
 using NUnit.Framework;
 using Spotlight.GameFlow;
@@ -586,8 +586,13 @@ namespace Spotlight.FreeCafe.Tests
             Assert.That(tutorialFlow.IsCafeTutorialActive,Is.True);
             Assert.That(world.HasTutorialCustomer,Is.True);
             typeof(DayFlowController).GetMethod("FindGameplayEndpoint",BindingFlags.Instance|BindingFlags.NonPublic).Invoke(tutorialFlow,null);
-            var delivery=app.DeliverCup();
-            Assert.That(delivery.success,Is.True,delivery.message);
+            Assert.That(production.deliver.interactable,Is.False,"Tutorial completion requires the physical bell");
+            Assert.That(app.DeliverCup().success,Is.False);
+            app.Click(app.View(tray.id));
+            Assert.That(guide.IsRunning,Is.True,"Clicking the plate must not complete the tutorial");
+            var bell=app.View(tray.id).GetComponentInChildren<FreeCafeDeliveryBell>();
+            Assert.That(bell,Is.Not.Null);
+            bell.OnPointerClick(new PointerEventData(EventSystem.current) {button=PointerEventData.InputButton.Left});
             Assert.That(tutorialFlow.IsCafeTutorialActive,Is.False);
             Assert.That(guide.IsRunning,Is.False);
             Assert.That(world.State.open,Is.False);

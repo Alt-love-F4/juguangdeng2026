@@ -10,9 +10,11 @@ namespace Spotlight.GameFlow
         [SerializeField] private Sprite rightPortrait;
         [SerializeField] private Sprite centerPortrait;
         [SerializeField] private Texture background;
+        [SerializeField] private string backgroundKey;
         public Sprite LeftPortrait => leftPortrait;
         public Sprite RightPortrait => rightPortrait;
         public Sprite CenterPortrait => centerPortrait;
         public Texture Background => background;
+        public string BackgroundKey => backgroundKey;
     }
 }

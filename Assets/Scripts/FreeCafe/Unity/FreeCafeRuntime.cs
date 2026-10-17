@@ -318,11 +318,28 @@ namespace Spotlight.FreeCafe
             }
             Debug.Log("[FreeCafe] "+(result.success ? "OK " : "拒绝 ")+result.message,this);
         }
-        public ActionResult DeliverCup()
+        public ActionResult RingDeliveryBell()
+        {
+            if (InputBlocked || IsDragging) return ActionResult.No("当前不能按铃交付");
+            if (PracticeTutorialActive && !WorkstationTutorial.IsFirstCafeTutorial)
+            {
+                var practice = WorkstationTutorial.RingPracticeBell();
+                Report(practice);
+                return practice;
+            }
+            return DeliverCup(true);
+        }
+        public ActionResult DeliverCup(bool fromBell = false)
         {
             if(InputBlocked) return ActionResult.No("当前不能交付");
-            if (WorkstationTutorial != null && !WorkstationTutorial.CanSubmitCup)
-                return ActionResult.No("请先按照教程完成黑咖啡，并把杯子放入交付区");
+            if (PracticeTutorialActive && (!WorkstationTutorial.CanSubmitCup || !fromBell))
+            {
+                string message = WorkstationTutorial.CanSubmitCup
+                    ? "请点击工作台右下角的按铃，完成交付"
+                    : "请先按照教程完成咖啡，并把杯子放到案板上的盘子里";
+                WorkstationTutorial.ReportError(message);
+                return ActionResult.No(message);
+            }
             bool tutorialOrder = CafeTutorialActive && cafeTutorial != null && cafeTutorial.WaitingForCoffee
                 && World.State.focusedRequestId == CafeWorld.TutorialOrderId;
             var request = World.Request(World.State.focusedRequestId);
@@ -377,7 +394,8 @@ namespace Spotlight.FreeCafe
             if (WorkstationTutorial != null && !WorkstationTutorial.AllowClick(entity.id)) return;
             var spec=World.Spec(entity.specId);
             if(spec.Has(Capability.BusinessControl)) { StartBusiness(); return; }
-            if(World.ProductionEnabled && spec.Has(Capability.Delivery)) { DeliverCup(); return; }
+            if(World.ProductionEnabled && spec.Has(Capability.Delivery))
+            { ShowHint("把饮品放到案板上的盘子里，再点击工作台右下角按铃交付"); return; }
             if(World.ProductionEnabled && entity.specId=="tool.latte-art") { Report(World.RequestProductionMiniGame()); return; }
             if(World.ProductionEnabled && World.IsMilkPitcher(entity)) { SelectedId=entity.id; Report(World.FrothMilk(entity.id)); return; }
             if(World.ProductionEnabled && spec.Has(Capability.Source) && World.Spec(spec.sourceItemId).Has(Capability.Container))

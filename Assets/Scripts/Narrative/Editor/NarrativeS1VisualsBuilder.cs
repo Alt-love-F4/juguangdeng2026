@@ -11,7 +11,7 @@ namespace Spotlight.Narrative.Editor
     {
         public const string RegistryPath = "Assets/Resources/Dialogue/NarrativeStageVisuals.asset";
         public const string EffectsPath = "Assets/Resources/Dialogue/PresentationEffectLibrary.asset";
-        public const string CafeSourcePath = "Assets/Art/Background/架空咖啡馆背景_01.png";
+        public const string CafeSourcePath = "Assets/Art/Background/game/SCE_一楼大厅对话场景日景.png";
 
         [MenuItem("Spotlight/Narrative/Build S1 Visual Resources")]
         public static void Build()
@@ -26,16 +26,10 @@ namespace Spotlight.Narrative.Editor
                 registry = ScriptableObject.CreateInstance<NarrativeStageVisuals>();
                 AssetDatabase.CreateAsset(registry, RegistryPath);
             }
-            Undo.RecordObject(registry, "Add missing S1 background aliases");
-            if (registry.Find("oct07.cafe.day") == null)
-                registry.SetEntry(new NarrativeStageVisuals.Entry { key = "oct07.cafe.day", texture = cafe, fadeSeconds = .3f });
-            // Asset search found no matching Saint Street artwork. Do not substitute another interior.
-            if (registry.Find("oct07.street.day") == null)
-                registry.SetEntry(new NarrativeStageVisuals.Entry { key = "oct07.street.day", placeholder = true,
-                    placeholderColor = new Color(.23f, .25f, .28f, 1f), fadeSeconds = .3f });
-            if (registry.Find("oct07.cafe.night") == null)
-                registry.SetEntry(new NarrativeStageVisuals.Entry { key = "oct07.cafe.night", texture = cafe,
-                    tint = new Color(.42f, .48f, .62f, 1f), fadeSeconds = .3f });
+            Undo.RecordObject(registry, "Update S1 background artwork");
+            SetBackground(registry, "oct07.cafe.day", CafeSourcePath);
+            SetBackground(registry, "oct07.street.day", "Assets/Art/Background/game/SCE_圣徒街场景1.png");
+            SetBackground(registry, "oct07.cafe.night", "Assets/Art/Background/game/SCE_一楼大厅场景夜晚.png");
             EditorUtility.SetDirty(registry);
             const string passivePath = "Assets/Resources/Dialogue/PassiveCheckPresentation.asset";
             var passive = AssetDatabase.LoadAssetAtPath<PassiveCheckPresentationConfig>(passivePath);
@@ -62,7 +56,18 @@ namespace Spotlight.Narrative.Editor
             effects.EnsureNarrativePresets();
             EditorUtility.SetDirty(effects);
             AssetDatabase.SaveAssets();
-            Debug.Log("[NCS] S1 resources ready: original cafe day/night aliases; explicit street placeholder; shared nod/pan presets; S2 fixed passive hint. Existing keys/presets preserved.");
+            Debug.Log("[NCS] S1 resources ready: approved game cafe day/night and street artwork; shared presets and background catalog preserved.");
+        }
+        private static void SetBackground(NarrativeStageVisuals registry, string key, string path)
+        {
+            var texture = AssetDatabase.LoadAssetAtPath<Texture>(path);
+            if (texture == null) throw new InvalidOperationException("Missing narrative source texture: " + path);
+            var entry = registry.Find(key) ?? new NarrativeStageVisuals.Entry { key = key };
+            entry.texture = texture;
+            entry.tint = Color.white;
+            entry.placeholder = false;
+            entry.solidColor = false;
+            registry.SetEntry(entry);
         }
     }
 }

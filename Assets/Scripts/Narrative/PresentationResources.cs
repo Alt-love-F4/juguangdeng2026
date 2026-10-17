@@ -35,6 +35,11 @@ namespace Spotlight.Narrative
         public void Background(string path)
         {
             if (string.IsNullOrWhiteSpace(path)) return;
+            if (string.Equals(path, NarrativeBackgroundKeys.CafeScene, StringComparison.Ordinal))
+            {
+                ui.SetBackground(null);
+                return;
+            }
             Sprite sprite = Load<Sprite>(path, "background");
             if (sprite != null) ui.SetBackground(sprite);
         }

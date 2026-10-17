@@ -175,6 +175,39 @@ namespace Spotlight.GameFlow.Tests
         }
 
         [UnityTest]
+        public IEnumerator BackgroundImagesAndLiveSceneSwitchCleanlyAcrossContinuousPages()
+        {
+            var owner = new object();
+            DialoguePanel panel = null;
+            foreach (string key in new[] { "street.day", NarrativeBackgroundKeys.CafeScene, "street.night", NarrativeBackgroundKeys.CafeScene })
+            {
+                var script = new DialogueScript(new[] { new DialogueLine(DialogueSpeaker.Narrator, "背景切换") },
+                    continuityOwner: owner, continues: true, backgroundVisual: NarrativeStageVisuals.Resolve(key));
+                panel = DialoguePlayback.Play(script, null, null,
+                    PresentationDebugSceneController.DebugTag, PanelCachePolicy.Transient);
+                bool sceneBackground = key == NarrativeBackgroundKeys.CafeScene;
+                Assert.That(panel.BackgroundLayer.enabled, Is.EqualTo(!sceneBackground), key);
+                if (sceneBackground)
+                {
+                    Assert.That(panel.BackgroundLayer.texture, Is.Null);
+                    foreach (var layer in panel.BackgroundLayer.GetComponentsInChildren<UnityEngine.UI.RawImage>(true))
+                        Assert.That(layer.enabled, Is.False, layer.name);
+                }
+                float deadline = Time.realtimeSinceStartup + 5f;
+                while (panel.IsPlaying)
+                {
+                    Assert.That(Time.realtimeSinceStartup, Is.LessThan(deadline));
+                    if (panel.IsReady) panel.Advance();
+                    yield return null;
+                }
+                Assert.That(panel.SeamlessChoicePending, Is.True);
+            }
+            DialoguePlayback.ReleaseStage(owner);
+            yield return null;
+            Assert.That(DialoguePanel.IsAnyPlaying, Is.False);
+        }
+
+        [UnityTest]
         public IEnumerator StopDuringContinuousSequenceSuppressesPendingCallbacks()
         {
             UIPanel current = null;

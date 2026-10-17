@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.IO;
 using Spotlight.FreeCafe;
 using TMPro;
@@ -76,6 +76,7 @@ namespace Spotlight.FreeCafe.Editor
             Label(cups,"Caption","出餐杯",new Vector2(0,35),new Vector2(280,24),17);
             hud.smallCup=Button(cups,"SelectSmallCup","小杯",new Vector2(-80,-9),new Vector2(138,47));
             hud.largeCup=Button(cups,"SelectLargeCup","大杯",new Vector2(80,-9),new Vector2(138,47));
+            hud.HideSceneReplacedControls();
             hud.returnButton=Button(footer,"ReturnToCafe","返回咖啡厅",Vector2.zero,new Vector2(300,64));
             Place((RectTransform)hud.returnButton.transform,new Vector2(1,0),new Vector2(-181,58),new Vector2(300,64));
             hud.clearMachine=Button(footer,"EmptySelectedMachine","清空所选容器",Vector2.zero,new Vector2(260,43));

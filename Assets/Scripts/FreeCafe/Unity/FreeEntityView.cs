@@ -234,12 +234,18 @@ namespace Spotlight.FreeCafe
                 if(body.sprite!=null)
                 {
                     var size=body.sprite.bounds.size;
-                    float fit=Mathf.Min(spec.width/size.x,spec.height/size.y);
+                    var plate = GetComponent<FreeCafeDeliveryZone>();
+                    var artworkSize = plate != null ? plate.ArtworkSize : new Vector2(spec.width, spec.height);
+                    float fit=Mathf.Min(artworkSize.x/size.x,artworkSize.y/size.y);
                     body.transform.localScale=new Vector3(fit,fit,1);
+                    if (plate != null) { body.transform.localPosition = plate.ArtworkOffset; body.enabled = true; }
                 }
                 var deliveryZone = GetComponent<FreeCafeDeliveryZone>();
                 hitbox.size=deliveryZone!=null ? deliveryZone.HitboxSize : new Vector2(spec.width,spec.height);
-                label.transform.localPosition=spec.Has(Capability.BusinessControl) ? new Vector3(0,.3f,-.1f) : new Vector3(0,-spec.height*.5f-.18f,-.1f);
+                if (deliveryZone != null) hitbox.offset = deliveryZone.ArtworkOffset;
+                label.transform.localPosition=deliveryZone!=null
+                    ? new Vector3(0,deliveryZone.ArtworkOffset.y-deliveryZone.ArtworkSize.y*.5f-.2f,-.1f)
+                    : spec.Has(Capability.BusinessControl) ? new Vector3(0,.3f,-.1f) : new Vector3(0,-spec.height*.5f-.18f,-.1f);
             }
             if (!motionInitialized)
             {

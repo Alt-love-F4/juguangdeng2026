@@ -73,7 +73,7 @@ namespace Spotlight.GameFlow
                             .OrderBy(p => p.seq).Last().bgOverride;
                         var stage = new DialogueScript(new[] { new DialogueLine(DialogueSpeaker.Narrator, string.Empty, autoAdvanceSeconds: .02f) },
                             new DialogueCharacter("", null), new DialogueCharacter("", null),
-                            continuityOwner: stageOwner, continues: true, backgroundVisual: NarrativeStageVisuals.Resolve(background));
+                            continuityOwner: stageOwner, continues: true, backgroundVisual: NarrativeStageVisuals.Resolve(background, data.pageId));
                         data.releaseStage = () => { LetterEventPlayback.ReleaseStage(data.continuityOwner); DialoguePlayback.ReleaseStage(data.continuityOwner); };
                         data.setSuspended = blocked => LetterEventPlayback.SetSuspended(data.continuityOwner, blocked);
                         DialoguePlayback.Play(stage.WithPreviewContext(), () =>

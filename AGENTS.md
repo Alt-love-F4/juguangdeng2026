@@ -1,5 +1,15 @@
 # Agent guidance: shared presentation debug scene
 
+## NCS 咖啡馆实景背景约定（2026-10-16）
+
+- **咖啡馆内普通对话使用游戏实际场景，不叠加全屏背景图。** 在 `Assets/ConfigTables/Data/Narrative/Narrative.xlsx` 的 `ConversationPage.bgOverride` 显式填写 `scene.cafe`；空值仍是继承上一页，不是关闭背景。
+- 开场 `first_day_cafe` 与 `cafe_tutorial.*` 在 `OpeningPresentation.visualsResource` 填 `Dialogue/CafeSceneVisuals`。该资源的 `backgroundKey=scene.cafe`，立绘和文本仍走原有适配层。
+- `scene.cafe` 不是图片路径或黑幕：面板必须取消旧背景淡入淡出并关闭自身背景层。街道、俱乐部、教堂等店外演出仍填写实际图片 key；进出店内时显式切换，不能整事件统一清空。
+- 正式店内页若从地图触发，复用 `GameFlowBootstrap.TransitionToGameplayScene` 准备 `CoffeeShop` 后再显示对话；预览不加载正式场景。该标记不负责解锁楼层、切楼、推进时间或模拟晨昏光照。
+- 一、二、三楼原始经营底图仅供实际经营场景组装：`SCE_一楼大厅场景底图.png`、`SCE_二楼会客室场景底图.png`、`SCE_ 三楼宿舍场景底图.png` 不得作为 `ConversationPage.bgOverride`、`DialogueVisualsAsset.background` 或对话背景目录的 Texture。对话只能使用对应的完整对话构图（或 `scene.cafe` 实景标记）；不要删除或覆盖经营原图。
+- 配表必须修改源 Excel 再通过项目现有官方 Luban 管线生成 JSON；不要仅手改生成 JSON，不新增平行剧情字段或复制一套演出系统。
+- 详见 `Docs/NcsCafeSceneBackground.md`；后续修改使用已有 `PresentationDebugScene.unity` 回归图片→实景→图片及连续翻页/取消/重播，不能另建临时场景。
+
 当需要测试、截图或验证演出 UI 时，**必须优先使用**：
 
 ```text

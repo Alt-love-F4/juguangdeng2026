@@ -78,13 +78,15 @@ namespace Spotlight.GameFlow.Tests
                 Assert.That(script.BackgroundVisual, Is.Not.Null); Assert.That(script.WithPreviewContext().IsPreview);
             }
         }
-        [Test] public void BackgroundRegistryMapsOriginalCafeAndExplicitStreetPlaceholder()
+        [Test] public void BackgroundRegistryMapsApprovedCafeAndStreetArtwork()
         {
             var cafe = NarrativeStageVisuals.Resolve("oct07.cafe.day"); var street = NarrativeStageVisuals.Resolve("oct07.street.day");
             Assert.That(cafe.texture, Is.Not.Null); Assert.That(cafe.placeholder, Is.False);
-            Assert.That(street.placeholder); Assert.That(street.texture, Is.Null); Assert.That(street.fadeSeconds, Is.EqualTo(.3f));
+            Assert.That(street.placeholder, Is.False); Assert.That(street.texture, Is.Not.Null); Assert.That(street.fadeSeconds, Is.EqualTo(.3f));
             var script = Page("oct07.s1.cafe");
             cafe.tint = Color.red; Assert.That(script.BackgroundVisual.tint, Is.EqualTo(Color.white));
+            Assert.That(script.BackgroundVisual.useSceneBackground, Is.True);
+            Assert.That(script.Background, Is.Null);
             Assert.That(script.WithPreviewContext().BackgroundVisual.texture, Is.SameAs(script.BackgroundVisual.texture));
         }
         [Test] public void ActualSharedPresetsHaveSingleNodAndBackgroundOnlyPanParameters()

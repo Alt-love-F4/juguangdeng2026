@@ -216,7 +216,7 @@ namespace Spotlight.GameFlow
             CenterCharacter = centerCharacter;
             Title = title ?? string.Empty;
             BackgroundVisual = backgroundVisual?.Snapshot();
-            Background = BackgroundVisual?.texture ?? background;
+            Background = BackgroundVisual?.useSceneBackground == true ? null : BackgroundVisual?.texture ?? background;
             OptionPrompt = optionPrompt ?? string.Empty;
             if (options != null)
             {

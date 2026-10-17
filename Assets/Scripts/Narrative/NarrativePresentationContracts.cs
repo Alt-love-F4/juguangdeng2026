@@ -1,5 +1,10 @@
 namespace Spotlight.Narrative
 {
+    public static class NarrativeBackgroundKeys
+    {
+        public const string CafeScene = "scene.cafe";
+    }
+
     public enum NarrativeAtomType
     {
         A_BG, A_PORTRAIT, A_DIALOG, A_NARRATE, A_CHOICE, A_WAIT,

@@ -58,6 +58,24 @@ namespace Spotlight.GameFlow.Tests
             Assert.That(script[1].Speaker, Is.EqualTo(DialogueSpeaker.Right));
             Assert.That(script[1].Gesture, Is.EqualTo(DialogueGesture.Shake));
             Assert.That(script[1].AutoAdvanceSeconds, Is.EqualTo(1.5f));
+            Assert.That(script.BackgroundVisual, Is.Null);
+            Assert.That(script.Background, Is.SameAs(Resources.Load<DialogueVisualsAsset>("Dialogue/DialoguePreview").Background));
+        }
+
+        [TestCase("first_day_cafe")]
+        [TestCase("cafe_tutorial.customer_arrives")]
+        [TestCase("cafe_tutorial.workstation_open")]
+        [TestCase("cafe_tutorial.demo_serve")]
+        [TestCase("cafe_tutorial.result_refund")]
+        public void SharedOpeningVisualsUseTheCafeSceneWithoutOverlayArtwork(string presentationId)
+        {
+            var config = LubanNarrativeLoader.Load();
+            Assert.That(NarrativePresentationDataAdapter.TryCreateOpeningDialogue(config, presentationId,
+                out var script, out var error), Is.True, error);
+            Assert.That(script.BackgroundVisual, Is.Not.Null);
+            Assert.That(script.BackgroundVisual.useSceneBackground, Is.True);
+            Assert.That(script.BackgroundVisual.key, Is.EqualTo(NarrativeBackgroundKeys.CafeScene));
+            Assert.That(script.Background, Is.Null);
         }
 
         [Test]

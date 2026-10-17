@@ -1,4 +1,4 @@
-﻿using System.Collections;
+using System.Collections;
 using NUnit.Framework;
 using Spotlight.GameFlow;
 using TMPro;
@@ -38,6 +38,36 @@ namespace Spotlight.FreeCafe.Tests
         { yield return DeliverAndConfirm(false); }
         [UnityTest] public IEnumerator ExistingDeliveryBellSharesTheReceiptAndDoesNotDeliverTwice()
         { yield return DeliverAndConfirm(true); }
+        [UnityTest] public IEnumerator BothPracticeRecipesWaitForPhysicalBellWithoutSettlingOrders()
+        {
+            foreach (bool extraction in new[] {false,true})
+            {
+                var guide=app.WorkstationTutorial;
+                Assert.That(guide.Begin(extraction),Is.True);
+                var world=app.World;
+                if(world.ServingCup==null) Assert.That(world.SelectServingCup("s.cups.large").success,Is.True);
+                var cup=world.ServingCup;
+                cup.contents.Add(new Portion {specId="coffee",units=1,milliliters=240});
+                var flags=System.Reflection.BindingFlags.Instance|System.Reflection.BindingFlags.NonPublic;
+                typeof(FreeCafeWorkstationTutorial).GetField("cup",flags).SetValue(guide,cup.id);
+                typeof(FreeCafeWorkstationTutorial).GetMethod("SetStage",flags).Invoke(guide,new object[] {FreeCafeWorkstationTutorial.Stage.DeliverCup});
+                Assert.That(world.Interact(cup.id,"service").success,Is.True);
+                app.DebugRefreshViews();yield return null;
+                Assert.That(guide.CurrentStage,Is.EqualTo(FreeCafeWorkstationTutorial.Stage.SubmitCup));
+                Assert.That(hud.deliver.interactable,Is.False);
+                Assert.That(app.DeliverCup().success,Is.False);
+                int money=world.State.money,served=world.State.todayServed,orders=world.State.requests.Count;
+                app.View("service").GetComponentInChildren<FreeCafeDeliveryBell>().OnPointerClick(
+                    new PointerEventData(EventSystem.current) {button=PointerEventData.InputButton.Left});
+                Assert.That(guide.CurrentStage,Is.EqualTo(FreeCafeWorkstationTutorial.Stage.Complete));
+                Assert.That(world.State.money,Is.EqualTo(money));
+                Assert.That(world.State.todayServed,Is.EqualTo(served));
+                Assert.That(world.State.requests.Count,Is.EqualTo(orders));
+                Assert.That(world.Find(cup.id),Is.Not.Null);
+                Assert.That(hud.receiptPanel.activeSelf,Is.False);
+                guide.Stop();yield return null;
+            }
+        }
         private IEnumerator DeliverAndConfirm(bool bell)
         {
             var w=app.World;
@@ -63,7 +93,14 @@ namespace Spotlight.FreeCafe.Tests
             app.CupDelivered+=listener;
             try
             {
-                if(bell) app.Click(app.View(tray.id)); else hud.deliver.onClick.Invoke();
+                if(bell)
+                {
+                    app.Click(app.View(tray.id));
+                    Assert.That(receipts,Is.Zero,"Placing or clicking a cup on the plate must not submit it");
+                    app.View(tray.id).GetComponentInChildren<FreeCafeDeliveryBell>().OnPointerClick(
+                        new PointerEventData(EventSystem.current) {button=PointerEventData.InputButton.Left});
+                }
+                else hud.deliver.onClick.Invoke();
                 yield return null;
                 Assert.That(receipts,Is.EqualTo(1));
                 Assert.That(hud.receiptPanel.activeInHierarchy,Is.True);

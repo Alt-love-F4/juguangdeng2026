@@ -70,6 +70,14 @@ Assets/ConfigTables/GenerateAll.bat
 
 策划从 [策划使用手册](策划使用手册.md) 开始：包含各表字段、茶话完整样例、新增事件步骤、条件/结果/演出配置与排错。
 
+### 店内对话背景（必须沿用）
+
+- `Narrative.xlsx / ConversationPage.bgOverride`：店内普通对话填 `scene.cafe`，关闭对话背景层并使用实际 `CoffeeShop` 场景。空值仍表示继承，不能用于取消背景。
+- `Assets/Art/Background/game/SCE_一楼大厅场景底图.png`、`SCE_二楼会客室场景底图.png`、`SCE_ 三楼宿舍场景底图.png` 是经营场景底图，不得填入对话背景；需要图片型对话时使用对应的完整“对话场景”资源。
+- 店外填原有图片 key（如 `oct07.street.day`）；同一事件从街道进店/出店要在对应页显式切换，不要批量清空整场事件。
+- `OpeningPresentation.visualsResource`：`first_day_cafe` 与 `cafe_tutorial.*` 使用 `Dialogue/CafeSceneVisuals`，不要恢复为默认叠图资源。
+- 只改第 5 行之后的数据；表头和 schema 不变。保存源 Excel 后运行官方生成流程，不能仅编辑 JSON。详见项目根 `AGENTS.md` 和 `Docs/NcsCafeSceneBackground.md`。
+
 - `Assets/ConfigTables/Data/Narrative/Narrative.xlsx`：Object、Bar、Trigger、Event、EventDate、Result、Condition、Template、SetupParams、Choice 共 10 个工作表。
 - `Assets/ConfigTables/Data/Shared/Text.xlsx`：唯一文本源，包含 UI 与叙事文本；原 Narrative 的 Text 内容已合并，原 UI 文本完整保留。
 - `Assets/ConfigTables/Defines/schema.xml`：唯一 schema。`luban.conf` 的 client target 导出 `cfg.Tables`。

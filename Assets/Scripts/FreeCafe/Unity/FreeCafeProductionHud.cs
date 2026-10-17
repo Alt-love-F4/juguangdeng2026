@@ -43,6 +43,7 @@ namespace Spotlight.FreeCafe
         private void OnEnable() { Bind(); }
         private void Bind()
         {
+            HideSceneReplacedControls();
             if(bound || runtime==null) return;
             bound=true; runtime.ViewChanged+=Refresh; runtime.CupDelivered+=ShowReceipt;
             bookView = bookPanel==null ? null : bookPanel.GetComponent<CoffeeBookPanelView>();
@@ -53,6 +54,23 @@ namespace Spotlight.FreeCafe
                 Spotlight.Audio.UIButtonAudio.Configure(button, string.Empty);
             foreach (Button button in new[] { returnButton, closeBook, cancelMiniGame })
                 Spotlight.Audio.UIButtonAudio.Configure(button, Spotlight.Audio.AudioKeys.Cancel);
+        }
+        /// <summary>杯堆、出品盘、按铃和废弃桶已接管这些操作，隐藏旧按钮及其独立纸卡。</summary>
+        public void HideSceneReplacedControls()
+        {
+            HideSceneReplacedControl(smallCup);
+            HideSceneReplacedControl(largeCup);
+            HideSceneReplacedControl(deliver);
+            HideSceneReplacedControl(discard);
+            if(deliveryPanel!=null) deliveryPanel.SetActive(false);
+        }
+        private static void HideSceneReplacedControl(Button button)
+        {
+            if(button==null) return;
+            button.gameObject.SetActive(false);
+            var card=button.transform.parent;
+            if(card!=null && (card.name=="CupTools" || card.name=="DeliveryActions"))
+                card.gameObject.SetActive(false);
         }
         private void OnDisable()
         {
@@ -248,8 +266,8 @@ namespace Spotlight.FreeCafe
             if(smallCup!=null) smallCup.interactable=canChange;
             if(largeCup!=null) largeCup.interactable=canChange;
             bool onTray=HasDeliveryCup();
-            if(deliveryPanel!=null) deliveryPanel.SetActive(onTray);
-            if(deliver!=null) deliver.interactable=!blocked && onTray && request!=null && (runtime.WorkstationTutorial==null || runtime.WorkstationTutorial.CanSubmitCup);
+            HideSceneReplacedControls();
+            if(deliver!=null) deliver.interactable=!blocked && onTray && request!=null && !runtime.PracticeTutorialActive;
             if(discard!=null) discard.interactable=!blocked && !guided && cup!=null;
             if(returnButton!=null) returnButton.interactable=!blocked && !guided;
             if(bookButton!=null) bookButton.interactable=!blocked;

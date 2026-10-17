@@ -1,4 +1,4 @@
-﻿using System.Collections;
+using System.Collections;
 using UnityEngine.InputSystem;
 using UnityEngine.InputSystem.LowLevel;
 using NUnit.Framework;
@@ -402,8 +402,14 @@ namespace Spotlight.FreeCafe.Tests
         [UnityTest] public IEnumerator PhysicalTrayAcceptsDraggedCupAndEmptyBellShowsNonModalToast()
         {
             var service=app.View("service");
-            Assert.That(service.hitbox.size,Is.EqualTo(new Vector2(3.2f,2.4f)));
-            Assert.That(service.transform.Find("DeliveryFrame"),Is.Not.Null);
+            Assert.That(service.body.enabled,Is.True);
+            Assert.That(service.body.sprite.name,Is.EqualTo("serving-plate"));
+            Assert.That(app.World.Find("service").x,Is.EqualTo(0).Within(.001f));
+            Assert.That(app.World.Find("service").y,Is.EqualTo(-1.3f).Within(.001f));
+            Assert.That(service.GetComponentsInChildren<FreeCafeDeliveryBell>().Length,Is.EqualTo(1));
+            Assert.That(service.hitbox.size,Is.EqualTo(new Vector2(4.4f,2.1f)));
+            Assert.That(service.hitbox.offset,Is.EqualTo(new Vector2(0,-.8f)));
+            Assert.That(service.transform.Find("DeliveryFrame").gameObject.activeSelf,Is.False);
             var bell=service.GetComponentInChildren<FreeCafeDeliveryBell>();Assert.That(bell,Is.Not.Null);
             bell.OnPointerClick(new PointerEventData(EventSystem.current) {button=PointerEventData.InputButton.Left});yield return null;
             var toast=Object.FindFirstObjectByType<OperationToastPanel>();Assert.That(toast,Is.Not.Null);
@@ -412,7 +418,7 @@ namespace Spotlight.FreeCafe.Tests
             Assert.That(app.InputBlocked,Is.False);
             app.World.Take("s.cups.small",AreaId.Counter,0,-2,out var cup);yield return null;
             Physics2D.SyncTransforms();app.BeginDrag(app.View(cup.id),Pointer(cup.x,cup.y));
-            var tray=app.World.Find("service");app.EndDrag(Pointer(tray.x+1.2f,tray.y+.8f));yield return null;
+            var tray=app.World.Find("service");app.EndDrag(Pointer(tray.x+1.2f,tray.y-.8f));yield return null;
             Assert.That(app.World.ServingCup,Is.SameAs(cup));
             Assert.That(cup.x,Is.EqualTo(tray.x));Assert.That(cup.y,Is.EqualTo(tray.y));
             Assert.That(app.World.Find(cup.id),Is.Not.Null,"拖入交付区不自动提交");

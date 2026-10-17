@@ -134,6 +134,12 @@ namespace Spotlight.GameFlow
         private void ApplyBackground(DialogueScript value, bool seamless)
         {
             var visual = value.BackgroundVisual;
+            if (visual != null && visual.useSceneBackground)
+            {
+                effects.SetBackground(null, Color.white);
+                background.enabled = false;
+                return;
+            }
             if (visual == null && value.Background == null)
             {
                 if (!seamless) { effects.SetBackground(null, Color.white); background.enabled = false; }

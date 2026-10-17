@@ -137,9 +137,14 @@ namespace Spotlight.GameFlow
                 // Opening schema has a fixed center slot but no character ID; use an explicit scoped legacy identity.
                 center = new DialogueCharacter("opening:" + presentationId + ":center", centerName, visuals.CenterPortrait);
             }
+            NarrativeStageVisuals.Entry background = !string.IsNullOrWhiteSpace(visuals.BackgroundKey)
+                ? NarrativeStageVisuals.Resolve(visuals.BackgroundKey, presentationId)
+                : string.Equals(presentation.visualsResource, "Dialogue/FirstDayIntroductionVisuals", StringComparison.Ordinal)
+                    ? NarrativeStageVisuals.Resolve("cafe.day", presentationId) : null;
             script = new DialogueScript(lines,
                 NarrativeCharacterResolver.CreateDialogueCharacter("player"),
-                NarrativeCharacterResolver.CreateDialogueCharacter("adele"), title, visuals.Background, centerCharacter: center);
+                NarrativeCharacterResolver.CreateDialogueCharacter("adele"), title, visuals.Background,
+                centerCharacter: center, backgroundVisual: background);
             return true;
         }
 

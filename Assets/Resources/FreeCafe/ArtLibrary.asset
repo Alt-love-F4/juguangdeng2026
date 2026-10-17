@@ -1078,3 +1078,22 @@ MonoBehaviour:
     variants:
     - state: default
       sprite: {fileID: 21300000, guid: 564558c20be0fbf419561b0c72fb0b94, type: 3}
+  - brief:
+      id: delivery.plate
+      label: "\u51FA\u54C1\u76D8"
+      category: entity
+      pivot: 
+      outputFolder: "Assets/Art/Gameplay/\u5496\u5561\u9986/Delivery/"
+      prompt: 
+      negativePrompt: 
+      width: 986
+      height: 497
+      transparent: 1
+      worldWidth: 4.4
+      worldHeight: 2.1
+      states:
+      - default
+    whitebox: {fileID: 21300000, guid: 6dca08a788c8a6b4cb247df700fc6a5e, type: 3}
+    variants:
+    - state: default
+      sprite: {fileID: 21300000, guid: 6dca08a788c8a6b4cb247df700fc6a5e, type: 3}

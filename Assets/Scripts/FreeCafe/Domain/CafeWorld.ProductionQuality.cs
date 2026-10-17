@@ -77,7 +77,7 @@ namespace Spotlight.FreeCafe
             var cup=ServingCup;
             var tray=State.entities.Find(e=>e.area==AreaId.Counter && Spec(e.specId).Has(Capability.Delivery));
             if(cup==null || tray==null || cup.area!=tray.area || Math.Abs(cup.x-tray.x)>.1f || Math.Abs(cup.y-tray.y)>.1f)
-                return ActionResult.No("交付区没有杯子，请先把杯子拖到方框内再按铃");
+                return ActionResult.No("盘子里没有杯子，请先把咖啡拖到案板上的盘子里，再点击右下角按铃");
             if (CupAbove(cup) != null || !string.IsNullOrEmpty(cup.cupStackBelowId)) return ActionResult.No("请先拆开杯堆再交付");
             if(Request(State.focusedRequestId)==null) return ActionResult.No("当前没有可交付的订单");
             return ServeProduction(cup, Request(State.focusedRequestId));
