@@ -19,5 +19,12 @@
     "timeSlot": "morning",
     "repeatRule": "once",
     "priority": 0
+  },
+  {
+    "eventId": "rose.1011.s1",
+    "day": 6,
+    "timeSlot": "morning",
+    "repeatRule": "once",
+    "priority": 0
   }
 ]

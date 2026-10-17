@@ -109,6 +109,21 @@ namespace Spotlight.GameFlow.Tests
         }
 
         [Test]
+        public void EarlyCafeTutorialUsesTheSameRoomBackgroundUntilTheWorkstationScene()
+        {
+            Texture cafeBackground = NarrativeStageVisuals.Resolve("cafe.day").texture;
+            foreach (string context in new[]
+            {
+                "first_day_cafe", "cafe_tutorial.customer_arrives", "cafe_tutorial.perception_success",
+                "cafe_tutorial.perception_failure", "cafe_tutorial.order_confirmed"
+            })
+                Assert.That(NarrativeStageVisuals.Resolve("cafe.day", context).texture, Is.SameAs(cafeBackground), context);
+
+            Assert.That(NarrativeStageVisuals.Resolve("cafe.day", "cafe_tutorial.workstation_open").texture,
+                Is.SameAs(NarrativeStageVisuals.Resolve("cafe.workstation.day").texture));
+        }
+
+        [Test]
         public void ConversationAdapterSuppliesPageContext()
         {
             var data = new NarrativeConversationPresentationData

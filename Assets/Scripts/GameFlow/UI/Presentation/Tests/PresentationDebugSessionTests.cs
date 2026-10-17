@@ -34,25 +34,23 @@ namespace Spotlight.GameFlow.Tests
         }
 
         [UnityTest]
-        public IEnumerator ReadingAndNoticeAreDiscoveredAndOpenProductionPanels()
+        public IEnumerator ReadingIsDiscoveredAndOpensProductionPanel()
         {
-            foreach (string id in new[] { "reading:TEST_READING", "notice:TEST_NOTICE" })
-            {
-                UIPanel panel = null;
-                using (var session = new PresentationDebugSession(LubanNarrativeLoader.Load(),
+            const string id = "reading:oct07.s2.letter";
+            UIPanel panel = null;
+            using (var session = new PresentationDebugSession(LubanNarrativeLoader.Load(),
                     PresentationDebugSceneController.DebugTag, true, true, 3, "馆长", value => panel = value, _ => { }))
-                {
-                    session.Play(id, () => { });
-                    yield return null;
-                    Assert.That(panel, Is.Not.Null, id);
-                    Assert.That(panel.Tag, Is.EqualTo(PresentationDebugSceneController.DebugTag));
-                    Assert.That(id.StartsWith("reading:") ? panel is ReadingPanel : panel is NoticePanel, Is.True, id);
-                    Assert.That(NarrativeRuntime.Instance, Is.Null);
-                }
-                UIKit.ClosePanelsByTag(PresentationDebugSceneController.DebugTag);
+            {
+                session.Play(id, () => { });
                 yield return null;
-                Assert.That(PresentationPauseRegistry.IsPaused, Is.False, id);
+                Assert.That(panel, Is.Not.Null, id);
+                Assert.That(panel.Tag, Is.EqualTo(PresentationDebugSceneController.DebugTag));
+                Assert.That(panel, Is.InstanceOf<ReadingPanel>(), id);
+                Assert.That(NarrativeRuntime.Instance, Is.Null);
             }
+            UIKit.ClosePanelsByTag(PresentationDebugSceneController.DebugTag);
+            yield return null;
+            Assert.That(PresentationPauseRegistry.IsPaused, Is.False, id);
         }
     }
 }

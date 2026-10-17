@@ -197,6 +197,13 @@ namespace Spotlight.GameFlow
             return new DialogueScript(copy, LeftCharacter, RightCharacter, Title, Background, Options, OptionPrompt, CenterCharacter, ContinuityOwner, IsPreview, Continues, MusicKey, BackgroundVisual);
         }
 
+        public DialogueScript WithContinuity(object owner, bool continues)
+        {
+            if (owner == null) throw new ArgumentNullException(nameof(owner));
+            return new DialogueScript(lines, LeftCharacter, RightCharacter, Title, Background, Options, OptionPrompt,
+                CenterCharacter, owner, IsPreview, continues, MusicKey, BackgroundVisual);
+        }
+
         public DialogueScript(IReadOnlyList<DialogueLine> lines, DialogueCharacter leftCharacter = null,
             DialogueCharacter rightCharacter = null, string title = null, Texture background = null,
             IReadOnlyList<DialogueOption> options = null, string optionPrompt = null,

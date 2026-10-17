@@ -1,23 +1,5 @@
 [
   {
-    "pageId": "test_read_page_01",
-    "presentationKey": "TEST_READING",
-    "seq": 1,
-    "titleKey": "narrative.test.reading.title",
-    "imageKey": "",
-    "pageCondKeys": "",
-    "pageBarConds": ""
-  },
-  {
-    "pageId": "test_read_page_02",
-    "presentationKey": "TEST_READING",
-    "seq": 2,
-    "titleKey": "narrative.test.reading.title",
-    "imageKey": "",
-    "pageCondKeys": "",
-    "pageBarConds": ""
-  },
-  {
     "pageId": "oct07.s2.letter.page",
     "presentationKey": "oct07.s2.letter",
     "seq": 1,
@@ -29,6 +11,15 @@
   {
     "pageId": "revolution.1014.s1.letter.page",
     "presentationKey": "revolution.1014.s1.letter",
+    "seq": 1,
+    "titleKey": "",
+    "imageKey": "",
+    "pageCondKeys": "",
+    "pageBarConds": ""
+  },
+  {
+    "pageId": "rose.1011.s1.card.page",
+    "presentationKey": "rose.1011.s1.card",
     "seq": 1,
     "titleKey": "",
     "imageKey": "",

@@ -1,49 +1,5 @@
 [
   {
-    "objId": "npc_a",
-    "objType": "npc",
-    "nameText": "npc.a.name",
-    "iconPath": "",
-    "portraitPath": "",
-    "portraitIndoorPath": "",
-    "avtarPath": "",
-    "descText": "npc.a.desc",
-    "tags": "servant,poor,revolutionary"
-  },
-  {
-    "objId": "npc_b",
-    "objType": "npc",
-    "nameText": "npc.b.name",
-    "iconPath": "",
-    "portraitPath": "",
-    "portraitIndoorPath": "",
-    "avtarPath": "",
-    "descText": "npc.b.desc",
-    "tags": "noble,daughter,love"
-  },
-  {
-    "objId": "npc_c",
-    "objType": "npc",
-    "nameText": "npc.c.name",
-    "iconPath": "",
-    "portraitPath": "",
-    "portraitIndoorPath": "",
-    "avtarPath": "",
-    "descText": "npc.c.desc",
-    "tags": "noble,suitor,bourgeois"
-  },
-  {
-    "objId": "npc_d",
-    "objType": "npc",
-    "nameText": "npc.d.name",
-    "iconPath": "",
-    "portraitPath": "",
-    "portraitIndoorPath": "",
-    "avtarPath": "",
-    "descText": "npc.d.desc",
-    "tags": "noble,father,authority"
-  },
-  {
     "objId": "player",
     "objType": "player",
     "nameText": "player.name",

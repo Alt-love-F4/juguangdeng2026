@@ -121,12 +121,12 @@ namespace Spotlight.GameFlow.Tests
             DialogueScript options = DialoguePreviewDialogue.CreateOptions();
             AssertCatalogCharacter(options.LeftCharacter, "player");
             AssertCatalogCharacter(options.RightCharacter, "adele");
-            AssertCatalogCharacter(options.CenterCharacter, "npc_a");
+            AssertCatalogCharacter(options.CenterCharacter, "sylvain");
             DialogueScript effects = PresentationEffectsPreview.Create();
             AssertCatalogCharacter(effects.LeftCharacter, "player");
             AssertCatalogCharacter(effects.RightCharacter, "adele");
             Assert.That(effects[1].AccentTargetKey, Is.EqualTo(effects.RightCharacter.CharacterKey));
-            AssertCatalogCharacter(effects[3].RightCharacter, "npc_a");
+            AssertCatalogCharacter(effects[3].RightCharacter, "sylvain");
             Assert.That(effects[4].AccentTargetKey, Is.EqualTo(effects[3].RightCharacter.CharacterKey));
         }
 
@@ -221,6 +221,41 @@ namespace Spotlight.GameFlow.Tests
             Assert.That(next.GetComponent<CanvasGroup>().alpha, Is.EqualTo(1f));
             Assert.That(next.LineIndex, Is.Zero);
             DialoguePlayback.Stop();
+        }
+
+        [UnityTest]
+        public IEnumerator ContinuousDialogueReusesTheOpenPanelWithoutReentering()
+        {
+            var owner = new object();
+            DialoguePanel panel = null;
+            int finished = 0;
+            panel = DialoguePlayback.Play(new DialogueScript(new[]
+            {
+                new DialogueLine(DialogueSpeaker.Narrator, "第一段")
+            }).WithContinuity(owner, continues: true), () =>
+            {
+                panel = DialoguePlayback.Play(new DialogueScript(new[]
+                {
+                    new DialogueLine(DialogueSpeaker.Narrator, "第二段")
+                }).WithContinuity(owner, continues: false), () => finished++);
+            });
+
+            DialoguePanel original = panel;
+            yield return Ready(panel);
+            panel.Advance(); // Reveal the first line before advancing it.
+            yield return null;
+            panel.Advance();
+            Assert.That(panel, Is.SameAs(original));
+            Assert.That(panel.IsPlaying, Is.True);
+            Assert.That(panel.LineIndex, Is.Zero);
+            Assert.That(panel.GetComponent<CanvasGroup>().alpha, Is.EqualTo(1f));
+            Assert.That(FindText(panel.gameObject, "Dialogue").text, Is.EqualTo("第二段"));
+            yield return Ready(panel);
+            panel.Advance();
+            yield return null;
+            panel.Advance();
+            yield return Until(() => finished == 1);
+            Assert.That(DialoguePanel.IsAnyPlaying, Is.False);
         }
 
         [UnityTest]

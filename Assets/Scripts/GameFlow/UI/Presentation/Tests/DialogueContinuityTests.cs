@@ -53,6 +53,25 @@ namespace Spotlight.GameFlow.Tests
         }
 
         [Test]
+        public void ContinuityCanBeAddedToAndRetainedByHintedDialogueCopies()
+        {
+            var owner = new object();
+            var script = new DialogueScript(new[] { new DialogueLine(DialogueSpeaker.Narrator, "教程对话") });
+            var continued = script.WithContinuity(owner, continues: true);
+            var hinted = continued.WithFirstPageHint("检定提示");
+            var final = hinted.WithContinuity(owner, continues: false);
+
+            Assert.That(continued.ContinuityOwner, Is.SameAs(owner));
+            Assert.That(continued.Continues, Is.True);
+            Assert.That(hinted.ContinuityOwner, Is.SameAs(owner));
+            Assert.That(hinted.Continues, Is.True);
+            Assert.That(hinted[0].PassiveHint, Is.EqualTo("检定提示"));
+            Assert.That(final.ContinuityOwner, Is.SameAs(owner));
+            Assert.That(final.Continues, Is.False);
+            Assert.Throws<System.ArgumentNullException>(() => script.WithContinuity(null, continues: true));
+        }
+
+        [Test]
         public void ConversationStartsEmptySupportsCenterAndPreservesNarratorEffects()
         {
             var data = new NarrativeConversationPresentationData { eventId = "event", presentationKey = "talk", continuityOwner = new object() };

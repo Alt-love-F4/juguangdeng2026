@@ -1,20 +1,5 @@
 [
   {
-    "presentationKey": "TEST_CONVERSATION",
-    "presentationClass": "Conversation",
-    "logTag": "TEST_CONVERSATION"
-  },
-  {
-    "presentationKey": "TEST_READING",
-    "presentationClass": "Reading",
-    "logTag": "TEST_READING"
-  },
-  {
-    "presentationKey": "TEST_NOTICE",
-    "presentationClass": "Notice",
-    "logTag": "TEST_NOTICE"
-  },
-  {
     "presentationKey": "DEMO_CAFE_BEFORE",
     "presentationClass": "Conversation",
     "logTag": "CAFE_VISIT_DEMO"
@@ -123,5 +108,20 @@
     "presentationKey": "neutral.1008.s1",
     "presentationClass": "Conversation",
     "logTag": "NEUTRAL_1008_S1"
+  },
+  {
+    "presentationKey": "rose.1011.s1.conversation",
+    "presentationClass": "Conversation",
+    "logTag": "B1011 full source configured; production bridge blocked at P047"
+  },
+  {
+    "presentationKey": "rose.1011.s1.card",
+    "presentationClass": "Reading",
+    "logTag": "B1011 card reading; completion/cancel bridge remains blocked"
+  },
+  {
+    "presentationKey": "rose.1011.s1.fulltext.preview",
+    "presentationClass": "Conversation",
+    "logTag": "B1011 all source-mapped dialogue and choices in source order; isolated preview"
   }
 ]

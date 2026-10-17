@@ -1,35 +1,5 @@
 [
   {
-    "actionKey": "act_salon",
-    "type": "ONCE",
-    "mustExecute": false,
-    "nameText": "action.salon.name",
-    "descText": "action.salon.desc",
-    "requirements": "ActionPoint(1)",
-    "resultEvents": "EV_ACT_SALON",
-    "durationDays": 0,
-    "progressTarget": 0,
-    "nextActionKey": "",
-    "deliveryMode": "None",
-    "replacesLocationActions": false,
-    "focusLocationOnComplete": false
-  },
-  {
-    "actionKey": "act_peer",
-    "type": "REPEAT",
-    "mustExecute": false,
-    "nameText": "action.peer.name",
-    "descText": "action.peer.desc",
-    "requirements": "ActionPoint(1)",
-    "resultEvents": "EV_ACT_C_PEER",
-    "durationDays": 0,
-    "progressTarget": 0,
-    "nextActionKey": "",
-    "deliveryMode": "None",
-    "replacesLocationActions": false,
-    "focusLocationOnComplete": false
-  },
-  {
     "actionKey": "act_test_delivery_cumulative",
     "type": "PROGRESS",
     "mustExecute": false,

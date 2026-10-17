@@ -157,10 +157,10 @@ namespace Spotlight.GameFlow.Tests
         [UnityTest]
         public IEnumerator SharedSceneChoiceButtonOpensSearchableConfiguredMenuAndReplaysSelection()
         {
-            const string selectedId = "sequence:EV_TEST_CONVERSATION";
+            const string selectedId = "sequence:oct07.s1";
             Assert.That(NarrativeRuntime.Instance, Is.Null, "The preview fixture must not start an NCS session.");
-            var scripts = PresentationDebugDialogueSource.Create(LubanNarrativeLoader.Load(), "conversation:TEST_CONVERSATION");
-            Assert.That(scripts.Count, Is.EqualTo(2), "The configured test conversation must exercise page handoff.");
+            var scripts = PresentationDebugDialogueSource.Create(LubanNarrativeLoader.Load(), "conversation:oct07.s1.conversation");
+            Assert.That(scripts.Count, Is.EqualTo(2), "The October 7 opening conversation must exercise page handoff.");
 
             Button launcher = null;
             foreach (GameObject root in debugScene.GetRootGameObjects())
@@ -216,7 +216,7 @@ namespace Spotlight.GameFlow.Tests
                 while (ReferenceEquals(controller.CurrentPanel, panel) && panel.CurrentSource?.PageId == pageId)
                 {
                     Assert.That(Time.realtimeSinceStartup, Is.LessThan(deadline), "Configured page failed to complete: " + pageIndex);
-                    Assert.That(panel.IsChoosing, Is.False, "TEST_CONVERSATION currently has no configured options.");
+                    Assert.That(panel.IsChoosing, Is.False, "The October 7 opening currently has no configured options.");
                     if (panel.IsReady) panel.Advance();
                     yield return null;
                 }

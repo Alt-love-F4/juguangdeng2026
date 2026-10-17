@@ -1,86 +1,9 @@
 # NCS Integration Report
 
 - Filter: (all)
-- Events: 57
-- Errors: 14
-- Warnings: 0
-
-## EV_AB_SWEAR [static_pass]
-
-- Entry: Immediate
-- Sources: Trigger: T_AB_5 / npc_a.trust_b @ 5 / Cross
-- Conditions: G1: EVENT_NOT_HAPPENED(event:EV_BC_SWEAR, true)
-- Presentation: NoClass setup=ab_swear
-- Pages/lines/options: 0/0/0
-- Letter/reading: 0/0 pages / 0 lines
-- Checks: (none)
-- Results: SetFlag -> ab_swear; BarSet -> bar:npc_b.trust_c; BarAdd -> bar:npc_b.rebel; BarHint -> bar:npc_a.trust_b
-
-## EV_ACT_C_PEER [static_pass]
-
-- Entry: Immediate
-- Sources: Action: act_peer
-- Conditions: (none)
-- Presentation: NoClass setup=act_peer
-- Pages/lines/options: 0/0/0
-- Letter/reading: 0/0 pages / 0 lines
-- Checks: (none)
-- Results: BarAdd -> bar:npc_c.wealth
-
-## EV_ACT_C_WITH_B [static_pass]
-
-- Entry: Immediate
-- Sources: Immediate / continuation or code-owned entrance
-- Conditions: (none)
-- Presentation: NoClass setup=act_cwithb
-- Pages/lines/options: 0/0/0
-- Letter/reading: 0/0 pages / 0 lines
-- Checks: (none)
-- Results: BarAdd -> bar:npc_b.trust_c; BarAdd -> bar:npc_c.trust_b; BarAdd -> bar:npc_b.trust_d; BarAdd -> bar:npc_a.trust_b; BarAdd -> bar:npc_a.respect_c
-
-## EV_ACT_MEET [static_pass]
-
-- Entry: Immediate
-- Sources: Immediate / continuation or code-owned entrance
-- Conditions: (none)
-- Presentation: NoClass setup=act_meet
-- Pages/lines/options: 0/0/0
-- Letter/reading: 0/0 pages / 0 lines
-- Checks: (none)
-- Results: BarAdd -> bar:npc_a.trust_b; BarAdd -> bar:npc_b.trust_a; BarAdd -> bar:npc_b.trust_c; BarAdd -> bar:npc_a.respect_c; BarAdd -> bar:npc_b.trust_d; SetFlag -> met_in_secret
-
-## EV_ACT_SALON [static_pass]
-
-- Entry: Immediate
-- Sources: Action: act_salon
-- Conditions: (none)
-- Presentation: NoClass setup=act_salon
-- Pages/lines/options: 0/0/0
-- Letter/reading: 0/0 pages / 0 lines
-- Checks: (none)
-- Results: BarAdd -> bar:npc_a.thought; SetFlag -> a_educated
-
-## EV_BC_SWEAR [static_pass]
-
-- Entry: Immediate
-- Sources: Trigger: T_BC_5 / npc_b.trust_c @ 5 / Cross
-- Conditions: G1: EVENT_NOT_HAPPENED(event:EV_AB_SWEAR, true)
-- Presentation: NoClass setup=bc_swear
-- Pages/lines/options: 0/0/0
-- Letter/reading: 0/0 pages / 0 lines
-- Checks: (none)
-- Results: SetFlag -> bc_swear; BarSet -> bar:npc_a.trust_b; BarAdd -> bar:npc_b.trust_d; BarHint -> bar:npc_b.trust_c
-
-## EV_COMRADE [static_pass]
-
-- Entry: Immediate
-- Sources: Trigger: T_THOUGHT_8 / npc_a.thought @ 8 / Cross
-- Conditions: G1: BAR_GTE(bar:npc_a.thought, 9)
-- Presentation: NoClass setup=comrade
-- Pages/lines/options: 0/0/0
-- Letter/reading: 0/0 pages / 0 lines
-- Checks: (none)
-- Results: SetFlag -> comrade; BarAdd -> bar:npc_a.respect_c
+- Events: 38
+- Errors: 18
+- Warnings: 1
 
 ## EV_DEMO_CAFE_ARRIVE [static_pass]
 
@@ -181,50 +104,6 @@
 - Checks: (none)
 - Results: (none)
 
-## EV_D_QUARREL_1 [static_pass]
-
-- Entry: Immediate
-- Sources: Trigger: T_BD_1_1 / npc_b.trust_d @ 1 / Cross
-- Conditions: (none)
-- Presentation: NoClass setup=dq1
-- Pages/lines/options: 0/0/0
-- Letter/reading: 0/0 pages / 0 lines
-- Checks: (none)
-- Results: BarAdd -> bar:npc_b.rebel; BarHint -> bar:npc_b.rebel
-
-## EV_D_QUARREL_2 [static_pass]
-
-- Entry: Immediate
-- Sources: Trigger: T_BD_1_2 / npc_b.trust_d @ 1 / Cross
-- Conditions: (none)
-- Presentation: NoClass setup=dq2
-- Pages/lines/options: 0/0/0
-- Letter/reading: 0/0 pages / 0 lines
-- Checks: (none)
-- Results: BarAdd -> bar:npc_b.rebel; BarHint -> bar:npc_b.rebel
-
-## EV_D_QUARREL_N [static_pass]
-
-- Entry: Immediate
-- Sources: Trigger: T_BD_1_N / npc_b.trust_d @ 1 / Cross
-- Conditions: (none)
-- Presentation: NoClass setup=dqn
-- Pages/lines/options: 0/0/0
-- Letter/reading: 0/0 pages / 0 lines
-- Checks: (none)
-- Results: BarAdd -> bar:npc_b.rebel
-
-## EV_ELOPE [static_pass]
-
-- Entry: Immediate
-- Sources: Trigger: T_REBEL_5 / npc_b.rebel @ 5 / Cross
-- Conditions: G1: EVENT_NOT_HAPPENED(event:EV_BC_SWEAR, true); G1: BAR_GTE(bar:npc_b.rebel, 5); G1: BAR_LTE(bar:npc_b.trust_d, 2); G1: EVENT_HAPPENED(event:EV_AB_SWEAR, true)
-- Presentation: NoClass setup=elope
-- Pages/lines/options: 0/0/0
-- Letter/reading: 0/0 pages / 0 lines
-- Checks: (none)
-- Results: SetFlag -> eloped; BarAdd -> bar:npc_b.trust_d
-
 ## EV_FIRST_DAY_PERCEPTION_CHECK [static_pass]
 
 - Entry: Immediate
@@ -258,50 +137,6 @@
 - Checks: (none)
 - Results: (none)
 
-## EV_FLEE [static_pass]
-
-- Entry: Immediate
-- Sources: Trigger: T_BD_5 / npc_b.trust_d @ 5 / Cross
-- Conditions: G1: BAR_GTE(bar:npc_b.trust_d, 5); G2: EVENT_NOT_HAPPENED(event:EV_BC_SWEAR, true); G2: EVENT_NOT_HAPPENED(event:EV_AB_SWEAR, true)
-- Presentation: NoClass setup=flee
-- Pages/lines/options: 0/0/0
-- Letter/reading: 0/0 pages / 0 lines
-- Checks: (none)
-- Results: SetFlag -> fled; BarAdd -> bar:world.stability
-
-## EV_MUSICIAN [static_pass]
-
-- Entry: Immediate
-- Sources: Immediate / continuation or code-owned entrance
-- Conditions: G1: EVENT_NOT_HAPPENED(event:EV_AB_SWEAR, true); G1: EVENT_NOT_HAPPENED(event:EV_BC_SWEAR, true)
-- Presentation: NoClass setup=musician
-- Pages/lines/options: 0/0/0
-- Letter/reading: 0/0 pages / 0 lines
-- Checks: (none)
-- Results: SetFlag -> musician_end
-
-## EV_PRISON [static_pass]
-
-- Entry: Immediate
-- Sources: Trigger: T_WEALTH_8 / npc_c.wealth @ 8 / Cross
-- Conditions: G1: BAR_GTE(bar:npc_c.wealth, 8); G1: BAR_LTE(bar:npc_a.respect_c, -1); G1: BAR_LTE(bar:npc_a.thought, 8)
-- Presentation: NoClass setup=prison
-- Pages/lines/options: 0/0/0
-- Letter/reading: 0/0 pages / 0 lines
-- Checks: (none)
-- Results: SetFlag -> b_arrested; BarAdd -> bar:npc_b.trust_d; BarAdd -> bar:npc_b.rebel
-
-## EV_RESCUE [static_pass]
-
-- Entry: Immediate
-- Sources: Immediate / continuation or code-owned entrance
-- Conditions: G1: BOOL_EQ(player_influence, true)
-- Presentation: NoClass setup=rescue
-- Pages/lines/options: 0/0/0
-- Letter/reading: 0/0 pages / 0 lines
-- Checks: (none)
-- Results: ClearFlag -> b_arrested; BarAdd -> bar:npc_b.trust_d
-
 ## EV_REVOLUTION [static_pass]
 
 - Entry: Immediate
@@ -312,39 +147,6 @@
 - Letter/reading: 0/0 pages / 0 lines
 - Checks: (none)
 - Results: SetFlag -> revolution; BarAdd -> bar:world.stability
-
-## EV_STANDOFF [static_pass]
-
-- Entry: Immediate
-- Sources: Trigger: T_AB_4 / npc_a.trust_b @ 4 / Cross; Trigger: T_BC_4 / npc_b.trust_c @ 4 / Cross
-- Conditions: (none)
-- Presentation: NoClass setup=standoff
-- Pages/lines/options: 0/0/0
-- Letter/reading: 0/0 pages / 0 lines
-- Checks: (none)
-- Results: SetFlag -> standoff_done; BarAdd -> bar:npc_a.respect_c
-
-## EV_TALK_CAFE [static_pass]
-
-- Entry: Immediate
-- Sources: Immediate / continuation or code-owned entrance
-- Conditions: (none)
-- Presentation: NoClass setup=talk_cafe
-- Pages/lines/options: 0/0/0
-- Letter/reading: 0/0 pages / 0 lines
-- Checks: (none)
-- Results: (none)
-
-## EV_TEST_CONVERSATION [static_pass]
-
-- Entry: Immediate
-- Sources: Immediate / continuation or code-owned entrance
-- Conditions: (none)
-- Presentation: NoClass/TEST_CONVERSATION
-- Pages/lines/options: 2/3/0
-- Letter/reading: 0/0 pages / 0 lines
-- Checks: (none)
-- Results: (none)
 
 ## EV_TEST_DELIVERY_CONSECUTIVE [static_pass]
 
@@ -385,28 +187,6 @@
 - Sources: Action: act_test_delivery_cumulative
 - Conditions: (none)
 - Presentation: NoClass setup=EV_TEST_DELIVERY_CUMULATIVE_MILESTONE
-- Pages/lines/options: 0/0/0
-- Letter/reading: 0/0 pages / 0 lines
-- Checks: (none)
-- Results: (none)
-
-## EV_TEST_NOTICE [static_pass]
-
-- Entry: Immediate
-- Sources: Immediate / continuation or code-owned entrance
-- Conditions: (none)
-- Presentation: NoClass/TEST_NOTICE
-- Pages/lines/options: 0/0/0
-- Letter/reading: 0/0 pages / 0 lines
-- Checks: (none)
-- Results: (none)
-
-## EV_TEST_READING [static_pass]
-
-- Entry: Immediate
-- Sources: Immediate / continuation or code-owned entrance
-- Conditions: (none)
-- Presentation: NoClass/TEST_READING
 - Pages/lines/options: 0/0/0
 - Letter/reading: 0/0 pages / 0 lines
 - Checks: (none)
@@ -653,4 +433,23 @@
 - Letter/reading: 0/0 pages / 0 lines
 - Checks: rose.1009.s1.perception
 - Results: SetFlag -> story.rose.1009.s1.completed
+
+## rose.1011.s1 [blocked]
+
+- Entry: MorningBeforeMap
+- Sources: Date: day 6 / Morning / Once
+- Conditions: G1: BAR_BETWEEN(world.calendar, 6,6); G1: BOOL_EQ(story.rose.1011.s1.completed, false); G1: BOOL_EQ(story.neutral.1010.s1.completed, true); G1: BOOL_EQ(story.rose.1009.s1.completed, true)
+- Presentation: Conversation/rose.1011.s1.conversation setup=rose.1011.s1
+- Pages/lines/options: 27/123/11
+- Letter/reading: 1/1 pages / 3 lines
+- Checks: rose.1011.s1.check.sparrow, rose.1011.s1.check.portrait, rose.1011.s1.check.wisdom
+- Results: (none)
+### Errors
+- Construction blocker: B-B05
+- Construction blocker: B-C02
+- Construction blocker: B-C04
+- Construction blocker: B-C07
+
+### Warnings
+- onceOnly event has no result rows; confirm that this is intentional.
 

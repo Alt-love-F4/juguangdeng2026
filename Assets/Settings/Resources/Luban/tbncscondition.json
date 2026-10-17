@@ -1,158 +1,5 @@
 [
   {
-    "conditionId": "C_AB_SWEAR_NBC",
-    "ownerType": "event",
-    "ownerId": "EV_AB_SWEAR",
-    "groupIndex": 1,
-    "condType": "EVENT_NOT_HAPPENED",
-    "target": "event:EV_BC_SWEAR",
-    "value": "true"
-  },
-  {
-    "conditionId": "C_BC_SWEAR_NAB",
-    "ownerType": "event",
-    "ownerId": "EV_BC_SWEAR",
-    "groupIndex": 1,
-    "condType": "EVENT_NOT_HAPPENED",
-    "target": "event:EV_AB_SWEAR",
-    "value": "true"
-  },
-  {
-    "conditionId": "C_PRISON_1",
-    "ownerType": "event",
-    "ownerId": "EV_PRISON",
-    "groupIndex": 1,
-    "condType": "BAR_GTE",
-    "target": "bar:npc_c.wealth",
-    "value": "8"
-  },
-  {
-    "conditionId": "C_PRISON_2",
-    "ownerType": "event",
-    "ownerId": "EV_PRISON",
-    "groupIndex": 1,
-    "condType": "BAR_LTE",
-    "target": "bar:npc_a.respect_c",
-    "value": "-1"
-  },
-  {
-    "conditionId": "C_PRISON_3",
-    "ownerType": "event",
-    "ownerId": "EV_PRISON",
-    "groupIndex": 1,
-    "condType": "BAR_LTE",
-    "target": "bar:npc_a.thought",
-    "value": "8"
-  },
-  {
-    "conditionId": "C_COMRADE_1",
-    "ownerType": "event",
-    "ownerId": "EV_COMRADE",
-    "groupIndex": 1,
-    "condType": "BAR_GTE",
-    "target": "bar:npc_a.thought",
-    "value": "9"
-  },
-  {
-    "conditionId": "C_ELOPE_1",
-    "ownerType": "event",
-    "ownerId": "EV_ELOPE",
-    "groupIndex": 1,
-    "condType": "EVENT_NOT_HAPPENED",
-    "target": "event:EV_BC_SWEAR",
-    "value": "true"
-  },
-  {
-    "conditionId": "C_ELOPE_2",
-    "ownerType": "event",
-    "ownerId": "EV_ELOPE",
-    "groupIndex": 1,
-    "condType": "BAR_GTE",
-    "target": "bar:npc_b.rebel",
-    "value": "5"
-  },
-  {
-    "conditionId": "C_ELOPE_3",
-    "ownerType": "event",
-    "ownerId": "EV_ELOPE",
-    "groupIndex": 1,
-    "condType": "BAR_LTE",
-    "target": "bar:npc_b.trust_d",
-    "value": "2"
-  },
-  {
-    "conditionId": "C_ELOPE_4",
-    "ownerType": "event",
-    "ownerId": "EV_ELOPE",
-    "groupIndex": 1,
-    "condType": "EVENT_HAPPENED",
-    "target": "event:EV_AB_SWEAR",
-    "value": "true"
-  },
-  {
-    "conditionId": "C_FLEE_1",
-    "ownerType": "event",
-    "ownerId": "EV_FLEE",
-    "groupIndex": 2,
-    "condType": "EVENT_NOT_HAPPENED",
-    "target": "event:EV_BC_SWEAR",
-    "value": "true"
-  },
-  {
-    "conditionId": "C_FLEE_2",
-    "ownerType": "event",
-    "ownerId": "EV_FLEE",
-    "groupIndex": 2,
-    "condType": "EVENT_NOT_HAPPENED",
-    "target": "event:EV_AB_SWEAR",
-    "value": "true"
-  },
-  {
-    "conditionId": "C_FLEE_3",
-    "ownerType": "event",
-    "ownerId": "EV_FLEE",
-    "groupIndex": 1,
-    "condType": "BAR_GTE",
-    "target": "bar:npc_b.trust_d",
-    "value": "5"
-  },
-  {
-    "conditionId": "C_RESCUE_1",
-    "ownerType": "event",
-    "ownerId": "EV_RESCUE",
-    "groupIndex": 1,
-    "condType": "BOOL_EQ",
-    "target": "player_influence",
-    "value": "true"
-  },
-  {
-    "conditionId": "C_MUSICIAN_1",
-    "ownerType": "event",
-    "ownerId": "EV_MUSICIAN",
-    "groupIndex": 1,
-    "condType": "EVENT_NOT_HAPPENED",
-    "target": "event:EV_AB_SWEAR",
-    "value": "true"
-  },
-  {
-    "conditionId": "C_MUSICIAN_2",
-    "ownerType": "event",
-    "ownerId": "EV_MUSICIAN",
-    "groupIndex": 1,
-    "condType": "EVENT_NOT_HAPPENED",
-    "target": "event:EV_BC_SWEAR",
-    "value": "true"
-  },
-  {
-    "conditionId": "C_CHOICE_1",
-    "ownerType": "choice",
-    "ownerId": "choice.talk.cafe.c",
-    "groupIndex": 1,
-    "condType": "BOOL_EQ",
-    "target": "a_educated",
-    "value": "true"
-  },
-  {
     "conditionId": "C_act_test_delivery_cumulative",
     "ownerType": "action",
     "ownerId": "act_test_delivery_cumulative",
@@ -456,6 +303,42 @@
     "groupIndex": 1,
     "condType": "BOOL_EQ",
     "target": "story.rose.1009.s1.completed",
+    "value": "false"
+  },
+  {
+    "conditionId": "rose.1011.s1.day",
+    "ownerType": "event",
+    "ownerId": "rose.1011.s1",
+    "groupIndex": 1,
+    "condType": "BAR_BETWEEN",
+    "target": "world.calendar",
+    "value": "6,6"
+  },
+  {
+    "conditionId": "rose.1011.s1.neutral_ready",
+    "ownerType": "event",
+    "ownerId": "rose.1011.s1",
+    "groupIndex": 1,
+    "condType": "BOOL_EQ",
+    "target": "story.neutral.1010.s1.completed",
+    "value": "true"
+  },
+  {
+    "conditionId": "rose.1011.s1.rose1009_ready",
+    "ownerType": "event",
+    "ownerId": "rose.1011.s1",
+    "groupIndex": 1,
+    "condType": "BOOL_EQ",
+    "target": "story.rose.1009.s1.completed",
+    "value": "true"
+  },
+  {
+    "conditionId": "rose.1011.s1.incomplete",
+    "ownerType": "event",
+    "ownerId": "rose.1011.s1",
+    "groupIndex": 1,
+    "condType": "BOOL_EQ",
+    "target": "story.rose.1011.s1.completed",
     "value": "false"
   }
 ]

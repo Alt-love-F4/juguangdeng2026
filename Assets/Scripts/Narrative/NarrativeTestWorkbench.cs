@@ -65,7 +65,7 @@ namespace Spotlight.Narrative
         private void RebuildData()
         {
             if (runtime?.Controller == null) return;
-            barKeys.Clear(); barKeys.AddRange(runtime.Controller.State.Bars.Keys.OrderBy(x => x == "npc_a.trust_b" ? 0 : 1).ThenBy(x => x, StringComparer.Ordinal));
+            barKeys.Clear(); barKeys.AddRange(runtime.Controller.State.Bars.Keys.OrderBy(x => x == "world.calendar" ? 0 : 1).ThenBy(x => x, StringComparer.Ordinal));
             eventIds.Clear();
             var config = runtime.Configuration;
             eventIds.AddRange(config.events.OrderBy(x => x.eventId.StartsWith("EV_TEST_", StringComparison.Ordinal) ? 0 : 1)
@@ -99,10 +99,10 @@ namespace Spotlight.Narrative
         {
             runtime.ResetSession();
             runtime.BeginTurn();
-            runtime.SetBar("npc_a.trust_b", 3);
-            runtime.AddBar("npc_a.trust_b", 1);
+            runtime.SetBar("world.calendar", 59);
+            runtime.AddBar("world.calendar", 1);
             runtime.EndTurn();
-            SetStatus("样例触发：npc_a.trust_b 穿过 4，等待 EV_STANDOFF 演出完成");
+            SetStatus("样例调试：world.calendar 从 59 进入第 60 天");
             RefreshBars();
         }
 

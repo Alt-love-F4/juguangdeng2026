@@ -140,7 +140,7 @@ namespace Spotlight.GameFlow.Tests
         public IEnumerator EntranceAndCharacterReplacementFinishBeforeTextStarts()
         {
             DialogueScript sample = PresentationEffectsPreview.Create();
-            var replacement = NarrativeCharacterResolver.CreatePreviewCharacter("npc_a", Resources.Load<DialogueVisualsAsset>("Dialogue/DialoguePreview").CenterPortrait);
+            var replacement = NarrativeCharacterResolver.CreatePreviewCharacter("sylvain", Resources.Load<DialogueVisualsAsset>("Dialogue/DialoguePreview").CenterPortrait);
             panel.Play(new DialogueScript(new[]
             {
                 new DialogueLine(DialogueSpeaker.Left, "第一句"),

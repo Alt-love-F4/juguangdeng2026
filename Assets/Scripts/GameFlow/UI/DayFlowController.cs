@@ -46,6 +46,7 @@ namespace Spotlight.GameFlow
 
         private IDialogueScriptSource introductionSource;
         private DialoguePanel introductionPanel;
+        private readonly object firstDayTutorialContinuityOwner = new object();
         private PlayerAvatarSelection avatarSelection;
         public PlayerAvatarSelection CurrentAvatarSelection => avatarSelection;
         private bool firstDayIntroductionCompleted;
@@ -369,15 +370,28 @@ namespace Spotlight.GameFlow
             int version = presentationVersion;
             try
             {
-                introductionPanel = DialoguePlayback.Play(ResolveIntroductionScript(), () =>
+                DialogueScript script = ResolveIntroductionScript();
+                if (day == 1 && firstDayCafeTutorialStarted)
+                    script = script.WithContinuity(firstDayTutorialContinuityOwner, continues: true);
+                introductionPanel = DialoguePlayback.Play(script, () =>
                 {
                     if (!SessionAllowsPlay || !running || version != presentationVersion || State != DayFlowState.FirstDayIntroduction) return;
-                    introductionPanel = null;
+                    if (!script.Continues) introductionPanel = null;
                     firstDayIntroductionCompleted = true;
                     if (day == 1 && firstDayCafeTutorialStarted)
                     {
                         cafeTutorialEndpoint?.PrepareCafeTutorial();
-                        PlayCafeTutorialContent("customer_arrives", version, () => QueueFirstDayPerceptionCheck(version));
+                        PlayCafeTutorialContent("customer_arrives", version, () =>
+                        {
+                            // The perception check uses its own modal presenter. Release the
+                            // seamless dialogue stage before handing input to that presenter.
+                            if (introductionPanel != null && introductionPanel.SeamlessChoicePending)
+                            {
+                                DialoguePlayback.Stop();
+                                introductionPanel = null;
+                            }
+                            QueueFirstDayPerceptionCheck(version);
+                        });
                         return;
                     }
                     StartFreeCafeBusiness();
@@ -418,10 +432,18 @@ namespace Spotlight.GameFlow
                     throw new InvalidOperationException("Missing cafe tutorial presentation: " + stepId);
                 var script = new LubanOpeningDialogueSource(step.presentationId).CreateScript();
                 if (stepId == "perception_success") script = script.WithFirstPageHint(firstDayPassiveHint);
+                if (stepId == "customer_arrives" || stepId == "perception_success"
+                    || stepId == "perception_failure" || stepId == "order_confirmed")
+                {
+                    // The ability check owns a separate modal UI; keep opening -> arrival and
+                    // each check result -> order follow-up free of an extra dialogue transition.
+                    bool continues = stepId == "perception_success" || stepId == "perception_failure";
+                    script = script.WithContinuity(firstDayTutorialContinuityOwner, continues);
+                }
                 introductionPanel = DialoguePlayback.Play(script, () =>
                 {
                     if (!SessionAllowsPlay || !running || version != presentationVersion) return;
-                    introductionPanel = null;
+                    if (!script.Continues) introductionPanel = null;
                     completed?.Invoke();
                 });
                 if (introductionPanel != null) introductionPanel.AllowCancel = false;
@@ -429,7 +451,12 @@ namespace Spotlight.GameFlow
             catch (Exception error)
             {
                 Debug.LogException(error, this);
-                // Missing tutorial content must not unlock free production.
+                // Missing tutorial content must not unlock free production or strand a continued panel.
+                if (introductionPanel != null && introductionPanel.SeamlessChoicePending)
+                {
+                    DialoguePlayback.Stop();
+                    introductionPanel = null;
+                }
             }
         }
 

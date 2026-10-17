@@ -1,23 +1,5 @@
 [
   {
-    "lineId": "test_read_line_01",
-    "pageId": "test_read_page_01",
-    "seq": 1,
-    "mode": "narration",
-    "speakerKey": "",
-    "textKey": "narrative.test.reading.01",
-    "voiceKey": ""
-  },
-  {
-    "lineId": "test_read_line_02",
-    "pageId": "test_read_page_02",
-    "seq": 1,
-    "mode": "dialogue",
-    "speakerKey": "npc_a",
-    "textKey": "narrative.test.reading.02",
-    "voiceKey": ""
-  },
-  {
     "lineId": "oct07.s2.p024",
     "pageId": "oct07.s2.letter.page",
     "seq": 1,
@@ -87,6 +69,33 @@
     "mode": "narration",
     "speakerKey": "",
     "textKey": "ncs.revolution.1014.s1.p017",
+    "voiceKey": ""
+  },
+  {
+    "lineId": "rose.1011.s1.card.p128",
+    "pageId": "rose.1011.s1.card.page",
+    "seq": 1,
+    "mode": "narration",
+    "speakerKey": "",
+    "textKey": "rose.1011.s1.text.p128",
+    "voiceKey": ""
+  },
+  {
+    "lineId": "rose.1011.s1.card.p129",
+    "pageId": "rose.1011.s1.card.page",
+    "seq": 2,
+    "mode": "narration",
+    "speakerKey": "",
+    "textKey": "rose.1011.s1.text.p129",
+    "voiceKey": ""
+  },
+  {
+    "lineId": "rose.1011.s1.card.p130",
+    "pageId": "rose.1011.s1.card.page",
+    "seq": 3,
+    "mode": "narration",
+    "speakerKey": "",
+    "textKey": "rose.1011.s1.text.p130",
     "voiceKey": ""
   }
 ]

@@ -11,5 +11,13 @@ namespace Spotlight.Narrative
                 .Replace("｛playername}", playerName, StringComparison.OrdinalIgnoreCase)
                 .Replace("｛playername｝", playerName, StringComparison.OrdinalIgnoreCase);
         }
+
+        public static string DrinkName(string text, string drinkName)
+        {
+            if (string.IsNullOrEmpty(text) || string.IsNullOrEmpty(drinkName)) return text;
+            return text.Replace("{drinkname}", drinkName, StringComparison.OrdinalIgnoreCase)
+                .Replace("｛drinkname}", drinkName, StringComparison.OrdinalIgnoreCase)
+                .Replace("｛drinkname｝", drinkName, StringComparison.OrdinalIgnoreCase);
+        }
     }
 }

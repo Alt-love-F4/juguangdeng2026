@@ -1,29 +1,5 @@
 [
   {
-    "choiceId": "choice.talk.cafe.a",
-    "groupKey": "talk.cafe.response",
-    "textKey": "choice.talk.cafe.a",
-    "resultOwnerId": "choice.talk.cafe.a.result",
-    "seq": 1,
-    "checkId": ""
-  },
-  {
-    "choiceId": "choice.talk.cafe.b",
-    "groupKey": "talk.cafe.response",
-    "textKey": "choice.talk.cafe.b",
-    "resultOwnerId": "choice.talk.cafe.b.result",
-    "seq": 2,
-    "checkId": ""
-  },
-  {
-    "choiceId": "choice.talk.cafe.c",
-    "groupKey": "talk.cafe.response",
-    "textKey": "choice.talk.cafe.c",
-    "resultOwnerId": "choice.talk.cafe.c.result",
-    "seq": 3,
-    "checkId": ""
-  },
-  {
     "choiceId": "choice.chen.tea",
     "groupKey": "tea.response",
     "textKey": "choice.tea.accept",
@@ -275,6 +251,94 @@
     "choiceId": "neutral.1008.s1.choice.q1.c",
     "groupKey": "neutral.1008.s1.q1",
     "textKey": "neutral.1008.s1.text.p038",
+    "resultOwnerId": "",
+    "seq": 3,
+    "checkId": ""
+  },
+  {
+    "choiceId": "rose.1011.s1.choice.p020",
+    "groupKey": "rose.1011.s1.choice.drink",
+    "textKey": "rose.1011.s1.text.p020",
+    "resultOwnerId": "",
+    "seq": 1,
+    "checkId": ""
+  },
+  {
+    "choiceId": "rose.1011.s1.choice.p022",
+    "groupKey": "rose.1011.s1.choice.drink",
+    "textKey": "rose.1011.s1.text.p022",
+    "resultOwnerId": "",
+    "seq": 2,
+    "checkId": ""
+  },
+  {
+    "choiceId": "rose.1011.s1.choice.p024",
+    "groupKey": "rose.1011.s1.choice.drink",
+    "textKey": "rose.1011.s1.text.p024",
+    "resultOwnerId": "",
+    "seq": 3,
+    "checkId": ""
+  },
+  {
+    "choiceId": "rose.1011.s1.choice.p032",
+    "groupKey": "rose.1011.s1.choice.news",
+    "textKey": "rose.1011.s1.text.p032",
+    "resultOwnerId": "",
+    "seq": 1,
+    "checkId": ""
+  },
+  {
+    "choiceId": "rose.1011.s1.choice.p033",
+    "groupKey": "rose.1011.s1.choice.news",
+    "textKey": "rose.1011.s1.text.p033",
+    "resultOwnerId": "",
+    "seq": 2,
+    "checkId": ""
+  },
+  {
+    "choiceId": "rose.1011.s1.choice.p060",
+    "groupKey": "rose.1011.s1.choice.nature",
+    "textKey": "rose.1011.s1.text.p060",
+    "resultOwnerId": "",
+    "seq": 1,
+    "checkId": ""
+  },
+  {
+    "choiceId": "rose.1011.s1.choice.p061",
+    "groupKey": "rose.1011.s1.choice.nature",
+    "textKey": "rose.1011.s1.text.p061",
+    "resultOwnerId": "",
+    "seq": 2,
+    "checkId": ""
+  },
+  {
+    "choiceId": "rose.1011.s1.choice.p062",
+    "groupKey": "rose.1011.s1.choice.nature",
+    "textKey": "rose.1011.s1.text.p062",
+    "resultOwnerId": "",
+    "seq": 3,
+    "checkId": ""
+  },
+  {
+    "choiceId": "rose.1011.s1.choice.p079",
+    "groupKey": "rose.1011.s1.choice.reason",
+    "textKey": "rose.1011.s1.text.p079",
+    "resultOwnerId": "",
+    "seq": 1,
+    "checkId": ""
+  },
+  {
+    "choiceId": "rose.1011.s1.choice.p080",
+    "groupKey": "rose.1011.s1.choice.reason",
+    "textKey": "rose.1011.s1.text.p080",
+    "resultOwnerId": "",
+    "seq": 2,
+    "checkId": "rose.1011.s1.check.wisdom"
+  },
+  {
+    "choiceId": "rose.1011.s1.choice.p081",
+    "groupKey": "rose.1011.s1.choice.reason",
+    "textKey": "rose.1011.s1.text.p081",
     "resultOwnerId": "",
     "seq": 3,
     "checkId": ""

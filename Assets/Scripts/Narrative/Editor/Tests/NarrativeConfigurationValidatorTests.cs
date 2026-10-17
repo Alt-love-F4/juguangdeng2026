@@ -44,7 +44,7 @@ namespace Spotlight.Narrative.Editor.Tests
             Assert.That(c.templates.Exists(x => x.tplName == "Tpl_PassiveCheck"), Is.True);
             Assert.That(c.templates.Exists(x => x.tplName == "Tpl_NarrativeSignal"), Is.True);
             Assert.That(c.eventDates.Exists(x => x.eventId == "oct07.s2" && x.day == 2), Is.True);
-            Assert.That(c.eventDates.Exists(x => x.eventId == "EV_TALK_CAFE" || x.eventId == "EV_REVOLUTION"), Is.False);
+            Assert.That(c.eventDates.Exists(x => x.eventId == "EV_REVOLUTION"), Is.False);
             Assert.That(c.triggers.Exists(x => x.eventId == "EV_REVOLUTION" && x.enabled), Is.False);
             Assert.That(c.actions.Exists(x => x.actionKey == "act_meet_b" || x.actionKey == "act_c_with_b"), Is.False);
             Assert.That(c.mapPositions.Exists(x => x.defaultAction == "act_meet_b" || x.defaultAction == "act_c_with_b"), Is.False);
@@ -136,6 +136,30 @@ namespace Spotlight.Narrative.Editor.Tests
             Assert.That(Enumerable.Range(74, 3).All(number => configuration.presentations.conversationLines
                 .Count(line => line.lineId == "rose.1009.s1.p" + number.ToString("000")) == 1), Is.True);
             Assert.That(rose.ExpectedResults.Exists(value => value.Contains("story.rose.1009.s1.completed")), Is.True);
+        }
+
+        [Test] public void IntegrationReportVerifiesRose1011StagedChecksAndProductionBoundary()
+        {
+            var configuration = LubanNarrativeLoader.Load();
+            var report = NarrativeIntegrationReport.Build(configuration);
+            var rose = report.Find("rose.1011.s1");
+            Assert.That(rose, Is.Not.Null);
+            Assert.That(rose.Entry, Is.EqualTo(NarrativeEntryPoint.MorningBeforeMap));
+            Assert.That(rose.PageCount, Is.EqualTo(10));
+            Assert.That(rose.LineCount, Is.EqualTo(33));
+            Assert.That(rose.ChoiceCount, Is.EqualTo(5));
+            Assert.That(rose.Errors.Exists(error => error.Contains("B-B04")), Is.True);
+            Assert.That(rose.Errors.Exists(error => error.Contains("B-B05")), Is.True);
+            Assert.That(rose.Errors.Exists(error => error.Contains("B-C02")), Is.True);
+            Assert.That(rose.ExpectedResults, Is.Empty);
+
+            Assert.That(configuration.abilityCheckConditions.Single(value => value.checkId == "rose.1011.s1.check.sparrow").threshold, Is.EqualTo(6));
+            Assert.That(configuration.abilityCheckConditions.Single(value => value.checkId == "rose.1011.s1.check.portrait").threshold, Is.EqualTo(5));
+            Assert.That(configuration.abilityCheckConditions.Single(value => value.checkId == "rose.1011.s1.check.wisdom").threshold, Is.EqualTo(3));
+            Assert.That(configuration.presentations.conversationPages.Any(page => page.checkId == "rose.1011.s1.check.sparrow"), Is.True);
+            Assert.That(configuration.choices.Count(choice => choice.groupKey == "rose.1011.s1.choice.drink"), Is.EqualTo(3));
+            Assert.That(configuration.choices.Count(choice => choice.groupKey == "rose.1011.s1.choice.news"), Is.EqualTo(2));
+            Assert.That(configuration.conditionKeys.Any(key => key.key == "specialization.player.letter.politics"), Is.True);
         }
 
         [Test] public void IntegrationQueueSyncPreservesOctoberSeventhStatusAndNotes()

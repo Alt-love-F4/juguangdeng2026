@@ -28,7 +28,7 @@ namespace Spotlight.GameFlow
                 new DialogueLine(DialogueSpeaker.Center, "我们三个人得一起想想：你准备怎么处理？")
             }, NarrativeCharacterResolver.CreatePreviewCharacter("player", visuals.LeftPortrait),
                 NarrativeCharacterResolver.CreatePreviewCharacter("adele", visuals.RightPortrait),
-                centerCharacter: NarrativeCharacterResolver.CreatePreviewCharacter("npc_a", visuals.CenterPortrait),
+                centerCharacter: NarrativeCharacterResolver.CreatePreviewCharacter("sylvain", visuals.CenterPortrait),
                 title: "咖啡馆 · 三人选项演出测试", background: visuals.Background,
                 optionPrompt: "你要如何回应？",
                 options: new[]

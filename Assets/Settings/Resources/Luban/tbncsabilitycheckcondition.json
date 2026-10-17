@@ -62,5 +62,29 @@
     "threshold": 5,
     "groupIndex": 1,
     "seq": 1
+  },
+  {
+    "conditionId": "rose.1011.s1.check.sparrow.1",
+    "checkId": "rose.1011.s1.check.sparrow",
+    "attributeId": "perception",
+    "threshold": 6,
+    "groupIndex": 1,
+    "seq": 1
+  },
+  {
+    "conditionId": "rose.1011.s1.check.portrait.1",
+    "checkId": "rose.1011.s1.check.portrait",
+    "attributeId": "perception",
+    "threshold": 5,
+    "groupIndex": 1,
+    "seq": 1
+  },
+  {
+    "conditionId": "rose.1011.s1.check.wisdom.1",
+    "checkId": "rose.1011.s1.check.wisdom",
+    "attributeId": "wisdom",
+    "threshold": 3,
+    "groupIndex": 1,
+    "seq": 1
   }
 ]

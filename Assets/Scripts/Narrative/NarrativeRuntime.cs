@@ -191,13 +191,13 @@ namespace Spotlight.Narrative
             if (textResolver != null)
             {
                 string resolved = textResolver(key);
-                if (!string.IsNullOrEmpty(resolved) && resolved != key) return SubstitutePlayerName(resolved);
+                if (!string.IsNullOrEmpty(resolved) && resolved != key) return SubstituteText(resolved);
             }
             if (configuration != null && configuration.texts != null)
                 for (int i = 0; i < configuration.texts.Count; i++)
                     if (configuration.texts[i] != null && configuration.texts[i].key == key)
-                        return SubstitutePlayerName(configuration.texts[i].content ?? key);
-            return SubstitutePlayerName(key);
+                        return SubstituteText(configuration.texts[i].content ?? key);
+            return SubstituteText(key);
         }
 
         private NarrativeCharacterPresentationData ResolveCharacterForPresentation(string key, string displayName, string portraitPath)
@@ -209,12 +209,35 @@ namespace Spotlight.Narrative
                 portraitPath = resolved.portraitPath, portrait = resolved.portrait, avatar = resolved.avatar };
         }
 
+        private string SubstituteText(string text)
+        {
+            text = SubstitutePlayerName(text);
+            if (string.IsNullOrEmpty(text) || controller == null
+                || !string.Equals(controller.CurrentEventId, "rose.1011.s1", StringComparison.Ordinal)) return text;
+            return NarrativeTextSubstitution.DrinkName(text, SelectedRoseDrinkName());
+        }
+
         private string SubstitutePlayerName(string text)
         {
             if (string.IsNullOrEmpty(text) || playerNameProvider == null) return text;
             string playerName = playerNameProvider();
             if (string.IsNullOrEmpty(playerName)) return text;
             return NarrativeTextSubstitution.PlayerName(text, playerName);
+        }
+
+        private string SelectedRoseDrinkName()
+        {
+            if (configuration?.choices == null || controller == null) return null;
+            for (int i = 0; i < controller.SelectedChoices.Count; i++)
+            {
+                string choiceId = controller.SelectedChoices[i];
+                NarrativeChoiceDefinition choice = configuration.choices.Find(item => item != null
+                    && item.choiceId == choiceId && item.groupKey == "rose.1011.s1.choice.drink");
+                if (choice == null) continue;
+                NarrativeTextDefinition text = configuration.texts?.Find(item => item != null && item.key == choice.textKey);
+                return text?.content;
+            }
+            return null;
         }
 
         private void OnDestroy()

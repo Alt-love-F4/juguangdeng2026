@@ -1,69 +1,9 @@
 [
   {
-    "key": "a_educated",
-    "nameText": "condition.a_educated",
-    "initialValue": false,
-    "onlySetTrue": false
-  },
-  {
-    "key": "ab_swear",
-    "nameText": "condition.ab_swear",
-    "initialValue": false,
-    "onlySetTrue": false
-  },
-  {
     "key": "accepted_tea",
     "nameText": "condition.accepted_tea",
     "initialValue": false,
     "onlySetTrue": false
-  },
-  {
-    "key": "b_arrested",
-    "nameText": "condition.b_arrested",
-    "initialValue": false,
-    "onlySetTrue": false
-  },
-  {
-    "key": "bc_swear",
-    "nameText": "condition.bc_swear",
-    "initialValue": false,
-    "onlySetTrue": false
-  },
-  {
-    "key": "comrade",
-    "nameText": "condition.comrade",
-    "initialValue": false,
-    "onlySetTrue": false
-  },
-  {
-    "key": "eloped",
-    "nameText": "condition.eloped",
-    "initialValue": false,
-    "onlySetTrue": false
-  },
-  {
-    "key": "fled",
-    "nameText": "condition.fled",
-    "initialValue": false,
-    "onlySetTrue": false
-  },
-  {
-    "key": "met_in_secret",
-    "nameText": "condition.met_in_secret",
-    "initialValue": false,
-    "onlySetTrue": false
-  },
-  {
-    "key": "musician_end",
-    "nameText": "condition.musician_end",
-    "initialValue": false,
-    "onlySetTrue": false
-  },
-  {
-    "key": "npc.npc_b.dead",
-    "nameText": "condition.npc.npc_b.dead",
-    "initialValue": false,
-    "onlySetTrue": true
   },
   {
     "key": "player_influence",
@@ -98,12 +38,6 @@
   {
     "key": "specialization.player.letter.science",
     "nameText": "condition.specialization.player.letter.science",
-    "initialValue": false,
-    "onlySetTrue": false
-  },
-  {
-    "key": "standoff_done",
-    "nameText": "condition.standoff_done",
     "initialValue": false,
     "onlySetTrue": false
   },
@@ -182,6 +116,24 @@
   {
     "key": "story.rose.1009.s1.completed",
     "nameText": "condition.story.rose.1009.s1.completed",
+    "initialValue": false,
+    "onlySetTrue": true
+  },
+  {
+    "key": "story.neutral.1010.s1.completed",
+    "nameText": "condition.story.neutral.1010.s1.completed",
+    "initialValue": false,
+    "onlySetTrue": true
+  },
+  {
+    "key": "story.rose.1011.s1.completed",
+    "nameText": "condition.story.rose.1011.s1.completed",
+    "initialValue": false,
+    "onlySetTrue": true
+  },
+  {
+    "key": "story.rose.1011.s1.sylvain_appreciation",
+    "nameText": "condition.story.rose.1011.s1.sylvain_appreciation",
     "initialValue": false,
     "onlySetTrue": true
   }

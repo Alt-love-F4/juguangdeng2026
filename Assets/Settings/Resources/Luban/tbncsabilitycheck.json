@@ -62,5 +62,29 @@
     "successResultOwnerId": "",
     "failureResultOwnerId": "",
     "mode": "Inline"
+  },
+  {
+    "checkId": "rose.1011.s1.check.sparrow",
+    "successEventId": "",
+    "failureEventId": "",
+    "successResultOwnerId": "",
+    "failureResultOwnerId": "",
+    "mode": "Inline"
+  },
+  {
+    "checkId": "rose.1011.s1.check.portrait",
+    "successEventId": "",
+    "failureEventId": "",
+    "successResultOwnerId": "",
+    "failureResultOwnerId": "",
+    "mode": "Inline"
+  },
+  {
+    "checkId": "rose.1011.s1.check.wisdom",
+    "successEventId": "",
+    "failureEventId": "",
+    "successResultOwnerId": "",
+    "failureResultOwnerId": "",
+    "mode": "Inline"
   }
 ]
