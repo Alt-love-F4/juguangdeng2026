@@ -17,6 +17,8 @@ namespace Spotlight.FreeCafe
         public bool DayFlowBusinessFinished => World != null && World.State.businessPhase == BusinessPhase.Night;
 
         public bool productionMode = true;
+        [Tooltip("显示咖啡店顶部的设备升级入口；默认隐藏，不影响设备解锁数据。")]
+        public bool showEquipmentUpgradeUI;
         [Tooltip("可选身份适配器，必须实现 ICafeCustomerIdentitySource；不负责启动剧情。") ]
         public MonoBehaviour customerIdentitySource;
         [Tooltip("运行时由 Luban Object 表创建；保留旧序列化字段以兼容场景。显式身份提供者优先。")]
@@ -211,7 +213,7 @@ namespace Spotlight.FreeCafe
             equipmentTutorialPrompt.Initialize(this);
             if (FreeCafeGMPanel.Instance != null) FreeCafeGMPanel.Instance.Initialize(this);
             if(World.State.currentArea==AreaId.Cafe)
-                ShowHint("点击大厅的「启动营业」立牌开始接单；点击客人查看订单，或前往制作台备料。");
+                ShowHint("点击大厅的「开始营业」挂牌开始接单；点击客人查看订单，或前往制作台备料。");
             else if(World.ProductionEnabled)
                 ShowHint("点击杯具选择出餐杯；原料拖到设备，点击启动。左键拖动壶，按住右键并上下移动鼠标双向倾倒，松开右键停止。");
             else
@@ -442,7 +444,13 @@ namespace Spotlight.FreeCafe
             var spec=World.Spec(entity.specId);
             if(spec.Has(Capability.BusinessControl))
             {
-                if (World.State.open) RequestBusinessEnd();
+                var sign = view.GetComponent<FreeCafeBusinessSignView>();
+                if (sign != null && sign.IsFlipping) return;
+                if (World.State.open)
+                {
+                    if (sign != null && CanEndBusiness) sign.CloseAfterFlip(RequestBusinessEnd);
+                    else RequestBusinessEnd();
+                }
                 else StartBusiness();
                 return;
             }
@@ -1167,6 +1175,42 @@ namespace Spotlight.FreeCafe
             return true;
         }
 
+        public bool DebugStartFirstGuestTutorial(out string message)
+        {
+            message = "请直接运行 CoffeeShop（沙盒）后使用此操作。";
+            if (!IsSandboxMode || World == null || !isActiveAndEnabled
+                || gameObject.scene.name != "CoffeeShop"
+                || UnityEngine.SceneManagement.SceneManager.GetActiveScene() != gameObject.scene
+                || FindFirstObjectByType<GameFlowBootstrap>() != null) return false;
+            if (dayFlow != null || FindFirstObjectByType<DayFlowController>() != null)
+            {
+                message = "本次沙盒已经存在日程/教程流程；请重新运行 CoffeeShop 后再试。";
+                return false;
+            }
+            if (World.State.day != 1 || World.State.open || World.State.requests.Count != 0
+                || World.Find(CafeWorld.TutorialCustomerId) != null)
+            {
+                message = "请在首日未营业、没有客人与订单的沙盒中启动首位客人教程。";
+                return false;
+            }
+            if (GameplayBlocked || PracticeTutorialActive || IsDragging || pendingBusinessStart
+                || playerHud != null && playerHud.IsModalOpen || productionHud != null && productionHud.IsModalOpen
+                || equipmentPanel != null && equipmentPanel.IsOpen
+                || equipmentTutorialPrompt != null && equipmentTutorialPrompt.IsOpen)
+            {
+                message = "请先结束当前教学、对话、小游戏或弹窗，并恢复游戏时间。";
+                return false;
+            }
+            // Use the existing scene world and presentation owners; do not reset sandbox resources.
+            var hud = GameplayHudPanel.Ensure();
+            if (!hud.TryStartStandaloneCafeTutorial(gameObject, out message)) return false;
+            dayFlow = GetComponent<DayFlowController>();
+            World.SetArea(AreaId.Cafe);
+            areaManager.SnapNow();
+            GetComponent<FreeCafeAudioPresenter>()?.Bind(this);
+            return true;
+        }
+
         public void PrepareCafeTutorial()
         {
             if (dayFlow == null) dayFlow = FindFirstObjectByType<DayFlowController>();
@@ -1177,7 +1221,7 @@ namespace Spotlight.FreeCafe
             var result = World.StartTutorialCustomer();
             if (!result.success) { Report(result); return; }
             cafeTutorial.Begin();
-            ShowHint("请点击「工作台」，为首位客人制作一杯黑咖啡；完成教程后才能正式营业。");
+            ShowHint("请点击大厅右侧吧台，为首位客人制作一杯黑咖啡；完成教程后才能正式营业。");
         }
 
         public void FinishCafeTutorial()
@@ -1234,7 +1278,7 @@ namespace Spotlight.FreeCafe
                 PrepareCafeTutorial();
                 return;
             }
-            ShowHint("准备就绪，点击大厅的「启动营业」立牌开始正式营业。");
+            ShowHint("准备就绪，点击大厅的「开始营业」挂牌开始正式营业。");
         }
         public void EndDayFlowBusiness()
         {

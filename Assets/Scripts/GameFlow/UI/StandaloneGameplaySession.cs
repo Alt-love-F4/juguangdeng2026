@@ -12,6 +12,7 @@ namespace Spotlight.GameFlow
         private PlayerRuntime player;
         private NarrativeRuntime runtime;
         private CafeWorld world;
+        private DayFlowController tutorialFlow;
 
         public void Ensure()
         {
@@ -46,8 +47,43 @@ namespace Spotlight.GameFlow
             runtime.Actions.RefreshMapContent();
         }
 
+        public bool TryStartCafeTutorial(GameObject owner, out string message)
+        {
+            Ensure();
+            message = "独立玩家/剧情会话尚未就绪，请稍后重试。";
+            if (player == null || PlayerRuntime.Current != player || runtime == null
+                || !runtime.IsReady || !player.CreationSubmitted || world != PlayerCafeOwner.Current) return false;
+            if (tutorialFlow != null)
+            {
+                message = "本次沙盒已经启动过首位客人教程；请重新运行 CoffeeShop 后再试。";
+                return false;
+            }
+            if (runtime.Controller.IsEnded || runtime.Controller.IsBusy || !runtime.Controller.IsSafeBoundary
+                || runtime.Actions.IsExecuting || runtime.Actions.CurrentDay != 1)
+            {
+                message = "当前剧情或行动未结束，或已不在首日；请重新运行 CoffeeShop 后再试。";
+                return false;
+            }
+            tutorialFlow = owner.AddComponent<DayFlowController>();
+            tutorialFlow.Initialize(null);
+            // Keep the existing identity, economy and ability readers. Do not create a second NCS/player owner.
+            coordinator.Bind(runtime, world, tutorialFlow);
+            runtime.Controller.SetOfficialDay(1);
+            runtime.Controller.CompleteValueRestore(evaluateInitial: false);
+            if (!player.HasSelectedAvatar) player.SelectAvatar(player.Catalog.DefaultAvatar);
+            tutorialFlow.BeginStandaloneCafeTutorial();
+            message = "已启动首位客人到访剧情及完整咖啡馆教学；跳过独立序章、来信与角色创建，不自动保存。";
+            return true;
+        }
+
         public void Dispose()
         {
+            if (tutorialFlow != null)
+            {
+                tutorialFlow.HideForMainMenu();
+                UnityEngine.Object.Destroy(tutorialFlow);
+                tutorialFlow = null;
+            }
             if (runtime != null) coordinator.Dispose();
             if (PlayerRuntime.Current == player) PlayerRuntime.Current = null;
             if (runtime != null) runtime.PlayerNameProvider = null;

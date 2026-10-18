@@ -25,7 +25,7 @@ def apply_player_facing_content(narrative, text):
         'order_confirmed.01': '看出这位先生想点餐，阿黛尔递给他一张亲手绘制的餐单。',
         'order_confirmed.02': '大杯黑咖啡，不加糖，就这样。',
         'order_confirmed.03': '这位先生是重新开张的沸点咖啡馆的第一位客人。',
-        'workstation_open.01': '接下来去工作台制作客人的咖啡。点击大堂中的箭头标志，进入工作台。',
+        'workstation_open.01': '接下来去工作台制作客人的咖啡。点击大厅右侧吧台处的箭头或吧台，进入工作台。',
         'make_coffee_base.01': '别紧张，店长，我会陪着你的。客人要的是大杯无糖黑咖啡，我们就从磨豆开始吧。',
         'make_coffee_base.02': '制作目标：研磨咖啡豆，用热水煮成黑咖啡，再装入杯中。不需要加糖。',
         'make_coffee_base.03': '工作台会一步步提示你。先学会取放原料，再试着启动设备。',

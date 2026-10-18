@@ -107,6 +107,7 @@ namespace Spotlight.FreeCafe.Editor
                 }
                 FreeCafeHudKit.Plaque(root.transform, "EndDayButton", "结束这一天",
                     new Vector2(1, 0), new Vector2(-110, 198), new Vector2(220, 52), true, 20);
+                root.transform.Find("EndDayButton").gameObject.SetActive(false);
                 CafeOrderStackBuilder.ApplyToRoot(root);
                 PrefabUtility.SaveAsPrefabAsset(root, PrefabPath);
             }

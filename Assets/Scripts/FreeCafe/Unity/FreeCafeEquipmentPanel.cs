@@ -28,6 +28,7 @@ namespace Spotlight.FreeCafe
             er.anchorMin = er.anchorMax = new Vector2(.5f, 1);
             er.anchoredPosition = new Vector2(0, -180);
             entry.onClick.AddListener(Open);
+            entry.gameObject.SetActive(runtime.showEquipmentUpgradeUI);
             root = new GameObject("EquipmentActivationPanel", typeof(RectTransform), typeof(Image));
             root.transform.SetParent(hud.transform, false);
             var backdrop = root.GetComponent<Image>();
@@ -54,7 +55,7 @@ namespace Spotlight.FreeCafe
 
         private void Open()
         {
-            if (runtime == null || runtime.InputBlocked || runtime.IsDragging || runtime.PracticeTutorialActive || runtime.CafeTutorialActive) return;
+            if (runtime == null || !runtime.showEquipmentUpgradeUI || runtime.InputBlocked || runtime.IsDragging || runtime.PracticeTutorialActive || runtime.CafeTutorialActive) return;
             runtime.CancelDrag();
             root.SetActive(true); root.transform.SetAsLastSibling();
             pause = PresentationPauseRegistry.Acquire("Cafe equipment activation");
@@ -80,7 +81,9 @@ namespace Spotlight.FreeCafe
         private void Update()
         {
             if (entry == null || runtime == null || runtime.World == null) return;
-            entry.gameObject.SetActive(!runtime.CafeTutorialActive && !runtime.PracticeTutorialActive);
+            bool visible = runtime.showEquipmentUpgradeUI && !runtime.CafeTutorialActive && !runtime.PracticeTutorialActive;
+            entry.gameObject.SetActive(visible);
+            if (!visible && IsOpen) Close();
             entry.interactable = !IsOpen && !runtime.InputBlocked;
             if (IsOpen && UnityEngine.InputSystem.Keyboard.current?.escapeKey.wasPressedThisFrame == true) Close();
         }

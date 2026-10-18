@@ -109,22 +109,22 @@ namespace Spotlight.FreeCafe
                     ui = production.bookButton.transform as RectTransform;
                     break;
                 case Stage.CloseRecipe:
-                    description = "咖啡谱记录饮品配方、参考用量和制作说明。\n记住这个入口即可；关闭咖啡谱，接下来回大厅启动正式营业。";
+                    description = "咖啡谱记录饮品配方、参考用量和制作说明。\n记住这个入口即可；关闭咖啡谱，接下来回大厅开始正式营业。";
                     summary = "咖啡谱可以随时查\n看完关闭咖啡谱\n接下来回大厅营业";
                     var compendium = production.bookPanel.GetComponent<CoffeeCompendiumPanel>();
                     ui = compendium != null && compendium.closeButton != null
                         ? compendium.closeButton.transform as RectTransform : production.bookButton.transform as RectTransform;
                     break;
                 case Stage.ReturnToCafe:
-                    description = "准备接待正式顾客。点击上方「返回大厅」，回到咖啡馆一楼。\n工作台用于制作；大厅用于接待顾客和启动营业。";
+                    description = "准备接待正式顾客。点击上方「返回大厅」，回到咖啡馆一楼。\n工作台用于制作；大厅用于接待顾客和开始营业。";
                     summary = "准备接待正式顾客\n点击「返回大厅」\n不是退出游戏";
                     ui = production.returnButton.transform as RectTransform;
                     break;
                 case Stage.StartBusiness:
-                    description = "点击大厅里的「启动营业」立牌，开始今天的正式经营。\n开店后顾客才会陆续入座；教程还会带你认识顾客需求和订单卡。";
-                    summary = "准备开店接客\n点击「启动营业」立牌\n等顾客入座后查看需求";
+                    description = "点击大厅左侧窗边的「开始营业」挂牌，开始今天的正式经营。\n开店后顾客会陆续入座。挂牌翻面后显示「结束营业」，完成教程后再次点击即可打烊。";
+                    summary = "准备开店接客\n点击窗边「开始营业」挂牌\n等顾客入座后查看需求";
                     foreach (var entity in app.World.State.entities)
-                        if (app.World.Spec(entity.specId).Has(Capability.BusinessControl)) { target = WorldPoint(entity.id); break; }
+                        if (app.World.Spec(entity.specId).Has(Capability.BusinessControl)) { target = SignPoint(entity.id); break; }
                     break;
                 case Stage.WaitForCustomer:
                     description = "已经开始营业，等待第一位正式顾客入座。\n顾客到店后，点击顾客查看他想喝什么；不需要立即回工作台。";
@@ -167,6 +167,11 @@ namespace Spotlight.FreeCafe
                 dot.rectTransform.position = target + new Vector2(Mathf.Cos(angle), Mathf.Sin(angle)) * radius;
                 dot.color = panel.trailColor;
             }
+        }
+        private Vector2 SignPoint(string id)
+        {
+            var sign = app.View(id)?.GetComponent<FreeCafeBusinessSignView>();
+            return sign == null ? WorldPoint(id) : (Vector2)app.worldCamera.WorldToScreenPoint(sign.CaptionWorldPosition);
         }
         private Vector2 WorldPoint(string id)
         {

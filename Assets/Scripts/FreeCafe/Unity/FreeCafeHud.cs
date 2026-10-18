@@ -381,6 +381,7 @@ namespace Spotlight.FreeCafe
         {
             if(runtime==null || runtime.World==null)
             {
+                if(endDayButton!=null) endDayButton.gameObject.SetActive(false);
                 for(int index=0;index<orderAvatars.Length;index++) SetOrderAvatar(index,null);
                 return;
             }

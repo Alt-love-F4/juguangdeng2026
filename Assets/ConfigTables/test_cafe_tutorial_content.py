@@ -68,6 +68,11 @@ class CafeTutorialContentTests(unittest.TestCase):
                 for marker in ['[', ']', '#', '鼠标', '左键', '右键', '高亮']:
                     self.assertNotIn(marker, text, row['textKey'])
                 self.assertLess(len(text), 110, row['textKey'])
+        entry = texts['cafe.tutorial.workstation_open.01']
+        self.assertNotIn('方框', entry)
+        self.assertIn('吧台', entry)
+        self.assertNotIn('挂牌', entry)
+        self.assertIn('箭头或吧台', entry)
         self.assertIn('男人', texts['cafe.tutorial.customer_arrives.01'])
         self.assertIn('大杯', texts['cafe.tutorial.order_confirmed.02'])
         self.assertIn('不加糖', texts['cafe.tutorial.order_confirmed.02'])

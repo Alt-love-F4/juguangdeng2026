@@ -160,6 +160,22 @@ namespace Spotlight.GameFlow
             ShowPresentation<FirstDayLetterPanel>(EnterAvatarSelection, ConfigureFirstDayLetter);
         }
 
+        /// <summary>Explicit GM entry: reuse the cafe story/tutorial without the separate prologue or map arrival.</summary>
+        internal void BeginStandaloneCafeTutorial()
+        {
+            day = 1;
+            previousDate = InitialDate;
+            newSessionFirstDay = false;
+            firstDayIntroductionCompleted = false;
+            firstDayCafeTutorialStarted = true;
+            firstDayCafeTutorialCompleted = false;
+            tutorialTestSkipSubmitted = false;
+            running = true;
+            FindGameplayEndpoint();
+            // No ProcessOfficialDay: it would schedule the independent first-arrival story.
+            PlayFirstDayIntroduction();
+        }
+
         private void EnterAvatarSelection()
         {
             // Avatar guidance will be introduced elsewhere. Keep startup unobstructed for now.
@@ -585,8 +601,13 @@ namespace Spotlight.GameFlow
         public bool DebugSkipTutorialToCafe(out string message)
         {
             message = "请先开始游戏并进入新手流程。";
-            if (flow == null || !SessionAllowsPlay || !running)
+            if (!SessionAllowsPlay || !running)
                 return false;
+            if (flow == null && UnityEngine.SceneManagement.SceneManager.GetActiveScene().name != "CoffeeShop")
+            {
+                message = "请在 CoffeeShop 中使用此操作。";
+                return false;
+            }
             if (!IsFirstSessionGuideActive && !(State == DayFlowState.FreeCafeBusiness && IsCafeTutorialActive))
             {
                 message = "当前不在新手教程阶段。";
@@ -601,7 +622,7 @@ namespace Spotlight.GameFlow
             PlayerRuntime player = PlayerRuntime.Current;
             if (player != null)
             {
-                if (!flow.TrySubmitPlayerCreation(null))
+                if (flow != null && !flow.TrySubmitPlayerCreation(null))
                 {
                     message = "角色初始化失败，未跳过教程。";
                     return false;
@@ -643,7 +664,7 @@ namespace Spotlight.GameFlow
             }
             else
             {
-                if (flow.IsMapOpen) flow.CloseMap();
+                if (flow != null && flow.IsMapOpen) flow.CloseMap();
                 StartFreeCafeBusiness();
             }
 

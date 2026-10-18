@@ -1,35 +1,88 @@
-using TMPro;
+using System;
 using UnityEngine;
 
 namespace Spotlight.FreeCafe
 {
-    /// <summary>世界内的木质营业立牌。交互仍由 FreeEntityView / CafeWorld 处理，没有独立营业状态。</summary>
+    /// <summary>营业挂牌只呈现世界状态；翻面结束后仍通过原有营业入口结算。</summary>
     [RequireComponent(typeof(FreeEntityView))]
     public sealed class FreeCafeBusinessSignView : MonoBehaviour
     {
         public FreeEntityView entityView;
-        public TMP_Text statusCaption;
-        public MeshRenderer face;
-        public MeshRenderer[] pieces;
-        private MaterialPropertyBlock tint;
+        public Transform flipRoot;
+        public SpriteRenderer artwork;
+        [Min(.1f)] public float flipDuration = .48f;
+        public bool IsFlipping { get; private set; }
+        public Vector3 CaptionWorldPosition => entityView.label.transform.position;
+        private bool initialized, shownOpen, targetOpen;
+        private float elapsed;
+        private Action afterFlip;
+
         public void Present(bool highlighted = false)
         {
-            var state = entityView.Runtime.World.State;
-            entityView.label.text = state.open ? "结束营业" : state.businessPhase == BusinessPhase.Night ? "开始新一天" : "启动营业";
-            statusCaption.text = state.open ? "点击打烊 · 当前 " + state.requests.Count + " 位客人"
-                : entityView.Runtime.CafeBusinessOnboardingActive ? "跟随提示点击开店 · 认识顾客与订单"
-                : entityView.Runtime.CafeTutorialActive ? "完成首杯黑咖啡后学习营业" : "点击开店 · 欢迎光临";
-            if (tint == null) tint = new MaterialPropertyBlock();
-            var color = state.open ? new Color(.81f,.89f,.74f) : new Color(.98f,.91f,.72f);
-            tint.SetColor("_Color", highlighted ? Color.Lerp(color,Color.white,.3f) : color);
-            face.SetPropertyBlock(tint);
+            if (entityView == null || entityView.Runtime == null || artwork == null) return;
+            bool open = entityView.Runtime.World.State.open;
+            if (!initialized)
+            {
+                initialized = true;
+                shownOpen = targetOpen = open;
+                SetCaption(open);
+            }
+            else if (afterFlip == null && targetOpen != open) BeginFlip(open);
+            // Refresh can replace the generic entity caption every frame.
+            SetCaption(shownOpen);
+            artwork.color = highlighted ? new Color(1f, .96f, .86f) : Color.white;
             UpdateSorting(entityView.body.sortingOrder);
+        }
+
+        public void CloseAfterFlip(Action close)
+        {
+            if (!IsFlipping && initialized && shownOpen) BeginFlip(false, close);
+        }
+
+        private void BeginFlip(bool open, Action completed = null)
+        {
+            targetOpen = open;
+            afterFlip = completed;
+            elapsed = 0;
+            IsFlipping = true;
+        }
+
+        private void Update()
+        {
+            if (!IsFlipping || flipRoot == null) return;
+            elapsed += Time.unscaledDeltaTime;
+            float t = Mathf.Clamp01(elapsed / Mathf.Max(.1f, flipDuration));
+            float eased = t * t * (3f - 2f * t);
+            // Positive width on both halves keeps Chinese glyphs readable on the reverse.
+            flipRoot.localScale = new Vector3(Mathf.Max(.015f, Mathf.Abs(Mathf.Cos(eased * Mathf.PI))), 1f, 1f);
+            flipRoot.localRotation = Quaternion.Euler(0, 0, Mathf.Sin(t * Mathf.PI * 2f) * 3f);
+            if (t >= .5f) { shownOpen = targetOpen; SetCaption(shownOpen); }
+            if (t < 1f) return;
+            ResetPose();
+            var completed = afterFlip;
+            afterFlip = null;
+            completed?.Invoke();
+        }
+
+        private void SetCaption(bool open) => entityView.label.text = open ? "结束营业" : "开始营业";
+        private void ResetPose()
+        {
+            IsFlipping = false;
+            if (flipRoot == null) return;
+            flipRoot.localScale = Vector3.one;
+            flipRoot.localRotation = Quaternion.identity;
+        }
+        private void OnDisable()
+        {
+            afterFlip = null;
+            initialized = false;
+            ResetPose();
         }
         public void UpdateSorting(int bodyOrder)
         {
-            for (int i = 0; i < pieces.Length; i++) pieces[i].sortingOrder = bodyOrder + i;
-            entityView.label.GetComponent<MeshRenderer>().sortingOrder = bodyOrder + pieces.Length + 1;
-            statusCaption.GetComponent<MeshRenderer>().sortingOrder = bodyOrder + pieces.Length + 2;
+            if (artwork != null) artwork.sortingOrder = bodyOrder + 1;
+            if (entityView != null && entityView.label != null)
+                entityView.label.GetComponent<MeshRenderer>().sortingOrder = bodyOrder + 2;
         }
     }
 }

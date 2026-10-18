@@ -72,8 +72,20 @@ namespace Spotlight.FreeCafe.Tests
             Assert.That(app.World.State.requests.Count, Is.GreaterThan(0));
             Assert.That(app.World.State.cafeVisits, Is.Empty);
         }
+        [UnityTest] public IEnumerator EquipmentUpgradeUiIsHiddenByDefault()
+        {
+            var hud = Object.FindFirstObjectByType<FreeCafeHud>();
+            var entry = hud.transform.Find("EquipmentActivation").GetComponent<Button>();
+            var panel = app.GetComponent<FreeCafeEquipmentPanel>();
+            Assert.That(app.showEquipmentUpgradeUI, Is.False);
+            Assert.That(entry.gameObject.activeSelf, Is.False);
+            entry.onClick.Invoke();
+            yield return null;
+            Assert.That(panel.IsOpen, Is.False, "Hidden entry cannot open the upgrade modal.");
+        }
         [UnityTest] public IEnumerator StoryConfigurationHidesToolsUntilPlayerActivatesFromPanel()
         {
+            app.showEquipmentUpgradeUI = true;
             app.World.ConfigureEquipmentProgression(false);
             app.World.SetArea(AreaId.Counter);
             yield return null;

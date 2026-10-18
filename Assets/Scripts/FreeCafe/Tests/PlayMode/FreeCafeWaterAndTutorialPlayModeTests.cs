@@ -123,6 +123,34 @@ namespace Spotlight.FreeCafe.Tests
                 Assert.That(entity.y, Is.EqualTo(initial.y).Within(.0001f));
             }
         }
+        [UnityTest] public IEnumerator BusinessSignKeepsScenePositionAcrossBindingRefreshAndOldSaveRestore()
+        {
+            var entity = app.World.Find("business.start");
+            var authored = Object.Instantiate(app.prefabLibrary.Require(entity.specId), app.areaRoots[(int)entity.area]);
+            authored.ConfigureAuthoring(app.World.Spec(entity.specId), app.artLibrary, entity.id, entity.x, entity.y);
+            var editedPosition = new Vector3(entity.x + 1.2f, entity.y + .8f, -.15f);
+            authored.transform.localPosition = editedPosition;
+            try
+            {
+                Assert.That(authored.preserveAuthoredPosition, Is.True);
+                authored.Bind(app, entity, true);
+                authored.Refresh(entity);
+                yield return null;
+                Assert.That(authored.transform.localPosition, Is.EqualTo(editedPosition));
+            }
+            finally { Object.Destroy(authored.gameObject); }
+
+            var sign = app.View(entity.id);
+            var scenePosition = sign.transform.localPosition;
+            var snapshot = JsonUtility.FromJson<CafeSnapshot>(app.CaptureJson());
+            var savedSign = snapshot.entities.Find(e => e.id == entity.id);
+            savedSign.x += 2f;
+            savedSign.y += 1f;
+            app.RestoreJson(JsonUtility.ToJson(snapshot));
+            yield return null;
+            yield return null;
+            Assert.That(sign.transform.localPosition, Is.EqualTo(scenePosition), "Saved coordinates must not replace the edited sign placement");
+        }
         [UnityTest] public IEnumerator RestartButtonIsAlwaysAvailableAndRestoresThePracticeWhileDragging()
         {
             var guide = app.WorkstationTutorial; var world = app.World;

@@ -610,6 +610,92 @@ namespace Spotlight.FreeCafe.Tests
             Assert.That(Object.FindObjectsByType<FreeCafeTutorialPanel>(FindObjectsInactive.Include,FindObjectsSortMode.None),Is.Empty);
             Assert.That(Object.FindFirstObjectByType<FreeCafeRuntime>(),Is.Null);
         }
+        [UnityTest] public IEnumerator DirectSandboxStaysFreeUntilFirstGuestGmActionIsRequested()
+        {
+            Assert.That(app.IsSandboxMode,Is.True);
+            Assert.That(Object.FindFirstObjectByType<DayFlowController>(),Is.Null);
+            Assert.That(app.CafeTutorialActive,Is.False);
+            Assert.That(app.World.State.sandboxEquipment,Is.True);
+            Assert.That(app.World.HasTutorialCustomer,Is.False);
+            Assert.That(app.World.StartDay().success,Is.True);
+            int requests=app.World.State.requests.Count;
+            Assert.That(app.DebugStartFirstGuestTutorial(out _),Is.False);
+            Assert.That(app.World.State.open,Is.True);
+            Assert.That(app.World.State.requests.Count,Is.EqualTo(requests));
+            Assert.That(Object.FindFirstObjectByType<DayFlowController>(),Is.Null);
+            yield return null;
+        }
+
+        [UnityTest] public IEnumerator SandboxGmFirstGuestReusesPlayerThenReachesOfficialWorkstationTutorial()
+        {
+            var player=PlayerRuntime.Current;
+            var narrative=Spotlight.Narrative.NarrativeRuntime.Instance;
+            int money=app.World.State.money;
+            var gm=FreeCafeGMPanel.Instance;
+            gm.SetVisible(true);
+            Assert.That(gm.SelectCategory("咖啡馆教程"),Is.True);
+            yield return null;
+            FindAction(gm,"首位客人剧情与完整教学（沙盒）").onClick.Invoke();
+            tutorialFlow=app.GetComponent<DayFlowController>();
+            Assert.That(tutorialFlow,Is.Not.Null);
+            Assert.That(gm.IsVisible,Is.False);
+            Assert.That(PlayerRuntime.Current,Is.SameAs(player));
+            Assert.That(Spotlight.Narrative.NarrativeRuntime.Instance,Is.SameAs(narrative));
+            Assert.That(player.CreationSubmitted,Is.True);
+            Assert.That(player.HasSelectedAvatar,Is.True);
+            Assert.That(app.World.State.money,Is.EqualTo(money));
+            Assert.That(tutorialFlow.State,Is.EqualTo(DayFlowState.FirstDayIntroduction));
+            Assert.That(tutorialFlow.CurrentPresentation,Is.Null,"No prologue, letter, date or opening page");
+            Assert.That(tutorialFlow.CurrentDialogue.AllowCancel,Is.False);
+            Assert.That(tutorialFlow.CanSave,Is.False);
+            Assert.That(app.CafeTutorialActive,Is.True);
+            Assert.That(app.DebugStartFirstGuestTutorial(out _),Is.False,"Repeated clicks cannot restart the story");
+
+            float deadline=Time.realtimeSinceStartup+30f;
+            bool checkedPerception=false;
+            narrative.Controller.AbilityCheckEvaluated+=OnCheck;
+            void OnCheck(Spotlight.Narrative.NarrativeAbilityCheckSnapshot _) => checkedPerception=true;
+            try
+            {
+                while(tutorialFlow.State!=DayFlowState.FreeCafeBusiness || DialoguePanel.IsAnyPlaying)
+                {
+                    Assert.That(Time.realtimeSinceStartup,Is.LessThan(deadline),"First guest story did not reach workstation handoff");
+                    var dialogue=DialoguePanel.Active;
+                    if(dialogue!=null && dialogue.IsPlaying) dialogue.Advance();
+                    var presentation=Object.FindFirstObjectByType<Spotlight.Narrative.NarrativePresentationUI>();
+                    if(presentation!=null)
+                        presentation.transform.Find("Blocker").GetComponent<Button>().onClick.Invoke();
+                    yield return null;
+                }
+            }
+            finally { narrative.Controller.AbilityCheckEvaluated-=OnCheck; }
+            Assert.That(checkedPerception,Is.True,"Use the real bound player ability check");
+            Assert.That(app.World.HasTutorialCustomer,Is.True);
+            Assert.That(app.World.State.open,Is.False);
+            Assert.That(app.World.State.requests.Count,Is.EqualTo(1));
+            Assert.That(app.World.State.sandboxEquipment,Is.False,"Official tutorial owns equipment progression after opt-in");
+            Assert.That(app.CafeTutorialWaitingForWorkstation,Is.True);
+            Assert.That(app.CanEnterArea(AreaId.Counter),Is.True);
+            Assert.That(app.CanEnterArea(AreaId.Cafe),Is.False);
+            app.RequestBusinessStart();
+            Assert.That(app.World.State.open,Is.False);
+            app.Enter(AreaId.Counter);
+            deadline=Time.realtimeSinceStartup+15f;
+            while(!app.WorkstationTutorial.IsFirstCafeTutorial)
+            {
+                Assert.That(Time.realtimeSinceStartup,Is.LessThan(deadline),"Workstation lesson did not start");
+                if(DialoguePanel.Active!=null && DialoguePanel.Active.IsPlaying) DialoguePanel.Active.Advance();
+                yield return null;
+            }
+            Assert.That(app.WorkstationTutorial.CurrentStage,Is.EqualTo(FreeCafeWorkstationTutorial.Stage.Beans));
+            Assert.That(tutorialFlow.DebugSkipTutorialToCafe(out _),Is.True,"Existing GM escape also works without Bootstrap");
+            Assert.That(app.WorkstationTutorial.IsRunning,Is.False);
+            Assert.That(app.CafeTutorialActive,Is.False);
+            Assert.That(app.World.HasTutorialCustomer,Is.False);
+            Assert.That(app.World.State.open,Is.False);
+            Assert.That(app.World.State.money,Is.EqualTo(money));
+        }
+
         [UnityTest] public IEnumerator GmSkipCancelsOfficialGuidanceAndRestoresPreparationWithoutTheFirstCustomer()
         {
             var flags=BindingFlags.Instance|BindingFlags.NonPublic;

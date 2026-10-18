@@ -410,10 +410,10 @@ namespace Spotlight.FreeCafe
             retry.SetActive(true);
             panel.exitButton.gameObject.SetActive(false);
             heading.text = "咖啡馆 · 新手教程";
-            instruction.text = "工作台是取用原料、加工和出餐的地方。\n点击场景中的箭头标志，进入工作台为首位客人制作无糖黑咖啡。";
+            instruction.text = "工作台是取用原料、加工和出餐的地方。\n点击大厅右侧吧台处的箭头或吧台，为首位客人制作无糖黑咖啡。";
             errorText.text = "跟随鼠标光标提示进入工作台 · 完成教程后才能正式营业";
             gesture.gameObject.SetActive(true);
-            gestureText.text = "进入工作台做首杯咖啡\n点击箭头，开始制作教学";
+            gestureText.text = "进入工作台做首杯咖啡\n点击大厅右侧吧台处的箭头或吧台";
             panel.SetMouseMode(false, false);
 
             var bounds = entryPortal.visual.bounds;

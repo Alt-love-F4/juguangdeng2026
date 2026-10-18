@@ -30,7 +30,10 @@ namespace Spotlight.FreeCafe.Tests
                 Assert.That(prefab.effectsRoot,Is.Not.Null,spec.id);Assert.That(prefab.liquidRoot,Is.Not.Null,spec.id);
                 Assert.That(prefab.pourOrigin,Is.Not.Null,spec.id);
                 foreach(string child in new[]{"Art","Label","FillStatus","FillBar","FillBarBackground"})
-                    Assert.That(prefab.transform.Find(child),Is.Not.Null,spec.id+" / "+child);
+                {
+                    string anchor = spec.id == "business.start" && child == "Label" ? "HangingSign/Label" : child;
+                    Assert.That(prefab.transform.Find(anchor),Is.Not.Null,spec.id+" / "+anchor);
+                }
             }
         }
         [Test] public void MissingOrDuplicateMappingsAreRejectedRatherThanUsingTheGenericPrefab()
