@@ -1,0 +1,33 @@
+THIRD-PARTY AUDIO CREDITS
+
+Water sounds by Vinrax
+https://opengameart.org/content/water-sounds
+https://opengameart.org/users/vinrax
+Licensed under Creative Commons Attribution 3.0 Unported:
+https://creativecommons.org/licenses/by/3.0/
+Adapted as LiquidPourLoop, LiquidDripLoop, LiquidSplash and MilkFoam.
+Changes: excerpts, mono resampling, high/low-pass filtering, peak-level adjustment,
+short fades, and crossfaded loop seams. Milk foam is designed water foley.
+
+Pouring coffee beans by Focus on Fun Games Company
+https://opengameart.org/content/pouring-coffee-beans
+https://opengameart.org/users/focusonfungames
+Licensed under Creative Commons Attribution 3.0 Unported:
+https://creativecommons.org/licenses/by/3.0/
+Adapted from the author's noise-reduced recording as BeansRustle, BeansAdd and
+PowderAdd. Changes: excerpts, mono resampling, filtering, peak-level adjustment
+and fades. PowderAdd is filtered bean foley.
+
+Impact Sounds and RPG Audio by Kenney (https://kenney.nl)
+https://kenney.nl/assets/impact-sounds
+https://kenney.nl/assets/rpg-audio
+Creative Commons Zero / CC0:
+https://creativecommons.org/publicdomain/zero/1.0/
+Adapted as CupLift, CupSetDown, SoftTouch, GrinderTurn, MachineSwitch,
+ServiceBell and ClothPickup. Changes: excerpts, mono resampling, filtering,
+peak-level adjustment and fades.
+
+No endorsement by the original authors is implied.
+These credits apply to the added cafe interaction recordings, not the project's
+pre-existing music, grinding or boiling recordings, which retain their original
+licensing arrangements.

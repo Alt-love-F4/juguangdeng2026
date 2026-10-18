@@ -138,6 +138,148 @@ namespace Spotlight.Audio.Tests
         }
 
         [Test]
+        public void LoopMultipliersApplyToCueAndExistingVoiceWithoutRestart()
+        {
+            AudioCue cue = catalog.Find(AudioKeys.Grinder);
+            cue.volume = .8f; cue.pitch = .8f;
+            var owner = new object();
+            GameAudio.SetLoop(owner, "machine", AudioKeys.Grinder, true, volume: .5f, pitch: 1.5f);
+            int id = backend.Active.Keys.Single();
+            Assert.That(backend.Active[id].Volume, Is.EqualTo(.4f).Within(.0001f));
+            Assert.That(backend.Active[id].Pitch, Is.EqualTo(1.2f).Within(.0001f));
+            GameAudio.SetLoop(owner, "machine", AudioKeys.Grinder, true, volume: 3f, pitch: 10f);
+            Assert.That(backend.PlayCount, Is.EqualTo(1));
+            Assert.That(backend.Active.Keys.Single(), Is.EqualTo(id));
+            Assert.That(backend.Active[id].Volume, Is.EqualTo(1f));
+            Assert.That(backend.Active[id].Pitch, Is.EqualTo(3f));
+            GameAudio.SetLoop(owner, "machine", AudioKeys.Grinder, true);
+            Assert.That(backend.Active[id].Volume, Is.EqualTo(.8f));
+            Assert.That(backend.Active[id].Pitch, Is.EqualTo(.8f));
+            cue.volume = .6f; cue.pitch = 1.4f;
+            GameAudio.SetLoop(owner, "machine", AudioKeys.Grinder, true, volume: .5f, pitch: .5f);
+            Assert.That(backend.PlayCount, Is.EqualTo(1));
+            Assert.That(backend.Active[id].Volume, Is.EqualTo(.3f).Within(.0001f));
+            Assert.That(backend.Active[id].Pitch, Is.EqualTo(.7f).Within(.0001f));
+        }
+
+        [Test]
+        public void LoopStopUsesCapturedCueFadeOutButStopOwnerStillStopsImmediately()
+        {
+            AudioCue cue = catalog.Find(AudioKeys.Grinder);
+            cue.fadeOut = .35f;
+            var owner = new object();
+            GameAudio.SetLoop(owner, "machine", AudioKeys.Grinder, true);
+            cue.fadeOut = .9f;
+            GameAudio.SetLoop(owner, "machine", AudioKeys.Grinder, false);
+            Assert.That(backend.LastFadeDuration, Is.EqualTo(.35f));
+            GameAudio.SetLoop(owner, "machine", AudioKeys.Grinder, true);
+            GameAudio.StopOwner(owner);
+            Assert.That(backend.Active, Is.Empty);
+            Assert.That(backend.LastFadeDuration, Is.EqualTo(.35f));
+        }
+
+        [Test]
+        public void UpdatingOneLoopDoesNotChangeAnotherOwnerOrReplacementBackend()
+        {
+            var first = new object(); var second = new object();
+            GameAudio.SetLoop(first, "machine", AudioKeys.Grinder, true);
+            int firstId = backend.Active.Keys.Single();
+            GameAudio.SetLoop(second, "machine", AudioKeys.Grinder, true);
+            int secondId = backend.Active.Keys.Single(id => id != firstId);
+            GameAudio.SetLoop(first, "machine", AudioKeys.Grinder, true, volume: .2f, pitch: .5f);
+            Assert.That(backend.Active[secondId].Volume, Is.EqualTo(1f));
+            Assert.That(backend.Active[secondId].Pitch, Is.EqualTo(1f));
+            var replacement = new FakeBackend();
+            AudioKit.SetBackend(replacement);
+            GameAudio.SetLoop(new object(), "other", AudioKeys.Grinder, true);
+            GameAudio.SetLoop(first, "machine", AudioKeys.Grinder, true, volume: .1f, pitch: 2f);
+            Assert.That(replacement.Active.Values.Single().Volume, Is.EqualTo(1f));
+            Assert.That(replacement.Active.Values.Single().Pitch, Is.EqualTo(1f));
+        }
+
+        [Test]
+        public void NativeLoopGlidesOnSameVoiceAndKeepsSettingsAndPauseLayers()
+        {
+            AudioCue cue = catalog.Find(AudioKeys.Grinder);
+            cue.volume = .8f; cue.pitch = .8f;
+            GameAudio.Shutdown(); AudioKit.ClearBackend(); GameAudio.Initialize(catalog);
+            AudioKit.SetGlobalVolume(.5f);
+            AudioKit.SetBusVolume(AudioBus.Sfx, .25f);
+            var owner = new object();
+            GameAudio.SetLoop(owner, "machine", AudioKeys.Grinder, true);
+            var actual = AudioKit.GetBackend();
+            var snapshots = new List<AudioVoiceSnapshot>();
+            actual.GetActiveVoices(snapshots);
+            int id = snapshots.Single().VoiceId;
+            GameAudio.SetLoop(owner, "machine", AudioKeys.Grinder, true, volume: .5f, pitch: 1.5f);
+            AdvanceNativeBackend(actual, .04f);
+            actual.GetActiveVoices(snapshots);
+            Assert.That(snapshots.Single().VoiceId, Is.EqualTo(id));
+            Assert.That(snapshots[0].Volume, Is.EqualTo(.6f * .5f * .25f).Within(.0001f));
+            Assert.That(snapshots[0].Pitch, Is.EqualTo(1f).Within(.0001f));
+            // Repeating the same target must not reset interpolation.
+            GameAudio.SetLoop(owner, "machine", AudioKeys.Grinder, true, volume: .5f, pitch: 1.5f);
+            GameAudio.SetOwnerPaused(owner, true);
+            AdvanceNativeBackend(actual, 1f);
+            actual.GetActiveVoices(snapshots);
+            Assert.That(snapshots[0].Pitch, Is.EqualTo(1f).Within(.0001f));
+            actual.PauseAll();
+            GameAudio.SetOwnerPaused(owner, false);
+            AdvanceNativeBackend(actual, 1f);
+            actual.GetActiveVoices(snapshots);
+            Assert.That(snapshots[0].IsPaused, Is.True);
+            Assert.That(snapshots[0].Pitch, Is.EqualTo(1f).Within(.0001f));
+            actual.ResumeAll(); AdvanceNativeBackend(actual, .04f);
+            actual.GetActiveVoices(snapshots);
+            Assert.That(snapshots[0].Pitch, Is.EqualTo(1.2f).Within(.0001f));
+            Assert.That(snapshots[0].Volume, Is.EqualTo(.4f * .5f * .25f).Within(.0001f));
+            AudioKit.MuteAll(true);
+            actual.GetActiveVoices(snapshots);
+            Assert.That(snapshots[0].Volume, Is.Zero);
+            AudioKit.MuteAll(false);
+            GameAudio.StopOwner(owner);
+            actual.GetActiveVoices(snapshots);
+            Assert.That(snapshots, Is.Empty);
+        }
+
+        [Test]
+        public void NativeLoopFadesRetainBusMuteAndGlobalPauseAndShutdownCleansOutgoingVoice()
+        {
+            catalog.Find(AudioKeys.Grinder).fadeIn = .2f;
+            GameAudio.Shutdown(); AudioKit.ClearBackend(); GameAudio.Initialize(catalog);
+            var owner = new object();
+            GameAudio.SetLoop(owner, "machine", AudioKeys.Grinder, true);
+            var actual = AudioKit.GetBackend();
+            var snapshots = new List<AudioVoiceSnapshot>();
+            AdvanceNativeBackend(actual, .1f);
+            actual.GetActiveVoices(snapshots);
+            Assert.That(snapshots.Single().Volume, Is.EqualTo(.5f).Within(.0001f));
+            GameAudio.SetLoop(owner, "machine", AudioKeys.Grinder, false);
+            actual.PauseAll(); AdvanceNativeBackend(actual, 1f);
+            actual.GetActiveVoices(snapshots);
+            Assert.That(snapshots.Count, Is.EqualTo(1));
+            actual.SetBusVolume(AudioBus.Sfx, 0f);
+            actual.GetActiveVoices(snapshots);
+            Assert.That(snapshots[0].Volume, Is.Zero);
+            actual.ResumeAll(); AdvanceNativeBackend(actual, .15f);
+            actual.GetActiveVoices(snapshots);
+            Assert.That(snapshots, Is.Empty);
+            GameAudio.SetLoop(owner, "machine", AudioKeys.Grinder, true);
+            GameAudio.SetLoop(owner, "machine", AudioKeys.Grinder, false);
+            GameAudio.Shutdown();
+            actual.GetActiveVoices(snapshots);
+            Assert.That(snapshots, Is.Empty);
+            Assert.That(AudioKit.HasBackend, Is.False);
+        }
+
+        private static void AdvanceNativeBackend(IAudioBackend actual, float seconds)
+        {
+            // Test the unscaled step deterministically without waiting for Editor frame timing.
+            actual.GetType().GetMethod("Advance", System.Reflection.BindingFlags.Instance | System.Reflection.BindingFlags.NonPublic)
+                .Invoke(actual, new object[] { seconds });
+        }
+
+        [Test]
         public void TemporaryMusicOverrideRestoresBaselineAndIdenticalRequestsDoNotRestart()
         {
             var owner = new object();
@@ -291,13 +433,14 @@ namespace Spotlight.Audio.Tests
             Assert.That(shipped.entries.Select(cue => cue.key).Distinct().Count(), Is.EqualTo(shipped.entries.Count));
         }
 
-        private sealed class FakeBackend : IAudioBackend
+        private sealed class FakeBackend : IAudioBackend, IDynamicAudioLoopBackend
         {
             private int nextId;
             public readonly Dictionary<int, AudioPlayOptions> Active = new Dictionary<int, AudioPlayOptions>();
             public AudioClip LoadedClip;
             public int PlayCount;
             public bool DeferFades;
+            public float LastFadeDuration;
             public string BackendName => "Test.Audio";
             public AudioBackendCapabilities Capabilities => AudioBackendCapabilities.All;
             public int Play(string path, AudioPlayOptions options)
@@ -308,8 +451,19 @@ namespace Spotlight.Audio.Tests
                 return nextId;
             }
             public Task<int> PlayAsync(string path, AudioPlayOptions options, CancellationToken token) => Task.FromResult(Play(path, options));
+            public bool SetLoopParameters(int voiceId, float volume, float pitch)
+            {
+                if (!Active.TryGetValue(voiceId, out AudioPlayOptions options)) return false;
+                options.Volume = volume; options.Pitch = pitch;
+                Active[voiceId] = options;
+                return true;
+            }
             public bool Stop(int voiceId) => Active.Remove(voiceId);
-            public bool StopWithFade(int voiceId, float duration) => DeferFades ? Active.ContainsKey(voiceId) : Stop(voiceId);
+            public bool StopWithFade(int voiceId, float duration)
+            {
+                LastFadeDuration = duration;
+                return DeferFades ? Active.ContainsKey(voiceId) : Stop(voiceId);
+            }
             public void StopAll() => Active.Clear();
             public void StopBus(string bus)
             {

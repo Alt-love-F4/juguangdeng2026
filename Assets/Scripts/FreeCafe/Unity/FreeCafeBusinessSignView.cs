@@ -64,7 +64,13 @@ namespace Spotlight.FreeCafe
             completed?.Invoke();
         }
 
-        private void SetCaption(bool open) => entityView.label.text = open ? "结束营业" : "开始营业";
+        private void SetCaption(bool open)
+        {
+            var runtime = entityView.Runtime;
+            bool closedToday = !open && runtime != null && !runtime.IsSandboxMode
+                && runtime.World.State.businessPhase == BusinessPhase.Night;
+            entityView.label.text = open ? "结束营业" : closedToday ? "今日已打烊" : "开始营业";
+        }
         private void ResetPose()
         {
             IsFlipping = false;

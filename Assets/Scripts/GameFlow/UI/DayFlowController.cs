@@ -66,6 +66,7 @@ namespace Spotlight.GameFlow
         private ICafeTutorialGameplayEndpoint cafeTutorialEndpoint;
         private bool initialized;
         private bool running;
+        private bool businessWasActive;
         private int presentationVersion;
         private string previousDate = InitialDate;
         private int day = 1;
@@ -86,7 +87,8 @@ namespace Spotlight.GameFlow
         // Phase pages remain blocking while they wait for a player confirmation.
         public bool BlocksGameplayInput => running && State != DayFlowState.FreeCafeBusiness && State != DayFlowState.CityMapLeisure;
         public bool CanFinishBusiness => running && !IsCafeTutorialActive && State == DayFlowState.FreeCafeBusiness
-            && endpointOwner != null && gameplayEndpoint.DayFlowBusinessActive;
+            && endpointOwner != null && (gameplayEndpoint.DayFlowBusinessActive
+                || businessWasActive && gameplayEndpoint.DayFlowBusinessFinished);
         public IDayFlowPresentation CurrentPresentation => currentPanel as IDayFlowPresentation;
 
         public DialoguePanel CurrentDialogue => introductionPanel;
@@ -127,6 +129,7 @@ namespace Spotlight.GameFlow
             CoffeeCupScreenTransition.Clear();
             Spotlight.Audio.GameAudio.StopOwner(this);
             running = false;
+            businessWasActive = false;
             awaitingNarrativeEntry = false;
             ++narrativeEntryVersion;
             SetMapAvailability(false);
@@ -190,6 +193,7 @@ namespace Spotlight.GameFlow
             if (!SessionAllowsPlay) return;
             if (!initialized) Initialize(flow);
             running = true;
+            PlayerCafeOwner.Current?.SynchronizeCalendarDay(day);
             HideGameplayPanel();
             var runtime = NarrativeRuntime.Instance;
             var actions = runtime?.Actions;
@@ -311,7 +315,10 @@ namespace Spotlight.GameFlow
         {
             if (!SessionAllowsPlay || Time.timeScale == 0f || !running || State != DayFlowState.FreeCafeBusiness) return;
             // Do not let an endpoint's old state bypass an unfinished presentation.
-            if (endpointOwner != null && gameplayEndpoint.DayFlowBusinessFinished)
+            if (endpointOwner == null) return;
+            if (gameplayEndpoint.DayFlowBusinessActive) businessWasActive = true;
+            // Night can belong to the previous visit: only settle an observed open session.
+            if (businessWasActive && gameplayEndpoint.DayFlowBusinessFinished)
                 FinishBusiness();
         }
 
@@ -693,6 +700,7 @@ namespace Spotlight.GameFlow
             SetState(DayFlowState.FreeCafeBusiness);
             ShowGameplayPanel();
             endpoint.StartDayFlowBusiness();
+            businessWasActive = endpoint.DayFlowBusinessActive;
             if (IsCafeTutorialActive)
             {
                 PlayCafeTutorialContent(CafeTutorialSession.WorkstationStep, presentationVersion, null);
@@ -704,6 +712,7 @@ namespace Spotlight.GameFlow
             if (!SessionAllowsPlay || !CanFinishBusiness) return;
             IDayFlowGameplayEndpoint endpoint = FindGameplayEndpoint();
             endpoint?.EndDayFlowBusiness();
+            businessWasActive = false;
             HideGameplayPanel();
             SetState(DayFlowState.PreLeisure);
             ShowPresentation<BusinessEndPanel>(() => RunNarrativeEntry(NarrativeEntryPoint.AfterBusiness, EnterCityMap));
@@ -890,8 +899,10 @@ namespace Spotlight.GameFlow
         {
             if (!SessionAllowsPlay || !running) return;
             SetState(DayFlowState.DateTransition);
+            FindGameplayEndpoint()?.EndDayFlowBusiness();
             previousDate = CurrentDate;
             day++;
+            PlayerCafeOwner.Current?.SynchronizeCalendarDay(day);
             if (flow != null && !flow.TryAutoSave(out string error)) Debug.LogWarning("日结自动存档失败：" + error, this);
             BeginNewDayFlow();
         }
@@ -1107,7 +1118,7 @@ namespace Spotlight.GameFlow
                 case DayFlowState.PreBusiness: EnterCityMap(); break;
                 case DayFlowState.BusinessTransition: EnterBusinessTransition(); break;
                 case DayFlowState.FreeCafeBusiness:
-                    FindGameplayEndpoint();
+                    businessWasActive = FindGameplayEndpoint()?.DayFlowBusinessActive == true;
                     ClosePresentation();
                     ShowGameplayPanel();
                     break;

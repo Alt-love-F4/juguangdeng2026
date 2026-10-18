@@ -177,8 +177,8 @@ namespace Spotlight.FreeCafe
             }
         }
 
-        /// <summary>开始营业：从夜间开业会进入下一天；重置当日统计并按客流生成首批顾客。</summary>
-        public ActionResult StartDay()
+        /// <summary>开始营业；独立沙盒可从打烊进入次日，正式日程必须先显式休息。</summary>
+        public ActionResult StartDay(bool advanceFromNight = true)
         {
             if (HasTutorialCustomer) return ActionResult.No("请先完成首位客人的黑咖啡教程");
             if (State.open)
@@ -189,6 +189,7 @@ namespace Spotlight.FreeCafe
             // 从夜间开始新的一天：天数和倒计时都要重置
             if (State.businessPhase == BusinessPhase.Night)
             {
+                if (!advanceFromNight) return ActionResult.No("今日营业已结束，请选择「结束这一天」或上床休息后再营业");
                 State.day++;
                 State.timeRemaining = Catalog.daySeconds;
             }
@@ -223,6 +224,20 @@ namespace Spotlight.FreeCafe
 
             Notify();
             return ActionResult.Yes("开始营业：今日客流 " + State.todayCustomerBudget + "，可自由备料；上餐时验证配方");
+        }
+
+        /// <summary>正式日程是日期的唯一来源；同日同步不重开营业，也不重置库存/统计。</summary>
+        public void SynchronizeCalendarDay(int day)
+        {
+            if (day < 1) throw new ArgumentOutOfRangeException(nameof(day));
+            if (State.day == day) return;
+            State.day = day;
+            if (!State.open)
+            {
+                State.businessPhase = BusinessPhase.Preparation;
+                State.timeRemaining = Catalog.daySeconds;
+            }
+            Notify();
         }
 
         public ActionResult StartTutorialCustomer()

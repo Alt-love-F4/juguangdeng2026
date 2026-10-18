@@ -228,7 +228,8 @@ namespace Spotlight.FreeCafe
         private void ThirdFloor()=>runtime.Enter(AreaId.Basement);
         private void EndDayFromDormitory()
         {
-            if (runtime == null || runtime.World == null || runtime.World.State.currentArea != AreaId.Basement) return;
+            if (runtime == null || runtime.World == null || runtime.InputBlocked) return;
+            if (runtime.World.State.currentArea != AreaId.Cafe && runtime.World.State.currentArea != AreaId.Basement) return;
             if (dayFlow == null) dayFlow = FindFirstObjectByType<DayFlowController>();
             dayFlow?.EndDayFromDormitory();
         }
@@ -389,18 +390,21 @@ namespace Spotlight.FreeCafe
             var state=runtime.World.State;
             if (endDayButton != null)
             {
-                bool dormitory = state.currentArea == AreaId.Basement;
-                endDayButton.gameObject.SetActive(dormitory);
-                endDayButton.interactable = dormitory && dayFlow != null;
+                bool canRestHere = state.currentArea == AreaId.Cafe || state.currentArea == AreaId.Basement;
+                endDayButton.gameObject.SetActive(canRestHere);
+                endDayButton.interactable = canRestHere && dayFlow != null && !runtime.InputBlocked;
             }
+            string closedStatus = state.businessPhase == BusinessPhase.Night
+                ? runtime.IsSandboxMode ? "已打烊 · 点击立牌开始新一天" : "今日已打烊 · 选择「结束这一天」或上床休息进入次日"
+                : "准备营业 · 点击大厅立牌开店";
             if(summary!=null)
             {
-                summary.text="第 "+state.day+" 天    王国币 "+state.money+"    声望 "+state.reputation+"\n"+(state.open ? "营业中 · 剩余 "+state.timeRemaining.ToString("0")+" 秒" : state.businessPhase==BusinessPhase.Night ? "已打烊 · 点击立牌开始新一天" : "准备营业 · 点击大厅立牌开店")+"    顾客 "+state.requests.Count+" 位";
+                summary.text="第 "+state.day+" 天    王国币 "+state.money+"    声望 "+state.reputation+"\n"+(state.open ? "营业中 · 剩余 "+state.timeRemaining.ToString("0")+" 秒" : closedStatus)+"    顾客 "+state.requests.Count+" 位";
                 var beans=runtime.World.Find("s.beans");var milk=runtime.World.Find("s.milk");
                 summary.text+="\n咖啡豆 "+(beans==null ? "—" : beans.stock.ToString())+"  ·  牛奶 "+(milk==null ? "—" : milk.stock.ToString());
             }
             if(dayLabel!=null) dayLabel.text="第 "+state.day+" 天";
-            if(statusLabel!=null) statusLabel.text=state.open ? "营业中 · 剩余 "+state.timeRemaining.ToString("0")+" 秒 · 顾客 "+state.requests.Count+" 位" : state.businessPhase==BusinessPhase.Night ? "已打烊 · 点击立牌开始新一天" : "准备营业 · 点击大厅立牌开店";
+            if(statusLabel!=null) statusLabel.text=state.open ? "营业中 · 剩余 "+state.timeRemaining.ToString("0")+" 秒 · 顾客 "+state.requests.Count+" 位" : closedStatus;
             if(moneyLabel!=null) moneyLabel.text=state.money.ToString();
             if(reputationLabel!=null) reputationLabel.text=state.reputation.ToString();
             if(stockLabel!=null)

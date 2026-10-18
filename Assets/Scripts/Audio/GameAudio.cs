@@ -25,7 +25,9 @@ namespace Spotlight.Audio
         }
         public static void PlayNarrative(string key, object owner, float volume = 1f, bool voice = false)
             => Service?.PlayNarrative(key, owner, volume, voice);
-        public static void SetLoop(object owner, string slot, string key, bool active) => Service?.SetLoop(owner, slot, key, active);
+        /// <summary>Sets an owned loop; multipliers are relative to the catalog cue. Existing voices glide without restarting.</summary>
+        public static void SetLoop(object owner, string slot, string key, bool active, float volume = 1f, float pitch = 1f)
+            => Service?.SetLoop(owner, slot, key, active, volume, pitch);
         public static void Music(string key) => Service?.SetMusic(key);
         public static void OverrideMusic(object owner, string key, float volume = 1f, float fadeIn = -1f, float fadeOut = -1f)
             => Service?.SetMusic(key, owner, volume, fadeIn, fadeOut, true);
