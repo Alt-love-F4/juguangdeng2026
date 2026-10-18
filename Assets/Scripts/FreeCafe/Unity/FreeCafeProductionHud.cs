@@ -234,7 +234,10 @@ namespace Spotlight.FreeCafe
             // 玩家 HUD 已改为独立纸卡布局；旧黑边不再由制作 HUD 恢复。
             if(!visible)
             {
-                CloseBook();
+                // A shared compendium also belongs to the lobby; leaving the counter must not close it there.
+                var playerHud = bookPanel == null ? null : bookPanel.GetComponentInParent<FreeCafeHud>(true);
+                bool sharedBook = playerHud != null && playerHud.recipePanel == bookPanel;
+                if (!sharedBook || latteOpen) CloseBook();
                 if(receiptPanel!=null) receiptPanel.SetActive(false);
                 if(miniGamePanel!=null) miniGamePanel.SetActive(false);
                 return;

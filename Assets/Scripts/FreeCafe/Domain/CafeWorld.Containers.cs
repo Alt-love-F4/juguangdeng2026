@@ -339,12 +339,7 @@ namespace Spotlight.FreeCafe
             if (IsContainer(item)) return ActionResult.Yes("左键拿起，按住右键倾倒；松开右键继续拿着");
             if (!Spec(item.specId).Has(Capability.Portion)) return ActionResult.No("请加入原料或从其他容器倾倒");
             if (IsExtractionFilter(target) && item.specId == "grounds")
-            {
-                var jug = ExtractionJug(target);
-                if ((target.production.filterWaterPassedMl > 0 || jug != null && jug.production.brewStarted)
-                    && (target.contents.Count > 0 || jug != null && LiquidVolume(jug) > 0))
-                    return ActionResult.No("请先清空本轮滤杯与下壶，再加入新粉");
-            }
+                return ActionResult.Yes("更换咖啡粉（自动清空上层滤杯）");
             float volume = IngredientPortion(item).milliliters;
             return volume <= ExtractionReceivingSpace(target) + .01f
                 ? ActionResult.Yes("自由加入 " + Spec(item.specId).label) : ActionResult.No("容器液体容量不足");
@@ -359,22 +354,21 @@ namespace Spotlight.FreeCafe
             if (IsPrecisionExtractor(target) && item.specId == "grounds" && target.production.brewCompleted)
                 ResetExtraction(target);
             var incoming = IngredientPortion(item);
+            if (IsExtractionFilter(target) && item.specId == "grounds")
+            {
+                // One successful ingredient transfer is one fresh dose, including its full payload.
+                // Clear once here, not per portion/pour frame; never discard the lower jug's drink.
+                target.contents.Clear();
+                target.production.filterSpent = false;
+                target.production.filterReferenceGroundsGrams = target.production.filterWaterPassedMl = 0;
+                target.production.filterDrainedMl = target.production.filterDrainHold = 0;
+                var linkedJug = ExtractionJug(target);
+                if (linkedJug != null) ResetExtraction(linkedJug);
+            }
             float mixedTemperature = MixedTemperature(target, incoming);
             // Only an incoming hot WATER drop after grounds may start a precision session.
             if ((incoming.specId == "water" || incoming.specId == "hotwater") && TemperatureBand(TemperatureCelsius(incoming)) != LiquidTemperature.Room)
                 AcceptExtractionWater(target, incoming.milliliters, 1);
-            float incomingGrams = incoming.grams;
-            if (IsExtractionFilter(target) && item.specId == "grounds")
-            {
-                if (target.production.filterSpent && target.contents.Count == 0)
-                {
-                    target.production.filterSpent = false;
-                    target.production.filterReferenceGroundsGrams = target.production.filterWaterPassedMl = 0;
-                    target.production.filterDrainedMl = 0;
-                }
-                else if (target.production.filterReferenceGroundsGrams > 0)
-                    target.production.filterReferenceGroundsGrams += incomingGrams;
-            }
             incoming.addedSequence = ++target.production.additionSequence;
             target.contents.Add(incoming);
             State.entities.Remove(item);

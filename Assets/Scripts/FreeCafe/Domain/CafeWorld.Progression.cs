@@ -5,6 +5,9 @@ namespace Spotlight.FreeCafe
     /// <summary>Session-scoped equipment progression. Legacy domain callers remain unrestricted.</summary>
     public sealed partial class CafeWorld
     {
+        /// <summary>Successful purchase only, after state/content notifications; true means latte equipment. Restore never emits this.</summary>
+        public event Action<bool> EquipmentAcquired;
+
         public const int PrecisionOrdersRequired = 5;
         public const int LatteOrdersRequired = 12;
         public const int PrecisionActivationCost = 200;
@@ -67,6 +70,7 @@ namespace Spotlight.FreeCafe
             if (latte) State.latteEquipmentActive = true; else State.precisionEquipmentActive = true;
             UnlockContent();
             Notify();
+            EquipmentAcquired?.Invoke(latte);
             return ActionResult.Yes(latte ? "拉花已激活：向拉花杯加入牛奶并点击打奶，再拖到饮品杯上开始拉花" : "精粹设备已激活：将咖啡粉装入滤杯，再用热水均匀注入");
         }
     }

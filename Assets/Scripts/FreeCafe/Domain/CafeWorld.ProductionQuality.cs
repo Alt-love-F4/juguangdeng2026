@@ -95,7 +95,7 @@ namespace Spotlight.FreeCafe
                     return ActionResult.No("请使用大杯制作一杯黑咖啡再交付；当前杯子和教程订单已保留");
                 ConsumeDeliveredContainer(cup);
                 CompleteCustomerOrder(request, true);
-                State.production.lastDelivery = "首位客人的黑咖啡已交付，新手教程完成";
+                State.production.lastDelivery = "首位客人的黑咖啡已交付，接下来学习查咖啡谱和正式营业";
                 Notify();
                 return ActionResult.Yes(State.production.lastDelivery, CafeFeedbackKind.DeliverySatisfied);
             }

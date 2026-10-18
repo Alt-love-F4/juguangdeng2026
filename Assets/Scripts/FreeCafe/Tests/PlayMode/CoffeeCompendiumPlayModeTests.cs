@@ -61,6 +61,7 @@ namespace Spotlight.FreeCafe.Tests
 
         private Button ButtonLabelled(string label)
             => book.GetComponentsInChildren<Button>().FirstOrDefault(button => !book.tabButtons.Contains(button)
+                && button.GetComponentsInChildren<Button>().Length == 1
                 && button.GetComponentsInChildren<TMP_Text>().Any(text => text.text.Replace(" ", "").Contains(label)));
 
         private Button RestockButton(EntitySpec spec)

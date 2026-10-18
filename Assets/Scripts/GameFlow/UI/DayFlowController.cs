@@ -956,7 +956,7 @@ namespace Spotlight.GameFlow
                         Debug.LogError("[DayFlow] 无法启动黑咖啡工作台教程，教程保持锁定。", this);
                 });
             }
-            else if (stepId == CafeTutorialSession.CoffeeSignal)
+            else if (stepId == CafeTutorialSession.PostCoffeeSignal)
             {
                 CompleteFirstDayCafeTutorial();
             }

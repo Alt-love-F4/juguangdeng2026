@@ -42,6 +42,9 @@ namespace Spotlight.FreeCafe
         private bool hovered, selected, dropTarget, invalidDrop;
         private bool extractionFilling;
         public bool IsReceivingPour => receivingPour;
+        /// <summary>The real-time GravityLiquidImage is on screen (pouring, receiving or extracting).</summary>
+        public bool LiquidVisualActive => pourVisual || receivingPour || extractionFilling;
+        private FreeCafeCupDrinkSurface drinkSurface;
         public bool IsHovered => hovered;
         private TMP_Text fillStatus;
         private SpriteRenderer fillBarBackground, fillBar;
@@ -283,6 +286,7 @@ namespace Spotlight.FreeCafe
             }
             bool visible=string.IsNullOrEmpty(entity.ownerId) && Runtime.World.IsEquipmentAvailable(entity);
             gameObject.SetActive(visible);
+            UpdateDrinkSurface(entity);
             hitbox.enabled=CanInteract && !pointerMotion && visible && entity.area==Runtime.World.State.currentArea;
             string caption=spec.label;
             if(spec.Has(Capability.Source)) caption+=" ["+entity.stock+"]";
@@ -465,6 +469,21 @@ namespace Spotlight.FreeCafe
             rejectionAnimation=null;invalidDrop=false;
         }
         private bool WorldVessel(WorldEntity entity) => Runtime.World.IsProductionVessel(entity);
+        /// <summary>Recognised drinks replace the cup mouth with that drink's surface art.</summary>
+        private void UpdateDrinkSurface(WorldEntity entity)
+        {
+            var library = CafeDrinkSurfaceLibrary.Default;
+            if (drinkSurface == null && (library == null || library.Cup(entity.specId) == null)) return;
+            if (drinkSurface == null)
+            {
+                drinkSurface = GetComponent<FreeCafeCupDrinkSurface>();
+                if (drinkSurface == null) drinkSurface = gameObject.AddComponent<FreeCafeCupDrinkSurface>();
+                drinkSurface.Bind(this, library);
+            }
+            // A cup nested under another cup shows only its rim; contents stay hidden.
+            var kind = Runtime.World.CupAbove(entity) == null ? Runtime.World.ClassifyCoffee(entity) : default;
+            drinkSurface.Present(entity.specId, kind.known ? kind.productId : null, preview);
+        }
         public void PresentPour(float tilt,bool pouring)
         {
             pourVisual = pouring || Mathf.Abs(tilt) > .001f;

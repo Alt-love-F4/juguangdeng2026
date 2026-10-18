@@ -43,6 +43,7 @@ namespace Spotlight.FreeCafe
         public sealed class PracticeCopy
         {
             public bool extraction;
+            public bool milkPitcher;
             public string title;
             public Sprite icon;
             [TextArea(2, 4)] public string description;
@@ -562,11 +563,16 @@ namespace Spotlight.FreeCafe
             y = Divider(leftPage, y + 8f);
             y = Para(leftPage, tutorialIntro, y + 4f, 20f);
             y += 12f;
+            bool hasMilkPitcher = false;
             foreach (var practice in practices)
             {
                 if (practice == null) continue;
-                y = PracticeCard(leftPage, practice, y) + 14f;
+                hasMilkPitcher |= practice.milkPitcher;
+                y = PracticeCard(leftPage, practice, y) + 12f;
             }
+            if (!hasMilkPitcher)
+                PracticeCard(leftPage, new PracticeCopy { milkPitcher = true, title = "拉花杯操作教程",
+                    description = "加牛奶、点击打奶、拖到饮品杯开启拉花。\n跟随鼠标提示练习，结束后恢复原工作台。" }, y);
             y = Title(rightPage, "吧台须知", 0f, 36f);
             y = Divider(rightPage, y + 8f);
             for (int i = 0; i < counterGuide.Length; i++)
@@ -576,40 +582,41 @@ namespace Spotlight.FreeCafe
 
         private float PracticeCard(RectTransform page, PracticeCopy practice, float y)
         {
-            const float height = 210f;
+            const float height = 170f;
             var card = Card(page, couponCard, y, height, out Button cardButton);
             cardButton.interactable = false;
-            Img(card, practice.icon, new Vector2(18f, -22f), new Vector2(120f, 120f), TextAnchor.UpperLeft);
-            Text(card, practice.title, new Vector2(150f, -18f), new Vector2(360f, 36f), 26f, rust, TextAlignmentOptions.TopLeft, TextAnchor.UpperLeft);
-            var desc = Text(card, practice.description, new Vector2(150f, -58f), new Vector2(360f, 90f), 18f, ink, TextAlignmentOptions.TopLeft, TextAnchor.UpperLeft);
+            Img(card, practice.icon, new Vector2(18f, -18f), new Vector2(84f, 84f), TextAnchor.UpperLeft);
+            Text(card, practice.title, new Vector2(116f, -14f), new Vector2(394f, 34f), 25f, rust, TextAlignmentOptions.TopLeft, TextAnchor.UpperLeft);
+            var desc = Text(card, practice.description, new Vector2(116f, -50f), new Vector2(394f, 62f), 17f, ink, TextAlignmentOptions.TopLeft, TextAnchor.UpperLeft);
             desc.textWrappingMode = TextWrappingModes.Normal;
-            string blocker = PracticeBlocker(practice.extraction);
-            var button = Seal(card, blocker == null ? "开始练习" : "暂不可用", blocker == null, new Vector2(-24f, -146f), new Vector2(170f, 50f));
-            Text(card, blocker ?? "练习不消耗店内原料，结束后台面复原", new Vector2(18f, -158f), new Vector2(320f, 30f), 16f, blocker == null ? inkSoft : rust, TextAlignmentOptions.TopLeft, TextAnchor.UpperLeft);
+            string blocker = PracticeBlocker(practice.extraction, practice.milkPitcher);
+            var button = Seal(card, blocker == null ? "开始练习" : "暂不可用", blocker == null, new Vector2(-24f, -114f), new Vector2(170f, 44f));
+            Text(card, blocker ?? "练习不消耗店内原料，结束后台面复原", new Vector2(18f, -124f), new Vector2(320f, 30f), 16f, blocker == null ? inkSoft : rust, TextAlignmentOptions.TopLeft, TextAnchor.UpperLeft);
             button.onClick.AddListener(() =>
             {
-                string reason = PracticeBlocker(practice.extraction);
+                string reason = PracticeBlocker(practice.extraction, practice.milkPitcher);
                 if (reason != null) { Deny(button.transform, reason); return; }
-                StartPractice(practice.extraction);
+                StartPractice(practice.extraction, practice.milkPitcher);
             });
             return y + height;
         }
 
-        private string PracticeBlocker(bool extraction)
+        private string PracticeBlocker(bool extraction, bool milkPitcher = false)
         {
             var w = World;
             if (runtime.WorkstationTutorial == null) return "当前场景没有吧台练习";
             if (runtime.CafeTutorialActive || runtime.PracticeTutorialActive) return "正在进行教程";
             if (!w.ProductionEnabled || w.State.currentArea != AreaId.Counter) return "请先走到吧台再开始";
+            if (milkPitcher && !w.LatteEquipmentAvailable) return "需先订购「拉花套装」";
             if (extraction && !w.PrecisionEquipmentAvailable) return "需先订购「精粹萃取组」";
             return null;
         }
 
-        private void StartPractice(bool extraction)
+        private void StartPractice(bool extraction, bool milkPitcher = false)
         {
             // The open book counts as a modal; close it first so the workstation accepts the tutorial.
             CloseImmediate();
-            if (!runtime.WorkstationTutorial.Begin(extraction))
+            if (!(milkPitcher ? runtime.StartEquipmentTutorial(true) : runtime.WorkstationTutorial.Begin(extraction)))
                 runtime.Report(ActionResult.No("暂时无法开始练习：请先清空手上的操作再试"));
         }
 

@@ -228,7 +228,8 @@ namespace Spotlight.FreeCafe
                 if (tableOccluders != null && tableIndex < tableOccluders.Length && tableOccluders[tableIndex] != null)
                 {
                     tableOccluders[tableIndex].sortingOrder = tables[tableIndex].sortingOrder + 3;
-                    tableOccluders[tableIndex].enabled = occupied;
+                    // Tables remain in front of chairs even when no customer is seated.
+                    tableOccluders[tableIndex].enabled = true;
                 }
             }
         }

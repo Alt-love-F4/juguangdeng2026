@@ -68,7 +68,7 @@ namespace Spotlight.Narrative.Tests
         }
 
         [Test]
-        public void TutorialCoffeeRequiresWorkstationHandoffAndCompletesOnlyOnce()
+        public void TutorialCoffeeRequiresWorkstationHandoffThenWaitsForBusinessOnboarding()
         {
             var session = new CafeTutorialSession();
             int notifications = 0;
@@ -85,11 +85,41 @@ namespace Spotlight.Narrative.Tests
             Assert.That(session.NotifyTutorialStepCompleted(CafeTutorialSession.TutorialId, CafeTutorialSession.CoffeeSignal), Is.True);
             Assert.That(session.NotifyTutorialStepCompleted(CafeTutorialSession.TutorialId, CafeTutorialSession.CoffeeSignal), Is.False);
             session.Begin();
-            Assert.That(session.Completed, Is.True);
+            Assert.That(session.Completed, Is.False);
+            Assert.That(session.WaitingForBusinessOnboarding, Is.True);
             Assert.That(session.WaitingForWorkstation, Is.False);
             Assert.That(session.WaitingForCoffee, Is.False);
+            Assert.That(session.BeginCoffee(), Is.False);
             Assert.That(session.CurrentStepId, Is.Empty);
             Assert.That(notifications, Is.EqualTo(2));
+        }
+
+        [Test]
+        public void BusinessOnboardingCompletesOnlyAfterCoffeeAndOnlyOnce()
+        {
+            var session = new CafeTutorialSession();
+            int notifications = 0;
+            session.StepCompleted += (_, _) => notifications++;
+            Assert.That(session.NotifyTutorialStepCompleted(CafeTutorialSession.TutorialId, CafeTutorialSession.PostCoffeeSignal), Is.False);
+            session.Begin();
+            Assert.That(session.NotifyTutorialStepCompleted(CafeTutorialSession.TutorialId, CafeTutorialSession.PostCoffeeSignal), Is.False);
+            session.NotifyTutorialStepCompleted(CafeTutorialSession.TutorialId, CafeTutorialSession.WorkstationSignal);
+            Assert.That(session.NotifyTutorialStepCompleted(CafeTutorialSession.TutorialId, CafeTutorialSession.PostCoffeeSignal), Is.False);
+            session.BeginCoffee();
+            Assert.That(session.NotifyTutorialStepCompleted(CafeTutorialSession.TutorialId, CafeTutorialSession.PostCoffeeSignal), Is.False);
+            session.NotifyTutorialStepCompleted(CafeTutorialSession.TutorialId, CafeTutorialSession.CoffeeSignal);
+            Assert.That(session.NotifyTutorialStepCompleted("other", CafeTutorialSession.PostCoffeeSignal), Is.False);
+            Assert.That(session.WaitingForBusinessOnboarding, Is.True);
+            Assert.That(session.Completed, Is.False);
+            Assert.That(session.NotifyTutorialStepCompleted(CafeTutorialSession.TutorialId, CafeTutorialSession.PostCoffeeSignal), Is.True);
+            Assert.That(session.WaitingForBusinessOnboarding, Is.False);
+            Assert.That(session.Completed, Is.True);
+            Assert.That(session.NotifyTutorialStepCompleted(CafeTutorialSession.TutorialId, CafeTutorialSession.PostCoffeeSignal), Is.False);
+            Assert.That(session.NotifyTutorialStepCompleted(CafeTutorialSession.TutorialId, CafeTutorialSession.CoffeeSignal), Is.False);
+            session.Begin();
+            Assert.That(session.WaitingForWorkstation, Is.False);
+            Assert.That(session.CurrentStepId, Is.Empty);
+            Assert.That(notifications, Is.EqualTo(3));
         }
     }
 }

@@ -802,16 +802,166 @@ namespace Spotlight.FreeCafe.Tests
             var bell=app.View(tray.id).GetComponentInChildren<FreeCafeDeliveryBell>();
             Assert.That(bell,Is.Not.Null);
             bell.OnPointerClick(new PointerEventData(EventSystem.current) {button=PointerEventData.InputButton.Left});
-            Assert.That(tutorialFlow.IsCafeTutorialActive,Is.False);
+            Assert.That(tutorialFlow.IsCafeTutorialActive,Is.True,"The first delivery must hand off to business onboarding, not finish the tutorial");
             Assert.That(guide.IsRunning,Is.False);
             Assert.That(world.State.open,Is.False);
             Assert.That(world.State.requests,Is.Empty);
-            Assert.That(production.receiptPanel.activeSelf,Is.True);
+            Assert.That(world.Find(CafeWorld.TutorialCustomerId),Is.Null);
+            var business=app.GetComponent<FreeCafeBusinessTutorial>();
+            Assert.That(business,Is.Not.Null);
+
+            void AssertBusinessStage(FreeCafeBusinessTutorial.Stage stage,bool paused)
+            {
+                Assert.That(business.IsRunning,Is.True);
+                Assert.That(business.CurrentStage,Is.EqualTo(stage));
+                Assert.That(tutorialFlow.IsCafeTutorialActive,Is.True,"Business onboarding must remain active until the order is explicitly acknowledged");
+                Assert.That(app.CafeBusinessOnboardingActive,Is.True);
+                Assert.That(business.PauseBusinessSimulation,Is.EqualTo(paused));
+                Assert.That(app.BusinessSimulationPaused,Is.EqualTo(paused));
+            }
+
+            Assert.That(production.receiptPanel.activeInHierarchy,Is.True);
+            Assert.That(app.TutorialInputBlocked,Is.True);
+            business.ConfirmOrderRead();
+            app.RequestBusinessStart();
+            production.bookButton.onClick.Invoke();
+            yield return null; yield return null;
+            Assert.That(production.bookPanel.activeInHierarchy,Is.False,"The receipt must be dismissed before opening the recipe book");
+            AssertBusinessStage(FreeCafeBusinessTutorial.Stage.OpenRecipe,true);
+            Assert.That(world.State.open,Is.False);
+            var businessPanel=Object.FindFirstObjectByType<FreeCafeTutorialPanel>(FindObjectsInactive.Include);
+            Assert.That(businessPanel,Is.Not.Null);
+            Assert.That(businessPanel.canvas.gameObject.activeSelf,Is.False,"Business guidance must not cover the delivery receipt");
+
             production.confirmReceipt.onClick.Invoke();
+            yield return null; yield return null;
+            Assert.That(production.receiptPanel.activeInHierarchy,Is.False);
             Assert.That(app.InputBlocked,Is.False);
-            app.Enter(AreaId.Cafe);
+            AssertBusinessStage(FreeCafeBusinessTutorial.Stage.OpenRecipe,true);
+            Assert.That(businessPanel.canvas.gameObject.activeInHierarchy,Is.True);
+            Assert.That(businessPanel.retry.activeSelf,Is.False,"Acknowledgement is available only after inspecting a real order");
+            Assert.That(production.bookPanel.activeInHierarchy,Is.False,"Reading the book during coffee preparation does not satisfy business onboarding");
+            business.ConfirmOrderRead();
+            app.RequestBusinessStart();
+            yield return null; yield return null;
+            AssertBusinessStage(FreeCafeBusinessTutorial.Stage.OpenRecipe,true);
+            Assert.That(world.State.open,Is.False,"Delivering coffee and dismissing the receipt must not unlock business start before reading the book");
+
+            Assert.That(production.bookButton.interactable,Is.True);
+            production.bookButton.onClick.Invoke();
+            yield return null; yield return null;
+            Assert.That(production.bookPanel.activeInHierarchy,Is.True);
+            AssertBusinessStage(FreeCafeBusinessTutorial.Stage.CloseRecipe,true);
+            Assert.That(business.AllowBusinessStart,Is.False);
+            business.ConfirmOrderRead();
+            app.RequestBusinessStart();
+            yield return null; yield return null;
+            AssertBusinessStage(FreeCafeBusinessTutorial.Stage.CloseRecipe,true);
+            Assert.That(world.State.open,Is.False,"Opening the book alone must not unlock business start");
+
+            var compendium=production.bookPanel.GetComponent<CoffeeCompendiumPanel>();
+            Assert.That(compendium.closeButton,Is.Not.Null);
+            compendium.closeButton.onClick.Invoke();
+            yield return new WaitForSecondsRealtime(.5f);
+            Assert.That(production.bookPanel.activeInHierarchy,Is.False);
+            AssertBusinessStage(FreeCafeBusinessTutorial.Stage.ReturnToCafe,true);
+            Assert.That(world.State.currentArea,Is.EqualTo(AreaId.Counter));
+            Assert.That(business.AllowBusinessStart,Is.False);
+            business.ConfirmOrderRead();
+            app.RequestBusinessStart();
+            Assert.That(world.State.open,Is.False,"Business start must remain blocked until returning to the cafe");
+            Assert.That(production.returnButton.interactable,Is.True);
+            production.returnButton.onClick.Invoke();
+            yield return null; yield return null;
+            Assert.That(world.State.currentArea,Is.EqualTo(AreaId.Cafe));
+            AssertBusinessStage(FreeCafeBusinessTutorial.Stage.StartBusiness,false);
+            Assert.That(business.AllowBusinessStart,Is.True);
+            Assert.That(world.State.open,Is.False,"Returning to the cafe must not automatically open for business");
+            business.ConfirmOrderRead();
+            Assert.That(tutorialFlow.IsCafeTutorialActive,Is.True);
+
             app.RequestBusinessStart();
             Assert.That(world.State.open,Is.True);
+            Assert.That(tutorialFlow.IsCafeTutorialActive,Is.True,"Opening for business is not the end of onboarding");
+            // StartDay can seat customers immediately; otherwise advance the real simulation.
+            yield return null; yield return null;
+            if(business.CurrentStage==FreeCafeBusinessTutorial.Stage.WaitForCustomer)
+            {
+                AssertBusinessStage(FreeCafeBusinessTutorial.Stage.WaitForCustomer,false);
+                Assert.That(business.AllowBusinessStart,Is.False);
+                business.ConfirmOrderRead();
+                Assert.That(tutorialFlow.IsCafeTutorialActive,Is.True);
+                for(int i=0;i<10 && business.CurrentStage==FreeCafeBusinessTutorial.Stage.WaitForCustomer;i++)
+                {
+                    world.Tick(world.Catalog.customerInterval);
+                    yield return null; yield return null;
+                }
+            }
+            AssertBusinessStage(FreeCafeBusinessTutorial.Stage.InspectCustomer,true);
+            Assert.That(world.State.requests,Is.Not.Empty);
+            var request=world.State.requests.Find(order=>order.id!=CafeWorld.TutorialOrderId && world.Find(order.customerId)!=null);
+            Assert.That(request,Is.Not.Null,"Inspection must use a real seated customer with a real order");
+            Assert.That(request.id,Is.Not.EqualTo(CafeWorld.TutorialOrderId),"Entity IDs can be reused after the tutorial customer leaves; the order must be a real business order");
+            business.ConfirmOrderRead();
+            business.CustomerInspected("missing-customer");
+            yield return null; yield return null;
+            AssertBusinessStage(FreeCafeBusinessTutorial.Stage.InspectCustomer,true);
+            Assert.That(businessPanel.retry.activeSelf,Is.False);
+            float patience=request.patience;
+            float businessElapsed=world.State.businessElapsed;
+            yield return new WaitForSecondsRealtime(.1f);
+            Assert.That(request.patience,Is.EqualTo(patience),"Customer patience must be paused while teaching inspection");
+            Assert.That(world.State.businessElapsed,Is.EqualTo(businessElapsed));
+            app.DebugRefreshViews();
+            yield return null;
+            var customerView=app.View(request.customerId);
+            Assert.That(customerView,Is.Not.Null);
+            Assert.That(customerView.CanInteract,Is.True);
+            Assert.That(app.InputBlocked,Is.False);
+            app.Click(customerView);
+            Assert.That(world.State.focusedRequestId,Is.EqualTo(request.id));
+            Assert.That(business.CurrentStage,Is.EqualTo(FreeCafeBusinessTutorial.Stage.ReadOrder));
+            Assert.That(tutorialFlow.IsCafeTutorialActive,Is.True,"Inspecting the customer must not bypass explicit order acknowledgement");
+            // Customer inspection can play a real dialogue; it must block acknowledgement too.
+            if(app.TutorialInputBlocked)
+            {
+                business.ConfirmOrderRead();
+                Assert.That(tutorialFlow.IsCafeTutorialActive,Is.True);
+                Assert.That(business.IsRunning,Is.True);
+            }
+            float dialogueDeadline=Time.realtimeSinceStartup+8f;
+            while(DialoguePanel.IsAnyPlaying && Time.realtimeSinceStartup<dialogueDeadline)
+            {
+                foreach(var dialogue in Object.FindObjectsByType<DialoguePanel>(FindObjectsSortMode.None)) dialogue.Skip();
+                yield return null;
+            }
+            Assert.That(DialoguePanel.IsAnyPlaying,Is.False,"Customer dialogue must finish before acknowledging the order");
+            yield return null; yield return null;
+            AssertBusinessStage(FreeCafeBusinessTutorial.Stage.ReadOrder,true);
+            Assert.That(businessPanel.retry.activeInHierarchy,Is.True);
+            Assert.That(business.AllowBusinessStart,Is.False);
+            Assert.That(app.TutorialInputBlocked,Is.False);
+            patience=request.patience;
+            businessElapsed=world.State.businessElapsed;
+            yield return new WaitForSecondsRealtime(.1f);
+            Assert.That(request.patience,Is.EqualTo(patience),"Order reading must not consume customer patience");
+            Assert.That(world.State.businessElapsed,Is.EqualTo(businessElapsed));
+            Time.timeScale=0;
+            business.ConfirmOrderRead();
+            Assert.That(business.IsRunning,Is.True,"A paused presentation must not accept order acknowledgement");
+            Assert.That(tutorialFlow.IsCafeTutorialActive,Is.True);
+            Time.timeScale=1;
+            business.ConfirmOrderRead();
+            Assert.That(tutorialFlow.IsCafeTutorialActive,Is.False);
+            Assert.That(app.CafeBusinessOnboardingActive,Is.False);
+            Assert.That(business.IsRunning,Is.False);
+            Assert.That(world.State.open,Is.True,"Completing onboarding must preserve the manually started business");
+            Assert.That(world.Request(request.id),Is.SameAs(request),"Acknowledging the order must not serve or remove it");
+            yield return null; yield return null;
+            Assert.That(businessPanel==null,Is.True,"The completed business guide must release its panel");
+            Assert.That(app.BusinessSimulationPaused,Is.False);
+            business.ConfirmOrderRead();
+            Assert.That(tutorialFlow.IsCafeTutorialActive,Is.False,"Repeated acknowledgement must not restart onboarding");
         }
         private static Button FindAction(FreeCafeGMPanel gm,string label)
         {

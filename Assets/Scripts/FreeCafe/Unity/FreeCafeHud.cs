@@ -22,6 +22,7 @@ namespace Spotlight.FreeCafe
         public Button previousOrder, nextOrder;
         public TMP_Text orderPage;
         private int orderOffset;
+        private CafeOrderStackView orderStack;
         public GameObject recipePanel;
         public TMP_Text recipeTitle,recipeBody;
         public Button recipeCloseButton;
@@ -96,6 +97,7 @@ namespace Spotlight.FreeCafe
             if(areaButtons!=null && areaButtons.Length>1 && areaButtons[1]!=null) areaButtons[1].onClick.AddListener(Counter);
             if(areaButtons!=null && areaButtons.Length>2 && areaButtons[2]!=null) areaButtons[2].onClick.AddListener(SecondFloor);
             if(areaButtons!=null && areaButtons.Length>3 && areaButtons[3]!=null) areaButtons[3].onClick.AddListener(ThirdFloor);
+            if (nextOrder != null) orderStack = nextOrder.GetComponentInParent<CafeOrderStackView>();
             BindOrderAvatars();
             boundOrderButtons=orderButtons==null ? Array.Empty<Button>() : (Button[])orderButtons.Clone();
             orderActions=new UnityAction[boundOrderButtons.Length];
@@ -236,6 +238,7 @@ namespace Spotlight.FreeCafe
         private void ChangeOrderPage(int direction)
         {
             if(runtime==null || runtime.World==null || runtime.InputBlocked) return;
+            if(orderStack!=null) orderStack.SetDirection(direction);
             if(IsWorkstation)
             {
                 string previous=runtime.World.State.focusedRequestId;
@@ -472,6 +475,7 @@ namespace Spotlight.FreeCafe
                 if(label!=null) label.text=recipe;
                 if(button!=null) { button.interactable=!runtime.InputBlocked; SetTicket(button,request.id==state.focusedRequestId); }
             }
+            if(orderStack!=null) orderStack.Show(orderOffset);
             if(pauseButton!=null) pauseButton.interactable=string.IsNullOrEmpty(state.production.miniGameToken) && !(FreeCafeGMPanel.Instance!=null && FreeCafeGMPanel.Instance.IsVisible);
             if(mapButton!=null) mapButton.interactable=Flow != null && Flow.CanOpenMap;
             if(recipeButton!=null) recipeButton.interactable=!runtime.InputBlocked || IsModalOpen;
