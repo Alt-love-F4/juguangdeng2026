@@ -122,7 +122,7 @@
     "ownerId": "rose.1009.s1",
     "groupIndex": 1,
     "condType": "BOOL_EQ",
-    "target": "story.oct09.meeting.known",
+    "target": "story.oct07.s2.completed",
     "value": "true"
   },
   {
@@ -293,7 +293,7 @@
     "ownerId": "rose.1009.s1.action",
     "groupIndex": 1,
     "condType": "BOOL_EQ",
-    "target": "story.oct09.meeting.known",
+    "target": "story.oct07.s2.completed",
     "value": "true"
   },
   {
@@ -315,15 +315,6 @@
     "value": "6,6"
   },
   {
-    "conditionId": "rose.1011.s1.neutral_ready",
-    "ownerType": "event",
-    "ownerId": "rose.1011.s1",
-    "groupIndex": 1,
-    "condType": "BOOL_EQ",
-    "target": "story.neutral.1010.s1.completed",
-    "value": "true"
-  },
-  {
     "conditionId": "rose.1011.s1.rose1009_ready",
     "ownerType": "event",
     "ownerId": "rose.1011.s1",
@@ -340,5 +331,23 @@
     "condType": "BOOL_EQ",
     "target": "story.rose.1011.s1.completed",
     "value": "false"
+  },
+  {
+    "conditionId": "church.1009.s2.rose1009_ready",
+    "ownerType": "event",
+    "ownerId": "church.1009.s2",
+    "groupIndex": 1,
+    "condType": "BOOL_EQ",
+    "target": "story.rose.1009.s1.completed",
+    "value": "true"
+  },
+  {
+    "conditionId": "revolution.1014.s1.rose1011_ready",
+    "ownerType": "event",
+    "ownerId": "revolution.1014.s1",
+    "groupIndex": 1,
+    "condType": "BOOL_EQ",
+    "target": "story.rose.1011.s1.completed",
+    "value": "true"
   }
 ]

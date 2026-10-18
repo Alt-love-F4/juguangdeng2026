@@ -66,6 +66,42 @@ namespace Spotlight.GameFlow.Tests
         }
 
         [Test]
+        public void MotionIsWiredToExistingArtworkAndAllButtonsShareHoverRules()
+        {
+            var prefab = AssetDatabase.LoadAssetAtPath<GameObject>(PanelPath);
+            var panelFields = new SerializedObject(prefab.GetComponent<MainMenuPanel>());
+            var motion = panelFields.FindProperty("motion").objectReferenceValue as MainMenuMotion;
+            Assert.That(motion, Is.Not.Null);
+            var fields = new SerializedObject(motion);
+            foreach (string name in new[] { "background", "backgroundMotion", "title", "subtitle", "divider", "ambience", "page", "pageSurface" })
+                Assert.That(fields.FindProperty(name).objectReferenceValue, Is.Not.Null, name);
+            Assert.That(fields.FindProperty("buttons").arraySize, Is.EqualTo(4));
+            Assert.That(((RectTransform)fields.FindProperty("page").objectReferenceValue).gameObject.activeSelf, Is.False,
+                "the transition page stays hidden until a page turn starts");
+
+            var ambience = new SerializedObject(prefab.GetComponent<MainMenuAmbience>());
+            Assert.That(ambience.FindProperty("backgroundMotion").objectReferenceValue, Is.Not.Null);
+            foreach (string name in new[] { "steam", "mist", "birds", "birdFrames", "motes" })
+                Assert.That(ambience.FindProperty(name).arraySize, Is.GreaterThan(0), name);
+            // Decorative overlays must never steal clicks from the paper buttons.
+            Transform backgroundMotion = (Transform)ambience.FindProperty("backgroundMotion").objectReferenceValue;
+            foreach (Graphic overlay in backgroundMotion.GetComponentsInChildren<Graphic>(true))
+                Assert.That(overlay.raycastTarget, Is.False, overlay.name);
+
+            SerializedObject reference = null;
+            foreach (Button button in prefab.GetComponentsInChildren<Button>(true))
+            {
+                var feedback = new SerializedObject(button.GetComponent<ButtonClickFeedback>());
+                Assert.That(feedback.FindProperty("hoverShadow").objectReferenceValue, Is.Not.Null, button.name);
+                Assert.That(feedback.FindProperty("hoverScale").floatValue, Is.GreaterThan(1f), button.name);
+                reference ??= feedback;
+                Assert.That(feedback.FindProperty("hoverScale").floatValue, Is.EqualTo(reference.FindProperty("hoverScale").floatValue));
+                Assert.That(feedback.FindProperty("hoverOffset").vector2Value, Is.EqualTo(reference.FindProperty("hoverOffset").vector2Value));
+                Assert.That(feedback.FindProperty("releaseOvershoot").floatValue, Is.EqualTo(reference.FindProperty("releaseOvershoot").floatValue));
+            }
+        }
+
+        [Test]
         public void MenuLayoutIsFiniteAndCoversCanvasWithoutScreenMotion()
         {
             var prefab = AssetDatabase.LoadAssetAtPath<GameObject>(PanelPath);
@@ -122,6 +158,8 @@ namespace Spotlight.GameFlow.Tests
             // overwriting the test's hover state on the next frame.
             foreach (BaseInputModule module in eventSystem.GetComponents<BaseInputModule>())
                 module.enabled = false;
+            // Earlier fixtures may leave a Reusable menu bound to a destroyed bootstrap.
+            UIKit.UnloadPanel<MainMenuPanel>();
             panel = UIKit.OpenPanel<MainMenuPanel>(UILevel.Pop, tag: TestTag,
                 cachePolicy: PanelCachePolicy.Transient);
             float deadline = Time.realtimeSinceStartup + 3f;
@@ -130,12 +168,15 @@ namespace Spotlight.GameFlow.Tests
                 Assert.That(Time.realtimeSinceStartup, Is.LessThan(deadline));
                 yield return null;
             }
+            panel.GetComponent<MainMenuMotion>()?.CompleteIntro();
         }
 
         [UnityTearDown]
         public IEnumerator TearDown()
         {
             UIKit.ClosePanelsByTag(TestTag);
+            // Reopen tests use the production Reusable policy; never leak that cached instance.
+            UIKit.UnloadPanel<MainMenuPanel>();
             if (scene.IsValid() && scene.isLoaded) yield return SceneManager.UnloadSceneAsync(scene);
             if (previousSystems != null)
                 foreach (EventSystem system in previousSystems) if (system != null) system.enabled = true;
@@ -201,6 +242,116 @@ namespace Spotlight.GameFlow.Tests
                 yield return new WaitForSecondsRealtime(.15f);
                 AssertVisual(button, false);
                 Assert.That(eventSystem.currentSelectedGameObject, Is.Null);
+            }
+        }
+
+        [UnityTest]
+        public IEnumerator HoverMotionRestoresExactlyAfterPressAndExit()
+        {
+            var pointer = new PointerEventData(eventSystem) { button = PointerEventData.InputButton.Left };
+            foreach (Button button in panel.GetComponentsInChildren<Button>(true))
+            {
+                var rect = (RectTransform)button.transform;
+                Vector3 scale = rect.localScale;
+                Vector2 position = rect.anchoredPosition;
+                Shadow shadow = button.GetComponent<Shadow>();
+                ExecuteEvents.Execute(button.gameObject, pointer, ExecuteEvents.pointerEnterHandler);
+                yield return new WaitForSecondsRealtime(.25f);
+                Assert.That(rect.localScale.x, Is.GreaterThan(scale.x), button.name);
+                Assert.That(rect.anchoredPosition.x, Is.GreaterThan(position.x), button.name);
+                Assert.That(shadow.effectColor.a, Is.GreaterThan(0f), button.name);
+                ExecuteEvents.Execute(button.gameObject, pointer, ExecuteEvents.pointerDownHandler);
+                yield return new WaitForSecondsRealtime(.12f);
+                Assert.That(rect.localScale.x, Is.LessThan(scale.x), "pressed " + button.name);
+                ExecuteEvents.Execute(button.gameObject, pointer, ExecuteEvents.pointerUpHandler);
+                ExecuteEvents.Execute(button.gameObject, pointer, ExecuteEvents.pointerExitHandler);
+                yield return new WaitForSecondsRealtime(.3f);
+                Assert.That(rect.localScale.x, Is.EqualTo(scale.x).Within(.001f), button.name);
+                Assert.That(rect.anchoredPosition.x, Is.EqualTo(position.x).Within(.01f), button.name);
+                Assert.That(shadow.effectColor.a, Is.EqualTo(0f).Within(.01f), button.name);
+            }
+        }
+
+        [UnityTest]
+        public IEnumerator ReopeningMenuReplaysIntroOnceWithoutStackingTweens()
+        {
+            var motion = panel.GetComponent<MainMenuMotion>();
+            Assert.That(motion, Is.Not.Null);
+            motion.CompleteIntro();
+            yield return new WaitForSecondsRealtime(.4f);
+            int baseline = DG.Tweening.DOTween.TotalActiveTweens();
+            for (int i = 0; i < 3; i++)
+            {
+                UIKit.ClosePanel(panel);
+                yield return null;
+                panel = UIKit.OpenPanel<MainMenuPanel>(UILevel.Pop, tag: TestTag,
+                    cachePolicy: PanelCachePolicy.Reusable);
+                motion = panel.GetComponent<MainMenuMotion>();
+                Assert.That(motion.IntroPlaying, Is.True, "fresh open plays the intro");
+                yield return null;
+            }
+            CanvasGroup slot = panel.GetComponentInChildren<Button>().transform.parent.GetComponent<CanvasGroup>();
+            Assert.That(slot.blocksRaycasts, Is.False, "buttons ignore input until they finish sliding in");
+            motion.CompleteIntro();
+            Assert.That(motion.IntroPlaying, Is.False);
+            Assert.That(slot.alpha, Is.EqualTo(1f));
+            Assert.That(slot.blocksRaycasts, Is.True);
+            yield return new WaitForSecondsRealtime(.4f);
+            // Only the ambient loop remains; repeated opens must not leave extra loops behind.
+            Assert.That(DG.Tweening.DOTween.TotalActiveTweens(), Is.LessThanOrEqualTo(baseline));
+        }
+
+        [UnityTest]
+        public IEnumerator PageTurnCoversOnceIgnoresRepeatClicksAndRecoversWhenNothingTakesOver()
+        {
+            var motion = panel.GetComponent<MainMenuMotion>();
+            RectTransform page = (RectTransform)panel.transform.Find("TransitionPage");
+            int opened = 0;
+            motion.CoverThen(() => opened++);
+            motion.CoverThen(() => opened++);
+            Assert.That(motion.Transitioning, Is.True);
+            float deadline = Time.realtimeSinceStartup + 2f;
+            while (opened == 0)
+            {
+                Assert.That(Time.realtimeSinceStartup, Is.LessThan(deadline), "page never covered the menu");
+                yield return null;
+            }
+            Assert.That(opened, Is.EqualTo(1), "repeated clicks must not open the target twice");
+            Assert.That(page.gameObject.activeSelf, Is.True);
+            Assert.That(page.anchoredPosition.x, Is.EqualTo(0f).Within(1f), "page fully covers the menu");
+            // No panel took focus (this fixture has no flow), so the page must flip back by itself.
+            deadline = Time.realtimeSinceStartup + 5f;
+            while (motion.Transitioning)
+            {
+                Assert.That(Time.realtimeSinceStartup, Is.LessThan(deadline), "menu stayed covered");
+                yield return null;
+            }
+            Assert.That(page.gameObject.activeSelf, Is.False);
+            foreach (Button button in panel.GetComponentsInChildren<Button>(true))
+            {
+                CanvasGroup slot = button.transform.parent.GetComponent<CanvasGroup>();
+                Assert.That(slot.alpha, Is.EqualTo(1f).Within(.01f), button.name);
+                Assert.That(slot.blocksRaycasts, Is.True, button.name);
+            }
+        }
+
+        [UnityTest]
+        public IEnumerator AmbienceKeepsBackgroundInsideItsOverscanMargin()
+        {
+            var ambience = panel.GetComponent<MainMenuAmbience>();
+            var fields = typeof(MainMenuAmbience).GetField("backgroundMotion", BindingFlags.Instance | BindingFlags.NonPublic);
+            var background = (RectTransform)fields.GetValue(ambience);
+            var timeField = typeof(MainMenuAmbience).GetField("time", BindingFlags.Instance | BindingFlags.NonPublic);
+            for (float t = 0f; t < 60f; t += 1.7f)
+            {
+                timeField.SetValue(ambience, t);
+                yield return null;
+                // Overscan is the zoom beyond 1: half of it is free on each side before an edge shows.
+                Vector2 size = background.rect.size;
+                float margin = (background.localScale.x - 1f) * .5f;
+                Vector2 offset = background.anchoredPosition;
+                Assert.That(Mathf.Abs(offset.x), Is.LessThan(size.x * margin), "x at " + t);
+                Assert.That(Mathf.Abs(offset.y), Is.LessThan(size.y * margin), "y at " + t);
             }
         }
 

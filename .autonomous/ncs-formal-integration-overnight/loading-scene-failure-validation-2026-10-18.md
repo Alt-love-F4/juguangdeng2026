@@ -2,7 +2,7 @@
 
 Date: 2026-10-18
 Scope: Task 37 of `ncs-formal-integration-overnight`
-Status: Partial; Task 37 is not complete because terminal scene-transition failures do not unwind the active NCS presentation or restore the gameplay session.
+Status: Implementation complete; Task 37 remains unchecked pending Unity compile and PlayMode verification.
 
 ## Success-path contract
 
@@ -31,8 +31,10 @@ This violates Task 37's required state consistency and is a concrete prerequisit
 - A fresh PlayMode run filtered to `StandaloneMapEntersCafeAndClosesLoading` did not return within the tool's 300-second timeout. The test status remained `running`; subsequent Editor status/cancel commands timed out and the Unity MCP websocket reported a closed connection. No test result was returned, so this attempt is not counted as a pass or failure.
 - The Unity Editor process remained present and OS-reported as responsive. It was not killed, and generated `InitTestScene*` artifacts were not removed.
 
-## Proposed bounded repair; awaiting approval
+## Bounded repair implemented; verification pending
 
-Extend the existing scene-transition contract with an explicit failure callback while preserving existing callers. Route every terminal load/readiness/panel-validation failure through one cleanup path that ends the loading UI, restores a usable prior gameplay/map state and `Playing` session, restores narrative visibility, and calls failure exactly once. The formal conversation adapter should forward that failure through the existing presenter-abort/cancellation contract, leaving authored results uncommitted and the original trigger/action retryable. Add focused PlayMode coverage for load failure and destination-panel/readiness failure, asserting loading cleanup, NCS pause/busy release, no settlement, and retry eligibility.
+The repair now extends `GameFlowBootstrap.TransitionToGameplayScene` with an optional failure callback while preserving all existing two-argument callers. Null/throwing load requests, invalid post-load destinations, missing map panels, missing gameplay panels, and player-creation failures route through `FailGameplaySceneTransition`, which ends the short loading panel, restores the previously active scene and host panel/cameras, returns the session to `Playing`, restores narrative visibility, and invokes failure once. Destination panel validation and player binding now occur before unloading the previous gameplay scene so rollback remains possible.
 
-No runtime or test source was changed in this session. This design requires user approval before implementation; Task 37 remains unchecked until the repair and verification are complete.
+`NarrativeConversationEventPlayback` passes a failure callback for formal scene-backed conversation. It invokes the existing per-page cancellation hook and interrupts the reusable presenter, so the active NCS request is cancelled rather than completed and its configured results remain uncommitted. `GameplayHudPlayModeTests.MissingGameplaySceneRestoresMapAndReportsFailure` covers a missing-scene failure through the shared `Map` route and asserts failure callback, no success callback, loading cleanup, `Playing` state, active map restoration, and no live presentation.
+
+Unity verification is still pending. The connected Editor lost its MCP session after the prior timed-out PlayMode run; `mcp__unityMCP` currently reports `no_unity_session`, `refresh_unity` timed out waiting for readiness, and the local Unity CLI also timed out. The Editor process remains open, so no process termination or project reset was performed. Task 37 must remain unchecked until a fresh compile and the new/related PlayMode tests run successfully.

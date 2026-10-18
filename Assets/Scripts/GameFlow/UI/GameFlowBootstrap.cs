@@ -355,31 +355,60 @@ namespace Spotlight.GameFlow
             mapOverlay = null;
         }
 
-        public void TransitionToGameplayScene(string sceneName, Action completed)
+        public void TransitionToGameplayScene(string sceneName, Action completed, Action failed = null)
         {
-            if (!gameplay) return;
+            if (!gameplay)
+            {
+                failed?.Invoke();
+                return;
+            }
             GameSaveParticipantRegistry.PendingRestore = GameSaveParticipantRegistry.CaptureAll();
             if (string.IsNullOrWhiteSpace(sceneName) || sceneName == SceneManager.GetActiveScene().name)
             {
-                CompletePendingPlayerCreation();
-                completed?.Invoke();
+                try
+                {
+                    CompletePendingPlayerCreation();
+                    completed?.Invoke();
+                }
+                catch (Exception error)
+                {
+                    Debug.LogException(error, this);
+                    failed?.Invoke();
+                }
                 return;
             }
-            StartCoroutine(TransitionGameplaySceneRoutine(sceneName, completed));
+            StartCoroutine(TransitionGameplaySceneRoutine(sceneName, completed, failed));
         }
 
-        private IEnumerator TransitionGameplaySceneRoutine(string sceneName, Action completed)
+        private IEnumerator TransitionGameplaySceneRoutine(string sceneName, Action completed, Action failed)
         {
             int version = ++loadingVersion;
+            Scene previousActive = SceneManager.GetActiveScene();
+            GameFlowPanel previousGameplayPanel = gameplayScenePanel;
+            bool previousGameplayPanelActive = previousGameplayPanel != null && previousGameplayPanel.gameObject.activeSelf;
+            MapSceneController previousMapOverlay = mapOverlay;
+            bool previousMapOverlayActive = previousMapOverlay != null && previousMapOverlay.gameObject.activeSelf;
+            List<GameObject> previousMapCameras = CaptureActiveMapCameras(previousActive);
             SetSessionState(GameSessionState.Loading);
             CloseDetails();
             CloseMap();
             loadingTransitioning = true;
             narrativeIntegration?.SetGameplayVisible(false);
 
-            if (shortLoadingPanel != null) UIKit.ClosePanel(shortLoadingPanel);
-            shortLoadingPanel = UIKit.OpenPanel<ShortLoadingPanel>(UILevel.AlwayTop,
-                tag: "game-flow-short-loading", cachePolicy: PanelCachePolicy.Reusable);
+            try
+            {
+                if (shortLoadingPanel != null) UIKit.ClosePanel(shortLoadingPanel);
+                shortLoadingPanel = UIKit.OpenPanel<ShortLoadingPanel>(UILevel.AlwayTop,
+                    tag: "game-flow-short-loading", cachePolicy: PanelCachePolicy.Reusable);
+            }
+            catch (Exception error)
+            {
+                Debug.LogException(error, this);
+                FailGameplaySceneTransition(version, shortLoadingPanel, previousActive, previousGameplayPanel,
+                    previousGameplayPanelActive, previousMapOverlay, previousMapOverlayActive, previousMapCameras, failed,
+                    error.Message);
+                yield break;
+            }
             while (shortLoadingPanel != null && !shortLoadingPanel.IsCovered) yield return null;
             if (version != loadingVersion) yield break;
 
@@ -388,26 +417,40 @@ namespace Spotlight.GameFlow
             Scene destination = SceneManager.GetSceneByName(sceneName);
             if (!destination.IsValid() || !destination.isLoaded)
             {
-                AsyncOperation load = SceneManager.LoadSceneAsync(sceneName, LoadSceneMode.Additive);
+                AsyncOperation load;
+                try { load = SceneManager.LoadSceneAsync(sceneName, LoadSceneMode.Additive); }
+                catch (Exception error)
+                {
+                    Debug.LogException(error, this);
+                    FailGameplaySceneTransition(version, shortLoadingPanel, previousActive, previousGameplayPanel,
+                        previousGameplayPanelActive, previousMapOverlay, previousMapOverlayActive, previousMapCameras, failed,
+                        error.Message);
+                    yield break;
+                }
                 if (load == null)
                 {
                     Debug.LogError("无法加载游戏场景：" + sceneName, this);
-                    FinishGameplaySceneTransition(version, shortLoadingPanel);
+                    FailGameplaySceneTransition(version, shortLoadingPanel, previousActive, previousGameplayPanel,
+                        previousGameplayPanelActive, previousMapOverlay, previousMapOverlayActive, previousMapCameras, failed,
+                        "Gameplay scene transition failed.");
                     yield break;
                 }
                 yield return load;
                 destination = SceneManager.GetSceneByName(sceneName);
             }
 
-            if (version != loadingVersion || !destination.IsValid() || !destination.isLoaded)
+            if (version != loadingVersion) yield break;
+            if (!destination.IsValid() || !destination.isLoaded)
+            {
+                FailGameplaySceneTransition(version, shortLoadingPanel, previousActive, previousGameplayPanel,
+                    previousGameplayPanelActive, previousMapOverlay, previousMapOverlayActive, previousMapCameras, failed,
+                    "Destination scene was not ready after loading.");
                 yield break;
+            }
 
             Scene previous = SceneManager.GetActiveScene();
             if (destination != previous)
                 SceneManager.SetActiveScene(destination);
-
-            if (sceneName != MapSceneName)
-                yield return UnloadGameplaySceneExcept(MapSceneName, sceneName);
 
             if (sceneName == MapSceneName)
             {
@@ -415,12 +458,21 @@ namespace Spotlight.GameFlow
                 if (map == null)
                 {
                     Debug.LogError("Map 场景未找到地图面板。", this);
-                    FinishGameplaySceneTransition(version, shortLoadingPanel);
+                    FailGameplaySceneTransition(version, shortLoadingPanel, previousActive, previousGameplayPanel,
+                        previousGameplayPanelActive, previousMapOverlay, previousMapOverlayActive, previousMapCameras, failed,
+                        "Gameplay scene transition failed.");
                     yield break;
                 }
                 map.RegisterAsGameplayPanel();
                 mapOverlay = null;
                 gameplayScenePanel = GameplayPanelHooks.OpenPanel(this);
+                if (gameplayScenePanel == null)
+                {
+                    FailGameplaySceneTransition(version, shortLoadingPanel, previousActive, previousGameplayPanel,
+                        previousGameplayPanelActive, previousMapOverlay, previousMapOverlayActive, previousMapCameras, failed,
+                        "Map scene has no registered gameplay panel.");
+                    yield break;
+                }
             }
             else
             {
@@ -432,17 +484,30 @@ namespace Spotlight.GameFlow
                 if (panel == null)
                 {
                     Debug.LogError("场景未注册玩法面板：" + sceneName, this);
-                    FinishGameplaySceneTransition(version, shortLoadingPanel);
+                    FailGameplaySceneTransition(version, shortLoadingPanel, previousActive, previousGameplayPanel,
+                        previousGameplayPanelActive, previousMapOverlay, previousMapOverlayActive, previousMapCameras, failed,
+                        "Gameplay scene transition failed.");
                     yield break;
                 }
                 gameplayScenePanel = panel;
             }
 
-            CompletePendingPlayerCreation();
+            try { CompletePendingPlayerCreation(); }
+            catch (Exception error)
+            {
+                Debug.LogException(error, this);
+                FailGameplaySceneTransition(version, shortLoadingPanel, previousActive, previousGameplayPanel,
+                    previousGameplayPanelActive, previousMapOverlay, previousMapOverlayActive, previousMapCameras, failed,
+                    error.Message);
+                yield break;
+            }
+            if (sceneName != MapSceneName)
+                yield return UnloadGameplaySceneExcept(MapSceneName, sceneName);
             SetSessionState(GameSessionState.Playing);
             narrativeIntegration?.SetGameplayVisible(true);
-            completed?.Invoke();
             FinishGameplaySceneTransition(version, shortLoadingPanel);
+            try { completed?.Invoke(); }
+            catch (Exception error) { Debug.LogException(error, this); }
         }
 
         private static MapSceneController FindMapPanel(Scene scene)
@@ -454,6 +519,16 @@ namespace Spotlight.GameFlow
                     if (panel.transform is RectTransform) return panel;
             }
             return null;
+        }
+
+        private static List<GameObject> CaptureActiveMapCameras(Scene scene)
+        {
+            var active = new List<GameObject>();
+            if (!scene.IsValid() || !scene.isLoaded) return active;
+            foreach (GameObject root in scene.GetRootGameObjects())
+                foreach (Camera camera in root.GetComponentsInChildren<Camera>(true))
+                    if (camera.gameObject.activeSelf) active.Add(camera.gameObject);
+            return active;
         }
 
         private static void RegisterGameplayPanel(Scene scene)
@@ -496,6 +571,51 @@ namespace Spotlight.GameFlow
             loadingTransitioning = false;
             shortLoadingPanel = null;
             if (transition != null) transition.EndLoading();
+        }
+
+        private void FailGameplaySceneTransition(int version, ShortLoadingPanel transition, Scene previousActive,
+            GameFlowPanel previousGameplayPanel, bool previousGameplayPanelActive, MapSceneController previousMapOverlay,
+            bool previousMapOverlayActive, List<GameObject> previousMapCameras, Action failed, string reason)
+        {
+            if (version != loadingVersion) return;
+            loadingTransitioning = false;
+            shortLoadingPanel = null;
+            if (transition != null) transition.EndLoading();
+
+            if (previousActive.IsValid() && previousActive.isLoaded)
+                SceneManager.SetActiveScene(previousActive);
+
+            if (gameplayScenePanel != null && gameplayScenePanel != previousGameplayPanel)
+                gameplayScenePanel.gameObject.SetActive(false);
+            gameplayScenePanel = previousGameplayPanel;
+            if (previousGameplayPanel != null) previousGameplayPanel.gameObject.SetActive(previousGameplayPanelActive);
+            if (previousMapOverlay != null)
+            {
+                previousMapOverlay.gameObject.SetActive(previousMapOverlayActive);
+                mapOverlay = previousMapOverlay;
+            }
+            else
+            {
+                mapOverlay = null;
+                if (previousActive.name == MapSceneName)
+                {
+                    MapSceneController map = FindMapPanel(previousActive);
+                    if (map != null)
+                    {
+                        map.gameObject.SetActive(previousGameplayPanelActive);
+                        gameplayScenePanel = map;
+                    }
+                }
+            }
+            if (previousMapCameras != null)
+                foreach (GameObject camera in previousMapCameras)
+                    if (camera != null) camera.SetActive(true);
+
+            SetSessionState(GameSessionState.Playing);
+            narrativeIntegration?.SetGameplayVisible(true);
+            Debug.LogError("Gameplay scene transition failed and was restored: " + reason, this);
+            try { failed?.Invoke(); }
+            catch (Exception error) { Debug.LogException(error, this); }
         }
 
         private void CompletePendingPlayerCreation()

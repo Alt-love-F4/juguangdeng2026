@@ -780,7 +780,10 @@ namespace Spotlight.Narrative
                 {
                     activeRequest = queue.Dequeue();
                     // Eligibility never bypasses fresh locks, completion, Hold values or date/phase constraints.
-                    if (!EventCanStart(activeRequest.Event) || activeRequest.Candidate != null && !CanStartCandidate(activeRequest.Candidate))
+                    bool eligible = activeRequest.Candidate == null
+                        ? EventCanStart(activeRequest.Event)
+                        : CanStartCandidate(activeRequest.Candidate);
+                    if (!eligible)
                     {
                         var rejected = activeRequest;
                         pendingEvents.Remove(rejected.Event.eventId);

@@ -26,5 +26,19 @@
     "timeSlot": "morning",
     "repeatRule": "once",
     "priority": 0
+  },
+  {
+    "eventId": "church.1009.s2",
+    "day": 4,
+    "timeSlot": "night",
+    "repeatRule": "once",
+    "priority": 0
+  },
+  {
+    "eventId": "revolution.1013.s2",
+    "day": 8,
+    "timeSlot": "noon",
+    "repeatRule": "once",
+    "priority": 0
   }
 ]

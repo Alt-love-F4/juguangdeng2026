@@ -128,3 +128,12 @@ outputs/map-layout/map-progress.png
 outputs/map-layout/map-tasks.png
 outputs/map-layout/validation.txt
 outputs/map-layout/validation-edit.txt
+
+# Unity crash recovery / test-framework leftovers
+Assets/_Recovery/
+Assets/InitTestScene*.unity
+Assets/InitTestScene*.unity.meta
+
+# Autonomous runner scratch logs (too large for git)
+.autonomous/*.log
+.autonomous/**/*.log

@@ -908,3 +908,31 @@
 ### Current Status
 - Total Tasks: 95
 - Completed: 36/95 (38%)
+
+## Session 19 (Executor) - Task 37 repair attempt - 2026-10-18
+
+### Accomplished
+- Continued Task 37 from the recorded failure-path defect and implemented the bounded repair in `Assets/Scripts/GameFlow/UI/GameFlowBootstrap.cs`.
+- Extended `TransitionToGameplayScene` with an optional failure callback while preserving existing callers; terminal load/readiness/panel/player-binding failures now end loading, restore the previous active scene and gameplay/map host, return the session to `Playing`, restore narrative visibility, and report failure.
+- Deferred unloading the previous gameplay scene until destination panel validation and player binding succeed, so non-map transitions retain a rollback target.
+- Updated `Assets/Scripts/GameFlow/UI/Presentation/NarrativeConversationEventPlayback.cs` to route formal scene-handoff failure through the existing cancellation/presenter interruption contract without settling authored results.
+- Added `GameplayHudPlayModeTests.MissingGameplaySceneRestoresMapAndReportsFailure` using the existing standalone `Map` route; it asserts failure callback, no success callback, loading cleanup, restored `Playing` state, active map host, and no live presentation.
+- Updated `loading-scene-failure-validation-2026-10-18.md` with the implementation details and current verification boundary.
+
+### Issues Encountered
+- Unity verification remains blocked by the prior timed-out PlayMode run. The MCP reports `no_unity_session`; `refresh_unity` timed out waiting for editor readiness, and the Unity CLI also timed out. The Editor process remains open and was not terminated.
+- Current host memory pressure is severe enough that `git diff --check` and some PowerShell operations fail to initialize. No reset, revert, or cleanup of the user's dirty worktree was attempted.
+- Task 37 remains unchecked because no fresh Unity compile or PlayMode result is available for the repair.
+
+### Notes
+- The code change is intentionally limited to existing GameFlow/NCS ownership; no workbook, generated data, scene asset, save slot, or parallel story system was added.
+- The next session must restore the connected Unity Editor or launch a supported clean verification path, force a compile, run the new failure test plus the existing successful cafe handoff tests, inspect console output, and only then decide whether Task 37 can be marked complete.
+
+### Next Session Should
+- Restore Unity/MCP readiness without borrowing another project Editor.
+- Run the new `MissingGameplaySceneRestoresMapAndReportsFailure` PlayMode test and the existing successful cafe transition tests.
+- Verify formal NCS cancellation releases presenter pause/busy state and leaves the original trigger retryable, then update Task 37 evidence and checkbox only if the results pass.
+
+### Current Status
+- Total Tasks: 95
+- Completed: 36/95 (38%)

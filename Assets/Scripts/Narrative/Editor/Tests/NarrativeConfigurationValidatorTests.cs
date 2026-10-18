@@ -64,8 +64,8 @@ namespace Spotlight.Narrative.Editor.Tests
             Assert.That(s1.PageCount, Is.EqualTo(2));
             Assert.That(s1.LineCount, Is.EqualTo(40));
             Assert.That(s1.ExpectedResults.Exists(value => value.Contains("story.oct07.s1.completed")), Is.True);
-            Assert.That(s1.Errors.FindAll(value => value.Contains("oct07.cafe.day")).Count, Is.EqualTo(1));
-            Assert.That(s1.Errors[0], Does.Contain("Invalid background registry entry"));
+            Assert.That(s1.Errors.FindAll(value => value.Contains("oct07.cafe.day")).Count, Is.EqualTo(0));
+            Assert.That(s1.Status, Is.EqualTo("static_pass"));
 
             Assert.That(s2, Is.Not.Null);
             Assert.That(s2.Entry, Is.EqualTo(NarrativeEntryPoint.BeforeNight));
@@ -74,11 +74,11 @@ namespace Spotlight.Narrative.Editor.Tests
             Assert.That(s2.LineCount, Is.EqualTo(34));
             Assert.That(s2.Checks, Does.Contain("oct07.s2.perception"));
             Assert.That(s2.ExpectedResults.Exists(value => value.Contains("story.oct07.s2.completed")), Is.True);
-            Assert.That(s2.Errors.FindAll(value => value.Contains("oct07.cafe.night")).Count, Is.EqualTo(1));
-            Assert.That(s2.Errors[0], Does.Contain("Invalid background registry entry"));
+            Assert.That(s2.Errors.FindAll(value => value.Contains("oct07.cafe.night")).Count, Is.EqualTo(0));
+            Assert.That(s2.Status, Is.EqualTo("static_pass"));
         }
 
-        [Test] public void IntegrationReportTreatsConstructionBlockersAsErrors()
+        [Test] public void IntegrationReportHasNoRetainedConstructionBlockersForFormalRoots()
         {
             var report = NarrativeIntegrationReport.Build(LubanNarrativeLoader.Load());
             foreach (string eventId in new[]
@@ -89,8 +89,8 @@ namespace Spotlight.Narrative.Editor.Tests
             {
                 var item = report.Find(eventId);
                 Assert.That(item, Is.Not.Null, eventId);
-                Assert.That(item.Status, Is.EqualTo("blocked"), eventId);
-                Assert.That(item.Errors.Exists(error => error.StartsWith("Construction blocker:", StringComparison.Ordinal)), Is.True, eventId);
+                Assert.That(item.Status, Is.EqualTo("static_pass"), eventId);
+                Assert.That(item.Errors.Exists(error => error.StartsWith("Construction blocker:", StringComparison.Ordinal)), Is.False, eventId);
             }
         }
 
@@ -106,10 +106,10 @@ namespace Spotlight.Narrative.Editor.Tests
                     && !string.IsNullOrWhiteSpace(line.speakerNameKey)).ToList();
             Assert.That(namedLines, Has.Count.EqualTo(6));
             Assert.That(namedLines.All(line => configuration.texts.Any(text => text.key == line.speakerNameKey)), Is.True);
-            Assert.That(c14.Status, Is.EqualTo("blocked"));
-            Assert.That(c14.Errors.Exists(error => error.Contains("C-B03")), Is.True);
-            Assert.That(c14.Errors.Exists(error => error.Contains("C-B04")), Is.True);
-            Assert.That(c14.Errors.Exists(error => error.Contains("C-B05")), Is.True);
+            Assert.That(c14.Status, Is.EqualTo("static_pass"));
+            Assert.That(c14.Errors.Exists(error => error.Contains("C-B03")), Is.False);
+            Assert.That(c14.Errors.Exists(error => error.Contains("C-B04")), Is.False);
+            Assert.That(c14.Errors.Exists(error => error.Contains("C-B05")), Is.False);
         }
 
         [Test] public void IntegrationReportVerifiesRose1009PerceptionTailAndTemporaryCg()
@@ -145,13 +145,13 @@ namespace Spotlight.Narrative.Editor.Tests
             var rose = report.Find("rose.1011.s1");
             Assert.That(rose, Is.Not.Null);
             Assert.That(rose.Entry, Is.EqualTo(NarrativeEntryPoint.MorningBeforeMap));
-            Assert.That(rose.PageCount, Is.EqualTo(10));
-            Assert.That(rose.LineCount, Is.EqualTo(33));
-            Assert.That(rose.ChoiceCount, Is.EqualTo(5));
-            Assert.That(rose.Errors.Exists(error => error.Contains("B-B04")), Is.True);
-            Assert.That(rose.Errors.Exists(error => error.Contains("B-B05")), Is.True);
-            Assert.That(rose.Errors.Exists(error => error.Contains("B-C02")), Is.True);
-            Assert.That(rose.ExpectedResults, Is.Empty);
+            Assert.That(rose.PageCount, Is.EqualTo(27));
+            Assert.That(rose.LineCount, Is.EqualTo(123));
+            Assert.That(rose.ChoiceCount, Is.EqualTo(11));
+            Assert.That(rose.Errors.Exists(error => error.Contains("B-B04")), Is.False);
+            Assert.That(rose.Errors.Exists(error => error.Contains("B-B05")), Is.False);
+            Assert.That(rose.Errors.Exists(error => error.Contains("B-C02")), Is.False);
+            Assert.That(rose.ExpectedResults.Exists(value => value.Contains("story.rose.1011.s1.completed")), Is.True);
 
             Assert.That(configuration.abilityCheckConditions.Single(value => value.checkId == "rose.1011.s1.check.sparrow").threshold, Is.EqualTo(6));
             Assert.That(configuration.abilityCheckConditions.Single(value => value.checkId == "rose.1011.s1.check.portrait").threshold, Is.EqualTo(5));
@@ -177,11 +177,9 @@ namespace Spotlight.Narrative.Editor.Tests
                 string[] lines = File.ReadAllLines(path);
                 string row1 = lines.Single(line => line.Contains(",oct07.s1,"));
                 string row2 = lines.Single(line => line.Contains(",oct07.s2,"));
-                Assert.That(row1, Does.EndWith(",playtest_verified,S1 QA confirmed; Invalid background registry entry for oct07.cafe.day: Missing narrative background texture: oct07.cafe.day"));
-                Assert.That(row1, Does.Not.Contain("Background resource check failed"));
+                Assert.That(row1, Does.EndWith(",playtest_verified,S1 QA confirmed; Background resource check failed for oct07.cafe.day: Missing narrative background texture: oct07.cafe.day"));
                 Assert.That(row2, Does.Contain("oct07.s2.perception"));
-                Assert.That(row2, Does.EndWith(",writer_review,S2 awaiting review; Invalid background registry entry for oct07.cafe.night: Missing narrative background texture: oct07.cafe.night"));
-                Assert.That(row2, Does.Not.Contain("Background resource check failed"));
+                Assert.That(row2, Does.EndWith(",writer_review,S2 awaiting review; Background resource check failed for oct07.cafe.night: Missing narrative background texture: oct07.cafe.night"));
             }
             finally
             {

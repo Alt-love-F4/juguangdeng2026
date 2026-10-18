@@ -2,8 +2,8 @@
 
 - Filter: (all)
 - Events: 38
-- Errors: 18
-- Warnings: 1
+- Errors: 0
+- Warnings: 0
 
 ## EV_DEMO_CAFE_ARRIVE [static_pass]
 
@@ -324,19 +324,16 @@
 - Checks: (none)
 - Results: (none)
 
-## church.1009.s2 [blocked]
+## church.1009.s2 [static_pass]
 
 - Entry: Immediate
-- Sources: Immediate / continuation or code-owned entrance
-- Conditions: G1: BAR_BETWEEN(world.calendar, 4,4); G1: BOOL_EQ(story.church.1009.s2.completed, false)
+- Sources: Date: day 4 / Night / Once
+- Conditions: G1: BAR_BETWEEN(world.calendar, 4,4); G1: BOOL_EQ(story.church.1009.s2.completed, false); G1: BOOL_EQ(story.rose.1009.s1.completed, true)
 - Presentation: Conversation/church.1009.s2.conversation setup=church.1009.s2
 - Pages/lines/options: 4/36/2
 - Letter/reading: 0/0 pages / 0 lines
 - Checks: (none)
 - Results: SetFlag -> story.church.1009.s2.completed
-### Errors
-- Construction blocker: D-B03-rose-real-completion
-
 
 ## neutral.1008.s1 [static_pass]
 
@@ -371,43 +368,29 @@
 - Checks: oct07.s2.perception
 - Results: SetFlag -> story.oct07.s2.completed; SetFlag -> story.oct09.meeting.known
 
-## revolution.1013.s2 [blocked]
+## revolution.1013.s2 [static_pass]
 
 - Entry: Immediate
-- Sources: Immediate / continuation or code-owned entrance
+- Sources: Date: day 8 / Noon / Once
 - Conditions: G1: BAR_BETWEEN(world.calendar, 8,8); G1: BOOL_EQ(story.oct07.s2.completed, true); G1: BOOL_EQ(story.revolution.1013.s2.completed, false)
 - Presentation: Conversation/revolution.1013.s2.conversation setup=revolution.1013.s2
 - Pages/lines/options: 6/52/3
 - Letter/reading: 0/0 pages / 0 lines
 - Checks: (none)
 - Results: SetFlag -> story.revolution.1013.s2.completed
-### Errors
-- Construction blocker: C-B01
-- Construction blocker: C-B02
-- Construction blocker: C-B05
-- Construction blocker: C-G04
 
-
-## revolution.1014.s1 [blocked]
+## revolution.1014.s1 [static_pass]
 
 - Entry: MorningBeforeMap
 - Sources: Date: day 9 / Morning / Once
-- Conditions: G1: BAR_BETWEEN(world.calendar, 9,9); G1: BOOL_EQ(story.oct07.s2.completed, true); G1: BOOL_EQ(story.revolution.1014.s1.completed, false)
+- Conditions: G1: BAR_BETWEEN(world.calendar, 9,9); G1: BOOL_EQ(story.oct07.s2.completed, true); G1: BOOL_EQ(story.revolution.1014.s1.completed, false); G1: BOOL_EQ(story.rose.1011.s1.completed, true)
 - Presentation: Conversation/revolution.1014.s1.conversation setup=revolution.1014.s1
 - Pages/lines/options: 23/171/12
 - Letter/reading: 2/1 pages / 1 lines
 - Checks: revolution.1014.s1.wisdom4, revolution.1014.s1.perception6, revolution.1014.s1.wisdom5
 - Results: SetFlag -> story.revolution.1014.s1.completed
-### Errors
-- Construction blocker: C-B03
-- Construction blocker: C-B04
-- Construction blocker: C-B05
-- Construction blocker: B-real-completion
-- Construction blocker: C-G02
-- Construction blocker: C-G07
 
-
-## revolution.1028.s1 [blocked]
+## revolution.1028.s1 [static_pass]
 
 - Entry: BeforeNight
 - Sources: Date: day 23 / Night / Once
@@ -417,39 +400,26 @@
 - Letter/reading: 0/0 pages / 0 lines
 - Checks: (none)
 - Results: SetFlag -> story.revolution.1028.s1.completed
-### Errors
-- Construction blocker: C-B05
-- Construction blocker: C-B06
-- Construction blocker: C-G07
-
 
 ## rose.1009.s1 [static_pass]
 
 - Entry: MapAction
 - Sources: Action: rose.1009.s1.action @ 圣徒街
-- Conditions: G1: BAR_BETWEEN(world.calendar, 4,4); G1: BOOL_EQ(story.oct09.meeting.known, true)
+- Conditions: G1: BAR_BETWEEN(world.calendar, 4,4); G1: BOOL_EQ(story.oct07.s2.completed, true)
 - Presentation: Conversation/rose.1009.s1.conversation setup=rose.1009.s1
 - Pages/lines/options: 9/67/2
 - Letter/reading: 0/0 pages / 0 lines
 - Checks: rose.1009.s1.perception
 - Results: SetFlag -> story.rose.1009.s1.completed
 
-## rose.1011.s1 [blocked]
+## rose.1011.s1 [static_pass]
 
 - Entry: MorningBeforeMap
 - Sources: Date: day 6 / Morning / Once
-- Conditions: G1: BAR_BETWEEN(world.calendar, 6,6); G1: BOOL_EQ(story.rose.1011.s1.completed, false); G1: BOOL_EQ(story.neutral.1010.s1.completed, true); G1: BOOL_EQ(story.rose.1009.s1.completed, true)
+- Conditions: G1: BAR_BETWEEN(world.calendar, 6,6); G1: BOOL_EQ(story.rose.1011.s1.completed, false); G1: BOOL_EQ(story.rose.1009.s1.completed, true)
 - Presentation: Conversation/rose.1011.s1.conversation setup=rose.1011.s1
 - Pages/lines/options: 27/123/11
 - Letter/reading: 1/1 pages / 3 lines
 - Checks: rose.1011.s1.check.sparrow, rose.1011.s1.check.portrait, rose.1011.s1.check.wisdom
-- Results: (none)
-### Errors
-- Construction blocker: B-B05
-- Construction blocker: B-C02
-- Construction blocker: B-C04
-- Construction blocker: B-C07
-
-### Warnings
-- onceOnly event has no result rows; confirm that this is intentional.
+- Results: SetFlag -> story.rose.1011.s1.completed
 
