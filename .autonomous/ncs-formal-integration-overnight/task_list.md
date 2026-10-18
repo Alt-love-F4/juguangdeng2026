@@ -49,13 +49,13 @@
 - [x] Task 29: Validate that formal results, relationship/bar changes, money changes, production facts, and completion flags are written only from authoritative configured results.
 - [x] Task 30: Validate incomplete, blocked, or partial source content remains isolated from formal completion and does not gain a fabricated ending or trigger.
 - [x] Task 31: Recheck the Revolution trigger guard after any generation or configuration change and prove the disabled `T_CAL_D60` state is preserved.
-- [ ] Task 32: Recheck the NPC test-junk boundary after generation and prove no deleted `npc_a` through `npc_d` definitions or formal references reappear.
+- [x] Task 32: Recheck the NPC test-junk boundary after generation and prove no deleted `npc_a` through `npc_d` definitions or formal references reappear.
 
 ### Phase 3: Runtime Lifecycle Integration
-- [ ] Task 33: Trace and, where needed, correct formal trigger dispatch so the same authoritative NCS controller owns candidate selection and event start.
-- [ ] Task 34: Wire or verify map-action handoff with the active map, venue, action-point rules, and formal event candidate identity preserved.
-- [ ] Task 35: Wire or verify date/phase dispatch for MorningBeforeMap, AfterBusiness, BeforeNight, and MapAction without bypassing DayFlow.
-- [ ] Task 36: Verify formal cafe dialogue transitions through `GameFlowBootstrap.TransitionToGameplayScene` and prepares `CoffeeShop` before presentation when triggered from the map.
+- [x] Task 33: Trace and, where needed, correct formal trigger dispatch so the same authoritative NCS controller owns candidate selection and event start.
+- [x] Task 34: Wire or verify map-action handoff with the active map, venue, action-point rules, and formal event candidate identity preserved.
+- [x] Task 35: Wire or verify date/phase dispatch for MorningBeforeMap, AfterBusiness, BeforeNight, and MapAction without bypassing DayFlow.
+- [x] Task 36: Verify formal cafe dialogue transitions through `GameFlowBootstrap.TransitionToGameplayScene` and prepares `CoffeeShop` before presentation when triggered from the map.
 - [ ] Task 37: Verify loading UI, asynchronous scene readiness, presentation ownership, and failure reporting keep NCS state consistent during scene transitions.
 - [ ] Task 38: Verify presentation resource resolution selects real NCS assets and applies the shared background/portrait/effect adaptation without introducing a parallel story system.
 - [ ] Task 39: Verify `blocksSave` and busy/pause ownership prevent unsafe saves while a formal presentation or required handoff is active.

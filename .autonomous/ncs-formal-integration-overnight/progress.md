@@ -758,3 +758,128 @@
 ### Current Status
 - Total Tasks: 95
 - Completed: 31/95 (33%)
+
+## Session 16 (Executor) - Task 32 continuation - 2026-10-18
+
+### Accomplished
+- Completed Task 32: added `npc-test-boundary-recheck-2026-10-18.md` with a fresh post-generation boundary audit.
+- Scanned every sheet in all 10 authoritative workbooks with explicit UTF-8 handling: zero exact `npc_a` through `npc_d` matches, including `Narrative.xlsx`, `Text.xlsx`, and the Simulation `Npc.xlsx`.
+- Parsed all 41 generated Luban JSON tables: zero exact matches in generated objects, events, triggers, NPC table, presentation data, text, conditions, actions, and results.
+- Rechecked the formal queue and integration report: zero exact matches; `Assets/Scripts` also has zero exact matches. Only the documented legacy/manual character snapshots and historical dependency documentation retain the old IDs.
+- Evaluated the connected Unity runtime: 45 objects, 38 events, 1 trigger, 42 runtime NPC objects, 41 loaded Luban TextAssets, and zero old IDs in runtime object/event/trigger references or loaded table text.
+- Ran focused EditMode validation: `ActualGeneratedLubanDataLoadsAndValidates` passed 1/1 and `FormalNarrativeFlowConfigurationTests` passed 3/3. Current compile ground truth remains clean with 0 errors and 0 warnings.
+
+### Issues Encountered
+- The first Python audit used a hard-coded non-ASCII working-directory literal that PowerShell converted to question marks; rerunning from `Path.cwd()` with explicit UTF-8 workbook/JSON reads completed successfully. No project file was changed.
+
+### Notes
+- No deleted `npc_a` through `npc_d` narrative, formal trigger, event, speaker, prerequisite, or result reappeared after generation.
+- The legacy `CharacterCatalog.asset`, `DetailsDisplayConfig.asset`, and historical documentation references remain intentionally preserved and are not read by the Luban runtime narrative loader.
+- This completes the source/configuration phase. Runtime lifecycle integration begins with Task 33; the real map, DayFlow, loading, cancellation, retry, save/restore, and exactly-once acceptance boundary remains open.
+
+### Next Session Should
+- Continue with Task 33: trace and, where needed, correct formal trigger dispatch so the same authoritative NCS controller owns candidate selection and event start.
+- Preserve the shared debug-scene rule and do not alter the retained Revolution content or disabled `T_CAL_D60` trigger.
+
+### Current Status
+- Total Tasks: 95
+- Completed: 32/95 (34%)
+
+## Session 16 (Executor) - Task 33 continuation - 2026-10-18
+
+### Accomplished
+- Completed Task 33: added `formal-trigger-dispatch-trace-2026-10-18.md`.
+- Traced bar-trigger and date dispatch from `NarrativeController.AddBar`/`SetBar` through `EvaluateBoundary`, candidate capture/promotion, the shared controller queue, presenter start, result settlement, and post-success candidate commit.
+- Traced map dispatch from `MapSceneController` through `NarrativeActionController.Execute` and `NarrativeController.QueueMapActionEvent`; confirmed mandatory Once actions remain incomplete until their entire configured result-event chain succeeds.
+- Traced DayFlow official-day and phase entry calls through the same `NarrativeRuntime.Instance.Controller`; no formal UI path directly starts a presenter or creates a second scheduler.
+- Runtime route audit confirmed 9 formal roots: 3 map actions (`oct07.s1`, `neutral.1008.s1`, `rose.1009.s1`) and 6 dated roots (`oct07.s2`, `rose.1011.s1`, `church.1009.s2`, `revolution.1013.s2`, `revolution.1014.s1`, `revolution.1028.s1`).
+- Focused Unity tests passed: `NarrativeEntryTests` 14/14 and `NarrativeActionTests` 27/27. No code correction was required because candidate selection and event start already converge on one authoritative controller.
+
+### Issues Encountered
+- None. The source trace and focused tests found no split-brain trigger path or alternate formal scheduler.
+
+### Notes
+- Formal preview/debug entrances remain intentionally separate from DayFlow/map dispatch and do not count as formal trigger paths.
+- This is code/lifecycle evidence only. Real map/scene loading, cancellation, retry, save/restore, and exactly-once Player acceptance remain open.
+
+### Next Session Should
+- Continue with Task 34: wire or verify map-action handoff with the active map, venue, action-point rules, and formal event candidate identity preserved.
+
+### Current Status
+- Total Tasks: 95
+- Completed: 33/95 (35%)
+
+## Session 16 (Executor) - Task 34 continuation - 2026-10-18
+
+### Accomplished
+- Completed Task 34: added `map-action-handoff-validation-2026-10-18.md`.
+- Verified `DayFlowController.SetState` controls the authored `world.map.active` fact and `GameFlowBootstrap.MapControlsAvailable` gates map interaction during active city-map leisure only.
+- Verified the map UI passes the same control predicate into action details and rechecks it before executing a card, preventing stale venue popups from bypassing DayFlow or loading guards.
+- Reconciled the three formal mounts: cafe -> `oct07.cafe.s1` -> `oct07.s1`, market -> `neutral.1008.s1.action` -> `neutral.1008.s1`, and Saints Street -> `rose.1009.s1.action` -> `rose.1009.s1`.
+- Verified authored action conditions and costs: the first two are zero-cost mandatory Once actions with explicit day/map-active/completion gates; Rose is day 4, requires `story.oct07.s2.completed=true`, and consumes `ActionPoint(1)` without inventing a separate map-active condition.
+- Verified `NarrativeActionController` preserves configured event order and event identity through `QueueMapActionEvent`, defers Once completion until `EventCompleted`, and reports refusal without declaring the action complete.
+- Focused tests passed: `MapUiRepairTests` 36/36, `MapActionPointsViewTests` 15/15, `MapLayoutTests` 5/5, and `NarrativeEntryTests` 14/14.
+
+### Issues Encountered
+- None. The existing active-map, venue, cost, and event-identity contracts are coherent; no runtime patch was required.
+
+### Notes
+- Rose's missing separate `world.map.active` condition remains an authored source distinction already documented in Task 21; this task did not add an unsourced condition.
+- This is code/configuration and focused UI test evidence. Real map scene loading and Player acceptance remain open.
+
+### Next Session Should
+- Continue with Task 35: verify date/phase dispatch for `MorningBeforeMap`, `AfterBusiness`, `BeforeNight`, and `MapAction` without bypassing DayFlow.
+
+### Current Status
+- Total Tasks: 95
+- Completed: 34/95 (36%)
+
+## Session 16 (Executor) - Task 35 continuation - 2026-10-18
+
+### Accomplished
+- Completed Task 35: added `date-phase-dispatch-validation-2026-10-18.md`.
+- Verified `ProcessEntry` accepts Morning/AfterBusiness/BeforeNight only at safe boundaries, maps them to the authored Morning/Noon/Night slots, and explicitly rejects `MapAction`.
+- Verified `ProcessOfficialDay` synchronizes the official calendar before date candidate evaluation and that DayFlow invokes Morning after date transition, AfterBusiness after business end, and BeforeNight from the real map day-end path.
+- Verified refusal/failure callbacks route through the existing DayFlow retry behavior and do not advance the phase or day prematurely.
+- Reconfirmed the nine formal route split: three map-action roots and six dated roots, with no alternate formal scheduler or direct phase bypass.
+- Focused passing tests: `NarrativeEntryTests` 14/14 and `FormalNarrativeFlowConfigurationTests` 3/3.
+
+### Issues Encountered
+- The exact PlayMode test `DayFlowPresentationTests.FormalDayStartsOnMapAndPresentationsAdvanceOnlyOnCompletion` fails before its assertions because the isolated `PlayerPresentationTestSession` has no `first_cafe_tutorial/workstation_open` step or opening presentation. DayFlow correctly reports `Missing cafe tutorial presentation: workstation_open`. No production or test fixture change was made; the blocker is recorded for later runtime acceptance.
+- A broad connected-Editor filter for `DayFlowPresentationTests` returned unrelated `MapLayoutTests`, so it was not counted as evidence. The exact full-name PlayMode job was used for the blocker record.
+
+### Notes
+- Task 35 is complete as a production code/configuration verification task, but full PlayMode evidence remains conditional on the isolated cafe-tutorial fixture being populated or the test boundary being narrowed.
+- This does not claim real formal map/scene loading, cancellation, retry, save/restore, or exactly-once Player acceptance.
+
+### Next Session Should
+- Continue with Task 36: verify formal cafe dialogue transitions through `GameFlowBootstrap.TransitionToGameplayScene` and prepares `CoffeeShop` before presentation when triggered from the map.
+
+### Current Status
+- Total Tasks: 95
+- Completed: 35/95 (37%)
+
+## Session 17 (Executor) - Task 36 continuation - 2026-10-18
+
+### Accomplished
+- Completed Task 36: added `cafe-dialogue-scene-handoff-validation-2026-10-18.md`.
+- Verified the formal runtime wiring assigns `NarrativeConversationEventPlayback.Play` to the single `NarrativeRuntime`/`NarrativePresenter` owned by `GameFlowBootstrap`; map fallback wiring uses the same delegate.
+- Verified formal non-preview conversations with `scene.cafe` resolve the real-scene marker and pass `BeginPlayback` as the callback to `GameFlowBootstrap.TransitionToGameplayScene` when the active scene is not `CoffeeShop`.
+- Verified the transition loads `CoffeeShop` additively, validates it, makes it active, registers and opens the destination gameplay panel, restores `Playing`/narrative visibility, and only then invokes the dialogue playback callback.
+- Focused PlayMode job `4e4739fb2f4c4011bdfa2f8769b4f935` passed `3/3`: main-flow cafe transition with shared owners, standalone map cafe entry, and standalone map cafe entry at `timeScale=0`.
+- Inspected and cleared the ephemeral Unity console after the run; final ground truth is `compilationFailed=false`, `compiling=false`, `0` errors, and `0` warnings.
+
+### Issues Encountered
+- No production defect was found. The PlayMode output included repeated missing-audio-listener messages and the Editor retained earlier expected negative-test diagnostics plus the Task 35 missing cafe-tutorial fixture exception; none caused a test failure and they were recorded in the Task 36 evidence.
+
+### Notes
+- This task verifies the scene/presentation handoff and real loading path only. Formal root completion, cancellation, retry, save/restore, and exactly-once settlement remain later acceptance tasks.
+- No project source, scene, prefab, workbook, generated file, or save slot was modified.
+
+### Next Session Should
+- Continue with Task 37: verify loading UI, asynchronous scene readiness, presentation ownership, and failure reporting keep NCS state consistent during scene transitions.
+- Preserve the documented Task 35 cafe-tutorial fixture blocker and the Task 36 shared-owner/loading evidence.
+
+### Current Status
+- Total Tasks: 95
+- Completed: 36/95 (38%)
