@@ -59,7 +59,7 @@ namespace Spotlight.Narrative.Tests
             var data = Data();
             data["tbncsaction"].Add(new JObject { ["actionKey"]="action", ["type"]=type, ["mustExecute"]=false,
                 ["nameText"]="title", ["descText"]="title", ["requirements"]="", ["resultEvents"]="", ["durationDays"]=2,
-                ["progressTarget"]=type.Contains("Progress") ? 2 : 0, ["nextActionKey"]="", ["deliveryMode"]="None" });
+                ["progressTarget"]=type.Contains("Progress") ? 2 : 0, ["nextActionKey"]="", ["deliveryMode"]="None", ["replacesLocationActions"]=false, ["focusLocationOnComplete"]=false });
             var action = Adapt(data).actions[0];
             Assert.That(action.type, Is.EqualTo(expected));
             Assert.That(action.endDay, Is.EqualTo(type == "EndDay"));
@@ -74,7 +74,7 @@ namespace Spotlight.Narrative.Tests
             var data = Data();
             data["tbncsaction"].Add(new JObject { ["actionKey"]="action", ["type"]=type, ["mustExecute"]=false,
                 ["nameText"]="title", ["descText"]="title", ["requirements"]="", ["resultEvents"]="", ["durationDays"]=2,
-                ["progressTarget"]=0, ["nextActionKey"]="", ["deliveryMode"]="None" });
+                ["progressTarget"]=0, ["nextActionKey"]="", ["deliveryMode"]="None", ["replacesLocationActions"]=false, ["focusLocationOnComplete"]=false });
             Assert.Throws<FormatException>(() => Adapt(data));
         }
 

@@ -19,7 +19,7 @@
         "Unity.InputSystem"
     ],
     "overrideReferences": true,
-    "precompiledReferences": ["Newtonsoft.Json.dll"],
+    "precompiledReferences": ["Newtonsoft.Json.dll", "DOTween.dll"],
     "autoReferenced": false,
     "optionalUnityReferences": [
         "TestAssemblies"

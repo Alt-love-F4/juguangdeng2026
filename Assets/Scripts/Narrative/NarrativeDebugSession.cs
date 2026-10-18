@@ -164,7 +164,13 @@ namespace Spotlight.Narrative
             RequireBaseline(); if (day < 1) throw new ArgumentOutOfRangeException(nameof(day));
             log.Add("自然日期提交 " + (providers.TryGetValue("dayflow", out var p) && p.TryRead("day", out int old) ? old.ToString() : "NCS") + " → " + day + " / ProcessOfficialDay");
             if (p != null) p.Set("day", day, true);
-            Controller.SetOfficialDay(day); Controller.ProcessOfficialDay(day); Controller.FlushValueChanges();
+            Controller.SetOfficialDay(day);
+            if (Controller.ProcessOfficialDay(day))
+                // The formal host enters the morning phase immediately after a new
+                // official day is scheduled. Keep this debug helper aligned with that
+                // scheduling contract so EventDate rows are observable in isolation.
+                Controller.ProcessEntry(NarrativeEntryPoint.MorningBeforeMap);
+            Controller.FlushValueChanges();
         }
         public void SubmitBar(string key, int value)
         {

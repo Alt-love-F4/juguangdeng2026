@@ -249,6 +249,9 @@ namespace Spotlight.Narrative
         public long sequence;
         public NarrativeTimeSlot timeSlot;
         public NarrativeRepeatRule repeatRule;
+        // Conditions are evaluated when a candidate is promoted into the playback queue.
+        // Fresh locks, once markers, dates and phase gates are still checked at playback.
+        public bool conditionsFrozen;
     }
     [Serializable] public sealed class NarrativePendingValue { public string eventId, triggerId, requestId, location, passiveHint; public int depth; public NarrativeTimeSlot timeSlot; public NarrativeCandidateValue candidate; public List<string> selectedChoices = new List<string>(); }
     [Serializable] public sealed class NarrativeBarChange { public string key; public int oldValue, newValue, depth; }

@@ -90,6 +90,14 @@ namespace Spotlight.GameFlow
             void Detach() { if (panel != null) panel.PlaybackInterrupted -= Cancel; }
             void Complete() { if (notified) return; notified = true; Detach(); completed?.Invoke(); }
             void Cancel() { if (notified) return; notified = true; Detach(); data.cancelled?.Invoke(); }
+            void Fail()
+            {
+                if (notified) return;
+                notified = true;
+                Detach();
+                data.cancelled?.Invoke();
+                NarrativeRuntime.Instance?.Presenter?.InterruptForHost();
+            }
             var script = CreateScript(data, request.PassiveHint);
             if (isPreview) script = script.WithPreviewContext();
             void BeginPlayback()
@@ -108,7 +116,7 @@ namespace Spotlight.GameFlow
                 && SceneManager.GetActiveScene().name != "CoffeeShop"
                 ? UnityEngine.Object.FindFirstObjectByType<GameFlowBootstrap>() : null;
             if (flow != null && flow.SessionState == GameSessionState.Playing)
-                flow.TransitionToGameplayScene("CoffeeShop", BeginPlayback);
+                flow.TransitionToGameplayScene("CoffeeShop", BeginPlayback, Fail);
             else BeginPlayback();
             return true;
         }

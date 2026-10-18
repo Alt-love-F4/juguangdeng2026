@@ -158,6 +158,39 @@ namespace Spotlight.GameFlow.Tests
         }
 
         [UnityTest]
+        public IEnumerator MissingGameplaySceneRestoresMapAndReportsFailure()
+        {
+            yield return SceneManager.LoadSceneAsync("Map", LoadSceneMode.Single);
+            yield return WaitFor(() => GameplayHudPanel.Instance != null && PlayerRuntime.Current?.CreationSubmitted == true,
+                "Standalone map session for transition failure");
+            var flow = Object.FindFirstObjectByType<GameFlowBootstrap>();
+            Assert.That(flow, Is.Not.Null);
+
+            bool completed = false;
+            bool failed = false;
+            bool previousIgnore = LogAssert.ignoreFailingMessages;
+            LogAssert.ignoreFailingMessages = true;
+            try
+            {
+                flow.TransitionToGameplayScene("NCS_Missing_Test_Scene", () => completed = true, () => failed = true);
+                yield return WaitFor(() => failed && !LoadingVisible(), "Failed scene transition cleanup");
+            }
+            finally
+            {
+                LogAssert.ignoreFailingMessages = previousIgnore;
+            }
+
+            Assert.That(completed, Is.False, "A failed transition must not invoke its success callback.");
+            Assert.That(flow.SessionState, Is.EqualTo(GameSessionState.Playing));
+            Assert.That(SceneManager.GetActiveScene().name, Is.EqualTo("Map"));
+            Assert.That(Object.FindObjectsByType<MapSceneController>(FindObjectsSortMode.None)
+                .Any(panel => panel.isActiveAndEnabled && panel.transform is RectTransform), Is.True,
+                "The previous map host must be restored after a load failure.");
+            Assert.That(NarrativeRuntime.Instance?.IsPresenting ?? false, Is.False,
+                "A failed scene handoff must release the formal presentation owner.");
+        }
+
+        [UnityTest]
         public IEnumerator MainFlowCafeAndMapOverlayUseSharedHudWithoutReplacingFormalSession()
         {
             yield return SceneManager.LoadSceneAsync("启动场景", LoadSceneMode.Single);

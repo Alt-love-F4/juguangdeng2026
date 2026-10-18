@@ -7,6 +7,7 @@ namespace Spotlight.Narrative
     public sealed partial class NarrativeController
     {
         private readonly List<NarrativeCandidateValue> candidates = new List<NarrativeCandidateValue>();
+        private readonly HashSet<string> warnedPresentationDependencies = new HashSet<string>(StringComparer.Ordinal);
         private long candidateSequence;
         private int morningEntryProcessedDay;
         private NarrativeEntryPoint? activeEntry;
@@ -97,6 +98,7 @@ namespace Spotlight.Narrative
         /// <summary>Read-only guards for the active root; never exports transient choices as world facts.</summary>
         public bool ReadPresentationCondition(string key)
         {
+            if (string.IsNullOrWhiteSpace(key)) throw new InvalidOperationException("Empty presentation condition.");
             if (key.StartsWith("choice:", StringComparison.Ordinal)) return selectedChoices.Contains(key.Substring(7));
             if (key.StartsWith("anyChoice:", StringComparison.Ordinal)) return key.Substring(10).Split(';').Any(selectedChoices.Contains);
             if (key.StartsWith("check:", StringComparison.Ordinal))
@@ -108,20 +110,30 @@ namespace Spotlight.Narrative
                 return snapshot.passed;
             }
             if (key.StartsWith("not:", StringComparison.Ordinal)) return !ReadPresentationCondition(key.Substring(4));
-            if (key.StartsWith("dependency:", StringComparison.Ordinal)) throw new InvalidOperationException("Unresolved presentation dependency: " + key);
+            if (key.StartsWith("dependency:", StringComparison.Ordinal))
+            {
+                string dependency = key.Substring("dependency:".Length).Trim();
+                string resolvedCondition = string.Equals(dependency, "C-B06.history-specialization", StringComparison.OrdinalIgnoreCase)
+                    ? "specialization.player.letter.politics" : null;
+                if (resolvedCondition != null && state.TryGetCondition(resolvedCondition, out bool resolved)) return resolved;
+                if (warnedPresentationDependencies.Add(key))
+                    UnityEngine.Debug.LogWarning("[NCS] Presentation dependency unavailable; dependent page will be skipped: " + key);
+                return false;
+            }
             if (!state.TryGetCondition(key, out bool value)) throw new InvalidOperationException("Unknown presentation condition: " + key);
             return value;
         }
 
-        private bool EventCanStart(NarrativeEventDefinition definition) => definition != null
+        private bool EventCanStart(NarrativeEventDefinition definition, bool evaluateConditions = true) => definition != null
             && string.IsNullOrWhiteSpace(ConstructionBlocker(definition))
             && !state.IsEventLocked(definition.eventId) && !state.IsFlagSet("event.once." + definition.eventId)
             && !(definition.onceOnly && state.HasHappenedEvent(definition.eventId))
-            && EvaluateConditions("event", string.IsNullOrWhiteSpace(definition.conditionOwnerId) ? definition.eventId : definition.conditionOwnerId, Context(definition));
+            && (!evaluateConditions || EvaluateConditions("event", string.IsNullOrWhiteSpace(definition.conditionOwnerId) ? definition.eventId : definition.conditionOwnerId, Context(definition)));
 
         private bool CanStartCandidate(NarrativeCandidateValue candidate)
         {
-            if (!events.TryGetValue(candidate.eventId ?? string.Empty, out var definition) || !EventCanStart(definition)) return false;
+            if (!events.TryGetValue(candidate.eventId ?? string.Empty, out var definition)
+                || !EventCanStart(definition, !candidate.conditionsFrozen)) return false;
             if (!string.IsNullOrEmpty(candidate.triggerId))
             {
                 var trigger = configuration.triggers.Find(t => t != null && t.triggerId == candidate.triggerId);
@@ -183,6 +195,9 @@ namespace Spotlight.Narrative
         {
             var definition = events[candidate.eventId];
             var trigger = configuration.triggers.Find(t => t != null && t.triggerId == candidate.triggerId);
+            // Preserve the condition decision made when this candidate entered the queue.
+            // Fresh locks, completion markers, date and phase checks remain live.
+            candidate.conditionsFrozen = true;
             pendingEvents.Add(candidate.eventId);
             var request = new NarrativeEventRequest(definition, trigger, candidate.depth, context: Context(definition), candidate: candidate);
             queue.Enqueue(request);
@@ -237,13 +252,13 @@ namespace Spotlight.Narrative
         }
 
         private NarrativeCandidateValue ContinuationCandidate(string eventId) => new NarrativeCandidateValue
-        { eventId = eventId, entry = NarrativeEntryPoint.Immediate, source = NarrativeCandidateSource.Continuation, sequence = ++candidateSequence, day = GetDay() };
+        { eventId = eventId, entry = NarrativeEntryPoint.Immediate, source = NarrativeCandidateSource.Continuation, sequence = ++candidateSequence, day = GetDay(), conditionsFrozen = true };
 
         private static NarrativeCandidateValue CloneCandidate(NarrativeCandidateValue c) => c == null ? null : new NarrativeCandidateValue
         {
             eventId = c.eventId, triggerId = c.triggerId, source = c.source, entry = c.entry, priority = c.priority,
             row = c.row, count = c.count, depth = c.depth, day = c.day, dateDay = c.dateDay, sequence = c.sequence,
-            timeSlot = c.timeSlot, repeatRule = c.repeatRule
+            timeSlot = c.timeSlot, repeatRule = c.repeatRule, conditionsFrozen = c.conditionsFrozen
         };
     }
 }

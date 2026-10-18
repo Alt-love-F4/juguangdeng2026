@@ -84,7 +84,7 @@ namespace Spotlight.GameFlow
             }
             conditions.CompleteValueRestore(false);
             presenter.CharacterResolver = NarrativeCharacterResolver.Resolve;
-            presenter.PageCondition = key => showAllPages || conditions.State.GetCondition(key);
+            presenter.PageCondition = key => showAllPages || conditions.ReadPresentationCondition(key);
             presenter.ChoiceUnlocked = (id, context) => unlockChoices || conditions.EvaluateConditions("choice", id, context);
             // Sequence choices go through the isolated formal controller; fragment choices remain UI-only.
             presenter.ChoiceSelected += id => !followEventChain || conditions.SelectChoice(id);

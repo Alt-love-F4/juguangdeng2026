@@ -286,5 +286,14 @@
     "target": "story.revolution.1028.s1.completed",
     "value": "true",
     "note": "C28 对话完整结束后记录剧情完成。"
+  },
+  {
+    "resultId": "rose.1011.s1.complete",
+    "eventId": "rose.1011.s1",
+    "seq": 1,
+    "resultType": "SET_FLAG",
+    "target": "story.rose.1011.s1.completed",
+    "value": "true",
+    "note": "Formal root completion; commit only after full presentation and reading return."
   }
 ]

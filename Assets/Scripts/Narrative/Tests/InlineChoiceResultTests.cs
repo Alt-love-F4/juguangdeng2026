@@ -178,5 +178,21 @@ namespace Spotlight.Narrative.Tests
             config.presentations.conversationLines.Add(new NarrativeConversationLineDefinition { lineId = "l", pageId = "pc", seq = 1, textKey = "t" });
             Assert.That(LubanNarrativeLoader.ValidateConversationSteps(config), Is.Empty);
         }
+
+        [Test] public void UnknownPresentationDependencyHidesOnlyTheDependentPage()
+        {
+            var p = new Presenter(); var c = Controller(p);
+            Assert.That(c.ReadPresentationCondition("dependency:C-B03.C-B04.C-B05.reciprocity"), Is.False);
+            Assert.That(c.ReadPresentationCondition("not:dependency:C-B03.C-B04.C-B05.reciprocity"), Is.True);
+        }
+
+        [Test] public void HistoryPresentationDependencyUsesExistingPoliticsSpecialization()
+        {
+            config.conditionKeys.Add(new NarrativeConditionKeyDefinition { key = "specialization.player.letter.politics" });
+            var p = new Presenter(); var c = Controller(p);
+            Assert.That(c.ReadPresentationCondition("dependency:C-B06.history-specialization"), Is.False);
+            c.State.SetCondition("specialization.player.letter.politics", true);
+            Assert.That(c.ReadPresentationCondition("dependency:C-B06.history-specialization"), Is.True);
+        }
     }
 }
