@@ -883,3 +883,28 @@
 ### Current Status
 - Total Tasks: 95
 - Completed: 36/95 (38%)
+
+## Session 18 (Executor) - Task 37 investigation - 2026-10-18
+
+### Accomplished
+- Continued with Task 37 and added `loading-scene-failure-validation-2026-10-18.md` with the current loading UI, async scene-readiness ordering, single NCS presenter ownership, and failure-path evidence.
+- Reconfirmed the successful transition contract from Task 36: the destination scene and gameplay panel are prepared before the formal dialogue callback; the previously recorded focused PlayMode job passed 3/3.
+- Found a concrete failure-path defect: the transition exposes only a completion callback. Null-load and panel-validation failures close the loading visual without restoring `GameSessionState.Playing` or notifying the presentation owner; the post-load invalid-scene branch exits without even finishing the loading transition. The active NarrativePresenter completion/pause lease and NarrativeController `activePresentation` can remain live indefinitely, although no event results are committed.
+- Proposed a bounded repair in the evidence note: add an explicit transition failure callback, route terminal failures through one cleanup/restore path, forward failure through the existing presenter cancellation contract, and cover failure/retry in PlayMode tests.
+
+### Issues Encountered
+- The fresh PlayMode test run filtered to `StandaloneMapEntersCafeAndClosesLoading` timed out after 300 seconds without returning a result. Unity test status remained `running`; Editor status and cancellation calls then timed out, while the Unity MCP websocket reported that its connection had closed. This run is not counted as a pass or failure.
+- Before the test attempt, Unity `6000.3.5f2` reported ready/stopped/not compiling with zero console errors and warnings. The Editor process remained present and responsive according to Windows; it was not terminated, and generated test artifacts were left untouched.
+- Task 37 cannot be marked complete: the observed failure behavior contradicts the required NCS lifecycle consistency. Runtime behavior changes are held for user review of the bounded design, as required by the brainstorming skill's approval gate.
+
+### Notes
+- No runtime source, test source, scene, prefab, workbook, generated data, save slot, or task checkbox was changed.
+- The task directory and project remain intentionally dirty; all pre-existing and newly generated test artifacts are preserved.
+
+### Next Session Should
+- Obtain approval for the bounded repair proposal in `loading-scene-failure-validation-2026-10-18.md` before changing runtime behavior.
+- After approval, implement and test explicit transition failure propagation, cleanup/restoration, presenter cancellation, and retry eligibility; then re-establish Unity bridge/test-runner health and rerun successful and failure PlayMode cases.
+
+### Current Status
+- Total Tasks: 95
+- Completed: 36/95 (38%)
