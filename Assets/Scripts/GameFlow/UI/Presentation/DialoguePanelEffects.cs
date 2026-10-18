@@ -136,8 +136,8 @@ namespace Spotlight.GameFlow
             var visual = value.BackgroundVisual;
             if (visual != null && visual.useSceneBackground)
             {
-                // Scene-backed dialogue must expose the live gameplay scene, including its authored background.
-                // SetBackground(null) enables the transition backing, so hide that backing as well as the RawImage.
+                // Explicit scene-backed dialogue must expose the authored gameplay scene.
+                // Cancel any incoming CG layer before disabling the main background.
                 effects.SetBackground(null, Color.white);
                 background.enabled = false;
                 effects.HideBackgroundBacking();

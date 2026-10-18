@@ -49,7 +49,8 @@ namespace Spotlight.FreeCafe
         {
             if (count <= 0 || count > 20) return ActionResult.No("一次只能生成 1~20 位顾客");
             if (!State.open) return ActionResult.No("请先开始营业，再生成顾客");
-            State.todayCustomerBudget = Math.Min(Catalog.economy.maxCustomers, State.todayCustomerBudget + count);
+            State.todayCustomerBudget = Math.Max(State.todayCustomerBudget,
+                Math.Min(Catalog.economy.maxCustomers, State.todayCustomerBudget + count));
             int before = State.todayArrivals;
             for (int i = 0; i < count; i++) SpawnCustomer();
             int created = State.todayArrivals - before;
@@ -102,7 +103,7 @@ namespace Spotlight.FreeCafe
                 if (AwaitingSeat(visit) && visit.budgetReserved) reserved--;
             bool reuseArrival = target != null;
             int requiredBudget = State.todayArrivals + reserved + (reuseArrival ? 0 : 1);
-            if (requiredBudget > Math.Max(Catalog.economy.maxCustomers, State.cafeVisitBudgetMinimum))
+            if (requiredBudget > Math.Max(State.todayCustomerBudget, Math.Max(Catalog.economy.maxCustomers, State.cafeVisitBudgetMinimum)))
                 return ActionResult.No("今日客流已达上限，请下一营业日再召唤");
 
             foreach (var visit in displacedVisits) FinishVisit(visit, "gm_replaced");

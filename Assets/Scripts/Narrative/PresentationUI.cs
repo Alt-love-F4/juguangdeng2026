@@ -16,7 +16,7 @@ namespace Spotlight.Narrative
         private Button previousButton, nextButton, continueButton;
         private Action previousPage, nextPage, continuePresentation;
         private bool navigationActive;
-        private Image background, portraitA, portraitB, fade;
+        private Image background, portraitA, portraitB, fade, blocker;
         private GameObject dialogue, choicesPanel;
         private RectTransform choicesContent;
         private bool submitted, revealNow;
@@ -43,7 +43,7 @@ namespace Spotlight.Narrative
         private void Build()
         {
             group = gameObject.AddComponent<CanvasGroup>();
-            Image blocker = Image("Blocker", transform, Vector2.zero, Vector2.one, new Color(0, 0, 0, .55f));
+            blocker = Image("Blocker", transform, Vector2.zero, Vector2.one, new Color(0, 0, 0, .55f));
             blocker.gameObject.AddComponent<Button>().onClick.AddListener(Submit);
             background = Image("Background", transform, Vector2.zero, Vector2.one, Color.white); background.raycastTarget = false;
             portraitA = Image("PortraitA", transform, new Vector2(.05f, .2f), new Vector2(.4f, .92f), Color.white);
@@ -117,8 +117,12 @@ namespace Spotlight.Narrative
             continueButton.gameObject.SetActive(canContinue);
         }
 
-        public void Show(string heading)
+        public void Show(string heading, bool overRetainedStage = false)
         {
+            // Template atoms (choices/waits/fades) still own their UI between conversation
+            // pages. Draw them above the retained stage without darkening/replacing its CG.
+            GetComponent<Canvas>().sortingOrder = overRetainedStage ? 810 : 250;
+            blocker.color = overRetainedStage ? Color.clear : new Color(0, 0, 0, .55f);
             visible = true; group.alpha = suspended ? 0 : 1; group.blocksRaycasts = group.interactable = !suspended; title.text = heading ?? string.Empty;
             ClearChoices(); hint.text = string.Empty; ResetSubmit();
             SetNavigation(false, false, false, null, null, null);

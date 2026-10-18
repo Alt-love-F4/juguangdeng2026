@@ -7,7 +7,7 @@ namespace Spotlight.FreeCafe
     /// <summary>Real first-day handoff from the practice order to the business loop.</summary>
     public sealed class FreeCafeBusinessTutorial : MonoBehaviour
     {
-        public enum Stage { OpenRecipe, CloseRecipe, ReturnToCafe, StartBusiness, WaitForCustomer, InspectCustomer, ReadOrder }
+        public enum Stage { OpenRecipe, CloseRecipe, ReturnToCafe, StartBusiness, WaitForCustomer, InspectCustomer, ReadOrder, TodoGuidance }
         public Stage CurrentStage { get; private set; }
         public bool IsRunning { get; private set; }
         public string TodoInstruction => panel != null ? panel.instruction.text : "跟随正式营业教程继续操作。";
@@ -31,8 +31,8 @@ namespace Spotlight.FreeCafe
             panel.shade.enabled = false;
             IsRunning = true;
             CurrentStage = Stage.OpenRecipe;
-            // Reuse the prominent button only for the final explicit acknowledgement.
-            panel.retryButton.onClick.AddListener(ConfirmOrderRead);
+            // Reuse the prominent button for the final order and todo acknowledgements.
+            panel.retryButton.onClick.AddListener(ConfirmCurrentStage);
             var confirmRect = (RectTransform)panel.retryButton.transform;
             confirmRect.sizeDelta = new Vector2(360, confirmRect.sizeDelta.y);
             var confirmText = panel.retryButton.GetComponentInChildren<TMPro.TMP_Text>();
@@ -60,10 +60,23 @@ namespace Spotlight.FreeCafe
                 return;
             }
         }
+        private void ConfirmCurrentStage()
+        {
+            if (CurrentStage == Stage.TodoGuidance) ConfirmTodoGuidance();
+            else ConfirmOrderRead();
+        }
+
         public void ConfirmOrderRead()
         {
             if (!IsRunning || CurrentStage != Stage.ReadOrder || app.TutorialInputBlocked) return;
             if (app.World.Request(app.World.State.focusedRequestId) == null) return;
+            CurrentStage = Stage.TodoGuidance;
+            Draw();
+        }
+
+        public void ConfirmTodoGuidance()
+        {
+            if (!IsRunning || CurrentStage != Stage.TodoGuidance || app.TutorialInputBlocked) return;
             app.NotifyTutorialStepCompleted(CafeTutorialSession.TutorialId, CafeTutorialSession.PostCoffeeSignal);
             // The day-flow completion normally calls Stop; also handle an endpoint without a subscriber.
             Stop();
@@ -136,23 +149,28 @@ namespace Spotlight.FreeCafe
                     summary = "先问顾客想喝什么\n点击顾客查看需求\n不要直接开始制作";
                     target = WorldPoint(customerId);
                     break;
+                case Stage.TodoGuidance:
+                    description = "开业引导已完成！\n如果不知道接下来做什么，可以按下 T，或点击右上角的「待办事项」面板，查看下一步该做什么。";
+                    summary = "不知道下一步做什么？\n按 T 或点击右上角「待办事项」\n查看下一步指引";
+                    break;
                 default:
-                    description = "看左上角订单卡：确认顾客、饮品、杯型和耐心。多份订单可切换查看；不记得做法就到工作台查咖啡谱。\n点击「明白了，开始经营」结束引导：查看需求 → 制作咖啡 → 放盘按铃交付。";
-                    summary = "看左上角订单\n确认饮品、杯型和耐心\n读完点「明白了，开始经营」";
+                    description = "看左上角订单卡：确认顾客、饮品、杯型和耐心。多份订单可切换查看；不记得做法就到工作台查咖啡谱。\n查看需求 → 制作咖啡 → 放盘按铃交付。读完后点击「明白了，下一步」。";
+                    summary = "看左上角订单\n确认饮品、杯型和耐心\n读完点「明白了，下一步」";
                     if (hud != null && hud.orderButtons != null && hud.orderButtons.Length > 0 && hud.orderButtons[0] != null)
                         ui = hud.orderButtons[0].transform as RectTransform;
                     break;
             }
             if (ui != null) target = RectTransformUtility.WorldToScreenPoint(null, ui.TransformPoint(ui.rect.center));
-            panel.heading.text = "首日新手教程 · 正式营业";
+            bool todoGuidance = CurrentStage == Stage.TodoGuidance;
+            panel.heading.text = todoGuidance ? "首日新手教程 · 下一步指引" : "首日新手教程 · 正式营业";
             panel.instruction.text = description;
-            panel.errorText.text = "完成咖啡谱、营业、顾客需求和订单引导后，进入自由经营";
-            panel.gesture.gameObject.SetActive(true);
+            panel.errorText.text = todoGuidance ? "待办事项会提示下一步目标；确认后即可自由经营" : "完成咖啡谱、营业、顾客需求和订单引导后，进入自由经营";
+            panel.gesture.gameObject.SetActive(!todoGuidance);
             panel.gestureText.text = summary;
             panel.SetMouseMode(false, false);
-            bool confirm = CurrentStage == Stage.ReadOrder;
+            bool confirm = CurrentStage == Stage.ReadOrder || todoGuidance;
             panel.retry.SetActive(confirm);
-            panel.retryButton.GetComponentInChildren<TMPro.TMP_Text>().text = "明白了，开始经营";
+            panel.retryButton.GetComponentInChildren<TMPro.TMP_Text>().text = todoGuidance ? "明白了，开始经营" : "明白了，下一步";
             float scale = panel.canvas.scaleFactor;
             Vector2 half = panel.gesture.rect.size * .5f + Vector2.one * 12;
             var badge = target + Vector2.down * (half.y + 65) * scale;
@@ -162,7 +180,7 @@ namespace Spotlight.FreeCafe
             for (int i = 0; i < panel.trail.Length; i++)
             {
                 var dot = panel.trail[i];
-                dot.enabled = CurrentStage != Stage.WaitForCustomer;
+                dot.enabled = CurrentStage != Stage.WaitForCustomer && !todoGuidance;
                 float angle = i * Mathf.PI * 2 / panel.trail.Length;
                 float radius = (40 + 12 * Mathf.Sin(Time.unscaledTime * 4)) * scale;
                 dot.rectTransform.position = target + new Vector2(Mathf.Cos(angle), Mathf.Sin(angle)) * radius;

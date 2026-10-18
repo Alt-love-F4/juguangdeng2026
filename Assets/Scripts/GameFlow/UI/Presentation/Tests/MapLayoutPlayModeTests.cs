@@ -251,7 +251,7 @@ namespace Spotlight.GameFlow.Tests
             var tasks = GameplayHudPanel.Instance.Tasks;
             tasks.SetItems(new[]
             {
-                new MapTaskItem { id = "active", name = "Active", currentTask = "Current", previousTasks = new List<string> { "Previous" } },
+                new MapTaskItem { id = "active", name = "Active", currentTask = "Current", previousTasks = new List<string> { "Previous" }, navigationLabel = "查看地点与行动" },
                 new MapTaskItem { id = "done", name = "Done", completed = true }
             });
             yield return null;
@@ -263,6 +263,17 @@ namespace Spotlight.GameFlow.Tests
             Assert.That(content.Find("PreviousTask").GetComponent<TMP_Text>().text, Does.Contain("Previous"));
             Assert.That(content.Find("CurrentTask").GetComponent<TMP_Text>().text, Does.Contain("Current"));
             Assert.That(content.Find("Track_active"), Is.Not.Null);
+            foreach (string node in new[] { "Navigate_active", "Track_active" })
+            {
+                var button = content.Find(node).GetComponent<Button>();
+                var image = button.GetComponent<Image>();
+                var label = button.GetComponentInChildren<TMP_Text>(true);
+                Assert.That(image.sprite, Is.EqualTo(MapVisualTheme.Current.taskCard), "Expanded actions reuse paper artwork.");
+                Assert.That(image.color, Is.EqualTo((Color)new Color32(224, 176, 107, 255)));
+                Assert.That(label.color, Is.EqualTo(MapVisualTheme.Ink), "Never inherit white-on-white template text.");
+                Assert.That(label.alignment, Is.EqualTo(TextAlignmentOptions.Center));
+                Assert.That(button.colors.pressedColor, Is.Not.EqualTo(button.colors.normalColor));
+            }
             tasks.SetVisible(false);
             tasks.SetVisible(true);
             Assert.That(content.Find("CurrentTask"), Is.Not.Null, "Visibility must preserve expansion.");

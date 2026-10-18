@@ -21,7 +21,7 @@ namespace Spotlight.FreeCafe
         public bool showEquipmentUpgradeUI;
         [Tooltip("可选身份适配器，必须实现 ICafeCustomerIdentitySource；不负责启动剧情。") ]
         public MonoBehaviour customerIdentitySource;
-        [Tooltip("运行时由 Luban Object 表创建；保留旧序列化字段以兼容场景。显式身份提供者优先。")]
+        [Tooltip("运行时由 Luban Object 表创建；普通客流仅借用 guest_* 外观，指定角色由 NCS 来访安排。保留旧序列化字段。")]
         public Spotlight.Narrative.CharacterCatalog characterCatalog;
         public Spotlight.Narrative.CharacterProfile Character(string id) => characterCatalog != null ? characterCatalog.Find(id) : null;
         public TextAsset catalogAsset;
@@ -183,7 +183,8 @@ namespace Spotlight.FreeCafe
             var identities = customerIdentitySource as ICafeCustomerIdentitySource;
             if(identities==null && characterCatalog!=null && characterCatalog.Characters.Count>0)
                 identities=new CatalogCustomerIdentitySource(characterCatalog);
-            if(customerIdentitySource==null && seating!=null && !IsSandboxMode) identities=seating.WithSuppliedGuest(identities);
+            // Named/supplied visitors must not leak into the ordinary opening batch.
+            // Explicit scene identity providers remain supported; NCS visits use CafeVisitBridge.
             World=new CafeWorld(catalog,identities);
             if(prefabLibrary==null) throw new InvalidOperationException("请配置 EntityPrefabLibrary");
             prefabLibrary.Validate(World.Catalog);
@@ -260,14 +261,14 @@ namespace Spotlight.FreeCafe
             if (sessionReady)
             {
                 if (pendingDailyCupRefresh) { RefreshDailyCups(); pendingDailyCupRefresh = false; }
-                if (!IsSandboxMode)
+                if (!IsSandboxMode || NarrativeRuntime.Instance != null)
                 {
                     if (cafeVisits == null) cafeVisits = new CafeVisitBridge(this);
                     cafeVisits.Pump();
                 }
                 if (pendingBusinessStart) TryStartBusiness();
                 if (!BusinessSimulationPaused && (IsSandboxMode || Spotlight.Narrative.NarrativeRuntime.Instance == null || cafeVisits != null && cafeVisits.Ready)) World.Tick(Time.deltaTime);
-                if (!IsSandboxMode) cafeVisits?.Pump();
+                if (!IsSandboxMode || NarrativeRuntime.Instance != null) cafeVisits?.Pump();
             }
             if (IsDragging && PresentationPauseRegistry.IsPaused) CancelDrag();
             if(IsDragging && draggingVessel && !InputBlocked) UpdateVesselInput();
@@ -1302,7 +1303,7 @@ namespace Spotlight.FreeCafe
         {
             if (World == null || World.State.open) { pendingBusinessStart = false; return; }
             if (GameplayBlocked || TutorialBusinessStartBlocked || PracticeTutorialActive) return;
-            if (!IsSandboxMode)
+            if (!IsSandboxMode || NarrativeRuntime.Instance != null)
             {
                 if (cafeVisits == null) cafeVisits = new CafeVisitBridge(this);
                 var ncs = Spotlight.Narrative.NarrativeRuntime.Instance;
@@ -1310,7 +1311,7 @@ namespace Spotlight.FreeCafe
             }
             pendingBusinessStart = false;
             Report(World.StartDay(IsSandboxMode));
-            if (!IsSandboxMode) cafeVisits?.Pump();
+            if (!IsSandboxMode || NarrativeRuntime.Instance != null) cafeVisits?.Pump();
         }
         public bool CanEndBusiness => World != null && World.State.open && !InputBlocked && !IsDragging
             && !CafeTutorialActive && !PracticeTutorialActive;
@@ -1345,6 +1346,36 @@ namespace Spotlight.FreeCafe
         public void RefillSources() { if(!InputBlocked) Report(World.Refill()); }
         public void RotateSelected() { if(!InputBlocked) World.Rotate(SelectedId); }
         public void DebugRefreshViews() { SyncViews(); ShowHint("经营视图已刷新"); }
+        /// <summary>GM requests the authored NCS events, never creates a fake story customer.</summary>
+        public ActionResult DebugArrangeCafeVisit(bool delayed = false)
+        {
+            if (World == null) return ActionResult.No("请先进入咖啡馆");
+            if (CafeTutorialActive || PracticeTutorialActive) return ActionResult.No("请先完成或跳过咖啡馆教程");
+            var ncs = NarrativeRuntime.Instance;
+            if (ncs == null || !ncs.IsReady) return ActionResult.No("NCS 尚未就绪，请从启动场景进入正式游戏会话");
+            if (ncs.Controller.IsBusy || !ncs.Controller.IsSafeBoundary) return ActionResult.No("剧情正在执行或结算，请稍后再试");
+            foreach (var visit in ncs.GetCommittedCafeVisits().Visits)
+                if (!visit.IsEnded && visit.CharacterId == "adele") return ActionResult.No("阿黛尔已有剧情来访，请查看来访状态或先取消");
+            foreach (var entity in World.State.entities)
+                if (entity.person?.characterId == "adele") return ActionResult.No("店内已有阿黛尔，请勿先使用普通强制召唤");
+            string reserve = delayed ? "EV_DEMO_CAFE_DELAYED_RESERVE" : "EV_DEMO_CAFE_RESERVE";
+            string arrive = "EV_DEMO_CAFE_ARRIVE";
+            var reservation = ncs.Controller.ExplainEvent(reserve);
+            if (!reservation.CanRequest) return ActionResult.No(reservation.ToString());
+            var arrival = ncs.Controller.ExplainEvent(arrive);
+            if (!arrival.CanRequest) return ActionResult.No(arrival.ToString());
+            if (!ncs.QueueEvent(reserve)) return ActionResult.No("预约事件被拒绝：" + reserve);
+            ncs.Controller.RunAtSafeBoundary(() =>
+            {
+                if (NarrativeRuntime.Instance != ncs) return;
+                if (!ncs.QueueEvent(arrive)) { ShowHint("到场事件被拒绝：" + ncs.Controller.ExplainEvent(arrive)); return; }
+                cafeVisits ??= new CafeVisitBridge(this);
+                cafeVisits.Pump();
+            });
+            return ActionResult.Yes("已通过 NCS 安排阿黛尔" + (delayed ? "延迟来访（当次营业累计 30 秒）" : "剧情来访")
+                + (World.State.open ? "；满座时等位，不挤掉客人。" : "；点击开始营业后到店。"));
+        }
+
         public ActionResult DebugSummonCustomer(string characterId, int seatIndex = -1,
             bool allowDuplicate = true, bool replaceExisting = false)
         {

@@ -5,7 +5,7 @@ namespace Spotlight.FreeCafe
 {
     public enum CafePersonRole { Customer, Staff, Player }
 
-    /// <summary>人物身份快照。personId 是人，不是座位号；narrativeCharacterId 仅为未来 NCS 适配的引用。</summary>
+    /// <summary>人物身份快照。personId 是一次普通到访或一个剧情人物；narrativeCharacterId 仅在显式剧情身份中填写。</summary>
     [Serializable]
     public sealed class CafePersonIdentity
     {

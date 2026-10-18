@@ -51,7 +51,9 @@ namespace Spotlight.FreeCafe
                     foreach (var other in State.cafeVisits)
                         if (other != v && other.status != CafeVisitStatus.Ended && !string.IsNullOrEmpty(v.preferredSeatId) && other.preferredSeatId == v.preferredSeatId)
                             VisitDiagnostic(v, "seat_conflict");
-                    v.budgetReserved = !State.open || State.todayArrivals + ReservedVisitBudget() < State.todayCustomerBudget;
+                    // Narrative traffic is additional to the normal daily customer budget.
+                    v.budgetReserved = true;
+                    if (State.open) State.todayCustomerBudget++;
                     EmitVisit(v, "reserved");
                 }
                 if (v.status == CafeVisitStatus.Ended) continue;
@@ -121,11 +123,9 @@ namespace Spotlight.FreeCafe
             int minimum = 0;
             foreach (var v in State.cafeVisits) if (AwaitingSeat(v)) { v.budgetReserved = true; minimum++; }
             State.cafeVisitBudgetMinimum = minimum;
-            if (State.todayCustomerBudget < minimum)
-            {
-                State.todayCustomerBudget = minimum;
+            State.todayCustomerBudget += minimum;
+            if (State.todayCustomerBudget > Catalog.economy.maxCustomers)
                 foreach (var v in State.cafeVisits) if (AwaitingSeat(v)) VisitDiagnostic(v, "customer_budget_minimum_adjusted");
-            }
             ProcessVisitArrivals();
         }
         private void ProcessVisitArrivals()
@@ -137,9 +137,9 @@ namespace Spotlight.FreeCafe
                 if (!v.arrivalAuthorized) { v.status = CafeVisitStatus.Reserved; continue; }
                 if (State.businessElapsed < v.arrivalDelaySeconds) { v.status = CafeVisitStatus.PendingArrival; continue; }
                 v.status = CafeVisitStatus.WaitingForSeat;
-                if (!v.budgetReserved && State.todayArrivals + ReservedVisitBudget() < State.todayCustomerBudget) v.budgetReserved = true;
-                if (!v.budgetReserved) { VisitDiagnostic(v, "budget_unavailable"); EmitVisit(v, "waiting"); continue; }
-                bool duplicate = State.entities.Exists(e => e.person != null && (e.person.personId == v.identity.personId || e.person.characterId == v.characterId));
+                // Also converge old saves that were waiting for a shared ordinary budget.
+                if (!v.budgetReserved) { State.todayCustomerBudget++; v.budgetReserved = true; }
+                bool duplicate = State.entities.Exists(e => e.person != null && (e.person.personId == v.identity.personId || e.person.narrativeCharacterId == v.characterId));
                 int slot = duplicate ? -1 : AvailableSeat(v);
                 if (slot < 0) { if (duplicate) VisitDiagnostic(v, "character_already_present"); EmitVisit(v, "waiting"); continue; }
                 var eligible = new List<ProductSpec>();

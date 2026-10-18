@@ -149,6 +149,18 @@ namespace Spotlight.FreeCafe
 
         private void BuildCafeVisits()
         {
+            AddAction("一键安排阿黛尔剧情来访（含对话）", () =>
+            {
+                var result = runtime.DebugArrangeCafeVisit();
+                Report(result);
+                if (result.success) SetVisible(false);
+            }, "走 NCS 预约与到场事件；未营业时先预约。入座后点击交谈，上餐后自动对话并留店继续聊。");
+            AddAction("一键安排阿黛尔延迟来访", () =>
+            {
+                var result = runtime.DebugArrangeCafeVisit(true);
+                Report(result);
+                if (result.success) SetVisible(false);
+            }, "当次营业累计 30 秒后申请入座；此预设仅测试延迟与离店，没有配置阶段对话。");
             foreach (string suffix in new[] { "RESERVE", "DELAYED_RESERVE", "ARRIVE", "CANCEL" })
             {
                 string id = "EV_DEMO_CAFE_" + suffix;
@@ -167,6 +179,10 @@ namespace Spotlight.FreeCafe
                     text.AppendLine($"{v.visitInstanceId} / {v.characterId} default={v.usesDefaultConfiguration} {v.status}");
                     text.AppendLine($"seat={v.preferredSeatId} actual={v.seatId} budget={v.budgetReserved} delay={Mathf.Max(0,v.arrivalDelaySeconds-runtime.World.State.businessElapsed):F1} patience={v.patienceRemaining:F1} reason={v.endReason}");
                     text.AppendLine("diagnostics=" + string.Join(",", v.diagnostics));
+                    var config = Spotlight.Narrative.NarrativeRuntime.Instance?.Configuration;
+                    if (config != null)
+                        text.AppendLine("hooks=" + string.Join(",", config.cafeVisitHooks
+                            .FindAll(h => h.visitKey == v.visitKey).ConvertAll(h => h.stage + "/" + h.trigger + " → " + h.eventId)));
                 }
                 foreach (var f in runtime.World.State.cafeVisitFeedback) text.AppendLine($"pending #{f.sequence} {f.visitInstanceId} {f.stage} click={f.isClick}");
                 text.AppendLine("NCS active=" + (Spotlight.Narrative.NarrativeRuntime.Instance?.Controller?.IsBusy ?? false));
@@ -374,7 +390,8 @@ namespace Spotlight.FreeCafe
 
         private void BuildTimeAndCustomers()
         {
-            AddAction("召唤指定顾客…", BuildCustomerSummon, "按角色名字或 ID 搜索；点击角色即可召唤到空座");
+            AddAction("NCS 剧情客人来店（含对话）…", () => SelectCategory("特殊来访"), "剧情客人与普通客流分开，走预约、到场和对话事件");
+            AddAction("强制召唤指定外观（不触发剧情）…", BuildCustomerSummon, "仅测试人物、座位和订单；不会建立 NCS 来访");
             AddAction("剩余时间设为 60 秒", () => Report(runtime.World.DebugSetTime(60)), "仅修改营业倒计时");
             AddAction("剩余时间设为 10 秒", () => Report(runtime.World.DebugSetTime(10)), "用于测试倒计时结算");
             AddAction("生成 1 位顾客", () => Report(runtime.World.DebugSpawnCustomers(1)), "需要营业且有空卡座");

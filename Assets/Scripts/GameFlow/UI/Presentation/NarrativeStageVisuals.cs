@@ -108,17 +108,32 @@ namespace Spotlight.GameFlow
             return entry;
         }
         private static readonly System.Collections.Generic.HashSet<string> warnedPlaceholders = new System.Collections.Generic.HashSet<string>(StringComparer.Ordinal);
-        public static Entry Resolve(string key, string contextKey = null)
+        private sealed class BackgroundResources
+        {
+            public readonly NarrativeStageVisuals library = Resources.Load<NarrativeStageVisuals>("Dialogue/NarrativeStageVisuals");
+            public readonly System.Collections.Generic.Dictionary<string, Texture> textures = new System.Collections.Generic.Dictionary<string, Texture>(StringComparer.Ordinal);
+        }
+        // Owner lifetime is the narrative batch, not the entire game session. Context overrides
+        // are still resolved per page; only resource lookups are reused, never the authored rules.
+        private static readonly System.Runtime.CompilerServices.ConditionalWeakTable<object, BackgroundResources> resourcesByOwner
+            = new System.Runtime.CompilerServices.ConditionalWeakTable<object, BackgroundResources>();
+        public static Entry Resolve(string key, string contextKey = null, object continuityOwner = null)
         {
             if (string.IsNullOrWhiteSpace(key)) return null;
-            var library = Resources.Load<NarrativeStageVisuals>("Dialogue/NarrativeStageVisuals");
+            var scope = continuityOwner == null ? null : resourcesByOwner.GetValue(continuityOwner, _ => new BackgroundResources());
+            var library = scope != null ? scope.library : Resources.Load<NarrativeStageVisuals>("Dialogue/NarrativeStageVisuals");
             var resolved = library != null ? library.Find(key, contextKey) : null;
             if (resolved != null)
             {
                 if (resolved.placeholder && warnedPlaceholders.Add(key)) Debug.LogWarning("[NCS][BackgroundPlaceholder] key=" + key + "; using explicitly configured neutral color. Replace registry entry with matching artwork.");
                 return resolved;
             }
-            var texture = Resources.Load<Texture>(key);
+            Texture texture;
+            if (scope == null || !scope.textures.TryGetValue(key, out texture) || texture == null)
+            {
+                texture = Resources.Load<Texture>(key);
+                if (texture != null && scope != null) scope.textures[key] = texture;
+            }
             if (texture == null) throw new InvalidOperationException("Missing narrative background resource: " + key);
             return new Entry { key = key, texture = texture };
         }

@@ -133,7 +133,9 @@ namespace Spotlight.GameFlow.Tests
             Assert.That(panel.EffectStage.localScale, Is.EqualTo(Vector3.one));
             foreach (TMPro.TMP_Text label in panel.GetComponentsInChildren<TMPro.TMP_Text>())
                 Assert.That(label.transform.localScale.x, Is.GreaterThan(0));
-            Assert.That(panel.LeftPortrait.color.a, Is.GreaterThan(.99f));
+            // The non-speaking portrait intentionally uses inactiveTint (including alpha .85).
+            // Entrance must be visible, not force that independent focus channel to opaque white.
+            Assert.That(panel.LeftPortrait.color.a, Is.GreaterThan(.8f));
             yield return null;
         }
         [UnityTest]

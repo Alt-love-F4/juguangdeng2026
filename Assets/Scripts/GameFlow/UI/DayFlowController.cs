@@ -70,6 +70,7 @@ namespace Spotlight.GameFlow
         private int presentationVersion;
         private string previousDate = InitialDate;
         private int day = 1;
+        private int lastCafeEntryDay;
 
         public DayFlowState State { get; private set; } = DayFlowState.DateTransition;
         public int CurrentDay => day;
@@ -145,6 +146,7 @@ namespace Spotlight.GameFlow
             HideForMainMenu();
             // The GameFlow session owns identity; reopening this flow must not reset it.
             day = 1;
+            lastCafeEntryDay = 0;
             newSessionFirstDay = true;
             firstDayCafeTutorialStarted = false;
             firstDayCafeTutorialCompleted = false;
@@ -167,6 +169,7 @@ namespace Spotlight.GameFlow
         internal void BeginStandaloneCafeTutorial()
         {
             day = 1;
+            lastCafeEntryDay = 1;
             previousDate = InitialDate;
             newSessionFirstDay = false;
             firstDayIntroductionCompleted = false;
@@ -329,8 +332,33 @@ namespace Spotlight.GameFlow
 
         private void EnterBusinessTransition()
         {
+            var cafe = PlayerCafeOwner.Current;
+            bool alreadyClosedToday = cafe != null && cafe.State.day == day
+                && cafe.State.businessPhase == Spotlight.FreeCafe.BusinessPhase.Night;
+            if (lastCafeEntryDay == day || alreadyClosedToday)
+            {
+                // A cancelled/failed first-day introduction is not a completed handoff.
+                if (day == 1 && !firstDayIntroductionCompleted) EnterFirstDayIntroductionOrBusiness();
+                else ResumeCafeVisit();
+                return;
+            }
+            ShowCafeOpening();
+        }
+
+        private void ShowCafeOpening()
+        {
+            lastCafeEntryDay = day;
             SetState(DayFlowState.BusinessTransition);
             ShowPresentation<CafeOpeningPanel>(EnterFirstDayIntroductionOrBusiness);
+        }
+
+        private void ResumeCafeVisit()
+        {
+            lastCafeEntryDay = day;
+            ClosePresentation();
+            businessWasActive = FindGameplayEndpoint()?.DayFlowBusinessActive == true;
+            SetState(DayFlowState.FreeCafeBusiness);
+            ShowGameplayPanel();
         }
 
         private void EnterFirstDayIntroductionOrBusiness()
@@ -433,7 +461,7 @@ namespace Spotlight.GameFlow
                 Debug.LogException(error, this);
                 SetState(DayFlowState.PreBusiness);
                 HideGameplayPanel();
-                ShowPresentation<PreBusinessPanel>(EnterBusinessTransition,
+                ShowPresentation<PreBusinessPanel>(ShowCafeOpening,
                     panel => panel.ShowIntroductionUnavailable());
             }
         }
@@ -693,10 +721,11 @@ namespace Spotlight.GameFlow
                 }
 #endif
                 SetState(DayFlowState.PreBusiness);
-                ShowPresentation<PreBusinessPanel>(EnterBusinessTransition,
+                ShowPresentation<PreBusinessPanel>(ShowCafeOpening,
                     panel => panel.ShowUnavailable());
                 return;
             }
+            lastCafeEntryDay = day;
             SetState(DayFlowState.FreeCafeBusiness);
             ShowGameplayPanel();
             endpoint.StartDayFlowBusiness();
@@ -764,6 +793,23 @@ namespace Spotlight.GameFlow
                 return;
             }
             ShowGameplayPanel();
+        }
+
+        /// <summary>A non-business visit: reach the bed without starting business or ending the day.</summary>
+        public bool TryVisitCafeForRest(Action arrived, Action failed = null)
+        {
+            var runtime = NarrativeRuntime.Instance;
+            if (!SessionAllowsPlay || !running || flow == null || IsFirstSessionGuideActive || awaitingNarrativeEntry
+                || (runtime?.Controller?.IsBusy ?? false) || (runtime?.Actions?.IsExecuting ?? false)
+                || (runtime?.Actions?.HasBlockingActions() ?? false)
+                || PlayerCafeOwner.Current?.State.open == true
+                || (State != DayFlowState.CityMapLeisure && State != DayFlowState.FreeCafeBusiness)) return false;
+            flow.TransitionToGameplayScene("CoffeeShop", () =>
+            {
+                ResumeCafeVisit();
+                arrived?.Invoke();
+            }, failed);
+            return true;
         }
 
         /// <summary>Called by the map when the player selects the cafe location.</summary>
@@ -1048,6 +1094,7 @@ namespace Spotlight.GameFlow
             public bool firstDayIntroductionCompleted;
             public bool firstDayCafeTutorialStarted;
             public bool firstDayCafeTutorialCompleted;
+            public int lastCafeEntryDay;
         }
 
         public string CaptureJson() => JsonUtility.ToJson(new SaveState
@@ -1055,7 +1102,8 @@ namespace Spotlight.GameFlow
             day = day, previousDate = previousDate, state = State,
             firstDayIntroductionCompleted = firstDayIntroductionCompleted,
             firstDayCafeTutorialStarted = firstDayCafeTutorialStarted,
-            firstDayCafeTutorialCompleted = firstDayCafeTutorialCompleted
+            firstDayCafeTutorialCompleted = firstDayCafeTutorialCompleted,
+            lastCafeEntryDay = lastCafeEntryDay
         });
 
         public void RestoreJson(string json)
@@ -1069,6 +1117,11 @@ namespace Spotlight.GameFlow
             newSessionFirstDay = false;
             firstDayCafeTutorialStarted = saved.firstDayCafeTutorialStarted;
             firstDayCafeTutorialCompleted = saved.firstDayCafeTutorialCompleted;
+            lastCafeEntryDay = Mathf.Clamp(saved.lastCafeEntryDay, 0, day);
+            // Legacy saves in/after business have already entered the cafe that day.
+            if (State == DayFlowState.FreeCafeBusiness || State == DayFlowState.PreLeisure
+                || day == 1 && firstDayCafeTutorialCompleted)
+                lastCafeEntryDay = day;
             // Old saves already in/after business must not replay the introduction.
             firstDayIntroductionCompleted = saved.firstDayIntroductionCompleted || day > 1
                 || (State >= DayFlowState.FreeCafeBusiness && State <= DayFlowState.DayComplete);
@@ -1090,6 +1143,7 @@ namespace Spotlight.GameFlow
             {
                 // Missing day-flow data must not inherit the previous session's date.
                 day = 1;
+                lastCafeEntryDay = 0;
                 previousDate = InitialDate;
                 firstDayIntroductionCompleted = true;
                 newSessionFirstDay = false;
@@ -1116,7 +1170,8 @@ namespace Spotlight.GameFlow
                 case DayFlowState.IntroLetter: ShowPresentation<FirstDayLetterPanel>(EnterAvatarSelection, ConfigureFirstDayLetter); break;
                 case DayFlowState.DateTransition: BeginNewDayFlow(); break;
                 case DayFlowState.PreBusiness: EnterCityMap(); break;
-                case DayFlowState.BusinessTransition: EnterBusinessTransition(); break;
+                // Resume an unconfirmed opening page even though this visit is already recorded.
+                case DayFlowState.BusinessTransition: ShowCafeOpening(); break;
                 case DayFlowState.FreeCafeBusiness:
                     businessWasActive = FindGameplayEndpoint()?.DayFlowBusinessActive == true;
                     ClosePresentation();

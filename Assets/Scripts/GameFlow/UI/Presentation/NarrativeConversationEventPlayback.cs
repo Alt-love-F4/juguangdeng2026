@@ -57,7 +57,7 @@ namespace Spotlight.GameFlow
                 options: options, continuityOwner: data.continuityOwner, continues: data.continues, musicKey: data.bgmOverride,
                 backgroundVisual: NarrativeStageVisuals.Resolve(data.backgroundPath,
                     data.lines.Count > 0 && !string.IsNullOrWhiteSpace(data.lines[0].pageId)
-                        ? data.lines[0].pageId : data.presentationKey));
+                        ? data.lines[0].pageId : data.presentationKey, data.continuityOwner));
         }
 
         private static readonly HashSet<string> warnedPortraits = new HashSet<string>(StringComparer.Ordinal);

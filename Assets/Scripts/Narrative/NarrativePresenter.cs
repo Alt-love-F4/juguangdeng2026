@@ -5,7 +5,7 @@ using UnityEngine;
 
 namespace Spotlight.Narrative
 {
-    public sealed partial class NarrativePresenter : INarrativePresenter, INarrativePresentationDrain, INarrativePresentationCancellation, IDisposable
+    public sealed partial class NarrativePresenter : INarrativePresenter, INarrativePresentationDrain, INarrativePresentationCancellation, INarrativePresentationContinuity, IDisposable
     {
         private readonly NarrativeConfiguration configuration;
         private readonly Func<string, string> resolve;
@@ -61,6 +61,76 @@ namespace Spotlight.Narrative
         /// <summary>Preview hosts only; null plays the complete formal sequence.</summary>
         public string PreviewStartPageId { get; set; }
         private Action releaseActiveStage;
+        private sealed class ContinuityStage
+        {
+            public readonly object Owner = new object();
+            public string Background;
+            public bool Released;
+            public Action Release, ConversationRelease;
+            public List<Action> StepReleases = new List<Action>();
+        }
+        private bool batchActive;
+        private ContinuityStage batchStage;
+
+        public void BeginBatch()
+        {
+            if (disposed) throw new ObjectDisposedException(nameof(NarrativePresenter));
+            batchActive = true;
+        }
+
+        public void EndBatch()
+        {
+            // Detach first: releasing an adapter may synchronously begin the next batch.
+            batchActive = false;
+            var stage = batchStage;
+            batchStage = null;
+            if (stage != null) ReleaseStage(stage);
+        }
+
+        private ContinuityStage CreateStage()
+        {
+            var stage = new ContinuityStage();
+            stage.Release = () => ReleaseStage(stage);
+            return stage;
+        }
+
+        private void ReleaseStage(ContinuityStage stage)
+        {
+            if (stage.Released) return;
+            stage.Released = true;
+            if (ReferenceEquals(releaseActiveStage, stage.Release)) releaseActiveStage = null;
+            suspendActiveLetter = null;
+            bool wasReleasing = stageReleaseInProgress;
+            stageReleaseInProgress = true;
+            try
+            {
+                InvokeStageRelease(stage.ConversationRelease);
+                foreach (var release in stage.StepReleases.ToArray()) InvokeStageRelease(release);
+            }
+            finally
+            {
+                stage.ConversationRelease = null;
+                stage.StepReleases.Clear();
+                stageReleaseInProgress = wasReleasing;
+            }
+        }
+
+        private void InvokeStageRelease(Action release)
+        {
+            if (release == null) return;
+            bool wasReleasing = stageReleaseInProgress;
+            stageReleaseInProgress = true;
+            try { release(); } catch (Exception error) { Debug.LogException(error); }
+            finally { stageReleaseInProgress = wasReleasing; }
+        }
+
+        private void RetainConversationRelease(ContinuityStage stage, Action release, bool batched)
+        {
+            if (release == null) return;
+            if (stage.Released) InvokeStageRelease(release); // Adapter returned after synchronous cancellation.
+            else if (batched) stage.ConversationRelease = release;
+            else stage.StepReleases.Add(release);
+        }
         private Action<bool> suspendActiveLetter;
         private bool stageCancellationRequested, stageReleaseInProgress;
         public NarrativeReadingPlayback ReadingPlayback { get => readingPlayback; set => readingPlayback = value; }
@@ -186,14 +256,16 @@ namespace Spotlight.Narrative
 
         private void AbortPresentation(string reason)
         {
-            bool wasActive = completion != null || draining;
+            bool wasActive = completion != null || draining || batchActive || releaseActiveStage != null;
             sessionVersion++;
             pauseOwner?.Dispose();
             pauseOwner = null;
             completion = drainCompleted = null;
             draining = choosing = false;
-            releaseActiveStage?.Invoke();
+            var release = releaseActiveStage;
             releaseActiveStage = null;
+            EndBatch();
+            release?.Invoke();
             suspendActiveLetter = null;
             effects.Clear();
             resources.RestoreCamera();
@@ -252,7 +324,7 @@ namespace Spotlight.Narrative
             allowSkip = string.Equals(template?.interruptType, "playback", StringComparison.OrdinalIgnoreCase) && (setup?.skipAble ?? template?.defaultSkip ?? false);
             string resolvedTitle = resolve(Get("titleKey", definition.titleText));
             if (!(Get("checkDisplay") == "passive" && string.IsNullOrWhiteSpace(definition.presentationKey)
-                && (definition.contentKeys == null || definition.contentKeys.Count == 0))) ui.Show(resolvedTitle);
+                && (definition.contentKeys == null || definition.contentKeys.Count == 0))) ui.Show(resolvedTitle, batchStage?.ConversationRelease != null);
             finishPresentation = false;
             presentedChoiceGroups.Clear();
             pageIndex = 0; choicesEverShown = false; continueEverShown = false; finishPresentation = false; pages.Clear();
@@ -294,14 +366,14 @@ namespace Spotlight.Narrative
                         {
                             yield return ConversationPages(definition, resolvedTitle, Get("bg"));
                             if (completion == null) yield break; // cancelled; never run trailing atoms
-                            ui.Show(resolvedTitle);
+                            ui.Show(resolvedTitle, batchStage?.ConversationRelease != null);
                             break;
                         }
                         if (isNotice && !string.IsNullOrWhiteSpace(definition.presentationKey))
                         {
                             yield return Notice(definition, resolvedTitle);
                             finishPresentation = false;
-                            ui.Show(resolvedTitle);
+                            ui.Show(resolvedTitle, batchStage?.ConversationRelease != null);
                             break;
                         }
                         if (isReading && configuration?.presentations?.readingPages?.Exists(page =>
@@ -309,7 +381,7 @@ namespace Spotlight.Narrative
                         {
                             yield return ReadingPages(definition, resolvedTitle);
                             if (disposed || sessionVersion != sequenceVersion) yield break;
-                            ui.Show(resolvedTitle);
+                            ui.Show(resolvedTitle, batchStage?.ConversationRelease != null);
                             break;
                         }
                         string lines = Get("lines", Get("textKey"));
@@ -329,14 +401,18 @@ namespace Spotlight.Narrative
                                     ui.Hide();
                                     while (!done && !skipRequested && !disposed && sessionVersion == version) yield return null;
                                     if (disposed || sessionVersion != version) yield break;
-                                    ui.Show(resolvedTitle);
+                                    ui.Show(resolvedTitle, batchStage?.ConversationRelease != null);
                                     break;
                                 }
                             }
                             if (conversationPlayback != null)
                             {
+                                var stage = batchActive ? batchStage ?? (batchStage = CreateStage()) : null;
+                                if (stage != null && !string.IsNullOrWhiteSpace(Get("bg"))) stage.Background = Get("bg");
                                 var data = new NarrativeConversationPresentationData { title = resolvedTitle,
-                                    eventId = definition.eventId, presentationKey = definition.presentationKey };
+                                    eventId = definition.eventId, presentationKey = definition.presentationKey,
+                                    continuityOwner = stage?.Owner, continues = stage != null,
+                                    backgroundPath = stage?.Background ?? Get("bg") };
                                 var speaker = configuration?.objects?.Find(o => o.objId == definition.actorId && o.objType != NarrativeObjectType.World);
                                 var character = speaker == null ? null : characterResolver?.Invoke(speaker.objId, resolve(speaker.nameText), speaker.portraitPath);
                                 foreach (var text in pages)
@@ -347,11 +423,17 @@ namespace Spotlight.Narrative
                                         portrait = character?.portrait, side = "right", text = text
                                     });
                                 bool dialogueDone = false;
-                                if (conversationPlayback(request, data, () => dialogueDone = true))
+                                long dialogueVersion = sessionVersion;
+                                data.cancelled = () => { if (!stageReleaseInProgress && sessionVersion == dialogueVersion) stageCancellationRequested = true; };
+                                bool handled;
+                                try { handled = conversationPlayback(request, data, () => { if (sessionVersion == dialogueVersion) dialogueDone = true; }); }
+                                finally { if (stage != null) RetainConversationRelease(stage, data.releaseStage, true); }
+                                if (handled)
                                 {
                                     ui.Hide();
-                                    while (!dialogueDone) yield return null;
-                                    ui.Show(resolvedTitle); // 后续选项/原子仍由 NCS 执行，不提前结算整个事件。
+                                    while (!dialogueDone && !disposed && sessionVersion == dialogueVersion) yield return null;
+                                    if (disposed || sessionVersion != dialogueVersion) yield break;
+                                    ui.Show(resolvedTitle, batchStage?.ConversationRelease != null); // 后续选项/原子仍由 NCS 执行，不提前结算整个事件。
                                     break;
                                 }
                             }
@@ -404,23 +486,13 @@ namespace Spotlight.Narrative
                 {
                     int startPage = string.IsNullOrWhiteSpace(PreviewStartPageId) ? 0 : dialoguePages.FindIndex(p => p.pageId == PreviewStartPageId);
                     if (startPage < 0) throw new InvalidOperationException("Unknown preview start page: " + PreviewStartPageId);
-                    string inheritedBackground = background;
-                    object stageOwner = new object();
+                    bool batched = batchActive;
+                    var stage = batched ? batchStage ?? (batchStage = CreateStage()) : CreateStage();
+                    if (!string.IsNullOrWhiteSpace(background)) stage.Background = background;
+                    string inheritedBackground = stage.Background;
+                    object stageOwner = stage.Owner;
                     var stageReleases = new List<Action>();
-                    bool stageReleased = false;
-                    void ReleaseStage()
-                    {
-                        if (stageReleased) return;
-                        stageReleased = true;
-                        stageReleaseInProgress = true;
-                        try
-                        {
-                            foreach (var release in stageReleases)
-                                try { release(); } catch (Exception error) { Debug.LogException(error); }
-                        }
-                        finally { stageReleaseInProgress = false; }
-                    }
-                    Action releaseStage = ReleaseStage;
+                    Action releaseStage = stage.Release;
                     releaseActiveStage = releaseStage;
                     try
                     {
@@ -431,7 +503,11 @@ namespace Spotlight.Narrative
                         if (dialoguePages.IndexOf(page) < startPage) continue;
                         if (page.stepType == NarrativeConversationStepType.LetterReveal || page.stepType == NarrativeConversationStepType.LetterRead)
                         {
-                            if (!string.IsNullOrWhiteSpace(page.bgOverride)) inheritedBackground = page.bgOverride;
+                            if (!string.IsNullOrWhiteSpace(page.bgOverride)) stage.Background = inheritedBackground = page.bgOverride;
+                            // Letter and dialogue adapters own different components. Retain both
+                            // cleanup paths without accumulating callbacks across batch events.
+                            if (batched) stage.StepReleases = stageReleases;
+                            else stageReleases = stage.StepReleases;
                             yield return LetterStep(definition, page, stageOwner, stageReleases);
                             if (completion == null) yield break;
                             continue;
@@ -444,10 +520,10 @@ namespace Spotlight.Narrative
                             if (!check.passed) continue;
                             stepHint = PassiveCheckPresentationConfig.Hint(check);
                         }
-                        if (!string.IsNullOrWhiteSpace(page.bgOverride)) inheritedBackground = page.bgOverride;
+                        if (!string.IsNullOrWhiteSpace(page.bgOverride)) stage.Background = inheritedBackground = page.bgOverride;
                         var conversationData = new NarrativeConversationPresentationData { title = resolvedTitle, backgroundPath = inheritedBackground, bgmOverride = page.bgmOverride,
                             eventId = definition.eventId, presentationKey = definition.presentationKey, continuityOwner = stageOwner,
-                            continues = dialoguePages.IndexOf(page) < dialoguePages.Count - 1 };
+                            continues = batched || dialoguePages.IndexOf(page) < dialoguePages.Count - 1 };
                         List<NarrativeConversationLineDefinition> lines = configuration.presentations.conversationLines.FindAll(item => item != null && item.pageId == page.pageId);
                         lines.Sort((a, b) => a.seq.CompareTo(b.seq));
                         foreach (NarrativeConversationLineDefinition line in lines)
@@ -484,7 +560,7 @@ namespace Spotlight.Narrative
                         var stepRequest = new NarrativeEventRequest(request.Event, request.Trigger, request.Depth, request.SelectedChoices, request.Context, request.RequestId, stepHint, candidate: request.Candidate);
                         bool handled;
                         try { handled = conversationPlayback(stepRequest, conversationData, () => { if (sessionVersion == pageVersion) pageFinished = true; }); }
-                        finally { if (conversationData.releaseStage != null) stageReleases.Add(conversationData.releaseStage); }
+                        finally { RetainConversationRelease(stage, conversationData.releaseStage, batched); }
                         if (!handled) throw new InvalidOperationException("Conversation playback rejected page: " + page.pageId);
                         if (handled)
                         {
@@ -499,7 +575,17 @@ namespace Spotlight.Narrative
                         throw new InvalidOperationException("Conversation playback is not connected: " + page.pageId);
                     }
                     }
-                    finally { releaseStage(); suspendActiveLetter = null; if (ReferenceEquals(releaseActiveStage, releaseStage)) releaseActiveStage = null; }
+                    finally
+                    {
+                        if (!batched) releaseStage();
+                        // A cancelled letter adapter can provide its release callback after
+                        // Abort already released the stage. Do not retain late callbacks.
+                        if (stage.Released)
+                        {
+                            foreach (var release in stageReleases.ToArray()) InvokeStageRelease(release);
+                            stageReleases.Clear();
+                        }
+                    }
                     yield break;
                 }
             throw new InvalidOperationException("Missing conversation pages: " + definition.presentationKey);

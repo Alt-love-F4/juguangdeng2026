@@ -24,6 +24,7 @@ namespace Spotlight.GameFlow
         public string positionKey;
         public string status;
         public string navigationLabel;
+        public bool preventsRest;
         public int priority = 10;
         public List<string> previousTasks = new List<string>();
     }
@@ -47,6 +48,11 @@ namespace Spotlight.GameFlow
             ?? items.Find(i => !i.completed);
         private readonly List<IGameplayTodoSource> guidanceSources = new List<IGameplayTodoSource>();
         private string itemSignature;
+        private bool restGuidanceAvailable;
+        private bool cafeTravelAvailable;
+        public void SetCafeTravelAvailable(bool value) => cafeTravelAvailable = value;
+        public bool CanNavigateToRest => items.Any(i => i.id == GameplayTodoProjection.RestTodoId && !i.completed);
+        public void SetRestGuidanceAvailable(bool value) => restGuidanceAvailable = value;
         public void SetGuidanceSources(IEnumerable<IGameplayTodoSource> sources)
         {
             guidanceSources.Clear();
@@ -90,6 +96,12 @@ namespace Spotlight.GameFlow
             var runtime = NarrativeRuntime.Instance;
             var values = GameplayTodoProjection.Build(runtime, position => guidanceSources.All(s => s.AllowsTodoPosition(position)));
             foreach (var source in guidanceSources) source.CollectTodos(values);
+            GameplayTodoProjection.AppendRestGuidance(values, runtime, restGuidanceAvailable);
+            if (cafeTravelAvailable && !values.Any(v => v.id == "guide.map.cafe"))
+                values.Add(new MapTaskItem { id = "guide.travel.cafe", name = "前往咖啡馆", location = "咖啡馆",
+                    description = "从当前场景返回咖啡馆，继续经营或前往三楼宿舍。",
+                    currentTask = "点击「前往咖啡馆」返回咖啡馆；需要休息时再到三楼点击床。",
+                    navigationLabel = "前往咖啡馆", status = "可前往", priority = 50 });
             values = values.OrderBy(v => v.completed).ThenBy(v => v.priority).ThenBy(v => v.remainingDays > 0 ? v.remainingDays : int.MaxValue).ToList();
             string signature = string.Join("\n", values.Select(v => string.Join("|", v.id, v.name, v.description,
                 v.currentTask, v.completed, v.location, v.positionKey, v.status, v.navigationLabel, v.remainingDays, v.priority)));

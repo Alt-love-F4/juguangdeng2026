@@ -154,7 +154,9 @@ JSON 文件位于 `Assets/Settings/Resources/Luban/`，上表 Resources 路径�
 
 `Narrative.xlsx` 新增 CafeVisit / CafeVisitHook。RESERVE_CAFE_VISIT（obj:角色 → visit:预设）只预留，SPAWN_NPC（obj:角色 → scene:cafe）授权到场；到场还需满足经营延迟。可选时间、耐心、leaveAfterServed 使用 string 列保留空值，由适配器诊断与默认处理：延迟 0、普通耐心、送餐后离店 true。Hook 的缺失 eventId 由运行时明确跳过，不阻塞交接。
 
-实际示例与入口、验证记录见 `Docs/superpowers/specs/2026-10-13-ncs-cafe-visitors-implementation.md`。GM 的“特殊来访”分类提供预约、延迟预约、到场、取消和状态检查。`python Assets/ConfigTables/create_cafe_visit_fixtures.py` 只在 Library/Locus/tmp 创建空表与非法配置副本。
+实际示例与入口、验证记录见 `Docs/superpowers/specs/2026-10-13-ncs-cafe-visitors-implementation.md`。GM 的“特殊来访”分类提供一键安排阿黛尔（含上餐前/上餐后/留店点击对话）、独立的延迟来访示例、原始预约/到场/取消事件和状态检查。延迟预设没有阶段对话；没有 NCS 会话时一键入口明确拒绝，不临时创建另一套剧情系统。`python Assets/ConfigTables/create_cafe_visit_fixtures.py` 只在 Library/Locus/tmp 创建空表与非法配置副本。
+
+普通客流与剧情来访分离：每次营业按现有客流规则补普通客人，只借用 `guest_a`～`guest_d` 通用外观，每次到访使用独立 personId，narrativeCharacterId 留空，不抽取命名剧情人物，也不需要 CafeVisit 配置。通用角色资源为空时回退匿名客人。剧情来访由 NCS 结果授权，额外增加客流名额，不消耗普通客流额度；入座仍受座位、预留、延迟和同剧情人物去重约束，满座等位而不挤掉普通客人。GM“强制召唤指定外观”保留为独立订单/美术测试，不激活剧情。旧档中的已有客人保持不变，后续新客流使用新机制。
 
 ## 条件系统测试样例
 

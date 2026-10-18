@@ -44,7 +44,8 @@ namespace Spotlight.GameFlow
         private int BackgroundFadeChannel => ShakeChannel + 4;
         private int DialogueShakeChannel => ShakeChannel + 5;
         private readonly RawImage background;
-        private readonly CoffeeCupTransition backgroundCurtain;
+        private RawImage backgroundIncoming;
+        private bool backgroundCrossfading;
         private readonly Vector2 backgroundPosition;
         private readonly Vector3 backgroundScale;
         private Color backgroundTint = Color.white;
@@ -91,7 +92,7 @@ namespace Spotlight.GameFlow
             {
                 backgroundPosition = background.rectTransform.anchoredPosition;
                 backgroundScale = background.rectTransform.localScale;
-                backgroundCurtain = new CoffeeCupTransition(stage, overlay);
+                backgroundTint = background.color;
             }
             this.focusSeconds = Mathf.Max(.001f, focusSeconds);
             stagePosition = stage.anchoredPosition;
@@ -254,51 +255,104 @@ namespace Spotlight.GameFlow
         {
             EnsureAlive(); ValidateFinite(fadeSeconds, nameof(fadeSeconds), 0f);
             if (background == null) throw new InvalidOperationException("Presentation has no background layer.");
-            CancelChannel(BackgroundMotionChannel); ResetBackgroundMotion();
-            CancelChannel(BackgroundFadeChannel);
-            bool same = background.texture == texture && backgroundTint == tint;
-            bool wasVisible = background.enabled;
-            Action swap = () =>
+            // Compare the requested visual before touching any channel or pose. In particular,
+            // repeated pages must not restart a pan or an in-flight fade to the same target.
+            Texture target = backgroundCrossfading ? backgroundIncoming.texture : background.texture;
+            Color targetTint = channels[BackgroundFadeChannel].Active ? backgroundTint : background.color;
+            if ((background.enabled || backgroundCrossfading) && target == texture && targetTint == tint)
             {
-                background.texture = texture; background.color = tint; backgroundTint = tint;
-                background.enabled = true; backgroundCurtain.SetBacking(true);
-            };
-            if (same || fadeSeconds <= 0f || !wasVisible)
-            {
-                swap(); backgroundCurtain.Reset(); ApplyPose();
-                var done = new PresentationEffectHandle(); done.Finish(true); return done;
+                // Track direct panel tint overrides without writing any visual state.
+                backgroundTint = tint;
+                return channels[BackgroundFadeChannel].Active ? channels[BackgroundFadeChannel].handle : Completed();
             }
-            bool swapped = false;
-            // Retain the old opaque CG until the aperture has closed. Hold a genuinely
-            // black frame around the resource swap, even when a Tick skips the midpoint.
-            return Start(BackgroundFadeChannel, Mathf.Max(.8f, fadeSeconds), t =>
+
+            CancelChannel(BackgroundFadeChannel); // Commit the previous target before replacing it.
+            CancelChannel(BackgroundMotionChannel); ResetBackgroundMotion();
+            bool wasVisible = background.enabled && background.color.a > 0f;
+            backgroundTint = tint;
+            if (fadeSeconds <= 0f || !wasVisible)
             {
-                if (t < .44f) backgroundCurtain.SetReveal(1f - Smooth(t / .44f));
-                else if (!swapped)
-                {
-                    backgroundCurtain.SetReveal(0f); swap(); swapped = true;
-                }
-                else backgroundCurtain.SetReveal(t <= .56f ? 0f : Smooth((t - .56f) / .44f));
-            }, () => { swap(); backgroundCurtain.Reset(); }, backgroundCurtain.Reset);
+                CommitBackground(texture, tint);
+                ApplyPose();
+                return Completed();
+            }
+
+            EnsureBackgroundIncoming();
+            backgroundCrossfading = true;
+            backgroundIncoming.texture = texture; // null is a solid-colour RawImage, not "no background".
+            backgroundIncoming.uvRect = background.uvRect;
+            backgroundIncoming.color = WithAlpha(tint, 0f);
+            backgroundIncoming.enabled = true;
+            background.color = WithAlpha(background.color, 1f);
+            ApplyPose();
+            // Only the incoming layer fades. The old layer stays opaque until the new one
+            // completely covers it, so neither the scene nor a black curtain shows through.
+            return Start(BackgroundFadeChannel, fadeSeconds,
+                t => backgroundIncoming.color = WithAlpha(tint, Smooth(t)),
+                () => CommitBackground(texture, tint), () => CommitBackground(texture, tint));
+        }
+        private static PresentationEffectHandle Completed()
+        { var result = new PresentationEffectHandle(); result.Finish(true); return result; }
+        private static Color WithAlpha(Color tint, float alpha)
+        { tint.a = alpha; return tint; }
+        private void EnsureBackgroundIncoming()
+        {
+            if (backgroundIncoming != null) return;
+            var layer = new GameObject("BackgroundCrossfade", typeof(RectTransform), typeof(CanvasRenderer), typeof(RawImage));
+            layer.transform.SetParent(background.transform, false);
+            backgroundIncoming = layer.GetComponent<RawImage>();
+            backgroundIncoming.raycastTarget = false;
+            backgroundIncoming.maskable = background.maskable;
+            backgroundIncoming.material = background.material;
+            RectTransform rect = backgroundIncoming.rectTransform;
+            rect.anchorMin = Vector2.zero; rect.anchorMax = Vector2.one;
+            rect.offsetMin = rect.offsetMax = Vector2.zero;
+            ClearBackgroundIncoming();
+        }
+        private void ClearBackgroundIncoming()
+        {
+            backgroundCrossfading = false;
+            if (backgroundIncoming == null) return;
+            backgroundIncoming.enabled = false;
+            backgroundIncoming.texture = null;
+            backgroundIncoming.color = Color.clear;
+        }
+        private void CommitBackground(Texture texture, Color tint)
+        {
+            background.texture = texture; background.color = tint; backgroundTint = tint;
+            background.enabled = true;
+            ClearBackgroundIncoming();
         }
         public PresentationEffectHandle RevealBackground(float seconds)
         {
-            EnsureAlive();
-            if (backgroundCurtain == null) return Rejected();
-            backgroundCurtain.SetBacking(true);
-            return Start(BackgroundFadeChannel, Mathf.Max(.45f, seconds),
-                t => backgroundCurtain.SetReveal(Smooth(t)), backgroundCurtain.Reset, backgroundCurtain.Reset);
+            EnsureAlive(); ValidateFinite(seconds, nameof(seconds), 0f);
+            if (background == null) return Rejected();
+            CancelChannel(BackgroundFadeChannel);
+            background.enabled = true;
+            if (seconds <= 0f) { background.color = backgroundTint; return Completed(); }
+            return Start(BackgroundFadeChannel, seconds,
+                t => background.color = WithAlpha(backgroundTint, backgroundTint.a * Smooth(t)),
+                () => background.color = backgroundTint, () => background.color = backgroundTint);
         }
         public PresentationEffectHandle CloseBackground(float seconds)
         {
-            EnsureAlive();
-            if (backgroundCurtain == null) return Rejected();
-            return Start(BackgroundFadeChannel, Mathf.Max(.35f, seconds),
-                t => backgroundCurtain.SetReveal(1f - Smooth(t)), backgroundCurtain.Reset);
+            EnsureAlive(); ValidateFinite(seconds, nameof(seconds), 0f);
+            if (background == null) return Rejected();
+            CancelChannel(BackgroundFadeChannel);
+            float from = background.color.a;
+            if (seconds <= 0f) { background.color = WithAlpha(backgroundTint, 0f); return Completed(); }
+            return Start(BackgroundFadeChannel, seconds,
+                t => background.color = WithAlpha(backgroundTint, Mathf.Lerp(from, 0f, Smooth(t))),
+                () => background.color = backgroundTint);
         }
         public void HideBackgroundBacking()
         {
-            backgroundCurtain?.SetBacking(false);
+            // Compatibility API: there is no longer a separate opaque backing/curtain.
+            // Do not leave an incoming child visible when the caller hides the main layer.
+            bool wasEnabled = background != null && background.enabled;
+            CancelChannel(BackgroundFadeChannel);
+            ClearBackgroundIncoming();
+            if (background != null) background.enabled = wasEnabled;
         }
         public PresentationEffectHandle Camera(float zoom, float shake, float duration, Vector2 focus, Action completed = null)
         {
@@ -401,8 +455,8 @@ namespace Spotlight.GameFlow
             cameraZoom = 1f; cameraOffset = screenOffset = dialogueOffset = Vector2.zero; shakePriority = 0;
             ResetBackgroundMotion();
             if (dialogueBox != null) dialogueBox.anchoredPosition = dialoguePosition;
-            backgroundCurtain?.Reset();
-            backgroundCurtain?.SetBacking(background != null && background.enabled);
+            ClearBackgroundIncoming();
+            if (background != null) background.color = backgroundTint;
             if (overlay != null) overlay.color = Color.clear;
             foreach (Portrait p in portraits)
             {
@@ -411,7 +465,20 @@ namespace Spotlight.GameFlow
             }
             ApplyPose();
         }
-        public void Dispose() { if (disposed) return; Reset(); backgroundCurtain?.Dispose(); disposed = true; }
+        public void Dispose()
+        {
+            if (disposed) return;
+            Reset();
+            if (backgroundIncoming != null)
+            {
+                GameObject layer = backgroundIncoming.gameObject;
+                layer.SetActive(false);
+                if (Application.isPlaying) UnityEngine.Object.Destroy(layer);
+                else UnityEngine.Object.DestroyImmediate(layer);
+                backgroundIncoming = null;
+            }
+            disposed = true;
+        }
         private static float Smooth(float t) => t * t * (3f - 2f * t);
         private static bool IsFinite(float value) => !float.IsNaN(value) && !float.IsInfinity(value);
         private static void ValidateFinite(float value, string name, float min)

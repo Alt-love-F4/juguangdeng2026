@@ -233,6 +233,135 @@ namespace Spotlight.GameFlow.Tests
             Assert.That(flow.CurrentPresentation, Is.Null);
         }
 
+        [UnityTest]
+        public IEnumerator CafeOpeningAppearsOnlyOnFirstVisitEachDayAndReturnDoesNotRestartBusiness()
+        {
+            DayFlowController flow = CreateCafeEntryFlow(out DayFlowTestEndpoint endpoint);
+            flow.StartCafeFromMap();
+            Assert.That(flow.State, Is.EqualTo(DayFlowState.BusinessTransition));
+            Assert.That(flow.CurrentPresentation, Is.TypeOf<CafeOpeningPanel>());
+            Assert.That(flow.BlocksGameplayInput, Is.True);
+            Assert.That(endpoint.starts, Is.Zero);
+            StringAssert.Contains("\"lastCafeEntryDay\":2", flow.CaptureJson());
+            yield return Submit((DayFlowPresentationPanel)flow.CurrentPresentation);
+            yield return WaitFor(() => flow.State == DayFlowState.FreeCafeBusiness);
+            Assert.That(endpoint.starts, Is.EqualTo(1));
+
+            flow.FinishBusiness();
+            Assert.That(endpoint.ends, Is.EqualTo(1));
+            Assert.That(flow.CurrentPresentation, Is.TypeOf<BusinessEndPanel>());
+            yield return Submit((DayFlowPresentationPanel)flow.CurrentPresentation);
+            yield return WaitFor(() => flow.State == DayFlowState.CityMapLeisure);
+            flow.StartCafeFromMap();
+            Assert.That(flow.State, Is.EqualTo(DayFlowState.FreeCafeBusiness));
+            Assert.That(flow.CurrentPresentation, Is.Null, "A same-day return must not show another opening page.");
+            Assert.That(flow.BlocksGameplayInput, Is.False);
+            Assert.That(endpoint.starts, Is.EqualTo(1), "Returning must not start business again.");
+            Assert.That(endpoint.active, Is.False, "Returning must leave the finished business closed.");
+            yield return null;
+            Assert.That(flow.CurrentPresentation, Is.Null, "A finished endpoint must not repeat settlement on return.");
+            Assert.That(endpoint.ends, Is.EqualTo(1));
+
+            flow.EndDayFromDormitory();
+            Assert.That(flow.CurrentDay, Is.EqualTo(3));
+            yield return WaitFor(() => flow.State == DayFlowState.CityMapLeisure);
+            flow.StartCafeFromMap();
+            Assert.That(flow.State, Is.EqualTo(DayFlowState.BusinessTransition));
+            Assert.That(flow.CurrentPresentation, Is.TypeOf<CafeOpeningPanel>());
+            Assert.That(endpoint.starts, Is.EqualTo(1), "The next day's start must still wait for confirmation.");
+            StringAssert.Contains("\"lastCafeEntryDay\":3", flow.CaptureJson());
+            yield return Submit((DayFlowPresentationPanel)flow.CurrentPresentation);
+            yield return WaitFor(() => flow.State == DayFlowState.FreeCafeBusiness);
+            Assert.That(endpoint.starts, Is.EqualTo(2));
+        }
+
+        [UnityTest]
+        public IEnumerator RestoredMapRemembersCafeEntryAndDoesNotReplayOpeningOrStartBusiness()
+        {
+            DayFlowController flow = CreateCafeEntryFlow(out DayFlowTestEndpoint endpoint);
+            flow.StartCafeFromMap();
+            yield return Submit((DayFlowPresentationPanel)flow.CurrentPresentation);
+            yield return WaitFor(() => flow.State == DayFlowState.FreeCafeBusiness);
+            flow.FinishBusiness();
+            yield return Submit((DayFlowPresentationPanel)flow.CurrentPresentation);
+            yield return WaitFor(() => flow.State == DayFlowState.CityMapLeisure);
+            string saved = flow.CaptureJson();
+            StringAssert.Contains("\"lastCafeEntryDay\":2", saved);
+
+            // Clear the in-memory marker before loading, so this proves persistence rather than reuse.
+            flow.RestoreJson("{\"day\":2,\"state\":5,\"firstDayIntroductionCompleted\":true}");
+            StringAssert.Contains("\"lastCafeEntryDay\":0", flow.CaptureJson());
+            flow.RestoreJson(saved);
+            flow.ResumeSavedPhase();
+            Assert.That(flow.State, Is.EqualTo(DayFlowState.CityMapLeisure));
+            StringAssert.Contains("\"lastCafeEntryDay\":2", flow.CaptureJson());
+            flow.StartCafeFromMap();
+            Assert.That(flow.State, Is.EqualTo(DayFlowState.FreeCafeBusiness));
+            Assert.That(flow.CurrentPresentation, Is.Null);
+            Assert.That(endpoint.starts, Is.EqualTo(1), "Loading and returning must not restart the saved day's business.");
+            Assert.That(endpoint.active, Is.False);
+            yield return null;
+            Assert.That(flow.CurrentPresentation, Is.Null);
+            Assert.That(endpoint.ends, Is.EqualTo(1));
+        }
+
+        [UnityTest]
+        public IEnumerator RestoredUnconfirmedCafeOpeningStillWaitsForConfirmation()
+        {
+            DayFlowController flow = CreateCafeEntryFlow(out DayFlowTestEndpoint endpoint);
+            flow.StartCafeFromMap();
+            Assert.That(flow.CurrentPresentation, Is.TypeOf<CafeOpeningPanel>());
+            string saved = flow.CaptureJson();
+            StringAssert.Contains("\"lastCafeEntryDay\":2", saved);
+            flow.RestoreJson(saved);
+            flow.ResumeSavedPhase();
+            Assert.That(flow.State, Is.EqualTo(DayFlowState.BusinessTransition));
+            Assert.That(flow.CurrentPresentation, Is.TypeOf<CafeOpeningPanel>(),
+                "A recorded entry must not skip the opening page saved before confirmation.");
+            Assert.That(flow.BlocksGameplayInput, Is.True);
+            Assert.That(endpoint.starts, Is.Zero);
+            yield return Submit((DayFlowPresentationPanel)flow.CurrentPresentation);
+            yield return WaitFor(() => flow.State == DayFlowState.FreeCafeBusiness);
+            Assert.That(endpoint.starts, Is.EqualTo(1));
+        }
+
+        [UnityTest]
+        public IEnumerator NewSessionClearsCafeEntryRecordAndShowsFirstDayOpeningAgain()
+        {
+            DayFlowController flow = CreateCafeEntryFlow(out DayFlowTestEndpoint endpoint);
+            flow.RestoreJson("{\"day\":1,\"state\":5,\"firstDayIntroductionCompleted\":true,"
+                + "\"firstDayCafeTutorialCompleted\":true,\"lastCafeEntryDay\":1}");
+            flow.ResumeSavedPhase();
+            StringAssert.Contains("\"lastCafeEntryDay\":1", flow.CaptureJson());
+
+            flow.BeginNewSession(playLetter: false, playIntroduction: false);
+            Assert.That(flow.CurrentDay, Is.EqualTo(1));
+            StringAssert.Contains("\"lastCafeEntryDay\":0", flow.CaptureJson());
+            yield return WaitFor(() => flow.State == DayFlowState.CityMapLeisure);
+            flow.StartCafeFromMap();
+            Assert.That(flow.State, Is.EqualTo(DayFlowState.BusinessTransition));
+            Assert.That(flow.CurrentPresentation, Is.TypeOf<CafeOpeningPanel>(),
+                "The previous session's day-one visit must not suppress the new session's opening page.");
+            Assert.That(endpoint.starts, Is.Zero);
+            StringAssert.Contains("\"lastCafeEntryDay\":1", flow.CaptureJson());
+        }
+
+        private DayFlowController CreateCafeEntryFlow(out DayFlowTestEndpoint endpoint)
+        {
+            controllerObject = new GameObject("DayFlowCafeEntryTest");
+            var flow = controllerObject.AddComponent<DayFlowController>();
+            flow.Initialize(null);
+            session.Bind(flow);
+            endpointObject = new GameObject("DayFlowEndpointTest");
+            endpoint = endpointObject.AddComponent<DayFlowTestEndpoint>();
+            Assert.That(session.Submit(null), Is.True);
+            // Start after the first-day tutorial; these tests isolate daily cafe-entry presentation.
+            flow.RestoreJson("{\"day\":2,\"state\":5,\"firstDayIntroductionCompleted\":true}");
+            flow.ResumeSavedPhase();
+            Assert.That(flow.State, Is.EqualTo(DayFlowState.CityMapLeisure));
+            return flow;
+        }
+
         private static T Open<T>() where T : DayFlowPresentationPanel
         {
             T panel = UIKit.OpenPanel<T>(UILevel.Pop, tag: TestTag, cachePolicy: PanelCachePolicy.Transient);

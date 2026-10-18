@@ -70,21 +70,26 @@ namespace Spotlight.FreeCafe.Tests
             catalog.economy.maxCustomers = 1; catalog.economy.baseCustomers = 1;
             world = new CafeWorld(catalog);
             Sync(Intent("v1"), Intent("v2", seat: "customer_1")); world.StartDay();
-            Assert.That(world.State.todayCustomerBudget, Is.EqualTo(2));
-            Assert.That(world.State.todayArrivals, Is.EqualTo(2));
+            Assert.That(world.State.todayCustomerBudget, Is.EqualTo(3));
+            Assert.That(world.State.todayArrivals, Is.EqualTo(3));
             Assert.That(world.CafeVisit("v1").diagnostics, Contains.Item("customer_budget_minimum_adjusted"));
             Assert.That(world.Restore(Copy()).success, Is.True);
         }
-        [Test] public void ImmediateVisitWithExhaustedBudgetWaitsWithoutIncreasingBudget()
+        [Test] public void MidBusinessVisitAddsBudgetAndWaitsOnlyForSeat()
         {
             world.StartDay(); world.State.todayCustomerBudget = world.State.todayArrivals;
             int budget = world.State.todayCustomerBudget; Sync(Intent());
             Assert.That(world.CafeVisit("v1").status, Is.EqualTo(CafeVisitStatus.WaitingForSeat));
-            Assert.That(world.CafeVisit("v1").diagnostics, Contains.Item("budget_unavailable"));
-            Assert.That(world.State.todayCustomerBudget, Is.EqualTo(budget));
-            int failed = world.State.todayFailed; world.EndDay();
-            Assert.That(world.State.todayFailed, Is.EqualTo(failed + budget));
-            Ack("leaving"); Assert.That(world.CafeVisit("v1").status, Is.EqualTo(CafeVisitStatus.Ended));
+            Assert.That(world.CafeVisit("v1").budgetReserved, Is.True);
+            Assert.That(world.CafeVisit("v1").diagnostics, Does.Not.Contain("budget_unavailable"));
+            Assert.That(world.State.todayCustomerBudget, Is.EqualTo(budget + 1));
+            Sync(Intent());
+            Assert.That(world.State.todayCustomerBudget, Is.EqualTo(budget + 1), "Repeated snapshots must not add another slot");
+            var ordinary = world.State.requests.Find(r => r.customerId == "customer_0");
+            ordinary.automaticRemaining = 0;
+            world.Tick(.01f);
+            Assert.That(Order(), Is.Not.Null, "A late story visitor must arrive even after normal traffic has exhausted its budget");
+            Assert.That(world.Restore(Copy()).success, Is.True);
         }
         [Test] public void DedicatedSeatConflictQueuesAndReleasesToNextVisit()
         {
@@ -104,6 +109,30 @@ namespace Spotlight.FreeCafe.Tests
             world.Tick(.01f);
             Assert.That(Order(), Is.Not.Null);
             Assert.That(world.Find("customer_0").person.characterId, Is.EqualTo("character_v1"));
+        }
+        [Test] public void StoryReservationsDoNotReduceOrdinaryDailyTraffic()
+        {
+            world.State.randomState = 3;
+            var baseline = new CafeWorld(JsonUtility.FromJson<CafeCatalog>(Resources.Load<TextAsset>("FreeCafe/catalog").text));
+            baseline.State.randomState = 3;
+            baseline.StartDay();
+            Sync(Intent()); world.StartDay();
+            Assert.That(world.State.todayCustomerBudget, Is.EqualTo(baseline.State.todayCustomerBudget + 1));
+            Assert.That(world.State.requests.Any(r => world.Find(r.customerId).person.narrativeCharacterId == null), Is.True);
+            Assert.That(Order(), Is.Not.Null);
+        }
+        [Test] public void OrdinaryArtworkDoesNotBlockAnNcsActorWithTheSameArtKey()
+        {
+            world.StartDay();
+            var ordinary = world.Find("customer_0");
+            ordinary.person.characterId = "character_v1";
+            var intent = Intent(seat: "customer_1");
+            var order = world.State.requests.Find(r => r.customerId == "customer_1");
+            order.automaticRemaining = 0;
+            world.Tick(.01f);
+            Sync(intent);
+            Assert.That(Order(), Is.Not.Null);
+            Assert.That(world.CafeVisit("v1").diagnostics, Does.Not.Contain("character_already_present"));
         }
         [Test] public void GenericReservationProtectsSeatBeforeAuthorization()
         {

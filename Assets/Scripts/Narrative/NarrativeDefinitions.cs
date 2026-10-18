@@ -263,6 +263,14 @@ namespace Spotlight.Narrative
         event Action<string> Cancelled;
     }
 
+    /// <summary>Optional presentation lifetime spanning queued events and pending setup effects.
+    /// Begin/End are idempotent; End is called only after the controller reaches an idle boundary.</summary>
+    public interface INarrativePresentationContinuity
+    {
+        void BeginBatch();
+        void EndBatch();
+    }
+
     public interface INarrativePresentationDrain
     {
         void Drain(Action completed);

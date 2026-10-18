@@ -238,7 +238,7 @@ namespace Spotlight.GameFlow.Editor
                 RectTransform paper = root.transform.Find("LetterPaper") as RectTransform;
                 TMP_Text body = paper.Find("LetterScroll/Viewport/Body").GetComponent<TMP_Text>();
                 body.font = Font;
-                body.fontSize = 18f; // 参考稿12pt，按1.5换算为Canvas单位。
+                body.fontSize = 28f; // 开场信件以屏幕阅读清晰度为准，长文通过滚动阅读。
                 body.enableAutoSizing = false;
                 body.color = Color.black;
                 body.lineSpacing = 4f;
@@ -250,14 +250,14 @@ namespace Spotlight.GameFlow.Editor
                 TopLeft(paper.Find("LetterScroll") as RectTransform, new Vector2(106, -207), new Vector2(1060, 470));
                 TMP_Text signature = paper.Find("SignatureButton/Signature").GetComponent<TMP_Text>();
                 signature.font = Font;
-                signature.fontSize = 18f;
+                signature.fontSize = 26f;
                 signature.color = Color.black;
                 signature.richText = true;
                 signature.text = "—— 永远惦念你的<size=116.667%>叔叔</size>";
                 TopLeft(paper.Find("SignatureButton") as RectTransform, new Vector2(106, -688), new Vector2(1060, 38));
                 TMP_Text hint = paper.Find("ReadingHint").GetComponent<TMP_Text>();
                 hint.font = Font;
-                hint.fontSize = 18f;
+                hint.fontSize = 24f;
                 hint.color = new Color32(179, 0, 15, 255);
                 TopLeft(hint.rectTransform, new Vector2(106, -727), new Vector2(1060, 32));
 

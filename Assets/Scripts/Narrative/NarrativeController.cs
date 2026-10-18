@@ -47,7 +47,28 @@ namespace Spotlight.Narrative
         private int operationDepth;
         private readonly Queue<Action> safeCallbacks = new Queue<Action>();
         private bool dispatchingSafeCallbacks;
-        public bool IsSafeBoundary => !valueRestore && valueBaselineReady && settledValueChanges.Count == 0 && operationDepth == 0 && !settling && !activePresentation && !draining && !pumping && queue.Count == 0 && pendingEffects.Count == 0;
+        private int boundaryDispatchDepth;
+        private bool presentationBatch;
+        private int completionNotificationDepth;
+        private bool collectingQueueChanges;
+        private void BeginPresentationBatch()
+        {
+            if (presentationBatch || !(presenter is INarrativePresentationContinuity continuity)) return;
+            presentationBatch = true; // Set before invoking user code: callbacks may re-enter the controller.
+            continuity.BeginBatch();
+        }
+        private void EndPresentationBatch()
+        {
+            if (!presentationBatch) return;
+            presentationBatch = false;
+            (presenter as INarrativePresentationContinuity)?.EndBatch();
+        }
+        private void EndPresentationBatchIfIdle()
+        {
+            if (boundaryDispatchDepth != 0 || dispatchingSafeCallbacks || !IsSafeBoundary || IsBusy) return;
+            EndPresentationBatch();
+        }
+        public bool IsSafeBoundary => completionNotificationDepth == 0 && !collectingQueueChanges && !valueRestore && valueBaselineReady && settledValueChanges.Count == 0 && operationDepth == 0 && !settling && !activePresentation && !draining && !pumping && queue.Count == 0 && pendingEffects.Count == 0;
         public void RunAtSafeBoundary(Action callback)
         {
             if (callback == null) return;
@@ -57,19 +78,28 @@ namespace Spotlight.Narrative
         }
         private void DispatchSafeCallbacks()
         {
-            CompleteEntryAtSafeBoundary();
-            PumpCafeBoundary();
-            if (dispatchingSafeCallbacks) return;
-            dispatchingSafeCallbacks = true;
+            boundaryDispatchDepth++;
             try
             {
-                while (IsSafeBoundary && safeCallbacks.Count > 0)
+                CompleteEntryAtSafeBoundary();
+                PumpCafeBoundary();
+                if (dispatchingSafeCallbacks) return;
+                dispatchingSafeCallbacks = true;
+                try
                 {
-                    var callback = safeCallbacks.Dequeue();
-                    callback();
+                    while (IsSafeBoundary && safeCallbacks.Count > 0)
+                    {
+                        var callback = safeCallbacks.Dequeue();
+                        callback();
+                    }
                 }
+                finally { dispatchingSafeCallbacks = false; }
             }
-            finally { dispatchingSafeCallbacks = false; }
+            finally
+            {
+                boundaryDispatchDepth--;
+                EndPresentationBatchIfIdle();
+            }
         }
         private bool endingChecksEnabled, endingDirty = true, officialDayManaged;
         private int officialDayProcessed;
@@ -499,6 +529,7 @@ namespace Spotlight.Narrative
             activeEntryDay = snapshot.bars?.Find(b => b != null && b.key == "world.calendar")?.value ?? 1;
             entryCompleted = null; entryFailed = false;
             presentationEpoch++;
+            EndPresentationBatch();
             queue.Clear(); pendingEvents.Clear(); changes.Clear(); selectedChoices.Clear(); pendingEffects.Clear(); safeCallbacks.Clear(); draining = false;
             inlineAbilityChecks.Clear();
             if (snapshot.inlineAbilityChecks != null)
@@ -696,6 +727,7 @@ namespace Spotlight.Narrative
             activeAbilityCheckId = null;
             processing = activePresentation = draining = false;
             turnOpen = turnEnding = resumeBoundary = false;
+            EndPresentationBatch();
             return true;
         }
 
@@ -710,6 +742,7 @@ namespace Spotlight.Narrative
             try
             {
                 presentationEpoch++;
+                EndPresentationBatch();
                 // Manual requests are retryable by a NEW explicit request, not by automatic promotion.
                 long failedCandidate = activeRequest.Candidate?.sequence ?? 0;
                 candidates.RemoveAll(c => c.source == NarrativeCandidateSource.Manual &&
@@ -748,17 +781,21 @@ namespace Spotlight.Narrative
             if (presenterUnavailable)
             {
                 queue.Clear(); pendingEffects.Clear(); processing = activePresentation = draining = false;
+                EndPresentationBatch();
                 CheckEndingsAtSafeBoundary();
                 return;
             }
-            if (valueRestore || !valueBaselineReady || IsEnded || pumping || draining) return;
-            DrainSettledValueChanges();
+            if (valueRestore || !valueBaselineReady || IsEnded || pumping || draining || settling || completionNotificationDepth != 0 || collectingQueueChanges) return;
+            collectingQueueChanges = true;
+            try { DrainSettledValueChanges(); }
+            finally { collectingQueueChanges = false; }
             if (pendingEffects.Count > 0 && presenter is INarrativePresentationDrain drain)
             {
                 draining = true;
                 long epoch = ++presentationEpoch;
                 try
                 {
+                    BeginPresentationBatch();
                     drain.Drain(() =>
                     {
                         if (!draining || presentationEpoch != epoch) return;
@@ -808,7 +845,11 @@ namespace Spotlight.Narrative
                     long epoch = ++presentationEpoch;
                     NarrativeEventRequest request = new NarrativeEventRequest(activeRequest.Event, activeRequest.Trigger, activeRequest.Depth, selectedChoices.ToArray(), activeRequest.Context, activeRequest.RequestId, activeRequest.PassiveHint, candidate: activeRequest.Candidate);
                     // A broken presenter is not treated as successful: its active request remains saveable.
-                    try { presenter.Play(request, () => { if (epoch == presentationEpoch && activePresentation) CompleteEvent(request); }); }
+                    try
+                    {
+                        BeginPresentationBatch();
+                        presenter.Play(request, () => { if (epoch == presentationEpoch && activePresentation) CompleteEvent(request); });
+                    }
                     catch (Exception error)
                     {
                         Debug.LogException(error);
@@ -823,8 +864,20 @@ namespace Spotlight.Narrative
                 }
             }
             finally { pumping = false; }
-            if (!activePresentation && pendingEffects.Count > 0) ProcessQueue();
+            // Multiple owner notifications can settle while a presentation is active.
+            // Consume idle value batches iteratively; stop as soon as one queues new work.
+            collectingQueueChanges = true;
+            try
+            {
+                while (!valueRestore && valueBaselineReady && !IsEnded && operationDepth == 0 &&
+                    !settling && completionNotificationDepth == 0 && !activePresentation && !draining &&
+                    queue.Count == 0 && pendingEffects.Count == 0 && settledValueChanges.Count > 0)
+                    DrainSettledValueChanges();
+            }
+            finally { collectingQueueChanges = false; }
+            if (!activePresentation && (pendingEffects.Count > 0 || queue.Count > 0)) ProcessQueue();
             CheckEndingsAtSafeBoundary();
+            EndPresentationBatchIfIdle();
         }
 
         private void CompleteEvent(NarrativeEventRequest request)
@@ -907,9 +960,16 @@ namespace Spotlight.Narrative
                 transactionDepth = 0; settling = false;
             }
             if (!transactionSucceeded) { ProcessQueue(); return; }
-            CompleteCafeHook(request.Event.eventId);
-            try { EventCompleted?.Invoke(request.Event.eventId); }
-            catch (Exception error) { Debug.LogException(error); }
+            // Completion listeners may queue continuations. Keep the whole notification boundary
+            // atomic so a synchronous nested pump cannot release the old stage between listeners.
+            completionNotificationDepth++;
+            try
+            {
+                CompleteCafeHook(request.Event.eventId);
+                try { EventCompleted?.Invoke(request.Event.eventId); }
+                catch (Exception error) { Debug.LogException(error); }
+            }
+            finally { completionNotificationDepth--; }
             ProcessQueue();
         }
 

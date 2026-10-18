@@ -190,6 +190,8 @@ namespace Spotlight.FreeCafe.Tests
             Assert.That(orderCorners[0].y,Is.GreaterThan(Screen.height*.8f));
             Assert.That(resourceCorners[0].y,Is.GreaterThan(Screen.height*.8f));
             var world=app.World;int sceneHandle=app.gameObject.scene.handle;
+            Assert.That(hud.endDayButton,Is.Not.Null);
+            Assert.That(hud.endDayButton.gameObject.activeSelf,Is.False,"The first-floor lobby must not show the next-day shortcut");
             var first=hud.areaButtons[(int)AreaId.Cafe];var second=hud.areaButtons[(int)AreaId.TopFloor];var third=hud.areaButtons[(int)AreaId.Basement];
             Assert.That(first.interactable,Is.False);
             Assert.That(((Image)first.targetGraphic).sprite,Is.SameAs(hud.floorCurrentSprite));
@@ -197,6 +199,7 @@ namespace Spotlight.FreeCafe.Tests
             yield return null;
             Assert.That(world.State.currentArea,Is.EqualTo(AreaId.TopFloor));
             Assert.That(app.areaManager.CurrentArea,Is.EqualTo(AreaId.TopFloor));
+            Assert.That(hud.endDayButton.gameObject.activeSelf,Is.False,"The second floor must not show the next-day shortcut");
             Assert.That(app.worldCamera.transform.position.y,Is.EqualTo(app.areaManager.Find(AreaId.TopFloor).cameraAnchor.position.y+app.areaManager.cameraOffset.y).Within(.01f));
             Assert.That(second.interactable,Is.False);
             Assert.That(((Image)second.targetGraphic).sprite,Is.SameAs(hud.floorCurrentSprite));
@@ -208,13 +211,16 @@ namespace Spotlight.FreeCafe.Tests
             yield return null;
             Assert.That(world.State.currentArea,Is.EqualTo(AreaId.Basement));
             Assert.That(app.areaManager.CurrentArea,Is.EqualTo(AreaId.Basement));
+            Assert.That(hud.endDayButton.gameObject.activeInHierarchy,Is.True,"Only the third-floor dormitory shows the next-day shortcut");
             ClickHudButton(first);
             yield return null;
             Assert.That(world.State.currentArea,Is.EqualTo(AreaId.Cafe));
+            Assert.That(hud.endDayButton.gameObject.activeSelf,Is.False,"Leaving the third floor must hide the next-day shortcut");
             Assert.That(app.World,Is.SameAs(world));
             Assert.That((int)app.gameObject.scene.handle,Is.EqualTo(sceneHandle));
             ClickWorkstationPortal();
             Assert.That(world.State.currentArea,Is.EqualTo(AreaId.Counter));
+            Assert.That(hud.endDayButton.gameObject.activeSelf,Is.False,"The workstation must not show the next-day shortcut");
         }
 
         [UnityTest] public IEnumerator RemovedPlayerHudWidgetsDoNotBlockStartupOrRemainingControls()
@@ -900,7 +906,7 @@ namespace Spotlight.FreeCafe.Tests
             {
                 Assert.That(business.IsRunning,Is.True);
                 Assert.That(business.CurrentStage,Is.EqualTo(stage));
-                Assert.That(tutorialFlow.IsCafeTutorialActive,Is.True,"Business onboarding must remain active until the order is explicitly acknowledged");
+                Assert.That(tutorialFlow.IsCafeTutorialActive,Is.True,"Business onboarding must remain active until order and todo guidance are acknowledged");
                 Assert.That(app.CafeBusinessOnboardingActive,Is.True);
                 Assert.That(business.PauseBusinessSimulation,Is.EqualTo(paused));
                 Assert.That(app.BusinessSimulationPaused,Is.EqualTo(paused));
@@ -1037,7 +1043,24 @@ namespace Spotlight.FreeCafe.Tests
             Assert.That(business.IsRunning,Is.True,"A paused presentation must not accept order acknowledgement");
             Assert.That(tutorialFlow.IsCafeTutorialActive,Is.True);
             Time.timeScale=1;
+            businessPanel.retryButton.onClick.Invoke();
+            AssertBusinessStage(FreeCafeBusinessTutorial.Stage.TodoGuidance,true);
+            Assert.That(businessPanel.instruction.text,Does.Contain("不知道接下来做什么"));
+            Assert.That(businessPanel.instruction.text,Does.Contain("按下 T"));
+            Assert.That(businessPanel.instruction.text,Does.Contain("右上角的「待办事项」面板"));
+            Assert.That(businessPanel.instruction.text,Does.Contain("下一步该做什么"));
+            Assert.That(businessPanel.retryButton.GetComponentInChildren<TMP_Text>().text,Is.EqualTo("明白了，开始经营"));
+            Assert.That(businessPanel.gesture.gameObject.activeSelf,Is.False,"The todo reminder must not point at the order card");
+            yield return new WaitForSecondsRealtime(.1f);
+            Assert.That(request.patience,Is.EqualTo(patience),"Reading the todo reminder must not consume customer patience");
+            Assert.That(world.State.businessElapsed,Is.EqualTo(businessElapsed));
             business.ConfirmOrderRead();
+            AssertBusinessStage(FreeCafeBusinessTutorial.Stage.TodoGuidance,true);
+            Time.timeScale=0;
+            business.ConfirmTodoGuidance();
+            Assert.That(tutorialFlow.IsCafeTutorialActive,Is.True,"A paused presentation must not accept todo acknowledgement");
+            Time.timeScale=1;
+            businessPanel.retryButton.onClick.Invoke();
             Assert.That(tutorialFlow.IsCafeTutorialActive,Is.False);
             Assert.That(app.CafeBusinessOnboardingActive,Is.False);
             Assert.That(business.IsRunning,Is.False);
@@ -1047,6 +1070,7 @@ namespace Spotlight.FreeCafe.Tests
             Assert.That(businessPanel==null,Is.True,"The completed business guide must release its panel");
             Assert.That(app.BusinessSimulationPaused,Is.False);
             business.ConfirmOrderRead();
+            business.ConfirmTodoGuidance();
             Assert.That(tutorialFlow.IsCafeTutorialActive,Is.False,"Repeated acknowledgement must not restart onboarding");
         }
         private static Button FindAction(FreeCafeGMPanel gm,string label)

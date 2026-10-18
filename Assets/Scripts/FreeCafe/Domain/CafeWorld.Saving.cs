@@ -37,7 +37,7 @@ namespace Spotlight.FreeCafe
                 || candidate.staff < 0 || candidate.staff > Catalog.economy.maxStaff
                 || candidate.beanQuality < 0 || candidate.beanQuality > 2
                 || candidate.skillPoints < 0
-                || candidate.todayCustomerBudget < 0 || candidate.todayCustomerBudget > Math.Max(Catalog.economy.maxCustomers, candidate.cafeVisitBudgetMinimum)
+                || candidate.todayCustomerBudget < 0 || candidate.todayCustomerBudget > Math.Max(Catalog.economy.maxCustomers + (candidate.cafeVisits?.Count ?? 0), candidate.cafeVisitBudgetMinimum)
                 || candidate.todayArrivals < 0 || candidate.todayArrivals > candidate.todayCustomerBudget
                 || !Enum.IsDefined(typeof(BusinessPhase), candidate.businessPhase)
                 || candidate.open != (candidate.businessPhase == BusinessPhase.Open))

@@ -143,7 +143,7 @@ namespace Spotlight.GameFlow.Tests
                 "Standalone map todos");
             var hud = GameplayHudPanel.Instance;
             yield return WaitFor(() => hud.Tasks.CurrentGuidance?.id == "guide.map.cafe", "Cafe next-step guidance");
-            Assert.That(hud.transform.Find("NextTodoGuidance/Text").GetComponent<TMP_Text>().text, Does.Contain("进入咖啡馆"));
+            Assert.That(hud.transform.Find("NextTodoGuidance"), Is.Null, "The persistent bottom-left todo hint has been removed.");
             int points = NarrativeRuntime.Instance.Actions.ActionPoints.Current;
             hud.Tasks.SetVisible(true);
             hud.Tasks.Navigate("guide.map.cafe");
@@ -155,6 +155,61 @@ namespace Spotlight.GameFlow.Tests
             Assert.That(NarrativeRuntime.Instance.Actions.ActionPoints.Current, Is.EqualTo(points));
             Assert.That(NarrativeRuntime.Instance.Actions.IsExecuting, Is.False);
             Assert.That(SceneManager.GetActiveScene().name, Is.EqualTo("Map"), "Todo navigation opens details; player confirms entry.");
+        }
+
+        [UnityTest]
+        public IEnumerator IdleRestTodoTravelsFromOtherSceneToThirdFloorWithoutSleeping()
+        {
+            yield return SceneManager.LoadSceneAsync("启动场景", LoadSceneMode.Single);
+            var flow = Object.FindFirstObjectByType<GameFlowBootstrap>();
+            yield return null;
+            flow.StartGame();
+            yield return WaitFor(() => SceneManager.GetActiveScene().name == "Map"
+                && UIKit.GetPanel<OpeningProloguePanel>() != null && !LoadingVisible(), "Formal entry for rest travel");
+            yield return WaitFor(() => flow.DebugSkipTutorialToMap(out _), "Skip to map");
+            var hud = GameplayHudPanel.Instance;
+            Assert.That(hud.TryNavigateToCafeForRest(), Is.False, "First-day guide must not be bypassed.");
+            Assert.That(hud.TryNavigateToCafe(), Is.True);
+            yield return WaitFor(() => SceneManager.GetActiveScene().name == "CoffeeShop" && !LoadingVisible(), "Cafe tutorial entry");
+            var days = flow.GetComponent<DayFlowController>();
+            Assert.That(days.DebugSkipTutorialToCafe(out string error), Is.True, error);
+            var world = PlayerCafeOwner.Current;
+            // Mark business finished using the real domain entry, without advancing the calendar.
+            var endpoint = Object.FindObjectsByType<MonoBehaviour>(FindObjectsSortMode.None).First(item => item is IDayFlowGameplayEndpoint);
+            endpoint.GetType().GetMethod("RequestBusinessStart").Invoke(endpoint, null);
+            yield return WaitFor(() => world.State.open, "Business starts");
+            world.EndDay();
+            yield return WaitFor(() => days.CurrentPresentation is BusinessEndPanel, "Business settlement");
+            var settlement = (DayFlowPresentationPanel)days.CurrentPresentation;
+            var confirm = settlement.GetComponentInChildren<Button>(true);
+            yield return WaitFor(() => confirm.interactable, "Settlement confirmation");
+            confirm.onClick.Invoke();
+            yield return WaitFor(() => SceneManager.GetActiveScene().name == "Map" && !LoadingVisible(), "After-business map");
+            yield return WaitFor(() => hud.Tasks.CurrentGuidance?.id == GameplayTodoProjection.RestTodoId, "Idle suggests three-floor sleep");
+            int day = days.CurrentDay;
+            int points = NarrativeRuntime.Instance.Actions.ActionPoints.Current;
+            int money = world.State.money;
+            var other = SceneManager.CreateScene("TodoTravelOtherGameplay");
+            SceneManager.SetActiveScene(other);
+            yield return null;
+            Assert.That(hud.TryNavigateToCafeForRest(), Is.True, "Travel works outside Map and CoffeeShop.");
+            Assert.That(hud.TryNavigateToCafeForRest(), Is.False, "Repeated clicks cannot start another handoff.");
+            yield return WaitFor(() => SceneManager.GetActiveScene().name == "CoffeeShop" && !LoadingVisible()
+                && world.State.currentArea == Spotlight.FreeCafe.AreaId.Basement, "Arrive at third floor");
+            Assert.That(PlayerCafeOwner.Current, Is.SameAs(world));
+            Assert.That(days.CurrentDay, Is.EqualTo(day));
+            Assert.That(NarrativeRuntime.Instance.Actions.ActionPoints.Current, Is.EqualTo(points));
+            Assert.That(world.State.money, Is.EqualTo(money));
+            Assert.That(world.State.open, Is.False);
+            Assert.That(hud.IsVisible, Is.True);
+            Assert.That(flow.DebugForceOpenMap(out string overlayError), Is.True, overlayError);
+            yield return WaitFor(() => flow.IsMapOpen && !LoadingVisible(), "Open map over resident cafe");
+            yield return new WaitForSecondsRealtime(.6f);
+            Assert.That(hud.TryNavigateToCafeForRest(), Is.True);
+            yield return WaitFor(() => !flow.IsMapOpen && world.State.currentArea == Spotlight.FreeCafe.AreaId.Basement,
+                "Rest navigation closes map and reuses third floor");
+            Assert.That(PlayerCafeOwner.Current, Is.SameAs(world));
+            Assert.That(days.CurrentDay, Is.EqualTo(day));
         }
 
         [UnityTest]
@@ -276,11 +331,10 @@ namespace Spotlight.GameFlow.Tests
                 && SceneManager.GetActiveScene().name == "Map" && !LoadingVisible(), "After-business map");
             Assert.That(days.CurrentDay, Is.EqualTo(1), "Closing must not end the calendar day.");
             days.StartCafeFromMap();
-            yield return WaitFor(() => days.CurrentPresentation is CafeOpeningPanel && !LoadingVisible(), "Resident cafe return");
-            submit = ((DayFlowPresentationPanel)days.CurrentPresentation).GetComponentInChildren<Button>(true);
-            yield return WaitFor(() => submit.interactable, "Cafe entrance");
-            submit.onClick.Invoke();
-            yield return WaitFor(() => days.State == DayFlowState.FreeCafeBusiness, "Cafe preparation");
+            yield return WaitFor(() => days.State == DayFlowState.FreeCafeBusiness && !LoadingVisible(), "Resident cafe return without an opening page");
+            Assert.That(days.CurrentPresentation, Is.Null, "Returning after closing must not replay the cafe opening page.");
+            Assert.That(world.State.businessPhase, Is.EqualTo(Spotlight.FreeCafe.BusinessPhase.Night));
+            Assert.That(world.State.open, Is.False, "A same-day return must not reopen the closed business.");
             Assert.That(PlayerCafeOwner.Current, Is.SameAs(world), "Return must reuse the scene world.");
             Assert.That(GameSaveParticipantRegistry.PendingRestore == null
                 || !GameSaveParticipantRegistry.PendingRestore.Any(p => p.Id == PlayerCafeOwner.SaveId), Is.True,
@@ -298,8 +352,12 @@ namespace Spotlight.GameFlow.Tests
             yield return null;
             Assert.That(endDay.gameObject.activeSelf, Is.True, "Third-floor dormitory exposes explicit rest.");
             enterArea.Invoke(endpoint, new object[] { Spotlight.FreeCafe.AreaId.Cafe });
+            Assert.That(endDay.gameObject.activeSelf, Is.False, "Leaving the third-floor dormitory hides the next-day shortcut.");
+            endDay.onClick.Invoke();
+            Assert.That(days.CurrentDay, Is.EqualTo(1), "Even a programmatic click outside the third floor must not advance the day.");
+            enterArea.Invoke(endpoint, new object[] { Spotlight.FreeCafe.AreaId.Basement });
             yield return WaitFor(() => endDay.gameObject.activeInHierarchy && endDay.interactable,
-                "Explicit end-day button is available in the first-floor lobby");
+                "Explicit end-day button is available only in the third-floor dormitory");
             endDay.onClick.Invoke();
             Assert.That(days.CurrentDay, Is.EqualTo(2));
             Assert.That(world.State.day, Is.EqualTo(2));

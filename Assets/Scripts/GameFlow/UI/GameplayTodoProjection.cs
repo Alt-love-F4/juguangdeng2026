@@ -8,6 +8,28 @@ namespace Spotlight.GameFlow
     /// <summary>Read-only projection of existing action state. No task state or content tables.</summary>
     public static class GameplayTodoProjection
     {
+        public const string RestTodoId = "guide.cafe.sleep";
+
+        public static void AppendRestGuidance(List<MapTaskItem> items, NarrativeRuntime runtime, bool available)
+        {
+            if (!available || runtime?.Actions == null || runtime.Controller.IsEnded || runtime.Controller.IsBusy
+                || runtime.Actions.IsExecuting || HasActionableContent(runtime)
+                || items.Any(i => !i.completed && i.preventsRest)) return;
+            items.Add(new MapTaskItem {
+                id = RestTodoId, name = "前往咖啡馆三楼睡觉", location = "咖啡馆 · 三楼宿舍",
+                description = "目前没有其他需要处理的事项，可以回咖啡馆三楼睡觉，迎接新的一天。",
+                currentTask = "前往咖啡馆三楼宿舍，点击床睡觉。前往不会推进日期，点击床后才会进入下一天。",
+                navigationLabel = "前往咖啡馆三楼", status = "暂无其他事项 · 可以休息", priority = 5
+            });
+        }
+
+        public static bool HasActionableContent(NarrativeRuntime runtime)
+        {
+            var actions = runtime?.Actions;
+            return actions != null && (actions.HasBlockingActions() || actions.GetMapPositions()
+                .SelectMany(actions.GetDisplayableActions).Any(a => actions.IsAvailable(a.actionKey, out _)));
+        }
+
         public static List<MapTaskItem> Build(NarrativeRuntime runtime, Func<string, bool> allowsPosition = null)
         {
             var result = new List<MapTaskItem>();
@@ -39,7 +61,8 @@ namespace Spotlight.GameFlow
                         currentTask = "前往「" + locationName + "」，在行动详情中选择「" + name + "」。",
                         location = locationName, positionKey = position, status = status,
                         navigationLabel = "查看地点与行动", priority = action.mustExecute && !done ? 0 : 10,
-                        remainingDays = actions.GetRemainingDays(action.actionKey)
+                        remainingDays = actions.GetRemainingDays(action.actionKey),
+                        preventsRest = !done && (action.mustExecute || actions.IsAvailable(action.actionKey, out _))
                     });
                 }
                 // Completed one-time actions no longer belong to the displayable map projection.

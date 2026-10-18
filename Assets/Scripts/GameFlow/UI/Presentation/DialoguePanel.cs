@@ -174,9 +174,9 @@ namespace Spotlight.GameFlow
             ApplyBackground(value, false);
             }
             if (psdBackground != null) psdBackground.SetActive(false);
-            // With a CG stage: keep the panel opaque so the cup aperture, not a whole-panel
-            // fade, decides what is visible; otherwise the scene behind would leak through.
-            bool revealInitialBackground = !seamless && value.Background != null;
+            // Keep the background opaque throughout entrance; only the dialogue box enters.
+            // Fading the whole panel would expose the gameplay camera between narrative pages.
+            bool hasBackground = background.enabled;
             if (titleText != null) titleText.text = string.IsNullOrEmpty(value.Title) ? "角色对话" : value.Title;
             finished = onFinished;
             cancelled = onCancelled;
@@ -184,7 +184,7 @@ namespace Spotlight.GameFlow
             active = this;
             IsPlaying = true;
             lastAdvanceFrame = Time.frameCount;
-            canvasGroup.alpha = seamless || revealInitialBackground ? 1f : 0f;
+            canvasGroup.alpha = seamless || hasBackground ? 1f : 0f;
             canvasGroup.blocksRaycasts = canvasGroup.interactable = true;
             continueButton.interactable = false;
             if (!seamless) leftPortrait.color = rightPortrait.color = centerPortrait.color = Color.white;
@@ -203,12 +203,8 @@ namespace Spotlight.GameFlow
             dialogueBox.anchoredPosition = boxPosition + new Vector2(0f, -32f);
             EnterVisiblePortraits();
             transition = Sequence();
-            if (revealInitialBackground)
+            if (hasBackground)
             {
-                // Start synchronously so the aperture is closed in the same frame the panel opens.
-                entranceComplete = false;
-                RevealInitialBackground(.65f);
-                transition.AppendInterval(.65f);
                 transition.Append(Move(dialogueBox, boxPosition, enterSeconds).SetEase(Ease.OutCubic));
             }
             else
@@ -490,12 +486,12 @@ namespace Spotlight.GameFlow
             effects.Play(PresentationEffectIds.PortraitFadeOut, 1);
             if (centerPortrait.enabled) effects.Play(PresentationEffectIds.PortraitFadeOut, 2);
             transition = Sequence();
-            bool curtainExit = background.enabled;
-            const float curtainExitSeconds = .5f;
-            if (curtainExit) transition.AppendCallback(() => effects.CloseBackground(curtainExitSeconds));
-            transition.AppendInterval(curtainExit ? curtainExitSeconds : 0f);
-            if (!curtainExit) transition.Append(DOTween.To(() => canvasGroup.alpha, v => canvasGroup.alpha = v, 0f, exitSeconds));
-            transition.Join(Move(dialogueBox, boxPosition + new Vector2(0f, -24f), curtainExit ? .3f : exitSeconds));
+            // Continuous narrative pages finish through SeamlessChoicePending above.
+            // Only a genuine return to gameplay reaches this exit; never insert a black curtain.
+            if (!background.enabled)
+                transition.Append(DOTween.To(() => canvasGroup.alpha, v => canvasGroup.alpha = v, 0f, exitSeconds));
+            else transition.AppendInterval(exitSeconds);
+            transition.Join(Move(dialogueBox, boxPosition + new Vector2(0f, -24f), exitSeconds));
             transition.OnComplete(() =>
             {
                 transition = null;

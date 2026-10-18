@@ -110,6 +110,34 @@ namespace Spotlight.FreeCafe.Tests
         }
 
         [UnityTest]
+        public IEnumerator GmOneClickUsesNcsVisitAndBothClickAndServedHooks()
+        {
+            Assert.That(app.DebugArrangeCafeVisit().success, Is.True);
+            yield return WaitFor(() => app.World.State.cafeVisits.Any(v => v.visitKey == "demo_cafe_visit"), "GM reservation did not reach the cafe");
+            Assert.That(narrative.GetCommittedCafeVisits().Visits.Single(v => !v.IsEnded).ArrivalAuthorized, Is.True);
+            Assert.That(app.DebugArrangeCafeVisit().success, Is.False, "Repeated GM clicks cannot duplicate the story guest");
+            app.RequestBusinessStart();
+            yield return WaitFor(() => app.World.State.open && Visit.status == CafeVisitStatus.SeatedBeforeServe && app.World.State.cafeVisitFeedback.Count == 0,
+                "One-click visitor was not seated");
+            foreach (var request in app.World.State.requests.Where(r => r.customerId != Visit.customerId))
+            {
+                var person = app.World.Find(request.customerId).person;
+                Assert.That(person.narrativeCharacterId, Is.Null.Or.Empty);
+                Assert.That(person.characterId, Does.StartWith("guest_"));
+            }
+            app.Click(app.View(Visit.customerId));
+            yield return WaitFor(() => narrative.Controller.State.HasHappenedEvent("EV_DEMO_CAFE_BEFORE"), "Before-serve click hook did not run");
+            Order.automaticRemaining = 0;
+            app.World.Tick(.01f);
+            narrative.Controller.FlushValueChanges();
+            yield return WaitFor(() => narrative.Controller.State.HasHappenedEvent("EV_DEMO_CAFE_SERVED") && app.World.State.cafeVisitFeedback.Count == 0,
+                "Served hook did not run");
+            Assert.That(app.View(Visit.customerId), Is.Not.Null);
+            app.Click(app.View(Visit.customerId));
+            yield return WaitFor(() => narrative.Controller.State.HasHappenedEvent("EV_DEMO_CAFE_CHAT"), "After-serve click hook did not run");
+        }
+
+        [UnityTest]
         public IEnumerator ExcelReservationAndArrivalWinOpeningSeatAndCreateOneRealOrder()
         {
             yield return OpenDemo();

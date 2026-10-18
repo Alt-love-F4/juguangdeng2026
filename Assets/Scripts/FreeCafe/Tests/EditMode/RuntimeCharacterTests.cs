@@ -98,7 +98,29 @@ namespace Spotlight.FreeCafe.Tests
         }
 
         [Test]
-        public void DefaultCharactersCreateIndependentVisitsAndPersistTheirDefinitions()
+        public void OrdinaryTrafficWorksWithNoCharacterOrVisitConfiguration()
+        {
+            var catalog = ScriptableObject.CreateInstance<CharacterCatalog>();
+            try
+            {
+                catalog.Configure(new CharacterProfile[0]);
+                var data = JsonUtility.FromJson<CafeCatalog>(Resources.Load<TextAsset>("FreeCafe/catalog").text);
+                var world = new CafeWorld(data, new CatalogCustomerIdentitySource(catalog));
+                Assert.That(world.StartDay().success, Is.True);
+                Assert.That(world.State.requests, Is.Not.Empty);
+                Assert.That(world.State.cafeVisits, Is.Empty);
+                foreach (var request in world.State.requests)
+                {
+                    var person = world.Find(request.customerId).person;
+                    Assert.That(person.characterId, Is.Null.Or.Empty);
+                    Assert.That(person.narrativeCharacterId, Is.Null.Or.Empty);
+                }
+            }
+            finally { Object.DestroyImmediate(catalog); }
+        }
+
+        [Test]
+        public void OrdinaryTrafficUsesGenericArtWithoutClaimingStoryIdentity()
         {
             var catalog=CharacterCatalog.LoadFromTables();
             Assert.That(catalog,Is.Not.Null);
@@ -106,11 +128,12 @@ namespace Spotlight.FreeCafe.Tests
             var source=new CatalogCustomerIdentitySource(catalog);
             var a=source.CreateIdentity("order_1",0);
             var b=source.CreateIdentity("order_2",0);
-            Assert.That(a.personId,Is.EqualTo(b.personId), "同一个正式角色跨到访保留身份");
-            Assert.That(a.characterId,Is.EqualTo(b.characterId));
-            Assert.That(a.narrativeCharacterId,Is.EqualTo(a.characterId));
+            Assert.That(a.personId, Is.Not.EqualTo(b.personId), "Each ordinary visit must have an independent identity");
+            Assert.That(a.characterId, Is.EqualTo(b.characterId), "Generic art may be reused");
+            Assert.That(a.characterId, Does.StartWith("guest_"));
+            Assert.That(a.narrativeCharacterId, Is.Null.Or.Empty);
             var next=source.CreateIdentity("order_3",0,new System.Collections.Generic.HashSet<string>{a.personId});
-            Assert.That(next.personId,Is.Not.EqualTo(a.personId));
+            Assert.That(next.personId, Is.Not.EqualTo(a.personId));
             var data=JsonUtility.FromJson<CafeCatalog>(Resources.Load<TextAsset>("FreeCafe/catalog").text);
             var world=new CafeWorld(data,source);
             world.StartDay();
@@ -118,7 +141,10 @@ namespace Spotlight.FreeCafe.Tests
             Assert.That(world.Restore(saved).success,Is.True);
             foreach(var request in world.State.requests)
             {
-                var profile=catalog.Find(world.Find(request.customerId).person.characterId);
+                var person = world.Find(request.customerId).person;
+                Assert.That(person.characterId, Does.StartWith("guest_"));
+                Assert.That(person.narrativeCharacterId, Is.Null.Or.Empty);
+                var profile=catalog.Find(person.characterId);
                 Assert.That(profile,Is.Not.Null);
                 Assert.That(profile.worldSprite,Is.Not.Null);
                 Assert.That(profile.portrait,Is.Not.Null);

@@ -41,12 +41,13 @@ namespace Spotlight.GameFlow
         private bool visible;
         private Vector2 authoredArtworkPosition;
         private readonly System.Collections.Generic.List<IGameplayTodoSource> todoSources = new System.Collections.Generic.List<IGameplayTodoSource>();
-        private TextMeshProUGUI todoGuidance;
         private float nextTodoRefresh;
         private MapTaskItem pendingTodo;
         private float pendingTodoDeadline;
         private bool todoSourcesDirty = true;
         private bool hadTodoMap;
+        private bool restTravelPending;
+        private float restTravelDeadline;
         public MapActionInventoryView Inventory => inventory;
         public MapTaskPanel Tasks => tasks;
         public Button EndDayButton => endDayButton;
@@ -98,8 +99,6 @@ namespace Spotlight.GameFlow
             artwork.GetComponent<MapActionPointsView>().Initialize(header, inventory.PointsFill, inventory.DateLabel, inventory.PointsSegments);
             tasks.Initialize();
             tasks.NavigationRequested += NavigateTodo;
-            tasks.ItemsChanged += RefreshTodoGuidance;
-            CreateTodoGuidance();
             detailsButton.onClick.AddListener(ToggleDetails);
             inventoryButton.onClick.AddListener(ToggleInventory);
             tasksButton.onClick.AddListener(ToggleTasks);
@@ -158,6 +157,16 @@ namespace Spotlight.GameFlow
             }
             if (endDayButton != null) endDayButton.gameObject.SetActive(map != null && map.isActiveAndEnabled);
             bool canInteract = CanInteract;
+            if (restTravelPending && canInteract)
+            {
+                if (Time.unscaledTime > restTravelDeadline) restTravelPending = false;
+                else if (active.name == "CoffeeShop")
+                {
+                    foreach (var source in todoSources)
+                        if (source.NavigateTodo(new MapTaskItem { id = GameplayTodoProjection.RestTodoId }))
+                        { restTravelPending = false; break; }
+                }
+            }
             visibility.alpha = show ? 1f : 0f;
             visibility.interactable = visibility.blocksRaycasts = show && canInteract;
             if (artwork != null && transform is RectTransform root)
@@ -201,39 +210,6 @@ namespace Spotlight.GameFlow
             return selected.GetComponent<TMP_InputField>() != null || selected.GetComponent<InputField>() != null;
         }
 
-        private void CreateTodoGuidance()
-        {
-            var root = new GameObject("NextTodoGuidance", typeof(RectTransform), typeof(Image), typeof(Button));
-            root.transform.SetParent(transform, false);
-            var rect = (RectTransform)root.transform;
-            rect.anchorMin = rect.anchorMax = new Vector2(0, 0);
-            rect.pivot = Vector2.zero;
-            rect.anchoredPosition = new Vector2(28, 24);
-            rect.sizeDelta = new Vector2(640, 112);
-            root.GetComponent<Image>().color = new Color(.13f, .10f, .07f, .92f);
-            root.GetComponent<Button>().onClick.AddListener(ToggleTasks);
-            var text = new GameObject("Text", typeof(RectTransform), typeof(TextMeshProUGUI));
-            text.transform.SetParent(root.transform, false);
-            todoGuidance = text.GetComponent<TextMeshProUGUI>();
-            var labelRect = todoGuidance.rectTransform;
-            labelRect.anchorMin = Vector2.zero; labelRect.anchorMax = Vector2.one;
-            labelRect.offsetMin = new Vector2(18, 10); labelRect.offsetMax = new Vector2(-18, -10);
-            todoGuidance.font = header.font;
-            todoGuidance.fontSize = 23;
-            todoGuidance.color = new Color(1, .94f, .79f);
-            todoGuidance.overflowMode = TextOverflowModes.Ellipsis;
-            todoGuidance.raycastTarget = false;
-            RefreshTodoGuidance();
-        }
-
-        private void RefreshTodoGuidance()
-        {
-            if (todoGuidance == null) return;
-            var item = tasks.CurrentGuidance;
-            todoGuidance.text = item == null ? "待办事项  [T / 点击查看]\n暂无待办，查看地图或继续咖啡馆经营。"
-                : "下一步 · " + item.name + "  [T / 点击查看]\n" + item.currentTask;
-        }
-
         private void RefreshTodos()
         {
             bool mapActive = map != null && map.isActiveAndEnabled;
@@ -249,12 +225,63 @@ namespace Spotlight.GameFlow
                             todoSources.Add(source);
                 tasks.SetGuidanceSources(todoSources);
             }
+            var days = flow != null ? flow.GetComponent<DayFlowController>() : FindFirstObjectByType<DayFlowController>();
+            bool canRest = days != null && !days.IsFirstSessionGuideActive && !days.BlocksGameplayInput
+                && days.CanSave
+                && (days.State == DayFlowState.CityMapLeisure || days.State == DayFlowState.FreeCafeBusiness)
+                && PlayerCafeOwner.Current?.State.open != true;
+            tasks.SetRestGuidanceAvailable(canRest);
+            tasks.SetCafeTravelAvailable(flow != null && flow.SessionState == GameSessionState.Playing
+                && (SceneManager.GetActiveScene().name != "CoffeeShop" || flow.IsMapOpen)
+                && !(NarrativeRuntime.Instance?.Actions?.ReplacesLocationActions("cafe") ?? false)
+                && (days == null || !days.BlocksGameplayInput));
             tasks.RefreshSource();
+        }
+
+        public bool TryNavigateToCafe()
+        {
+            if (!CanInteract || flow == null || flow.SessionState != GameSessionState.Playing
+                || NarrativeRuntime.Instance?.Actions?.ReplacesLocationActions("cafe") == true) return false;
+            CloseSidebars();
+            if (SceneManager.GetActiveScene().name == "CoffeeShop") { flow.CloseMap(); todoSourcesDirty = true; return true; }
+            if (map != null && map.isActiveAndEnabled) return map.TryEnterCafeFromTodo();
+            var days = flow.GetComponent<DayFlowController>();
+            if (days != null && days.State == DayFlowState.CityMapLeisure) { days.StartCafeFromMap(); return true; }
+            if (days != null && (days.BlocksGameplayInput || days.IsFirstSessionGuideActive)) return false;
+            flow.TransitionToGameplayScene("CoffeeShop", () => { todoSourcesDirty = true; });
+            return true;
+        }
+
+        public bool TryNavigateToCafeForRest()
+        {
+            if (!CanInteract || restTravelPending || flow == null || flow.SessionState != GameSessionState.Playing) return false;
+            RefreshTodos();
+            if (!tasks.CanNavigateToRest) return false;
+            var runtime = NarrativeRuntime.Instance;
+            if (GameplayTodoProjection.HasActionableContent(runtime) || runtime?.Actions?.ReplacesLocationActions("cafe") == true) return false;
+            var days = flow.GetComponent<DayFlowController>();
+            if (days == null || days.IsFirstSessionGuideActive || PlayerCafeOwner.Current?.State.open == true) return false;
+            CloseSidebars();
+            restTravelPending = true;
+            restTravelDeadline = Time.unscaledTime + 30f;
+            if (SceneManager.GetActiveScene().name == "CoffeeShop")
+            {
+                flow.CloseMap();
+                todoSourcesDirty = true;
+                RefreshTodos();
+                return true;
+            }
+            bool started = days.TryVisitCafeForRest(() => { todoSourcesDirty = true; nextTodoRefresh = 0; },
+                () => restTravelPending = false);
+            if (!started) restTravelPending = false;
+            return started;
         }
 
         private void NavigateTodo(MapTaskItem item)
         {
             if (!CanInteract) return;
+            if (item.id == GameplayTodoProjection.RestTodoId) { TryNavigateToCafeForRest(); return; }
+            if (item.id == "guide.travel.cafe") { TryNavigateToCafe(); return; }
             CloseSidebars();
             foreach (var source in todoSources)
                 if (source.NavigateTodo(item)) return;
@@ -369,8 +396,8 @@ namespace Spotlight.GameFlow
             SceneManager.activeSceneChanged -= ActiveSceneChanged;
             CloseWindows();
             pendingTodo = null;
+            restTravelPending = false;
             tasks.NavigationRequested -= NavigateTodo;
-            tasks.ItemsChanged -= RefreshTodoGuidance;
             UnbindSources();
             standalone?.Dispose();
             standalone = null;

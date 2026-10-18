@@ -459,6 +459,41 @@ namespace Spotlight.GameFlow.Tests
         }
 
         [Test]
+        public void IdleTodosSuggestThirdFloorButUtilitiesDoNotPreventRest()
+        {
+            var config = new NarrativeConfiguration();
+            runtime.Initialize(config, new ImmediatePresenter());
+            var items = new System.Collections.Generic.List<MapTaskItem> {
+                new MapTaskItem { id = "guide.cafe.recipes" }, new MapTaskItem { id = "guide.cafe.area.2" } };
+            GameplayTodoProjection.AppendRestGuidance(items, runtime, true);
+            var rest = items.Single(i => i.id == GameplayTodoProjection.RestTodoId);
+            Assert.That(rest.currentTask, Does.Contain("三楼").And.Contain("点击床"));
+            Assert.That(rest.navigationLabel, Is.Not.Empty);
+            items.Remove(rest);
+            items.Add(new MapTaskItem { id = "tutorial", preventsRest = true });
+            GameplayTodoProjection.AppendRestGuidance(items, runtime, true);
+            Assert.That(items.Any(i => i.id == GameplayTodoProjection.RestTodoId), Is.False);
+            items.Clear();
+            GameplayTodoProjection.AppendRestGuidance(items, runtime, false);
+            Assert.That(items, Is.Empty);
+        }
+
+        [TestCase(false)]
+        [TestCase(true)]
+        public void ExecutableOrMandatoryActionsPreventSleepSuggestion(bool mandatory)
+        {
+            var config = new NarrativeConfiguration();
+            config.actions.Add(new NarrativeActionDefinition { actionKey = "activity", mustExecute = mandatory,
+                requirements = mandatory ? "ActionPoint(1)" : "" });
+            config.mapPositions.Add(new NarrativeMapPositionDefinition { positionKey = "market", enabled = true, defaultAction = "activity" });
+            runtime.Initialize(config, new ImmediatePresenter());
+            if (mandatory) runtime.Actions.ActionPoints.Set(0);
+            var items = new System.Collections.Generic.List<MapTaskItem>();
+            GameplayTodoProjection.AppendRestGuidance(items, runtime, true);
+            Assert.That(items, Is.Empty, "Do not infer idle from only the visible scene's utility list.");
+        }
+
+        [Test]
         public void OtherLocationsDoNotExposeEnterCafe()
         {
             CreateDetails(null);

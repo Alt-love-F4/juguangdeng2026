@@ -1132,7 +1132,7 @@ namespace Spotlight.GameFlow
                 && UnityEngine.SceneManagement.SceneManager.GetActiveScene().name != "CoffeeShop")
                 items.Add(new MapTaskItem { id = "guide.map.cafe", name = "进入咖啡馆", location = "咖啡馆", positionKey = "cafe",
                     description = "前往咖啡馆，继续教程或今天的经营。", currentTask = "点击咖啡馆地点，在详情中选择「进入咖啡馆」。",
-                    status = "可前往", navigationLabel = "查看咖啡馆入口", priority = GuideLocked ? 0 : 20 });
+                    status = "可前往", navigationLabel = "查看咖啡馆入口", priority = GuideLocked ? 0 : 20, preventsRest = GuideLocked });
             if (!GuideLocked && !(actions?.HasBlockingActions() ?? false))
                 items.Add(new MapTaskItem { id = "guide.map.rest", name = "结束这一天", location = "城区地图",
                     description = "今天的事项处理完毕后，可以休息并进入下一天。", currentTask = "点击待办面板底部的「结束当天」。休息会推进日期，请先确认没有遗漏。",
@@ -1226,6 +1226,15 @@ namespace Spotlight.GameFlow
             if (!actions.ConsumePendingFocus(key)) return;
             FocusPosition(position);
             BeginFocusMovement(position.position);
+        }
+
+        public bool TryEnterCafeFromTodo()
+        {
+            if (scenePanelInstance != null) return scenePanelInstance.TryEnterCafeFromTodo();
+            if (!ControlsAvailable || (actionDetails != null && actionDetails.IsBusy)
+                || (NarrativeRuntime.Instance?.Actions?.ReplacesLocationActions(MapActionDetailsView.CafePositionKey) ?? false)) return false;
+            StartCafe();
+            return true;
         }
 
         private void StartCafe()

@@ -229,7 +229,7 @@ namespace Spotlight.FreeCafe
         private void EndDayFromDormitory()
         {
             if (runtime == null || runtime.World == null || runtime.InputBlocked) return;
-            if (runtime.World.State.currentArea != AreaId.Cafe && runtime.World.State.currentArea != AreaId.Basement) return;
+            if (runtime.World.State.currentArea != AreaId.Basement) return;
             if (dayFlow == null) dayFlow = FindFirstObjectByType<DayFlowController>();
             dayFlow?.EndDayFromDormitory();
         }
@@ -394,19 +394,19 @@ namespace Spotlight.FreeCafe
                 else if (tutorial != null && tutorial.IsRunning) step = tutorial.TodoInstruction;
                 else if (runtime.CafeTutorialWaitingForWorkstation) step = "点击大厅右侧吧台处的箭头，进入工作台制作首杯黑咖啡。";
                 items.Add(new MapTaskItem { id = "guide.cafe.tutorial", name = "完成当前咖啡馆教程", location = "咖啡馆",
-                    description = step, currentTask = step, status = "当前必做", priority = 0 });
+                    description = step, currentTask = step, status = "当前必做", priority = 0, preventsRest = true });
                 return;
             }
             if (state.businessPhase == BusinessPhase.Preparation)
                 items.Add(new MapTaskItem { id = "guide.cafe.open", name = "开始今天的营业", location = "咖啡馆一楼大厅",
                     description = "准备好后，点击大厅左侧窗边的「开始营业」挂牌。",
-                    currentTask = "回到一楼大厅，点击「开始营业」挂牌接待顾客。", status = "可进行", priority = 20,
+                    currentTask = "回到一楼大厅，点击「开始营业」挂牌接待顾客。", status = "可进行", priority = 20, preventsRest = true,
                     navigationLabel = runtime.CanEnterArea(AreaId.Cafe) && state.currentArea != AreaId.Cafe ? "返回大厅" : null });
             if (state.open)
             {
                 if (state.requests.Count == 0)
                     items.Add(new MapTaskItem { id = "guide.cafe.wait", name = "接待到店顾客", location = "咖啡馆一楼大厅",
-                        currentTask = "等待顾客入座，点击顾客查看需求，再根据订单制作饮品。", description = "营业进行中，留意到店顾客。", status = "等待顾客", priority = 20 });
+                        currentTask = "等待顾客入座，点击顾客查看需求，再根据订单制作饮品。", description = "营业进行中，留意到店顾客。", status = "等待顾客", priority = 20, preventsRest = true });
                 foreach (var request in state.requests)
                 {
                     var person = runtime.World.Find(request.customerId);
@@ -414,7 +414,7 @@ namespace Spotlight.FreeCafe
                     string name = person == null ? "顾客" : runtime.World.PersonName(person);
                     items.Add(new MapTaskItem { id = "guide.cafe.order." + request.id, name = "为" + name + "准备" + (product?.label ?? "饮品"),
                         location = "咖啡馆制作台", description = "查看左上角订单，确认饮品和杯型；忘记做法时打开「咖啡谱」。",
-                        currentTask = "进入制作台，按订单制作饮品，放到交付盘后按铃交付。", status = "营业订单 · 留意顾客耐心", priority = 10,
+                        currentTask = "进入制作台，按订单制作饮品，放到交付盘后按铃交付。", status = "营业订单 · 留意顾客耐心", priority = 10, preventsRest = true,
                         navigationLabel = runtime.CanEnterArea(AreaId.Counter) && state.currentArea != AreaId.Counter ? "前往制作台" : null });
                 }
                 if (runtime.CanEndBusiness)
@@ -423,9 +423,9 @@ namespace Spotlight.FreeCafe
                         status = "可选择 · 将结束营业", priority = 90, navigationLabel = state.currentArea != AreaId.Cafe ? "返回大厅" : null });
             }
             if (state.businessPhase == BusinessPhase.Night && dayFlow != null)
-                items.Add(new MapTaskItem { id = "guide.cafe.rest", name = "休息并进入下一天", location = "大厅或三楼宿舍",
-                    description = "今日已打烊；也可以先打开地图处理其他事项。", currentTask = "确认今天的事项后，点击大厅「结束这一天」，或到三楼上床休息。",
-                    status = "可选择 · 将推进日期", priority = 100, navigationLabel = state.currentArea != AreaId.Cafe ? "返回大厅" : null });
+                items.Add(new MapTaskItem { id = "guide.cafe.rest", name = "休息并进入下一天", location = "咖啡馆三楼宿舍",
+                    description = "今日已打烊；也可以先打开地图处理其他事项。", currentTask = "确认今天的事项后，前往三楼宿舍，点击「结束这一天」或上床休息。",
+                    status = "可选择 · 将推进日期", priority = 100, navigationLabel = state.currentArea != AreaId.Basement ? "前往三楼宿舍" : null });
             var bookButton = IsWorkstation ? runtime.GetComponent<FreeCafeProductionHud>()?.bookButton : recipeButton;
             if (bookButton != null && bookButton.gameObject.activeInHierarchy && bookButton.interactable)
                 items.Add(new MapTaskItem { id = "guide.cafe.recipes", name = "查看咖啡谱", location = "咖啡馆",
@@ -457,12 +457,13 @@ namespace Spotlight.FreeCafe
                 if (button == null || !button.isActiveAndEnabled || !button.interactable) return false;
                 button.onClick.Invoke(); return true;
             }
-            AreaId destination = item.id.StartsWith("guide.cafe.order.", StringComparison.Ordinal) ? AreaId.Counter : AreaId.Cafe;
+            AreaId destination = item.id == GameplayTodoProjection.RestTodoId ? AreaId.Basement
+                : item.id.StartsWith("guide.cafe.order.", StringComparison.Ordinal) ? AreaId.Counter : AreaId.Cafe;
             if (item.id.StartsWith("guide.cafe.area.", StringComparison.Ordinal)
                 && int.TryParse(item.id.Substring("guide.cafe.area.".Length), out int index)) destination = (AreaId)index;
             if (!item.id.StartsWith("guide.cafe.", StringComparison.Ordinal) || !runtime.CanEnterArea(destination)) return false;
             runtime.Enter(destination);
-            return true;
+            return runtime.World.State.currentArea == destination;
         }
 
         private void Refresh()
@@ -477,7 +478,7 @@ namespace Spotlight.FreeCafe
             var state=runtime.World.State;
             if (endDayButton != null)
             {
-                bool canRestHere = state.currentArea == AreaId.Cafe || state.currentArea == AreaId.Basement;
+                bool canRestHere = state.currentArea == AreaId.Basement;
                 endDayButton.gameObject.SetActive(canRestHere);
                 endDayButton.interactable = canRestHere && dayFlow != null && !runtime.InputBlocked;
             }
