@@ -13,6 +13,15 @@ namespace Spotlight.Audio
         public const string PanelOpen = "ui.panel_open";
         public const string PanelClose = "ui.panel_close";
         public const string MapComplete = "map.action_complete";
+        public const string Pickup = "cafe.item_pickup";
+        public const string BeansPickup = "cafe.beans_pickup";
+        public const string BeansAdd = "cafe.beans_add";
+        public const string PowderAdd = "cafe.powder_add";
+        public const string LiquidAdd = "cafe.liquid_add";
+        public const string MachineSwitch = "cafe.machine_switch";
+        public const string Stove = "cafe.stove_run";
+        public const string Spill = "cafe.liquid_spill";
+        public const string DragCancel = "cafe.drag_cancel";
         public const string CupPickup = "cafe.cup_pickup";
         public const string Place = "cafe.item_place";
         public const string Ingredient = "cafe.ingredient_add";

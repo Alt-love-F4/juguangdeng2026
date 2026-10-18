@@ -106,6 +106,9 @@ namespace Spotlight.FreeCafe
         private string dragItemId,dragSourceId,dragMachineId,dragOutputId,confirmCancelId;
         private bool committingDrag, clearingDrag, dragPreview;
         private bool quitting;
+        private string dragAudioSpecId;
+        private Vector3 dragRustlePosition;
+        private float dragRustleDistance, nextDragRustle;
         private Vector3 origin,offset;
         private Camera dragCamera;
         private Plane dragPlane;
@@ -266,6 +269,7 @@ namespace Spotlight.FreeCafe
                 if (!BusinessSimulationPaused && (IsSandboxMode || Spotlight.Narrative.NarrativeRuntime.Instance == null || cafeVisits != null && cafeVisits.Ready)) World.Tick(Time.deltaTime);
                 if (!IsSandboxMode) cafeVisits?.Pump();
             }
+            if (IsDragging && PresentationPauseRegistry.IsPaused) CancelDrag();
             if(IsDragging && draggingVessel && !InputBlocked) UpdateVesselInput();
             // GameFlowBootstrap owns the global Escape/pause flow. FreeCafe only
             // cancels an active drag; the shared pause panel handles everything else.
@@ -469,7 +473,7 @@ namespace Spotlight.FreeCafe
                 Report(result); return;
             }
             if(World.ProductionEnabled && spec.Has(Capability.Processor))
-            { SelectedId=entity.id; Report(World.OperateProduction(entity.id)); return; }
+            { SelectedId=entity.id; OperateWithAudio(entity); return; }
             if(spec.Has(Capability.Source))
             {
                 var stack = view.GetComponent<FreeCafeCupStackVisual>();
@@ -478,6 +482,7 @@ namespace Spotlight.FreeCafe
                 if(result.success)
                 {
                     View(item.id)?.StartMotionFrom(pickupPosition);
+                    GameAudio.Play(FreeCafeSoundDynamics.PickupKey(item.specId), this, .5f);
                     Select(item.id);
                 }
                 Report(result);
@@ -493,13 +498,13 @@ namespace Spotlight.FreeCafe
                 if(entity.task.phase==MachinePhase.Loaded)
                 {
                     confirmCancelId=null;
-                    Report(World.Operate(entity.id));
+                    OperateWithAudio(entity);
                     return;
                 }
                 if(entity.task.phase==MachinePhase.Ready)
                 {
                     confirmCancelId=null;
-                    Report(World.Operate(entity.id));
+                    OperateWithAudio(entity);
                     return;
                 }
                 bool cancel=entity.task.phase==MachinePhase.Running;
@@ -534,6 +539,19 @@ namespace Spotlight.FreeCafe
                 }
             }
             else Select(entity.id);
+        }
+        private void OperateWithAudio(WorldEntity machine)
+        {
+            var heated = machine.specId == "machine.stove" ? World.Find(machine.production?.heatingVesselId) : machine;
+            ProductionPhase? before = heated?.production?.phase;
+            bool selfHeating = heated?.production?.selfHeating == true;
+            MachinePhase? taskBefore = machine.task?.phase;
+            var result = World.ProductionEnabled ? World.OperateProduction(machine.id) : World.Operate(machine.id);
+            if (result.success && result.feedback == CafeFeedbackKind.None &&
+                (World.ProductionEnabled ? before != heated?.production?.phase || selfHeating != (heated?.production?.selfHeating == true)
+                    : taskBefore != machine.task?.phase))
+                GameAudio.Play(AudioKeys.MachineSwitch, this);
+            Report(result);
         }
         public void CancelProcessing(FreeEntityView view)
         {
@@ -646,6 +664,10 @@ namespace Spotlight.FreeCafe
             }
             if (reservedCupStack != null) reservedCupStack.ReserveTopCup(true);
             draggedView.BeginPointerMotion();
+            dragAudioSpecId = draggedView.PrefabSpecId;
+            dragRustlePosition = WorldToArea(World.State.currentArea, origin);
+            dragRustleDistance = 0; nextDragRustle = Time.unscaledTime + FreeCafeSoundDynamics.DragRustleCooldown;
+            GameAudio.Play(FreeCafeSoundDynamics.PickupKey(dragAudioSpecId), this, .5f);
             draggedView.hitbox.enabled=false; MoveDrag(e);
         }
         private WorldEntity DragData()
@@ -699,6 +721,18 @@ namespace Spotlight.FreeCafe
             // 左键落点冻结；右键移动只控制倾斜，不重新寻找接收物。
             if(!vesselTiltMode) { draggedView.MovePointer(point+offset); FindReceiver(e); }
             if (!IsDragging || draggedView != movingView) return;
+            if (dragAudioSpecId == "beans" && !vesselTiltMode)
+            {
+                var position = WorldToArea(World.State.currentArea, point + offset);
+                float distance = Vector3.Distance(position, dragRustlePosition);
+                dragRustleDistance += distance;
+                dragRustlePosition = position;
+                if (distance > .0001f && dragRustleDistance >= FreeCafeSoundDynamics.DragDistanceForRustle && Time.unscaledTime >= nextDragRustle)
+                {
+                    GameAudio.Play(AudioKeys.BeansPickup, this, .35f);
+                    dragRustleDistance = 0; nextDragRustle = Time.unscaledTime + FreeCafeSoundDynamics.DragRustleCooldown;
+                }
+            }
             draggedView.body.sortingOrder=2000;
             bool placeOnly=Keyboard.current!=null && (Keyboard.current.leftShiftKey.isPressed || Keyboard.current.rightShiftKey.isPressed);
             var item=DragData();
@@ -770,6 +804,8 @@ namespace Spotlight.FreeCafe
             bool cupPickup = sourceId != null && reservedCupStack != null;
             bool returnedCup = World.IsCup(World.Find(itemId)) && receiver != null
                 && World.Spec(World.Find(receiver.EntityId).specId).sourceItemId == ghost.PrefabSpecId;
+            string releasedSpecId = ghost.PrefabSpecId;
+            bool materialAddition = !placeOnly && targetId != null && World.Spec(releasedSpecId).Has(Capability.Portion);
             bool wasPreview=dragPreview;
             bool wasVessel=draggingVessel; bool wasTilted=vesselWasTilted; ClearDrag(); ActionResult result;
             committingDrag = true;
@@ -833,8 +869,12 @@ namespace Spotlight.FreeCafe
                 }
             }
             if (result.success && result.feedback == CafeFeedbackKind.None && !wasTilted)
-                GameAudio.Play(sourceId != null ? cupPickup ? AudioKeys.CupPickup : AudioKeys.Ingredient : targetId != null ? AudioKeys.Ingredient : AudioKeys.Place);
-            if (!validScreen) ShowHint(result.message);
+                GameAudio.Play(materialAddition ? FreeCafeSoundDynamics.AdditionKey(World, releasedSpecId) : AudioKeys.Place, this);
+            if (!validScreen)
+            {
+                if (isActiveAndEnabled && !InputBlocked) GameAudio.Play(AudioKeys.DragCancel, this, .6f);
+                ShowHint(result.message);
+            }
             else Report(result);
         }
         private void RetireDragPreview(FreeEntityView preview)
@@ -858,6 +898,9 @@ namespace Spotlight.FreeCafe
             // before publishing anything so cancellation cannot re-enter this drag.
             draggedView=null; receiver=null; dragEventOwner=null; dragCamera=null;
             dragSourceId=dragItemId=dragMachineId=dragOutputId=null;
+            dragAudioSpecId=null; dragRustleDistance=0;
+            GameAudio.SetLoop(this, "pour", AudioKeys.Pour, false);
+            GameAudio.SetLoop(this, "spill", AudioKeys.Spill, false);
             dragCompanion=null; reservedCupStack=null; dragPreview=false;
             draggingVessel=false; draggingCupPickupPreview=false; vesselTiltMode=false; vesselWasTilted=false; vesselTilt=0;
             dragFinishedFrame=Time.frameCount;
@@ -880,6 +923,7 @@ namespace Spotlight.FreeCafe
         {
             if(clearingDrag || committingDrag || !HasDragState) return;
             bool cupPickup=dragSourceId!=null && reservedCupStack!=null;
+            if (isActiveAndEnabled && !InputBlocked && !PresentationPauseRegistry.IsPaused && !quitting) GameAudio.Play(AudioKeys.DragCancel, this, .6f);
             var view=draggedView; string id=dragItemId; bool provisional=dragPreview;
             ClearDrag();
             var released=World.Find(id);
@@ -1037,11 +1081,21 @@ namespace Spotlight.FreeCafe
             float amount = World.Catalog.production.pourRateMl*Mathf.Max(.1f,pourRateMultiplier)*tilt*Time.deltaTime;
             if (WorkstationTutorial != null) amount = WorkstationTutorial.LimitPourAmount(dragItemId, amount);
             if (amount <= 0) { StopVesselPour(); return; }
+            // Snapshot the effective receiver before reactions/refills replace production states.
+            var audioReceiver = FreeCafeSoundDynamics.PourReceiver(World, target);
+            float receiverBefore = World.LiquidVolume(audioReceiver);
+            float outflow = FreeCafeSoundDynamics.Outflow(World, source, amount);
             var result=World.PourLiquid(dragItemId,targetId,amount,Time.deltaTime);
             if(result.success)
             {
                 pouredThisDrag=true; lastPourTarget=targetId;
-                GameAudio.SetLoop(this, "pour", AudioKeys.Pour, true);
+                float received = Mathf.Max(0, World.LiquidVolume(audioReceiver) - receiverBefore);
+                float spilled = Mathf.Max(0, outflow - received);
+                float baseAmount = Mathf.Max(.0001f, World.Catalog.production.pourRateMl * Mathf.Max(.1f, pourRateMultiplier) * Time.deltaTime);
+                FreeCafeSoundDynamics.Pour(outflow / baseAmount, FreeCafeSoundDynamics.Fill(World, audioReceiver), out float volume, out float pitch);
+                GameAudio.SetLoop(this, "pour", AudioKeys.Pour, outflow > .0001f, volume, pitch);
+                FreeCafeSoundDynamics.Pour(spilled / baseAmount, 0, out volume, out pitch);
+                GameAudio.SetLoop(this, "spill", AudioKeys.Spill, spilled > .0001f, volume, pitch);
                 if(draggedView!=null) draggedView.RefreshLiquid(signedTilt,true);
                 if(target!=null && views.TryGetValue(target.id,out var targetView) && targetView!=null)
                 {
@@ -1059,6 +1113,7 @@ namespace Spotlight.FreeCafe
             {
                 ShowHint(result.message);
                 GameAudio.SetLoop(this, "pour", AudioKeys.Pour, false);
+                GameAudio.SetLoop(this, "spill", AudioKeys.Spill, false);
                 if(lastPourError!=result.message) { lastPourError=result.message; OperationToastPanel.ShowMessage(result.message); }
             }
         }
@@ -1094,6 +1149,7 @@ namespace Spotlight.FreeCafe
         private void StopVesselPour()
         {
             GameAudio.SetLoop(this, "pour", AudioKeys.Pour, false);
+            GameAudio.SetLoop(this, "spill", AudioKeys.Spill, false);
             if(receivingView!=null) receivingView.SetReceivingPour(false);
             if(!pouredThisDrag) return;
             var targetId=lastPourTarget;
@@ -1253,7 +1309,7 @@ namespace Spotlight.FreeCafe
                 if (ncs != null && (!cafeVisits.Pump() || !ncs.Controller.CanCaptureSnapshot || ncs.Controller.IsBusy || cafeVisits.HasStageHandoff)) return;
             }
             pendingBusinessStart = false;
-            Report(World.StartDay());
+            Report(World.StartDay(IsSandboxMode));
             if (!IsSandboxMode) cafeVisits?.Pump();
         }
         public bool CanEndBusiness => World != null && World.State.open && !InputBlocked && !IsDragging
@@ -1268,6 +1324,7 @@ namespace Spotlight.FreeCafe
         private void RefreshDailyCups()
         {
             int day = dayFlow != null ? dayFlow.CurrentDay : World.State.day;
+            if (!IsSandboxMode && dayFlow != null) World.SynchronizeCalendarDay(day);
             World.RefreshDailyCupStock((IsSandboxMode ? "sandbox:" : "story:") + day);
         }
         public void StartDayFlowBusiness()

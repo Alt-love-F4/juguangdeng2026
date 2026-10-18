@@ -30,6 +30,39 @@ namespace Spotlight.FreeCafe.Tests
             world.State.currentArea=AreaId.Cafe;world.ActivateBusinessControl("business.start");world.EndDay();
             Assert.That(world.ActivateBusinessControl("business.start").success,Is.True);Assert.That(world.State.day,Is.EqualTo(2));
         }
+        [Test] public void FormalClosingCannotAdvanceDayOrReopenUntilExplicitCalendarChange()
+        {
+            Assert.That(world.StartDay(advanceFromNight: false).success, Is.True);
+            Assert.That(world.EndDay().success, Is.True);
+            int reputation = world.State.reputation;
+            string summary = world.State.lastSummary;
+            Assert.That(world.State.day, Is.EqualTo(1));
+            Assert.That(world.StartDay(advanceFromNight: false).success, Is.False);
+            Assert.That(world.State.day, Is.EqualTo(1));
+            Assert.That(world.State.businessPhase, Is.EqualTo(BusinessPhase.Night));
+            Assert.That(world.State.reputation, Is.EqualTo(reputation));
+            Assert.That(world.State.lastSummary, Is.EqualTo(summary));
+            world.SynchronizeCalendarDay(1);
+            Assert.That(world.State.businessPhase, Is.EqualTo(BusinessPhase.Night), "Returning to the cafe cannot reopen today's business.");
+            world.SynchronizeCalendarDay(2);
+            Assert.That(world.State.day, Is.EqualTo(2));
+            Assert.That(world.State.businessPhase, Is.EqualTo(BusinessPhase.Preparation));
+            Assert.That(world.StartDay(advanceFromNight: false).success, Is.True);
+            Assert.That(world.State.day, Is.EqualTo(2), "Opening must not increment the official date a second time.");
+        }
+        [Test] public void CalendarSynchronizationPreservesOpenBusinessAndSameDayInventory()
+        {
+            world.RefreshDailyCupStock("story:2");
+            world.Find("s.cups.small").stock = 1;
+            world.StartDay(advanceFromNight: false);
+            var request = world.State.requests[0];
+            world.SynchronizeCalendarDay(2);
+            world.SynchronizeCalendarDay(2);
+            Assert.That(world.State.day, Is.EqualTo(2));
+            Assert.That(world.State.open, Is.True, "An old save's mismatched date must not discard active orders.");
+            Assert.That(world.State.requests[0], Is.SameAs(request));
+            Assert.That(world.Find("s.cups.small").stock, Is.EqualTo(1));
+        }
         [Test] public void TutorialCustomerHasAClosedShopBlackCoffeeOrder()
         {
             Assert.That(world.State.open, Is.False);

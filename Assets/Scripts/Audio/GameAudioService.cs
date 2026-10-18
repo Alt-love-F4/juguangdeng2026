@@ -13,6 +13,10 @@ namespace Spotlight.Audio
             public object owner;
             public string slot;
             public AudioVoiceHandle handle;
+            public IAudioBackend backend;
+            public float baseVolume;
+            public float basePitch;
+            public float fadeOut;
             public float end;
             public bool paused;
             public float pausedAt;
@@ -68,7 +72,7 @@ namespace Spotlight.Audio
         public AudioVoiceHandle Play(string key, object owner = null, float volume = 1f)
             => PlayCue(key, owner, null, volume, false);
 
-        private AudioVoiceHandle PlayCue(string key, object owner, string slot, float volume, bool forceLoop, AudioCategory? category = null)
+        private AudioVoiceHandle PlayCue(string key, object owner, string slot, float volume, bool forceLoop, AudioCategory? category = null, float pitch = 1f)
         {
             if (disposed || string.IsNullOrWhiteSpace(key)) return default;
             AudioCue cue = catalog != null ? catalog.Find(key) : null;
@@ -86,7 +90,7 @@ namespace Spotlight.Audio
             options.Bus = Bus(category ?? cue.category);
             options.Loop = category == AudioCategory.Voice ? false : forceLoop || cue.loop;
             options.Volume = Mathf.Clamp01(cue.volume * volume);
-            options.Pitch = Mathf.Clamp(cue.pitch, .1f, 3f);
+            options.Pitch = Mathf.Clamp(cue.pitch * pitch, .1f, 3f);
             options.FadeInDuration = cue.fadeIn;
             options.FadeOutDuration = cue.fadeOut;
             string path = cue.clip != null ? loader.Register(cue.clip) : cue.resourcePath;
@@ -94,22 +98,33 @@ namespace Spotlight.Audio
             if (!handle.IsValid) return handle;
             lastPlayed[key] = Time.unscaledTime;
             voices.Add(new Voice { key = key, owner = owner, slot = slot, handle = handle,
+                backend = AudioKit.GetBackend(), baseVolume = cue.volume, basePitch = cue.pitch, fadeOut = Mathf.Max(0f, cue.fadeOut),
                 end = options.Loop ? float.PositiveInfinity : Time.unscaledTime + loader.Duration(path) / options.Pitch });
             return handle;
         }
 
-        public void SetLoop(object owner, string slot, string key, bool active)
+        /// <summary>Volume and pitch multiply the cue defaults; repeated requests update the same voice over 80 ms.</summary>
+        public void SetLoop(object owner, string slot, string key, bool active, float volume = 1f, float pitch = 1f)
         {
             if (owner == null || disposed) return;
             for (int index = voices.Count - 1; index >= 0; index--)
             {
                 Voice voice = voices[index];
                 if (!ReferenceEquals(voice.owner, owner) || voice.slot != slot) continue;
-                if (active && voice.key == key) return;
-                AudioKit.StopWithFade(voice.handle, .08f);
+                if (active && voice.key == key)
+                {
+                    AudioCue cue = catalog != null ? catalog.Find(key) : null;
+                    if (cue != null) { voice.baseVolume = cue.volume; voice.basePitch = cue.pitch; }
+                    // Never send a stale local id to a replacement backend or take over an injected backend.
+                    if (ReferenceEquals(voice.backend, AudioKit.GetBackend()) && voice.backend is IDynamicAudioLoopBackend dynamicBackend)
+                        dynamicBackend.SetLoopParameters(voice.handle.VoiceId,
+                            Mathf.Clamp01(voice.baseVolume * volume), Mathf.Clamp(voice.basePitch * pitch, .1f, 3f));
+                    return;
+                }
+                AudioKit.StopWithFade(voice.handle, voice.fadeOut);
                 voices.RemoveAt(index);
             }
-            if (active) PlayCue(key, owner, slot, 1f, true);
+            if (active) PlayCue(key, owner, slot, volume, true, pitch: pitch);
         }
 
         public AudioVoiceHandle PlayNarrative(string keyOrResource, object owner, float volume = 1f, bool voice = false)

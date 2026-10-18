@@ -91,7 +91,11 @@ namespace OnePersonCompany
         public string Solver => "2D MAC-grid NS + limited MacCormack milk + damped surface waves";
         public int StrokePointCount => strokePoints.Count;
         public LatteArtRecognitionResult Recognize(IList<LatteArtPatternPreset> presets = null) => LatteArtPatternRecognizer.Recognize(strokePoints, presets, strokeStarts);
-        public void SetInteractionEnabled(bool value) { interactionEnabled = value; if (!value) { strokeActive = false; wasPouring = false; } }
+        public void SetInteractionEnabled(bool value)
+        {
+            interactionEnabled = value;
+            if (!value) { strokeActive = false; wasPouring = false; Spotlight.Audio.GameAudio.StopOwner(this); }
+        }
 
         private RenderTexture velocityRead, velocityWrite, velocityScratch, pressureRead, pressureWrite, divergence, densityRead, densityWrite, densityForward;
 
@@ -136,6 +140,7 @@ namespace OnePersonCompany
         private void ApplySurface() { if (image != null) { image.material = surfaceMaterial; image.texture = densityRead; } else if (worldSurface) { worldRenderer.material = surfaceMaterial; surfaceMaterial.SetTexture("_MainTex", densityRead); } }
         public void ResetLatte()
         {
+            Spotlight.Audio.GameAudio.StopOwner(this);
             ClearRT(velocityRead); ClearRT(velocityWrite); ClearRT(velocityScratch); ClearRT(pressureRead); ClearRT(pressureWrite); ClearRT(divergence); ClearRT(densityRead); ClearRT(densityWrite); ClearRT(densityForward);
             strokePoints.Clear(); strokeStarts.Clear(); strokeActive = false; wasPouring = false; simulationTime = 0; simulationFrameCount = 0; ApplySurface();
         }
@@ -222,7 +227,9 @@ namespace OnePersonCompany
                 if (resetHandler != null) resetHandler();
                 else ResetLatte();
             }
-            bool inside = TryGetPointerUV(out Vector2 uv); bool pouring = inside && !IsPointerOverUI() && (!requireLeftButton || Mouse.current != null && Mouse.current.leftButton.isPressed);
+            bool inside = TryGetPointerUV(out Vector2 uv);
+            bool audible = dt > 0 && !float.IsNaN(dt) && !float.IsInfinity(dt) && !Spotlight.GameFlow.PresentationPauseRegistry.IsPaused;
+            bool pouring = audible && inside && !IsPointerOverUI() && (!requireLeftButton || Mouse.current != null && Mouse.current.leftButton.isPressed);
             float depositFraction = 1;
             if (pouring && foamConsumer != null)
             {
@@ -236,7 +243,10 @@ namespace OnePersonCompany
                     pouring = accepted > 0;
                 }
             }
-            Spotlight.Audio.GameAudio.SetLoop(this, "latte", Spotlight.Audio.AudioKeys.LattePour, pouring && dt > 0);
+            // This surface is the sole latte-loop owner, including foam-limited final frames.
+            float normalizedFlow = pourRate / 5f * BrushRadiusScale * BrushRadiusScale * depositFraction;
+            FreeCafeSoundDynamics.Pour(normalizedFlow, 0, out float volume, out float pitch);
+            Spotlight.Audio.GameAudio.SetLoop(this, "latte", Spotlight.Audio.AudioKeys.LattePour, pouring, volume, pitch);
             if (pouring && !strokeActive && strokePoints.Count < MaxStrokePoints)
             {
                 strokeStarts.Add(strokePoints.Count);

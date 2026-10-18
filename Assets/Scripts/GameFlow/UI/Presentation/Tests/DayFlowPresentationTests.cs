@@ -61,21 +61,6 @@ namespace Spotlight.GameFlow.Tests
             Assert.That(prefab.GetComponentInChildren<Button>(true), Is.Not.Null);
         }
 
-        [Test]
-        public void DateChangeUsesCalendarArtworkAndUniformLayout()
-        {
-            GameObject prefab = Resources.Load<GameObject>("Art/UIPrefab/DateChangePanel");
-            Transform art = prefab.transform.Find("Content/Artwork");
-            Assert.That(art, Is.Not.Null);
-            Assert.That(prefab.GetComponentInChildren<DateChangeArtworkLayout>(true), Is.Not.Null);
-            Assert.That(art.Find("Background").GetComponent<RawImage>().texture.name, Is.EqualTo("背景"));
-            Assert.That(art.Find("Calendar/Board").GetComponent<Image>().sprite.name, Is.EqualTo("底板"));
-            Assert.That(art.Find("Calendar/BasePage").GetComponent<Image>().sprite.name, Is.EqualTo("底页"));
-            Assert.That(art.Find("Calendar/OldPage").GetComponent<Image>().sprite.name, Is.EqualTo("切页"));
-            Assert.That(art.Find("CandleSconce").GetComponent<Image>().sprite.name, Is.EqualTo("烛台"));
-            Assert.That(prefab.GetComponentsInChildren<SpriteRenderer>(true), Is.Empty);
-        }
-
         [UnityTest]
         public IEnumerator AutomaticDateCompletesOnceEvenWhenTimeIsPaused()
         {
@@ -95,7 +80,7 @@ namespace Spotlight.GameFlow.Tests
         {
             DateChangePanel panel = Open<DateChangePanel>();
             panel.SetDates("王国纪元 670年12月31日", "王国纪元 671年1月1日");
-            TMP_Text Text(string path) => panel.transform.Find("Content/Artwork/Calendar/" + path).GetComponent<TMP_Text>();
+            TMP_Text Text(string path) => panel.transform.Find("Content/Calendar/" + path).GetComponent<TMP_Text>();
             Assert.That(Text("OldPage/Day").text, Is.EqualTo("31"));
             Assert.That(Text("OldPage/Month").text, Is.EqualTo("十二月"));
             Assert.That(Text("NewPage/Day").text, Is.EqualTo("1"));

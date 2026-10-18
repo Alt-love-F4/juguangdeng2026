@@ -358,13 +358,19 @@ namespace Spotlight.GameFlow
         public void TransitionToGameplayScene(string sceneName, Action completed)
         {
             if (!gameplay) return;
-            GameSaveParticipantRegistry.PendingRestore = GameSaveParticipantRegistry.CaptureAll();
             if (string.IsNullOrWhiteSpace(sceneName) || sceneName == SceneManager.GetActiveScene().name)
             {
                 CompletePendingPlayerCreation();
                 completed?.Invoke();
                 return;
             }
+            // Resident scene adapters already own live data: Start will not run on return.
+            // Carry a cafe snapshot only while there is no loaded adapter to preserve it.
+            var handoff = GameSaveParticipantRegistry.CaptureAll();
+            handoff.RemoveAll(item => item != null && (item.Id == DayFlowController.SaveId
+                || item.Id == PlayerRuntime.SaveId
+                || item.Id == PlayerCafeOwner.SaveId && PlayerCafeOwner.HasSceneOwner));
+            GameSaveParticipantRegistry.PendingRestore = handoff;
             StartCoroutine(TransitionGameplaySceneRoutine(sceneName, completed));
         }
 
