@@ -10,6 +10,7 @@ namespace Spotlight.FreeCafe
         public enum Stage { OpenRecipe, CloseRecipe, ReturnToCafe, StartBusiness, WaitForCustomer, InspectCustomer, ReadOrder }
         public Stage CurrentStage { get; private set; }
         public bool IsRunning { get; private set; }
+        public string TodoInstruction => panel != null ? panel.instruction.text : "跟随正式营业教程继续操作。";
         public bool AllowBusinessStart => IsRunning && CurrentStage == Stage.StartBusiness;
         public bool PauseBusinessSimulation => IsRunning && CurrentStage != Stage.StartBusiness && CurrentStage != Stage.WaitForCustomer;
         private FreeCafeRuntime app;

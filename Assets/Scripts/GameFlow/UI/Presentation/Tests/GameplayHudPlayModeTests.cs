@@ -136,6 +136,28 @@ namespace Spotlight.GameFlow.Tests
         }
 
         [UnityTest]
+        public IEnumerator MapTodoNavigatesToCafeWithoutExecutingOrSpendingResources()
+        {
+            yield return SceneManager.LoadSceneAsync("Map", LoadSceneMode.Single);
+            yield return WaitFor(() => GameplayHudPanel.Instance != null && PlayerRuntime.Current?.CreationSubmitted == true,
+                "Standalone map todos");
+            var hud = GameplayHudPanel.Instance;
+            yield return WaitFor(() => hud.Tasks.CurrentGuidance?.id == "guide.map.cafe", "Cafe next-step guidance");
+            Assert.That(hud.transform.Find("NextTodoGuidance/Text").GetComponent<TMP_Text>().text, Does.Contain("进入咖啡馆"));
+            int points = NarrativeRuntime.Instance.Actions.ActionPoints.Current;
+            hud.Tasks.SetVisible(true);
+            hud.Tasks.Navigate("guide.map.cafe");
+            yield return null;
+            var map = Object.FindObjectsByType<MapSceneController>(FindObjectsSortMode.None)
+                .First(candidate => candidate.isActiveAndEnabled && candidate.transform is RectTransform);
+            var entry = map.GetComponentInChildren<MapActionDetailsView>(true).transform.Find("Viewport/ActionList/EnterCafe");
+            Assert.That(entry, Is.Not.Null);
+            Assert.That(NarrativeRuntime.Instance.Actions.ActionPoints.Current, Is.EqualTo(points));
+            Assert.That(NarrativeRuntime.Instance.Actions.IsExecuting, Is.False);
+            Assert.That(SceneManager.GetActiveScene().name, Is.EqualTo("Map"), "Todo navigation opens details; player confirms entry.");
+        }
+
+        [UnityTest]
         public IEnumerator MainFlowCafeAndMapOverlayUseSharedHudWithoutReplacingFormalSession()
         {
             yield return SceneManager.LoadSceneAsync("启动场景", LoadSceneMode.Single);

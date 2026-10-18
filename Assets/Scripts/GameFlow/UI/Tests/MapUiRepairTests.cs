@@ -405,17 +405,57 @@ namespace Spotlight.GameFlow.Tests
         }
 
         [Test]
-        public void MandatoryZeroCostActionDoesNotBecomeTaskButRealAPActivityDoes()
+        public void MandatoryZeroCostAndAPActionsBothBecomeTodos()
         {
             var story = new NarrativeActionDefinition { actionKey = "zero", mustExecute = true };
             var activity = new NarrativeActionDefinition { actionKey = "activity", requirements = "ActionPoint(1)" };
             var config = new NarrativeConfiguration(); config.actions.Add(story); config.actions.Add(activity);
             runtime.Initialize(config, new ImmediatePresenter());
-            Assert.That(MapTaskPanel.ShouldListAction(story), Is.False);
+            Assert.That(MapTaskPanel.ShouldListAction(story), Is.True);
             Assert.That(MapTaskPanel.ShouldListAction(activity), Is.True);
             var taskRoot = Create("TaskFilter", root.transform); var tasks = taskRoot.AddComponent<MapTaskPanel>();
             tasks.SetItems(new[] { new MapTaskItem { id = "zero" }, new MapTaskItem { id = "activity" } });
-            Assert.That(tasks.ItemCount, Is.EqualTo(1));
+            Assert.That(tasks.ItemCount, Is.EqualTo(2));
+        }
+
+        [Test]
+        public void TodosUseCurrentConditionsReadableLocationsAndPersistedCompletion()
+        {
+            var config = new NarrativeConfiguration();
+            config.conditionKeys.Add(new NarrativeConditionKeyDefinition { key = "known" });
+            config.conditions.Add(new NarrativeConditionDefinition { conditionId = "gate", ownerType = "action", ownerId = "story",
+                condType = "BOOL_EQ", target = "known", value = "true" });
+            config.actions.Add(new NarrativeActionDefinition { actionKey = "story", nameText = "name", type = NarrativeActionType.Once, mustExecute = true });
+            config.mapPositions.Add(new NarrativeMapPositionDefinition { positionKey = "market", nameText = "place", enabled = true, defaultAction = "story" });
+            runtime.Initialize(config, new ImmediatePresenter(), key => key == "name" ? "免费剧情" : key == "place" ? "集市" : key);
+            Assert.That(GameplayTodoProjection.Build(runtime), Is.Empty);
+            runtime.Controller.State.SetCondition("known", true);
+            var item = GameplayTodoProjection.Build(runtime).Single();
+            Assert.That(item.location, Is.EqualTo("集市"));
+            Assert.That(item.currentTask, Does.Contain("集市").And.Contain("免费剧情"));
+            Assert.That(item.priority, Is.Zero);
+            Assert.That(item.completed, Is.False);
+            Assert.That(GameplayTodoProjection.Build(runtime, _ => false), Is.Empty);
+            Assert.That(runtime.Actions.Execute("story"), Is.True);
+            item = GameplayTodoProjection.Build(runtime).Single();
+            Assert.That(item.completed, Is.True, "Completion remains visible using NCS persisted counters.");
+            Assert.That(item.navigationLabel, Is.Null);
+        }
+
+        [Test]
+        public void TodosKeepCostBlockedActivitiesAndMarkDailyCompletion()
+        {
+            var config = new NarrativeConfiguration();
+            config.actions.Add(new NarrativeActionDefinition { actionKey = "daily", type = NarrativeActionType.Daily, requirements = "ActionPoint(1)" });
+            config.mapPositions.Add(new NarrativeMapPositionDefinition { positionKey = "market", enabled = true, defaultAction = "daily" });
+            runtime.Initialize(config, new ImmediatePresenter());
+            runtime.Actions.ActionPoints.Set(0);
+            Assert.That(GameplayTodoProjection.Build(runtime).Single().status, Does.Contain("行动点不足"));
+            runtime.Actions.ActionPoints.Set(1);
+            Assert.That(runtime.Actions.Execute("daily"), Is.True);
+            Assert.That(GameplayTodoProjection.Build(runtime).Single().completed, Is.True);
+            runtime.Actions.BeginDay(2);
+            Assert.That(GameplayTodoProjection.Build(runtime).Single().completed, Is.False);
         }
 
         [Test]

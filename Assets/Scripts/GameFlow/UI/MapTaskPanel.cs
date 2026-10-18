@@ -21,6 +21,10 @@ namespace Spotlight.GameFlow
 
         public int remainingDays;
         public string location;
+        public string positionKey;
+        public string status;
+        public string navigationLabel;
+        public int priority = 10;
         public List<string> previousTasks = new List<string>();
     }
 
@@ -37,6 +41,17 @@ namespace Spotlight.GameFlow
         public string TrackedId => trackedId;
         public int ItemCount => items.Count;
         public event Action<string> TrackingChanged;
+        public event Action<MapTaskItem> NavigationRequested;
+        public event Action ItemsChanged;
+        public MapTaskItem CurrentGuidance => items.Find(i => i.id == trackedId && !i.completed)
+            ?? items.Find(i => !i.completed);
+        private readonly List<IGameplayTodoSource> guidanceSources = new List<IGameplayTodoSource>();
+        private string itemSignature;
+        public void SetGuidanceSources(IEnumerable<IGameplayTodoSource> sources)
+        {
+            guidanceSources.Clear();
+            if (sources != null) guidanceSources.AddRange(sources);
+        }
         private const float Width = 550f;
         private MapSidebarView sidebar;
         [SerializeField] private bool showEditorPreview = true;
@@ -47,12 +62,9 @@ namespace Spotlight.GameFlow
         private NarrativeActionController actionSource;
         private bool externalItems;
 
-        public static bool ShouldListAction(NarrativeActionDefinition action)
-            => action != null && (action.parsedRequirements != null && action.parsedRequirements.Count > 0
-                ? action.parsedRequirements : NarrativeActionRequirementParser.Parse(action.requirements))
-                .Any(r => r.type == NarrativeActionRequirementType.ActionPoint && r.value > 0);
+        public static bool ShouldListAction(NarrativeActionDefinition action) => action != null;
 
-        public void RefreshSource() => BindActions();
+        public void RefreshSource() { BindActions(); RefreshActions(); }
 
         private void BindActions()
         {
@@ -74,17 +86,16 @@ namespace Spotlight.GameFlow
 
         private void RefreshActions()
         {
-            if (externalItems || actionSource == null) return;
-            // Query only mount identities; never capture/save during a running action.
-            var values = actionSource.GetMapPositions().SelectMany(position => actionSource.GetDisplayableActions(position)
-                .Where(ShouldListAction).Select(action => new { position, action }))
-                .GroupBy(value => value.action.actionKey).Select(group => group.First());
-            ReplaceItems(values.Select(value => new MapTaskItem { id = value.action.actionKey, actionKey = value.action.actionKey,
-                name = NarrativeRuntime.Instance.ResolveText(value.action.nameText),
-                description = NarrativeRuntime.Instance.ResolveText(value.action.descText),
-                currentTask = NarrativeRuntime.Instance.ResolveText(value.action.nameText),
-                completed = actionSource.IsCompleted(value.action.actionKey), location = value.position,
-                remainingDays = actionSource.GetRemainingDays(value.action.actionKey) }));
+            if (externalItems) return;
+            var runtime = NarrativeRuntime.Instance;
+            var values = GameplayTodoProjection.Build(runtime, position => guidanceSources.All(s => s.AllowsTodoPosition(position)));
+            foreach (var source in guidanceSources) source.CollectTodos(values);
+            values = values.OrderBy(v => v.completed).ThenBy(v => v.priority).ThenBy(v => v.remainingDays > 0 ? v.remainingDays : int.MaxValue).ToList();
+            string signature = string.Join("\n", values.Select(v => string.Join("|", v.id, v.name, v.description,
+                v.currentTask, v.completed, v.location, v.positionKey, v.status, v.navigationLabel, v.remainingDays, v.priority)));
+            if (signature == itemSignature) return;
+            itemSignature = signature;
+            ReplaceItems(values);
         }
 
         public void Initialize()
@@ -201,6 +212,15 @@ namespace Spotlight.GameFlow
             if (items.Find(item => item.id == expandedId) == null) expandedId = null;
             if (items.Find(item => item.id == trackedId) == null) SetTracked(null);
             else Refresh();
+            ItemsChanged?.Invoke();
+        }
+
+        public void Navigate(string id)
+        {
+            var item = items.Find(i => i.id == id && !i.completed);
+            if (item == null || string.IsNullOrEmpty(item.navigationLabel)) return;
+            SetTracked(id);
+            NavigationRequested?.Invoke(item);
         }
 
         public void SetTracked(string id)
@@ -209,7 +229,7 @@ namespace Spotlight.GameFlow
             bool changed = trackedId != next;
             trackedId = next;
             Refresh();
-            if (changed) TrackingChanged?.Invoke(trackedId);
+            if (changed) { TrackingChanged?.Invoke(trackedId); ItemsChanged?.Invoke(); }
         }
 
         private void SelectTab(bool completed)
@@ -260,32 +280,52 @@ namespace Spotlight.GameFlow
                 var description = row.Find("Description")?.GetComponent<TextMeshProUGUI>();
                 var location = row.Find("Location")?.GetComponent<TextMeshProUGUI>();
                 if (title != null) title.text = item.name + (trackedId == item.id ? "  · 追踪中" : "");
-                if (description != null) description.text = string.IsNullOrEmpty(item.description) ? "暂无事项描述" : item.description;
-                if (location != null) location.text = string.IsNullOrEmpty(item.location) ? "" : "地点：" + item.location;
+                if (description != null)
+                {
+                    description.text = string.IsNullOrEmpty(item.description) ? item.currentTask : item.description;
+                    description.overflowMode = TextOverflowModes.Ellipsis;
+                }
+                if (title != null) title.overflowMode = TextOverflowModes.Ellipsis;
+                if (location != null)
+                {
+                    location.text = string.IsNullOrEmpty(item.location) ? "" : "地点：" + item.location;
+                    location.overflowMode = TextOverflowModes.Ellipsis;
+                }
                 ConfigureTimerIcons(row, item.remainingDays);
                 var rowButton = row.GetComponent<Button>();
                 if (rowButton != null) { rowButton.onClick.RemoveAllListeners(); rowButton.onClick.AddListener(() => { expandedId = expandedId == item.id ? null : item.id; Refresh(); }); }
                 Spotlight.Audio.UIButtonAudio.Configure(rowButton);
                 float height = row.sizeDelta.y;
                 Top(row, 0, -y, Width - 64, height); y += height + 14;
+                if (!string.IsNullOrEmpty(item.status)) y += AddDetailText(item.status, y, "TodoStatus");
                 if (expandedId != item.id) continue;
                 if (item.previousTasks != null)
                     foreach (string task in item.previousTasks) y += AddDetailText("已进行：" + task, y, "PreviousTask");
                 if (!item.completed)
-                    y += AddDetailText("当前任务：" + (string.IsNullOrEmpty(item.currentTask) ? "暂无" : item.currentTask), y, "CurrentTask");
+                    y += AddDetailText("当前待办：" + (string.IsNullOrEmpty(item.currentTask) ? "暂无" : item.currentTask), y, "CurrentTask");
                 else y += AddDetailText("事项已完成", y, "CompletedStatus");
-                if (trackButtonTemplate != null)
+                if (trackButtonTemplate != null && !item.completed)
                 {
+                    if (!string.IsNullOrEmpty(item.navigationLabel))
+                    {
+                        var go = Instantiate(trackButtonTemplate, content, false); go.gameObject.SetActive(true); go.name = "Navigate_" + item.id;
+                        var goButton = go.GetComponent<Button>();
+                        var goLabel = go.GetComponentInChildren<TextMeshProUGUI>(true);
+                        if (goLabel != null) goLabel.text = item.navigationLabel;
+                        goButton.onClick.RemoveAllListeners(); goButton.onClick.AddListener(() => Navigate(item.id));
+                        Spotlight.Audio.UIButtonAudio.Configure(goButton);
+                        Top(go, 8, -y, Width - 64, go.sizeDelta.y); y += go.sizeDelta.y + 8;
+                    }
                     var trackRect = Instantiate(trackButtonTemplate, content, false); trackRect.gameObject.SetActive(true); trackRect.name = "Track_" + item.id;
                     var track = trackRect.GetComponent<Button>();
                     var label = trackRect.GetComponentInChildren<TextMeshProUGUI>(true);
-                    if (label != null) label.text = trackedId == item.id ? "取消追踪" : "追踪此事件";
+                    if (label != null) label.text = trackedId == item.id ? "取消追踪" : "追踪此待办";
                     track.onClick.RemoveAllListeners(); track.onClick.AddListener(() => SetTracked(trackedId == item.id ? null : item.id));
                     Spotlight.Audio.UIButtonAudio.Configure(track);
                     Top(trackRect, 8, -y, Width - 64, trackRect.sizeDelta.y); y += trackRect.sizeDelta.y + 8;
                 }
             }
-            if (count == 0) y += AddDetailText(showCompleted ? "暂无已完成事项" : "暂无进行中事项", y, "Empty");
+            if (count == 0) y += AddDetailText(showCompleted ? "暂无已完成事项" : "暂无待办，可前往咖啡馆或查看地图。", y, "Empty");
             bool showPreview = !Application.isPlaying && showEditorPreview;
             if (taskRowTemplate != null) taskRowTemplate.gameObject.SetActive(showPreview);
             var previewDetail = content.Find("PreviewDetailText"); if (previewDetail != null) previewDetail.gameObject.SetActive(showPreview);
@@ -327,8 +367,10 @@ namespace Spotlight.GameFlow
         {
             if (detailTextTemplate == null) return 0;
             var rect = Instantiate(detailTextTemplate, content, false); rect.gameObject.SetActive(true); rect.name = name;
-            var label = rect.GetComponent<TextMeshProUGUI>(); if (label != null) label.text = text;
-            Top(rect, 12, -y, Width - 72, rect.sizeDelta.y); return rect.sizeDelta.y + 4;
+            var label = rect.GetComponent<TextMeshProUGUI>();
+            if (label != null) { label.text = text; label.color = MapVisualTheme.Ink; }
+            float height = Mathf.Max(rect.sizeDelta.y, label != null ? label.GetPreferredValues(text, Width - 72, 0).y + 8 : 0);
+            Top(rect, 12, -y, Width - 72, height); return height + 4;
         }
 
         private static void SetTab(Button button, bool selected)

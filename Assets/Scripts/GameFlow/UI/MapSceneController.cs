@@ -12,7 +12,7 @@ namespace Spotlight.GameFlow
 {
     /// <summary>Scene-owned city map shell. Art and positions are intentionally data-driven later.</summary>
     [DefaultExecutionOrder(-500)]
-    public sealed class MapSceneController : GameFlowPanel, IGameplayScenePanelRegistration
+    public sealed class MapSceneController : GameFlowPanel, IGameplayScenePanelRegistration, IGameplayTodoSource
     {
         private const float MapWidth = 2400f;
         private const float MapHeight = 1350f;
@@ -1122,6 +1122,43 @@ namespace Spotlight.GameFlow
             TextMeshProUGUI label = button.transform.Find("Label").GetComponent<TextMeshProUGUI>();
             label.text = text;
             label.fontSize = size;
+        }
+
+        public void CollectTodos(List<MapTaskItem> items)
+        {
+            if (scenePanelInstance != null || !isActiveAndEnabled || !ControlsAvailable) return;
+            var actions = NarrativeRuntime.Instance?.Actions;
+            if (AllowsTodoPosition("cafe") && !(actions?.ReplacesLocationActions("cafe") ?? false)
+                && UnityEngine.SceneManagement.SceneManager.GetActiveScene().name != "CoffeeShop")
+                items.Add(new MapTaskItem { id = "guide.map.cafe", name = "进入咖啡馆", location = "咖啡馆", positionKey = "cafe",
+                    description = "前往咖啡馆，继续教程或今天的经营。", currentTask = "点击咖啡馆地点，在详情中选择「进入咖啡馆」。",
+                    status = "可前往", navigationLabel = "查看咖啡馆入口", priority = GuideLocked ? 0 : 20 });
+            if (!GuideLocked && !(actions?.HasBlockingActions() ?? false))
+                items.Add(new MapTaskItem { id = "guide.map.rest", name = "结束这一天", location = "城区地图",
+                    description = "今天的事项处理完毕后，可以休息并进入下一天。", currentTask = "点击待办面板底部的「结束当天」。休息会推进日期，请先确认没有遗漏。",
+                    status = "可进行 · 将推进日期", priority = 100 });
+        }
+
+        public bool AllowsTodoPosition(string positionKey)
+        {
+            if (scenePanelInstance != null) return scenePanelInstance.AllowsTodoPosition(positionKey);
+            return locationButtons.TryGetValue(positionKey, out var button) && button != null && button.gameObject.activeInHierarchy
+                && button.interactable && (!IsFirstDay || MapActionDetailsView.IsCafeEntryPosition(positionKey));
+        }
+
+        public bool NavigateTodo(MapTaskItem item) => FocusTodo(item.positionKey, item.actionKey);
+
+        public bool FocusTodo(string positionKey, string actionKey = null)
+        {
+            if (scenePanelInstance != null) return scenePanelInstance.FocusTodo(positionKey, actionKey);
+            if (!ControlsAvailable || (actionDetails != null && actionDetails.IsBusy) || !AllowsTodoPosition(positionKey)
+                || !runtimePositions.TryGetValue(positionKey, out var position)) return false;
+            if (!string.IsNullOrEmpty(actionKey) && !(NarrativeRuntime.Instance?.Actions?.GetDisplayableActions(positionKey)
+                .Any(a => a.actionKey == actionKey) ?? false)) return false;
+            FocusPosition(position);
+            if (!string.IsNullOrEmpty(actionKey)) actionDetails?.SelectAction(actionKey);
+            BeginFocusMovement(position.position);
+            return true;
         }
 
         public void FinishDayFromHud() => EndDay();

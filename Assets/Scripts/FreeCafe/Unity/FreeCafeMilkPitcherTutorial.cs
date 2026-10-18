@@ -44,6 +44,7 @@ namespace Spotlight.FreeCafe
 
         public bool IsRunning { get; private set; }
         public Stage CurrentStage => stage;
+        public string TodoInstruction => Description();
 
         private CafeWorld W => app == null ? null : app.World;
 

@@ -8,7 +8,7 @@ using Spotlight.GameFlow;
 
 namespace Spotlight.FreeCafe
 {
-    public sealed class FreeCafeHud : GameFlowPanel
+    public sealed class FreeCafeHud : GameFlowPanel, IGameplayTodoSource
     {
         public FreeCafeRuntime runtime;
         public GameObject playerRoot;
@@ -378,6 +378,93 @@ namespace Spotlight.FreeCafe
             text.Append("规则：步骤、加工次数、等待时间和售价均来自 catalog.json；材料不足时按配表价格购买。流程全部完成后才能确认上餐。 ");
             recipeBody.text=text.ToString();
         }
+        public bool AllowsTodoPosition(string positionKey) => runtime == null || !runtime.CafeTutorialActive;
+
+        public void CollectTodos(System.Collections.Generic.List<MapTaskItem> items)
+        {
+            if (runtime == null || runtime.World == null || !isActiveAndEnabled) return;
+            var state = runtime.World.State;
+            if (runtime.CafeTutorialActive || runtime.PracticeTutorialActive)
+            {
+                string step = "跟随屏幕教程继续操作。";
+                var tutorial = runtime.WorkstationTutorial;
+                var business = runtime.GetComponent<FreeCafeBusinessTutorial>();
+                if (business != null && business.IsRunning) step = business.TodoInstruction;
+                else if (runtime.MilkPitcherTutorial != null && runtime.MilkPitcherTutorial.IsRunning) step = runtime.MilkPitcherTutorial.TodoInstruction;
+                else if (tutorial != null && tutorial.IsRunning) step = tutorial.TodoInstruction;
+                else if (runtime.CafeTutorialWaitingForWorkstation) step = "点击大厅右侧吧台处的箭头，进入工作台制作首杯黑咖啡。";
+                items.Add(new MapTaskItem { id = "guide.cafe.tutorial", name = "完成当前咖啡馆教程", location = "咖啡馆",
+                    description = step, currentTask = step, status = "当前必做", priority = 0 });
+                return;
+            }
+            if (state.businessPhase == BusinessPhase.Preparation)
+                items.Add(new MapTaskItem { id = "guide.cafe.open", name = "开始今天的营业", location = "咖啡馆一楼大厅",
+                    description = "准备好后，点击大厅左侧窗边的「开始营业」挂牌。",
+                    currentTask = "回到一楼大厅，点击「开始营业」挂牌接待顾客。", status = "可进行", priority = 20,
+                    navigationLabel = runtime.CanEnterArea(AreaId.Cafe) && state.currentArea != AreaId.Cafe ? "返回大厅" : null });
+            if (state.open)
+            {
+                if (state.requests.Count == 0)
+                    items.Add(new MapTaskItem { id = "guide.cafe.wait", name = "接待到店顾客", location = "咖啡馆一楼大厅",
+                        currentTask = "等待顾客入座，点击顾客查看需求，再根据订单制作饮品。", description = "营业进行中，留意到店顾客。", status = "等待顾客", priority = 20 });
+                foreach (var request in state.requests)
+                {
+                    var person = runtime.World.Find(request.customerId);
+                    var product = runtime.World.Product(request.productId);
+                    string name = person == null ? "顾客" : runtime.World.PersonName(person);
+                    items.Add(new MapTaskItem { id = "guide.cafe.order." + request.id, name = "为" + name + "准备" + (product?.label ?? "饮品"),
+                        location = "咖啡馆制作台", description = "查看左上角订单，确认饮品和杯型；忘记做法时打开「咖啡谱」。",
+                        currentTask = "进入制作台，按订单制作饮品，放到交付盘后按铃交付。", status = "营业订单 · 留意顾客耐心", priority = 10,
+                        navigationLabel = runtime.CanEnterArea(AreaId.Counter) && state.currentArea != AreaId.Counter ? "前往制作台" : null });
+                }
+                if (runtime.CanEndBusiness)
+                    items.Add(new MapTaskItem { id = "guide.cafe.close", name = "结束今天的营业", location = "咖啡馆一楼大厅",
+                        description = "不再接待顾客时，点击窗边的「结束营业」挂牌。", currentTask = "确认订单处理情况后，回大厅点击「结束营业」挂牌。",
+                        status = "可选择 · 将结束营业", priority = 90, navigationLabel = state.currentArea != AreaId.Cafe ? "返回大厅" : null });
+            }
+            if (state.businessPhase == BusinessPhase.Night && dayFlow != null)
+                items.Add(new MapTaskItem { id = "guide.cafe.rest", name = "休息并进入下一天", location = "大厅或三楼宿舍",
+                    description = "今日已打烊；也可以先打开地图处理其他事项。", currentTask = "确认今天的事项后，点击大厅「结束这一天」，或到三楼上床休息。",
+                    status = "可选择 · 将推进日期", priority = 100, navigationLabel = state.currentArea != AreaId.Cafe ? "返回大厅" : null });
+            var bookButton = IsWorkstation ? runtime.GetComponent<FreeCafeProductionHud>()?.bookButton : recipeButton;
+            if (bookButton != null && bookButton.gameObject.activeInHierarchy && bookButton.interactable)
+                items.Add(new MapTaskItem { id = "guide.cafe.recipes", name = "查看咖啡谱", location = "咖啡馆",
+                    description = "查看已解锁饮品的配方、用量与制作说明。", currentTask = "点击上方「咖啡谱」，选择要制作的饮品查看做法。",
+                    status = "可查看", priority = 60, navigationLabel = "查看咖啡谱" });
+            if (areaButtons != null)
+                for (int i = 0; i < areaButtons.Length; i++)
+                {
+                    var area = (AreaId)i;
+                    if (areaButtons[i] == null || !areaButtons[i].gameObject.activeInHierarchy || state.currentArea == area || !runtime.CanEnterArea(area)) continue;
+                    string areaLabel = runtime.World.Area(area)?.label;
+                    items.Add(new MapTaskItem { id = "guide.cafe.area." + i, name = "前往" + areaLabel, location = areaLabel,
+                        description = "使用楼层或区域切换入口前往该区域。", currentTask = "点击区域切换入口「" + areaLabel + "」。",
+                        status = "可前往", priority = 70, navigationLabel = "前往该区域" });
+                }
+            if (Flow != null && Flow.CanOpenMap)
+                items.Add(new MapTaskItem { id = "guide.cafe.map", name = "查看城区中的其他事项", location = "城区地图",
+                    description = "打开地图查看目前可进行的剧情与行动。", currentTask = "点击地图按钮或按 M 打开地图，再选择地点查看行动详情。",
+                    status = "可查看", priority = 50, navigationLabel = "打开城区地图" });
+        }
+
+        public bool NavigateTodo(MapTaskItem item)
+        {
+            if (runtime == null || runtime.World == null || runtime.InputBlocked || runtime.CafeTutorialActive) return false;
+            if (item.id == "guide.cafe.map") { OpenMap(); return true; }
+            if (item.id == "guide.cafe.recipes")
+            {
+                var button = IsWorkstation ? runtime.GetComponent<FreeCafeProductionHud>()?.bookButton : recipeButton;
+                if (button == null || !button.isActiveAndEnabled || !button.interactable) return false;
+                button.onClick.Invoke(); return true;
+            }
+            AreaId destination = item.id.StartsWith("guide.cafe.order.", StringComparison.Ordinal) ? AreaId.Counter : AreaId.Cafe;
+            if (item.id.StartsWith("guide.cafe.area.", StringComparison.Ordinal)
+                && int.TryParse(item.id.Substring("guide.cafe.area.".Length), out int index)) destination = (AreaId)index;
+            if (!item.id.StartsWith("guide.cafe.", StringComparison.Ordinal) || !runtime.CanEnterArea(destination)) return false;
+            runtime.Enter(destination);
+            return true;
+        }
+
         private void Refresh()
         {
             if(runtime==null || runtime.World==null)

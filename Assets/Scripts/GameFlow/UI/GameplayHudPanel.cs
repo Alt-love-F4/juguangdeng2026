@@ -40,10 +40,17 @@ namespace Spotlight.GameFlow
         private IDisposable detailsPause;
         private bool visible;
         private Vector2 authoredArtworkPosition;
+        private readonly System.Collections.Generic.List<IGameplayTodoSource> todoSources = new System.Collections.Generic.List<IGameplayTodoSource>();
+        private TextMeshProUGUI todoGuidance;
+        private float nextTodoRefresh;
+        private MapTaskItem pendingTodo;
+        private float pendingTodoDeadline;
+        private bool todoSourcesDirty = true;
+        private bool hadTodoMap;
         public MapActionInventoryView Inventory => inventory;
         public MapTaskPanel Tasks => tasks;
         public Button EndDayButton => endDayButton;
-        public void BindMap(MapSceneController owner) => map = owner;
+        public void BindMap(MapSceneController owner) { map = owner; todoSourcesDirty = true; }
         public RectTransform Artwork => artwork;
         public bool IsDetailsOpen => details != null;
         public bool IsVisible => visible;
@@ -90,6 +97,9 @@ namespace Spotlight.GameFlow
             inventory.Initialize(header);
             artwork.GetComponent<MapActionPointsView>().Initialize(header, inventory.PointsFill, inventory.DateLabel, inventory.PointsSegments);
             tasks.Initialize();
+            tasks.NavigationRequested += NavigateTodo;
+            tasks.ItemsChanged += RefreshTodoGuidance;
+            CreateTodoGuidance();
             detailsButton.onClick.AddListener(ToggleDetails);
             inventoryButton.onClick.AddListener(ToggleInventory);
             tasksButton.onClick.AddListener(ToggleTasks);
@@ -108,7 +118,7 @@ namespace Spotlight.GameFlow
             canvas.sortingOrder = SortingOrder;
         }
 
-        private void ActiveSceneChanged(Scene before, Scene after) => CloseWindows();
+        private void ActiveSceneChanged(Scene before, Scene after) { CloseWindows(); todoSourcesDirty = true; }
 
         private void Update()
         {
@@ -128,7 +138,19 @@ namespace Spotlight.GameFlow
             var cafe=PlayerCafeOwner.Current;
             bool workstation=active.name=="CoffeeShop" && cafe!=null && cafe.ProductionEnabled
                 && cafe.State.currentArea==Spotlight.FreeCafe.AreaId.Counter && !(map!=null && map.isActiveAndEnabled);
-            bool show = gameplayScene && !workstation && (flow == null || flow.SessionState == GameSessionState.Playing);
+            bool show = gameplayScene && (flow == null || flow.SessionState == GameSessionState.Playing);
+            artwork.gameObject.SetActive(!workstation);
+            if (Time.unscaledTime >= nextTodoRefresh)
+            {
+                nextTodoRefresh = Time.unscaledTime + .5f;
+                RefreshTodos();
+            }
+            if (pendingTodo != null)
+            {
+                if (Time.unscaledTime > pendingTodoDeadline) pendingTodo = null;
+                else if (CanInteract && map != null && map.isActiveAndEnabled && map.FocusTodo(pendingTodo.positionKey, pendingTodo.actionKey))
+                    pendingTodo = null;
+            }
             if (visible != show)
             {
                 visible = show;
@@ -177,6 +199,71 @@ namespace Spotlight.GameFlow
             if (EventSystem.current == null || EventSystem.current.currentSelectedGameObject == null) return false;
             var selected = EventSystem.current.currentSelectedGameObject;
             return selected.GetComponent<TMP_InputField>() != null || selected.GetComponent<InputField>() != null;
+        }
+
+        private void CreateTodoGuidance()
+        {
+            var root = new GameObject("NextTodoGuidance", typeof(RectTransform), typeof(Image), typeof(Button));
+            root.transform.SetParent(transform, false);
+            var rect = (RectTransform)root.transform;
+            rect.anchorMin = rect.anchorMax = new Vector2(0, 0);
+            rect.pivot = Vector2.zero;
+            rect.anchoredPosition = new Vector2(28, 24);
+            rect.sizeDelta = new Vector2(640, 112);
+            root.GetComponent<Image>().color = new Color(.13f, .10f, .07f, .92f);
+            root.GetComponent<Button>().onClick.AddListener(ToggleTasks);
+            var text = new GameObject("Text", typeof(RectTransform), typeof(TextMeshProUGUI));
+            text.transform.SetParent(root.transform, false);
+            todoGuidance = text.GetComponent<TextMeshProUGUI>();
+            var labelRect = todoGuidance.rectTransform;
+            labelRect.anchorMin = Vector2.zero; labelRect.anchorMax = Vector2.one;
+            labelRect.offsetMin = new Vector2(18, 10); labelRect.offsetMax = new Vector2(-18, -10);
+            todoGuidance.font = header.font;
+            todoGuidance.fontSize = 23;
+            todoGuidance.color = new Color(1, .94f, .79f);
+            todoGuidance.overflowMode = TextOverflowModes.Ellipsis;
+            todoGuidance.raycastTarget = false;
+            RefreshTodoGuidance();
+        }
+
+        private void RefreshTodoGuidance()
+        {
+            if (todoGuidance == null) return;
+            var item = tasks.CurrentGuidance;
+            todoGuidance.text = item == null ? "待办事项  [T / 点击查看]\n暂无待办，查看地图或继续咖啡馆经营。"
+                : "下一步 · " + item.name + "  [T / 点击查看]\n" + item.currentTask;
+        }
+
+        private void RefreshTodos()
+        {
+            bool mapActive = map != null && map.isActiveAndEnabled;
+            if (todoSourcesDirty || mapActive != hadTodoMap)
+            {
+                todoSourcesDirty = false;
+                hadTodoMap = mapActive;
+                todoSources.Clear();
+                if (mapActive) todoSources.Add(map);
+                else
+                    foreach (var behaviour in FindObjectsByType<MonoBehaviour>(FindObjectsSortMode.None))
+                        if (behaviour.isActiveAndEnabled && behaviour is IGameplayTodoSource source && !(behaviour is MapSceneController))
+                            todoSources.Add(source);
+                tasks.SetGuidanceSources(todoSources);
+            }
+            tasks.RefreshSource();
+        }
+
+        private void NavigateTodo(MapTaskItem item)
+        {
+            if (!CanInteract) return;
+            CloseSidebars();
+            foreach (var source in todoSources)
+                if (source.NavigateTodo(item)) return;
+            if (!string.IsNullOrEmpty(item.positionKey) && flow != null && flow.CanOpenMap)
+            {
+                pendingTodo = item;
+                pendingTodoDeadline = Time.unscaledTime + 15f;
+                flow.OpenMap();
+            }
         }
 
         public void ToggleInventory()
@@ -281,6 +368,9 @@ namespace Spotlight.GameFlow
             enabled = false; // UIKit releases ownership before Unity destroys the object at frame end.
             SceneManager.activeSceneChanged -= ActiveSceneChanged;
             CloseWindows();
+            pendingTodo = null;
+            tasks.NavigationRequested -= NavigateTodo;
+            tasks.ItemsChanged -= RefreshTodoGuidance;
             UnbindSources();
             standalone?.Dispose();
             standalone = null;

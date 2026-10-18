@@ -512,6 +512,15 @@ namespace Spotlight.GameFlow
             UpdateVisiblePage();
         }
 
+        public bool SelectAction(string actionKey)
+        {
+            int index = cards.FindIndex(card => card.action?.actionKey == actionKey);
+            if (index < 0) return false;
+            currentPage = index;
+            UpdateVisiblePage();
+            return true;
+        }
+
         private void ChangePage(int direction)
         {
             int pageCount = Mathf.Max(1, cards.Count);

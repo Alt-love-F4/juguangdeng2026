@@ -37,6 +37,8 @@ namespace Spotlight.FreeCafe
         private bool showingWorkstationEntry;
         public bool IsRunning { get; private set; }
         public Stage CurrentStage => stage;
+        public string TodoInstruction => showingWorkstationEntry
+            ? "点击大厅右侧吧台处的箭头或吧台，进入工作台制作首杯黑咖啡。" : Description();
         public bool IsFirstCafeTutorial => IsRunning && firstCafeTutorial;
         public bool HighlightsExtractionGauges(string id) => IsRunning && essence && id == extractor
             && (stage == Stage.Extract || stage == Stage.Drain);

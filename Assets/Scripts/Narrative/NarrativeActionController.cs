@@ -209,6 +209,8 @@ namespace Spotlight.Narrative
         public bool ConsumePendingFocus(string position) => pendingFocusPositions.Remove(position);
 
         public IEnumerable<string> GetMapPositions() => mounts.Select(m => m.position).Distinct();
+        public bool IsMounted(string position, string actionKey) => mounts.Any(m => m.position == position && m.action == actionKey);
+        public bool HasExecutedToday(string actionKey) => dailyExecution.TryGetValue(actionKey, out int day) && day == CurrentDay;
 
         public IEnumerable<NarrativeActionDefinition> GetMountedActions(string position)
             => mounts.Where(m => m.position == position).Select(m => Get(m.action)).Where(a => a != null && IsVisible(a.actionKey));
