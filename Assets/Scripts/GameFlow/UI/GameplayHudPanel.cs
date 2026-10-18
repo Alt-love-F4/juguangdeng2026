@@ -258,6 +258,17 @@ namespace Spotlight.GameFlow
             details = null;
         }
 
+        public bool TryStartStandaloneCafeTutorial(GameObject owner, out string message)
+        {
+            message = "请直接运行 CoffeeShop 后使用此操作。";
+            if (owner == null || owner.scene.name != "CoffeeShop"
+                || SceneManager.GetActiveScene() != owner.scene
+                || FindFirstObjectByType<GameFlowBootstrap>() != null) return false;
+            standalone ??= new StandaloneGameplaySession();
+            CloseWindows();
+            return standalone.TryStartCafeTutorial(owner, out message);
+        }
+
         public static void ReleaseStandaloneSession()
         {
             if (Instance == null || Instance.standalone == null) return;

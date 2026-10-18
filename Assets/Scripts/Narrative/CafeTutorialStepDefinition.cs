@@ -17,8 +17,10 @@ namespace Spotlight.Narrative
         public const string WorkstationSignal = "workstation_opened";
         public const string CoffeeStep = "make_coffee_base";
         public const string CoffeeSignal = "coffee_base_completed";
+        public const string PostCoffeeSignal = "business_onboarding_completed";
         public bool WaitingForWorkstation { get; private set; }
         public bool WaitingForCoffee { get; private set; }
+        public bool WaitingForBusinessOnboarding { get; private set; }
         public bool HandoffReady { get; private set; }
         public bool Completed { get; private set; }
         public string CurrentStepId => WaitingForWorkstation ? WorkstationStep
@@ -28,7 +30,7 @@ namespace Spotlight.Narrative
 
         public void Begin()
         {
-            if (WaitingForWorkstation || HandoffReady || WaitingForCoffee || Completed) return;
+            if (WaitingForWorkstation || HandoffReady || WaitingForCoffee || WaitingForBusinessOnboarding || Completed) return;
             WaitingForWorkstation = true;
         }
 
@@ -51,6 +53,11 @@ namespace Spotlight.Narrative
             else if (WaitingForCoffee && stepId == CoffeeSignal)
             {
                 WaitingForCoffee = false;
+                WaitingForBusinessOnboarding = true;
+            }
+            else if (WaitingForBusinessOnboarding && stepId == PostCoffeeSignal)
+            {
+                WaitingForBusinessOnboarding = false;
                 Completed = true;
             }
             else return false;

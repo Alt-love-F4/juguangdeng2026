@@ -38,6 +38,8 @@ namespace Spotlight.FreeCafe
         public bool IsRunning { get; private set; }
         public Stage CurrentStage => stage;
         public bool IsFirstCafeTutorial => IsRunning && firstCafeTutorial;
+        public bool HighlightsExtractionGauges(string id) => IsRunning && essence && id == extractor
+            && (stage == Stage.Extract || stage == Stage.Drain);
         public bool CanSubmitCup => !IsRunning || stage == Stage.SubmitCup;
         public ActionResult RingPracticeBell()
         {
@@ -65,7 +67,7 @@ namespace Spotlight.FreeCafe
         private string FindSource(string spec) => W.State.entities.Find(e => e.area == AreaId.Counter && W.Spec(e.specId).Has(Capability.Source) && W.Spec(e.specId).sourceItemId == spec)?.id;
         public bool Begin(bool extraction)
         {
-            if (app == null || app.CafeTutorialActive) return false;
+            if (app == null || app.CafeTutorialActive || app.MilkPitcherTutorial != null && app.MilkPitcherTutorial.IsRunning) return false;
             return BeginGuidance(extraction, false);
         }
 
@@ -181,13 +183,13 @@ namespace Spotlight.FreeCafe
             if (!IsRunning || restoring) return true;
             if (stage == Stage.SubmitCup) { ReportError("请点击工作台右下角的按铃交付，不是点击盘子。"); return false; }
             if ((stage == Stage.Grind || stage == Stage.Grinding) && id == grinder || stage == Stage.Heat && id == heater) return true;
-            ReportError(DragStep ? "此步骤需要按住左键拖动，不是单击。" : "请点击提示标记的设备；加工会自动继续。"); return false;
+            ReportError(DragStep ? "取放原料需要按住左键拖动，再松开放下，不是单击。" : "请点击" + (stage == Stage.Grind || stage == Stage.Grinding ? "研磨机" : "通用加热炉") + "；正在加工时等待完成即可。"); return false;
         }
         public bool AllowDrag(string id)
         {
             if (!IsRunning || restoring) return true;
             if (DragStep && id == Source) return true;
-            ReportError(DragStep ? "拿错物品了，请从光效的起点拖动。" : "请先完成点击或等待加工结束，再拖动。"); return false;
+            ReportError(DragStep ? "请按住左键从" + SourceLabel + "取用物品。" : "请先完成点击或等待加工结束，再拖动。"); return false;
         }
         public bool AllowDrop(string id, bool placeOnly)
         {
@@ -203,14 +205,14 @@ namespace Spotlight.FreeCafe
                 ReportError("先把空杯拖到桌面空处，不要叠回杯堆或放进设备。"); return false;
             }
             if (!placeOnly && id == Target) return true;
-            ReportError(placeOnly ? "请松开 Shift；Shift 只摆放，不会投入原料。" : "尚未拖到目标就松手了，请重新拖到光效终点。"); return false;
+            ReportError(placeOnly ? "请松开 Shift；Shift 只摆放，不会投入原料。" : "还没放入" + TargetLabel + "。请按住左键移到" + TargetLabel + "，再松开左键。"); return false;
         }
         public bool AllowPour(string source, string target)
         {
             if (!IsRunning || restoring) return true;
             bool valid = PourStep && source == Source && IsPourTarget(target);
             if (valid) rightStarted = true;
-            if (!valid) ReportError("还没有对准目标。请先松开右键，按住左键将容器拖到标记目标上方。");
+            if (!valid) ReportError("还没有对准" + TargetLabel + "。请先松开右键，再按住左键把" + SourceLabel + "移到" + TargetLabel + "上方。");
             return valid;
         }
         private bool IsPourTarget(string target) => target != null && (target == Target || stage == Stage.Extract && target == extractor);
@@ -283,31 +285,70 @@ namespace Spotlight.FreeCafe
                 ReportError(empty ? "本次萃取未完成，已重置本步。请对准滤杯，保持稳定流量。" : "倾倒未完成，本步液体已复原。请跟随第 1 步，按住左键重新拖到目标上方。");
             }
         }
+        private string SourceLabel => stage == Stage.Beans ? "咖啡豆袋" : stage == Stage.Grounds ? "研磨机抽屉" : stage == Stage.Water ? "清水壶" : stage == Stage.TakeCup ? "杯堆" : stage == Stage.DeliverCup ? "装好咖啡的杯子" : stage == Stage.Pour && essence ? "精粹炉下层咖啡壶" : "通用加热炉";
+        private string TargetLabel => stage == Stage.Beans ? "研磨机" : stage == Stage.Grounds && essence || stage == Stage.Extract ? "精粹炉上层滤杯" : stage == Stage.Pour ? "空杯" : stage == Stage.TakeCup ? "桌面空处" : stage == Stage.DeliverCup ? "案板上的盘子" : "通用加热炉";
         private string Description()
         {
             switch (stage)
             {
-                case Stage.Beans: return "按住左键，从咖啡豆袋拖出咖啡豆 → 研磨机，在终点松手";
-                case Stage.Grind: return "点击研磨机，开始研磨";
-                case Stage.Grinding: return "连续点击研磨机加速！圆圈会反复提示点击；不点击也会自动磨完";
-                case Stage.Grounds: return essence ? "拖出研磨机抽屉里的咖啡粉 → 精粹炉上层滤杯" : "拖出研磨机抽屉里的咖啡粉 → 通用加热炉";
+                case Stage.Beans: return "先把咖啡豆磨成粉，才能制作咖啡。\n按住鼠标左键从咖啡豆袋取豆，拖到研磨机后松开左键，放入豆子。";
+                case Stage.Grind: return "豆子已放入研磨机。点击鼠标左键启动研磨，把豆子磨成咖啡粉。";
+                case Stage.Grinding: return "研磨机正在把豆子磨成粉，等待完成即可。\n想快一点，可以连续点击研磨机加速；不点击也会自动磨完。";
+                case Stage.Grounds: return "接下来" + (essence ? "把咖啡粉放入滤杯，准备热水萃取。" : "把咖啡粉放入加热炉，准备加水煮咖啡。")
+                    + "\n按住左键从研磨机抽屉取粉，拖到" + TargetLabel + "后松开左键。" + (essence ? " 新加粉会自动清空上层滤杯原有内容。" : "");
                 case Stage.Water: return ReadyToPour
-                    ? $"第 2 步：已对准加热炉，按住右键，上下移动鼠标使水壶倾斜\n注水：{W.LiquidVolume(W.Find(heater)):0}/{WaterTargetMl:0} ml · 达标后水壶自动归位"
-                    : "第 1 步：按住左键，将右上角清水壶拖到加热炉上方\n保持左键，跟随光效对准目标；对准后显示倾倒提示";
-                case Stage.Heat: return "点击通用加热炉加热（加热不需要连续点击）";
-                case Stage.Heating: return "正在自动加热，请等待；不用重做上一步";
+                    ? $"{(essence ? "准备一份萃取用水。" : "给咖啡粉加入一份水。")}第 2 步：按住右键，上下移动鼠标使清水壶倾斜。\n注水 {W.LiquidVolume(W.Find(heater)):0}/{WaterTargetMl:0} ml；加够后水壶自动归位。"
+                    : $"先加入 {WaterTargetMl:0} ml 清水，供下一步加热。\n第 1 步：按住左键拿起右上角清水壶，移到通用加热炉上方；先别松开左键。";
+                case Stage.Heat: return essence ? "点击通用加热炉，把清水加热成萃取用的热水。\n单击左键启动后自动加热，不需要连续点击。" : "点击通用加热炉，把咖啡粉和水煮成黑咖啡。\n单击左键启动后自动加热，不需要连续点击。";
+                case Stage.Heating: return "正在自动加热，等待完成即可。\n不用再次点击，也不用重做加水。";
                 case Stage.Extract:
-                    if (!ReadyToPour) return "第 1 步：按住左键，将热水壶拖到精粹炉上层滤杯上方\n保持左键，跟随光效对准滤杯；对准后显示倾倒提示";
+                    if (!ReadyToPour) return "先看精粹炉旁高亮的两条进度：左侧＝萃取时间，右侧＝热水量；绿色合格，金色最佳。\n按住左键拿起热水壶，移到上层滤杯上方，先别松开左键。";
                     var s = W.ExtractionSnapshot(extractor);
-                    return $"第 2 步：已对准滤杯，按住右键，上下移动鼠标控制流量\n粉 {s.groundsGrams:0} g · 注水 {s.injectedHotWaterMl:0}/{s.idealMl:0} ml · 时间 {s.elapsedSeconds:0.0}/{s.idealSeconds:0.0} s\n稳定小角度倾倒；保持右键直到热水倒空，中途松键会重来";
-                case Stage.Drain: return "等待滤杯滴滤完成。下一步拿下层壶，不是上层滤杯";
-                case Stage.TakeCup: return "按住左键，从杯堆拖出一个空杯，放到桌面空处\n先准备接咖啡的杯子，装好咖啡后再放到案板上的盘子里";
-                case Stage.DeliverCup: return "按住左键，把装好咖啡的杯子拖到案板上的盘子里\n看到盘子高亮后松开左键，然后点击右下角按铃";
-                case Stage.SubmitCup: return "咖啡已放到盘子里！点击工作台右下角的按铃完成交付\n" + (firstCafeTutorial ? "按铃交给首位客人后，新手教程才会结束" : "练习也要按铃才算完成；本次不结算正式订单");
+                    return $"按住右键并上下移动鼠标调整流量，让左侧时间条、右侧热水条尽量同时进入金区（绿区合格）。\n时间 {s.elapsedSeconds:0.0}/{s.idealSeconds:0.0} s · 热水 {s.injectedHotWaterMl:0}/{s.idealMl:0} ml；小角度倒空后松右键，中途松开会重来。";
+                case Stage.Drain: return "等待上层滤杯滴完，咖啡会流入下层壶。\n回看两侧进度条：绿色合格，金色最佳；滴滤结束后拿下层咖啡壶，不是上层滤杯。";
+                case Stage.TakeCup: return "咖啡做好了，先准备一个杯子来接咖啡。\n按住左键从杯堆取出空杯，拖到桌面空处，松开左键放下。";
+                case Stage.DeliverCup: return "把装好的咖啡放到出餐盘，准备交给客人。\n按住左键拖动咖啡杯，移到案板上的盘子后松开左键；下一步再按铃。";
+                case Stage.SubmitCup: return "咖啡已放到出餐盘。点击工作台右下角的按铃，通知出餐并完成交付。\n" + (firstCafeTutorial                     ? "首杯交付后，继续学习咖啡谱、营业和查看订单。" : "这是操作练习，本次不结算正式订单。");
                 case Stage.Pour: return ReadyToPour
-                    ? "第 2 步：已对准杯子，按住右键，上下移动鼠标使壶倾斜\n持续倾倒，壶中咖啡倒空后再松开右键"
-                    : "第 1 步：按住左键，将" + (essence ? "精粹炉下层咖啡壶（自动分离滤杯）" : "通用加热炉") + "拖到标记杯子上方\n保持左键，跟随光效对准杯子；对准后显示倾倒提示";
-                default: return "制作完成！是否要再来一次？退出后恢复练习前的工作台";
+                    ? "把咖啡倒进杯里。第 2 步：按住右键，上下移动鼠标使壶倾斜。\n保持倾倒，等壶中咖啡倒空后再松开右键。"
+                    : "接下来装杯，把做好的咖啡倒进空杯。\n第 1 步：按住左键拿起" + (essence ? "精粹炉下层咖啡壶" : "通用加热炉") + "，移到空杯上方，先别松开左键。";
+                default: return "制作完成！是否要再来一次？退出后恢复练习前的工作台。";
+            }
+        }
+        // Keep each step's purpose, action and main caution next to the player's focus.
+        private string GestureDescription(bool readyToPour)
+        {
+            switch (stage)
+            {
+                case Stage.Beans: return "准备磨粉\n左键取豆，拖到研磨机松开";
+                case Stage.Grind: return "把豆磨成咖啡粉\n单击左键启动研磨";
+                case Stage.Grinding: return "正在磨粉，等完成\n可连续左键点击加速";
+                case Stage.Grounds: return essence
+                    ? "装粉准备萃取\n左键取粉，放上层滤杯\n新粉会清空滤杯旧内容"
+                    : "装粉准备煮咖啡\n左键取粉，放通用加热炉";
+                case Stage.Water: return readyToPour
+                    ? $"准备{WaterTargetMl:0}ml用水\n按住右键，上下移动倾倒\n加够自动归位"
+                    : "准备加水\n左键拿清水壶移到加热炉\n先别松开左键";
+                case Stage.Heat: return essence
+                    ? "把清水加热成热水\n单击加热炉，自动加热"
+                    : "把粉和水煮成黑咖啡\n单击加热炉，自动加热";
+                case Stage.Heating: return essence
+                    ? "正在准备萃取热水\n等加热完成，不用再点击"
+                    : "正在煮黑咖啡\n等完成，不用再点击或加水";
+                case Stage.Extract: return readyToPour
+                    ? "热水萃取咖啡粉\n右键倾倒，控制流速\n看两侧进度条，绿区达标\n争取金区，倒空再松右键"
+                    : "准备热水萃取\n左键拿热水壶移到上层滤杯\n别松左键；看进度条控流速";
+                case Stage.Drain: return "等待咖啡滴入下壶\n两侧进度条：绿区合格\n滴完拿下壶，不拿上层滤杯";
+                case Stage.TakeCup: return "准备接咖啡的空杯\n左键从杯堆取杯\n拖到桌面空处再松开";
+                case Stage.Pour: return readyToPour
+                    ? "把咖啡装杯\n按右键上下移动倾倒\n倒空后再松右键"
+                    : "准备把咖啡装杯\n左键拿" + (essence ? "下层咖啡壶" : "加热炉") + "移到空杯上方\n先别松开左键";
+                case Stage.DeliverCup: return "把咖啡放到出餐盘\n左键拖杯到盘子后松开\n放好后还要按铃";
+                case Stage.SubmitCup: return firstCafeTutorial
+                    ? "把咖啡交给首位客人\n点击右下角按铃交付\n接下来学习查谱和营业"
+                    : "完成本次操作练习\n点击右下角按铃\n练习不结算正式订单";
+                case Stage.Complete: return "咖啡制作完成！\n点重新开始可再练一次\n退出恢复练习前的工作台";
+                default: return "跟随提示完成咖啡制作";
             }
         }
         private void BuildUI()
@@ -369,10 +410,10 @@ namespace Spotlight.FreeCafe
             retry.SetActive(true);
             panel.exitButton.gameObject.SetActive(false);
             heading.text = "咖啡馆 · 新手教程";
-            instruction.text = "点击场景中的箭头标志，进入工作台为首位客人制作黑咖啡";
+            instruction.text = "工作台是取用原料、加工和出餐的地方。\n点击大厅右侧吧台处的箭头或吧台，为首位客人制作无糖黑咖啡。";
             errorText.text = "跟随鼠标光标提示进入工作台 · 完成教程后才能正式营业";
             gesture.gameObject.SetActive(true);
-            gestureText.text = "点击箭头\n进入工作台";
+            gestureText.text = "进入工作台做首杯咖啡\n点击大厅右侧吧台处的箭头或吧台";
             panel.SetMouseMode(false, false);
 
             var bounds = entryPortal.visual.bounds;
@@ -395,11 +436,13 @@ namespace Spotlight.FreeCafe
             }
             Vector2 center = screenCenter;
             float scale = canvas.scaleFactor;
-            float badgeX = min.x - 145 * scale;
-            if (badgeX < 165 * scale) badgeX = max.x + 145 * scale;
+            float halfWidth = gesture.rect.width * .5f + 12;
+            float halfHeight = gesture.rect.height * .5f + 12;
+            float badgeX = min.x - halfWidth * scale;
+            if (badgeX < halfWidth * scale) badgeX = max.x + halfWidth * scale;
             gesture.position = new Vector2(
-                Mathf.Clamp(badgeX, 165 * scale, Mathf.Max(165 * scale, Screen.width - 165 * scale)),
-                Mathf.Clamp(center.y, 80 * scale, Mathf.Max(80 * scale, Screen.height - 80 * scale)));
+                Mathf.Clamp(badgeX, halfWidth * scale, Mathf.Max(halfWidth * scale, Screen.width - halfWidth * scale)),
+                Mathf.Clamp(center.y, halfHeight * scale, Mathf.Max(halfHeight * scale, Screen.height - halfHeight * scale)));
             float pulse = Mathf.Repeat(Time.unscaledTime * .8f, 1);
             Vector2 radius = (max - min) * .5f + Vector2.one * ((12 + pulse * 14) * scale);
             for (int i = 0; i < trail.Count; i++)
@@ -426,26 +469,46 @@ namespace Spotlight.FreeCafe
             var position = plate != null ? view.transform.TransformPoint(plate.ArtworkOffset) : view.transform.position;
             return app.worldCamera.WorldToScreenPoint(position);
         }
+        private string StageTitle()
+        {
+            switch (stage)
+            {
+                case Stage.Beans: return "放入咖啡豆";
+                case Stage.Grind: case Stage.Grinding: return "把豆磨成粉";
+                case Stage.Grounds: return "取出咖啡粉";
+                case Stage.Heat: case Stage.Heating: return essence ? "准备热水" : "煮成黑咖啡";
+                case Stage.TakeCup: return "准备空杯";
+                case Stage.DeliverCup: return "放上出餐盘";
+                case Stage.SubmitCup: return "按铃交付";
+                case Stage.Drain: return "等待滴滤";
+                default: return "练习完成";
+            }
+        }
         private void DrawGuide()
         {
             shade.enabled = DragStep && !app.IsDragging;
             bool readyToPour = ReadyToPour;
-            heading.text = (firstCafeTutorial ? "黑咖啡 · 新手教程" : essence ? "精粹咖啡 · 操作练习" : "黑咖啡 · 操作练习") + (PourStep ? readyToPour ? "    |    第 2 步 · 右键倾倒" : "    |    第 1 步 · 左键拖到目标上方" : "    |    跟随光效操作");
+            heading.text = (firstCafeTutorial ? "无糖黑咖啡 · 新手教程" : essence ? "精粹咖啡 · 操作练习" : "黑咖啡 · 操作练习") + (PourStep ? readyToPour ? "    |    第 2 步 · 右键倾倒" : "    |    第 1 步 · 左键拿起" : "    |    " + StageTitle());
             instruction.text = Description();
             errorText.text = Time.unscaledTime < errorUntil ? error : firstCafeTutorial
-                ? "完成黑咖啡并交付首位客人后，解锁正常营业 · 随时点上方重来" : "练习不结算订单 · 废弃桶在左下角 · 随时点上方重来，恢复初始练习";
-            bool showGesture = DragStep || stage == Stage.Grind || stage == Stage.Grinding || stage == Stage.Heat || stage == Stage.SubmitCup;
-            gesture.gameObject.SetActive(showGesture);
+                ? "交付首杯后继续学习咖啡谱与营业 · 随时点上方重来" : "练习不结算订单 · 废弃桶在左下角 · 随时点上方重来，恢复初始练习";
+            gesture.gameObject.SetActive(true);
             panel.SetMouseMode(readyToPour, readyToPour);
-            gestureText.text = PourStep ? readyToPour ? "按住右键\n上下移动倾倒" : "按住左键\n拖到目标上方" : DragStep ? "按住左键\n拖到目标松开" : stage == Stage.Grinding ? "左键连续点击\n加速研磨" : stage == Stage.SubmitCup ? "点击右下角按铃\n完成交付" : "单击左键";
+            gestureText.text = GestureDescription(readyToPour);
+            if (Time.unscaledTime < errorUntil && !string.IsNullOrEmpty(error))
+                gestureText.text += "\n<color=#A52C16>" + error + "</color>";
             Vector2 start = ScreenPoint(Source), end = ScreenPoint(Target);
             if (PourStep) end += Vector2.up * (55 * canvas.scaleFactor);
             if (app.IsDragging && Mouse.current != null) start = Mouse.current.position.ReadValue();
             if (stage == Stage.TakeCup) end = new Vector2(Screen.width * .5f, Screen.height * .48f);
+            if (stage == Stage.Drain) start = ScreenPoint(extractor);
+            if (stage == Stage.Complete && Mouse.current != null) start = Mouse.current.position.ReadValue();
             float scale = canvas.scaleFactor;
             Vector2 badge = start + new Vector2(0, -panel.gestureOffset * scale);
-            badge.x = Mathf.Clamp(badge.x, 165 * scale, Mathf.Max(165 * scale, Screen.width - 165 * scale));
-            badge.y = Mathf.Clamp(badge.y, Screen.height * .25f + 65 * scale, Screen.height - 65 * scale);
+            float halfWidth = gesture.rect.width * .5f + 12;
+            float halfHeight = gesture.rect.height * .5f + 12;
+            badge.x = Mathf.Clamp(badge.x, halfWidth * scale, Mathf.Max(halfWidth * scale, Screen.width - halfWidth * scale));
+            badge.y = Mathf.Clamp(badge.y, Screen.height * .25f + halfHeight * scale, Mathf.Max(Screen.height * .25f + halfHeight * scale, Screen.height - halfHeight * scale));
             gesture.position = badge;
             for (int i = 0; i < trail.Count; i++)
             {

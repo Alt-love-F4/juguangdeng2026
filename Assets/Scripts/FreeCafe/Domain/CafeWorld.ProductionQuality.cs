@@ -4,14 +4,15 @@ namespace Spotlight.FreeCafe
 {
     public sealed partial class CafeWorld
     {
-        public ProductionQuality EvaluateProduction(WorldEntity cup, ProductSpec product)
+        public ProductionQuality EvaluateProduction(WorldEntity cup, ProductSpec product, string requiredCupSpecId = null)
         {
             if (cup == null || product == null || cup.contents.Count == 0) return new ProductionQuality(0, 0, 0, 0, 0);
             if(product.evaluation!=null)
             {
-                var evaluated=EvaluateProductComposition(cup,product);
+                var evaluated=EvaluateProductComposition(cup,product,requiredCupSpecId);
                 return new ProductionQuality(evaluated.total,evaluated.total,evaluated.total,evaluated.total,evaluated.total);
             }
+            float portionScale = ProductPortionScale(product, requiredCupSpecId);
             float totalMl = LiquidVolume(cup), coffeeMl = 0, extractionSum = 0, liquidScore = 0, coverage = 0;
             int liquidCount = 0, coffeeOrder = 0, firstLiquid = int.MaxValue, firstTopping = int.MaxValue;
             float sweetness = 0;
@@ -35,12 +36,12 @@ namespace Spotlight.FreeCafe
                 }
                 if (IsLiquid(need.specId))
                 {
-                    float ideal = need.milliliters > 0 ? need.milliliters : need.units * Prep.portionMl;
+                    float ideal = (need.milliliters > 0 ? need.milliliters : need.units * Prep.portionMl) * portionScale;
                     float quantityScore = Clamp(100 - Math.Abs(ml - ideal) / ideal * 100);
                     liquidScore += ml > 0 ? (quantityScore + temperature / ml) / 2 : 0;
                     liquidCount++; coverage += Math.Min(1, ml / ideal);
                 }
-                else coverage += Math.Min(1, (float)units / need.units);
+                else coverage += Math.Min(1, (float)units / (need.units * portionScale));
                 if (need.specId == "coffee") needsCoffee = true;
             }
             coverage /= product.ingredients.Length;
@@ -49,14 +50,14 @@ namespace Spotlight.FreeCafe
             int latestLiquid = 0;
             foreach (var p in cup.contents) if (p.milliliters > 0) latestLiquid = Math.Max(latestLiquid, p.addedSequence);
             float order = 100; // Latte-art kind requires completion, never a particular pattern or recognizer score.
-            float sweet = Clamp(100 - Math.Abs(sweetness - product.idealSweetness) * 20);
+            float sweet = Clamp(100 - Math.Abs(sweetness - product.idealSweetness * portionScale) * 20);
             float ratio = totalMl > 0 ? coffeeMl / totalMl : 0;
             float grounds = 0;
             foreach (var portion in cup.contents) if (portion.specId == "grounds") grounds += portion.grams;
             float strength = grounds > 0 && coffeeMl > 0 ? Clamp(100 - Math.Abs(grounds / coffeeMl - .06f) / .06f * 100) : 100;
             float concentration = Clamp(100 - Math.Abs(ratio - product.idealCoffeeRatio) * 150) * strength / 100;
             // 杯型、配方完整度和多余原料是独立惩罚，空杯/半成品允许出品但不会获得虚假高分。
-            float penalty = cup.specId == product.cupSpecId ? 1 : .75f;
+            float penalty = cup.specId == (requiredCupSpecId ?? product.cupSpecId) ? 1 : .75f;
             foreach (var p in cup.contents)
             {
                 bool expected = p.specId == "sugar" || p.specId == "grounds" && needsCoffee
@@ -90,21 +91,22 @@ namespace Spotlight.FreeCafe
             if (request.id == TutorialOrderId)
             {
                 var tutorialCoffee = ClassifyCoffee(cup);
-                if (!tutorialCoffee.known || tutorialCoffee.productId != "blackcoffee")
-                    return ActionResult.No("请制作一杯黑咖啡再交付；当前杯子和教程订单已保留");
+                if (!tutorialCoffee.known || tutorialCoffee.productId != "blackcoffee" || cup.specId != RequiredCupSpecId(request))
+                    return ActionResult.No("请使用大杯制作一杯黑咖啡再交付；当前杯子和教程订单已保留");
                 ConsumeDeliveredContainer(cup);
                 CompleteCustomerOrder(request, true);
-                State.production.lastDelivery = "首位客人的黑咖啡已交付，新手教程完成";
+                State.production.lastDelivery = "首位客人的黑咖啡已交付，接下来学习查咖啡谱和正式营业";
                 Notify();
                 return ActionResult.Yes(State.production.lastDelivery, CafeFeedbackKind.DeliverySatisfied);
             }
-            var product = Product(request.productId); var score = EvaluateProduction(cup, product);
+            string requiredCup = RequiredCupSpecId(request);
+            var product = Product(request.productId); var score = EvaluateProduction(cup, product, requiredCup);
             var classification=ClassifyCoffee(cup);
             bool correctType=product.evaluation==null || classification.known && classification.productId==product.id;
-            bool satisfied = correctType && score.total >= product.minimumScore
+            bool satisfied = cup.specId == requiredCup && correctType && score.total >= product.minimumScore
                 && (!Prep.requireLatteArt || !product.requiresLatteArt || cup.latteArt || State.automaticLatteArt);
             request.lastProductionScore = score.total;
-            string detail = "种类："+classification.label+" · "+(product.evaluation!=null ? EvaluateProductComposition(cup,product).description : score.grade + " " + score.total.ToString("0.0") + "分 · 萃取 " + score.extraction.ToString("0")
+            string detail = "杯型：" + Spec(requiredCup).label + (cup.specId == requiredCup ? "（符合）" : "（不符）") + " · 种类："+classification.label+" · "+(product.evaluation!=null ? EvaluateProductComposition(cup,product,requiredCup).description : score.grade + " " + score.total.ToString("0.0") + "分 · 萃取 " + score.extraction.ToString("0")
                 + " / 液体 " + score.liquid.ToString("0") + " / 顺序 " + score.order.ToString("0")
                 + " / 甜度 " + score.sweetness.ToString("0") + " / 浓度 " + score.concentration.ToString("0"));
             int price = satisfied ? SalePrice(cup, product) : 0;
@@ -118,7 +120,7 @@ namespace Spotlight.FreeCafe
             if (satisfied)
             {
                 State.money += price; State.todayRevenue += price;
-                State.todayServed++; State.reputation += 2;
+                State.todayServed++; State.successfulOrders++; State.reputation += 2;
                 State.production.lastDelivery = "订单完成 +" + price + " 金币 · " + detail;
             }
             else
@@ -139,7 +141,7 @@ namespace Spotlight.FreeCafe
             var home = Array.Find(Catalog.layout, entry => entry.id == container.id && entry.specId == container.specId);
             bool reusable = home != null && IsContainer(container) &&
                 (IsMilkPitcher(container) || Spec(container.specId).Has(Capability.Processor) || Spec(container.specId).Has(Capability.HotExtraction));
-            if (!reusable) { State.entities.Remove(container); return; }
+            if (!reusable) { RemoveCupAndRefundStock(container); return; }
             var filter = ExtractionFilter(container);
             if (filter != null)
             {
@@ -153,7 +155,7 @@ namespace Spotlight.FreeCafe
         {
             var cup = ServingCup; if (cup == null) return ActionResult.No("托盘为空");
             CancelProductionMiniGame(); ConsumeDeliveredContainer(cup);
-            Notify(); return ActionResult.Yes("出餐杯已丢弃，消耗的资源不返还", CafeFeedbackKind.Discard);
+            Notify(); return ActionResult.Yes(IsCup(cup) ? "出餐杯已回收至对应杯堆，饮品原料不返还" : "容器已归位，饮品原料不返还", CafeFeedbackKind.Discard);
         }
         public ActionResult EmptyProductionMachine(string id)
         {
@@ -184,6 +186,7 @@ namespace Spotlight.FreeCafe
         public ActionResult RequestProductionMiniGame(string kind = "latte-art")
         {
             var cup = ServingCup;
+            if (!LatteEquipmentAvailable) return ActionResult.No("请先在设备升级面板激活拉花");
             // 拉花是杯子在出餐点之后的独立玩法：不再要求杯中先有咖啡或牛奶。
             if (!ProductionEnabled || kind != "latte-art" || cup == null || Locked(cup))
                 return ActionResult.No("请先在出餐点选择一只可用的杯子");

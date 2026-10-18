@@ -188,15 +188,27 @@ namespace Spotlight.FreeCafe
 
         private void BuildTutorials()
         {
+            AddFirstGuestTutorialAction();
             AddSkipAllTutorialsAction();
             AddAction("黑咖啡操作教程", () => StartTutorial(false), "工作台内启动：拖豆、研磨、加水加热、右键倾倒。退出恢复原物品。", false);
             AddAction("精粹炉操作教程", () => StartTutorial(true), "工作台内启动：装粉、热水、控制注水成分、倒出精粹咖啡液。", false);
+            AddAction("拉花杯操作教程", StartMilkPitcherTutorial, "工作台内启动：加牛奶、点击打奶、拖到饮品杯并练习拉花。退出恢复原物品。", false);
             AddAction("结束操作教程", () =>
             {
                 if (runtime == null) return;
                 if (runtime.CafeTutorialActive) { SetStatus("请完成首位客人的黑咖啡，或使用「跳过所有教程（首杯完成后）」跳过正式教程。"); return; }
                 runtime.WorkstationTutorial?.Stop();
+                runtime.MilkPitcherTutorial?.Stop();
             }, "恢复练习前工作台，不提交剧情教程进度。", false);
+        }
+
+        private void AddFirstGuestTutorialAction()
+        {
+            AddAction("首位客人剧情与完整教学（沙盒）", () =>
+            {
+                if (runtime.DebugStartFirstGuestTutorial(out string message)) SetVisible(false);
+                SetStatus(message);
+            }, "直启 CoffeeShop 后使用：跳过序章/来信/建角，从客人入店对白开始，继续制作与营业教学。", true);
         }
 
         private void AddSkipAllTutorialsAction()
@@ -208,6 +220,17 @@ namespace Spotlight.FreeCafe
                 if (dayFlow.DebugSkipTutorialToCafe(out string message)) SetVisible(false);
                 SetStatus(message);
             }, "跳过开场、首位客人对话和制作教学；停在首杯交付完成后的准备阶段，不跨天、不自动营业。", false);
+        }
+
+        private void StartMilkPitcherTutorial()
+        {
+            if (runtime == null) { SetStatus("请先进入咖啡馆工作台。"); return; }
+            SetVisible(false);
+            if (!runtime.StartEquipmentTutorial(true))
+            {
+                SetVisible(true);
+                SetStatus("无法启动：请进入工作台、获得拉花套装，并结束当前教程、对话或小游戏。");
+            }
         }
 
         private void StartTutorial(bool extraction)
@@ -304,6 +327,7 @@ namespace Spotlight.FreeCafe
 
         private void BuildGlobal()
         {
+            AddFirstGuestTutorialAction();
             AddSkipAllTutorialsAction();
             AddAction("打开地图（保留当前场景）", () =>
             {

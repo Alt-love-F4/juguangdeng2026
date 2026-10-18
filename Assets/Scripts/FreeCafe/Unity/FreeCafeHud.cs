@@ -22,6 +22,7 @@ namespace Spotlight.FreeCafe
         public Button previousOrder, nextOrder;
         public TMP_Text orderPage;
         private int orderOffset;
+        private CafeOrderStackView orderStack;
         public GameObject recipePanel;
         public TMP_Text recipeTitle,recipeBody;
         public Button recipeCloseButton;
@@ -96,6 +97,7 @@ namespace Spotlight.FreeCafe
             if(areaButtons!=null && areaButtons.Length>1 && areaButtons[1]!=null) areaButtons[1].onClick.AddListener(Counter);
             if(areaButtons!=null && areaButtons.Length>2 && areaButtons[2]!=null) areaButtons[2].onClick.AddListener(SecondFloor);
             if(areaButtons!=null && areaButtons.Length>3 && areaButtons[3]!=null) areaButtons[3].onClick.AddListener(ThirdFloor);
+            if (nextOrder != null) orderStack = nextOrder.GetComponentInParent<CafeOrderStackView>();
             BindOrderAvatars();
             boundOrderButtons=orderButtons==null ? Array.Empty<Button>() : (Button[])orderButtons.Clone();
             orderActions=new UnityAction[boundOrderButtons.Length];
@@ -226,7 +228,8 @@ namespace Spotlight.FreeCafe
         private void ThirdFloor()=>runtime.Enter(AreaId.Basement);
         private void EndDayFromDormitory()
         {
-            if (runtime == null || runtime.World == null || runtime.World.State.currentArea != AreaId.Basement) return;
+            if (runtime == null || runtime.World == null || runtime.InputBlocked) return;
+            if (runtime.World.State.currentArea != AreaId.Cafe && runtime.World.State.currentArea != AreaId.Basement) return;
             if (dayFlow == null) dayFlow = FindFirstObjectByType<DayFlowController>();
             dayFlow?.EndDayFromDormitory();
         }
@@ -236,6 +239,7 @@ namespace Spotlight.FreeCafe
         private void ChangeOrderPage(int direction)
         {
             if(runtime==null || runtime.World==null || runtime.InputBlocked) return;
+            if(orderStack!=null) orderStack.SetDirection(direction);
             if(IsWorkstation)
             {
                 string previous=runtime.World.State.focusedRequestId;
@@ -289,10 +293,17 @@ namespace Spotlight.FreeCafe
         private void ToggleRecipeTips()
         {
             if(recipePanel==null || runtime==null || (runtime.InputBlocked && !IsModalOpen)) return;
+            var compendium=recipePanel.GetComponent<CoffeeCompendiumPanel>();
+            if(compendium!=null) { if(compendium.IsOpen) compendium.Close(); else compendium.Open(runtime); return; }
             runtime.CancelDrag(); recipePanel.SetActive(!recipePanel.activeSelf);
             if(recipePanel.activeSelf) RefreshRecipeTips();
         }
-        public void CloseRecipeTips() { if(recipePanel!=null) recipePanel.SetActive(false); }
+        public void CloseRecipeTips()
+        {
+            if(recipePanel==null) return;
+            var compendium=recipePanel.GetComponent<CoffeeCompendiumPanel>();
+            if(compendium!=null) compendium.CloseImmediate(); else recipePanel.SetActive(false);
+        }
         private void PreviousRecipe() => SelectRecipe(recipeIndex - 1);
         private void NextRecipe() => SelectRecipe(recipeIndex + 1);
         private void SelectRecipe(int index)
@@ -307,6 +318,7 @@ namespace Spotlight.FreeCafe
         }
         private void RefreshRecipeTips()
         {
+            if(recipePanel!=null && recipePanel.GetComponent<CoffeeCompendiumPanel>()!=null) return; // 咖啡宝典自行刷新
             if(runtime==null || runtime.World==null) return;
             if(bookView != null && runtime.World.ProductionEnabled)
             {
@@ -370,6 +382,7 @@ namespace Spotlight.FreeCafe
         {
             if(runtime==null || runtime.World==null)
             {
+                if(endDayButton!=null) endDayButton.gameObject.SetActive(false);
                 for(int index=0;index<orderAvatars.Length;index++) SetOrderAvatar(index,null);
                 return;
             }
@@ -377,18 +390,21 @@ namespace Spotlight.FreeCafe
             var state=runtime.World.State;
             if (endDayButton != null)
             {
-                bool dormitory = state.currentArea == AreaId.Basement;
-                endDayButton.gameObject.SetActive(dormitory);
-                endDayButton.interactable = dormitory && dayFlow != null;
+                bool canRestHere = state.currentArea == AreaId.Cafe || state.currentArea == AreaId.Basement;
+                endDayButton.gameObject.SetActive(canRestHere);
+                endDayButton.interactable = canRestHere && dayFlow != null && !runtime.InputBlocked;
             }
+            string closedStatus = state.businessPhase == BusinessPhase.Night
+                ? runtime.IsSandboxMode ? "已打烊 · 点击立牌开始新一天" : "今日已打烊 · 选择「结束这一天」或上床休息进入次日"
+                : "准备营业 · 点击大厅立牌开店";
             if(summary!=null)
             {
-                summary.text="第 "+state.day+" 天    王国币 "+state.money+"    声望 "+state.reputation+"\n"+(state.open ? "营业中 · 剩余 "+state.timeRemaining.ToString("0")+" 秒" : state.businessPhase==BusinessPhase.Night ? "已打烊 · 点击立牌开始新一天" : "准备营业 · 点击大厅立牌开店")+"    顾客 "+state.requests.Count+" 位";
+                summary.text="第 "+state.day+" 天    王国币 "+state.money+"    声望 "+state.reputation+"\n"+(state.open ? "营业中 · 剩余 "+state.timeRemaining.ToString("0")+" 秒" : closedStatus)+"    顾客 "+state.requests.Count+" 位";
                 var beans=runtime.World.Find("s.beans");var milk=runtime.World.Find("s.milk");
                 summary.text+="\n咖啡豆 "+(beans==null ? "—" : beans.stock.ToString())+"  ·  牛奶 "+(milk==null ? "—" : milk.stock.ToString());
             }
             if(dayLabel!=null) dayLabel.text="第 "+state.day+" 天";
-            if(statusLabel!=null) statusLabel.text=state.open ? "营业中 · 剩余 "+state.timeRemaining.ToString("0")+" 秒 · 顾客 "+state.requests.Count+" 位" : state.businessPhase==BusinessPhase.Night ? "已打烊 · 点击立牌开始新一天" : "准备营业 · 点击大厅立牌开店";
+            if(statusLabel!=null) statusLabel.text=state.open ? "营业中 · 剩余 "+state.timeRemaining.ToString("0")+" 秒 · 顾客 "+state.requests.Count+" 位" : closedStatus;
             if(moneyLabel!=null) moneyLabel.text=state.money.ToString();
             if(reputationLabel!=null) reputationLabel.text=state.reputation.ToString();
             if(stockLabel!=null)
@@ -460,15 +476,16 @@ namespace Spotlight.FreeCafe
                 var character=customer!=null && customer.person!=null ? runtime.Character(customer.person.characterId) : null;
                 SetOrderAvatar(index,character?.avatar);
                 string status=request.id==CafeWorld.TutorialOrderId ? "教程订单 · 尚未营业" : name+"  ·  "+request.patience.ToString("0")+" 秒";
-                string recipe=(request.id==state.focusedRequestId ? "● " : "")+status+"\n"+FreeCafeProductionText.Recipe(product.label)+"  /  "+product.price+" 王国币";
+                string recipe=(request.id==state.focusedRequestId ? "● " : "")+status+"\n"+FreeCafeProductionText.Recipe(product.label)+" · "+runtime.World.Spec(runtime.World.RequiredCupSpecId(request)).label+"  /  "+product.price+" 王国币";
                 if(label!=null) label.text=recipe;
                 if(button!=null) { button.interactable=!runtime.InputBlocked; SetTicket(button,request.id==state.focusedRequestId); }
             }
+            if(orderStack!=null) orderStack.Show(orderOffset);
             if(pauseButton!=null) pauseButton.interactable=string.IsNullOrEmpty(state.production.miniGameToken) && !(FreeCafeGMPanel.Instance!=null && FreeCafeGMPanel.Instance.IsVisible);
             if(mapButton!=null) mapButton.interactable=Flow != null && Flow.CanOpenMap;
             if(recipeButton!=null) recipeButton.interactable=!runtime.InputBlocked || IsModalOpen;
 
-            if(recipePanel!=null && recipePanel.activeSelf) RefreshRecipeTips();
+            if(recipePanel!=null && recipePanel.activeSelf && recipePanel.GetComponent<CoffeeCompendiumPanel>()==null) RefreshRecipeTips();
         }
         private void SetTicket(Button button,bool focused)
         {

@@ -13,6 +13,8 @@ namespace Spotlight.FreeCafe
         [Header("Prefab / scene authoring")]
         [SerializeField] private string prefabSpecId;
         [SerializeField] private string authoringEntityId;
+        [Tooltip("Keep a scene-authored static prop at its edited position, including after save restoration.")]
+        public bool preserveAuthoredPosition;
         public string PrefabSpecId => prefabSpecId;
         public string AuthoringEntityId => authoringEntityId;
         [Header("Presentation extension anchors (local world units)")]
@@ -30,6 +32,8 @@ namespace Spotlight.FreeCafe
         public string EntityId { get; private set; }
         public FreeCafeRuntime Runtime { get; private set; }
         private bool hasAuthoredPresentation;
+        private bool hasAuthoredPosition;
+        private Vector3 authoredPosition;
         private Vector3 authoredArtworkSize, authoredArtworkScale;
         private Sprite lastCharacterSprite;
         private string specId,lastState,lastArtId;
@@ -42,6 +46,9 @@ namespace Spotlight.FreeCafe
         private bool hovered, selected, dropTarget, invalidDrop;
         private bool extractionFilling;
         public bool IsReceivingPour => receivingPour;
+        /// <summary>The real-time GravityLiquidImage is on screen (pouring, receiving or extracting).</summary>
+        public bool LiquidVisualActive => pourVisual || receivingPour || extractionFilling;
+        private FreeCafeCupDrinkSurface drinkSurface;
         public bool IsHovered => hovered;
         private TMP_Text fillStatus;
         private SpriteRenderer fillBarBackground, fillBar;
@@ -195,7 +202,8 @@ namespace Spotlight.FreeCafe
                 body.transform.localScale=new Vector3(fit,fit,1);
             }
             hitbox.size=new Vector2(spec.width,spec.height);hitbox.isTrigger=true;
-            label.transform.localPosition=spec.Has(Capability.BusinessControl) ? new Vector3(0,.3f,-.1f) : new Vector3(0,-spec.height*.5f-.18f,-.1f);
+            if (!spec.Has(Capability.BusinessControl) || GetComponent<FreeCafeBusinessSignView>() == null)
+                label.transform.localPosition=spec.Has(Capability.BusinessControl) ? new Vector3(0,.3f,-.1f) : new Vector3(0,-spec.height*.5f-.18f,-.1f);
             label.text=spec.label;label.raycastTarget=false;
             body.sortingOrder=100+Mathf.RoundToInt(-y*10)+(spec.Has(Capability.Movable) ? 30 : 0);
             var labelRenderer=label.GetComponent<MeshRenderer>();if(labelRenderer!=null) labelRenderer.sortingOrder=body.sortingOrder+1;
@@ -208,6 +216,12 @@ namespace Spotlight.FreeCafe
             if(runtime==null || entity==null) throw new System.ArgumentNullException("实体绑定缺少 runtime 或实体");
             if(!string.IsNullOrEmpty(prefabSpecId) && prefabSpecId!=entity.specId)
                 throw new System.InvalidOperationException("Prefab 规格不匹配："+prefabSpecId+" / "+entity.specId);
+            // Capture after adoption into the area root, before world/save coordinates can move a static prop.
+            if (Runtime == null && preserveAuthoredPosition && !string.IsNullOrEmpty(authoringEntityId))
+            {
+                authoredPosition = transform.localPosition;
+                hasAuthoredPosition = true;
+            }
             // Capture scene edits before the first runtime refresh can fit art to catalog dimensions.
             if (Runtime == null && !string.IsNullOrEmpty(authoringEntityId) && body != null && body.sprite != null)
             {
@@ -256,20 +270,21 @@ namespace Spotlight.FreeCafe
                 var deliveryZone = GetComponent<FreeCafeDeliveryZone>();
                 if (!hasAuthoredPresentation)
                 {
-                    hitbox.size=deliveryZone!=null ? deliveryZone.HitboxSize : new Vector2(spec.width,spec.height);
+                    if (businessSignView == null) hitbox.size=deliveryZone!=null ? deliveryZone.HitboxSize : new Vector2(spec.width,spec.height);
                     if (deliveryZone != null) hitbox.offset = deliveryZone.ArtworkOffset;
-                    label.transform.localPosition=deliveryZone!=null
+                    if (businessSignView == null) label.transform.localPosition=deliveryZone!=null
                         ? new Vector3(0,deliveryZone.ArtworkOffset.y-deliveryZone.ArtworkSize.y*.5f-.2f,-.1f)
                         : spec.Has(Capability.BusinessControl) ? new Vector3(0,.3f,-.1f) : new Vector3(0,-spec.height*.5f-.18f,-.1f);
                 }
             }
+            Vector3 entityPosition = hasAuthoredPosition ? authoredPosition : new Vector3(entity.x, entity.y, 0);
             if (!motionInitialized)
             {
-                transform.localPosition = new Vector3(entity.x, entity.y, 0);
+                transform.localPosition = entityPosition;
                 motionTarget = transform.localPosition;
                 motionInitialized = true;
             }
-            else if (!pointerMotion && !destroyOnArrival) motionTarget = new Vector3(entity.x, entity.y, 0);
+            else if (!pointerMotion && !destroyOnArrival) motionTarget = entityPosition;
             baseRotation = entity.rotation;
             body.sortingOrder=preview ? 2000 : 100+Mathf.RoundToInt(-entity.y*10)+(spec.Has(Capability.Movable) ? 30 : 0);
             label.GetComponent<MeshRenderer>().sortingOrder=body.sortingOrder+1;
@@ -281,8 +296,9 @@ namespace Spotlight.FreeCafe
                 if(cupStack==null) cupStack=gameObject.AddComponent<FreeCafeCupStackVisual>();
                 cupStack.Present(spec,Runtime.World.Catalog,Runtime.artLibrary,entity.stock,Runtime.World.CupAbove(entity)!=null);
             }
-            bool visible=string.IsNullOrEmpty(entity.ownerId);
+            bool visible=string.IsNullOrEmpty(entity.ownerId) && Runtime.World.IsEquipmentAvailable(entity);
             gameObject.SetActive(visible);
+            UpdateDrinkSurface(entity);
             hitbox.enabled=CanInteract && !pointerMotion && visible && entity.area==Runtime.World.State.currentArea;
             string caption=spec.label;
             if(spec.Has(Capability.Source)) caption+=" ["+entity.stock+"]";
@@ -465,6 +481,21 @@ namespace Spotlight.FreeCafe
             rejectionAnimation=null;invalidDrop=false;
         }
         private bool WorldVessel(WorldEntity entity) => Runtime.World.IsProductionVessel(entity);
+        /// <summary>Recognised drinks replace the cup mouth with that drink's surface art.</summary>
+        private void UpdateDrinkSurface(WorldEntity entity)
+        {
+            var library = CafeDrinkSurfaceLibrary.Default;
+            if (drinkSurface == null && (library == null || library.Cup(entity.specId) == null)) return;
+            if (drinkSurface == null)
+            {
+                drinkSurface = GetComponent<FreeCafeCupDrinkSurface>();
+                if (drinkSurface == null) drinkSurface = gameObject.AddComponent<FreeCafeCupDrinkSurface>();
+                drinkSurface.Bind(this, library);
+            }
+            // A cup nested under another cup shows only its rim; contents stay hidden.
+            var kind = Runtime.World.CupAbove(entity) == null ? Runtime.World.ClassifyCoffee(entity) : default;
+            drinkSurface.Present(entity.specId, kind.known ? kind.productId : null, preview);
+        }
         public void PresentPour(float tilt,bool pouring)
         {
             pourVisual = pouring || Mathf.Abs(tilt) > .001f;

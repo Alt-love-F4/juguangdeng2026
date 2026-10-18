@@ -315,10 +315,13 @@ namespace Spotlight.FreeCafe.Tests
             Assert.That(world.StartDay().success, Is.True);
             var request = world.Request(world.State.focusedRequestId);
             request.productId = "espresso";
-            Assert.That(world.SelectServingCup("s.cups.small").success, Is.True);
+            string requiredCup = world.RequiredCupSpecId(request);
+            Assert.That(world.SelectServingCup(requiredCup == "cup.small" ? "s.cups.small" : "s.cups.large").success, Is.True);
             var cup = world.ServingCup;
             cup.contents.AddRange(RecommendedCup(world.Product("espresso")).contents);
-            Assert.That(world.Matches(cup, world.Product("espresso")), Is.True);
+            float scale = world.OrderPortionScale(request);
+            foreach (var portion in cup.contents) { portion.milliliters *= scale; portion.grams *= scale; }
+            Assert.That(world.MatchesOrder(cup, request), Is.True);
             ActionResult delivered = world.DeliverProductionCup();
             Assert.That(delivered.success, Is.True);
             Assert.That(delivered.feedback, Is.EqualTo(CafeFeedbackKind.DeliverySatisfied));
@@ -333,17 +336,18 @@ namespace Spotlight.FreeCafe.Tests
             Assert.That(world.StartDay().success, Is.True);
             var request = world.Request(world.State.focusedRequestId);
             request.productId = requestedId;
+            request.cupSpecId = world.Product(requestedId).cupSpecId; // Isolate classification rejection from cup mismatch.
             var requested = world.Product(requestedId);
             int money = world.State.money;
             for (int delivery = 0; delivery <= requested.maxRemakes; delivery++)
             {
-                Assert.That(world.SelectServingCup(world.Product(actualId).cupSpecId == "cup.small"
+                Assert.That(world.SelectServingCup(world.RequiredCupSpecId(request) == "cup.small"
                     ? "s.cups.small" : "s.cups.large").success, Is.True);
                 var cup = world.ServingCup;
                 cup.contents.AddRange(RecommendedCup(world.Product(actualId)).contents);
                 cup.latteArt = true;
                 if (addBeans) cup.contents.Add(new Portion { specId = "beans", grams = .1f });
-                var score = world.EvaluateProduction(cup, requested);
+                var score = world.EvaluateProduction(cup, requested, world.RequiredCupSpecId(request));
                 Assert.That(score.total, Is.GreaterThanOrEqualTo(requested.minimumScore));
                 Assert.That(world.ClassifyCoffee(cup).productId, Is.Not.EqualTo(requestedId));
                 Assert.That(world.Matches(cup, requested), Is.False);

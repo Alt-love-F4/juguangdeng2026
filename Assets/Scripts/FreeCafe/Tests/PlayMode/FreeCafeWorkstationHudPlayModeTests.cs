@@ -130,8 +130,10 @@ namespace Spotlight.FreeCafe.Tests
             var product=w.Product(w.Request(w.State.focusedRequestId).productId);
             hud.orderRecipe.onClick.Invoke();yield return null;
             Assert.That(hud.bookPanel.activeInHierarchy,Is.True);
-            Assert.That(hud.bookTitle.text,Does.Contain(FreeCafeProductionText.Recipe(product.label)));
-            hud.closeBook.onClick.Invoke();yield return null;
+            var book=hud.bookPanel.GetComponent<CoffeeCompendiumPanel>();
+            Assert.That(book.CurrentTab,Is.EqualTo(CoffeeCompendiumPanel.Tab.Recipes));
+            Assert.That(book.ProductOrder[book.RecipeIndex],Is.EqualTo(product.id),"The order button opens that order's recipe page.");
+            book.CloseImmediate();yield return null;
             Assert.That(app.InputBlocked,Is.False);
         }
         [UnityTest] public IEnumerator PatternMeaningAppearsOnHoverAndDisappearsWithoutBlockingDrawing()

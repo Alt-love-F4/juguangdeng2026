@@ -956,8 +956,8 @@
   },
   {
     "key": "cafe.tutorial.customer.name",
-    "text": "顾客B",
-    "comment": "文案-新手教程.docx；原文保留"
+    "text": "顾客",
+    "comment": "玩家教程修订；原稿保留在 cafe.tutorial.source.*；按键细节由工作台指引负责"
   },
   {
     "key": "opening.line.01",
@@ -1001,13 +1001,13 @@
   },
   {
     "key": "cafe.tutorial.customer_arrives.title",
-    "text": "customer_arrives",
-    "comment": "文案-新手教程.docx；原文保留"
+    "text": "第一位客人",
+    "comment": "玩家教程修订；原稿保留在 cafe.tutorial.source.*；按键细节由工作台指引负责"
   },
   {
     "key": "cafe.tutorial.customer_arrives.01",
-    "text": "进来的是一个衣着普通的老太太，记不住脸",
-    "comment": "原稿段落 15"
+    "text": "进来的是一位衣着普通的男人，看起来是附近的居民。",
+    "comment": "玩家教程修订；原稿保留在 cafe.tutorial.source.*；按键细节由工作台指引负责"
   },
   {
     "key": "cafe.tutorial.customer_arrives.02",
@@ -1031,13 +1031,13 @@
   },
   {
     "key": "cafe.tutorial.customer_arrives.06",
-    "text": "她看了我一眼，我回以微笑。",
-    "comment": "原稿段落 20"
+    "text": "他看了我一眼，我回以微笑。",
+    "comment": "玩家教程修订；原稿保留在 cafe.tutorial.source.*；按键细节由工作台指引负责"
   },
   {
     "key": "cafe.tutorial.perception_success.title",
-    "text": "perception_success",
-    "comment": "文案-新手教程.docx；原文保留"
+    "text": "熟悉的老客人",
+    "comment": "玩家教程修订；原稿保留在 cafe.tutorial.source.*；按键细节由工作台指引负责"
   },
   {
     "key": "cafe.tutorial.perception_success.01",
@@ -1066,8 +1066,8 @@
   },
   {
     "key": "cafe.tutorial.perception_success.06",
-    "text": "阿黛尔，你和这位太太说说这两天你做了什么",
-    "comment": "原稿段落 26"
+    "text": "阿黛尔，你和这位先生说说这两天你做了什么。",
+    "comment": "玩家教程修订；原稿保留在 cafe.tutorial.source.*；按键细节由工作台指引负责"
   },
   {
     "key": "cafe.tutorial.perception_success.07",
@@ -1086,43 +1086,43 @@
   },
   {
     "key": "cafe.tutorial.perception_failure.title",
-    "text": "perception_failure",
-    "comment": "文案-新手教程.docx；原文保留"
+    "text": "难以捉摸的客人",
+    "comment": "玩家教程修订；原稿保留在 cafe.tutorial.source.*；按键细节由工作台指引负责"
   },
   {
     "key": "cafe.tutorial.perception_failure.01",
-    "text": "不知怎么，总感觉她身上的气息突然变了",
-    "comment": "原稿段落 31"
+    "text": "不知怎么，总感觉他身上的气息突然变了。",
+    "comment": "玩家教程修订；原稿保留在 cafe.tutorial.source.*；按键细节由工作台指引负责"
   },
   {
     "key": "cafe.tutorial.perception_failure.02",
-    "text": "我没心思琢磨古怪的老太太爱琢磨些什么",
-    "comment": "原稿段落 32"
+    "text": "我没心思琢磨这位客人在想些什么。",
+    "comment": "玩家教程修订；原稿保留在 cafe.tutorial.source.*；按键细节由工作台指引负责"
   },
   {
     "key": "cafe.tutorial.perception_failure.03",
-    "text": "还好她把视线收了回去",
-    "comment": "原稿段落 33"
+    "text": "还好他把视线收了回去。",
+    "comment": "玩家教程修订；原稿保留在 cafe.tutorial.source.*；按键细节由工作台指引负责"
   },
   {
     "key": "cafe.tutorial.order_confirmed.title",
-    "text": "order_confirmed",
-    "comment": "文案-新手教程.docx；原文保留"
+    "text": "确认订单",
+    "comment": "玩家教程修订；原稿保留在 cafe.tutorial.source.*；按键细节由工作台指引负责"
   },
   {
     "key": "cafe.tutorial.order_confirmed.01",
-    "text": "可能是看出老太太想点餐，阿黛尔塞去一张自己无聊手绘的餐单",
-    "comment": "原稿段落 35"
+    "text": "看出这位先生想点餐，阿黛尔递给他一张亲手绘制的餐单。",
+    "comment": "玩家教程修订；原稿保留在 cafe.tutorial.source.*；按键细节由工作台指引负责"
   },
   {
     "key": "cafe.tutorial.order_confirmed.02",
-    "text": "小杯装黑咖啡 ，无糖，就这样",
-    "comment": "原稿段落 36"
+    "text": "大杯黑咖啡，不加糖，就这样。",
+    "comment": "玩家教程修订；原稿保留在 cafe.tutorial.source.*；按键细节由工作台指引负责"
   },
   {
     "key": "cafe.tutorial.order_confirmed.03",
-    "text": "B太太——新沸点咖啡的第一位客人",
-    "comment": "原稿段落 37"
+    "text": "这位先生是重新开张的沸点咖啡馆的第一位客人。",
+    "comment": "玩家教程修订；原稿保留在 cafe.tutorial.source.*；按键细节由工作台指引负责"
   },
   {
     "key": "cafe.tutorial.order_confirmed.04",
@@ -1131,63 +1131,63 @@
   },
   {
     "key": "cafe.tutorial.workstation_open.title",
-    "text": "workstation_open",
-    "comment": "文案-新手教程.docx；原文保留"
+    "text": "前往工作台",
+    "comment": "玩家教程修订；原稿保留在 cafe.tutorial.source.*；按键细节由工作台指引负责"
   },
   {
     "key": "cafe.tutorial.workstation_open.01",
-    "text": "[演出说明：背景：大堂-吧台；UI正式开放，点击吧台的桌面可立刻转换至操作台视角，]",
-    "comment": "原稿段落 40"
+    "text": "接下来去工作台制作客人的咖啡。点击大厅右侧吧台处的箭头或吧台，进入工作台。",
+    "comment": "玩家教程修订；原稿保留在 cafe.tutorial.source.*；按键细节由工作台指引负责"
   },
   {
     "key": "cafe.tutorial.make_coffee_base.title",
-    "text": "make_coffee_base",
-    "comment": "文案-新手教程.docx；原文保留"
+    "text": "制作黑咖啡",
+    "comment": "玩家教程修订；原稿保留在 cafe.tutorial.source.*；按键细节由工作台指引负责"
   },
   {
     "key": "cafe.tutorial.make_coffee_base.01",
-    "text": "哎呀呀，还没正式营业，就有了一笔生意进账。但是店长，你都不说话。看着有点紧张？哦，因为是第一次！我会全程提醒你的！首先，要确认客户订单上的需求！",
-    "comment": "原稿段落 45"
+    "text": "别紧张，店长，我会陪着你的。客人要的是大杯无糖黑咖啡，我们就从磨豆开始吧。",
+    "comment": "玩家教程修订；原稿保留在 cafe.tutorial.source.*；按键细节由工作台指引负责"
   },
   {
     "key": "cafe.tutorial.make_coffee_base.02",
-    "text": "顾客姓名：B顾客要求：无糖黑咖，其他随便配料表:咖啡原液（咖啡粉+开水）根据浓度/甜度要求，加入适量清水/方糖顾客姓名：B顾客要求：无糖黑咖，其他随便配料表:咖啡原液（咖啡粉+开水）根据浓度/甜度要求，加入适量清水/方糖",
-    "comment": "原稿段落 46"
+    "text": "制作目标：研磨咖啡豆，用热水煮成黑咖啡，再装入杯中。不需要加糖。",
+    "comment": "玩家教程修订；原稿保留在 cafe.tutorial.source.*；按键细节由工作台指引负责"
   },
   {
     "key": "cafe.tutorial.make_coffee_base.03",
-    "text": "按照要求，首先我们要配置咖啡原液；然后将其注杯——",
-    "comment": "原稿段落 51"
+    "text": "工作台会一步步提示你。先学会取放原料，再试着启动设备。",
+    "comment": "玩家教程修订；原稿保留在 cafe.tutorial.source.*；按键细节由工作台指引负责"
   },
   {
     "key": "cafe.tutorial.pour_into_cup.title",
-    "text": "pour_into_cup",
-    "comment": "文案-新手教程.docx；原文保留"
+    "text": "装杯",
+    "comment": "玩家教程修订；原稿保留在 cafe.tutorial.source.*；按键细节由工作台指引负责"
   },
   {
     "key": "cafe.tutorial.pour_into_cup.01",
-    "text": "按照要求，首先我们要配置咖啡原液；然后将其注杯——",
-    "comment": "原稿段落 51"
+    "text": "咖啡做好了。准备一个空杯，把壶里的咖啡倒进去，就可以出餐啦。",
+    "comment": "玩家教程修订；原稿保留在 cafe.tutorial.source.*；按键细节由工作台指引负责"
   },
   {
     "key": "cafe.tutorial.adjust_strength.title",
-    "text": "adjust_strength",
-    "comment": "文案-新手教程.docx；原文保留"
+    "text": "认识浓度",
+    "comment": "玩家教程修订；原稿保留在 cafe.tutorial.source.*；按键细节由工作台指引负责"
   },
   {
     "key": "cafe.tutorial.adjust_strength.01",
-    "text": "其后，查看浓度与甜度要求，判断是否添入清水与方糖；今天顾客似乎只要求了无糖；",
-    "comment": "原稿段落 52"
+    "text": "加清水会让咖啡变淡。这次先按当前配方完成黑咖啡，不必额外调浓度。",
+    "comment": "玩家教程修订；原稿保留在 cafe.tutorial.source.*；按键细节由工作台指引负责"
   },
   {
     "key": "cafe.tutorial.adjust_sweetness.title",
-    "text": "adjust_sweetness",
-    "comment": "文案-新手教程.docx；原文保留"
+    "text": "确认甜度",
+    "comment": "玩家教程修订；原稿保留在 cafe.tutorial.source.*；按键细节由工作台指引负责"
   },
   {
     "key": "cafe.tutorial.adjust_sweetness.01",
-    "text": "其后，查看浓度与甜度要求，判断是否添入清水与方糖；今天顾客似乎只要求了无糖；",
-    "comment": "原稿段落 52"
+    "text": "客人要无糖黑咖啡，这次不需要加糖。",
+    "comment": "玩家教程修订；原稿保留在 cafe.tutorial.source.*；按键细节由工作台指引负责"
   },
   {
     "key": "cafe.tutorial.adjust_sweetness.02",
@@ -1276,8 +1276,8 @@
   },
   {
     "key": "cafe.tutorial.serve_customer.title",
-    "text": "serve_customer",
-    "comment": "文案-新手教程.docx；原文保留"
+    "text": "交付咖啡",
+    "comment": "玩家教程修订；原稿保留在 cafe.tutorial.source.*；按键细节由工作台指引负责"
   },
   {
     "key": "cafe.tutorial.serve_customer.01",
@@ -1361,8 +1361,8 @@
   },
   {
     "key": "cafe.tutorial.ending.title",
-    "text": "ending",
-    "comment": "文案-新手教程.docx；原文保留"
+    "text": "新的开始",
+    "comment": "玩家教程修订；原稿保留在 cafe.tutorial.source.*；按键细节由工作台指引负责"
   },
   {
     "key": "cafe.tutorial.ending.01",

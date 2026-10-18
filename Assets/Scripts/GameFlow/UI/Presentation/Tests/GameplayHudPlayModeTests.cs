@@ -219,6 +219,88 @@ namespace Spotlight.GameFlow.Tests
             Assert.That(hud.IsVisible, Is.True);
         }
 
+        [UnityTest]
+        public IEnumerator ClosingKeepsDateAndResidentCafeUntilExplicitRestThenNextDayCanOpen()
+        {
+            yield return SceneManager.LoadSceneAsync("启动场景", LoadSceneMode.Single);
+            var flow = Object.FindFirstObjectByType<GameFlowBootstrap>();
+            yield return null;
+            flow.StartGame();
+            yield return WaitFor(() => SceneManager.GetActiveScene().name == "Map"
+                && UIKit.GetPanel<OpeningProloguePanel>() != null && !LoadingVisible(), "New game entry");
+            bool skipped = false;
+            yield return WaitFor(() => skipped = flow.DebugSkipTutorialToMap(out _), "Skip arrival to map");
+            bool arrived = false;
+            flow.TransitionToGameplayScene("CoffeeShop", () => arrived = true);
+            yield return WaitFor(() => arrived && !LoadingVisible(), "First cafe entry");
+            var days = flow.GetComponent<DayFlowController>();
+            Assert.That(days.DebugSkipTutorialToCafe(out string error), Is.True, error);
+            var world = PlayerCafeOwner.Current;
+            var endpoint = Object.FindObjectsByType<MonoBehaviour>(FindObjectsSortMode.None)
+                .First(item => item is IDayFlowGameplayEndpoint);
+            var requestStart = endpoint.GetType().GetMethod("RequestBusinessStart");
+            requestStart.Invoke(endpoint, null);
+            yield return WaitFor(() => world.State.open, "Formal business start through narrative bridge");
+            yield return null;
+            days.FinishBusiness();
+            Assert.That(days.CurrentDay, Is.EqualTo(1));
+            Assert.That(world.State.day, Is.EqualTo(1));
+            Assert.That(world.StartDay(advanceFromNight: false).success, Is.False);
+            var settlement = (DayFlowPresentationPanel)days.CurrentPresentation;
+            var submit = settlement.GetComponentInChildren<Button>(true);
+            yield return WaitFor(() => submit.interactable, "Settlement entrance");
+            submit.onClick.Invoke();
+            yield return WaitFor(() => days.State == DayFlowState.CityMapLeisure
+                && SceneManager.GetActiveScene().name == "Map" && !LoadingVisible(), "After-business map");
+            Assert.That(days.CurrentDay, Is.EqualTo(1), "Closing must not end the calendar day.");
+            days.StartCafeFromMap();
+            yield return WaitFor(() => days.CurrentPresentation is CafeOpeningPanel && !LoadingVisible(), "Resident cafe return");
+            submit = ((DayFlowPresentationPanel)days.CurrentPresentation).GetComponentInChildren<Button>(true);
+            yield return WaitFor(() => submit.interactable, "Cafe entrance");
+            submit.onClick.Invoke();
+            yield return WaitFor(() => days.State == DayFlowState.FreeCafeBusiness, "Cafe preparation");
+            Assert.That(PlayerCafeOwner.Current, Is.SameAs(world), "Return must reuse the scene world.");
+            Assert.That(GameSaveParticipantRegistry.PendingRestore == null
+                || !GameSaveParticipantRegistry.PendingRestore.Any(p => p.Id == PlayerCafeOwner.SaveId), Is.True,
+                "A resident adapter must not wait for a Start-only restore.");
+            yield return null;
+            Assert.That(days.CurrentPresentation, Is.Null, "Old Night state cannot repeat settlement.");
+            var cafeHud = Object.FindObjectsByType<GameFlowPanel>(FindObjectsSortMode.None)
+                .First(item => item.GetType().Name == "FreeCafeHud");
+            var endDay = (Button)cafeHud.GetType().GetField("endDayButton").GetValue(cafeHud);
+            var enterArea = endpoint.GetType().GetMethod("Enter");
+            enterArea.Invoke(endpoint, new object[] { Spotlight.FreeCafe.AreaId.Counter });
+            yield return null;
+            Assert.That(endDay.gameObject.activeSelf, Is.False, "The workstation is not a rest entry.");
+            enterArea.Invoke(endpoint, new object[] { Spotlight.FreeCafe.AreaId.Basement });
+            yield return null;
+            Assert.That(endDay.gameObject.activeSelf, Is.True, "Third-floor dormitory exposes explicit rest.");
+            enterArea.Invoke(endpoint, new object[] { Spotlight.FreeCafe.AreaId.Cafe });
+            yield return WaitFor(() => endDay.gameObject.activeInHierarchy && endDay.interactable,
+                "Explicit end-day button is available in the first-floor lobby");
+            endDay.onClick.Invoke();
+            Assert.That(days.CurrentDay, Is.EqualTo(2));
+            Assert.That(world.State.day, Is.EqualTo(2));
+            Assert.That(world.State.businessPhase, Is.EqualTo(Spotlight.FreeCafe.BusinessPhase.Preparation));
+            Assert.That(world.State.open, Is.False);
+            yield return WaitFor(() => days.State == DayFlowState.CityMapLeisure && !LoadingVisible(), "Next morning");
+            days.StartCafeFromMap();
+            yield return WaitFor(() => days.CurrentPresentation is CafeOpeningPanel && !LoadingVisible(), "Day-two cafe");
+            submit = ((DayFlowPresentationPanel)days.CurrentPresentation).GetComponentInChildren<Button>(true);
+            yield return WaitFor(() => submit.interactable, "Day-two entrance");
+            submit.onClick.Invoke();
+            yield return WaitFor(() => days.State == DayFlowState.FreeCafeBusiness, "Day-two preparation");
+            requestStart.Invoke(endpoint, null);
+            yield return WaitFor(() => world.State.open, "Day-two business through narrative bridge");
+            Assert.That(world.State.day, Is.EqualTo(2));
+            Assert.That(days.CurrentDay, Is.EqualTo(2));
+            // The timer closes the domain before DayFlow observes it; this path must settle once too.
+            yield return null;
+            Assert.That(world.EndDay().success, Is.True);
+            yield return WaitFor(() => days.CurrentPresentation is BusinessEndPanel, "Domain-driven closing settlement");
+            Assert.That(days.CurrentDay, Is.EqualTo(2));
+        }
+
         private IEnumerator ExerciseWindows(GameplayHudPanel hud)
         {
             Time.timeScale = 0;

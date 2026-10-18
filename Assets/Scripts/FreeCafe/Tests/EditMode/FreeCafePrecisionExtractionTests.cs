@@ -29,17 +29,22 @@ namespace Spotlight.FreeCafe.Tests
         private void Pour(float ml, float dt) => Assert.That(world.PourLiquid("m.heater", Target, ml, dt).success, Is.True);
         private CafeExtractionSnapshot Snapshot => world.ExtractionSnapshot(Target);
 
-        [Test] public void GroundsScaleAllBandsAndRemainFrozenDuringSession()
+        [Test] public void WholeIncomingDoseScalesBandsAndNextDoseStartsFreshSession()
         {
-            Add("grounds"); Add("grounds"); Supply(); Pour(10, 1);
+            var dose = new WorldEntity { id = "precision.double", specId = "grounds", units = 2, area = AreaId.Counter };
+            world.State.entities.Add(dose);
+            Assert.That(world.Interact(dose.id, Target).success, Is.True);
+            Supply(); Pour(10, 1);
             Assert.That(Snapshot.idealMl, Is.EqualTo(400)); Assert.That(Snapshot.idealSeconds, Is.EqualTo(15));
             Assert.That(Snapshot.greenMlMin, Is.EqualTo(300));
-            var extra = new WorldEntity { id = "precision.extra", specId = "grounds", units = 1, area = AreaId.Counter };
-            world.State.entities.Add(extra);
-            string before = JsonUtility.ToJson(world.State);
-            Assert.That(world.Interact(extra.id, Target).success, Is.False);
-            Assert.That(JsonUtility.ToJson(world.State), Is.EqualTo(before));
-            Assert.That(Snapshot.groundsGrams, Is.EqualTo(24));
+            Add("grounds");
+            Assert.That(Snapshot.inProgress, Is.False);
+            Assert.That(Snapshot.groundsGrams, Is.EqualTo(12));
+            Assert.That(Snapshot.injectedHotWaterMl, Is.Zero);
+            Assert.That(world.LiquidVolume(world.ExtractionFilter(Extractor)), Is.Zero);
+            Pour(10, 1);
+            Assert.That(Snapshot.inProgress, Is.True);
+            Assert.That(Snapshot.idealMl, Is.EqualTo(200));
         }
         [Test] public void IndependentGreenLengthsAreExactAndBrewerIsNotPrecisionApparatus()
         {
@@ -64,10 +69,10 @@ namespace Spotlight.FreeCafe.Tests
         [TestCase("milk")]
         [TestCase("coffee")]
         [TestCase("hotwater")]
-        public void PrefilledLiquidThenGroundsAndMoreWaterStaysOrdinary(string ingredient)
+        public void GroundsClearPrefilledUpperLiquidSoNewHotWaterStartsSession(string ingredient)
         {
             Add(ingredient); Add("grounds"); Supply(); Pour(100, 1);
-            Assert.That(Snapshot.inProgress, Is.False); Assert.That(Snapshot.injectedHotWaterMl, Is.Zero);
+            Assert.That(Snapshot.inProgress, Is.True); Assert.That(Snapshot.injectedHotWaterMl, Is.EqualTo(100));
         }
         [Test] public void OnlyAcceptedHotWaterCountsAndFullTargetDoesNotStartTimer()
         {

@@ -143,8 +143,7 @@ namespace Spotlight.FreeCafe.Tests
             ClickHudButton(production.orderRecipe);
             yield return null;
             Assert.That(production.IsModalOpen,Is.True);
-            production.closeBook.onClick.Invoke();
-            yield return null;
+            yield return CloseBook(Compendium(production.bookPanel));
             yield return new WaitForEndOfFrame();
             var screenshot=ScreenCapture.CaptureScreenshotAsTexture();
             var directory=System.IO.Path.Combine(Application.dataPath,"../Logs/GameplayHud");
@@ -367,6 +366,26 @@ namespace Spotlight.FreeCafe.Tests
             Assert.That(production.saveButton==null || !production.saveButton.gameObject.activeInHierarchy,Is.True);
             Assert.That(production.productionRoot.GetComponentsInChildren<Canvas>().Length,Is.EqualTo(0));
         }
+        private static CoffeeCompendiumPanel Compendium(GameObject panel) => panel == null ? null : panel.GetComponent<CoffeeCompendiumPanel>();
+        private static IEnumerator WaitForBook(CoffeeCompendiumPanel book)
+        {
+            float deadline = Time.realtimeSinceStartup + 5f;
+            while (book.IsAnimating && Time.realtimeSinceStartup < deadline) yield return null;
+            yield return null;
+        }
+        private static string BookText(CoffeeCompendiumPanel book)
+        {
+            var text = new System.Text.StringBuilder();
+            foreach (var label in book.GetComponentsInChildren<TMP_Text>()) text.AppendLine(label.text);
+            return text.ToString();
+        }
+        private static IEnumerator CloseBook(CoffeeCompendiumPanel book)
+        {
+            book.closeButton.onClick.Invoke();
+            float deadline = Time.realtimeSinceStartup + 5f;
+            while (book.IsOpen && Time.realtimeSinceStartup < deadline) yield return null;
+            Assert.That(book.IsOpen, Is.False);
+        }
         [UnityTest] public IEnumerator BothCoffeeBooksUseLatteArtRecipeTermsWhilePreservingRawIngredientLabels()
         {
             var world=app.World;
@@ -376,17 +395,20 @@ namespace Spotlight.FreeCafe.Tests
             world.State.unlockedProducts.Clear();world.State.unlockedProducts.Add(product.id);
             string before=JsonUtility.ToJson(world.Catalog);
             app.Enter(AreaId.Counter);yield return null;
-            var production=app.GetComponent<FreeCafeProductionHud>();production.bookButton.onClick.Invoke();yield return null;
-            Assert.That(production.bookTitle.text,Does.Contain("拉花饮品"));
-            Assert.That(production.bookBody.text,Does.Contain("精粹咖啡与拉花").And.Contain("拉花  20 ml").And.Not.Contain("奶泡").And.Not.Contain("奶沫"));
-            production.closeBook.onClick.Invoke();
+            var production=app.GetComponent<FreeCafeProductionHud>();production.bookButton.onClick.Invoke();
+            var book=Compendium(production.bookPanel);yield return WaitForBook(book);
+            book.ShowRecipe(System.Linq.Enumerable.ToList(book.ProductOrder).IndexOf(product.id));yield return WaitForBook(book);
+            string text=BookText(book);
+            Assert.That(text,Does.Contain("拉花饮品"));
+            Assert.That(text,Does.Contain("拉花").And.Contain("20 ml").And.Not.Contain("奶泡").And.Not.Contain("奶沫"));
+            yield return CloseBook(book);
             app.Enter(AreaId.Cafe);yield return null;
-            OpenPlayerCoffeeBook();yield return null;
-            Assert.That(hud.recipeTitle.text,Does.Contain("拉花饮品"));
-            Assert.That(hud.recipeBody.text,Does.Contain("配方种类：拉花").And.Not.Contain("奶泡").And.Not.Contain("奶沫"));
+            OpenPlayerCoffeeBook();
+            var lobbyBook=Compendium(hud.recipePanel);yield return WaitForBook(lobbyBook);
+            Assert.That(BookText(lobbyBook),Does.Contain("拉花饮品").And.Not.Contain("奶泡").And.Not.Contain("奶沫"));
             Assert.That(world.IngredientLabel(product.ingredients[0]),Does.Match("奶泡|奶沫"));
             Assert.That(JsonUtility.ToJson(world.Catalog),Is.EqualTo(before),"Recipe terminology must not rename authoritative ingredient data");
-            hud.recipeCloseButton.onClick.Invoke();
+            yield return CloseBook(lobbyBook);
         }
 
         [UnityTest] public IEnumerator CoffeeBookBlocksEntityInputAndClosingRestoresIt()
@@ -396,54 +418,52 @@ namespace Spotlight.FreeCafe.Tests
             Assert.That(app.InputBlocked,Is.True);Assert.That(production.bookPanel.activeSelf,Is.True);
             var beans=app.World.Find("s.beans");int stock=beans.stock;
             app.Click(app.View(beans.id));Assert.That(beans.stock,Is.EqualTo(stock));
-            production.closeBook.onClick.Invoke();yield return null;
+            yield return CloseBook(Compendium(production.bookPanel));
             Assert.That(app.InputBlocked,Is.False);
             app.Enter(AreaId.Cafe);yield return null;
             OpenPlayerCoffeeBook();yield return null;Assert.That(app.InputBlocked,Is.True);
-            hud.recipeCloseButton.onClick.Invoke();yield return null;Assert.That(app.InputBlocked,Is.False);
+            yield return CloseBook(Compendium(hud.recipePanel));Assert.That(app.InputBlocked,Is.False);
         }
 
-        [UnityTest] public IEnumerator CoffeeBooksKeepPsdLayersAndUseOnlyUguiAndTmp()
+        [UnityTest] public IEnumerator CoffeeCompendiumReplacesTheOldBookAndUsesOnlyUguiAndTmp()
         {
             app.Enter(AreaId.Counter);yield return null;
             var production=app.GetComponent<FreeCafeProductionHud>();
-            var view=production.bookPanel.GetComponent<CoffeeBookPanelView>();
-            Assert.That(view,Is.Not.Null);
-            Assert.That(production.bookPanel.GetComponentsInChildren<SpriteRenderer>(true),Is.Empty);
-            Assert.That(production.bookPanel.GetComponentsInChildren<UnityEngine.UI.Text>(true),Is.Empty);
-            Assert.That(production.bookPanel.GetComponentsInChildren<Canvas>(true),Is.Empty);
-            foreach(string name in new[]{"图层 1","图层 5","进度条蒙版","进度条","标题底图","选中标","选项底图","咖啡icon","图层 8","精粹咖啡"})
-                Assert.That(view.artRoot.Find(name),Is.Not.Null,name);
-            Assert.That(view.artRoot.Find("精粹咖啡").GetComponent<Image>().enabled,Is.False,"Rasterized PSD text must be replaced by TMP");
-            Assert.That(view.title,Is.TypeOf<TextMeshProUGUI>());
-            Assert.That(view.bodyScroll.content,Is.EqualTo(view.body.rectTransform));
-            Assert.That(hud.recipePanel.GetComponent<CoffeeBookPanelView>(),Is.Not.Null);
+            foreach(var panel in new[]{production.bookPanel,hud.recipePanel})
+            {
+                Assert.That(Compendium(panel),Is.Not.Null,panel.name);
+                Assert.That(panel.GetComponent<CoffeeBookPanelView>(),Is.Null,"The PSD coffee book is no longer used in CoffeeShop.");
+                Assert.That(panel.GetComponentsInChildren<SpriteRenderer>(true),Is.Empty);
+                Assert.That(panel.GetComponentsInChildren<UnityEngine.UI.Text>(true),Is.Empty);
+                Assert.That(panel.GetComponentsInChildren<Canvas>(true),Is.Empty);
+            }
+            Assert.That(Object.FindObjectsByType<CoffeeBookPanelView>(FindObjectsInactive.Include,FindObjectsSortMode.None),Is.Empty);
         }
 
-        [UnityTest] public IEnumerator CoffeeBookSidebarChangesRecipeAndEmptyListClearsSelection()
+        [UnityTest] public IEnumerator CoffeeBookListsEveryRecipeAndMarksLockedOnes()
         {
             var world=app.World;
             Assert.That(world.Catalog.products.Length,Is.GreaterThan(1));
             world.State.unlockedProducts.Clear();
             world.State.unlockedProducts.Add(world.Catalog.products[0].id);
-            world.State.unlockedProducts.Add(world.Catalog.products[1].id);
             app.Enter(AreaId.Counter);yield return null;
             var production=app.GetComponent<FreeCafeProductionHud>();
-            production.bookButton.onClick.Invoke();yield return null;
-            var view=production.bookPanel.GetComponent<CoffeeBookPanelView>();
-            view.entries[1].onClick.Invoke();yield return null;
-            Assert.That(view.title.text,Is.EqualTo(FreeCafeProductionText.Recipe(world.Catalog.products[1].label)));
-            Assert.That(view.page.text,Is.EqualTo("02 / 02"));
-            production.closeBook.onClick.Invoke();
-            world.State.unlockedProducts.Clear();
-            production.bookButton.onClick.Invoke();yield return null;
-            Assert.That(view.body.text,Does.Contain("尚未学会咖啡"));
-            Assert.That(view.marker.gameObject.activeSelf,Is.False);
-            Assert.That(view.previous.interactable,Is.False);
-            Assert.That(view.next.interactable,Is.False);
-            foreach(var entry in view.entries) Assert.That(entry.interactable,Is.False);
-            production.closeBook.onClick.Invoke();
+            production.bookButton.onClick.Invoke();
+            var book=Compendium(production.bookPanel);yield return WaitForBook(book);
+            Assert.That(book.CurrentTab,Is.EqualTo(CoffeeCompendiumPanel.Tab.Recipes));
+            Assert.That(book.RecipeIndex,Is.EqualTo(-1),"Opening without an order shows the table of contents.");
+            Assert.That(book.ProductOrder.Count,Is.EqualTo(world.Catalog.products.Length));
+            string contents=BookText(book);
+            foreach(var product in world.Catalog.products) Assert.That(contents,Does.Contain(FreeCafeProductionText.Recipe(product.label)),product.id);
+            Assert.That(contents,Does.Contain("已掌握").And.Contain("未解锁"));
+            var locked=System.Array.Find(world.Catalog.products,product=>product.id!=world.Catalog.products[0].id);
+            book.ShowRecipe(System.Linq.Enumerable.ToList(book.ProductOrder).IndexOf(locked.id));yield return WaitForBook(book);
+            Assert.That(BookText(book),Does.Contain("尚未解锁").And.Contain("制作方式"));
+            book.ShowContents();yield return WaitForBook(book);
+            Assert.That(book.RecipeIndex,Is.EqualTo(-1));
+            yield return CloseBook(book);
         }
+
         [UnityTest] public IEnumerator GmActionsWorkWhileUnderlyingWorldInputIsBlocked()
         {
             var gm=FreeCafeGMPanel.Instance;gm.SetVisible(true);gm.SelectCategory("经营流程");yield return null;
@@ -590,6 +610,92 @@ namespace Spotlight.FreeCafe.Tests
             Assert.That(Object.FindObjectsByType<FreeCafeTutorialPanel>(FindObjectsInactive.Include,FindObjectsSortMode.None),Is.Empty);
             Assert.That(Object.FindFirstObjectByType<FreeCafeRuntime>(),Is.Null);
         }
+        [UnityTest] public IEnumerator DirectSandboxStaysFreeUntilFirstGuestGmActionIsRequested()
+        {
+            Assert.That(app.IsSandboxMode,Is.True);
+            Assert.That(Object.FindFirstObjectByType<DayFlowController>(),Is.Null);
+            Assert.That(app.CafeTutorialActive,Is.False);
+            Assert.That(app.World.State.sandboxEquipment,Is.True);
+            Assert.That(app.World.HasTutorialCustomer,Is.False);
+            Assert.That(app.World.StartDay().success,Is.True);
+            int requests=app.World.State.requests.Count;
+            Assert.That(app.DebugStartFirstGuestTutorial(out _),Is.False);
+            Assert.That(app.World.State.open,Is.True);
+            Assert.That(app.World.State.requests.Count,Is.EqualTo(requests));
+            Assert.That(Object.FindFirstObjectByType<DayFlowController>(),Is.Null);
+            yield return null;
+        }
+
+        [UnityTest] public IEnumerator SandboxGmFirstGuestReusesPlayerThenReachesOfficialWorkstationTutorial()
+        {
+            var player=PlayerRuntime.Current;
+            var narrative=Spotlight.Narrative.NarrativeRuntime.Instance;
+            int money=app.World.State.money;
+            var gm=FreeCafeGMPanel.Instance;
+            gm.SetVisible(true);
+            Assert.That(gm.SelectCategory("咖啡馆教程"),Is.True);
+            yield return null;
+            FindAction(gm,"首位客人剧情与完整教学（沙盒）").onClick.Invoke();
+            tutorialFlow=app.GetComponent<DayFlowController>();
+            Assert.That(tutorialFlow,Is.Not.Null);
+            Assert.That(gm.IsVisible,Is.False);
+            Assert.That(PlayerRuntime.Current,Is.SameAs(player));
+            Assert.That(Spotlight.Narrative.NarrativeRuntime.Instance,Is.SameAs(narrative));
+            Assert.That(player.CreationSubmitted,Is.True);
+            Assert.That(player.HasSelectedAvatar,Is.True);
+            Assert.That(app.World.State.money,Is.EqualTo(money));
+            Assert.That(tutorialFlow.State,Is.EqualTo(DayFlowState.FirstDayIntroduction));
+            Assert.That(tutorialFlow.CurrentPresentation,Is.Null,"No prologue, letter, date or opening page");
+            Assert.That(tutorialFlow.CurrentDialogue.AllowCancel,Is.False);
+            Assert.That(tutorialFlow.CanSave,Is.False);
+            Assert.That(app.CafeTutorialActive,Is.True);
+            Assert.That(app.DebugStartFirstGuestTutorial(out _),Is.False,"Repeated clicks cannot restart the story");
+
+            float deadline=Time.realtimeSinceStartup+30f;
+            bool checkedPerception=false;
+            narrative.Controller.AbilityCheckEvaluated+=OnCheck;
+            void OnCheck(Spotlight.Narrative.NarrativeAbilityCheckSnapshot _) => checkedPerception=true;
+            try
+            {
+                while(tutorialFlow.State!=DayFlowState.FreeCafeBusiness || DialoguePanel.IsAnyPlaying)
+                {
+                    Assert.That(Time.realtimeSinceStartup,Is.LessThan(deadline),"First guest story did not reach workstation handoff");
+                    var dialogue=DialoguePanel.Active;
+                    if(dialogue!=null && dialogue.IsPlaying) dialogue.Advance();
+                    var presentation=Object.FindFirstObjectByType<Spotlight.Narrative.NarrativePresentationUI>();
+                    if(presentation!=null)
+                        presentation.transform.Find("Blocker").GetComponent<Button>().onClick.Invoke();
+                    yield return null;
+                }
+            }
+            finally { narrative.Controller.AbilityCheckEvaluated-=OnCheck; }
+            Assert.That(checkedPerception,Is.True,"Use the real bound player ability check");
+            Assert.That(app.World.HasTutorialCustomer,Is.True);
+            Assert.That(app.World.State.open,Is.False);
+            Assert.That(app.World.State.requests.Count,Is.EqualTo(1));
+            Assert.That(app.World.State.sandboxEquipment,Is.False,"Official tutorial owns equipment progression after opt-in");
+            Assert.That(app.CafeTutorialWaitingForWorkstation,Is.True);
+            Assert.That(app.CanEnterArea(AreaId.Counter),Is.True);
+            Assert.That(app.CanEnterArea(AreaId.Cafe),Is.False);
+            app.RequestBusinessStart();
+            Assert.That(app.World.State.open,Is.False);
+            app.Enter(AreaId.Counter);
+            deadline=Time.realtimeSinceStartup+15f;
+            while(!app.WorkstationTutorial.IsFirstCafeTutorial)
+            {
+                Assert.That(Time.realtimeSinceStartup,Is.LessThan(deadline),"Workstation lesson did not start");
+                if(DialoguePanel.Active!=null && DialoguePanel.Active.IsPlaying) DialoguePanel.Active.Advance();
+                yield return null;
+            }
+            Assert.That(app.WorkstationTutorial.CurrentStage,Is.EqualTo(FreeCafeWorkstationTutorial.Stage.Beans));
+            Assert.That(tutorialFlow.DebugSkipTutorialToCafe(out _),Is.True,"Existing GM escape also works without Bootstrap");
+            Assert.That(app.WorkstationTutorial.IsRunning,Is.False);
+            Assert.That(app.CafeTutorialActive,Is.False);
+            Assert.That(app.World.HasTutorialCustomer,Is.False);
+            Assert.That(app.World.State.open,Is.False);
+            Assert.That(app.World.State.money,Is.EqualTo(money));
+        }
+
         [UnityTest] public IEnumerator GmSkipCancelsOfficialGuidanceAndRestoresPreparationWithoutTheFirstCustomer()
         {
             var flags=BindingFlags.Instance|BindingFlags.NonPublic;
@@ -782,16 +888,166 @@ namespace Spotlight.FreeCafe.Tests
             var bell=app.View(tray.id).GetComponentInChildren<FreeCafeDeliveryBell>();
             Assert.That(bell,Is.Not.Null);
             bell.OnPointerClick(new PointerEventData(EventSystem.current) {button=PointerEventData.InputButton.Left});
-            Assert.That(tutorialFlow.IsCafeTutorialActive,Is.False);
+            Assert.That(tutorialFlow.IsCafeTutorialActive,Is.True,"The first delivery must hand off to business onboarding, not finish the tutorial");
             Assert.That(guide.IsRunning,Is.False);
             Assert.That(world.State.open,Is.False);
             Assert.That(world.State.requests,Is.Empty);
-            Assert.That(production.receiptPanel.activeSelf,Is.True);
+            Assert.That(world.Find(CafeWorld.TutorialCustomerId),Is.Null);
+            var business=app.GetComponent<FreeCafeBusinessTutorial>();
+            Assert.That(business,Is.Not.Null);
+
+            void AssertBusinessStage(FreeCafeBusinessTutorial.Stage stage,bool paused)
+            {
+                Assert.That(business.IsRunning,Is.True);
+                Assert.That(business.CurrentStage,Is.EqualTo(stage));
+                Assert.That(tutorialFlow.IsCafeTutorialActive,Is.True,"Business onboarding must remain active until the order is explicitly acknowledged");
+                Assert.That(app.CafeBusinessOnboardingActive,Is.True);
+                Assert.That(business.PauseBusinessSimulation,Is.EqualTo(paused));
+                Assert.That(app.BusinessSimulationPaused,Is.EqualTo(paused));
+            }
+
+            Assert.That(production.receiptPanel.activeInHierarchy,Is.True);
+            Assert.That(app.TutorialInputBlocked,Is.True);
+            business.ConfirmOrderRead();
+            app.RequestBusinessStart();
+            production.bookButton.onClick.Invoke();
+            yield return null; yield return null;
+            Assert.That(production.bookPanel.activeInHierarchy,Is.False,"The receipt must be dismissed before opening the recipe book");
+            AssertBusinessStage(FreeCafeBusinessTutorial.Stage.OpenRecipe,true);
+            Assert.That(world.State.open,Is.False);
+            var businessPanel=Object.FindFirstObjectByType<FreeCafeTutorialPanel>(FindObjectsInactive.Include);
+            Assert.That(businessPanel,Is.Not.Null);
+            Assert.That(businessPanel.canvas.gameObject.activeSelf,Is.False,"Business guidance must not cover the delivery receipt");
+
             production.confirmReceipt.onClick.Invoke();
+            yield return null; yield return null;
+            Assert.That(production.receiptPanel.activeInHierarchy,Is.False);
             Assert.That(app.InputBlocked,Is.False);
-            app.Enter(AreaId.Cafe);
+            AssertBusinessStage(FreeCafeBusinessTutorial.Stage.OpenRecipe,true);
+            Assert.That(businessPanel.canvas.gameObject.activeInHierarchy,Is.True);
+            Assert.That(businessPanel.retry.activeSelf,Is.False,"Acknowledgement is available only after inspecting a real order");
+            Assert.That(production.bookPanel.activeInHierarchy,Is.False,"Reading the book during coffee preparation does not satisfy business onboarding");
+            business.ConfirmOrderRead();
+            app.RequestBusinessStart();
+            yield return null; yield return null;
+            AssertBusinessStage(FreeCafeBusinessTutorial.Stage.OpenRecipe,true);
+            Assert.That(world.State.open,Is.False,"Delivering coffee and dismissing the receipt must not unlock business start before reading the book");
+
+            Assert.That(production.bookButton.interactable,Is.True);
+            production.bookButton.onClick.Invoke();
+            yield return null; yield return null;
+            Assert.That(production.bookPanel.activeInHierarchy,Is.True);
+            AssertBusinessStage(FreeCafeBusinessTutorial.Stage.CloseRecipe,true);
+            Assert.That(business.AllowBusinessStart,Is.False);
+            business.ConfirmOrderRead();
+            app.RequestBusinessStart();
+            yield return null; yield return null;
+            AssertBusinessStage(FreeCafeBusinessTutorial.Stage.CloseRecipe,true);
+            Assert.That(world.State.open,Is.False,"Opening the book alone must not unlock business start");
+
+            var compendium=production.bookPanel.GetComponent<CoffeeCompendiumPanel>();
+            Assert.That(compendium.closeButton,Is.Not.Null);
+            compendium.closeButton.onClick.Invoke();
+            yield return new WaitForSecondsRealtime(.5f);
+            Assert.That(production.bookPanel.activeInHierarchy,Is.False);
+            AssertBusinessStage(FreeCafeBusinessTutorial.Stage.ReturnToCafe,true);
+            Assert.That(world.State.currentArea,Is.EqualTo(AreaId.Counter));
+            Assert.That(business.AllowBusinessStart,Is.False);
+            business.ConfirmOrderRead();
+            app.RequestBusinessStart();
+            Assert.That(world.State.open,Is.False,"Business start must remain blocked until returning to the cafe");
+            Assert.That(production.returnButton.interactable,Is.True);
+            production.returnButton.onClick.Invoke();
+            yield return null; yield return null;
+            Assert.That(world.State.currentArea,Is.EqualTo(AreaId.Cafe));
+            AssertBusinessStage(FreeCafeBusinessTutorial.Stage.StartBusiness,false);
+            Assert.That(business.AllowBusinessStart,Is.True);
+            Assert.That(world.State.open,Is.False,"Returning to the cafe must not automatically open for business");
+            business.ConfirmOrderRead();
+            Assert.That(tutorialFlow.IsCafeTutorialActive,Is.True);
+
             app.RequestBusinessStart();
             Assert.That(world.State.open,Is.True);
+            Assert.That(tutorialFlow.IsCafeTutorialActive,Is.True,"Opening for business is not the end of onboarding");
+            // StartDay can seat customers immediately; otherwise advance the real simulation.
+            yield return null; yield return null;
+            if(business.CurrentStage==FreeCafeBusinessTutorial.Stage.WaitForCustomer)
+            {
+                AssertBusinessStage(FreeCafeBusinessTutorial.Stage.WaitForCustomer,false);
+                Assert.That(business.AllowBusinessStart,Is.False);
+                business.ConfirmOrderRead();
+                Assert.That(tutorialFlow.IsCafeTutorialActive,Is.True);
+                for(int i=0;i<10 && business.CurrentStage==FreeCafeBusinessTutorial.Stage.WaitForCustomer;i++)
+                {
+                    world.Tick(world.Catalog.customerInterval);
+                    yield return null; yield return null;
+                }
+            }
+            AssertBusinessStage(FreeCafeBusinessTutorial.Stage.InspectCustomer,true);
+            Assert.That(world.State.requests,Is.Not.Empty);
+            var request=world.State.requests.Find(order=>order.id!=CafeWorld.TutorialOrderId && world.Find(order.customerId)!=null);
+            Assert.That(request,Is.Not.Null,"Inspection must use a real seated customer with a real order");
+            Assert.That(request.id,Is.Not.EqualTo(CafeWorld.TutorialOrderId),"Entity IDs can be reused after the tutorial customer leaves; the order must be a real business order");
+            business.ConfirmOrderRead();
+            business.CustomerInspected("missing-customer");
+            yield return null; yield return null;
+            AssertBusinessStage(FreeCafeBusinessTutorial.Stage.InspectCustomer,true);
+            Assert.That(businessPanel.retry.activeSelf,Is.False);
+            float patience=request.patience;
+            float businessElapsed=world.State.businessElapsed;
+            yield return new WaitForSecondsRealtime(.1f);
+            Assert.That(request.patience,Is.EqualTo(patience),"Customer patience must be paused while teaching inspection");
+            Assert.That(world.State.businessElapsed,Is.EqualTo(businessElapsed));
+            app.DebugRefreshViews();
+            yield return null;
+            var customerView=app.View(request.customerId);
+            Assert.That(customerView,Is.Not.Null);
+            Assert.That(customerView.CanInteract,Is.True);
+            Assert.That(app.InputBlocked,Is.False);
+            app.Click(customerView);
+            Assert.That(world.State.focusedRequestId,Is.EqualTo(request.id));
+            Assert.That(business.CurrentStage,Is.EqualTo(FreeCafeBusinessTutorial.Stage.ReadOrder));
+            Assert.That(tutorialFlow.IsCafeTutorialActive,Is.True,"Inspecting the customer must not bypass explicit order acknowledgement");
+            // Customer inspection can play a real dialogue; it must block acknowledgement too.
+            if(app.TutorialInputBlocked)
+            {
+                business.ConfirmOrderRead();
+                Assert.That(tutorialFlow.IsCafeTutorialActive,Is.True);
+                Assert.That(business.IsRunning,Is.True);
+            }
+            float dialogueDeadline=Time.realtimeSinceStartup+8f;
+            while(DialoguePanel.IsAnyPlaying && Time.realtimeSinceStartup<dialogueDeadline)
+            {
+                foreach(var dialogue in Object.FindObjectsByType<DialoguePanel>(FindObjectsSortMode.None)) dialogue.Skip();
+                yield return null;
+            }
+            Assert.That(DialoguePanel.IsAnyPlaying,Is.False,"Customer dialogue must finish before acknowledging the order");
+            yield return null; yield return null;
+            AssertBusinessStage(FreeCafeBusinessTutorial.Stage.ReadOrder,true);
+            Assert.That(businessPanel.retry.activeInHierarchy,Is.True);
+            Assert.That(business.AllowBusinessStart,Is.False);
+            Assert.That(app.TutorialInputBlocked,Is.False);
+            patience=request.patience;
+            businessElapsed=world.State.businessElapsed;
+            yield return new WaitForSecondsRealtime(.1f);
+            Assert.That(request.patience,Is.EqualTo(patience),"Order reading must not consume customer patience");
+            Assert.That(world.State.businessElapsed,Is.EqualTo(businessElapsed));
+            Time.timeScale=0;
+            business.ConfirmOrderRead();
+            Assert.That(business.IsRunning,Is.True,"A paused presentation must not accept order acknowledgement");
+            Assert.That(tutorialFlow.IsCafeTutorialActive,Is.True);
+            Time.timeScale=1;
+            business.ConfirmOrderRead();
+            Assert.That(tutorialFlow.IsCafeTutorialActive,Is.False);
+            Assert.That(app.CafeBusinessOnboardingActive,Is.False);
+            Assert.That(business.IsRunning,Is.False);
+            Assert.That(world.State.open,Is.True,"Completing onboarding must preserve the manually started business");
+            Assert.That(world.Request(request.id),Is.SameAs(request),"Acknowledging the order must not serve or remove it");
+            yield return null; yield return null;
+            Assert.That(businessPanel==null,Is.True,"The completed business guide must release its panel");
+            Assert.That(app.BusinessSimulationPaused,Is.False);
+            business.ConfirmOrderRead();
+            Assert.That(tutorialFlow.IsCafeTutorialActive,Is.False,"Repeated acknowledgement must not restart onboarding");
         }
         private static Button FindAction(FreeCafeGMPanel gm,string label)
         {

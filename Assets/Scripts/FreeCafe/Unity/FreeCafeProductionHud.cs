@@ -12,7 +12,7 @@ namespace Spotlight.FreeCafe
     {
         public FreeCafeRuntime runtime;
         public bool IsModalOpen => bookPanel!=null && bookPanel.activeInHierarchy || receiptPanel!=null && receiptPanel.activeInHierarchy;
-        public void CloseOverlays() { if(bookPanel!=null) bookPanel.SetActive(false); if(receiptPanel!=null) receiptPanel.SetActive(false); }
+        public void CloseOverlays() { CloseBook(); if(receiptPanel!=null) receiptPanel.SetActive(false); }
         private static readonly Color Ink=new Color(.25f,.15f,.095f);
         public GameObject productionRoot, legacyTop, legacyBottom, bookPanel, miniGamePanel;
         public TMP_Text timeCaption, volumeCaption;
@@ -153,6 +153,8 @@ namespace Spotlight.FreeCafe
         {
             if(runtime==null || runtime.InputBlocked) return;
             var request=runtime.World.Request(runtime.World.State.focusedRequestId);
+            var compendium=bookPanel==null ? null : bookPanel.GetComponent<CoffeeCompendiumPanel>();
+            if(compendium!=null) { compendium.Open(runtime,request?.productId); return; }
             if(request!=null) recipeIndex=Mathf.Max(0,runtime.World.State.unlockedProducts.IndexOf(request.productId));
             OpenBook();
         }
@@ -166,8 +168,19 @@ namespace Spotlight.FreeCafe
                     && Mathf.Abs(entity.x-cup.x)<=.1f && Mathf.Abs(entity.y-cup.y)<=.1f) return true;
             return false;
         }
-        private void OpenBook() { if(bookPanel==null || runtime.InputBlocked) return; runtime.CancelDrag(); bookPanel.SetActive(true); RefreshBook(); }
-        private void CloseBook() { if(bookPanel!=null) bookPanel.SetActive(false); }
+        private void OpenBook()
+        {
+            if(bookPanel==null || runtime.InputBlocked) return;
+            var compendium=bookPanel.GetComponent<CoffeeCompendiumPanel>();
+            if(compendium!=null) { compendium.Open(runtime); return; }
+            runtime.CancelDrag(); bookPanel.SetActive(true); RefreshBook();
+        }
+        private void CloseBook()
+        {
+            if(bookPanel==null) return;
+            var compendium=bookPanel.GetComponent<CoffeeCompendiumPanel>();
+            if(compendium!=null) compendium.CloseImmediate(); else bookPanel.SetActive(false);
+        }
         private void PreviousRecipe() => ChangeRecipe(-1);
         private void NextRecipe() => ChangeRecipe(1);
         private void SelectRecipe(int index) => ChangeRecipe(index - recipeIndex);
@@ -181,6 +194,7 @@ namespace Spotlight.FreeCafe
         }
         private void RefreshBook()
         {
+            if(bookPanel!=null && bookPanel.GetComponent<CoffeeCompendiumPanel>()!=null) return; // 咖啡宝典自行刷新
             if(bookView != null)
             {
                 bookView.Show(runtime, recipeIndex);
@@ -199,9 +213,12 @@ namespace Spotlight.FreeCafe
             if(bookTitle!=null) bookTitle.text=FreeCafeProductionText.Recipe(product.label)+"  ·  "+(recipeIndex+1)+" / "+learned.Count;
             if(bookIcon!=null) bookIcon.sprite=runtime.artLibrary.Resolve(world.Spec(product.cupSpecId).artId);
             var text=new StringBuilder(); text.AppendLine(FreeCafeProductionText.Recipe(product.description)).AppendLine().AppendLine(FreeCafeProductionText.Recipe(product.tutorial)).AppendLine();
-            text.Append("杯型：").Append(world.Spec(product.cupSpecId).label).Append(" / 温度：").Append(product.requiredTemperature==LiquidTemperature.Boiling ? "沸腾" : product.requiredTemperature==LiquidTemperature.Warm ? "温热" : "常温").AppendLine();
-            text.AppendLine("参考用量（自由操作，不锁步骤）：");
-            foreach(var p in product.ingredients) text.Append("  ").Append(FreeCafeProductionText.Recipe(world.Spec(p.specId).label)).Append("  ").Append(p.milliliters>0 ? p.milliliters.ToString("0")+" ml" : p.units+" 份").AppendLine();
+            var focused=world.Request(world.State.focusedRequestId);
+            bool forOrder=focused!=null && focused.productId==product.id;
+            float portionScale=forOrder ? world.OrderPortionScale(focused) : 1f;
+            text.Append("杯型：").Append(world.Spec(forOrder ? world.RequiredCupSpecId(focused) : product.cupSpecId).label).Append(" / 温度：").Append(product.requiredTemperature==LiquidTemperature.Boiling ? "沸腾" : product.requiredTemperature==LiquidTemperature.Warm ? "温热" : "常温").AppendLine();
+            text.AppendLine(forOrder ? "当前订单用量（按杯型换算）：" : "参考用量（自由操作，不锁步骤）：");
+            foreach(var p in product.ingredients) text.Append("  ").Append(FreeCafeProductionText.Recipe(world.Spec(p.specId).label)).Append("  ").Append(p.milliliters>0 ? (p.milliliters*portionScale).ToString("0")+" ml" : p.grams>0 ? (p.grams*portionScale).ToString("0.#")+" g" : (p.units*portionScale).ToString("0.#")+" 份").AppendLine();
             text.AppendLine().Append("任何容器都能自由加料；咖啡粉与水混合是冷萃，放到炉台并点击炉台加热完成萃取。\n空杯、半成品也能出品，但顾客会按实际质量评价。");
             if(bookBody!=null) bookBody.text=text.ToString();
             if(bookNote!=null) bookNote.text="注意\n\n参考用量不锁定操作步骤，最终按实际质量评价。";
@@ -217,7 +234,10 @@ namespace Spotlight.FreeCafe
             // 玩家 HUD 已改为独立纸卡布局；旧黑边不再由制作 HUD 恢复。
             if(!visible)
             {
-                if(bookPanel!=null) bookPanel.SetActive(false);
+                // A shared compendium also belongs to the lobby; leaving the counter must not close it there.
+                var playerHud = bookPanel == null ? null : bookPanel.GetComponentInParent<FreeCafeHud>(true);
+                bool sharedBook = playerHud != null && playerHud.recipePanel == bookPanel;
+                if (!sharedBook || latteOpen) CloseBook();
                 if(receiptPanel!=null) receiptPanel.SetActive(false);
                 if(miniGamePanel!=null) miniGamePanel.SetActive(false);
                 return;
@@ -249,12 +269,14 @@ namespace Spotlight.FreeCafe
                 customerAvatar.gameObject.SetActive(request!=null && customerAvatar.sprite!=null);
                 FrameAvatar(customerAvatar);
             }
+            string cupRequirement = request == null ? "" : world.Spec(world.RequiredCupSpecId(request)).label;
+            string orderLabel = product == null ? "尚无订单" : FreeCafeProductionText.Recipe(product.label) + " · " + cupRequirement;
             if(splitTicket)
             {
-                orderProduct.text=product==null ? "尚无订单" : FreeCafeProductionText.Recipe(product.label);
+                orderProduct.text=orderLabel;
                 if(orderDescription!=null) orderDescription.text=product==null ? "可以先准备原料" : tutorialOrder ? "教程首杯 · 完成后放入出餐口" : "满意 ≥ "+product.minimumScore.ToString("0")+" 分"+(request.remakes>0 ? " · 重做中" : "");
             }
-            else if(orderDescription!=null) orderDescription.text=product==null ? "尚无订单，可先准备原料。" : FreeCafeProductionText.Recipe(product.label)+"\n"+(tutorialOrder ? "教程首杯 · 完成后放入出餐口" : "满意要求 ≥ "+product.minimumScore.ToString("0")+" 分"+(request.remakes>0 ? " · 正在重做" : ""));
+            else if(orderDescription!=null) orderDescription.text=product==null ? "尚无订单，可先准备原料。" : orderLabel+"\n"+(tutorialOrder ? "教程首杯 · 完成后放入出餐口" : "满意要求 ≥ "+product.minimumScore.ToString("0")+" 分"+(request.remakes>0 ? " · 正在重做" : ""));
             RefreshPatience(request,tutorialOrder);
             if(moneyText!=null) moneyText.text=state.money.ToString();
             if(reputationText!=null) reputationText.text=state.reputation.ToString();

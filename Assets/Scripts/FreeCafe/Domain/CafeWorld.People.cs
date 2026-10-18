@@ -63,13 +63,20 @@ namespace Spotlight.FreeCafe
 
         private CafePersonIdentity CreateCustomerIdentity(string visitId, int seatIndex)
         {
+            // The tutorial visitor is deliberately anonymous: never sample a story protagonist
+            // or a scene-supplied seated character for this one-off teaching order.
+            if (visitId == "tutorial_customer") return new CafePersonIdentity
+            {
+                personId = "tutorial_customer", displayName = "男顾客", visualId = "customer",
+                role = CafePersonRole.Customer
+            };
             CafePersonIdentity supplied;
             if (customerIdentities is ICafeAvailableCustomerIdentitySource available)
             {
                 var occupied = new HashSet<string>();
                 foreach (var entity in State.entities)
                     if (entity.person != null) occupied.Add(entity.person.personId);
-                supplied = available.CreateIdentity(visitId, seatIndex, occupied);
+                supplied = available.CreateIdentity(visitId, State.sandboxEquipment ? (int)(NextRandom() % 1024) : seatIndex, occupied);
             }
             else supplied = customerIdentities?.CreateIdentity(visitId, seatIndex);
             var identity = supplied ?? AnonymousCustomer(visitId);

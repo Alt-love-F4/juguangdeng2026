@@ -72,15 +72,17 @@ namespace Spotlight.FreeCafe.Editor
                 var back=new GameObject("Background_WHITEBOX",typeof(SpriteRenderer));back.transform.SetParent(room.transform,false);
                 var sr=back.GetComponent<SpriteRenderer>();sr.sprite=LoadSketchSprite(SketchBackgrounds[(int)area.id]) ?? library.Resolve(area.artId);sr.sortingOrder=-100;
                 var size=sr.sprite.bounds.size;back.transform.localScale=new Vector3(area.halfWidth*2/size.x,area.halfHeight*2/size.y,1);
-                var note=new GameObject("AreaArtNote",typeof(TextMeshPro));note.transform.SetParent(room.transform,false);note.transform.localPosition=new Vector3(0,4.8f,0);
-                var label=note.GetComponent<TextMeshPro>();label.font=Font;label.fontSize=2.4f;label.alignment=TextAlignmentOptions.Center;label.text="白模 / "+area.label+" / "+area.artId;label.color=new Color(.32f,.36f,.39f);label.GetComponent<MeshRenderer>().sortingOrder=0;
+                if(area.id!=AreaId.Basement)
+                {
+                    var note=new GameObject("AreaArtNote",typeof(TextMeshPro));note.transform.SetParent(room.transform,false);note.transform.localPosition=new Vector3(0,4.8f,0);
+                    var label=note.GetComponent<TextMeshPro>();label.font=Font;label.fontSize=2.4f;label.alignment=TextAlignmentOptions.Center;label.text="白模 / "+area.label+" / "+area.artId;label.color=new Color(.32f,.36f,.39f);label.GetComponent<MeshRenderer>().sortingOrder=0;
+                }
                 room.SetActive(true);
             }
-            Portal(runtime,library,runtime.areaRoots[0],AreaId.Counter,7.8f,0,"进入工作台 ↓");
+            Portal(runtime,library,runtime.areaRoots[0],AreaId.Counter,19f,-3f,"进入工作台");
             Portal(runtime,library,runtime.areaRoots[1],AreaId.Cafe,8f,3.5f,"↑ 返回大厅");
             FuturePlaceholder(library,runtime.areaRoots[2],"future.topic","未来：对话 / 热点词条",-4,1);
-            FuturePlaceholder(library,runtime.areaRoots[3],"future.press","未来：夜间印刷（未实现）",-4,1);
-            FuturePlaceholder(library,runtime.areaRoots[3],"future.newspaper","未来：报纸自由排版（未实现）",3,-1);
+            FreeCafeInteractivePropBuilder.ConfigureBed(runtime.areaRoots[(int)AreaId.Basement],runtime);
             runtime.authoringPreviews=new GameObject[4];
             for(int i=0;i<4;i++)
             {
@@ -199,6 +201,11 @@ namespace Spotlight.FreeCafe.Editor
             var size=sr.sprite.bounds.size;go.transform.localScale=new Vector3(1.1f/size.x,1.1f/size.y,1);
             go.GetComponent<BoxCollider2D>().size=new Vector2(size.x,size.y);
             var portal=go.GetComponent<FreeCafePortal>();portal.runtime=runtime;portal.destination=destination;portal.visual=sr;
+            if (destination == AreaId.Counter)
+            {
+                FreeCafeEntranceMarkerBuilder.ConfigurePortal(portal, Font);
+                return;
+            }
             var label=new GameObject("Label",typeof(TextMeshPro));label.transform.SetParent(parent,false);label.transform.localPosition=new Vector3(x,y-1,0);
             var tmp=label.GetComponent<TextMeshPro>();tmp.font=Font;tmp.fontSize=2.2f;tmp.alignment=TextAlignmentOptions.Center;tmp.text=text;tmp.color=new Color(.25f,.28f,.3f);tmp.GetComponent<MeshRenderer>().sortingOrder=11;
         }

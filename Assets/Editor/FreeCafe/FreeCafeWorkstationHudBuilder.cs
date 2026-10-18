@@ -110,17 +110,18 @@ namespace Spotlight.FreeCafe.Editor
 
         private static void BindCoffeeBook(Transform canvas,FreeCafeProductionHud hud)
         {
-            if(hud.bookPanel==null)
+            // The legacy PSD book is replaced by the 咖啡宝典 compendium.
+            if(hud.bookPanel==null || hud.bookPanel.GetComponent<CoffeeCompendiumPanel>()==null)
             {
-                var prefab=AssetDatabase.LoadAssetAtPath<GameObject>("Assets/Prefabs/FreeCafe/CoffeeBookPanel.prefab");
-                if(prefab==null) throw new InvalidOperationException("Missing existing CoffeeBookPanel prefab.");
+                if(hud.bookPanel!=null) Undo.DestroyObjectImmediate(hud.bookPanel);
+                var prefab=AssetDatabase.LoadAssetAtPath<GameObject>(CoffeeCompendiumBuilder.PrefabPath) ?? CoffeeCompendiumBuilder.BuildPrefab();
                 hud.bookPanel=(GameObject)PrefabUtility.InstantiatePrefab(prefab,canvas);
-                Undo.RegisterCreatedObjectUndo(hud.bookPanel,"Restore coffee book");
-                hud.bookPanel.name="CoffeeBookPanel";
+                Undo.RegisterCreatedObjectUndo(hud.bookPanel,"Restore coffee compendium");
+                hud.bookPanel.name="CoffeeCompendiumPanel";
             }
-            var view=hud.bookPanel.GetComponent<CoffeeBookPanelView>();
-            hud.bookTitle=view.title;hud.bookBody=view.body;hud.bookNote=view.note;
-            hud.previousRecipe=view.previous;hud.nextRecipe=view.next;hud.closeBook=view.close;
+            hud.bookPanel.GetComponent<CoffeeCompendiumPanel>().runtime=hud.runtime;
+            hud.bookTitle=hud.bookBody=hud.bookNote=null;
+            hud.previousRecipe=hud.nextRecipe=hud.closeBook=null;
             hud.bookIcon=null;hud.bookPanel.SetActive(false);
         }
 

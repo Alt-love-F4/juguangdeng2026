@@ -66,6 +66,7 @@ namespace Spotlight.GameFlow
         private ICafeTutorialGameplayEndpoint cafeTutorialEndpoint;
         private bool initialized;
         private bool running;
+        private bool businessWasActive;
         private int presentationVersion;
         private string previousDate = InitialDate;
         private int day = 1;
@@ -86,7 +87,8 @@ namespace Spotlight.GameFlow
         // Phase pages remain blocking while they wait for a player confirmation.
         public bool BlocksGameplayInput => running && State != DayFlowState.FreeCafeBusiness && State != DayFlowState.CityMapLeisure;
         public bool CanFinishBusiness => running && !IsCafeTutorialActive && State == DayFlowState.FreeCafeBusiness
-            && endpointOwner != null && gameplayEndpoint.DayFlowBusinessActive;
+            && endpointOwner != null && (gameplayEndpoint.DayFlowBusinessActive
+                || businessWasActive && gameplayEndpoint.DayFlowBusinessFinished);
         public IDayFlowPresentation CurrentPresentation => currentPanel as IDayFlowPresentation;
 
         public DialoguePanel CurrentDialogue => introductionPanel;
@@ -127,6 +129,7 @@ namespace Spotlight.GameFlow
             CoffeeCupScreenTransition.Clear();
             Spotlight.Audio.GameAudio.StopOwner(this);
             running = false;
+            businessWasActive = false;
             awaitingNarrativeEntry = false;
             ++narrativeEntryVersion;
             SetMapAvailability(false);
@@ -160,6 +163,22 @@ namespace Spotlight.GameFlow
             ShowPresentation<FirstDayLetterPanel>(EnterAvatarSelection, ConfigureFirstDayLetter);
         }
 
+        /// <summary>Explicit GM entry: reuse the cafe story/tutorial without the separate prologue or map arrival.</summary>
+        internal void BeginStandaloneCafeTutorial()
+        {
+            day = 1;
+            previousDate = InitialDate;
+            newSessionFirstDay = false;
+            firstDayIntroductionCompleted = false;
+            firstDayCafeTutorialStarted = true;
+            firstDayCafeTutorialCompleted = false;
+            tutorialTestSkipSubmitted = false;
+            running = true;
+            FindGameplayEndpoint();
+            // No ProcessOfficialDay: it would schedule the independent first-arrival story.
+            PlayFirstDayIntroduction();
+        }
+
         private void EnterAvatarSelection()
         {
             // Avatar guidance will be introduced elsewhere. Keep startup unobstructed for now.
@@ -174,6 +193,7 @@ namespace Spotlight.GameFlow
             if (!SessionAllowsPlay) return;
             if (!initialized) Initialize(flow);
             running = true;
+            PlayerCafeOwner.Current?.SynchronizeCalendarDay(day);
             HideGameplayPanel();
             var runtime = NarrativeRuntime.Instance;
             var actions = runtime?.Actions;
@@ -295,7 +315,10 @@ namespace Spotlight.GameFlow
         {
             if (!SessionAllowsPlay || Time.timeScale == 0f || !running || State != DayFlowState.FreeCafeBusiness) return;
             // Do not let an endpoint's old state bypass an unfinished presentation.
-            if (endpointOwner != null && gameplayEndpoint.DayFlowBusinessFinished)
+            if (endpointOwner == null) return;
+            if (gameplayEndpoint.DayFlowBusinessActive) businessWasActive = true;
+            // Night can belong to the previous visit: only settle an observed open session.
+            if (businessWasActive && gameplayEndpoint.DayFlowBusinessFinished)
                 FinishBusiness();
         }
 
@@ -585,8 +608,13 @@ namespace Spotlight.GameFlow
         public bool DebugSkipTutorialToCafe(out string message)
         {
             message = "请先开始游戏并进入新手流程。";
-            if (flow == null || !SessionAllowsPlay || !running)
+            if (!SessionAllowsPlay || !running)
                 return false;
+            if (flow == null && UnityEngine.SceneManagement.SceneManager.GetActiveScene().name != "CoffeeShop")
+            {
+                message = "请在 CoffeeShop 中使用此操作。";
+                return false;
+            }
             if (!IsFirstSessionGuideActive && !(State == DayFlowState.FreeCafeBusiness && IsCafeTutorialActive))
             {
                 message = "当前不在新手教程阶段。";
@@ -601,7 +629,7 @@ namespace Spotlight.GameFlow
             PlayerRuntime player = PlayerRuntime.Current;
             if (player != null)
             {
-                if (!flow.TrySubmitPlayerCreation(null))
+                if (flow != null && !flow.TrySubmitPlayerCreation(null))
                 {
                     message = "角色初始化失败，未跳过教程。";
                     return false;
@@ -643,7 +671,7 @@ namespace Spotlight.GameFlow
             }
             else
             {
-                if (flow.IsMapOpen) flow.CloseMap();
+                if (flow != null && flow.IsMapOpen) flow.CloseMap();
                 StartFreeCafeBusiness();
             }
 
@@ -672,6 +700,7 @@ namespace Spotlight.GameFlow
             SetState(DayFlowState.FreeCafeBusiness);
             ShowGameplayPanel();
             endpoint.StartDayFlowBusiness();
+            businessWasActive = endpoint.DayFlowBusinessActive;
             if (IsCafeTutorialActive)
             {
                 PlayCafeTutorialContent(CafeTutorialSession.WorkstationStep, presentationVersion, null);
@@ -683,6 +712,7 @@ namespace Spotlight.GameFlow
             if (!SessionAllowsPlay || !CanFinishBusiness) return;
             IDayFlowGameplayEndpoint endpoint = FindGameplayEndpoint();
             endpoint?.EndDayFlowBusiness();
+            businessWasActive = false;
             HideGameplayPanel();
             SetState(DayFlowState.PreLeisure);
             ShowPresentation<BusinessEndPanel>(() => RunNarrativeEntry(NarrativeEntryPoint.AfterBusiness, EnterCityMap));
@@ -869,8 +899,10 @@ namespace Spotlight.GameFlow
         {
             if (!SessionAllowsPlay || !running) return;
             SetState(DayFlowState.DateTransition);
+            FindGameplayEndpoint()?.EndDayFlowBusiness();
             previousDate = CurrentDate;
             day++;
+            PlayerCafeOwner.Current?.SynchronizeCalendarDay(day);
             if (flow != null && !flow.TryAutoSave(out string error)) Debug.LogWarning("日结自动存档失败：" + error, this);
             BeginNewDayFlow();
         }
@@ -956,7 +988,7 @@ namespace Spotlight.GameFlow
                         Debug.LogError("[DayFlow] 无法启动黑咖啡工作台教程，教程保持锁定。", this);
                 });
             }
-            else if (stepId == CafeTutorialSession.CoffeeSignal)
+            else if (stepId == CafeTutorialSession.PostCoffeeSignal)
             {
                 CompleteFirstDayCafeTutorial();
             }
@@ -1086,7 +1118,7 @@ namespace Spotlight.GameFlow
                 case DayFlowState.PreBusiness: EnterCityMap(); break;
                 case DayFlowState.BusinessTransition: EnterBusinessTransition(); break;
                 case DayFlowState.FreeCafeBusiness:
-                    FindGameplayEndpoint();
+                    businessWasActive = FindGameplayEndpoint()?.DayFlowBusinessActive == true;
                     ClosePresentation();
                     ShowGameplayPanel();
                     break;

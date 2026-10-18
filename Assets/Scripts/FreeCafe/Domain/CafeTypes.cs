@@ -301,6 +301,7 @@ namespace Spotlight.FreeCafe
         public string id;         // 订单 id
         public string customerId; // 下单顾客的实体 id
         public string productId;  // 想要的餐品
+        public string cupSpecId;  // 本单杯型；旧档空值按餐品默认杯型（教程固定大杯）
         public int remakes;
         public float lastProductionScore;
         public float patience;    // 剩余耐心（秒）
@@ -322,7 +323,14 @@ namespace Spotlight.FreeCafe
         public int money;       // 当前金币
         public int reputation;  // 当前声望
         public int day = 1;     // 第几天
+        public string cupStockDayKey; // 最后一次刷新杯库存的外部日历键；同日重入/读档不重复补杯
         public int served;      // 累计完成订单数
+        public int successfulOrders; // 累计成功订单，用于设备成长（不含教程与失败单）
+        public bool equipmentProgressionConfigured;
+        public bool equipmentProgressionEnabled;
+        public bool sandboxEquipment;
+        public bool precisionEquipmentActive;
+        public bool latteEquipmentActive;
         public int requestSequence; // 订单序号（用于轮换餐品与 NPC）
         public int todayServed;  // 今日成功单数
         public int todayFailed;  // 今日失败/未完成单数

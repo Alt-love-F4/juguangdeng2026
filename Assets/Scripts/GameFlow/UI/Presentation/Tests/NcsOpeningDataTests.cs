@@ -79,6 +79,30 @@ namespace Spotlight.GameFlow.Tests
         }
 
         [Test]
+        public void TutorialCustomerUsesItsOwnGenericSilhouetteWithoutChangingSharedVisuals()
+        {
+            var config = LubanNarrativeLoader.Load();
+            foreach (var presentation in config.openingPresentations.Where(item => item.presentationId.StartsWith("cafe_tutorial.")))
+                Assert.That(presentation.visualsResource, Is.EqualTo("Dialogue/CafeTutorialVisuals"));
+            var visuals = Resources.Load<DialogueVisualsAsset>("Dialogue/CafeTutorialVisuals");
+            Assert.That(visuals, Is.Not.Null);
+            Assert.That(visuals.BackgroundKey, Is.EqualTo(NarrativeBackgroundKeys.CafeScene));
+            Assert.That(visuals.CenterPortrait, Is.Not.Null);
+            Assert.That(visuals.CenterPortrait.name, Is.EqualTo("silhouette_seated"));
+            Assert.That(Resources.Load<DialogueVisualsAsset>("Dialogue/CafeSceneVisuals").CenterPortrait, Is.Null,
+                "The generic cafe resource must not acquire a tutorial-only guest.");
+            Assert.That(NarrativePresentationDataAdapter.TryCreateOpeningDialogue(config, "cafe_tutorial.customer_arrives",
+                out var script, out var error), Is.True, error);
+            Assert.That(script.CenterCharacter, Is.Not.Null);
+            Assert.That(script.CenterCharacter.DisplayName, Is.EqualTo("顾客"));
+            Assert.That(script.CenterCharacter.Portrait, Is.SameAs(visuals.CenterPortrait));
+            Assert.That(script.CenterCharacter.Portrait, Is.Not.SameAs(script.RightCharacter.Portrait));
+            Assert.That(NarrativePresentationDataAdapter.TryCreateOpeningDialogue(config, "first_day_cafe",
+                out script, out error), Is.True, error);
+            Assert.That(script.CenterCharacter, Is.Null, "The guest must not appear before arrival.");
+        }
+
+        [Test]
         public void MissingOpeningOrTextReturnsDiagnosticInsteadOfRawKey()
         {
             NarrativeConfiguration config = LubanNarrativeLoader.Load();

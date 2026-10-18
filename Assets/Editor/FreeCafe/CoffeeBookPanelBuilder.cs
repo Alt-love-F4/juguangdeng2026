@@ -15,11 +15,8 @@ namespace Spotlight.FreeCafe.Editor
         private const string FontPath = "Assets/Resources/Fonts/SimHei SDF.asset";
         private const float PixelsPerUnit = 40f;
 
-        public static void ApplySavedPrefab()
-        {
-            var prefab = AssetDatabase.LoadAssetAtPath<GameObject>(PrefabPath);
-            if(prefab != null) ApplyToCoffeeShop(prefab);
-        }
+        /// <summary>CoffeeShop now hosts the 咖啡宝典; the PSD coffee book is kept only as a legacy asset.</summary>
+        public static void ApplySavedPrefab() => CoffeeCompendiumBuilder.BindScene();
 
         private sealed class Layer
         {
@@ -204,7 +201,7 @@ namespace Spotlight.FreeCafe.Editor
             var prefab = PrefabUtility.SaveAsPrefabAsset(root, PrefabPath);
             Object.DestroyImmediate(root);
             if(prefab == null) { Debug.LogError("CoffeeBookPanel prefab save failed."); return; }
-            ApplyToCoffeeShop(prefab);
+            // CoffeeShop uses the 咖啡宝典 compendium; rebuilding the legacy book no longer rebinds the scene.
             AssetDatabase.SaveAssets();
             Debug.Log("CoffeeBookPanel rebuilt as UGUI from PSD layer prefab.");
         }
@@ -300,69 +297,6 @@ namespace Spotlight.FreeCafe.Editor
             var button = objectRoot.GetComponent<Button>(); button.targetGraphic = image;
             var text = Text(objectRoot.transform, "Label", label, font, Vector2.zero, size, 18f, TextAlignmentOptions.Center); text.color = new Color(.35f, .18f, .08f);
             return button;
-        }
-
-        private static void ApplyToCoffeeShop(GameObject prefab)
-        {
-            const string path = "Assets/Scenes/CoffeeShop.unity";
-            var scene = UnityEngine.SceneManagement.SceneManager.GetSceneByPath(path);
-            bool wasLoaded = scene.IsValid() && scene.isLoaded;
-            if(!wasLoaded) scene = EditorSceneManager.OpenScene(path, OpenSceneMode.Additive);
-            try
-            {
-                foreach(var sceneRoot in scene.GetRootGameObjects())
-                {
-                    var hud = sceneRoot.GetComponentInChildren<FreeCafeProductionHud>(true);
-                    if(hud != null) ApplyToProduction(hud, prefab);
-                    var playerHud = sceneRoot.GetComponentInChildren<FreeCafeHud>(true);
-                    if(playerHud != null) ApplyToPlayer(playerHud, prefab);
-                }
-                EditorSceneManager.MarkSceneDirty(scene);
-                EditorSceneManager.SaveScene(scene);
-            }
-            finally
-            {
-                if(!wasLoaded) EditorSceneManager.CloseScene(scene, true);
-            }
-        }
-
-        private static void ApplyToProduction(FreeCafeProductionHud hud, GameObject prefab)
-        {
-            if(hud == null || hud.bookPanel == null) return;
-            var oldPanel = hud.bookPanel;
-            var parent = oldPanel.transform.parent != null ? oldPanel.transform.parent : hud.transform;
-            var instance = (GameObject)PrefabUtility.InstantiatePrefab(prefab, parent);
-            instance.name = "CoffeeBookPanel";
-            instance.transform.SetAsLastSibling();
-            instance.SetActive(false);
-            var view = instance.GetComponent<CoffeeBookPanelView>();
-            hud.bookPanel = instance;
-            hud.bookTitle = view.title;
-            hud.bookBody = view.body;
-            hud.bookNote = view.note;
-            hud.previousRecipe = view.previous;
-            hud.nextRecipe = view.next;
-            hud.closeBook = view.close;
-            hud.bookIcon = null;
-            Object.DestroyImmediate(oldPanel);
-            EditorUtility.SetDirty(hud);
-        }
-
-        private static void ApplyToPlayer(FreeCafeHud hud, GameObject prefab)
-        {
-            if(hud.recipePanel == null) return;
-            var previous = hud.recipePanel;
-            var instance = (GameObject)PrefabUtility.InstantiatePrefab(prefab, previous.transform.parent);
-            instance.name = "CoffeeBookPanel";
-            instance.transform.SetAsLastSibling();
-            instance.SetActive(false);
-            var view = instance.GetComponent<CoffeeBookPanelView>();
-            hud.recipePanel = instance;
-            hud.recipeTitle = view.title;
-            hud.recipeBody = view.body;
-            hud.recipeCloseButton = view.close;
-            Object.DestroyImmediate(previous);
-            EditorUtility.SetDirty(hud);
         }
 
         private static Button FindButton(GameObject root, string name) { var child = root.transform.Find(name); return child == null ? null : child.GetComponent<Button>(); }

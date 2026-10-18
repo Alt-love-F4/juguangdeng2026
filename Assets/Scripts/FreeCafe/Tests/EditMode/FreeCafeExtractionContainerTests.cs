@@ -90,6 +90,15 @@ namespace Spotlight.FreeCafe.Tests
             if (groundsFirst) Add("grounds", ExtractorId);
             Add("hotwater", ExtractorId);
             if (!groundsFirst) Add("grounds", ExtractorId);
+            if (!groundsFirst)
+            {
+                Assert.That(world.ExtractionFilter(Extractor).contents.Count, Is.EqualTo(1));
+                Assert.That(world.SolidMass(world.ExtractionFilter(Extractor)), Is.EqualTo(12));
+                Assert.That(world.LiquidVolume(world.ExtractionFilter(Extractor)), Is.Zero);
+                Assert.That(world.LiquidVolume(Extractor), Is.Zero);
+                Assert.That(world.ExtractionSnapshot(Extractor).inProgress, Is.False);
+                return;
+            }
             AssertCoffee(Extractor, 200, 12, false);
             Assert.That(world.ExtractionSnapshot(Extractor).inProgress, Is.EqualTo(groundsFirst));
             Assert.That(world.LiquidSnapshot(Extractor).temperature, Is.EqualTo(LiquidTemperature.Boiling));
@@ -107,6 +116,15 @@ namespace Spotlight.FreeCafe.Tests
             if (groundsFirst) Add("grounds", ExtractorId);
             Assert.That(world.PourLiquid("m.heater", ExtractorId, 200, 1).success, Is.True);
             if (!groundsFirst) Add("grounds", ExtractorId);
+            if (!groundsFirst)
+            {
+                Assert.That(world.ExtractionFilter(Extractor).contents.Count, Is.EqualTo(1));
+                Assert.That(world.SolidMass(world.ExtractionFilter(Extractor)), Is.EqualTo(12));
+                Assert.That(world.LiquidVolume(world.ExtractionFilter(Extractor)), Is.Zero);
+                Assert.That(world.LiquidVolume(Extractor), Is.Zero);
+                Assert.That(world.ExtractionSnapshot(Extractor).inProgress, Is.False);
+                return;
+            }
             AssertCoffee(Extractor, 200, 12, false);
             Assert.That(world.ExtractionSnapshot(Extractor).inProgress, Is.EqualTo(groundsFirst));
             Assert.That(world.LiquidSnapshot(Extractor).temperature, Is.EqualTo(temperature));
@@ -136,6 +154,15 @@ namespace Spotlight.FreeCafe.Tests
             if (groundsFirst) Add("grounds", ExtractorId);
             Add("water", ExtractorId);
             if (!groundsFirst) Add("grounds", ExtractorId);
+            if (!groundsFirst)
+            {
+                Assert.That(world.ExtractionFilter(Extractor).contents.Count, Is.EqualTo(1));
+                Assert.That(world.SolidMass(world.ExtractionFilter(Extractor)), Is.EqualTo(12));
+                Assert.That(world.LiquidVolume(world.ExtractionFilter(Extractor)), Is.Zero);
+                Assert.That(world.LiquidVolume(Extractor), Is.Zero);
+                Assert.That(world.ExtractionSnapshot(Extractor).inProgress, Is.False);
+                return;
+            }
             AssertCoffee(Extractor, 200, 12, false);
             Assert.That(world.LiquidSnapshot(Extractor).temperature, Is.EqualTo(LiquidTemperature.Room));
         }
@@ -144,7 +171,8 @@ namespace Spotlight.FreeCafe.Tests
         {
             Add("coffee", ExtractorId);
             Add("grounds", ExtractorId);
-            AssertCoffee(Extractor, 200, 24, false);
+            Assert.That(Extractor.contents, Is.Empty);
+            Assert.That(world.SolidMass(world.ExtractionFilter(Extractor)), Is.EqualTo(12));
         }
 
         [Test] public void AddingGroundsToColdCoffeeMixedWithHotMilkDoesNotMakeEssence()
@@ -152,8 +180,9 @@ namespace Spotlight.FreeCafe.Tests
             Add("coffee", ExtractorId);
             Add("hotmilk", ExtractorId);
             Add("grounds", ExtractorId);
-            AssertCoffee(Extractor, 200, 24, false);
-            Assert.That(world.LiquidSnapshot(Extractor).composition.milkMl, Is.EqualTo(200));
+            Assert.That(Extractor.contents, Is.Empty);
+            Assert.That(world.SolidMass(world.ExtractionFilter(Extractor)), Is.EqualTo(12));
+            Assert.That(world.LiquidSnapshot(Extractor).composition.milkMl, Is.Zero);
         }
 
         [TestCase(true)]

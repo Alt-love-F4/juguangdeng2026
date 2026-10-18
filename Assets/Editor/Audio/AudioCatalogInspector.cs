@@ -13,6 +13,7 @@ namespace Spotlight.Audio.Editor
         public override void OnInspectorGUI()
         {
             serializedObject.Update();
+            EditorGUILayout.PropertyField(serializedObject.FindProperty("cafeDynamics"), new GUIContent("经营交互动态音效"), true);
             EditorGUILayout.PropertyField(serializedObject.FindProperty("musicTransitionSeconds"), new GUIContent("音乐切换时长"));
             EditorGUILayout.PropertyField(serializedObject.FindProperty("videoVolume"), new GUIContent("视频音轨基础音量"));
             EditorGUILayout.PropertyField(serializedObject.FindProperty("videoCategory"), new GUIContent("视频音轨分类"));

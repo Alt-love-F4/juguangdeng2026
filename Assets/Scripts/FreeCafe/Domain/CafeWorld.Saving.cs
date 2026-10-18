@@ -16,6 +16,7 @@ namespace Spotlight.FreeCafe
                 || candidate.entities == null || candidate.requests == null
                 || Area(candidate.currentArea) == null || candidate.nextId < 1
                 || candidate.money < 0 || candidate.day < 1
+                || !string.IsNullOrEmpty(candidate.cupStockDayKey) && string.IsNullOrWhiteSpace(candidate.cupStockDayKey)
                 || !Finite(candidate.timeRemaining) || !Finite(candidate.arrivalRemaining)
                 || candidate.timeRemaining < 0)
             {
@@ -121,7 +122,9 @@ namespace Spotlight.FreeCafe
             foreach (var r in candidate.requests)
             {
                 if (r == null || string.IsNullOrEmpty(r.id) || !requestIds.Add(r.id) || !customers.Add(r.customerId)
-                    || Product(r.productId) == null || !ids.TryGetValue(r.customerId, out var customer)
+                    || Product(r.productId) == null
+                    || !string.IsNullOrEmpty(r.cupSpecId) && !IsCupSpec(r.cupSpecId)
+                    || !ids.TryGetValue(r.customerId, out var customer)
                     || !Spec(customer.specId).Has(Capability.Customer)
                     || !Finite(r.patience) || r.patience <= 0 || !Finite(r.automaticRemaining))
                 {

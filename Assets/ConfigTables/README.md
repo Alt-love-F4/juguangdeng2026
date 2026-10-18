@@ -76,7 +76,8 @@ Assets/ConfigTables/GenerateAll.bat
 - `Assets/Art/Background/game/SCE_一楼大厅场景底图.png`、`SCE_二楼会客室场景底图.png`、`SCE_ 三楼宿舍场景底图.png` 是经营场景底图，不得填入对话背景；需要图片型对话时使用对应的完整“对话场景”资源。
 - 店外填原有图片 key（如 `oct07.street.day`）；同一事件从街道进店/出店要在对应页显式切换，不要批量清空整场事件。
 - 店内特殊叙事画面可显式覆盖实景：闭门蒂博剪影填 `cafe.door.thibaut`，也兼容旧 key `church.cafe.thibaut.departure`；回到普通店内对话时再填 `scene.cafe`。不要仅按地点将特殊插图改为实景。该图已登记，但截至 2026-10-17，`church.1014.s2` 尚无正式源表页面，不能误报已接线。
-- `OpeningPresentation.visualsResource`：`first_day_cafe` 与 `cafe_tutorial.*` 使用 `Dialogue/CafeSceneVisuals`，不要恢复为默认叠图资源。
+- `OpeningPresentation.visualsResource`：`first_day_cafe` 使用 `Dialogue/CafeSceneVisuals`；`cafe_tutorial.*` 使用专用 `Dialogue/CafeTutorialVisuals`（同样 `backgroundKey=scene.cafe`，仅中心普通顾客剪影不同）。不要恢复为默认叠图资源，也不要为教程修改通用 `CafeSceneVisuals` 的角色。
+- `configure_cafe_tutorial.py` 导入原稿后会执行 `apply_player_facing_content`：原稿完整保留在 `cafe.tutorial.source.*`，不接入 `OpeningLine`；实际播放文本只保留玩家可读叙事，详细按键由 `FreeCafeWorkstationTutorial` 负责。源表编辑后须运行 `GenerateAll.bat`；可用 `python -B Assets/ConfigTables/test_cafe_tutorial_content.py` 检查源表/生成内容一致与重新导入幂等性。
 - 只改第 5 行之后的数据；表头和 schema 不变。保存源 Excel 后运行官方生成流程，不能仅编辑 JSON。详见项目根 `AGENTS.md` 和 `Docs/NcsCafeSceneBackground.md`。
 
 - `Assets/ConfigTables/Data/Narrative/Narrative.xlsx`：Object、Bar、Trigger、Event、EventDate、Result、Condition、Template、SetupParams、Choice 共 10 个工作表。

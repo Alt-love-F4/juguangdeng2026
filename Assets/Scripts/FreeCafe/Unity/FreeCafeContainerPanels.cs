@@ -71,6 +71,8 @@ namespace Spotlight.FreeCafe
             public RectTransform root, green, gold, level, pointer;
             public Image levelImage;
             public TMP_Text caption;
+            public RectTransform tutorialFocus;
+            public Image tutorialFocusImage;
         }
         private sealed class Judgment
         {
@@ -114,7 +116,14 @@ namespace Spotlight.FreeCafe
             if (canvasRect == null || runtime == null || runtime.World == null || runtime.worldCamera == null) return;
             for (int i = 0; i < activeCount; i++) Position(cards[i], i);
             for (int i = 0; i < progressCount; i++) PositionProgress(progress[i]);
-            for (int i = 0; i < judgmentCount; i++) PositionJudgment(judgments[i]);
+            for (int i = 0; i < judgmentCount; i++)
+            {
+                var judgment = judgments[i];
+                PositionJudgment(judgment);
+                bool guided = runtime.WorkstationTutorial != null && runtime.WorkstationTutorial.HighlightsExtractionGauges(judgment.id);
+                HighlightGauge(judgment.time, guided);
+                HighlightGauge(judgment.water, guided);
+            }
         }
 
         private void OnDisable()
@@ -398,7 +407,8 @@ namespace Spotlight.FreeCafe
             var world = runtime.World;
             var extraction = world.ExtractionSnapshot(jug);
             bool inspected = inspectedId == jug.id || world.ExtractionFilter(jug) != null && inspectedId == world.ExtractionFilter(jug).id;
-            if (!extraction.available || !(extraction.inProgress || extraction.completed && inspected)) return;
+            bool guided = runtime.WorkstationTutorial != null && runtime.WorkstationTutorial.HighlightsExtractionGauges(jug.id);
+            if (!extraction.available || !(guided || extraction.inProgress || extraction.completed && inspected)) return;
             if (judgmentCount == judgments.Count) judgments.Add(BuildJudgment());
             var judgment = judgments[judgmentCount++];
             judgment.id = jug.id;
@@ -439,7 +449,27 @@ namespace Spotlight.FreeCafe
             rect.anchorMin = new Vector2(.5f, 0); rect.anchorMax = new Vector2(.5f, 0); rect.pivot = new Vector2(.5f, 0);
             rect.sizeDelta = new Vector2(88, 40); rect.anchoredPosition = new Vector2(0, 3);
             caption.alignment = TextAlignmentOptions.Center; caption.lineSpacing = -8;
-            return new Gauge { root = root, green = greenBand, gold = goldBand, level = level, levelImage = level.GetComponent<Image>(), pointer = pointer, caption = caption };
+            var focus = Graphic(root, "TutorialFocus", Color.clear);
+            focus.anchorMin = Vector2.zero; focus.anchorMax = Vector2.one;
+            focus.offsetMin = new Vector2(-8, -6); focus.offsetMax = new Vector2(8, 8);
+            focus.SetAsFirstSibling();
+            var focusImage = focus.GetComponent<Image>();
+            focusImage.raycastTarget = false;
+            var outline = focus.gameObject.AddComponent<Outline>();
+            outline.effectColor = new Color(1, .73f, .25f, .95f);
+            outline.effectDistance = new Vector2(3, 3);
+            focus.gameObject.SetActive(false);
+            return new Gauge { root = root, green = greenBand, gold = goldBand, level = level, levelImage = level.GetComponent<Image>(), pointer = pointer, caption = caption,
+                tutorialFocus = focus, tutorialFocusImage = focusImage };
+        }
+
+        private static void HighlightGauge(Gauge gauge, bool guided)
+        {
+            gauge.tutorialFocus.gameObject.SetActive(guided);
+            gauge.caption.fontStyle = guided ? FontStyles.Bold : FontStyles.Normal;
+            if (!guided) return;
+            float pulse = .5f + .5f * Mathf.Sin(Time.unscaledTime * 4);
+            gauge.tutorialFocusImage.color = new Color(1, .73f, .25f, .10f + pulse * .12f);
         }
 
         private void UpdateGauge(Gauge gauge, string label, float value, float ideal, float greenMin, float greenMax, float goldMin, float goldMax, string unit)

@@ -26,11 +26,26 @@ namespace Spotlight.Audio
         [TextArea] public string materialNote;
     }
 
+    [Serializable]
+    public sealed class CafeAudioDynamics
+    {
+        [Tooltip("倾倒流量由轻到重时的音量倍率")]
+        public Vector2 pourVolume = new Vector2(.32f, 1f);
+        [Tooltip("倾倒流量由轻到重时的音高倍率")]
+        public Vector2 pourPitch = new Vector2(.88f, 1.12f);
+        [Range(0f, .3f)] public float receiverFillPitch = .08f;
+        public Vector2 heatingVolume = new Vector2(.25f, .7f);
+        public Vector2 heatingPitch = new Vector2(.9f, 1.04f);
+        [Min(.05f)] public float dragDistanceForRustle = .45f;
+        [Min(.1f)] public float dragRustleCooldown = .22f;
+    }
+
     [CreateAssetMenu(menuName = "Spotlight/Audio Catalog", fileName = "GameAudioCatalog")]
     public sealed class AudioCatalog : ScriptableObject
     {
         public const string ResourceName = "GameAudioCatalog";
         public List<AudioCue> entries = new List<AudioCue>();
+        public CafeAudioDynamics cafeDynamics = new CafeAudioDynamics();
         [Range(0f, 1f)] public float videoVolume = 1f;
         public AudioCategory videoCategory = AudioCategory.Sfx;
         [Min(0f)] public float musicTransitionSeconds = .5f;

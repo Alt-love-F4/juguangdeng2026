@@ -107,6 +107,8 @@ namespace Spotlight.FreeCafe.Editor
                 }
                 FreeCafeHudKit.Plaque(root.transform, "EndDayButton", "结束这一天",
                     new Vector2(1, 0), new Vector2(-110, 198), new Vector2(220, 52), true, 20);
+                root.transform.Find("EndDayButton").gameObject.SetActive(false);
+                CafeOrderStackBuilder.ApplyToRoot(root);
                 PrefabUtility.SaveAsPrefabAsset(root, PrefabPath);
             }
             finally { UnityEngine.Object.DestroyImmediate(root); }
@@ -144,8 +146,9 @@ namespace Spotlight.FreeCafe.Editor
                 hud.runtime.worldCamera.backgroundColor = new Color(.60f, .51f, .43f, 1f);
                 EditorUtility.SetDirty(hud.runtime.worldCamera);
             }
-            hud.orderButtons = new[] { orders.Find("Order0").GetComponent<Button>() };
-            hud.orderLabels = new TMP_Text[] { orders.Find("Order0/Label").GetComponent<TMP_Text>() };
+            var order = orders.Find("Cards/Order0") ?? orders.Find("Order0");
+            hud.orderButtons = new[] { order.GetComponent<Button>() };
+            hud.orderLabels = new TMP_Text[] { order.Find("Label").GetComponent<TMP_Text>() };
             hud.previousOrder = orders.Find("PreviousOrder").GetComponent<Button>();
             hud.nextOrder = orders.Find("NextOrder").GetComponent<Button>();
             hud.orderPage = orders.Find("Page").GetComponent<TMP_Text>();

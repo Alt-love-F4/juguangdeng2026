@@ -9,6 +9,36 @@ namespace Spotlight.FreeCafe
         public const string TutorialOrderId = "tutorial_order";
         public const string TutorialCustomerId = "customer_0";
         public bool HasTutorialCustomer => Request(TutorialOrderId) != null;
+
+        /// <summary>订单杯型独立于配方；旧订单未记录时保持原餐品默认值。</summary>
+        public string RequiredCupSpecId(CustomerRequest request) => request == null ? null
+            : !string.IsNullOrEmpty(request.cupSpecId) ? request.cupSpecId
+            : request.id == TutorialOrderId ? "cup.large" : Product(request.productId)?.cupSpecId;
+
+        /// <summary>按订单杯容量等比缩放配方推荐量（原料比例/咖啡浓度不变）。</summary>
+        public float OrderPortionScale(CustomerRequest request) => ProductPortionScale(
+            request == null ? null : Product(request.productId), RequiredCupSpecId(request));
+
+        private float ProductPortionScale(ProductSpec product, string requiredCupSpecId)
+        {
+            var original = product == null ? null : Spec(product.cupSpecId);
+            var requested = Spec(requiredCupSpecId);
+            return original != null && requested != null && original.capacityMl > 0 && requested.capacityMl > 0
+                ? requested.capacityMl / original.capacityMl : 1;
+        }
+
+        public bool MatchesOrder(WorldEntity cup, CustomerRequest request)
+        {
+            var product = request == null ? null : Product(request.productId);
+            string requiredCup = RequiredCupSpecId(request);
+            if (cup == null || product == null || cup.specId != requiredCup) return false;
+            return ProductionEnabled
+                ? cup == ServingCup && (product.evaluation == null || ClassifyCoffee(cup).productId == product.id)
+                    && EvaluateProduction(cup, product, requiredCup).total >= product.minimumScore
+                    && (!Prep.requireLatteArt || !product.requiresLatteArt || cup.latteArt || State.automaticLatteArt)
+                : Evaluate(cup, product, requiredCup) >= .999f
+                    && (!product.requiresLatteArt || cup.latteArt || State.automaticLatteArt);
+        }
         /// <summary>判断杯子是否符合餐品配方：杯型、配比、拉花要求都满足才算匹配。</summary>
         public bool Matches(WorldEntity cup, ProductSpec product) => ProductionEnabled
             ? cup != null && product != null && cup == ServingCup && (product.evaluation==null || ClassifyCoffee(cup).productId==product.id) && EvaluateProduction(cup, product).total >= product.minimumScore
@@ -21,7 +51,7 @@ namespace Spotlight.FreeCafe
         /// 给一杯饮品打分：先算配方原料的匹配比例，多放的部分按一半扣分，
         /// 杯子用错再乘 0.75；结果夹在 0~1。
         /// </summary>
-        public float Evaluate(WorldEntity cup, ProductSpec product)
+        public float Evaluate(WorldEntity cup, ProductSpec product, string requiredCupSpecId = null)
         {
             if (cup == null || product == null || !Spec(cup.specId).Has(Capability.Container))
             {
@@ -45,7 +75,7 @@ namespace Spotlight.FreeCafe
             }
 
             float score = Math.Max(0, (matched - Math.Max(0, TotalUnits(cup) - matched) * .5f) / expected);
-            if (cup.specId != product.cupSpecId)
+            if (cup.specId != (requiredCupSpecId ?? product.cupSpecId))
             {
                 score *= .75f;
             }
@@ -86,7 +116,7 @@ namespace Spotlight.FreeCafe
             var request = RequestForTarget(target);
             if (ProductionEnabled) return ServeProduction(cup, request);
             var product = Product(request.productId);
-            bool correct = Matches(cup, product);
+            bool correct = MatchesOrder(cup, request);
             int price = correct ? SalePrice(cup, product) : 0;
             State.served++;
             if (correct)
@@ -94,6 +124,7 @@ namespace Spotlight.FreeCafe
                 State.money += price;
                 State.todayRevenue += price;
                 State.todayServed++;
+                State.successfulOrders++;
                 State.reputation += 2;
             }
             else
@@ -104,7 +135,7 @@ namespace Spotlight.FreeCafe
             }
 
             CompleteCustomerOrder(request, correct);
-            State.entities.Remove(cup);
+            RemoveCupAndRefundStock(cup);
             UpdateFocusedRequest();
             Notify();
             return ActionResult.Yes(correct
@@ -128,7 +159,7 @@ namespace Spotlight.FreeCafe
         {
             foreach (var product in Catalog.products)
             {
-                if (State.reputation >= product.unlockReputation && !State.unlockedProducts.Contains(product.id))
+                if (State.reputation >= product.unlockReputation && CanOfferProduct(product) && !State.unlockedProducts.Contains(product.id))
                 {
                     State.unlockedProducts.Add(product.id);
                 }
@@ -146,8 +177,8 @@ namespace Spotlight.FreeCafe
             }
         }
 
-        /// <summary>开始营业：从夜间开业会进入下一天；重置当日统计并按客流生成首批顾客。</summary>
-        public ActionResult StartDay()
+        /// <summary>开始营业；独立沙盒可从打烊进入次日，正式日程必须先显式休息。</summary>
+        public ActionResult StartDay(bool advanceFromNight = true)
         {
             if (HasTutorialCustomer) return ActionResult.No("请先完成首位客人的黑咖啡教程");
             if (State.open)
@@ -158,10 +189,13 @@ namespace Spotlight.FreeCafe
             // 从夜间开始新的一天：天数和倒计时都要重置
             if (State.businessPhase == BusinessPhase.Night)
             {
+                if (!advanceFromNight) return ActionResult.No("今日营业已结束，请选择「结束这一天」或上床休息后再营业");
                 State.day++;
                 State.timeRemaining = Catalog.daySeconds;
             }
 
+            if (string.IsNullOrEmpty(State.cupStockDayKey) || State.cupStockDayKey.StartsWith("sandbox:"))
+                RefreshDailyCupStock("sandbox:" + State.day);
             State.open = true;
             State.businessPhase = BusinessPhase.Open;
             State.todayServed = 0;
@@ -192,6 +226,20 @@ namespace Spotlight.FreeCafe
             return ActionResult.Yes("开始营业：今日客流 " + State.todayCustomerBudget + "，可自由备料；上餐时验证配方");
         }
 
+        /// <summary>正式日程是日期的唯一来源；同日同步不重开营业，也不重置库存/统计。</summary>
+        public void SynchronizeCalendarDay(int day)
+        {
+            if (day < 1) throw new ArgumentOutOfRangeException(nameof(day));
+            if (State.day == day) return;
+            State.day = day;
+            if (!State.open)
+            {
+                State.businessPhase = BusinessPhase.Preparation;
+                State.timeRemaining = Catalog.daySeconds;
+            }
+            Notify();
+        }
+
         public ActionResult StartTutorialCustomer()
         {
             if (State.open) return ActionResult.No("教程客人不能在营业中生成");
@@ -213,6 +261,7 @@ namespace Spotlight.FreeCafe
                 id = TutorialOrderId,
                 customerId = TutorialCustomerId,
                 productId = "blackcoffee",
+                cupSpecId = "cup.large", // Existing workstation lessons use the large teaching cup.
                 patience = Catalog.customerPatience
             });
             State.focusedRequestId = TutorialOrderId;
@@ -297,12 +346,13 @@ namespace Spotlight.FreeCafe
             var eligible = new List<ProductSpec>();
             foreach (var p in Catalog.products)
             {
-                if (State.unlockedProducts.Contains(p.id))
+                if (State.unlockedProducts.Contains(p.id) && CanOfferProduct(p))
                 {
                     eligible.Add(p);
                 }
             }
 
+            if (eligible.Count == 0) { State.todayArrivals--; return; }
             var product = eligible[State.requestSequence++ % eligible.Count];
 
             // 卡座按 4 列排布，x/y 由座位号换算而来
@@ -320,6 +370,7 @@ namespace Spotlight.FreeCafe
                 id = Allocate("order_"),
                 customerId = customer.id,
                 productId = product.id,
+                cupSpecId = NextRandom() % 2 == 0 ? "cup.small" : "cup.large",
                 patience = Catalog.customerPatience
             };
             // 普通客人只下单。未来角色身份由显式注入的适配器提供，不自动触发 NCS。
@@ -398,6 +449,7 @@ namespace Spotlight.FreeCafe
                             State.money += p.price;
                             State.todayRevenue += p.price;
                             State.todayServed++;
+                            State.successfulOrders++;
                             State.served++;
                             CompleteCustomerOrder(r, true);
                             changed = true;
@@ -449,7 +501,7 @@ namespace Spotlight.FreeCafe
                             if (e.area == service.area && !Locked(e) && Spec(e.specId).Has(Capability.Container))
                             {
                                 var r = Request(State.focusedRequestId);
-                                if (r != null && Matches(e, Product(r.productId)))
+                                if (r != null && MatchesOrder(e, r))
                                 {
                                     deliver = e;
                                     break;
@@ -585,15 +637,11 @@ namespace Spotlight.FreeCafe
             }
 
             // 只补齐缺的那部分
-            int missing = s.initialStock - e.stock;
+            int cost = RestockQuote(e, quality, out int missing);
             if (missing <= 0)
             {
                 return ActionResult.No("来源库存已满");
             }
-
-            int cost = s.sourceItemId == "beans"
-                ? missing * Catalog.economy.beanUnitPrices[quality]
-                : (s.unitCost > 0 ? missing * s.unitCost : s.refillCost);
             if (State.money < cost)
             {
                 return ActionResult.No("购买需要 " + cost + " 金币");

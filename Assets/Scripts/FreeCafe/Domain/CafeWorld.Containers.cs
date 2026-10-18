@@ -83,6 +83,59 @@ namespace Spotlight.FreeCafe
         private bool IsCupSource(EntitySpec spec) => spec != null && spec.Has(Capability.Source)
             && Spec(spec.sourceItemId) != null && Spec(spec.sourceItemId).Has(Capability.Container);
 
+        /// <summary>按外部日历键刷新当天杯子总数；保留在场杯和内容物，同日重入不复制杯子。</summary>
+        public ActionResult RefreshDailyCupStock(string dayKey)
+        {
+            if (string.IsNullOrWhiteSpace(dayKey)) return ActionResult.No("需要有效的营业日期");
+            if (State.cupStockDayKey == dayKey) return ActionResult.Yes("今日杯子库存已刷新");
+            var countedTypes = new HashSet<string>();
+            foreach (var source in State.entities)
+            {
+                var spec = Spec(source.specId);
+                if (!IsCupSource(spec) || !IsCupSpec(spec.sourceItemId)) continue;
+                int remaining = spec.initialStock;
+                if (countedTypes.Add(spec.sourceItemId))
+                {
+                    foreach (var cup in State.entities)
+                        if (cup.specId == spec.sourceItemId) remaining = Math.Max(0, remaining - 1);
+                }
+                else remaining = 0; // One daily pool per cup type, even with duplicate source entities.
+                source.stock = remaining;
+            }
+            State.cupStockDayKey = dayKey;
+            Notify();
+            return ActionResult.Yes("今日杯子库存已刷新");
+        }
+
+        private static bool IsCupSpec(string specId) => specId == "cup.small" || specId == "cup.large";
+
+        // Recycling returns the vessel only; consumed ingredients and penalties are never refunded.
+        private bool RemoveCupAndRefundStock(WorldEntity cup)
+        {
+            if (cup == null || !State.entities.Remove(cup)) return false;
+            if (IsCup(cup))
+            {
+                foreach (var source in State.entities)
+                {
+                    var spec = Spec(source.specId);
+                    if (!IsCupSource(spec) || spec.sourceItemId != cup.specId) continue;
+                    if (source.stock < int.MaxValue) source.stock++;
+                    break;
+                }
+            }
+            ClearConsumedCupReferences(cup);
+            return true;
+        }
+
+        private void ClearConsumedCupReferences(WorldEntity cup)
+        {
+            if (State.production != null && State.production.activeCupId == cup.id)
+                State.production.activeCupId = null;
+            foreach (var entity in State.entities)
+                if (entity.production != null && entity.production.heatingVesselId == cup.id)
+                    entity.production.heatingVesselId = null;
+        }
+
         private ActionResult PreviewCupReturn(WorldEntity cup, WorldEntity source)
         {
             var sourceSpec = Spec(source.specId);
@@ -106,11 +159,7 @@ namespace Spotlight.FreeCafe
         {
             State.entities.Remove(cup);
             source.stock++;
-            if (State.production != null && State.production.activeCupId == cup.id)
-                State.production.activeCupId = null;
-            foreach (var entity in State.entities)
-                if (entity.production != null && entity.production.heatingVesselId == cup.id)
-                    entity.production.heatingVesselId = null;
+            ClearConsumedCupReferences(cup);
         }
 
         public float SolidMass(WorldEntity entity)
@@ -290,12 +339,7 @@ namespace Spotlight.FreeCafe
             if (IsContainer(item)) return ActionResult.Yes("左键拿起，按住右键倾倒；松开右键继续拿着");
             if (!Spec(item.specId).Has(Capability.Portion)) return ActionResult.No("请加入原料或从其他容器倾倒");
             if (IsExtractionFilter(target) && item.specId == "grounds")
-            {
-                var jug = ExtractionJug(target);
-                if ((target.production.filterWaterPassedMl > 0 || jug != null && jug.production.brewStarted)
-                    && (target.contents.Count > 0 || jug != null && LiquidVolume(jug) > 0))
-                    return ActionResult.No("请先清空本轮滤杯与下壶，再加入新粉");
-            }
+                return ActionResult.Yes("更换咖啡粉（自动清空上层滤杯）");
             float volume = IngredientPortion(item).milliliters;
             return volume <= ExtractionReceivingSpace(target) + .01f
                 ? ActionResult.Yes("自由加入 " + Spec(item.specId).label) : ActionResult.No("容器液体容量不足");
@@ -310,22 +354,21 @@ namespace Spotlight.FreeCafe
             if (IsPrecisionExtractor(target) && item.specId == "grounds" && target.production.brewCompleted)
                 ResetExtraction(target);
             var incoming = IngredientPortion(item);
+            if (IsExtractionFilter(target) && item.specId == "grounds")
+            {
+                // One successful ingredient transfer is one fresh dose, including its full payload.
+                // Clear once here, not per portion/pour frame; never discard the lower jug's drink.
+                target.contents.Clear();
+                target.production.filterSpent = false;
+                target.production.filterReferenceGroundsGrams = target.production.filterWaterPassedMl = 0;
+                target.production.filterDrainedMl = target.production.filterDrainHold = 0;
+                var linkedJug = ExtractionJug(target);
+                if (linkedJug != null) ResetExtraction(linkedJug);
+            }
             float mixedTemperature = MixedTemperature(target, incoming);
             // Only an incoming hot WATER drop after grounds may start a precision session.
             if ((incoming.specId == "water" || incoming.specId == "hotwater") && TemperatureBand(TemperatureCelsius(incoming)) != LiquidTemperature.Room)
                 AcceptExtractionWater(target, incoming.milliliters, 1);
-            float incomingGrams = incoming.grams;
-            if (IsExtractionFilter(target) && item.specId == "grounds")
-            {
-                if (target.production.filterSpent && target.contents.Count == 0)
-                {
-                    target.production.filterSpent = false;
-                    target.production.filterReferenceGroundsGrams = target.production.filterWaterPassedMl = 0;
-                    target.production.filterDrainedMl = 0;
-                }
-                else if (target.production.filterReferenceGroundsGrams > 0)
-                    target.production.filterReferenceGroundsGrams += incomingGrams;
-            }
             incoming.addedSequence = ++target.production.additionSequence;
             target.contents.Add(incoming);
             State.entities.Remove(item);

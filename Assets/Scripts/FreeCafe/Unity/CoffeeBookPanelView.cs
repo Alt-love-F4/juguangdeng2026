@@ -91,16 +91,19 @@ namespace Spotlight.FreeCafe
                 var product = world.Product(learned[index]);
                 title.text = FreeCafeProductionText.Recipe(product.label);
                 var text = new StringBuilder();
+                var focused = world.Request(world.State.focusedRequestId);
+                bool forOrder = focused != null && focused.productId == product.id;
+                float scale = forOrder ? world.OrderPortionScale(focused) : 1f;
                 text.AppendLine("<b>参考目标</b>\n").AppendLine(FreeCafeProductionText.Recipe(product.description));
                 text.AppendLine().AppendLine(FreeCafeProductionText.Recipe(product.tutorial));
                 text.AppendLine().AppendLine("<b>杯型 / 温度</b>\n");
-                text.Append(world.Spec(product.cupSpecId).label).Append(" / ");
+                text.Append(world.Spec(forOrder ? world.RequiredCupSpecId(focused) : product.cupSpecId).label).Append(" / ");
                 text.AppendLine(product.requiredTemperature == LiquidTemperature.Boiling ? "沸腾" : product.requiredTemperature == LiquidTemperature.Warm ? "温热" : "常温");
-                text.AppendLine().AppendLine("<b>参考用量</b>（自由操作，不锁步骤）\n");
+                text.AppendLine().AppendLine(forOrder ? "<b>当前订单用量</b>（已按需求杯型换算）\n" : "<b>参考用量</b>（自由操作，不锁步骤）\n");
                 if(product.ingredients != null)
                     foreach(var portion in product.ingredients)
                         text.Append(FreeCafeProductionText.Recipe(world.Spec(portion.specId).label)).Append("  ")
-                            .Append(portion.milliliters > 0 ? portion.milliliters.ToString("0") + " ml" : portion.units + " 份").AppendLine();
+                            .Append(portion.milliliters > 0 ? (portion.milliliters * scale).ToString("0") + " ml" : portion.grams > 0 ? (portion.grams * scale).ToString("0.#") + " g" : (portion.units * scale).ToString("0.#") + " 份").AppendLine();
                 body.text = text.ToString();
             }
             note.text = "<align=center><b>注意</b></align>\n\n计时注水完成的咖啡，品质由时间、水量和均匀性决定。\n\n任何容器都能自由加料；咖啡粉与水混合是冷萃，放到炉台并点击炉台加热完成萃取。\n\n空杯、半成品也能出品，但顾客会按实际质量评价。";

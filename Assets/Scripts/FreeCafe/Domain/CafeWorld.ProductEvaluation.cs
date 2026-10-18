@@ -7,7 +7,7 @@ namespace Spotlight.FreeCafe
     public sealed partial class CafeWorld
     {
         /// <summary>Evaluate configured ingredient amounts and standards without changing the cup or world.</summary>
-        public CafeProductEvaluation EvaluateProductComposition(WorldEntity cup, ProductSpec product)
+        public CafeProductEvaluation EvaluateProductComposition(WorldEntity cup, ProductSpec product, string requiredCupSpecId = null)
         {
             var evaluation = product?.evaluation;
             if (cup?.contents == null || cup.contents.Count == 0 || !ValidProductEvaluation(evaluation))
@@ -39,7 +39,7 @@ namespace Spotlight.FreeCafe
                     }
                 }
 
-                double ideal = need.idealMl > 0 ? need.idealMl : need.idealGrams;
+                double ideal = (need.idealMl > 0 ? need.idealMl : need.idealGrams) * ProductPortionScale(product, requiredCupSpecId);
                 // The tolerance band is free; outside it, equal excess/shortage has equal cost.
                 // Normalize by the remaining distance to an empty serving, so missing is always zero.
                 float amount = ProductAmountScore(actual, ideal, need.tolerance);
@@ -79,7 +79,7 @@ namespace Spotlight.FreeCafe
                 if (!expected) extras.Add(ProductIngredientKey(portion.specId));
             }
             total *= Clamp(1 - extras.Count * evaluation.extraIngredientPenalty, 0, 1);
-            if (evaluation.enforceCup && cup.specId != product.cupSpecId) total = 0;
+            if (evaluation.enforceCup && cup.specId != (requiredCupSpecId ?? product.cupSpecId)) total = 0;
             float concentrationScore = concentrationVolume > 0 ? (float)(concentrationSum / concentrationVolume) : 0;
             return ProductCompositionResult(amountScore, standardScore, total, concentrationScore,
                 needsCoffee && evaluation.concentrationWeight > 0);

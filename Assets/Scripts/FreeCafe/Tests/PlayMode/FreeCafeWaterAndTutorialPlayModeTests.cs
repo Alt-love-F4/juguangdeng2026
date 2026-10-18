@@ -123,6 +123,34 @@ namespace Spotlight.FreeCafe.Tests
                 Assert.That(entity.y, Is.EqualTo(initial.y).Within(.0001f));
             }
         }
+        [UnityTest] public IEnumerator BusinessSignKeepsScenePositionAcrossBindingRefreshAndOldSaveRestore()
+        {
+            var entity = app.World.Find("business.start");
+            var authored = Object.Instantiate(app.prefabLibrary.Require(entity.specId), app.areaRoots[(int)entity.area]);
+            authored.ConfigureAuthoring(app.World.Spec(entity.specId), app.artLibrary, entity.id, entity.x, entity.y);
+            var editedPosition = new Vector3(entity.x + 1.2f, entity.y + .8f, -.15f);
+            authored.transform.localPosition = editedPosition;
+            try
+            {
+                Assert.That(authored.preserveAuthoredPosition, Is.True);
+                authored.Bind(app, entity, true);
+                authored.Refresh(entity);
+                yield return null;
+                Assert.That(authored.transform.localPosition, Is.EqualTo(editedPosition));
+            }
+            finally { Object.Destroy(authored.gameObject); }
+
+            var sign = app.View(entity.id);
+            var scenePosition = sign.transform.localPosition;
+            var snapshot = JsonUtility.FromJson<CafeSnapshot>(app.CaptureJson());
+            var savedSign = snapshot.entities.Find(e => e.id == entity.id);
+            savedSign.x += 2f;
+            savedSign.y += 1f;
+            app.RestoreJson(JsonUtility.ToJson(snapshot));
+            yield return null;
+            yield return null;
+            Assert.That(sign.transform.localPosition, Is.EqualTo(scenePosition), "Saved coordinates must not replace the edited sign placement");
+        }
         [UnityTest] public IEnumerator RestartButtonIsAlwaysAvailableAndRestoresThePracticeWhileDragging()
         {
             var guide = app.WorkstationTutorial; var world = app.World;
@@ -150,6 +178,29 @@ namespace Spotlight.FreeCafe.Tests
             Assert.That(panel.retry.activeInHierarchy, Is.True);
             yield return Capture("tutorial-persistent-restart");
         }
+        [UnityTest] public IEnumerator ExtractionTutorialShowsBothGaugesBeforeTheFirstPour()
+        {
+            var guide = app.WorkstationTutorial;
+            Assert.That(guide.Begin(true), Is.True);
+            Assert.That(app.World.TakeAndInteract("s.beans", "m.grinder", AreaId.Counter, 0, 0).success, Is.True);
+            Assert.That(app.World.OperateProduction("m.grinder").success, Is.True); app.World.Tick(20);
+            var output = app.World.DragOutputPreview("m.grinder");
+            Assert.That(app.World.TakeMachineOutput("m.grinder", output.id, "v.extractor.filter", AreaId.Counter, 0, 0).success, Is.True);
+            SetTutorialStage(FreeCafeWorkstationTutorial.Stage.Extract);
+            yield return new WaitForSecondsRealtime(.25f);
+            Assert.That(guide.HighlightsExtractionGauges("v.extractor"), Is.True);
+            var panels = app.GetComponent<FreeCafeContainerPanels>();
+            var focuses = panels.GetComponentsInChildren<UnityEngine.UI.Image>();
+            int shown = 0;
+            foreach (var image in focuses) if (image.name == "TutorialFocus" && image.gameObject.activeInHierarchy) shown++;
+            Assert.That(shown, Is.EqualTo(2), "Both judgment bars should be highlighted before injecting water");
+            var panel = Object.FindFirstObjectByType<FreeCafeTutorialPanel>();
+            StringAssert.Contains("左侧", panel.instruction.text);
+            StringAssert.Contains("右侧", panel.instruction.text);
+            guide.Stop(); yield return null;
+            Assert.That(guide.HighlightsExtractionGauges("v.extractor"), Is.False);
+        }
+
         [UnityTest] public IEnumerator TutorialWaterStepMeasuresTheReceiverRatherThanEmptyingUnlimitedWater()
         {
             var guide = app.WorkstationTutorial; var world = app.World;
@@ -218,6 +269,73 @@ namespace Spotlight.FreeCafe.Tests
             yield return new WaitForSecondsRealtime(.4f);
             Physics2D.SyncTransforms(); app.MoveDrag(pointer); yield return null;
             Assert.That(app.CurrentPourTargetId, Is.EqualTo(target), source + " should be over the actual receiver");
+        }
+        [UnityTest] public IEnumerator TutorialExplainsPurposeAndNamedControlsBeforeVisualHints()
+        {
+            Assert.That(app.WorkstationTutorial.Begin(false), Is.True);
+            yield return null;
+            var panel = Object.FindFirstObjectByType<FreeCafeTutorialPanel>();
+            Assert.That(panel.heading.text, Does.Contain("放入咖啡豆"));
+            Assert.That(panel.instruction.text, Does.Contain("磨成粉").And.Contain("按住鼠标左键").And.Contain("研磨机").And.Contain("松开"));
+            Assert.That(panel.gestureText.text, Does.Contain("咖啡豆袋").And.Contain("研磨机"));
+            Assert.That(app.WorkstationTutorial.AllowDrag("s.water"), Is.False);
+            yield return null;
+            Assert.That(panel.errorText.text, Does.Contain("咖啡豆袋"));
+            SetTutorialStage(FreeCafeWorkstationTutorial.Stage.Grounds); yield return null;
+            Assert.That(panel.instruction.text, Does.Contain("咖啡粉").And.Contain("煮咖啡").And.Contain("研磨机抽屉"));
+            SetTutorialStage(FreeCafeWorkstationTutorial.Stage.Water); yield return null;
+            Assert.That(panel.instruction.text, Does.Contain("清水").And.Contain("加热").And.Contain("第 1 步").And.Contain("先别松开左键"));
+            Assert.That(panel.instruction.text, Does.Not.Contain("高亮").And.Not.Contain("光效"));
+            Assert.That(panel.rotationArrow.activeSelf, Is.False);
+            SetTutorialStage(FreeCafeWorkstationTutorial.Stage.Heat); yield return null;
+            Assert.That(panel.instruction.text, Does.Contain("煮成黑咖啡").And.Contain("不需要连续点击"));
+            SetTutorialStage(FreeCafeWorkstationTutorial.Stage.TakeCup); yield return null;
+            Assert.That(panel.instruction.text, Does.Contain("接咖啡").And.Contain("空杯").And.Contain("桌面空处"));
+            SetTutorialStage(FreeCafeWorkstationTutorial.Stage.DeliverCup);
+            // Render this hint directly: an unprepared fixture has no cup and would auto-advance.
+            typeof(FreeCafeWorkstationTutorial).GetMethod("DrawGuide", BindingFlags.Instance | BindingFlags.NonPublic)
+                .Invoke(app.WorkstationTutorial, null);
+            Assert.That(panel.instruction.text, Does.Contain("交给客人").And.Contain("盘子").And.Contain("松开左键"));
+            SetTutorialStage(FreeCafeWorkstationTutorial.Stage.SubmitCup); yield return null;
+            Assert.That(panel.instruction.text, Does.Contain("按铃").And.Contain("完成交付"));
+        }
+        [UnityTest] public IEnumerator EveryBlackCoffeeAndEssenceStageKeepsGestureGuidanceAndAppendsErrors()
+        {
+            var guide = app.WorkstationTutorial;
+            var drawGuide = typeof(FreeCafeWorkstationTutorial).GetMethod("DrawGuide", BindingFlags.Instance | BindingFlags.NonPublic);
+            Assert.That(drawGuide, Is.Not.Null);
+            foreach (bool essence in new[] { false, true })
+            {
+                Assert.That(guide.Begin(essence), Is.True);
+                yield return null;
+                var panel = Object.FindFirstObjectByType<FreeCafeTutorialPanel>();
+                Assert.That(panel, Is.Not.Null);
+                foreach (FreeCafeWorkstationTutorial.Stage stage in System.Enum.GetValues(typeof(FreeCafeWorkstationTutorial.Stage)))
+                {
+                    string context = (essence ? "Essence" : "Black coffee") + " / " + stage;
+                    SetTutorialStage(stage);
+                    yield return null;
+                    // An unprepared fixture can auto-advance Heating, Drain or DeliverCup.
+                    // Render the exact requested stage so those wait/completion hints are covered too.
+                    SetTutorialStage(stage);
+                    drawGuide.Invoke(guide, null);
+                    Assert.That(panel.gesture.gameObject.activeInHierarchy, Is.True, context);
+                    Assert.That(string.IsNullOrWhiteSpace(panel.gestureText.text), Is.False, context);
+                    string operation = panel.gestureText.text;
+                    if (stage == FreeCafeWorkstationTutorial.Stage.Extract)
+                    {
+                        Assert.That(operation, Does.Contain("进度条").And.Contain("流速"), context);
+                    }
+                    const string error = "回归测试：操作错误，请重试";
+                    guide.ReportError(error);
+                    drawGuide.Invoke(guide, null);
+                    Assert.That(panel.gesture.gameObject.activeInHierarchy, Is.True, context + " after error");
+                    Assert.That(panel.gestureText.text, Does.Contain(error).And.Contain(operation),
+                        context + " must append the error without replacing the current operation");
+                }
+                guide.Stop();
+                yield return null;
+            }
         }
         [UnityTest] public IEnumerator MisplacedRightClickCanReturnWaterAndRetryThroughTheHeatStep()
         {

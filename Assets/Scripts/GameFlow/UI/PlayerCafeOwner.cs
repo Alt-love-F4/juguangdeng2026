@@ -9,6 +9,7 @@ namespace Spotlight.GameFlow
         public const string SaveId = "freecafe.world.v1";
         public static CafeWorld Current { get; private set; }
         public static string RestoreError { get; private set; }
+        public static bool HasSceneOwner => sceneWorld != null;
         private static CafeWorld sceneWorld;
         private static Action<string> sceneRestore;
         private static Func<string> sceneCapture;

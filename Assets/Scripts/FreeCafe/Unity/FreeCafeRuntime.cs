@@ -17,6 +17,8 @@ namespace Spotlight.FreeCafe
         public bool DayFlowBusinessFinished => World != null && World.State.businessPhase == BusinessPhase.Night;
 
         public bool productionMode = true;
+        [Tooltip("显示咖啡店顶部的设备升级入口；默认隐藏，不影响设备解锁数据。")]
+        public bool showEquipmentUpgradeUI;
         [Tooltip("可选身份适配器，必须实现 ICafeCustomerIdentitySource；不负责启动剧情。") ]
         public MonoBehaviour customerIdentitySource;
         [Tooltip("运行时由 Luban Object 表创建；保留旧序列化字段以兼容场景。显式身份提供者优先。")]
@@ -40,12 +42,32 @@ namespace Spotlight.FreeCafe
         public FreeEntityView DraggedView => draggedView;
         public bool IsDraggingOutputFrom(string entityId) => draggedView != null && dragMachineId == entityId;
         public FreeCafeWorkstationTutorial WorkstationTutorial { get; private set; }
-        public bool PracticeTutorialActive => WorkstationTutorial != null && WorkstationTutorial.IsRunning;
+        public FreeCafeMilkPitcherTutorial MilkPitcherTutorial { get; private set; }
+        private FreeCafeEquipmentTutorialPrompt equipmentTutorialPrompt;
+        public bool StartEquipmentTutorial(bool latte)
+        {
+            if (CafeTutorialActive || PracticeTutorialActive || InputBlocked || IsDragging) return false;
+            if (latte)
+            {
+                MilkPitcherTutorial ??= gameObject.AddComponent<FreeCafeMilkPitcherTutorial>();
+                return MilkPitcherTutorial.Begin(this);
+            }
+            return World.PrecisionEquipmentAvailable && WorkstationTutorial != null && WorkstationTutorial.Begin(true);
+        }
+        public bool IsSandboxMode { get; private set; }
+        private FreeCafeEquipmentPanel equipmentPanel;
+        private bool pendingDailyCupRefresh = true;
+        public bool PracticeTutorialActive => WorkstationTutorial != null && WorkstationTutorial.IsRunning
+            || MilkPitcherTutorial != null && MilkPitcherTutorial.IsRunning;
         private CafeTutorialSession cafeTutorial;
         private bool pendingTutorialCoffee;
         public event System.Action<string, string> CafeTutorialStepCompleted;
         private NarrativeConfiguration tutorialConfiguration;
         public bool CafeTutorialActive => dayFlow != null && dayFlow.IsCafeTutorialActive;
+        public bool CafeBusinessOnboardingActive => CafeTutorialActive && cafeTutorial?.WaitingForBusinessOnboarding == true;
+        private FreeCafeBusinessTutorial BusinessTutorial => GetComponent<FreeCafeBusinessTutorial>();
+        private bool TutorialBusinessStartBlocked => CafeTutorialActive
+            && (!CafeBusinessOnboardingActive || BusinessTutorial == null || !BusinessTutorial.AllowBusinessStart);
         public bool CafeTutorialWaitingForWorkstation => CafeTutorialActive && cafeTutorial != null && cafeTutorial.WaitingForWorkstation;
         private bool PresentationInputBlocked => GameplayHudPanel.BlocksWorldInput || (miniGameGateway != null && miniGameGateway.BlocksInput) || (gameFlow != null && (gameFlow.IsMapOpen || gameFlow.IsDetailsOpen)) || (World != null && World.ProductionEnabled && !string.IsNullOrEmpty(World.State.production.miniGameToken)) || Time.timeScale<=0 || DialoguePanel.IsAnyPlaying || (dayFlow != null && dayFlow.BlocksGameplayInput);
         public bool GameplayBlocked => PresentationInputBlocked || CafeTutorialWaitingForWorkstation
@@ -54,7 +76,10 @@ namespace Spotlight.FreeCafe
         private bool pendingBusinessStart;
         public Sprite CafeVisitSprite(string customerId) => cafeVisits?.SeatedSprite(customerId);
         public bool BusinessSimulationPaused => PresentationPauseRegistry.IsPaused || (cafeVisits != null && cafeVisits.HasStageHandoff)
-            || CafeTutorialActive && TutorialInputBlocked;
+            || CafeTutorialActive && TutorialInputBlocked
+            || CafeBusinessOnboardingActive && BusinessTutorial != null && BusinessTutorial.PauseBusinessSimulation
+            || MilkPitcherTutorial != null && MilkPitcherTutorial.IsRunning
+            || equipmentTutorialPrompt != null && equipmentTutorialPrompt.IsOpen;
         private DayFlowController dayFlow;
         private GameFlowBootstrap gameFlow;
         public event Action ViewChanged;
@@ -68,7 +93,7 @@ namespace Spotlight.FreeCafe
         public float pourRateMultiplier = 2f;
         public FreeCafeContainerPanels ContainerPanels { get; private set; }
         private FreeCafeMiniGameGateway miniGameGateway;
-        private bool ModalInputBlocked => (FreeCafeGMPanel.Instance!=null && FreeCafeGMPanel.Instance.IsVisible) ||
+        private bool ModalInputBlocked => (equipmentTutorialPrompt != null && equipmentTutorialPrompt.IsOpen) || (equipmentPanel != null && equipmentPanel.IsOpen) || (FreeCafeGMPanel.Instance!=null && FreeCafeGMPanel.Instance.IsVisible) ||
             (playerHud!=null && playerHud.IsModalOpen) || (productionHud!=null && productionHud.IsModalOpen);
         public bool TutorialInputBlocked => PresentationInputBlocked || ModalInputBlocked;
         public bool InputBlocked => GameplayBlocked || ModalInputBlocked;
@@ -81,6 +106,9 @@ namespace Spotlight.FreeCafe
         private string dragItemId,dragSourceId,dragMachineId,dragOutputId,confirmCancelId;
         private bool committingDrag, clearingDrag, dragPreview;
         private bool quitting;
+        private string dragAudioSpecId;
+        private Vector3 dragRustlePosition;
+        private float dragRustleDistance, nextDragRustle;
         private Vector3 origin,offset;
         private Camera dragCamera;
         private Plane dragPlane;
@@ -150,10 +178,12 @@ namespace Spotlight.FreeCafe
             catalog.layout = FreeCafeSceneLayout.Capture(this, authored);
             FreeCafeSceneLayout.FitAuthoredBounds(this, catalog, authored);
             characterCatalog=Spotlight.Narrative.CharacterCatalog.LoadFromTables();
+            // Resolve the entry before any scene-owned narrative fallback is created.
+            IsSandboxMode = FindFirstObjectByType<GameFlowBootstrap>() == null;
             var identities = customerIdentitySource as ICafeCustomerIdentitySource;
             if(identities==null && characterCatalog!=null && characterCatalog.Characters.Count>0)
                 identities=new CatalogCustomerIdentitySource(characterCatalog);
-            if(customerIdentitySource==null && seating!=null) identities=seating.WithSuppliedGuest(identities);
+            if(customerIdentitySource==null && seating!=null && !IsSandboxMode) identities=seating.WithSuppliedGuest(identities);
             World=new CafeWorld(catalog,identities);
             if(prefabLibrary==null) throw new InvalidOperationException("请配置 EntityPrefabLibrary");
             prefabLibrary.Validate(World.Catalog);
@@ -176,9 +206,17 @@ namespace Spotlight.FreeCafe
             playerHud=FindFirstObjectByType<FreeCafeHud>(); productionHud=GetComponent<FreeCafeProductionHud>();
             string pending=GameSaveParticipantRegistry.TakePending(SaveId);
             if(!string.IsNullOrEmpty(pending)) RestoreJson(pending); else SyncViews();
+            World.ConfigureEquipmentProgression(IsSandboxMode);
+            // Formal saves restore their calendar after scene Start. Wait for Playing
+            // before choosing a date key, or a day-3 save could be refilled as day 1.
+            if (IsSandboxMode) { RefreshDailyCups(); pendingDailyCupRefresh = false; }
+            equipmentPanel = gameObject.AddComponent<FreeCafeEquipmentPanel>();
+            equipmentPanel.Initialize(this, playerHud);
+            equipmentTutorialPrompt = gameObject.AddComponent<FreeCafeEquipmentTutorialPrompt>();
+            equipmentTutorialPrompt.Initialize(this);
             if (FreeCafeGMPanel.Instance != null) FreeCafeGMPanel.Instance.Initialize(this);
             if(World.State.currentArea==AreaId.Cafe)
-                ShowHint("点击大厅的「启动营业」立牌开始接单；点击客人查看订单，或前往制作台备料。");
+                ShowHint("点击大厅的「开始营业」挂牌开始接单；点击客人查看订单，或前往制作台备料。");
             else if(World.ProductionEnabled)
                 ShowHint("点击杯具选择出餐杯；原料拖到设备，点击启动。左键拖动壶，按住右键并上下移动鼠标双向倾倒，松开右键停止。");
             else
@@ -221,12 +259,17 @@ namespace Spotlight.FreeCafe
             bool sessionReady = gameFlow == null || gameFlow.SessionState == GameSessionState.Playing;
             if (sessionReady)
             {
-                if (cafeVisits == null) cafeVisits = new CafeVisitBridge(this);
-                cafeVisits.Pump();
+                if (pendingDailyCupRefresh) { RefreshDailyCups(); pendingDailyCupRefresh = false; }
+                if (!IsSandboxMode)
+                {
+                    if (cafeVisits == null) cafeVisits = new CafeVisitBridge(this);
+                    cafeVisits.Pump();
+                }
                 if (pendingBusinessStart) TryStartBusiness();
-                if (!BusinessSimulationPaused && (Spotlight.Narrative.NarrativeRuntime.Instance == null || cafeVisits.Ready)) World.Tick(Time.deltaTime);
-                cafeVisits.Pump();
+                if (!BusinessSimulationPaused && (IsSandboxMode || Spotlight.Narrative.NarrativeRuntime.Instance == null || cafeVisits != null && cafeVisits.Ready)) World.Tick(Time.deltaTime);
+                if (!IsSandboxMode) cafeVisits?.Pump();
             }
+            if (IsDragging && PresentationPauseRegistry.IsPaused) CancelDrag();
             if(IsDragging && draggingVessel && !InputBlocked) UpdateVesselInput();
             // GameFlowBootstrap owns the global Escape/pause flow. FreeCafe only
             // cancels an active drag; the shared pause panel handles everything else.
@@ -327,6 +370,7 @@ namespace Spotlight.FreeCafe
         public ActionResult RingDeliveryBell()
         {
             if (InputBlocked || IsDragging) return ActionResult.No("当前不能按铃交付");
+            if (MilkPitcherTutorial != null && MilkPitcherTutorial.IsRunning) return ActionResult.No("拉花练习不交付正式订单，请完成拉花后退出练习");
             if (PracticeTutorialActive && !WorkstationTutorial.IsFirstCafeTutorial)
             {
                 var practice = WorkstationTutorial.RingPracticeBell();
@@ -338,6 +382,7 @@ namespace Spotlight.FreeCafe
         public ActionResult DeliverCup(bool fromBell = false)
         {
             if(InputBlocked) return ActionResult.No("当前不能交付");
+            if (MilkPitcherTutorial != null && MilkPitcherTutorial.IsRunning) return ActionResult.No("拉花练习不交付正式订单，请先退出练习");
             if (PracticeTutorialActive && (!WorkstationTutorial.CanSubmitCup || !fromBell))
             {
                 string message = WorkstationTutorial.CanSubmitCup
@@ -362,7 +407,9 @@ namespace Spotlight.FreeCafe
             {
                 WorkstationTutorial?.Finish(true);
                 NotifyTutorialStepCompleted(CafeTutorialSession.TutorialId, CafeTutorialSession.CoffeeSignal);
-                ShowHint("首位客人的黑咖啡已交付！新手教程结束，现在可以点击「启动营业」并进入正常流程。");
+                ShowHint("首位客人的黑咖啡已交付！接下来继续学习咖啡谱与营业流程。");
+                var guide = BusinessTutorial ?? gameObject.AddComponent<FreeCafeBusinessTutorial>();
+                guide.Begin(this);
             }
             if (result.success)
                 CupDelivered?.Invoke(new CafeDeliveryReceipt(productName, customerName, quality,
@@ -401,7 +448,13 @@ namespace Spotlight.FreeCafe
             var spec=World.Spec(entity.specId);
             if(spec.Has(Capability.BusinessControl))
             {
-                if (World.State.open) RequestBusinessEnd();
+                var sign = view.GetComponent<FreeCafeBusinessSignView>();
+                if (sign != null && sign.IsFlipping) return;
+                if (World.State.open)
+                {
+                    if (sign != null && CanEndBusiness) sign.CloseAfterFlip(RequestBusinessEnd);
+                    else RequestBusinessEnd();
+                }
                 else StartBusiness();
                 return;
             }
@@ -420,7 +473,7 @@ namespace Spotlight.FreeCafe
                 Report(result); return;
             }
             if(World.ProductionEnabled && spec.Has(Capability.Processor))
-            { SelectedId=entity.id; Report(World.OperateProduction(entity.id)); return; }
+            { SelectedId=entity.id; OperateWithAudio(entity); return; }
             if(spec.Has(Capability.Source))
             {
                 var stack = view.GetComponent<FreeCafeCupStackVisual>();
@@ -429,6 +482,7 @@ namespace Spotlight.FreeCafe
                 if(result.success)
                 {
                     View(item.id)?.StartMotionFrom(pickupPosition);
+                    GameAudio.Play(FreeCafeSoundDynamics.PickupKey(item.specId), this, .5f);
                     Select(item.id);
                 }
                 Report(result);
@@ -444,13 +498,13 @@ namespace Spotlight.FreeCafe
                 if(entity.task.phase==MachinePhase.Loaded)
                 {
                     confirmCancelId=null;
-                    Report(World.Operate(entity.id));
+                    OperateWithAudio(entity);
                     return;
                 }
                 if(entity.task.phase==MachinePhase.Ready)
                 {
                     confirmCancelId=null;
-                    Report(World.Operate(entity.id));
+                    OperateWithAudio(entity);
                     return;
                 }
                 bool cancel=entity.task.phase==MachinePhase.Running;
@@ -464,17 +518,40 @@ namespace Spotlight.FreeCafe
             }
             else if(spec.Has(Capability.Customer))
             {
-                if (cafeVisits != null && cafeVisits.Click(entity.id)) return;
-                foreach(var request in World.State.requests) if(request.customerId==entity.id)
+                string requestId = null;
+                foreach (var request in World.State.requests)
+                    if (request.customerId == entity.id) { requestId = request.id; break; }
+                if (requestId != null) World.Focus(requestId);
+                if (cafeVisits != null && cafeVisits.Click(entity.id))
                 {
-                    World.Focus(request.id);
+                    if (requestId != null) BusinessTutorial?.CustomerInspected(entity.id);
+                    return;
+                }
+                if (requestId != null)
+                {
                     var result=World.Talk(entity.id);
                     Report(result);
-                    if(result.success) CafeDialoguePlayback.PlayCustomer(entity.person, result.message);
-                    break;
+                    if(result.success)
+                    {
+                        CafeDialoguePlayback.PlayCustomer(entity.person, result.message);
+                        BusinessTutorial?.CustomerInspected(entity.id);
+                    }
                 }
             }
             else Select(entity.id);
+        }
+        private void OperateWithAudio(WorldEntity machine)
+        {
+            var heated = machine.specId == "machine.stove" ? World.Find(machine.production?.heatingVesselId) : machine;
+            ProductionPhase? before = heated?.production?.phase;
+            bool selfHeating = heated?.production?.selfHeating == true;
+            MachinePhase? taskBefore = machine.task?.phase;
+            var result = World.ProductionEnabled ? World.OperateProduction(machine.id) : World.Operate(machine.id);
+            if (result.success && result.feedback == CafeFeedbackKind.None &&
+                (World.ProductionEnabled ? before != heated?.production?.phase || selfHeating != (heated?.production?.selfHeating == true)
+                    : taskBefore != machine.task?.phase))
+                GameAudio.Play(AudioKeys.MachineSwitch, this);
+            Report(result);
         }
         public void CancelProcessing(FreeEntityView view)
         {
@@ -499,6 +576,11 @@ namespace Spotlight.FreeCafe
         public void BeginDrag(FreeEntityView view,PointerEventData e)
         {
             if(World==null || InputBlocked || IsDragging || committingDrag || clearingDrag || view==null || !view.CanInteract || e==null) return;
+            if (CafeBusinessOnboardingActive)
+            {
+                ShowHint("请先完成咖啡谱与营业教程，再继续制作饮品。");
+                return;
+            }
             if (HasDragState) CancelDrag();
             var inputCamera=e.pressEventCamera!=null ? e.pressEventCamera : worldCamera;
             if(inputCamera==null || !inputCamera.isActiveAndEnabled) { ShowHint("游戏摄像机未启用，无法拖拽实体"); return; }
@@ -582,6 +664,10 @@ namespace Spotlight.FreeCafe
             }
             if (reservedCupStack != null) reservedCupStack.ReserveTopCup(true);
             draggedView.BeginPointerMotion();
+            dragAudioSpecId = draggedView.PrefabSpecId;
+            dragRustlePosition = WorldToArea(World.State.currentArea, origin);
+            dragRustleDistance = 0; nextDragRustle = Time.unscaledTime + FreeCafeSoundDynamics.DragRustleCooldown;
+            GameAudio.Play(FreeCafeSoundDynamics.PickupKey(dragAudioSpecId), this, .5f);
             draggedView.hitbox.enabled=false; MoveDrag(e);
         }
         private WorldEntity DragData()
@@ -635,6 +721,18 @@ namespace Spotlight.FreeCafe
             // 左键落点冻结；右键移动只控制倾斜，不重新寻找接收物。
             if(!vesselTiltMode) { draggedView.MovePointer(point+offset); FindReceiver(e); }
             if (!IsDragging || draggedView != movingView) return;
+            if (dragAudioSpecId == "beans" && !vesselTiltMode)
+            {
+                var position = WorldToArea(World.State.currentArea, point + offset);
+                float distance = Vector3.Distance(position, dragRustlePosition);
+                dragRustleDistance += distance;
+                dragRustlePosition = position;
+                if (distance > .0001f && dragRustleDistance >= FreeCafeSoundDynamics.DragDistanceForRustle && Time.unscaledTime >= nextDragRustle)
+                {
+                    GameAudio.Play(AudioKeys.BeansPickup, this, .35f);
+                    dragRustleDistance = 0; nextDragRustle = Time.unscaledTime + FreeCafeSoundDynamics.DragRustleCooldown;
+                }
+            }
             draggedView.body.sortingOrder=2000;
             bool placeOnly=Keyboard.current!=null && (Keyboard.current.leftShiftKey.isPressed || Keyboard.current.rightShiftKey.isPressed);
             var item=DragData();
@@ -706,6 +804,8 @@ namespace Spotlight.FreeCafe
             bool cupPickup = sourceId != null && reservedCupStack != null;
             bool returnedCup = World.IsCup(World.Find(itemId)) && receiver != null
                 && World.Spec(World.Find(receiver.EntityId).specId).sourceItemId == ghost.PrefabSpecId;
+            string releasedSpecId = ghost.PrefabSpecId;
+            bool materialAddition = !placeOnly && targetId != null && World.Spec(releasedSpecId).Has(Capability.Portion);
             bool wasPreview=dragPreview;
             bool wasVessel=draggingVessel; bool wasTilted=vesselWasTilted; ClearDrag(); ActionResult result;
             committingDrag = true;
@@ -769,8 +869,12 @@ namespace Spotlight.FreeCafe
                 }
             }
             if (result.success && result.feedback == CafeFeedbackKind.None && !wasTilted)
-                GameAudio.Play(sourceId != null ? cupPickup ? AudioKeys.CupPickup : AudioKeys.Ingredient : targetId != null ? AudioKeys.Ingredient : AudioKeys.Place);
-            if (!validScreen) ShowHint(result.message);
+                GameAudio.Play(materialAddition ? FreeCafeSoundDynamics.AdditionKey(World, releasedSpecId) : AudioKeys.Place, this);
+            if (!validScreen)
+            {
+                if (isActiveAndEnabled && !InputBlocked) GameAudio.Play(AudioKeys.DragCancel, this, .6f);
+                ShowHint(result.message);
+            }
             else Report(result);
         }
         private void RetireDragPreview(FreeEntityView preview)
@@ -794,6 +898,9 @@ namespace Spotlight.FreeCafe
             // before publishing anything so cancellation cannot re-enter this drag.
             draggedView=null; receiver=null; dragEventOwner=null; dragCamera=null;
             dragSourceId=dragItemId=dragMachineId=dragOutputId=null;
+            dragAudioSpecId=null; dragRustleDistance=0;
+            GameAudio.SetLoop(this, "pour", AudioKeys.Pour, false);
+            GameAudio.SetLoop(this, "spill", AudioKeys.Spill, false);
             dragCompanion=null; reservedCupStack=null; dragPreview=false;
             draggingVessel=false; draggingCupPickupPreview=false; vesselTiltMode=false; vesselWasTilted=false; vesselTilt=0;
             dragFinishedFrame=Time.frameCount;
@@ -816,6 +923,7 @@ namespace Spotlight.FreeCafe
         {
             if(clearingDrag || committingDrag || !HasDragState) return;
             bool cupPickup=dragSourceId!=null && reservedCupStack!=null;
+            if (isActiveAndEnabled && !InputBlocked && !PresentationPauseRegistry.IsPaused && !quitting) GameAudio.Play(AudioKeys.DragCancel, this, .6f);
             var view=draggedView; string id=dragItemId; bool provisional=dragPreview;
             ClearDrag();
             var released=World.Find(id);
@@ -860,6 +968,7 @@ namespace Spotlight.FreeCafe
         {
             if (World == null || World.Area(area) == null || areaManager.Find(area) == null || TutorialInputBlocked) return false;
             if (CafeTutorialWaitingForWorkstation) return area == AreaId.Counter;
+            if (CafeBusinessOnboardingActive) return !InputBlocked && (area == AreaId.Cafe || area == AreaId.Counter);
             if (WorkstationTutorial != null && WorkstationTutorial.IsFirstCafeTutorial) return false;
             return !InputBlocked;
         }
@@ -972,11 +1081,21 @@ namespace Spotlight.FreeCafe
             float amount = World.Catalog.production.pourRateMl*Mathf.Max(.1f,pourRateMultiplier)*tilt*Time.deltaTime;
             if (WorkstationTutorial != null) amount = WorkstationTutorial.LimitPourAmount(dragItemId, amount);
             if (amount <= 0) { StopVesselPour(); return; }
+            // Snapshot the effective receiver before reactions/refills replace production states.
+            var audioReceiver = FreeCafeSoundDynamics.PourReceiver(World, target);
+            float receiverBefore = World.LiquidVolume(audioReceiver);
+            float outflow = FreeCafeSoundDynamics.Outflow(World, source, amount);
             var result=World.PourLiquid(dragItemId,targetId,amount,Time.deltaTime);
             if(result.success)
             {
                 pouredThisDrag=true; lastPourTarget=targetId;
-                GameAudio.SetLoop(this, "pour", AudioKeys.Pour, true);
+                float received = Mathf.Max(0, World.LiquidVolume(audioReceiver) - receiverBefore);
+                float spilled = Mathf.Max(0, outflow - received);
+                float baseAmount = Mathf.Max(.0001f, World.Catalog.production.pourRateMl * Mathf.Max(.1f, pourRateMultiplier) * Time.deltaTime);
+                FreeCafeSoundDynamics.Pour(outflow / baseAmount, FreeCafeSoundDynamics.Fill(World, audioReceiver), out float volume, out float pitch);
+                GameAudio.SetLoop(this, "pour", AudioKeys.Pour, outflow > .0001f, volume, pitch);
+                FreeCafeSoundDynamics.Pour(spilled / baseAmount, 0, out volume, out pitch);
+                GameAudio.SetLoop(this, "spill", AudioKeys.Spill, spilled > .0001f, volume, pitch);
                 if(draggedView!=null) draggedView.RefreshLiquid(signedTilt,true);
                 if(target!=null && views.TryGetValue(target.id,out var targetView) && targetView!=null)
                 {
@@ -994,6 +1113,7 @@ namespace Spotlight.FreeCafe
             {
                 ShowHint(result.message);
                 GameAudio.SetLoop(this, "pour", AudioKeys.Pour, false);
+                GameAudio.SetLoop(this, "spill", AudioKeys.Spill, false);
                 if(lastPourError!=result.message) { lastPourError=result.message; OperationToastPanel.ShowMessage(result.message); }
             }
         }
@@ -1029,6 +1149,7 @@ namespace Spotlight.FreeCafe
         private void StopVesselPour()
         {
             GameAudio.SetLoop(this, "pour", AudioKeys.Pour, false);
+            GameAudio.SetLoop(this, "spill", AudioKeys.Spill, false);
             if(receivingView!=null) receivingView.SetReceivingPour(false);
             if(!pouredThisDrag) return;
             var targetId=lastPourTarget;
@@ -1067,7 +1188,10 @@ namespace Spotlight.FreeCafe
                     entity.area=initial.area; entity.x=initial.x; entity.y=initial.y;
                 }
             var result=World.Restore(candidate);
-            if(!result.success) throw new FormatException(result.message); SelectedId=null; if(productionMode && !World.ProductionEnabled) World.EnableProduction(); SyncViews();
+            if(!result.success) throw new FormatException(result.message); SelectedId=null; if(productionMode && !World.ProductionEnabled) World.EnableProduction();
+            World.ConfigureEquipmentProgression(IsSandboxMode);
+            pendingDailyCupRefresh = true;
+            SyncViews();
             // 读档后镜头瞬间就位，不做区域切换的平滑平移
             areaManager.SnapNow();
 
@@ -1107,21 +1231,60 @@ namespace Spotlight.FreeCafe
             return true;
         }
 
+        public bool DebugStartFirstGuestTutorial(out string message)
+        {
+            message = "请直接运行 CoffeeShop（沙盒）后使用此操作。";
+            if (!IsSandboxMode || World == null || !isActiveAndEnabled
+                || gameObject.scene.name != "CoffeeShop"
+                || UnityEngine.SceneManagement.SceneManager.GetActiveScene() != gameObject.scene
+                || FindFirstObjectByType<GameFlowBootstrap>() != null) return false;
+            if (dayFlow != null || FindFirstObjectByType<DayFlowController>() != null)
+            {
+                message = "本次沙盒已经存在日程/教程流程；请重新运行 CoffeeShop 后再试。";
+                return false;
+            }
+            if (World.State.day != 1 || World.State.open || World.State.requests.Count != 0
+                || World.Find(CafeWorld.TutorialCustomerId) != null)
+            {
+                message = "请在首日未营业、没有客人与订单的沙盒中启动首位客人教程。";
+                return false;
+            }
+            if (GameplayBlocked || PracticeTutorialActive || IsDragging || pendingBusinessStart
+                || playerHud != null && playerHud.IsModalOpen || productionHud != null && productionHud.IsModalOpen
+                || equipmentPanel != null && equipmentPanel.IsOpen
+                || equipmentTutorialPrompt != null && equipmentTutorialPrompt.IsOpen)
+            {
+                message = "请先结束当前教学、对话、小游戏或弹窗，并恢复游戏时间。";
+                return false;
+            }
+            // Use the existing scene world and presentation owners; do not reset sandbox resources.
+            var hud = GameplayHudPanel.Ensure();
+            if (!hud.TryStartStandaloneCafeTutorial(gameObject, out message)) return false;
+            dayFlow = GetComponent<DayFlowController>();
+            World.SetArea(AreaId.Cafe);
+            areaManager.SnapNow();
+            GetComponent<FreeCafeAudioPresenter>()?.Bind(this);
+            return true;
+        }
+
         public void PrepareCafeTutorial()
         {
             if (dayFlow == null) dayFlow = FindFirstObjectByType<DayFlowController>();
             if (!CafeTutorialActive) return;
+            World.ConfigureEquipmentProgression(false);
+            RefreshDailyCups();
             cafeTutorial ??= new CafeTutorialSession();
             var result = World.StartTutorialCustomer();
             if (!result.success) { Report(result); return; }
             cafeTutorial.Begin();
-            ShowHint("请点击「工作台」，为首位客人制作一杯黑咖啡；完成教程后才能正式营业。");
+            ShowHint("请点击大厅右侧吧台，为首位客人制作一杯黑咖啡；完成教程后才能正式营业。");
         }
 
         public void FinishCafeTutorial()
         {
             pendingTutorialCoffee = false;
             pendingBusinessStart = false;
+            BusinessTutorial?.Stop();
             if (WorkstationTutorial != null && WorkstationTutorial.IsFirstCafeTutorial) WorkstationTutorial.Stop();
             World.EndTutorialCustomer();
             cafeTutorial = null;
@@ -1130,21 +1293,24 @@ namespace Spotlight.FreeCafe
 
         public void StartBusiness()
         {
-            if (World == null || InputBlocked || CafeTutorialActive) return;
+            if (World == null || InputBlocked || TutorialBusinessStartBlocked) return;
             if (World.State.open) RequestBusinessEnd();
             else RequestBusinessStart();
         }
-        public void RequestBusinessStart() { if (!GameplayBlocked && !CafeTutorialActive && !PracticeTutorialActive) { pendingBusinessStart = true; TryStartBusiness(); } }
+        public void RequestBusinessStart() { if (!GameplayBlocked && !TutorialBusinessStartBlocked && !PracticeTutorialActive) { pendingBusinessStart = true; TryStartBusiness(); } }
         private void TryStartBusiness()
         {
             if (World == null || World.State.open) { pendingBusinessStart = false; return; }
-            if (GameplayBlocked || CafeTutorialActive || PracticeTutorialActive) return;
-            if (cafeVisits == null) cafeVisits = new CafeVisitBridge(this);
-            var ncs = Spotlight.Narrative.NarrativeRuntime.Instance;
-            if (ncs != null && (!cafeVisits.Pump() || !ncs.Controller.CanCaptureSnapshot || ncs.Controller.IsBusy || cafeVisits.HasStageHandoff)) return;
+            if (GameplayBlocked || TutorialBusinessStartBlocked || PracticeTutorialActive) return;
+            if (!IsSandboxMode)
+            {
+                if (cafeVisits == null) cafeVisits = new CafeVisitBridge(this);
+                var ncs = Spotlight.Narrative.NarrativeRuntime.Instance;
+                if (ncs != null && (!cafeVisits.Pump() || !ncs.Controller.CanCaptureSnapshot || ncs.Controller.IsBusy || cafeVisits.HasStageHandoff)) return;
+            }
             pendingBusinessStart = false;
-            Report(World.StartDay());
-            cafeVisits.Pump();
+            Report(World.StartDay(IsSandboxMode));
+            if (!IsSandboxMode) cafeVisits?.Pump();
         }
         public bool CanEndBusiness => World != null && World.State.open && !InputBlocked && !IsDragging
             && !CafeTutorialActive && !PracticeTutorialActive;
@@ -1155,14 +1321,21 @@ namespace Spotlight.FreeCafe
             else EndBusiness();
         }
         public void EndBusiness() { if(!InputBlocked) Report(World.EndDay()); }
+        private void RefreshDailyCups()
+        {
+            int day = dayFlow != null ? dayFlow.CurrentDay : World.State.day;
+            if (!IsSandboxMode && dayFlow != null) World.SynchronizeCalendarDay(day);
+            World.RefreshDailyCupStock((IsSandboxMode ? "sandbox:" : "story:") + day);
+        }
         public void StartDayFlowBusiness()
         {
+            RefreshDailyCups();
             if (CafeTutorialActive)
             {
                 PrepareCafeTutorial();
                 return;
             }
-            ShowHint("准备就绪，点击大厅的「启动营业」立牌开始正式营业。");
+            ShowHint("准备就绪，点击大厅的「开始营业」挂牌开始正式营业。");
         }
         public void EndDayFlowBusiness()
         {

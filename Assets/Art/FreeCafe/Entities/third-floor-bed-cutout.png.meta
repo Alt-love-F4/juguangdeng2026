@@ -1,0 +1,1157 @@
+fileFormatVersion: 2
+guid: 700d05b2f1e0e1d4d89d0e234c28ccb1
+TextureImporter:
+  internalIDToNameTable:
+  - first:
+      213: -6961164604791610097
+    second: third-floor-bed-cutout_0
+  - first:
+      213: 8807253791721806806
+    second: third-floor-bed-cutout_1
+  - first:
+      213: 7520094866059447449
+    second: third-floor-bed-cutout_2
+  - first:
+      213: -8829381458753270912
+    second: third-floor-bed-cutout_3
+  - first:
+      213: -7795163248615257033
+    second: third-floor-bed-cutout_4
+  - first:
+      213: 5601184489781236948
+    second: third-floor-bed-cutout_5
+  - first:
+      213: 6574950948953450661
+    second: third-floor-bed-cutout_6
+  - first:
+      213: -4338829268959127401
+    second: third-floor-bed-cutout_7
+  - first:
+      213: -1739459440495659982
+    second: third-floor-bed-cutout_8
+  - first:
+      213: 5226652451361369706
+    second: third-floor-bed-cutout_9
+  - first:
+      213: -5794624052024863882
+    second: third-floor-bed-cutout_10
+  - first:
+      213: -846055279229719349
+    second: third-floor-bed-cutout_11
+  - first:
+      213: 8791289109253212602
+    second: third-floor-bed-cutout_12
+  - first:
+      213: -3091904834212309113
+    second: third-floor-bed-cutout_13
+  - first:
+      213: 7811985939941181355
+    second: third-floor-bed-cutout_14
+  - first:
+      213: -6106606408258927737
+    second: third-floor-bed-cutout_15
+  - first:
+      213: 4865090784014254730
+    second: third-floor-bed-cutout_16
+  - first:
+      213: 6104801554267512512
+    second: third-floor-bed-cutout_17
+  - first:
+      213: -228503529798078437
+    second: third-floor-bed-cutout_18
+  - first:
+      213: -3430174053234062362
+    second: third-floor-bed-cutout_19
+  - first:
+      213: -4299817908095946661
+    second: third-floor-bed-cutout_20
+  - first:
+      213: 8319321725794140403
+    second: third-floor-bed-cutout_21
+  - first:
+      213: -6008626400570904507
+    second: third-floor-bed-cutout_22
+  - first:
+      213: -6141461460769645295
+    second: third-floor-bed-cutout_23
+  - first:
+      213: 3883612053223775408
+    second: third-floor-bed-cutout_24
+  - first:
+      213: -4114838632793242501
+    second: third-floor-bed-cutout_25
+  - first:
+      213: -7788326721891883452
+    second: third-floor-bed-cutout_26
+  - first:
+      213: 3639472948738676802
+    second: third-floor-bed-cutout_27
+  - first:
+      213: 869751984689918094
+    second: third-floor-bed-cutout_28
+  - first:
+      213: 2813169185081800349
+    second: third-floor-bed-cutout_29
+  - first:
+      213: 1631643867388563852
+    second: third-floor-bed-cutout_30
+  - first:
+      213: -7865278879432233258
+    second: third-floor-bed-cutout_31
+  - first:
+      213: -8556203195926240575
+    second: third-floor-bed-cutout_32
+  - first:
+      213: -3686645036756535863
+    second: third-floor-bed-cutout_33
+  - first:
+      213: -7434969900316382671
+    second: third-floor-bed-cutout_34
+  - first:
+      213: -8569094671110832088
+    second: third-floor-bed-cutout_35
+  - first:
+      213: 1426814883709520288
+    second: third-floor-bed-cutout_36
+  - first:
+      213: 4163649219088636566
+    second: third-floor-bed-cutout_37
+  - first:
+      213: -1047588312940520553
+    second: third-floor-bed-cutout_38
+  - first:
+      213: -255530655289047839
+    second: third-floor-bed-cutout_39
+  externalObjects: {}
+  serializedVersion: 13
+  mipmaps:
+    mipMapMode: 0
+    enableMipMap: 0
+    sRGBTexture: 1
+    linearTexture: 0
+    fadeOut: 0
+    borderMipMap: 0
+    mipMapsPreserveCoverage: 0
+    alphaTestReferenceValue: 0.5
+    mipMapFadeDistanceStart: 1
+    mipMapFadeDistanceEnd: 3
+  bumpmap:
+    convertToNormalMap: 0
+    externalNormalMap: 0
+    heightScale: 0.25
+    normalMapFilter: 0
+    flipGreenChannel: 0
+  isReadable: 0
+  streamingMipmaps: 0
+  streamingMipmapsPriority: 0
+  vTOnly: 0
+  ignoreMipmapLimit: 0
+  grayScaleToAlpha: 0
+  generateCubemap: 6
+  cubemapConvolution: 0
+  seamlessCubemap: 0
+  textureFormat: 1
+  maxTextureSize: 2048
+  textureSettings:
+    serializedVersion: 2
+    filterMode: 1
+    aniso: 1
+    mipBias: 0
+    wrapU: 1
+    wrapV: 1
+    wrapW: 1
+  nPOTScale: 0
+  lightmap: 0
+  compressionQuality: 50
+  spriteMode: 2
+  spriteExtrude: 1
+  spriteMeshType: 1
+  alignment: 0
+  spritePivot: {x: 0.5, y: 0.5}
+  spritePixelsToUnits: 100
+  spriteBorder: {x: 0, y: 0, z: 0, w: 0}
+  spriteGenerateFallbackPhysicsShape: 1
+  alphaUsage: 1
+  alphaIsTransparency: 1
+  spriteTessellationDetail: -1
+  textureType: 8
+  textureShape: 1
+  singleChannelComponent: 0
+  flipbookRows: 1
+  flipbookColumns: 1
+  maxTextureSizeSet: 0
+  compressionQualitySet: 0
+  textureFormatSet: 0
+  ignorePngGamma: 0
+  applyGammaDecoding: 0
+  swizzle: 50462976
+  cookieLightType: 0
+  platformSettings:
+  - serializedVersion: 4
+    buildTarget: DefaultTexturePlatform
+    maxTextureSize: 2048
+    resizeAlgorithm: 0
+    textureFormat: -1
+    textureCompression: 1
+    compressionQuality: 50
+    crunchedCompression: 0
+    allowsAlphaSplitting: 0
+    overridden: 0
+    ignorePlatformSupport: 0
+    androidETC2FallbackOverride: 0
+    forceMaximumCompressionQuality_BC6H_BC7: 0
+  - serializedVersion: 4
+    buildTarget: Standalone
+    maxTextureSize: 2048
+    resizeAlgorithm: 0
+    textureFormat: -1
+    textureCompression: 1
+    compressionQuality: 50
+    crunchedCompression: 0
+    allowsAlphaSplitting: 0
+    overridden: 0
+    ignorePlatformSupport: 0
+    androidETC2FallbackOverride: 0
+    forceMaximumCompressionQuality_BC6H_BC7: 0
+  spriteSheet:
+    serializedVersion: 2
+    sprites:
+    - serializedVersion: 2
+      name: third-floor-bed-cutout_0
+      rect:
+        serializedVersion: 2
+        x: 0
+        y: 0
+        width: 1288
+        height: 1178
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: f05af5c7ca9f46f90800000000000000
+      internalID: -6961164604791610097
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: third-floor-bed-cutout_1
+      rect:
+        serializedVersion: 2
+        x: 390
+        y: 1165
+        width: 9
+        height: 15
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 6db5a4629a6a93a70800000000000000
+      internalID: 8807253791721806806
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: third-floor-bed-cutout_2
+      rect:
+        serializedVersion: 2
+        x: 406
+        y: 1165
+        width: 17
+        height: 10
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 99c46b0007ebc5860800000000000000
+      internalID: 7520094866059447449
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: third-floor-bed-cutout_3
+      rect:
+        serializedVersion: 2
+        x: 548
+        y: 1163
+        width: 7
+        height: 10
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 08b4794e75cb77580800000000000000
+      internalID: -8829381458753270912
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: third-floor-bed-cutout_4
+      rect:
+        serializedVersion: 2
+        x: 553
+        y: 1163
+        width: 11
+        height: 11
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 73c8b10735402d390800000000000000
+      internalID: -7795163248615257033
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: third-floor-bed-cutout_5
+      rect:
+        serializedVersion: 2
+        x: 562
+        y: 1163
+        width: 16
+        height: 13
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 4d496dafd976bbd40800000000000000
+      internalID: 5601184489781236948
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: third-floor-bed-cutout_6
+      rect:
+        serializedVersion: 2
+        x: 574
+        y: 1167
+        width: 6
+        height: 9
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 5a8ecff6d0bee3b50800000000000000
+      internalID: 6574950948953450661
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: third-floor-bed-cutout_7
+      rect:
+        serializedVersion: 2
+        x: 598
+        y: 1145
+        width: 26
+        height: 29
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 7989f9a94c169c3c0800000000000000
+      internalID: -4338829268959127401
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: third-floor-bed-cutout_8
+      rect:
+        serializedVersion: 2
+        x: 616
+        y: 1164
+        width: 19
+        height: 10
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 2347e0cdad23cd7e0800000000000000
+      internalID: -1739459440495659982
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: third-floor-bed-cutout_9
+      rect:
+        serializedVersion: 2
+        x: 672
+        y: 1140
+        width: 34
+        height: 34
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: a6ea1d766bcc88840800000000000000
+      internalID: 5226652451361369706
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: third-floor-bed-cutout_10
+      rect:
+        serializedVersion: 2
+        x: 718
+        y: 1154
+        width: 20
+        height: 19
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 6739f1c302c559fa0800000000000000
+      internalID: -5794624052024863882
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: third-floor-bed-cutout_11
+      rect:
+        serializedVersion: 2
+        x: 758
+        y: 1167
+        width: 10
+        height: 7
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: bcc2b25c4353244f0800000000000000
+      internalID: -846055279229719349
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: third-floor-bed-cutout_12
+      rect:
+        serializedVersion: 2
+        x: 776
+        y: 1165
+        width: 8
+        height: 9
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: ab94ccadddee00a70800000000000000
+      internalID: 8791289109253212602
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: third-floor-bed-cutout_13
+      rect:
+        serializedVersion: 2
+        x: 781
+        y: 1144
+        width: 51
+        height: 36
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 78756755fe85715d0800000000000000
+      internalID: -3091904834212309113
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: third-floor-bed-cutout_14
+      rect:
+        serializedVersion: 2
+        x: 873
+        y: 1156
+        width: 7
+        height: 17
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: ba74a8c92dfb96c60800000000000000
+      internalID: 7811985939941181355
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: third-floor-bed-cutout_15
+      rect:
+        serializedVersion: 2
+        x: 879
+        y: 1160
+        width: 7
+        height: 12
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 7834a9c63d9f04ba0800000000000000
+      internalID: -6106606408258927737
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: third-floor-bed-cutout_16
+      rect:
+        serializedVersion: 2
+        x: 937
+        y: 1172
+        width: 9
+        height: 11
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: a82423daa46448340800000000000000
+      internalID: 4865090784014254730
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: third-floor-bed-cutout_17
+      rect:
+        serializedVersion: 2
+        x: 1223
+        y: 1167
+        width: 9
+        height: 13
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 0ce1e524bac98b450800000000000000
+      internalID: 6104801554267512512
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: third-floor-bed-cutout_18
+      rect:
+        serializedVersion: 2
+        x: 468
+        y: 1143
+        width: 11
+        height: 14
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: b107674104134dcf0800000000000000
+      internalID: -228503529798078437
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: third-floor-bed-cutout_19
+      rect:
+        serializedVersion: 2
+        x: 552
+        y: 1154
+        width: 6
+        height: 6
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 6ebc8375fd29560d0800000000000000
+      internalID: -3430174053234062362
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: third-floor-bed-cutout_20
+      rect:
+        serializedVersion: 2
+        x: 648
+        y: 1156
+        width: 8
+        height: 14
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: b50f31dd46af354c0800000000000000
+      internalID: -4299817908095946661
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: third-floor-bed-cutout_21
+      rect:
+        serializedVersion: 2
+        x: 700
+        y: 1146
+        width: 8
+        height: 11
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 3f0462e280b247370800000000000000
+      internalID: 8319321725794140403
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: third-floor-bed-cutout_22
+      rect:
+        serializedVersion: 2
+        x: 772
+        y: 1146
+        width: 10
+        height: 11
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 540ffedaf121d9ca0800000000000000
+      internalID: -6008626400570904507
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: third-floor-bed-cutout_23
+      rect:
+        serializedVersion: 2
+        x: 550
+        y: 1142
+        width: 6
+        height: 10
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 11dd21d175525caa0800000000000000
+      internalID: -6141461460769645295
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: third-floor-bed-cutout_24
+      rect:
+        serializedVersion: 2
+        x: 552
+        y: 1140
+        width: 10
+        height: 12
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 0bc14dd069c55e530800000000000000
+      internalID: 3883612053223775408
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: third-floor-bed-cutout_25
+      rect:
+        serializedVersion: 2
+        x: 614
+        y: 1143
+        width: 6
+        height: 6
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: b740e48901825e6c0800000000000000
+      internalID: -4114838632793242501
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: third-floor-bed-cutout_26
+      rect:
+        serializedVersion: 2
+        x: 762
+        y: 1140
+        width: 8
+        height: 7
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 446a3fa5c1e4ae390800000000000000
+      internalID: -7788326721891883452
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: third-floor-bed-cutout_27
+      rect:
+        serializedVersion: 2
+        x: 764
+        y: 1146
+        width: 6
+        height: 6
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 24856373d51028230800000000000000
+      internalID: 3639472948738676802
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: third-floor-bed-cutout_28
+      rect:
+        serializedVersion: 2
+        x: 769
+        y: 1140
+        width: 7
+        height: 9
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: e80322a62daf11c00800000000000000
+      internalID: 869751984689918094
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: third-floor-bed-cutout_29
+      rect:
+        serializedVersion: 2
+        x: 694
+        y: 1139
+        width: 8
+        height: 6
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: d9630e118726a0720800000000000000
+      internalID: 2813169185081800349
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: third-floor-bed-cutout_30
+      rect:
+        serializedVersion: 2
+        x: 210
+        y: 78
+        width: 17
+        height: 24
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: c81d3abd373c4a610800000000000000
+      internalID: 1631643867388563852
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: third-floor-bed-cutout_31
+      rect:
+        serializedVersion: 2
+        x: 246
+        y: 80
+        width: 13
+        height: 11
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 6de2f0cf78ae8d290800000000000000
+      internalID: -7865278879432233258
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: third-floor-bed-cutout_32
+      rect:
+        serializedVersion: 2
+        x: 606
+        y: 77
+        width: 6
+        height: 6
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 1c221c8a682424980800000000000000
+      internalID: -8556203195926240575
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: third-floor-bed-cutout_33
+      rect:
+        serializedVersion: 2
+        x: 664
+        y: 82
+        width: 11
+        height: 19
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 9c57b2b2fd766dcc0800000000000000
+      internalID: -3686645036756535863
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: third-floor-bed-cutout_34
+      rect:
+        serializedVersion: 2
+        x: 690
+        y: 80
+        width: 16
+        height: 21
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 13aabef844ea1d890800000000000000
+      internalID: -7434969900316382671
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: third-floor-bed-cutout_35
+      rect:
+        serializedVersion: 2
+        x: 803
+        y: 68
+        width: 9
+        height: 16
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 8200fb13cc5741980800000000000000
+      internalID: -8569094671110832088
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: third-floor-bed-cutout_36
+      rect:
+        serializedVersion: 2
+        x: 903
+        y: 80
+        width: 17
+        height: 19
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 0a90fbfb3901dc310800000000000000
+      internalID: 1426814883709520288
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: third-floor-bed-cutout_37
+      rect:
+        serializedVersion: 2
+        x: 614
+        y: 66
+        width: 12
+        height: 15
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 69a5c11a7e048c930800000000000000
+      internalID: 4163649219088636566
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: third-floor-bed-cutout_38
+      rect:
+        serializedVersion: 2
+        x: 622
+        y: 70
+        width: 6
+        height: 6
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 79b5450daf73671f0800000000000000
+      internalID: -1047588312940520553
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: third-floor-bed-cutout_39
+      rect:
+        serializedVersion: 2
+        x: 424
+        y: 0
+        width: 31
+        height: 10
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 1e4064e093c247cf0800000000000000
+      internalID: -255530655289047839
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    outline: []
+    customData: 
+    physicsShape: []
+    bones: []
+    spriteID: 
+    internalID: 0
+    vertices: []
+    indices: 
+    edges: []
+    weights: []
+    secondaryTextures: []
+    spriteCustomMetadata:
+      entries: []
+    nameFileIdTable:
+      third-floor-bed-cutout_0: -6961164604791610097
+      third-floor-bed-cutout_1: 8807253791721806806
+      third-floor-bed-cutout_10: -5794624052024863882
+      third-floor-bed-cutout_11: -846055279229719349
+      third-floor-bed-cutout_12: 8791289109253212602
+      third-floor-bed-cutout_13: -3091904834212309113
+      third-floor-bed-cutout_14: 7811985939941181355
+      third-floor-bed-cutout_15: -6106606408258927737
+      third-floor-bed-cutout_16: 4865090784014254730
+      third-floor-bed-cutout_17: 6104801554267512512
+      third-floor-bed-cutout_18: -228503529798078437
+      third-floor-bed-cutout_19: -3430174053234062362
+      third-floor-bed-cutout_2: 7520094866059447449
+      third-floor-bed-cutout_20: -4299817908095946661
+      third-floor-bed-cutout_21: 8319321725794140403
+      third-floor-bed-cutout_22: -6008626400570904507
+      third-floor-bed-cutout_23: -6141461460769645295
+      third-floor-bed-cutout_24: 3883612053223775408
+      third-floor-bed-cutout_25: -4114838632793242501
+      third-floor-bed-cutout_26: -7788326721891883452
+      third-floor-bed-cutout_27: 3639472948738676802
+      third-floor-bed-cutout_28: 869751984689918094
+      third-floor-bed-cutout_29: 2813169185081800349
+      third-floor-bed-cutout_3: -8829381458753270912
+      third-floor-bed-cutout_30: 1631643867388563852
+      third-floor-bed-cutout_31: -7865278879432233258
+      third-floor-bed-cutout_32: -8556203195926240575
+      third-floor-bed-cutout_33: -3686645036756535863
+      third-floor-bed-cutout_34: -7434969900316382671
+      third-floor-bed-cutout_35: -8569094671110832088
+      third-floor-bed-cutout_36: 1426814883709520288
+      third-floor-bed-cutout_37: 4163649219088636566
+      third-floor-bed-cutout_38: -1047588312940520553
+      third-floor-bed-cutout_39: -255530655289047839
+      third-floor-bed-cutout_4: -7795163248615257033
+      third-floor-bed-cutout_5: 5601184489781236948
+      third-floor-bed-cutout_6: 6574950948953450661
+      third-floor-bed-cutout_7: -4338829268959127401
+      third-floor-bed-cutout_8: -1739459440495659982
+      third-floor-bed-cutout_9: 5226652451361369706
+  mipmapLimitGroupName: 
+  pSDRemoveMatte: 0
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 

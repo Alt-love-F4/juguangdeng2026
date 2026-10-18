@@ -164,6 +164,25 @@ Skip 按钮始终显示，建议放在右下角，不能遮挡正文。
 
 Skip 是正式画面中的正式功能，不做 Editor/Development Build 隐藏逻辑。
 
+## 5.5 分镜 CG 演出（2026-10-18 补充）
+
+5.2 的「整段淡入」已升级为可交互过场 CG，文案与段数不变：
+
+- 第 1~7 段各配一组分镜格（共 14 格），第 8 段「孩子们……」只有文字、居中显示。
+- 每段开始时，正文逐字渐显（每字轻微上浮），分镜格**同时**按顺序出场；有配图时正文位于分镜下方。
+- 出场方式由每格的 `ProloguePanelArt.entrance` 决定：主要使用 `FlyFrom*`，即从屏幕半程位置边滑动边渐显（`flyDistance=0.5`，非屏幕外飞入）；第 2 段光环用 `SplitVertical` 上下展开，第 7 段眼部特写用 `ZoomIn` 推近。全部完成后会缓慢推近。
+- 输入：演出中第一次点击/空格/Enter 立即补全本段（文字和分镜停到最终状态），再次输入才翻页；淡出期间输入无效。Skip 行为不变。
+- 所有动画都由每段的本地时钟求值（不用 Tween），补全、Skip、重播都落在确定的画面上，并使用非缩放时间。
+
+资源与参数：
+
+- 裁好的分镜：`Assets/Art/UI/OpeningPrologue/prologue_XX_y.png`；原始分镜参考图保存在同目录 `Source~/`（Unity 不导入）。
+- 每段可调：`text`、单字渐显时长 `fadeInSeconds`、`fadeOutSeconds`、分镜根节点 `art`、`artDelaySeconds`（默认 0，即图文同时出场）、正文纵向区域 `textArea`、字号 `fontSize`。
+- 每格可调：`entrance`、`delay`、`duration`、`flyDistance`、`flyFadePortion`、`flyTilt`、`flyParallax`、推近幅度 `driftScale`。
+- 全局：`charStaggerSeconds`（逐字间隔）、`charRisePixels`。
+- 生成/重建：`Tools > Game Flow > Rebuild Opening Prologue Panel`（`OpeningProloguePrefabBuilder` 内含排版坐标与出场配置；重建会覆盖 Prefab 中的手动修改）。
+- 预览：`PresentationDebugScene` 按 `Z`。
+
 ## 6. Prefab 结构
 
 建议资源路径：

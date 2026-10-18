@@ -242,6 +242,7 @@ namespace Spotlight.FreeCafe
         public ActionResult OperateProduction(string machineId)
         {
             var machine = Find(machineId);
+            if (machine == null || !IsEquipmentAvailable(machine)) return ActionResult.No("请先在设备升级面板激活此设备");
             if (!IsProductionMachine(machine)) return ActionResult.No("无效设备");
             var data = machine.production;
             if (machine.specId == "machine.stove") return StartStove(machine);
