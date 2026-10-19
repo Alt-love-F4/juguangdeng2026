@@ -33,9 +33,14 @@ namespace Spotlight.Narrative
         }
 
         /// <summary>运行时仅从 Luban Object/Text 创建目录；不读取手动资产作为权威数据。</summary>
-        public static CharacterCatalog LoadFromTables()
+        public static CharacterCatalog LoadFromTables() => LoadFromTables(LubanNarrativeLoader.Load());
+
+        /// <summary>
+        /// 用已有配置快照构建目录，避免调用方再次全量解析 Luban 表（转场时为重复开销）。
+        /// </summary>
+        public static CharacterCatalog LoadFromTables(NarrativeConfiguration config)
         {
-            var config = LubanNarrativeLoader.Load();
+            if (config == null) config = LubanNarrativeLoader.Load();
             var catalog = CreateInstance<CharacterCatalog>();
             catalog.hideFlags = HideFlags.HideAndDontSave;
             var profiles = new List<CharacterProfile>();

@@ -17,6 +17,11 @@ namespace Spotlight.Narrative
         private readonly Dictionary<StoryGraphNode, Status> nodes = new Dictionary<StoryGraphNode, Status>();
         private readonly Dictionary<string, string> pages = new Dictionary<string, string>(StringComparer.Ordinal);
         private readonly Dictionary<string, NarrativeEventDefinition> events;
+        private readonly Dictionary<string, IReadOnlyList<NarrativeConditionDiagnostic>> endingConditions = new Dictionary<string, IReadOnlyList<NarrativeConditionDiagnostic>>(StringComparer.Ordinal);
+        private readonly Dictionary<string, string> endingConditionErrors = new Dictionary<string, string>(StringComparer.Ordinal);
+
+
+        private string endingForecast;
         private NarrativeController controller;
 
         private sealed class Status
@@ -36,9 +41,79 @@ namespace Spotlight.Narrative
             this.controller = controller;
             nodes.Clear();
             pages.Clear();
+            endingConditions.Clear();
+            endingConditionErrors.Clear();
+            endingForecast = null;
         }
 
         public string Label(StoryGraphNode node) => Read(node).Label;
+
+        public string EndingForecast => endingForecast ?? (endingForecast = BuildEndingForecast());
+
+        private string BuildEndingForecast()
+        {
+            if (controller == null) return "无正式会话：无法读取当前参数或推演结局。";
+            if (controller.IsEnded) return "实际结果：正式会话已选中结局 " + controller.SelectedEndingId + "。";
+            if (!controller.ValuesReady) return "无法推演：NCS 外部数值尚未完成恢复。";
+
+            string lineBreak = Environment.NewLine;
+            string context = !controller.EndingChecksEnabled
+                ? "自动结局检查未启用；以下仅为按当前条件假设重新检查的结果。" + lineBreak
+                : !controller.IsSafeBoundary
+                    ? "当前不在安全结算点；以下是当前已提交参数的快照推演，不代表即将触发。" + lineBreak
+                    : controller.EndingEvaluationPending
+                        ? "结局检查待处理；以下是下一次安全结算检查的只读预测。" + lineBreak
+                        : "当前没有待处理的结局检查；以下是假设按当前参数重新检查的结果。" + lineBreak;
+
+            var endings = configuration.endings.Where(e => e != null && e.enabled)
+                .OrderByDescending(e => e.priority).ThenBy(e => e.endingId, StringComparer.Ordinal).ToArray();
+            if (endings.Length == 0) return context + "没有启用的结局配置。";
+
+            foreach (var ending in endings)
+            {
+                var rows = EndingConditions(ending.endingId);
+                if (endingConditionErrors.TryGetValue(ending.endingId, out string readError))
+                    return context + "无法确定：优先级 " + ending.priority + " 的结局 " + ending.endingId
+                        + " 条件读取失败（" + readError + "）；不能跳过它预测较低优先级结局。";
+                if (rows.Count == 0)
+                    return context + "无法确定：结局 " + ending.endingId + " 没有条件行；正式检查无法安全推断后续结局。";
+
+                NarrativeConditionDiagnostic unavailable = rows.FirstOrDefault(row => !string.IsNullOrEmpty(row.Error));
+                if (unavailable != null)
+                    return context + "无法确定：按正式优先级首先检查结局 " + ending.endingId + "，但条件 "
+                        + unavailable.ConditionId + " 当前不可用（" + unavailable.Error + "）；不能跳过它预测较低优先级结局。";
+
+                bool? eligible = GroupedConditions(rows);
+                if (!eligible.HasValue)
+                    return context + "无法确定：结局 " + ending.endingId + " 的条件组无法判定；不能跳过它预测较低优先级结局。";
+                if (!eligible.Value) continue;
+
+                string title = configuration.texts.Find(text => text != null && text.key == ending.titleText)?.content;
+                if (string.IsNullOrWhiteSpace(title)) title = ending.titleText;
+                return context + "预测首个满足的结局：" + title + " [" + ending.endingId + "]，优先级 "
+                    + ending.priority + "。这是只读推演，未选择或触发结局。";
+            }
+
+            return context + "当前参数下，所有启用结局的条件均不满足。";
+        }
+
+        private IReadOnlyList<NarrativeConditionDiagnostic> EndingConditions(string endingId)
+        {
+            string key = endingId ?? string.Empty;
+            if (endingConditions.TryGetValue(key, out var cached)) return cached;
+            try
+            {
+                cached = controller.ExplainConditions("ending", endingId) ?? Array.Empty<NarrativeConditionDiagnostic>();
+            }
+            catch (Exception error)
+            {
+                endingConditionErrors[key] = error.Message;
+                cached = Array.Empty<NarrativeConditionDiagnostic>();
+            }
+            endingConditions[key] = cached;
+            return cached;
+        }
+
         public string Details(StoryGraphNode node) => Read(node).Details;
 
         private Status Read(StoryGraphNode node)
@@ -112,7 +187,9 @@ namespace Spotlight.Narrative
                     return priority ?? "未知（Opening 无独立历史）";
                 case StoryNodeKind.Ending:
                     text.AppendLine("已选择结局事实：" + (controller.SelectedEndingId ?? "无"));
-                    var conditions = controller.ExplainConditions("ending", node.Key);
+                    var conditions = EndingConditions(node.Key);
+                    if (endingConditionErrors.TryGetValue(node.Key ?? string.Empty, out string conditionError))
+                        text.AppendLine("结局条件读取失败：" + conditionError);
                     AppendConditions(text, conditions);
                     text.AppendLine("不调用结局检查，不选择结局，不以当前条件反推已达成。");
                     if (priority != null) return priority;

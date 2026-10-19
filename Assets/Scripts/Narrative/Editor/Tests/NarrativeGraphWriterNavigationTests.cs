@@ -61,6 +61,24 @@ namespace Spotlight.Narrative.Editor.Tests
         }
 
         [Test]
+        public void LoadBuildsEndingDirectoryInPriorityOrderAndKeepsDisabledEntriesVisible()
+        {
+            var config = Config();
+            config.endings.Add(new NarrativeEndingDefinition { endingId = "ending.mid", enabled = true, priority = 10 });
+            config.endings.Add(new NarrativeEndingDefinition { endingId = "ending.disabled", enabled = false, priority = 50 });
+            config.endings.Add(new NarrativeEndingDefinition { endingId = "ending.high", enabled = true, priority = 30 });
+
+            view.Load(config);
+
+            Assert.That(view.EndingNodes.Count, Is.EqualTo(3));
+            Assert.That(view.EndingNodes[0].Key, Is.EqualTo("ending.disabled"));
+            Assert.That(view.EndingNodes[1].Key, Is.EqualTo("ending.high"));
+            Assert.That(view.EndingNodes[2].Key, Is.EqualTo("ending.mid"));
+            Assert.That(view.EndingNodes[0].Disabled, Is.True);
+        }
+
+
+        [Test]
         public void TrySelectPage_UsesExactIdEvenForNumericIds()
         {
             LoadAndSelect(NodeB);

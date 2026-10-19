@@ -190,7 +190,7 @@ namespace Spotlight.GameFlow
             });
             letterBody.richText = true;
             letterBody.enableAutoSizing = false;
-            letterBody.fontSize = Mathf.Max(26, size);
+            letterBody.fontSize = Mathf.Max(30, size);
             letterBody.textWrappingMode = TextWrappingModes.Normal;
             letterBody.overflowMode = TextOverflowModes.Overflow;
             letterBody.maxVisibleCharacters = int.MaxValue;

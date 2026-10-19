@@ -1,4 +1,4 @@
-﻿#if UNITY_EDITOR
+#if UNITY_EDITOR
 using System;
 using System.Collections;
 using System.Linq;
@@ -107,6 +107,43 @@ namespace Spotlight.GameFlow.Tests
             Assert.That(ordinary.IsEndingDialogueVisible,Is.False);
             Assert.That(ordinary.GetComponentsInChildren<TMPro.TMP_Text>(true).Any(t=>t.gameObject.activeSelf&&t.text.StartsWith("ENDING  /")),Is.False);
         }
+
+        [UnityTest]
+        public IEnumerator SaveSuccessUsesCompactContinueLayoutAndRestoresOrdinaryLayout()
+        {
+            Time.timeScale = 1f;
+            int closed = 0;
+            var data = new ResultPanelData(null, "保存成功", "已保存到槽 3", () => closed++,
+                "继续游戏", isSaveSuccess: true);
+            ResultPanel save = UIKit.OpenPanel<ResultPanel>(UILevel.Pop, data,
+                tag: "ending-panel-test", cachePolicy: PanelCachePolicy.Reusable);
+            for (int i = 0; i < 25 && save.State == PanelState.Opening; i++) yield return null;
+
+            Assert.That(save.IsSaveSuccessPresentation, Is.True);
+            Assert.That(save.IsEndingPresentation, Is.False);
+            Assert.That(save.DisplayedTitle, Is.EqualTo("保存成功"));
+            Assert.That(save.DisplayedMessage, Is.EqualTo("已保存到槽 3"));
+            Assert.That(save.DisplayedCloseLabel, Is.EqualTo("继续游戏"));
+            var panelRect = save.transform.Find("Panel") as RectTransform;
+            Assert.That(panelRect.anchorMin.x, Is.EqualTo(.28f).Within(.001f));
+            Assert.That(panelRect.anchorMax.x, Is.EqualTo(.72f).Within(.001f));
+            Assert.That(panelRect.anchorMin.y, Is.EqualTo(.30f).Within(.001f));
+            Assert.That(panelRect.anchorMax.y, Is.EqualTo(.70f).Within(.001f));
+
+            save.ConfirmResult();
+            for (int i = 0; i < 40 && closed == 0; i++) yield return null;
+            Assert.That(closed, Is.EqualTo(1));
+
+            ResultPanel ordinary = UIKit.OpenPanel<ResultPanel>(UILevel.Pop,
+                new ResultPanelData(null, "操作提示", "普通消息", null),
+                tag: "ending-panel-test", cachePolicy: PanelCachePolicy.Reusable);
+            for (int i = 0; i < 25 && ordinary.State == PanelState.Opening; i++) yield return null;
+            Assert.That(ordinary.IsSaveSuccessPresentation, Is.False);
+            panelRect = ordinary.transform.Find("Panel") as RectTransform;
+            Assert.That(panelRect.anchorMin.x, Is.EqualTo(.105f).Within(.001f));
+            Assert.That(panelRect.anchorMax.x, Is.EqualTo(.895f).Within(.001f));
+        }
+
         [UnityTest]public IEnumerator ActualAuthoredRootCompletesThroughPresenterThenOpensTheRealEndingPanel()
         {
             var c=LubanNarrativeLoader.Load();

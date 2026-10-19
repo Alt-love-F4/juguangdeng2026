@@ -11,6 +11,8 @@ namespace Spotlight.Narrative
     /// Construct, draw, load and dispose on the Unity main thread.</summary>
     public sealed partial class NarrativeRelationshipGraphView : IDisposable
     {
+
+        private StoryGraphNode[] endingNodes = Array.Empty<StoryGraphNode>();
         private NarrativeRelationshipGraph graph;
         private readonly Dictionary<string, Rect> positions = new Dictionary<string, Rect>(StringComparer.Ordinal);
         private readonly List<StoryGraphNode> visible = new List<StoryGraphNode>();
@@ -57,6 +59,8 @@ namespace Spotlight.Narrative
         private Rect worldBounds;
         /// <summary>Optional live, read-only host annotations. Never evaluated by the graph model.</summary>
         public Func<StoryGraphNode, string> StatusLabel { get; set; }
+
+        public Func<string> EndingForecastText { get; set; }
         public Func<StoryGraphNode, string> StatusDetails { get; set; }
         /// <summary>Null/empty permits preview; any nonempty value is a visible blocking reason.</summary>
         public Func<StoryGraphNode, string> PreviewBlockReason { get; set; }
@@ -78,6 +82,8 @@ namespace Spotlight.Narrative
             }
         }
         public int VisibleNodeCount => visible.Count;
+        public IReadOnlyList<StoryGraphNode> EndingNodes => endingNodes;
+
 
         /// <summary>Rebuild from the supplied snapshot; never reads disk or creates a runtime.</summary>
         public void Load(NarrativeConfiguration config)
@@ -91,6 +97,9 @@ namespace Spotlight.Narrative
                 string previousPage = SelectedPageId;
                 var nextGraph = NarrativeRelationshipGraph.Build(config);
                 graph = nextGraph;
+                endingNodes = graph.Nodes.Where(node => node.Kind == StoryNodeKind.Ending)
+                    .OrderByDescending(node => node.Priority).ThenBy(node => node.Key, StringComparer.Ordinal).ToArray();
+                InvalidateStatusCache();
                 error = null;
                 if (graph.Find(selected) == null) selected = null;
                 page = selected == null ? 0 : Math.Max(0, NarrativeRelationshipGraph.FindPageIndex(graph.Content(selected), previousPage));
@@ -99,7 +108,7 @@ namespace Spotlight.Narrative
                 RefreshNeighbors();
                 Rebuild();
             }
-            catch (Exception ex) { error = ex.Message; graph = null; selected = null; ResetNavigation(); Rebuild(); }
+            catch (Exception ex) { error = ex.Message; graph = null; endingNodes = Array.Empty<StoryGraphNode>(); selected = null; ResetNavigation(); Rebuild(); }
         }
 
         /// <summary>Original standalone behavior: reload the generated configuration from Luban.</summary>
@@ -249,6 +258,8 @@ namespace Spotlight.Narrative
             }
             return value;
         }
+        public void InvalidateStatusCache() => statusLabels.Clear();
+
         private static Color LaneColor(string group)
         {
             switch (group)
@@ -284,7 +295,7 @@ namespace Spotlight.Narrative
             // A generic SynchronizationContext posts to the thread pool, not Unity's main thread.
             var context = SynchronizationContext.Current;
             if (context != null && context.GetType().FullName == "UnityEngine.UnitySynchronizationContext") mainContext = context;
-            statusLabels.Clear(); // Live host state, but evaluate each label at most once per draw.
+
             var oldSkin = GUI.skin;
             var oldColor = GUI.color; var oldBackground = GUI.backgroundColor; var oldContent = GUI.contentColor;
             try
@@ -535,8 +546,79 @@ namespace Spotlight.Narrative
             pendingRequest = null;
         }
 
+        private void EndingDetails(float width, ref float y)
+        {
+            Section(ref y, width, "结局推演 / 当前正式会话参数");
+            string forecast;
+            try { forecast = EndingForecastText != null ? EndingForecastText() : null; }
+            catch (Exception error) { forecast = "结局推演读取失败：" + error.Message; }
+            Paragraph(ref y, width, forecast ?? "尚未注入正式会话状态。", wrapped);
+            Paragraph(ref y, width, "按正式优先级从高到低检查；组内 AND、组间 OR。禁用项不会参与预测。此页只读，不触发结局、结果或存档写入。", tiny);
+            Section(ref y, width, "结局顺序 / 点击展开参数与关系");
+            if (endingNodes.Length == 0)
+            {
+                Paragraph(ref y, width, "当前配置没有结局节点。", body);
+                return;
+            }
+
+            foreach (var ending in endingNodes)
+            {
+                const float rowHeight = 58;
+                Rect row = new Rect(0, y, width, rowHeight);
+                bool expanded = expandedEndingId == ending.Id;
+                Fill(row, expanded ? SelectedPaper : panel);
+                Frame(row, Rule);
+                if (GUI.Button(row, GUIContent.none, GUIStyle.none))
+                    expandedEndingId = expanded ? null : ending.Id;
+                GUI.Label(new Rect(10, y + 5, width - 20, 22), new GUIContent(ending.Title, ending.Title), small);
+                string status = NodeStatus(ending) ?? "状态不可用";
+                string enabled = ending.Disabled ? "禁用" : "启用";
+                GUI.Label(new Rect(10, y + 29, width - 20, 21), new GUIContent(
+                    "优先级 " + ending.Priority + " · " + enabled + " · " + status, status), tiny);
+                y += rowHeight + 7;
+
+                if (!expanded) continue;
+                string details = Annotation(StatusDetails, ending) ?? "当前没有条件明细。";
+                Paragraph(ref y, width, details, body);
+                float buttonWidth = (width - 8) / 2;
+                if (GUI.Button(new Rect(0, y, buttonWidth, 29), "查看关系证据", button))
+                {
+                    Select(ending.Id);
+                    tab = 2;
+                    expandedEndingId = null;
+                    showEndingForecast = false;
+                    detailScroll = Vector2.zero;
+                    return;
+                }
+                if (GUI.Button(new Rect(buttonWidth + 8, y, buttonWidth, 29), "复制结局诊断", button))
+                    CopyText(ending.Key + "\n优先级：" + ending.Priority + "\n状态：" + status + "\n\n" + details,
+                        "已复制结局条件与参数诊断。");
+                y += 38;
+            }
+        }
+
+        private string expandedEndingId;
+        private bool showEndingForecast;
+
+
         private void RelationshipDetails(StoryGraphNode node, float width, ref float y)
         {
+            if (EndingForecastText != null)
+            {
+                float modeWidth = (width - 4) / 2;
+                if (Chip(new Rect(0, y, modeWidth, 27), "关系证据", !showEndingForecast))
+                { showEndingForecast = false; detailScroll = Vector2.zero; }
+                if (Chip(new Rect(modeWidth + 4, y, modeWidth, 27), "结局推演", showEndingForecast))
+                { showEndingForecast = true; detailScroll = Vector2.zero; }
+                y += 36;
+                if (showEndingForecast)
+                {
+                    EndingDetails(width, ref y);
+                    return;
+                }
+            }
+            else showEndingForecast = false;
+
             var connections = graph.Connections(node.Id);
             Section(ref y, width, "关系证据 / " + connections.Count + " 条");
             Paragraph(ref y, width, "点击关系定位另一端；完整证据保留条件组与分支方向。", wrapped);
@@ -585,14 +667,14 @@ namespace Spotlight.Narrative
             if (disposed) return;
             disposed = true;
             CancelPendingRequest();
-            StatusLabel = null; StatusDetails = null; PreviewBlockReason = null; PreviewRequested = null; RefreshRequested = null; ContextLabel = null;
+            StatusLabel = null; StatusDetails = null; EndingForecastText = null; PreviewBlockReason = null; PreviewRequested = null; RefreshRequested = null; ContextLabel = null;
             // Only the fallback dynamic font is ours; resource fonts are shared with Map/Details.
             Destroy(skin); skin = null;
             foreach (var texture in textures) Destroy(texture);
             textures.Clear(); white = null;
             if (ownsFont) Destroy(font);
             font = null; headingFont = null; ownsFont = false;
-            graph = null; selected = null; mainContext = null; ResetNavigation();
+            graph = null; endingNodes = Array.Empty<StoryGraphNode>(); selected = null; mainContext = null; ResetNavigation();
             visible.Clear(); positions.Clear(); links.Clear(); lanes.Clear(); dayColumns.Clear(); neighbors.Clear(); statusLabels.Clear();
         }
         private static void Destroy(UnityEngine.Object value){if(value==null)return;if(Application.isPlaying)UnityEngine.Object.Destroy(value);else UnityEngine.Object.DestroyImmediate(value);}

@@ -67,6 +67,15 @@ namespace Spotlight.GameFlow
         protected override bool CompletesAutomatically => true;
         public bool UseCoffeeCupExit { get; set; }
         protected override bool UsesCoffeeCupExit => UseCoffeeCupExit;
+        public bool UseCoffeeCupEntrance { get; set; }
+        protected override bool UsesCoffeeCupEntrance => UseCoffeeCupEntrance;
+
+        protected override void OnOpen(IUIData data = null)
+        {
+            base.OnOpen(data);
+            UseCoffeeCupExit = false;
+            UseCoffeeCupEntrance = false;
+        }
 
         protected override void OnInit(IUIData data = null)
         {

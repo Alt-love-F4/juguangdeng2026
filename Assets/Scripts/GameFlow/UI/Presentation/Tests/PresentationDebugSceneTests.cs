@@ -3,6 +3,7 @@ using System;
 using System.Collections;
 using System.IO;
 using System.Linq;
+using System.Reflection;
 using Spotlight.Narrative;
 using NUnit.Framework;
 using TMPro;
@@ -46,6 +47,7 @@ namespace Spotlight.GameFlow.Tests
         public IEnumerator TearDown()
         {
             if (controller != null) controller.StopCurrent();
+            UIKit.ClosePanelsByTag(PresentationDebugSceneController.DebugTag);
             if (debugScene.IsValid() && debugScene.isLoaded) yield return SceneManager.UnloadSceneAsync(debugScene);
             foreach (EventSystem system in previousSystems) if (system != null) system.enabled = true;
             Time.timeScale = oldTime;
@@ -427,6 +429,80 @@ namespace Spotlight.GameFlow.Tests
             controller.PlayLetter();
             yield return new WaitForSecondsRealtime(2.6f);
             Assert.That(controller.CurrentPanel, Is.InstanceOf<FirstDayLetterPanel>());
+        }
+
+        [UnityTest]
+        public IEnumerator CompletedLetterHighlightsUncleSignatureAndContinueHint()
+        {
+            var panel = UIKit.OpenPanel<FirstDayLetterPanel>(UILevel.Pop,
+                tag: PresentationDebugSceneController.DebugTag, cachePolicy: PanelCachePolicy.Transient);
+            Assert.That(panel, Is.Not.Null);
+            panel.SetContent(new FirstDayLetterContent("letter test", "\u53d4\u53d4"));
+            panel.Play(() => { });
+            typeof(FirstDayLetterPanel).GetField("characterInterval", BindingFlags.Instance | BindingFlags.NonPublic)
+                .SetValue(panel, .001f);
+            panel.OpenEnvelope();
+            float deadline = Time.realtimeSinceStartup + 8f;
+            while (panel.Stage != FirstDayLetterPanel.LetterStage.AwaitingSignature)
+            {
+                Assert.That(Time.realtimeSinceStartup, Is.LessThan(deadline));
+                yield return null;
+            }
+            yield return null;
+            var signature = (TMP_Text)typeof(FirstDayLetterPanel)
+                .GetField("signatureText", BindingFlags.Instance | BindingFlags.NonPublic).GetValue(panel);
+            var hint = (TMP_Text)typeof(FirstDayLetterPanel)
+                .GetField("readingHint", BindingFlags.Instance | BindingFlags.NonPublic).GetValue(panel);
+            StringAssert.Contains("<color=#9B3B32>", signature.text);
+            StringAssert.Contains("<u>叔叔</u>", signature.text);
+            StringAssert.Contains("叔叔", hint.text);
+            panel.Stop();
+            UIKit.ClosePanel(panel);
+        }
+
+        [UnityTest]
+        public IEnumerator LetterCupTransitionClosesBeforeCalendarReveals()
+        {
+            var transitionType = typeof(FirstDayLetterPanel).Assembly.GetType("Spotlight.GameFlow.CoffeeCupScreenTransition");
+            var pendingProperty = transitionType.GetProperty("IsPending", BindingFlags.Static | BindingFlags.Public);
+            var clearMethod = transitionType.GetMethod("Clear", BindingFlags.Static | BindingFlags.Public);
+            FirstDayLetterPanel letter = null;
+            DateChangePanel date = null;
+            bool calendarCompleted = false;
+            try
+            {
+                letter = UIKit.OpenPanel<FirstDayLetterPanel>(UILevel.Pop,
+                    tag: PresentationDebugSceneController.DebugTag, cachePolicy: PanelCachePolicy.Transient);
+                letter.UseCoffeeCupExit = true;
+                letter.Play(() =>
+                {
+                    UIKit.ClosePanel(letter);
+                    date = UIKit.OpenPanel<DateChangePanel>(UILevel.Pop,
+                        tag: PresentationDebugSceneController.DebugTag, cachePolicy: PanelCachePolicy.Transient);
+                    date.SetDates("1860\u5e746\u67081\u65e5", "1860\u5e746\u67082\u65e5");
+                    date.UseCoffeeCupEntrance = true;
+                    date.Play(() => calendarCompleted = true);
+                });
+                letter.SkipLetter();
+                float deadline = Time.realtimeSinceStartup + 3f;
+                while (date == null)
+                {
+                    Assert.That(Time.realtimeSinceStartup, Is.LessThan(deadline));
+                    yield return null;
+                }
+                yield return new WaitForSecondsRealtime(.15f);
+                Assert.That(pendingProperty.GetValue(null), Is.EqualTo(true), "The date panel must wait under the closed cup.");
+                yield return new WaitForSecondsRealtime(.35f);
+                Assert.That(pendingProperty.GetValue(null), Is.EqualTo(false), "The cup should reveal after the date panel's base entrance.");
+                Assert.That(date.GetComponent<CanvasGroup>().alpha, Is.EqualTo(1f).Within(.01f));
+                Assert.That(calendarCompleted, Is.False, "The calendar remains on screen for its full presentation.");
+            }
+            finally
+            {
+                if (letter != null) { letter.Stop(); UIKit.ClosePanel(letter); }
+                if (date != null) { date.Stop(); UIKit.ClosePanel(date); }
+                clearMethod.Invoke(null, null);
+            }
         }
 
         [UnityTest]

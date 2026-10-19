@@ -84,6 +84,8 @@ namespace Spotlight.GameFlow
             view ??= new NarrativeRelationshipGraphView();
             view.Load(config);
             view.StatusLabel = status.Label;
+            view.EndingForecastText = () => status.EndingForecast;
+
             view.StatusDetails = node =>
             {
                 string details = status.Details(node);
@@ -109,6 +111,7 @@ namespace Spotlight.GameFlow
         {
             var runtime = NarrativeRuntime.Instance;
             status?.Refresh(runtime != null && runtime.IsReady ? runtime.Controller : null);
+            view?.InvalidateStatusCache();
             if (view != null) view.ContextLabel = runtime != null && runtime.IsReady
                 ? "当前正式会话 · 状态只读 / 独立试播不结算 / 逐页历史未单独记录"
                 : "未加载正式会话 · 仅配置浏览 / 独立试播使用默认测试数值";
@@ -140,6 +143,9 @@ namespace Spotlight.GameFlow
         }
         private void Update()
         {
+            bool atlasVisible = open && shell != null && shell.IsVisible;
+            if (preview == null && !atlasVisible && !openRequested && !playRequested && !reloadRequested) return;
+
             preview?.Tick();
             if (reloadRequested)
             {
@@ -148,7 +154,7 @@ namespace Spotlight.GameFlow
                 catch (Exception error) { message = "刷新失败：" + error.Message; }
             }
             if (openRequested) Open();
-            if (open)
+            if (open && shell != null && shell.IsVisible)
             {
                 try { EnsureData(); if (Time.unscaledTime >= nextRefresh) RefreshStatus(); }
                 catch (Exception error) { message = "读取失败：" + error.Message; }
