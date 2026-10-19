@@ -38,6 +38,7 @@ namespace Spotlight.GameFlow
         private const string FirstDayPerceptionCheckEventId = "EV_FIRST_DAY_PERCEPTION_CHECK";
         private const string FirstDayPerceptionSuccessEventId = "EV_FIRST_DAY_PERCEPTION_SUCCESS";
         private const string FirstDayPerceptionFailureEventId = "EV_FIRST_DAY_PERCEPTION_FAILURE";
+        private const string DetentionActiveCondition = "church.detention.active";
 
         [Header("NCS opening content selection")]
         [SerializeField] private string openingPresentationId = NarrativePresentationDataAdapter.DefaultOpeningPresentationId;
@@ -53,6 +54,8 @@ namespace Spotlight.GameFlow
         private bool newSessionFirstDay;
         private bool firstDayCafeTutorialStarted;
         private bool firstDayCafeTutorialCompleted;
+        private bool mapUsageTutorialPending;
+        private bool mapUsageTutorialCompleted;
         private bool tutorialTestSkipSubmitted;
         private bool awaitingNarrativeEntry;
         private int narrativeEntryVersion;
@@ -67,10 +70,29 @@ namespace Spotlight.GameFlow
         private bool initialized;
         private bool running;
         private bool businessWasActive;
+        private Action pendingMapAction;
+        private Spotlight.FreeCafe.CafeWorld businessWorld;
+        private bool businessWorldSubscribed;
         private int presentationVersion;
         private string previousDate = InitialDate;
         private int day = 1;
         private int lastCafeEntryDay;
+        private int morningCompletedDay;
+        private int detentionAdvanceDay;
+        private bool detentionMapSuppressed;
+        private string detentionAdvanceError;
+        public bool IsDetained
+        {
+            get
+            {
+                var controller = NarrativeRuntime.Instance?.Controller;
+                return controller != null && controller.State.TryGetCondition(DetentionActiveCondition, out bool active) && active;
+            }
+        }
+        private NarrativePresenter cafeGameplayPresenter;
+        private Func<NarrativeEventRequest, NarrativeGameplayPresentationData, Action<NarrativeGameplayResult>, IDisposable> cafeGameplayPlayback;
+        private NarrativeCafeGameplayBridgeSession cafeGameplaySession;
+        public bool IsNarrativeCafeGameplayActive => cafeGameplaySession != null && cafeGameplaySession.IsReady;
 
         public DayFlowState State { get; private set; } = DayFlowState.DateTransition;
         public int CurrentDay => day;
@@ -83,13 +105,34 @@ namespace Spotlight.GameFlow
             && !firstDayCafeTutorialCompleted
             && (State == DayFlowState.CityMapLeisure || IsCafeTutorialActive);
         public bool IsFirstSessionGuideActive => running && day == 1 && !firstDayCafeTutorialCompleted;
-        public bool CanSave => !IsFirstSessionGuideActive && !awaitingNarrativeEntry
+        public bool ShouldShowMapUsageTutorial => running && day == 1 && mapUsageTutorialPending
+            && !mapUsageTutorialCompleted && State == DayFlowState.CityMapLeisure && !BlocksGameplayInput;
+        public bool CanSave => !IsFirstSessionGuideActive && !awaitingNarrativeEntry && cafeGameplaySession == null
             && !(NarrativeRuntime.Instance?.Controller?.BlocksSave ?? false);
         // Phase pages remain blocking while they wait for a player confirmation.
-        public bool BlocksGameplayInput => running && State != DayFlowState.FreeCafeBusiness && State != DayFlowState.CityMapLeisure;
-        public bool CanFinishBusiness => running && !IsCafeTutorialActive && State == DayFlowState.FreeCafeBusiness
+        public bool BlocksGameplayInput => running && (IsDetained || (cafeGameplaySession != null
+            ? !IsNarrativeCafeGameplayActive
+            : State != DayFlowState.FreeCafeBusiness && State != DayFlowState.CityMapLeisure));
+        public bool CanFinishBusiness => running && !IsDetained && !IsCafeTutorialActive && cafeGameplaySession == null
+            && !(NarrativeRuntime.Instance?.Controller?.IsBusy ?? false) && State == DayFlowState.FreeCafeBusiness
             && endpointOwner != null && (gameplayEndpoint.DayFlowBusinessActive
                 || businessWasActive && gameplayEndpoint.DayFlowBusinessFinished);
+        public string BusinessClosingBlockReason
+        {
+            get
+            {
+                if (!running || !SessionAllowsPlay) return "游戏日程尚未就绪，请稍后再试。";
+                if (IsDetained) return "当前剧情限制营业操作，请先完成剧情。";
+                if (IsCafeTutorialActive) return "请先完成咖啡馆新手教程。";
+                if (cafeGameplaySession != null) return cafeGameplaySession.GameplayHint ?? "请先完成当前剧情要求的咖啡制作与交付。";
+                if (NarrativeRuntime.Instance?.Controller?.IsBusy == true) return "当前剧情尚未结束，请先完成对话或事件后再打烊。";
+                if (State != DayFlowState.FreeCafeBusiness) return "当前不在自由营业阶段，请先完成日程演出。";
+                if (FindGameplayEndpoint() == null) return "咖啡馆营业系统尚未就绪，请稍后再试。";
+                if (!CanFinishBusiness) return "当前没有可结算的营业。";
+                return null;
+            }
+        }
+
         public IDayFlowPresentation CurrentPresentation => currentPanel as IDayFlowPresentation;
 
         public DialoguePanel CurrentDialogue => introductionPanel;
@@ -106,6 +149,20 @@ namespace Spotlight.GameFlow
             PlayerSaveBridge.Register(() => PlayerRuntime.Current);
             GameSaveParticipantRegistry.Capturers[SaveId] = CaptureJson;
             GameSaveParticipantRegistry.Restorers[SaveId] = RestoreJson;
+            EnsureNarrativeCafeGameplayBinding();
+        }
+
+        private void OnEnable()
+        {
+            if (initialized && running) EnsureNarrativeCafeGameplayBinding();
+            EnsureBusinessWorldBinding();
+        }
+
+        private void OnDisable()
+        {
+            pendingMapAction = null;
+            ReleaseBusinessWorldBinding();
+            ReleaseNarrativeCafeGameplayBinding();
         }
 
         private void OnDestroy()
@@ -127,9 +184,17 @@ namespace Spotlight.GameFlow
 
         public void HideForMainMenu()
         {
+            pendingMapAction = null;
+            ReleaseBusinessWorldBinding();
+            businessWorld = null;
+            ReleaseNarrativeCafeGameplayBinding();
             CoffeeCupScreenTransition.Clear();
             Spotlight.Audio.GameAudio.StopOwner(this);
             running = false;
+            morningCompletedDay = 0;
+            detentionAdvanceDay = 0;
+            detentionMapSuppressed = false;
+            detentionAdvanceError = null;
             businessWasActive = false;
             awaitingNarrativeEntry = false;
             ++narrativeEntryVersion;
@@ -150,6 +215,8 @@ namespace Spotlight.GameFlow
             newSessionFirstDay = true;
             firstDayCafeTutorialStarted = false;
             firstDayCafeTutorialCompleted = false;
+            mapUsageTutorialPending = false;
+            mapUsageTutorialCompleted = false;
             tutorialTestSkipSubmitted = false;
             UnsubscribeFirstDayPerceptionEvents();
             firstDayIntroductionCompleted = !playIntroduction;
@@ -175,6 +242,8 @@ namespace Spotlight.GameFlow
             firstDayIntroductionCompleted = false;
             firstDayCafeTutorialStarted = true;
             firstDayCafeTutorialCompleted = false;
+            mapUsageTutorialPending = false;
+            mapUsageTutorialCompleted = false;
             tutorialTestSkipSubmitted = false;
             running = true;
             FindGameplayEndpoint();
@@ -194,8 +263,10 @@ namespace Spotlight.GameFlow
         public void BeginNewDayFlow()
         {
             if (!SessionAllowsPlay) return;
+            pendingMapAction = null;
             if (!initialized) Initialize(flow);
             running = true;
+            EnsureNarrativeCafeGameplayBinding();
             PlayerCafeOwner.Current?.SynchronizeCalendarDay(day);
             HideGameplayPanel();
             var runtime = NarrativeRuntime.Instance;
@@ -316,8 +387,33 @@ namespace Spotlight.GameFlow
 
         private void Update()
         {
+            if (initialized && running) EnsureNarrativeCafeGameplayBinding();
+            EnsureBusinessWorldBinding();
+            if (SessionAllowsPlay && running)
+            {
+                if (IsDetained)
+                {
+                    if (!detentionMapSuppressed)
+                    {
+                        detentionMapSuppressed = true;
+                        SetMapAvailability(false);
+                        if (flow != null && flow.IsMapOpen) flow.CloseMapForDayFlow();
+                    }
+                    // A capture result may commit from a MapAction root, outside ProcessEntry.
+                    // Observe it only after that entire root/action has returned to a safe boundary.
+                    if (TryCompleteDetainedDay()) return;
+                }
+                else { detentionMapSuppressed = false; detentionAdvanceError = null; }
+            }
+            var gameplay = cafeGameplaySession;
+            if (gameplay != null && gameplay.IsReady && !ReferenceEquals(gameplay.World, PlayerCafeOwner.Current))
+            {
+                Debug.LogWarning("[DayFlow] Narrative cafe world was replaced; cancelling pending service.", this);
+                gameplay.Cancel();
+            }
             if (!SessionAllowsPlay || Time.timeScale == 0f || !running || State != DayFlowState.FreeCafeBusiness) return;
             // Do not let an endpoint's old state bypass an unfinished presentation.
+            if (endpointOwner == null) FindGameplayEndpoint();
             if (endpointOwner == null) return;
             if (gameplayEndpoint.DayFlowBusinessActive) businessWasActive = true;
             // Night can belong to the previous visit: only settle an observed open session.
@@ -327,11 +423,65 @@ namespace Spotlight.GameFlow
 
         private void EnterPreBusiness()
         {
+            if (IsDetained) { TryCompleteDetainedDay(); return; }
             EnterCityMap();
+        }
+
+        private bool CanCompleteDetainedDay()
+        {
+            var runtime = NarrativeRuntime.Instance;
+            var controller = runtime != null ? runtime.Controller : null;
+            return SessionAllowsPlay && running && Time.timeScale > 0f && !PresentationPauseRegistry.IsPaused
+                && IsDetained && morningCompletedDay == day
+                && detentionAdvanceDay != day && !awaitingNarrativeEntry && cafeGameplaySession == null
+                && controller != null && !controller.IsEnded && controller.IsSafeBoundary && !controller.IsBusy
+                && !(runtime.Actions?.IsExecuting ?? false)
+                && State != DayFlowState.DateTransition && currentPanel == null;
+        }
+
+        private bool TryCompleteDetainedDay()
+        {
+            if (!CanCompleteDetainedDay()) return false;
+            SetMapAvailability(false);
+            if (!TryEndBoundCafeBusiness(out string error))
+            {
+                // Do not skip the calendar if an actually open world could not be closed by its
+                // real endpoint. Retry only after the scene owner/endpoint is correctly available.
+                if (detentionAdvanceError != error)
+                {
+                    detentionAdvanceError = error;
+                    Debug.LogWarning("[DayFlow] Detention day held: " + error, this);
+                }
+                return false;
+            }
+            detentionAdvanceError = null;
+            businessWasActive = false;
+            detentionAdvanceDay = day;
+            HideGameplayPanel();
+            // Exactly the existing one-day transition. No AddCalendar, StartDay, service orders,
+            // money grants or manual loop; next morning MUST run NCS before inspecting the fact.
+            CompleteDay();
+            return true;
+        }
+
+        private bool TryEndBoundCafeBusiness(out string error)
+        {
+            error = null;
+            var world = PlayerCafeOwner.Current;
+            if (world == null) { error = "No authoritative cafe world is bound."; return false; }
+            if (!world.State.open) return true; // Already closed is a legitimate idempotent success.
+            if (!PlayerCafeOwner.HasSceneOwner || FindGameplayEndpoint() == null)
+            { error = "Open cafe has no live scene-owned gameplay endpoint."; return false; }
+            gameplayEndpoint.EndDayFlowBusiness();
+            if (!ReferenceEquals(PlayerCafeOwner.Current, world) || world.State.open)
+            { error = "Cafe endpoint did not close the same authoritative world."; return false; }
+            businessWasActive = false;
+            return true;
         }
 
         private void EnterBusinessTransition()
         {
+            if (IsDetained) { TryCompleteDetainedDay(); return; }
             var cafe = PlayerCafeOwner.Current;
             bool alreadyClosedToday = cafe != null && cafe.State.day == day
                 && cafe.State.businessPhase == Spotlight.FreeCafe.BusinessPhase.Night;
@@ -356,7 +506,7 @@ namespace Spotlight.GameFlow
         {
             lastCafeEntryDay = day;
             ClosePresentation();
-            businessWasActive = FindGameplayEndpoint()?.DayFlowBusinessActive == true;
+            FindGameplayEndpoint();
             SetState(DayFlowState.FreeCafeBusiness);
             ShowGameplayPanel();
         }
@@ -699,7 +849,7 @@ namespace Spotlight.GameFlow
             }
             else
             {
-                if (flow != null && flow.IsMapOpen) flow.CloseMap();
+                if (flow != null && flow.IsMapOpen) flow.CloseMapForDayFlow();
                 StartFreeCafeBusiness();
             }
 
@@ -709,7 +859,7 @@ namespace Spotlight.GameFlow
 
         private void StartFreeCafeBusiness()
         {
-            if (!SessionAllowsPlay || !running) return;
+            if (!SessionAllowsPlay || !running || IsDetained) return;
             IDayFlowGameplayEndpoint endpoint = FindGameplayEndpoint();
             if (endpoint == null)
             {
@@ -729,22 +879,41 @@ namespace Spotlight.GameFlow
             SetState(DayFlowState.FreeCafeBusiness);
             ShowGameplayPanel();
             endpoint.StartDayFlowBusiness();
-            businessWasActive = endpoint.DayFlowBusinessActive;
+            businessWasActive |= endpoint.DayFlowBusinessActive;
             if (IsCafeTutorialActive)
             {
                 PlayCafeTutorialContent(CafeTutorialSession.WorkstationStep, presentationVersion, null);
             }
         }
 
-        public void FinishBusiness()
+        public void FinishBusiness() => FinishBusiness(null);
+
+        /// <summary>Continue a requested map action only after settlement and AfterBusiness finish.</summary>
+        public bool TryFinishBusinessForMapAction(Action onMapReady)
+            => onMapReady != null && FinishBusiness(onMapReady);
+
+        private bool FinishBusiness(Action onMapReady)
         {
-            if (!SessionAllowsPlay || !CanFinishBusiness) return;
             IDayFlowGameplayEndpoint endpoint = FindGameplayEndpoint();
-            endpoint?.EndDayFlowBusiness();
+            if (!SessionAllowsPlay || endpoint == null || !CanFinishBusiness) return false;
+            endpoint.EndDayFlowBusiness();
+            // A refusal or a replaced/destroyed endpoint must not consume this session.
+            if (endpointOwner == null || !ReferenceEquals(endpoint, gameplayEndpoint)
+                || !ReferenceEquals(businessWorld, PlayerCafeOwner.Current) || endpoint.DayFlowBusinessActive) return false;
+            // Keep this transient continuation out of saves, and never retain a refused request.
+            pendingMapAction = onMapReady;
             businessWasActive = false;
+            flow?.CloseMapForDayFlow();
             HideGameplayPanel();
+            ShowBusinessEndThen(EnterCityMap);
+            return true;
+        }
+
+        private void ShowBusinessEndThen(Action next)
+        {
+            if (day == 1 && !mapUsageTutorialCompleted) mapUsageTutorialPending = true;
             SetState(DayFlowState.PreLeisure);
-            ShowPresentation<BusinessEndPanel>(() => RunNarrativeEntry(NarrativeEntryPoint.AfterBusiness, EnterCityMap));
+            ShowPresentation<BusinessEndPanel>(() => RunNarrativeEntry(NarrativeEntryPoint.AfterBusiness, next));
         }
 
         public bool DebugSkipTutorialToMap(out string message)
@@ -784,22 +953,34 @@ namespace Spotlight.GameFlow
 
         private void EnterCityMap()
         {
-            if (!SessionAllowsPlay) return;
+            if (!SessionAllowsPlay || !running) { pendingMapAction = null; return; }
+            if (IsDetained)
+            {
+                pendingMapAction = null;
+                SetMapAvailability(false);
+                TryCompleteDetainedDay();
+                return;
+            }
             SetState(DayFlowState.CityMapLeisure);
             ClosePresentation();
             if (flow != null && UnityEngine.SceneManagement.SceneManager.GetActiveScene().name != "Map")
             {
-                flow.TransitionToGameplayScene("Map", EnterCityMap);
+                // Preserve the continuation through the asynchronous recursive arrival callback.
+                flow.TransitionToGameplayScene("Map", EnterCityMap, () => pendingMapAction = null);
                 return;
             }
             ShowGameplayPanel();
+            if (UnityEngine.SceneManagement.SceneManager.GetActiveScene().name != "Map") return;
+            Action onMapReady = pendingMapAction;
+            pendingMapAction = null;
+            if (SessionAllowsPlay && running) onMapReady?.Invoke();
         }
 
         /// <summary>A non-business visit: reach the bed without starting business or ending the day.</summary>
         public bool TryVisitCafeForRest(Action arrived, Action failed = null)
         {
             var runtime = NarrativeRuntime.Instance;
-            if (!SessionAllowsPlay || !running || flow == null || IsFirstSessionGuideActive || awaitingNarrativeEntry
+            if (!SessionAllowsPlay || !running || flow == null || IsDetained || IsFirstSessionGuideActive || awaitingNarrativeEntry
                 || (runtime?.Controller?.IsBusy ?? false) || (runtime?.Actions?.IsExecuting ?? false)
                 || (runtime?.Actions?.HasBlockingActions() ?? false)
                 || PlayerCafeOwner.Current?.State.open == true
@@ -815,7 +996,7 @@ namespace Spotlight.GameFlow
         /// <summary>Called by the map when the player selects the cafe location.</summary>
         public void StartCafeFromMap()
         {
-            if (!SessionAllowsPlay) return;
+            if (!SessionAllowsPlay || IsDetained) return;
             if (State == DayFlowState.CityMapLeisure && day == 1 && !firstDayCafeTutorialStarted && !firstDayCafeTutorialCompleted)
                 firstDayCafeTutorialStarted = true;
             if (UnityEngine.SceneManagement.SceneManager.GetActiveScene().name == "CoffeeShop") return;
@@ -843,56 +1024,87 @@ namespace Spotlight.GameFlow
             Debug.Log("[DayFlow] First-day cafe tutorial completed; free business remains active.", this);
         }
 
+        public void CompleteMapUsageTutorial()
+        {
+            if (!ShouldShowMapUsageTutorial) return;
+            mapUsageTutorialPending = false;
+            mapUsageTutorialCompleted = true;
+        }
+
         public void EndDayFromMap()
         {
-            if (IsFirstDayCafeMapGuideActive) return;
-            if (!SessionAllowsPlay || !running || State != DayFlowState.CityMapLeisure) return;
-            var actions = Spotlight.Narrative.NarrativeRuntime.Instance?.Actions;
-            if (awaitingNarrativeEntry || (NarrativeRuntime.Instance?.Controller?.IsBusy ?? false)) return;
-            if (actions != null && actions.IsExecuting) return;
+            // Compatibility entry for old bindings. Only the real cafe bed may end a day.
+            if (State != DayFlowState.CityMapLeisure || !SessionAllowsPlay || IsDetained) return;
+            FindFirstObjectByType<MapSceneController>()?.ShowBlockingActionHint("请回咖啡馆三楼宿舍，点击床休息并结束这一天。");
+        }
+
+        /// <summary>The bed shares map gates; an active cafe first settles AfterBusiness.</summary>
+        public void EndDayFromDormitory()
+        {
+            if (State != DayFlowState.FreeCafeBusiness && State != DayFlowState.CityMapLeisure
+                && State != DayFlowState.PreLeisure) return;
+            // A visible settlement page must be confirmed, not replaced by a second bed click.
+            if (State == DayFlowState.PreLeisure && currentPanel != null) return;
+            if (!CanRequestDayEnd()) return;
+            if (State == DayFlowState.CityMapLeisure)
+            {
+                RunBeforeNightAndCompleteDay();
+                return;
+            }
+            if (State == DayFlowState.FreeCafeBusiness)
+            {
+                var endpoint = FindGameplayEndpoint();
+                bool needsBusinessSettlement = businessWasActive || endpoint?.DayFlowBusinessActive == true;
+                if (!needsBusinessSettlement)
+                {
+                    // A preparation/rest visit (or a return after settled business) is not another
+                    // business session. Preserve its existing UI and do not replay AfterBusiness.
+                    RunBeforeNightAndCompleteDay();
+                    return;
+                }
+                // Closing an actual business always confirms settlement and returns to Map.
+                // Rest can be requested again on a subsequent non-business visit.
+                FinishBusiness();
+                return;
+            }
+            RunNarrativeEntry(NarrativeEntryPoint.AfterBusiness, RunBeforeNightAndCompleteDay);
+        }
+
+        private bool CanRequestDayEnd()
+        {
+            if (!SessionAllowsPlay || !running || IsDetained || IsFirstSessionGuideActive
+                || awaitingNarrativeEntry || cafeGameplaySession != null
+                || (NarrativeRuntime.Instance?.Controller?.IsBusy ?? false)) return false;
+            var actions = NarrativeRuntime.Instance?.Actions;
+            if (actions != null && actions.IsExecuting) return false;
             if (actions != null && actions.HasBlockingActions())
             {
                 var map = FindFirstObjectByType<MapSceneController>();
                 map?.FocusFirstBlockingAction();
-                map?.ShowBlockingActionHint();
+                if (map != null) map.ShowBlockingActionHint();
+                else if (Application.isPlaying) OperationToastPanel.ShowMessage("还有事情需要先处理，请打开地图查看必须完成的行动。");
+                return false;
+            }
+            return true;
+        }
+
+        private void RunBeforeNightAndCompleteDay()
+        {
+            // AfterBusiness may unlock new mandatory actions. Recheck before the night boundary.
+            if (!CanRequestDayEnd())
+            {
+                if (SessionAllowsPlay && running && !awaitingNarrativeEntry
+                    && !(NarrativeRuntime.Instance?.Controller?.IsBusy ?? false)) EnterCityMap();
                 return;
             }
             RunNarrativeEntry(NarrativeEntryPoint.BeforeNight, CompleteDay);
-        }
-
-        /// <summary>
-        /// Temporary direct day-end shortcut from the third-floor dormitory.
-        /// Mandatory-story checks will be added here when the night gate is finalized.
-        /// </summary>
-        public void EndDayFromDormitory()
-        {
-            if (!SessionAllowsPlay || !running || awaitingNarrativeEntry) return;
-            if (NarrativeRuntime.Instance?.Controller?.IsBusy ?? false) return;
-            var actions = NarrativeRuntime.Instance?.Actions;
-            if (actions != null && actions.IsExecuting) return;
-            if (State != DayFlowState.FreeCafeBusiness && State != DayFlowState.CityMapLeisure
-                && State != DayFlowState.PreLeisure) return;
-
-            if (State == DayFlowState.FreeCafeBusiness)
-            {
-                if (IsCafeTutorialActive)
-                {
-                    firstDayCafeTutorialStarted = true;
-                    firstDayCafeTutorialCompleted = true;
-                    cafeTutorialEndpoint?.FinishCafeTutorial();
-                }
-                FindGameplayEndpoint()?.EndDayFlowBusiness();
-            }
-            HideGameplayPanel();
-            // Temporary dormitory shortcut: deliberately skips the current mandatory-story gate.
-            // Add the future night eligibility check here before calling CompleteDay.
-            CompleteDay();
         }
 
         private void RunNarrativeEntry(NarrativeEntryPoint entry, Action next)
         {
             if (!SessionAllowsPlay || !running || awaitingNarrativeEntry) return;
             ClosePresentation();
+            EnsureNarrativeCafeGameplayBinding();
             var controller = NarrativeRuntime.Instance?.Controller;
             if (controller == null) { next(); return; }
             awaitingNarrativeEntry = true;
@@ -905,7 +1117,12 @@ namespace Spotlight.GameFlow
                 {
                     if (!SessionAllowsPlay || !running || token != narrativeEntryVersion) return;
                     awaitingNarrativeEntry = false;
-                    if (success) next();
+                    if (success)
+                    {
+                        if (entry == NarrativeEntryPoint.MorningBeforeMap) morningCompletedDay = day;
+                        if (IsDetained) { TryCompleteDetainedDay(); return; }
+                        next();
+                    }
                     else RetryNarrativeEntry(entry, next);
                 }))
                 {
@@ -915,12 +1132,85 @@ namespace Spotlight.GameFlow
             });
         }
 
+        private void EnsureNarrativeCafeGameplayBinding()
+        {
+            var presenter = NarrativeRuntime.Instance?.Presenter;
+            if (cafeGameplayPlayback == null) cafeGameplayPlayback = PlayNarrativeCafeGameplay;
+            if (ReferenceEquals(presenter, cafeGameplayPresenter)
+                && (presenter == null || presenter.GameplayPlayback == cafeGameplayPlayback)) return;
+            ReleaseNarrativeCafeGameplayBinding();
+            // An explicit/injected host takes precedence. Never overwrite somebody else's adapter.
+            if (presenter == null || presenter.GameplayPlayback != null) return;
+            cafeGameplayPresenter = presenter;
+            presenter.GameplayPlayback = cafeGameplayPlayback;
+        }
+
+        private void ReleaseNarrativeCafeGameplayBinding()
+        {
+            var presenter = cafeGameplayPresenter;
+            cafeGameplayPresenter = null;
+            if (presenter != null && presenter.GameplayPlayback == cafeGameplayPlayback)
+                presenter.GameplayPlayback = null;
+            var pending = cafeGameplaySession;
+            cafeGameplaySession = null;
+            pending?.Cancel();
+        }
+
+        private IDisposable PlayNarrativeCafeGameplay(NarrativeEventRequest request,
+            NarrativeGameplayPresentationData data, Action<NarrativeGameplayResult> completed)
+        {
+            // A presenter owns at most one gameplay step. Invalidate the previous owner first.
+            cafeGameplaySession?.Dispose();
+            var pending = new NarrativeCafeGameplayBridgeSession(completed, released =>
+            {
+                if (ReferenceEquals(cafeGameplaySession, released)) cafeGameplaySession = null;
+            }, "narrative-cafe:" + request.RequestId + ":" + data?.eventId + ":" + data?.pageId + ":" + Guid.NewGuid().ToString("N"));
+            cafeGameplaySession = pending;
+            void Reject(string reason)
+            {
+                if (pending.IsDisposed) return;
+                Debug.LogWarning("[DayFlow] Narrative cafe gameplay cancelled (" + data?.eventId + "/" + data?.pageId + "): " + reason, this);
+                pending.Cancel();
+            }
+            void Arrived()
+            {
+                if (pending.IsDisposed || pending.IsReady || !ReferenceEquals(cafeGameplaySession, pending)) return;
+                if (!SessionAllowsPlay || !running) { Reject("Game session is no longer playing."); return; }
+                if (!PlayerCafeOwner.HasSceneOwner || PlayerCafeOwner.Current == null)
+                { Reject("CoffeeShop has no live scene-owned cafe world."); return; }
+                if (data.gameplayKey == "host:end_business")
+                {
+                    if (!TryEndBoundCafeBusiness(out string closeError)) { Reject(closeError); return; }
+                    pending.CompleteHostCommand();
+                    return;
+                }
+                if (IsDetained) { Reject("Cafe service is unavailable during church.detention.active."); return; }
+                if (FindGameplayEndpoint() == null) { Reject("CoffeeShop has no live cafe gameplay endpoint."); return; }
+                if (!pending.Attach(PlayerCafeOwner.Current, data.gameplayKey, out string error))
+                { Reject(error); return; }
+                // Retain NarrativeEntry and its continuation; only the cafe input gate is opened.
+                // The runtime releases its OWN narrative pause. No global Resume/Clear is allowed.
+                if (flow != null && flow.IsMapOpen) flow.CloseMapForDayFlow();
+                ShowGameplayPanel();
+                OperationToastPanel.ShowMessage(pending.GameplayHint, string.Empty);
+            }
+            if (data == null || completed == null || !SessionAllowsPlay || !running || IsFirstSessionGuideActive)
+            { Reject("Missing gameplay request or first-day tutorial/session is not ready."); return pending; }
+            if (UnityEngine.SceneManagement.SceneManager.GetActiveScene().name == "CoffeeShop") Arrived();
+            else if (flow != null) flow.TransitionToGameplayScene("CoffeeShop", Arrived,
+                () => Reject("Could not transition to the real CoffeeShop scene."));
+            else Reject("Cannot load the real CoffeeShop without GameFlowBootstrap.");
+            return pending;
+        }
+
         private void RetryNarrativeEntry(NarrativeEntryPoint entry, Action next)
         {
+            // A cancelled/failed entry may be retried, but must not replay an old map intent.
+            pendingMapAction = null;
             if (entry == NarrativeEntryPoint.BeforeNight)
             {
                 EnterCityMap();
-                FindFirstObjectByType<MapSceneController>()?.ShowBlockingActionHint("剧情已中断，请再次结束当天重试。");
+                FindFirstObjectByType<MapSceneController>()?.ShowBlockingActionHint("请回咖啡馆三楼宿舍，再次点击床休息以重试。");
                 return;
             }
             SetState(DayFlowState.PreBusiness);
@@ -928,8 +1218,13 @@ namespace Spotlight.GameFlow
                 panel => panel.ShowNarrativeEntryUnavailable());
         }
 
+        public void RefreshMapAvailability()
+            => SetMapAvailability(running && (State == DayFlowState.CityMapLeisure
+                || State == DayFlowState.FreeCafeBusiness && flow != null && flow.IsMapOpen && !IsFirstSessionGuideActive));
+
         private void SetMapAvailability(bool available)
         {
+            available &= !IsDetained;
             var runtime = NarrativeRuntime.Instance;
             var state = runtime?.Controller?.State;
             if (state != null && state.TryGetCondition("world.map.active", out bool old) && old != available)
@@ -944,6 +1239,7 @@ namespace Spotlight.GameFlow
         private void CompleteDay()
         {
             if (!SessionAllowsPlay || !running) return;
+            pendingMapAction = null;
             SetState(DayFlowState.DateTransition);
             FindGameplayEndpoint()?.EndDayFlowBusiness();
             previousDate = CurrentDate;
@@ -996,8 +1292,49 @@ namespace Spotlight.GameFlow
             UIKit.ClosePanel(panel);
         }
 
+        private void EnsureBusinessWorldBinding()
+        {
+            if (!isActiveAndEnabled || !running || State != DayFlowState.FreeCafeBusiness)
+            {
+                ReleaseBusinessWorldBinding();
+                return;
+            }
+            var world = PlayerCafeOwner.Current;
+            if (!ReferenceEquals(businessWorld, world))
+            {
+                ReleaseBusinessWorldBinding();
+                businessWorld = world;
+                businessWasActive = false; // An old world's Night cannot settle a new visit.
+            }
+            if (businessWorld == null) return;
+            if (!businessWorldSubscribed)
+            {
+                businessWorld.Changed += OnBusinessWorldChanged;
+                businessWorldSubscribed = true;
+            }
+            OnBusinessWorldChanged();
+        }
+
+        private void ReleaseBusinessWorldBinding()
+        {
+            if (businessWorldSubscribed && businessWorld != null)
+                businessWorld.Changed -= OnBusinessWorldChanged;
+            businessWorldSubscribed = false;
+        }
+
+        private void OnBusinessWorldChanged()
+        {
+            // Record synchronously, including open -> Night within one frame. Never settle
+            // inside Changed: narrative/world transactions may still be on the call stack.
+            if (isActiveAndEnabled && running && State == DayFlowState.FreeCafeBusiness
+                && ReferenceEquals(businessWorld, PlayerCafeOwner.Current) && businessWorld != null
+                && businessWorld.State.open)
+                businessWasActive = true;
+        }
+
         private IDayFlowGameplayEndpoint FindGameplayEndpoint()
         {
+            EnsureBusinessWorldBinding();
             if (endpointOwner != null) return gameplayEndpoint;
             UnsubscribeGameplayEndpoint();
             MonoBehaviour[] behaviours = FindObjectsByType<MonoBehaviour>(FindObjectsInactive.Include, FindObjectsSortMode.None);
@@ -1043,7 +1380,8 @@ namespace Spotlight.GameFlow
         private void SetState(DayFlowState state)
         {
             State = state;
-            SetMapAvailability(running && state == DayFlowState.CityMapLeisure);
+            EnsureBusinessWorldBinding();
+            RefreshMapAvailability();
             ApplyAudioState();
             Debug.Log("[DayFlow] " + state);
         }
@@ -1094,6 +1432,8 @@ namespace Spotlight.GameFlow
             public bool firstDayIntroductionCompleted;
             public bool firstDayCafeTutorialStarted;
             public bool firstDayCafeTutorialCompleted;
+            public bool mapUsageTutorialPending;
+            public bool mapUsageTutorialCompleted;
             public int lastCafeEntryDay;
         }
 
@@ -1103,6 +1443,8 @@ namespace Spotlight.GameFlow
             firstDayIntroductionCompleted = firstDayIntroductionCompleted,
             firstDayCafeTutorialStarted = firstDayCafeTutorialStarted,
             firstDayCafeTutorialCompleted = firstDayCafeTutorialCompleted,
+            mapUsageTutorialPending = mapUsageTutorialPending,
+            mapUsageTutorialCompleted = mapUsageTutorialCompleted,
             lastCafeEntryDay = lastCafeEntryDay
         });
 
@@ -1117,6 +1459,8 @@ namespace Spotlight.GameFlow
             newSessionFirstDay = false;
             firstDayCafeTutorialStarted = saved.firstDayCafeTutorialStarted;
             firstDayCafeTutorialCompleted = saved.firstDayCafeTutorialCompleted;
+            mapUsageTutorialPending = saved.mapUsageTutorialPending;
+            mapUsageTutorialCompleted = saved.mapUsageTutorialCompleted;
             lastCafeEntryDay = Mathf.Clamp(saved.lastCafeEntryDay, 0, day);
             // Legacy saves in/after business have already entered the cafe that day.
             if (State == DayFlowState.FreeCafeBusiness || State == DayFlowState.PreLeisure
@@ -1149,6 +1493,8 @@ namespace Spotlight.GameFlow
                 newSessionFirstDay = false;
                 firstDayCafeTutorialStarted = false;
                 firstDayCafeTutorialCompleted = false;
+                mapUsageTutorialPending = false;
+                mapUsageTutorialCompleted = false;
                 IDayFlowGameplayEndpoint endpoint = FindGameplayEndpoint();
                 State = endpoint != null && endpoint.DayFlowBusinessActive
                     ? DayFlowState.FreeCafeBusiness : DayFlowState.PreBusiness;
@@ -1160,6 +1506,16 @@ namespace Spotlight.GameFlow
             if (!SessionAllowsPlay) return;
             ApplyAudioState();
             running = true;
+            EnsureNarrativeCafeGameplayBinding();
+            if (State == DayFlowState.FreeCafeBusiness || State == DayFlowState.CityMapLeisure || State == DayFlowState.PreLeisure)
+                morningCompletedDay = day;
+            if (IsDetained && State != DayFlowState.DateTransition)
+            {
+                SetMapAvailability(false);
+                if (TryCompleteDetainedDay()) return;
+                // Interrupted roots must resume in NCS, never be interpreted as a safe day-end.
+                if (State == DayFlowState.NarrativeEntry) return;
+            }
             if (State != DayFlowState.FreeCafeBusiness) HideGameplayPanel();
             switch (State)
             {
@@ -1173,11 +1529,12 @@ namespace Spotlight.GameFlow
                 // Resume an unconfirmed opening page even though this visit is already recorded.
                 case DayFlowState.BusinessTransition: ShowCafeOpening(); break;
                 case DayFlowState.FreeCafeBusiness:
-                    businessWasActive = FindGameplayEndpoint()?.DayFlowBusinessActive == true;
+                    FindGameplayEndpoint();
+                    EnsureBusinessWorldBinding();
                     ClosePresentation();
                     ShowGameplayPanel();
                     break;
-                case DayFlowState.PreLeisure: ShowPresentation<BusinessEndPanel>(() => RunNarrativeEntry(NarrativeEntryPoint.AfterBusiness, EnterCityMap)); break;
+                case DayFlowState.PreLeisure: ShowBusinessEndThen(EnterCityMap); break;
                 case DayFlowState.CityMapLeisure: EnterCityMap(); break;
                 // Legacy saves may still contain the removed leisure phases. Finish them
                 // immediately and continue with the current night-to-calendar flow.

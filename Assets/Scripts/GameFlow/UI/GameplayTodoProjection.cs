@@ -61,6 +61,8 @@ namespace Spotlight.GameFlow
                         currentTask = "前往「" + locationName + "」，在行动详情中选择「" + name + "」。",
                         location = locationName, positionKey = position, status = status,
                         navigationLabel = "查看地点与行动", priority = action.mustExecute && !done ? 0 : 10,
+                        important = action.mustExecute && !done && action.type != NarrativeActionType.Future
+                            && !actions.HasExecutedToday(action.actionKey),
                         remainingDays = actions.GetRemainingDays(action.actionKey),
                         preventsRest = !done && (action.mustExecute || actions.IsAvailable(action.actionKey, out _))
                     });
@@ -76,7 +78,23 @@ namespace Spotlight.GameFlow
                         completed = true, location = locationName, status = "已完成" });
                 }
             }
-            return result;
+            return result.OrderBy(item => item.completed).ThenByDescending(item => item.important)
+                .ThenBy(item => item.priority).ThenBy(item => item.remainingDays > 0 ? item.remainingDays : int.MaxValue).ToList();
+        }
+
+        /// <summary>Guide only to a real, currently visible mandatory action, never invent a future prerequisite.</summary>
+        public static bool ShouldGuideToImportantTodo(NarrativeRuntime runtime, NarrativeActionDefinition action,
+            IReadOnlyList<NarrativeActionCheck> checks)
+        {
+            var actions = runtime?.Actions;
+            if (actions == null || action == null || !runtime.Controller.ValuesReady || runtime.Controller.IsBusy
+                || runtime.Controller.IsEnded || actions.IsExecuting || actions.IsCompleted(action.actionKey)
+                || action.type == NarrativeActionType.Future
+                || ((action.type == NarrativeActionType.Daily || action.IsDelivery) && actions.HasExecutedToday(action.actionKey))
+                || checks.Any(check => !check.satisfied && (check.requirement.StartsWith("ActionPoint(") || check.requirement.StartsWith("Item(")))) return false;
+            bool storyBlocked = action.endDay && actions.HasBlockingActions()
+                || checks.Any(check => !check.satisfied && check.messageKey == "action.condition.missing");
+            return storyBlocked && Build(runtime).Any(item => item.important && !item.completed);
         }
     }
 }

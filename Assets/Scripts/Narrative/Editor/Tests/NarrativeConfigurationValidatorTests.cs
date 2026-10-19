@@ -104,8 +104,24 @@ namespace Spotlight.Narrative.Editor.Tests
             var namedLines = configuration.presentations.conversationLines
                 .Where(line => line.pageId.StartsWith("revolution.1014.s1.", StringComparison.Ordinal)
                     && !string.IsNullOrWhiteSpace(line.speakerNameKey)).ToList();
-            Assert.That(namedLines, Has.Count.EqualTo(6));
+            Assert.That(namedLines, Is.Not.Empty);
             Assert.That(namedLines.All(line => configuration.texts.Any(text => text.key == line.speakerNameKey)), Is.True);
+            var textByKey = configuration.texts.ToDictionary(text => text.key, text => text.content ?? "");
+            var pageOrder = configuration.presentations.conversationPages.Where(page => page.presentationKey == "revolution.1014.s1.conversation")
+                .ToDictionary(page => page.pageId, page => page.seq);
+            var sorelLines = configuration.presentations.conversationLines.Where(line => pageOrder.ContainsKey(line.pageId) && line.speakerKey == "sorel")
+                .OrderBy(line => pageOrder[line.pageId]).ThenBy(line => line.seq).ToList();
+            var introduction = sorelLines.Single(line => textByKey[line.textKey].Contains("叫我索雷尔"));
+            int identityPage = pageOrder[introduction.pageId];
+            var preIdentity = sorelLines.Where(line => pageOrder[line.pageId] <= identityPage).ToList();
+            var postIdentity = sorelLines.Where(line => pageOrder[line.pageId] > identityPage).ToList();
+            Assert.That(preIdentity, Is.Not.Empty); Assert.That(postIdentity, Is.Not.Empty);
+            Assert.That(preIdentity.All(line => !string.IsNullOrWhiteSpace(line.speakerNameKey)
+                && textByKey[line.speakerNameKey].Length > 0 && textByKey[line.speakerNameKey].All(ch => ch == '?' || ch == '？')), Is.True,
+                "Sorel's displayed name must stay anonymous through his introduction line, not leak from his portrait object.");
+            Assert.That(postIdentity.All(line => !string.IsNullOrWhiteSpace(line.speakerNameKey)
+                && textByKey[line.speakerNameKey] == "索雷尔"), Is.True,
+                "After the source identity reveal, do not keep anonymizing the rest of the scene.");
             Assert.That(c14.Status, Is.EqualTo("static_pass"));
             Assert.That(c14.Errors.Exists(error => error.Contains("C-B03")), Is.False);
             Assert.That(c14.Errors.Exists(error => error.Contains("C-B04")), Is.False);
@@ -145,20 +161,44 @@ namespace Spotlight.Narrative.Editor.Tests
             var rose = report.Find("rose.1011.s1");
             Assert.That(rose, Is.Not.Null);
             Assert.That(rose.Entry, Is.EqualTo(NarrativeEntryPoint.MorningBeforeMap));
-            Assert.That(rose.PageCount, Is.EqualTo(27));
-            Assert.That(rose.LineCount, Is.EqualTo(123));
+            Assert.That(rose.PageCount, Is.EqualTo(35));
+            Assert.That(rose.LineCount, Is.EqualTo(126));
             Assert.That(rose.ChoiceCount, Is.EqualTo(11));
             Assert.That(rose.Errors.Exists(error => error.Contains("B-B04")), Is.False);
             Assert.That(rose.Errors.Exists(error => error.Contains("B-B05")), Is.False);
             Assert.That(rose.Errors.Exists(error => error.Contains("B-C02")), Is.False);
             Assert.That(rose.ExpectedResults.Exists(value => value.Contains("story.rose.1011.s1.completed")), Is.True);
 
-            Assert.That(configuration.abilityCheckConditions.Single(value => value.checkId == "rose.1011.s1.check.sparrow").threshold, Is.EqualTo(6));
-            Assert.That(configuration.abilityCheckConditions.Single(value => value.checkId == "rose.1011.s1.check.portrait").threshold, Is.EqualTo(5));
-            Assert.That(configuration.abilityCheckConditions.Single(value => value.checkId == "rose.1011.s1.check.wisdom").threshold, Is.EqualTo(3));
-            Assert.That(configuration.presentations.conversationPages.Any(page => page.checkId == "rose.1011.s1.check.sparrow"), Is.True);
-            Assert.That(configuration.choices.Count(choice => choice.groupKey == "rose.1011.s1.choice.drink"), Is.EqualTo(3));
-            Assert.That(configuration.choices.Count(choice => choice.groupKey == "rose.1011.s1.choice.news"), Is.EqualTo(2));
+            var pages = configuration.presentations.conversationPages.Where(page => page.presentationKey == "rose.1011.s1.conversation").OrderBy(page => page.seq).ToList();
+            var gameplay = pages.Single(page => page.stepType == NarrativeConversationStepType.Gameplay);
+            Assert.That(gameplay.pageId, Is.EqualTo("rose.1011.s1.brew_gate"));
+            Assert.That(gameplay.gameplayKey, Is.EqualTo("taste:blackcoffee:90:1"), "The real cafe tasting bridge, not an empty Dialogue page, owns production completion.");
+            Assert.That(configuration.presentations.conversationLines.Any(line => line.pageId == gameplay.pageId), Is.False);
+            var failure = pages.Single(page => page.pageId == "rose.1011.s1.brew_gate.failed");
+            Assert.That(failure.pageCondKeys, Is.EqualTo("not:gameplay:" + gameplay.pageId + ":passed"));
+            Assert.That(failure.seq, Is.GreaterThan(gameplay.seq));
+            Assert.That(configuration.presentations.conversationLines.Any(line => line.pageId == failure.pageId), Is.True);
+            Assert.That(pages.Single(page => page.pageId == "rose.1011.s1.sparrow.insight").pageCondKeys, Is.EqualTo("bar:player.perception:gt:5"));
+            Assert.That(pages.Single(page => page.pageId == "rose.1011.s1.long.recognition").pageCondKeys, Does.Contain("bar:player.perception:gt:4"));
+            foreach (string branch in new[] { "nature", "reason", "wisdom" })
+            {
+                var shortPage = pages.Single(page => page.pageId == "rose.1011.s1.short." + branch);
+                var end = pages.Single(page => page.pageId == "rose.1011.s1.end.short." + branch);
+                Assert.That(end.stepType, Is.EqualTo(NarrativeConversationStepType.End));
+                Assert.That(end.pageCondKeys, Is.EqualTo(shortPage.pageCondKeys));
+                Assert.That(end.seq, Is.GreaterThan(shortPage.seq));
+                Assert.That(end.seq, Is.LessThan(pages.Single(page => page.pageId == "rose.1011.s1.long.answer").seq));
+                Assert.That(end.nextPageId, Is.Null.Or.Empty);
+            }
+            Assert.That(pages.Single(page => page.pageId == "rose.1011.s1.short.wisdom").pageCondKeys, Does.Contain("bar:player.wisdom:lt:3"));
+            foreach (var page in pages.Where(page => page.pageId.StartsWith("rose.1011.s1.long.", StringComparison.Ordinal)))
+            {
+                Assert.That(page.pageCondKeys, Does.Contain("choice:rose.1011.s1.choice.p080"), page.pageId);
+                Assert.That(page.pageCondKeys, Does.Contain("bar:player.wisdom:ge:3"), page.pageId);
+            }
+            Assert.That(pages.Last().stepType, Is.EqualTo(NarrativeConversationStepType.End));
+            Assert.That(configuration.choices.Count(choice => choice.groupKey == "rose.1011.s1.choices.sparrow_drink"), Is.EqualTo(3));
+            Assert.That(configuration.choices.Count(choice => choice.groupKey == "rose.1011.s1.choices.heard"), Is.EqualTo(2));
             Assert.That(configuration.conditionKeys.Any(key => key.key == "specialization.player.letter.politics"), Is.True);
         }
 

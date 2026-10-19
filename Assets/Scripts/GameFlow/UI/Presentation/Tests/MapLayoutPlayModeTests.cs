@@ -3,6 +3,7 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using System.Reflection;
 using NUnit.Framework;
 using Spotlight.Narrative;
@@ -89,6 +90,7 @@ namespace Spotlight.GameFlow.Tests
         public IEnumerator TearDown()
         {
             Time.timeScale = previousTime;
+            YokiFrame.UIKit.ClosePanel<OperationToastPanel>();
             if (map != null) Object.Destroy(map);
             YokiFrame.UIKit.ClosePanel<GameplayHudPanel>();
             YokiFrame.UIKit.UnloadPanel<GameplayHudPanel>();
@@ -97,6 +99,56 @@ namespace Spotlight.GameFlow.Tests
             instance?.GetSetMethod(true).Invoke(null, new object[] { previousRuntime });
             if (scene.IsValid() && scene.isLoaded) yield return SceneManager.UnloadSceneAsync(scene);
             foreach (var system in previousSystems) if (system != null) system.enabled = true;
+        }
+
+        [UnityTest]
+        public IEnumerator BlockedDetailsShowsExistingToastAndOpensImportantTodoAtTop()
+        {
+            var config = new NarrativeConfiguration();
+            config.conditionKeys.Add(new NarrativeConditionKeyDefinition { key = "story.ready" });
+            config.conditions.Add(new NarrativeConditionDefinition { conditionId = "gate", ownerType = "event", ownerId = "ordinary",
+                groupIndex = 1, condType = "BOOL_EQ", target = "story.ready", value = "true" });
+            config.events.Add(new NarrativeEventDefinition { eventId = "ordinary", entry = NarrativeEntryPoint.MapAction,
+                eventProperties = new List<NarrativeEventProperty> {
+                    new NarrativeEventProperty { property = "dailyPool", value = "cafe" },
+                    new NarrativeEventProperty { property = "dailyKind", value = "ordinary" } } });
+            config.actions.Add(new NarrativeActionDefinition { actionKey = "optional", nameText = "闲逛", requirements = "ActionPoint(1)", resultEvents = new List<string> { "ordinary" } });
+            config.actions.Add(new NarrativeActionDefinition { actionKey = "important", nameText = "重要拜访", type = NarrativeActionType.Once, mustExecute = true });
+            var runtime = runtimeObject.GetComponent<NarrativeRuntime>();
+            runtime.Initialize(config, new Presenter());
+            actions = runtime.Actions;
+            actions.Mount("cafe", "optional"); actions.Mount("cafe", "important");
+            var hud = GameplayHudPanel.Instance;
+            hud.Tasks.RefreshSource();
+            hud.Tasks.SetTracked("optional");
+            hud.Tasks.SetVisible(true);
+            hud.Tasks.transform.Find("TaskBody/CompletedTab").GetComponent<Button>().onClick.Invoke();
+            hud.Tasks.SetVisible(false);
+            hud.Inventory.SetVisible(true);
+            var details = map.GetComponentInChildren<MapActionDetailsView>(true);
+            details.Show("cafe", "咖啡馆");
+            yield return new WaitForSecondsRealtime(.35f);
+            var execute = details.transform.Find("Viewport/ActionList/Action_optional/ExecutePreview").GetComponent<Button>();
+            Assert.That(execute.GetComponentInChildren<TMP_Text>().text, Is.EqualTo("查看详情"));
+            execute.onClick.Invoke();
+            yield return new WaitForSecondsRealtime(.3f);
+            var toast = YokiFrame.UIKit.GetPanel<OperationToastPanel>();
+            Assert.That(toast, Is.Not.Null);
+            Assert.That(toast.Message, Does.Contain("请先完成重要的事情"));
+            Assert.That(toast.GetComponent<CanvasGroup>().blocksRaycasts, Is.False);
+            Assert.That(details.gameObject.activeSelf, Is.False);
+            Assert.That(hud.Inventory.IsVisible, Is.False);
+            Assert.That(hud.Tasks.IsVisible, Is.True);
+            Assert.That(hud.Tasks.TrackedId, Is.EqualTo("important"));
+            Assert.That(hud.Tasks.CurrentGuidance.id, Is.EqualTo("important"));
+            var content = hud.Tasks.transform.Find("TaskBody/TaskViewport/TaskContent");
+            var first = content.Cast<Transform>().First(t => t.gameObject.activeSelf && t.name.StartsWith("Task_"));
+            Assert.That(first.name, Is.EqualTo("Task_important"));
+            Assert.That(first.Find("Label").GetComponent<TMP_Text>().text, Does.Contain("重要 · "));
+            Assert.That(content.Find("Navigate_important"), Is.Not.Null, "The important task is expanded, not merely listed.");
+            Assert.That(actions.ActionPoints.Current, Is.EqualTo(5));
+            Assert.That(actions.IsCompleted("important"), Is.False);
+            Assert.That(actions.IsExecuting, Is.False);
         }
 
         [UnityTest]

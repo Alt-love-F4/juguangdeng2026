@@ -209,9 +209,10 @@ namespace Spotlight.FreeCafe
     [Serializable]
     public sealed class EconomySpec
     {
-        public int baseCustomers = 12;       // 每日基础客流
-        public int customerGrowthEvery = 30; // 每累计服务多少位顾客，客流 +1
-        public int maxCustomers = 24;        // 每日客流上限
+        public int baseCustomers = 3;        // 每日普通基础客流
+        public int customerGrowthEvery = 30; // 旧配置序列字段保留兼容；客流不再按累计服务量成长
+        public int maxCustomers = 5;         // 每日普通客流上限
+        public int customersReputationStep = 5; // 开业时每满多少非负声望，普通客流 +1
         public int initialSeats = 3;         // 初始卡座数
         public int wastePenalty = 10;        // 丢弃原料的扣款
         public int wrongOrderPenalty = 10;   // 交付错误订单的扣款
@@ -336,6 +337,7 @@ namespace Spotlight.FreeCafe
         public int todayFailed;  // 今日失败/未完成单数
         public int todayRevenue; // 今日收入
         public int todayArrivals; // 今日已到店顾客数
+        public int todayReplacedCustomers; // 为剧情人物让座的普通客人，不计失败或日结服务义务
         public int todayCustomerBudget; // 今日客流上限
         public int skillPoints;  // 可用技能点
         public int rewardedSkillMilestones; // 已发放的技能点里程碑，避免重复发

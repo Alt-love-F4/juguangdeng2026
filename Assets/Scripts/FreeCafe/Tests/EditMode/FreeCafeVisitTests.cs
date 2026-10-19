@@ -75,22 +75,57 @@ namespace Spotlight.FreeCafe.Tests
             Assert.That(world.CafeVisit("v1").diagnostics, Contains.Item("customer_budget_minimum_adjusted"));
             Assert.That(world.Restore(Copy()).success, Is.True);
         }
-        [Test] public void MidBusinessVisitAddsBudgetAndWaitsOnlyForSeat()
+        [Test] public void MidBusinessVisitAddsOnlyItsOwnBudgetAndReplacesOrdinaryCustomer()
         {
             world.StartDay(); world.State.todayCustomerBudget = world.State.todayArrivals;
-            int budget = world.State.todayCustomerBudget; Sync(Intent());
-            Assert.That(world.CafeVisit("v1").status, Is.EqualTo(CafeVisitStatus.WaitingForSeat));
-            Assert.That(world.CafeVisit("v1").budgetReserved, Is.True);
-            Assert.That(world.CafeVisit("v1").diagnostics, Does.Not.Contain("budget_unavailable"));
-            Assert.That(world.State.todayCustomerBudget, Is.EqualTo(budget + 1));
+            int budget = world.State.todayCustomerBudget, arrivals = world.State.todayArrivals;
             Sync(Intent());
+            Assert.That(world.CafeVisit("v1").status, Is.EqualTo(CafeVisitStatus.SeatedBeforeServe));
+            Assert.That(world.CafeVisit("v1").budgetReserved, Is.False);
+            Assert.That(world.CafeVisit("v1").diagnostics, Contains.Item("ordinary_customer_replaced"));
+            Assert.That(world.State.todayCustomerBudget, Is.EqualTo(budget + 1));
+            Assert.That(world.State.todayArrivals, Is.EqualTo(arrivals + 1), "Historical ordinary arrivals must not roll back");
+            var order = Order(); var customer = world.Find("customer_0");
+            long sequence = world.State.cafeVisitFeedbackSequence;
+            Sync(Intent()); Sync(Intent());
+            Assert.That(Order(), Is.SameAs(order));
+            Assert.That(world.Find("customer_0"), Is.SameAs(customer));
             Assert.That(world.State.todayCustomerBudget, Is.EqualTo(budget + 1), "Repeated snapshots must not add another slot");
-            var ordinary = world.State.requests.Find(r => r.customerId == "customer_0");
-            ordinary.automaticRemaining = 0;
-            world.Tick(.01f);
-            Assert.That(Order(), Is.Not.Null, "A late story visitor must arrive even after normal traffic has exhausted its budget");
+            Assert.That(world.State.todayArrivals, Is.EqualTo(arrivals + 1));
+            Assert.That(world.State.cafeVisitFeedbackSequence, Is.EqualTo(sequence));
+            Assert.That(world.CafeVisit("v1").diagnostics.Count(d => d == "ordinary_customer_replaced"), Is.EqualTo(1));
             Assert.That(world.Restore(Copy()).success, Is.True);
         }
+        [Test] public void ReplacedOrdinaryCustomerDoesNotPenalizeDailyReputationAndCounterPersists()
+        {
+            world.StartDay();
+            Sync(Intent());
+            Assert.That(world.State.todayReplacedCustomers, Is.EqualTo(1));
+            Assert.That(world.Restore(Copy()).success, Is.True);
+            Assert.That(world.State.todayReplacedCustomers, Is.EqualTo(1));
+            foreach (var request in world.State.requests.ToArray())
+            {
+                request.automaticRemaining = 0;
+            }
+            world.Tick(.01f);
+            int served = world.State.todayServed;
+            Assert.That(served, Is.EqualTo(world.State.todayArrivals - 1));
+            int reputation = world.State.reputation;
+            world.EndDay();
+            Assert.That(world.State.reputation, Is.EqualTo(reputation + served));
+            world.StartDay();
+            Assert.That(world.State.todayReplacedCustomers, Is.Zero);
+        }
+
+        [TestCase(-1)] [TestCase(100)]
+        public void InvalidReplacementCounterRejectsSave(int count)
+        {
+            world.StartDay();
+            var snapshot = Copy();
+            snapshot.todayReplacedCustomers = count;
+            Assert.That(world.Restore(snapshot).success, Is.False);
+        }
+
         [Test] public void DedicatedSeatConflictQueuesAndReleasesToNextVisit()
         {
             Sync(Intent("v1"), Intent("v2")); world.StartDay();
@@ -101,14 +136,241 @@ namespace Spotlight.FreeCafe.Tests
             Assert.That(Order("v2"), Is.Not.Null);
             Assert.That(world.CafeVisit("v2").seatId, Is.EqualTo("customer_0"));
         }
-        [Test] public void ExistingOrdinaryCustomerIsNotEvictedAndSpecialWinsReleasedSeat()
+        [Test] public void ReplacementCancelsUnfinishedOrderAndClearsSpokenAndFocusWithoutSettlement()
         {
-            world.StartDay(); var original = world.Find("customer_0"); Sync(Intent());
-            Assert.That(world.Find("customer_0"), Is.SameAs(original));
-            world.State.requests.Find(r => r.customerId == original.id).automaticRemaining = 0;
-            world.Tick(.01f);
-            Assert.That(Order(), Is.Not.Null);
+            world.StartDay(); var original = world.Find("customer_0");
+            var request = world.State.requests.Find(r => r.customerId == original.id);
+            world.Focus(request.id); world.State.spokenCustomers.Add(original.id);
+            var cup = CorrectCup(request);
+            int money = world.State.money, reputation = world.State.reputation, failed = world.State.todayFailed;
+            int served = world.State.served, successful = world.State.successfulOrders, revenue = world.State.todayRevenue;
+            Sync(Intent());
+            Assert.That(world.Find(original.id), Is.Not.SameAs(original));
+            Assert.That(world.Request(request.id), Is.Null);
+            Assert.That(world.State.requests.Count(r => r.customerId == original.id), Is.EqualTo(1));
+            Assert.That(world.State.spokenCustomers, Does.Not.Contain(original.id));
+            Assert.That(world.State.focusedRequestId, Is.Not.EqualTo(request.id));
+            Assert.That(world.Request(world.State.focusedRequestId), Is.Not.Null);
+            Assert.That(world.Find(cup.id), Is.SameAs(cup), "Player-made drinks must not be discarded or refunded");
+            Assert.That(world.State.money, Is.EqualTo(money));
+            Assert.That(world.State.reputation, Is.EqualTo(reputation));
+            Assert.That(world.State.todayFailed, Is.EqualTo(failed));
+            Assert.That(world.State.served, Is.EqualTo(served));
+            Assert.That(world.State.successfulOrders, Is.EqualTo(successful));
+            Assert.That(world.State.todayRevenue, Is.EqualTo(revenue));
             Assert.That(world.Find("customer_0").person.characterId, Is.EqualTo("character_v1"));
+        }
+        [Test] public void ThreeCustomerBudgetDoesNotBlockStoryOrCreateOrdinaryRefillQuota()
+        {
+            catalog.economy.baseCustomers = catalog.economy.maxCustomers = 3;
+            world = new CafeWorld(catalog); world.StartDay();
+            Assert.That(world.State.todayArrivals, Is.EqualTo(3));
+            Sync(Intent());
+            Assert.That(Order(), Is.Not.Null);
+            Assert.That(world.State.todayArrivals, Is.EqualTo(4));
+            Assert.That(world.State.todayCustomerBudget, Is.EqualTo(4));
+            foreach (var r in world.State.requests) r.automaticRemaining = 0;
+            world.Tick(.01f); world.Tick(catalog.customerInterval);
+            Assert.That(world.State.requests, Is.Empty);
+            Assert.That(world.State.todayArrivals, Is.EqualTo(4));
+        }
+        private void UseTables(int count = 3)
+        {
+            catalog.customerTableCount = count;
+            world = new CafeWorld(catalog);
+            world.State.seats = count * 2;
+        }
+        private void MoveCustomer(int from, int to)
+        {
+            string id = "customer_" + from;
+            var customer = world.Find(id);
+            var request = world.State.requests.Find(r => r.customerId == id);
+            customer.id = "customer_" + to;
+            request.customerId = customer.id;
+        }
+        [TestCase(false, 0f, CafeVisitStatus.Reserved)]
+        [TestCase(true, 10f, CafeVisitStatus.PendingArrival)]
+        public void UnauthorizedOrDelayedVisitDoesNotDisplaceAnyone(bool authorized, float delay, CafeVisitStatus status)
+        {
+            world.StartDay();
+            var occupants = world.State.entities.Where(e => e.specId == "customer").ToArray();
+            var requests = world.State.requests.ToArray();
+            var intent = Intent(authorized: authorized); intent.arrivalDelaySeconds = delay;
+            Sync(intent); Sync(intent);
+            Assert.That(world.CafeVisit("v1").status, Is.EqualTo(status));
+            Assert.That(world.State.entities.Where(e => e.specId == "customer"), Is.EqualTo(occupants));
+            Assert.That(world.State.requests, Is.EqualTo(requests));
+            Assert.That(world.CafeVisit("v1").diagnostics, Does.Not.Contain("ordinary_customer_replaced"));
+            intent.arrivalAuthorized = true;
+            if (delay > 0) world.State.businessElapsed = delay;
+            Sync(intent);
+            Assert.That(Order(), Is.Not.Null);
+            Assert.That(world.CafeVisit("v1").diagnostics, Contains.Item("ordinary_customer_replaced"));
+        }
+        [Test] public void NoEligibleProductDoesNotDisplaceOrdinaryCustomer()
+        {
+            world.StartDay(); var original = world.Find("customer_0");
+            var requests = world.State.requests.ToArray();
+            world.State.unlockedProducts.Clear(); Sync(Intent());
+            Assert.That(world.CafeVisit("v1").status, Is.EqualTo(CafeVisitStatus.WaitingForSeat));
+            Assert.That(world.Find("customer_0"), Is.SameAs(original));
+            Assert.That(world.State.requests, Is.EqualTo(requests));
+            world.State.unlockedProducts.Add(catalog.products[0].id); Sync(Intent());
+            Assert.That(Order(), Is.Not.Null);
+        }
+        [Test] public void DuplicateIdentityDoesNotDisplaceAnyCustomer()
+        {
+            world.StartDay(); var requests = world.State.requests.ToArray();
+            world.Find("customer_1").person.personId = "person_v1";
+            var original = world.Find("customer_0"); Sync(Intent()); Sync(Intent());
+            Assert.That(world.Find("customer_0"), Is.SameAs(original));
+            Assert.That(world.State.requests, Is.EqualTo(requests));
+            Assert.That(world.CafeVisit("v1").status, Is.EqualTo(CafeVisitStatus.WaitingForSeat));
+            Assert.That(world.CafeVisit("v1").diagnostics, Contains.Item("character_already_present"));
+        }
+        [TestCase(0, 0)]
+        [TestCase(0, 2)]
+        [TestCase(2, 0)]
+        [TestCase(2, 2)]
+        public void DedicatedTableReplacesOrdinaryOccupantOnEitherSide(int occupied, int requested)
+        {
+            UseTables(2); world.StartDay();
+            if (occupied != 0) MoveCustomer(0, occupied);
+            var original = world.Find("customer_" + occupied);
+            var untouched = world.Find("customer_1");
+            Sync(Intent(seat: "customer_" + requested));
+            Assert.That(world.CafeVisit("v1").seatId, Is.EqualTo("customer_" + requested));
+            Assert.That(world.Find(original.id), Is.Not.SameAs(original));
+            Assert.That(world.Find("customer_1"), Is.SameAs(untouched));
+            Assert.That(world.State.requests.Count, Is.EqualTo(2));
+            Assert.That(world.State.requests.Count(r => r.customerId == "customer_" + requested), Is.EqualTo(1));
+            Assert.That(world.Restore(Copy()).success, Is.True);
+        }
+        [Test] public void EmptyLegalSeatWinsBeforeAnyOrdinaryReplacement()
+        {
+            world.State.seats = 4; world.StartDay();
+            var originals = world.State.entities.Where(e => e.specId == "customer").ToArray();
+            Sync(Intent(seat: null));
+            Assert.That(world.CafeVisit("v1").seatId, Is.EqualTo("customer_3"));
+            foreach (var original in originals) Assert.That(world.State.entities, Does.Contain(original));
+            Assert.That(world.CafeVisit("v1").diagnostics, Does.Not.Contain("ordinary_customer_replaced"));
+        }
+        [Test] public void GenericReplacementRespectsEarlierGenericReservation()
+        {
+            UseTables(); world.StartDay();
+            var protectedCustomer = world.Find("customer_0");
+            Sync(Intent("earlier", authorized: false, seat: null), Intent(seat: null));
+            Assert.That(world.CafeVisit("v1").seatId, Is.EqualTo("customer_1"));
+            Assert.That(world.Find("customer_0"), Is.SameAs(protectedCustomer));
+            Assert.That(world.CafeVisit("earlier").status, Is.EqualTo(CafeVisitStatus.Reserved));
+        }
+        [Test] public void GenericReplacementRespectsLaterDedicatedWholeTableReservation()
+        {
+            UseTables(); world.StartDay();
+            var protectedCustomer = world.Find("customer_0");
+            Sync(Intent(seat: null), Intent("later", authorized: false, seat: "customer_3"));
+            Assert.That(world.CafeVisit("v1").seatId, Is.EqualTo("customer_1"));
+            Assert.That(world.Find("customer_0"), Is.SameAs(protectedCustomer));
+            Assert.That(world.Find("customer_3"), Is.Null);
+        }
+        [Test] public void EarlierDedicatedReservationBlocksReplacementOnOppositeSide()
+        {
+            UseTables(); world.StartDay();
+            var original = world.Find("customer_0");
+            Sync(Intent("earlier", authorized: false), Intent(seat: "customer_3"));
+            Assert.That(world.CafeVisit("v1").status, Is.EqualTo(CafeVisitStatus.WaitingForSeat));
+            Assert.That(world.Find("customer_0"), Is.SameAs(original));
+            Assert.That(Order(), Is.Null);
+        }
+        [Test] public void FullySpecialTablesKeepLateVisitorWaitingEvenAfterService()
+        {
+            UseTables();
+            Sync(Intent("v1"), Intent("v2", seat: "customer_1"), Intent("v3", seat: "customer_2"));
+            world.StartDay(); AutoServe("v1");
+            var occupants = world.State.entities.Where(e => e.specId == "customer").ToArray();
+            var requests = world.State.requests.ToArray(); int arrivals = world.State.todayArrivals;
+            Sync(Intent("late", seat: null)); Sync(Intent("late", seat: null));
+            Assert.That(world.CafeVisit("late").status, Is.EqualTo(CafeVisitStatus.WaitingForSeat));
+            Assert.That(world.State.entities.Where(e => e.specId == "customer"), Is.EqualTo(occupants));
+            Assert.That(world.State.requests, Is.EqualTo(requests));
+            Assert.That(world.State.todayArrivals, Is.EqualTo(arrivals));
+            Assert.That(world.CafeVisit("late").diagnostics, Does.Not.Contain("ordinary_customer_replaced"));
+        }
+        [Test] public void OppositeSideStoryVisitCannotBeDisplaced()
+        {
+            UseTables(); Sync(Intent("first", seat: "customer_3")); world.StartDay();
+            var original = world.Find("customer_3");
+            Sync(Intent());
+            Assert.That(world.CafeVisit("v1").status, Is.EqualTo(CafeVisitStatus.WaitingForSeat));
+            Assert.That(world.Find("customer_3"), Is.SameAs(original));
+            Assert.That(world.CafeVisit("first").status, Is.EqualTo(CafeVisitStatus.SeatedBeforeServe));
+        }
+        [Test] public void NamedNarrativeIdentityWithoutVisitOwnershipIsNotOrdinary()
+        {
+            world.StartDay(); var original = world.Find("customer_0");
+            original.person.narrativeCharacterId = "other_story_character";
+            Sync(Intent());
+            Assert.That(world.CafeVisit("v1").status, Is.EqualTo(CafeVisitStatus.WaitingForSeat));
+            Assert.That(world.Find("customer_0"), Is.SameAs(original));
+        }
+        [TestCase(0)]
+        [TestCase(2)]
+        public void NarrativeServiceOwnedTableIsProtected(int requested)
+        {
+            UseTables(2); world.StartDay();
+            world.State.requests.Find(r => r.customerId == "customer_0").automaticRemaining = 0;
+            world.Tick(.01f); world.EnableProduction();
+            Assert.That(world.TryBeginNarrativeService("protected-service", new[] { new CafeNarrativeOrderSpec { productId = "blackcoffee" } },
+                _ => Assert.Fail("Replacement cannot complete narrative service"), out var lease, out var error), Is.True, error);
+            try
+            {
+                var customer = world.Find("customer_0");
+                var request = world.State.requests.Find(r => r.customerId == customer.id);
+                Sync(Intent(seat: "customer_" + requested));
+                Assert.That(world.CafeVisit("v1").status, Is.EqualTo(CafeVisitStatus.WaitingForSeat));
+                Assert.That(world.Find("customer_0"), Is.SameAs(customer));
+                Assert.That(world.Request(request.id), Is.SameAs(request));
+                Assert.That(world.State.focusedRequestId, Is.EqualTo(request.id));
+                Assert.That(world.HasNarrativeService, Is.True);
+            }
+            finally { lease.Dispose(); }
+        }
+        [Test] public void TutorialCustomerIsNeverAnOrdinaryReplacementCandidate()
+        {
+            Assert.That(world.StartTutorialCustomer().success, Is.True);
+            var customer = world.Find(CafeWorld.TutorialCustomerId);
+            // Defensive coverage for a mixed tutorial/business state; StartDay normally refuses it.
+            world.State.open = true; world.State.businessPhase = BusinessPhase.Open;
+            Sync(Intent());
+            Assert.That(world.CafeVisit("v1").status, Is.EqualTo(CafeVisitStatus.WaitingForSeat));
+            Assert.That(world.Find(CafeWorld.TutorialCustomerId), Is.SameAs(customer));
+            Assert.That(world.Request(CafeWorld.TutorialOrderId), Is.Not.Null);
+        }
+        [Test] public void ReplacementClearsBothOrdinaryOccupantsOfLegacyConflictedTable()
+        {
+            UseTables(2); world.StartDay(); MoveCustomer(1, 2);
+            var first = world.Find("customer_0"); var opposite = world.Find("customer_2");
+            var requests = world.State.requests.ToArray();
+            Sync(Intent());
+            Assert.That(Order(), Is.Not.Null);
+            Assert.That(world.Find(first.id), Is.Not.SameAs(first));
+            Assert.That(world.Find(opposite.id), Is.Not.SameAs(opposite));
+            foreach (var r in requests) Assert.That(world.Request(r.id), Is.Null);
+            Assert.That(world.State.requests.Count, Is.EqualTo(1));
+            Assert.That(world.Find("customer_2"), Is.Null);
+            Assert.That(world.State.todayArrivals, Is.EqualTo(3));
+            Assert.That(world.State.todayFailed, Is.Zero);
+        }
+        [Test] public void MixedOrdinaryAndSpecialTableConflictCannotCausePartialEviction()
+        {
+            UseTables(2); Sync(Intent("first")); world.StartDay(); MoveCustomer(1, 2);
+            var special = world.Find("customer_0"); var ordinary = world.Find("customer_2");
+            var requests = world.State.requests.ToArray();
+            Sync(Intent(seat: "customer_2"));
+            Assert.That(world.CafeVisit("v1").status, Is.EqualTo(CafeVisitStatus.WaitingForSeat));
+            Assert.That(world.Find("customer_0"), Is.SameAs(special));
+            Assert.That(world.Find("customer_2"), Is.SameAs(ordinary));
+            Assert.That(world.State.requests, Is.EqualTo(requests));
         }
         [Test] public void StoryReservationsDoNotReduceOrdinaryDailyTraffic()
         {

@@ -1,4 +1,6 @@
-# NCS 正式接入依赖清单
+﻿# NCS 正式接入依赖清单
+
+> 2026-10-19 更新：本文下方保留的是10/18历史依赖基线。全量接入后的当前入口为 `Docs/NarrativeIntegrationHandoff.md`，测试与剩余限制见 `Docs/NarrativeIntegrationVerification.md`；不要继续把下文“38事件、9根、只剩回归”当作当前状态。旧施工编号与桌面源稿只用于追溯，当前仓库原稿优先。
 
 更新时间：2026-10-18 02:27（源表、Luban JSON、Unity 报告已同步）
 

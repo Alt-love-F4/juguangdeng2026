@@ -24,7 +24,7 @@
     "mode": "Inline"
   },
   {
-    "checkId": "revolution.1014.s1.wisdom4",
+    "checkId": "neutral.1008.s1.check.q1b",
     "successEventId": "",
     "failureEventId": "",
     "successResultOwnerId": "",
@@ -32,7 +32,7 @@
     "mode": "Inline"
   },
   {
-    "checkId": "revolution.1014.s1.perception6",
+    "checkId": "neutral.1010.s1.check.q1b",
     "successEventId": "",
     "failureEventId": "",
     "successResultOwnerId": "",
@@ -40,7 +40,7 @@
     "mode": "Inline"
   },
   {
-    "checkId": "revolution.1014.s1.wisdom5",
+    "checkId": "neutral.1010.s1.check.q1c",
     "successEventId": "",
     "failureEventId": "",
     "successResultOwnerId": "",
@@ -48,7 +48,71 @@
     "mode": "Inline"
   },
   {
-    "checkId": "neutral.1008.s1.q1b",
+    "checkId": "neutral.1010.s2.check.q1b",
+    "successEventId": "",
+    "failureEventId": "",
+    "successResultOwnerId": "",
+    "failureResultOwnerId": "",
+    "mode": "Inline"
+  },
+  {
+    "checkId": "neutral.1010.s2.check.q2a",
+    "successEventId": "",
+    "failureEventId": "",
+    "successResultOwnerId": "",
+    "failureResultOwnerId": "",
+    "mode": "Inline"
+  },
+  {
+    "checkId": "neutral.1013.s2.check.q1b",
+    "successEventId": "",
+    "failureEventId": "",
+    "successResultOwnerId": "",
+    "failureResultOwnerId": "",
+    "mode": "Inline"
+  },
+  {
+    "checkId": "neutral.1013.s2.check.q1c",
+    "successEventId": "",
+    "failureEventId": "",
+    "successResultOwnerId": "",
+    "failureResultOwnerId": "",
+    "mode": "Inline"
+  },
+  {
+    "checkId": "neutral.1013.s2.check.q2a",
+    "successEventId": "",
+    "failureEventId": "",
+    "successResultOwnerId": "",
+    "failureResultOwnerId": "",
+    "mode": "Inline"
+  },
+  {
+    "checkId": "neutral.1027.s1.check.q1a",
+    "successEventId": "",
+    "failureEventId": "",
+    "successResultOwnerId": "",
+    "failureResultOwnerId": "",
+    "mode": "Inline"
+  },
+  {
+    "checkId": "neutral.1027.s1.check.q1b",
+    "successEventId": "",
+    "failureEventId": "",
+    "successResultOwnerId": "",
+    "failureResultOwnerId": "",
+    "mode": "Inline"
+  },
+  {
+    "checkId": "neutral.1030.s1.check.q1b",
+    "successEventId": "",
+    "failureEventId": "",
+    "successResultOwnerId": "",
+    "failureResultOwnerId": "",
+    "mode": "Inline"
+  },
+  {
+    "checkId": "neutral.route.1130.s1.check.negotiation",
     "successEventId": "",
     "failureEventId": "",
     "successResultOwnerId": "",
@@ -64,7 +128,7 @@
     "mode": "Inline"
   },
   {
-    "checkId": "rose.1011.s1.check.sparrow",
+    "checkId": "church.1020.s1.check.search_language",
     "successEventId": "",
     "failureEventId": "",
     "successResultOwnerId": "",
@@ -72,7 +136,7 @@
     "mode": "Inline"
   },
   {
-    "checkId": "rose.1011.s1.check.portrait",
+    "checkId": "church.1020.s1.check.search_courage",
     "successEventId": "",
     "failureEventId": "",
     "successResultOwnerId": "",
@@ -80,7 +144,143 @@
     "mode": "Inline"
   },
   {
-    "checkId": "rose.1011.s1.check.wisdom",
+    "checkId": "church.1020.s1.check.search_wisdom",
+    "successEventId": "",
+    "failureEventId": "",
+    "successResultOwnerId": "",
+    "failureResultOwnerId": "",
+    "mode": "Inline"
+  },
+  {
+    "checkId": "church.1020.s1.check.search_perception",
+    "successEventId": "",
+    "failureEventId": "",
+    "successResultOwnerId": "",
+    "failureResultOwnerId": "",
+    "mode": "Inline"
+  },
+  {
+    "checkId": "church.1023.s1.check.altered_release",
+    "successEventId": "",
+    "failureEventId": "",
+    "successResultOwnerId": "",
+    "failureResultOwnerId": "",
+    "mode": "Inline"
+  },
+  {
+    "checkId": "church.1105.s1.check.intuition",
+    "successEventId": "",
+    "failureEventId": "",
+    "successResultOwnerId": "",
+    "failureResultOwnerId": "",
+    "mode": "Inline"
+  },
+  {
+    "checkId": "church.1105.s2.check.intuition",
+    "successEventId": "",
+    "failureEventId": "",
+    "successResultOwnerId": "",
+    "failureResultOwnerId": "",
+    "mode": "Inline"
+  },
+  {
+    "checkId": "revolution.1014.s1.check.wisdom4",
+    "successEventId": "",
+    "failureEventId": "",
+    "successResultOwnerId": "",
+    "failureResultOwnerId": "",
+    "mode": "Inline"
+  },
+  {
+    "checkId": "revolution.1014.s1.check.perception6",
+    "successEventId": "",
+    "failureEventId": "",
+    "successResultOwnerId": "",
+    "failureResultOwnerId": "",
+    "mode": "Inline"
+  },
+  {
+    "checkId": "revolution.1014.s1.check.wisdom5",
+    "successEventId": "",
+    "failureEventId": "",
+    "successResultOwnerId": "",
+    "failureResultOwnerId": "",
+    "mode": "Inline"
+  },
+  {
+    "checkId": "revolution.1014.s1.check.language3",
+    "successEventId": "",
+    "failureEventId": "",
+    "successResultOwnerId": "",
+    "failureResultOwnerId": "",
+    "mode": "Inline"
+  },
+  {
+    "checkId": "revolution.1107.s1.check.letters",
+    "successEventId": "",
+    "failureEventId": "",
+    "successResultOwnerId": "",
+    "failureResultOwnerId": "",
+    "mode": "Inline"
+  },
+  {
+    "checkId": "revolution.1107.s1.check.timing",
+    "successEventId": "",
+    "failureEventId": "",
+    "successResultOwnerId": "",
+    "failureResultOwnerId": "",
+    "mode": "Inline"
+  },
+  {
+    "checkId": "revolution.1107.s1.check.route",
+    "successEventId": "",
+    "failureEventId": "",
+    "successResultOwnerId": "",
+    "failureResultOwnerId": "",
+    "mode": "Inline"
+  },
+  {
+    "checkId": "revolution.1107.s1.check.alliance",
+    "successEventId": "",
+    "failureEventId": "",
+    "successResultOwnerId": "",
+    "failureResultOwnerId": "",
+    "mode": "Inline"
+  },
+  {
+    "checkId": "revolution.1107.s1.check.challenge",
+    "successEventId": "",
+    "failureEventId": "",
+    "successResultOwnerId": "",
+    "failureResultOwnerId": "",
+    "mode": "Inline"
+  },
+  {
+    "checkId": "revolution.route.1112.s1.check.wisdom12",
+    "successEventId": "",
+    "failureEventId": "",
+    "successResultOwnerId": "",
+    "failureResultOwnerId": "",
+    "mode": "Inline"
+  },
+  {
+    "checkId": "revolution.route.1112.s1.check.language10",
+    "successEventId": "",
+    "failureEventId": "",
+    "successResultOwnerId": "",
+    "failureResultOwnerId": "",
+    "mode": "Inline"
+  },
+  {
+    "checkId": "revolution.route.1115.s1.check.structure9",
+    "successEventId": "",
+    "failureEventId": "",
+    "successResultOwnerId": "",
+    "failureResultOwnerId": "",
+    "mode": "Inline"
+  },
+  {
+    "checkId": "revolution.route.1123.s1.check.mary_final",
     "successEventId": "",
     "failureEventId": "",
     "successResultOwnerId": "",

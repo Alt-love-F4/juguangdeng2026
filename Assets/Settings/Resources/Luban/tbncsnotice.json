@@ -1,1 +1,83 @@
-[]
+[
+  {
+    "presentationKey": "news.bulletin.7e9cc445.presentation",
+    "titleKey": "news.bulletin.7e9cc445.title",
+    "timeKey": "news.bulletin.7e9cc445.date",
+    "imageKey": "",
+    "textKey": "news.bulletin.7e9cc445.body",
+    "barConds": "",
+    "noticeBarConds": ""
+  },
+  {
+    "presentationKey": "news.bulletin.837fdfd7.presentation",
+    "titleKey": "news.bulletin.837fdfd7.title",
+    "timeKey": "news.bulletin.837fdfd7.date",
+    "imageKey": "",
+    "textKey": "news.bulletin.837fdfd7.body",
+    "barConds": "",
+    "noticeBarConds": ""
+  },
+  {
+    "presentationKey": "news.bulletin.29af38b6.presentation",
+    "titleKey": "news.bulletin.29af38b6.title",
+    "timeKey": "news.bulletin.29af38b6.date",
+    "imageKey": "",
+    "textKey": "news.bulletin.29af38b6.body",
+    "barConds": "",
+    "noticeBarConds": ""
+  },
+  {
+    "presentationKey": "news.bulletin.ce650510.presentation",
+    "titleKey": "news.bulletin.ce650510.title",
+    "timeKey": "news.bulletin.ce650510.date",
+    "imageKey": "",
+    "textKey": "news.bulletin.ce650510.body",
+    "barConds": "",
+    "noticeBarConds": ""
+  },
+  {
+    "presentationKey": "news.bulletin.c1b54ba7.presentation",
+    "titleKey": "news.bulletin.c1b54ba7.title",
+    "timeKey": "news.bulletin.c1b54ba7.date",
+    "imageKey": "",
+    "textKey": "news.bulletin.c1b54ba7.body",
+    "barConds": "",
+    "noticeBarConds": ""
+  },
+  {
+    "presentationKey": "news.bulletin.12ed1d36.presentation",
+    "titleKey": "news.bulletin.12ed1d36.title",
+    "timeKey": "news.bulletin.12ed1d36.date",
+    "imageKey": "",
+    "textKey": "news.bulletin.12ed1d36.body",
+    "barConds": "",
+    "noticeBarConds": ""
+  },
+  {
+    "presentationKey": "news.bulletin.8140f96a.presentation",
+    "titleKey": "news.bulletin.8140f96a.title",
+    "timeKey": "news.bulletin.8140f96a.date",
+    "imageKey": "",
+    "textKey": "news.bulletin.8140f96a.body",
+    "barConds": "",
+    "noticeBarConds": ""
+  },
+  {
+    "presentationKey": "news.bulletin.d7760931.presentation",
+    "titleKey": "news.bulletin.d7760931.title",
+    "timeKey": "news.bulletin.d7760931.date",
+    "imageKey": "",
+    "textKey": "news.bulletin.d7760931.body",
+    "barConds": "",
+    "noticeBarConds": ""
+  },
+  {
+    "presentationKey": "news.bulletin.58d0aef1.presentation",
+    "titleKey": "news.bulletin.58d0aef1.title",
+    "timeKey": "news.bulletin.58d0aef1.date",
+    "imageKey": "",
+    "textKey": "news.bulletin.58d0aef1.body",
+    "barConds": "",
+    "noticeBarConds": ""
+  }
+]

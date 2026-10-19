@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Collections.Generic;
 using Spotlight.Audio;
 using Spotlight.GameFlow;
@@ -312,6 +312,8 @@ namespace Spotlight.FreeCafe
                 {
                     view=CreateEntityView(entity.specId,entity.area); view.name=entity.id; views[entity.id]=view;
                     view.Bind(this,entity);
+                    if (entity.area == AreaId.Cafe && World.Spec(entity.specId).Has(Capability.Customer))
+                        view.PlayArrivalFade();
                 }
                 if(view!=draggedView && view!=dragCompanion)
                 {
@@ -442,7 +444,8 @@ namespace Spotlight.FreeCafe
         public void Select(string id) { SelectedId=id; SyncViews(); Inspect(id); }
         public void Click(FreeEntityView view)
         {
-            if(World==null || view==null || !view.CanInteract || InputBlocked || IsDragging || dragFinishedFrame==Time.frameCount) return;
+            if(World==null || view==null || !view.CanInteract || IsDragging || dragFinishedFrame==Time.frameCount) return;
+            if (InputBlocked) { NotifyBlockedOperation(); return; }
             var entity=World.Find(view.EntityId); if(entity==null || entity.area!=World.State.currentArea) return;
             if (cafeTutorial != null && cafeTutorial.WaitingForWorkstation) return;
             if (WorkstationTutorial != null && !WorkstationTutorial.AllowClick(entity.id)) return;
@@ -450,7 +453,11 @@ namespace Spotlight.FreeCafe
             if(spec.Has(Capability.BusinessControl))
             {
                 var sign = view.GetComponent<FreeCafeBusinessSignView>();
-                if (sign != null && sign.IsFlipping) return;
+                if (sign != null && sign.IsFlipping)
+                {
+                    if (World.State.open && CanEndBusiness) sign.CloseAfterFlip(RequestBusinessEnd);
+                    return;
+                }
                 if (World.State.open)
                 {
                     if (sign != null && CanEndBusiness) sign.CloseAfterFlip(RequestBusinessEnd);
@@ -534,7 +541,12 @@ namespace Spotlight.FreeCafe
                     Report(result);
                     if(result.success)
                     {
-                        CafeDialoguePlayback.PlayCustomer(entity.person, result.message);
+                        if (!CafeTutorialActive && NarrativeCafeAmbientContent.TryOrder(World, entity, out string orderText))
+                        {
+                            // Order talk is nonmodal: keep production and customer patience alive.
+                            ShowHint(orderText); OperationToastPanel.ShowMessage(orderText);
+                        }
+                        else CafeDialoguePlayback.PlayCustomer(entity.person, result.message);
                         BusinessTutorial?.CustomerInspected(entity.id);
                     }
                 }
@@ -940,7 +952,7 @@ namespace Spotlight.FreeCafe
         }
         public void Enter(AreaId area)
         {
-            if (!CanEnterArea(area)) return;
+            if (!CanEnterArea(area)) { NotifyBlockedOperation(); return; }
             if (CafeTutorialWaitingForWorkstation)
             {
                 if (area != AreaId.Counter || World.Area(area) == null || areaManager.Find(area) == null) return;
@@ -1298,7 +1310,23 @@ namespace Spotlight.FreeCafe
             if (World.State.open) RequestBusinessEnd();
             else RequestBusinessStart();
         }
-        public void RequestBusinessStart() { if (!GameplayBlocked && !TutorialBusinessStartBlocked && !PracticeTutorialActive) { pendingBusinessStart = true; TryStartBusiness(); } }
+        private void NotifyBlockedOperation()
+        {
+            string message = CafeTutorialActive || PracticeTutorialActive
+                ? "请先按照教程完成当前步骤，再进行其他操作。"
+                : gameFlow != null && (gameFlow.IsMapOpen || gameFlow.IsDetailsOpen)
+                    ? "请先关闭地图或详情面板，再操作咖啡馆。"
+                    : IsDragging ? "请先放下手中的物品，再进行其他操作。"
+                    : "当前剧情、面板或小游戏尚未结束，请完成或关闭后重试。";
+            ShowHint(message);
+            OperationToastPanel.ShowBlocked(message);
+        }
+        public void RequestBusinessStart()
+        {
+            if (GameplayBlocked || TutorialBusinessStartBlocked || PracticeTutorialActive) { NotifyBlockedOperation(); return; }
+            pendingBusinessStart = true;
+            TryStartBusiness();
+        }
         private void TryStartBusiness()
         {
             if (World == null || World.State.open) { pendingBusinessStart = false; return; }
@@ -1313,11 +1341,49 @@ namespace Spotlight.FreeCafe
             Report(World.StartDay(IsSandboxMode));
             if (!IsSandboxMode || NarrativeRuntime.Instance != null) cafeVisits?.Pump();
         }
-        public bool CanEndBusiness => World != null && World.State.open && !InputBlocked && !IsDragging
-            && !CafeTutorialActive && !PracticeTutorialActive;
+        public string BusinessClosingBlockReason
+        {
+            get
+            {
+                if (World == null || !World.State.open) return "当前没有营业。";
+                if (IsDragging) return "请先放下手中的物品，再结束营业。";
+                if (CafeTutorialActive || PracticeTutorialActive) return "请先完成或退出当前操作教程，再结束营业。";
+                if (gameFlow != null && gameFlow.IsMapOpen) return "请先关闭地图返回咖啡馆，再点击结束营业。";
+                if (dayFlow == null && !IsSandboxMode) dayFlow = FindFirstObjectByType<DayFlowController>();
+                if (dayFlow != null && !IsSandboxMode)
+                {
+                    string reason = dayFlow.BusinessClosingBlockReason;
+                    if (!string.IsNullOrEmpty(reason)) return reason;
+                }
+                if (InputBlocked) return "请先关闭当前面板、结束对话或小游戏后，再结束营业。";
+                if (!IsSandboxMode && dayFlow == null) return "营业日程尚未就绪，请稍后再试。";
+                return null;
+            }
+        }
+        public bool CanEndBusiness => BusinessClosingBlockReason == null;
         public void RequestBusinessEnd()
         {
-            if (!CanEndBusiness) return;
+            string reason = BusinessClosingBlockReason;
+            if (reason != null)
+            {
+                ShowHint(reason);
+                OperationToastPanel.ShowMessage(reason);
+                return;
+            }
+            if (dayFlow == null) dayFlow = FindFirstObjectByType<DayFlowController>();
+            if (!IsSandboxMode)
+            {
+                // Formal closing must go through settlement/AfterBusiness/Map, never
+                // silently close the domain while its day-flow gates are still blocked.
+                if (dayFlow != null) dayFlow.FinishBusiness();
+                if (World.State.open)
+                {
+                    string blocked = dayFlow?.BusinessClosingBlockReason ?? "营业结算尚未就绪，请稍后再试。";
+                    ShowHint(blocked);
+                    OperationToastPanel.ShowMessage(blocked);
+                }
+                return;
+            }
             if (dayFlow != null && dayFlow.CanFinishBusiness) dayFlow.FinishBusiness();
             else EndBusiness();
         }

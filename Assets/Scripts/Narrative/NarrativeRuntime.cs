@@ -24,7 +24,9 @@ namespace Spotlight.Narrative
         public NarrativeMapInventory MapInventory { get; private set; }
         public bool IsReady => controller != null;
         public bool IsPresenting => runtimePresenter != null && runtimePresenter.IsPresenting;
-        public bool BlocksGameplayInput => IsPresenting || (controller != null && controller.IsBusy);
+        public bool IsAwaitingGameplay => runtimePresenter != null && runtimePresenter.IsAwaitingGameplay;
+        // Only world interaction yields. Story scheduling and save gates still see the active root.
+        public bool BlocksGameplayInput => !IsAwaitingGameplay && (IsPresenting || (controller != null && controller.IsBusy));
         private bool restoringCafeSession;
         public event Action<NarrativeCafeVisitSnapshot> CafeVisitsCommitted;
         public NarrativeCafeVisitSnapshot GetCommittedCafeVisits() => controller?.GetCommittedCafeVisits();
@@ -39,6 +41,12 @@ namespace Spotlight.Narrative
         private NarrativeLetterPlayback letterPlayback;
         private NarrativeNoticePlayback noticePlayback;
         private NarrativeConversationPlayback conversationPlayback;
+        private Func<NarrativeEventRequest, NarrativeGameplayPresentationData, Action<NarrativeGameplayResult>, IDisposable> gameplayPlayback;
+        public Func<NarrativeEventRequest, NarrativeGameplayPresentationData, Action<NarrativeGameplayResult>, IDisposable> GameplayPlayback
+        {
+            get => gameplayPlayback;
+            set { gameplayPlayback = value; if (runtimePresenter != null) runtimePresenter.GameplayPlayback = value; }
+        }
         private Func<string, string, string, NarrativeCharacterPresentationData> characterResolver;
         private Func<string, (bool ready, int value)> abilityReader;
         /// <summary>Provides the current player name for NCS text placeholders such as {playername}.</summary>
@@ -114,6 +122,7 @@ namespace Spotlight.Narrative
                 runtimePresenter.LetterPlayback = LetterPlayback;
                 runtimePresenter.NoticePlayback = NoticePlayback;
                 runtimePresenter.ConversationPlayback = ConversationPlayback;
+                runtimePresenter.GameplayPlayback = GameplayPlayback;
                 runtimePresenter.CharacterResolver = ResolveCharacterForPresentation;
             }
             controller = new NarrativeController(configuration, injectedPresenter ?? runtimePresenter);
@@ -154,6 +163,9 @@ namespace Spotlight.Narrative
 
         public void ResetSession(NarrativeConfiguration overrideConfiguration = null)
         {
+            // Explicit presenters belong to their host, not this runtime. Retain that
+            // injection across session resets instead of silently creating graphical UI.
+            INarrativePresenter preservedPresenter = injectedPresenter;
             runtimePresenter?.Dispose();
             runtimePresenter = null;
             injectedPresenter = null;
@@ -161,7 +173,8 @@ namespace Spotlight.Narrative
             controller = null;
             actionController = null;
             if (overrideConfiguration != null) configuration = overrideConfiguration;
-            Initialize(configuration, textResolver);
+            if (preservedPresenter != null) Initialize(configuration, preservedPresenter, textResolver);
+            else Initialize(configuration, textResolver);
         }
 
         public void Initialize(NarrativeConfiguration source, INarrativePresenter presenter, Func<string, string> resolver = null)
@@ -252,7 +265,7 @@ namespace Spotlight.Narrative
         public bool QueueEvent(string eventId) => controller != null && controller.QueueEvent(eventId);
         public bool QueueMapActionEvent(string eventId) => controller != null && controller.QueueMapActionEvent(eventId);
         public bool ProcessEntry(NarrativeEntryPoint entry, Action<bool> completed = null) => controller != null && controller.ProcessEntry(entry, completed);
-        public bool BlocksSave => controller != null && controller.BlocksSave;
+        public bool BlocksSave => IsAwaitingGameplay || controller != null && controller.BlocksSave;
         public bool AddBar(string barKey, int delta) => controller != null && controller.AddBar(barKey, delta);
         public bool SetBar(string barKey, int value) => controller != null && controller.SetBar(barKey, value);
         public bool SelectChoice(string choiceId) => controller != null && controller.SelectChoice(choiceId);

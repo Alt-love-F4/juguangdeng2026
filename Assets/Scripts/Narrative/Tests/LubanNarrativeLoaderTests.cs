@@ -1,5 +1,6 @@
-using System;
+﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using Newtonsoft.Json.Linq;
 using NUnit.Framework;
 
@@ -261,8 +262,29 @@ Assert.That(slots["bg"], Is.EqualTo("night")); Assert.That(slots["fade"], Is.Equ
                 Assert.That(c.conditions.Exists(x => x.ownerType == "action" && x.ownerId == action.actionKey && x.target == "test.delivery.enabled"), Is.True);
                 Assert.That(c.mapPositions.Exists(x => x.defaultAction == action.actionKey || x.extendedActions.Contains(action.actionKey)), Is.False);
             }
-            Assert.That(c.endings, Has.Count.EqualTo(2));
-            Assert.That(c.endings.TrueForAll(x => !x.enabled), Is.True);
+            Assert.That(c.endings, Has.Count.EqualTo(18));
+            var disabledSamples = c.endings.Where(x => x.endingId.StartsWith("ending_test_", StringComparison.Ordinal)).ToList();
+            Assert.That(disabledSamples.Select(x => x.endingId), Is.EquivalentTo(new[] { "ending_test_cumulative", "ending_test_consecutive" }));
+            Assert.That(disabledSamples.All(x => !x.enabled), Is.True);
+            var formalEndings = c.endings.Except(disabledSamples).ToList();
+            Assert.That(formalEndings, Has.Count.EqualTo(16));
+            Assert.That(formalEndings.Any(e => e.endingId == "arrival.ending.if0"), Is.True, "Confirmed authored opening departure must also use the formal Ending pipeline.");
+            Assert.That(formalEndings.All(x => x.enabled), Is.True);
+            var core = new NarrativeController(c);
+            foreach (var ending in formalEndings)
+            {
+                var gates = c.conditions.Where(x => x.ownerType == "ending" && x.ownerId == ending.endingId).ToList();
+                Assert.That(gates, Is.Not.Empty, ending.endingId);
+                foreach (var group in gates.GroupBy(x => x.groupIndex))
+                {
+                    Assert.That(group.Any(gate => gate.condType == "BOOL_EQ" && gate.value == "true"
+                        && c.conditionKeys.Any(key => key.key == gate.target && !key.initialValue)
+                        && c.results.Any(result => result.resultType == NarrativeResultType.SetFlag && result.target == gate.target && result.value == "true")),
+                        Is.True, ending.endingId + " must gate every OR branch on an authored, initially-false outcome fact.");
+                }
+                Assert.That(core.EvaluateConditions("ending", ending.endingId), Is.False,
+                    ending.endingId + " must not trigger on a fresh session.");
+            }
             Assert.That(c.conditionKeys.Find(x => x.key == "test.delivery.enabled").initialValue, Is.False);
         }
 

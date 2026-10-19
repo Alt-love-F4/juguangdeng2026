@@ -32,8 +32,9 @@ namespace Spotlight.GameFlow.Editor
             var artwork = root.transform.Find("ArtworkHud");
             artwork.SetAsLastSibling(); // Header buttons remain clickable while a drawer slides underneath.
             var data = new SerializedObject(root.GetComponent<GameplayHudPanel>());
-            data.FindProperty("endDayButton").objectReferenceValue = root.transform.Find("TaskPanel")
-                .GetComponentsInChildren<Button>(true).FirstOrDefault(button => button.name == "结束当天");
+            Transform legacyEndDay = root.transform.Find("TaskPanel/结束当天");
+            if (legacyEndDay != null) UnityEngine.Object.DestroyImmediate(legacyEndDay.gameObject);
+            data.FindProperty("endDayButton").objectReferenceValue = null;
             data.FindProperty("pointsFill").objectReferenceValue = artwork.Find("PointsFill").GetComponent<Image>();
             data.FindProperty("dateLabel").objectReferenceValue = artwork.Find("Date/DateText").GetComponent<TextMeshProUGUI>();
             var segments = artwork.GetComponentsInChildren<Image>(true)

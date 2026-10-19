@@ -23,6 +23,21 @@ namespace Spotlight.FreeCafe
         private GameObject body;
         private TMP_Text status;
         private TMP_FontAsset font;
+        private TMP_FontAsset headingFont;
+        private CanvasGroup shellGroup;
+        private ScrollRect contentScroll;
+        private RectTransform contentViewport;
+        private ContentSizeFitter contentFitter;
+        private LayoutElement contentMinimum;
+        private readonly List<Button> categoryButtons = new List<Button>();
+
+        // Warm paper and coffee ink, matching Map/Details without changing shared assets.
+        private static readonly Color Paper = new Color(.98f, .95f, .87f);
+        private static readonly Color Parchment = new Color(.93f, .87f, .75f);
+        private static readonly Color Ink = new Color(.35f, .19f, .07f);
+        private static readonly Color MutedInk = new Color(.46f, .35f, .25f);
+        private static readonly Color Burgundy = new Color(.43f, .15f, .16f);
+        private static readonly Color Brass = new Color(.65f, .48f, .26f);
         private int activeCategory = -1;
         private string pendingDanger;
         private float pendingUntil;
@@ -61,7 +76,12 @@ namespace Spotlight.FreeCafe
             Spotlight.GameFlow.DialoguePanel.ExternalInputBlocked = () => BlocksDialogueInput;
             Spotlight.Narrative.NarrativePresenter.ExternalInputBlocked = () => BlocksDialogueInput;
             DontDestroyOnLoad(gameObject);
-            font = Resources.Load<TMP_FontAsset>("Fonts/乐米曲奇方块体 SDF");
+            font = Resources.Load<TMP_FontAsset>("Fonts/Map/SourceHanSansSC-Regular-2 SDF");
+            if (font == null) font = Resources.Load<TMP_FontAsset>("Fonts/乐米曲奇方块体 SDF");
+            if (font == null) font = Resources.Load<TMP_FontAsset>("Fonts/SimHei SDF");
+            if (font == null) font = TMP_Settings.defaultFontAsset;
+            headingFont = Resources.Load<TMP_FontAsset>("Fonts/Map/SourceHanSerifCN-Heavy-4 SDF");
+            if (headingFont == null) headingFont = font;
             BuildCategories();
             BuildShell();
             SetVisible(false);
@@ -204,6 +224,7 @@ namespace Spotlight.FreeCafe
 
         private void BuildTutorials()
         {
+            AddMapTutorialAction();
             AddFirstGuestTutorialAction();
             AddSkipAllTutorialsAction();
             AddAction("黑咖啡操作教程", () => StartTutorial(false), "工作台内启动：拖豆、研磨、加水加热、右键倾倒。退出恢复原物品。", false);
@@ -216,6 +237,15 @@ namespace Spotlight.FreeCafe
                 runtime.WorkstationTutorial?.Stop();
                 runtime.MilkPitcherTutorial?.Stop();
             }, "恢复练习前工作台，不提交剧情教程进度。", false);
+        }
+
+        private void AddMapTutorialAction()
+        {
+            AddAction("地图使用教程", () =>
+            {
+                if (MapUsageTutorial.DebugPlay(out string message)) SetVisible(false);
+                SetStatus(message);
+            }, "介绍拖动/缩放地图、点击点位、查看行动需求及 T 待办；可重复播放，不执行行动或修改日期。", false);
         }
 
         private void AddFirstGuestTutorialAction()
@@ -262,8 +292,9 @@ namespace Spotlight.FreeCafe
 
         private void BuildShell()
         {
-            root = new GameObject("GMPanel", typeof(RectTransform), typeof(Canvas), typeof(CanvasScaler), typeof(GraphicRaycaster));
+            root = new GameObject("GMPanel", typeof(RectTransform), typeof(Canvas), typeof(CanvasScaler), typeof(GraphicRaycaster), typeof(CanvasGroup));
             root.transform.SetParent(transform, false);
+            shellGroup = root.GetComponent<CanvasGroup>();
             var canvas = root.GetComponent<Canvas>();
             canvas.renderMode = RenderMode.ScreenSpaceOverlay;
             canvasRect = root.GetComponent<RectTransform>();
@@ -273,45 +304,114 @@ namespace Spotlight.FreeCafe
             scaler.referenceResolution = new Vector2(1920, 1080);
             scaler.matchWidthOrHeight = .5f;
 
-            var backdrop = CreateImage(root.transform, "Backdrop", new Color(0, 0, 0, .58f));
+            var backdrop = CreateImage(root.transform, "Backdrop", new Color(.12f, .08f, .06f, .58f));
             Stretch(backdrop.rectTransform);
-            var window = CreateImage(root.transform, "Window", new Color(.08f, .09f, .11f, .98f));
+            var window = CreateImage(root.transform, "Window", Paper);
+            AddRuleBorder(window);
+            var shadow = window.gameObject.AddComponent<Shadow>();
+            shadow.effectColor = new Color(.12f, .07f, .03f, .24f);
+            shadow.effectDistance = new Vector2(5, -7);
             windowRect = window.rectTransform;
             windowRect.anchorMin = new Vector2(.5f, .5f);
             windowRect.anchorMax = new Vector2(.5f, .5f);
             windowRect.pivot = new Vector2(.5f, .5f);
             windowRect.sizeDelta = new Vector2(1400f, 800f);
             windowRect.anchoredPosition = Vector2.zero;
-            var dragHandle = CreateImage(window.transform, "TitleDragHandle", new Color(0, 0, 0, 0));
-            SetRect(dragHandle.rectTransform, new Vector2(0, .91f), new Vector2(1, 1), Vector2.zero);
+            var dragHandle = CreateImage(window.transform, "TitleDragHandle", Color.clear);
+            SetRect(dragHandle.rectTransform, Vector2.up, Vector2.one, Vector2.zero);
+            dragHandle.rectTransform.offsetMin = new Vector2(0, -94);
             dragHandle.gameObject.AddComponent<GMWindowHandle>().Configure(windowRect, canvasRect, false);
-            var resizeHandle = CreateImage(window.transform, "ResizeHandle", new Color(.35f, .4f, .45f, .9f));
-            resizeHandle.rectTransform.anchorMin = new Vector2(1, 0);
-            resizeHandle.rectTransform.anchorMax = new Vector2(1, 0);
-            resizeHandle.rectTransform.pivot = new Vector2(1, 0);
-            resizeHandle.rectTransform.sizeDelta = new Vector2(28, 28);
-            resizeHandle.rectTransform.anchoredPosition = new Vector2(-8, 8);
-            resizeHandle.gameObject.AddComponent<GMWindowHandle>().Configure(windowRect, canvasRect, true);
-
-            var title = CreateText(window.transform, "Title", "GM 调试面板   [~] 开关   · 拖动标题栏移动 · 拖动右下角调整大小", 25, Color.white);
-            SetRect(title.rectTransform, new Vector2(.035f, .91f), new Vector2(.965f, .99f), Vector2.zero);
+            var title = CreateText(dragHandle.transform, "Title", "咖啡馆 · 管理手册", 30, Burgundy);
+            title.font = headingFont;
+            SetRect(title.rectTransform, Vector2.zero, Vector2.one, Vector2.zero);
+            title.rectTransform.offsetMin = new Vector2(28, 37);
+            title.rectTransform.offsetMax = new Vector2(-28, -14);
             title.alignment = TextAlignmentOptions.MidlineLeft;
-            status = CreateText(window.transform, "Status", "准备就绪", 18, new Color(.75f, .82f, .85f));
-            SetRect(status.rectTransform, new Vector2(.035f, .02f), new Vector2(.965f, .09f), Vector2.zero);
-            status.alignment = TextAlignmentOptions.MidlineLeft;
+            var subtitle = CreateText(dragHandle.transform, "Subtitle", "GM 调试  /  [~] 开关  ·  拖动标题移动  ·  右下角调整大小", 18, MutedInk);
+            Stretch(subtitle.rectTransform);
+            subtitle.rectTransform.offsetMin = new Vector2(28, 9);
+            subtitle.rectTransform.offsetMax = new Vector2(-28, -56);
+            subtitle.alignment = TextAlignmentOptions.MidlineLeft;
+            CreateRule(window.transform, "HeaderRule", new Vector2(.02f, 1), new Vector2(.98f, 1), -94);
 
-            var sidebar = CreateImage(window.transform, "Sidebar", new Color(.12f, .14f, .17f, 1));
-            sidebarTransform = sidebar.transform;
-            SetRect(sidebar.rectTransform, new Vector2(.02f, .12f), new Vector2(.25f, .9f), Vector2.zero);
-            var sideLayout = sidebar.gameObject.AddComponent<VerticalLayoutGroup>();
-            sideLayout.padding = new RectOffset(14, 14, 14, 14);
-            sideLayout.spacing = 10;
+            var statusPanel = CreateImage(window.transform, "StatusPaper", Parchment);
+            SetRect(statusPanel.rectTransform, new Vector2(.02f, 0), new Vector2(.98f, 0), Vector2.zero);
+            statusPanel.rectTransform.offsetMin = new Vector2(0, 22);
+            statusPanel.rectTransform.offsetMax = new Vector2(0, 100);
+            AddRuleBorder(statusPanel);
+            var statusView = CreateImage(statusPanel.transform, "StatusViewport", Color.clear);
+            Stretch(statusView.rectTransform);
+            statusView.rectTransform.offsetMin = new Vector2(14, 6);
+            statusView.rectTransform.offsetMax = new Vector2(-14, -6);
+            statusView.gameObject.AddComponent<RectMask2D>();
+            status = CreateText(statusView.transform, "Status", "准备就绪", 18, Ink);
+            status.alignment = TextAlignmentOptions.TopLeft;
+            status.rectTransform.anchorMin = Vector2.up;
+            status.rectTransform.anchorMax = Vector2.one;
+            status.rectTransform.pivot = Vector2.up;
+            status.rectTransform.sizeDelta = Vector2.zero;
+            status.gameObject.AddComponent<ContentSizeFitter>().verticalFit = ContentSizeFitter.FitMode.PreferredSize;
+            ConfigureScroll(statusView.gameObject, statusView.rectTransform, status.rectTransform);
+
+            var sidebar = CreateImage(window.transform, "Sidebar", Parchment);
+            SetRect(sidebar.rectTransform, new Vector2(.02f, 0), new Vector2(.25f, 1), Vector2.zero);
+            sidebar.rectTransform.offsetMin = new Vector2(0, 114);
+            sidebar.rectTransform.offsetMax = new Vector2(0, -108);
+            AddRuleBorder(sidebar);
+            var sideView = CreateImage(sidebar.transform, "CategoryViewport", Color.clear);
+            Stretch(sideView.rectTransform);
+            sideView.rectTransform.offsetMin = new Vector2(8, 8);
+            sideView.rectTransform.offsetMax = new Vector2(-8, -8);
+            sideView.gameObject.AddComponent<RectMask2D>();
+            var sideContent = new GameObject("Categories", typeof(RectTransform), typeof(VerticalLayoutGroup), typeof(ContentSizeFitter));
+            sideContent.transform.SetParent(sideView.transform, false);
+            sidebarTransform = sideContent.transform;
+            var sideRect = (RectTransform)sidebarTransform;
+            sideRect.anchorMin = Vector2.up;
+            sideRect.anchorMax = Vector2.one;
+            sideRect.pivot = Vector2.up;
+            sideRect.sizeDelta = Vector2.zero;
+            var sideLayout = sideContent.GetComponent<VerticalLayoutGroup>();
+            sideLayout.padding = new RectOffset(4, 4, 4, 4);
+            sideLayout.spacing = 8;
+            sideLayout.childControlWidth = sideLayout.childControlHeight = true;
+            sideLayout.childForceExpandWidth = true;
             sideLayout.childForceExpandHeight = false;
+            sideContent.GetComponent<ContentSizeFitter>().verticalFit = ContentSizeFitter.FitMode.PreferredSize;
+            ConfigureScroll(sideView.gameObject, sideView.rectTransform, sideRect);
             for (int i = 0; i < categories.Count; i++) AddCategoryButton(i);
 
-            var content = CreateImage(window.transform, "Content", new Color(.1f, .11f, .13f, 1));
-            SetRect(content.rectTransform, new Vector2(.27f, .12f), new Vector2(.98f, .9f), Vector2.zero);
-            body = content.gameObject;
+            var content = CreateImage(window.transform, "Content", Paper);
+            SetRect(content.rectTransform, new Vector2(.27f, 0), new Vector2(.98f, 1), Vector2.zero);
+            content.rectTransform.offsetMin = new Vector2(0, 114);
+            content.rectTransform.offsetMax = new Vector2(0, -108);
+            AddRuleBorder(content);
+            var view = CreateImage(content.transform, "ContentViewport", Color.clear);
+            Stretch(view.rectTransform);
+            view.rectTransform.offsetMin = new Vector2(3, 3);
+            view.rectTransform.offsetMax = new Vector2(-3, -3);
+            view.gameObject.AddComponent<RectMask2D>();
+            contentViewport = view.rectTransform;
+            body = new GameObject("ContentRoot", typeof(RectTransform), typeof(LayoutElement), typeof(ContentSizeFitter));
+            body.transform.SetParent(view.transform, false);
+            Stretch((RectTransform)body.transform);
+            contentFitter = body.GetComponent<ContentSizeFitter>();
+            contentFitter.enabled = false;
+            contentMinimum = body.GetComponent<LayoutElement>();
+            contentScroll = ConfigureScroll(view.gameObject, view.rectTransform, (RectTransform)body.transform);
+            contentScroll.enabled = false;
+
+            // Keep this last in the window so the resize target always stays above the paper.
+            var resizeHandle = CreateImage(window.transform, "ResizeHandle", Parchment);
+            resizeHandle.rectTransform.anchorMin = resizeHandle.rectTransform.anchorMax = new Vector2(1, 0);
+            resizeHandle.rectTransform.pivot = new Vector2(1, 0);
+            resizeHandle.rectTransform.sizeDelta = new Vector2(28, 28);
+            resizeHandle.rectTransform.anchoredPosition = new Vector2(-5, 3);
+            AddRuleBorder(resizeHandle);
+            var grip = CreateText(resizeHandle.transform, "Grip", "//", 18, Burgundy);
+            Stretch(grip.rectTransform);
+            grip.alignment = TextAlignmentOptions.Center;
+            resizeHandle.gameObject.AddComponent<GMWindowHandle>().Configure(windowRect, canvasRect, true);
             ShowCategory(0);
         }
 
@@ -321,28 +421,72 @@ namespace Spotlight.FreeCafe
             var button = CreateButton(sidebarTransform, categories[index].Name, 20);
             int captured = index;
             button.onClick.AddListener(() => ShowCategory(captured));
-            button.GetComponent<LayoutElement>().preferredHeight = 58;
+            button.GetComponent<LayoutElement>().minHeight = 50;
+            categoryButtons.Add(button);
+            StyleButton(button, index == activeCategory);
         }
 
         private void ShowCategory(int index)
         {
             if (index < 0 || index >= categories.Count || body == null) return;
             activeCategory = index;
+            for (int i = 0; i < categoryButtons.Count; i++) StyleButton(categoryButtons[i], i == index);
             var oldLayout = body.GetComponent<VerticalLayoutGroup>();
             if (oldLayout != null) oldLayout.enabled = false;
+            // External categories own their layout inside the same, full-size ContentRoot.
+            contentScroll.StopMovement();
+            contentScroll.enabled = false;
+            contentFitter.enabled = false;
+            contentMinimum.minHeight = 0;
+            var bodyRect = (RectTransform)body.transform;
+            bodyRect.pivot = Vector2.up;
+            Stretch(bodyRect);
             for (int i = body.transform.childCount - 1; i >= 0; i--)
             {
                 body.transform.GetChild(i).gameObject.SetActive(false);
                 Destroy(body.transform.GetChild(i).gameObject);
             }
-            var heading = CreateText(body.transform, "Heading", categories[index].Name, 27, Color.white);
+            var heading = CreateText(body.transform, "Heading", categories[index].Name, 27, Burgundy);
+            heading.font = headingFont;
             SetRect(heading.rectTransform, new Vector2(.04f, .87f), new Vector2(.96f, .99f), Vector2.zero);
             heading.alignment = TextAlignmentOptions.MidlineLeft;
+            heading.gameObject.AddComponent<LayoutElement>().preferredHeight = 44;
             categories[index].Build();
+        }
+
+        private void EnableActionLayout()
+        {
+            var layout = body.GetComponent<VerticalLayoutGroup>();
+            if (layout == null) layout = body.AddComponent<VerticalLayoutGroup>();
+            layout.padding = new RectOffset(22, 22, 16, 20);
+            layout.spacing = 10;
+            layout.childControlWidth = layout.childControlHeight = true;
+            layout.childForceExpandWidth = true;
+            layout.childForceExpandHeight = false;
+            layout.enabled = true;
+            var rect = (RectTransform)body.transform;
+            rect.pivot = Vector2.up;
+            contentMinimum.minHeight = contentViewport.rect.height;
+            contentFitter.verticalFit = ContentSizeFitter.FitMode.PreferredSize;
+            contentFitter.enabled = true;
+            contentScroll.enabled = true;
+        }
+
+        private void LateUpdate()
+        {
+            // A stretched root is retained for external views; only standard rows are fitted.
+            if (IsVisible && contentFitter != null && contentFitter.enabled)
+            {
+                float height = contentViewport.rect.height;
+                if (!Mathf.Approximately(contentMinimum.minHeight, height)) contentMinimum.minHeight = height;
+            }
         }
 
         private void BuildGlobal()
         {
+            AddAction("剧情图谱 · 分支 / 状态 / 试播", () => SelectCategory("剧情图谱"),
+                "查看故事连线与当前会话诊断；复用正式演出样式，不结算正式进度", false);
+            AddMapTutorialAction();
             AddFirstGuestTutorialAction();
             AddSkipAllTutorialsAction();
             AddAction("打开地图（保留当前场景）", () =>
@@ -419,27 +563,36 @@ namespace Spotlight.FreeCafe
                 summonReplaceExisting = !summonReplaceExisting;
                 BuildCustomerSummon();
             }, "仅作用于指定座位；移除旧顾客和订单，剧情来访按离店流程结束");
-            var searchBox = CreateImage(body.transform, "CustomerSearch", new Color(.14f, .17f, .2f));
-            searchBox.gameObject.AddComponent<LayoutElement>().preferredHeight = 46;
+            var searchBox = CreateImage(body.transform, "CustomerSearch", Paper);
+            AddRuleBorder(searchBox);
+            searchBox.gameObject.AddComponent<LayoutElement>().minHeight = 52;
             var textArea = new GameObject("TextArea", typeof(RectTransform), typeof(RectMask2D));
             textArea.transform.SetParent(searchBox.transform, false);
             Stretch((RectTransform)textArea.transform);
-            var searchText = CreateText(textArea.transform, "Text", "", 20, Color.white);
+            var searchText = CreateText(textArea.transform, "Text", "", 20, Ink);
             Stretch(searchText.rectTransform);
             searchText.margin = new Vector4(12, 6, 12, 6);
             searchText.richText = false;
-            var placeholder = CreateText(textArea.transform, "Placeholder", "搜索角色名字 / ID（留空显示全部）", 20, Color.gray);
+            var placeholder = CreateText(textArea.transform, "Placeholder", "搜索角色名字 / ID（留空显示全部）", 19, MutedInk);
             Stretch(placeholder.rectTransform);
             placeholder.margin = searchText.margin;
             var input = searchBox.gameObject.AddComponent<TMP_InputField>();
+            input.targetGraphic = searchBox;
+            input.colors = PaperStates();
+            searchBox.color = Color.white;
+            input.customCaretColor = true;
+            input.caretColor = Burgundy;
+            input.selectionColor = new Color(.65f, .48f, .26f, .28f);
             input.textViewport = (RectTransform)textArea.transform;
             input.textComponent = (TextMeshProUGUI)searchText;
             input.placeholder = placeholder;
             input.fontAsset = font;
             input.lineType = TMP_InputField.LineType.SingleLine;
             input.SetTextWithoutNotify(customerSearch);
-            var viewport = CreateImage(body.transform, "CustomerList", new Color(.08f, .1f, .12f));
-            viewport.gameObject.AddComponent<LayoutElement>().flexibleHeight = 1;
+            var viewport = CreateImage(body.transform, "CustomerList", Parchment);
+            AddRuleBorder(viewport);
+            viewport.gameObject.AddComponent<LayoutElement>().minHeight = 180;
+            viewport.GetComponent<LayoutElement>().flexibleHeight = 1;
             viewport.gameObject.AddComponent<RectMask2D>();
             var content = new GameObject("Customers", typeof(RectTransform), typeof(VerticalLayoutGroup), typeof(ContentSizeFitter));
             content.transform.SetParent(viewport.transform, false);
@@ -475,9 +628,10 @@ namespace Spotlight.FreeCafe
                     if (!string.IsNullOrEmpty(filter) && id.IndexOf(filter, StringComparison.OrdinalIgnoreCase) < 0
                         && name.IndexOf(filter, StringComparison.OrdinalIgnoreCase) < 0) return;
                     count++;
-                    var button = CreateButton(content.transform, name + "  [" + id + "]\n<size=14>"
+                    var button = CreateButton(content.transform, name + "  [" + id + "]\n<size=17>"
                         + (hasArtwork ? "点击按上方设置召唤到店" : "未配置店内素材，无法召唤") + "</size>", 20);
-                    button.GetComponent<LayoutElement>().preferredHeight = 64;
+                    button.GetComponent<LayoutElement>().minHeight = 70;
+                    button.GetComponentInChildren<TMP_Text>().alignment = TextAlignmentOptions.MidlineLeft;
                     button.interactable = hasArtwork;
                     button.onClick.AddListener(() =>
                     {
@@ -499,7 +653,7 @@ namespace Spotlight.FreeCafe
                 }
                 if (count == 0)
                 {
-                    var empty = CreateText(content.transform, "Empty", "没有匹配角色；可清空搜索，或进入 CoffeeShop 后重开列表。", 20, Color.gray);
+                    var empty = CreateText(content.transform, "Empty", "没有匹配角色；可清空搜索，或进入 CoffeeShop 后重开列表。", 20, MutedInk);
                     empty.gameObject.AddComponent<LayoutElement>().preferredHeight = 64;
                 }
                 Canvas.ForceUpdateCanvases();
@@ -568,11 +722,12 @@ namespace Spotlight.FreeCafe
 
         public void AddAction(string label, Action action, string help, bool requiresCafe = true)
         {
-            var button = CreateButton(body.transform, label + "\n<size=14>" + help + "</size>", 19);
+            var button = CreateButton(body.transform, label + "\n<size=17>" + help + "</size>", 19);
             var rect = button.GetComponent<RectTransform>();
             SetRect(rect, new Vector2(.06f, 0), new Vector2(.94f, 0), Vector2.zero);
             var layout = button.GetComponent<LayoutElement>();
-            layout.preferredHeight = 62;
+            layout.minHeight = 72;
+            button.GetComponentInChildren<TMP_Text>().alignment = TextAlignmentOptions.MidlineLeft;
             layout.flexibleWidth = 1;
             button.onClick.AddListener(() =>
             {
@@ -583,16 +738,7 @@ namespace Spotlight.FreeCafe
                 }
                 action?.Invoke();
             });
-            var layoutGroup = body.GetComponent<VerticalLayoutGroup>();
-            if (layoutGroup == null)
-            {
-                layoutGroup = body.AddComponent<VerticalLayoutGroup>();
-                layoutGroup.padding = new RectOffset(30, 30, 90, 30);
-                layoutGroup.spacing = 12;
-                layoutGroup.childForceExpandWidth = true;
-                layoutGroup.childForceExpandHeight = false;
-            }
-            layoutGroup.enabled = true;
+            EnableActionLayout();
             button.transform.SetAsLastSibling();
         }
 
@@ -616,7 +762,12 @@ namespace Spotlight.FreeCafe
         }
 
         private void Report(ActionResult result) { SetStatus(result.message); }
-        private void SetStatus(string message) { if (status != null) status.text = message; }
+        private void SetStatus(string message)
+        {
+            if (status == null) return;
+            status.text = message;
+            status.rectTransform.anchoredPosition = Vector2.zero;
+        }
         public void SetExternalStatus(string message) => SetStatus(message);
 
         public void AddSlider(string label, float min, float max, Func<float> getter, Action<float> setter, string format = "F2", bool wholeNumbers = false)
@@ -625,22 +776,33 @@ namespace Spotlight.FreeCafe
             var row = new GameObject(label + "Slider", typeof(RectTransform));
             row.transform.SetParent(body.transform, false);
             var layout = row.AddComponent<LayoutElement>(); layout.preferredHeight = 72; layout.flexibleWidth = 1;
-            var title = CreateText(row.transform, "Label", label, 17, Color.white);
+            var title = CreateText(row.transform, "Label", label, 20, Ink);
             title.rectTransform.anchorMin = new Vector2(0, .52f); title.rectTransform.anchorMax = new Vector2(.72f, 1); title.rectTransform.offsetMin = title.rectTransform.offsetMax = Vector2.zero;
-            var value = CreateText(row.transform, "Value", getter().ToString(format), 16, new Color(.95f,.76f,.38f));
+            var value = CreateText(row.transform, "Value", getter().ToString(format), 20, Burgundy);
             value.rectTransform.anchorMin = new Vector2(.72f, .52f); value.rectTransform.anchorMax = new Vector2(1, 1); value.rectTransform.offsetMin = value.rectTransform.offsetMax = Vector2.zero; value.alignment = TextAlignmentOptions.MidlineRight;
-            var track = CreateImage(row.transform, "Track", new Color(.18f,.22f,.26f,.9f)); track.rectTransform.anchorMin = new Vector2(0, 0); track.rectTransform.anchorMax = new Vector2(1, .42f); track.rectTransform.offsetMin = track.rectTransform.offsetMax = Vector2.zero;
+            var track = CreateImage(row.transform, "Track", Parchment); track.rectTransform.anchorMin = new Vector2(0, 0); track.rectTransform.anchorMax = new Vector2(1, .42f); track.rectTransform.offsetMin = track.rectTransform.offsetMax = Vector2.zero;
             var slider = track.gameObject.AddComponent<Slider>(); slider.minValue = min; slider.maxValue = max; slider.wholeNumbers = wholeNumbers; slider.navigation = new Navigation { mode = Navigation.Mode.None };
-            var fill = CreateImage(track.transform, "Fill", new Color(.93f,.71f,.39f,1)); fill.rectTransform.anchorMin = Vector2.zero; fill.rectTransform.anchorMax = Vector2.one; fill.rectTransform.offsetMin = fill.rectTransform.offsetMax = Vector2.zero; fill.raycastTarget = false;
-            var handle = CreateImage(track.transform, "Handle", new Color(1f,.9f,.7f,1)); handle.rectTransform.anchorMin = new Vector2(0,0); handle.rectTransform.anchorMax = new Vector2(0,1); handle.rectTransform.sizeDelta = new Vector2(18,0); handle.raycastTarget = false;
+            var fill = CreateImage(track.transform, "Fill", Brass); fill.rectTransform.anchorMin = Vector2.zero; fill.rectTransform.anchorMax = Vector2.one; fill.rectTransform.offsetMin = fill.rectTransform.offsetMax = Vector2.zero; fill.raycastTarget = false;
+            var handle = CreateImage(track.transform, "Handle", Color.white); handle.rectTransform.anchorMin = new Vector2(0,0); handle.rectTransform.anchorMax = new Vector2(0,1); handle.rectTransform.sizeDelta = new Vector2(18,0); handle.raycastTarget = false;
+            var handleStates = ColorBlock.defaultColorBlock;
+            handleStates.normalColor = Ink;
+            handleStates.highlightedColor = Burgundy;
+            handleStates.pressedColor = new Color(.28f, .08f, .09f);
+            handleStates.selectedColor = Burgundy;
+            handleStates.disabledColor = MutedInk;
+            handleStates.fadeDuration = .1f;
+            slider.colors = handleStates;
+            AddRuleBorder(track);
             slider.fillRect = fill.rectTransform; slider.handleRect = handle.rectTransform; slider.targetGraphic = handle; slider.SetValueWithoutNotify(Mathf.Clamp(getter(), min, max));
             slider.onValueChanged.AddListener(v => { setter(v); value.text = getter().ToString(format); });
+            EnableActionLayout();
         }
         public void SetVisible(bool visible)
         {
             if (root == null) return;
             if (visible) { runtime = FindFirstObjectByType<FreeCafeRuntime>();if(runtime!=null) runtime.CancelDrag(); }
             pendingDanger = null;
+            if (!visible) SetExternalOverlay(false);
             root.SetActive(visible);
             lastVisibilityFrame = Time.frameCount;
             dialoguePause?.Dispose();
@@ -662,14 +824,86 @@ namespace Spotlight.FreeCafe
 
         private Button CreateButton(Transform parent, string label, float size)
         {
-            var image = CreateImage(parent, "Button", new Color(.2f, .25f, .29f, 1));
+            var image = CreateImage(parent, "Button", Color.white);
+            AddRuleBorder(image);
             var button = image.gameObject.AddComponent<Button>();
-            var layout = image.gameObject.AddComponent<LayoutElement>();
-            layout.minHeight = 50;
-            var text = CreateText(image.transform, "Label", label, size, Color.white);
-            Stretch(text.rectTransform); text.alignment = TextAlignmentOptions.Center;
-            text.margin = new Vector4(12, 6, 12, 6);
+            button.targetGraphic = image;
+            image.gameObject.AddComponent<LayoutElement>().minHeight = 50;
+            // The button grows with wrapped Chinese text instead of clipping its help line.
+            var layout = image.gameObject.AddComponent<VerticalLayoutGroup>();
+            layout.padding = new RectOffset(12, 12, 8, 8);
+            layout.childControlWidth = layout.childControlHeight = true;
+            layout.childForceExpandWidth = layout.childForceExpandHeight = true;
+            var text = CreateText(image.transform, "Label", label, size, Ink);
+            text.alignment = TextAlignmentOptions.Center;
+            StyleButton(button, false);
             return button;
+        }
+
+        private static ColorBlock PaperStates()
+        {
+            var colors = ColorBlock.defaultColorBlock;
+            colors.normalColor = new Color(.95f, .90f, .80f);
+            colors.highlightedColor = new Color(1f, .97f, .90f);
+            colors.pressedColor = new Color(.80f, .69f, .54f);
+            colors.selectedColor = new Color(.98f, .93f, .84f);
+            colors.disabledColor = new Color(.82f, .79f, .73f);
+            colors.fadeDuration = .1f;
+            return colors;
+        }
+
+        private static void StyleButton(Button button, bool active)
+        {
+            var colors = PaperStates();
+            if (active)
+            {
+                colors.normalColor = Burgundy;
+                colors.highlightedColor = new Color(.52f, .21f, .21f);
+                colors.pressedColor = new Color(.32f, .10f, .11f);
+                colors.selectedColor = new Color(.48f, .18f, .19f);
+                colors.disabledColor = new Color(.42f, .33f, .30f);
+            }
+            button.colors = colors;
+            button.GetComponentInChildren<TMP_Text>().color = active ? Paper : Ink;
+        }
+
+        private static ScrollRect ConfigureScroll(GameObject owner, RectTransform viewport, RectTransform content)
+        {
+            var scroll = owner.AddComponent<ScrollRect>();
+            scroll.viewport = viewport;
+            scroll.content = content;
+            scroll.horizontal = false;
+            scroll.vertical = true;
+            scroll.movementType = ScrollRect.MovementType.Clamped;
+            scroll.inertia = false;
+            scroll.scrollSensitivity = 36;
+            return scroll;
+        }
+
+        private static void AddRuleBorder(Image image)
+        {
+            var outline = image.gameObject.AddComponent<Outline>();
+            outline.effectColor = new Color(Brass.r, Brass.g, Brass.b, .65f);
+            outline.effectDistance = new Vector2(1, -1);
+            outline.useGraphicAlpha = false;
+        }
+
+        private void CreateRule(Transform parent, string name, Vector2 min, Vector2 max, float y)
+        {
+            var line = CreateImage(parent, name, Brass);
+            SetRect(line.rectTransform, min, max, Vector2.zero);
+            line.rectTransform.offsetMin = new Vector2(0, y);
+            line.rectTransform.offsetMax = new Vector2(0, y + 1);
+            line.raycastTarget = false;
+        }
+
+        /// <summary>Hide the UGUI shell under an external overlay without releasing its input shield.</summary>
+        public void SetExternalOverlay(bool active)
+        {
+            if (shellGroup == null) return;
+            shellGroup.alpha = active ? 0f : 1f;
+            shellGroup.interactable = !active;
+            shellGroup.blocksRaycasts = true;
         }
 
         private Image CreateImage(Transform parent, string name, Color color)

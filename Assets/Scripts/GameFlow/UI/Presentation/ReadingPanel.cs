@@ -122,14 +122,14 @@ namespace Spotlight.GameFlow
 
         private bool TakeInput()
         {
-            if (!IsPlaying || !ready || exiting || lastInputFrame == Time.frameCount) return false;
+            if (!IsPlaying || !ready || exiting || DialoguePanel.IsExternalInputBlocked || lastInputFrame == Time.frameCount) return false;
             lastInputFrame = Time.frameCount;
             return true;
         }
 
         private void Update()
         {
-            if (!IsPlaying || exiting) return;
+            if (!IsPlaying || exiting || DialoguePanel.IsExternalInputBlocked) return;
             Keyboard keyboard = Keyboard.current;
             if (keyboard != null && keyboard.escapeKey.wasPressedThisFrame) { Cancel(); return; }
             if (!ready) return;
@@ -229,7 +229,7 @@ namespace Spotlight.GameFlow
 
         public void Cancel()
         {
-            if (!IsPlaying) return;
+            if (!IsPlaying || DialoguePanel.IsExternalInputBlocked) return;
             Spotlight.Audio.GameAudio.Play(Spotlight.Audio.AudioKeys.Cancel);
             Action callback = cancelled;
             Stop();

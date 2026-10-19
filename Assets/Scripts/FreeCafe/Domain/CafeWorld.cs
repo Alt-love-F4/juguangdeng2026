@@ -79,6 +79,13 @@ namespace Spotlight.FreeCafe
                 throw new ArgumentException("Invalid business timing");
             }
 
+            // 允许测试/沙盒自定义 1 客等范围；正式目录的 3~5 由配置决定，不硬夹到 3。
+            if (Catalog.economy.baseCustomers < 1 || Catalog.economy.maxCustomers < Catalog.economy.baseCustomers
+                || Catalog.economy.customersReputationStep < 1)
+            {
+                throw new ArgumentException("Invalid customer budget configuration");
+            }
+
             // 实体规格：尺寸、库存、成本都必须有效，id 不能重复
             foreach (var spec in Catalog.entities)
             {

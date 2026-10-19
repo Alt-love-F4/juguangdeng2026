@@ -36,8 +36,10 @@ namespace Spotlight.Narrative.Tests
             var actions = new NarrativeActionController(narrative, new[] { definition });
             actions.Mount("cafe", "visit");
             Assert.That(actions.HasUnseenActions("cafe"), Is.False);
+            Assert.That(actions.HasUnseenAvailableActions("cafe"), Is.False);
             narrative.State.SetCondition("map.active", true);
             Assert.That(actions.HasUnseenActions("cafe"), Is.True);
+            Assert.That(actions.HasUnseenAvailableActions("cafe"), Is.True);
             string token = actions.GetActionInstanceKey("cafe", "visit");
             Assert.That(actions.ConfirmActionDisplayed("cafe", token), Is.True);
             Assert.That(actions.HasBlockingActions(), Is.True, "Seen is not completed.");
@@ -83,7 +85,20 @@ namespace Spotlight.Narrative.Tests
                 new NarrativeActionMountValue { position = "market", action = "costly", day = 1 } } });
             Assert.That(actions.GetDisplayableActions("market").Count(), Is.EqualTo(1));
             Assert.That(actions.HasUnseenActions("market"), Is.True);
+            Assert.That(actions.HasUnseenAvailableActions("market"), Is.False);
             Assert.That(actions.IsAvailable("costly", out _), Is.False);
+            var changedPositions = new List<string>();
+            actions.MapContentChanged += changedPositions.Add;
+            actions.ActionPoints.Add(2);
+            Assert.That(actions.HasUnseenAvailableActions("market"), Is.True);
+            Assert.That(changedPositions, Is.EqualTo(new[] { "market" }), "AP changes must refresh the badge without changing the card instance.");
+            actions.ActionPoints.Add(1);
+            actions.RefreshMapContent();
+            Assert.That(changedPositions.Count, Is.EqualTo(1), "Still-affordable actions do not produce duplicate content notifications.");
+            actions.ActionPoints.Set(0);
+            Assert.That(actions.HasUnseenAvailableActions("market"), Is.False);
+            Assert.That(actions.GetDisplayableActions("market").Count(), Is.EqualTo(1));
+            Assert.That(changedPositions.Count, Is.EqualTo(2));
         }
 
         [Test]
@@ -143,7 +158,123 @@ namespace Spotlight.Narrative.Tests
             Assert.DoesNotThrow(() => actions.RefreshMapContent());
             Assert.That(actions.GetDisplayableActions("cafe"), Is.Empty);
             Assert.That(actions.HasUnseenActions("cafe"), Is.False);
+            Assert.That(actions.HasUnseenAvailableActions("cafe"), Is.False);
             Assert.That(actions.IsAvailable("visit", out _), Is.False);
+        }
+
+        [Test]
+        public void FutureCardIsUnreadButDoesNotBadgeUntilItsSuccessorIsMounted()
+        {
+            var actions = new NarrativeActionController(Controller(new Presenter()), new[] {
+                new NarrativeActionDefinition { actionKey = "future", type = NarrativeActionType.Future, durationDays = 1, nextActionKey = "ready" },
+                new NarrativeActionDefinition { actionKey = "ready" } });
+            actions.Mount("market", "future");
+            Assert.That(actions.GetDisplayableActions("market").Select(a => a.actionKey), Is.EqualTo(new[] { "future" }));
+            Assert.That(actions.HasUnseenActions("market"), Is.True);
+            Assert.That(actions.HasUnseenAvailableActions("market"), Is.False);
+            actions.BeginDay(2);
+            Assert.That(actions.HasUnseenAvailableActions("market"), Is.True);
+            Assert.That(actions.GetDisplayableActions("market").Select(a => a.actionKey), Is.EqualTo(new[] { "ready" }));
+        }
+
+        [TestCase(false)]
+        [TestCase(true)]
+        public void DailyOrDeliveryPerformedTodayDoesNotBadgeAndNextDayCanBecomeNew(bool delivery)
+        {
+            var action = new NarrativeActionDefinition { actionKey = "daily", type = delivery ? NarrativeActionType.Repeat : NarrativeActionType.Daily,
+                deliveryMode = delivery ? NarrativeDeliveryMode.Cumulative : NarrativeDeliveryMode.None, progressTarget = delivery ? 2 : 0 };
+            var actions = new NarrativeActionController(Controller(new Presenter()), new[] { action });
+            actions.Mount("market", "daily");
+            Assert.That(actions.HasUnseenAvailableActions("market"), Is.True);
+            Assert.That(actions.Execute("daily"), Is.True);
+            Assert.That(actions.GetDisplayableActions("market"), Is.EqualTo(new[] { action }));
+            Assert.That(actions.HasUnseenAvailableActions("market"), Is.False);
+            actions.BeginDay(2);
+            Assert.That(actions.HasUnseenAvailableActions("market"), Is.True);
+            Assert.That(actions.Execute("daily"), Is.True);
+            actions.BeginDay(3);
+            Assert.That(actions.HasUnseenAvailableActions("market"), Is.EqualTo(!delivery), "Completed deliveries must not badge on later days.");
+        }
+
+        [Test]
+        public void ItemCostsRefreshBadgesAndInventoryReplacementUnsubscribesPreviousStore()
+        {
+            var inventory = new NarrativeMapInventory();
+            var actions = new NarrativeActionController(Controller(new Presenter()), new[] {
+                new NarrativeActionDefinition { actionKey = "deliver", requirements = "Item(bean,1);Item(bean,1)" } }, inventory: inventory);
+            actions.Mount("market", "deliver");
+            int changes = 0;
+            actions.MapContentChanged += _ => changes++;
+            Assert.That(actions.HasUnseenActions("market"), Is.True);
+            Assert.That(actions.HasUnseenAvailableActions("market"), Is.False);
+            inventory.TryAdd("bean", 1);
+            Assert.That(actions.HasUnseenAvailableActions("market"), Is.False, "Repeated costs share the same stock.");
+            Assert.That(changes, Is.Zero);
+            inventory.TryAdd("bean", 1);
+            Assert.That(actions.HasUnseenAvailableActions("market"), Is.True);
+            Assert.That(changes, Is.EqualTo(1));
+            var replacement = new NarrativeMapInventory();
+            actions.SetInventory(replacement);
+            Assert.That(actions.HasUnseenAvailableActions("market"), Is.False);
+            Assert.That(changes, Is.EqualTo(2));
+            int stateChanges = 0;
+            actions.StateChanged += () => stateChanges++;
+            inventory.TryAdd("bean", 1);
+            Assert.That(stateChanges, Is.Zero, "An old store must not keep notifying the action controller.");
+            replacement.TryAdd("bean", 2);
+            Assert.That(actions.HasUnseenAvailableActions("market"), Is.True);
+            Assert.That(stateChanges, Is.EqualTo(1));
+            Assert.That(changes, Is.EqualTo(3));
+        }
+
+        [Test]
+        public void EndDayDoesNotBadgeWhileMandatoryActionBlocksIt()
+        {
+            var actions = new NarrativeActionController(Controller(new Presenter()), new[] {
+                new NarrativeActionDefinition { actionKey = "visit", type = NarrativeActionType.Once, mustExecute = true },
+                new NarrativeActionDefinition { actionKey = "end", type = NarrativeActionType.Daily, endDay = true } });
+            actions.Mount("cafe", "visit"); actions.Mount("home", "end");
+            Assert.That(actions.HasUnseenActions("home"), Is.True);
+            Assert.That(actions.HasUnseenAvailableActions("home"), Is.False);
+            var changedPositions = new List<string>();
+            actions.MapContentChanged += changedPositions.Add;
+            Assert.That(actions.Execute("visit"), Is.True);
+            Assert.That(actions.HasUnseenAvailableActions("cafe"), Is.False);
+            Assert.That(actions.HasUnseenAvailableActions("home"), Is.True);
+            Assert.That(changedPositions, Does.Contain("home"));
+        }
+
+        [Test]
+        public void TemporaryStoryBusyAndExecutingLocksDoNotFlickerBadges()
+        {
+            var presenter = new Presenter(); var narrative = Controller(presenter);
+            var actions = new NarrativeActionController(narrative, new[] {
+                new NarrativeActionDefinition { actionKey = "visit", type = NarrativeActionType.Once, resultEvents = new List<string> { "story" } },
+                new NarrativeActionDefinition { actionKey = "ordinary" } });
+            actions.Mount("cafe", "visit"); actions.Mount("market", "ordinary");
+            int changes = 0;
+            actions.MapContentChanged += _ => changes++;
+            Assert.That(narrative.QueueEvent("story"), Is.True);
+            Assert.That(narrative.IsBusy, Is.True);
+            actions.RefreshMapContent();
+            Assert.That(actions.IsAvailable("visit", out _), Is.False);
+            Assert.That(actions.HasUnseenAvailableActions("cafe"), Is.True);
+            Assert.That(changes, Is.Zero);
+            presenter.complete();
+            actions.RefreshMapContent();
+            Assert.That(changes, Is.Zero);
+            Assert.That(actions.Execute("visit"), Is.True);
+            Assert.That(actions.IsExecuting, Is.True);
+            Assert.That(narrative.IsBusy, Is.True);
+            actions.RefreshMapContent();
+            Assert.That(actions.IsAvailable("ordinary", out _), Is.False);
+            Assert.That(actions.HasUnseenAvailableActions("cafe"), Is.True);
+            Assert.That(actions.HasUnseenAvailableActions("market"), Is.True);
+            Assert.That(changes, Is.Zero, "Playback locks alone must not change the stable map signature.");
+            presenter.complete();
+            Assert.That(actions.HasUnseenAvailableActions("cafe"), Is.False, "Actual completion still clears the badge.");
+            Assert.That(actions.HasUnseenAvailableActions("market"), Is.True);
+            Assert.That(changes, Is.EqualTo(1));
         }
 
         [Test]

@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using YokiFrame;
 
 namespace Spotlight.GameFlow
@@ -46,19 +46,22 @@ namespace Spotlight.GameFlow
 
     public sealed class ResultPanelData : IGameFlowPanelData
     {
-        public ResultPanelData(GameFlowBootstrap flow, string title, string message, Action closed, string closeLabel = "关闭")
+        public ResultPanelData(GameFlowBootstrap flow, string title, string message, Action closed, string closeLabel = "关闭", string endingId = null)
         {
             Flow = flow;
             Title = title;
             Message = message;
             Closed = closed;
             CloseLabel = closeLabel;
+            EndingId = endingId;
         }
 
         public GameFlowBootstrap Flow { get; }
         public string Title { get; }
         public string Message { get; }
         public Action Closed { get; }
+        public string EndingId { get; }
+        public bool IsEnding => !string.IsNullOrWhiteSpace(EndingId);
         public string CloseLabel { get; }
     }
 }

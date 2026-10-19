@@ -28,19 +28,19 @@ namespace Spotlight.Narrative
         public IReadOnlyList<string> PendingEventIds => queue.Select(r => r.Event.eventId).ToArray();
         public bool BlocksSave => activePresentation && activeRequest.Event.blocksSave || queue.Any(r => r.Event.blocksSave) || pendingEffects.Count > 0 && activeRequest.Event != null && activeRequest.Event.blocksSave;
 
-        private string GetEventRejection(string eventId, bool mapAction = false)
+        private string GetEventRejection(string eventId, bool mapAction = false, bool ignoreTransientBusy = false)
         {
             if (string.IsNullOrWhiteSpace(eventId) || !events.TryGetValue(eventId, out var definition)) return "事件不存在";
             if (!string.IsNullOrWhiteSpace(ConstructionBlocker(definition))) return "施工阻塞：" + ConstructionBlocker(definition);
             if (presenterUnavailable) return "演出器不可用";
             if (valueRestore || !valueBaselineReady) return "数值未就绪";
             if (IsEnded) return "会话已结束";
-            if (activeEntry.HasValue) return "阶段入口执行中";
+            if (!ignoreTransientBusy && activeEntry.HasValue) return "阶段入口执行中";
             if (definition.entry != NarrativeEntryPoint.Immediate && !(mapAction && definition.entry == NarrativeEntryPoint.MapAction)) return "事件等待声明入口：" + definition.entry;
             var dates = configuration.eventDates.Where(d => d != null && d.eventId == eventId).ToArray();
             if (dates.Length > 0 && !dates.Any(d => DateMatches(d, GetDay()) && DateBoundaryMatches(d))) return "日期或真实阶段不匹配";
-            if (activePresentation || draining) return "系统忙：活动演出或等待演出结束";
-            if (queue.Any(r => r.Event.eventId == eventId)) return "事件已在队列";
+            if (!ignoreTransientBusy && (activePresentation || draining)) return "系统忙：活动演出或等待演出结束";
+            if (!ignoreTransientBusy && queue.Any(r => r.Event.eventId == eventId)) return "事件已在队列";
             if (state.IsEventLocked(eventId)) return "事件被锁定";
             if (state.IsFlagSet("event.once." + eventId) || definition.onceOnly && state.HasHappenedEvent(eventId)) return "一次性事件已发生";
             return EvaluateConditions("event", string.IsNullOrWhiteSpace(definition.conditionOwnerId) ? eventId : definition.conditionOwnerId, Context(definition)) ? null : "条件不满足";
@@ -48,10 +48,10 @@ namespace Spotlight.Narrative
 
         public NarrativeEventDiagnostic ExplainEvent(string eventId) => ExplainEventAtEntry(eventId, false);
 
-        private NarrativeEventDiagnostic ExplainEventAtEntry(string eventId, bool mapAction)
+        private NarrativeEventDiagnostic ExplainEventAtEntry(string eventId, bool mapAction, bool ignoreTransientBusy = false)
         {
             var result = new NarrativeEventDiagnostic { EventId = eventId };
-            try { result.Rejection = GetEventRejection(eventId, mapAction); }
+            try { result.Rejection = GetEventRejection(eventId, mapAction, ignoreTransientBusy); }
             catch (Exception e) { result.Rejection = e.Message; }
             events.TryGetValue(eventId ?? string.Empty, out var definition);
             result.Conditions = ExplainConditions("event", string.IsNullOrWhiteSpace(definition?.conditionOwnerId) ? eventId : definition.conditionOwnerId);
@@ -77,7 +77,11 @@ namespace Spotlight.Narrative
             string key = StripPrefix(c.target, "bar:", "rel:", "event:", "item:", "action:");
             switch (c.condType?.Trim().ToUpperInvariant())
             {
-                case "BOOL_EQ": return state.GetCondition(c.target).ToString();
+                case "BOOL_EQ":
+                    if (string.Equals(c.ownerType, "result", StringComparison.OrdinalIgnoreCase)
+                        || string.Equals(c.ownerType, "action", StringComparison.OrdinalIgnoreCase))
+                        return TryReadPresentationCondition(c.target, out bool guardValue) ? guardValue.ToString() : "不可用";
+                    return state.GetCondition(c.target).ToString();
                 case "ITEM_GTE": return inventory.GetCount(key).ToString();
                 case "ACTION_PROGRESS_GTE": return ActionProgressReader?.Invoke(key)?.ToString();
                 case "ACTION_COMPLETED": return ActionCompletedReader?.Invoke(key)?.ToString();

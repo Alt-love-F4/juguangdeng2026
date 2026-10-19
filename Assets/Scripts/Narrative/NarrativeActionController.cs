@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
@@ -30,6 +30,7 @@ namespace Spotlight.Narrative
         private Queue<string> pendingEvents;
         private string currentEventId;
         private Action<bool> pendingCompletion;
+        private int refundablePoolPoints;
 
         public NarrativeActionPoints ActionPoints { get; }
         public int CurrentDay { get; private set; } = 1;
@@ -62,20 +63,32 @@ namespace Spotlight.Narrative
                     throw new FormatException("Future action requires a different configured nextActionKey: " + action.actionKey);
             ActionPoints = new NarrativeActionPoints(actionPointMax);
             StateChanged += () => RefreshMapContent();
-            narrative.State.ConditionsChanged += () => { if (!committing) RefreshMapContent(); };
+            narrative.State.ConditionsChanged += () => { if (!committing) StateChanged?.Invoke(); };
             narrative.BarChanged += (_, __, ___) => { if (!committing) { RefreshMapContent(); StateChanged?.Invoke(); } };
             ActionPoints.Changed += (_, __) => { if (!committing) StateChanged?.Invoke(); };
             SetInventory(inventory);
             narrative.ActionProgressReader = key => Get(key) == null ? (int?)null : GetProgress(key);
             narrative.ActionCompletedReader = key => Get(key) == null ? (bool?)null : IsCompleted(key);
             narrative.EventCompleted += OnEventCompleted;
+            narrative.RefreshDailyAvailability(CurrentDay);
             narrative.EventFailed += (eventId, error) => { if (executing && currentEventId == eventId) ReportFailure(); };
         }
 
         public void SetInventory(INarrativeActionInventory value)
         {
+            if (inventory is NarrativeMapInventory previous) previous.Changed -= OnInventoryChanged;
             inventory = value ?? new EmptyNarrativeActionInventory();
-            if (inventory is NarrativeMapInventory mapInventory) narrative.Inventory = mapInventory;
+            if (inventory is NarrativeMapInventory mapInventory)
+            {
+                narrative.Inventory = mapInventory;
+                mapInventory.Changed += OnInventoryChanged;
+            }
+            OnInventoryChanged();
+        }
+
+        private void OnInventoryChanged()
+        {
+            if (!committing) StateChanged?.Invoke();
         }
         public IEnumerable<NarrativeActionDefinition> Actions => definitions.Values;
         public NarrativeActionDefinition Get(string actionKey) => actionKey != null && definitions.TryGetValue(actionKey, out var action) ? action : null;
@@ -113,6 +126,7 @@ namespace Spotlight.Narrative
         {
             if (day < 1) throw new ArgumentOutOfRangeException(nameof(day));
             CurrentDay = day;
+            narrative.RefreshDailyAvailability(day);
             bool changed = false;
             foreach (var pair in deliveries)
             {
@@ -173,8 +187,15 @@ namespace Spotlight.Narrative
             => !IsCompleted(action.actionKey) && !(dailyExecution.TryGetValue(action.actionKey, out int day) && day == CurrentDay
                 && (action.type == NarrativeActionType.Daily || action.IsDelivery));
 
+        /// <summary>Unread visible cards, including those whose costs cannot currently be paid.</summary>
         public bool HasUnseenActions(string position)
             => GetDisplayableActions(position).Any(a => IsUnseenCandidate(a) && !seenActionInstances.Contains(GetActionInstanceKey(position, a.actionKey)));
+
+        /// <summary>Map badge eligibility ignores temporary playback/execution locks, but not costs or world state.</summary>
+        public bool HasUnseenAvailableActions(string position)
+            => GetDisplayableActions(position).Any(a => IsUnseenCandidate(a)
+                && !seenActionInstances.Contains(GetActionInstanceKey(position, a.actionKey))
+                && IsAvailable(a.actionKey, out _, ignoreTransientBusy: true));
 
         /// <summary>Only the actual rendered, unobscured detail page may acknowledge its captured instance token.</summary>
         public bool ConfirmActionDisplayed(string position, string instanceKey)
@@ -191,7 +212,8 @@ namespace Spotlight.Narrative
             foreach (string position in mounts.Select(m => m.position).Distinct().Where(p => positionKey == null || p == positionKey).ToArray())
             {
                 string signature = string.Join(";", GetDisplayableActions(position).Select(a => GetActionInstanceKey(position, a.actionKey)
-                    + ":" + IsUnseenCandidate(a) + ":" + seenActionInstances.Contains(GetActionInstanceKey(position, a.actionKey))));
+                    + ":" + IsUnseenCandidate(a) + ":" + seenActionInstances.Contains(GetActionInstanceKey(position, a.actionKey))
+                    + ":" + IsAvailable(a.actionKey, out _, ignoreTransientBusy: true)));
                 if (mapContentSignatures.TryGetValue(position, out string previous) && previous == signature) continue;
                 mapContentSignatures[position] = signature;
                 MapContentChanged?.Invoke(position);
@@ -236,11 +258,15 @@ namespace Spotlight.Narrative
         }
 
         public bool IsAvailable(string actionKey, out List<NarrativeActionCheck> checks)
+            => IsAvailable(actionKey, out checks, ignoreTransientBusy: false);
+
+        private bool IsAvailable(string actionKey, out List<NarrativeActionCheck> checks, bool ignoreTransientBusy)
         {
             checks = new List<NarrativeActionCheck>();
             NarrativeActionDefinition action = Get(actionKey);
             if (action == null || !narrative.ValuesReady) return false;
-            bool eligible = !executing && !narrative.IsEnded && !narrative.IsBusy && IsVisible(actionKey) && !IsCompleted(actionKey) && action.type != NarrativeActionType.Future;
+            bool eligible = (ignoreTransientBusy || (!executing && !narrative.IsBusy)) && !narrative.IsEnded
+                && IsVisible(actionKey) && !IsCompleted(actionKey) && action.type != NarrativeActionType.Future;
             if (action.IsDelivery && HasSubmittedToday(actionKey)) eligible = false;
             if (action.endDay && HasBlockingActions()) eligible = false;
             if (action.type == NarrativeActionType.Daily && dailyExecution.TryGetValue(actionKey, out int day) && day == CurrentDay) eligible = false;
@@ -259,13 +285,17 @@ namespace Spotlight.Narrative
                     if (action.parsedRequirements[i].type == NarrativeActionRequirementType.ActionPoint) checks[i].satisfied = false;
             bool conditionsMet = narrative.EvaluateConditions("action", actionKey);
             if (!conditionsMet) checks.Add(new NarrativeActionCheck { satisfied = false, requirement = "Condition(action," + actionKey + ")", messageKey = "action.condition.missing" });
-            return eligible && conditionsMet && checks.All(check => check.satisfied);
+            bool poolReady = !narrative.UsesDailyPool(action) || narrative.TrySelectActionEvents(action, out _, ignoreTransientBusy);
+            if (!poolReady) checks.Add(new NarrativeActionCheck { satisfied = false, requirement = "DailyPool", messageKey = "action.condition.missing" });
+            return eligible && conditionsMet && poolReady && checks.All(check => check.satisfied);
         }
 
         public bool Execute(string actionKey, Action<bool> completed = null)
         {
             if (!IsAvailable(actionKey, out _)) return false;
             NarrativeActionDefinition action = definitions[actionKey];
+            if (!narrative.TrySelectActionEvents(action, out var selectedEvents)) return false;
+            refundablePoolPoints = narrative.UsesDailyPool(action) ? action.parsedRequirements.Where(r => r.type == NarrativeActionRequirementType.ActionPoint).Sum(r => r.value) : 0;
             executing = true;
             committing = true;
             executingAction = actionKey;
@@ -297,7 +327,7 @@ namespace Spotlight.Narrative
                         }
                     }
                     if (!action.IsProgress || IsCompleted(actionKey))
-                        foreach (string eventId in action.resultEvents ?? new List<string>()) pendingEvents.Enqueue(eventId);
+                        foreach (string eventId in selectedEvents) pendingEvents.Enqueue(eventId);
                 }
             }
             finally { committing = false; }
@@ -500,11 +530,13 @@ namespace Spotlight.Narrative
             }
         }
 
-        private static bool DefersCompletion(NarrativeActionDefinition action)
-            => action != null && action.type == NarrativeActionType.Once && !action.IsProgress && !action.IsDelivery;
+        private bool DefersCompletion(NarrativeActionDefinition action)
+            => action != null && (action.type == NarrativeActionType.Once || narrative.UsesDailyPool(action)) && !action.IsProgress && !action.IsDelivery;
 
         private void ReportFailure()
         {
+            if (refundablePoolPoints > 0) ActionPoints.Add(refundablePoolPoints);
+            refundablePoolPoints = 0;
             var action = Get(executingAction);
             var callback = pendingCompletion; pendingCompletion = null;
             if (DefersCompletion(action))
@@ -520,6 +552,8 @@ namespace Spotlight.Narrative
 
         private void OnEventCompleted(string eventId)
         {
+            narrative.RecordDailyPoolCompletion(eventId);
+            narrative.RefreshDailyAvailability(CurrentDay);
             if (!executing || pendingEvents == null || eventId != currentEventId) return;
             currentEventId = null;
             PlayNextEvent();
@@ -528,6 +562,8 @@ namespace Spotlight.Narrative
         private void Finish(bool success)
         {
             NarrativeActionDefinition action = Get(executingAction);
+            if (!success && refundablePoolPoints > 0) ActionPoints.Add(refundablePoolPoints);
+            refundablePoolPoints = 0;
             if (success && !narrative.IsEnded && DefersCompletion(action)) RecordExecution(action);
             narrative.NotifyConditionsChanged();
             CloseOperation();

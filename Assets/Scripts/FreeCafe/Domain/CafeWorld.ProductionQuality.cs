@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 
 namespace Spotlight.FreeCafe
 {
@@ -88,6 +88,7 @@ namespace Spotlight.FreeCafe
             if (!ProductionEnabled || cup == null || request == null || !Spec(cup.specId).Has(Capability.Container))
                 return ActionResult.No("需要出餐杯和当前显示的订单");
             if (!string.IsNullOrEmpty(State.production.miniGameToken)) return ActionResult.No("请先结束或取消小游戏");
+            if (TryServeNarrativeOrder(cup, request, out var narrativeResult)) return narrativeResult;
             if (request.id == TutorialOrderId)
             {
                 var tutorialCoffee = ClassifyCoffee(cup);

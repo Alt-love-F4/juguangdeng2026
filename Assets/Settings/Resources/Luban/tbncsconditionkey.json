@@ -27,7 +27,7 @@
     "key": "specialization.player.letter.politics",
     "nameText": "condition.specialization.player.letter.politics",
     "initialValue": false,
-    "onlySetTrue": false
+    "onlySetTrue": true
   },
   {
     "key": "specialization.player.letter.religion",
@@ -134,6 +134,3030 @@
   {
     "key": "story.rose.1011.s1.sylvain_appreciation",
     "nameText": "condition.story.rose.1011.s1.sylvain_appreciation",
+    "initialValue": false,
+    "onlySetTrue": true
+  },
+  {
+    "key": "route.neutral",
+    "nameText": "condition.route.neutral",
+    "initialValue": false,
+    "onlySetTrue": false
+  },
+  {
+    "key": "route.rose",
+    "nameText": "condition.route.rose",
+    "initialValue": false,
+    "onlySetTrue": false
+  },
+  {
+    "key": "route.church",
+    "nameText": "condition.route.church",
+    "initialValue": false,
+    "onlySetTrue": false
+  },
+  {
+    "key": "route.revolution",
+    "nameText": "condition.route.revolution",
+    "initialValue": false,
+    "onlySetTrue": false
+  },
+  {
+    "key": "story.detained",
+    "nameText": "condition.story.detained",
+    "initialValue": false,
+    "onlySetTrue": true
+  },
+  {
+    "key": "story.adele.away",
+    "nameText": "condition.story.adele.away",
+    "initialValue": false,
+    "onlySetTrue": false
+  },
+  {
+    "key": "story.sylvain.unavailable",
+    "nameText": "condition.story.sylvain.unavailable",
+    "initialValue": false,
+    "onlySetTrue": false
+  },
+  {
+    "key": "weather.rain",
+    "nameText": "condition.weather.rain",
+    "initialValue": false,
+    "onlySetTrue": false
+  },
+  {
+    "key": "availability.adele",
+    "nameText": "condition.availability.adele",
+    "initialValue": false,
+    "onlySetTrue": false
+  },
+  {
+    "key": "availability.sylvain",
+    "nameText": "condition.availability.sylvain",
+    "initialValue": false,
+    "onlySetTrue": false
+  },
+  {
+    "key": "known.adele",
+    "nameText": "condition.known.adele",
+    "initialValue": false,
+    "onlySetTrue": true
+  },
+  {
+    "key": "known.antoine",
+    "nameText": "condition.known.antoine",
+    "initialValue": false,
+    "onlySetTrue": true
+  },
+  {
+    "key": "known.colette",
+    "nameText": "condition.known.colette",
+    "initialValue": false,
+    "onlySetTrue": true
+  },
+  {
+    "key": "known.alienor",
+    "nameText": "condition.known.alienor",
+    "initialValue": false,
+    "onlySetTrue": true
+  },
+  {
+    "key": "known.sylvain",
+    "nameText": "condition.known.sylvain",
+    "initialValue": false,
+    "onlySetTrue": true
+  },
+  {
+    "key": "known.lesou",
+    "nameText": "condition.known.lesou",
+    "initialValue": false,
+    "onlySetTrue": true
+  },
+  {
+    "key": "known.sorel",
+    "nameText": "condition.known.sorel",
+    "initialValue": false,
+    "onlySetTrue": true
+  },
+  {
+    "key": "known.eugene",
+    "nameText": "condition.known.eugene",
+    "initialValue": false,
+    "onlySetTrue": true
+  },
+  {
+    "key": "known.pascal",
+    "nameText": "condition.known.pascal",
+    "initialValue": false,
+    "onlySetTrue": true
+  },
+  {
+    "key": "known.sparrow",
+    "nameText": "condition.known.sparrow",
+    "initialValue": false,
+    "onlySetTrue": true
+  },
+  {
+    "key": "known.sade",
+    "nameText": "condition.known.sade",
+    "initialValue": false,
+    "onlySetTrue": true
+  },
+  {
+    "key": "known.mary",
+    "nameText": "condition.known.mary",
+    "initialValue": false,
+    "onlySetTrue": true
+  },
+  {
+    "key": "neutral.antoine.appreciation",
+    "nameText": "condition.neutral.antoine.appreciation",
+    "initialValue": false,
+    "onlySetTrue": true
+  },
+  {
+    "key": "neutral.antoine.observation",
+    "nameText": "condition.neutral.antoine.observation",
+    "initialValue": false,
+    "onlySetTrue": true
+  },
+  {
+    "key": "neutral.association.member",
+    "nameText": "condition.neutral.association.member",
+    "initialValue": false,
+    "onlySetTrue": true
+  },
+  {
+    "key": "neutral.investigation.shelter",
+    "nameText": "condition.neutral.investigation.shelter",
+    "initialValue": false,
+    "onlySetTrue": true
+  },
+  {
+    "key": "neutral.investigation.bribed",
+    "nameText": "condition.neutral.investigation.bribed",
+    "initialValue": false,
+    "onlySetTrue": true
+  },
+  {
+    "key": "neutral.stayed",
+    "nameText": "condition.neutral.stayed",
+    "initialValue": false,
+    "onlySetTrue": true
+  },
+  {
+    "key": "neutral.negotiation.failed",
+    "nameText": "condition.neutral.negotiation.failed",
+    "initialValue": false,
+    "onlySetTrue": true
+  },
+  {
+    "key": "neutral.negotiation.success",
+    "nameText": "condition.neutral.negotiation.success",
+    "initialValue": false,
+    "onlySetTrue": true
+  },
+  {
+    "key": "neutral.promotion.cost_saving",
+    "nameText": "condition.neutral.promotion.cost_saving",
+    "initialValue": false,
+    "onlySetTrue": true
+  },
+  {
+    "key": "story.neutral.1010.s2.completed",
+    "nameText": "condition.story.neutral.1010.s2.completed",
+    "initialValue": false,
+    "onlySetTrue": true
+  },
+  {
+    "key": "story.neutral.1013.s2.completed",
+    "nameText": "condition.story.neutral.1013.s2.completed",
+    "initialValue": false,
+    "onlySetTrue": true
+  },
+  {
+    "key": "blocked.neutral.1013.s2.cafe_any_service_bridge",
+    "nameText": "condition.blocked.neutral.1013.s2.cafe_any_service_bridge",
+    "initialValue": false,
+    "onlySetTrue": true
+  },
+  {
+    "key": "blocked.neutral.promotion_wisdom_conflict",
+    "nameText": "condition.blocked.neutral.promotion_wisdom_conflict",
+    "initialValue": false,
+    "onlySetTrue": true
+  },
+  {
+    "key": "neutral.promotion.organized",
+    "nameText": "condition.neutral.promotion.organized",
+    "initialValue": false,
+    "onlySetTrue": true
+  },
+  {
+    "key": "neutral.promotion.recommended",
+    "nameText": "condition.neutral.promotion.recommended",
+    "initialValue": false,
+    "onlySetTrue": true
+  },
+  {
+    "key": "story.neutral.1018.s1.completed",
+    "nameText": "condition.story.neutral.1018.s1.completed",
+    "initialValue": false,
+    "onlySetTrue": true
+  },
+  {
+    "key": "blocked.neutral.1018.s1.cafe_any_grade_bridge",
+    "nameText": "condition.blocked.neutral.1018.s1.cafe_any_grade_bridge",
+    "initialValue": false,
+    "onlySetTrue": true
+  },
+  {
+    "key": "blocked.neutral.1018.s1.cafe_reporter_daytime_entry",
+    "nameText": "condition.blocked.neutral.1018.s1.cafe_reporter_daytime_entry",
+    "initialValue": false,
+    "onlySetTrue": true
+  },
+  {
+    "key": "blocked.neutral.reporter_advert_price",
+    "nameText": "condition.blocked.neutral.reporter_advert_price",
+    "initialValue": false,
+    "onlySetTrue": true
+  },
+  {
+    "key": "neutral.newspaper.recommendation",
+    "nameText": "condition.neutral.newspaper.recommendation",
+    "initialValue": false,
+    "onlySetTrue": true
+  },
+  {
+    "key": "story.neutral.1027.s1.completed",
+    "nameText": "condition.story.neutral.1027.s1.completed",
+    "initialValue": false,
+    "onlySetTrue": true
+  },
+  {
+    "key": "story.rose.1016.s1.completed",
+    "nameText": "condition.story.rose.1016.s1.completed",
+    "initialValue": false,
+    "onlySetTrue": true
+  },
+  {
+    "key": "neutral.alienor.dialogue",
+    "nameText": "condition.neutral.alienor.dialogue",
+    "initialValue": false,
+    "onlySetTrue": true
+  },
+  {
+    "key": "story.neutral.1030.s1.completed",
+    "nameText": "condition.story.neutral.1030.s1.completed",
+    "initialValue": false,
+    "onlySetTrue": true
+  },
+  {
+    "key": "neutral.adele.dreams_unlocked",
+    "nameText": "condition.neutral.adele.dreams_unlocked",
+    "initialValue": false,
+    "onlySetTrue": true
+  },
+  {
+    "key": "neutral.adele.city_talk_closed",
+    "nameText": "condition.neutral.adele.city_talk_closed",
+    "initialValue": false,
+    "onlySetTrue": true
+  },
+  {
+    "key": "story.neutral.route.1111.s1.completed",
+    "nameText": "condition.story.neutral.route.1111.s1.completed",
+    "initialValue": false,
+    "onlySetTrue": true
+  },
+  {
+    "key": "story.neutral.route.1111.s1.ending.a",
+    "nameText": "condition.story.neutral.route.1111.s1.ending.a",
+    "initialValue": false,
+    "onlySetTrue": true
+  },
+  {
+    "key": "story.neutral.route.1111.s2.completed",
+    "nameText": "condition.story.neutral.route.1111.s2.completed",
+    "initialValue": false,
+    "onlySetTrue": true
+  },
+  {
+    "key": "story.neutral.route.1112.s1.completed",
+    "nameText": "condition.story.neutral.route.1112.s1.completed",
+    "initialValue": false,
+    "onlySetTrue": true
+  },
+  {
+    "key": "story.neutral.route.1118.s1.completed",
+    "nameText": "condition.story.neutral.route.1118.s1.completed",
+    "initialValue": false,
+    "onlySetTrue": true
+  },
+  {
+    "key": "blocked.neutral.route.1118.s1.neutral_end_if4_and_bribe",
+    "nameText": "condition.blocked.neutral.route.1118.s1.neutral_end_if4_and_bribe",
+    "initialValue": false,
+    "onlySetTrue": true
+  },
+  {
+    "key": "blocked.neutral.missing_end_if4",
+    "nameText": "condition.blocked.neutral.missing_end_if4",
+    "initialValue": false,
+    "onlySetTrue": true
+  },
+  {
+    "key": "blocked.neutral.investigation_bribe",
+    "nameText": "condition.blocked.neutral.investigation_bribe",
+    "initialValue": false,
+    "onlySetTrue": true
+  },
+  {
+    "key": "story.neutral.route.1122.s1.completed",
+    "nameText": "condition.story.neutral.route.1122.s1.completed",
+    "initialValue": false,
+    "onlySetTrue": true
+  },
+  {
+    "key": "story.neutral.route.1122.s1.ending.b",
+    "nameText": "condition.story.neutral.route.1122.s1.ending.b",
+    "initialValue": false,
+    "onlySetTrue": true
+  },
+  {
+    "key": "story.neutral.route.1129.s1.completed",
+    "nameText": "condition.story.neutral.route.1129.s1.completed",
+    "initialValue": false,
+    "onlySetTrue": true
+  },
+  {
+    "key": "blocked.neutral.route.1129.s1.neutral_revenue_threshold",
+    "nameText": "condition.blocked.neutral.route.1129.s1.neutral_revenue_threshold",
+    "initialValue": false,
+    "onlySetTrue": true
+  },
+  {
+    "key": "neutral.association.committee",
+    "nameText": "condition.neutral.association.committee",
+    "initialValue": false,
+    "onlySetTrue": true
+  },
+  {
+    "key": "story.neutral.route.1130.s1.completed",
+    "nameText": "condition.story.neutral.route.1130.s1.completed",
+    "initialValue": false,
+    "onlySetTrue": true
+  },
+  {
+    "key": "story.neutral.route.1130.s1.ending.d",
+    "nameText": "condition.story.neutral.route.1130.s1.ending.d",
+    "initialValue": false,
+    "onlySetTrue": true
+  },
+  {
+    "key": "story.neutral.route.1130.s2.completed",
+    "nameText": "condition.story.neutral.route.1130.s2.completed",
+    "initialValue": false,
+    "onlySetTrue": true
+  },
+  {
+    "key": "neutral.revenue.below_standard",
+    "nameText": "condition.neutral.revenue.below_standard",
+    "initialValue": false,
+    "onlySetTrue": true
+  },
+  {
+    "key": "story.neutral.route.1130.s2.ending.c",
+    "nameText": "condition.story.neutral.route.1130.s2.ending.c",
+    "initialValue": false,
+    "onlySetTrue": true
+  },
+  {
+    "key": "story.church.1009.s2.hat_helped",
+    "nameText": "condition.story.church.1009.s2.hat_helped",
+    "initialValue": false,
+    "onlySetTrue": true
+  },
+  {
+    "key": "story.church.1020.s1.cleared",
+    "nameText": "condition.story.church.1020.s1.cleared",
+    "initialValue": false,
+    "onlySetTrue": true
+  },
+  {
+    "key": "church.release.bribery",
+    "nameText": "condition.church.release.bribery",
+    "initialValue": false,
+    "onlySetTrue": true
+  },
+  {
+    "key": "church.release.rescue",
+    "nameText": "condition.church.release.rescue",
+    "initialValue": false,
+    "onlySetTrue": true
+  },
+  {
+    "key": "story.revolution.1029.s1.cooperated",
+    "nameText": "condition.story.revolution.1029.s1.cooperated",
+    "initialValue": false,
+    "onlySetTrue": true
+  },
+  {
+    "key": "story.revolution.1029.s1.refused",
+    "nameText": "condition.story.revolution.1029.s1.refused",
+    "initialValue": false,
+    "onlySetTrue": true
+  },
+  {
+    "key": "story.rose.1024.allegiance",
+    "nameText": "condition.story.rose.1024.allegiance",
+    "initialValue": false,
+    "onlySetTrue": true
+  },
+  {
+    "key": "story.rose.1024.safe_refusal",
+    "nameText": "condition.story.rose.1024.safe_refusal",
+    "initialValue": false,
+    "onlySetTrue": true
+  },
+  {
+    "key": "story.rose.ending.trust_limit.pending",
+    "nameText": "condition.story.rose.ending.trust_limit.pending",
+    "initialValue": false,
+    "onlySetTrue": true
+  },
+  {
+    "key": "story.rose.ending.job_requirements.pending",
+    "nameText": "condition.story.rose.ending.job_requirements.pending",
+    "initialValue": false,
+    "onlySetTrue": true
+  },
+  {
+    "key": "story.rose.route.ending.unforgiven.pending",
+    "nameText": "condition.story.rose.route.ending.unforgiven.pending",
+    "initialValue": false,
+    "onlySetTrue": true
+  },
+  {
+    "key": "story.rose.route.ending.bloom.pending",
+    "nameText": "condition.story.rose.route.ending.bloom.pending",
+    "initialValue": false,
+    "onlySetTrue": true
+  },
+  {
+    "key": "story.rose.1012.s1.completed",
+    "nameText": "condition.story.rose.1012.s1.completed",
+    "initialValue": false,
+    "onlySetTrue": true
+  },
+  {
+    "key": "story.rose.1019.s1.completed",
+    "nameText": "condition.story.rose.1019.s1.completed",
+    "initialValue": false,
+    "onlySetTrue": true
+  },
+  {
+    "key": "story.rose.1024.s1.completed",
+    "nameText": "condition.story.rose.1024.s1.completed",
+    "initialValue": false,
+    "onlySetTrue": true
+  },
+  {
+    "key": "story.rose.1024.s2.completed",
+    "nameText": "condition.story.rose.1024.s2.completed",
+    "initialValue": false,
+    "onlySetTrue": true
+  },
+  {
+    "key": "story.rose.1026.s2.completed",
+    "nameText": "condition.story.rose.1026.s2.completed",
+    "initialValue": false,
+    "onlySetTrue": true
+  },
+  {
+    "key": "story.rose.ending.trust_limit.completed",
+    "nameText": "condition.story.rose.ending.trust_limit.completed",
+    "initialValue": false,
+    "onlySetTrue": true
+  },
+  {
+    "key": "story.rose.1101.s1.completed",
+    "nameText": "condition.story.rose.1101.s1.completed",
+    "initialValue": false,
+    "onlySetTrue": true
+  },
+  {
+    "key": "story.rose.ending.job_requirements.completed",
+    "nameText": "condition.story.rose.ending.job_requirements.completed",
+    "initialValue": false,
+    "onlySetTrue": true
+  },
+  {
+    "key": "story.rose.1103.s1.completed",
+    "nameText": "condition.story.rose.1103.s1.completed",
+    "initialValue": false,
+    "onlySetTrue": true
+  },
+  {
+    "key": "story.rose.route.1111.s2.completed",
+    "nameText": "condition.story.rose.route.1111.s2.completed",
+    "initialValue": false,
+    "onlySetTrue": true
+  },
+  {
+    "key": "story.rose.route.1115.s1.completed",
+    "nameText": "condition.story.rose.route.1115.s1.completed",
+    "initialValue": false,
+    "onlySetTrue": true
+  },
+  {
+    "key": "story.rose.route.1122.s1.completed",
+    "nameText": "condition.story.rose.route.1122.s1.completed",
+    "initialValue": false,
+    "onlySetTrue": true
+  },
+  {
+    "key": "story.rose.route.ending.unforgiven.completed",
+    "nameText": "condition.story.rose.route.ending.unforgiven.completed",
+    "initialValue": false,
+    "onlySetTrue": true
+  },
+  {
+    "key": "story.rose.route.ending.bloom.completed",
+    "nameText": "condition.story.rose.route.ending.bloom.completed",
+    "initialValue": false,
+    "onlySetTrue": true
+  },
+  {
+    "key": "integration.rose.1016.stance3.resolved",
+    "nameText": "condition.integration.rose.1016.stance3.resolved",
+    "initialValue": false,
+    "onlySetTrue": true
+  },
+  {
+    "key": "integration.rose.1016.s1.ready",
+    "nameText": "condition.integration.rose.1016.s1.ready",
+    "initialValue": false,
+    "onlySetTrue": true
+  },
+  {
+    "key": "story.church.1020.s1.completed",
+    "nameText": "condition.story.church.1020.s1.completed",
+    "initialValue": false,
+    "onlySetTrue": true
+  },
+  {
+    "key": "story.church.1023.s1.completed",
+    "nameText": "condition.story.church.1023.s1.completed",
+    "initialValue": false,
+    "onlySetTrue": true
+  },
+  {
+    "key": "story.rose.1025.s2.completed",
+    "nameText": "condition.story.rose.1025.s2.completed",
+    "initialValue": false,
+    "onlySetTrue": true
+  },
+  {
+    "key": "story.rose.1026.s2.prisoner_list_received",
+    "nameText": "condition.story.rose.1026.s2.prisoner_list_received",
+    "initialValue": false,
+    "onlySetTrue": true
+  },
+  {
+    "key": "story.rose.ending.trust_limit.terminal",
+    "nameText": "condition.story.rose.ending.trust_limit.terminal",
+    "initialValue": false,
+    "onlySetTrue": true
+  },
+  {
+    "key": "story.revolution.1029.s1.completed",
+    "nameText": "condition.story.revolution.1029.s1.completed",
+    "initialValue": false,
+    "onlySetTrue": true
+  },
+  {
+    "key": "story.rose.ending.job_requirements.terminal",
+    "nameText": "condition.story.rose.ending.job_requirements.terminal",
+    "initialValue": false,
+    "onlySetTrue": true
+  },
+  {
+    "key": "integration.rose.1103.cocoa_milk.served",
+    "nameText": "condition.integration.rose.1103.cocoa_milk.served",
+    "initialValue": false,
+    "onlySetTrue": true
+  },
+  {
+    "key": "story.rose.1103.s1.sheltered",
+    "nameText": "condition.story.rose.1103.s1.sheltered",
+    "initialValue": false,
+    "onlySetTrue": true
+  },
+  {
+    "key": "church.alienor.sheltered",
+    "nameText": "condition.church.alienor.sheltered",
+    "initialValue": false,
+    "onlySetTrue": true
+  },
+  {
+    "key": "church.alienor.refused_shelter",
+    "nameText": "condition.church.alienor.refused_shelter",
+    "initialValue": false,
+    "onlySetTrue": true
+  },
+  {
+    "key": "story.rose.1103.s1.identity_known",
+    "nameText": "condition.story.rose.1103.s1.identity_known",
+    "initialValue": false,
+    "onlySetTrue": true
+  },
+  {
+    "key": "integration.rose.1103.s1.ready",
+    "nameText": "condition.integration.rose.1103.s1.ready",
+    "initialValue": false,
+    "onlySetTrue": true
+  },
+  {
+    "key": "integration.rose.route.1115.candor.low",
+    "nameText": "condition.integration.rose.route.1115.candor.low",
+    "initialValue": false,
+    "onlySetTrue": true
+  },
+  {
+    "key": "integration.rose.route.1115.candor.high",
+    "nameText": "condition.integration.rose.route.1115.candor.high",
+    "initialValue": false,
+    "onlySetTrue": true
+  },
+  {
+    "key": "story.rose.route.1115.s1.terminal.ideal_world",
+    "nameText": "condition.story.rose.route.1115.s1.terminal.ideal_world",
+    "initialValue": false,
+    "onlySetTrue": true
+  },
+  {
+    "key": "story.rose.route.1115.s1.plan_known",
+    "nameText": "condition.story.rose.route.1115.s1.plan_known",
+    "initialValue": false,
+    "onlySetTrue": true
+  },
+  {
+    "key": "integration.rose.route.1115.s1.ready",
+    "nameText": "condition.integration.rose.route.1115.s1.ready",
+    "initialValue": false,
+    "onlySetTrue": true
+  },
+  {
+    "key": "story.rose.route.ending.unforgiven.terminal",
+    "nameText": "condition.story.rose.route.ending.unforgiven.terminal",
+    "initialValue": false,
+    "onlySetTrue": true
+  },
+  {
+    "key": "story.rose.route.ending.bloom.terminal",
+    "nameText": "condition.story.rose.route.ending.bloom.terminal",
+    "initialValue": false,
+    "onlySetTrue": true
+  },
+  {
+    "key": "church.detention.active",
+    "nameText": "condition.church.detention.active",
+    "initialValue": false,
+    "onlySetTrue": false
+  },
+  {
+    "key": "story.church.1014.s2.completed",
+    "nameText": "condition.story.church.1014.s2.completed",
+    "initialValue": false,
+    "onlySetTrue": true
+  },
+  {
+    "key": "construction.church.1020.s1.ready",
+    "nameText": "condition.construction.church.1020.s1.ready",
+    "initialValue": false,
+    "onlySetTrue": false
+  },
+  {
+    "key": "church.detention.requested",
+    "nameText": "condition.church.detention.requested",
+    "initialValue": false,
+    "onlySetTrue": true
+  },
+  {
+    "key": "construction.church.1023.s1.ready",
+    "nameText": "condition.construction.church.1023.s1.ready",
+    "initialValue": false,
+    "onlySetTrue": false
+  },
+  {
+    "key": "church.detention.bribe_quote_ready",
+    "nameText": "condition.church.detention.bribe_quote_ready",
+    "initialValue": false,
+    "onlySetTrue": true
+  },
+  {
+    "key": "church.detention.bribe_affordable",
+    "nameText": "condition.church.detention.bribe_affordable",
+    "initialValue": false,
+    "onlySetTrue": false
+  },
+  {
+    "key": "church.detention.bribery_payment_confirmed",
+    "nameText": "condition.church.detention.bribery_payment_confirmed",
+    "initialValue": false,
+    "onlySetTrue": true
+  },
+  {
+    "key": "church.release.records_anomalous",
+    "nameText": "condition.church.release.records_anomalous",
+    "initialValue": false,
+    "onlySetTrue": true
+  },
+  {
+    "key": "church.revolution.intervened",
+    "nameText": "condition.church.revolution.intervened",
+    "initialValue": false,
+    "onlySetTrue": true
+  },
+  {
+    "key": "church.detention.release_failed",
+    "nameText": "condition.church.detention.release_failed",
+    "initialValue": false,
+    "onlySetTrue": true
+  },
+  {
+    "key": "church.detention.release_acknowledged",
+    "nameText": "condition.church.detention.release_acknowledged",
+    "initialValue": false,
+    "onlySetTrue": true
+  },
+  {
+    "key": "church.release.persuasion",
+    "nameText": "condition.church.release.persuasion",
+    "initialValue": false,
+    "onlySetTrue": true
+  },
+  {
+    "key": "story.church.1023.s1.release.persuasion",
+    "nameText": "condition.story.church.1023.s1.release.persuasion",
+    "initialValue": false,
+    "onlySetTrue": true
+  },
+  {
+    "key": "story.church.1023.s1.release.bribery",
+    "nameText": "condition.story.church.1023.s1.release.bribery",
+    "initialValue": false,
+    "onlySetTrue": true
+  },
+  {
+    "key": "story.church.1023.s1.release.bribe",
+    "nameText": "condition.story.church.1023.s1.release.bribe",
+    "initialValue": false,
+    "onlySetTrue": true
+  },
+  {
+    "key": "story.church.1023.s1.release.rescue",
+    "nameText": "condition.story.church.1023.s1.release.rescue",
+    "initialValue": false,
+    "onlySetTrue": true
+  },
+  {
+    "key": "story.church.1023.s2.completed",
+    "nameText": "condition.story.church.1023.s2.completed",
+    "initialValue": false,
+    "onlySetTrue": true
+  },
+  {
+    "key": "construction.church.1023.s2.ready",
+    "nameText": "condition.construction.church.1023.s2.ready",
+    "initialValue": false,
+    "onlySetTrue": false
+  },
+  {
+    "key": "terminal.church.ending.if2",
+    "nameText": "condition.terminal.church.ending.if2",
+    "initialValue": false,
+    "onlySetTrue": true
+  },
+  {
+    "key": "story.church.1104.s1.completed",
+    "nameText": "condition.story.church.1104.s1.completed",
+    "initialValue": false,
+    "onlySetTrue": true
+  },
+  {
+    "key": "construction.church.1104.s1.ready",
+    "nameText": "condition.construction.church.1104.s1.ready",
+    "initialValue": false,
+    "onlySetTrue": false
+  },
+  {
+    "key": "story.church.1105.s1.completed",
+    "nameText": "condition.story.church.1105.s1.completed",
+    "initialValue": false,
+    "onlySetTrue": true
+  },
+  {
+    "key": "story.church.1105.s2.completed",
+    "nameText": "condition.story.church.1105.s2.completed",
+    "initialValue": false,
+    "onlySetTrue": true
+  },
+  {
+    "key": "story.church.1111.s1.completed",
+    "nameText": "condition.story.church.1111.s1.completed",
+    "initialValue": false,
+    "onlySetTrue": true
+  },
+  {
+    "key": "terminal.church.ending.if4",
+    "nameText": "condition.terminal.church.ending.if4",
+    "initialValue": false,
+    "onlySetTrue": true
+  },
+  {
+    "key": "route.eligible.church",
+    "nameText": "condition.route.eligible.church",
+    "initialValue": false,
+    "onlySetTrue": false
+  },
+  {
+    "key": "route.eligible.rose",
+    "nameText": "condition.route.eligible.rose",
+    "initialValue": false,
+    "onlySetTrue": false
+  },
+  {
+    "key": "route.eligible.revolution",
+    "nameText": "condition.route.eligible.revolution",
+    "initialValue": false,
+    "onlySetTrue": false
+  },
+  {
+    "key": "story.church.route.1111.s1.completed",
+    "nameText": "condition.story.church.route.1111.s1.completed",
+    "initialValue": false,
+    "onlySetTrue": true
+  },
+  {
+    "key": "story.church.route.1112.s1.completed",
+    "nameText": "condition.story.church.route.1112.s1.completed",
+    "initialValue": false,
+    "onlySetTrue": true
+  },
+  {
+    "key": "construction.church.route.1112.s1.ready",
+    "nameText": "condition.construction.church.route.1112.s1.ready",
+    "initialValue": false,
+    "onlySetTrue": false
+  },
+  {
+    "key": "story.church.route.1113.s1.completed",
+    "nameText": "condition.story.church.route.1113.s1.completed",
+    "initialValue": false,
+    "onlySetTrue": true
+  },
+  {
+    "key": "construction.church.route.1113.s1.ready",
+    "nameText": "condition.construction.church.route.1113.s1.ready",
+    "initialValue": false,
+    "onlySetTrue": false
+  },
+  {
+    "key": "church.route.1113.serving.excellent",
+    "nameText": "condition.church.route.1113.serving.excellent",
+    "initialValue": false,
+    "onlySetTrue": true
+  },
+  {
+    "key": "church.route.1113.serving.ordinary_or_below",
+    "nameText": "condition.church.route.1113.serving.ordinary_or_below",
+    "initialValue": false,
+    "onlySetTrue": true
+  },
+  {
+    "key": "story.church.route.1115.s1.completed",
+    "nameText": "condition.story.church.route.1115.s1.completed",
+    "initialValue": false,
+    "onlySetTrue": true
+  },
+  {
+    "key": "church.thibaut.followed",
+    "nameText": "condition.church.thibaut.followed",
+    "initialValue": false,
+    "onlySetTrue": true
+  },
+  {
+    "key": "church.revolution.watch_requested",
+    "nameText": "condition.church.revolution.watch_requested",
+    "initialValue": false,
+    "onlySetTrue": true
+  },
+  {
+    "key": "story.church.route.1116.s1.completed",
+    "nameText": "condition.story.church.route.1116.s1.completed",
+    "initialValue": false,
+    "onlySetTrue": true
+  },
+  {
+    "key": "story.church.route.1118.s1.completed",
+    "nameText": "condition.story.church.route.1118.s1.completed",
+    "initialValue": false,
+    "onlySetTrue": true
+  },
+  {
+    "key": "construction.church.route.1118.s1.ready",
+    "nameText": "condition.construction.church.route.1118.s1.ready",
+    "initialValue": false,
+    "onlySetTrue": false
+  },
+  {
+    "key": "story.church.route.1123.s1.completed",
+    "nameText": "condition.story.church.route.1123.s1.completed",
+    "initialValue": false,
+    "onlySetTrue": true
+  },
+  {
+    "key": "construction.church.route.1123.s1.ready",
+    "nameText": "condition.construction.church.route.1123.s1.ready",
+    "initialValue": false,
+    "onlySetTrue": false
+  },
+  {
+    "key": "terminal.church.ending.ry1",
+    "nameText": "condition.terminal.church.ending.ry1",
+    "initialValue": false,
+    "onlySetTrue": true
+  },
+  {
+    "key": "terminal.church.ending.ry2",
+    "nameText": "condition.terminal.church.ending.ry2",
+    "initialValue": false,
+    "onlySetTrue": true
+  },
+  {
+    "key": "story.revolution.terminal",
+    "nameText": "condition.story.revolution.terminal",
+    "initialValue": false,
+    "onlySetTrue": true
+  },
+  {
+    "key": "story.revolution.sorel.organization.known",
+    "nameText": "condition.story.revolution.sorel.organization.known",
+    "initialValue": false,
+    "onlySetTrue": true
+  },
+  {
+    "key": "story.revolution.cafe.organization.known",
+    "nameText": "condition.story.revolution.cafe.organization.known",
+    "initialValue": false,
+    "onlySetTrue": true
+  },
+  {
+    "key": "integration.revolution.1014.s1.ready",
+    "nameText": "condition.integration.revolution.1014.s1.ready",
+    "initialValue": false,
+    "onlySetTrue": true
+  },
+  {
+    "key": "integration.revolution.1029.s1.ready",
+    "nameText": "condition.integration.revolution.1029.s1.ready",
+    "initialValue": false,
+    "onlySetTrue": true
+  },
+  {
+    "key": "story.revolution.revolution_date.known",
+    "nameText": "condition.story.revolution.revolution_date.known",
+    "initialValue": false,
+    "onlySetTrue": true
+  },
+  {
+    "key": "story.revolution.rose.plan.known",
+    "nameText": "condition.story.revolution.rose.plan.known",
+    "initialValue": false,
+    "onlySetTrue": true
+  },
+  {
+    "key": "story.revolution.cafe.transfer_plan.known",
+    "nameText": "condition.story.revolution.cafe.transfer_plan.known",
+    "initialValue": false,
+    "onlySetTrue": true
+  },
+  {
+    "key": "story.revolution.1107.s1.completed",
+    "nameText": "condition.story.revolution.1107.s1.completed",
+    "initialValue": false,
+    "onlySetTrue": true
+  },
+  {
+    "key": "integration.revolution.1107.s1.ready",
+    "nameText": "condition.integration.revolution.1107.s1.ready",
+    "initialValue": false,
+    "onlySetTrue": true
+  },
+  {
+    "key": "story.revolution.protection_request.sent",
+    "nameText": "condition.story.revolution.protection_request.sent",
+    "initialValue": false,
+    "onlySetTrue": true
+  },
+  {
+    "key": "story.revolution.route.1111.s2.completed",
+    "nameText": "condition.story.revolution.route.1111.s2.completed",
+    "initialValue": false,
+    "onlySetTrue": true
+  },
+  {
+    "key": "story.revolution.mary.contradiction.known",
+    "nameText": "condition.story.revolution.mary.contradiction.known",
+    "initialValue": false,
+    "onlySetTrue": true
+  },
+  {
+    "key": "story.revolution.mary.unwilling.known",
+    "nameText": "condition.story.revolution.mary.unwilling.known",
+    "initialValue": false,
+    "onlySetTrue": true
+  },
+  {
+    "key": "story.revolution.mary.pistol.received",
+    "nameText": "condition.story.revolution.mary.pistol.received",
+    "initialValue": false,
+    "onlySetTrue": true
+  },
+  {
+    "key": "story.revolution.private_invitation.received",
+    "nameText": "condition.story.revolution.private_invitation.received",
+    "initialValue": false,
+    "onlySetTrue": true
+  },
+  {
+    "key": "story.revolution.route.1112.s1.completed",
+    "nameText": "condition.story.revolution.route.1112.s1.completed",
+    "initialValue": false,
+    "onlySetTrue": true
+  },
+  {
+    "key": "integration.revolution.route.1112.s1.ready",
+    "nameText": "condition.integration.revolution.route.1112.s1.ready",
+    "initialValue": false,
+    "onlySetTrue": true
+  },
+  {
+    "key": "story.revolution.alliance_structure.known",
+    "nameText": "condition.story.revolution.alliance_structure.known",
+    "initialValue": false,
+    "onlySetTrue": true
+  },
+  {
+    "key": "story.revolution.lesou.coordinator.known",
+    "nameText": "condition.story.revolution.lesou.coordinator.known",
+    "initialValue": false,
+    "onlySetTrue": true
+  },
+  {
+    "key": "story.revolution.badge.received",
+    "nameText": "condition.story.revolution.badge.received",
+    "initialValue": false,
+    "onlySetTrue": true
+  },
+  {
+    "key": "story.revolution.route.1115.s1.completed",
+    "nameText": "condition.story.revolution.route.1115.s1.completed",
+    "initialValue": false,
+    "onlySetTrue": true
+  },
+  {
+    "key": "integration.revolution.route.1115.s1.ready",
+    "nameText": "condition.integration.revolution.route.1115.s1.ready",
+    "initialValue": false,
+    "onlySetTrue": true
+  },
+  {
+    "key": "story.revolution.route.1122.s1.completed",
+    "nameText": "condition.story.revolution.route.1122.s1.completed",
+    "initialValue": false,
+    "onlySetTrue": true
+  },
+  {
+    "key": "integration.revolution.route.1122.s1.ready",
+    "nameText": "condition.integration.revolution.route.1122.s1.ready",
+    "initialValue": false,
+    "onlySetTrue": true
+  },
+  {
+    "key": "story.revolution.mary.assassination.stopped",
+    "nameText": "condition.story.revolution.mary.assassination.stopped",
+    "initialValue": false,
+    "onlySetTrue": true
+  },
+  {
+    "key": "story.revolution.route.1123.s1.completed",
+    "nameText": "condition.story.revolution.route.1123.s1.completed",
+    "initialValue": false,
+    "onlySetTrue": true
+  },
+  {
+    "key": "integration.revolution.route.1123.s1.ready",
+    "nameText": "condition.integration.revolution.route.1123.s1.ready",
+    "initialValue": false,
+    "onlySetTrue": true
+  },
+  {
+    "key": "story.revolution.end01.selected",
+    "nameText": "condition.story.revolution.end01.selected",
+    "initialValue": false,
+    "onlySetTrue": true
+  },
+  {
+    "key": "story.revolution.end02.selected",
+    "nameText": "condition.story.revolution.end02.selected",
+    "initialValue": false,
+    "onlySetTrue": true
+  },
+  {
+    "key": "story.revolution.route.1124.s1.completed",
+    "nameText": "condition.story.revolution.route.1124.s1.completed",
+    "initialValue": false,
+    "onlySetTrue": true
+  },
+  {
+    "key": "integration.revolution.route.1124.s1.ready",
+    "nameText": "condition.integration.revolution.route.1124.s1.ready",
+    "initialValue": false,
+    "onlySetTrue": true
+  },
+  {
+    "key": "story.daily.old.01.completed",
+    "nameText": "condition.story.daily.old.01.completed",
+    "initialValue": false,
+    "onlySetTrue": true
+  },
+  {
+    "key": "story.daily.old.r01.completed",
+    "nameText": "condition.story.daily.old.r01.completed",
+    "initialValue": false,
+    "onlySetTrue": true
+  },
+  {
+    "key": "story.daily.old.02.completed",
+    "nameText": "condition.story.daily.old.02.completed",
+    "initialValue": false,
+    "onlySetTrue": true
+  },
+  {
+    "key": "story.daily.old.03.completed",
+    "nameText": "condition.story.daily.old.03.completed",
+    "initialValue": false,
+    "onlySetTrue": true
+  },
+  {
+    "key": "story.daily.old.r02.completed",
+    "nameText": "condition.story.daily.old.r02.completed",
+    "initialValue": false,
+    "onlySetTrue": true
+  },
+  {
+    "key": "story.daily.old.04.completed",
+    "nameText": "condition.story.daily.old.04.completed",
+    "initialValue": false,
+    "onlySetTrue": true
+  },
+  {
+    "key": "story.daily.old.05.completed",
+    "nameText": "condition.story.daily.old.05.completed",
+    "initialValue": false,
+    "onlySetTrue": true
+  },
+  {
+    "key": "story.daily.old.06.completed",
+    "nameText": "condition.story.daily.old.06.completed",
+    "initialValue": false,
+    "onlySetTrue": true
+  },
+  {
+    "key": "story.daily.old.07.completed",
+    "nameText": "condition.story.daily.old.07.completed",
+    "initialValue": false,
+    "onlySetTrue": true
+  },
+  {
+    "key": "story.daily.old.08.completed",
+    "nameText": "condition.story.daily.old.08.completed",
+    "initialValue": false,
+    "onlySetTrue": true
+  },
+  {
+    "key": "daily.old.08.selected.a",
+    "nameText": "condition.daily.old.08.selected.a",
+    "initialValue": false,
+    "onlySetTrue": true
+  },
+  {
+    "key": "daily.old.08.selected.b",
+    "nameText": "condition.daily.old.08.selected.b",
+    "initialValue": false,
+    "onlySetTrue": true
+  },
+  {
+    "key": "story.daily.old.09.completed",
+    "nameText": "condition.story.daily.old.09.completed",
+    "initialValue": false,
+    "onlySetTrue": true
+  },
+  {
+    "key": "story.daily.old.10.completed",
+    "nameText": "condition.story.daily.old.10.completed",
+    "initialValue": false,
+    "onlySetTrue": true
+  },
+  {
+    "key": "story.daily.old.11.completed",
+    "nameText": "condition.story.daily.old.11.completed",
+    "initialValue": false,
+    "onlySetTrue": true
+  },
+  {
+    "key": "story.daily.old.12.completed",
+    "nameText": "condition.story.daily.old.12.completed",
+    "initialValue": false,
+    "onlySetTrue": true
+  },
+  {
+    "key": "story.daily.old.13.completed",
+    "nameText": "condition.story.daily.old.13.completed",
+    "initialValue": false,
+    "onlySetTrue": true
+  },
+  {
+    "key": "story.daily.old.14.completed",
+    "nameText": "condition.story.daily.old.14.completed",
+    "initialValue": false,
+    "onlySetTrue": true
+  },
+  {
+    "key": "daily.old.14.selected.a",
+    "nameText": "condition.daily.old.14.selected.a",
+    "initialValue": false,
+    "onlySetTrue": true
+  },
+  {
+    "key": "daily.old.14.selected.b",
+    "nameText": "condition.daily.old.14.selected.b",
+    "initialValue": false,
+    "onlySetTrue": true
+  },
+  {
+    "key": "story.daily.old.15.completed",
+    "nameText": "condition.story.daily.old.15.completed",
+    "initialValue": false,
+    "onlySetTrue": true
+  },
+  {
+    "key": "story.daily.old.16.completed",
+    "nameText": "condition.story.daily.old.16.completed",
+    "initialValue": false,
+    "onlySetTrue": true
+  },
+  {
+    "key": "story.daily.old.17.completed",
+    "nameText": "condition.story.daily.old.17.completed",
+    "initialValue": false,
+    "onlySetTrue": true
+  },
+  {
+    "key": "story.daily.old.18.completed",
+    "nameText": "condition.story.daily.old.18.completed",
+    "initialValue": false,
+    "onlySetTrue": true
+  },
+  {
+    "key": "story.daily.old.19.completed",
+    "nameText": "condition.story.daily.old.19.completed",
+    "initialValue": false,
+    "onlySetTrue": true
+  },
+  {
+    "key": "story.daily.old.20.completed",
+    "nameText": "condition.story.daily.old.20.completed",
+    "initialValue": false,
+    "onlySetTrue": true
+  },
+  {
+    "key": "daily.old.20.selected.a",
+    "nameText": "condition.daily.old.20.selected.a",
+    "initialValue": false,
+    "onlySetTrue": true
+  },
+  {
+    "key": "daily.old.20.selected.b",
+    "nameText": "condition.daily.old.20.selected.b",
+    "initialValue": false,
+    "onlySetTrue": true
+  },
+  {
+    "key": "story.daily.old.21.completed",
+    "nameText": "condition.story.daily.old.21.completed",
+    "initialValue": false,
+    "onlySetTrue": true
+  },
+  {
+    "key": "story.daily.old.22.completed",
+    "nameText": "condition.story.daily.old.22.completed",
+    "initialValue": false,
+    "onlySetTrue": true
+  },
+  {
+    "key": "story.daily.st.01.completed",
+    "nameText": "condition.story.daily.st.01.completed",
+    "initialValue": false,
+    "onlySetTrue": true
+  },
+  {
+    "key": "story.daily.st.r01.completed",
+    "nameText": "condition.story.daily.st.r01.completed",
+    "initialValue": false,
+    "onlySetTrue": true
+  },
+  {
+    "key": "story.daily.st.02.completed",
+    "nameText": "condition.story.daily.st.02.completed",
+    "initialValue": false,
+    "onlySetTrue": true
+  },
+  {
+    "key": "story.daily.st.03.completed",
+    "nameText": "condition.story.daily.st.03.completed",
+    "initialValue": false,
+    "onlySetTrue": true
+  },
+  {
+    "key": "story.daily.st.r02.completed",
+    "nameText": "condition.story.daily.st.r02.completed",
+    "initialValue": false,
+    "onlySetTrue": true
+  },
+  {
+    "key": "story.daily.st.04.completed",
+    "nameText": "condition.story.daily.st.04.completed",
+    "initialValue": false,
+    "onlySetTrue": true
+  },
+  {
+    "key": "story.daily.st.05.completed",
+    "nameText": "condition.story.daily.st.05.completed",
+    "initialValue": false,
+    "onlySetTrue": true
+  },
+  {
+    "key": "story.daily.st.06.completed",
+    "nameText": "condition.story.daily.st.06.completed",
+    "initialValue": false,
+    "onlySetTrue": true
+  },
+  {
+    "key": "story.daily.st.07.completed",
+    "nameText": "condition.story.daily.st.07.completed",
+    "initialValue": false,
+    "onlySetTrue": true
+  },
+  {
+    "key": "story.daily.st.08.completed",
+    "nameText": "condition.story.daily.st.08.completed",
+    "initialValue": false,
+    "onlySetTrue": true
+  },
+  {
+    "key": "story.daily.st.09.completed",
+    "nameText": "condition.story.daily.st.09.completed",
+    "initialValue": false,
+    "onlySetTrue": true
+  },
+  {
+    "key": "daily.st.09.selected.a",
+    "nameText": "condition.daily.st.09.selected.a",
+    "initialValue": false,
+    "onlySetTrue": true
+  },
+  {
+    "key": "daily.st.09.selected.b",
+    "nameText": "condition.daily.st.09.selected.b",
+    "initialValue": false,
+    "onlySetTrue": true
+  },
+  {
+    "key": "story.daily.st.10.completed",
+    "nameText": "condition.story.daily.st.10.completed",
+    "initialValue": false,
+    "onlySetTrue": true
+  },
+  {
+    "key": "story.daily.st.11.completed",
+    "nameText": "condition.story.daily.st.11.completed",
+    "initialValue": false,
+    "onlySetTrue": true
+  },
+  {
+    "key": "story.daily.st.12.completed",
+    "nameText": "condition.story.daily.st.12.completed",
+    "initialValue": false,
+    "onlySetTrue": true
+  },
+  {
+    "key": "story.daily.st.13.completed",
+    "nameText": "condition.story.daily.st.13.completed",
+    "initialValue": false,
+    "onlySetTrue": true
+  },
+  {
+    "key": "story.daily.st.14.completed",
+    "nameText": "condition.story.daily.st.14.completed",
+    "initialValue": false,
+    "onlySetTrue": true
+  },
+  {
+    "key": "story.daily.st.15.completed",
+    "nameText": "condition.story.daily.st.15.completed",
+    "initialValue": false,
+    "onlySetTrue": true
+  },
+  {
+    "key": "story.daily.st.16.completed",
+    "nameText": "condition.story.daily.st.16.completed",
+    "initialValue": false,
+    "onlySetTrue": true
+  },
+  {
+    "key": "daily.st.16.selected.a",
+    "nameText": "condition.daily.st.16.selected.a",
+    "initialValue": false,
+    "onlySetTrue": true
+  },
+  {
+    "key": "daily.st.16.selected.b",
+    "nameText": "condition.daily.st.16.selected.b",
+    "initialValue": false,
+    "onlySetTrue": true
+  },
+  {
+    "key": "story.daily.st.17.completed",
+    "nameText": "condition.story.daily.st.17.completed",
+    "initialValue": false,
+    "onlySetTrue": true
+  },
+  {
+    "key": "story.daily.st.18.completed",
+    "nameText": "condition.story.daily.st.18.completed",
+    "initialValue": false,
+    "onlySetTrue": true
+  },
+  {
+    "key": "story.daily.st.19.completed",
+    "nameText": "condition.story.daily.st.19.completed",
+    "initialValue": false,
+    "onlySetTrue": true
+  },
+  {
+    "key": "story.daily.st.20.completed",
+    "nameText": "condition.story.daily.st.20.completed",
+    "initialValue": false,
+    "onlySetTrue": true
+  },
+  {
+    "key": "story.daily.st.21.completed",
+    "nameText": "condition.story.daily.st.21.completed",
+    "initialValue": false,
+    "onlySetTrue": true
+  },
+  {
+    "key": "story.daily.st.22.completed",
+    "nameText": "condition.story.daily.st.22.completed",
+    "initialValue": false,
+    "onlySetTrue": true
+  },
+  {
+    "key": "story.daily.out.01.completed",
+    "nameText": "condition.story.daily.out.01.completed",
+    "initialValue": false,
+    "onlySetTrue": true
+  },
+  {
+    "key": "story.daily.out.r01.completed",
+    "nameText": "condition.story.daily.out.r01.completed",
+    "initialValue": false,
+    "onlySetTrue": true
+  },
+  {
+    "key": "story.daily.out.02.completed",
+    "nameText": "condition.story.daily.out.02.completed",
+    "initialValue": false,
+    "onlySetTrue": true
+  },
+  {
+    "key": "story.daily.out.03.completed",
+    "nameText": "condition.story.daily.out.03.completed",
+    "initialValue": false,
+    "onlySetTrue": true
+  },
+  {
+    "key": "story.daily.out.r02.completed",
+    "nameText": "condition.story.daily.out.r02.completed",
+    "initialValue": false,
+    "onlySetTrue": true
+  },
+  {
+    "key": "story.daily.out.04.completed",
+    "nameText": "condition.story.daily.out.04.completed",
+    "initialValue": false,
+    "onlySetTrue": true
+  },
+  {
+    "key": "story.daily.out.05.completed",
+    "nameText": "condition.story.daily.out.05.completed",
+    "initialValue": false,
+    "onlySetTrue": true
+  },
+  {
+    "key": "story.daily.out.06.completed",
+    "nameText": "condition.story.daily.out.06.completed",
+    "initialValue": false,
+    "onlySetTrue": true
+  },
+  {
+    "key": "story.daily.out.07.completed",
+    "nameText": "condition.story.daily.out.07.completed",
+    "initialValue": false,
+    "onlySetTrue": true
+  },
+  {
+    "key": "story.daily.out.08.completed",
+    "nameText": "condition.story.daily.out.08.completed",
+    "initialValue": false,
+    "onlySetTrue": true
+  },
+  {
+    "key": "story.daily.out.09.completed",
+    "nameText": "condition.story.daily.out.09.completed",
+    "initialValue": false,
+    "onlySetTrue": true
+  },
+  {
+    "key": "story.daily.out.10.completed",
+    "nameText": "condition.story.daily.out.10.completed",
+    "initialValue": false,
+    "onlySetTrue": true
+  },
+  {
+    "key": "daily.out.10.selected.a",
+    "nameText": "condition.daily.out.10.selected.a",
+    "initialValue": false,
+    "onlySetTrue": true
+  },
+  {
+    "key": "daily.out.10.selected.b",
+    "nameText": "condition.daily.out.10.selected.b",
+    "initialValue": false,
+    "onlySetTrue": true
+  },
+  {
+    "key": "story.daily.out.11.completed",
+    "nameText": "condition.story.daily.out.11.completed",
+    "initialValue": false,
+    "onlySetTrue": true
+  },
+  {
+    "key": "story.daily.out.12.completed",
+    "nameText": "condition.story.daily.out.12.completed",
+    "initialValue": false,
+    "onlySetTrue": true
+  },
+  {
+    "key": "story.daily.out.13.completed",
+    "nameText": "condition.story.daily.out.13.completed",
+    "initialValue": false,
+    "onlySetTrue": true
+  },
+  {
+    "key": "story.daily.out.14.completed",
+    "nameText": "condition.story.daily.out.14.completed",
+    "initialValue": false,
+    "onlySetTrue": true
+  },
+  {
+    "key": "story.daily.out.15.completed",
+    "nameText": "condition.story.daily.out.15.completed",
+    "initialValue": false,
+    "onlySetTrue": true
+  },
+  {
+    "key": "story.daily.out.16.completed",
+    "nameText": "condition.story.daily.out.16.completed",
+    "initialValue": false,
+    "onlySetTrue": true
+  },
+  {
+    "key": "story.daily.out.17.completed",
+    "nameText": "condition.story.daily.out.17.completed",
+    "initialValue": false,
+    "onlySetTrue": true
+  },
+  {
+    "key": "story.daily.out.18.completed",
+    "nameText": "condition.story.daily.out.18.completed",
+    "initialValue": false,
+    "onlySetTrue": true
+  },
+  {
+    "key": "story.daily.out.19.completed",
+    "nameText": "condition.story.daily.out.19.completed",
+    "initialValue": false,
+    "onlySetTrue": true
+  },
+  {
+    "key": "daily.out.19.selected.a",
+    "nameText": "condition.daily.out.19.selected.a",
+    "initialValue": false,
+    "onlySetTrue": true
+  },
+  {
+    "key": "daily.out.19.selected.b",
+    "nameText": "condition.daily.out.19.selected.b",
+    "initialValue": false,
+    "onlySetTrue": true
+  },
+  {
+    "key": "story.daily.out.20.completed",
+    "nameText": "condition.story.daily.out.20.completed",
+    "initialValue": false,
+    "onlySetTrue": true
+  },
+  {
+    "key": "story.daily.out.21.completed",
+    "nameText": "condition.story.daily.out.21.completed",
+    "initialValue": false,
+    "onlySetTrue": true
+  },
+  {
+    "key": "story.daily.out.22.completed",
+    "nameText": "condition.story.daily.out.22.completed",
+    "initialValue": false,
+    "onlySetTrue": true
+  },
+  {
+    "key": "story.daily.mkt.01.completed",
+    "nameText": "condition.story.daily.mkt.01.completed",
+    "initialValue": false,
+    "onlySetTrue": true
+  },
+  {
+    "key": "story.daily.mkt.r01.completed",
+    "nameText": "condition.story.daily.mkt.r01.completed",
+    "initialValue": false,
+    "onlySetTrue": true
+  },
+  {
+    "key": "story.daily.mkt.02.completed",
+    "nameText": "condition.story.daily.mkt.02.completed",
+    "initialValue": false,
+    "onlySetTrue": true
+  },
+  {
+    "key": "story.daily.mkt.03.completed",
+    "nameText": "condition.story.daily.mkt.03.completed",
+    "initialValue": false,
+    "onlySetTrue": true
+  },
+  {
+    "key": "story.daily.mkt.r02.completed",
+    "nameText": "condition.story.daily.mkt.r02.completed",
+    "initialValue": false,
+    "onlySetTrue": true
+  },
+  {
+    "key": "story.daily.mkt.04.completed",
+    "nameText": "condition.story.daily.mkt.04.completed",
+    "initialValue": false,
+    "onlySetTrue": true
+  },
+  {
+    "key": "story.daily.mkt.05.completed",
+    "nameText": "condition.story.daily.mkt.05.completed",
+    "initialValue": false,
+    "onlySetTrue": true
+  },
+  {
+    "key": "story.daily.mkt.06.completed",
+    "nameText": "condition.story.daily.mkt.06.completed",
+    "initialValue": false,
+    "onlySetTrue": true
+  },
+  {
+    "key": "story.daily.mkt.07.completed",
+    "nameText": "condition.story.daily.mkt.07.completed",
+    "initialValue": false,
+    "onlySetTrue": true
+  },
+  {
+    "key": "daily.mkt.07.selected.a",
+    "nameText": "condition.daily.mkt.07.selected.a",
+    "initialValue": false,
+    "onlySetTrue": true
+  },
+  {
+    "key": "daily.mkt.07.selected.b",
+    "nameText": "condition.daily.mkt.07.selected.b",
+    "initialValue": false,
+    "onlySetTrue": true
+  },
+  {
+    "key": "story.daily.mkt.08.completed",
+    "nameText": "condition.story.daily.mkt.08.completed",
+    "initialValue": false,
+    "onlySetTrue": true
+  },
+  {
+    "key": "story.daily.mkt.09.completed",
+    "nameText": "condition.story.daily.mkt.09.completed",
+    "initialValue": false,
+    "onlySetTrue": true
+  },
+  {
+    "key": "story.daily.mkt.10.completed",
+    "nameText": "condition.story.daily.mkt.10.completed",
+    "initialValue": false,
+    "onlySetTrue": true
+  },
+  {
+    "key": "story.daily.mkt.11.completed",
+    "nameText": "condition.story.daily.mkt.11.completed",
+    "initialValue": false,
+    "onlySetTrue": true
+  },
+  {
+    "key": "story.daily.mkt.12.completed",
+    "nameText": "condition.story.daily.mkt.12.completed",
+    "initialValue": false,
+    "onlySetTrue": true
+  },
+  {
+    "key": "story.daily.mkt.13.completed",
+    "nameText": "condition.story.daily.mkt.13.completed",
+    "initialValue": false,
+    "onlySetTrue": true
+  },
+  {
+    "key": "story.daily.mkt.14.completed",
+    "nameText": "condition.story.daily.mkt.14.completed",
+    "initialValue": false,
+    "onlySetTrue": true
+  },
+  {
+    "key": "story.daily.mkt.15.completed",
+    "nameText": "condition.story.daily.mkt.15.completed",
+    "initialValue": false,
+    "onlySetTrue": true
+  },
+  {
+    "key": "daily.mkt.15.selected.a",
+    "nameText": "condition.daily.mkt.15.selected.a",
+    "initialValue": false,
+    "onlySetTrue": true
+  },
+  {
+    "key": "daily.mkt.15.selected.b",
+    "nameText": "condition.daily.mkt.15.selected.b",
+    "initialValue": false,
+    "onlySetTrue": true
+  },
+  {
+    "key": "story.daily.mkt.16.completed",
+    "nameText": "condition.story.daily.mkt.16.completed",
+    "initialValue": false,
+    "onlySetTrue": true
+  },
+  {
+    "key": "story.daily.mkt.17.completed",
+    "nameText": "condition.story.daily.mkt.17.completed",
+    "initialValue": false,
+    "onlySetTrue": true
+  },
+  {
+    "key": "story.daily.mkt.18.completed",
+    "nameText": "condition.story.daily.mkt.18.completed",
+    "initialValue": false,
+    "onlySetTrue": true
+  },
+  {
+    "key": "story.daily.mkt.19.completed",
+    "nameText": "condition.story.daily.mkt.19.completed",
+    "initialValue": false,
+    "onlySetTrue": true
+  },
+  {
+    "key": "story.daily.mkt.20.completed",
+    "nameText": "condition.story.daily.mkt.20.completed",
+    "initialValue": false,
+    "onlySetTrue": true
+  },
+  {
+    "key": "story.daily.mkt.21.completed",
+    "nameText": "condition.story.daily.mkt.21.completed",
+    "initialValue": false,
+    "onlySetTrue": true
+  },
+  {
+    "key": "daily.mkt.21.selected.a",
+    "nameText": "condition.daily.mkt.21.selected.a",
+    "initialValue": false,
+    "onlySetTrue": true
+  },
+  {
+    "key": "daily.mkt.21.selected.b",
+    "nameText": "condition.daily.mkt.21.selected.b",
+    "initialValue": false,
+    "onlySetTrue": true
+  },
+  {
+    "key": "story.daily.mkt.22.completed",
+    "nameText": "condition.story.daily.mkt.22.completed",
+    "initialValue": false,
+    "onlySetTrue": true
+  },
+  {
+    "key": "story.daily.cat.01.completed",
+    "nameText": "condition.story.daily.cat.01.completed",
+    "initialValue": false,
+    "onlySetTrue": true
+  },
+  {
+    "key": "story.daily.cat.r01.completed",
+    "nameText": "condition.story.daily.cat.r01.completed",
+    "initialValue": false,
+    "onlySetTrue": true
+  },
+  {
+    "key": "story.daily.cat.02.completed",
+    "nameText": "condition.story.daily.cat.02.completed",
+    "initialValue": false,
+    "onlySetTrue": true
+  },
+  {
+    "key": "story.daily.cat.03.completed",
+    "nameText": "condition.story.daily.cat.03.completed",
+    "initialValue": false,
+    "onlySetTrue": true
+  },
+  {
+    "key": "story.daily.cat.r02.completed",
+    "nameText": "condition.story.daily.cat.r02.completed",
+    "initialValue": false,
+    "onlySetTrue": true
+  },
+  {
+    "key": "story.daily.cat.04.completed",
+    "nameText": "condition.story.daily.cat.04.completed",
+    "initialValue": false,
+    "onlySetTrue": true
+  },
+  {
+    "key": "story.daily.cat.05.completed",
+    "nameText": "condition.story.daily.cat.05.completed",
+    "initialValue": false,
+    "onlySetTrue": true
+  },
+  {
+    "key": "story.daily.cat.06.completed",
+    "nameText": "condition.story.daily.cat.06.completed",
+    "initialValue": false,
+    "onlySetTrue": true
+  },
+  {
+    "key": "story.daily.cat.07.completed",
+    "nameText": "condition.story.daily.cat.07.completed",
+    "initialValue": false,
+    "onlySetTrue": true
+  },
+  {
+    "key": "story.daily.cat.08.completed",
+    "nameText": "condition.story.daily.cat.08.completed",
+    "initialValue": false,
+    "onlySetTrue": true
+  },
+  {
+    "key": "daily.cat.08.selected.a",
+    "nameText": "condition.daily.cat.08.selected.a",
+    "initialValue": false,
+    "onlySetTrue": true
+  },
+  {
+    "key": "daily.cat.08.selected.b",
+    "nameText": "condition.daily.cat.08.selected.b",
+    "initialValue": false,
+    "onlySetTrue": true
+  },
+  {
+    "key": "story.daily.cat.09.completed",
+    "nameText": "condition.story.daily.cat.09.completed",
+    "initialValue": false,
+    "onlySetTrue": true
+  },
+  {
+    "key": "story.daily.cat.10.completed",
+    "nameText": "condition.story.daily.cat.10.completed",
+    "initialValue": false,
+    "onlySetTrue": true
+  },
+  {
+    "key": "story.daily.cat.11.completed",
+    "nameText": "condition.story.daily.cat.11.completed",
+    "initialValue": false,
+    "onlySetTrue": true
+  },
+  {
+    "key": "story.daily.cat.12.completed",
+    "nameText": "condition.story.daily.cat.12.completed",
+    "initialValue": false,
+    "onlySetTrue": true
+  },
+  {
+    "key": "story.daily.cat.13.completed",
+    "nameText": "condition.story.daily.cat.13.completed",
+    "initialValue": false,
+    "onlySetTrue": true
+  },
+  {
+    "key": "story.daily.cat.14.completed",
+    "nameText": "condition.story.daily.cat.14.completed",
+    "initialValue": false,
+    "onlySetTrue": true
+  },
+  {
+    "key": "story.daily.cat.15.completed",
+    "nameText": "condition.story.daily.cat.15.completed",
+    "initialValue": false,
+    "onlySetTrue": true
+  },
+  {
+    "key": "story.daily.cat.16.completed",
+    "nameText": "condition.story.daily.cat.16.completed",
+    "initialValue": false,
+    "onlySetTrue": true
+  },
+  {
+    "key": "story.daily.cat.17.completed",
+    "nameText": "condition.story.daily.cat.17.completed",
+    "initialValue": false,
+    "onlySetTrue": true
+  },
+  {
+    "key": "daily.cat.17.selected.a",
+    "nameText": "condition.daily.cat.17.selected.a",
+    "initialValue": false,
+    "onlySetTrue": true
+  },
+  {
+    "key": "daily.cat.17.selected.b",
+    "nameText": "condition.daily.cat.17.selected.b",
+    "initialValue": false,
+    "onlySetTrue": true
+  },
+  {
+    "key": "story.daily.cat.18.completed",
+    "nameText": "condition.story.daily.cat.18.completed",
+    "initialValue": false,
+    "onlySetTrue": true
+  },
+  {
+    "key": "story.daily.cat.19.completed",
+    "nameText": "condition.story.daily.cat.19.completed",
+    "initialValue": false,
+    "onlySetTrue": true
+  },
+  {
+    "key": "story.daily.cat.20.completed",
+    "nameText": "condition.story.daily.cat.20.completed",
+    "initialValue": false,
+    "onlySetTrue": true
+  },
+  {
+    "key": "story.daily.cat.21.completed",
+    "nameText": "condition.story.daily.cat.21.completed",
+    "initialValue": false,
+    "onlySetTrue": true
+  },
+  {
+    "key": "story.daily.cat.22.completed",
+    "nameText": "condition.story.daily.cat.22.completed",
+    "initialValue": false,
+    "onlySetTrue": true
+  },
+  {
+    "key": "story.daily.uni.01.completed",
+    "nameText": "condition.story.daily.uni.01.completed",
+    "initialValue": false,
+    "onlySetTrue": true
+  },
+  {
+    "key": "story.daily.uni.r01.completed",
+    "nameText": "condition.story.daily.uni.r01.completed",
+    "initialValue": false,
+    "onlySetTrue": true
+  },
+  {
+    "key": "story.daily.uni.02.completed",
+    "nameText": "condition.story.daily.uni.02.completed",
+    "initialValue": false,
+    "onlySetTrue": true
+  },
+  {
+    "key": "story.daily.uni.03.completed",
+    "nameText": "condition.story.daily.uni.03.completed",
+    "initialValue": false,
+    "onlySetTrue": true
+  },
+  {
+    "key": "story.daily.uni.r02.completed",
+    "nameText": "condition.story.daily.uni.r02.completed",
+    "initialValue": false,
+    "onlySetTrue": true
+  },
+  {
+    "key": "story.daily.uni.04.completed",
+    "nameText": "condition.story.daily.uni.04.completed",
+    "initialValue": false,
+    "onlySetTrue": true
+  },
+  {
+    "key": "story.daily.uni.05.completed",
+    "nameText": "condition.story.daily.uni.05.completed",
+    "initialValue": false,
+    "onlySetTrue": true
+  },
+  {
+    "key": "story.daily.uni.06.completed",
+    "nameText": "condition.story.daily.uni.06.completed",
+    "initialValue": false,
+    "onlySetTrue": true
+  },
+  {
+    "key": "story.daily.uni.07.completed",
+    "nameText": "condition.story.daily.uni.07.completed",
+    "initialValue": false,
+    "onlySetTrue": true
+  },
+  {
+    "key": "story.daily.uni.08.completed",
+    "nameText": "condition.story.daily.uni.08.completed",
+    "initialValue": false,
+    "onlySetTrue": true
+  },
+  {
+    "key": "story.daily.uni.09.completed",
+    "nameText": "condition.story.daily.uni.09.completed",
+    "initialValue": false,
+    "onlySetTrue": true
+  },
+  {
+    "key": "daily.uni.09.selected.a",
+    "nameText": "condition.daily.uni.09.selected.a",
+    "initialValue": false,
+    "onlySetTrue": true
+  },
+  {
+    "key": "daily.uni.09.selected.b",
+    "nameText": "condition.daily.uni.09.selected.b",
+    "initialValue": false,
+    "onlySetTrue": true
+  },
+  {
+    "key": "story.daily.uni.10.completed",
+    "nameText": "condition.story.daily.uni.10.completed",
+    "initialValue": false,
+    "onlySetTrue": true
+  },
+  {
+    "key": "story.daily.uni.11.completed",
+    "nameText": "condition.story.daily.uni.11.completed",
+    "initialValue": false,
+    "onlySetTrue": true
+  },
+  {
+    "key": "story.daily.uni.12.completed",
+    "nameText": "condition.story.daily.uni.12.completed",
+    "initialValue": false,
+    "onlySetTrue": true
+  },
+  {
+    "key": "story.daily.uni.13.completed",
+    "nameText": "condition.story.daily.uni.13.completed",
+    "initialValue": false,
+    "onlySetTrue": true
+  },
+  {
+    "key": "story.daily.uni.14.completed",
+    "nameText": "condition.story.daily.uni.14.completed",
+    "initialValue": false,
+    "onlySetTrue": true
+  },
+  {
+    "key": "story.daily.uni.15.completed",
+    "nameText": "condition.story.daily.uni.15.completed",
+    "initialValue": false,
+    "onlySetTrue": true
+  },
+  {
+    "key": "story.daily.uni.16.completed",
+    "nameText": "condition.story.daily.uni.16.completed",
+    "initialValue": false,
+    "onlySetTrue": true
+  },
+  {
+    "key": "story.daily.uni.17.completed",
+    "nameText": "condition.story.daily.uni.17.completed",
+    "initialValue": false,
+    "onlySetTrue": true
+  },
+  {
+    "key": "story.daily.uni.18.completed",
+    "nameText": "condition.story.daily.uni.18.completed",
+    "initialValue": false,
+    "onlySetTrue": true
+  },
+  {
+    "key": "daily.uni.18.selected.a",
+    "nameText": "condition.daily.uni.18.selected.a",
+    "initialValue": false,
+    "onlySetTrue": true
+  },
+  {
+    "key": "daily.uni.18.selected.b",
+    "nameText": "condition.daily.uni.18.selected.b",
+    "initialValue": false,
+    "onlySetTrue": true
+  },
+  {
+    "key": "story.daily.uni.19.completed",
+    "nameText": "condition.story.daily.uni.19.completed",
+    "initialValue": false,
+    "onlySetTrue": true
+  },
+  {
+    "key": "story.daily.uni.20.completed",
+    "nameText": "condition.story.daily.uni.20.completed",
+    "initialValue": false,
+    "onlySetTrue": true
+  },
+  {
+    "key": "story.daily.uni.21.completed",
+    "nameText": "condition.story.daily.uni.21.completed",
+    "initialValue": false,
+    "onlySetTrue": true
+  },
+  {
+    "key": "story.daily.uni.22.completed",
+    "nameText": "condition.story.daily.uni.22.completed",
+    "initialValue": false,
+    "onlySetTrue": true
+  },
+  {
+    "key": "story.daily.civ.01.completed",
+    "nameText": "condition.story.daily.civ.01.completed",
+    "initialValue": false,
+    "onlySetTrue": true
+  },
+  {
+    "key": "story.daily.civ.r01.completed",
+    "nameText": "condition.story.daily.civ.r01.completed",
+    "initialValue": false,
+    "onlySetTrue": true
+  },
+  {
+    "key": "story.daily.civ.02.completed",
+    "nameText": "condition.story.daily.civ.02.completed",
+    "initialValue": false,
+    "onlySetTrue": true
+  },
+  {
+    "key": "story.daily.civ.03.completed",
+    "nameText": "condition.story.daily.civ.03.completed",
+    "initialValue": false,
+    "onlySetTrue": true
+  },
+  {
+    "key": "story.daily.civ.r02.completed",
+    "nameText": "condition.story.daily.civ.r02.completed",
+    "initialValue": false,
+    "onlySetTrue": true
+  },
+  {
+    "key": "known.lefebvre",
+    "nameText": "condition.known.lefebvre",
+    "initialValue": false,
+    "onlySetTrue": true
+  },
+  {
+    "key": "story.daily.civ.04.completed",
+    "nameText": "condition.story.daily.civ.04.completed",
+    "initialValue": false,
+    "onlySetTrue": true
+  },
+  {
+    "key": "story.daily.civ.05.completed",
+    "nameText": "condition.story.daily.civ.05.completed",
+    "initialValue": false,
+    "onlySetTrue": true
+  },
+  {
+    "key": "story.daily.civ.06.completed",
+    "nameText": "condition.story.daily.civ.06.completed",
+    "initialValue": false,
+    "onlySetTrue": true
+  },
+  {
+    "key": "story.daily.civ.07.completed",
+    "nameText": "condition.story.daily.civ.07.completed",
+    "initialValue": false,
+    "onlySetTrue": true
+  },
+  {
+    "key": "story.daily.civ.08.completed",
+    "nameText": "condition.story.daily.civ.08.completed",
+    "initialValue": false,
+    "onlySetTrue": true
+  },
+  {
+    "key": "daily.civ.08.selected.a",
+    "nameText": "condition.daily.civ.08.selected.a",
+    "initialValue": false,
+    "onlySetTrue": true
+  },
+  {
+    "key": "daily.civ.08.selected.b",
+    "nameText": "condition.daily.civ.08.selected.b",
+    "initialValue": false,
+    "onlySetTrue": true
+  },
+  {
+    "key": "story.daily.civ.09.completed",
+    "nameText": "condition.story.daily.civ.09.completed",
+    "initialValue": false,
+    "onlySetTrue": true
+  },
+  {
+    "key": "story.daily.civ.10.completed",
+    "nameText": "condition.story.daily.civ.10.completed",
+    "initialValue": false,
+    "onlySetTrue": true
+  },
+  {
+    "key": "story.daily.civ.11.completed",
+    "nameText": "condition.story.daily.civ.11.completed",
+    "initialValue": false,
+    "onlySetTrue": true
+  },
+  {
+    "key": "story.daily.civ.12.completed",
+    "nameText": "condition.story.daily.civ.12.completed",
+    "initialValue": false,
+    "onlySetTrue": true
+  },
+  {
+    "key": "story.daily.civ.13.completed",
+    "nameText": "condition.story.daily.civ.13.completed",
+    "initialValue": false,
+    "onlySetTrue": true
+  },
+  {
+    "key": "story.daily.civ.14.completed",
+    "nameText": "condition.story.daily.civ.14.completed",
+    "initialValue": false,
+    "onlySetTrue": true
+  },
+  {
+    "key": "story.daily.civ.15.completed",
+    "nameText": "condition.story.daily.civ.15.completed",
+    "initialValue": false,
+    "onlySetTrue": true
+  },
+  {
+    "key": "story.daily.civ.16.completed",
+    "nameText": "condition.story.daily.civ.16.completed",
+    "initialValue": false,
+    "onlySetTrue": true
+  },
+  {
+    "key": "story.daily.civ.17.completed",
+    "nameText": "condition.story.daily.civ.17.completed",
+    "initialValue": false,
+    "onlySetTrue": true
+  },
+  {
+    "key": "story.daily.civ.18.completed",
+    "nameText": "condition.story.daily.civ.18.completed",
+    "initialValue": false,
+    "onlySetTrue": true
+  },
+  {
+    "key": "daily.civ.18.selected.a",
+    "nameText": "condition.daily.civ.18.selected.a",
+    "initialValue": false,
+    "onlySetTrue": true
+  },
+  {
+    "key": "daily.civ.18.selected.b",
+    "nameText": "condition.daily.civ.18.selected.b",
+    "initialValue": false,
+    "onlySetTrue": true
+  },
+  {
+    "key": "story.daily.civ.19.completed",
+    "nameText": "condition.story.daily.civ.19.completed",
+    "initialValue": false,
+    "onlySetTrue": true
+  },
+  {
+    "key": "story.daily.civ.20.completed",
+    "nameText": "condition.story.daily.civ.20.completed",
+    "initialValue": false,
+    "onlySetTrue": true
+  },
+  {
+    "key": "story.daily.civ.21.completed",
+    "nameText": "condition.story.daily.civ.21.completed",
+    "initialValue": false,
+    "onlySetTrue": true
+  },
+  {
+    "key": "story.daily.civ.22.completed",
+    "nameText": "condition.story.daily.civ.22.completed",
+    "initialValue": false,
+    "onlySetTrue": true
+  },
+  {
+    "key": "story.daily.crt.01.completed",
+    "nameText": "condition.story.daily.crt.01.completed",
+    "initialValue": false,
+    "onlySetTrue": true
+  },
+  {
+    "key": "story.daily.crt.r01.completed",
+    "nameText": "condition.story.daily.crt.r01.completed",
+    "initialValue": false,
+    "onlySetTrue": true
+  },
+  {
+    "key": "story.daily.crt.02.completed",
+    "nameText": "condition.story.daily.crt.02.completed",
+    "initialValue": false,
+    "onlySetTrue": true
+  },
+  {
+    "key": "story.daily.crt.03.completed",
+    "nameText": "condition.story.daily.crt.03.completed",
+    "initialValue": false,
+    "onlySetTrue": true
+  },
+  {
+    "key": "story.daily.crt.r02.completed",
+    "nameText": "condition.story.daily.crt.r02.completed",
+    "initialValue": false,
+    "onlySetTrue": true
+  },
+  {
+    "key": "story.daily.crt.04.completed",
+    "nameText": "condition.story.daily.crt.04.completed",
+    "initialValue": false,
+    "onlySetTrue": true
+  },
+  {
+    "key": "story.daily.crt.05.completed",
+    "nameText": "condition.story.daily.crt.05.completed",
+    "initialValue": false,
+    "onlySetTrue": true
+  },
+  {
+    "key": "story.daily.crt.06.completed",
+    "nameText": "condition.story.daily.crt.06.completed",
+    "initialValue": false,
+    "onlySetTrue": true
+  },
+  {
+    "key": "story.daily.crt.07.completed",
+    "nameText": "condition.story.daily.crt.07.completed",
+    "initialValue": false,
+    "onlySetTrue": true
+  },
+  {
+    "key": "story.daily.crt.08.completed",
+    "nameText": "condition.story.daily.crt.08.completed",
+    "initialValue": false,
+    "onlySetTrue": true
+  },
+  {
+    "key": "story.daily.crt.09.completed",
+    "nameText": "condition.story.daily.crt.09.completed",
+    "initialValue": false,
+    "onlySetTrue": true
+  },
+  {
+    "key": "story.daily.crt.10.completed",
+    "nameText": "condition.story.daily.crt.10.completed",
+    "initialValue": false,
+    "onlySetTrue": true
+  },
+  {
+    "key": "daily.crt.10.selected.a",
+    "nameText": "condition.daily.crt.10.selected.a",
+    "initialValue": false,
+    "onlySetTrue": true
+  },
+  {
+    "key": "daily.crt.10.selected.b",
+    "nameText": "condition.daily.crt.10.selected.b",
+    "initialValue": false,
+    "onlySetTrue": true
+  },
+  {
+    "key": "story.daily.crt.11.completed",
+    "nameText": "condition.story.daily.crt.11.completed",
+    "initialValue": false,
+    "onlySetTrue": true
+  },
+  {
+    "key": "story.daily.crt.12.completed",
+    "nameText": "condition.story.daily.crt.12.completed",
+    "initialValue": false,
+    "onlySetTrue": true
+  },
+  {
+    "key": "story.daily.crt.13.completed",
+    "nameText": "condition.story.daily.crt.13.completed",
+    "initialValue": false,
+    "onlySetTrue": true
+  },
+  {
+    "key": "story.daily.crt.14.completed",
+    "nameText": "condition.story.daily.crt.14.completed",
+    "initialValue": false,
+    "onlySetTrue": true
+  },
+  {
+    "key": "story.daily.crt.15.completed",
+    "nameText": "condition.story.daily.crt.15.completed",
+    "initialValue": false,
+    "onlySetTrue": true
+  },
+  {
+    "key": "story.daily.crt.16.completed",
+    "nameText": "condition.story.daily.crt.16.completed",
+    "initialValue": false,
+    "onlySetTrue": true
+  },
+  {
+    "key": "story.daily.crt.17.completed",
+    "nameText": "condition.story.daily.crt.17.completed",
+    "initialValue": false,
+    "onlySetTrue": true
+  },
+  {
+    "key": "story.daily.crt.18.completed",
+    "nameText": "condition.story.daily.crt.18.completed",
+    "initialValue": false,
+    "onlySetTrue": true
+  },
+  {
+    "key": "story.daily.crt.19.completed",
+    "nameText": "condition.story.daily.crt.19.completed",
+    "initialValue": false,
+    "onlySetTrue": true
+  },
+  {
+    "key": "daily.crt.19.selected.a",
+    "nameText": "condition.daily.crt.19.selected.a",
+    "initialValue": false,
+    "onlySetTrue": true
+  },
+  {
+    "key": "daily.crt.19.selected.b",
+    "nameText": "condition.daily.crt.19.selected.b",
+    "initialValue": false,
+    "onlySetTrue": true
+  },
+  {
+    "key": "story.daily.crt.20.completed",
+    "nameText": "condition.story.daily.crt.20.completed",
+    "initialValue": false,
+    "onlySetTrue": true
+  },
+  {
+    "key": "story.daily.crt.21.completed",
+    "nameText": "condition.story.daily.crt.21.completed",
+    "initialValue": false,
+    "onlySetTrue": true
+  },
+  {
+    "key": "story.daily.crt.22.completed",
+    "nameText": "condition.story.daily.crt.22.completed",
+    "initialValue": false,
+    "onlySetTrue": true
+  },
+  {
+    "key": "story.daily.gar.01.completed",
+    "nameText": "condition.story.daily.gar.01.completed",
+    "initialValue": false,
+    "onlySetTrue": true
+  },
+  {
+    "key": "story.daily.gar.r01.completed",
+    "nameText": "condition.story.daily.gar.r01.completed",
+    "initialValue": false,
+    "onlySetTrue": true
+  },
+  {
+    "key": "story.daily.gar.02.completed",
+    "nameText": "condition.story.daily.gar.02.completed",
+    "initialValue": false,
+    "onlySetTrue": true
+  },
+  {
+    "key": "story.daily.gar.03.completed",
+    "nameText": "condition.story.daily.gar.03.completed",
+    "initialValue": false,
+    "onlySetTrue": true
+  },
+  {
+    "key": "story.daily.gar.r02.completed",
+    "nameText": "condition.story.daily.gar.r02.completed",
+    "initialValue": false,
+    "onlySetTrue": true
+  },
+  {
+    "key": "story.daily.gar.04.completed",
+    "nameText": "condition.story.daily.gar.04.completed",
+    "initialValue": false,
+    "onlySetTrue": true
+  },
+  {
+    "key": "story.daily.gar.05.completed",
+    "nameText": "condition.story.daily.gar.05.completed",
+    "initialValue": false,
+    "onlySetTrue": true
+  },
+  {
+    "key": "story.daily.gar.06.completed",
+    "nameText": "condition.story.daily.gar.06.completed",
+    "initialValue": false,
+    "onlySetTrue": true
+  },
+  {
+    "key": "story.daily.gar.07.completed",
+    "nameText": "condition.story.daily.gar.07.completed",
+    "initialValue": false,
+    "onlySetTrue": true
+  },
+  {
+    "key": "story.daily.gar.08.completed",
+    "nameText": "condition.story.daily.gar.08.completed",
+    "initialValue": false,
+    "onlySetTrue": true
+  },
+  {
+    "key": "story.daily.gar.09.completed",
+    "nameText": "condition.story.daily.gar.09.completed",
+    "initialValue": false,
+    "onlySetTrue": true
+  },
+  {
+    "key": "story.daily.gar.10.completed",
+    "nameText": "condition.story.daily.gar.10.completed",
+    "initialValue": false,
+    "onlySetTrue": true
+  },
+  {
+    "key": "story.daily.gar.11.completed",
+    "nameText": "condition.story.daily.gar.11.completed",
+    "initialValue": false,
+    "onlySetTrue": true
+  },
+  {
+    "key": "story.daily.gar.12.completed",
+    "nameText": "condition.story.daily.gar.12.completed",
+    "initialValue": false,
+    "onlySetTrue": true
+  },
+  {
+    "key": "daily.gar.12.selected.a",
+    "nameText": "condition.daily.gar.12.selected.a",
+    "initialValue": false,
+    "onlySetTrue": true
+  },
+  {
+    "key": "daily.gar.12.selected.b",
+    "nameText": "condition.daily.gar.12.selected.b",
+    "initialValue": false,
+    "onlySetTrue": true
+  },
+  {
+    "key": "story.daily.gar.13.completed",
+    "nameText": "condition.story.daily.gar.13.completed",
+    "initialValue": false,
+    "onlySetTrue": true
+  },
+  {
+    "key": "story.daily.gar.14.completed",
+    "nameText": "condition.story.daily.gar.14.completed",
+    "initialValue": false,
+    "onlySetTrue": true
+  },
+  {
+    "key": "story.daily.gar.15.completed",
+    "nameText": "condition.story.daily.gar.15.completed",
+    "initialValue": false,
+    "onlySetTrue": true
+  },
+  {
+    "key": "story.daily.gar.16.completed",
+    "nameText": "condition.story.daily.gar.16.completed",
+    "initialValue": false,
+    "onlySetTrue": true
+  },
+  {
+    "key": "story.daily.gar.17.completed",
+    "nameText": "condition.story.daily.gar.17.completed",
+    "initialValue": false,
+    "onlySetTrue": true
+  },
+  {
+    "key": "story.daily.gar.18.completed",
+    "nameText": "condition.story.daily.gar.18.completed",
+    "initialValue": false,
+    "onlySetTrue": true
+  },
+  {
+    "key": "story.daily.gar.19.completed",
+    "nameText": "condition.story.daily.gar.19.completed",
+    "initialValue": false,
+    "onlySetTrue": true
+  },
+  {
+    "key": "story.daily.gar.20.completed",
+    "nameText": "condition.story.daily.gar.20.completed",
+    "initialValue": false,
+    "onlySetTrue": true
+  },
+  {
+    "key": "daily.gar.20.selected.a",
+    "nameText": "condition.daily.gar.20.selected.a",
+    "initialValue": false,
+    "onlySetTrue": true
+  },
+  {
+    "key": "daily.gar.20.selected.b",
+    "nameText": "condition.daily.gar.20.selected.b",
+    "initialValue": false,
+    "onlySetTrue": true
+  },
+  {
+    "key": "story.daily.gar.21.completed",
+    "nameText": "condition.story.daily.gar.21.completed",
+    "initialValue": false,
+    "onlySetTrue": true
+  },
+  {
+    "key": "story.daily.gar.22.completed",
+    "nameText": "condition.story.daily.gar.22.completed",
+    "initialValue": false,
+    "onlySetTrue": true
+  },
+  {
+    "key": "story.daily.news.07.completed",
+    "nameText": "condition.story.daily.news.07.completed",
+    "initialValue": false,
+    "onlySetTrue": true
+  },
+  {
+    "key": "story.daily.news.08.completed",
+    "nameText": "condition.story.daily.news.08.completed",
+    "initialValue": false,
+    "onlySetTrue": true
+  },
+  {
+    "key": "story.daily.news.01.completed",
+    "nameText": "condition.story.daily.news.01.completed",
+    "initialValue": false,
+    "onlySetTrue": true
+  },
+  {
+    "key": "news.public.5.7e9cc445",
+    "nameText": "condition.news.public.5.7e9cc445",
+    "initialValue": false,
+    "onlySetTrue": true
+  },
+  {
+    "key": "story.daily.news.09.completed",
+    "nameText": "condition.story.daily.news.09.completed",
+    "initialValue": false,
+    "onlySetTrue": true
+  },
+  {
+    "key": "story.daily.news.02.completed",
+    "nameText": "condition.story.daily.news.02.completed",
+    "initialValue": false,
+    "onlySetTrue": true
+  },
+  {
+    "key": "news.public.6.837fdfd7",
+    "nameText": "condition.news.public.6.837fdfd7",
+    "initialValue": false,
+    "onlySetTrue": true
+  },
+  {
+    "key": "story.daily.news.10.completed",
+    "nameText": "condition.story.daily.news.10.completed",
+    "initialValue": false,
+    "onlySetTrue": true
+  },
+  {
+    "key": "story.daily.news.03.completed",
+    "nameText": "condition.story.daily.news.03.completed",
+    "initialValue": false,
+    "onlySetTrue": true
+  },
+  {
+    "key": "news.public.7.29af38b6",
+    "nameText": "condition.news.public.7.29af38b6",
+    "initialValue": false,
+    "onlySetTrue": true
+  },
+  {
+    "key": "story.daily.news.11.completed",
+    "nameText": "condition.story.daily.news.11.completed",
+    "initialValue": false,
+    "onlySetTrue": true
+  },
+  {
+    "key": "news.public.7.ce650510",
+    "nameText": "condition.news.public.7.ce650510",
+    "initialValue": false,
+    "onlySetTrue": true
+  },
+  {
+    "key": "story.daily.news.12.completed",
+    "nameText": "condition.story.daily.news.12.completed",
+    "initialValue": false,
+    "onlySetTrue": true
+  },
+  {
+    "key": "news.public.7.c1b54ba7",
+    "nameText": "condition.news.public.7.c1b54ba7",
+    "initialValue": false,
+    "onlySetTrue": true
+  },
+  {
+    "key": "story.daily.news.04.completed",
+    "nameText": "condition.story.daily.news.04.completed",
+    "initialValue": false,
+    "onlySetTrue": true
+  },
+  {
+    "key": "news.public.10.12ed1d36",
+    "nameText": "condition.news.public.10.12ed1d36",
+    "initialValue": false,
+    "onlySetTrue": true
+  },
+  {
+    "key": "story.daily.news.13.completed",
+    "nameText": "condition.story.daily.news.13.completed",
+    "initialValue": false,
+    "onlySetTrue": true
+  },
+  {
+    "key": "news.public.10.8140f96a",
+    "nameText": "condition.news.public.10.8140f96a",
+    "initialValue": false,
+    "onlySetTrue": true
+  },
+  {
+    "key": "story.daily.news.05.completed",
+    "nameText": "condition.story.daily.news.05.completed",
+    "initialValue": false,
+    "onlySetTrue": true
+  },
+  {
+    "key": "news.public.18.d7760931",
+    "nameText": "condition.news.public.18.d7760931",
+    "initialValue": false,
+    "onlySetTrue": true
+  },
+  {
+    "key": "story.daily.news.14.completed",
+    "nameText": "condition.story.daily.news.14.completed",
+    "initialValue": false,
+    "onlySetTrue": true
+  },
+  {
+    "key": "story.daily.news.06.completed",
+    "nameText": "condition.story.daily.news.06.completed",
+    "initialValue": false,
+    "onlySetTrue": true
+  },
+  {
+    "key": "news.public.31.58d0aef1",
+    "nameText": "condition.news.public.31.58d0aef1",
+    "initialValue": false,
+    "onlySetTrue": true
+  },
+  {
+    "key": "story.daily.news.15.completed",
+    "nameText": "condition.story.daily.news.15.completed",
+    "initialValue": false,
+    "onlySetTrue": true
+  },
+  {
+    "key": "story.daily.visit.01.completed",
+    "nameText": "condition.story.daily.visit.01.completed",
+    "initialValue": false,
+    "onlySetTrue": true
+  },
+  {
+    "key": "story.daily.visit.02.completed",
+    "nameText": "condition.story.daily.visit.02.completed",
+    "initialValue": false,
+    "onlySetTrue": true
+  },
+  {
+    "key": "story.daily.visit.03.completed",
+    "nameText": "condition.story.daily.visit.03.completed",
+    "initialValue": false,
+    "onlySetTrue": true
+  },
+  {
+    "key": "story.daily.visit.04.completed",
+    "nameText": "condition.story.daily.visit.04.completed",
+    "initialValue": false,
+    "onlySetTrue": true
+  },
+  {
+    "key": "story.daily.visit.05.completed",
+    "nameText": "condition.story.daily.visit.05.completed",
+    "initialValue": false,
+    "onlySetTrue": true
+  },
+  {
+    "key": "story.daily.visit.06.completed",
+    "nameText": "condition.story.daily.visit.06.completed",
+    "initialValue": false,
+    "onlySetTrue": true
+  },
+  {
+    "key": "story.daily.visit.07.completed",
+    "nameText": "condition.story.daily.visit.07.completed",
+    "initialValue": false,
+    "onlySetTrue": true
+  },
+  {
+    "key": "story.daily.visit.08.completed",
+    "nameText": "condition.story.daily.visit.08.completed",
+    "initialValue": false,
+    "onlySetTrue": true
+  },
+  {
+    "key": "story.daily.visit.09.completed",
+    "nameText": "condition.story.daily.visit.09.completed",
+    "initialValue": false,
+    "onlySetTrue": true
+  },
+  {
+    "key": "story.news.bulletin.7e9cc445.completed",
+    "nameText": "condition.story.news.bulletin.7e9cc445.completed",
+    "initialValue": false,
+    "onlySetTrue": true
+  },
+  {
+    "key": "story.news.bulletin.837fdfd7.completed",
+    "nameText": "condition.story.news.bulletin.837fdfd7.completed",
+    "initialValue": false,
+    "onlySetTrue": true
+  },
+  {
+    "key": "story.news.bulletin.29af38b6.completed",
+    "nameText": "condition.story.news.bulletin.29af38b6.completed",
+    "initialValue": false,
+    "onlySetTrue": true
+  },
+  {
+    "key": "story.news.bulletin.ce650510.completed",
+    "nameText": "condition.story.news.bulletin.ce650510.completed",
+    "initialValue": false,
+    "onlySetTrue": true
+  },
+  {
+    "key": "story.news.bulletin.c1b54ba7.completed",
+    "nameText": "condition.story.news.bulletin.c1b54ba7.completed",
+    "initialValue": false,
+    "onlySetTrue": true
+  },
+  {
+    "key": "story.news.bulletin.12ed1d36.completed",
+    "nameText": "condition.story.news.bulletin.12ed1d36.completed",
+    "initialValue": false,
+    "onlySetTrue": true
+  },
+  {
+    "key": "story.news.bulletin.8140f96a.completed",
+    "nameText": "condition.story.news.bulletin.8140f96a.completed",
+    "initialValue": false,
+    "onlySetTrue": true
+  },
+  {
+    "key": "story.news.bulletin.d7760931.completed",
+    "nameText": "condition.story.news.bulletin.d7760931.completed",
+    "initialValue": false,
+    "onlySetTrue": true
+  },
+  {
+    "key": "story.news.bulletin.58d0aef1.completed",
+    "nameText": "condition.story.news.bulletin.58d0aef1.completed",
+    "initialValue": false,
+    "onlySetTrue": true
+  },
+  {
+    "key": "story.newspaper.1014.completed",
+    "nameText": "condition.story.newspaper.1014.completed",
+    "initialValue": false,
+    "onlySetTrue": true
+  },
+  {
+    "key": "story.newspaper.1021.completed",
+    "nameText": "condition.story.newspaper.1021.completed",
+    "initialValue": false,
+    "onlySetTrue": true
+  },
+  {
+    "key": "story.newspaper.1028.completed",
+    "nameText": "condition.story.newspaper.1028.completed",
+    "initialValue": false,
+    "onlySetTrue": true
+  },
+  {
+    "key": "story.newspaper.1111.completed",
+    "nameText": "condition.story.newspaper.1111.completed",
+    "initialValue": false,
+    "onlySetTrue": true
+  },
+  {
+    "key": "story.newspaper.1104.completed",
+    "nameText": "condition.story.newspaper.1104.completed",
+    "initialValue": false,
+    "onlySetTrue": true
+  },
+  {
+    "key": "story.newspaper.1007.completed",
+    "nameText": "condition.story.newspaper.1007.completed",
+    "initialValue": false,
+    "onlySetTrue": true
+  },
+  {
+    "key": "known.marie",
+    "nameText": "condition.known.marie",
+    "initialValue": false,
+    "onlySetTrue": true
+  },
+  {
+    "key": "integration.revolution.1014.s1.c14_revolution_trust_bar_unresolved.ready",
+    "nameText": "condition.integration.revolution.1014.s1.c14_revolution_trust_bar_unresolved.ready",
+    "initialValue": false,
+    "onlySetTrue": true
+  },
+  {
+    "key": "integration.revolution.route.1122.s1.re1122_language_threshold_unspecified.ready",
+    "nameText": "condition.integration.revolution.route.1122.s1.re1122_language_threshold_unspecified.ready",
+    "initialValue": false,
+    "onlySetTrue": true
+  },
+  {
+    "key": "integration.rose.1103.revenue_transfer.ready",
+    "nameText": "condition.integration.rose.1103.revenue_transfer.ready",
+    "initialValue": false,
+    "onlySetTrue": true
+  },
+  {
+    "key": "construction.church.1023.s1.bribery_ready",
+    "nameText": "condition.construction.church.1023.s1.bribery_ready",
+    "initialValue": false,
+    "onlySetTrue": false
+  },
+  {
+    "key": "construction.church.1104.s1.fee_amount_ready",
+    "nameText": "condition.construction.church.1104.s1.fee_amount_ready",
+    "initialValue": false,
+    "onlySetTrue": false
+  },
+  {
+    "key": "story.arrival.leave.completed",
+    "nameText": "condition.story.arrival.leave.completed",
     "initialValue": false,
     "onlySetTrue": true
   }

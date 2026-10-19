@@ -13,7 +13,7 @@ namespace Spotlight.Narrative
     public enum NarrativeCrossType { Cross, Hold }
     public enum NarrativeOnceType { Once, Repeat }
     public enum NarrativeEventKind { Actor, World }
-    public enum NarrativeResultType { BarAdd, BarSet, RelAdd, SetFlag, ClearFlag, SetSwitch, ObjectState, UnlockEvent, LockEvent, AdvanceDay, AwardAchievement, PlaySetup, BarHint, SpawnNpc, DespawnNpc, ShowPosition, HidePosition, AddTempPosition, RemoveTempPosition, ItemAdd, ItemRemove, MoneyAdd, MoneyRemove, ReserveCafeVisit, QueueEvent }
+    public enum NarrativeResultType { BarAdd, BarSet, RelAdd, SetFlag, ClearFlag, SetSwitch, ObjectState, UnlockEvent, LockEvent, AdvanceDay, AwardAchievement, PlaySetup, BarHint, SpawnNpc, DespawnNpc, ShowPosition, HidePosition, AddTempPosition, RemoveTempPosition, ItemAdd, ItemRemove, MoneyAdd, MoneyRemove, ReserveCafeVisit, QueueEvent, TrainAttribute }
     public enum NarrativeTimeSlot { Morning, Noon, Night }
     public enum NarrativeEntryPoint { Immediate, MorningBeforeMap, AfterBusiness, BeforeNight, MapAction }
     public enum NarrativeCandidateSource { Manual, Cross, Hold, Date, Continuation }
@@ -212,6 +212,7 @@ namespace Spotlight.Narrative
         public NarrativeAbilityCheckSnapshot activeAbilityCheck;
         public string activeAbilityCheckId;
         public List<NarrativeAbilityCheckSnapshot> inlineAbilityChecks = new List<NarrativeAbilityCheckSnapshot>();
+        public List<NarrativeBoolValue> gameplayResults = new List<NarrativeBoolValue>();
         public List<NarrativeBarChange> changes = new List<NarrativeBarChange>();
         public List<NarrativeStringValue> npcLocations = new List<NarrativeStringValue>();
         public List<NarrativeResultDefinition> pendingEffects = new List<NarrativeResultDefinition>();
@@ -234,10 +235,11 @@ namespace Spotlight.Narrative
         public readonly IReadOnlyList<NarrativeReadingLinePresentationData> ReadingLines;
         public readonly IReadOnlyList<string> SelectedChoices;
         public readonly NarrativeConditionContext Context;
+        public readonly Action PresentationCancelled;
         public string SelectedChoiceId => SelectedChoices != null && SelectedChoices.Count > 0 ? SelectedChoices[0] : null;
         public NarrativeEventRequest(NarrativeEventDefinition @event, NarrativeTriggerDefinition trigger, int depth, IReadOnlyList<string> selectedChoices = null, NarrativeConditionContext context = null, string requestId = null, string passiveHint = null,
-            IReadOnlyList<NarrativeReadingLinePresentationData> readingLines = null, NarrativeCandidateValue candidate = null)
-        { Candidate = candidate; ReadingLines = readingLines; PassiveHint = passiveHint; Event = @event; Trigger = trigger; Depth = depth; SelectedChoices = selectedChoices; Context = context; RequestId = requestId ?? Guid.NewGuid().ToString("N"); }
+            IReadOnlyList<NarrativeReadingLinePresentationData> readingLines = null, NarrativeCandidateValue candidate = null, Action presentationCancelled = null)
+        { PresentationCancelled = presentationCancelled; Candidate = candidate; ReadingLines = readingLines; PassiveHint = passiveHint; Event = @event; Trigger = trigger; Depth = depth; SelectedChoices = selectedChoices; Context = context; RequestId = requestId ?? Guid.NewGuid().ToString("N"); }
     }
     // Waiting eligibility is not a playback request and never contributes to IsBusy.
     [Serializable] public sealed class NarrativeCandidateValue

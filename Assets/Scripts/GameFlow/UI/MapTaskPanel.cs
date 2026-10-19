@@ -17,6 +17,7 @@ namespace Spotlight.GameFlow
         public string name;
         public string description;
         public bool completed;
+        public bool important;
         public string currentTask;
 
         public int remainingDays;
@@ -40,11 +41,23 @@ namespace Spotlight.GameFlow
         private bool expanded, showCompleted;
         private string expandedId, trackedId;
         public string TrackedId => trackedId;
+        public string ExpandedId => expandedId;
+        public Button GetItemButton(string id) => FindVisibleButton("Task_" + id);
+        public Button GetTrackingButton(string id) => FindVisibleButton("Track_" + id);
+        private Button FindVisibleButton(string name)
+        {
+            if (content == null || !IsVisible) return null;
+            foreach (Transform child in content)
+                if (child.name == name && child.gameObject.activeInHierarchy) return child.GetComponent<Button>();
+            return null;
+        }
         public int ItemCount => items.Count;
         public event Action<string> TrackingChanged;
         public event Action<MapTaskItem> NavigationRequested;
         public event Action ItemsChanged;
-        public MapTaskItem CurrentGuidance => items.Find(i => i.id == trackedId && !i.completed)
+        public MapTaskItem CurrentGuidance => items.Find(i => i.id == trackedId && !i.completed && i.important)
+            ?? items.Find(i => !i.completed && i.important)
+            ?? items.Find(i => i.id == trackedId && !i.completed)
             ?? items.Find(i => !i.completed);
         private readonly List<IGameplayTodoSource> guidanceSources = new List<IGameplayTodoSource>();
         private string itemSignature;
@@ -102,9 +115,9 @@ namespace Spotlight.GameFlow
                     description = "从当前场景返回咖啡馆，继续经营或前往三楼宿舍。",
                     currentTask = "点击「前往咖啡馆」返回咖啡馆；需要休息时再到三楼点击床。",
                     navigationLabel = "前往咖啡馆", status = "可前往", priority = 50 });
-            values = values.OrderBy(v => v.completed).ThenBy(v => v.priority).ThenBy(v => v.remainingDays > 0 ? v.remainingDays : int.MaxValue).ToList();
+            values = values.OrderBy(v => v.completed).ThenByDescending(v => v.important).ThenBy(v => v.priority).ThenBy(v => v.remainingDays > 0 ? v.remainingDays : int.MaxValue).ToList();
             string signature = string.Join("\n", values.Select(v => string.Join("|", v.id, v.name, v.description,
-                v.currentTask, v.completed, v.location, v.positionKey, v.status, v.navigationLabel, v.remainingDays, v.priority)));
+                v.currentTask, v.completed, v.important, v.location, v.positionKey, v.status, v.navigationLabel, v.remainingDays, v.priority)));
             if (signature == itemSignature) return;
             itemSignature = signature;
             ReplaceItems(values);
@@ -204,6 +217,24 @@ namespace Spotlight.GameFlow
             sidebar.SetVisible(value);
         }
 
+        public bool ShowImportantTodo()
+        {
+            RefreshSource();
+            var item = items.Find(i => !i.completed && i.important);
+            if (item == null) return false;
+            showCompleted = false;
+            expandedId = item.id;
+            SetTracked(item.id);
+            SetVisible(true);
+            Refresh();
+            if (scroll != null)
+            {
+                scroll.StopMovement();
+                scroll.verticalNormalizedPosition = 1;
+            }
+            return true;
+        }
+
         public void SetItems(IEnumerable<MapTaskItem> values)
         {
             externalItems = true;
@@ -221,6 +252,10 @@ namespace Spotlight.GameFlow
                         var action = NarrativeRuntime.Instance?.Actions?.Get(string.IsNullOrEmpty(item.actionKey) ? item.id : item.actionKey);
                         if (action == null || ShouldListAction(action)) items.Add(item);
                     }
+            var sorted = items.OrderBy(i => i.completed).ThenByDescending(i => i.important).ThenBy(i => i.priority)
+                .ThenBy(i => i.remainingDays > 0 ? i.remainingDays : int.MaxValue).ToArray();
+            items.Clear();
+            items.AddRange(sorted);
             if (items.Find(item => item.id == expandedId) == null) expandedId = null;
             if (items.Find(item => item.id == trackedId) == null) SetTracked(null);
             else Refresh();
@@ -291,7 +326,7 @@ namespace Spotlight.GameFlow
                 var title = row.Find("Label")?.GetComponent<TextMeshProUGUI>();
                 var description = row.Find("Description")?.GetComponent<TextMeshProUGUI>();
                 var location = row.Find("Location")?.GetComponent<TextMeshProUGUI>();
-                if (title != null) title.text = item.name + (trackedId == item.id ? "  · 追踪中" : "");
+                if (title != null) title.text = (item.important ? "重要 · " : "") + item.name + (trackedId == item.id ? "  · 追踪中" : "");
                 if (description != null)
                 {
                     description.text = string.IsNullOrEmpty(item.description) ? item.currentTask : item.description;

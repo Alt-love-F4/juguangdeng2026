@@ -1,0 +1,351 @@
+{
+  "schemaVersion": 1,
+  "source": {
+    "path": "策划文件/文案",
+    "kind": "current-docx-nonempty-paragraphs",
+    "files": [
+      {
+        "path": "策划文件/文案/a-革命联合（共通+支线）/MA70.10.29-S1.docx",
+        "sha256": "fc3e30713525ca37148f83c4583cf6ecdb0f710ec31bae9a25a265e646cbcea7",
+        "nonemptyParagraphCount": 628
+      },
+      {
+        "path": "策划文件/文案/a-革命联合（共通+支线）/RE70.11.23-S1.docx",
+        "sha256": "29930bca1ecb8d62c2a399ee95da8ff902f4aa86e99001edf4bc11db54f23758",
+        "nonemptyParagraphCount": 301
+      },
+      {
+        "path": "策划文件/文案/a-王庭教会（共通+支线）/MA70.11.04-S1.docx",
+        "sha256": "b7fa234c2f824bfec4ba8ff34c495d2f904a79bf78fe0d8d8fb15e18030c6508",
+        "nonemptyParagraphCount": 479
+      }
+    ]
+  },
+  "primaryManifest": "Docs/NarrativeArtPlaceholderManifest.json",
+  "generator": {
+    "path": "Tools/Narrative/build_additional_art_placeholders.py",
+    "sha256": "2ff9b48b4ac6831bbf1fa5cc6311da008cdc567594b1b9491aa316cc55912b7b",
+    "rendererPath": "Tools/Narrative/build_art_placeholders.py",
+    "rendererSha256": "acf6f5a783c4d916615135a20435c4d7c7ecc35e35463be9f3480df5a959724d",
+    "fontSha256": "d79c55e68b1131eea0cc1c47be4f572d964f28c682e143db2ad09c1e4cb07a3f",
+    "pillowVersion": "12.3.0",
+    "networkCalls": 0,
+    "imageApiCalls": 0,
+    "overwriteExistingArt": false
+  },
+  "summary": {
+    "requirementCount": 6,
+    "placeholderPngCount": 6,
+    "placeholderTypes": {
+      "CG": 5,
+      "P": 1
+    },
+    "isSupplement": true
+  },
+  "policy": {
+    "scope": "Only these six assigned current-source requirements; supplement does not alter the original 93-item manifest or 31 cards.",
+    "keys": "suggestedRegistryKeys are owner-requested proposed binding names, not verified existing registrations; this script never reads/writes the registry.",
+    "optional": "CG08 may reuse; CG10 may use actor-out fallback; CG11 may be omitted. None of the cards is approved finished artwork.",
+    "cafe": "Special illustrations/diagram only; ordinary cafe dialogue stays scene.cafe. P12 is not a gameplay map."
+  },
+  "requirements": [
+    {
+      "id": "CG07",
+      "category": "CG／插画",
+      "name": "月光下墙角的玛丽",
+      "status": "当前原稿明确CG需求／尚未制作",
+      "requirement": "腰间别枪，靠窗桌旁站在墙角；月光只映出半身与半张脸。",
+      "sourceEvidence": "策划文件/文案/a-革命联合（共通+支线）/MA70.10.29-S1.docx P012",
+      "configuration": "cg.marie_moonlit（建议注册名；本工具不接线）",
+      "notes": "不是普通店内背景；特殊CG结束后由剧情明确恢复scene.cafe。",
+      "disposition": "placeholder",
+      "assetPath": "Assets/Art/NarrativePlaceholders/Additional/CG07_marie_moonlit.png",
+      "suggestedRegistryKeys": [
+        "cg.marie_moonlit"
+      ],
+      "proposedUnregisteredKeys": [
+        "cg.marie_moonlit"
+      ],
+      "suggestedRegistryKeysVerified": false,
+      "sourceFile": {
+        "path": "策划文件/文案/a-革命联合（共通+支线）/MA70.10.29-S1.docx",
+        "sha256": "fc3e30713525ca37148f83c4583cf6ecdb0f710ec31bae9a25a265e646cbcea7",
+        "nonemptyParagraphCount": 628
+      },
+      "sourceParagraphs": [
+        {
+          "paragraph": 12,
+          "anchor": "P012",
+          "text": "[CG：玛丽站在墙角，腰上别着枪，依靠着靠窗的一张桌子。月光从窗外落下，映照出她半个身子和半张脸]"
+        }
+      ],
+      "sourceAnchorVerified": true,
+      "approvedArtOrder": false,
+      "existingAssets": [],
+      "registryEvidence": [],
+      "cardRequirement": "原稿标记原文：\nP012 [CG：玛丽站在墙角，腰上别着枪，依靠着靠窗的一张桌子。月光从窗外落下，映照出她半个身子和半张脸]",
+      "cardConfiguration": "cg.marie_moonlit（建议key，是否已注册以Unity当前表为准）",
+      "decisionReason": "仅本地素色需求卡；未制作画稿、未绑定、未验收。",
+      "placeholderImage": {
+        "width": 1920,
+        "height": 1080,
+        "mode": "RGB",
+        "bodyFontSize": 34,
+        "sha256": "4d3d30da12c6ea217a4d0cad20f537b7ff2f2803136c90db82145432496df127",
+        "pixelSha256": "caa57d67dd93caf17e890cc1af1a21bf5a6fb97cf40bfabc5e0a43ae1e7059d6",
+        "layoutBottom": 726,
+        "layoutLimit": 972
+      }
+    },
+    {
+      "id": "CG08",
+      "category": "CG／插画",
+      "name": "合作握手特写",
+      "status": "可复用或新增／非强制新增订单",
+      "requirement": "合作达成时的握手特写；先查是否可复用，不要求另画全景。",
+      "sourceEvidence": "策划文件/文案/a-革命联合（共通+支线）/MA70.10.29-S1.docx P591",
+      "configuration": "cg.handshake（建议注册名；本工具不接线）",
+      "notes": "原文允许复用或新增；需求卡不等于批准新CG。",
+      "disposition": "placeholder",
+      "assetPath": "Assets/Art/NarrativePlaceholders/Additional/CG08_handshake_optional.png",
+      "suggestedRegistryKeys": [
+        "cg.handshake"
+      ],
+      "proposedUnregisteredKeys": [
+        "cg.handshake"
+      ],
+      "suggestedRegistryKeysVerified": false,
+      "sourceFile": {
+        "path": "策划文件/文案/a-革命联合（共通+支线）/MA70.10.29-S1.docx",
+        "sha256": "fc3e30713525ca37148f83c4583cf6ecdb0f710ec31bae9a25a265e646cbcea7",
+        "nonemptyParagraphCount": 628
+      },
+      "sourceParagraphs": [
+        {
+          "paragraph": 591,
+          "anchor": "P591",
+          "text": "[演出：握手特写，可复用或新增CG]"
+        }
+      ],
+      "sourceAnchorVerified": true,
+      "approvedArtOrder": false,
+      "existingAssets": [],
+      "registryEvidence": [],
+      "cardRequirement": "原稿标记原文：\nP591 [演出：握手特写，可复用或新增CG]",
+      "cardConfiguration": "cg.handshake（建议key，是否已注册以Unity当前表为准）",
+      "decisionReason": "仅本地素色需求卡；未制作画稿、未绑定、未验收。原稿允许复用／省略／演出替代，须先确认方案。",
+      "placeholderImage": {
+        "width": 1920,
+        "height": 1080,
+        "mode": "RGB",
+        "bodyFontSize": 34,
+        "sha256": "75ea6ecc69c43a48f608803c347028fa6089787db6ca1a2f8465916d90a94540",
+        "pixelSha256": "7c99f00c8c601efc0bf6f53eb9ef39ec1ba99a6df933e0b870aa13cdf046e6e9",
+        "layoutBottom": 726,
+        "layoutLimit": 972
+      }
+    },
+    {
+      "id": "CG09",
+      "category": "CG／插画",
+      "name": "雨中的玛丽、主角与勒苏",
+      "status": "当前原稿明确CG需求／尚未制作",
+      "requirement": "雨中三人，从主角脚后方视角看向玛丽与勒苏。",
+      "sourceEvidence": "策划文件/文案/a-革命联合（共通+支线）/RE70.11.23-S1.docx P228",
+      "configuration": "cg.rainy_triad（建议注册名；本工具不接线）",
+      "notes": "构图按原稿；不把三人CG拆成三个新角色订单。",
+      "disposition": "placeholder",
+      "assetPath": "Assets/Art/NarrativePlaceholders/Additional/CG09_rainy_triad.png",
+      "suggestedRegistryKeys": [
+        "cg.rainy_triad"
+      ],
+      "proposedUnregisteredKeys": [
+        "cg.rainy_triad"
+      ],
+      "suggestedRegistryKeysVerified": false,
+      "sourceFile": {
+        "path": "策划文件/文案/a-革命联合（共通+支线）/RE70.11.23-S1.docx",
+        "sha256": "29930bca1ecb8d62c2a399ee95da8ff902f4aa86e99001edf4bc11db54f23758",
+        "nonemptyParagraphCount": 301
+      },
+      "sourceParagraphs": [
+        {
+          "paragraph": 228,
+          "anchor": "P228",
+          "text": "[cg：雨中的玛丽，主角和勒苏三人，从主角脚后的视角看向玛丽和勒苏]"
+        }
+      ],
+      "sourceAnchorVerified": true,
+      "approvedArtOrder": false,
+      "existingAssets": [],
+      "registryEvidence": [],
+      "cardRequirement": "原稿标记原文：\nP228 [cg：雨中的玛丽，主角和勒苏三人，从主角脚后的视角看向玛丽和勒苏]",
+      "cardConfiguration": "cg.rainy_triad（建议key，是否已注册以Unity当前表为准）",
+      "decisionReason": "仅本地素色需求卡；未制作画稿、未绑定、未验收。",
+      "placeholderImage": {
+        "width": 1920,
+        "height": 1080,
+        "mode": "RGB",
+        "bodyFontSize": 34,
+        "sha256": "4c060ca2bac69dbc10f0a8bba042652fab5c12e34d8c587e6b33e20f4a171366",
+        "pixelSha256": "8bcd8beed03bc88a79629c3500763147549a18230b82f630cbf15d5a36903ca6",
+        "layoutBottom": 726,
+        "layoutLimit": 972
+      }
+    },
+    {
+      "id": "CG10",
+      "category": "CG／插画",
+      "name": "雨水中倒地的玛丽",
+      "status": "CG或立绘下移替代／方案待确认",
+      "requirement": "玛丽倒地，血与雨水混合；周围人群奔向勒苏。原文允许立绘向下移出屏幕替代。",
+      "sourceEvidence": "策划文件/文案/a-革命联合（共通+支线）/RE70.11.23-S1.docx P292／P293",
+      "configuration": "cg.marie_fallen（建议注册名；本工具不接线）",
+      "notes": "P293明确fallback：不能做CG时用立绘下移动作；不得把新增CG写成唯一必需方案。",
+      "disposition": "placeholder",
+      "assetPath": "Assets/Art/NarrativePlaceholders/Additional/CG10_marie_fallen_pending.png",
+      "suggestedRegistryKeys": [
+        "cg.marie_fallen"
+      ],
+      "proposedUnregisteredKeys": [
+        "cg.marie_fallen"
+      ],
+      "suggestedRegistryKeysVerified": false,
+      "sourceFile": {
+        "path": "策划文件/文案/a-革命联合（共通+支线）/RE70.11.23-S1.docx",
+        "sha256": "29930bca1ecb8d62c2a399ee95da8ff902f4aa86e99001edf4bc11db54f23758",
+        "nonemptyParagraphCount": 301
+      },
+      "sourceParagraphs": [
+        {
+          "paragraph": 292,
+          "anchor": "P292",
+          "text": "[cg：倒在地上的玛丽，血与周围的雨水混合在一起，周围是向着勒苏奔去的人群]"
+        },
+        {
+          "paragraph": 293,
+          "anchor": "P293",
+          "text": "[如果没有办法做cg，可以做演出：玛丽的立绘向下移动，移出屏幕外，模拟尸体倒下的动作]"
+        }
+      ],
+      "sourceAnchorVerified": true,
+      "approvedArtOrder": false,
+      "existingAssets": [],
+      "registryEvidence": [],
+      "cardRequirement": "原稿标记原文：\nP292 [cg：倒在地上的玛丽，血与周围的雨水混合在一起，周围是向着勒苏奔去的人群]\nP293 [如果没有办法做cg，可以做演出：玛丽的立绘向下移动，移出屏幕外，模拟尸体倒下的动作]",
+      "cardConfiguration": "cg.marie_fallen（建议key，是否已注册以Unity当前表为准）",
+      "decisionReason": "仅本地素色需求卡；未制作画稿、未绑定、未验收。原稿允许复用／省略／演出替代，须先确认方案。",
+      "placeholderImage": {
+        "width": 1920,
+        "height": 1080,
+        "mode": "RGB",
+        "bodyFontSize": 34,
+        "sha256": "507246cbddf2dc158d17cea1dec42d8e01b6f5682abd468a73508a41cdd47017",
+        "pixelSha256": "311585030b6208d2fce6720fca0d3c6fe8834a7f992e9a7ce99a89253cd94015",
+        "layoutBottom": 771,
+        "layoutLimit": 972
+      }
+    },
+    {
+      "id": "CG11",
+      "category": "CG／插画",
+      "name": "暖光角落中的王女",
+      "status": "可省略／原稿明确复杂可不做",
+      "requirement": "王女坐在咖啡馆角落，手撑下巴沉思；周围昏暗，一束暖光打在脸上忽明忽暗。",
+      "sourceEvidence": "策划文件/文案/a-王庭教会（共通+支线）/MA70.11.04-S1.docx P453／P476",
+      "configuration": "cg.alienor_corner（建议注册名；本工具不接线）",
+      "notes": "两处相同演出共用一张需求卡；原文允许复杂时省略。不是普通店内对白的新背景。",
+      "disposition": "placeholder",
+      "assetPath": "Assets/Art/NarrativePlaceholders/Additional/CG11_alienor_corner_optional.png",
+      "suggestedRegistryKeys": [
+        "cg.alienor_corner"
+      ],
+      "proposedUnregisteredKeys": [
+        "cg.alienor_corner"
+      ],
+      "suggestedRegistryKeysVerified": false,
+      "sourceFile": {
+        "path": "策划文件/文案/a-王庭教会（共通+支线）/MA70.11.04-S1.docx",
+        "sha256": "b7fa234c2f824bfec4ba8ff34c495d2f904a79bf78fe0d8d8fb15e18030c6508",
+        "nonemptyParagraphCount": 479
+      },
+      "sourceParagraphs": [
+        {
+          "paragraph": 453,
+          "anchor": "P453",
+          "text": "[美术：王女坐在咖啡馆角落的座位上，一只手撑着下巴，沉思状，四周是昏暗的，只有一束暖光打在她脸上，忽明忽暗（如果有点复杂的话就算了）]"
+        },
+        {
+          "paragraph": 476,
+          "anchor": "P476",
+          "text": "[美术：王女坐在咖啡馆角落的座位上，一只手撑着下巴，沉思状，四周是昏暗的，只有一束暖光打在她脸上，忽明忽暗（如果有点复杂的话就算了）]"
+        }
+      ],
+      "sourceAnchorVerified": true,
+      "approvedArtOrder": false,
+      "existingAssets": [],
+      "registryEvidence": [],
+      "cardRequirement": "原稿标记原文：\nP453 [美术：王女坐在咖啡馆角落的座位上，一只手撑着下巴，沉思状，四周是昏暗的，只有一束暖光打在她脸上，忽明忽暗（如果有点复杂的话就算了）]\nP476 [美术：王女坐在咖啡馆角落的座位上，一只手撑着下巴，沉思状，四周是昏暗的，只有一束暖光打在她脸上，忽明忽暗（如果有点复杂的话就算了）]",
+      "cardConfiguration": "cg.alienor_corner（建议key，是否已注册以Unity当前表为准）",
+      "decisionReason": "仅本地素色需求卡；未制作画稿、未绑定、未验收。原稿允许复用／省略／演出替代，须先确认方案。",
+      "placeholderImage": {
+        "width": 1920,
+        "height": 1080,
+        "mode": "RGB",
+        "bodyFontSize": 34,
+        "sha256": "3eab599ab3e9bff38943d2523e34b9814c95c3bf0a010b47f2c7e429417cd8e5",
+        "pixelSha256": "8aad3a7fcbeede2386ff53652da13891471252e985f5eac6eeddb76839dfb0a8",
+        "layoutBottom": 861,
+        "layoutLimit": 972
+      }
+    },
+    {
+      "id": "P12",
+      "category": "道具／叙事复合示意图",
+      "name": "咖啡馆建筑与双密道复合示意图",
+      "status": "当前原稿明确示意图需求／尚未制作",
+      "requirement": "建筑平面＋地下剖面：两条密道分别通往灰墙学院与圣西尔万郊区。红色阴影标大型排水主管和承重地基，表明无法直接横向连通；高亮经咖啡馆内部中转路线。",
+      "sourceEvidence": "策划文件/文案/a-革命联合（共通+支线）/MA70.10.29-S1.docx P384",
+      "configuration": "cg.cafe_tunnel_diagram（建议注册名；本工具不接线）",
+      "notes": "这是单张叙事复合示意图，不创建新的玩法地图、可走通道或经营系统。",
+      "disposition": "placeholder",
+      "assetPath": "Assets/Art/NarrativePlaceholders/Additional/P12_cafe_tunnel_diagram.png",
+      "suggestedRegistryKeys": [
+        "cg.cafe_tunnel_diagram"
+      ],
+      "proposedUnregisteredKeys": [
+        "cg.cafe_tunnel_diagram"
+      ],
+      "suggestedRegistryKeysVerified": false,
+      "sourceFile": {
+        "path": "策划文件/文案/a-革命联合（共通+支线）/MA70.10.29-S1.docx",
+        "sha256": "fc3e30713525ca37148f83c4583cf6ecdb0f710ec31bae9a25a265e646cbcea7",
+        "nonemptyParagraphCount": 628
+      },
+      "sourceParagraphs": [
+        {
+          "paragraph": 384,
+          "anchor": "P384",
+          "text": "[画面：展开咖啡馆建筑平面及地下剖面的复合示意图。图中有两条分别连接不同下水道区段的密道，前者通往灰墙学院方向，后者通往圣西尔万郊区方向。两条地下密道之间以红色阴影标注大型排水主管和咖啡馆承重地基，表示无法直接横向连通。画面高亮一条通过咖啡馆内部的中转路线。]"
+        }
+      ],
+      "sourceAnchorVerified": true,
+      "approvedArtOrder": false,
+      "existingAssets": [],
+      "registryEvidence": [],
+      "cardRequirement": "原稿标记原文：\nP384 [画面：展开咖啡馆建筑平面及地下剖面的复合示意图。图中有两条分别连接不同下水道区段的密道，前者通往灰墙学院方向，后者通往圣西尔万郊区方向。两条地下密道之间以红色阴影标注大型排水主管和咖啡馆承重地基，表示无法直接横向连通。画面高亮一条通过咖啡馆内部的中转路线。]",
+      "cardConfiguration": "cg.cafe_tunnel_diagram（建议key，是否已注册以Unity当前表为准）",
+      "decisionReason": "仅本地素色需求卡；未制作画稿、未绑定、未验收。",
+      "placeholderImage": {
+        "width": 1920,
+        "height": 1080,
+        "mode": "RGB",
+        "bodyFontSize": 34,
+        "sha256": "ff3ff35636643bec8c14c2c1bedccc2845c19a1964546f25b6198de2b44a5799",
+        "pixelSha256": "df309d8c8dd43234bde55f17186ba476e37a53ec29ba774a0bc091661008828e",
+        "layoutBottom": 861,
+        "layoutLimit": 972
+      }
+    }
+  ]
+}

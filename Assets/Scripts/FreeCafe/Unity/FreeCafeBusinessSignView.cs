@@ -15,7 +15,7 @@ namespace Spotlight.FreeCafe
         public Vector3 CaptionWorldPosition => entityView.label.transform.position;
         private bool initialized, shownOpen, targetOpen;
         private float elapsed;
-        private Action afterFlip;
+        private Action afterFlip, queuedClose;
 
         public void Present(bool highlighted = false)
         {
@@ -36,7 +36,14 @@ namespace Spotlight.FreeCafe
 
         public void CloseAfterFlip(Action close)
         {
-            if (!IsFlipping && initialized && shownOpen) BeginFlip(false, close);
+            if (IsFlipping)
+            {
+                // Opening animation must not swallow a player's immediate close request.
+                // Repeated clicks during the closing animation remain idempotent.
+                if (targetOpen) queuedClose = close;
+                return;
+            }
+            if (initialized && shownOpen) BeginFlip(false, close);
         }
 
         private void BeginFlip(bool open, Action completed = null)
@@ -62,6 +69,10 @@ namespace Spotlight.FreeCafe
             var completed = afterFlip;
             afterFlip = null;
             completed?.Invoke();
+            var close = queuedClose;
+            queuedClose = null;
+            if (close != null && entityView != null && entityView.Runtime != null
+                && entityView.Runtime.World.State.open) BeginFlip(false, close);
         }
 
         private void SetCaption(bool open)
@@ -80,7 +91,7 @@ namespace Spotlight.FreeCafe
         }
         private void OnDisable()
         {
-            afterFlip = null;
+            afterFlip = queuedClose = null;
             initialized = false;
             ResetPose();
         }

@@ -8,13 +8,13 @@ namespace Spotlight.Narrative
         public string presentationKey, presentationClass, logTag;
     }
 
-    public enum NarrativeConversationStepType { Dialogue, PassiveCheck, LetterReveal, LetterRead }
+    public enum NarrativeConversationStepType { Dialogue, PassiveCheck, LetterReveal, LetterRead, End, Gameplay }
 
     [Serializable] public sealed class NarrativeConversationPageDefinition
     {
         public string pageId, presentationKey, pageCondKeys, pageBarConds, optionGroupKey, bgOverride, bgmOverride;
         public NarrativeConversationStepType stepType;
-        public string readingKey, checkId;
+        public string readingKey, checkId, gameplayKey, nextPageId;
         public int seq;
     }
 
@@ -39,6 +39,23 @@ namespace Spotlight.Narrative
     {
         public string lineId, pageId, mode, speakerKey, textKey, voiceKey;
         public int seq;
+    }
+
+    /// <summary>A real host gameplay request. The host owns the coffee interaction, not NCS.</summary>
+    public sealed class NarrativeGameplayPresentationData
+    {
+        public string pageId, gameplayKey, eventId;
+        public object continuityOwner;
+    }
+
+    public sealed class NarrativeGameplayResult
+    {
+        public bool passed, cancelled;
+    }
+
+    public interface INarrativeGameplayResultSource
+    {
+        event Action<string, bool> GameplayCompleted;
     }
 
     public sealed class NarrativeConversationPresentationData

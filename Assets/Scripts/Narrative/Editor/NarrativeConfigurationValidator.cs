@@ -24,8 +24,12 @@ namespace Spotlight.Narrative.Editor
                 if (!ids.Contains(b.ownerId)) e.Add($"Bar {b.barKey}: unknown owner {b.ownerId}.");
                 if (b.barType == NarrativeBarType.Relation && !ids.Contains(b.targetId)) e.Add($"Bar {b.barKey}: relation target {b.targetId} is unknown.");
                 bool calendar = b.barKey == "world.calendar";
-                bool allowed = b.sourceMode == NarrativeSourceMode.External || calendar || (b.min == 0 && b.max == 20) || (b.min == 0 && b.max == 10) || (b.min == -2 && b.max == 5);
-                if (!allowed) e.Add($"Bar {b.barKey}: range must be 0..20, 0..10, -2..5; only world.calendar is exempt.");
+                bool training = b.barKey.StartsWith("training.", StringComparison.Ordinal) && new[] { "language", "courage", "wisdom", "perception" }.Contains(b.barKey.Substring(9))
+                    && b.sourceMode == NarrativeSourceMode.Ncs && b.advanceMode == NarrativeAdvanceMode.EventDriven && b.min == 0 && b.max == 9;
+                bool social = (b.barKey.StartsWith("faction.", StringComparison.Ordinal) || b.barKey.EndsWith(".affection", StringComparison.Ordinal))
+                    && b.sourceMode == NarrativeSourceMode.Ncs && b.advanceMode == NarrativeAdvanceMode.EventDriven && b.min == -20 && b.max == 20;
+                bool allowed = b.sourceMode == NarrativeSourceMode.External || calendar || training || social || (b.min == 0 && b.max == 20) || (b.min == 0 && b.max == 10) || (b.min == -2 && b.max == 5);
+                if (!allowed) e.Add($"Bar {b.barKey}: range must be 0..20, 0..10, -2..5; training attributes use 0..9, faction/affection bars use -20..20; only world.calendar/external bars are exempt.");
                 if (b.min >= b.max) e.Add($"Bar {b.barKey}: min must be less than max.");
                 if (b.initValue < b.min || b.initValue > b.max) e.Add($"Bar {b.barKey}: initValue is outside its range.");
                 if (b.advanceMode == NarrativeAdvanceMode.Derived && b.derivedSources.Count == 0) e.Add($"Bar {b.barKey}: derived bar requires derivedSources.");

@@ -818,6 +818,16 @@ namespace Spotlight.FreeCafe.Tests
 
         [UnityTest] public IEnumerator FirstCafeTutorialRequiresWorkstationAndRealBlackCoffeeDeliveryBeforeManualOpening()
         {
+            return RunFirstCafeTutorial(false);
+        }
+
+        [UnityTest] public IEnumerator FirstCafeTutorialCanFinishWithoutTodoTracking()
+        {
+            return RunFirstCafeTutorial(true);
+        }
+
+        private IEnumerator RunFirstCafeTutorial(bool skipOptionalTracking)
+        {
             tutorialFlow=app.gameObject.AddComponent<DayFlowController>();
             tutorialFlow.RestoreJson("{\"day\":1,\"state\":3,\"firstDayIntroductionCompleted\":true,\"firstDayCafeTutorialStarted\":true}");
             typeof(DayFlowController).GetField("running",BindingFlags.Instance|BindingFlags.NonPublic).SetValue(tutorialFlow,true);
@@ -1044,23 +1054,125 @@ namespace Spotlight.FreeCafe.Tests
             Assert.That(tutorialFlow.IsCafeTutorialActive,Is.True);
             Time.timeScale=1;
             businessPanel.retryButton.onClick.Invoke();
+            AssertBusinessStage(FreeCafeBusinessTutorial.Stage.OpenDetails,true);
+            Assert.That(businessPanel.retry.activeSelf,Is.False,"Opening details must require the real HUD button, not acknowledgement");
+            Assert.That(businessPanel.canvas.gameObject.activeInHierarchy,Is.True);
+            Assert.That(businessPanel.gesture.gameObject.activeInHierarchy,Is.True);
+            Assert.That(businessPanel.instruction.text,Does.Contain("Tab"));
+            business.ConfirmOrderRead();
+            business.ConfirmTodoGuidance();
+            AssertBusinessStage(FreeCafeBusinessTutorial.Stage.OpenDetails,true);
+            var gameplayHud=GameplayHudPanel.Instance;
+            Assert.That(gameplayHud,Is.Not.Null);
+            Assert.That(gameplayHud.DetailsButton,Is.Not.Null);
+            ClickHudButton(gameplayHud.DetailsButton);
+            yield return null; yield return null;
+            AssertBusinessStage(FreeCafeBusinessTutorial.Stage.CloseDetails,true);
+            Assert.That(gameplayHud.IsDetailsOpen,Is.True);
+            var details=gameplayHud.OpenDetailsPanel;
+            Assert.That(details,Is.Not.Null,"The real opened details panel must be publicly accessible");
+            var detailsCanvas=details.GetComponent<Canvas>();
+            Assert.That(detailsCanvas,Is.Not.Null);
+            foreach(var page in new[] {DetailsPanel.Page.MyInfo,DetailsPanel.Page.Relationships,DetailsPanel.Page.World})
+            {
+                details.SelectPage(page);
+                yield return null; yield return null;
+                Assert.That(details.CurrentPage,Is.EqualTo(page));
+                AssertBusinessStage(FreeCafeBusinessTutorial.Stage.CloseDetails,true);
+                Assert.That(businessPanel.canvas.gameObject.activeInHierarchy,Is.True,"Details must not hide the tutorial guidance");
+                Assert.That(businessPanel.canvas.sortingOrder,Is.GreaterThan(detailsCanvas.sortingOrder),"Tutorial guidance must remain above details");
+                Assert.That(businessPanel.gesture.gameObject.activeInHierarchy,Is.True,"The short hint must remain visible on every details page");
+                Assert.That(businessPanel.instruction.text,Does.Contain("Tab"));
+                Assert.That(businessPanel.instruction.text,Does.Contain("Esc"));
+                string pageHint=page==DetailsPanel.Page.MyInfo ? "属性" : page==DetailsPanel.Page.Relationships ? "人物" : "世界";
+                Assert.That(businessPanel.gestureText.text,Does.Contain(pageHint));
+                Assert.That(businessPanel.retry.activeSelf,Is.False,"Details guidance must not offer an acknowledgement shortcut");
+                Assert.That(request.patience,Is.EqualTo(patience),"Browsing details must not consume customer patience");
+                Assert.That(world.State.businessElapsed,Is.EqualTo(businessElapsed));
+            }
+            business.ConfirmTodoGuidance();
+            AssertBusinessStage(FreeCafeBusinessTutorial.Stage.CloseDetails,true);
+            details.RequestClose();
+            float detailsDeadline=Time.realtimeSinceStartup+3f;
+            while(gameplayHud.IsDetailsOpen && Time.realtimeSinceStartup<detailsDeadline) yield return null;
+            yield return null; yield return null;
+            Assert.That(gameplayHud.IsDetailsOpen,Is.False,"The real details panel must finish closing before todo guidance");
             AssertBusinessStage(FreeCafeBusinessTutorial.Stage.TodoGuidance,true);
+            Assert.That(businessPanel.canvas.gameObject.activeInHierarchy,Is.True);
             Assert.That(businessPanel.instruction.text,Does.Contain("不知道接下来做什么"));
             Assert.That(businessPanel.instruction.text,Does.Contain("按下 T"));
-            Assert.That(businessPanel.instruction.text,Does.Contain("右上角的「待办事项」面板"));
-            Assert.That(businessPanel.instruction.text,Does.Contain("下一步该做什么"));
-            Assert.That(businessPanel.retryButton.GetComponentInChildren<TMP_Text>().text,Is.EqualTo("明白了，开始经营"));
-            Assert.That(businessPanel.gesture.gameObject.activeSelf,Is.False,"The todo reminder must not point at the order card");
+            Assert.That(businessPanel.instruction.text,Does.Contain("上方 HUD"));
+            Assert.That(businessPanel.instruction.text,Does.Contain("下一步目标"));
+            Assert.That(businessPanel.gesture.gameObject.activeInHierarchy,Is.True,"The todo reminder must visibly point to the tasks entry");
+            Assert.That(businessPanel.gestureText.text,Does.Contain("T"));
+            Assert.That(businessPanel.gestureText.text,Does.Contain("不知道接下来做什么"));
+            Assert.That(businessPanel.retry.activeSelf,Is.False,"Todo guidance cannot be skipped before opening tasks");
             yield return new WaitForSecondsRealtime(.1f);
             Assert.That(request.patience,Is.EqualTo(patience),"Reading the todo reminder must not consume customer patience");
             Assert.That(world.State.businessElapsed,Is.EqualTo(businessElapsed));
             business.ConfirmOrderRead();
+            business.ConfirmTodoGuidance();
             AssertBusinessStage(FreeCafeBusinessTutorial.Stage.TodoGuidance,true);
+            Assert.That(gameplayHud.TasksButton,Is.Not.Null);
+            ClickHudButton(gameplayHud.TasksButton);
+            yield return null; yield return null;
+            var tasks=gameplayHud.Tasks;
+            Assert.That(tasks.IsVisible,Is.True);
+            AssertBusinessStage(FreeCafeBusinessTutorial.Stage.ReadTodo,true);
+            Assert.That(businessPanel.retry.activeInHierarchy,Is.True);
+            Assert.That(businessPanel.retryButton.GetComponentInChildren<TMP_Text>().text,Is.EqualTo("完成教程"));
+            Assert.That(businessPanel.gesture.gameObject.activeInHierarchy,Is.True);
+            yield return new WaitForSecondsRealtime(.1f);
+            Assert.That(request.patience,Is.EqualTo(patience),"Reading the real tasks panel must not consume customer patience");
+            Assert.That(world.State.businessElapsed,Is.EqualTo(businessElapsed));
+            const string tutorialTodoId="guide.cafe.tutorial";
+            if(skipOptionalTracking)
+            {
+                Assert.That(tasks.ExpandedId,Is.Not.EqualTo(tutorialTodoId));
+                Assert.That(tasks.TrackedId,Is.Not.EqualTo(tutorialTodoId));
+                tasks.SetItems(new MapTaskItem[0]);
+                yield return null; yield return null;
+                Assert.That(tasks.ItemCount,Is.Zero);
+                Assert.That(tasks.GetItemButton(tutorialTodoId),Is.Null);
+                Assert.That(tasks.GetTrackingButton(tutorialTodoId),Is.Null);
+                AssertBusinessStage(FreeCafeBusinessTutorial.Stage.ReadTodo,true);
+                Assert.That(businessPanel.retry.activeInHierarchy,Is.True);
+                Assert.That(businessPanel.retryButton.interactable,Is.True);
+                tasks.SetVisible(false);
+                yield return null; yield return null;
+                Assert.That(tasks.IsVisible,Is.False);
+                Assert.That(tasks.TrackedId,Is.Not.EqualTo(tutorialTodoId));
+            }
+            else
+            {
+                float todoDeadline=Time.realtimeSinceStartup+3f;
+                while(tasks.GetItemButton(tutorialTodoId)==null && Time.realtimeSinceStartup<todoDeadline) yield return null;
+                var todoButton=tasks.GetItemButton(tutorialTodoId);
+                Assert.That(todoButton,Is.Not.Null,"The real tutorial task row must be available for optional tracking");
+                todoButton.onClick.Invoke();
+                yield return null; yield return null;
+                Assert.That(tasks.ExpandedId,Is.EqualTo(tutorialTodoId));
+                var trackingButton=tasks.GetTrackingButton(tutorialTodoId);
+                Assert.That(trackingButton,Is.Not.Null);
+                Assert.That(businessPanel.gestureText.text,Does.Contain("追踪此待办"));
+                trackingButton.onClick.Invoke();
+                yield return null; yield return null;
+                Assert.That(tasks.TrackedId,Is.EqualTo(tutorialTodoId));
+            }
+            AssertBusinessStage(FreeCafeBusinessTutorial.Stage.ReadTodo,true);
+            Assert.That(businessPanel.retry.activeInHierarchy,Is.True,"Optional task tracking and closing tasks must not hide tutorial completion");
+            Assert.That(businessPanel.retryButton.interactable,Is.True);
+            Assert.That(businessPanel.retryButton.GetComponentInChildren<TMP_Text>().text,Is.EqualTo("完成教程"));
+            Assert.That(request.patience,Is.EqualTo(patience),"Optional task tracking must not consume customer patience");
+            Assert.That(world.State.businessElapsed,Is.EqualTo(businessElapsed));
+            business.ConfirmOrderRead();
+            AssertBusinessStage(FreeCafeBusinessTutorial.Stage.ReadTodo,true);
             Time.timeScale=0;
             business.ConfirmTodoGuidance();
+            AssertBusinessStage(FreeCafeBusinessTutorial.Stage.ReadTodo,true);
             Assert.That(tutorialFlow.IsCafeTutorialActive,Is.True,"A paused presentation must not accept todo acknowledgement");
             Time.timeScale=1;
-            businessPanel.retryButton.onClick.Invoke();
+            ClickHudButton(businessPanel.retryButton);
             Assert.That(tutorialFlow.IsCafeTutorialActive,Is.False);
             Assert.That(app.CafeBusinessOnboardingActive,Is.False);
             Assert.That(business.IsRunning,Is.False);
@@ -1072,6 +1184,13 @@ namespace Spotlight.FreeCafe.Tests
             business.ConfirmOrderRead();
             business.ConfirmTodoGuidance();
             Assert.That(tutorialFlow.IsCafeTutorialActive,Is.False,"Repeated acknowledgement must not restart onboarding");
+            if(skipOptionalTracking)
+            {
+                // Do not leak the test-only SetItems override through the reusable HUD.
+                YokiFrame.UIKit.ClosePanel<GameplayHudPanel>();
+                YokiFrame.UIKit.UnloadPanel<GameplayHudPanel>();
+                yield return null;
+            }
         }
         private static Button FindAction(FreeCafeGMPanel gm,string label)
         {

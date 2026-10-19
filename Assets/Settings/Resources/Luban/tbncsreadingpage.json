@@ -9,8 +9,8 @@
     "pageBarConds": ""
   },
   {
-    "pageId": "revolution.1014.s1.letter.page",
-    "presentationKey": "revolution.1014.s1.letter",
+    "pageId": "rose.1011.s1.card.page",
+    "presentationKey": "rose.1011.s1.card",
     "seq": 1,
     "titleKey": "",
     "imageKey": "",
@@ -18,10 +18,109 @@
     "pageBarConds": ""
   },
   {
-    "pageId": "rose.1011.s1.card.page",
-    "presentationKey": "rose.1011.s1.card",
+    "pageId": "church.route.1113.s1.reading.princess.page",
+    "presentationKey": "church.route.1113.s1.reading.princess",
     "seq": 1,
     "titleKey": "",
+    "imageKey": "",
+    "pageCondKeys": "",
+    "pageBarConds": ""
+  },
+  {
+    "pageId": "church.route.1115.s1.reading.princess.page",
+    "presentationKey": "church.route.1115.s1.reading.princess",
+    "seq": 1,
+    "titleKey": "",
+    "imageKey": "",
+    "pageCondKeys": "",
+    "pageBarConds": ""
+  },
+  {
+    "pageId": "revolution.1014.s1.reading.cipher.page",
+    "presentationKey": "revolution.1014.s1.reading.cipher",
+    "seq": 1,
+    "titleKey": "",
+    "imageKey": "",
+    "pageCondKeys": "",
+    "pageBarConds": ""
+  },
+  {
+    "pageId": "revolution.1029.s1.reading.passage_diagram.page",
+    "presentationKey": "revolution.1029.s1.reading.passage_diagram",
+    "seq": 1,
+    "titleKey": "",
+    "imageKey": "",
+    "pageCondKeys": "",
+    "pageBarConds": ""
+  },
+  {
+    "pageId": "revolution.route.1111.s2.reading.protection_request.page",
+    "presentationKey": "revolution.route.1111.s2.reading.protection_request",
+    "seq": 1,
+    "titleKey": "",
+    "imageKey": "",
+    "pageCondKeys": "",
+    "pageBarConds": ""
+  },
+  {
+    "pageId": "revolution.route.1122.s1.reading.adele_note.page",
+    "presentationKey": "revolution.route.1122.s1.reading.adele_note",
+    "seq": 1,
+    "titleKey": "",
+    "imageKey": "",
+    "pageCondKeys": "",
+    "pageBarConds": ""
+  },
+  {
+    "pageId": "newspaper.1014.reading",
+    "presentationKey": "newspaper.1014.presentation",
+    "seq": 1,
+    "titleKey": "newspaper.1014.title",
+    "imageKey": "",
+    "pageCondKeys": "",
+    "pageBarConds": ""
+  },
+  {
+    "pageId": "newspaper.1021.reading",
+    "presentationKey": "newspaper.1021.presentation",
+    "seq": 1,
+    "titleKey": "newspaper.1021.title",
+    "imageKey": "",
+    "pageCondKeys": "",
+    "pageBarConds": ""
+  },
+  {
+    "pageId": "newspaper.1028.reading",
+    "presentationKey": "newspaper.1028.presentation",
+    "seq": 1,
+    "titleKey": "newspaper.1028.title",
+    "imageKey": "",
+    "pageCondKeys": "",
+    "pageBarConds": ""
+  },
+  {
+    "pageId": "newspaper.1111.reading",
+    "presentationKey": "newspaper.1111.presentation",
+    "seq": 1,
+    "titleKey": "newspaper.1111.title",
+    "imageKey": "",
+    "pageCondKeys": "",
+    "pageBarConds": ""
+  },
+  {
+    "pageId": "newspaper.1104.reading",
+    "presentationKey": "newspaper.1104.presentation",
+    "seq": 1,
+    "titleKey": "newspaper.1104.title",
+    "imageKey": "",
+    "pageCondKeys": "",
+    "pageBarConds": ""
+  },
+  {
+    "pageId": "newspaper.1007.reading",
+    "presentationKey": "newspaper.1007.presentation",
+    "seq": 1,
+    "titleKey": "newspaper.1007.title",
     "imageKey": "",
     "pageCondKeys": "",
     "pageBarConds": ""

@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Collections.Generic;
 using Spotlight.Narrative;
 using UnityEngine;
@@ -56,9 +56,18 @@ namespace Spotlight.GameFlow
                 UIKit.ClosePanel(panel);
                 completed?.Invoke();
             }
+            void Cancel()
+            {
+                if (notified) return;
+                if (request.PresentationCancelled == null) { Complete(); return; } // Legacy external callback contract.
+                notified = true;
+                panel.PlaybackStopped -= Stopped;
+                UIKit.ClosePanel(panel);
+                request.PresentationCancelled();
+            }
             try
             {
-                panel.Play(new ReadingScript(readingPages, title), Complete, Complete);
+                panel.Play(new ReadingScript(readingPages, title), Complete, Cancel);
                 if (!notified) panel.PlaybackStopped += Stopped;
                 return true;
             }

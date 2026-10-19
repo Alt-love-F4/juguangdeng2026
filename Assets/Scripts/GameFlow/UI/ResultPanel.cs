@@ -1,4 +1,4 @@
-using TMPro;
+﻿using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -9,7 +9,14 @@ namespace Spotlight.GameFlow
         [SerializeField] private TMP_Text titleText;
         [SerializeField] private TMP_Text messageText;
         [SerializeField] private Button closeButton;
+        [SerializeField] private TMP_Text endingIdText;
+        [SerializeField] private GameObject endingDecoration;
         private ResultPanelData current;
+        public string CurrentEndingId => current?.EndingId;
+        public string DisplayedTitle => titleText != null ? titleText.text : string.Empty;
+        public string DisplayedMessage => messageText != null ? messageText.text : string.Empty;
+        public bool IsEndingPresentation => current?.IsEnding == true;
+        public void ConfirmResult() => CloseResult();
 
         protected override void Awake()
         {
@@ -23,6 +30,12 @@ namespace Spotlight.GameFlow
         {
             base.OnOpen(data);
             current = data as ResultPanelData;
+            if (endingIdText != null)
+            {
+                endingIdText.text = current?.IsEnding == true ? "ENDING  /  " + current.EndingId : string.Empty;
+                endingIdText.gameObject.SetActive(current?.IsEnding == true);
+            }
+            if (endingDecoration != null) endingDecoration.SetActive(current?.IsEnding == true);
             if (titleText != null) titleText.text = current?.Title ?? string.Empty;
             if (messageText != null) messageText.text = current?.Message ?? string.Empty;
             var label = closeButton != null ? closeButton.GetComponentInChildren<TMP_Text>(true) : null;

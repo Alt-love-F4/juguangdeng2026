@@ -34,6 +34,9 @@ public sealed partial class NcsConversationPageEntry : Luban.BeanBase
         ReadingKey_Ref = null;
         CheckId = (string)_obj.GetValue("checkId");
         CheckId_Ref = null;
+        GameplayKey = (string)_obj.GetValue("gameplayKey");
+        NextPageId = (string)_obj.GetValue("nextPageId");
+        NextPageId_Ref = null;
     }
 
     public static NcsConversationPageEntry DeserializeNcsConversationPageEntry(JToken _buf)
@@ -55,6 +58,9 @@ public sealed partial class NcsConversationPageEntry : Luban.BeanBase
     public NcsPresentationIndexEntry ReadingKey_Ref;
     public readonly string CheckId;
     public NcsAbilityCheckEntry CheckId_Ref;
+    public readonly string GameplayKey;
+    public readonly string NextPageId;
+    public NcsConversationPageEntry NextPageId_Ref;
 
 
     public const int __ID__ = 1117425474;
@@ -65,6 +71,7 @@ public sealed partial class NcsConversationPageEntry : Luban.BeanBase
         PresentationKey_Ref = tables.TbNcsPresentationIndex.GetOrDefault(PresentationKey);
         ReadingKey_Ref = tables.TbNcsPresentationIndex.GetOrDefault(ReadingKey);
         CheckId_Ref = tables.TbNcsAbilityCheck.GetOrDefault(CheckId);
+        NextPageId_Ref = tables.TbNcsConversationPage.GetOrDefault(NextPageId);
     }
 
     public override string ToString()
@@ -81,6 +88,8 @@ public sealed partial class NcsConversationPageEntry : Luban.BeanBase
         + "stepType:" + StepType + ","
         + "readingKey:" + ReadingKey + ","
         + "checkId:" + CheckId + ","
+        + "gameplayKey:" + GameplayKey + ","
+        + "nextPageId:" + NextPageId + ","
         + "}";
     }
 }

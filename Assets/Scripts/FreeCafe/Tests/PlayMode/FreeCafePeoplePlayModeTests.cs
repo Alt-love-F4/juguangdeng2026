@@ -51,6 +51,26 @@ namespace Spotlight.FreeCafe.Tests
             string identity=person.Identity.personId;app.RestoreJson(app.CaptureJson());yield return null;
             Assert.That(app.View(request.customerId).GetComponent<FreeCafePersonView>().Identity.personId,Is.EqualTo(identity));
         }
+        [UnityTest] public IEnumerator NewCafeCustomersFadeInWithoutRepeatingOnRefresh()
+        {
+            app.Click(app.View("business.start"));
+            Assert.That(app.World.State.requests, Is.Not.Empty);
+            foreach (var request in app.World.State.requests)
+            {
+                var view = app.View(request.customerId);
+                Assert.That(view, Is.Not.Null);
+                Assert.That(view.body.color.a, Is.LessThan(.01f), "新到店客人应从透明状态开始显现");
+            }
+
+            yield return new WaitForSecondsRealtime(.15f);
+            var first = app.View(app.World.State.requests[0].customerId);
+            Assert.That(first.body.color.a, Is.GreaterThan(0f).And.LessThan(1f));
+            yield return new WaitForSecondsRealtime(.4f);
+            Assert.That(first.body.color.a, Is.EqualTo(1f).Within(.01f));
+            yield return null;
+            Assert.That(first.body.color.a, Is.EqualTo(1f).Within(.01f), "常规视图刷新不能重启淡入");
+        }
+
         [UnityTest] public IEnumerator OtherAreasAndPlayerModalCannotActivateTheLobbySign()
         {
             var view=app.View("business.start");app.Enter(AreaId.Counter);app.Click(view);

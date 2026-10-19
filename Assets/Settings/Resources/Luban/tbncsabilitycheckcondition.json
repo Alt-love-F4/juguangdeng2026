@@ -24,34 +24,98 @@
     "seq": 1
   },
   {
-    "conditionId": "revolution.1014.s1.wisdom4.1",
-    "checkId": "revolution.1014.s1.wisdom4",
+    "conditionId": "neutral.1008.s1.check.q1b.threshold",
+    "checkId": "neutral.1008.s1.check.q1b",
+    "attributeId": "language",
+    "threshold": 2,
+    "groupIndex": 1,
+    "seq": 1
+  },
+  {
+    "conditionId": "neutral.1010.s1.check.q1b.threshold",
+    "checkId": "neutral.1010.s1.check.q1b",
+    "attributeId": "wisdom",
+    "threshold": 3,
+    "groupIndex": 1,
+    "seq": 1
+  },
+  {
+    "conditionId": "neutral.1010.s1.check.q1c.threshold",
+    "checkId": "neutral.1010.s1.check.q1c",
+    "attributeId": "language",
+    "threshold": 2,
+    "groupIndex": 1,
+    "seq": 1
+  },
+  {
+    "conditionId": "neutral.1010.s2.check.q1b.threshold",
+    "checkId": "neutral.1010.s2.check.q1b",
+    "attributeId": "language",
+    "threshold": 2,
+    "groupIndex": 1,
+    "seq": 1
+  },
+  {
+    "conditionId": "neutral.1010.s2.check.q2a.threshold",
+    "checkId": "neutral.1010.s2.check.q2a",
+    "attributeId": "language",
+    "threshold": 3,
+    "groupIndex": 1,
+    "seq": 1
+  },
+  {
+    "conditionId": "neutral.1013.s2.check.q1b.threshold",
+    "checkId": "neutral.1013.s2.check.q1b",
+    "attributeId": "wisdom",
+    "threshold": 2,
+    "groupIndex": 1,
+    "seq": 1
+  },
+  {
+    "conditionId": "neutral.1013.s2.check.q1c.threshold",
+    "checkId": "neutral.1013.s2.check.q1c",
+    "attributeId": "language",
+    "threshold": 3,
+    "groupIndex": 1,
+    "seq": 1
+  },
+  {
+    "conditionId": "neutral.1013.s2.check.q2a.threshold",
+    "checkId": "neutral.1013.s2.check.q2a",
+    "attributeId": "language",
+    "threshold": 3,
+    "groupIndex": 1,
+    "seq": 1
+  },
+  {
+    "conditionId": "neutral.1027.s1.check.q1a.threshold",
+    "checkId": "neutral.1027.s1.check.q1a",
     "attributeId": "wisdom",
     "threshold": 4,
     "groupIndex": 1,
     "seq": 1
   },
   {
-    "conditionId": "revolution.1014.s1.perception6.1",
-    "checkId": "revolution.1014.s1.perception6",
-    "attributeId": "perception",
-    "threshold": 6,
-    "groupIndex": 1,
-    "seq": 1
-  },
-  {
-    "conditionId": "revolution.1014.s1.wisdom5.1",
-    "checkId": "revolution.1014.s1.wisdom5",
-    "attributeId": "wisdom",
-    "threshold": 5,
-    "groupIndex": 1,
-    "seq": 1
-  },
-  {
-    "conditionId": "neutral.1008.s1.q1b.1",
-    "checkId": "neutral.1008.s1.q1b",
+    "conditionId": "neutral.1027.s1.check.q1b.threshold",
+    "checkId": "neutral.1027.s1.check.q1b",
     "attributeId": "language",
-    "threshold": 2,
+    "threshold": 3,
+    "groupIndex": 1,
+    "seq": 1
+  },
+  {
+    "conditionId": "neutral.1030.s1.check.q1b.threshold",
+    "checkId": "neutral.1030.s1.check.q1b",
+    "attributeId": "perception",
+    "threshold": 4,
+    "groupIndex": 1,
+    "seq": 1
+  },
+  {
+    "conditionId": "neutral.route.1130.s1.check.negotiation.threshold",
+    "checkId": "neutral.route.1130.s1.check.negotiation",
+    "attributeId": "language",
+    "threshold": 5,
     "groupIndex": 1,
     "seq": 1
   },
@@ -64,27 +128,203 @@
     "seq": 1
   },
   {
-    "conditionId": "rose.1011.s1.check.sparrow.1",
-    "checkId": "rose.1011.s1.check.sparrow",
+    "conditionId": "church.1020.s1.check.search_language.1",
+    "checkId": "church.1020.s1.check.search_language",
+    "attributeId": "language",
+    "threshold": 8,
+    "groupIndex": 1,
+    "seq": 1
+  },
+  {
+    "conditionId": "church.1020.s1.check.search_courage.1",
+    "checkId": "church.1020.s1.check.search_courage",
+    "attributeId": "courage",
+    "threshold": 8,
+    "groupIndex": 1,
+    "seq": 1
+  },
+  {
+    "conditionId": "church.1020.s1.check.search_wisdom.1",
+    "checkId": "church.1020.s1.check.search_wisdom",
+    "attributeId": "wisdom",
+    "threshold": 8,
+    "groupIndex": 1,
+    "seq": 1
+  },
+  {
+    "conditionId": "church.1020.s1.check.search_perception.1",
+    "checkId": "church.1020.s1.check.search_perception",
+    "attributeId": "perception",
+    "threshold": 8,
+    "groupIndex": 1,
+    "seq": 1
+  },
+  {
+    "conditionId": "church.1023.s1.check.altered_release.1",
+    "checkId": "church.1023.s1.check.altered_release",
+    "attributeId": "wisdom",
+    "threshold": 6,
+    "groupIndex": 1,
+    "seq": 1
+  },
+  {
+    "conditionId": "church.1023.s1.check.altered_release.2",
+    "checkId": "church.1023.s1.check.altered_release",
+    "attributeId": "perception",
+    "threshold": 6,
+    "groupIndex": 2,
+    "seq": 2
+  },
+  {
+    "conditionId": "church.1105.s1.check.intuition.1",
+    "checkId": "church.1105.s1.check.intuition",
+    "attributeId": "wisdom",
+    "threshold": 4,
+    "groupIndex": 1,
+    "seq": 1
+  },
+  {
+    "conditionId": "church.1105.s1.check.intuition.2",
+    "checkId": "church.1105.s1.check.intuition",
+    "attributeId": "perception",
+    "threshold": 4,
+    "groupIndex": 2,
+    "seq": 2
+  },
+  {
+    "conditionId": "church.1105.s2.check.intuition.1",
+    "checkId": "church.1105.s2.check.intuition",
+    "attributeId": "wisdom",
+    "threshold": 4,
+    "groupIndex": 1,
+    "seq": 1
+  },
+  {
+    "conditionId": "church.1105.s2.check.intuition.2",
+    "checkId": "church.1105.s2.check.intuition",
+    "attributeId": "perception",
+    "threshold": 4,
+    "groupIndex": 2,
+    "seq": 2
+  },
+  {
+    "conditionId": "revolution.1014.s1.check.wisdom4.1",
+    "checkId": "revolution.1014.s1.check.wisdom4",
+    "attributeId": "wisdom",
+    "threshold": 4,
+    "groupIndex": 1,
+    "seq": 1
+  },
+  {
+    "conditionId": "revolution.1014.s1.check.perception6.1",
+    "checkId": "revolution.1014.s1.check.perception6",
     "attributeId": "perception",
     "threshold": 6,
     "groupIndex": 1,
     "seq": 1
   },
   {
-    "conditionId": "rose.1011.s1.check.portrait.1",
-    "checkId": "rose.1011.s1.check.portrait",
+    "conditionId": "revolution.1014.s1.check.wisdom5.1",
+    "checkId": "revolution.1014.s1.check.wisdom5",
+    "attributeId": "wisdom",
+    "threshold": 5,
+    "groupIndex": 1,
+    "seq": 1
+  },
+  {
+    "conditionId": "revolution.1014.s1.check.language3.1",
+    "checkId": "revolution.1014.s1.check.language3",
+    "attributeId": "language",
+    "threshold": 3,
+    "groupIndex": 1,
+    "seq": 1
+  },
+  {
+    "conditionId": "revolution.1107.s1.check.letters.1",
+    "checkId": "revolution.1107.s1.check.letters",
     "attributeId": "perception",
     "threshold": 5,
     "groupIndex": 1,
     "seq": 1
   },
   {
-    "conditionId": "rose.1011.s1.check.wisdom.1",
-    "checkId": "rose.1011.s1.check.wisdom",
+    "conditionId": "revolution.1107.s1.check.timing.1",
+    "checkId": "revolution.1107.s1.check.timing",
     "attributeId": "wisdom",
-    "threshold": 3,
+    "threshold": 5,
     "groupIndex": 1,
     "seq": 1
+  },
+  {
+    "conditionId": "revolution.1107.s1.check.route.1",
+    "checkId": "revolution.1107.s1.check.route",
+    "attributeId": "perception",
+    "threshold": 5,
+    "groupIndex": 1,
+    "seq": 1
+  },
+  {
+    "conditionId": "revolution.1107.s1.check.alliance.1",
+    "checkId": "revolution.1107.s1.check.alliance",
+    "attributeId": "wisdom",
+    "threshold": 5,
+    "groupIndex": 1,
+    "seq": 1
+  },
+  {
+    "conditionId": "revolution.1107.s1.check.challenge.1",
+    "checkId": "revolution.1107.s1.check.challenge",
+    "attributeId": "courage",
+    "threshold": 5,
+    "groupIndex": 1,
+    "seq": 1
+  },
+  {
+    "conditionId": "revolution.route.1112.s1.check.wisdom12.1",
+    "checkId": "revolution.route.1112.s1.check.wisdom12",
+    "attributeId": "wisdom",
+    "threshold": 12,
+    "groupIndex": 1,
+    "seq": 1
+  },
+  {
+    "conditionId": "revolution.route.1112.s1.check.language10.1",
+    "checkId": "revolution.route.1112.s1.check.language10",
+    "attributeId": "language",
+    "threshold": 10,
+    "groupIndex": 1,
+    "seq": 1
+  },
+  {
+    "conditionId": "revolution.route.1115.s1.check.structure9.1",
+    "checkId": "revolution.route.1115.s1.check.structure9",
+    "attributeId": "wisdom",
+    "threshold": 9,
+    "groupIndex": 1,
+    "seq": 1
+  },
+  {
+    "conditionId": "revolution.route.1123.s1.check.mary_final.1",
+    "checkId": "revolution.route.1123.s1.check.mary_final",
+    "attributeId": "perception",
+    "threshold": 10,
+    "groupIndex": 1,
+    "seq": 1
+  },
+  {
+    "conditionId": "revolution.route.1123.s1.check.mary_final.2",
+    "checkId": "revolution.route.1123.s1.check.mary_final",
+    "attributeId": "wisdom",
+    "threshold": 10,
+    "groupIndex": 2,
+    "seq": 2
+  },
+  {
+    "conditionId": "revolution.route.1123.s1.check.mary_final.3",
+    "checkId": "revolution.route.1123.s1.check.mary_final",
+    "attributeId": "language",
+    "threshold": 10,
+    "groupIndex": 3,
+    "seq": 3
   }
 ]

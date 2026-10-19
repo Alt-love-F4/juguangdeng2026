@@ -1,0 +1,377 @@
+{
+    "policy": "Local labelled placeholders. Not final art. No image API.",
+    "bindings": [
+        {
+            "key": "art.requirement.CG02",
+            "id": "CG02",
+            "assetPath": "Assets/Art/NarrativePlaceholders/CG02_protagonist_turn.png",
+            "status": "labelled-placeholder-not-final-art"
+        },
+        {
+            "key": "cg.protagonist_turn",
+            "id": "CG02",
+            "assetPath": "Assets/Art/NarrativePlaceholders/CG02_protagonist_turn.png",
+            "status": "labelled-placeholder-not-final-art"
+        },
+        {
+            "key": "art.requirement.CG03",
+            "id": "CG03",
+            "assetPath": "Assets/Art/NarrativePlaceholders/CG03_knight_guidance.png",
+            "status": "labelled-placeholder-not-final-art"
+        },
+        {
+            "key": "rose.club.knight_guidance",
+            "id": "CG03",
+            "assetPath": "Assets/Art/NarrativePlaceholders/CG03_knight_guidance.png",
+            "status": "labelled-placeholder-not-final-art"
+        },
+        {
+            "key": "art.requirement.CG04",
+            "id": "CG04",
+            "assetPath": "Assets/Art/NarrativePlaceholders/CG04_adele_sampling.png",
+            "status": "labelled-placeholder-not-final-art"
+        },
+        {
+            "key": "cg.adele_sampling",
+            "id": "CG04",
+            "assetPath": "Assets/Art/NarrativePlaceholders/CG04_adele_sampling.png",
+            "status": "labelled-placeholder-not-final-art"
+        },
+        {
+            "key": "art.requirement.CG05",
+            "id": "CG05",
+            "assetPath": "Assets/Art/NarrativePlaceholders/CG05_burning_letter.png",
+            "status": "labelled-placeholder-not-final-art"
+        },
+        {
+            "key": "cg.burning_letter",
+            "id": "CG05",
+            "assetPath": "Assets/Art/NarrativePlaceholders/CG05_burning_letter.png",
+            "status": "labelled-placeholder-not-final-art"
+        },
+        {
+            "key": "art.requirement.CG06",
+            "id": "CG06",
+            "assetPath": "Assets/Art/NarrativePlaceholders/CG06_duke_blessing_PENDING.png",
+            "status": "labelled-placeholder-not-final-art"
+        },
+        {
+            "key": "cg.duke_blessing",
+            "id": "CG06",
+            "assetPath": "Assets/Art/NarrativePlaceholders/CG06_duke_blessing_PENDING.png",
+            "status": "labelled-placeholder-not-final-art"
+        },
+        {
+            "key": "art.requirement.P02",
+            "id": "P02",
+            "assetPath": "Assets/Art/NarrativePlaceholders/P02_rose_knight_painting.png",
+            "status": "labelled-placeholder-not-final-art"
+        },
+        {
+            "key": "prop.rose_knight_painting",
+            "id": "P02",
+            "assetPath": "Assets/Art/NarrativePlaceholders/P02_rose_knight_painting.png",
+            "status": "labelled-placeholder-not-final-art"
+        },
+        {
+            "key": "art.requirement.P03",
+            "id": "P03",
+            "assetPath": "Assets/Art/NarrativePlaceholders/P03_sylvain_card.png",
+            "status": "labelled-placeholder-not-final-art"
+        },
+        {
+            "key": "prop.sylvain_card",
+            "id": "P03",
+            "assetPath": "Assets/Art/NarrativePlaceholders/P03_sylvain_card.png",
+            "status": "labelled-placeholder-not-final-art"
+        },
+        {
+            "key": "art.requirement.P04",
+            "id": "P04",
+            "assetPath": "Assets/Art/NarrativePlaceholders/P04_king_coins.png",
+            "status": "labelled-placeholder-not-final-art"
+        },
+        {
+            "key": "prop.king_coins",
+            "id": "P04",
+            "assetPath": "Assets/Art/NarrativePlaceholders/P04_king_coins.png",
+            "status": "labelled-placeholder-not-final-art"
+        },
+        {
+            "key": "art.requirement.P06",
+            "id": "P06",
+            "assetPath": "Assets/Art/NarrativePlaceholders/P06_two_shadows.png",
+            "status": "labelled-placeholder-not-final-art"
+        },
+        {
+            "key": "prop.old_house_shadows",
+            "id": "P06",
+            "assetPath": "Assets/Art/NarrativePlaceholders/P06_two_shadows.png",
+            "status": "labelled-placeholder-not-final-art"
+        },
+        {
+            "key": "art.requirement.P07",
+            "id": "P07",
+            "assetPath": "Assets/Art/NarrativePlaceholders/P07_evicted_family.png",
+            "status": "labelled-placeholder-not-final-art"
+        },
+        {
+            "key": "prop.evicted_family",
+            "id": "P07",
+            "assetPath": "Assets/Art/NarrativePlaceholders/P07_evicted_family.png",
+            "status": "labelled-placeholder-not-final-art"
+        },
+        {
+            "key": "art.requirement.P08",
+            "id": "P08",
+            "assetPath": "Assets/Art/NarrativePlaceholders/P08_church_search_group.png",
+            "status": "labelled-placeholder-not-final-art"
+        },
+        {
+            "key": "prop.church_search_group",
+            "id": "P08",
+            "assetPath": "Assets/Art/NarrativePlaceholders/P08_church_search_group.png",
+            "status": "labelled-placeholder-not-final-art"
+        },
+        {
+            "key": "art.requirement.P09",
+            "id": "P09",
+            "assetPath": "Assets/Art/NarrativePlaceholders/P09_wide_brim_hat_PENDING.png",
+            "status": "labelled-placeholder-not-final-art"
+        },
+        {
+            "key": "prop.wide_brim_hat",
+            "id": "P09",
+            "assetPath": "Assets/Art/NarrativePlaceholders/P09_wide_brim_hat_PENDING.png",
+            "status": "labelled-placeholder-not-final-art"
+        },
+        {
+            "key": "art.requirement.P10",
+            "id": "P10",
+            "assetPath": "Assets/Art/NarrativePlaceholders/P10_cathedral_groups_PENDING.png",
+            "status": "labelled-placeholder-not-final-art"
+        },
+        {
+            "key": "prop.cathedral_groups",
+            "id": "P10",
+            "assetPath": "Assets/Art/NarrativePlaceholders/P10_cathedral_groups_PENDING.png",
+            "status": "labelled-placeholder-not-final-art"
+        },
+        {
+            "key": "art.requirement.P11",
+            "id": "P11",
+            "assetPath": "Assets/Art/NarrativePlaceholders/P11_newspaper_layout_PENDING.png",
+            "status": "labelled-placeholder-not-final-art"
+        },
+        {
+            "key": "prop.newspaper_layout",
+            "id": "P11",
+            "assetPath": "Assets/Art/NarrativePlaceholders/P11_newspaper_layout_PENDING.png",
+            "status": "labelled-placeholder-not-final-art"
+        },
+        {
+            "key": "art.requirement.FX03",
+            "id": "FX03",
+            "assetPath": "Assets/Art/NarrativePlaceholders/FX03_golden_light_PENDING.png",
+            "status": "labelled-placeholder-not-final-art"
+        },
+        {
+            "key": "fx.cathedral_golden_light",
+            "id": "FX03",
+            "assetPath": "Assets/Art/NarrativePlaceholders/FX03_golden_light_PENDING.png",
+            "status": "labelled-placeholder-not-final-art"
+        },
+        {
+            "key": "art.requirement.FX05",
+            "id": "FX05",
+            "assetPath": "Assets/Art/NarrativePlaceholders/FX05_thibaut_drink_motion.png",
+            "status": "labelled-placeholder-not-final-art"
+        },
+        {
+            "key": "fx.thibaut_drink_motion",
+            "id": "FX05",
+            "assetPath": "Assets/Art/NarrativePlaceholders/FX05_thibaut_drink_motion.png",
+            "status": "labelled-placeholder-not-final-art"
+        },
+        {
+            "key": "art.requirement.FX06",
+            "id": "FX06",
+            "assetPath": "Assets/Art/NarrativePlaceholders/FX06_business_rating.png",
+            "status": "labelled-placeholder-not-final-art"
+        },
+        {
+            "key": "fx.business_rating",
+            "id": "FX06",
+            "assetPath": "Assets/Art/NarrativePlaceholders/FX06_business_rating.png",
+            "status": "labelled-placeholder-not-final-art"
+        },
+        {
+            "key": "art.requirement.CH05",
+            "id": "CH05",
+            "assetPath": "Assets/Art/NarrativePlaceholders/CH05_alienor_variants.png",
+            "status": "labelled-placeholder-not-final-art"
+        },
+        {
+            "key": "art.requirement.CH07",
+            "id": "CH07",
+            "assetPath": "Assets/Art/NarrativePlaceholders/CH07_bertrand_variants.png",
+            "status": "labelled-placeholder-not-final-art"
+        },
+        {
+            "key": "art.requirement.CH08",
+            "id": "CH08",
+            "assetPath": "Assets/Art/NarrativePlaceholders/CH08_sade_variants.png",
+            "status": "labelled-placeholder-not-final-art"
+        },
+        {
+            "key": "art.requirement.CH11",
+            "id": "CH11",
+            "assetPath": "Assets/Art/NarrativePlaceholders/CH11_lesou_variants.png",
+            "status": "labelled-placeholder-not-final-art"
+        },
+        {
+            "key": "art.requirement.CH12",
+            "id": "CH12",
+            "assetPath": "Assets/Art/NarrativePlaceholders/CH12_sylvain_variants.png",
+            "status": "labelled-placeholder-not-final-art"
+        },
+        {
+            "key": "art.requirement.CH13",
+            "id": "CH13",
+            "assetPath": "Assets/Art/NarrativePlaceholders/CH13_antoine_variants.png",
+            "status": "labelled-placeholder-not-final-art"
+        },
+        {
+            "key": "art.requirement.CH16",
+            "id": "CH16",
+            "assetPath": "Assets/Art/NarrativePlaceholders/CH16_adele_variants.png",
+            "status": "labelled-placeholder-not-final-art"
+        },
+        {
+            "key": "art.requirement.CH17",
+            "id": "CH17",
+            "assetPath": "Assets/Art/NarrativePlaceholders/CH17_emmanuel_variants.png",
+            "status": "labelled-placeholder-not-final-art"
+        },
+        {
+            "key": "art.requirement.CH18",
+            "id": "CH18",
+            "assetPath": "Assets/Art/NarrativePlaceholders/CH18_sparrow_variants.png",
+            "status": "labelled-placeholder-not-final-art"
+        },
+        {
+            "key": "art.requirement.CH19",
+            "id": "CH19",
+            "assetPath": "Assets/Art/NarrativePlaceholders/CH19_thibaut_variants.png",
+            "status": "labelled-placeholder-not-final-art"
+        },
+        {
+            "key": "art.requirement.CH22",
+            "id": "CH22",
+            "assetPath": "Assets/Art/NarrativePlaceholders/CH22_colette_variants.png",
+            "status": "labelled-placeholder-not-final-art"
+        },
+        {
+            "key": "art.requirement.CH24",
+            "id": "CH24",
+            "assetPath": "Assets/Art/NarrativePlaceholders/CH24_marie_variants.png",
+            "status": "labelled-placeholder-not-final-art"
+        },
+        {
+            "key": "art.requirement.CH33",
+            "id": "CH33",
+            "assetPath": "Assets/Art/NarrativePlaceholders/CH33_church_npc.png",
+            "status": "labelled-placeholder-not-final-art"
+        },
+        {
+            "key": "character.church_npc",
+            "id": "CH33",
+            "assetPath": "Assets/Art/NarrativePlaceholders/CH33_church_npc.png",
+            "status": "labelled-placeholder-not-final-art"
+        },
+        {
+            "key": "art.requirement.CH35",
+            "id": "CH35",
+            "assetPath": "Assets/Art/NarrativePlaceholders/CH35_tutorial_elderly_woman.png",
+            "status": "labelled-placeholder-not-final-art"
+        },
+        {
+            "key": "character.tutorial_elderly_woman",
+            "id": "CH35",
+            "assetPath": "Assets/Art/NarrativePlaceholders/CH35_tutorial_elderly_woman.png",
+            "status": "labelled-placeholder-not-final-art"
+        },
+        {
+            "key": "art.requirement.CG07",
+            "id": "CG07",
+            "assetPath": "Assets/Art/NarrativePlaceholders/Additional/CG07_marie_moonlit.png",
+            "status": "labelled-placeholder-not-final-art"
+        },
+        {
+            "key": "cg.marie_moonlit",
+            "id": "CG07",
+            "assetPath": "Assets/Art/NarrativePlaceholders/Additional/CG07_marie_moonlit.png",
+            "status": "labelled-placeholder-not-final-art"
+        },
+        {
+            "key": "art.requirement.CG08",
+            "id": "CG08",
+            "assetPath": "Assets/Art/NarrativePlaceholders/Additional/CG08_handshake_optional.png",
+            "status": "labelled-placeholder-not-final-art"
+        },
+        {
+            "key": "cg.handshake",
+            "id": "CG08",
+            "assetPath": "Assets/Art/NarrativePlaceholders/Additional/CG08_handshake_optional.png",
+            "status": "labelled-placeholder-not-final-art"
+        },
+        {
+            "key": "art.requirement.CG09",
+            "id": "CG09",
+            "assetPath": "Assets/Art/NarrativePlaceholders/Additional/CG09_rainy_triad.png",
+            "status": "labelled-placeholder-not-final-art"
+        },
+        {
+            "key": "cg.rainy_triad",
+            "id": "CG09",
+            "assetPath": "Assets/Art/NarrativePlaceholders/Additional/CG09_rainy_triad.png",
+            "status": "labelled-placeholder-not-final-art"
+        },
+        {
+            "key": "art.requirement.CG10",
+            "id": "CG10",
+            "assetPath": "Assets/Art/NarrativePlaceholders/Additional/CG10_marie_fallen_pending.png",
+            "status": "labelled-placeholder-not-final-art"
+        },
+        {
+            "key": "cg.marie_fallen",
+            "id": "CG10",
+            "assetPath": "Assets/Art/NarrativePlaceholders/Additional/CG10_marie_fallen_pending.png",
+            "status": "labelled-placeholder-not-final-art"
+        },
+        {
+            "key": "art.requirement.CG11",
+            "id": "CG11",
+            "assetPath": "Assets/Art/NarrativePlaceholders/Additional/CG11_alienor_corner_optional.png",
+            "status": "labelled-placeholder-not-final-art"
+        },
+        {
+            "key": "cg.alienor_corner",
+            "id": "CG11",
+            "assetPath": "Assets/Art/NarrativePlaceholders/Additional/CG11_alienor_corner_optional.png",
+            "status": "labelled-placeholder-not-final-art"
+        },
+        {
+            "key": "art.requirement.P12",
+            "id": "P12",
+            "assetPath": "Assets/Art/NarrativePlaceholders/Additional/P12_cafe_tunnel_diagram.png",
+            "status": "labelled-placeholder-not-final-art"
+        },
+        {
+            "key": "cg.cafe_tunnel_diagram",
+            "id": "P12",
+            "assetPath": "Assets/Art/NarrativePlaceholders/Additional/P12_cafe_tunnel_diagram.png",
+            "status": "labelled-placeholder-not-final-art"
+        }
+    ]
+}

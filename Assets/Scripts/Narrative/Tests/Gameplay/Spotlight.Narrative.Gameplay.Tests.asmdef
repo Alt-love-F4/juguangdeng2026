@@ -1,0 +1,8 @@
+{
+    "name": "Spotlight.Narrative.Gameplay.Tests",
+    "rootNamespace": "Spotlight.Narrative.Tests",
+    "references": ["Spotlight.Narrative", "Spotlight.GameFlow.Settings"],
+    "autoReferenced": false,
+    "optionalUnityReferences": ["TestAssemblies"],
+    "defineConstraints": ["UNITY_INCLUDE_TESTS"]
+}

@@ -1417,9 +1417,10 @@
     }
   ],
   "economy": {
-    "baseCustomers": 12,
+    "baseCustomers": 3,
     "customerGrowthEvery": 30,
-    "maxCustomers": 24,
+    "maxCustomers": 5,
+    "customersReputationStep": 5,
     "initialSeats": 3,
     "wastePenalty": 10,
     "wrongOrderPenalty": 10,

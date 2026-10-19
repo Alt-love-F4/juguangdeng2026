@@ -67,6 +67,11 @@ namespace Spotlight.FreeCafe
         private Coroutine rejectionAnimation;
         private Coroutine pickupReveal;
         private Vector3 pickupBodyScale;
+        private bool arrivalFading;
+        private float arrivalFadeElapsed, arrivalFadeDuration, arrivalFade = 1f;
+        private SpriteRenderer[] arrivalSprites;
+        private TMP_Text[] arrivalTexts;
+        private float[] arrivalSpriteAlpha, arrivalTextAlpha;
         private OrthographicGlassCupPresenter glassCup;
         private Canvas glassCanvas;
         private bool pourVisual, receivingPour;
@@ -370,6 +375,57 @@ namespace Spotlight.FreeCafe
             motionVelocity = Vector3.zero;
             motionInitialized = true;
         }
+        public void PlayArrivalFade(float duration = .45f)
+        {
+            arrivalSprites = GetComponentsInChildren<SpriteRenderer>(true);
+            arrivalTexts = GetComponentsInChildren<TMP_Text>(true);
+            arrivalSpriteAlpha = new float[arrivalSprites.Length];
+            arrivalTextAlpha = new float[arrivalTexts.Length];
+            for (int i = 0; i < arrivalSprites.Length; i++) arrivalSpriteAlpha[i] = arrivalSprites[i].color.a;
+            for (int i = 0; i < arrivalTexts.Length; i++) arrivalTextAlpha[i] = arrivalTexts[i].color.a;
+            arrivalFadeDuration = Mathf.Max(.01f, duration);
+            arrivalFadeElapsed = 0f;
+            arrivalFade = 0f;
+            arrivalFading = true;
+            ApplyArrivalFade();
+            ApplyVisual();
+        }
+
+        private void ApplyArrivalFade()
+        {
+            if (!arrivalFading) return;
+            for (int i = 0; i < arrivalSprites.Length; i++)
+            {
+                if (arrivalSprites[i] == null) continue;
+                var color = arrivalSprites[i].color;
+                color.a = arrivalSpriteAlpha[i] * arrivalFade;
+                arrivalSprites[i].color = color;
+            }
+            for (int i = 0; i < arrivalTexts.Length; i++)
+            {
+                if (arrivalTexts[i] == null) continue;
+                var color = arrivalTexts[i].color;
+                color.a = arrivalTextAlpha[i] * arrivalFade;
+                arrivalTexts[i].color = color;
+            }
+        }
+
+        private void UpdateArrivalFade()
+        {
+            if (!arrivalFading) return;
+            arrivalFadeElapsed += Time.unscaledDeltaTime;
+            arrivalFade = Mathf.SmoothStep(0f, 1f, Mathf.Clamp01(arrivalFadeElapsed / arrivalFadeDuration));
+            ApplyArrivalFade();
+            if (arrivalFadeElapsed < arrivalFadeDuration) return;
+            arrivalFade = 1f;
+            ApplyArrivalFade();
+            arrivalFading = false;
+            arrivalSprites = null;
+            arrivalTexts = null;
+            arrivalSpriteAlpha = null;
+            arrivalTextAlpha = null;
+        }
+
         public void PlayPickupReveal()
         {
             StopPickupReveal();
@@ -439,6 +495,7 @@ namespace Spotlight.FreeCafe
         }
         private void LateUpdate()
         {
+            UpdateArrivalFade();
             if (!motionInitialized) return;
             float dt = Mathf.Min(Time.unscaledDeltaTime, .05f);
             float smoothTime = pointerMotion ? Mathf.Min(dragSmoothTime, .035f) : Mathf.Min(releaseSmoothTime, .07f);
@@ -607,6 +664,7 @@ namespace Spotlight.FreeCafe
             if(body==null) return;
             if(businessSignView!=null && Runtime!=null) businessSignView.Present(hovered);
             body.color=invalidDrop ? new Color(1,.35f,.28f,1) : dropTarget ? new Color(.35f,1,.82f,1) : hovered ? new Color(1,.94f,.55f,1) : selected ? new Color(1,.84f,.4f,1) : preview ? new Color(1,1,1,.65f) : Color.white;
+            if (arrivalFading) { var tint=body.color; tint.a*=arrivalFade; body.color=tint; }
             if(pourVisual || receivingPour || extractionFilling) { var tint=body.color; tint.a=.22f; body.color=tint; }
             if(glassCup!=null) glassCup.SetTint(Color.white);
         }

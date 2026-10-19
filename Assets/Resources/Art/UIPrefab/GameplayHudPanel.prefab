@@ -2239,7 +2239,7 @@ MonoBehaviour:
   detailsButton: {fileID: 4680892411322735164}
   inventoryButton: {fileID: 7494876346333726813}
   tasksButton: {fileID: 178844815767948719}
-  endDayButton: {fileID: 2048848362606341551}
+  endDayButton: {fileID: 0}
   references:
     version: 2
     RefIds:
@@ -2654,17 +2654,6 @@ RectTransform:
   m_CorrespondingSourceObject: {fileID: 216553924943608080, guid: 362c4abfc4913ec4595acc9af10a43dc, type: 3}
   m_PrefabInstance: {fileID: 297168342088819950}
   m_PrefabAsset: {fileID: 0}
---- !u!114 &2048848362606341551 stripped
-MonoBehaviour:
-  m_CorrespondingSourceObject: {fileID: 1761252371842238785, guid: 362c4abfc4913ec4595acc9af10a43dc, type: 3}
-  m_PrefabInstance: {fileID: 297168342088819950}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 0}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 4e29b1a8efbd4b44bb3f3716e73f07ff, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: UnityEngine.UI::UnityEngine.UI.Button
 --- !u!114 &8040674095100064352 stripped
 MonoBehaviour:
   m_CorrespondingSourceObject: {fileID: 7748996714235549326, guid: 362c4abfc4913ec4595acc9af10a43dc, type: 3}

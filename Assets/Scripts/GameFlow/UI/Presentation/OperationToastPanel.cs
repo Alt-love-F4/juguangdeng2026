@@ -16,6 +16,20 @@ namespace Spotlight.GameFlow
         [SerializeField, Min(.01f)] private float floatSeconds = .65f;
         [SerializeField] private float riseDistance = 68f;
         private static OperationToastPanel active;
+        private static string lastBlockedMessage;
+        private static float nextBlockedTime;
+        [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.SubsystemRegistration)]
+        private static void ResetBlockedFeedback() { lastBlockedMessage = null; nextBlockedTime = 0; }
+
+        /// <summary>For explicit rejected input only, never Update/hover; coalesce repeated clicks.</summary>
+        public static void ShowBlocked(string message)
+        {
+            if (!Application.isPlaying || string.IsNullOrWhiteSpace(message)) return;
+            if (message == lastBlockedMessage && Time.unscaledTime < nextBlockedTime) return;
+            lastBlockedMessage = message;
+            nextBlockedTime = Time.unscaledTime + 1f;
+            ShowMessage(message, string.Empty);
+        }
         private Coroutine animation;
         public string Message => messageText != null ? messageText.text : "";
 

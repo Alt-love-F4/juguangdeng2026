@@ -75,53 +75,1613 @@
     "logTag": "OCT07_S2"
   },
   {
-    "presentationKey": "rose.1009.s1.conversation",
+    "presentationKey": "rose.1012.s1.conversation",
     "presentationClass": "Conversation",
-    "logTag": "B1009 P003-P076; temporary black CG placeholder pending B-R004 art"
+    "logTag": "rose.1012.s1"
   },
   {
-    "presentationKey": "revolution.1013.s2.conversation",
+    "presentationKey": "rose.1019.s1.conversation",
     "presentationClass": "Conversation",
-    "logTag": "C13"
+    "logTag": "rose.1019.s1"
   },
   {
-    "presentationKey": "revolution.1028.s1.conversation",
+    "presentationKey": "rose.1024.s1.conversation",
     "presentationClass": "Conversation",
-    "logTag": "C28"
+    "logTag": "rose.1024.s1"
   },
   {
-    "presentationKey": "revolution.1014.s1.conversation",
+    "presentationKey": "rose.1024.s2.conversation",
     "presentationClass": "Conversation",
-    "logTag": "C14"
+    "logTag": "rose.1024.s2"
   },
   {
-    "presentationKey": "revolution.1014.s1.letter",
-    "presentationClass": "Reading",
-    "logTag": "C14"
+    "presentationKey": "rose.1026.s2.conversation",
+    "presentationClass": "Conversation",
+    "logTag": "rose.1026.s2"
   },
   {
-    "presentationKey": "church.1009.s2.conversation",
+    "presentationKey": "rose.ending.trust_limit.conversation",
     "presentationClass": "Conversation",
-    "logTag": "D1009"
+    "logTag": "rose.ending.trust_limit"
+  },
+  {
+    "presentationKey": "rose.1101.s1.conversation",
+    "presentationClass": "Conversation",
+    "logTag": "rose.1101.s1"
+  },
+  {
+    "presentationKey": "rose.ending.job_requirements.conversation",
+    "presentationClass": "Conversation",
+    "logTag": "rose.ending.job_requirements"
+  },
+  {
+    "presentationKey": "rose.route.1111.s2.conversation",
+    "presentationClass": "Conversation",
+    "logTag": "rose.route.1111.s2"
+  },
+  {
+    "presentationKey": "rose.route.1115.s1.conversation",
+    "presentationClass": "Conversation",
+    "logTag": "rose.route.1115.s1"
+  },
+  {
+    "presentationKey": "rose.route.1122.s1.conversation",
+    "presentationClass": "Conversation",
+    "logTag": "rose.route.1122.s1"
+  },
+  {
+    "presentationKey": "rose.route.ending.unforgiven.conversation",
+    "presentationClass": "Conversation",
+    "logTag": "rose.route.ending.unforgiven"
+  },
+  {
+    "presentationKey": "rose.route.ending.bloom.conversation",
+    "presentationClass": "Conversation",
+    "logTag": "rose.route.ending.bloom"
+  },
+  {
+    "presentationKey": "rose.1025.s2.conversation",
+    "presentationClass": "Conversation",
+    "logTag": "rose.1025.s2"
   },
   {
     "presentationKey": "neutral.1008.s1",
     "presentationClass": "Conversation",
-    "logTag": "NEUTRAL_1008_S1"
+    "logTag": "neutral.1008.s1"
+  },
+  {
+    "presentationKey": "neutral.1010.s1",
+    "presentationClass": "Conversation",
+    "logTag": "neutral.1010.s1"
+  },
+  {
+    "presentationKey": "neutral.1010.s2",
+    "presentationClass": "Conversation",
+    "logTag": "neutral.1010.s2"
+  },
+  {
+    "presentationKey": "neutral.1013.s2",
+    "presentationClass": "Conversation",
+    "logTag": "neutral.1013.s2"
+  },
+  {
+    "presentationKey": "neutral.1018.s1",
+    "presentationClass": "Conversation",
+    "logTag": "neutral.1018.s1"
+  },
+  {
+    "presentationKey": "neutral.1027.s1",
+    "presentationClass": "Conversation",
+    "logTag": "neutral.1027.s1"
+  },
+  {
+    "presentationKey": "neutral.1030.s1",
+    "presentationClass": "Conversation",
+    "logTag": "neutral.1030.s1"
+  },
+  {
+    "presentationKey": "neutral.route.1111.s1",
+    "presentationClass": "Conversation",
+    "logTag": "neutral.route.1111.s1"
+  },
+  {
+    "presentationKey": "neutral.route.1111.s2",
+    "presentationClass": "Conversation",
+    "logTag": "neutral.route.1111.s2"
+  },
+  {
+    "presentationKey": "neutral.route.1112.s1",
+    "presentationClass": "Conversation",
+    "logTag": "neutral.route.1112.s1"
+  },
+  {
+    "presentationKey": "neutral.route.1118.s1",
+    "presentationClass": "Conversation",
+    "logTag": "neutral.route.1118.s1"
+  },
+  {
+    "presentationKey": "neutral.route.1122.s1",
+    "presentationClass": "Conversation",
+    "logTag": "neutral.route.1122.s1"
+  },
+  {
+    "presentationKey": "neutral.route.1129.s1",
+    "presentationClass": "Conversation",
+    "logTag": "neutral.route.1129.s1"
+  },
+  {
+    "presentationKey": "neutral.route.1130.s1",
+    "presentationClass": "Conversation",
+    "logTag": "neutral.route.1130.s1"
+  },
+  {
+    "presentationKey": "neutral.route.1130.s2",
+    "presentationClass": "Conversation",
+    "logTag": "neutral.route.1130.s2"
+  },
+  {
+    "presentationKey": "rose.1009.s1.conversation",
+    "presentationClass": "Conversation",
+    "logTag": "rose.1009.s1"
   },
   {
     "presentationKey": "rose.1011.s1.conversation",
     "presentationClass": "Conversation",
-    "logTag": "B1011 full source configured; production bridge blocked at P047"
+    "logTag": "rose.1011.s1"
+  },
+  {
+    "presentationKey": "rose.1016.s1.conversation",
+    "presentationClass": "Conversation",
+    "logTag": "rose.1016.s1"
+  },
+  {
+    "presentationKey": "rose.1103.s1.conversation",
+    "presentationClass": "Conversation",
+    "logTag": "rose.1103.s1"
   },
   {
     "presentationKey": "rose.1011.s1.card",
     "presentationClass": "Reading",
-    "logTag": "B1011 card reading; completion/cancel bridge remains blocked"
+    "logTag": ""
   },
   {
-    "presentationKey": "rose.1011.s1.fulltext.preview",
+    "presentationKey": "church.1009.s2.conversation",
     "presentationClass": "Conversation",
-    "logTag": "B1011 all source-mapped dialogue and choices in source order; isolated preview"
+    "logTag": "church.1009.s2"
+  },
+  {
+    "presentationKey": "church.1014.s2.conversation",
+    "presentationClass": "Conversation",
+    "logTag": "church.1014.s2"
+  },
+  {
+    "presentationKey": "church.1020.s1.conversation",
+    "presentationClass": "Conversation",
+    "logTag": "church.1020.s1"
+  },
+  {
+    "presentationKey": "church.1023.s1.conversation",
+    "presentationClass": "Conversation",
+    "logTag": "church.1023.s1"
+  },
+  {
+    "presentationKey": "church.1023.s2.conversation",
+    "presentationClass": "Conversation",
+    "logTag": "church.1023.s2"
+  },
+  {
+    "presentationKey": "church.1104.s1.conversation",
+    "presentationClass": "Conversation",
+    "logTag": "church.1104.s1"
+  },
+  {
+    "presentationKey": "church.1105.s1.conversation",
+    "presentationClass": "Conversation",
+    "logTag": "church.1105.s1"
+  },
+  {
+    "presentationKey": "church.1105.s2.conversation",
+    "presentationClass": "Conversation",
+    "logTag": "church.1105.s2"
+  },
+  {
+    "presentationKey": "church.1111.s1.conversation",
+    "presentationClass": "Conversation",
+    "logTag": "church.1111.s1"
+  },
+  {
+    "presentationKey": "church.route.1111.s1.conversation",
+    "presentationClass": "Conversation",
+    "logTag": "church.route.1111.s1"
+  },
+  {
+    "presentationKey": "church.route.1112.s1.conversation",
+    "presentationClass": "Conversation",
+    "logTag": "church.route.1112.s1"
+  },
+  {
+    "presentationKey": "church.route.1113.s1.conversation",
+    "presentationClass": "Conversation",
+    "logTag": "church.route.1113.s1"
+  },
+  {
+    "presentationKey": "church.route.1113.s1.reading.princess",
+    "presentationClass": "Reading",
+    "logTag": "church.route.1113.s1"
+  },
+  {
+    "presentationKey": "church.route.1115.s1.conversation",
+    "presentationClass": "Conversation",
+    "logTag": "church.route.1115.s1"
+  },
+  {
+    "presentationKey": "church.route.1115.s1.reading.princess",
+    "presentationClass": "Reading",
+    "logTag": "church.route.1115.s1"
+  },
+  {
+    "presentationKey": "church.route.1116.s1.conversation",
+    "presentationClass": "Conversation",
+    "logTag": "church.route.1116.s1"
+  },
+  {
+    "presentationKey": "church.route.1118.s1.conversation",
+    "presentationClass": "Conversation",
+    "logTag": "church.route.1118.s1"
+  },
+  {
+    "presentationKey": "church.route.1123.s1.conversation",
+    "presentationClass": "Conversation",
+    "logTag": "church.route.1123.s1"
+  },
+  {
+    "presentationKey": "revolution.1013.s2.conversation",
+    "presentationClass": "Conversation",
+    "logTag": "revolution.1013.s2"
+  },
+  {
+    "presentationKey": "revolution.1014.s1.conversation",
+    "presentationClass": "Conversation",
+    "logTag": "revolution.1014.s1"
+  },
+  {
+    "presentationKey": "revolution.1014.s1.reading.cipher",
+    "presentationClass": "Reading",
+    "logTag": "revolution.1014.s1"
+  },
+  {
+    "presentationKey": "revolution.1028.s1.conversation",
+    "presentationClass": "Conversation",
+    "logTag": "revolution.1028.s1"
+  },
+  {
+    "presentationKey": "revolution.1029.s1.conversation",
+    "presentationClass": "Conversation",
+    "logTag": "revolution.1029.s1"
+  },
+  {
+    "presentationKey": "revolution.1029.s1.reading.passage_diagram",
+    "presentationClass": "Reading",
+    "logTag": "revolution.1029.s1"
+  },
+  {
+    "presentationKey": "revolution.1107.s1.conversation",
+    "presentationClass": "Conversation",
+    "logTag": "revolution.1107.s1"
+  },
+  {
+    "presentationKey": "revolution.route.1111.s2.conversation",
+    "presentationClass": "Conversation",
+    "logTag": "revolution.route.1111.s2"
+  },
+  {
+    "presentationKey": "revolution.route.1111.s2.reading.protection_request",
+    "presentationClass": "Reading",
+    "logTag": "revolution.route.1111.s2"
+  },
+  {
+    "presentationKey": "revolution.route.1112.s1.conversation",
+    "presentationClass": "Conversation",
+    "logTag": "revolution.route.1112.s1"
+  },
+  {
+    "presentationKey": "revolution.route.1115.s1.conversation",
+    "presentationClass": "Conversation",
+    "logTag": "revolution.route.1115.s1"
+  },
+  {
+    "presentationKey": "revolution.route.1122.s1.conversation",
+    "presentationClass": "Conversation",
+    "logTag": "revolution.route.1122.s1"
+  },
+  {
+    "presentationKey": "revolution.route.1122.s1.reading.adele_note",
+    "presentationClass": "Reading",
+    "logTag": "revolution.route.1122.s1"
+  },
+  {
+    "presentationKey": "revolution.route.1123.s1.conversation",
+    "presentationClass": "Conversation",
+    "logTag": "revolution.route.1123.s1"
+  },
+  {
+    "presentationKey": "revolution.route.1124.s1.conversation",
+    "presentationClass": "Conversation",
+    "logTag": "revolution.route.1124.s1"
+  },
+  {
+    "presentationKey": "daily.old.01.presentation",
+    "presentationClass": "Conversation",
+    "logTag": ""
+  },
+  {
+    "presentationKey": "daily.old.r01.presentation",
+    "presentationClass": "Conversation",
+    "logTag": ""
+  },
+  {
+    "presentationKey": "daily.old.02.presentation",
+    "presentationClass": "Conversation",
+    "logTag": ""
+  },
+  {
+    "presentationKey": "daily.old.03.presentation",
+    "presentationClass": "Conversation",
+    "logTag": ""
+  },
+  {
+    "presentationKey": "daily.old.r02.presentation",
+    "presentationClass": "Conversation",
+    "logTag": ""
+  },
+  {
+    "presentationKey": "daily.old.04.presentation",
+    "presentationClass": "Conversation",
+    "logTag": ""
+  },
+  {
+    "presentationKey": "daily.old.05.presentation",
+    "presentationClass": "Conversation",
+    "logTag": ""
+  },
+  {
+    "presentationKey": "daily.old.06.presentation",
+    "presentationClass": "Conversation",
+    "logTag": ""
+  },
+  {
+    "presentationKey": "daily.old.07.presentation",
+    "presentationClass": "Conversation",
+    "logTag": ""
+  },
+  {
+    "presentationKey": "daily.old.08.presentation",
+    "presentationClass": "Conversation",
+    "logTag": ""
+  },
+  {
+    "presentationKey": "daily.old.09.presentation",
+    "presentationClass": "Conversation",
+    "logTag": ""
+  },
+  {
+    "presentationKey": "daily.old.10.presentation",
+    "presentationClass": "Conversation",
+    "logTag": ""
+  },
+  {
+    "presentationKey": "daily.old.11.presentation",
+    "presentationClass": "Conversation",
+    "logTag": ""
+  },
+  {
+    "presentationKey": "daily.old.12.presentation",
+    "presentationClass": "Conversation",
+    "logTag": ""
+  },
+  {
+    "presentationKey": "daily.old.13.presentation",
+    "presentationClass": "Conversation",
+    "logTag": ""
+  },
+  {
+    "presentationKey": "daily.old.14.presentation",
+    "presentationClass": "Conversation",
+    "logTag": ""
+  },
+  {
+    "presentationKey": "daily.old.15.presentation",
+    "presentationClass": "Conversation",
+    "logTag": ""
+  },
+  {
+    "presentationKey": "daily.old.16.presentation",
+    "presentationClass": "Conversation",
+    "logTag": ""
+  },
+  {
+    "presentationKey": "daily.old.17.presentation",
+    "presentationClass": "Conversation",
+    "logTag": ""
+  },
+  {
+    "presentationKey": "daily.old.18.presentation",
+    "presentationClass": "Conversation",
+    "logTag": ""
+  },
+  {
+    "presentationKey": "daily.old.19.presentation",
+    "presentationClass": "Conversation",
+    "logTag": ""
+  },
+  {
+    "presentationKey": "daily.old.20.presentation",
+    "presentationClass": "Conversation",
+    "logTag": ""
+  },
+  {
+    "presentationKey": "daily.old.21.presentation",
+    "presentationClass": "Conversation",
+    "logTag": ""
+  },
+  {
+    "presentationKey": "daily.old.22.presentation",
+    "presentationClass": "Conversation",
+    "logTag": ""
+  },
+  {
+    "presentationKey": "daily.st.01.presentation",
+    "presentationClass": "Conversation",
+    "logTag": ""
+  },
+  {
+    "presentationKey": "daily.st.r01.presentation",
+    "presentationClass": "Conversation",
+    "logTag": ""
+  },
+  {
+    "presentationKey": "daily.st.02.presentation",
+    "presentationClass": "Conversation",
+    "logTag": ""
+  },
+  {
+    "presentationKey": "daily.st.03.presentation",
+    "presentationClass": "Conversation",
+    "logTag": ""
+  },
+  {
+    "presentationKey": "daily.st.r02.presentation",
+    "presentationClass": "Conversation",
+    "logTag": ""
+  },
+  {
+    "presentationKey": "daily.st.04.presentation",
+    "presentationClass": "Conversation",
+    "logTag": ""
+  },
+  {
+    "presentationKey": "daily.st.05.presentation",
+    "presentationClass": "Conversation",
+    "logTag": ""
+  },
+  {
+    "presentationKey": "daily.st.06.presentation",
+    "presentationClass": "Conversation",
+    "logTag": ""
+  },
+  {
+    "presentationKey": "daily.st.07.presentation",
+    "presentationClass": "Conversation",
+    "logTag": ""
+  },
+  {
+    "presentationKey": "daily.st.08.presentation",
+    "presentationClass": "Conversation",
+    "logTag": ""
+  },
+  {
+    "presentationKey": "daily.st.09.presentation",
+    "presentationClass": "Conversation",
+    "logTag": ""
+  },
+  {
+    "presentationKey": "daily.st.10.presentation",
+    "presentationClass": "Conversation",
+    "logTag": ""
+  },
+  {
+    "presentationKey": "daily.st.11.presentation",
+    "presentationClass": "Conversation",
+    "logTag": ""
+  },
+  {
+    "presentationKey": "daily.st.12.presentation",
+    "presentationClass": "Conversation",
+    "logTag": ""
+  },
+  {
+    "presentationKey": "daily.st.13.presentation",
+    "presentationClass": "Conversation",
+    "logTag": ""
+  },
+  {
+    "presentationKey": "daily.st.14.presentation",
+    "presentationClass": "Conversation",
+    "logTag": ""
+  },
+  {
+    "presentationKey": "daily.st.15.presentation",
+    "presentationClass": "Conversation",
+    "logTag": ""
+  },
+  {
+    "presentationKey": "daily.st.16.presentation",
+    "presentationClass": "Conversation",
+    "logTag": ""
+  },
+  {
+    "presentationKey": "daily.st.17.presentation",
+    "presentationClass": "Conversation",
+    "logTag": ""
+  },
+  {
+    "presentationKey": "daily.st.18.presentation",
+    "presentationClass": "Conversation",
+    "logTag": ""
+  },
+  {
+    "presentationKey": "daily.st.19.presentation",
+    "presentationClass": "Conversation",
+    "logTag": ""
+  },
+  {
+    "presentationKey": "daily.st.20.presentation",
+    "presentationClass": "Conversation",
+    "logTag": ""
+  },
+  {
+    "presentationKey": "daily.st.21.presentation",
+    "presentationClass": "Conversation",
+    "logTag": ""
+  },
+  {
+    "presentationKey": "daily.st.22.presentation",
+    "presentationClass": "Conversation",
+    "logTag": ""
+  },
+  {
+    "presentationKey": "daily.out.01.presentation",
+    "presentationClass": "Conversation",
+    "logTag": ""
+  },
+  {
+    "presentationKey": "daily.out.r01.presentation",
+    "presentationClass": "Conversation",
+    "logTag": ""
+  },
+  {
+    "presentationKey": "daily.out.02.presentation",
+    "presentationClass": "Conversation",
+    "logTag": ""
+  },
+  {
+    "presentationKey": "daily.out.03.presentation",
+    "presentationClass": "Conversation",
+    "logTag": ""
+  },
+  {
+    "presentationKey": "daily.out.r02.presentation",
+    "presentationClass": "Conversation",
+    "logTag": ""
+  },
+  {
+    "presentationKey": "daily.out.04.presentation",
+    "presentationClass": "Conversation",
+    "logTag": ""
+  },
+  {
+    "presentationKey": "daily.out.05.presentation",
+    "presentationClass": "Conversation",
+    "logTag": ""
+  },
+  {
+    "presentationKey": "daily.out.06.presentation",
+    "presentationClass": "Conversation",
+    "logTag": ""
+  },
+  {
+    "presentationKey": "daily.out.07.presentation",
+    "presentationClass": "Conversation",
+    "logTag": ""
+  },
+  {
+    "presentationKey": "daily.out.08.presentation",
+    "presentationClass": "Conversation",
+    "logTag": ""
+  },
+  {
+    "presentationKey": "daily.out.09.presentation",
+    "presentationClass": "Conversation",
+    "logTag": ""
+  },
+  {
+    "presentationKey": "daily.out.10.presentation",
+    "presentationClass": "Conversation",
+    "logTag": ""
+  },
+  {
+    "presentationKey": "daily.out.11.presentation",
+    "presentationClass": "Conversation",
+    "logTag": ""
+  },
+  {
+    "presentationKey": "daily.out.12.presentation",
+    "presentationClass": "Conversation",
+    "logTag": ""
+  },
+  {
+    "presentationKey": "daily.out.13.presentation",
+    "presentationClass": "Conversation",
+    "logTag": ""
+  },
+  {
+    "presentationKey": "daily.out.14.presentation",
+    "presentationClass": "Conversation",
+    "logTag": ""
+  },
+  {
+    "presentationKey": "daily.out.15.presentation",
+    "presentationClass": "Conversation",
+    "logTag": ""
+  },
+  {
+    "presentationKey": "daily.out.16.presentation",
+    "presentationClass": "Conversation",
+    "logTag": ""
+  },
+  {
+    "presentationKey": "daily.out.17.presentation",
+    "presentationClass": "Conversation",
+    "logTag": ""
+  },
+  {
+    "presentationKey": "daily.out.18.presentation",
+    "presentationClass": "Conversation",
+    "logTag": ""
+  },
+  {
+    "presentationKey": "daily.out.19.presentation",
+    "presentationClass": "Conversation",
+    "logTag": ""
+  },
+  {
+    "presentationKey": "daily.out.20.presentation",
+    "presentationClass": "Conversation",
+    "logTag": ""
+  },
+  {
+    "presentationKey": "daily.out.21.presentation",
+    "presentationClass": "Conversation",
+    "logTag": ""
+  },
+  {
+    "presentationKey": "daily.out.22.presentation",
+    "presentationClass": "Conversation",
+    "logTag": ""
+  },
+  {
+    "presentationKey": "daily.mkt.01.presentation",
+    "presentationClass": "Conversation",
+    "logTag": ""
+  },
+  {
+    "presentationKey": "daily.mkt.r01.presentation",
+    "presentationClass": "Conversation",
+    "logTag": ""
+  },
+  {
+    "presentationKey": "daily.mkt.02.presentation",
+    "presentationClass": "Conversation",
+    "logTag": ""
+  },
+  {
+    "presentationKey": "daily.mkt.03.presentation",
+    "presentationClass": "Conversation",
+    "logTag": ""
+  },
+  {
+    "presentationKey": "daily.mkt.r02.presentation",
+    "presentationClass": "Conversation",
+    "logTag": ""
+  },
+  {
+    "presentationKey": "daily.mkt.04.presentation",
+    "presentationClass": "Conversation",
+    "logTag": ""
+  },
+  {
+    "presentationKey": "daily.mkt.05.presentation",
+    "presentationClass": "Conversation",
+    "logTag": ""
+  },
+  {
+    "presentationKey": "daily.mkt.06.presentation",
+    "presentationClass": "Conversation",
+    "logTag": ""
+  },
+  {
+    "presentationKey": "daily.mkt.07.presentation",
+    "presentationClass": "Conversation",
+    "logTag": ""
+  },
+  {
+    "presentationKey": "daily.mkt.08.presentation",
+    "presentationClass": "Conversation",
+    "logTag": ""
+  },
+  {
+    "presentationKey": "daily.mkt.09.presentation",
+    "presentationClass": "Conversation",
+    "logTag": ""
+  },
+  {
+    "presentationKey": "daily.mkt.10.presentation",
+    "presentationClass": "Conversation",
+    "logTag": ""
+  },
+  {
+    "presentationKey": "daily.mkt.11.presentation",
+    "presentationClass": "Conversation",
+    "logTag": ""
+  },
+  {
+    "presentationKey": "daily.mkt.12.presentation",
+    "presentationClass": "Conversation",
+    "logTag": ""
+  },
+  {
+    "presentationKey": "daily.mkt.13.presentation",
+    "presentationClass": "Conversation",
+    "logTag": ""
+  },
+  {
+    "presentationKey": "daily.mkt.14.presentation",
+    "presentationClass": "Conversation",
+    "logTag": ""
+  },
+  {
+    "presentationKey": "daily.mkt.15.presentation",
+    "presentationClass": "Conversation",
+    "logTag": ""
+  },
+  {
+    "presentationKey": "daily.mkt.16.presentation",
+    "presentationClass": "Conversation",
+    "logTag": ""
+  },
+  {
+    "presentationKey": "daily.mkt.17.presentation",
+    "presentationClass": "Conversation",
+    "logTag": ""
+  },
+  {
+    "presentationKey": "daily.mkt.18.presentation",
+    "presentationClass": "Conversation",
+    "logTag": ""
+  },
+  {
+    "presentationKey": "daily.mkt.19.presentation",
+    "presentationClass": "Conversation",
+    "logTag": ""
+  },
+  {
+    "presentationKey": "daily.mkt.20.presentation",
+    "presentationClass": "Conversation",
+    "logTag": ""
+  },
+  {
+    "presentationKey": "daily.mkt.21.presentation",
+    "presentationClass": "Conversation",
+    "logTag": ""
+  },
+  {
+    "presentationKey": "daily.mkt.22.presentation",
+    "presentationClass": "Conversation",
+    "logTag": ""
+  },
+  {
+    "presentationKey": "daily.cat.01.presentation",
+    "presentationClass": "Conversation",
+    "logTag": ""
+  },
+  {
+    "presentationKey": "daily.cat.r01.presentation",
+    "presentationClass": "Conversation",
+    "logTag": ""
+  },
+  {
+    "presentationKey": "daily.cat.02.presentation",
+    "presentationClass": "Conversation",
+    "logTag": ""
+  },
+  {
+    "presentationKey": "daily.cat.03.presentation",
+    "presentationClass": "Conversation",
+    "logTag": ""
+  },
+  {
+    "presentationKey": "daily.cat.r02.presentation",
+    "presentationClass": "Conversation",
+    "logTag": ""
+  },
+  {
+    "presentationKey": "daily.cat.04.presentation",
+    "presentationClass": "Conversation",
+    "logTag": ""
+  },
+  {
+    "presentationKey": "daily.cat.05.presentation",
+    "presentationClass": "Conversation",
+    "logTag": ""
+  },
+  {
+    "presentationKey": "daily.cat.06.presentation",
+    "presentationClass": "Conversation",
+    "logTag": ""
+  },
+  {
+    "presentationKey": "daily.cat.07.presentation",
+    "presentationClass": "Conversation",
+    "logTag": ""
+  },
+  {
+    "presentationKey": "daily.cat.08.presentation",
+    "presentationClass": "Conversation",
+    "logTag": ""
+  },
+  {
+    "presentationKey": "daily.cat.09.presentation",
+    "presentationClass": "Conversation",
+    "logTag": ""
+  },
+  {
+    "presentationKey": "daily.cat.10.presentation",
+    "presentationClass": "Conversation",
+    "logTag": ""
+  },
+  {
+    "presentationKey": "daily.cat.11.presentation",
+    "presentationClass": "Conversation",
+    "logTag": ""
+  },
+  {
+    "presentationKey": "daily.cat.12.presentation",
+    "presentationClass": "Conversation",
+    "logTag": ""
+  },
+  {
+    "presentationKey": "daily.cat.13.presentation",
+    "presentationClass": "Conversation",
+    "logTag": ""
+  },
+  {
+    "presentationKey": "daily.cat.14.presentation",
+    "presentationClass": "Conversation",
+    "logTag": ""
+  },
+  {
+    "presentationKey": "daily.cat.15.presentation",
+    "presentationClass": "Conversation",
+    "logTag": ""
+  },
+  {
+    "presentationKey": "daily.cat.16.presentation",
+    "presentationClass": "Conversation",
+    "logTag": ""
+  },
+  {
+    "presentationKey": "daily.cat.17.presentation",
+    "presentationClass": "Conversation",
+    "logTag": ""
+  },
+  {
+    "presentationKey": "daily.cat.18.presentation",
+    "presentationClass": "Conversation",
+    "logTag": ""
+  },
+  {
+    "presentationKey": "daily.cat.19.presentation",
+    "presentationClass": "Conversation",
+    "logTag": ""
+  },
+  {
+    "presentationKey": "daily.cat.20.presentation",
+    "presentationClass": "Conversation",
+    "logTag": ""
+  },
+  {
+    "presentationKey": "daily.cat.21.presentation",
+    "presentationClass": "Conversation",
+    "logTag": ""
+  },
+  {
+    "presentationKey": "daily.cat.22.presentation",
+    "presentationClass": "Conversation",
+    "logTag": ""
+  },
+  {
+    "presentationKey": "daily.uni.01.presentation",
+    "presentationClass": "Conversation",
+    "logTag": ""
+  },
+  {
+    "presentationKey": "daily.uni.r01.presentation",
+    "presentationClass": "Conversation",
+    "logTag": ""
+  },
+  {
+    "presentationKey": "daily.uni.02.presentation",
+    "presentationClass": "Conversation",
+    "logTag": ""
+  },
+  {
+    "presentationKey": "daily.uni.03.presentation",
+    "presentationClass": "Conversation",
+    "logTag": ""
+  },
+  {
+    "presentationKey": "daily.uni.r02.presentation",
+    "presentationClass": "Conversation",
+    "logTag": ""
+  },
+  {
+    "presentationKey": "daily.uni.04.presentation",
+    "presentationClass": "Conversation",
+    "logTag": ""
+  },
+  {
+    "presentationKey": "daily.uni.05.presentation",
+    "presentationClass": "Conversation",
+    "logTag": ""
+  },
+  {
+    "presentationKey": "daily.uni.06.presentation",
+    "presentationClass": "Conversation",
+    "logTag": ""
+  },
+  {
+    "presentationKey": "daily.uni.07.presentation",
+    "presentationClass": "Conversation",
+    "logTag": ""
+  },
+  {
+    "presentationKey": "daily.uni.08.presentation",
+    "presentationClass": "Conversation",
+    "logTag": ""
+  },
+  {
+    "presentationKey": "daily.uni.09.presentation",
+    "presentationClass": "Conversation",
+    "logTag": ""
+  },
+  {
+    "presentationKey": "daily.uni.10.presentation",
+    "presentationClass": "Conversation",
+    "logTag": ""
+  },
+  {
+    "presentationKey": "daily.uni.11.presentation",
+    "presentationClass": "Conversation",
+    "logTag": ""
+  },
+  {
+    "presentationKey": "daily.uni.12.presentation",
+    "presentationClass": "Conversation",
+    "logTag": ""
+  },
+  {
+    "presentationKey": "daily.uni.13.presentation",
+    "presentationClass": "Conversation",
+    "logTag": ""
+  },
+  {
+    "presentationKey": "daily.uni.14.presentation",
+    "presentationClass": "Conversation",
+    "logTag": ""
+  },
+  {
+    "presentationKey": "daily.uni.15.presentation",
+    "presentationClass": "Conversation",
+    "logTag": ""
+  },
+  {
+    "presentationKey": "daily.uni.16.presentation",
+    "presentationClass": "Conversation",
+    "logTag": ""
+  },
+  {
+    "presentationKey": "daily.uni.17.presentation",
+    "presentationClass": "Conversation",
+    "logTag": ""
+  },
+  {
+    "presentationKey": "daily.uni.18.presentation",
+    "presentationClass": "Conversation",
+    "logTag": ""
+  },
+  {
+    "presentationKey": "daily.uni.19.presentation",
+    "presentationClass": "Conversation",
+    "logTag": ""
+  },
+  {
+    "presentationKey": "daily.uni.20.presentation",
+    "presentationClass": "Conversation",
+    "logTag": ""
+  },
+  {
+    "presentationKey": "daily.uni.21.presentation",
+    "presentationClass": "Conversation",
+    "logTag": ""
+  },
+  {
+    "presentationKey": "daily.uni.22.presentation",
+    "presentationClass": "Conversation",
+    "logTag": ""
+  },
+  {
+    "presentationKey": "daily.civ.01.presentation",
+    "presentationClass": "Conversation",
+    "logTag": ""
+  },
+  {
+    "presentationKey": "daily.civ.r01.presentation",
+    "presentationClass": "Conversation",
+    "logTag": ""
+  },
+  {
+    "presentationKey": "daily.civ.02.presentation",
+    "presentationClass": "Conversation",
+    "logTag": ""
+  },
+  {
+    "presentationKey": "daily.civ.03.presentation",
+    "presentationClass": "Conversation",
+    "logTag": ""
+  },
+  {
+    "presentationKey": "daily.civ.r02.presentation",
+    "presentationClass": "Conversation",
+    "logTag": ""
+  },
+  {
+    "presentationKey": "daily.civ.04.presentation",
+    "presentationClass": "Conversation",
+    "logTag": ""
+  },
+  {
+    "presentationKey": "daily.civ.05.presentation",
+    "presentationClass": "Conversation",
+    "logTag": ""
+  },
+  {
+    "presentationKey": "daily.civ.06.presentation",
+    "presentationClass": "Conversation",
+    "logTag": ""
+  },
+  {
+    "presentationKey": "daily.civ.07.presentation",
+    "presentationClass": "Conversation",
+    "logTag": ""
+  },
+  {
+    "presentationKey": "daily.civ.08.presentation",
+    "presentationClass": "Conversation",
+    "logTag": ""
+  },
+  {
+    "presentationKey": "daily.civ.09.presentation",
+    "presentationClass": "Conversation",
+    "logTag": ""
+  },
+  {
+    "presentationKey": "daily.civ.10.presentation",
+    "presentationClass": "Conversation",
+    "logTag": ""
+  },
+  {
+    "presentationKey": "daily.civ.11.presentation",
+    "presentationClass": "Conversation",
+    "logTag": ""
+  },
+  {
+    "presentationKey": "daily.civ.12.presentation",
+    "presentationClass": "Conversation",
+    "logTag": ""
+  },
+  {
+    "presentationKey": "daily.civ.13.presentation",
+    "presentationClass": "Conversation",
+    "logTag": ""
+  },
+  {
+    "presentationKey": "daily.civ.14.presentation",
+    "presentationClass": "Conversation",
+    "logTag": ""
+  },
+  {
+    "presentationKey": "daily.civ.15.presentation",
+    "presentationClass": "Conversation",
+    "logTag": ""
+  },
+  {
+    "presentationKey": "daily.civ.16.presentation",
+    "presentationClass": "Conversation",
+    "logTag": ""
+  },
+  {
+    "presentationKey": "daily.civ.17.presentation",
+    "presentationClass": "Conversation",
+    "logTag": ""
+  },
+  {
+    "presentationKey": "daily.civ.18.presentation",
+    "presentationClass": "Conversation",
+    "logTag": ""
+  },
+  {
+    "presentationKey": "daily.civ.19.presentation",
+    "presentationClass": "Conversation",
+    "logTag": ""
+  },
+  {
+    "presentationKey": "daily.civ.20.presentation",
+    "presentationClass": "Conversation",
+    "logTag": ""
+  },
+  {
+    "presentationKey": "daily.civ.21.presentation",
+    "presentationClass": "Conversation",
+    "logTag": ""
+  },
+  {
+    "presentationKey": "daily.civ.22.presentation",
+    "presentationClass": "Conversation",
+    "logTag": ""
+  },
+  {
+    "presentationKey": "daily.crt.01.presentation",
+    "presentationClass": "Conversation",
+    "logTag": ""
+  },
+  {
+    "presentationKey": "daily.crt.r01.presentation",
+    "presentationClass": "Conversation",
+    "logTag": ""
+  },
+  {
+    "presentationKey": "daily.crt.02.presentation",
+    "presentationClass": "Conversation",
+    "logTag": ""
+  },
+  {
+    "presentationKey": "daily.crt.03.presentation",
+    "presentationClass": "Conversation",
+    "logTag": ""
+  },
+  {
+    "presentationKey": "daily.crt.r02.presentation",
+    "presentationClass": "Conversation",
+    "logTag": ""
+  },
+  {
+    "presentationKey": "daily.crt.04.presentation",
+    "presentationClass": "Conversation",
+    "logTag": ""
+  },
+  {
+    "presentationKey": "daily.crt.05.presentation",
+    "presentationClass": "Conversation",
+    "logTag": ""
+  },
+  {
+    "presentationKey": "daily.crt.06.presentation",
+    "presentationClass": "Conversation",
+    "logTag": ""
+  },
+  {
+    "presentationKey": "daily.crt.07.presentation",
+    "presentationClass": "Conversation",
+    "logTag": ""
+  },
+  {
+    "presentationKey": "daily.crt.08.presentation",
+    "presentationClass": "Conversation",
+    "logTag": ""
+  },
+  {
+    "presentationKey": "daily.crt.09.presentation",
+    "presentationClass": "Conversation",
+    "logTag": ""
+  },
+  {
+    "presentationKey": "daily.crt.10.presentation",
+    "presentationClass": "Conversation",
+    "logTag": ""
+  },
+  {
+    "presentationKey": "daily.crt.11.presentation",
+    "presentationClass": "Conversation",
+    "logTag": ""
+  },
+  {
+    "presentationKey": "daily.crt.12.presentation",
+    "presentationClass": "Conversation",
+    "logTag": ""
+  },
+  {
+    "presentationKey": "daily.crt.13.presentation",
+    "presentationClass": "Conversation",
+    "logTag": ""
+  },
+  {
+    "presentationKey": "daily.crt.14.presentation",
+    "presentationClass": "Conversation",
+    "logTag": ""
+  },
+  {
+    "presentationKey": "daily.crt.15.presentation",
+    "presentationClass": "Conversation",
+    "logTag": ""
+  },
+  {
+    "presentationKey": "daily.crt.16.presentation",
+    "presentationClass": "Conversation",
+    "logTag": ""
+  },
+  {
+    "presentationKey": "daily.crt.17.presentation",
+    "presentationClass": "Conversation",
+    "logTag": ""
+  },
+  {
+    "presentationKey": "daily.crt.18.presentation",
+    "presentationClass": "Conversation",
+    "logTag": ""
+  },
+  {
+    "presentationKey": "daily.crt.19.presentation",
+    "presentationClass": "Conversation",
+    "logTag": ""
+  },
+  {
+    "presentationKey": "daily.crt.20.presentation",
+    "presentationClass": "Conversation",
+    "logTag": ""
+  },
+  {
+    "presentationKey": "daily.crt.21.presentation",
+    "presentationClass": "Conversation",
+    "logTag": ""
+  },
+  {
+    "presentationKey": "daily.crt.22.presentation",
+    "presentationClass": "Conversation",
+    "logTag": ""
+  },
+  {
+    "presentationKey": "daily.gar.01.presentation",
+    "presentationClass": "Conversation",
+    "logTag": ""
+  },
+  {
+    "presentationKey": "daily.gar.r01.presentation",
+    "presentationClass": "Conversation",
+    "logTag": ""
+  },
+  {
+    "presentationKey": "daily.gar.02.presentation",
+    "presentationClass": "Conversation",
+    "logTag": ""
+  },
+  {
+    "presentationKey": "daily.gar.03.presentation",
+    "presentationClass": "Conversation",
+    "logTag": ""
+  },
+  {
+    "presentationKey": "daily.gar.r02.presentation",
+    "presentationClass": "Conversation",
+    "logTag": ""
+  },
+  {
+    "presentationKey": "daily.gar.04.presentation",
+    "presentationClass": "Conversation",
+    "logTag": ""
+  },
+  {
+    "presentationKey": "daily.gar.05.presentation",
+    "presentationClass": "Conversation",
+    "logTag": ""
+  },
+  {
+    "presentationKey": "daily.gar.06.presentation",
+    "presentationClass": "Conversation",
+    "logTag": ""
+  },
+  {
+    "presentationKey": "daily.gar.07.presentation",
+    "presentationClass": "Conversation",
+    "logTag": ""
+  },
+  {
+    "presentationKey": "daily.gar.08.presentation",
+    "presentationClass": "Conversation",
+    "logTag": ""
+  },
+  {
+    "presentationKey": "daily.gar.09.presentation",
+    "presentationClass": "Conversation",
+    "logTag": ""
+  },
+  {
+    "presentationKey": "daily.gar.10.presentation",
+    "presentationClass": "Conversation",
+    "logTag": ""
+  },
+  {
+    "presentationKey": "daily.gar.11.presentation",
+    "presentationClass": "Conversation",
+    "logTag": ""
+  },
+  {
+    "presentationKey": "daily.gar.12.presentation",
+    "presentationClass": "Conversation",
+    "logTag": ""
+  },
+  {
+    "presentationKey": "daily.gar.13.presentation",
+    "presentationClass": "Conversation",
+    "logTag": ""
+  },
+  {
+    "presentationKey": "daily.gar.14.presentation",
+    "presentationClass": "Conversation",
+    "logTag": ""
+  },
+  {
+    "presentationKey": "daily.gar.15.presentation",
+    "presentationClass": "Conversation",
+    "logTag": ""
+  },
+  {
+    "presentationKey": "daily.gar.16.presentation",
+    "presentationClass": "Conversation",
+    "logTag": ""
+  },
+  {
+    "presentationKey": "daily.gar.17.presentation",
+    "presentationClass": "Conversation",
+    "logTag": ""
+  },
+  {
+    "presentationKey": "daily.gar.18.presentation",
+    "presentationClass": "Conversation",
+    "logTag": ""
+  },
+  {
+    "presentationKey": "daily.gar.19.presentation",
+    "presentationClass": "Conversation",
+    "logTag": ""
+  },
+  {
+    "presentationKey": "daily.gar.20.presentation",
+    "presentationClass": "Conversation",
+    "logTag": ""
+  },
+  {
+    "presentationKey": "daily.gar.21.presentation",
+    "presentationClass": "Conversation",
+    "logTag": ""
+  },
+  {
+    "presentationKey": "daily.gar.22.presentation",
+    "presentationClass": "Conversation",
+    "logTag": ""
+  },
+  {
+    "presentationKey": "daily.news.07.presentation",
+    "presentationClass": "Conversation",
+    "logTag": ""
+  },
+  {
+    "presentationKey": "daily.news.08.presentation",
+    "presentationClass": "Conversation",
+    "logTag": ""
+  },
+  {
+    "presentationKey": "daily.news.01.presentation",
+    "presentationClass": "Conversation",
+    "logTag": ""
+  },
+  {
+    "presentationKey": "daily.news.09.presentation",
+    "presentationClass": "Conversation",
+    "logTag": ""
+  },
+  {
+    "presentationKey": "daily.news.02.presentation",
+    "presentationClass": "Conversation",
+    "logTag": ""
+  },
+  {
+    "presentationKey": "daily.news.10.presentation",
+    "presentationClass": "Conversation",
+    "logTag": ""
+  },
+  {
+    "presentationKey": "daily.news.03.presentation",
+    "presentationClass": "Conversation",
+    "logTag": ""
+  },
+  {
+    "presentationKey": "daily.news.11.presentation",
+    "presentationClass": "Conversation",
+    "logTag": ""
+  },
+  {
+    "presentationKey": "daily.news.12.presentation",
+    "presentationClass": "Conversation",
+    "logTag": ""
+  },
+  {
+    "presentationKey": "daily.news.04.presentation",
+    "presentationClass": "Conversation",
+    "logTag": ""
+  },
+  {
+    "presentationKey": "daily.news.13.presentation",
+    "presentationClass": "Conversation",
+    "logTag": ""
+  },
+  {
+    "presentationKey": "daily.news.05.presentation",
+    "presentationClass": "Conversation",
+    "logTag": ""
+  },
+  {
+    "presentationKey": "daily.news.14.presentation",
+    "presentationClass": "Conversation",
+    "logTag": ""
+  },
+  {
+    "presentationKey": "daily.news.06.presentation",
+    "presentationClass": "Conversation",
+    "logTag": ""
+  },
+  {
+    "presentationKey": "daily.news.15.presentation",
+    "presentationClass": "Conversation",
+    "logTag": ""
+  },
+  {
+    "presentationKey": "daily.visit.01.presentation",
+    "presentationClass": "Conversation",
+    "logTag": ""
+  },
+  {
+    "presentationKey": "daily.visit.02.presentation",
+    "presentationClass": "Conversation",
+    "logTag": ""
+  },
+  {
+    "presentationKey": "daily.visit.03.presentation",
+    "presentationClass": "Conversation",
+    "logTag": ""
+  },
+  {
+    "presentationKey": "daily.visit.04.presentation",
+    "presentationClass": "Conversation",
+    "logTag": ""
+  },
+  {
+    "presentationKey": "daily.visit.05.presentation",
+    "presentationClass": "Conversation",
+    "logTag": ""
+  },
+  {
+    "presentationKey": "daily.visit.06.presentation",
+    "presentationClass": "Conversation",
+    "logTag": ""
+  },
+  {
+    "presentationKey": "daily.visit.07.presentation",
+    "presentationClass": "Conversation",
+    "logTag": ""
+  },
+  {
+    "presentationKey": "daily.visit.08.presentation",
+    "presentationClass": "Conversation",
+    "logTag": ""
+  },
+  {
+    "presentationKey": "daily.visit.09.presentation",
+    "presentationClass": "Conversation",
+    "logTag": ""
+  },
+  {
+    "presentationKey": "news.bulletin.7e9cc445.presentation",
+    "presentationClass": "Notice",
+    "logTag": ""
+  },
+  {
+    "presentationKey": "news.bulletin.837fdfd7.presentation",
+    "presentationClass": "Notice",
+    "logTag": ""
+  },
+  {
+    "presentationKey": "news.bulletin.29af38b6.presentation",
+    "presentationClass": "Notice",
+    "logTag": ""
+  },
+  {
+    "presentationKey": "news.bulletin.ce650510.presentation",
+    "presentationClass": "Notice",
+    "logTag": ""
+  },
+  {
+    "presentationKey": "news.bulletin.c1b54ba7.presentation",
+    "presentationClass": "Notice",
+    "logTag": ""
+  },
+  {
+    "presentationKey": "news.bulletin.12ed1d36.presentation",
+    "presentationClass": "Notice",
+    "logTag": ""
+  },
+  {
+    "presentationKey": "news.bulletin.8140f96a.presentation",
+    "presentationClass": "Notice",
+    "logTag": ""
+  },
+  {
+    "presentationKey": "news.bulletin.d7760931.presentation",
+    "presentationClass": "Notice",
+    "logTag": ""
+  },
+  {
+    "presentationKey": "news.bulletin.58d0aef1.presentation",
+    "presentationClass": "Notice",
+    "logTag": ""
+  },
+  {
+    "presentationKey": "newspaper.1014.presentation",
+    "presentationClass": "Reading",
+    "logTag": ""
+  },
+  {
+    "presentationKey": "newspaper.1021.presentation",
+    "presentationClass": "Reading",
+    "logTag": ""
+  },
+  {
+    "presentationKey": "newspaper.1028.presentation",
+    "presentationClass": "Reading",
+    "logTag": ""
+  },
+  {
+    "presentationKey": "newspaper.1111.presentation",
+    "presentationClass": "Reading",
+    "logTag": ""
+  },
+  {
+    "presentationKey": "newspaper.1104.presentation",
+    "presentationClass": "Reading",
+    "logTag": ""
+  },
+  {
+    "presentationKey": "newspaper.1007.presentation",
+    "presentationClass": "Reading",
+    "logTag": ""
   }
 ]

@@ -20,7 +20,7 @@ namespace Spotlight.GameFlow
         public static bool BlocksWorldInput => Instance != null && Instance.IsDetailsOpen;
         public static bool IsHandlingEscape => DismissedFrame == Time.frameCount || Instance != null
             && (Instance.IsDetailsOpen || Instance.inventory.IsVisible || Instance.tasks.IsVisible);
-        internal DetailsPanel OpenDetailsPanel => details;
+        public DetailsPanel OpenDetailsPanel => details;
         public static int DismissedFrame { get; private set; } = -1;
         [SerializeField] private RectTransform artwork;
         [SerializeField] private TextMeshProUGUI header, dateLabel;
@@ -51,6 +51,8 @@ namespace Spotlight.GameFlow
         public MapActionInventoryView Inventory => inventory;
         public MapTaskPanel Tasks => tasks;
         public Button EndDayButton => endDayButton;
+        public Button DetailsButton => detailsButton;
+        public Button TasksButton => tasksButton;
         public void BindMap(MapSceneController owner) { map = owner; todoSourcesDirty = true; }
         public RectTransform Artwork => artwork;
         public bool IsDetailsOpen => details != null;
@@ -102,7 +104,9 @@ namespace Spotlight.GameFlow
             detailsButton.onClick.AddListener(ToggleDetails);
             inventoryButton.onClick.AddListener(ToggleInventory);
             tasksButton.onClick.AddListener(ToggleTasks);
-            if (endDayButton != null) endDayButton.onClick.AddListener(() => { if (map != null && map.isActiveAndEnabled) map.FinishDayFromHud(); });
+            // Legacy serialized reference is retained for old prefabs, but the map must never
+            // expose a calendar-advance shortcut. Rest is owned by the cafe bed.
+            if (endDayButton != null) endDayButton.gameObject.SetActive(false);
             // Keep one input owner as the map and cafe coexist additively.
             EventSystem input = UIKit.EnsureEventSystem();
             DontDestroyOnLoad(input.transform.root.gameObject);
@@ -155,7 +159,7 @@ namespace Spotlight.GameFlow
                 visible = show;
                 if (!show) CloseWindows();
             }
-            if (endDayButton != null) endDayButton.gameObject.SetActive(map != null && map.isActiveAndEnabled);
+            if (endDayButton != null) endDayButton.gameObject.SetActive(false);
             bool canInteract = CanInteract;
             if (restTravelPending && canInteract)
             {
@@ -177,9 +181,15 @@ namespace Spotlight.GameFlow
                     : Mathf.Min(1f, Mathf.Max(.1f, (root.rect.width - 64f) / 1380f)));
                 artwork.anchoredPosition = cafeLayout ? new Vector2(-6f, -85f * cafeFit) : authoredArtworkPosition;
             }
-            if (!show || !canInteract || IsTyping()) return;
+            if (!show || IsTyping()) return;
             Keyboard key = Keyboard.current;
             if (key == null) return;
+            if (!canInteract)
+            {
+                if (key.tabKey.wasPressedThisFrame || key.bKey.wasPressedThisFrame || key.tKey.wasPressedThisFrame)
+                    NotifyBlocked("打开 HUD 面板");
+                return;
+            }
             // DetailsPanel owns its close keys; do not reopen it on the closing frame.
             if (key.tabKey.wasPressedThisFrame && details == null && DismissedFrame != Time.frameCount) ToggleDetails();
             if (key.bKey.wasPressedThisFrame) ToggleInventory();
@@ -295,14 +305,24 @@ namespace Spotlight.GameFlow
 
         public void ToggleInventory()
         {
-            if (!CanInteract || IsDetailsOpen) return;
+            if (!CanInteract || IsDetailsOpen) { NotifyBlocked("打开物品栏"); return; }
             if (!inventory.IsVisible) tasks.SetVisible(false);
             inventory.Toggle();
         }
 
+        /// <summary>Open, rather than toggle, the real outstanding important task and keep it above optional guidance.</summary>
+        public bool ShowImportantTodos()
+        {
+            if (!CanInteract || IsDetailsOpen) return false;
+            RefreshTodos();
+            if (!tasks.ShowImportantTodo()) return false;
+            inventory.SetVisible(false);
+            return true;
+        }
+
         public void ToggleTasks()
         {
-            if (!CanInteract || IsDetailsOpen) return;
+            if (!CanInteract || IsDetailsOpen) { NotifyBlocked("打开待办事项"); return; }
             if (!tasks.IsVisible) inventory.SetVisible(false);
             tasks.Toggle();
         }
@@ -315,11 +335,19 @@ namespace Spotlight.GameFlow
 
         public void OpenDetails()
         {
-            if (!CanInteract || details != null || PlayerRuntime.Current == null) return;
+            if (details != null) return;
+            if (!CanInteract || PlayerRuntime.Current == null) { NotifyBlocked("打开详情面板"); return; }
             CloseSidebars();
             details = UIKit.OpenPanel<DetailsPanel>(UILevel.Pop, DetailsGameDataAdapter.Create(), cachePolicy: PanelCachePolicy.Reusable);
             detailsPause = PresentationPauseRegistry.Acquire("gameplay-details");
             details.Closed += DetailsClosed;
+        }
+
+        private void NotifyBlocked(string operation)
+        {
+            OperationToastPanel.ShowBlocked(IsDetailsOpen ? "请先关闭详情面板，再" + operation + "。"
+                : flow != null ? flow.InteractionBlockedMessage(operation)
+                : "当前剧情或操作尚未结束，暂时不能" + operation + "。");
         }
 
         private void DetailsClosed()

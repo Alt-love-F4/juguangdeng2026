@@ -37,6 +37,7 @@ namespace Spotlight.GameFlow
         {
             shell = GetComponent<FreeCafeGMPanel>();
             shell.RegisterCategory("叙事调试", Build);
+            if (GetComponent<NarrativeAtlasGM>() == null) gameObject.AddComponent<NarrativeAtlasGM>();
             SceneManager.sceneUnloaded += OnSceneUnloaded;
         }
         private void OnDestroy() { SceneManager.sceneUnloaded -= OnSceneUnloaded; ExitTest(); }

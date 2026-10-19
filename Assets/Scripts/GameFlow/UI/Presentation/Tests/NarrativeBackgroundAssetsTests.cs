@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using NUnit.Framework;
 using Spotlight.Narrative;
 using UnityEngine;
@@ -146,7 +146,21 @@ namespace Spotlight.GameFlow.Tests
                 if (string.IsNullOrWhiteSpace(page.bgOverride)) continue;
                 var background = NarrativeStageVisuals.Resolve(page.bgOverride, page.pageId);
                 Assert.That(background, Is.Not.Null, page.pageId);
-                Assert.That(background.placeholder, Is.False, page.pageId);
+                if (background.placeholder)
+                {
+                    // User-marked unfinished CGs are deliberately labelled local white cards,
+                    // not a missing resource, approved finished art or an accidental black fill.
+                    string card = page.bgOverride == "rose.club.knight_guidance" ? "CG03_"
+                        : page.bgOverride == "cg.adele_sampling" ? "CG04_"
+                        : page.bgOverride == "cg.burning_letter" ? "CG05_"
+                        : page.bgOverride == "cg.marie_moonlit" ? "CG07_"
+                        : page.bgOverride == "cg.rainy_triad" ? "CG09_" : null;
+                    Assert.That(card, Is.Not.Null, "Unreviewed background placeholder: " + page.pageId);
+                    Assert.That(background.texture, Is.Not.Null, page.pageId);
+                    Assert.That(background.texture.name, Does.StartWith(card), page.pageId);
+                    Assert.That(background.placeholderColor, Is.EqualTo(Color.white), page.pageId);
+                    Assert.That(background.useSceneBackground || background.solidColor, Is.False, page.pageId);
+                }
                 Assert.That(background.texture != null || background.solidColor || background.useSceneBackground, Is.True, page.pageId);
                 checkedPages++;
             }

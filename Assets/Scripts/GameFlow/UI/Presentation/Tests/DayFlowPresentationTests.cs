@@ -190,6 +190,9 @@ namespace Spotlight.GameFlow.Tests
             Assert.That(flow.CurrentPresentation, Is.Null);
             Assert.That(flow.BlocksGameplayInput, Is.False);
             flow.EndDayFromMap();
+            Assert.That(flow.State, Is.EqualTo(DayFlowState.CityMapLeisure));
+            Assert.That(flow.CurrentDay, Is.EqualTo(1), "The map cannot advance the calendar; return to the cafe bed.");
+            flow.EndDayFromDormitory();
             Assert.That(flow.State, Is.EqualTo(DayFlowState.DateTransition));
             Assert.That(flow.CurrentPresentation, Is.TypeOf<DateChangePanel>());
             StringAssert.Contains("10月7日", flow.CurrentDate);

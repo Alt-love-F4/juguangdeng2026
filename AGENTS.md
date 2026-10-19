@@ -94,3 +94,32 @@ All projects have a user-wide image-generation skill at `C:\Users\AltF4\.agents\
 The model/endpoint are in the skill's `config.json`; the key is separate and Windows-encrypted, never in a project or chat. Check key availability first; if missing, direct the user to the hidden-input setup script. Do not reuse a disclosed key or read Codex auth files. Generate only the images reasonably needed, without automatic retries or unrequested batches. Ask before uploading sensitive content. Save images in the current project's appropriate outputs/assets directory and show them by absolute filesystem path. Report actual failures and never claim an untested API/model works.
 For one-request model selection pass `-Model` (`gpt-image-2`, `gpt-image-2.5-flare`, or `gpt-image-2.5-sunburst`) without changing global defaults. Preserve source images and save edited results to new files. User-requested editing uploads the referenced files to PackyAPI; do not include unrelated private project content. A mask must match the first image and uses alpha=0 for the edit region. Do not claim PackyAPI editing compatibility until a real edit succeeds; installation tests are network-free.
 <!-- packy-image:end -->
+
+## 全量叙事接入约定（2026-10-19）
+
+- 接手入口：`Docs/NarrativeIntegrationHandoff.md`。四线、Runtime、咖啡馆各自交接文档见该入口索引。旧的 2026-10-16 桌面来源施工包仅作历史证据，不覆盖当前 `策划文件/文案`。
+- 当前源稿编译器在 `Tools/Narrative/Content/`；主表唯一合并入口为 `Tools/Narrative/integrate_content.py` → `merge_workbooks.mjs` → 现有官方 `Assets/ConfigTables/GenerateAll.bat`。内容 worker 输出行，不并行写共享 Excel。不得只改 JSON，也不得生成第二套剧情配置源。
+- `End`、`Gameplay`、`nextPageId` 是现有 NCS ConversationPage 的扩展；`Gameplay` 必须等待真实 CafeWorld 交付回执。`serve:` 是达标重试，`taste:` 是品鉴一次返回；`host:end_business` 只关闭真实营业，不推进日期。不能让伪完成回调写 `completed`。
+- 咖啡馆制作交互已经可用，不可为了播放剧情禁用整场景或重建工作台。等待真实制作时只让出本 Presenter 的暂停/输入 owner，存档、其他剧情和日终仍受门禁。
+- 属性成长通过现有 NCS `TRAIN_ATTRIBUTE` 与 `training.<attribute>` 的 0..9 余数累计，十点进一整属性，真实四属性仍由原 Bar 持有；不得再建一份 float 属性状态。
+- 拘押权威事实为可反转的 `church.detention.active`；DayFlow 逐日走真实阶段，不营业、不制造收益，不裸改 calendar；释放仅由真实剧情根尾结果清除。
+- `construction.*` / `integration.*` / `blocked.*` 是明确未决内容闸门，不是玩家剧情成就。缺少作者判定时保持不可用并记录原因，禁止统一设为 true 假装全线可通。
+- 四线源文件的覆盖、静态配置通过、Unity 测试通过和自然通关是不同状态；交接中必须分别说明，不能把全文入库写成全部实机验收。
+
+## 只读剧情关系图（2026-10-19）
+
+- 关系图场景：`Assets/Scenes/NarrativeRelationshipScene.unity`；无需运行场景的窗口：`Tools > Narrative > Story Relationship Window`。
+- 用于内容关系浏览，不是演出Panel测试场景；Panel/截图回归仍使用既有 `PresentationDebugScene.unity`。
+- 只从现有生成NCS配置建立图，不启动NarrativeRuntime、不创建CafeWorld/订单、不执行结果、不写存档，不改变Build Settings。
+- 模型与窗口/场景共享renderer在 `Assets/Scripts/Narrative/Graph/`；Editor安全构建入口在 `Assets/Scripts/Narrative/Editor/NarrativeRelationshipSceneBuilder.cs`；交接见 `Docs/NarrativeRelationshipGraph.md`。
+- 日期只排布，不代表因果；条件组内AND/组间OR与分支结果必须保留证据。未找到表内事实生产者不等于确认缺少宿主实现。禁止为了连通图形新建剧情事实或修改原事件结果。
+
+## 已明确结局与美术占位（2026-10-19）
+
+- 开场IF0及四线结局复用NCS Ending安全边界和现有ResultPanel。Panel不授予事实；不得靠日期、打开面板、取消或预览写completed。未明确的三个作者终局闸门保持关闭。
+- 新开场终局 `arrival.ending.if0` 仅由实际 arrival.leave 根尾完成；拒绝后的“重新抉择”不是终局。中央定义在integrate_content.py，不重复加进四线模块。
+- 本批美术仅用本地白底/素色中文需求图，不调用任何生图API、不上传。93项需求处置和31张卡见Docs/NarrativeArtPlaceholderManifest.json及Assets/Art/NarrativePlaceholders；未来正式美术替换不得被占位脚本覆盖。
+- 占位仍标placeholder，不代表资源完成/剧情验收。只将有明确原稿挂点的CG接到演出；角色差分需求卡不能直接顶替已有角色。
+- 结局面板核对菜单：Tools > Narrative > Ending Panels and Trigger Review；美术需求窗口：Tools > Narrative > Art Requirement Placeholders。演出验证仍用PresentationDebugScene，不另造测试Scene/Canvas/Input。
+- 交接入口：Docs/NarrativeEndingAndArtDelivery.md。
+- 同批从当前原稿另补6组已标记CG/示意图（Additional子目录），总计37张本地需求卡；窗口合并99项记录，原93项清单保持独立。补充来源与精确现稿锚点见Docs/NarrativeAdditionalArtPlaceholderManifest.json，不得误删为“未列入旧表的多余图”。

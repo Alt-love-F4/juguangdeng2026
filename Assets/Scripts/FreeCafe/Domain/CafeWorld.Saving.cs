@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Collections.Generic;
 
 namespace Spotlight.FreeCafe
@@ -33,12 +33,17 @@ namespace Spotlight.FreeCafe
                 candidate.todayCustomerBudget = Catalog.economy.baseCustomers;
             }
 
+            // 旧版普通客流可达 24，另有特殊来访追加预算；降到 3~5 后仍接受旧档当天预算。
+            // 读档不重算、不截断，只在下次 StartDay 按新配置和开业声望生成预算。
+            int customerBudgetLimit = Math.Max(Math.Max(24, Catalog.economy.maxCustomers)
+                + (candidate.cafeVisits?.Count ?? 0), candidate.cafeVisitBudgetMinimum);
             if (candidate.seats < 1 || candidate.seats > 8
                 || candidate.staff < 0 || candidate.staff > Catalog.economy.maxStaff
                 || candidate.beanQuality < 0 || candidate.beanQuality > 2
                 || candidate.skillPoints < 0
-                || candidate.todayCustomerBudget < 0 || candidate.todayCustomerBudget > Math.Max(Catalog.economy.maxCustomers + (candidate.cafeVisits?.Count ?? 0), candidate.cafeVisitBudgetMinimum)
+                || candidate.todayCustomerBudget < 0 || candidate.todayCustomerBudget > customerBudgetLimit
                 || candidate.todayArrivals < 0 || candidate.todayArrivals > candidate.todayCustomerBudget
+                || candidate.todayReplacedCustomers < 0 || candidate.todayReplacedCustomers > candidate.todayArrivals
                 || !Enum.IsDefined(typeof(BusinessPhase), candidate.businessPhase)
                 || candidate.open != (candidate.businessPhase == BusinessPhase.Open))
             {
@@ -203,6 +208,7 @@ namespace Spotlight.FreeCafe
             if (!people.success) return people;
             var visits = ValidateVisitSnapshot(candidate, ids);
             if (!visits.success) return visits;
+            narrativeService?.Dispose();
             State = candidate;
             RestoreContainerDefaults();
             UnlockContent();

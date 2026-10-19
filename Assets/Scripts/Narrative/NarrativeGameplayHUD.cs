@@ -32,6 +32,7 @@ namespace Spotlight.Narrative
         public Action EndDayRequested { get; set; }
         public event Action BlockingActionHintRequested;
         private bool AllowsAction => visible && runtime != null && runtime.IsReady && !runtime.BlocksGameplayInput
+            && !runtime.Controller.IsBusy
             && Time.timeScale > 0 && !advancingDay && (CanInteract?.Invoke() ?? true);
 
         public static NarrativeGameplayHUD Create(NarrativeRuntime owner)

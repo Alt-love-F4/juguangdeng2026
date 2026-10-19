@@ -78,7 +78,22 @@ namespace Spotlight.FreeCafe
             foreach (var v in State.cafeVisits) if (AwaitingSeat(v) && v.budgetReserved) count++;
             return count;
         }
-        private int AvailableSeat(CafeVisitInstance applicant = null, int requestedIndex = -1)
+        private bool CanReplaceOrdinaryCustomer(WorldEntity customer)
+        {
+            if (customer == null || !Spec(customer.specId).Has(Capability.Customer)
+                || VisitForCustomer(customer.id) != null
+                || customer.person != null && (customer.person.role != CafePersonRole.Customer
+                    || !string.IsNullOrEmpty(customer.person.narrativeCharacterId)
+                    || customer.person.personId == "tutorial_customer")) return false;
+            return !State.requests.Exists(r => r.customerId == customer.id
+                && (r.id == TutorialOrderId || narrativeService != null && narrativeService.Owns(r.id)));
+        }
+        private bool VisitSeatOccupied(string id, bool replaceOrdinaryCustomers)
+        {
+            var customer = Find(id);
+            return customer != null && (!replaceOrdinaryCustomers || !CanReplaceOrdinaryCustomer(customer));
+        }
+        private int AvailableSeat(CafeVisitInstance applicant = null, int requestedIndex = -1, bool replaceOrdinaryCustomers = false)
         {
             int genericReservations = 0;
             foreach (var earlier in State.cafeVisits)
@@ -93,11 +108,11 @@ namespace Spotlight.FreeCafe
                 {
                     if (requestedIndex < 0 && i >= tableCount && (applicant == null || string.IsNullOrEmpty(applicant.preferredSeatId))) continue;
                     int other = (i + tableCount) % (tableCount * 2);
-                    if (Find("customer_" + other) != null) continue;
+                    if (VisitSeatOccupied("customer_" + other, replaceOrdinaryCustomers)) continue;
                 }
                 string seat = "customer_" + i;
                 if (applicant != null && !string.IsNullOrEmpty(applicant.preferredSeatId) && applicant.preferredSeatId != seat) continue;
-                if (Find(seat) != null) continue;
+                if (VisitSeatOccupied(seat, replaceOrdinaryCustomers)) continue;
                 bool reserved = false;
                 foreach (var v in State.cafeVisits)
                 {
@@ -141,10 +156,14 @@ namespace Spotlight.FreeCafe
                 if (!v.budgetReserved) { State.todayCustomerBudget++; v.budgetReserved = true; }
                 bool duplicate = State.entities.Exists(e => e.person != null && (e.person.personId == v.identity.personId || e.person.narrativeCharacterId == v.characterId));
                 int slot = duplicate ? -1 : AvailableSeat(v);
+                // Probe the same reservation/table rules without mutating occupants, requests or visit state.
+                bool replaceOrdinary = !duplicate && slot < 0;
+                if (replaceOrdinary) slot = AvailableSeat(v, replaceOrdinaryCustomers: true);
                 if (slot < 0) { if (duplicate) VisitDiagnostic(v, "character_already_present"); EmitVisit(v, "waiting"); continue; }
                 var eligible = new List<ProductSpec>();
                 foreach (var p in Catalog.products) if (State.unlockedProducts.Contains(p.id) && CanOfferProduct(p)) eligible.Add(p);
                 if (eligible.Count == 0) continue;
+                if (replaceOrdinary) ReplaceOrdinaryCustomersAtTable(v, slot);
                 var product = eligible[State.requestSequence++ % eligible.Count];
                 v.seatId = v.customerId = "customer_" + slot;
                 var customer = new WorldEntity { id = v.customerId, specId = "customer", area = AreaId.Cafe, person = v.identity };
@@ -159,6 +178,23 @@ namespace Spotlight.FreeCafe
                 EmitVisit(v, "arrived");
             }
             UpdateFocusedRequest();
+        }
+
+        private void ReplaceOrdinaryCustomersAtTable(CafeVisitInstance visit, int slot)
+        {
+            string seat = "customer_" + slot;
+            for (int i = State.entities.Count - 1; i >= 0; i--)
+            {
+                var customer = State.entities[i];
+                if (!SameCustomerTable(customer.id, seat) || !CanReplaceOrdinaryCustomer(customer)) continue;
+                // Passive displacement cancels unfinished orders, not a failed/served economic transaction.
+                // Keep all historical arrivals and the existing budget: no ordinary refill entitlement.
+                State.requests.RemoveAll(r => r.customerId == customer.id);
+                State.spokenCustomers.RemoveAll(id => id == customer.id);
+                State.entities.RemoveAt(i);
+                State.todayReplacedCustomers++;
+                VisitDiagnostic(visit, "ordinary_customer_replaced");
+            }
         }
 
         public ActionResult RequestCafeVisitClick(string visitInstanceId)

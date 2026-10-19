@@ -12,23 +12,23 @@
   },
   {
     "positionKey": "market",
-    "nameText": "map.position.market.name",
+    "nameText": "map.position.integrated.market.name",
     "posX": -57.8125,
     "posY": 192.1875,
     "isImportant": true,
     "defaultAction": "",
-    "extendedActions": "neutral.1008.s1.action",
+    "extendedActions": "neutral.1008.s1.action,daily.action.market",
     "imgPath": "Art/Map/Locations/location_05",
     "enabled": true
   },
   {
     "positionKey": "library",
-    "nameText": "map.position.library.name",
+    "nameText": "map.position.integrated.library.name",
     "posX": 187.5,
     "posY": -159.6875,
-    "isImportant": false,
+    "isImportant": true,
     "defaultAction": "",
-    "extendedActions": "",
+    "extendedActions": "daily.action.library",
     "imgPath": "Art/UI/Avatars/Unknown",
     "enabled": true
   },
@@ -41,61 +41,83 @@
     "defaultAction": "",
     "extendedActions": "",
     "imgPath": "Art/UI/Avatars/Unknown",
-    "enabled": true
+    "enabled": false
   },
   {
     "positionKey": "圣西尔万郊区",
-    "nameText": "map.position.saint_sylvain.name",
+    "nameText": "map.position.integrated.圣西尔万郊区.name",
     "posX": -379.375,
     "posY": 406.25,
     "isImportant": true,
     "defaultAction": "",
-    "extendedActions": "",
+    "extendedActions": "daily.action.圣西尔万郊区",
     "imgPath": "Art/Map/Locations/location_02",
     "enabled": true
   },
   {
     "positionKey": "圣徒街",
-    "nameText": "map.position.saint_street.name",
+    "nameText": "map.position.integrated.圣徒街.name",
     "posX": 774.6875,
     "posY": 399.0625,
     "isImportant": true,
     "defaultAction": "",
-    "extendedActions": "rose.1009.s1.action",
+    "extendedActions": "rose.1009.s1.action,daily.action.圣徒街",
     "imgPath": "Art/Map/Locations/location_03",
     "enabled": true
   },
   {
     "positionKey": "首都法院",
-    "nameText": "map.position.capital_court.name",
+    "nameText": "map.position.integrated.首都法院.name",
     "posX": 567.5,
     "posY": 86.25,
     "isImportant": true,
     "defaultAction": "",
-    "extendedActions": "",
+    "extendedActions": "daily.action.首都法院",
     "imgPath": "Art/Map/Locations/location_06",
     "enabled": true
   },
   {
     "positionKey": "市政厅",
-    "nameText": "map.position.city_hall.name",
+    "nameText": "map.position.integrated.市政厅.name",
     "posX": -411.5625,
     "posY": 45.3125,
     "isImportant": true,
     "defaultAction": "",
-    "extendedActions": "",
+    "extendedActions": "daily.action.市政厅",
     "imgPath": "Art/Map/Locations/location_07",
     "enabled": true
   },
   {
     "positionKey": "花园区",
-    "nameText": "map.position.garden_district.name",
+    "nameText": "map.position.integrated.花园区.name",
     "posX": 610.9375,
     "posY": -407.1875,
     "isImportant": true,
     "defaultAction": "",
-    "extendedActions": "",
+    "extendedActions": "daily.action.花园区",
     "imgPath": "Art/Map/Locations/location_09",
+    "enabled": true
+  },
+  {
+    "positionKey": "旧城区",
+    "nameText": "map.position.integrated.旧城区.name",
+    "posX": -958,
+    "posY": 367,
+    "isImportant": true,
+    "defaultAction": "",
+    "extendedActions": "daily.action.旧城区",
+    "imgPath": "Art/UI/Avatars/Unknown",
+    "enabled": true
+  },
+  {
+    "positionKey": "圣地大教堂",
+    "nameText": "map.position.integrated.圣地大教堂.name",
+    "posX": 300,
+    "posY": 484,
+    "isImportant": true,
+    "defaultAction": "",
+    "extendedActions": "daily.action.圣地大教堂",
+    "imgPath": "Art/UI/Avatars/Unknown",
     "enabled": true
   }
 ]

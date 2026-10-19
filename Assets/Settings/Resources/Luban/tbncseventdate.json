@@ -7,23 +7,170 @@
     "priority": 0
   },
   {
-    "eventId": "revolution.1028.s1",
-    "day": 23,
+    "eventId": "rose.1012.s1",
+    "day": 7,
+    "timeSlot": "morning",
+    "repeatRule": "once",
+    "priority": 0
+  },
+  {
+    "eventId": "rose.1019.s1",
+    "day": 14,
+    "timeSlot": "noon",
+    "repeatRule": "once",
+    "priority": 0
+  },
+  {
+    "eventId": "rose.1024.s1",
+    "day": 19,
+    "timeSlot": "noon",
+    "repeatRule": "once",
+    "priority": 0
+  },
+  {
+    "eventId": "rose.1024.s2",
+    "day": 19,
+    "timeSlot": "noon",
+    "repeatRule": "once",
+    "priority": 0
+  },
+  {
+    "eventId": "rose.1026.s2",
+    "day": 21,
     "timeSlot": "night",
     "repeatRule": "once",
     "priority": 0
   },
   {
-    "eventId": "revolution.1014.s1",
-    "day": 9,
-    "timeSlot": "morning",
+    "eventId": "rose.ending.trust_limit",
+    "day": 21,
+    "timeSlot": "night",
     "repeatRule": "once",
     "priority": 0
+  },
+  {
+    "eventId": "rose.1101.s1",
+    "day": 27,
+    "timeSlot": "noon",
+    "repeatRule": "once",
+    "priority": 0
+  },
+  {
+    "eventId": "rose.route.1115.s1",
+    "day": 41,
+    "timeSlot": "night",
+    "repeatRule": "once",
+    "priority": 0
+  },
+  {
+    "eventId": "rose.route.1122.s1",
+    "day": 48,
+    "timeSlot": "night",
+    "repeatRule": "once",
+    "priority": 0
+  },
+  {
+    "eventId": "rose.1025.s2",
+    "day": 20,
+    "timeSlot": "night",
+    "repeatRule": "once",
+    "priority": 0
+  },
+  {
+    "eventId": "neutral.1010.s1",
+    "day": 5,
+    "timeSlot": "morning",
+    "repeatRule": "once",
+    "priority": 70
+  },
+  {
+    "eventId": "neutral.1013.s2",
+    "day": 8,
+    "timeSlot": "morning",
+    "repeatRule": "once",
+    "priority": 70
+  },
+  {
+    "eventId": "neutral.1018.s1",
+    "day": 13,
+    "timeSlot": "noon",
+    "repeatRule": "once",
+    "priority": 70
+  },
+  {
+    "eventId": "neutral.1027.s1",
+    "day": 22,
+    "timeSlot": "noon",
+    "repeatRule": "once",
+    "priority": 70
+  },
+  {
+    "eventId": "neutral.1030.s1",
+    "day": 25,
+    "timeSlot": "noon",
+    "repeatRule": "once",
+    "priority": 70
+  },
+  {
+    "eventId": "neutral.route.1112.s1",
+    "day": 38,
+    "timeSlot": "morning",
+    "repeatRule": "once",
+    "priority": 70
+  },
+  {
+    "eventId": "neutral.route.1118.s1",
+    "day": 44,
+    "timeSlot": "morning",
+    "repeatRule": "once",
+    "priority": 70
+  },
+  {
+    "eventId": "neutral.route.1122.s1",
+    "day": 48,
+    "timeSlot": "morning",
+    "repeatRule": "once",
+    "priority": 70
+  },
+  {
+    "eventId": "neutral.route.1129.s1",
+    "day": 55,
+    "timeSlot": "morning",
+    "repeatRule": "once",
+    "priority": 70
+  },
+  {
+    "eventId": "neutral.route.1130.s1",
+    "day": 56,
+    "timeSlot": "morning",
+    "repeatRule": "once",
+    "priority": 70
+  },
+  {
+    "eventId": "neutral.route.1130.s2",
+    "day": 56,
+    "timeSlot": "morning",
+    "repeatRule": "once",
+    "priority": 70
   },
   {
     "eventId": "rose.1011.s1",
     "day": 6,
     "timeSlot": "morning",
+    "repeatRule": "once",
+    "priority": 0
+  },
+  {
+    "eventId": "rose.1016.s1",
+    "day": 11,
+    "timeSlot": "morning",
+    "repeatRule": "once",
+    "priority": 0
+  },
+  {
+    "eventId": "rose.1103.s1",
+    "day": 29,
+    "timeSlot": "night",
     "repeatRule": "once",
     "priority": 0
   },
@@ -35,10 +182,262 @@
     "priority": 0
   },
   {
-    "eventId": "revolution.1013.s2",
-    "day": 8,
+    "eventId": "church.1014.s2",
+    "day": 9,
     "timeSlot": "noon",
     "repeatRule": "once",
     "priority": 0
+  },
+  {
+    "eventId": "church.1020.s1",
+    "day": 15,
+    "timeSlot": "morning",
+    "repeatRule": "once",
+    "priority": 0
+  },
+  {
+    "eventId": "church.1023.s1",
+    "day": 18,
+    "timeSlot": "morning",
+    "repeatRule": "once",
+    "priority": 0
+  },
+  {
+    "eventId": "church.1104.s1",
+    "day": 30,
+    "timeSlot": "morning",
+    "repeatRule": "once",
+    "priority": 0
+  },
+  {
+    "eventId": "church.1105.s1",
+    "day": 31,
+    "timeSlot": "morning",
+    "repeatRule": "once",
+    "priority": 0
+  },
+  {
+    "eventId": "church.1105.s2",
+    "day": 31,
+    "timeSlot": "morning",
+    "repeatRule": "once",
+    "priority": 0
+  },
+  {
+    "eventId": "church.1111.s1",
+    "day": 37,
+    "timeSlot": "morning",
+    "repeatRule": "once",
+    "priority": 0
+  },
+  {
+    "eventId": "church.route.1112.s1",
+    "day": 38,
+    "timeSlot": "morning",
+    "repeatRule": "once",
+    "priority": 0
+  },
+  {
+    "eventId": "church.route.1113.s1",
+    "day": 39,
+    "timeSlot": "morning",
+    "repeatRule": "once",
+    "priority": 0
+  },
+  {
+    "eventId": "church.route.1115.s1",
+    "day": 41,
+    "timeSlot": "morning",
+    "repeatRule": "once",
+    "priority": 0
+  },
+  {
+    "eventId": "church.route.1116.s1",
+    "day": 42,
+    "timeSlot": "morning",
+    "repeatRule": "once",
+    "priority": 0
+  },
+  {
+    "eventId": "church.route.1118.s1",
+    "day": 44,
+    "timeSlot": "morning",
+    "repeatRule": "once",
+    "priority": 0
+  },
+  {
+    "eventId": "church.route.1123.s1",
+    "day": 49,
+    "timeSlot": "morning",
+    "repeatRule": "once",
+    "priority": 0
+  },
+  {
+    "eventId": "revolution.1014.s1",
+    "day": 9,
+    "timeSlot": "morning",
+    "repeatRule": "once",
+    "priority": 20
+  },
+  {
+    "eventId": "revolution.1028.s1",
+    "day": 23,
+    "timeSlot": "night",
+    "repeatRule": "once",
+    "priority": 20
+  },
+  {
+    "eventId": "revolution.1029.s1",
+    "day": 24,
+    "timeSlot": "night",
+    "repeatRule": "once",
+    "priority": 20
+  },
+  {
+    "eventId": "revolution.1107.s1",
+    "day": 33,
+    "timeSlot": "night",
+    "repeatRule": "once",
+    "priority": 20
+  },
+  {
+    "eventId": "revolution.route.1112.s1",
+    "day": 38,
+    "timeSlot": "noon",
+    "repeatRule": "once",
+    "priority": 20
+  },
+  {
+    "eventId": "revolution.route.1115.s1",
+    "day": 41,
+    "timeSlot": "noon",
+    "repeatRule": "once",
+    "priority": 20
+  },
+  {
+    "eventId": "revolution.route.1122.s1",
+    "day": 48,
+    "timeSlot": "noon",
+    "repeatRule": "once",
+    "priority": 20
+  },
+  {
+    "eventId": "revolution.route.1123.s1",
+    "day": 49,
+    "timeSlot": "night",
+    "repeatRule": "once",
+    "priority": 20
+  },
+  {
+    "eventId": "revolution.route.1124.s1",
+    "day": 50,
+    "timeSlot": "morning",
+    "repeatRule": "once",
+    "priority": 20
+  },
+  {
+    "eventId": "news.bulletin.7e9cc445",
+    "day": 5,
+    "timeSlot": "morning",
+    "repeatRule": "once",
+    "priority": 100
+  },
+  {
+    "eventId": "news.bulletin.837fdfd7",
+    "day": 6,
+    "timeSlot": "morning",
+    "repeatRule": "once",
+    "priority": 100
+  },
+  {
+    "eventId": "news.bulletin.29af38b6",
+    "day": 7,
+    "timeSlot": "morning",
+    "repeatRule": "once",
+    "priority": 100
+  },
+  {
+    "eventId": "news.bulletin.ce650510",
+    "day": 7,
+    "timeSlot": "morning",
+    "repeatRule": "once",
+    "priority": 100
+  },
+  {
+    "eventId": "news.bulletin.c1b54ba7",
+    "day": 7,
+    "timeSlot": "morning",
+    "repeatRule": "once",
+    "priority": 100
+  },
+  {
+    "eventId": "news.bulletin.12ed1d36",
+    "day": 10,
+    "timeSlot": "morning",
+    "repeatRule": "once",
+    "priority": 100
+  },
+  {
+    "eventId": "news.bulletin.8140f96a",
+    "day": 10,
+    "timeSlot": "morning",
+    "repeatRule": "once",
+    "priority": 100
+  },
+  {
+    "eventId": "news.bulletin.d7760931",
+    "day": 18,
+    "timeSlot": "morning",
+    "repeatRule": "once",
+    "priority": 100
+  },
+  {
+    "eventId": "news.bulletin.58d0aef1",
+    "day": 31,
+    "timeSlot": "morning",
+    "repeatRule": "once",
+    "priority": 100
+  },
+  {
+    "eventId": "newspaper.1014",
+    "day": 9,
+    "timeSlot": "morning",
+    "repeatRule": "once",
+    "priority": 200
+  },
+  {
+    "eventId": "newspaper.1021",
+    "day": 16,
+    "timeSlot": "morning",
+    "repeatRule": "once",
+    "priority": 200
+  },
+  {
+    "eventId": "newspaper.1028",
+    "day": 23,
+    "timeSlot": "morning",
+    "repeatRule": "once",
+    "priority": 200
+  },
+  {
+    "eventId": "newspaper.1111",
+    "day": 37,
+    "timeSlot": "morning",
+    "repeatRule": "once",
+    "priority": 200
+  },
+  {
+    "eventId": "newspaper.1104",
+    "day": 30,
+    "timeSlot": "morning",
+    "repeatRule": "once",
+    "priority": 200
+  },
+  {
+    "eventId": "newspaper.1007",
+    "day": 2,
+    "timeSlot": "morning",
+    "repeatRule": "once",
+    "priority": 200
   }
 ]

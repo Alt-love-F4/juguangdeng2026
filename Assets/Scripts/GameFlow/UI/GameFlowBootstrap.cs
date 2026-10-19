@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.IO;
@@ -78,17 +78,27 @@ namespace Spotlight.GameFlow
         private DetailsPanel detailsPanel => GameplayHudPanel.Instance != null ? GameplayHudPanel.Instance.OpenDetailsPanel : null;
         private MapSceneController mapOverlay;
         private bool openingMap;
+        private int mapNavigationVersion;
         private GameFlowPanel gameplayScenePanel;
         public bool IsMapOpen => mapOverlay != null || openingMap;
         public bool IsDetailsOpen => detailsPanel != null;
         internal bool SharedHudControlsAvailable => gameplay && !paused && !loadingTransitioning && !openingMap
             && !saving && (dayFlow == null || !dayFlow.BlocksGameplayInput);
         public bool CanOpenMap => CanOpenMapFromGameplayScene() && !IsMapOpen
+            && !paused && !saving && !openingPause && Time.timeScale > 0f && !PresentationPauseRegistry.IsPaused
+            && !DialoguePanel.IsAnyPlaying && !CafeMiniGameActive
+            && !(narrativeIntegration?.Runtime?.BlocksGameplayInput ?? false)
+            && !(narrativeIntegration?.Runtime?.Actions?.IsExecuting ?? false)
+            && (dayFlow == null || !dayFlow.IsFirstSessionGuideActive && !dayFlow.BlocksGameplayInput)
             && SceneManager.GetActiveScene().name != MapSceneName;
-        internal bool MapControlsAvailable => gameplay && !paused && !loadingTransitioning && detailsPanel == null
+        private static bool CafeMiniGameActive
+            => !string.IsNullOrEmpty(PlayerCafeOwner.Current?.State.production?.miniGameToken);
+        internal bool MapControlsAvailable => gameplay && !paused && !saving && !openingPause && !loadingTransitioning
+            && Time.timeScale > 0f && detailsPanel == null
             && !(narrativeIntegration?.Runtime?.Actions?.IsExecuting ?? false)
             && (dayFlow != null && dayFlow.IsFirstDayCafeMapGuideActive
-                || !DialoguePanel.IsAnyPlaying && (dayFlow == null || !dayFlow.BlocksGameplayInput))
+                || !DialoguePanel.IsAnyPlaying && !(narrativeIntegration?.Runtime?.BlocksGameplayInput ?? false)
+                    && (dayFlow == null || !dayFlow.BlocksGameplayInput))
             && (PlayerRuntime.Current?.CreationSubmitted == true || dayFlow != null && dayFlow.State == DayFlowState.CityMapLeisure);
         private int detailsClosedFrame = -1;
         private EventSystem persistentEventSystem;
@@ -242,7 +252,7 @@ namespace Spotlight.GameFlow
             Keyboard keyboard = Keyboard.current;
             if (keyboard != null && keyboard.escapeKey.wasPressedThisFrame)
                 HandleEscape();
-            if (keyboard != null && keyboard.mKey.wasPressedThisFrame)
+            if (keyboard != null && keyboard.mKey.wasPressedThisFrame && !IsTypingInInputField())
             {
                 if (IsMapOpen) CloseMap();
                 else OpenMap();
@@ -285,9 +295,54 @@ namespace Spotlight.GameFlow
             }
         }
 
+        private static bool IsTypingInInputField()
+        {
+            GameObject selected = EventSystem.current != null ? EventSystem.current.currentSelectedGameObject : null;
+            return selected != null && (selected.GetComponentInParent<TMPro.TMP_InputField>() != null
+                || selected.GetComponentInParent<UnityEngine.UI.InputField>() != null);
+        }
+
         public void OpenMap()
         {
             OpenMapInternal(false);
+        }
+
+        /// <summary>True means the caller must stop, whether settlement was accepted or refused.</summary>
+        public bool TryCloseCafeForMapAction(string position, string actionKey)
+        {
+            if (PlayerCafeOwner.Current?.State.open != true) return false;
+            // Only a formal session owns DayFlow. Never fall through to an action with an open
+            // formal cafe when closing is currently unsafe or the endpoint refused the request.
+            int version = sessionVersion;
+            var runtime = narrativeIntegration?.Runtime;
+            var actions = runtime?.Actions;
+            var world = PlayerCafeOwner.Current;
+            int day = dayFlow != null ? dayFlow.CurrentDay : 0;
+            string instanceKey = !string.IsNullOrWhiteSpace(position) && !string.IsNullOrWhiteSpace(actionKey)
+                ? actions?.GetActionInstanceKey(position, actionKey) : null;
+            if (!isActiveAndEnabled || !gameplay || paused || saving || openingPause || loadingTransitioning
+                || Time.timeScale <= 0f || PresentationPauseRegistry.IsPaused || CafeMiniGameActive
+                || DialoguePanel.IsAnyPlaying || dayFlow == null || dayFlow.IsFirstSessionGuideActive
+                || (runtime?.BlocksGameplayInput ?? false) || (actions?.IsExecuting ?? false)
+                || string.IsNullOrEmpty(instanceKey)
+                || !dayFlow.TryFinishBusinessForMapAction(() =>
+                {
+                    if (!isActiveAndEnabled || !gameplay || version != sessionVersion) return;
+                    if (dayFlow == null || dayFlow.CurrentDay != day || !ReferenceEquals(world, PlayerCafeOwner.Current)
+                        || !ReferenceEquals(runtime, narrativeIntegration?.Runtime) || !ReferenceEquals(actions, runtime?.Actions)
+                        || instanceKey != actions.GetActionInstanceKey(position, actionKey))
+                    {
+                        OperationToastPanel.ShowMessage("所选行动或游戏状态已变化，已取消自动继续，请重新选择行动。");
+                        return;
+                    }
+                    FindMapPanel(SceneManager.GetSceneByName(MapSceneName))?.ResumeRequestedAction(position, actionKey);
+                }))
+            {
+                OperationToastPanel.ShowMessage("当前无法自动打烊，请先完成当前操作后重试所选行动。");
+                return true;
+            }
+            OperationToastPanel.ShowMessage("咖啡店已自动打烊，营业结算后继续所选行动。未完成订单按打烊规则结算。", string.Empty);
+            return true;
         }
 
         public bool DebugForceOpenMap(out string message)
@@ -304,10 +359,29 @@ namespace Spotlight.GameFlow
 
         private void OpenMapInternal(bool ignoreTutorial)
         {
-            if (!CanOpenMap) return;
+            if (!CanOpenMap)
+            {
+                if (IsMapOpen || gameplay && SceneManager.GetActiveScene().name == MapSceneName) return;
+                OperationToastPanel.ShowBlocked(InteractionBlockedMessage("打开地图"));
+                return;
+            }
             CloseDetails();
             openingMap = true;
             StartCoroutine(OpenMapRoutine(ignoreTutorial));
+        }
+
+        public string InteractionBlockedMessage(string operation)
+        {
+            if (!gameplay) return "请先进入游戏，再" + operation + "。";
+            if (loadingTransitioning || openingMap) return "正在切换场景或打开地图，请稍候。";
+            if (saving) return "正在保存，请稍后再" + operation + "。";
+            if (paused || openingPause || Time.timeScale <= 0f) return "请先恢复游戏，再" + operation + "。";
+            if (dayFlow?.IsFirstSessionGuideActive == true) return "请先按照新手教程完成当前步骤，再" + operation + "。";
+            if (CafeMiniGameActive) return "请先完成或退出当前制作小游戏，再" + operation + "。";
+            if (narrativeIntegration?.Runtime?.Actions?.IsExecuting == true) return "当前行动正在执行，请完成后再" + operation + "。";
+            if (DialoguePanel.IsAnyPlaying || narrativeIntegration?.Runtime?.BlocksGameplayInput == true)
+                return "当前剧情尚未结束，请完成对话或事件后再" + operation + "。";
+            return "当前阶段暂不能" + operation + "，请先完成当前操作。";
         }
 
         private bool CanOpenMapFromGameplayScene()
@@ -317,6 +391,7 @@ namespace Spotlight.GameFlow
         private IEnumerator OpenMapRoutine(bool ignoreTutorial = false)
         {
             int version = sessionVersion;
+            int mapVersion = mapNavigationVersion;
             // Admission was checked before openingMap became true. Rechecking gameplay
             // controls here would reject our own IsMapOpen loading guard.
             Scene scene = SceneManager.GetSceneByName(MapSceneName);
@@ -329,6 +404,7 @@ namespace Spotlight.GameFlow
                 if (transition != null) transition.EndLoading();
             }
             scene = SceneManager.GetSceneByName(MapSceneName);
+            if (mapVersion != mapNavigationVersion) yield break;
             if (!gameplay || version != sessionVersion) { openingMap = false; yield break; }
             foreach (GameObject root in scene.GetRootGameObjects())
             {
@@ -346,13 +422,36 @@ namespace Spotlight.GameFlow
             }
             mapOverlay.OpenOverlay(this);
             openingMap = false;
+            dayFlow?.RefreshMapAvailability();
         }
 
         public void CloseMap()
         {
-            if (openingMap || mapOverlay == null) return;
-            mapOverlay.gameObject.SetActive(false);
+            if (!gameplay || paused || saving || openingPause || loadingTransitioning
+                || (narrativeIntegration?.Runtime?.Actions?.IsExecuting ?? false)
+                || (narrativeIntegration?.Runtime?.BlocksGameplayInput ?? false)
+                || DialoguePanel.IsAnyPlaying || (dayFlow != null && dayFlow.BlocksGameplayInput)
+                || mapOverlay != null && mapOverlay.GetComponentInChildren<MapActionDetailsView>(true)?.IsBusy == true)
+            {
+                OperationToastPanel.ShowBlocked(InteractionBlockedMessage("关闭地图或返回咖啡馆"));
+                return;
+            }
+            ForceCloseMap();
+        }
+
+        // Host-owned transitions must still release the overlay while ordinary user dismissal
+        // is locked. In particular AfterBusiness cannot run behind a suspended map presenter.
+        internal void CloseMapForDayFlow() => ForceCloseMap();
+
+        private void ForceCloseMap()
+        {
+            // Invalidate an additive open still waiting on its cover/load as well as a visible
+            // overlay, so a timer-driven settlement cannot reopen the map over its confirmation.
+            ++mapNavigationVersion;
+            openingMap = false;
+            if (mapOverlay != null) mapOverlay.gameObject.SetActive(false);
             mapOverlay = null;
+            dayFlow?.RefreshMapAvailability();
         }
 
         public void TransitionToGameplayScene(string sceneName, Action completed, Action failed = null)
@@ -397,7 +496,7 @@ namespace Spotlight.GameFlow
             List<GameObject> previousMapCameras = CaptureActiveMapCameras(previousActive);
             SetSessionState(GameSessionState.Loading);
             CloseDetails();
-            CloseMap();
+            ForceCloseMap();
             loadingTransitioning = true;
             narrativeIntegration?.SetGameplayVisible(false);
 
@@ -1019,7 +1118,10 @@ namespace Spotlight.GameFlow
         }
 
         private bool CanUseGameplayControls()
-            => gameplay && !paused && !loadingTransitioning && !IsMapOpen && detailsPanel == null && !DialoguePanel.IsAnyPlaying
+            => gameplay && !paused && !saving && !openingPause && !loadingTransitioning
+                && Time.timeScale > 0f && !IsMapOpen && detailsPanel == null && !DialoguePanel.IsAnyPlaying
+                && !CafeMiniGameActive
+                && !(narrativeIntegration?.Runtime?.Actions?.IsExecuting ?? false)
                 && (dayFlow == null || !dayFlow.BlocksGameplayInput)
                 && (GameplayPanelHooks.PanelType != null && GameplayPanelHooks.PanelType.IsInstanceOfType(UIKit.PeekPanel(MainStack))
                     || GameplayPanelHooks.IsScenePanel && UIKit.PeekPanel(MainStack) == null);
@@ -1134,7 +1236,7 @@ namespace Spotlight.GameFlow
             PlayerCafeOwner.EndSession();
             pendingSaveCompletion = null;
             CloseDetails();
-            CloseMap();
+            ForceCloseMap();
             DialoguePlayback.Stop();
             narrativeIntegration?.SetGameplayVisible(false);
             narrativeIntegration?.Runtime?.Presenter?.SetSuspended(true);
@@ -1254,14 +1356,17 @@ namespace Spotlight.GameFlow
             paused = false;
             dayFlow?.StopForGameOver();
             CloseDetails();
-            CloseMap();
+            ForceCloseMap();
             DialoguePlayback.Stop();
             narrativeIntegration?.Runtime?.StopForGameOver();
             UIKit.ClearStack(MainStack, true);
             Time.timeScale = 0f;
             NarrativeRuntime runtime = narrativeIntegration?.Runtime;
-            var data = new ResultPanelData(this, runtime?.ResolveText(selectedEnding?.titleText) ?? "游戏结束",
-                runtime?.ResolveText(selectedEnding?.messageText) ?? "", ReturnFromGameOver, "返回主菜单");
+            // A real accepted ending and the restored-ending path share exactly the same panel snapshot.
+            // Do not show raw text keys or manufacture completion facts to produce this screen.
+            var accepted = selectedEnding ?? new NarrativeEndingDefinition { endingId = runtime?.Controller?.SelectedEndingId ?? "ending.unknown" };
+            var data = NarrativeEndingPresentation.Create(this, accepted,
+                key => runtime?.ResolveText(key) ?? key, ReturnFromGameOver);
             ResultPanel panel = UIKit.OpenPanel<ResultPanel>(UILevel.Pop, data, cachePolicy: PanelCachePolicy.Reusable);
             StartCoroutine(PushPanelWhenReady(panel, true, rootNavigationVersion));
         }
@@ -1269,6 +1374,23 @@ namespace Spotlight.GameFlow
         public void ReturnFromFirstArrival()
         {
             if (!gameplay || dayFlow == null || !dayFlow.IsFirstSessionGuideActive) return;
+            // Explicit opening IF0 belongs to the same ending pipeline as the later stories.
+            // Do not skip its panel by jumping to the menu from an EventCompleted listener.
+            var core = narrativeIntegration?.Runtime?.Controller;
+            if (core != null && core.State.HasHappenedEvent("arrival.leave"))
+            {
+                // EventCompleted listeners are inside an atomic notification boundary. Wait
+                // for that boundary instead of falsely reporting the completed IF0 as unready.
+                core.RunAtSafeBoundary(() =>
+                {
+                    if (SessionState != GameSessionState.Playing) return;
+                    core.SetEndingChecksEnabled(true);
+                    var ending = core.CheckEndingsAtSafeBoundary();
+                    if (ending != null) OnEndingSelected(ending);
+                    else Debug.LogWarning("[DayFlow] Opening departure has no valid formal ending; keeping the session rather than silently skipping its result panel.", this);
+                });
+                return;
+            }
             dayFlow.HideForMainMenu();
             Time.timeScale = 1f;
             LoadThen(OpenMainMenu, config.MainMenuScene);
@@ -1312,7 +1434,7 @@ namespace Spotlight.GameFlow
         {
             SetSessionState(GameSessionState.Loading);
             CloseDetails();
-            CloseMap();
+            ForceCloseMap();
             if (!preserveDayFlow && dayFlow != null) dayFlow.HideForMainMenu();
             int version = ++loadingVersion;
             loadingTransitioning = true;

@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using UnityEngine;
 
 namespace Spotlight.GameFlow
@@ -125,7 +125,7 @@ namespace Spotlight.GameFlow
             var resolved = library != null ? library.Find(key, contextKey) : null;
             if (resolved != null)
             {
-                if (resolved.placeholder && warnedPlaceholders.Add(key)) Debug.LogWarning("[NCS][BackgroundPlaceholder] key=" + key + "; using explicitly configured neutral color. Replace registry entry with matching artwork.");
+                if (resolved.placeholder && warnedPlaceholders.Add(key)) Debug.LogWarning("[NCS][BackgroundPlaceholder] key=" + key + (resolved.texture != null ? "; using a labelled local requirement card, NOT final artwork." : "; using explicitly configured neutral color.") + " Replace the registry entry only after art approval.");
                 return resolved;
             }
             Texture texture;

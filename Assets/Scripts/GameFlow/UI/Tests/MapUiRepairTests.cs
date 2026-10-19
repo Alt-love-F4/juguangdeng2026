@@ -284,6 +284,88 @@ namespace Spotlight.GameFlow.Tests
             Assert.That(calls, Is.EqualTo(1));
         }
 
+        [TestCase(NarrativeActionType.Daily)]
+        [TestCase(NarrativeActionType.Repeat)]
+        public void DetailUpdatesAffordableCostAndExecuteCaptionAfterDailyRefill(NarrativeActionType type)
+        {
+            var action = new NarrativeActionDefinition { actionKey = "daily_cost", type = type, requirements = "ActionPoint(1)" };
+            var config = new NarrativeConfiguration(); config.actions.Add(action);
+            runtime.Initialize(config, new ImmediatePresenter());
+            runtime.Actions.Mount("market", action.actionKey);
+            runtime.Actions.ActionPoints.Set(0);
+            CreateDetails(null); details.Show("market", "市场");
+            var card = details.transform.Find("Viewport/ActionList/Action_" + action.actionKey);
+            var caption = Widget(card.Find("Execute/Label"), "TMPro.TextMeshProUGUI");
+            var cost = Widget(card.Find("Requirement/Label"), "TMPro.TextMeshProUGUI");
+            Assert.That(Get<string>(caption, "text"), Is.EqualTo("行动点不足"));
+            Assert.That(card.Find("Requirement/ActionPointIcon").gameObject.activeSelf, Is.True);
+            runtime.Actions.BeginDay(2);
+            Invoke(details, "Update");
+            // Daily cards receive a new instance token and are rebuilt on the new day.
+            card = details.transform.Find("Viewport/ActionList/Action_" + action.actionKey);
+            caption = Widget(card.Find("Execute/Label"), "TMPro.TextMeshProUGUI");
+            cost = Widget(card.Find("Requirement/Label"), "TMPro.TextMeshProUGUI");
+            Assert.That(Get<string>(caption, "text"), Is.EqualTo("执行"));
+            Assert.That(Get<string>(cost, "text"), Is.EqualTo("消耗 1 点行动点\n当前 5 / 5"));
+            Assert.That(Get<Color>(cost, "color"), Is.EqualTo(MapVisualTheme.Ink));
+        }
+
+        [Test]
+        public void UnavailableStoryDoesNotMislabelAffordableActionPoints()
+        {
+            var action = new NarrativeActionDefinition { actionKey = "daily_pool", requirements = "ActionPoint(1)", resultEvents = new System.Collections.Generic.List<string> { "unavailable" } };
+            var config = new NarrativeConfiguration(); config.actions.Add(action);
+            config.events.Add(new NarrativeEventDefinition { eventId = "unavailable", onceOnly = true, entry = NarrativeEntryPoint.MapAction,
+                eventProperties = new System.Collections.Generic.List<NarrativeEventProperty> {
+                    new NarrativeEventProperty { property = "dailyPool", value = "market" },
+                    new NarrativeEventProperty { property = "dailyKind", value = "ordinary" } } });
+            runtime.Initialize(config, new ImmediatePresenter());
+            Assert.That(runtime.QueueMapActionEvent("unavailable"), Is.True);
+            runtime.Actions.Mount("market", action.actionKey);
+            CreateDetails(null); details.Show("market", "市场");
+            var card = details.transform.Find("Viewport/ActionList/Action_" + action.actionKey);
+            Assert.That(Get<string>(Widget(card.Find("Execute/Label"), "TMPro.TextMeshProUGUI"), "text"), Is.EqualTo("暂无可用事件"));
+            Assert.That(Get<Color>(Widget(card.Find("Requirement/Label"), "TMPro.TextMeshProUGUI"), "color"), Is.EqualTo(MapVisualTheme.Ink));
+        }
+
+        [Test]
+        public void PoolConditionUnlockRefreshesExistingDetailButtonWithoutReopening()
+        {
+            var config = new NarrativeConfiguration();
+            config.conditionKeys.Add(new NarrativeConditionKeyDefinition { key = "pool.ready" });
+            config.conditions.Add(new NarrativeConditionDefinition { conditionId = "pool.ready", ownerType = "event", ownerId = "ordinary",
+                groupIndex = 1, condType = "BOOL_EQ", target = "pool.ready", value = "true" });
+            config.events.Add(new NarrativeEventDefinition { eventId = "ordinary", entry = NarrativeEntryPoint.MapAction,
+                eventProperties = new System.Collections.Generic.List<NarrativeEventProperty> {
+                    new NarrativeEventProperty { property = "dailyPool", value = "market" },
+                    new NarrativeEventProperty { property = "dailyKind", value = "ordinary" } } });
+            var action = new NarrativeActionDefinition { actionKey = "daily_pool", requirements = "ActionPoint(1)",
+                resultEvents = new System.Collections.Generic.List<string> { "ordinary" } };
+            config.actions.Add(action); runtime.Initialize(config, new ImmediatePresenter());
+            runtime.Actions.Mount("market", action.actionKey);
+            CreateDetails(null); details.Show("market", "市场");
+            var card = details.transform.Find("Viewport/ActionList/Action_" + action.actionKey);
+            var caption = Widget(card.Find("Execute/Label"), "TMPro.TextMeshProUGUI");
+            Assert.That(Get<string>(caption, "text"), Is.EqualTo("暂无可用事件"));
+            runtime.Controller.State.SetCondition("pool.ready", true);
+            Invoke(details, "Update");
+            Assert.That(details.transform.Find("Viewport/ActionList/Action_" + action.actionKey), Is.SameAs(card));
+            Assert.That(Get<string>(caption, "text"), Is.EqualTo("执行"));
+            Assert.That(runtime.Actions.ActionPoints.Current, Is.EqualTo(5));
+        }
+
+        [Test]
+        public void ItemOnlyCostHidesActionPointIcon()
+        {
+            var action = new NarrativeActionDefinition { actionKey = "item_cost", requirements = "Item(beans,1)" };
+            var config = new NarrativeConfiguration(); config.actions.Add(action);
+            runtime.Initialize(config, new ImmediatePresenter()); runtime.Actions.Mount("market", action.actionKey);
+            CreateDetails(null); details.Show("market", "市场");
+            var card = details.transform.Find("Viewport/ActionList/Action_" + action.actionKey);
+            Assert.That(card.Find("Requirement/ActionPointIcon").gameObject.activeSelf, Is.False);
+            Assert.That(Get<string>(Widget(card.Find("Execute/Label"), "TMPro.TextMeshProUGUI"), "text"), Is.EqualTo("物品不足"));
+        }
+
         [Test]
         public void CafeEntryConsumesNoActionPointsItemsOrNarrativeActions()
         {
@@ -402,6 +484,61 @@ namespace Spotlight.GameFlow.Tests
             Assert.That(content.Find("EnterCafe"), Is.Not.Null);
             Assert.That(content.Find("Action_generic.activity"), Is.Not.Null);
             Assert.That(runtime.Actions.PendingFocusPosition, Is.EqualTo("cafe"));
+        }
+
+        [Test]
+        public void StoryBlockedActionGuidesToRealUnfinishedImportantTodoOnly()
+        {
+            var config = new NarrativeConfiguration();
+            config.conditionKeys.Add(new NarrativeConditionKeyDefinition { key = "story.ready" });
+            config.conditions.Add(new NarrativeConditionDefinition { conditionId = "pool.gate", ownerType = "event", ownerId = "ordinary",
+                groupIndex = 1, condType = "BOOL_EQ", target = "story.ready", value = "true" });
+            config.events.Add(new NarrativeEventDefinition { eventId = "ordinary", entry = NarrativeEntryPoint.MapAction,
+                eventProperties = new System.Collections.Generic.List<NarrativeEventProperty> {
+                    new NarrativeEventProperty { property = "dailyPool", value = "market" },
+                    new NarrativeEventProperty { property = "dailyKind", value = "ordinary" } } });
+            var optional = new NarrativeActionDefinition { actionKey = "optional", requirements = "ActionPoint(1)", resultEvents = new System.Collections.Generic.List<string> { "ordinary" } };
+            var important = new NarrativeActionDefinition { actionKey = "important", nameText = "重要拜访", type = NarrativeActionType.Once, mustExecute = true };
+            config.actions.Add(optional); config.actions.Add(important);
+            runtime.Initialize(config, new ImmediatePresenter());
+            runtime.Actions.Mount("market", optional.actionKey);
+            runtime.Actions.IsAvailable(optional.actionKey, out var checks);
+            Assert.That(GameplayTodoProjection.ShouldGuideToImportantTodo(runtime, optional, checks), Is.False,
+                "A future/unmounted prerequisite must not be invented as a current important task.");
+            runtime.Actions.Mount("cafe", important.actionKey);
+            var items = GameplayTodoProjection.Build(runtime);
+            Assert.That(items.First().actionKey, Is.EqualTo(important.actionKey));
+            Assert.That(items.First().important, Is.True);
+            Assert.That(GameplayTodoProjection.ShouldGuideToImportantTodo(runtime, optional, checks), Is.True);
+            CreateDetails(null); details.Show("market", "市场");
+            var caption = Widget(details.transform.Find("Viewport/ActionList/Action_optional/Execute/Label"), "TMPro.TextMeshProUGUI");
+            Assert.That(Get<string>(caption, "text"), Is.EqualTo("查看详情"));
+            runtime.Actions.ActionPoints.Set(0);
+            runtime.Actions.IsAvailable(optional.actionKey, out var costChecks);
+            Assert.That(GameplayTodoProjection.ShouldGuideToImportantTodo(runtime, optional, costChecks), Is.False,
+                "Insufficient resources retain their own feedback even when the story pool is also locked.");
+            runtime.Actions.ActionPoints.Set(5);
+            Assert.That(runtime.Actions.Execute(important.actionKey), Is.True);
+            Assert.That(GameplayTodoProjection.ShouldGuideToImportantTodo(runtime, optional, checks), Is.False);
+            Assert.That(GameplayTodoProjection.Build(runtime).Any(i => i.important), Is.False);
+            Assert.That(runtime.Actions.ActionPoints.Current, Is.EqualTo(5));
+        }
+
+        [Test]
+        public void ImportantTodoOverridesOptionalTrackingAndFutureIsNotImportant()
+        {
+            var taskRoot = Create("TaskFilter", root.transform); var tasks = taskRoot.AddComponent<MapTaskPanel>();
+            tasks.SetItems(new[] { new MapTaskItem { id = "optional", priority = -100 },
+                new MapTaskItem { id = "important", important = true },
+                new MapTaskItem { id = "done", completed = true, important = true } });
+            tasks.SetTracked("optional");
+            Assert.That(tasks.CurrentGuidance.id, Is.EqualTo("important"));
+            var config = new NarrativeConfiguration();
+            config.actions.Add(new NarrativeActionDefinition { actionKey = "future", type = NarrativeActionType.Future, durationDays = 3,
+                mustExecute = true, nextActionKey = "next" });
+            config.actions.Add(new NarrativeActionDefinition { actionKey = "next" });
+            runtime.Initialize(config, new ImmediatePresenter()); runtime.Actions.Mount("market", "future");
+            Assert.That(GameplayTodoProjection.Build(runtime).Single().important, Is.False);
         }
 
         [Test]
@@ -663,6 +800,7 @@ namespace Spotlight.GameFlow.Tests
             var requirement = Create("Requirement", template.transform);
             requirement.AddComponent(UiType("UnityEngine.UI.Image"));
             AddText("Label", requirement.transform, "行动点\n× 1");
+            Create("ActionPointIcon", requirement.transform).AddComponent(UiType("UnityEngine.UI.Image"));
             template.SetActive(false);
         }
 

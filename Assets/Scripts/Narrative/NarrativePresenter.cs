@@ -5,7 +5,7 @@ using UnityEngine;
 
 namespace Spotlight.Narrative
 {
-    public sealed partial class NarrativePresenter : INarrativePresenter, INarrativePresentationDrain, INarrativePresentationCancellation, INarrativePresentationContinuity, IDisposable
+    public sealed partial class NarrativePresenter : INarrativePresenter, INarrativePresentationDrain, INarrativePresentationCancellation, INarrativePresentationContinuity, INarrativeGameplayResultSource, IDisposable
     {
         private readonly NarrativeConfiguration configuration;
         private readonly Func<string, string> resolve;
@@ -15,7 +15,7 @@ namespace Spotlight.Narrative
         private Action completion;
         private Action drainCompleted;
         private Coroutine routine;
-        private IDisposable pauseOwner;
+        private PresenterPauseLease pauseOwner;
         private int ownerSceneHandle;
         private long sessionVersion;
         private NarrativeEventRequest request;
@@ -211,7 +211,8 @@ namespace Spotlight.Narrative
         private void BeginPause()
         {
             ownerSceneHandle = UnityEngine.SceneManagement.SceneManager.GetActiveScene().handle;
-            pauseOwner = Spotlight.GameFlow.PresentationPauseRegistry.Acquire("NarrativePresenter");
+            pauseOwner = new PresenterPauseLease();
+            pauseOwner.Resume();
         }
 
         // Drive nested enumerators ourselves: Unity does not propagate a child coroutine's
@@ -258,6 +259,7 @@ namespace Spotlight.Narrative
         {
             bool wasActive = completion != null || draining || batchActive || releaseActiveStage != null;
             sessionVersion++;
+            CancelGameplay();
             pauseOwner?.Dispose();
             pauseOwner = null;
             completion = drainCompleted = null;
@@ -322,6 +324,9 @@ namespace Spotlight.Narrative
             string Get(string key, string fallback = "") => slots.TryGetValue(key, out string value) ? value : fallback;
             skipRequested = false;
             allowSkip = string.Equals(template?.interruptType, "playback", StringComparison.OrdinalIgnoreCase) && (setup?.skipAble ?? template?.defaultSkip ?? false);
+            // A playback skip must never manufacture completion of a required host interaction.
+            if (configuration?.presentations?.conversationPages?.Exists(p => p != null && p.presentationKey == definition.presentationKey && p.stepType == NarrativeConversationStepType.Gameplay) == true)
+                allowSkip = false;
             string resolvedTitle = resolve(Get("titleKey", definition.titleText));
             if (!(Get("checkDisplay") == "passive" && string.IsNullOrWhiteSpace(definition.presentationKey)
                 && (definition.contentKeys == null || definition.contentKeys.Count == 0))) ui.Show(resolvedTitle, batchStage?.ConversationRelease != null);
@@ -496,11 +501,19 @@ namespace Spotlight.Narrative
                     releaseActiveStage = releaseStage;
                     try
                     {
-                    foreach (NarrativeConversationPageDefinition page in dialoguePages)
+                    var traversal = new NarrativeConversationTraversal(dialoguePages, startPage);
+                    while (traversal.MoveNext(p => PageVisible(p.pageId, p.pageCondKeys, p.pageBarConds)))
                     {
+                        NarrativeConversationPageDefinition page = traversal.Current;
                         if (disposed || skipRequested) yield break;
-                        if (!PageVisible(page.pageId, page.pageCondKeys, page.pageBarConds)) continue;
-                        if (dialoguePages.IndexOf(page) < startPage) continue;
+                        if (page.stepType == NarrativeConversationStepType.End) { finishPresentation = true; yield break; }
+                        if (page.stepType == NarrativeConversationStepType.Gameplay)
+                        {
+                            if (!string.IsNullOrWhiteSpace(page.bgOverride)) stage.Background = inheritedBackground = page.bgOverride;
+                            yield return GameplayStep(definition, page, stage);
+                            if (completion == null) yield break;
+                            continue;
+                        }
                         if (page.stepType == NarrativeConversationStepType.LetterReveal || page.stepType == NarrativeConversationStepType.LetterRead)
                         {
                             if (!string.IsNullOrWhiteSpace(page.bgOverride)) stage.Background = inheritedBackground = page.bgOverride;
@@ -517,7 +530,7 @@ namespace Spotlight.Narrative
                         {
                             var check = (InlineAbilityCheck ?? AbilityCheck)?.Invoke(page.checkId);
                             if (check == null) throw new InvalidOperationException("Inline ability check unavailable: " + page.checkId);
-                            if (!check.passed) continue;
+                            if (!check.passed) { traversal.ResumeLinearAfterCurrent(); continue; }
                             stepHint = PassiveCheckPresentationConfig.Hint(check);
                         }
                         if (!string.IsNullOrWhiteSpace(page.bgOverride)) stage.Background = inheritedBackground = page.bgOverride;
@@ -636,17 +649,29 @@ namespace Spotlight.Narrative
                         portraitPath = character?.portraitPath ?? (string.IsNullOrWhiteSpace(speaker?.portraitPath) ? speaker?.iconPath : speaker.portraitPath), mode = line.mode, voiceKey = line.voiceKey
                     });
                 }
+                bool pageClosed = false;
                 var pageRequest = new NarrativeEventRequest(request.Event, request.Trigger, request.Depth, request.SelectedChoices,
-                    request.Context, request.RequestId, request.PassiveHint, readingLines);
+                    request.Context, request.RequestId, request.PassiveHint, readingLines, candidate: request.Candidate,
+                    presentationCancelled: () =>
+                    {
+                        if (pageClosed || disposed || sessionVersion != version || completion == null) return;
+                        pageClosed = true;
+                        AbortPresentation("playback_cancelled");
+                    });
                 bool done = false;
                 string title = string.IsNullOrWhiteSpace(page.titleKey) ? resolvedTitle : resolve(page.titleKey);
                 string body = string.Join("\n", readingLines.ConvertAll(line => line.text));
                 var dialogueLine = readingLines.Find(line => string.Equals(line.mode, "dialogue", StringComparison.OrdinalIgnoreCase));
-                // The formal single-page API has one terminal callback: both finish and cancel
-                // complete this page. Disposal/host loss instead invalidates the entire session.
+                // Finish advances this page; cancellation uses the optional request callback
+                // and aborts the root without settling growth/news/choice results.
                 bool handled = readingPlayback?.Invoke(pageRequest, title, new[] { body }, page.imageKey,
                     dialogueLine != null, dialogueLine?.speakerName, dialogueLine?.portraitPath,
-                    () => { if (!disposed && sessionVersion == version) done = true; }) ?? false;
+                    () =>
+                    {
+                        if (pageClosed || disposed || sessionVersion != version || completion == null) return;
+                        pageClosed = true;
+                        done = true;
+                    }) ?? false;
                 if (disposed || sessionVersion != version) yield break;
                 if (!handled) throw new InvalidOperationException("Reading playback is unavailable: " + page.pageId);
                 ui.Hide();

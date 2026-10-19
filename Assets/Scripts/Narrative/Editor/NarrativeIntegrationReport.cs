@@ -103,18 +103,29 @@ namespace Spotlight.Narrative.Editor
             result.LineCount = lines.Count;
             result.ChoiceCount = c.choices.Count(item => item != null && pages.Any(page => page.optionGroupKey == item.groupKey));
             result.LetterStepCount = pages.Count(page => page.stepType == NarrativeConversationStepType.LetterReveal || page.stepType == NarrativeConversationStepType.LetterRead);
-            result.ReadingPageCount = c.presentations?.readingPages?.Count(item => item != null && pages.Any(page => page.readingKey == item.presentationKey)) ?? 0;
-            result.ReadingLineCount = c.presentations?.readingLines?.Count(item => item != null
-                && c.presentations.readingPages.Any(page => page != null && page.pageId == item.pageId && pages.Any(step => step.readingKey == page.presentationKey))) ?? 0;
+            // Reading can be the event's direct presentation, not only a nested letter step.
+            // Resolve the index class exactly as the runtime does and count shared readings once.
+            var presentation = c.presentations?.index?.FirstOrDefault(item => item != null && item.presentationKey == definition.presentationKey);
+            string presentationClass = presentation?.presentationClass ?? definition.presentationClass;
+            var readingKeys = new HashSet<string>(pages.Where(page => !string.IsNullOrWhiteSpace(page.readingKey)).Select(page => page.readingKey), StringComparer.Ordinal);
+            if (!string.IsNullOrWhiteSpace(definition.presentationKey) && string.Equals(presentationClass, "Reading", StringComparison.OrdinalIgnoreCase))
+                readingKeys.Add(definition.presentationKey);
+            var readingPages = c.presentations?.readingPages?.Where(item => item != null && readingKeys.Contains(item.presentationKey))
+                .ToList() ?? new List<NarrativeReadingPageDefinition>();
+            var readingPageIds = new HashSet<string>(readingPages.Select(page => page.pageId), StringComparer.Ordinal);
+            var readingLines = c.presentations?.readingLines?.Where(item => item != null && readingPageIds.Contains(item.pageId))
+                .ToList() ?? new List<NarrativeReadingLineDefinition>();
+            result.ReadingPageCount = readingPages.Count;
+            result.ReadingLineCount = readingLines.Count;
 
             var setup = c.setups.FirstOrDefault(item => item != null && item.setupKey == definition.setupKey);
             if (!string.IsNullOrWhiteSpace(definition.setupKey) && setup == null)
                 result.Errors.Add("Missing SetupParams: " + definition.setupKey);
             if (!string.IsNullOrWhiteSpace(definition.presentationKey) && pages.Count == 0
-                && string.Equals(definition.presentationClass, "Conversation", StringComparison.OrdinalIgnoreCase))
+                && string.Equals(presentationClass, "Conversation", StringComparison.OrdinalIgnoreCase))
                 result.Errors.Add("Conversation has no ConversationPage rows: " + definition.presentationKey);
-            if (!string.IsNullOrWhiteSpace(definition.presentationKey) && string.Equals(definition.presentationClass, "Reading", StringComparison.OrdinalIgnoreCase)
-                && result.ReadingPageCount == 0)
+            if (!string.IsNullOrWhiteSpace(definition.presentationKey) && string.Equals(presentationClass, "Reading", StringComparison.OrdinalIgnoreCase)
+                && !readingPages.Any(page => page.presentationKey == definition.presentationKey))
                 result.Errors.Add("Reading presentation has no ReadingPage rows: " + definition.presentationKey);
 
             var checkedBackgrounds = new HashSet<string>(StringComparer.Ordinal);
@@ -144,6 +155,19 @@ namespace Spotlight.Narrative.Editor
                     result.Errors.Add("Line " + line.lineId + " references unknown speaker: " + line.speakerKey);
                 if (!string.IsNullOrWhiteSpace(line.speakerNameKey))
                     RequireText(c, line.speakerNameKey, "Speaker name " + line.lineId, result);
+            }
+            foreach (NarrativeReadingPageDefinition page in readingPages)
+            {
+                RequireText(c, page.titleKey, "Reading page title " + page.pageId, result);
+                if (!readingLines.Any(line => line.pageId == page.pageId))
+                    result.Errors.Add("ReadingPage has no ReadingLine rows: " + page.pageId);
+            }
+            foreach (NarrativeReadingLineDefinition line in readingLines)
+            {
+                if (string.IsNullOrWhiteSpace(line.textKey)) result.Errors.Add("Reading line " + line.lineId + " has no text key.");
+                else RequireText(c, line.textKey, "Reading line " + line.lineId, result);
+                if (!string.IsNullOrWhiteSpace(line.speakerKey) && !c.objects.Any(item => item != null && item.objId == line.speakerKey))
+                    result.Errors.Add("Reading line " + line.lineId + " references unknown speaker: " + line.speakerKey);
             }
             if (!string.IsNullOrWhiteSpace(definition.titleText)) RequireText(c, definition.titleText, "Event title", result);
             foreach (string key in definition.contentKeys ?? new List<string>()) RequireText(c, key, "Event content", result);

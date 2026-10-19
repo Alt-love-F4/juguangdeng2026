@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Collections.Generic;
 
 namespace Spotlight.FreeCafe
@@ -180,6 +180,7 @@ namespace Spotlight.FreeCafe
         /// <summary>开始营业；独立沙盒可从打烊进入次日，正式日程必须先显式休息。</summary>
         public ActionResult StartDay(bool advanceFromNight = true)
         {
+            if (HasNarrativeService) return ActionResult.No("请先完成或取消当前剧情点单。 ");
             if (HasTutorialCustomer) return ActionResult.No("请先完成首位客人的黑咖啡教程");
             if (State.open)
             {
@@ -202,15 +203,15 @@ namespace Spotlight.FreeCafe
             State.todayFailed = 0;
             State.todayRevenue = 0;
             State.todayArrivals = 0;
+            State.todayReplacedCustomers = 0;
             State.lastSummary = null;
             State.arrivalRemaining = Catalog.customerInterval;
             State.timeRemaining = Catalog.daySeconds;
 
-            // 今日客流 = 基础客流 + 历史服务量的成长奖励 + 0~2 的随机浮动，且不超过上限
-            State.todayCustomerBudget = Math.Min(Catalog.economy.maxCustomers,
-                Catalog.economy.baseCustomers
-                + State.served / Math.Max(1, Catalog.economy.customerGrowthEvery)
-                + (int)(NextRandom() % 3));
+            // 普通客流只按开业时声望确定；负声望按 0 计，不受累计服务量或随机数影响。
+            State.todayCustomerBudget = (int)Math.Min(Catalog.economy.maxCustomers,
+                (long)Catalog.economy.baseCustomers
+                + Math.Max(0, State.reputation) / Catalog.economy.customersReputationStep);
 
             UnlockContent();
 
@@ -284,6 +285,7 @@ namespace Spotlight.FreeCafe
         /// <summary>打烊结算：未完成的订单算失败，按当日成绩增减声望，并结算技能点里程碑。</summary>
         public ActionResult EndDay()
         {
+            narrativeService?.Dispose();
             if (!State.open)
             {
                 return ActionResult.No("当前没有营业");
@@ -305,8 +307,10 @@ namespace Spotlight.FreeCafe
             State.open = false;
             State.businessPhase = BusinessPhase.Night;
 
-            // 当日不足 10 单会倒扣声望，差额就是惩罚
-            int change = State.todayServed >= 10 ? State.todayServed : State.todayServed - 10;
+            // 最多要求 10 单，但只以实际到店人数为目标；未到店的特殊预约不增加义务。
+            int target = Math.Min(10, Math.Max(1, Math.Min(State.todayCustomerBudget,
+                State.todayArrivals - State.todayReplacedCustomers)));
+            int change = State.todayServed >= target ? State.todayServed : State.todayServed - target;
             State.reputation += change;
 
             if (change > 0)
@@ -437,6 +441,7 @@ namespace Spotlight.FreeCafe
                 for (int i = State.requests.Count - 1; i >= 0; i--)
                 {
                     var r = State.requests[i];
+                    if (narrativeService != null && narrativeService.Owns(r.id)) continue;
                     r.patience -= seconds;
 
                     // 自动点单到期：顾客自行完成，直接结算
@@ -498,6 +503,7 @@ namespace Spotlight.FreeCafe
                         WorldEntity deliver = null;
                         foreach (var e in State.entities)
                         {
+                            if (narrativeService != null && narrativeService.Owns(State.focusedRequestId)) break;
                             if (e.area == service.area && !Locked(e) && Spec(e.specId).Has(Capability.Container))
                             {
                                 var r = Request(State.focusedRequestId);

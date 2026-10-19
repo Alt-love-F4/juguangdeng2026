@@ -191,7 +191,7 @@ namespace Spotlight.Narrative
             foreach (var row in tables.TbNcsPresentationIndex.DataList)
                 config.presentations.index.Add(new NarrativePresentationIndexDefinition { presentationKey = row.PresentationKey, presentationClass = row.PresentationClass, logTag = row.LogTag });
             foreach (var row in tables.TbNcsConversationPage.DataList)
-                config.presentations.conversationPages.Add(new NarrativeConversationPageDefinition { pageId = row.PageId, presentationKey = row.PresentationKey, seq = row.Seq, pageCondKeys = row.PageCondKeys, pageBarConds = row.PageBarConds, optionGroupKey = row.OptionGroupKey, bgOverride = row.BgOverride, bgmOverride = row.BgmOverride, stepType = ParseConversationStepType(row.StepType), readingKey = row.ReadingKey, checkId = row.CheckId });
+                config.presentations.conversationPages.Add(new NarrativeConversationPageDefinition { pageId = row.PageId, presentationKey = row.PresentationKey, seq = row.Seq, pageCondKeys = row.PageCondKeys, pageBarConds = row.PageBarConds, optionGroupKey = row.OptionGroupKey, bgOverride = row.BgOverride, bgmOverride = row.BgmOverride, stepType = ParseConversationStepType(row.StepType), readingKey = row.ReadingKey, checkId = row.CheckId, gameplayKey = row.GameplayKey, nextPageId = row.NextPageId });
             foreach (var row in tables.TbNcsConversationLine.DataList)
                 config.presentations.conversationLines.Add(new NarrativeConversationLineDefinition { lineId = row.LineId, pageId = row.PageId, seq = row.Seq, speakerKey = row.SpeakerKey, side = row.Side, textKey = row.TextKey, voiceKey = row.VoiceKey, emote = row.Emote, sfxKey = row.SfxKey, accentFxKey = row.AccentFxKey, accentTargetKey = row.AccentTargetKey, speakerNameKey = row.SpeakerNameKey });
             foreach (var row in tables.TbNcsNotice.DataList)
@@ -275,6 +275,7 @@ namespace Spotlight.Narrative
                     "choice" => c.choices.Any(x => x.choiceId == row.ownerId),
                     "action" => c.actions.Any(x => x.actionKey == row.ownerId),
                     "ending" => endingIds.Contains(row.ownerId),
+                    "result" => c.results.Any(x => x != null && x.resultId == row.ownerId),
                     _ => false
                 };
                 if (!knownOwner || string.IsNullOrWhiteSpace(row.ownerId)) errors.Add(label + "unknown " + owner + " owner " + row.ownerId);
@@ -283,10 +284,16 @@ namespace Spotlight.Narrative
                 string type = (row.condType ?? "").ToUpperInvariant();
                 string target = row.target ?? "";
                 string key = target.Contains(":") ? target.Substring(target.IndexOf(':') + 1) : target;
+                if (owner == "result" && type != "BOOL_EQ") errors.Add(label + "result conditions require BOOL_EQ presentation guards.");
                 switch (type)
                 {
                     case "BOOL_EQ":
-                        if (!keys.ContainsKey(target)) errors.Add(label + "unknown bool key " + target);
+                        if (owner == "result" || owner == "action")
+                        {
+                            string guardError = NarrativePresentationGuards.Validate(c, target, allowTransient: owner == "result");
+                            if (guardError != null) errors.Add(label + guardError);
+                        }
+                        else if (!keys.ContainsKey(target)) errors.Add(label + "unknown bool key " + target);
                         if (!bool.TryParse(row.value, out _)) errors.Add(label + "expected true or false.");
                         break;
                     case "ITEM_GTE":
@@ -324,6 +331,11 @@ namespace Spotlight.Narrative
             {
                 string label = "Result " + result.resultId + ": ";
                 if (!Enum.IsDefined(typeof(NarrativeResultType), result.resultType)) errors.Add(label + "unsupported resultType.");
+                if (result.resultType == NarrativeResultType.TrainAttribute)
+                {
+                    string trainingError = ValidateTrainingResult(c, result);
+                    if (trainingError != null) errors.Add(label + trainingError);
+                }
                 if (result.resultType == NarrativeResultType.SetFlag || result.resultType == NarrativeResultType.ClearFlag)
                 {
                     string target = result.target ?? "";
@@ -698,6 +710,7 @@ namespace Spotlight.Narrative
             "DESPAWN_NPC" => NarrativeResultType.DespawnNpc,
             "RESERVE_CAFE_VISIT" => NarrativeResultType.ReserveCafeVisit,
             "QUEUE_EVENT" => NarrativeResultType.QueueEvent,
+            "TRAIN_ATTRIBUTE" => NarrativeResultType.TrainAttribute,
             "SHOWPOSITION" or "SHOW_POSITION" => NarrativeResultType.ShowPosition,
             "HIDEPOSITION" or "HIDE_POSITION" => NarrativeResultType.HidePosition,
             "ADDTEMPPOSITION" or "ADD_TEMP_POSITION" => NarrativeResultType.AddTempPosition,

@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Collections;
 using System.Collections.Generic;
 using TMPro;
@@ -58,6 +58,8 @@ namespace Spotlight.GameFlow
         private Preview lastPreview;
         private readonly PresentationDebugDialogueMenu dialogueMenu = new PresentationDebugDialogueMenu();
         private string selectedDialogueId;
+        private string selectedEndingPreviewId;
+        private NarrativeConfiguration endingPreviewConfiguration;
 
         public bool IsDialogueMenuOpen => dialogueMenu.IsOpen;
         public string SelectedDialogueId => selectedDialogueId;
@@ -149,7 +151,21 @@ namespace Spotlight.GameFlow
             catch (Exception error) { chapterPreview.Dispose(); chapterPreview = null; SetStatus("预览失败", error.Message); }
         }
 
-        public void PlayGameOver() => PlayPreview(Preview.GameOver);
+        public void PlayGameOver() { selectedEndingPreviewId = null; PlayPreview(Preview.GameOver); }
+
+        /// <summary>Read-only preview of a configured ending panel; never requests an event or marks facts.</summary>
+        public void PlayEnding(string endingId) => PlayEnding(endingId, LubanNarrativeLoader.Load());
+
+        /// <summary>Browse several ending snapshots without loading all story tables twice per panel.</summary>
+        public void PlayEnding(string endingId, NarrativeConfiguration configuration)
+        {
+            if (configuration == null) throw new ArgumentNullException(nameof(configuration));
+            var definition = configuration.endings.Find(e => e.endingId == endingId && e.enabled);
+            if (definition == null) throw new ArgumentException("Unknown or disabled ending: " + endingId, nameof(endingId));
+            selectedEndingPreviewId = endingId;
+            endingPreviewConfiguration = configuration;
+            PlayPreview(Preview.GameOver);
+        }
         public void PlayOpeningPrologue() => PlayPreview(Preview.OpeningPrologue);
         public void PlayLongLoading() => PlayPreview(Preview.LongLoading);
         public void PlayShortLoading() => PlayPreview(Preview.ShortLoading);
@@ -223,6 +239,7 @@ namespace Spotlight.GameFlow
         {
             StopCurrent();
             selectedDialogueId = null;
+            if (preview != Preview.GameOver) { selectedEndingPreviewId = null; endingPreviewConfiguration = null; }
             lastPreview = preview;
             hasLastPreview = true;
             int version = ++requestVersion;
@@ -233,9 +250,17 @@ namespace Spotlight.GameFlow
                 switch (preview)
                 {
                     case Preview.GameOver:
-                        currentPanel = UIKit.OpenPanel<ResultPanel>(UILevel.Pop,
-                            new ResultPanelData(null, "游戏结束", "每日交付已完成。你的选择让这段旅程迎来了结局。", () => Complete(version), "返回主菜单"),
-                            tag: DebugTag, cachePolicy: PanelCachePolicy.Transient);
+                        ResultPanelData resultData;
+                        if (!string.IsNullOrWhiteSpace(selectedEndingPreviewId))
+                        {
+                            var endingConfig = endingPreviewConfiguration ?? LubanNarrativeLoader.Load();
+                            var ending = endingConfig.endings.Find(e => e.endingId == selectedEndingPreviewId && e.enabled);
+                            resultData = NarrativeEndingPresentation.Create(null, ending,
+                                key => endingConfig.texts.Find(t => t.key == key)?.content ?? key,
+                                () => Complete(version), "关闭结局预览");
+                        }
+                        else resultData = new ResultPanelData(null, "游戏结束", "每日交付已完成。你的选择让这段旅程迎来了结局。", () => Complete(version), "返回主菜单");
+                        currentPanel = UIKit.OpenPanel<ResultPanel>(UILevel.Pop, resultData, tag: DebugTag, cachePolicy: PanelCachePolicy.Transient);
                         break;
                     case Preview.OpeningPrologue:
                         Open<OpeningProloguePanel>().Play(() => Complete(version));

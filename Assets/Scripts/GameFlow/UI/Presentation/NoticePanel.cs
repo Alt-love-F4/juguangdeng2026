@@ -165,7 +165,7 @@ namespace Spotlight.GameFlow
 
         public void Confirm()
         {
-            if (!IsPlaying || !ready || exiting || lastConfirmFrame == Time.frameCount) return;
+            if (!IsPlaying || !ready || exiting || DialoguePanel.IsExternalInputBlocked || lastConfirmFrame == Time.frameCount) return;
             lastConfirmFrame = Time.frameCount;
             if (textPage < textPageCount)
             {
@@ -217,7 +217,7 @@ namespace Spotlight.GameFlow
         private void Update()
         {
             if (newspaperLayout != null && transform is RectTransform root && root.rect.size != layoutSize) FitLayout();
-            if (!IsPlaying || exiting) return;
+            if (!IsPlaying || exiting || DialoguePanel.IsExternalInputBlocked) return;
             Keyboard keyboard = Keyboard.current;
             if (keyboard != null && keyboard.escapeKey.wasPressedThisFrame) { Cancel(); return; }
             if (keyboard != null && (keyboard.spaceKey.wasPressedThisFrame || keyboard.enterKey.wasPressedThisFrame
@@ -226,7 +226,7 @@ namespace Spotlight.GameFlow
 
         public void Cancel()
         {
-            if (!IsPlaying || exiting) return;
+            if (!IsPlaying || exiting || DialoguePanel.IsExternalInputBlocked) return;
             Action callback = cancelled;
             Stop();
             CloseSelf();

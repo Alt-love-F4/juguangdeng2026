@@ -56,6 +56,27 @@ namespace Spotlight.Narrative
                 string label = "ConversationPage " + page.pageId + ": ";
                 var lines = c.presentations.conversationLines.FindAll(x => x != null && x.pageId == page.pageId);
                 if (page.seq < 1) errors.Add(label + "sequence must be positive.");
+                if (!string.IsNullOrWhiteSpace(page.nextPageId))
+                {
+                    var next = pages.Find(p => p != null && p.pageId == page.nextPageId);
+                    if (next == null || next.presentationKey != page.presentationKey) errors.Add(label + "nextPageId must stay inside the same presentation.");
+                    if (page.stepType == NarrativeConversationStepType.End) errors.Add(label + "End cannot have nextPageId.");
+                }
+                if (!string.IsNullOrWhiteSpace(page.pageCondKeys))
+                    foreach (string guard in page.pageCondKeys.Split(new[] { '|', ',' }, StringSplitOptions.RemoveEmptyEntries))
+                    {
+                        string guardError = NarrativePresentationGuards.Validate(c, guard);
+                        if (guardError != null) errors.Add(label + guardError);
+                    }
+                if (page.stepType == NarrativeConversationStepType.End || page.stepType == NarrativeConversationStepType.Gameplay)
+                {
+                    if (lines.Count > 0 || !string.IsNullOrWhiteSpace(page.optionGroupKey)) errors.Add(label + "End/Gameplay cannot contain dialogue or choices.");
+                }
+                if (page.stepType == NarrativeConversationStepType.Gameplay)
+                {
+                    if (string.IsNullOrWhiteSpace(page.gameplayKey)) errors.Add(label + "Gameplay requires gameplayKey.");
+                }
+                else if (!string.IsNullOrWhiteSpace(page.gameplayKey)) errors.Add(label + "gameplayKey requires Gameplay.");
                 bool letter = page.stepType == NarrativeConversationStepType.LetterReveal || page.stepType == NarrativeConversationStepType.LetterRead;
                 if (!Enum.IsDefined(typeof(NarrativeConversationStepType), page.stepType)) errors.Add(label + "invalid stepType.");
                 if (page.stepType == NarrativeConversationStepType.PassiveCheck)

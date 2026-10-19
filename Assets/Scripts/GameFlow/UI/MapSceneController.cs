@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using TMPro;
 using UnityEngine;
 using UnityEngine.EventSystems;
@@ -153,7 +153,15 @@ namespace Spotlight.GameFlow
             }
         }
 
-        internal bool ControlsAvailable => !standaloneLoading && !GameplayHudPanel.BlocksWorldInput && (flow == null || flow.MapControlsAvailable);
+        public bool ControlsAvailable => !standaloneLoading && !GameplayHudPanel.BlocksWorldInput && (flow == null || flow.MapControlsAvailable);
+        public bool UsageTutorialAvailable => ControlsAvailable && !GuideLocked && isActiveAndEnabled
+            && !DialoguePanel.IsAnyPlaying && Time.timeScale > 0
+            && !(NarrativeRuntime.Instance?.Controller?.IsBusy ?? false)
+            && !(NarrativeRuntime.Instance?.Actions?.IsExecuting ?? false);
+        public event Action<string, bool> LocationSelected;
+        public Button TutorialLocationButton => locationButtons.Values.FirstOrDefault(button => button != null
+            && button.isActiveAndEnabled && button.interactable);
+        public bool IsLocationPopupVisible => actionDetails != null && actionDetails.gameObject.activeInHierarchy;
         private bool ViewAvailable => !standaloneLoading && !GameplayHudPanel.BlocksWorldInput && isActiveAndEnabled;
         private bool GuideLocked => IsFirstDay && flow != null && flow.GetComponent<DayFlowController>()?.IsFirstSessionGuideActive == true;
         private bool IsFirstDay => (NarrativeRuntime.Instance?.Actions?.CurrentDay ?? 1) == 1;
@@ -237,15 +245,12 @@ namespace Spotlight.GameFlow
                     case "详情面板": button.onClick.AddListener(OpenDetails); break;
                     case "InventoryToggle": button.onClick.AddListener(ToggleInventory); break;
                     case "TasksToggle": button.onClick.AddListener(ToggleTasks); break;
-                    case "结束当天":
-                        if (endDayButton == null) endDayButton = button;
-                        button.onClick.AddListener(EndDay);
-                        break;
+                    case "结束当天": button.gameObject.SetActive(false); break;
                 }
             }
             ConfigureZoomFill(zoomSlider);
             if (zoomSlider != null) zoomSlider.onValueChanged.AddListener(value => { targetZoom = value; focusZooming = false; });
-            if (endDayButton != null && UnityEngine.SceneManagement.SceneManager.GetActiveScene().name == "CoffeeShop") endDayButton.gameObject.SetActive(false);
+            if (endDayButton != null) endDayButton.gameObject.SetActive(false);
             BindConfiguredLocations();
         }
 
@@ -323,15 +328,6 @@ namespace Spotlight.GameFlow
             BuildArtworkHud(hud, header, detail);
             actionDetails.Initialize(inventoryView, () => ControlsAvailable, EndDay, StartCafe);
             BuildTaskPanel(widgets);
-            Button endDay = CreateButton("结束当天", root, new Vector2(-110, 46), new Vector2(180, 52));
-            endDayButton = endDay;
-            endDay.transform.SetParent(hud, false);
-            endDay.transform.SetParent(widgets.Find("TaskPanel"), false);
-            ((RectTransform)endDay.transform).SetAnchors(new Vector2(.5f, 0), new Vector2(.5f, 0), new Vector2(0, 48), new Vector2(280, 50));
-            MapVisualTheme.Skin(endDay.GetComponent<Image>(), MapVisualTheme.Current?.tracking);
-            endDay.onClick.AddListener(EndDay);
-            if (UnityEngine.SceneManagement.SceneManager.GetActiveScene().name == "CoffeeShop")
-                endDay.gameObject.SetActive(false);
             status = CreateLabel("Status", root, "滚轮缩放，WASD移动；点击地点聚焦，右键退出聚焦", 20, new Color(1,1,1,.8f), TextAlignmentOptions.Center);
             status.transform.SetParent(hud, false);
             status.rectTransform.SetAnchors(new Vector2(.5f, 0), new Vector2(.5f, 0), new Vector2(0, 22), new Vector2(960, 32));
@@ -467,18 +463,7 @@ namespace Spotlight.GameFlow
                 float sliderValue = Mathf.Clamp(targetZoom, minZoom, maxZoom);
                 if (zoomSlider.value != sliderValue) zoomSlider.SetValueWithoutNotify(sliderValue);
             }
-            if (endDayButton != null)
-            {
-                bool blocking = NarrativeRuntime.Instance?.Actions?.HasBlockingActions() ?? false;
-                string endDayText = blocking ? "有需要进行的行动" : "结束当天";
-                if (endDayLabel != null)
-                {
-                    if (endDayLabel.text != endDayText) endDayLabel.text = endDayText;
-                    if (endDayLabel.fontSize != 18f) endDayLabel.fontSize = 18f;
-                }
-                Color endDayColor = blocking ? new Color(.75f, .67f, .55f) : Color.white;
-                if (endDayImage != null && !endDayImage.color.Equals(endDayColor)) endDayImage.color = endDayColor;
-            }
+            if (endDayButton != null) endDayButton.gameObject.SetActive(false);
             ApplyFirstDayGuide();
             TryFocusCompletedAction();
             if (zoomSlider != null) zoomSlider.interactable = ViewAvailable && !GuideLocked;
@@ -762,7 +747,9 @@ namespace Spotlight.GameFlow
         private void BindAuthoredLocation(NarrativeMapPositionDefinition position)
         {
             if (entities == null || position == null) return;
-            Button button = entities.Find("Location:" + position.positionKey)?.GetComponent<Button>();
+            string anchorKey = position.positionKey == "旧城区" ? "大堂区" : position.positionKey == "圣地大教堂" ? "temporary" : position.positionKey;
+            // Reuse authored legacy anchors, not runtime-generated map artwork. Canonical keys remain in NCS.
+            Button button = entities.Find("Location:" + anchorKey)?.GetComponent<Button>();
             if (button == null)
             {
                 Debug.LogWarning("[Map] No authored location object for " + position.positionKey + "; runtime will not synthesize map artwork.", this);
@@ -794,7 +781,8 @@ namespace Spotlight.GameFlow
         private void OnMapContentChanged(string positionKey)
         {
             if (locationDots.TryGetValue(positionKey, out var dot) && dot != null)
-                dot.gameObject.SetActive(NarrativeRuntime.Instance?.Actions?.HasUnseenActions(positionKey) ?? false);
+                dot.gameObject.SetActive(AllowsTodoPosition(positionKey)
+                    && (NarrativeRuntime.Instance?.Actions?.HasUnseenAvailableActions(positionKey) ?? false));
         }
 
         private void EnsureNarrativeRuntime()
@@ -897,9 +885,18 @@ namespace Spotlight.GameFlow
 
         private void OnPositionClicked(NarrativeMapPositionDefinition position)
         {
-            if (!ControlsAvailable || (actionDetails != null && actionDetails.IsBusy) || position == null) return;
+            if (!ControlsAvailable || (actionDetails != null && actionDetails.IsBusy))
+            {
+                OperationToastPanel.ShowBlocked("当前行动或剧情尚未结束，暂时不能选择新的地点。");
+                return;
+            }
+            if (position == null) return;
             DayFlowController dayFlow = flow != null ? flow.GetComponent<DayFlowController>() : null;
-            if (IsFirstDay && dayFlow != null && dayFlow.IsFirstDayCafeMapGuideActive && !MapActionDetailsView.IsCafeEntryPosition(position.positionKey)) return;
+            if (IsFirstDay && dayFlow != null && dayFlow.IsFirstDayCafeMapGuideActive && !MapActionDetailsView.IsCafeEntryPosition(position.positionKey))
+            {
+                OperationToastPanel.ShowBlocked("请先进入咖啡馆完成新手教程，再探索其他地点。");
+                return;
+            }
             bool hasConfiguredContent = NarrativeRuntime.Instance?.Actions?.GetDisplayableActions(position.positionKey).Any() ?? false;
             if (MapActionDetailsView.IsCafeEntryPosition(position.positionKey) || (!IsFirstDay && hasConfiguredContent))
             {
@@ -916,6 +913,7 @@ namespace Spotlight.GameFlow
             // Ordinary map locations remain visible while their action details are open.
             // Only explicitly dismissible temporary markers should disappear on click.
             if (position.isTemporary && position.dismissOnClick) RemoveTemporaryPosition(position.positionKey);
+            LocationSelected?.Invoke(position.positionKey, IsLocationPopupVisible);
         }
 
         private void ApplyFirstDayGuide()
@@ -1058,6 +1056,8 @@ namespace Spotlight.GameFlow
             if (!ControlsAvailable) return;
             NarrativeActionController actions = NarrativeRuntime.Instance?.Actions;
             if (actions == null) { status.text = "行动系统尚未初始化"; return; }
+            if (actions.IsAvailable(action.actionKey, out _) && flow != null
+                && flow.TryCloseCafeForMapAction(focusedPosition?.positionKey, action.actionKey)) return;
             if (!actions.Execute(action.actionKey, success =>
             {
                 status.text = success ? "行动完成：" + ResolveText(action.nameText, action.actionKey) : "行动事件未能执行";
@@ -1133,10 +1133,6 @@ namespace Spotlight.GameFlow
                 items.Add(new MapTaskItem { id = "guide.map.cafe", name = "进入咖啡馆", location = "咖啡馆", positionKey = "cafe",
                     description = "前往咖啡馆，继续教程或今天的经营。", currentTask = "点击咖啡馆地点，在详情中选择「进入咖啡馆」。",
                     status = "可前往", navigationLabel = "查看咖啡馆入口", priority = GuideLocked ? 0 : 20, preventsRest = GuideLocked });
-            if (!GuideLocked && !(actions?.HasBlockingActions() ?? false))
-                items.Add(new MapTaskItem { id = "guide.map.rest", name = "结束这一天", location = "城区地图",
-                    description = "今天的事项处理完毕后，可以休息并进入下一天。", currentTask = "点击待办面板底部的「结束当天」。休息会推进日期，请先确认没有遗漏。",
-                    status = "可进行 · 将推进日期", priority = 100 });
         }
 
         public bool AllowsTodoPosition(string positionKey)
@@ -1165,18 +1161,10 @@ namespace Spotlight.GameFlow
 
         private void EndDay()
         {
+            // Legacy map/NCS end-day callbacks may guide home, but never advance the date.
             if (!ControlsAvailable || GuideLocked || (actionDetails != null && actionDetails.IsBusy)) return;
-            if (NarrativeRuntime.Instance?.Actions?.HasBlockingActions() ?? false)
-            {
-                FocusFirstBlockingAction();
-                ShowBlockingActionHint();
-                return;
-            }
-            var actions = NarrativeRuntime.Instance?.Actions;
-            if (actions == null || actions.IsExecuting) return;
-            var dayFlow = flow?.GetComponent<DayFlowController>();
-            if (dayFlow != null) dayFlow.EndDayFromMap();
-            else actions.BeginDay(checked(actions.CurrentDay + 1));
+            if (!GameplayHudPanel.Ensure().TryNavigateToCafe())
+                ShowBlockingActionHint("请回咖啡馆三楼宿舍，点击床休息并结束这一天。");
         }
 
         /// <summary>Guidance only: focus/open the first real blocking location, never execute its action.</summary>
@@ -1228,26 +1216,49 @@ namespace Spotlight.GameFlow
             BeginFocusMovement(position.position);
         }
 
+        public void ResumeRequestedAction(string positionKey, string actionKey)
+        {
+            if (!FocusTodo(positionKey, actionKey) || actionDetails == null || !actionDetails.ResumeAction(actionKey))
+                OperationToastPanel.ShowMessage("咖啡店已打烊；所选事项已变化或暂不可用，请重新查看地图行动。", string.Empty);
+        }
+
         public bool TryEnterCafeFromTodo()
         {
             if (scenePanelInstance != null) return scenePanelInstance.TryEnterCafeFromTodo();
-            if (!ControlsAvailable || (actionDetails != null && actionDetails.IsBusy)
-                || (NarrativeRuntime.Instance?.Actions?.ReplacesLocationActions(MapActionDetailsView.CafePositionKey) ?? false)) return false;
+            if (!ControlsAvailable || (actionDetails != null && actionDetails.IsBusy))
+            {
+                OperationToastPanel.ShowBlocked("当前行动或剧情尚未结束，暂时不能返回咖啡馆。");
+                return false;
+            }
+            bool returningToResidentCafe = UnityEngine.SceneManagement.SceneManager.GetActiveScene().name == "CoffeeShop";
+            if (!returningToResidentCafe && (NarrativeRuntime.Instance?.Actions?.ReplacesLocationActions(MapActionDetailsView.CafePositionKey) ?? false))
+            {
+                OperationToastPanel.ShowBlocked("请先处理咖啡馆地点的重要事项，再进入咖啡馆。");
+                return false;
+            }
             StartCafe();
             return true;
         }
 
         private void StartCafe()
         {
-            if (!ControlsAvailable) return;
-            if (NarrativeRuntime.Instance?.Actions?.ReplacesLocationActions(MapActionDetailsView.CafePositionKey) ?? false)
+            if (!ControlsAvailable)
             {
-                FocusFirstBlockingAction(); ShowBlockingActionHint(); return;
+                OperationToastPanel.ShowBlocked("当前行动、剧情或转场尚未结束，暂时不能进入咖啡馆。");
+                return;
             }
+            // An overlay is only a view: returning to its already-running cafe must remain
+            // possible even when an NCS action replaces the cafe's map cards.
             if (UnityEngine.SceneManagement.SceneManager.GetActiveScene().name == "CoffeeShop")
             {
                 if (flow != null) flow.CloseMap();
                 else gameObject.SetActive(false);
+                return;
+            }
+            if (NarrativeRuntime.Instance?.Actions?.ReplacesLocationActions(MapActionDetailsView.CafePositionKey) ?? false)
+            {
+                FocusFirstBlockingAction(); ShowBlockingActionHint();
+                OperationToastPanel.ShowBlocked("请先处理咖啡馆地点的重要事项，再进入咖啡馆。");
                 return;
             }
             CancelFocusMovement();

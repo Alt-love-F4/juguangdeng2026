@@ -231,6 +231,7 @@ namespace Spotlight.Narrative
             state.ConditionsChanged += OnStoreChanged;
             this.presenter = presenter ?? new ImmediateNarrativePresenter();
             if (this.presenter is INarrativePresentationCancellation cancellation) cancellation.Cancelled += OnPresentationCancelled;
+            if (this.presenter is INarrativeGameplayResultSource gameplay) gameplay.GameplayCompleted += RecordGameplayResultForPresentation;
             BuildIndexes();
             valueBaselineReady = !configuration.bars.Any(b => b.sourceMode == NarrativeSourceMode.External);
         }
@@ -305,6 +306,14 @@ namespace Spotlight.Narrative
             switch (type)
             {
                 case "BOOL_EQ":
+                    if (string.Equals(condition.ownerType, "result", StringComparison.OrdinalIgnoreCase)
+                        || string.Equals(condition.ownerType, "action", StringComparison.OrdinalIgnoreCase))
+                    {
+                        if (string.Equals(condition.ownerType, "action", StringComparison.OrdinalIgnoreCase)
+                            && !NarrativePresentationGuards.IsReadOnlyWorldGuard(condition.target)) throw Invalid();
+                        if (!bool.TryParse(condition.value, out bool guardExpected)) throw Invalid();
+                        return TryReadPresentationCondition(condition.target, out bool guardValue) && guardValue == guardExpected;
+                    }
                     if (!state.TryGetCondition(condition.target, out bool fact) || !bool.TryParse(condition.value, out bool expected)) throw Invalid();
                     return fact == expected;
                 case "ITEM_GTE":
@@ -493,6 +502,8 @@ namespace Spotlight.Narrative
             if (activePresentation) { snapshot.active = ToSaved(activeRequest); snapshot.active.selectedChoices.Clear(); snapshot.active.selectedChoices.AddRange(selectedChoices); }
             snapshot.activeAbilityCheck = CloneAbilityCheck(activeAbilityCheck);
             snapshot.activeAbilityCheckId = activeAbilityCheckId;
+            if (activePresentation) foreach (var result in gameplayResults)
+                snapshot.gameplayResults.Add(new NarrativeBoolValue { key = result.Key, value = result.Value });
             if (inlineAbilityChecks != null)
                 foreach (NarrativeAbilityCheckSnapshot check in inlineAbilityChecks.Values)
                     snapshot.inlineAbilityChecks.Add(CloneAbilityCheck(check));
@@ -531,13 +542,18 @@ namespace Spotlight.Narrative
             presentationEpoch++;
             EndPresentationBatch();
             queue.Clear(); pendingEvents.Clear(); changes.Clear(); selectedChoices.Clear(); pendingEffects.Clear(); safeCallbacks.Clear(); draining = false;
-            inlineAbilityChecks.Clear();
+            inlineAbilityChecks.Clear(); gameplayResults.Clear();
             if (snapshot.inlineAbilityChecks != null)
                 foreach (NarrativeAbilityCheckSnapshot check in snapshot.inlineAbilityChecks)
                     if (check != null && !string.IsNullOrWhiteSpace(check.checkId)) inlineAbilityChecks[check.checkId] = CloneAbilityCheck(check);
+            if (snapshot.active != null && snapshot.gameplayResults != null)
+                foreach (var result in snapshot.gameplayResults)
+                    if (result != null && configuration.presentations.conversationPages.Exists(p => p != null && p.pageId == result.key
+                        && p.stepType == NarrativeConversationStepType.Gameplay && events.TryGetValue(snapshot.active.eventId ?? "", out var root) && p.presentationKey == root.presentationKey))
+                        gameplayResults[result.key] = result.value;
             activeAbilityCheck = CloneAbilityCheck(snapshot.activeAbilityCheck);
             activeAbilityCheckId = snapshot.activeAbilityCheckId ?? activeAbilityCheck?.checkId;
-            resumeActiveAbilityCheck = snapshot.active != null && activeAbilityCheck != null;
+            resumeActiveAbilityCheck = snapshot.active != null && (activeAbilityCheck != null || gameplayResults.Count > 0);
             processing = false; activePresentation = false; pumping = false; transactionDepth = 0;
             resumeBoundary = snapshot.turnEnding;
             state.Restore(snapshot);
@@ -722,6 +738,7 @@ namespace Spotlight.Narrative
             presentationEpoch++;
             queue.Clear(); pendingEvents.Clear(); pendingEffects.Clear(); safeCallbacks.Clear();
             selectedChoices.Clear();
+            inlineAbilityChecks.Clear(); gameplayResults.Clear();
             activeRequest = default;
             activeAbilityCheck = null;
             activeAbilityCheckId = null;
@@ -752,7 +769,7 @@ namespace Spotlight.Narrative
                 activeRequest = default;
                 activeAbilityCheck = null;
                 activeAbilityCheckId = null;
-                inlineAbilityChecks.Clear();
+                inlineAbilityChecks.Clear(); gameplayResults.Clear();
                 selectedChoices.Clear(); pendingEffects.Clear();
                 if (terminal) presenterUnavailable = true;
                 if (terminal || hostUnavailable)
@@ -837,7 +854,7 @@ namespace Spotlight.Narrative
                     {
                         activeAbilityCheck = null;
                         activeAbilityCheckId = null;
-                        inlineAbilityChecks.Clear();
+                        inlineAbilityChecks.Clear(); gameplayResults.Clear();
                     }
                     resumeActiveAbilityCheck = false;
                     if (activeRequest.SelectedChoices != null) selectedChoices.AddRange(activeRequest.SelectedChoices);
@@ -913,6 +930,10 @@ namespace Spotlight.Narrative
             }
             try
             {
+                // Freeze all guards against the completed presentation, before any result changes
+                // bools/bars or clears the choice/check/gameplay evidence.
+                batch = batch.Where(r => EvaluateConditions("result", r.resultId, request.Context)).ToList();
+                batch = ExpandTrainingResults(batch);
                 PreflightResults(batch, out var boolValues, out var itemCounts, out int? moneyBefore, out int? moneyAfter);
                 BeginOperation();
                 if (moneyBefore.HasValue && !MoneyAccount.TryCommit(moneyBefore.Value, moneyAfter.Value, out string moneyError))
@@ -929,7 +950,7 @@ namespace Spotlight.Narrative
                 activePresentation = false;
                 activeAbilityCheck = null;
                 activeAbilityCheckId = null;
-                inlineAbilityChecks.Clear();
+                inlineAbilityChecks.Clear(); gameplayResults.Clear();
                 selectedChoices.Clear();
                 EndOperation();
                 DrainSettledValueChanges();
@@ -946,7 +967,7 @@ namespace Spotlight.Narrative
                     FailEntryBatch();
                     presentationEpoch++; activePresentation = processing = false;
                     pendingEvents.Remove(request.Event.eventId);
-                    activeAbilityCheck = null; activeAbilityCheckId = null; inlineAbilityChecks.Clear(); selectedChoices.Clear();
+                    activeAbilityCheck = null; activeAbilityCheckId = null; inlineAbilityChecks.Clear(); gameplayResults.Clear(); selectedChoices.Clear();
                 }
                 else return; // Preserve legacy transaction-failure inspection/recovery.
             }

@@ -46,7 +46,9 @@ namespace Spotlight.Narrative
         }
 
         public bool QueueMapActionEvent(string eventId) => QueueManualEvent(eventId, true);
-        public NarrativeEventDiagnostic ExplainMapActionEvent(string eventId) => ExplainEventAtEntry(eventId, true);
+        public NarrativeEventDiagnostic ExplainMapActionEvent(string eventId) => ExplainMapActionEvent(eventId, ignoreTransientBusy: false);
+        internal NarrativeEventDiagnostic ExplainMapActionEvent(string eventId, bool ignoreTransientBusy)
+            => ExplainEventAtEntry(eventId, true, ignoreTransientBusy);
 
         private bool QueueManualEvent(string eventId, bool mapAction)
         {
@@ -96,32 +98,59 @@ namespace Spotlight.Narrative
             => definition?.eventProperties?.FirstOrDefault(p => p.property == "blockedBy")?.value;
 
         /// <summary>Read-only guards for the active root; never exports transient choices as world facts.</summary>
-        public bool ReadPresentationCondition(string key)
+        public bool ReadPresentationCondition(string key) => TryReadPresentationCondition(key, out bool value) && value;
+
+        private bool TryReadPresentationCondition(string key, out bool value, int depth = 0)
         {
-            if (string.IsNullOrWhiteSpace(key)) throw new InvalidOperationException("Empty presentation condition.");
-            if (key.StartsWith("choice:", StringComparison.Ordinal)) return selectedChoices.Contains(key.Substring(7));
-            if (key.StartsWith("anyChoice:", StringComparison.Ordinal)) return key.Substring(10).Split(';').Any(selectedChoices.Contains);
+            value = false;
+            if (string.IsNullOrWhiteSpace(key) || depth > 64) throw new InvalidOperationException("Empty or over-nested presentation condition.");
+            key = key.Trim();
+            if (key.StartsWith("not:", StringComparison.Ordinal))
+            {
+                if (!TryReadPresentationCondition(key.Substring(4), out bool inner, depth + 1)) return false;
+                value = !inner; return true;
+            }
+            if (key.StartsWith("bar:", StringComparison.Ordinal))
+            {
+                if (!NarrativePresentationGuards.TryParseNumeric(key, out string bar, out string op, out int bound))
+                    throw new InvalidOperationException("Invalid numeric presentation condition: " + key);
+                if (!state.TryGetBar(bar, out int current)) return UnavailablePresentationGuard(key);
+                value = NarrativePresentationGuards.Compare(current, op, bound); return true;
+            }
+            if (key.StartsWith("gameplay:", StringComparison.Ordinal))
+            {
+                if (!NarrativePresentationGuards.TryParseGameplay(key, out string page)) throw new InvalidOperationException("Invalid gameplay condition: " + key);
+                if (!activePresentation || !gameplayResults.TryGetValue(page, out value)) return UnavailablePresentationGuard(key);
+                return true;
+            }
+            if (key.StartsWith("choice:", StringComparison.Ordinal)) { value = selectedChoices.Contains(key.Substring(7)); return true; }
+            if (key.StartsWith("anyChoice:", StringComparison.Ordinal)) { value = key.Substring(10).Split(';').Any(selectedChoices.Contains); return true; }
             if (key.StartsWith("check:", StringComparison.Ordinal))
             {
                 string checkId = key.Substring(6);
                 if (string.IsNullOrWhiteSpace(checkId)) throw new InvalidOperationException("Empty presentation ability check condition.");
                 if (!inlineAbilityChecks.TryGetValue(checkId, out NarrativeAbilityCheckSnapshot snapshot))
                     throw new InvalidOperationException("Presentation ability check has not been evaluated: " + checkId);
-                return snapshot.passed;
+                value = snapshot.passed; return true;
             }
-            if (key.StartsWith("not:", StringComparison.Ordinal)) return !ReadPresentationCondition(key.Substring(4));
             if (key.StartsWith("dependency:", StringComparison.Ordinal))
             {
                 string dependency = key.Substring("dependency:".Length).Trim();
                 string resolvedCondition = string.Equals(dependency, "C-B06.history-specialization", StringComparison.OrdinalIgnoreCase)
                     ? "specialization.player.letter.politics" : null;
-                if (resolvedCondition != null && state.TryGetCondition(resolvedCondition, out bool resolved)) return resolved;
-                if (warnedPresentationDependencies.Add(key))
-                    UnityEngine.Debug.LogWarning("[NCS] Presentation dependency unavailable; dependent page will be skipped: " + key);
-                return false;
+                if (resolvedCondition != null && state.TryGetCondition(resolvedCondition, out value)) return true;
+                // Preserve the existing explicitly declared construction-dependency fallback.
+                UnavailablePresentationGuard(key); value = false; return true;
             }
-            if (!state.TryGetCondition(key, out bool value)) throw new InvalidOperationException("Unknown presentation condition: " + key);
-            return value;
+            if (!state.TryGetCondition(key, out value)) throw new InvalidOperationException("Unknown presentation condition: " + key);
+            return true;
+        }
+
+        private bool UnavailablePresentationGuard(string key)
+        {
+            if (warnedPresentationDependencies.Add(key))
+                UnityEngine.Debug.LogWarning("[NCS] Presentation dependency unavailable; dependent page will be skipped: " + key);
+            return false;
         }
 
         private bool EventCanStart(NarrativeEventDefinition definition, bool evaluateConditions = true) => definition != null

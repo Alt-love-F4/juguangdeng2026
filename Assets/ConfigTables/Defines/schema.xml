@@ -211,9 +211,11 @@
     <var name="optionGroupKey" type="string"/>
     <var name="bgOverride" type="string"/>
     <var name="bgmOverride" type="string"/>
-    <var name="stepType" type="string#set=,Dialogue,PassiveCheck,LetterReveal,LetterRead"/>
+    <var name="stepType" type="string#set=,Dialogue,PassiveCheck,LetterReveal,LetterRead,End,Gameplay"/>
     <var name="readingKey" type="string#ref=TbNcsPresentationIndex?"/>
     <var name="checkId" type="string#ref=TbNcsAbilityCheck?"/>
+    <var name="gameplayKey" type="string"/>
+    <var name="nextPageId" type="string#ref=TbNcsConversationPage?"/>
   </bean>
   <table name="TbNcsConversationPage" value="NcsConversationPageEntry" mode="map" index="pageId" input="ConversationPage@Narrative/Narrative.xlsx"/>
 
@@ -264,7 +266,7 @@
     <var name="resultId" type="string"/>
     <var name="eventId" type="string"/>
     <var name="seq" type="int"/>
-    <var name="resultType" type="string#set=BAR_ADD,BAR_SET,REL_ADD,SET_FLAG,CLEAR_FLAG,SET_SWITCH,OBJ_STATE,OBJECT_STATE,UNLOCK_EVENT,LOCK_EVENT,ADVANCE_DAY,AWARD_ACH,AWARD_ACHIEVEMENT,PLAY_SETUP,BAR_HINT,SPAWN_NPC,DESPAWN_NPC,RESERVE_CAFE_VISIT,QUEUE_EVENT,ITEM_ADD,ITEM_REMOVE,MONEY_ADD,MONEY_REMOVE"/>
+    <var name="resultType" type="string#set=BAR_ADD,BAR_SET,REL_ADD,SET_FLAG,CLEAR_FLAG,SET_SWITCH,OBJ_STATE,OBJECT_STATE,UNLOCK_EVENT,LOCK_EVENT,ADVANCE_DAY,AWARD_ACH,AWARD_ACHIEVEMENT,PLAY_SETUP,BAR_HINT,SPAWN_NPC,DESPAWN_NPC,RESERVE_CAFE_VISIT,QUEUE_EVENT,ITEM_ADD,ITEM_REMOVE,MONEY_ADD,MONEY_REMOVE,TRAIN_ATTRIBUTE"/>
     <var name="target" type="string"/>
     <var name="value" type="string"/>
     <var name="note" type="string"/>
@@ -272,7 +274,7 @@
   <table name="TbNcsResult" value="NcsResultEntry" mode="map" index="resultId" input="Result@Narrative/Narrative.xlsx"/>
   <bean name="NcsConditionEntry">
     <var name="conditionId" type="string"/>
-    <var name="ownerType" type="string#set=event,choice,action,ending"/>
+    <var name="ownerType" type="string#set=event,choice,action,ending,result"/>
     <var name="ownerId" type="string"/>
     <var name="groupIndex" type="int"/>
     <var name="condType" type="string#set=BOOL_EQ,ITEM_GTE,ACTION_PROGRESS_GTE,ACTION_COMPLETED,BAR_GTE,BAR_LTE,BAR_BETWEEN,REL_GTE,EVENT_HAPPENED,EVENT_NOT_HAPPENED"/>
