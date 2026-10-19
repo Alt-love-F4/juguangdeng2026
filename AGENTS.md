@@ -1,3 +1,11 @@
+## Git 主仓库与分支（2026-10-19）
+
+- 当前协作主仓库为 `https://github.com/Alt-love-F4/juguangdeng2026.git`，主分支为 `main`。拉取、推送前先核对实际远端 URL，不能只凭远端名称判断。
+- 标准配置中 `origin` 指向上述 GitHub 仓库，`main` 跟踪 `origin/main`，默认推送也指向 `origin`。旧 `gitee-clean` 和 `gitee-legacy` 只用于历史回溯；除非用户明确要求，不再向 Gitee 上传。
+- 提交当前进度时排除所有大小写形式的 `.psd` 及 `.psd.meta`；保留本地文件。已有历史中的 PSD 不通过日常上传重写或删除。
+- 普通功能提交排除经确认仅为 TMP 自动生成缓存的字体 `.asset`，遵循 `Docs/Collaboration/FontAssetGitWorkflow.md`，不跳过 hooks。
+- 团队迁移和新克隆步骤见 `Docs/Collaboration/GitRepository.md`。
+
 # Agent guidance: shared presentation debug scene
 
 ## NCS 咖啡馆实景背景约定（2026-10-16）
