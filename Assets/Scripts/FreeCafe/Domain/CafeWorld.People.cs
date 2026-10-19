@@ -14,6 +14,8 @@ namespace Spotlight.FreeCafe
         public string displayName;
         public string narrativeCharacterId;
         public string visualId = "customer";
+        public string portraitVariantPath;
+        public string avatarVariantPath;
         public CafePersonRole role;
     }
 
@@ -67,7 +69,7 @@ namespace Spotlight.FreeCafe
             // or a scene-supplied seated character for this one-off teaching order.
             if (visitId == "tutorial_customer") return new CafePersonIdentity
             {
-                personId = "tutorial_customer", displayName = "男顾客", visualId = "customer",
+                personId = "tutorial_customer", displayName = "B太太", visualId = "customer",
                 role = CafePersonRole.Customer
             };
             CafePersonIdentity supplied;
@@ -88,7 +90,8 @@ namespace Spotlight.FreeCafe
             return new CafePersonIdentity
             {
                 personId = identity.personId, characterId = identity.characterId, displayName = identity.displayName, role = identity.role,
-                narrativeCharacterId = identity.narrativeCharacterId, visualId = identity.visualId
+                narrativeCharacterId = identity.narrativeCharacterId, visualId = identity.visualId,
+                portraitVariantPath = identity.portraitVariantPath, avatarVariantPath = identity.avatarVariantPath
             };
         }
 

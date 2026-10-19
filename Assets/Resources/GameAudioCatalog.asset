@@ -383,7 +383,7 @@ MonoBehaviour:
   - key: cafe.order_success
     description: "\u51FA\u54C1 UI \u2014 \u987E\u5BA2\u6EE1\u610F"
     enabled: 1
-    clip: {fileID: 8300000, guid: 25c0d0e64aeecaa46aac0283156cc15c, type: 3}
+    clip: {fileID: 8300000, guid: b105030604e94cf448bb5186ad7bcedc, type: 3}
     resourcePath: 
     category: 0
     loop: 0
@@ -393,12 +393,13 @@ MonoBehaviour:
     fadeOut: 0.15
     cooldown: 0.08
     maxVoices: 3
-    provisional: 1
-    materialNote: "\u73B0\u6709\u7D20\u6750\u6309\u6587\u4EF6\u540D\u521D\u914D\uFF0C\u4E34\u65F6\u66FF\u4EE3\uFF1B\u8BF7\u8BD5\u542C\u786E\u8BA4\u6216\u66FF\u6362\u3002"
+    provisional: 0
+    materialNote: "\u65B0\u97F3\u9891\u517C\u5BB9\u65E7\u53CD\u9988 Key\uFF1B\u5B9E\u9645\u5496\u5561\u4EA4\u4ED8\u4F7F\u7528
+      cafe.result_* \u6309\u54C1\u8D28\u64AD\u653E\u3002"
   - key: cafe.order_remake
     description: "\u51FA\u54C1 UI \u2014 \u8981\u6C42\u91CD\u505A"
     enabled: 1
-    clip: {fileID: 8300000, guid: 0cc7e012ee452e847acb9272027082c3, type: 3}
+    clip: {fileID: 8300000, guid: dfdcb3d83e9d85e43bf3b32e6041fc21, type: 3}
     resourcePath: 
     category: 0
     loop: 0
@@ -408,12 +409,13 @@ MonoBehaviour:
     fadeOut: 0.15
     cooldown: 0.08
     maxVoices: 3
-    provisional: 1
-    materialNote: "\u73B0\u6709\u7D20\u6750\u6309\u6587\u4EF6\u540D\u521D\u914D\uFF0C\u4E34\u65F6\u66FF\u4EE3\uFF1B\u8BF7\u8BD5\u542C\u786E\u8BA4\u6216\u66FF\u6362\u3002"
+    provisional: 0
+    materialNote: "\u65B0\u97F3\u9891\u517C\u5BB9\u65E7\u53CD\u9988 Key\uFF1B\u5B9E\u9645\u5496\u5561\u4EA4\u4ED8\u4F7F\u7528
+      cafe.result_* \u6309\u54C1\u8D28\u64AD\u653E\u3002"
   - key: cafe.order_failed
     description: "\u51FA\u54C1 UI \u2014 \u4E0D\u6EE1\u610F\u79BB\u5F00"
     enabled: 1
-    clip: {fileID: 8300000, guid: d66aa921d39d0004b894e2ad8ee2b126, type: 3}
+    clip: {fileID: 8300000, guid: dfdcb3d83e9d85e43bf3b32e6041fc21, type: 3}
     resourcePath: 
     category: 0
     loop: 0
@@ -423,8 +425,9 @@ MonoBehaviour:
     fadeOut: 0.15
     cooldown: 0.08
     maxVoices: 3
-    provisional: 1
-    materialNote: "\u73B0\u6709\u7D20\u6750\u6309\u6587\u4EF6\u540D\u521D\u914D\uFF0C\u4E34\u65F6\u66FF\u4EE3\uFF1B\u8BF7\u8BD5\u542C\u786E\u8BA4\u6216\u66FF\u6362\u3002"
+    provisional: 0
+    materialNote: "\u65B0\u97F3\u9891\u517C\u5BB9\u65E7\u53CD\u9988 Key\uFF1B\u5B9E\u9645\u5496\u5561\u4EA4\u4ED8\u4F7F\u7528
+      cafe.result_* \u6309\u54C1\u8D28\u64AD\u653E\u3002"
   - key: cafe.discard
     description: "\u4E22\u5F03\u7269\u54C1"
     enabled: 1
@@ -551,7 +554,8 @@ MonoBehaviour:
     cooldown: 0.08
     maxVoices: 8
     provisional: 0
-    materialNote: "\u6309\u6587\u4EF6\u540D\u521D\u914D\uFF0C\u8BF7\u8BD5\u542C\u786E\u8BA4\u97F3\u91CF\u53CA\u5FAA\u73AF\u8854\u63A5\u3002"
+    materialNote: "\u7B56\u5212\u6587\u4EF6/\u65B0\u97F3\u9891/Dorian-C#.mp3\uFF1B\u539F\u4F4D\u66FF\u6362\u83DC\u5355\u97F3\u4E50\uFF0C\u4FDD\u7559\u8D44\u6E90
+      GUID\u3002"
   - key: music.cafe_day
     description: "\u7ECF\u8425\u97F3\u4E50"
     enabled: 1
@@ -570,7 +574,7 @@ MonoBehaviour:
   - key: music.city
     description: "\u57CE\u533A\u97F3\u4E50"
     enabled: 1
-    clip: {fileID: 8300000, guid: 2a1a4379bdccd7742a66694b4812d528, type: 3}
+    clip: {fileID: 8300000, guid: 754ed0e7c4ea12649858a4b6375891ff, type: 3}
     resourcePath: 
     category: 2
     loop: 1
@@ -581,7 +585,7 @@ MonoBehaviour:
     cooldown: 0.08
     maxVoices: 8
     provisional: 0
-    materialNote: "\u6309\u6587\u4EF6\u540D\u521D\u914D\uFF0C\u8BF7\u8BD5\u542C\u786E\u8BA4\u97F3\u91CF\u53CA\u5FAA\u73AF\u8854\u63A5\u3002"
+    materialNote: "\u7B56\u5212\u6587\u4EF6/\u65B0\u97F3\u9891/map.mp3\uFF1B\u66FF\u6362\u539F\u5730\u56FE\u80CC\u666F\u97F3\u4E50\uFF0C\u6CBF\u7528\u73B0\u6709\u97F3\u91CF\u4E0E\u5FAA\u73AF\u8BBE\u7F6E\u3002"
   - key: music.home_night
     description: "\u591C\u665A\u97F3\u4E50"
     enabled: 1
@@ -946,7 +950,8 @@ MonoBehaviour:
     cooldown: 0.08
     maxVoices: 8
     provisional: 0
-    materialNote: "\u6309\u6587\u4EF6\u540D\u521D\u914D\uFF0C\u8BF7\u8BD5\u542C\u786E\u8BA4\u97F3\u91CF\u53CA\u5FAA\u73AF\u8854\u63A5\u3002"
+    materialNote: "\u7B56\u5212\u6587\u4EF6/\u65B0\u97F3\u9891/win\uFF01 (1).mp3\uFF1B\u539F\u4F4D\u66FF\u6362\u80DC\u5229\u97F3\u4E50\uFF0C\u4FDD\u7559\u8D44\u6E90
+      GUID \u548C\u73B0\u6709\u5267\u60C5 Key\u3002"
   - key: ui.menu.select
     description: "menu / \u6309\u94AE\u60AC\u505C / \u4E3B\u52A8\u5BFC\u822A\u9009\u4E2D"
     enabled: 1
@@ -4611,6 +4616,70 @@ MonoBehaviour:
     provisional: 0
     materialNote: "\u67D4\u548C\u6EE4\u6CE2\u3001\u5CF0\u503C\u63A7\u5236\u4E0E\u6DE1\u5165\u6DE1\u51FA\uFF1B\u5FAA\u73AF\u5DF2\u4EA4\u53C9\u5904\u7406\u3002\u6765\u6E90\u548C\u7F72\u540D\u89C1
       Assets/Art/audio/SFX/CafeSoft/CREDITS.md\u3002\u6405\u62CC/\u811A\u6B65/\u5B8C\u6210\u63D0\u793A\u4E3A\u62DF\u97F3\u8BBE\u8BA1\uFF0C\u53EF\u7EDF\u4E00\u66FF\u6362\u3002"
+  - key: cafe.result_bad
+    description: "\u5496\u5561\u51FA\u54C1\u7ED3\u679C \u2014 bad"
+    enabled: 1
+    clip: {fileID: 8300000, guid: dfdcb3d83e9d85e43bf3b32e6041fc21, type: 3}
+    resourcePath: 
+    category: 0
+    loop: 0
+    volume: 0.55
+    pitch: 1
+    fadeIn: 0
+    fadeOut: 0.15
+    cooldown: 0.08
+    maxVoices: 1
+    provisional: 0
+    materialNote: "\u7B56\u5212\u6587\u4EF6/\u65B0\u97F3\u9891/\u5496\u5561\u7ED3\u679C-\u97F3\u6548bad.mp3\uFF1B\u6309\u51FA\u54C1\u5C0F\u7968\u73B0\u6709\u56DB\u6863\u8BC4\u5206\u64AD\u653E\uFF0840/60/80
+      \u5206\u754C\uFF09\u3002"
+  - key: cafe.result_good
+    description: "\u5496\u5561\u51FA\u54C1\u7ED3\u679C \u2014 good"
+    enabled: 1
+    clip: {fileID: 8300000, guid: b105030604e94cf448bb5186ad7bcedc, type: 3}
+    resourcePath: 
+    category: 0
+    loop: 0
+    volume: 0.55
+    pitch: 1
+    fadeIn: 0
+    fadeOut: 0.15
+    cooldown: 0.08
+    maxVoices: 1
+    provisional: 0
+    materialNote: "\u7B56\u5212\u6587\u4EF6/\u65B0\u97F3\u9891/\u5496\u5561\u7ED3\u679C-\u97F3\u6548good.mp3\uFF1B\u6309\u51FA\u54C1\u5C0F\u7968\u73B0\u6709\u56DB\u6863\u8BC4\u5206\u64AD\u653E\uFF0840/60/80
+      \u5206\u754C\uFF09\u3002"
+  - key: cafe.result_great
+    description: "\u5496\u5561\u51FA\u54C1\u7ED3\u679C \u2014 great"
+    enabled: 1
+    clip: {fileID: 8300000, guid: 62d0fb29ce6da4a4ab30a356f01aa20f, type: 3}
+    resourcePath: 
+    category: 0
+    loop: 0
+    volume: 0.55
+    pitch: 1
+    fadeIn: 0
+    fadeOut: 0.15
+    cooldown: 0.08
+    maxVoices: 1
+    provisional: 0
+    materialNote: "\u7B56\u5212\u6587\u4EF6/\u65B0\u97F3\u9891/\u5496\u5561\u7ED3\u679C-\u97F3\u6548great.mp3\uFF1B\u6309\u51FA\u54C1\u5C0F\u7968\u73B0\u6709\u56DB\u6863\u8BC4\u5206\u64AD\u653E\uFF0840/60/80
+      \u5206\u754C\uFF09\u3002"
+  - key: cafe.result_perfect
+    description: "\u5496\u5561\u51FA\u54C1\u7ED3\u679C \u2014 perfect"
+    enabled: 1
+    clip: {fileID: 8300000, guid: 3444ceffabcb0dc4892a77f8130de1f7, type: 3}
+    resourcePath: 
+    category: 0
+    loop: 0
+    volume: 0.55
+    pitch: 1
+    fadeIn: 0
+    fadeOut: 0.15
+    cooldown: 0.08
+    maxVoices: 1
+    provisional: 0
+    materialNote: "\u7B56\u5212\u6587\u4EF6/\u65B0\u97F3\u9891/\u5496\u5561\u7ED3\u679C-\u97F3\u6548perfect.mp3\uFF1B\u6309\u51FA\u54C1\u5C0F\u7968\u73B0\u6709\u56DB\u6863\u8BC4\u5206\u64AD\u653E\uFF0840/60/80
+      \u5206\u754C\uFF09\u3002"
   cafeDynamics:
     pourVolume: {x: 0.32, y: 1}
     pourPitch: {x: 0.88, y: 1.12}

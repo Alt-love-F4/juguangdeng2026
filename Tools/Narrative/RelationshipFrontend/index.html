@@ -1,0 +1,130 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="color-scheme" content="light">
+  <title>叙事触发线 · 聚光灯2026</title>
+  <link rel="stylesheet" href="app.css">
+</head>
+<body>
+  <div class="app-shell">
+    <header class="topbar">
+      <div class="brand">
+        <div class="brand-mark" aria-hidden="true"><i></i><i></i><i></i></div>
+        <div>
+          <h1>叙事触发线</h1>
+          <div class="brand-subtitle">NCS 配置只读视图 <span id="snapshot-label">正在读取生成配置</span></div>
+        </div>
+      </div>
+      <div class="top-stats" aria-live="polite">
+        <div><strong id="stat-nodes">--</strong><span>节点</span></div>
+        <div><strong id="stat-edges">--</strong><span>关系证据</span></div>
+        <div><strong id="stat-stories">--</strong><span>正文根</span></div>
+        <div class="stat-alert"><strong id="stat-blocked">--</strong><span>明确阻塞</span></div>
+      </div>
+    </header>
+
+    <section class="toolbar" aria-label="图谱筛选">
+      <div class="scope-switch" role="group" aria-label="显示范围">
+        <button class="scope-button active" data-scope="main" type="button">主线 / 分支</button>
+        <button class="scope-button" data-scope="all" type="button">全部配置</button>
+        <button class="scope-button" data-scope="daily" type="button">日常 / 首访</button>
+        <button class="scope-button" data-scope="opening" type="button">开场 / 教程</button>
+        <button class="scope-button" data-scope="blocked" type="button">仅阻塞</button>
+      </div>
+      <label class="search-box">
+        <span class="search-symbol" aria-hidden="true">⌕</span>
+        <input id="search-input" type="search" placeholder="搜索 ID、标题、正文或事实" autocomplete="off">
+        <kbd>/</kbd>
+      </label>
+      <label class="filter-select">
+        <span class="sr-only">阵营筛选</span>
+        <select id="faction-filter">
+          <option value="">全部阵营</option>
+          <option value="neutral">中立 / 经营</option>
+          <option value="rose">新玫瑰</option>
+          <option value="church">王庭教会</option>
+          <option value="revolution">革命联合</option>
+          <option value="daily">地图日常</option>
+          <option value="opening">开场 / 教程</option>
+          <option value="ending">结局</option>
+          <option value="fact">表外条件</option>
+          <option value="sample">演示 / 测试</option>
+        </select>
+      </label>
+      <button class="icon-command" id="fit-button" type="button" title="适配当前图谱">适配</button>
+      <button class="icon-command" id="reload-button" type="button" title="重新读取生成配置">重读</button>
+    </section>
+
+    <div class="notice-strip">
+      <span class="notice-dot"></span>
+      日期只用于排布；连线是配置证据，不代表条件已满足、流程必然可达或已实机验收。
+    </div>
+
+    <main class="workspace">
+      <aside class="catalog panel" aria-label="剧情节点列表">
+        <div class="panel-heading">
+          <div><h2>配置目录</h2><span id="visible-count">0 个节点</span></div>
+          <button id="clear-selection" class="plain-command" type="button" title="清除选择">清除</button>
+        </div>
+        <div id="group-summary" class="group-summary"></div>
+        <div id="node-list" class="node-list" role="listbox" aria-label="筛选后的剧情节点">
+          <div class="loading-state">正在加载 Luban 生成配置…</div>
+        </div>
+      </aside>
+
+      <section class="graph-panel panel" aria-label="剧情关系图">
+        <div class="graph-heading">
+          <div class="graph-title-wrap">
+            <h2>关系图</h2>
+            <span id="graph-caption">主线与分支配置</span>
+          </div>
+          <div class="graph-actions">
+            <label class="toggle-control"><input id="neighbors-only" type="checkbox"><span>仅看选中节点及相邻</span></label>
+            <button id="zoom-out" class="square-command" type="button" aria-label="缩小" title="缩小">−</button>
+            <button id="zoom-reset" class="square-command zoom-value" type="button" aria-label="重置缩放" title="重置缩放">100%</button>
+            <button id="zoom-in" class="square-command" type="button" aria-label="放大" title="放大">+</button>
+          </div>
+        </div>
+        <div class="graph-legend" id="graph-legend">
+          <span><i class="legend-swatch prereq"></i>前置事实</span>
+          <span><i class="legend-swatch continuation"></i>续接 / 结局</span>
+          <span><i class="legend-swatch check"></i>检定分支</span>
+          <span><i class="legend-swatch exclusion"></i>排斥条件</span>
+          <span><i class="legend-swatch unresolved"></i>未找到表内生产者</span>
+        </div>
+        <div class="canvas-wrap" id="canvas-wrap">
+          <div id="graph-empty" class="canvas-empty" hidden>没有匹配的节点</div>
+          <svg id="graph-svg" role="img" aria-label="可缩放、可拖动的剧情关系图">
+            <defs>
+              <marker id="arrow-prereq" markerWidth="8" markerHeight="8" refX="7" refY="4" orient="auto"><path d="M0,0 L8,4 L0,8 Z" fill="#557b66"></path></marker>
+              <marker id="arrow-continuation" markerWidth="8" markerHeight="8" refX="7" refY="4" orient="auto"><path d="M0,0 L8,4 L0,8 Z" fill="#a56c28"></path></marker>
+              <marker id="arrow-check" markerWidth="8" markerHeight="8" refX="7" refY="4" orient="auto"><path d="M0,0 L8,4 L0,8 Z" fill="#597a9b"></path></marker>
+              <marker id="arrow-exclusion" markerWidth="8" markerHeight="8" refX="7" refY="4" orient="auto"><path d="M0,0 L8,4 L0,8 Z" fill="#ad6257"></path></marker>
+              <marker id="arrow-unresolved" markerWidth="8" markerHeight="8" refX="7" refY="4" orient="auto"><path d="M0,0 L8,4 L0,8 Z" fill="#8b7b60"></path></marker>
+            </defs>
+            <g id="graph-world"><g id="lane-layer"></g><g id="edge-layer"></g><g id="node-layer"></g></g>
+          </svg>
+          <div class="map-hint">滚轮缩放 · 拖动画布平移 · 选择节点查看详情</div>
+        </div>
+      </section>
+
+      <aside class="details panel" aria-label="选中节点详情">
+        <div id="details-content" class="details-scroll">
+          <div class="empty-detail">
+            <div class="empty-mark" aria-hidden="true">◇</div>
+            <h2>选择一个节点</h2>
+            <p>查看入口、正文、选项、结果和关系证据。</p>
+          </div>
+        </div>
+      </aside>
+    </main>
+    <footer class="statusbar">
+      <span id="status-message">只读配置视图</span>
+      <span>不启动 NCS · 不执行结果 · 不写入存档</span>
+    </footer>
+  </div>
+  <script src="app.js" defer></script>
+</body>
+</html>

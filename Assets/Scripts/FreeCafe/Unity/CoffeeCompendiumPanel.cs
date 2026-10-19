@@ -695,7 +695,7 @@ namespace Spotlight.FreeCafe
             var result = World.ActivateEquipment(latte);
             if (!result.success) { Deny(button.transform, result.message); return; }
             runtime.Report(result);
-            Spotlight.Audio.GameAudio.Play(Spotlight.Audio.AudioKeys.OrderSuccess);
+            Spotlight.Audio.GameAudio.Play(Spotlight.Audio.AudioKeys.Confirm);
             Toast(result.message);
             celebrateLatte = latte ? 1 : 0;
             RenderPages();

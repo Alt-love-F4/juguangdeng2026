@@ -12,7 +12,8 @@ namespace Spotlight.FreeCafe
             if (person == null || string.IsNullOrWhiteSpace(person.characterId)) return null;
             CharacterProfile character = Spotlight.GameFlow.NarrativeCharacterResolver.Find(person.characterId);
             if (character == null) return null;
-            var speaker = new Spotlight.GameFlow.DialogueCharacter(character.characterId, character.displayName, character.PortraitFor(null));
+            var speaker = new Spotlight.GameFlow.DialogueCharacter(character.characterId, character.displayName,
+                CafeCustomerVisualVariants.ResolvePortrait(person, character));
             var playerProfile = Spotlight.GameFlow.NarrativeCharacterResolver.Find("player");
             var player = playerProfile == null ? null : Spotlight.GameFlow.NarrativeCharacterResolver.CreateDialogueCharacter("player");
             var text = content ?? string.Empty;

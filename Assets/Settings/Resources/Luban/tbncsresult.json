@@ -663,7 +663,7 @@
     "resultType": "BAR_ADD",
     "target": "colette.affection",
     "value": "2",
-    "note": "Root-tail settlement; 策划文件/文案/a-中立（共通+支线）/MA70.10.08-S1.docx#P045"
+    "note": "Root-tail settlement; 策划文件/文案6点/文案/a-中立（共通+支线）/MA70.10.08-S1.docx#P045"
   },
   {
     "resultId": "neutral.1008.s1.result.talk",
@@ -672,7 +672,7 @@
     "resultType": "BAR_ADD",
     "target": "colette.affection",
     "value": "1",
-    "note": "Root-tail settlement; 策划文件/文案/a-中立（共通+支线）/MA70.10.08-S1.docx#P050"
+    "note": "Root-tail settlement; 策划文件/文案6点/文案/a-中立（共通+支线）/MA70.10.08-S1.docx#P050"
   },
   {
     "resultId": "neutral.1008.s1.result.known.colette",
@@ -681,7 +681,7 @@
     "resultType": "SET_FLAG",
     "target": "known.colette",
     "value": "true",
-    "note": "Root-tail settlement; 策划文件/文案/a-中立（共通+支线）/MA70.10.08-S1.docx"
+    "note": "Root-tail settlement; 策划文件/文案6点/文案/a-中立（共通+支线）/MA70.10.08-S1.docx"
   },
   {
     "resultId": "neutral.1008.s1.result.complete",
@@ -690,7 +690,7 @@
     "resultType": "SET_FLAG",
     "target": "story.neutral.1008.s1.completed",
     "value": "true",
-    "note": "Root-tail settlement; 策划文件/文案/a-中立（共通+支线）/MA70.10.08-S1.docx"
+    "note": "Root-tail settlement; 策划文件/文案6点/文案/a-中立（共通+支线）/MA70.10.08-S1.docx"
   },
   {
     "resultId": "neutral.1010.s1.result.agreement",
@@ -699,7 +699,7 @@
     "resultType": "BAR_ADD",
     "target": "adele.affection",
     "value": "1",
-    "note": "Root-tail settlement; 策划文件/文案/a-中立（共通+支线）/MA70.10.10-S1.docx#P041"
+    "note": "Root-tail settlement; 策划文件/文案6点/文案/a-中立（共通+支线）/MA70.10.10-S1.docx#P041"
   },
   {
     "resultId": "neutral.1010.s1.result.recognition",
@@ -708,7 +708,7 @@
     "resultType": "BAR_ADD",
     "target": "adele.affection",
     "value": "2",
-    "note": "Root-tail settlement; 策划文件/文案/a-中立（共通+支线）/MA70.10.10-S1.docx#P058"
+    "note": "Root-tail settlement; 策划文件/文案6点/文案/a-中立（共通+支线）/MA70.10.10-S1.docx#P058"
   },
   {
     "resultId": "neutral.1010.s1.result.cost_saving",
@@ -717,7 +717,7 @@
     "resultType": "SET_FLAG",
     "target": "neutral.promotion.cost_saving",
     "value": "true",
-    "note": "Root-tail settlement; 策划文件/文案/a-中立（共通+支线）/MA70.10.10-S1.docx#P047"
+    "note": "Root-tail settlement; 策划文件/文案6点/文案/a-中立（共通+支线）/MA70.10.10-S1.docx#P047"
   },
   {
     "resultId": "neutral.1010.s1.result.continue",
@@ -726,7 +726,7 @@
     "resultType": "QUEUE_EVENT",
     "target": "neutral.1010.s2",
     "value": "true",
-    "note": "Root-tail settlement; 策划文件/文案/a-中立（共通+支线）/MA70.10.10-S1.docx"
+    "note": "Root-tail settlement; 策划文件/文案6点/文案/a-中立（共通+支线）/MA70.10.10-S1.docx"
   },
   {
     "resultId": "neutral.1010.s1.result.complete",
@@ -735,7 +735,7 @@
     "resultType": "SET_FLAG",
     "target": "story.neutral.1010.s1.completed",
     "value": "true",
-    "note": "Root-tail settlement; 策划文件/文案/a-中立（共通+支线）/MA70.10.10-S1.docx"
+    "note": "Root-tail settlement; 策划文件/文案6点/文案/a-中立（共通+支线）/MA70.10.10-S1.docx"
   },
   {
     "resultId": "neutral.1010.s2.result.welcome",
@@ -744,7 +744,7 @@
     "resultType": "BAR_ADD",
     "target": "antoine.affection",
     "value": "1",
-    "note": "Root-tail settlement; 策划文件/文案/a-中立（共通+支线）/MA70.10.10-S2.docx#P027"
+    "note": "Root-tail settlement; 策划文件/文案6点/文案/a-中立（共通+支线）/MA70.10.10-S2.docx#P027"
   },
   {
     "resultId": "neutral.1010.s2.result.business",
@@ -753,7 +753,7 @@
     "resultType": "BAR_ADD",
     "target": "antoine.affection",
     "value": "2",
-    "note": "Root-tail settlement; 策划文件/文案/a-中立（共通+支线）/MA70.10.10-S2.docx#P070"
+    "note": "Root-tail settlement; 策划文件/文案6点/文案/a-中立（共通+支线）/MA70.10.10-S2.docx#P070"
   },
   {
     "resultId": "neutral.1010.s2.result.appreciation",
@@ -762,7 +762,7 @@
     "resultType": "SET_FLAG",
     "target": "neutral.antoine.appreciation",
     "value": "true",
-    "note": "Root-tail settlement; 策划文件/文案/a-中立（共通+支线）/MA70.10.10-S2.docx#P071"
+    "note": "Root-tail settlement; 策划文件/文案6点/文案/a-中立（共通+支线）/MA70.10.10-S2.docx#P071"
   },
   {
     "resultId": "neutral.1010.s2.result.known.antoine",
@@ -771,7 +771,7 @@
     "resultType": "SET_FLAG",
     "target": "known.antoine",
     "value": "true",
-    "note": "Root-tail settlement; 策划文件/文案/a-中立（共通+支线）/MA70.10.10-S2.docx#P114"
+    "note": "Root-tail settlement; 策划文件/文案6点/文案/a-中立（共通+支线）/MA70.10.10-S2.docx#P114"
   },
   {
     "resultId": "neutral.1010.s2.result.complete",
@@ -780,7 +780,7 @@
     "resultType": "SET_FLAG",
     "target": "story.neutral.1010.s2.completed",
     "value": "true",
-    "note": "Root-tail settlement; 策划文件/文案/a-中立（共通+支线）/MA70.10.10-S2.docx"
+    "note": "Root-tail settlement; 策划文件/文案6点/文案/a-中立（共通+支线）/MA70.10.10-S2.docx"
   },
   {
     "resultId": "neutral.1013.s2.result.cooperation",
@@ -789,7 +789,7 @@
     "resultType": "BAR_ADD",
     "target": "adele.affection",
     "value": "1",
-    "note": "Root-tail settlement; 策划文件/文案/a-中立（共通+支线）/MA70.10.13-S1.docx#P045"
+    "note": "Root-tail settlement; 策划文件/文案6点/文案/a-中立（共通+支线）/MA70.10.13-S1.docx#P045"
   },
   {
     "resultId": "neutral.1013.s2.result.long_term",
@@ -798,7 +798,7 @@
     "resultType": "BAR_ADD",
     "target": "antoine.affection",
     "value": "2",
-    "note": "Root-tail settlement; 策划文件/文案/a-中立（共通+支线）/MA70.10.13-S1.docx#P108"
+    "note": "Root-tail settlement; 策划文件/文案6点/文案/a-中立（共通+支线）/MA70.10.13-S1.docx#P108"
   },
   {
     "resultId": "neutral.1013.s2.result.observed",
@@ -807,7 +807,7 @@
     "resultType": "SET_FLAG",
     "target": "neutral.antoine.observation",
     "value": "true",
-    "note": "Root-tail settlement; 策划文件/文案/a-中立（共通+支线）/MA70.10.13-S1.docx"
+    "note": "Root-tail settlement; 策划文件/文案6点/文案/a-中立（共通+支线）/MA70.10.13-S1.docx"
   },
   {
     "resultId": "neutral.1013.s2.result.organized",
@@ -816,7 +816,7 @@
     "resultType": "SET_FLAG",
     "target": "neutral.promotion.organized",
     "value": "true",
-    "note": "Root-tail settlement; 策划文件/文案/a-中立（共通+支线）/MA70.10.13-S1.docx#P053"
+    "note": "Root-tail settlement; 策划文件/文案6点/文案/a-中立（共通+支线）/MA70.10.13-S1.docx#P053"
   },
   {
     "resultId": "neutral.1013.s2.result.recommended",
@@ -825,7 +825,7 @@
     "resultType": "SET_FLAG",
     "target": "neutral.promotion.recommended",
     "value": "true",
-    "note": "Root-tail settlement; 策划文件/文案/a-中立（共通+支线）/MA70.10.13-S1.docx#P066"
+    "note": "Root-tail settlement; 策划文件/文案6点/文案/a-中立（共通+支线）/MA70.10.13-S1.docx#P066"
   },
   {
     "resultId": "neutral.1013.s2.result.complete",
@@ -834,7 +834,7 @@
     "resultType": "SET_FLAG",
     "target": "story.neutral.1013.s2.completed",
     "value": "true",
-    "note": "Root-tail settlement; 策划文件/文案/a-中立（共通+支线）/MA70.10.13-S1.docx"
+    "note": "Root-tail settlement; 策划文件/文案6点/文案/a-中立（共通+支线）/MA70.10.13-S1.docx"
   },
   {
     "resultId": "neutral.1013.s2.result.c13_continuation",
@@ -843,7 +843,7 @@
     "resultType": "QUEUE_EVENT",
     "target": "revolution.1013.s2",
     "value": "true",
-    "note": "Root-tail settlement; 策划文件/文案/a-中立（共通+支线）/MA70.10.13-S1.docx"
+    "note": "Root-tail settlement; 策划文件/文案6点/文案/a-中立（共通+支线）/MA70.10.13-S1.docx"
   },
   {
     "resultId": "neutral.1018.s1.result.newspaper_recommendation",
@@ -852,7 +852,7 @@
     "resultType": "SET_FLAG",
     "target": "neutral.newspaper.recommendation",
     "value": "true",
-    "note": "Root-tail settlement; 策划文件/文案/a-中立（共通+支线）/MA70.10.18-S1.docx#P055"
+    "note": "Root-tail settlement; 策划文件/文案6点/文案/a-中立（共通+支线）/MA70.10.18-S1.docx#P055"
   },
   {
     "resultId": "neutral.1018.s1.result.complete",
@@ -861,7 +861,7 @@
     "resultType": "SET_FLAG",
     "target": "story.neutral.1018.s1.completed",
     "value": "true",
-    "note": "Root-tail settlement; 策划文件/文案/a-中立（共通+支线）/MA70.10.18-S1.docx"
+    "note": "Root-tail settlement; 策划文件/文案6点/文案/a-中立（共通+支线）/MA70.10.18-S1.docx"
   },
   {
     "resultId": "neutral.1027.s1.result.chess_success",
@@ -870,7 +870,7 @@
     "resultType": "BAR_ADD",
     "target": "alienor.affection",
     "value": "2",
-    "note": "Root-tail settlement; 策划文件/文案/a-中立（共通+支线）/MA70.10.27-S1.docx#P059"
+    "note": "Root-tail settlement; 策划文件/文案6点/文案/a-中立（共通+支线）/MA70.10.27-S1.docx#P059"
   },
   {
     "resultId": "neutral.1027.s1.result.chess_learning",
@@ -879,7 +879,7 @@
     "resultType": "BAR_ADD",
     "target": "alienor.affection",
     "value": "1",
-    "note": "Root-tail settlement; 策划文件/文案/a-中立（共通+支线）/MA70.10.27-S1.docx#P083"
+    "note": "Root-tail settlement; 策划文件/文案6点/文案/a-中立（共通+支线）/MA70.10.27-S1.docx#P083"
   },
   {
     "resultId": "neutral.1027.s1.result.chess_resignation",
@@ -888,7 +888,7 @@
     "resultType": "BAR_ADD",
     "target": "alienor.affection",
     "value": "-1",
-    "note": "Root-tail settlement; 策划文件/文案/a-中立（共通+支线）/MA70.10.27-S1.docx#P094"
+    "note": "Root-tail settlement; 策划文件/文案6点/文案/a-中立（共通+支线）/MA70.10.27-S1.docx#P094"
   },
   {
     "resultId": "neutral.1027.s1.result.alienor_dialogue",
@@ -897,7 +897,7 @@
     "resultType": "SET_FLAG",
     "target": "neutral.alienor.dialogue",
     "value": "true",
-    "note": "Root-tail settlement; 策划文件/文案/a-中立（共通+支线）/MA70.10.27-S1.docx#P185"
+    "note": "Root-tail settlement; 策划文件/文案6点/文案/a-中立（共通+支线）/MA70.10.27-S1.docx#P185"
   },
   {
     "resultId": "neutral.1027.s1.result.complete",
@@ -906,7 +906,7 @@
     "resultType": "SET_FLAG",
     "target": "story.neutral.1027.s1.completed",
     "value": "true",
-    "note": "Root-tail settlement; 策划文件/文案/a-中立（共通+支线）/MA70.10.27-S1.docx"
+    "note": "Root-tail settlement; 策划文件/文案6点/文案/a-中立（共通+支线）/MA70.10.27-S1.docx"
   },
   {
     "resultId": "neutral.1030.s1.result.admire",
@@ -915,7 +915,7 @@
     "resultType": "BAR_ADD",
     "target": "adele.affection",
     "value": "1",
-    "note": "Root-tail settlement; 策划文件/文案/a-中立（共通+支线）/MA70.10.30-S1.docx#P033"
+    "note": "Root-tail settlement; 策划文件/文案6点/文案/a-中立（共通+支线）/MA70.10.30-S1.docx#P033"
   },
   {
     "resultId": "neutral.1030.s1.result.arrange",
@@ -924,7 +924,7 @@
     "resultType": "BAR_ADD",
     "target": "adele.affection",
     "value": "2",
-    "note": "Root-tail settlement; 策划文件/文案/a-中立（共通+支线）/MA70.10.30-S1.docx#P044"
+    "note": "Root-tail settlement; 策划文件/文案6点/文案/a-中立（共通+支线）/MA70.10.30-S1.docx#P044"
   },
   {
     "resultId": "neutral.1030.s1.result.rest",
@@ -933,7 +933,7 @@
     "resultType": "BAR_ADD",
     "target": "adele.affection",
     "value": "-1",
-    "note": "Root-tail settlement; 策划文件/文案/a-中立（共通+支线）/MA70.10.30-S1.docx#P058"
+    "note": "Root-tail settlement; 策划文件/文案6点/文案/a-中立（共通+支线）/MA70.10.30-S1.docx#P058"
   },
   {
     "resultId": "neutral.1030.s1.result.adele_dreams",
@@ -942,7 +942,7 @@
     "resultType": "SET_FLAG",
     "target": "neutral.adele.dreams_unlocked",
     "value": "true",
-    "note": "Root-tail settlement; 策划文件/文案/a-中立（共通+支线）/MA70.10.30-S1.docx#P107"
+    "note": "Root-tail settlement; 策划文件/文案6点/文案/a-中立（共通+支线）/MA70.10.30-S1.docx#P107"
   },
   {
     "resultId": "neutral.1030.s1.result.adele_city_talk_closed",
@@ -951,7 +951,7 @@
     "resultType": "SET_FLAG",
     "target": "neutral.adele.city_talk_closed",
     "value": "true",
-    "note": "Root-tail settlement; 策划文件/文案/a-中立（共通+支线）/MA70.10.30-S1.docx#P106"
+    "note": "Root-tail settlement; 策划文件/文案6点/文案/a-中立（共通+支线）/MA70.10.30-S1.docx#P106"
   },
   {
     "resultId": "neutral.1030.s1.result.complete",
@@ -960,7 +960,7 @@
     "resultType": "SET_FLAG",
     "target": "story.neutral.1030.s1.completed",
     "value": "true",
-    "note": "Root-tail settlement; 策划文件/文案/a-中立（共通+支线）/MA70.10.30-S1.docx"
+    "note": "Root-tail settlement; 策划文件/文案6点/文案/a-中立（共通+支线）/MA70.10.30-S1.docx"
   },
   {
     "resultId": "neutral.route.1111.s1.result.ending.a",
@@ -969,7 +969,7 @@
     "resultType": "SET_FLAG",
     "target": "story.neutral.route.1111.s1.ending.a",
     "value": "true",
-    "note": "Root-tail settlement; 策划文件/文案/a-中立（共通+支线）/入线MA70.11.11-S1(中立结局A）.docx#P284"
+    "note": "Root-tail settlement; 策划文件/文案6点/文案/a-中立（共通+支线）/入线MA70.11.11-S1(中立结局A）.docx#P284"
   },
   {
     "resultId": "neutral.route.1111.s1.result.complete",
@@ -978,7 +978,7 @@
     "resultType": "SET_FLAG",
     "target": "story.neutral.route.1111.s1.completed",
     "value": "true",
-    "note": "Root-tail settlement; 策划文件/文案/a-中立（共通+支线）/入线MA70.11.11-S1(中立结局A）.docx"
+    "note": "Root-tail settlement; 策划文件/文案6点/文案/a-中立（共通+支线）/入线MA70.11.11-S1(中立结局A）.docx"
   },
   {
     "resultId": "neutral.route.1111.s2.result.complete",
@@ -987,7 +987,7 @@
     "resultType": "SET_FLAG",
     "target": "story.neutral.route.1111.s2.completed",
     "value": "true",
-    "note": "Root-tail settlement; 策划文件/文案/a-中立（共通+支线）/入线MA70.11.11-S2.docx"
+    "note": "Root-tail settlement; 策划文件/文案6点/文案/a-中立（共通+支线）/入线MA70.11.11-S2.docx"
   },
   {
     "resultId": "neutral.route.1112.s1.result.association_member",
@@ -996,7 +996,7 @@
     "resultType": "SET_FLAG",
     "target": "neutral.association.member",
     "value": "true",
-    "note": "Root-tail settlement; 策划文件/文案/a-中立（共通+支线）/入线MA70.11.12-S1.docx#P043"
+    "note": "Root-tail settlement; 策划文件/文案6点/文案/a-中立（共通+支线）/入线MA70.11.12-S1.docx#P043"
   },
   {
     "resultId": "neutral.route.1112.s1.result.complete",
@@ -1005,7 +1005,7 @@
     "resultType": "SET_FLAG",
     "target": "story.neutral.route.1112.s1.completed",
     "value": "true",
-    "note": "Root-tail settlement; 策划文件/文案/a-中立（共通+支线）/入线MA70.11.12-S1.docx"
+    "note": "Root-tail settlement; 策划文件/文案6点/文案/a-中立（共通+支线）/入线MA70.11.12-S1.docx"
   },
   {
     "resultId": "neutral.route.1118.s1.result.shelter",
@@ -1014,7 +1014,7 @@
     "resultType": "SET_FLAG",
     "target": "neutral.investigation.shelter",
     "value": "true",
-    "note": "Root-tail settlement; 策划文件/文案/a-中立（共通+支线）/入线MA70.11.18-S1.docx#P107"
+    "note": "Root-tail settlement; 策划文件/文案6点/文案/a-中立（共通+支线）/入线MA70.11.18-S1.docx#P107"
   },
   {
     "resultId": "neutral.route.1118.s1.result.complete",
@@ -1023,7 +1023,7 @@
     "resultType": "SET_FLAG",
     "target": "story.neutral.route.1118.s1.completed",
     "value": "true",
-    "note": "Root-tail settlement; 策划文件/文案/a-中立（共通+支线）/入线MA70.11.18-S1.docx"
+    "note": "Root-tail settlement; 策划文件/文案6点/文案/a-中立（共通+支线）/入线MA70.11.18-S1.docx"
   },
   {
     "resultId": "neutral.route.1122.s1.result.stayed",
@@ -1032,7 +1032,7 @@
     "resultType": "SET_FLAG",
     "target": "neutral.stayed",
     "value": "true",
-    "note": "Root-tail settlement; 策划文件/文案/a-中立（共通+支线）/入线MA70.11.22-S1包含中立结局B.docx#P110"
+    "note": "Root-tail settlement; 策划文件/文案6点/文案/a-中立（共通+支线）/入线MA70.11.22-S1包含中立结局B.docx#P110"
   },
   {
     "resultId": "neutral.route.1122.s1.result.ending.b",
@@ -1041,7 +1041,7 @@
     "resultType": "SET_FLAG",
     "target": "story.neutral.route.1122.s1.ending.b",
     "value": "true",
-    "note": "Root-tail settlement; 策划文件/文案/a-中立（共通+支线）/入线MA70.11.22-S1包含中立结局B.docx#P219"
+    "note": "Root-tail settlement; 策划文件/文案6点/文案/a-中立（共通+支线）/入线MA70.11.22-S1包含中立结局B.docx#P219"
   },
   {
     "resultId": "neutral.route.1122.s1.result.complete",
@@ -1050,7 +1050,7 @@
     "resultType": "SET_FLAG",
     "target": "story.neutral.route.1122.s1.completed",
     "value": "true",
-    "note": "Root-tail settlement; 策划文件/文案/a-中立（共通+支线）/入线MA70.11.22-S1包含中立结局B.docx"
+    "note": "Root-tail settlement; 策划文件/文案6点/文案/a-中立（共通+支线）/入线MA70.11.22-S1包含中立结局B.docx"
   },
   {
     "resultId": "neutral.route.1129.s1.result.committee",
@@ -1059,7 +1059,7 @@
     "resultType": "SET_FLAG",
     "target": "neutral.association.committee",
     "value": "true",
-    "note": "Root-tail settlement; 策划文件/文案/a-中立（共通+支线）/入线MA70.11.29-S1.docx#P101"
+    "note": "Root-tail settlement; 策划文件/文案6点/文案/a-中立（共通+支线）/入线MA70.11.29-S1.docx#P101"
   },
   {
     "resultId": "neutral.route.1129.s1.result.complete",
@@ -1068,7 +1068,7 @@
     "resultType": "SET_FLAG",
     "target": "story.neutral.route.1129.s1.completed",
     "value": "true",
-    "note": "Root-tail settlement; 策划文件/文案/a-中立（共通+支线）/入线MA70.11.29-S1.docx"
+    "note": "Root-tail settlement; 策划文件/文案6点/文案/a-中立（共通+支线）/入线MA70.11.29-S1.docx"
   },
   {
     "resultId": "neutral.route.1130.s1.result.negotiation_success",
@@ -1077,7 +1077,7 @@
     "resultType": "SET_FLAG",
     "target": "neutral.negotiation.success",
     "value": "true",
-    "note": "Root-tail settlement; 策划文件/文案/a-中立（共通+支线）/入线MA70.11.30-S1中立结局D商业大亨.docx#P088"
+    "note": "Root-tail settlement; 策划文件/文案6点/文案/a-中立（共通+支线）/入线MA70.11.30-S1中立结局D商业大亨.docx#P088"
   },
   {
     "resultId": "neutral.route.1130.s1.result.negotiation_failure",
@@ -1086,7 +1086,7 @@
     "resultType": "SET_FLAG",
     "target": "neutral.negotiation.failed",
     "value": "true",
-    "note": "Root-tail settlement; 策划文件/文案/a-中立（共通+支线）/入线MA70.11.30-S1中立结局D商业大亨.docx#P106"
+    "note": "Root-tail settlement; 策划文件/文案6点/文案/a-中立（共通+支线）/入线MA70.11.30-S1中立结局D商业大亨.docx#P106"
   },
   {
     "resultId": "neutral.route.1130.s1.result.failure_continuation",
@@ -1095,7 +1095,7 @@
     "resultType": "QUEUE_EVENT",
     "target": "neutral.route.1130.s2",
     "value": "true",
-    "note": "Root-tail settlement; 策划文件/文案/a-中立（共通+支线）/入线MA70.11.30-S1中立结局D商业大亨.docx#P107"
+    "note": "Root-tail settlement; 策划文件/文案6点/文案/a-中立（共通+支线）/入线MA70.11.30-S1中立结局D商业大亨.docx#P107"
   },
   {
     "resultId": "neutral.route.1130.s1.result.ending.d",
@@ -1104,7 +1104,7 @@
     "resultType": "SET_FLAG",
     "target": "story.neutral.route.1130.s1.ending.d",
     "value": "true",
-    "note": "Root-tail settlement; 策划文件/文案/a-中立（共通+支线）/入线MA70.11.30-S1中立结局D商业大亨.docx#P225"
+    "note": "Root-tail settlement; 策划文件/文案6点/文案/a-中立（共通+支线）/入线MA70.11.30-S1中立结局D商业大亨.docx#P225"
   },
   {
     "resultId": "neutral.route.1130.s1.result.complete",
@@ -1113,7 +1113,7 @@
     "resultType": "SET_FLAG",
     "target": "story.neutral.route.1130.s1.completed",
     "value": "true",
-    "note": "Root-tail settlement; 策划文件/文案/a-中立（共通+支线）/入线MA70.11.30-S1中立结局D商业大亨.docx"
+    "note": "Root-tail settlement; 策划文件/文案6点/文案/a-中立（共通+支线）/入线MA70.11.30-S1中立结局D商业大亨.docx"
   },
   {
     "resultId": "neutral.route.1130.s2.result.ending.c",
@@ -1122,7 +1122,7 @@
     "resultType": "SET_FLAG",
     "target": "story.neutral.route.1130.s2.ending.c",
     "value": "true",
-    "note": "Root-tail settlement; 策划文件/文案/a-中立（共通+支线）/入线MA70.11.30-S2中立结局C.docx#P131"
+    "note": "Root-tail settlement; 策划文件/文案6点/文案/a-中立（共通+支线）/入线MA70.11.30-S2中立结局C.docx#P131"
   },
   {
     "resultId": "neutral.route.1130.s2.result.complete",
@@ -1131,7 +1131,7 @@
     "resultType": "SET_FLAG",
     "target": "story.neutral.route.1130.s2.completed",
     "value": "true",
-    "note": "Root-tail settlement; 策划文件/文案/a-中立（共通+支线）/入线MA70.11.30-S2中立结局C.docx"
+    "note": "Root-tail settlement; 策划文件/文案6点/文案/a-中立（共通+支线）/入线MA70.11.30-S2中立结局C.docx"
   },
   {
     "resultId": "rose.1009.s1.result.complete",
@@ -1972,8 +1972,17 @@
   },
   {
     "resultId": "church.1104.s1.result.003",
-    "eventId": "church.1104.s1",
+    "eventId": "church.1104.s1.choice.guide_fee.3.result",
     "seq": 3,
+    "resultType": "MONEY_ADD",
+    "target": "cafe",
+    "value": "50",
+    "note": "Source choice reward; root-tail settlement; external money uses host command"
+  },
+  {
+    "resultId": "church.1104.s1.result.004",
+    "eventId": "church.1104.s1",
+    "seq": 4,
     "resultType": "SET_FLAG",
     "target": "known.alienor",
     "value": "true",
@@ -8937,63 +8946,9 @@
     "note": ""
   },
   {
-    "resultId": "daily.news.07.complete",
-    "eventId": "daily.news.07",
-    "seq": 689,
-    "resultType": "SET_FLAG",
-    "target": "story.daily.news.07.completed",
-    "value": "true",
-    "note": ""
-  },
-  {
-    "resultId": "daily.news.07.training.lt",
-    "eventId": "daily.news.07",
-    "seq": 690,
-    "resultType": "TRAIN_ATTRIBUTE",
-    "target": "player.perception",
-    "value": "2",
-    "note": ""
-  },
-  {
-    "resultId": "daily.news.07.training.ge",
-    "eventId": "daily.news.07",
-    "seq": 691,
-    "resultType": "TRAIN_ATTRIBUTE",
-    "target": "player.perception",
-    "value": "1",
-    "note": ""
-  },
-  {
-    "resultId": "daily.news.08.complete",
-    "eventId": "daily.news.08",
-    "seq": 692,
-    "resultType": "SET_FLAG",
-    "target": "story.daily.news.08.completed",
-    "value": "true",
-    "note": ""
-  },
-  {
-    "resultId": "daily.news.08.training.lt",
-    "eventId": "daily.news.08",
-    "seq": 693,
-    "resultType": "TRAIN_ATTRIBUTE",
-    "target": "player.wisdom",
-    "value": "2",
-    "note": ""
-  },
-  {
-    "resultId": "daily.news.08.training.ge",
-    "eventId": "daily.news.08",
-    "seq": 694,
-    "resultType": "TRAIN_ATTRIBUTE",
-    "target": "player.wisdom",
-    "value": "1",
-    "note": ""
-  },
-  {
     "resultId": "daily.news.01.complete",
     "eventId": "daily.news.01",
-    "seq": 695,
+    "seq": 689,
     "resultType": "SET_FLAG",
     "target": "story.daily.news.01.completed",
     "value": "true",
@@ -9002,7 +8957,7 @@
   {
     "resultId": "daily.news.01.training.lt",
     "eventId": "daily.news.01",
-    "seq": 696,
+    "seq": 690,
     "resultType": "TRAIN_ATTRIBUTE",
     "target": "player.language",
     "value": "2",
@@ -9011,6 +8966,60 @@
   {
     "resultId": "daily.news.01.training.ge",
     "eventId": "daily.news.01",
+    "seq": 691,
+    "resultType": "TRAIN_ATTRIBUTE",
+    "target": "player.language",
+    "value": "1",
+    "note": ""
+  },
+  {
+    "resultId": "daily.news.07.complete",
+    "eventId": "daily.news.07",
+    "seq": 692,
+    "resultType": "SET_FLAG",
+    "target": "story.daily.news.07.completed",
+    "value": "true",
+    "note": ""
+  },
+  {
+    "resultId": "daily.news.07.training.lt",
+    "eventId": "daily.news.07",
+    "seq": 693,
+    "resultType": "TRAIN_ATTRIBUTE",
+    "target": "player.courage",
+    "value": "2",
+    "note": ""
+  },
+  {
+    "resultId": "daily.news.07.training.ge",
+    "eventId": "daily.news.07",
+    "seq": 694,
+    "resultType": "TRAIN_ATTRIBUTE",
+    "target": "player.courage",
+    "value": "1",
+    "note": ""
+  },
+  {
+    "resultId": "daily.news.08.complete",
+    "eventId": "daily.news.08",
+    "seq": 695,
+    "resultType": "SET_FLAG",
+    "target": "story.daily.news.08.completed",
+    "value": "true",
+    "note": ""
+  },
+  {
+    "resultId": "daily.news.08.training.lt",
+    "eventId": "daily.news.08",
+    "seq": 696,
+    "resultType": "TRAIN_ATTRIBUTE",
+    "target": "player.language",
+    "value": "2",
+    "note": ""
+  },
+  {
+    "resultId": "daily.news.08.training.ge",
+    "eventId": "daily.news.08",
     "seq": 697,
     "resultType": "TRAIN_ATTRIBUTE",
     "target": "player.language",
@@ -9018,36 +9027,9 @@
     "note": ""
   },
   {
-    "resultId": "daily.news.09.complete",
-    "eventId": "daily.news.09",
-    "seq": 698,
-    "resultType": "SET_FLAG",
-    "target": "story.daily.news.09.completed",
-    "value": "true",
-    "note": ""
-  },
-  {
-    "resultId": "daily.news.09.training.lt",
-    "eventId": "daily.news.09",
-    "seq": 699,
-    "resultType": "TRAIN_ATTRIBUTE",
-    "target": "player.wisdom",
-    "value": "2",
-    "note": ""
-  },
-  {
-    "resultId": "daily.news.09.training.ge",
-    "eventId": "daily.news.09",
-    "seq": 700,
-    "resultType": "TRAIN_ATTRIBUTE",
-    "target": "player.wisdom",
-    "value": "1",
-    "note": ""
-  },
-  {
     "resultId": "daily.news.02.complete",
     "eventId": "daily.news.02",
-    "seq": 701,
+    "seq": 698,
     "resultType": "SET_FLAG",
     "target": "story.daily.news.02.completed",
     "value": "true",
@@ -9056,7 +9038,7 @@
   {
     "resultId": "daily.news.02.training.lt",
     "eventId": "daily.news.02",
-    "seq": 702,
+    "seq": 699,
     "resultType": "TRAIN_ATTRIBUTE",
     "target": "player.wisdom",
     "value": "2",
@@ -9065,7 +9047,7 @@
   {
     "resultId": "daily.news.02.training.ge",
     "eventId": "daily.news.02",
-    "seq": 703,
+    "seq": 700,
     "resultType": "TRAIN_ATTRIBUTE",
     "target": "player.wisdom",
     "value": "1",
@@ -9074,7 +9056,7 @@
   {
     "resultId": "daily.news.10.complete",
     "eventId": "daily.news.10",
-    "seq": 704,
+    "seq": 701,
     "resultType": "SET_FLAG",
     "target": "story.daily.news.10.completed",
     "value": "true",
@@ -9083,18 +9065,45 @@
   {
     "resultId": "daily.news.10.training.lt",
     "eventId": "daily.news.10",
-    "seq": 705,
+    "seq": 702,
     "resultType": "TRAIN_ATTRIBUTE",
-    "target": "player.language",
+    "target": "player.courage",
     "value": "2",
     "note": ""
   },
   {
     "resultId": "daily.news.10.training.ge",
     "eventId": "daily.news.10",
+    "seq": 703,
+    "resultType": "TRAIN_ATTRIBUTE",
+    "target": "player.courage",
+    "value": "1",
+    "note": ""
+  },
+  {
+    "resultId": "daily.news.11.complete",
+    "eventId": "daily.news.11",
+    "seq": 704,
+    "resultType": "SET_FLAG",
+    "target": "story.daily.news.11.completed",
+    "value": "true",
+    "note": ""
+  },
+  {
+    "resultId": "daily.news.11.training.lt",
+    "eventId": "daily.news.11",
+    "seq": 705,
+    "resultType": "TRAIN_ATTRIBUTE",
+    "target": "player.courage",
+    "value": "2",
+    "note": ""
+  },
+  {
+    "resultId": "daily.news.11.training.ge",
+    "eventId": "daily.news.11",
     "seq": 706,
     "resultType": "TRAIN_ATTRIBUTE",
-    "target": "player.language",
+    "target": "player.courage",
     "value": "1",
     "note": ""
   },
@@ -9112,7 +9121,7 @@
     "eventId": "daily.news.03",
     "seq": 708,
     "resultType": "TRAIN_ATTRIBUTE",
-    "target": "player.courage",
+    "target": "player.language",
     "value": "2",
     "note": ""
   },
@@ -9121,68 +9130,14 @@
     "eventId": "daily.news.03",
     "seq": 709,
     "resultType": "TRAIN_ATTRIBUTE",
-    "target": "player.courage",
-    "value": "1",
-    "note": ""
-  },
-  {
-    "resultId": "daily.news.11.complete",
-    "eventId": "daily.news.11",
-    "seq": 710,
-    "resultType": "SET_FLAG",
-    "target": "story.daily.news.11.completed",
-    "value": "true",
-    "note": ""
-  },
-  {
-    "resultId": "daily.news.11.training.lt",
-    "eventId": "daily.news.11",
-    "seq": 711,
-    "resultType": "TRAIN_ATTRIBUTE",
-    "target": "player.courage",
-    "value": "2",
-    "note": ""
-  },
-  {
-    "resultId": "daily.news.11.training.ge",
-    "eventId": "daily.news.11",
-    "seq": 712,
-    "resultType": "TRAIN_ATTRIBUTE",
-    "target": "player.courage",
-    "value": "1",
-    "note": ""
-  },
-  {
-    "resultId": "daily.news.12.complete",
-    "eventId": "daily.news.12",
-    "seq": 713,
-    "resultType": "SET_FLAG",
-    "target": "story.daily.news.12.completed",
-    "value": "true",
-    "note": ""
-  },
-  {
-    "resultId": "daily.news.12.training.lt",
-    "eventId": "daily.news.12",
-    "seq": 714,
-    "resultType": "TRAIN_ATTRIBUTE",
-    "target": "player.perception",
-    "value": "2",
-    "note": ""
-  },
-  {
-    "resultId": "daily.news.12.training.ge",
-    "eventId": "daily.news.12",
-    "seq": 715,
-    "resultType": "TRAIN_ATTRIBUTE",
-    "target": "player.perception",
+    "target": "player.language",
     "value": "1",
     "note": ""
   },
   {
     "resultId": "daily.news.04.complete",
     "eventId": "daily.news.04",
-    "seq": 716,
+    "seq": 710,
     "resultType": "SET_FLAG",
     "target": "story.daily.news.04.completed",
     "value": "true",
@@ -9191,7 +9146,7 @@
   {
     "resultId": "daily.news.04.training.lt",
     "eventId": "daily.news.04",
-    "seq": 717,
+    "seq": 711,
     "resultType": "TRAIN_ATTRIBUTE",
     "target": "player.language",
     "value": "2",
@@ -9200,7 +9155,7 @@
   {
     "resultId": "daily.news.04.training.ge",
     "eventId": "daily.news.04",
-    "seq": 718,
+    "seq": 712,
     "resultType": "TRAIN_ATTRIBUTE",
     "target": "player.language",
     "value": "1",
@@ -9209,7 +9164,7 @@
   {
     "resultId": "daily.news.13.complete",
     "eventId": "daily.news.13",
-    "seq": 719,
+    "seq": 713,
     "resultType": "SET_FLAG",
     "target": "story.daily.news.13.completed",
     "value": "true",
@@ -9218,25 +9173,25 @@
   {
     "resultId": "daily.news.13.training.lt",
     "eventId": "daily.news.13",
-    "seq": 720,
+    "seq": 714,
     "resultType": "TRAIN_ATTRIBUTE",
-    "target": "player.perception",
+    "target": "player.wisdom",
     "value": "2",
     "note": ""
   },
   {
     "resultId": "daily.news.13.training.ge",
     "eventId": "daily.news.13",
-    "seq": 721,
+    "seq": 715,
     "resultType": "TRAIN_ATTRIBUTE",
-    "target": "player.perception",
+    "target": "player.wisdom",
     "value": "1",
     "note": ""
   },
   {
     "resultId": "daily.news.05.complete",
     "eventId": "daily.news.05",
-    "seq": 722,
+    "seq": 716,
     "resultType": "SET_FLAG",
     "target": "story.daily.news.05.completed",
     "value": "true",
@@ -9245,7 +9200,7 @@
   {
     "resultId": "daily.news.05.training.lt",
     "eventId": "daily.news.05",
-    "seq": 723,
+    "seq": 717,
     "resultType": "TRAIN_ATTRIBUTE",
     "target": "player.courage",
     "value": "2",
@@ -9254,6 +9209,60 @@
   {
     "resultId": "daily.news.05.training.ge",
     "eventId": "daily.news.05",
+    "seq": 718,
+    "resultType": "TRAIN_ATTRIBUTE",
+    "target": "player.courage",
+    "value": "1",
+    "note": ""
+  },
+  {
+    "resultId": "daily.news.09.complete",
+    "eventId": "daily.news.09",
+    "seq": 719,
+    "resultType": "SET_FLAG",
+    "target": "story.daily.news.09.completed",
+    "value": "true",
+    "note": ""
+  },
+  {
+    "resultId": "daily.news.09.training.lt",
+    "eventId": "daily.news.09",
+    "seq": 720,
+    "resultType": "TRAIN_ATTRIBUTE",
+    "target": "player.wisdom",
+    "value": "2",
+    "note": ""
+  },
+  {
+    "resultId": "daily.news.09.training.ge",
+    "eventId": "daily.news.09",
+    "seq": 721,
+    "resultType": "TRAIN_ATTRIBUTE",
+    "target": "player.wisdom",
+    "value": "1",
+    "note": ""
+  },
+  {
+    "resultId": "daily.news.12.complete",
+    "eventId": "daily.news.12",
+    "seq": 722,
+    "resultType": "SET_FLAG",
+    "target": "story.daily.news.12.completed",
+    "value": "true",
+    "note": ""
+  },
+  {
+    "resultId": "daily.news.12.training.lt",
+    "eventId": "daily.news.12",
+    "seq": 723,
+    "resultType": "TRAIN_ATTRIBUTE",
+    "target": "player.courage",
+    "value": "2",
+    "note": ""
+  },
+  {
+    "resultId": "daily.news.12.training.ge",
+    "eventId": "daily.news.12",
     "seq": 724,
     "resultType": "TRAIN_ATTRIBUTE",
     "target": "player.courage",
@@ -9274,7 +9283,7 @@
     "eventId": "daily.news.14",
     "seq": 726,
     "resultType": "TRAIN_ATTRIBUTE",
-    "target": "player.wisdom",
+    "target": "player.courage",
     "value": "2",
     "note": ""
   },
@@ -9283,7 +9292,7 @@
     "eventId": "daily.news.14",
     "seq": 727,
     "resultType": "TRAIN_ATTRIBUTE",
-    "target": "player.wisdom",
+    "target": "player.courage",
     "value": "1",
     "note": ""
   },
@@ -9301,7 +9310,7 @@
     "eventId": "daily.news.06",
     "seq": 729,
     "resultType": "TRAIN_ATTRIBUTE",
-    "target": "player.perception",
+    "target": "player.language",
     "value": "2",
     "note": ""
   },
@@ -9310,7 +9319,7 @@
     "eventId": "daily.news.06",
     "seq": 730,
     "resultType": "TRAIN_ATTRIBUTE",
-    "target": "player.perception",
+    "target": "player.language",
     "value": "1",
     "note": ""
   },
@@ -9423,171 +9432,261 @@
     "note": ""
   },
   {
-    "resultId": "news.bulletin.7e9cc445.complete",
-    "eventId": "news.bulletin.7e9cc445",
+    "resultId": "news.bulletin.4e97d60a.complete",
+    "eventId": "news.bulletin.4e97d60a",
     "seq": 743,
     "resultType": "SET_FLAG",
-    "target": "story.news.bulletin.7e9cc445.completed",
+    "target": "story.news.bulletin.4e97d60a.completed",
     "value": "true",
     "note": ""
   },
   {
-    "resultId": "news.bulletin.7e9cc445.public",
-    "eventId": "news.bulletin.7e9cc445",
+    "resultId": "news.bulletin.4e97d60a.public",
+    "eventId": "news.bulletin.4e97d60a",
     "seq": 744,
     "resultType": "SET_FLAG",
-    "target": "news.public.5.7e9cc445",
+    "target": "news.public.2.4e97d60a",
     "value": "true",
     "note": ""
   },
   {
-    "resultId": "news.bulletin.837fdfd7.complete",
-    "eventId": "news.bulletin.837fdfd7",
+    "resultId": "news.bulletin.0534bc9c.complete",
+    "eventId": "news.bulletin.0534bc9c",
     "seq": 745,
     "resultType": "SET_FLAG",
-    "target": "story.news.bulletin.837fdfd7.completed",
+    "target": "story.news.bulletin.0534bc9c.completed",
     "value": "true",
     "note": ""
   },
   {
-    "resultId": "news.bulletin.837fdfd7.public",
-    "eventId": "news.bulletin.837fdfd7",
+    "resultId": "news.bulletin.0534bc9c.public",
+    "eventId": "news.bulletin.0534bc9c",
     "seq": 746,
     "resultType": "SET_FLAG",
-    "target": "news.public.6.837fdfd7",
+    "target": "news.public.2.0534bc9c",
     "value": "true",
     "note": ""
   },
   {
-    "resultId": "news.bulletin.29af38b6.complete",
-    "eventId": "news.bulletin.29af38b6",
+    "resultId": "news.bulletin.4b69a3d7.complete",
+    "eventId": "news.bulletin.4b69a3d7",
     "seq": 747,
     "resultType": "SET_FLAG",
-    "target": "story.news.bulletin.29af38b6.completed",
+    "target": "story.news.bulletin.4b69a3d7.completed",
     "value": "true",
     "note": ""
   },
   {
-    "resultId": "news.bulletin.29af38b6.public",
-    "eventId": "news.bulletin.29af38b6",
+    "resultId": "news.bulletin.4b69a3d7.public",
+    "eventId": "news.bulletin.4b69a3d7",
     "seq": 748,
     "resultType": "SET_FLAG",
-    "target": "news.public.7.29af38b6",
+    "target": "news.public.9.4b69a3d7",
     "value": "true",
     "note": ""
   },
   {
-    "resultId": "news.bulletin.ce650510.complete",
-    "eventId": "news.bulletin.ce650510",
+    "resultId": "news.bulletin.7798da75.complete",
+    "eventId": "news.bulletin.7798da75",
     "seq": 749,
     "resultType": "SET_FLAG",
-    "target": "story.news.bulletin.ce650510.completed",
+    "target": "story.news.bulletin.7798da75.completed",
     "value": "true",
     "note": ""
   },
   {
-    "resultId": "news.bulletin.ce650510.public",
-    "eventId": "news.bulletin.ce650510",
+    "resultId": "news.bulletin.7798da75.public",
+    "eventId": "news.bulletin.7798da75",
     "seq": 750,
     "resultType": "SET_FLAG",
-    "target": "news.public.7.ce650510",
+    "target": "news.public.9.7798da75",
     "value": "true",
     "note": ""
   },
   {
-    "resultId": "news.bulletin.c1b54ba7.complete",
-    "eventId": "news.bulletin.c1b54ba7",
+    "resultId": "news.bulletin.b010d9c5.complete",
+    "eventId": "news.bulletin.b010d9c5",
     "seq": 751,
     "resultType": "SET_FLAG",
-    "target": "story.news.bulletin.c1b54ba7.completed",
+    "target": "story.news.bulletin.b010d9c5.completed",
     "value": "true",
     "note": ""
   },
   {
-    "resultId": "news.bulletin.c1b54ba7.public",
-    "eventId": "news.bulletin.c1b54ba7",
+    "resultId": "news.bulletin.b010d9c5.public",
+    "eventId": "news.bulletin.b010d9c5",
     "seq": 752,
     "resultType": "SET_FLAG",
-    "target": "news.public.7.c1b54ba7",
+    "target": "news.public.9.b010d9c5",
     "value": "true",
     "note": ""
   },
   {
-    "resultId": "news.bulletin.12ed1d36.complete",
-    "eventId": "news.bulletin.12ed1d36",
+    "resultId": "news.bulletin.52bc0928.complete",
+    "eventId": "news.bulletin.52bc0928",
     "seq": 753,
     "resultType": "SET_FLAG",
-    "target": "story.news.bulletin.12ed1d36.completed",
+    "target": "story.news.bulletin.52bc0928.completed",
     "value": "true",
     "note": ""
   },
   {
-    "resultId": "news.bulletin.12ed1d36.public",
-    "eventId": "news.bulletin.12ed1d36",
+    "resultId": "news.bulletin.52bc0928.public",
+    "eventId": "news.bulletin.52bc0928",
     "seq": 754,
     "resultType": "SET_FLAG",
-    "target": "news.public.10.12ed1d36",
+    "target": "news.public.16.52bc0928",
     "value": "true",
     "note": ""
   },
   {
-    "resultId": "news.bulletin.8140f96a.complete",
-    "eventId": "news.bulletin.8140f96a",
+    "resultId": "news.bulletin.d7731a0a.complete",
+    "eventId": "news.bulletin.d7731a0a",
     "seq": 755,
     "resultType": "SET_FLAG",
-    "target": "story.news.bulletin.8140f96a.completed",
+    "target": "story.news.bulletin.d7731a0a.completed",
     "value": "true",
     "note": ""
   },
   {
-    "resultId": "news.bulletin.8140f96a.public",
-    "eventId": "news.bulletin.8140f96a",
+    "resultId": "news.bulletin.d7731a0a.public",
+    "eventId": "news.bulletin.d7731a0a",
     "seq": 756,
     "resultType": "SET_FLAG",
-    "target": "news.public.10.8140f96a",
+    "target": "news.public.16.d7731a0a",
     "value": "true",
     "note": ""
   },
   {
-    "resultId": "news.bulletin.d7760931.complete",
-    "eventId": "news.bulletin.d7760931",
+    "resultId": "news.bulletin.d8022902.complete",
+    "eventId": "news.bulletin.d8022902",
     "seq": 757,
     "resultType": "SET_FLAG",
-    "target": "story.news.bulletin.d7760931.completed",
+    "target": "story.news.bulletin.d8022902.completed",
     "value": "true",
     "note": ""
   },
   {
-    "resultId": "news.bulletin.d7760931.public",
-    "eventId": "news.bulletin.d7760931",
+    "resultId": "news.bulletin.d8022902.public",
+    "eventId": "news.bulletin.d8022902",
     "seq": 758,
     "resultType": "SET_FLAG",
-    "target": "news.public.18.d7760931",
+    "target": "news.public.16.d8022902",
     "value": "true",
     "note": ""
   },
   {
-    "resultId": "news.bulletin.58d0aef1.complete",
-    "eventId": "news.bulletin.58d0aef1",
+    "resultId": "news.bulletin.7897b5c9.complete",
+    "eventId": "news.bulletin.7897b5c9",
     "seq": 759,
     "resultType": "SET_FLAG",
-    "target": "story.news.bulletin.58d0aef1.completed",
+    "target": "story.news.bulletin.7897b5c9.completed",
     "value": "true",
     "note": ""
   },
   {
-    "resultId": "news.bulletin.58d0aef1.public",
-    "eventId": "news.bulletin.58d0aef1",
+    "resultId": "news.bulletin.7897b5c9.public",
+    "eventId": "news.bulletin.7897b5c9",
     "seq": 760,
     "resultType": "SET_FLAG",
-    "target": "news.public.31.58d0aef1",
+    "target": "news.public.23.7897b5c9",
+    "value": "true",
+    "note": ""
+  },
+  {
+    "resultId": "news.bulletin.4e747465.complete",
+    "eventId": "news.bulletin.4e747465",
+    "seq": 761,
+    "resultType": "SET_FLAG",
+    "target": "story.news.bulletin.4e747465.completed",
+    "value": "true",
+    "note": ""
+  },
+  {
+    "resultId": "news.bulletin.4e747465.public",
+    "eventId": "news.bulletin.4e747465",
+    "seq": 762,
+    "resultType": "SET_FLAG",
+    "target": "news.public.23.4e747465",
+    "value": "true",
+    "note": ""
+  },
+  {
+    "resultId": "news.bulletin.e7f0c5a9.complete",
+    "eventId": "news.bulletin.e7f0c5a9",
+    "seq": 763,
+    "resultType": "SET_FLAG",
+    "target": "story.news.bulletin.e7f0c5a9.completed",
+    "value": "true",
+    "note": ""
+  },
+  {
+    "resultId": "news.bulletin.e7f0c5a9.public",
+    "eventId": "news.bulletin.e7f0c5a9",
+    "seq": 764,
+    "resultType": "SET_FLAG",
+    "target": "news.public.30.e7f0c5a9",
+    "value": "true",
+    "note": ""
+  },
+  {
+    "resultId": "news.bulletin.ad3f2a62.complete",
+    "eventId": "news.bulletin.ad3f2a62",
+    "seq": 765,
+    "resultType": "SET_FLAG",
+    "target": "story.news.bulletin.ad3f2a62.completed",
+    "value": "true",
+    "note": ""
+  },
+  {
+    "resultId": "news.bulletin.ad3f2a62.public",
+    "eventId": "news.bulletin.ad3f2a62",
+    "seq": 766,
+    "resultType": "SET_FLAG",
+    "target": "news.public.30.ad3f2a62",
+    "value": "true",
+    "note": ""
+  },
+  {
+    "resultId": "news.bulletin.213e19c7.complete",
+    "eventId": "news.bulletin.213e19c7",
+    "seq": 767,
+    "resultType": "SET_FLAG",
+    "target": "story.news.bulletin.213e19c7.completed",
+    "value": "true",
+    "note": ""
+  },
+  {
+    "resultId": "news.bulletin.213e19c7.public",
+    "eventId": "news.bulletin.213e19c7",
+    "seq": 768,
+    "resultType": "SET_FLAG",
+    "target": "news.public.37.213e19c7",
+    "value": "true",
+    "note": ""
+  },
+  {
+    "resultId": "news.bulletin.614a28cd.complete",
+    "eventId": "news.bulletin.614a28cd",
+    "seq": 769,
+    "resultType": "SET_FLAG",
+    "target": "story.news.bulletin.614a28cd.completed",
+    "value": "true",
+    "note": ""
+  },
+  {
+    "resultId": "news.bulletin.614a28cd.public",
+    "eventId": "news.bulletin.614a28cd",
+    "seq": 770,
+    "resultType": "SET_FLAG",
+    "target": "news.public.37.614a28cd",
     "value": "true",
     "note": ""
   },
   {
     "resultId": "newspaper.1014.complete",
     "eventId": "newspaper.1014",
-    "seq": 761,
+    "seq": 771,
     "resultType": "SET_FLAG",
     "target": "story.newspaper.1014.completed",
     "value": "true",
@@ -9596,7 +9695,7 @@
   {
     "resultId": "newspaper.1021.complete",
     "eventId": "newspaper.1021",
-    "seq": 762,
+    "seq": 772,
     "resultType": "SET_FLAG",
     "target": "story.newspaper.1021.completed",
     "value": "true",
@@ -9605,7 +9704,7 @@
   {
     "resultId": "newspaper.1028.complete",
     "eventId": "newspaper.1028",
-    "seq": 763,
+    "seq": 773,
     "resultType": "SET_FLAG",
     "target": "story.newspaper.1028.completed",
     "value": "true",
@@ -9614,7 +9713,7 @@
   {
     "resultId": "newspaper.1111.complete",
     "eventId": "newspaper.1111",
-    "seq": 764,
+    "seq": 774,
     "resultType": "SET_FLAG",
     "target": "story.newspaper.1111.completed",
     "value": "true",
@@ -9623,7 +9722,7 @@
   {
     "resultId": "newspaper.1104.complete",
     "eventId": "newspaper.1104",
-    "seq": 765,
+    "seq": 775,
     "resultType": "SET_FLAG",
     "target": "story.newspaper.1104.completed",
     "value": "true",
@@ -9632,7 +9731,7 @@
   {
     "resultId": "newspaper.1007.complete",
     "eventId": "newspaper.1007",
-    "seq": 766,
+    "seq": 776,
     "resultType": "SET_FLAG",
     "target": "story.newspaper.1007.completed",
     "value": "true",

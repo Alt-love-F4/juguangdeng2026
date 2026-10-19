@@ -42,7 +42,8 @@ namespace Spotlight.GameFlow
         /// Only the close button invokes onClosed; the controller owns stopping the preview.
         /// </summary>
         public void Show(Transform owner, TMP_FontAsset font, IReadOnlyList<string> ids,
-            IReadOnlyList<string> labels, Action<string> onSelected, Action onClosed)
+            IReadOnlyList<string> labels, Action<string> onSelected, Action onClosed,
+            string titleText = null, string hintText = null)
         {
             if (owner == null) throw new ArgumentNullException(nameof(owner));
             Close();
@@ -72,10 +73,11 @@ namespace Spotlight.GameFlow
             Image panel = Box(backdrop.transform, "Panel", new Vector2(.15f, .12f),
                 new Vector2(.85f, .88f), new Color(.10f, .12f, .16f, 1f));
 
-            TMP_Text title = Text(panel.transform, "Title", "连续演出 · 选择播放入口", 32);
+            TMP_Text title = Text(panel.transform, "Title", string.IsNullOrWhiteSpace(titleText) ? "连续演出 · 选择播放入口" : titleText, 32);
             Place(title.rectTransform, new Vector2(0, 1), Vector2.one,
                 new Vector2(30, -72), new Vector2(-150, -16));
-            TMP_Text hint = Text(panel.transform, "Hint", "优先选择入口候选 · 按选项/检定连续播放 · 仅影响临时预览状态", 24);
+            TMP_Text hint = Text(panel.transform, "Hint", string.IsNullOrWhiteSpace(hintText)
+                ? "优先选择入口候选 · 按选项/检定连续播放 · 仅影响临时预览状态" : hintText, 24);
             hint.color = new Color(.75f, .80f, .86f, 1f);
             Place(hint.rectTransform, new Vector2(0, 1), Vector2.one,
                 new Vector2(30, -115), new Vector2(-30, -72));

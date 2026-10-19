@@ -197,6 +197,19 @@ namespace Spotlight.Narrative
                 && !seenActionInstances.Contains(GetActionInstanceKey(position, a.actionKey))
                 && IsAvailable(a.actionKey, out _, ignoreTransientBusy: true));
 
+        /// <summary>Unread important story actions with configured events; daily pools are activity, not map alerts.</summary>
+        public bool HasUnseenImportantActions(string position)
+            => GetDisplayableActions(position).Any(a => a.mustExecute
+                && a.type != NarrativeActionType.Daily
+                && !IsDailyPoolAction(a.actionKey)
+                && a.resultEvents != null && a.resultEvents.Any(eventId => !string.IsNullOrWhiteSpace(eventId))
+                && IsUnseenCandidate(a)
+                && !seenActionInstances.Contains(GetActionInstanceKey(position, a.actionKey))
+                && IsAvailableForMapBadge(a.actionKey));
+
+        private bool IsAvailableForMapBadge(string actionKey)
+            => IsAvailable(actionKey, out _, ignoreTransientBusy: true, ignoreCosts: true);
+
         /// <summary>Only the actual rendered, unobscured detail page may acknowledge its captured instance token.</summary>
         public bool ConfirmActionDisplayed(string position, string instanceKey)
         {
@@ -264,6 +277,9 @@ namespace Spotlight.Narrative
             => IsAvailable(actionKey, out checks, ignoreTransientBusy: false);
 
         private bool IsAvailable(string actionKey, out List<NarrativeActionCheck> checks, bool ignoreTransientBusy)
+            => IsAvailable(actionKey, out checks, ignoreTransientBusy, ignoreCosts: false);
+
+        private bool IsAvailable(string actionKey, out List<NarrativeActionCheck> checks, bool ignoreTransientBusy, bool ignoreCosts)
         {
             checks = new List<NarrativeActionCheck>();
             NarrativeActionDefinition action = Get(actionKey);
@@ -273,24 +289,27 @@ namespace Spotlight.Narrative
             if (action.IsDelivery && HasSubmittedToday(actionKey)) eligible = false;
             if (action.endDay && HasBlockingActions()) eligible = false;
             if (action.type == NarrativeActionType.Daily && dailyExecution.TryGetValue(actionKey, out int day) && day == CurrentDay) eligible = false;
-            foreach (NarrativeActionRequirement requirement in action.parsedRequirements ?? NarrativeActionRequirementParser.Parse(action.requirements))
+            if (!ignoreCosts)
             {
-                NarrativeActionCheck check = Check(requirement);
-                checks.Add(check);
-            }
-            // Repeated costs share the same stock; checking each row independently could overspend.
-            foreach (var group in action.parsedRequirements.Where(r => r.type == NarrativeActionRequirementType.Item).GroupBy(r => r.key))
-                if (group.Sum(r => (long)r.value) > inventory.GetCount(group.Key))
+                foreach (NarrativeActionRequirement requirement in action.parsedRequirements ?? NarrativeActionRequirementParser.Parse(action.requirements))
+                {
+                    NarrativeActionCheck check = Check(requirement);
+                    checks.Add(check);
+                }
+                // Repeated costs share the same stock; checking each row independently could overspend.
+                foreach (var group in action.parsedRequirements.Where(r => r.type == NarrativeActionRequirementType.Item).GroupBy(r => r.key))
+                    if (group.Sum(r => (long)r.value) > inventory.GetCount(group.Key))
+                        for (int i = 0; i < action.parsedRequirements.Count; i++)
+                            if (action.parsedRequirements[i].type == NarrativeActionRequirementType.Item && action.parsedRequirements[i].key == group.Key) checks[i].satisfied = false;
+                if (action.parsedRequirements.Where(r => r.type == NarrativeActionRequirementType.ActionPoint).Sum(r => (long)r.value) > ActionPoints.Current)
                     for (int i = 0; i < action.parsedRequirements.Count; i++)
-                        if (action.parsedRequirements[i].type == NarrativeActionRequirementType.Item && action.parsedRequirements[i].key == group.Key) checks[i].satisfied = false;
-            if (action.parsedRequirements.Where(r => r.type == NarrativeActionRequirementType.ActionPoint).Sum(r => (long)r.value) > ActionPoints.Current)
-                for (int i = 0; i < action.parsedRequirements.Count; i++)
-                    if (action.parsedRequirements[i].type == NarrativeActionRequirementType.ActionPoint) checks[i].satisfied = false;
+                        if (action.parsedRequirements[i].type == NarrativeActionRequirementType.ActionPoint) checks[i].satisfied = false;
+            }
             bool conditionsMet = narrative.EvaluateConditions("action", actionKey);
             if (!conditionsMet) checks.Add(new NarrativeActionCheck { satisfied = false, requirement = "Condition(action," + actionKey + ")", messageKey = "action.condition.missing" });
             bool poolReady = !narrative.UsesDailyPool(action) || narrative.TrySelectActionEvents(action, out _, ignoreTransientBusy);
             if (!poolReady) checks.Add(new NarrativeActionCheck { satisfied = false, requirement = "DailyPool", messageKey = "action.condition.missing" });
-            return eligible && conditionsMet && poolReady && checks.All(check => check.satisfied);
+            return eligible && conditionsMet && poolReady && (ignoreCosts || checks.All(check => check.satisfied));
         }
 
         public bool Execute(string actionKey, Action<bool> completed = null)

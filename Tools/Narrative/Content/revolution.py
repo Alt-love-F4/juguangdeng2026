@@ -10,7 +10,7 @@ import re
 import xml.etree.ElementTree as ET
 import zipfile
 
-SOURCE_DIR = Path("策划文件/文案/a-革命联合（共通+支线）")
+SOURCE_DIR = Path("策划文件/文案6点/文案/a-革命联合（共通+支线）")
 SHEETS = ("Event", "EventDate", "SetupParams", "PresentationIndex", "ConversationPage",
           "ConversationLine", "ReadingPage", "ReadingLine", "Choice", "Condition",
           "ConditionKey", "Result", "AbilityCheck", "AbilityCheckCondition", "Ending", "Object", "Text")

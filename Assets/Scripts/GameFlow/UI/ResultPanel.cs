@@ -37,7 +37,12 @@ namespace Spotlight.GameFlow
         public string DisplayedEndingArtworkStatus => endingArtworkStatus != null ? endingArtworkStatus.text : string.Empty;
         public Sprite DisplayedEndingArtwork => endingArtwork != null ? endingArtwork.sprite : null;
         public bool IsEndingPresentation => current?.IsEnding == true;
-        public void ConfirmResult() => CloseResult();
+        public void ConfirmResult()
+        {
+            if (current?.IsEnding == true && endingDialoguePanel != null && endingDialoguePanel.IsEndingSettlement)
+                endingDialoguePanel.AdvanceEndingSettlement();
+            else CloseResult();
+        }
 
         protected override void Awake()
         {
@@ -45,7 +50,8 @@ namespace Spotlight.GameFlow
             base.Awake();
             CaptureRectStates();
             Spotlight.Audio.UIButtonAudio.Configure(closeButton, string.Empty);
-            closeButton?.onClick.AddListener(CloseResult);
+            closeButton?.onClick.AddListener(ConfirmResult);
+            if (endingDialoguePanel != null) endingDialoguePanel.SettlementChanged += RefreshContinueLabel;
         }
 
         protected override void OnOpen(YokiFrame.IUIData data = null)
@@ -65,7 +71,7 @@ namespace Spotlight.GameFlow
             {
                 bool ending=current?.IsEnding==true;
                 endingDialoguePanel.gameObject.SetActive(ending);
-                if(ending)endingDialoguePanel.ShowEndingSettlement(current.Message);
+                if(ending)endingDialoguePanel.ShowEndingSettlement(current.Message, CloseResult);
             }
             if (endingArtworkFrame != null) endingArtworkFrame.SetActive(current?.IsEnding == true);
             if (endingArtwork != null)
@@ -85,8 +91,17 @@ namespace Spotlight.GameFlow
             }
             if (endingEchoText != null) endingEchoText.text = string.Empty;
             if (endingEchoSection != null) endingEchoSection.SetActive(false);
+            RefreshContinueLabel();
+        }
+
+        private void RefreshContinueLabel()
+        {
             var label = closeButton != null ? closeButton.GetComponentInChildren<TMP_Text>(true) : null;
-            if (label != null) label.text = current?.CloseLabel ?? "关闭";
+            if (label == null) return;
+            label.text = current?.IsEnding == true && endingDialoguePanel != null && endingDialoguePanel.IsEndingSettlement
+                ? endingDialoguePanel.IsSettlementTyping ? "点击显示全文"
+                    : !endingDialoguePanel.IsSettlementLastPage ? "继续阅读" : current.CloseLabel
+                : current?.CloseLabel ?? "关闭";
         }
 
         private struct RectState

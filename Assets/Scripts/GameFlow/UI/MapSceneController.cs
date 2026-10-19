@@ -782,7 +782,7 @@ namespace Spotlight.GameFlow
         {
             if (locationDots.TryGetValue(positionKey, out var dot) && dot != null)
                 dot.gameObject.SetActive(AllowsTodoPosition(positionKey)
-                    && (NarrativeRuntime.Instance?.Actions?.HasUnseenAvailableActions(positionKey) ?? false));
+                    && (NarrativeRuntime.Instance?.Actions?.HasUnseenImportantActions(positionKey) ?? false));
         }
 
         private void EnsureNarrativeRuntime()

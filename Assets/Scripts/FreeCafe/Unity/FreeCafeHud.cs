@@ -562,7 +562,7 @@ namespace Spotlight.FreeCafe
                 var customer=runtime.World.Find(request.customerId);string name="顾客";
                 if(customer!=null) name=runtime.World.PersonName(customer);
                 var character=customer!=null && customer.person!=null ? runtime.Character(customer.person.characterId) : null;
-                SetOrderAvatar(index,character?.avatar);
+                SetOrderAvatar(index,CafeCustomerVisualVariants.ResolveAvatar(customer?.person,character));
                 string status=request.id==CafeWorld.TutorialOrderId ? "教程订单 · 尚未营业" : name+"  ·  "+request.patience.ToString("0")+" 秒";
                 string recipe=(request.id==state.focusedRequestId ? "● " : "")+status+"\n"+FreeCafeProductionText.Recipe(product.label)+" · "+runtime.World.Spec(runtime.World.RequiredCupSpecId(request)).label+"  /  "+product.price+" 王国币";
                 if(label!=null) label.text=recipe;

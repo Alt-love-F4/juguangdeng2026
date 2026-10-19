@@ -38,9 +38,9 @@ namespace Spotlight.Narrative.Editor.Tests
             var config = LubanNarrativeLoader.Load();
             var lines = config.presentations.conversationLines
                 .Where(l => l.speakerKey == "sparrow").ToArray();
-            Assert.That(sparrow.ConversationLines, Is.EqualTo(112));
-            Assert.That(sparrow.OnstageConversationLines, Is.EqualTo(83));
-            Assert.That(sparrow.OffstageConversationLines, Is.EqualTo(29));
+            Assert.That(sparrow.ConversationLines, Is.EqualTo(lines.Length));
+            Assert.That(sparrow.OnstageConversationLines, Is.GreaterThan(0));
+            Assert.That(sparrow.OffstageConversationLines, Is.GreaterThan(0));
             Assert.That(sparrow.OnstageConversationLines + sparrow.OffstageConversationLines, Is.EqualTo(sparrow.ConversationLines));
             Assert.That(lines.Count(l => l.side == "right"), Is.EqualTo(sparrow.OnstageConversationLines));
             Assert.That(lines.Count(l => l.side == "none"), Is.EqualTo(sparrow.OffstageConversationLines));
@@ -241,6 +241,65 @@ namespace Spotlight.Narrative.Editor.Tests
             Assert.That(filesAfter.Keys, Is.EquivalentTo(filesBefore.Keys), "Source files must not be created or deleted by an audit.");
             foreach (var file in filesBefore)
                 Assert.That(filesAfter[file.Key], Is.EqualTo(file.Value), file.Key);
+        }
+
+        [Test]
+        public void AllObjectsSeparateRequiredOnstageGapsFromNoPortraitActors()
+        {
+            var audit = NarrativeCharacterArtAudit.Load();
+            var configuration = LubanNarrativeLoader.Load();
+            var objects = audit.InspectAllObjects();
+            Assert.That(objects.Length, Is.EqualTo(configuration.objects.Count));
+            Assert.That(objects.Select(c => c.Id).Distinct(StringComparer.Ordinal).Count(), Is.EqualTo(objects.Length));
+
+            var sorel = audit.Inspect("sorel");
+            Assert.That(sorel.ObjectExists, Is.True);
+            Assert.That(sorel.NoPortrait, Is.False);
+            Assert.That(sorel.CanAppearOnstage, Is.True);
+            Assert.That(sorel.Portrait.Available, Is.False);
+            Assert.That(audit.MissingOnstageNpcPortraitIds(), Does.Contain("sorel"));
+
+            var genericWorker = audit.Inspect("revolution.actor.young_worker");
+            Assert.That(genericWorker.NoPortrait, Is.True);
+            Assert.That(genericWorker.CanAppearOnstage, Is.True);
+            Assert.That(genericWorker.Portrait.Available, Is.False);
+            Assert.That(audit.MissingOnstageNpcPortraitIds(), Does.Not.Contain(genericWorker.Id));
+            Assert.That(NarrativeCharacterArtAudit.Summary(new[] { genericWorker }), Is.EqualTo("全部标记 no_portrait"));
+        }
+
+        [Test]
+        public void GuestVariantInventoryCountsPortraitAndAvatarPoolsWithoutAddingDemandIds()
+        {
+            string root = Path.Combine(Path.GetTempPath(), "NarrativeGuestVariantAudit_" + Guid.NewGuid().ToString("N"));
+            try
+            {
+                WriteVariant(root, "guest_a", "portrait_01.png");
+                WriteVariant(root, "guest_a", "avatar_01.png");
+                WriteVariant(root, "guest_b", "portrait_02.png");
+                WriteVariant(root, "guest_d", "avatar_03.png");
+                WriteVariant(root, "guest_e", "portrait_ignored.png");
+                WriteVariant(root, "guest_c", "other_ignored.png");
+
+                var counts = NarrativeCharacterArtAudit.CountGuestVariants(root);
+                Assert.That(counts.Pools.Select(pool => pool.GuestId),
+                    Is.EqualTo(new[] { "guest_a", "guest_b", "guest_c", "guest_d" }));
+                Assert.That(counts.Pools.Select(pool => pool.Portraits), Is.EqualTo(new[] { 1, 1, 0, 0 }));
+                Assert.That(counts.Pools.Select(pool => pool.Avatars), Is.EqualTo(new[] { 1, 0, 0, 1 }));
+                Assert.That(counts.Portraits, Is.EqualTo(2));
+                Assert.That(counts.Avatars, Is.EqualTo(2));
+                Assert.That(counts.Total, Is.EqualTo(4));
+            }
+            finally
+            {
+                if (Directory.Exists(root)) Directory.Delete(root, true);
+            }
+        }
+
+        private static void WriteVariant(string root, string guestId, string fileName)
+        {
+            string directory = Path.Combine(root, guestId, "variants");
+            Directory.CreateDirectory(directory);
+            File.WriteAllBytes(Path.Combine(directory, fileName), Array.Empty<byte>());
         }
 
         private static NarrativeArtPlaceholderBuilder.Requirement Requirement(string id)

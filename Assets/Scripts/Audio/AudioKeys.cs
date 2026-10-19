@@ -37,6 +37,10 @@ namespace Spotlight.Audio
         public const string OrderSuccess = "cafe.order_success";
         public const string OrderRemake = "cafe.order_remake";
         public const string OrderFailed = "cafe.order_failed";
+        public const string CoffeeResultBad = "cafe.result_bad";
+        public const string CoffeeResultGood = "cafe.result_good";
+        public const string CoffeeResultGreat = "cafe.result_great";
+        public const string CoffeeResultPerfect = "cafe.result_perfect";
         public const string Discard = "cafe.discard";
         public const string Empty = "cafe.container_empty";
         public const string LattePour = "cafe.latte_pour";

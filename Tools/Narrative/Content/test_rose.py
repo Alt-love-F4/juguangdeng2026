@@ -153,6 +153,25 @@ class RoseContentTests(unittest.TestCase):
             self.assertNotIn('D:/',src['path'])
         self.assertEqual(next(s['paragraphCount'] for s in audit['sources'] if s['root']=='rose.1016.s1'),96)
 
+    def test_oct19_rose_revisions_compile_without_unlocking_author_gates(self):
+        texts = {row['key']: row['text'] for row in self.b['Text']}
+        sources = {row['root']: row for row in self.b['_audit']['sources']}
+        for root, anchors in {
+            'rose.route.1115.s1': (113,),
+            'rose.route.ending.bloom': (53, 58, 59),
+        }.items():
+            source = sources[root]
+            for anchor in anchors:
+                key = f'{root}.text.p{anchor:03}'
+                self.assertEqual(source['paragraphs'][anchor - 1], texts[key], key)
+        ideal = texts['rose.route.1115.s1.text.p113']
+        self.assertIn('十五年都未发生过叛乱', ideal)
+        self.assertNotIn('十五年都发生过叛乱', ideal)
+        event = next(row for row in self.b['Event'] if row['eventId'] == 'rose.route.1115.s1')
+        self.assertIn('blockedBy=', event['eventProperty'])
+        self.assertTrue(any(row['code'] == 'candor_baseline_and_gap'
+            for row in sources['rose.route.1115.s1']['blockedBy']))
+
     def test_build_is_deterministic_and_no_writes(self):
         with patch.object(Path,'write_text',side_effect=AssertionError('compiler wrote text')), \
              patch.object(Path,'write_bytes',side_effect=AssertionError('compiler wrote bytes')):

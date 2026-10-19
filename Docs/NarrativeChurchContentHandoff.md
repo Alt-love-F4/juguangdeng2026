@@ -56,6 +56,10 @@ Repeated guarded pages implement alternatives/topic-order paths; counts are NOT 
 
 ## Source-by-source status
 
+### 文案6点当前覆盖修正（2026-10-19）
+
+下方旧表的来源目录、11/4 段数和第三报价锁定状态为早期快照；当前输入为 `策划文件/文案6点/文案/a-王庭教会（共通+支线）`，细节见 `Docs/Narrative6PointIntegration.md`。11/4 新稿原480段，其中P096/P097是拆开的同一句，编译归一化为479个稳定Text锚点。第三报价由P061收50币、P064金钱+50的明确文本接入真实 `MONEY_ADD cafe 50`；市场 `xx` 占位保留已有具体填值。10/23处死稿/11/11说明改名不更改旧存档所用Root/Ending ID。RY1123源引用歧义仍保持整根关闭。
+
 All current DOCX are in 策划文件/文案/a-王庭教会（共通+支线）.
 
 | DOCX stem | Paragraphs | Root | Actual content status |

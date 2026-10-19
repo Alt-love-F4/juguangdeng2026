@@ -927,6 +927,15 @@
     "autoAdvanceSeconds": 0
   },
   {
+    "lineId": "cafe.ambient.chat.chat-07.5",
+    "presentationId": "cafe.ambient.chat.chat-07",
+    "seq": 5,
+    "speaker": "right",
+    "textKey": "cafe.ambient.chat.chat-07.text.5",
+    "gesture": "none",
+    "autoAdvanceSeconds": 0
+  },
+  {
     "lineId": "cafe.ambient.chat.chat-08.3",
     "presentationId": "cafe.ambient.chat.chat-08",
     "seq": 3,
@@ -999,15 +1008,6 @@
     "autoAdvanceSeconds": 0
   },
   {
-    "lineId": "cafe.ambient.chat.chat-11.2",
-    "presentationId": "cafe.ambient.chat.chat-11",
-    "seq": 2,
-    "speaker": "right",
-    "textKey": "cafe.ambient.chat.chat-11.text.2",
-    "gesture": "none",
-    "autoAdvanceSeconds": 0
-  },
-  {
     "lineId": "cafe.ambient.chat.chat-11.3",
     "presentationId": "cafe.ambient.chat.chat-11",
     "seq": 3,
@@ -1022,6 +1022,15 @@
     "seq": 4,
     "speaker": "right",
     "textKey": "cafe.ambient.chat.chat-11.text.4",
+    "gesture": "none",
+    "autoAdvanceSeconds": 0
+  },
+  {
+    "lineId": "cafe.ambient.chat.chat-11.5",
+    "presentationId": "cafe.ambient.chat.chat-11",
+    "seq": 5,
+    "speaker": "right",
+    "textKey": "cafe.ambient.chat.chat-11.text.5",
     "gesture": "none",
     "autoAdvanceSeconds": 0
   },
@@ -1107,15 +1116,6 @@
     "autoAdvanceSeconds": 0
   },
   {
-    "lineId": "cafe.ambient.chat.chat-15.2",
-    "presentationId": "cafe.ambient.chat.chat-15",
-    "seq": 2,
-    "speaker": "right",
-    "textKey": "cafe.ambient.chat.chat-15.text.2",
-    "gesture": "none",
-    "autoAdvanceSeconds": 0
-  },
-  {
     "lineId": "cafe.ambient.chat.chat-15.3",
     "presentationId": "cafe.ambient.chat.chat-15",
     "seq": 3,
@@ -1130,6 +1130,24 @@
     "seq": 4,
     "speaker": "right",
     "textKey": "cafe.ambient.chat.chat-15.text.4",
+    "gesture": "none",
+    "autoAdvanceSeconds": 0
+  },
+  {
+    "lineId": "cafe.ambient.chat.chat-15.5",
+    "presentationId": "cafe.ambient.chat.chat-15",
+    "seq": 5,
+    "speaker": "right",
+    "textKey": "cafe.ambient.chat.chat-15.text.5",
+    "gesture": "none",
+    "autoAdvanceSeconds": 0
+  },
+  {
+    "lineId": "cafe.ambient.chat.chat-15.6",
+    "presentationId": "cafe.ambient.chat.chat-15",
+    "seq": 6,
+    "speaker": "right",
+    "textKey": "cafe.ambient.chat.chat-15.text.6",
     "gesture": "none",
     "autoAdvanceSeconds": 0
   },

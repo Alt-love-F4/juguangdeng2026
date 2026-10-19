@@ -14,7 +14,7 @@ namespace Spotlight.GameFlow
     {
         public const string DebugTag = "presentation-debug";
         public const string ScenePath = "Assets/Scenes/PresentationDebugScene.unity";
-        public const string DefaultHint = "F1 10/7 S1 · F2/F3 S2知觉1/2 · F4知觉节点 · F5信纸。Esc 关闭 · Backspace 重播 · H 收起说明 · F9 暂停。";
+        public const string DefaultHint = "D 人物巡览 · F1 10/7 S1 · F2/F3 S2知觉1/2 · F4知觉节点 · F5信纸。Esc 关闭 · Backspace 重播 · H 收起说明 · F9 暂停。";
 
         public enum Preview { DateChange, Letter, Dialogue, PreBusiness, CafeOpening, BusinessEnd, CityMap, PreNight, HomeNight, DayEnd, Introduction, Effects, Reading, Notice, CutScene, HardcodedDialogue, HardcodedLetter, HardcodedOptions, Details, LongLoading, ShortLoading, GameOver, OpeningPrologue }
 
@@ -58,6 +58,7 @@ namespace Spotlight.GameFlow
         private Preview lastPreview;
         private readonly PresentationDebugDialogueMenu dialogueMenu = new PresentationDebugDialogueMenu();
         private string selectedDialogueId;
+        private bool selectedDialogueGallery;
         private string selectedEndingPreviewId;
         private NarrativeConfiguration endingPreviewConfiguration;
 
@@ -102,6 +103,7 @@ namespace Spotlight.GameFlow
             if (keyboard.qKey.wasPressedThisFrame) PlayDateChange();
             else if (keyboard.wKey.wasPressedThisFrame) { if (draftPreview) PlayHardcodedLetter(); else PlayLetter(); }
             else if (keyboard.eKey.wasPressedThisFrame) { if (draftPreview) PlayHardcodedDialogue(); else PlayDialogue(); }
+            else if (keyboard.dKey.wasPressedThisFrame) ShowCharacterGalleryMenu();
             else if (keyboard.cKey.wasPressedThisFrame) PlayDialogueOptions();
             else if (keyboard.vKey.wasPressedThisFrame) PlayReading();
             else if (keyboard.bKey.wasPressedThisFrame) PlayNotice();
@@ -189,6 +191,7 @@ namespace Spotlight.GameFlow
         public void PlayDayEnd() => PlayPreview(Preview.DayEnd);
         public void PlayIntroduction() => PlayPreview(Preview.Introduction);
         public void PlayEffects() => PlayPreview(Preview.Effects);
+        public void PlayDialogueCharacterGallery() => ShowCharacterGalleryMenu();
         public void PreviewEnter() => PreviewEffectCue(1);
         public void PreviewStartle() => PreviewEffectCue(2);
         public void PreviewShakeLight() => PreviewEffectCue(3);
@@ -239,6 +242,7 @@ namespace Spotlight.GameFlow
         {
             StopCurrent();
             selectedDialogueId = null;
+            selectedDialogueGallery = false;
             if (preview != Preview.GameOver) { selectedEndingPreviewId = null; endingPreviewConfiguration = null; }
             lastPreview = preview;
             hasLastPreview = true;
@@ -398,10 +402,31 @@ namespace Spotlight.GameFlow
             catch (Exception error) { ReportDialogueError(error); }
         }
 
+        public void ShowCharacterGalleryMenu()
+        {
+            StopCurrent();
+            try
+            {
+                var configuration = LubanNarrativeLoader.Load();
+                var entries = PresentationDebugDialogueSource.List(configuration);
+                var ids = new List<string>(entries.Count);
+                var labels = new List<string>(entries.Count);
+                foreach (var entry in entries) { ids.Add(entry.Id); labels.Add(entry.Label); }
+                dialogueMenu.Show(transform, statusText != null ? statusText.font : TMP_Settings.defaultFontAsset,
+                    ids, labels, PlayConfiguredCharacterGallery, StopCurrent,
+                    "人物巡览 · 选择一段对话",
+                    "覆盖所选对话的全部页与分支；同一角色只展示一次，关联事件中生成的 NPC 也会加入。仅预览，不执行剧情结果。");
+                SetStatus("选择人物巡览", "对话 / " + entries.Count);
+                SetHint("选择一段开场或对话；每次点击继续切换到下一位。NPC 有独立场景形象时会并排展示。");
+            }
+            catch (Exception error) { ReportDialogueError(error); }
+        }
+
         public void PlayConfiguredDialogue(string id)
         {
             StopCurrent();
             selectedDialogueId = id;
+            selectedDialogueGallery = false;
             lastPreview = Preview.Dialogue;
             hasLastPreview = true;
             int version = ++requestVersion;
@@ -414,6 +439,32 @@ namespace Spotlight.GameFlow
                 SetHint("隔离预览：H 显示控制台，Esc 停止整段，Backspace 从入口重播。连续演出跟随选项/检定跳转；所有结果只作用于临时状态。" +
                     (previewAllPages ? " 显示全部条件页。" : " 按预览状态筛页。") +
                     (previewUnlockChoices ? " 选项全解锁。" : " 按预览状态锁定选项。"));
+            }
+            catch (Exception error) { ReportDialogueError(error); }
+        }
+
+        public void PlayConfiguredCharacterGallery(string id)
+        {
+            StopCurrent();
+            selectedDialogueId = id;
+            selectedDialogueGallery = true;
+            lastPreview = Preview.Dialogue;
+            hasLastPreview = true;
+            int version = ++requestVersion;
+            startedFrame = Time.frameCount;
+            try
+            {
+                DialogueScript script = PresentationDebugDialogueSource.CreateCharacterGallery(LubanNarrativeLoader.Load(), id)
+                    .WithPreviewContext();
+                if (hideHelpDuringPlayback && HelpVisible)
+                {
+                    restoreHelpAfterPlayback = true;
+                    ToggleHelp();
+                }
+                currentPanel = DialoguePlayback.Play(script, () => Complete(version), () => Cancelled(version),
+                    DebugTag, PanelCachePolicy.Transient);
+                SetStatus("人物巡览", id);
+                SetHint("每次点击继续显示下一位；NPC 独立场景形象与对话立绘并排。Esc 关闭，Backspace 重播。");
             }
             catch (Exception error) { ReportDialogueError(error); }
         }
@@ -576,7 +627,11 @@ namespace Spotlight.GameFlow
             if (chapterPreview != null) PlayChapter(chapterEvent, chapterPerception, chapterPage);
             else if (hasLastPreview)
             {
-                if (!string.IsNullOrEmpty(selectedDialogueId)) PlayConfiguredDialogue(selectedDialogueId);
+                if (!string.IsNullOrEmpty(selectedDialogueId))
+                {
+                    if (selectedDialogueGallery) PlayConfiguredCharacterGallery(selectedDialogueId);
+                    else PlayConfiguredDialogue(selectedDialogueId);
+                }
                 else PlayPreview(lastPreview);
             }
         }

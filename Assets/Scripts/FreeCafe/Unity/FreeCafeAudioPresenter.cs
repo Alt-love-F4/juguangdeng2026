@@ -139,6 +139,18 @@ namespace Spotlight.FreeCafe
             GameAudio.SetLoop(this, slot, key, true, volume, pitch);
         }
 
+        /// <summary>Use the same four quality bands as the delivery receipt, not customer acceptance.</summary>
+        public static string DeliveryKey(CafeDeliveryReceipt receipt)
+        {
+            switch (receipt.Grade)
+            {
+                case 0: return AudioKeys.CoffeeResultBad;
+                case 1: return AudioKeys.CoffeeResultGood;
+                case 2: return AudioKeys.CoffeeResultGreat;
+                default: return AudioKeys.CoffeeResultPerfect;
+            }
+        }
+
         public static string FeedbackKey(CafeFeedbackKind kind)
         {
             switch (kind)

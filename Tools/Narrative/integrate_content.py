@@ -3,7 +3,7 @@ Read XLSX with bundled Python; emit merge plan, then use artifact-tool to edit s
 XLSX. Official GenerateAll.bat remains the only production JSON/C# generator.
 """
 from __future__ import annotations
-import argparse,importlib.util,json,hashlib,shutil,sys
+import argparse,importlib.util,json,hashlib,shutil,sys,re
 from pathlib import Path
 from collections import defaultdict
 import openpyxl
@@ -12,6 +12,14 @@ OUT=ROOT/'output/narrative-integration'
 NARRATIVE=ROOT/'Assets/ConfigTables/Data/Narrative/Narrative.xlsx'
 TEXT=ROOT/'Assets/ConfigTables/Data/Shared/Text.xlsx'
 PRIMARY={'Bar':lambda r:(r.get('ownerId'),r.get('barId')),'EventDate':lambda r:(r.get('eventId'),r.get('day'),r.get('timeSlot'),r.get('repeatRule')),'CafeVisitHook':lambda r:(r.get('visitKey'),r.get('stage'),r.get('trigger'),r.get('seq'))}
+PLACEHOLDER_TOKEN=re.compile(r'(?i)x{2,}')
+
+def preserve_filled_text(existing,incoming):
+ old_text=existing.get('text') if existing else None
+ new_text=incoming.get('text')
+ if isinstance(new_text,str) and PLACEHOLDER_TOKEN.search(new_text) and isinstance(old_text,str) and old_text.strip() and not PLACEHOLDER_TOKEN.search(old_text):
+  return {**incoming,'text':old_text}
+ return incoming
 
 def read_book(path):
  wb=openpyxl.load_workbook(path,read_only=True,data_only=True);sheets={}
@@ -51,7 +59,7 @@ def add_defaults(data):
 
 def merge(modules):
  books={str(NARRATIVE):read_book(NARRATIVE),str(TEXT):read_book(TEXT)};sheets=dict(books[str(NARRATIVE)]);sheets.update(books[str(TEXT)])
- data=defaultdict(list);add_defaults(data);audit={};replace=[]
+ data=defaultdict(list);add_defaults(data);audit={};replace=[];placeholder_preservations=[]
  for module in modules:
   path=ROOT/'Tools/Narrative/Content'/f'{module}.py';spec=importlib.util.spec_from_file_location('content_'+module,path);m=importlib.util.module_from_spec(spec);sys.modules[spec.name]=m;spec.loader.exec_module(m)
   rows=m.build(ROOT)
@@ -89,6 +97,11 @@ def merge(modules):
    if unknown:raise ValueError(f'{name} unsupported fields {unknown} in {row}')
    k=key(row)
    if k is None or k=='':raise ValueError(f'{name} missing primary key: {row}')
+   if name=='Text' and k in index:
+    merged=preserve_filled_text(index[k],row)
+    if merged.get('text')!=row.get('text'):
+     placeholder_preservations.append({'key':k,'sourcePlaceholder':row.get('text'),'preservedText':merged.get('text')})
+    row=merged
    # New declared facts never erase current creation/specialization flags. Route policy
    # is intentionally mutable so session restore/branch transactions can clear them.
    if name=='ConditionKey'and k in index:
@@ -145,7 +158,7 @@ def merge(modules):
    exported.append({'name':name,'matrix':matrix,'originalRows':s['originalRows'],'width':len(h)})
   workbooks.append({'path':path,'beforeSha256':hashlib.sha256(Path(path).read_bytes()).hexdigest(),'sheets':exported})
  OUT.mkdir(parents=True,exist_ok=True)
- plan={'workbooks':workbooks,'audit':audit,'errors':errors,'counts':{name:len(s['rows'])for name,s in sheets.items()},'modules':modules}
+ plan={'workbooks':workbooks,'audit':audit,'placeholderPreservations':placeholder_preservations,'errors':errors,'counts':{name:len(s['rows'])for name,s in sheets.items()},'modules':modules}
  (OUT/'merge-plan.json').write_text(json.dumps(plan,ensure_ascii=False,indent=2),encoding='utf-8')
  (OUT/'content-audit.json').write_text(json.dumps({'modules':audit,'errors':errors,'counts':plan['counts']},ensure_ascii=False,indent=2),encoding='utf-8')
  print(json.dumps({'counts':plan['counts'],'errors':errors},ensure_ascii=False))

@@ -78,9 +78,13 @@ namespace Spotlight.Audio.Editor
             Add(asset, AudioKeys.Ready, "设备完成", "H-pitch wooooooodblock 高音调西洋木鱼", volume: .3f, provisional: true);
             Add(asset, AudioKeys.Froth, "即时打奶完成", null);
             Add(asset, AudioKeys.Bell, "出餐铃", "H-pitch wooooooodblock 高音调西洋木鱼", volume: .4f, provisional: true);
-            Add(asset, AudioKeys.OrderSuccess, "出品 UI — 顾客满意", "确认选择", AudioCategory.UI, .55f, provisional: true);
-            Add(asset, AudioKeys.OrderRemake, "出品 UI — 要求重做", "M-pitch wooooooodblock 中音调西洋木鱼", AudioCategory.UI, .5f, provisional: true);
-            Add(asset, AudioKeys.OrderFailed, "出品 UI — 不满意离开", "L-pitch wooooooodblock 低音调西洋木鱼", AudioCategory.UI, .55f, provisional: true);
+            Add(asset, AudioKeys.OrderSuccess, "出品 UI — 顾客满意（兼容）", "咖啡结果-音效good", AudioCategory.UI, .55f);
+            Add(asset, AudioKeys.OrderRemake, "出品 UI — 要求重做（兼容）", "咖啡结果-音效bad", AudioCategory.UI, .5f);
+            Add(asset, AudioKeys.OrderFailed, "出品 UI — 不满意离开（兼容）", "咖啡结果-音效bad", AudioCategory.UI, .55f);
+            Add(asset, AudioKeys.CoffeeResultBad, "咖啡出品结果 — bad", "咖啡结果-音效bad", AudioCategory.UI, .55f);
+            Add(asset, AudioKeys.CoffeeResultGood, "咖啡出品结果 — good", "咖啡结果-音效good", AudioCategory.UI, .55f);
+            Add(asset, AudioKeys.CoffeeResultGreat, "咖啡出品结果 — great", "咖啡结果-音效great", AudioCategory.UI, .55f);
+            Add(asset, AudioKeys.CoffeeResultPerfect, "咖啡出品结果 — perfect", "咖啡结果-音效perfect", AudioCategory.UI, .55f);
             Add(asset, AudioKeys.Discard, "丢弃杯子", null);
             Add(asset, AudioKeys.Empty, "清空容器", null);
             Add(asset, AudioKeys.LattePour, "拉花有效注奶", null, loop: true);
@@ -90,7 +94,7 @@ namespace Spotlight.Audio.Editor
             Add(asset, AudioKeys.Area, "切换大厅 / 制作台", null);
             Add(asset, AudioKeys.MenuMusic, "主菜单音乐", "Dorian-C#-一号主菜单(1)", AudioCategory.Music, .35f, true);
             Add(asset, AudioKeys.CafeMusic, "经营音乐", "休闲", AudioCategory.Music, .25f, true);
-            Add(asset, AudioKeys.CityMusic, "城区音乐", "日常推进", AudioCategory.Music, .25f, true);
+            Add(asset, AudioKeys.CityMusic, "城区音乐", "map", AudioCategory.Music, .25f, true);
             Add(asset, AudioKeys.NightMusic, "夜晚音乐", "回忆", AudioCategory.Music, .25f, true);
             Add(asset, AudioKeys.CafeAmbience, "咖啡店环境", "洽谈", AudioCategory.Ambience, .08f, true, true);
             Add(asset, "ambience.city", "城区街道环境", "中世纪街道", AudioCategory.Ambience, .12f, true);

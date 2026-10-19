@@ -101,6 +101,7 @@ namespace Spotlight.FreeCafe
             var product = world.Product(request.productId);
             var customer = world.Find(request.customerId);
             var character = customer?.person == null ? null : hud.runtime.Character(customer.person.characterId);
+            var avatar = CafeCustomerVisualVariants.ResolveAvatar(customer?.person, character);
             bool tutorial = request.id == CafeWorld.TutorialOrderId;
             float fraction = tutorial ? 1 : Mathf.Clamp01(request.patience / Mathf.Max(1, world.Catalog.customerPatience));
             Sprite icon = null;
@@ -111,7 +112,7 @@ namespace Spotlight.FreeCafe
                 id = request.id, heading = tutorial ? "练习订单" : "来客订单",
                 label = (customer == null ? "顾客" : world.PersonName(customer)) + "\n<b>" + FreeCafeProductionText.Recipe(product.label) + "</b>",
                 details = world.Spec(world.RequiredCupSpecId(request)).label + "   ·   " + product.price + " 王国币" + (request.remakes > 0 ? "  ·  重做" : ""),
-                number = (index + 1).ToString("00"), avatar = character?.avatar, drink = icon,
+                number = (index + 1).ToString("00"), avatar = avatar, drink = icon,
                 patience = tutorial ? "教程 · 不限时" : "等候  " + Mathf.CeilToInt(Mathf.Max(0, request.patience)) + " 秒",
                 fraction = fraction, patienceColor = fraction > .5f ? new Color(.34f,.43f,.23f) : fraction > .25f ? new Color(.72f,.45f,.16f) : new Color(.67f,.22f,.14f)
             };

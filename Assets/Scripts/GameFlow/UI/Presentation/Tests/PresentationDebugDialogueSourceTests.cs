@@ -78,6 +78,82 @@ namespace Spotlight.GameFlow.Tests
             Assert.That(JsonConvert.SerializeObject(configuration), Is.EqualTo(before));
         }
 
+        [Test]
+        public void OpeningCharacterGalleryUsesConfiguredDialogueVisualSlots()
+        {
+            NarrativeConfiguration configuration = LubanNarrativeLoader.Load();
+            var opening = configuration.openingPresentations.First(item => item.presentationId == "first_day_cafe");
+            DialogueVisualsAsset visuals = UnityEngine.Resources.Load<DialogueVisualsAsset>(opening.visualsResource);
+            Assert.That(visuals, Is.Not.Null);
+
+            DialogueScript gallery = PresentationDebugDialogueSource.CreateCharacterGallery(
+                configuration, "opening:first_day_cafe");
+
+            Assert.That(gallery[0].LeftCharacter.CharacterKey, Is.EqualTo("player"));
+            Assert.That(gallery[0].LeftCharacter.Portrait, Is.SameAs(visuals.LeftPortrait));
+            Assert.That(gallery[1].LeftCharacter.CharacterKey, Is.EqualTo("adele"));
+            Assert.That(gallery[1].LeftCharacter.Portrait, Is.SameAs(visuals.RightPortrait));
+        }
+
+        [Test]
+        public void CharacterGalleryIncludesBranchSpeakersAndPresentationSpawnedNpcsOnce()
+        {
+            var configuration = new NarrativeConfiguration();
+            configuration.objects.Add(new NarrativeObjectDefinition
+            {
+                objId = "speaker.one", objType = NarrativeObjectType.Npc, nameText = "name.one",
+                portraitPath = "Characters/adele/neutral", portraitIndoorPath = "Characters/adele/seated_placeholder"
+            });
+            configuration.objects.Add(new NarrativeObjectDefinition { objId = "speaker.two", objType = NarrativeObjectType.Player, nameText = "name.two" });
+            configuration.objects.Add(new NarrativeObjectDefinition { objId = "spawned.npc", objType = NarrativeObjectType.Npc, nameText = "name.npc" });
+            configuration.objects.Add(new NarrativeObjectDefinition { objId = "unrelated.npc", objType = NarrativeObjectType.Npc, nameText = "name.other" });
+            void Text(string key, string text) => configuration.texts.Add(new NarrativeTextDefinition { key = key, content = text });
+            Text("name.one", "第一位"); Text("name.two", "第二位"); Text("name.npc", "场景客人"); Text("name.other", "无关角色");
+            configuration.presentations.index.Add(new NarrativePresentationIndexDefinition
+                { presentationKey = "fixture", presentationClass = "Conversation", logTag = "fixture" });
+            configuration.presentations.conversationPages.Add(new NarrativeConversationPageDefinition
+                { pageId = "branch.page", presentationKey = "fixture", seq = 20, pageCondKeys = "optional_branch" });
+            configuration.presentations.conversationPages.Add(new NarrativeConversationPageDefinition
+                { pageId = "first.page", presentationKey = "fixture", seq = 10 });
+            configuration.presentations.conversationPages.Add(new NarrativeConversationPageDefinition
+                { pageId = "other.page", presentationKey = "other", seq = 1 });
+            configuration.presentations.conversationLines.Add(new NarrativeConversationLineDefinition
+                { lineId = "first.line", pageId = "first.page", seq = 1, speakerKey = "speaker.one" });
+            configuration.presentations.conversationLines.Add(new NarrativeConversationLineDefinition
+                { lineId = "repeat.line", pageId = "first.page", seq = 2, speakerKey = "speaker.one" });
+            configuration.presentations.conversationLines.Add(new NarrativeConversationLineDefinition
+                { lineId = "branch.line", pageId = "branch.page", seq = 1, speakerKey = "speaker.two", side = "none" });
+            configuration.presentations.conversationLines.Add(new NarrativeConversationLineDefinition
+                { lineId = "other.line", pageId = "other.page", seq = 1, speakerKey = "unrelated.npc" });
+            configuration.events.Add(new NarrativeEventDefinition { eventId = "fixture.event", presentationKey = "fixture" });
+            configuration.events.Add(new NarrativeEventDefinition { eventId = "other.event", presentationKey = "other" });
+            configuration.results.Add(new NarrativeResultDefinition
+                { eventId = "fixture.event", seq = 1, resultType = NarrativeResultType.SpawnNpc, target = "obj:spawned.npc" });
+            configuration.results.Add(new NarrativeResultDefinition
+                { eventId = "fixture.event", seq = 2, resultType = NarrativeResultType.SpawnNpc, target = "obj:speaker.two" });
+            configuration.results.Add(new NarrativeResultDefinition
+                { eventId = "other.event", seq = 1, resultType = NarrativeResultType.SpawnNpc, target = "obj:unrelated.npc" });
+
+            var people = PresentationDebugDialogueSource.ListCharacterGallery(configuration, "conversation:fixture");
+            CollectionAssert.AreEqual(new[] { "speaker.one", "speaker.two", "spawned.npc" }, people.Select(person => person.CharacterId));
+            Assert.That(people[0].DisplayName, Is.EqualTo("第一位"));
+            Assert.That(people[0].IsNpc, Is.True);
+            Assert.That(people[1].IsNpc, Is.False);
+            Assert.That(people[2].IsNpc, Is.True);
+
+            DialogueScript gallery = PresentationDebugDialogueSource.CreateCharacterGallery(configuration, "conversation:fixture");
+            Assert.That(gallery.Count, Is.EqualTo(3));
+            Assert.That(gallery[0].ReplaceLeft, Is.True);
+            Assert.That(gallery[0].LeftCharacter.CharacterKey, Is.EqualTo("speaker.one"));
+            Assert.That(gallery[1].LeftCharacter.CharacterKey, Is.EqualTo("speaker.two"));
+            Assert.That(gallery[2].LeftCharacter.CharacterKey, Is.EqualTo("spawned.npc"));
+            Assert.That(gallery[0].ReplaceRight, Is.True, "Each step clears or replaces the previous NPC scene portrait.");
+            Assert.That(gallery[0].RightCharacter.CharacterKey, Is.EqualTo("speaker.one#scene-preview"));
+            Assert.That(gallery[0].RightCharacter.Portrait, Is.Not.Null);
+            Assert.That(gallery[0].Text, Does.Contain("1 / 3"));
+            Assert.That(gallery[2].Text, Does.Contain("3 / 3"));
+        }
+
         [TestCase("opening:missing")]
         [TestCase("conversation:missing")]
         [TestCase("unsupported:missing")]

@@ -67,6 +67,52 @@ namespace Spotlight.GameFlow.Tests
         }
 
         [UnityTest]
+        public IEnumerator CharacterGalleryButtonSelectsDialogueAndAdvancesOnePersonPerClick()
+        {
+            Button launcher = null;
+            foreach (GameObject root in debugScene.GetRootGameObjects())
+                foreach (Button button in root.GetComponentsInChildren<Button>(true))
+                    if (button.name == "Preview_21") launcher = button;
+            Assert.That(launcher, Is.Not.Null);
+            Assert.That(launcher.onClick.GetPersistentTarget(0), Is.SameAs(controller));
+            Assert.That(launcher.onClick.GetPersistentMethodName(0), Is.EqualTo("PlayDialogueCharacterGallery"));
+
+            launcher.onClick.Invoke();
+            Assert.That(controller.IsDialogueMenuOpen, Is.True);
+            Transform menu = controller.transform.Find("PresentationDebugDialogueMenu");
+            TMP_InputField search = menu.GetComponentInChildren<TMP_InputField>();
+            search.text = "conversation:oct07.s1.conversation";
+            Button selection = menu.GetComponentsInChildren<Button>()
+                .First(button => button.transform.Find("Id") != null
+                    && button.transform.Find("Id").GetComponent<TMP_Text>().text == "conversation:oct07.s1.conversation");
+            selection.onClick.Invoke();
+
+            Assert.That(NarrativeRuntime.Instance, Is.Null);
+            Assert.That(controller.SelectedDialogueId, Is.EqualTo("conversation:oct07.s1.conversation"));
+            var panel = controller.CurrentPanel as DialoguePanel;
+            Assert.That(panel, Is.Not.Null);
+            DialogueScript gallery = PresentationDebugDialogueSource.CreateCharacterGallery(
+                LubanNarrativeLoader.Load(), controller.SelectedDialogueId);
+            Assert.That(gallery.Count, Is.GreaterThan(1));
+
+            float deadline = Time.realtimeSinceStartup + 12f;
+            while (!panel.IsReady)
+            {
+                Assert.That(Time.realtimeSinceStartup, Is.LessThan(deadline));
+                yield return null;
+            }
+            panel.SetPreviewReading(0f, typewriter: false);
+            Assert.That(panel.LeftCharacter.CharacterKey, Is.EqualTo(gallery[0].LeftCharacter.CharacterKey));
+            panel.Advance();
+            while (!panel.IsReady)
+            {
+                Assert.That(Time.realtimeSinceStartup, Is.LessThan(deadline));
+                yield return null;
+            }
+            Assert.That(panel.LeftCharacter.CharacterKey, Is.EqualTo(gallery[1].LeftCharacter.CharacterKey));
+        }
+
+        [UnityTest]
         public IEnumerator CafeDemoConversationsPauseUntilAdvancedAndClosed()
         {
             controller.StopCurrent();

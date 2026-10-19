@@ -31,8 +31,8 @@ namespace Spotlight.Narrative.Tests
                 string text = texts[line.textKey];
                 Assert.That(text, Does.Not.Contain("演出说明"), line.textKey);
                 Assert.That(text, Does.Not.Contain("配料表"), line.textKey);
-                Assert.That(text, Does.Not.Contain("老太太"), line.textKey);
-                Assert.That(text, Does.Not.Contain("太太"), line.textKey);
+                Assert.That(text, Does.Not.Contain("先生"), line.textKey);
+                Assert.That(text, Does.Not.Contain("男人"), line.textKey);
                 Assert.That(text, Does.Not.Contain("→"), line.textKey);
                 if (line.speaker == "right")
                 {
@@ -40,7 +40,15 @@ namespace Spotlight.Narrative.Tests
                     Assert.That(text.Length, Is.LessThan(110), "Adele introduces the goal; workstation hints own detailed controls: " + line.textKey);
                 }
             }
-            Assert.That(texts["cafe.tutorial.customer_arrives.01"], Does.Contain("男人"));
+            Assert.That(texts["cafe.tutorial.customer.name"], Is.EqualTo("B太太"));
+            Assert.That(texts["cafe.tutorial.customer_arrives.01"], Does.Contain("老太太"));
+            Assert.That(texts["cafe.tutorial.customer_arrives.06"], Does.Contain("她"));
+            Assert.That(texts["cafe.tutorial.perception_success.06"], Does.Contain("太太"));
+            Assert.That(texts["cafe.tutorial.perception_failure.01"], Does.Contain("她"));
+            Assert.That(texts["cafe.tutorial.perception_failure.03"], Does.Contain("她"));
+            Assert.That(texts["cafe.tutorial.order_confirmed.01"], Does.Contain("老太太"));
+            Assert.That(texts["cafe.tutorial.order_confirmed.03"], Does.Contain("B太太"));
+            Assert.That(texts["cafe.tutorial.source.p015"], Does.Contain("老太太"), "Keep the authored source archive unchanged.");
             Assert.That(texts["cafe.tutorial.order_confirmed.02"], Does.Contain("大杯").And.Contain("不加糖"));
             Assert.That(texts["cafe.tutorial.make_coffee_base.02"], Does.Contain("研磨").And.Contain("装入杯中"));
             Assert.That(config.texts.Any(text => text.key.StartsWith("cafe.tutorial.source.")

@@ -16,7 +16,7 @@ class DailyContentTests(unittest.TestCase):
  BACKGROUNDS = {
   '旧城区': 'old.street.day', '圣徒街': 'street.day',
   '圣西尔万郊区': 'suburb.day', '大堂区': 'market.day',
-  '圣地大教堂': 'cathedral.day', '灰墙学院': 'street.day',
+  '圣地大教堂': 'cathedral.day', '圣卷大教堂': 'cathedral.day', '灰墙学院': 'street.day',
   '市政厅': 'street.day', '首都法院': 'street.day', '花园区': 'street.day',
  }
  SPEAKER_KEYS = {
@@ -31,7 +31,7 @@ class DailyContentTests(unittest.TestCase):
  def setUpClass(cls):
   cls.project_root = Path(__file__).resolve().parents[3]
   cls.source_groups = []
-  source = cls.project_root / '策划文件/文案/b-地图事件-日常/日常对话_270组.xlsx'
+  source = cls.project_root / daily.SOURCE_PATH
   workbook = openpyxl.load_workbook(source, read_only=True, data_only=True)
   try:
    for sheet in workbook:
@@ -49,6 +49,7 @@ class DailyContentTests(unittest.TestCase):
    workbook.close()
   cls.map_groups = [g for g in cls.source_groups if not g['sheet'].startswith('咖啡馆')]
   cls.data = daily.build(cls.project_root)
+  cls.source_sha256 = daily.sha256(source.read_bytes()).hexdigest()
   cls.texts = {row['key']: row['text'] for row in cls.data['Text']}
   cls.pages_by_presentation = defaultdict(list)
   for page in cls.data['ConversationPage']:
@@ -85,9 +86,45 @@ class DailyContentTests(unittest.TestCase):
     self.assertEqual(speaker, self.texts.get(line.get('speakerNameKey'), ''))
 
  def test_all_270_groups_and_six_papers_are_mapped(self):
+  self.assertEqual(daily.SOURCE_SHA256,self.source_sha256)
+  self.assertEqual(daily.SOURCE_SHA256,self.data['_audit']['daily']['sha256'])
   self.assertEqual(270,len(self.data['_audit']['daily']['groups']))
   self.assertEqual(6,len(self.data['_audit']['newspapers']))
   self.assertEqual(9,len(self.data['Action']))
+
+ def test_latest_news_windows_exclusions_and_issue_read_gates(self):
+  conditions=self.data['Condition']
+  cases={
+   'daily.news.01': ({(2,8)},'story.newspaper.1007.completed'),
+   'daily.news.07': ({(3,6)},'story.newspaper.1007.completed'),
+   'daily.news.02': ({(9,10),(14,15)},'story.newspaper.1014.completed'),
+   'daily.news.13': ({(17,22)},'story.newspaper.1021.completed'),
+   'daily.news.05': ({(23,29)},'story.newspaper.1028.completed'),
+  }
+  for root,(windows,issue_flag) in cases.items():
+   rows=[row for row in conditions if row['ownerType']=='event' and row['ownerId']==root]
+   date_rows=[row for row in rows if row['condType']=='BAR_BETWEEN' and row['target']=='world.calendar'
+      and row['value'] not in ('2,48',)]
+   self.assertEqual(windows,{tuple(map(int,row['value'].split(','))) for row in date_rows},root)
+   groups={row['groupIndex'] for row in date_rows}
+   self.assertEqual(groups,{row['groupIndex'] for row in rows if row['target']==issue_flag},root)
+   newspaper=issue_flag[len('story.'):].removesuffix('.completed')
+   self.assertIn(newspaper,{row['eventId'] for row in self.data['Event']})
+
+ def test_date_window_parser_keeps_exclusion_out_of_minimum(self):
+  windows,excluded,earliest=daily.date_rules('窗口：10月14—20日；排除10月16—18日')
+  self.assertEqual([(daily.day(10,14),daily.day(10,20))],windows)
+  self.assertEqual([(daily.day(10,16),daily.day(10,18))],excluded)
+  self.assertIsNone(earliest)
+
+ def test_latest_news_negative_and_prior_event_guards_are_truthful(self):
+  conditions=self.data['Condition']
+  ritual=[row for row in conditions if row['ownerType']=='event' and row['ownerId']=='daily.news.08'
+      and row['target']=='story.church.1009.s2.completed']
+  self.assertEqual(['false'],[row['value'] for row in ritual])
+  relief=[row for row in conditions if row['ownerType']=='event' and row['ownerId']=='daily.news.11'
+      and row['target']=='story.daily.old.02.completed']
+  self.assertEqual(['true'],[row['value'] for row in relief])
  def test_choice_events_are_not_flattened(self):
   self.assertEqual(40,len(self.data['Choice']))
   responses=[p for p in self.data['ConversationPage']if '.response.'in p['pageId']]
@@ -199,7 +236,7 @@ class DailyContentTests(unittest.TestCase):
   # assumed weekly schedule or the compiler's own audit output.
   expected = {}
   namespace = '{http://schemas.openxmlformats.org/wordprocessingml/2006/main}'
-  for source in sorted((self.project_root / '策划文件/文案/b-报纸事件-换皮').glob('*.docx')):
+  for source in sorted((self.project_root / '策划文件/文案6点/文案/b-报纸事件-换皮').glob('*.docx')):
    with ZipFile(source) as archive:
     document = ET.fromstring(archive.read('word/document.xml'))
    paragraphs = []
@@ -237,17 +274,18 @@ class DailyContentTests(unittest.TestCase):
     self.assertFalse(self.pages_by_presentation[key])
     self.assertFalse(any(n['presentationKey'] == key for n in self.data['Notice']))
 
- def test_generic_church_helper_has_its_own_named_object_not_a_cast_portrait(self):
+ def test_generic_church_helper_is_registered_only_when_source_uses_it(self):
   speakers = {speaker for g in self.map_groups for row in g['rows']
               if (prose := self._prose(row)) is not None
               and not row[0].startswith('选项 ') for speaker in [prose[0]]}
-  self.assertIn('教会帮工', speakers)
-  objects = [obj for obj in self.data['Object'] if obj['objId'] == 'daily.actor.church_helper']
-  self.assertEqual(1, len(objects))
-  self.assertEqual('npc', objects[0]['objType'])
-  self.assertEqual('教会帮工', self.texts[objects[0]['nameText']])
-  self.assertFalse(objects[0].get('portraitPath'))
-  self.assertFalse(objects[0].get('iconPath'))
+  used = '教会帮工' in speakers
+  objects = [obj for obj in self.data.get('Object', []) if obj['objId'] == 'daily.actor.church_helper']
+  self.assertEqual(1 if used else 0, len(objects))
+  if used:
+   self.assertEqual('npc', objects[0]['objType'])
+   self.assertEqual('教会帮工', self.texts[objects[0]['nameText']])
+   self.assertFalse(objects[0].get('portraitPath'))
+   self.assertFalse(objects[0].get('iconPath'))
 
  def test_unmapped_source_speaker_fails_closed_instead_of_becoming_narration(self):
   # Simulate losing a mapping for a name really present in the source, without

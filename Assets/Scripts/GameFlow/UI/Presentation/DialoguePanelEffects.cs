@@ -424,7 +424,7 @@ namespace Spotlight.GameFlow
             hold = 0f;
             if (option.Response != null)
             {
-                activeLines.Add(option.Response);
+                activeLines.Add(AssignSpeakerToOpenSlot(option.Response, new[] { left, right, center }));
                 PrepareNextLine(activeLines.Count - 1);
             }
             else if (OptionSelectionRequested != null)

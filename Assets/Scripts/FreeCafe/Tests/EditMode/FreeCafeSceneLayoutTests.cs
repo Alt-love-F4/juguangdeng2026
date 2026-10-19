@@ -126,5 +126,52 @@ namespace Spotlight.FreeCafe.Tests
             var source=Find("m.grinder");UnityEngine.Object.Instantiate(source.gameObject,source.transform.parent);
             Assert.Throws<InvalidOperationException>(()=>FreeCafeSceneLayout.Capture(runtime));
         }
+
+        [Test] public void OrdinaryGuestsUseSceneSilhouetteAndStoryArtworkOverridesRemainAvailable()
+        {
+            var seating=runtime.seating;
+            Assert.That(seating,Is.Not.Null);
+            Assert.That(seating.silhouetteCustomer,Is.Not.Null,"CoffeeShop must keep its authored silhouette binding.");
+            Assert.That(seating.suppliedCustomer,Is.Not.Null,"Acceptance preview keeps its authored supplied guest.");
+
+            var originalArt=seating.characterArt;
+            var texture=new Texture2D(2,2);
+            var bodySprite=Sprite.Create(texture,new Rect(0,0,2,2),new Vector2(.5f,.5f));
+            var storyOverride=Sprite.Create(texture,new Rect(0,0,2,2),new Vector2(.5f,.5f));
+            try
+            {
+                seating.characterArt=new[] { new CafeSeatedArtwork { characterId="guest_a", sprite=bodySprite } };
+                var ordinary=new WorldEntity { specId="customer", person=new CafePersonIdentity {
+                    personId="visitor_order_1", characterId="guest_a", visualId="guest_a", role=CafePersonRole.Customer } };
+                Assert.That(seating.Artwork(ordinary),Is.SameAs(seating.silhouetteCustomer));
+
+                seating.characterArt=originalArt;
+                var storyEntry=Array.Find(originalArt,entry=>entry!=null && entry.sprite!=null);
+                Assert.That(storyEntry,Is.Not.Null,"CoffeeShop must keep its authored story seated artwork.");
+                var story=new WorldEntity { specId="customer", person=new CafePersonIdentity {
+                    personId="story_visitor", characterId=storyEntry.characterId,
+                    narrativeCharacterId=storyEntry.characterId, visualId="customer", role=CafePersonRole.Customer } };
+                Assert.That(seating.Artwork(story),Is.SameAs(storyEntry.sprite));
+                var storyWithVisitOverride=new WorldEntity { specId="customer", person=new CafePersonIdentity {
+                    personId="story_override_visitor", characterId="story_override_character",
+                    narrativeCharacterId="story_override_character", visualId="customer", role=CafePersonRole.Customer } };
+                Assert.That(seating.Artwork(storyWithVisitOverride,storyOverride),Is.SameAs(storyOverride));
+
+                var acceptance=new WorldEntity { specId="customer", person=new CafePersonIdentity {
+                    personId=FreeCafeSeating.AcceptancePersonId, role=CafePersonRole.Customer } };
+                Assert.That(seating.Artwork(acceptance),Is.SameAs(seating.suppliedCustomer));
+
+                var tutorial=new WorldEntity { specId="customer", person=new CafePersonIdentity {
+                    personId="tutorial_customer", displayName="B太太", role=CafePersonRole.Customer } };
+                Assert.That(seating.Artwork(tutorial),Is.SameAs(seating.silhouetteCustomer));
+            }
+            finally
+            {
+                seating.characterArt=originalArt;
+                UnityEngine.Object.DestroyImmediate(bodySprite);
+                UnityEngine.Object.DestroyImmediate(storyOverride);
+                UnityEngine.Object.DestroyImmediate(texture);
+            }
+        }
     }
 }

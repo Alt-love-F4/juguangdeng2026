@@ -43,14 +43,23 @@ namespace Spotlight.FreeCafe.Tests
         [Test] public void ReserveRequiresSpawnAndElapsedTimeAndCopiesInput()
         {
             var intent = Intent(authorized: false); intent.arrivalDelaySeconds = 5;
+            intent.identity.portraitVariantPath="Characters/guest_a/variants/portrait_03";
+            intent.identity.avatarVariantPath="Characters/guest_a/variants/avatar_03";
             Sync(intent); intent.identity.displayName = "changed";
+            intent.identity.portraitVariantPath="changed/portrait";
             world.StartDay(); world.Tick(6);
             Assert.That(world.CafeVisit("v1").status, Is.EqualTo(CafeVisitStatus.Reserved));
             Assert.That(world.Find("customer_0"), Is.Null);
             Assert.That(world.CafeVisit("v1").identity.displayName, Is.EqualTo("v1"));
+            Assert.That(world.CafeVisit("v1").identity.portraitVariantPath,Is.EqualTo("Characters/guest_a/variants/portrait_03"));
             intent.arrivalAuthorized = true; Sync(intent);
             Assert.That(Order(), Is.Not.Null);
             Assert.That(world.Find("customer_0").x, Is.EqualTo(-6));
+            Assert.That(world.Find("customer_0").person.portraitVariantPath,Is.EqualTo("Characters/guest_a/variants/portrait_03"));
+            Assert.That(world.Find("customer_0").person.avatarVariantPath,Is.EqualTo("Characters/guest_a/variants/avatar_03"));
+            Assert.That(world.Restore(Copy()).success,Is.True);
+            Assert.That(world.CafeVisit("v1").identity.portraitVariantPath,Is.EqualTo("Characters/guest_a/variants/portrait_03"));
+            Assert.That(world.Find("customer_0").person.avatarVariantPath,Is.EqualTo("Characters/guest_a/variants/avatar_03"));
             int arrivals = world.State.todayArrivals; Sync(intent); Sync(intent);
             Assert.That(world.State.todayArrivals, Is.EqualTo(arrivals));
             Assert.That(world.State.cafeVisitFeedback.Count(f => f.stage == "arrived"), Is.EqualTo(1));

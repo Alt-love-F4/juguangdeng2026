@@ -173,6 +173,7 @@ namespace Spotlight.GameFlow
             center = value.CenterCharacter;
             ApplyBackground(value, false);
             }
+            AssignUnplacedSpeakers(activeLines, left, right, center);
             if (psdBackground != null) psdBackground.SetActive(false);
             // Keep the background opaque throughout entrance; only the dialogue box enters.
             // Fading the whole panel would expose the gameplay camera between narrative pages.
@@ -225,6 +226,107 @@ namespace Spotlight.GameFlow
 
         private Sequence Sequence() => DOTween.Sequence().SetUpdate(true).SetLink(gameObject, LinkBehaviour.KillOnDestroy);
 
+        private static void AssignUnplacedSpeakers(List<DialogueLine> lines, DialogueCharacter initialLeft,
+            DialogueCharacter initialRight, DialogueCharacter initialCenter)
+        {
+            var stage = new[] { initialLeft, initialRight, initialCenter };
+            for (int i = 0; i < lines.Count; i++)
+            {
+                NormalizeStage(ref stage[0], ref stage[1], ref stage[2], SpeakerSlot(lines[i].Speaker));
+                DialogueLine line = AssignSpeakerToOpenSlot(lines[i], stage);
+                lines[i] = line;
+                if (line.ReplaceLeft) stage[0] = DialogueCharacter.Resolve(stage[0], line.LeftCharacter);
+                if (line.ReplaceRight) stage[1] = DialogueCharacter.Resolve(stage[1], line.RightCharacter);
+                if (line.ReplaceCenter) stage[2] = DialogueCharacter.Resolve(stage[2], line.CenterCharacter);
+                NormalizeStage(ref stage[0], ref stage[1], ref stage[2], SpeakerSlot(line.Speaker));
+            }
+        }
+
+        private static void NormalizeStage(ref DialogueCharacter left, ref DialogueCharacter right,
+            ref DialogueCharacter center, int preferredSlot)
+        {
+            KeepOneIdentity(ref left, ref right, 0, 1, preferredSlot);
+            KeepOneIdentity(ref left, ref center, 0, 2, preferredSlot);
+            KeepOneIdentity(ref right, ref center, 1, 2, preferredSlot);
+        }
+
+        private static void KeepOneIdentity(ref DialogueCharacter first, ref DialogueCharacter second,
+            int firstSlot, int secondSlot, int preferredSlot)
+        {
+            if (!SameStageCharacter(first, second)) return;
+
+            bool keepSecond = preferredSlot == secondSlot
+                || preferredSlot != firstSlot && IsPlayerCharacter(second) && !IsPlayerCharacter(first);
+            if (keepSecond) first = null;
+            else second = null;
+        }
+
+        private static bool IsPlayerCharacter(DialogueCharacter character)
+            => character != null && string.Equals(character.CharacterKey, "player", StringComparison.Ordinal);
+
+        private static DialogueLine AssignSpeakerToOpenSlot(DialogueLine line, DialogueCharacter[] stage)
+        {
+            int requested = SpeakerSlot(line.Speaker);
+            if (requested < 0 || !LineReplacesSlot(line, requested)) return line;
+
+            DialogueCharacter incoming = LineCharacter(line, requested);
+            if (incoming == null) return line;
+            if (SameStageCharacter(stage[requested], incoming)) return line;
+
+            for (int slot = 0; slot < stage.Length; slot++)
+            {
+                if (slot == requested || !SameStageCharacter(stage[slot], incoming)) continue;
+                if (LineReplacesSlot(line, slot) && !SameStageCharacter(LineCharacter(line, slot), incoming)) continue;
+                return MoveSpeakerReplacement(line, requested, slot, incoming);
+            }
+
+            if (!HasStageCharacter(stage[requested])) return line;
+            for (int slot = 0; slot < stage.Length; slot++)
+            {
+                if (slot == requested || LineReplacesSlot(line, slot) || HasStageCharacter(stage[slot])) continue;
+                return MoveSpeakerReplacement(line, requested, slot, incoming);
+            }
+            return line;
+        }
+
+        private static DialogueLine MoveSpeakerReplacement(DialogueLine line, int from, int to, DialogueCharacter character)
+        {
+            bool replaceLeft = line.ReplaceLeft, replaceRight = line.ReplaceRight, replaceCenter = line.ReplaceCenter;
+            DialogueCharacter leftCharacter = line.LeftCharacter, rightCharacter = line.RightCharacter,
+                centerCharacter = line.CenterCharacter;
+            SetReplacement(from, false, null, ref replaceLeft, ref leftCharacter, ref replaceRight, ref rightCharacter,
+                ref replaceCenter, ref centerCharacter);
+            SetReplacement(to, true, character, ref replaceLeft, ref leftCharacter, ref replaceRight, ref rightCharacter,
+                ref replaceCenter, ref centerCharacter);
+            DialogueSpeaker speaker = to == 0 ? DialogueSpeaker.Left : to == 1 ? DialogueSpeaker.Right : DialogueSpeaker.Center;
+            return new DialogueLine(speaker, line.Text, line.SpeakerNameOverride, line.Gesture, line.AutoAdvanceSeconds,
+                replaceLeft, leftCharacter, replaceRight, rightCharacter, line.AccentFxKey, line.AccentTargetKey,
+                replaceCenter, centerCharacter, line.PassiveHint, line.SfxKey, line.VoiceKey, line.Source);
+        }
+
+        private static void SetReplacement(int slot, bool replace, DialogueCharacter character,
+            ref bool replaceLeft, ref DialogueCharacter leftCharacter,
+            ref bool replaceRight, ref DialogueCharacter rightCharacter,
+            ref bool replaceCenter, ref DialogueCharacter centerCharacter)
+        {
+            if (slot == 0) { replaceLeft = replace; leftCharacter = character; }
+            else if (slot == 1) { replaceRight = replace; rightCharacter = character; }
+            else { replaceCenter = replace; centerCharacter = character; }
+        }
+
+        private static bool LineReplacesSlot(DialogueLine line, int slot)
+            => slot == 0 ? line.ReplaceLeft : slot == 1 ? line.ReplaceRight : line.ReplaceCenter;
+
+        private static DialogueCharacter LineCharacter(DialogueLine line, int slot)
+            => slot == 0 ? line.LeftCharacter : slot == 1 ? line.RightCharacter : line.CenterCharacter;
+
+        private static bool SameStageCharacter(DialogueCharacter a, DialogueCharacter b)
+            => ReferenceEquals(a, b) || DialogueCharacter.SameIdentity(a, b);
+
+        private static bool HasStageCharacter(DialogueCharacter character)
+            => character != null && (!string.IsNullOrWhiteSpace(character.CharacterKey)
+                || !string.IsNullOrWhiteSpace(character.DisplayName) || character.Portrait != null);
+
         private static Tween Move(RectTransform rect, Vector2 target, float seconds)
             => DOTween.To(() => rect.anchoredPosition, v => rect.anchoredPosition = v, target, seconds);
 
@@ -242,6 +344,7 @@ namespace Spotlight.GameFlow
             if (line.ReplaceLeft) left = DialogueCharacter.Resolve(left, line.LeftCharacter);
             if (line.ReplaceRight) right = DialogueCharacter.Resolve(right, line.RightCharacter);
             if (line.ReplaceCenter) center = DialogueCharacter.Resolve(center, line.CenterCharacter);
+            NormalizeStage(ref left, ref right, ref center, SpeakerSlot(line.Speaker));
             ApplyPortrait(leftPortrait, leftPortraitFrame, left);
             ApplyPortrait(rightPortrait, rightPortraitFrame, right);
             ApplyPortrait(centerPortrait, centerPortraitFrame, center);
@@ -548,6 +651,10 @@ namespace Spotlight.GameFlow
         private void Stop(bool completed)
         {
             endingSettlementMode=false;
+            endingSettlementCompleted = null;
+            endingSettlementText = string.Empty;
+            endingSettlementSegments = Array.Empty<string>();
+            endingSettlementSegment = 0;
             // Exiting alone is not completion: an external Stop/Cancel can kill its tween.
             bool interrupted = !completed && (IsPlaying || SeamlessChoicePending);
             Action interruption = interrupted ? PlaybackInterrupted : null;

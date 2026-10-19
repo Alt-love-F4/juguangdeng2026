@@ -54,7 +54,7 @@ namespace Spotlight.FreeCafe.Tests
             world = new CafeWorld(catalog, new StoryIdentity());
             Assert.That(world.StartTutorialCustomer().success, Is.True);
             var person = world.Find(CafeWorld.TutorialCustomerId).person;
-            Assert.That(person.displayName, Is.EqualTo("男顾客"));
+            Assert.That(person.displayName, Is.EqualTo("B太太"));
             Assert.That(person.characterId, Is.Null.Or.Empty);
             Assert.That(person.narrativeCharacterId, Is.Null.Or.Empty);
             Assert.That(person.visualId, Is.EqualTo("customer"));

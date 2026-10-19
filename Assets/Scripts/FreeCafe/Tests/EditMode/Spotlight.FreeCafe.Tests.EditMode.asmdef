@@ -4,7 +4,8 @@
   "references": [
     "Spotlight.FreeCafe.Domain",
     "Spotlight.FreeCafe.Unity",
-    "Spotlight.Narrative"
+    "Spotlight.Narrative",
+    "Spotlight.Audio"
   ],
   "autoReferenced": false,
   "includePlatforms": [

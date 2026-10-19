@@ -119,7 +119,7 @@ namespace Spotlight.GameFlow.Editor
             TMP_Text active = Text(sidebar.transform, "Active", "当前 / 无", new Vector2(.045f, .872f), new Vector2(.955f, .905f), 17f, Muted);
 
             PresentationDebugSceneController controller = root.AddComponent<PresentationDebugSceneController>();
-            string[] labels = { "Q   新一天 / 日期切换", "W   NCS 来信（Shift：草稿）", "E   连续演出 / 选择入口", "R   经营前阶段", "T   开店演出", "Y   经营结束", "U   城区地图", "I   夜晚前阶段", "O   住房夜晚", "P   一天结束", "F   NCS 第一天阿黛尔引入", "G   配表对话特效（1~0）", "V   阅读（图文 / 旁白 / 对话）", "B   单页事件通知", "N   视频过场 / 长按跳过", "C   连续演出 / 选项分支", "M   详情面板（全占位）", "L   长加载测试", "K   短加载测试", "游戏结束 / 返回主菜单", "Z   开场序章（独立预览）" };
+            string[] labels = { "Q   新一天 / 日期切换", "W   NCS 来信（Shift：草稿）", "E   连续演出 / 选择入口", "R   经营前阶段", "T   开店演出", "Y   经营结束", "U   城区地图", "I   夜晚前阶段", "O   住房夜晚", "P   一天结束", "F   NCS 第一天阿黛尔引入", "G   配表对话特效（1~0）", "V   阅读（图文 / 旁白 / 对话）", "B   单页事件通知", "N   视频过场 / 长按跳过", "C   连续演出 / 选项分支", "M   详情面板（全占位）", "L   长加载测试", "K   短加载测试", "游戏结束 / 返回主菜单", "Z   开场序章（独立预览）", "D   对话人物巡览" };
             for (int i = 0; i < labels.Length; i++)
             {
                 float top = .855f - i * .021f;
@@ -204,6 +204,15 @@ namespace Spotlight.GameFlow.Editor
             {
                 Undo.RegisterFullObjectHierarchyUndo(stage.gameObject, "Upgrade debug stage");
                 Undo.RegisterFullObjectHierarchyUndo(sidebar.gameObject, "Upgrade debug shortcuts");
+                if (sidebar.Find("Preview_21") == null)
+                {
+                    PresentationDebugSceneController controller = stage.GetComponentInParent<PresentationDebugSceneController>();
+                    if (controller == null) throw new InvalidOperationException("Missing PresentationDebugSceneController on DebugRoomCanvas.");
+                    Button gallery = Button(sidebar, "Preview_21", "D   对话人物巡览", Vector2.zero, Vector2.one);
+                    Undo.RegisterCreatedObjectUndo(gallery.gameObject, "Create character gallery debug entry");
+                    AddPreviewListener(gallery, controller, 21);
+                }
+                else Require<Button>(sidebar, "Preview_21");
                 ApplyLayout(stage, sidebar);
                 Undo.CollapseUndoOperations(undoGroup);
             }
@@ -275,7 +284,7 @@ namespace Spotlight.GameFlow.Editor
         {
             Rect((RectTransform)stage, new Vector2(.025f, .08f), new Vector2(.665f, .92f));
             Require<TMP_Text>(stage, "Title").text = "PRESENTATION\n演出调试室";
-            Require<TMP_Text>(stage, "Description").text = "所有配表演出与 UI 样例的共享入口\n\n右侧按类型分组，可滚动选择。\nE 打开连续演出二级菜单：选择事件入口，跟随选项与检定连续播放。\n\n仅预览，不启动经营；分支结果只影响临时状态，不写入正式存档。";
+            Require<TMP_Text>(stage, "Description").text = "所有配表演出与 UI 样例的共享入口\n\n右侧按类型分组，可滚动选择。\nE 打开连续演出二级菜单；D 选择对话后逐人巡览立绘与 NPC 场景形象。\n\n仅预览，不启动经营；分支结果只影响临时状态，不写入正式存档。";
             Require<TMP_Text>(stage, "AgentNotice").text = "播放时按 H 收起说明，F12 恢复。\n复用本场景，不为单个演出创建临时 Scene。";
             Rect((RectTransform)sidebar, new Vector2(.69f, .025f), new Vector2(.985f, .975f));
             // Keep the legacy 1000 root untouched. Its only graphics live in this nested canvas,
@@ -330,9 +339,9 @@ namespace Spotlight.GameFlow.Editor
             bar.direction = Scrollbar.Direction.BottomToTop;
             scroll.verticalScrollbar = bar;
 
-            string[] labels = { "Q   新一天 / 日期切换", "W   来信（Shift：草稿）", "E   连续演出 / 选择入口", "R   经营前阶段", "T   开店演出", "Y   经营结束", "U   城区地图", "I   夜晚前阶段", "O   住房夜晚", "P   一天结束", "F   第一天引入", "G   配表演出 / 特效预览", "V   阅读（图文 / 旁白）", "B   单页事件通知", "N   视频过场 / 长按跳过", "C   连续演出 / 选项分支", "M   详情面板（占位）", "L   长加载测试", "K   短加载测试", "游戏结束 / 返回主菜单", "Z   开场序章（独立预览）" };
+            string[] labels = { "Q   新一天 / 日期切换", "W   来信（Shift：草稿）", "E   连续演出 / 选择入口", "R   经营前阶段", "T   开店演出", "Y   经营结束", "U   城区地图", "I   夜晚前阶段", "O   住房夜晚", "P   一天结束", "F   第一天引入", "G   配表演出 / 特效预览", "V   阅读（图文 / 旁白）", "B   单页事件通知", "N   视频过场 / 长按跳过", "C   连续演出 / 选项分支", "M   详情面板（占位）", "L   长加载测试", "K   短加载测试", "游戏结束 / 返回主菜单", "Z   开场序章（独立预览）", "D   对话人物巡览" };
             Heading(content, "ConfiguredHeading", "01  配表与叙事");
-            foreach (int i in new[] { 0, 1, 2, 15, 10, 20, 12, 13, 14 }) LayoutEntry(sidebar, content, i, labels[i]);
+            foreach (int i in new[] { 0, 1, 2, 15, 10, 20, 21, 12, 13, 14 }) LayoutEntry(sidebar, content, i, labels[i]);
             Heading(content, "FlowHeading", "02  日程与场景");
             foreach (int i in new[] { 3, 4, 5, 6, 7, 8, 9, 19 }) LayoutEntry(sidebar, content, i, labels[i]);
             Heading(content, "ToolsHeading", "03  面板与加载");
@@ -404,6 +413,7 @@ namespace Spotlight.GameFlow.Editor
                 case 18: UnityEventTools.AddVoidPersistentListener(button.onClick, controller.PlayShortLoading); break;
                 case 19: UnityEventTools.AddVoidPersistentListener(button.onClick, controller.PlayGameOver); break;
                 case 20: UnityEventTools.AddVoidPersistentListener(button.onClick, controller.PlayOpeningPrologue); break;
+                case 21: UnityEventTools.AddVoidPersistentListener(button.onClick, controller.PlayDialogueCharacterGallery); break;
             }
         }
 

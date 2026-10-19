@@ -40,7 +40,8 @@ namespace Spotlight.FreeCafe
                     var identity = input.identity;
                     if (identity != null) v.identity = new CafePersonIdentity { personId = identity.personId, characterId = input.characterId,
                         displayName = identity.displayName, narrativeCharacterId = identity.narrativeCharacterId,
-                        visualId = identity.visualId, role = identity.role };
+                        visualId = identity.visualId, role = identity.role,
+                        portraitVariantPath = identity.portraitVariantPath, avatarVariantPath = identity.avatarVariantPath };
                     State.cafeVisits.Add(v);
                     if (input.isEnded) { FinishVisit(v, input.endReason ?? "ncs_despawn"); continue; }
                     if (!ValidCustomerIdentity(v.identity)) { FinishVisit(v, "configuration_invalid"); continue; }

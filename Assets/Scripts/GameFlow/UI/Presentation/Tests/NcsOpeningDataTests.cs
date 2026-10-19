@@ -94,7 +94,7 @@ namespace Spotlight.GameFlow.Tests
             Assert.That(NarrativePresentationDataAdapter.TryCreateOpeningDialogue(config, "cafe_tutorial.customer_arrives",
                 out var script, out var error), Is.True, error);
             Assert.That(script.CenterCharacter, Is.Not.Null);
-            Assert.That(script.CenterCharacter.DisplayName, Is.EqualTo("顾客"));
+            Assert.That(script.CenterCharacter.DisplayName, Is.EqualTo("B太太"));
             Assert.That(script.CenterCharacter.Portrait, Is.SameAs(visuals.CenterPortrait));
             Assert.That(script.CenterCharacter.Portrait, Is.Not.SameAs(script.RightCharacter.Portrait));
             Assert.That(NarrativePresentationDataAdapter.TryCreateOpeningDialogue(config, "first_day_cafe",

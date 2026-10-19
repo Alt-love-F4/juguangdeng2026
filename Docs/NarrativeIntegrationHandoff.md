@@ -12,6 +12,10 @@
 
 ## 当前配置量级
 
+### 文案6点当前生成快照（2026-10-19）
+
+最新官方 Luban 生成：351 Event、68 EventDate、5727 ConversationPage、9147 ConversationLine、300 Choice、36 AbilityCheck/41 AbilityCheckCondition、14 ReadingPage/180 ReadingLine、18 Ending（16启用、2禁用历史测试）、11791 Text。四线与日常编译器现指向 `策划文件/文案6点/文案`。本批未新增 Ending ID；实际生成配置加载校验1/1、配置验证器25/25、共享演出特效PlayMode 17/17通过；全流程自然通关仍待执行，详见 `Docs/Narrative6PointIntegration.md`。
+
 此前全量集成快照（地图面板修正前；当前数目见 `Docs/NarrativeMapDialoguePanelFix.md`）：346 Event，其中62个正文根、240个地图日常/首访/新闻反应根、15个报纸/公开消息根、29个开场子链/历史测试演示事件；5506 ConversationPage、8156 ConversationLine、300 Choice、36 AbilityCheck、234 ReadingPage/1049 ReadingLine、10788 Text、17 Ending（15个正式条件结局+2个禁用历史测试结局）。三处根级作者阻塞仍关闭；节点数不是完成率，也不代表全部自然可达。
 
 新编译器覆盖四线61份现稿，保留原oct07两根，并把10/25邀请从10/26稿拆成独立日期事件，所以正文根数为62。日常270组由240个NCS根与30个咖啡馆非模态快照承载。普通成长、初访与新闻替换复用同一Action/Controller。

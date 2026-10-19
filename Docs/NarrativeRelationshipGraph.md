@@ -22,6 +22,12 @@ Tools > Narrative > Story Relationship Window
 
 独立 EditorWindow 与场景复用 `NarrativeRelationshipGraphView`。不进入 Play Mode 就可浏览，适合已有正式游戏场景或未保存工作的情况。关闭窗口会释放其独立 view；不会停止或启动游戏剧情。
 
+## 独立网页前端
+
+额外的浏览器只读入口位于 `Tools/Narrative/RelationshipFrontend/`。从仓库根目录启动 `python -m http.server 8765 --bind 127.0.0.1`，再打开 `http://127.0.0.1:8765/Tools/Narrative/RelationshipFrontend/`。页面直接读取 `Assets/Settings/Resources/Luban/` 当前生成 JSON；源工作簿变更后先运行官方 Luban 生成管线，再用页面“重读”。
+
+网页端不依赖 Unity Runtime，也不执行条件、结果或存档写入。它在浏览器侧从生成表建立展示关系；字段与关系语义应与 `NarrativeRelationshipGraph.cs` 保持一致。日期只用于排布，缺少表内生产者不等于确认缺少宿主实现。网页前端与 Unity EditorWindow 是独立入口，Panel 回归仍使用 `PresentationDebugScene.unity`。
+
 ## 场景入口
 
 目标场景：

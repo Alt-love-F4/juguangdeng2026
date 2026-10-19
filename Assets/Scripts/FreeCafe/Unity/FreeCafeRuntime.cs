@@ -357,13 +357,14 @@ namespace Spotlight.FreeCafe
         {
             Hint=message; ViewChanged?.Invoke();
         }
-        public void Report(ActionResult result)
+        public void Report(ActionResult result) => Report(result, null);
+        private void Report(ActionResult result, string deliveryCue)
         {
             ShowHint(result.message);
             if(!result.success) OperationToastPanel.ShowMessage(result.message);
             else
             {
-                string cue = FreeCafeAudioPresenter.FeedbackKey(result.feedback);
+                string cue = deliveryCue ?? FreeCafeAudioPresenter.FeedbackKey(result.feedback);
                 if (result.feedback == CafeFeedbackKind.DeliverySatisfied || result.feedback == CafeFeedbackKind.DeliveryRemake || result.feedback == CafeFeedbackKind.DeliveryFailed)
                     OperationToastPanel.ShowMessage(result.message, cue);
                 else GameAudio.Play(cue);
@@ -399,13 +400,16 @@ namespace Spotlight.FreeCafe
             var request = World.Request(World.State.focusedRequestId);
             var cup = World.ServingCup;
             var product = request == null ? null : World.Product(request.productId);
-            var quality = cup != null && product != null ? World.EvaluateProduction(cup, product) : default;
+            var quality = cup != null && product != null ? World.EvaluateProduction(cup, product, World.RequiredCupSpecId(request)) : default;
             string productName = product == null ? "咖啡" : FreeCafeProductionText.Recipe(product.label);
             var customer = request == null ? null : World.Find(request.customerId);
             string customerName = customer == null ? "顾客" : World.PersonName(customer);
             int moneyBefore = World.State.money, reputationBefore = World.State.reputation;
             var result=World.DeliverProductionCup();
-            Report(result);
+            var receipt = new CafeDeliveryReceipt(productName, customerName, quality,
+                World.State.money - moneyBefore, World.State.reputation - reputationBefore,
+                result.feedback, result.message);
+            Report(result, result.success ? FreeCafeAudioPresenter.DeliveryKey(receipt) : null);
             if (tutorialOrder && result.success && result.feedback == CafeFeedbackKind.DeliverySatisfied)
             {
                 WorkstationTutorial?.Finish(true);
@@ -414,10 +418,7 @@ namespace Spotlight.FreeCafe
                 var guide = BusinessTutorial ?? gameObject.AddComponent<FreeCafeBusinessTutorial>();
                 guide.Begin(this);
             }
-            if (result.success)
-                CupDelivered?.Invoke(new CafeDeliveryReceipt(productName, customerName, quality,
-                    World.State.money - moneyBefore, World.State.reputation - reputationBefore,
-                    result.feedback, result.message));
+            if (result.success) CupDelivered?.Invoke(receipt);
             return result;
         }
         public void Inspect(string id)

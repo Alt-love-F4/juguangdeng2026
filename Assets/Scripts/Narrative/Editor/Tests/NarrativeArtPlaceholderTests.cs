@@ -9,20 +9,68 @@ namespace Spotlight.Narrative.Editor.Tests
 {
     public sealed class NarrativeArtPlaceholderTests
     {
-        [Test]public void MarkedRequirementsHaveLocalCardsWithoutReplacingExistingArtwork()
+        [Test]public void HistoricalRequirementCardsAreCountedIndependentlyFromCurrentCoverage()
         {
-            var manifest=NarrativeArtPlaceholderBuilder.ReadManifest();Assert.That(manifest.requirements.Length,Is.EqualTo(115));
-            var cards=manifest.requirements.Where(r=>r.disposition=="placeholder").ToArray();Assert.That(cards.Length,Is.EqualTo(51));
-            var registry=new SerializedObject(AssetDatabase.LoadMainAssetAtPath(NarrativeArtPlaceholderBuilder.RegistryPath));var entries=registry.FindProperty("entries");
+            var manifest=NarrativeArtPlaceholderBuilder.ReadManifest();
+            Assert.That(manifest.requirements.Length,Is.EqualTo(NarrativeArtPlaceholderBuilder.ExpectedRequirementCount));
+            Assert.That(manifest.requirements.Select(r=>r.id).Distinct(System.StringComparer.Ordinal).Count(),Is.EqualTo(115));
+            var cards=manifest.requirements.Where(NarrativeArtPlaceholderBuilder.HasHistoricalCard).ToArray();
+            Assert.That(cards.Length,Is.EqualTo(51));
             foreach(var item in cards)
             {
                 Assert.That(item.assetPath,Does.StartWith("Assets/Art/NarrativePlaceholders/"));Assert.That(File.Exists(item.assetPath),Is.True);
                 Assert.That(item.requirement,Is.Not.Empty);Assert.That(item.sourceEvidence,Is.Not.Empty);
                 var texture=AssetDatabase.LoadAssetAtPath<Texture>(item.assetPath);Assert.That(texture,Is.Not.Null,item.id);Assert.That(texture.width,Is.GreaterThanOrEqualTo(768));
-                SerializedProperty entry=null;for(int i=0;i<entries.arraySize;i++){var e=entries.GetArrayElementAtIndex(i);if(e.FindPropertyRelative("key").stringValue=="art.requirement."+item.id)entry=e;}
-                Assert.That(entry,Is.Not.Null,item.id);Assert.That(entry.FindPropertyRelative("placeholder").boolValue,Is.True,item.id);
-                Assert.That(entry.FindPropertyRelative("texture").objectReferenceValue,Is.EqualTo(texture));
             }
+        }
+
+        [Test]public void CurrentArtUsesProductionSourcesForCg07Ch35AndP04()
+        {
+            var requirements=NarrativeArtPlaceholderBuilder.ReadManifest().requirements;
+            var registry=AssetDatabase.LoadAssetAtPath<NarrativeStageVisuals>(NarrativeArtPlaceholderBuilder.RegistryPath);
+            var characters=NarrativeCharacterArtAudit.Load();
+            var config=LubanNarrativeLoader.Load();
+            var endings=NarrativeEndingArtworkCatalog.Load();
+
+            var cg07=NarrativeArtPlaceholderBuilder.InspectCurrentArt(requirements.Single(r=>r.id=="CG07"),registry,characters,config,endings);
+            Assert.That(cg07.Connected,Is.True);
+            Assert.That(cg07.Key,Is.EqualTo("cg.marie_moonlit"));
+            Assert.That(cg07.Asset,Is.Not.Null);
+            Assert.That(cg07.AssetPath,Does.Not.StartWith("Assets/Art/NarrativePlaceholders/"));
+
+            var ch35=NarrativeArtPlaceholderBuilder.InspectCurrentArt(requirements.Single(r=>r.id=="CH35"),registry,characters,config,endings);
+            var tutorial=Resources.Load<DialogueVisualsAsset>(NarrativeArtPlaceholderBuilder.TutorialVisualsPath);
+            Assert.That(ch35.Connected,Is.True);
+            Assert.That(ch35.Key,Is.EqualTo("Dialogue/CafeTutorialVisuals.centerPortrait"));
+            Assert.That(ch35.Asset,Is.SameAs(tutorial.CenterPortrait));
+            Assert.That(ch35.AssetPath,Is.EqualTo(AssetDatabase.GetAssetPath(tutorial.CenterPortrait)));
+
+            var p04=NarrativeArtPlaceholderBuilder.InspectCurrentArt(requirements.Single(r=>r.id=="P04"),registry,characters,config,endings);
+            Assert.That(p04.Connected,Is.True);
+            Assert.That(p04.Key,Is.EqualTo("prop.king_coins"));
+            Assert.That(p04.Asset,Is.Not.Null);
+            Assert.That(p04.AssetPath,Does.Not.StartWith("Assets/Art/NarrativePlaceholders/"));
+
+            var summary=NarrativeArtPlaceholderBuilder.Summarize(requirements,registry,characters,config,endings);
+            Assert.That(summary.Total,Is.EqualTo(115));
+            Assert.That(summary.HistoricalCards,Is.EqualTo(51));
+            Assert.That(summary.EndingNewImages,Is.EqualTo(14));
+            Assert.That(summary.EndingReuses,Is.EqualTo(1));
+            Assert.That(summary.EndingNoNewArtwork,Is.EqualTo(1));
+        }
+
+        [Test]public void ProposedKeysAndRequirementCardRegistryEntriesDoNotCountAsProductionHooks()
+        {
+            var registry=AssetDatabase.LoadAssetAtPath<NarrativeStageVisuals>(NarrativeArtPlaceholderBuilder.RegistryPath);
+            var config=LubanNarrativeLoader.Load();
+            var audit=NarrativeCharacterArtAudit.Load();
+            var status=NarrativeArtPlaceholderBuilder.InspectCurrentArt(new NarrativeArtPlaceholderBuilder.Requirement
+            {
+                id="__audit_unregistered__",category="CG／插画",
+                proposedUnregisteredKeys=new[]{"cg.marie_moonlit","art.requirement.CG07"}
+            },registry,audit,config,NarrativeEndingArtworkCatalog.Load());
+            Assert.That(status.Connected,Is.False);
+            Assert.That(status.Key,Is.Null.Or.Empty);
         }
         [Test]public void OrdinaryCafeMarkerAndExistingRealBackgroundsRemainUnchanged()
         {
@@ -37,7 +85,7 @@ namespace Spotlight.Narrative.Editor.Tests
         }
         [Test]public void DeliveredCgArtUsesStableKeysWithoutActivatingPendingStoryHooks()
         {
-            var visuals=AssetDatabase.LoadAssetAtPath<NarrativeStageVisuals>(NarrativeArtPlaceholderBuilder.RegistryPath);
+            var visuals=AssetDatabase.LoadAssetAtPath<Spotlight.GameFlow.NarrativeStageVisuals>(NarrativeArtPlaceholderBuilder.RegistryPath);
             foreach(var binding in new[]
             {
                 new[]{"rose.club.knight_guidance","Assets/Art/NarrativeCG/CG03_knight_guidance.jpg"},

@@ -37,9 +37,11 @@ namespace Spotlight.Narrative.Tests
             actions.Mount("cafe", "visit");
             Assert.That(actions.HasUnseenActions("cafe"), Is.False);
             Assert.That(actions.HasUnseenAvailableActions("cafe"), Is.False);
+            Assert.That(actions.HasUnseenImportantActions("cafe"), Is.False, "No action events means no important map dot.");
             narrative.State.SetCondition("map.active", true);
             Assert.That(actions.HasUnseenActions("cafe"), Is.True);
             Assert.That(actions.HasUnseenAvailableActions("cafe"), Is.True);
+            Assert.That(actions.HasUnseenImportantActions("cafe"), Is.False, "The configured event list is empty.");
             string token = actions.GetActionInstanceKey("cafe", "visit");
             Assert.That(actions.ConfirmActionDisplayed("cafe", token), Is.True);
             Assert.That(actions.HasBlockingActions(), Is.True, "Seen is not completed.");
@@ -99,6 +101,56 @@ namespace Spotlight.Narrative.Tests
             Assert.That(actions.HasUnseenAvailableActions("market"), Is.False);
             Assert.That(actions.GetDisplayableActions("market").Count(), Is.EqualTo(1));
             Assert.That(changedPositions.Count, Is.EqualTo(2));
+        }
+
+        [Test]
+        public void MapDotOnlyShowsUnreadImportantNonDailyActionsWithEvents()
+        {
+            var presenter = new Presenter();
+            var narrative = Controller(presenter);
+            var important = new NarrativeActionDefinition { actionKey = "important", type = NarrativeActionType.Once,
+                mustExecute = true, requirements = "ActionPoint(2)", resultEvents = new List<string> { "story" } };
+            var optional = new NarrativeActionDefinition { actionKey = "optional", resultEvents = new List<string> { "story" } };
+            var noEvents = new NarrativeActionDefinition { actionKey = "no-events", mustExecute = true };
+            var daily = new NarrativeActionDefinition { actionKey = "daily", type = NarrativeActionType.Daily,
+                mustExecute = true, resultEvents = new List<string> { "story" } };
+            var actions = new NarrativeActionController(narrative, new[] { important, optional, noEvents, daily });
+            actions.ActionPoints.Set(0);
+            actions.Mount("market", "important");
+            actions.Mount("cafe", "optional");
+            actions.Mount("home", "no-events");
+            actions.Mount("shop", "daily");
+
+            Assert.That(actions.HasUnseenImportantActions("market"), Is.True, "Important action dots should not depend on affordability.");
+            Assert.That(actions.HasUnseenImportantActions("cafe"), Is.False, "Ordinary actions should not have map dots.");
+            Assert.That(actions.HasUnseenImportantActions("home"), Is.False, "Actions without event lists should not have map dots.");
+            Assert.That(actions.HasUnseenImportantActions("shop"), Is.False, "Daily actions should not have map dots.");
+
+            string token = actions.GetActionInstanceKey("market", "important");
+            Assert.That(actions.ConfirmActionDisplayed("market", token), Is.True);
+            Assert.That(actions.HasUnseenImportantActions("market"), Is.False, "Opening the important action clears its dot.");
+        }
+
+        [Test]
+        public void ImportantMapDotStillHonorsConditionsAndFutureState()
+        {
+            var narrative = Controller(new Presenter(), true);
+            var gated = new NarrativeActionDefinition { actionKey = "visit", type = NarrativeActionType.Once,
+                mustExecute = true, resultEvents = new List<string> { "story" } };
+            var future = new NarrativeActionDefinition { actionKey = "future", type = NarrativeActionType.Future,
+                mustExecute = true, durationDays = 1, nextActionKey = "next", resultEvents = new List<string> { "story" } };
+            var next = new NarrativeActionDefinition { actionKey = "next", type = NarrativeActionType.Once,
+                mustExecute = true, resultEvents = new List<string> { "story" } };
+            var actions = new NarrativeActionController(narrative, new[] { gated, future, next });
+            actions.Mount("cafe", "visit");
+            actions.Mount("market", "future");
+
+            Assert.That(actions.HasUnseenImportantActions("cafe"), Is.False, "Unmet action conditions still hide the dot.");
+            Assert.That(actions.HasUnseenImportantActions("market"), Is.False, "Future actions do not have map dots.");
+            narrative.State.SetCondition("map.active", true);
+            Assert.That(actions.HasUnseenImportantActions("cafe"), Is.True);
+            actions.BeginDay(2);
+            Assert.That(actions.HasUnseenImportantActions("market"), Is.True, "The successor action becomes eligible after mounting.");
         }
 
         [Test]

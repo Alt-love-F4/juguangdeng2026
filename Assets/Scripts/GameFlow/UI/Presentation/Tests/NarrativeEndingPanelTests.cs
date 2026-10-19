@@ -59,17 +59,23 @@ namespace Spotlight.GameFlow.Tests
                 Assert.That(panel.EndingDialogue.SettlementPageCount,Is.GreaterThanOrEqualTo(1));
                 Assert.That(panel.EndingDialogue.SettlementText,Is.EqualTo(NarrativeTextSubstitution.PlayerName(config.texts.Find(t=>t.key==e.messageText).content,"预览店长")));
                 Assert.That(DialoguePanel.IsAnyPlaying,Is.False,"Embedded settlement must not own formal dialogue playback.");
-                int pageCount=panel.EndingDialogue.SettlementPageCount;
-                if(pageCount>1)
+                // Each paragraph/page starts hidden. Revealing the last page must not close it;
+                // only the following confirmation returns from the ending.
+                int guard=0;
+                while(true)
                 {
-                    int first=panel.EndingDialogue.PageNumber;
+                    Assert.That(++guard,Is.LessThan(100),e.endingId);
+                    if(panel.EndingDialogue.IsSettlementTyping)
+                    {
+                        panel.EndingDialogue.AdvanceEndingSettlement();
+                        Assert.That(panel.EndingDialogue.IsSettlementTyping,Is.False);
+                        yield return null;
+                    }
+                    if(panel.EndingDialogue.IsSettlementLastPage)break;
                     panel.EndingDialogue.AdvanceEndingSettlement();
-                    Assert.That(panel.EndingDialogue.PageNumber,Is.EqualTo(first+1));
-                    for(int p=first+1;p<pageCount;p++){yield return null;panel.EndingDialogue.AdvanceEndingSettlement();}
-                    yield return null;panel.EndingDialogue.AdvanceEndingSettlement();
-                    Assert.That(panel.EndingDialogue.PageNumber,Is.EqualTo(pageCount),"Final page stays visible until the ending return button.");
-                    Assert.That(panel.CurrentEndingId,Is.EqualTo(e.endingId));
+                    yield return null;
                 }
+                Assert.That(panel.CurrentEndingId,Is.EqualTo(e.endingId));
                 Assert.That(title.rectTransform.anchorMin.y,Is.GreaterThan(.85f));
                 Assert.That(message.rectTransform.anchorMax.y,Is.LessThan(.35f));
                 if(e.endingId=="neutral.ending.a"||e.endingId=="church.ending.if2"||e.endingId=="rose.route.ending.bloom.ending")
@@ -91,6 +97,7 @@ namespace Spotlight.GameFlow.Tests
             var data=NarrativeEndingPresentation.Create(null,ending,key=>c.texts.Find(t=>t.key==key)?.content??key,()=>closed++,"关闭测试");
             var panel=UIKit.OpenPanel<ResultPanel>(UILevel.Pop,data,tag:"ending-panel-test",cachePolicy:PanelCachePolicy.Reusable);
             for(int i=0;i<25&&panel.State==PanelState.Opening;i++)yield return null;
+            yield return ReadToLastPage(panel);
             panel.ConfirmResult();panel.ConfirmResult();for(int i=0;i<30&&closed==0;i++)yield return null;
             Assert.That(closed,Is.EqualTo(1));
             var ordinary=UIKit.OpenPanel<ResultPanel>(UILevel.Pop,new ResultPanelData(null,"操作提示","普通消息",null),tag:"ending-panel-test",cachePolicy:PanelCachePolicy.Reusable);yield return null;
@@ -134,6 +141,89 @@ namespace Spotlight.GameFlow.Tests
                 core.UnbindValueProviders();
             }
         }
+        private static IEnumerator ReadToLastPage(ResultPanel panel)
+        {
+            for(int guard=0;guard<100;guard++)
+            {
+                yield return null;
+                var dialogue=panel.EndingDialogue;
+                if(!dialogue.IsSettlementTyping&&dialogue.IsSettlementLastPage)yield break;
+                panel.ConfirmResult();
+            }
+            Assert.Fail("Ending text did not reach its last readable page.");
+        }
+
+        [UnityTest]public IEnumerator EndingTypesInUnscaledTimeAndBodyClicksRevealThenAdvanceParagraphs()
+        {
+            Time.timeScale=0;
+            int closed=0;
+            var panel=UIKit.OpenPanel<ResultPanel>(UILevel.Pop,
+                new ResultPanelData(null,"逐字结局","第一段的文字逐字出现，不应直接跳过。\n\n第二段也从头逐字显示。",()=>closed++,"返回主菜单","fixture.typing"),
+                tag:"ending-panel-test",cachePolicy:PanelCachePolicy.Reusable);
+            yield return null;
+            var dialogue=panel.EndingDialogue;
+            var serial=new UnityEditor.SerializedObject(dialogue);
+            var text=(TMPro.TMP_Text)serial.FindProperty("dialogueText").objectReferenceValue;
+            var body=(UnityEngine.UI.Button)serial.FindProperty("dialogueBodyButton").objectReferenceValue;
+            var speed=serial.FindProperty("charactersPerSecond");speed.floatValue=1f;serial.ApplyModifiedPropertiesWithoutUndo();
+            Assert.That(dialogue.SettlementSegmentCount,Is.EqualTo(2));
+            Assert.That(dialogue.IsSettlementTyping,Is.True);
+            int visible=text.maxVisibleCharacters;
+            yield return new WaitForSecondsRealtime(1.1f);
+            Assert.That(text.maxVisibleCharacters,Is.GreaterThan(visible),"Typing must continue at timeScale=0.");
+            body.onClick.Invoke();body.onClick.Invoke();
+            Assert.That(dialogue.IsSettlementTyping,Is.False);
+            Assert.That(dialogue.SettlementSegmentIndex,Is.Zero,"Same-frame clicks must not skip to another paragraph.");
+            Assert.That(closed,Is.Zero);
+            yield return null;body.onClick.Invoke();
+            Assert.That(dialogue.SettlementSegmentIndex,Is.EqualTo(1));
+            Assert.That(dialogue.IsSettlementTyping,Is.True);
+            yield return null;panel.ConfirmResult();
+            Assert.That(dialogue.IsSettlementTyping,Is.False);
+            Assert.That(closed,Is.Zero,"The last reveal must not also close the ending.");
+            yield return null;body.onClick.Invoke();body.onClick.Invoke();
+            for(int i=0;i<45&&closed==0;i++)yield return null;
+            Assert.That(closed,Is.EqualTo(1));
+            Assert.That(DialoguePanel.IsAnyPlaying,Is.False);
+        }
+
+        [UnityTest]public IEnumerator EndingKeyboardAndContinueButtonShareOneAdvanceAndHonorExternalInputGate()
+        {
+            var keyboard=UnityEngine.InputSystem.InputSystem.AddDevice<UnityEngine.InputSystem.Keyboard>();
+            var oldGate=DialoguePanel.ExternalInputBlocked;
+            try
+            {
+                Time.timeScale=0;
+                var panel=UIKit.OpenPanel<ResultPanel>(UILevel.Pop,
+                    new ResultPanelData(null,"键盘结局",new string('文',1800),null,"关闭","fixture.keyboard"),
+                    tag:"ending-panel-test",cachePolicy:PanelCachePolicy.Reusable);
+                yield return null;
+                var dialogue=panel.EndingDialogue;
+                var serial=new UnityEditor.SerializedObject(dialogue);
+                var arrow=(UnityEngine.UI.Button)serial.FindProperty("continueButton").objectReferenceValue;
+                serial.FindProperty("charactersPerSecond").floatValue=.01f;serial.ApplyModifiedPropertiesWithoutUndo();
+                Assert.That(dialogue.SettlementPageCount,Is.GreaterThan(1));
+                DialoguePanel.ExternalInputBlocked=()=>true;
+                arrow.onClick.Invoke();
+                Assert.That(dialogue.IsSettlementTyping,Is.True);
+                DialoguePanel.ExternalInputBlocked=()=>false;
+                UnityEngine.InputSystem.InputSystem.QueueStateEvent(keyboard,new UnityEngine.InputSystem.LowLevel.KeyboardState(UnityEngine.InputSystem.Key.Enter));
+                yield return null;yield return null;
+                UnityEngine.InputSystem.InputSystem.QueueStateEvent(keyboard,new UnityEngine.InputSystem.LowLevel.KeyboardState());
+                yield return null;
+                Assert.That(dialogue.IsSettlementTyping,Is.False);
+                Assert.That(dialogue.PageNumber,Is.EqualTo(1),"One Enter reveals but does not also turn the page.");
+                arrow.onClick.Invoke();
+                Assert.That(dialogue.PageNumber,Is.EqualTo(2));
+                Assert.That(dialogue.IsSettlementTyping,Is.True);
+            }
+            finally
+            {
+                DialoguePanel.ExternalInputBlocked=oldGate;
+                UnityEngine.InputSystem.InputSystem.RemoveDevice(keyboard);
+            }
+        }
+
         private static void SaveScreenshot(string path)
         {
             var texture=ScreenCapture.CaptureScreenshotAsTexture();

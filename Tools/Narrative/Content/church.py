@@ -9,12 +9,29 @@ import re
 from xml.etree import ElementTree as ET
 from zipfile import ZipFile
 
-SOURCE_DIR = Path("策划文件/文案/a-王庭教会（共通+支线）")
+SOURCE_DIR = Path("策划文件/文案6点/文案/a-王庭教会（共通+支线）")
 W = "{http://schemas.openxmlformats.org/wordprocessingml/2006/main}"
 ROUTES = ("neutral", "rose", "church", "revolution")
 EXCELLENT_SCORE_PRESET = 90  # Shared host preset, not a source-author numeric grade.
 SHEETS = ("Object", "Event", "EventDate", "SetupParams", "PresentationIndex", "ConditionKey", "Condition", "Result", "ConversationPage", "ConversationLine", "Choice", "AbilityCheck", "AbilityCheckCondition", "ReadingPage", "ReadingLine", "Ending", "Text")
-SOURCE_HASHES = {'MA70.10.09-S2.docx': '15c3101b85329f082efa98d9c938791089d9ac5e5cb35c50d8788fa4a3d9c58d', 'MA70.10.14-S2.docx': '31215dd3c7c612e1aec62f1a192c724eafffb009c42142d8dad5607541be6907', 'MA70.10.20-S1.docx': 'ef542841f02f8e52a648f963ebd04669f3c5c925ecb4964097161a74b5547042', 'MA70.10.23-S1.docx': '34676606041bea930580ec20511d19fb78a46c83fc825d9cb3127a5c03dbaf3d', 'MA70.10.23-S2-End if2.docx': 'da8691c9b44b8b5b3455c5276acc8aebd41fffb3d34503a45e0e050f182f6a91', 'MA70.11.04-S1.docx': 'b7fa234c2f824bfec4ba8ff34c495d2f904a79bf78fe0d8d8fb15e18030c6508', 'MA70.11.05-S1.docx': '9adf4277422a337e24752714b1ead52192d4f364ead8a94ce380cfd14dba3a9d', 'MA70.11.05-S2.docx': '8cb1fa3b42a79db4583419bc3851fe891ef104eacd6f73a151be12b73df42790', 'MA70.11.11-S1.docx': '396432ca41f0479bbe8d13205f700fda85d6f6b0461e8af8d3e276af64b5f5ca', 'RY70.11.11-S1.docx': 'f3e1ae56f55471b7e4e2f4ba26dc5bfbe79b683082f6f34ce86ec772e8d67a3b', 'RY70.11.12-S1.docx': 'c77bfd4d4a494e19b6624ce08cf976f122bbaff7384ee83c28e253344ac363c0', 'RY70.11.13-S1.docx': 'e5b7eb86b5681eaf81559b3334a381ee0f924ba1037c391493568498a0b654fd', 'RY70.11.15-S1.docx': '4bcd445bc3bfab306d8cb95a565a99f32999ed43444ca2fa5d171d814b963313', 'RY70.11.16-S1.docx': 'd4df86d2b714985110e13b7bbdcf903527fe6bbf5fb54fb68bdd092606727a91', 'RY70.11.18-S1.docx': '0006e097bbac49b28630f38d988af4ca76dade04f5a410fc5d99387a0fd4686d', 'RY70.11.23-S1【结局1&2】.docx': 'c9af366a682b13fabd3b4f58ba6c4f643d70b290037772a37c285b9b4b4c89a2'}  # Pinned current sources; fail closed on positional drift.
+SOURCE_HASHES = {
+    "MA70.10.09-S2.docx": "15c3101b85329f082efa98d9c938791089d9ac5e5cb35c50d8788fa4a3d9c58d",
+    "MA70.10.14-S2.docx": "31215dd3c7c612e1aec62f1a192c724eafffb009c42142d8dad5607541be6907",
+    "MA70.10.20-S1.docx": "ef542841f02f8e52a648f963ebd04669f3c5c925ecb4964097161a74b5547042",
+    "MA70.10.23-S1.docx": "34676606041bea930580ec20511d19fb78a46c83fc825d9cb3127a5c03dbaf3d",
+    "MA70.10.23-S2-End if3.docx": "da8691c9b44b8b5b3455c5276acc8aebd41fffb3d34503a45e0e050f182f6a91",
+    "MA70.11.04-S1.docx": "a6bd2474abbec96491fbb9ee6bfd85e03464f8df73769bc613a6073b8fb2c177",
+    "MA70.11.05-S1.docx": "9adf4277422a337e24752714b1ead52192d4f364ead8a94ce380cfd14dba3a9d",
+    "MA70.11.05-S2.docx": "8cb1fa3b42a79db4583419bc3851fe891ef104eacd6f73a151be12b73df42790",
+    "MA70.11.11-S1（内含end if4-再见，亚拿尼亚）.docx": "bc842b005503683f760bce5b58028088b336edeb080c128e59170bfc8598970c",
+    "RY70.11.11-S1.docx": "f3e1ae56f55471b7e4e2f4ba26dc5bfbe79b683082f6f34ce86ec772e8d67a3b",
+    "RY70.11.12-S1.docx": "c77bfd4d4a494e19b6624ce08cf976f122bbaff7384ee83c28e253344ac363c0",
+    "RY70.11.13-S1.docx": "e5b7eb86b5681eaf81559b3334a381ee0f924ba1037c391493568498a0b654fd",
+    "RY70.11.15-S1.docx": "4bcd445bc3bfab306d8cb95a565a99f32999ed43444ca2fa5d171d814b963313",
+    "RY70.11.16-S1.docx": "d4df86d2b714985110e13b7bbdcf903527fe6bbf5fb54fb68bdd092606727a91",
+    "RY70.11.18-S1.docx": "0006e097bbac49b28630f38d988af4ca76dade04f5a410fc5d99387a0fd4686d",
+    "RY70.11.23-S1【结局1&2】.docx": "c9af366a682b13fabd3b4f58ba6c4f643d70b290037772a37c285b9b4b4c89a2",
+}  # Exact current sources; positional change in 11/4 is normalized below.
 
 def paragraphs(path: Path) -> list[str]:
     with ZipFile(path) as z:
@@ -85,14 +102,22 @@ class _Root:
     def __init__(self, c, filename, root, slot, prerequisites, blocked, route):
         self.c, self.root, self.pk = c, root, root + ".conversation"
         self.path = c.project / SOURCE_DIR / filename
-        self.source = paragraphs(self.path)
+        raw_source = paragraphs(self.path)
+        self.source = raw_source
+        self.source_anchor_map = [(i,) for i in range(1, len(raw_source) + 1)]
+        normalization = None
+        if filename == "MA70.11.04-S1.docx":
+            self.source = raw_source[:95] + [raw_source[95] + raw_source[96]] + raw_source[97:]
+            self.source_anchor_map = [(i,) for i in range(1, 96)] + [(96, 97)] + [(i,) for i in range(98, len(raw_source) + 1)]
+            normalization = dict(kind="paragraph-continuation", sourceParagraphs=[96, 97], canonicalParagraph=96,
+                detail="The price token is split across two DOCX paragraphs; merge it to preserve the existing P096 Text key and following anchors.")
         digest = sha256(self.path.read_bytes()).hexdigest()
         if SOURCE_HASHES.get(filename) != digest:
             raise ValueError(f"Church source changed; re-audit anchors: {filename}; sha256={digest}")
-        self.anchors = {i: dict(paragraph=i, sourceText=t, kind="directive" if directive(t) else "unmapped", emitted=[], status="mapped-directive" if directive(t) else "unmapped") for i,t in enumerate(self.source, 1)}
+        self.anchors = {i: dict(paragraph=i, sourceText=t, kind="directive" if directive(t) else "unmapped", emitted=[], status="mapped-directive" if directive(t) else "unmapped") for i,t in enumerate(raw_source, 1)}
         self.seq, self.result_seq, self.page_rows = 0, 0, []
         self.blocked = list(blocked)
-        self.audit = dict(source=str(SOURCE_DIR / filename), sha256=digest, nonemptyParagraphs=len(self.source), root=root, status="construction-blocked" if blocked else "compiled", blockedBy=self.blocked, prerequisites=list(prerequisites), dependencies=[], decisions=[], anchors=list(self.anchors.values()))
+        self.audit = dict(source=str(SOURCE_DIR / filename), sha256=digest, nonemptyParagraphs=len(raw_source), normalizedParagraphs=len(self.source), normalization=normalization, root=root, status="construction-blocked" if blocked else "compiled", blockedBy=self.blocked, prerequisites=list(prerequisites), dependencies=[], decisions=[], anchors=list(self.anchors.values()))
         c.audit.append(self.audit); c.replacements.append(root)
         entry = "Immediate" if root in {"church.route.1111.s1", "church.1023.s2"} else {"morning": "MorningBeforeMap", "noon": "AfterBusiness", "night": "BeforeNight"}[slot]
         prop = f"entry={entry};blocksSave=true" + (";blockedBy=" + ",".join(blocked) if blocked else "")
@@ -117,8 +142,12 @@ class _Root:
     def depend(self, key, detail):
         self.audit["dependencies"].append(dict(id=key, detail=detail))
     def mark(self, n, kind, emitted=None, status="implemented"):
-        a=self.anchors[n]; a["kind"],a["status"]=kind,status
-        if emitted and emitted not in a["emitted"]: a["emitted"].append(emitted)
+        source_anchors = self.source_anchor_map[n - 1]
+        for index, source_n in enumerate(source_anchors):
+            a = self.anchors[source_n]
+            a["kind"] = kind if index == 0 else "continuation"
+            a["status"] = status if index == 0 else f"merged-into-P{n:03}"
+            if emitted and emitted not in a["emitted"]: a["emitted"].append(emitted)
     def page(self, suffix, when="", *, step="Dialogue", bg=None, gameplay=None, next_id=None, check=None):
         self.seq += 1
         p=self.c.add("ConversationPage", pageId=self.root+"."+suffix, presentationKey=self.pk, seq=self.seq, pageCondKeys=when, bgOverride=bg, stepType=step, gameplayKey=gameplay, nextPageId=next_id, checkId=check)
@@ -332,7 +361,7 @@ def _church1023(c):
     return r.done()
 
 def _church_if2(c):
-    r=c.source("MA70.10.23-S2-End if2.docx","church.1023.s2",prerequisites=("story.church.1023.s1.completed","church.detention.release_failed","church.detention.active"))
+    r=c.source("MA70.10.23-S2-End if3.docx","church.1023.s2",prerequisites=("story.church.1023.s1.completed","church.detention.release_failed","church.detention.active"))
     r.span(5,34,bg="detention.interior"); r.ending("church.ending.if2","牢狱终点","church.detention.release_failed")
     for n in range(35,40): r.mark(n,"host-checkpoint-ui",status="optional-checkpoint-unresolved")
     r.depend("Existing Ending terminal/GameFlow menu","Normal terminal uses existing Ending lifecycle; optional return-to-last-choice remains separate pending UX, not root blocker")
@@ -344,13 +373,13 @@ def _church1104(c):
     r.span(22,28,numeric_guard("player.perception","ge",3)); r.span(30,32,numeric_guard("player.perception","lt",3)); r.span(34,39)
     pay=r.menu("guide_fee",[41,42,43]); r.span(45,47,choice(pay[0])); r.span(49,58,choice(pay[1]))
     r.reward(pay[1],"cafe.money",1)
-    fee_ready="construction.church.1104.s1.fee_amount_ready"
-    c.fact(fee_ready,"Only the unresolved third fee choice; free and one-coin paths remain available",only_set_true=False)
-    c.condition("choice",pay[2],fee_ready)
-    r.audit["nodeBlockers"]=[dict(node="P043",choiceId=pay[2],blockedBy="church.1104.xx_fee_pending",readyKey=fee_ready)]
-    r.depend(fee_ready,"Approve exact third fee and actual MONEY_ADD before enabling this option; no guessed amount")
-    r.span(60,68,choice(pay[2])); r.mark(43,"choice",pay[2],"blocked-decision")
-    r.audit["decisions"].append(dict(kind="unresolved-money",paragraphs=[43,61,64],detail="Third option retained; no fabricated xx reward"))
+    fee_text_key=f"{r.root}.text.p043.option"
+    fee_text=next(row for row in r.c.rows["Text"] if row["key"]==fee_text_key)
+    fee_text["text"]=fee_text["text"].replace("xx个国王币","50个国王币")
+    fee_text["comment"] += "; amount resolved by the selected branch's P061/P064 50-coin receipt"
+    r.span(60,68,choice(pay[2])); r.mark(43,"choice",pay[2])
+    r.reward(pay[2],"cafe.money",50)
+    r.audit["decisions"].append(dict(kind="source-derived-amount",paragraphs=[43,61,64],amount=50,detail="P061 explicitly receives 50 coins and P064 specifies Money+50; the linked P043 placeholder is compiled as 50."))
     r.business_end("business.end",(69,70))
     r.span(71,73); order=r.menu("tour_order",[75,76]); g1,g2=choice(order[0]),choice(order[1])
     r.span(80,119,g1,bg="market.day"); r.span(121,127,g1,bg="suburb.day")
@@ -404,7 +433,7 @@ def _church1105(c,sheltered):
     return r.done()
 
 def _hub1111(c):
-    r=c.source("MA70.11.11-S1.docx","church.1111.s1",prerequisites=("story.revolution.1107.s1.completed",))
+    r=c.source("MA70.11.11-S1（内含end if4-再见，亚拿尼亚）.docx","church.1111.s1",prerequisites=("story.revolution.1107.s1.completed",))
     r.depend("story.revolution.1107.s1.completed","Real Lesou common prerequisite; integrator must verify current source ID")
     for name in ROUTES: c.condition("event",r.root,"route."+name,"false")
     r.span(3,26,bg="scene.cafe"); r.span(28,30,numeric_guard("player.language","ge",6))

@@ -264,7 +264,9 @@ namespace Spotlight.FreeCafe
             var character=customer!=null && customer.person!=null ? runtime.Character(customer.person.characterId) : null;
             if(customerAvatar!=null)
             {
-                customerAvatar.sprite=character!=null && character.avatar!=null ? character.avatar : runtime.artLibrary.Resolve(customerArt);
+                var identity=customer!=null ? customer.person : null;
+                customerAvatar.sprite=CafeCustomerVisualVariants.ResolveAvatar(identity,character);
+                if(customerAvatar.sprite==null) customerAvatar.sprite=runtime.artLibrary.Resolve(customerArt);
                 if(customerAvatar.sprite==null) customerAvatar.sprite=customerAvatarFallback;
                 customerAvatar.gameObject.SetActive(request!=null && customerAvatar.sprite!=null);
                 FrameAvatar(customerAvatar);

@@ -96,9 +96,9 @@ class ChurchContentTests(unittest.TestCase):
     @classmethod
     def setUpClass(cls): cls.rows=church.build(PROJECT)
 
-    def test_all_current_16_sources_and_1952_anchors(self):
+    def test_all_current_16_sources_and_1953_anchors(self):
         a=self.rows["_audit"]
-        self.assertEqual(16,len(a)); self.assertEqual(1952,sum(x["nonemptyParagraphs"] for x in a))
+        self.assertEqual(16,len(a)); self.assertEqual(1953,sum(x["nonemptyParagraphs"] for x in a))
         self.assertEqual(set(church.SOURCE_HASHES),{Path(x["source"]).name for x in a})
         for source in a:
             self.assertNotIn("unmapped",{x["kind"] for x in source["anchors"]})
@@ -209,7 +209,18 @@ class ChurchContentTests(unittest.TestCase):
                 self.assertEqual(order==1 and perception>=3,g.seen(272))
                 self.assertTrue(g.seen(436))
         choices=[x for x in self.rows["Choice"] if ".choice.guide_fee." in x["choiceId"]]
-        self.assertEqual(3,len(choices)); self.assertIn("xx",next(x["text"] for x in self.rows["Text"] if x["key"]==choices[2]["textKey"]))
+        self.assertEqual(3,len(choices)); self.assertIn("50个国王币",next(x["text"] for x in self.rows["Text"] if x["key"]==choices[2]["textKey"]))
+
+    def test_latest_outing_source_settles_explicit_fifty_coin_option(self):
+        graph=Graph(self.rows,"church.1104.s1").run({"guide_fee":2,"tour_order":0,"patient":0})
+        self.assertTrue(graph.seen(61)); self.assertTrue(graph.seen(64))
+        payments=[row for row in graph.results() if row["resultType"]=="MONEY_ADD" and row["target"]=="cafe"]
+        self.assertEqual(["50"],[row["value"] for row in payments])
+        audit=next(row for row in self.rows["_audit"] if row["root"]=="church.1104.s1")
+        self.assertEqual(480,audit["nonemptyParagraphs"])
+        self.assertEqual({96,97},set(audit["normalization"]["sourceParagraphs"]))
+        self.assertEqual("continuation",audit["anchors"][96]["kind"])
+        self.assertEqual("merged-into-P096",audit["anchors"][96]["status"])
 
     def test_1105_shelter_variants_have_real_opposite_gates(self):
         for root,fact in (("church.1105.s1","church.alienor.refused_shelter"),("church.1105.s2","church.alienor.sheltered")):
@@ -260,17 +271,16 @@ class ChurchContentTests(unittest.TestCase):
         self.assertEqual(["church.route.1123.s1"],[a["root"] for a in self.rows["_audit"] if a["blockedBy"]])
         self.assertFalse(any("release_acknowledged" in c["target"] for c in self.rows["Condition"]))
 
-    def test_fees_only_unknown_option_locked_and_one_coin_uses_money_add(self):
+    def test_all_authored_fee_options_settle_their_actual_money(self):
         root="church.1104.s1"
         options=sorted([c for c in self.rows["Choice"] if c["groupKey"]==root+".choices.guide_fee"],key=lambda c:c["seq"])
-        for option in options[:2]:
+        for option in options:
             self.assertFalse(any(c["ownerType"]=="choice" and c["ownerId"]==option["choiceId"] for c in self.rows["Condition"]))
-        self.assertTrue(any(c["ownerType"]=="choice" and c["ownerId"]==options[2]["choiceId"] and c["target"]=="construction.church.1104.s1.fee_amount_ready" for c in self.rows["Condition"]))
-        for fee in (0,1):
+        for fee,expected in ((0,0),(1,1),(2,50)):
             g=Graph(self.rows,root).run({"guide_fee":fee})
             money=[r for r in g.results() if r["resultType"]=="MONEY_ADD"]
             self.assertEqual(0 if fee==0 else 1,len(money))
-            if money: self.assertEqual(("cafe","1"),(money[0]["target"],money[0]["value"]))
+            if money: self.assertEqual(("cafe",str(expected)),(money[0]["target"],money[0]["value"]))
         self.assertFalse(any(r["resultType"].startswith("BAR_") and r["target"] in ("cafe.money","bar:cafe.money") for r in self.rows["Result"]))
 
     def test_1115_follow_and_watch_are_different_choices(self):

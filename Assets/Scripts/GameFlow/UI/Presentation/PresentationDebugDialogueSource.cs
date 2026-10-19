@@ -17,6 +17,12 @@ namespace Spotlight.GameFlow
             public string Id, Label;
         }
 
+        public sealed class CharacterGalleryEntry
+        {
+            public string CharacterId, DisplayName, PortraitPath, AvatarPath, ScenePortraitPath;
+            public bool IsNpc, IsOpeningCenter, UsesAvatarFallback;
+        }
+
         private const string OpeningPrefix = "opening:";
         private const string ConversationPrefix = "conversation:";
         private const string PreviewRequirementHint = "仅预览，不结算；忽略选项条件，不执行 Result/Event。";
@@ -149,6 +155,178 @@ namespace Spotlight.GameFlow
                     title, string.IsNullOrWhiteSpace(page.bgOverride) ? null : Resources.Load<Texture>(page.bgOverride), options));
             }
             return scripts;
+        }
+
+        public static List<CharacterGalleryEntry> ListCharacterGallery(NarrativeConfiguration configuration, string id)
+        {
+            if (configuration == null) throw new ArgumentNullException(nameof(configuration));
+            if (string.IsNullOrWhiteSpace(id)) throw new ArgumentException("A debug dialogue id is required.", nameof(id));
+
+            if (id.StartsWith(OpeningPrefix, StringComparison.Ordinal))
+            {
+                string key = id.Substring(OpeningPrefix.Length);
+                var opening = configuration.openingPresentations?.FirstOrDefault(item => item != null
+                    && string.Equals(item.presentationId, key, StringComparison.Ordinal));
+                if (opening == null || string.IsNullOrWhiteSpace(key)) throw Error(id, "Unknown opening presentation.");
+                var people = new List<CharacterGalleryEntry>
+                {
+                    GalleryObject(configuration, "player", id),
+                    GalleryObject(configuration, "adele", id)
+                };
+                if (!string.IsNullOrWhiteSpace(opening.centerNameKey))
+                {
+                    people.Add(new CharacterGalleryEntry
+                    {
+                        CharacterId = "opening:" + key + ":center",
+                        DisplayName = FindText(configuration, opening.centerNameKey) ?? opening.centerNameKey,
+                        IsOpeningCenter = true
+                    });
+                }
+                return people;
+            }
+
+            if (!id.StartsWith(ConversationPrefix, StringComparison.Ordinal))
+                throw Error(id, "Unknown dialogue source; expected opening:<id> or conversation:<key>.");
+
+            string presentationKey = id.Substring(ConversationPrefix.Length);
+            var presentation = configuration.presentations?.index.FirstOrDefault(item => IsConversation(item)
+                && string.Equals(item.presentationKey, presentationKey, StringComparison.Ordinal));
+            if (presentation == null || string.IsNullOrWhiteSpace(presentationKey))
+                throw Error(id, "Unknown Conversation presentation: " + presentationKey);
+
+            var characterIds = new List<string>();
+            var seen = new HashSet<string>(StringComparer.Ordinal);
+            var pages = GetPages(configuration, presentationKey);
+            var pageIds = new HashSet<string>(pages.Select(page => page.pageId), StringComparer.Ordinal);
+            foreach (var line in (configuration.presentations?.conversationLines ?? Enumerable.Empty<NarrativeConversationLineDefinition>())
+                         .Where(item => item != null && pageIds.Contains(item.pageId)).OrderBy(item =>
+                             pages.FindIndex(page => string.Equals(page.pageId, item.pageId, StringComparison.Ordinal)))
+                         .ThenBy(item => item.seq))
+                AddCharacterId(line.speakerKey, characterIds, seen);
+
+            var eventIds = new HashSet<string>((configuration.events ?? Enumerable.Empty<NarrativeEventDefinition>())
+                .Where(item => item != null && string.Equals(item.presentationKey, presentationKey, StringComparison.Ordinal))
+                .Select(item => item.eventId), StringComparer.Ordinal);
+            foreach (var result in (configuration.results ?? Enumerable.Empty<NarrativeResultDefinition>())
+                         .Where(item => item != null && item.resultType == NarrativeResultType.SpawnNpc && eventIds.Contains(item.eventId))
+                         .OrderBy(item => item.eventId, StringComparer.Ordinal).ThenBy(item => item.seq))
+                AddCharacterId(StripObjectPrefix(result.target), characterIds, seen);
+
+            var entries = new List<CharacterGalleryEntry>(characterIds.Count);
+            foreach (string characterId in characterIds)
+            {
+                CharacterGalleryEntry entry = GalleryObject(configuration, characterId, id);
+                if (entry != null) entries.Add(entry);
+            }
+            if (entries.Count == 0) throw Error(id, "No character speakers or spawned NPCs were found.");
+            return entries;
+        }
+
+        public static DialogueScript CreateCharacterGallery(NarrativeConfiguration configuration, string id)
+        {
+            List<CharacterGalleryEntry> people = ListCharacterGallery(configuration, id);
+            DialogueVisualsAsset openingVisuals = null;
+            if (id.StartsWith(OpeningPrefix, StringComparison.Ordinal))
+            {
+                string key = id.Substring(OpeningPrefix.Length);
+                var opening = configuration.openingPresentations.First(item => item != null && item.presentationId == key);
+                openingVisuals = string.IsNullOrWhiteSpace(opening.visualsResource)
+                    ? null : Resources.Load<DialogueVisualsAsset>(opening.visualsResource);
+                if (openingVisuals == null) throw Error(id, "Missing opening visuals resource: " + opening.visualsResource);
+            }
+
+            string title = GalleryTitle(configuration, id);
+            var lines = new List<DialogueLine>(people.Count);
+            for (int i = 0; i < people.Count; i++)
+            {
+                CharacterGalleryEntry person = people[i];
+                Sprite portrait = person.IsOpeningCenter
+                    ? openingVisuals.CenterPortrait
+                    : openingVisuals != null && string.Equals(person.CharacterId, "player", StringComparison.Ordinal)
+                        ? openingVisuals.LeftPortrait
+                        : openingVisuals != null && string.Equals(person.CharacterId, "adele", StringComparison.Ordinal)
+                            ? openingVisuals.RightPortrait
+                            : LoadGallerySprite(string.IsNullOrWhiteSpace(person.PortraitPath) ? person.AvatarPath : person.PortraitPath, id, person.CharacterId);
+                Sprite scenePortrait = person.IsNpc && !string.IsNullOrWhiteSpace(person.ScenePortraitPath)
+                    ? LoadGallerySprite(person.ScenePortraitPath, id, person.CharacterId)
+                    : null;
+                bool showScenePortrait = scenePortrait != null && !ReferenceEquals(scenePortrait, portrait);
+                var left = new DialogueCharacter(person.CharacterId, person.DisplayName, portrait);
+                var right = showScenePortrait
+                    ? new DialogueCharacter(person.CharacterId + "#scene-preview", person.DisplayName + " · 场景", scenePortrait)
+                    : null;
+
+                string artDescription = person.UsesAvatarFallback
+                    ? "当前未配置对话立绘，左侧显示头像素材。"
+                    : portrait == null ? "尚未配置可用立绘。" : "左侧显示对话立绘。";
+                if (person.IsNpc)
+                    artDescription += showScenePortrait ? "右侧显示 NPC 在对话场景中的形象。"
+                        : person.ScenePortraitPath == person.PortraitPath ? "场景形象与对话立绘共用素材。"
+                        : "未配置独立 NPC 场景形象。";
+                artDescription += "点击继续查看下一位。";
+                lines.Add(new DialogueLine(DialogueSpeaker.Left,
+                    (i + 1) + " / " + people.Count + "　" + person.DisplayName + "\n" + artDescription,
+                    speakerNameOverride: person.DisplayName, replaceLeft: true, leftCharacter: left,
+                    replaceRight: true, rightCharacter: right));
+            }
+
+            return new DialogueScript(lines, new DialogueCharacter("", null), new DialogueCharacter("", null),
+                title: title);
+        }
+
+        private static CharacterGalleryEntry GalleryObject(NarrativeConfiguration configuration, string id, string context)
+        {
+            NarrativeObjectDefinition character = configuration.objects?.FirstOrDefault(item => item != null
+                && string.Equals(item.objId, id, StringComparison.Ordinal));
+            if (character == null) throw Error(context, "Missing speaker Object: " + id);
+            if (character.objType == NarrativeObjectType.World) return null;
+            string name = FindText(configuration, character.nameText);
+            return new CharacterGalleryEntry
+            {
+                CharacterId = character.objId,
+                DisplayName = string.IsNullOrWhiteSpace(name) ? character.objId : name,
+                PortraitPath = string.IsNullOrWhiteSpace(character.portraitPath) ? character.iconPath : character.portraitPath,
+                AvatarPath = string.IsNullOrWhiteSpace(character.avtarPath) ? character.iconPath : character.avtarPath,
+                ScenePortraitPath = character.portraitIndoorPath,
+                IsNpc = character.objType == NarrativeObjectType.Npc,
+                UsesAvatarFallback = string.IsNullOrWhiteSpace(character.portraitPath)
+                    && (!string.IsNullOrWhiteSpace(character.avtarPath) || !string.IsNullOrWhiteSpace(character.iconPath))
+            };
+        }
+
+        private static void AddCharacterId(string id, List<string> result, HashSet<string> seen)
+        {
+            if (string.IsNullOrWhiteSpace(id)) return;
+            if (seen.Add(id)) result.Add(id);
+        }
+
+        private static string StripObjectPrefix(string value)
+        {
+            const string prefix = "obj:";
+            return !string.IsNullOrWhiteSpace(value) && value.StartsWith(prefix, StringComparison.OrdinalIgnoreCase)
+                ? value.Substring(prefix.Length).Trim() : value;
+        }
+
+        private static Sprite LoadGallerySprite(string path, string presentationId, string characterId)
+        {
+            if (string.IsNullOrWhiteSpace(path)) return null;
+            Sprite sprite = Resources.Load<Sprite>(path);
+            if (sprite == null) throw Error(presentationId, "Missing character Sprite for " + characterId + ": " + path);
+            return sprite;
+        }
+
+        private static string GalleryTitle(NarrativeConfiguration configuration, string id)
+        {
+            if (id.StartsWith(OpeningPrefix, StringComparison.Ordinal))
+            {
+                var opening = configuration.openingPresentations.First(item => item != null
+                    && item.presentationId == id.Substring(OpeningPrefix.Length));
+                return "人物巡览 · " + (FindText(configuration, opening.titleKey) ?? opening.presentationId);
+            }
+            string key = id.Substring(ConversationPrefix.Length);
+            var presentation = configuration.presentations.index.First(item => IsConversation(item)
+                && item.presentationKey == key);
+            return "人物巡览 · " + ConversationTitle(configuration, presentation);
         }
 
         private static bool IsConversation(NarrativePresentationIndexDefinition item)

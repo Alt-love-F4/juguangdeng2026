@@ -134,9 +134,17 @@ namespace Spotlight.FreeCafe
             if (entity.specId != "customer") return null;
             if (entity.person == null) return visitSprite != null ? visitSprite : silhouetteCustomer;
             if (entity.person.personId == AcceptancePersonId || entity.person.visualId == "supplied.seated.guest") return suppliedCustomer;
+            if (IsOrdinaryRandomGuest(entity.person)) return silhouetteCustomer;
             foreach (var entry in characterArt)
                 if (entry != null && entry.characterId == entity.person.characterId && entry.sprite != null) return entry.sprite;
             return visitSprite != null ? visitSprite : silhouetteCustomer;
+        }
+
+        private static bool IsOrdinaryRandomGuest(CafePersonIdentity person)
+        {
+            if (person == null || !string.IsNullOrEmpty(person.narrativeCharacterId)) return false;
+            return person.characterId == "guest_a" || person.characterId == "guest_b"
+                || person.characterId == "guest_c" || person.characterId == "guest_d";
         }
 
         public Vector3 ArtworkScale(float perspectiveScale)

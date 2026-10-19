@@ -26,6 +26,52 @@ SPEAKERS={'{playername}':'player','阿黛尔':'adele','麻雀':'sparrow','柯莱
 NODE=re.compile(r'^[A-Z]+-(?:R)?\d{2}$')
 
 def day(month:int, d:int): return (date(2000,month,d)-date(2000,10,6)).days+1
+DATE_CONSTRAINT = re.compile(r'(?P<kind>窗口|排除|避开|不在)\s*[:：]?\s*(?P<m1>10|11)月(?P<d1>\d{1,2})日?\s*(?:[—–-]\s*(?:(?P<m2>10|11)月)?(?P<d2>\d{1,2})日?)?')
+DATE_TOKEN = re.compile(r'(?P<month>10|11)月(?P<day>\d{1,2})日?')
+ISSUE_DAYS = {'一':'1007','二':'1014','三':'1021','四':'1028','五':'1104','六':'1111'}
+SOURCE_PATH = '策划文件/文案6点/文案/b-地图事件-日常/日常对话_报纸联动修订版_20261019.xlsx'
+SOURCE_SHA256 = '026d6dd5684aee7f1be92ceabd66eaa970453a5a9e564ca4b08c8e1a5925e7dd'
+
+def date_rules(constraint):
+ windows=[]; exclusions=[]; consumed=[]
+ for match in DATE_CONSTRAINT.finditer(constraint):
+  kind=match.group('kind'); m1=int(match.group('m1')); d1=int(match.group('d1'))
+  m2=int(match.group('m2') or m1); d2=int(match.group('d2') or d1)
+  (windows if kind=='窗口' else exclusions).append((day(m1,d1),day(m2,d2)))
+  consumed.append(match.span())
+ earliest=[]
+ for match in DATE_TOKEN.finditer(constraint):
+  if any(start <= match.start() < end for start,end in consumed): continue
+  earliest.append(day(int(match.group('month')),int(match.group('day'))))
+ return windows,exclusions,max(earliest) if earliest else None
+
+def available_date_ranges(start,end,excluded):
+ ranges=[(start,end)]
+ for lower,upper in sorted(excluded):
+  next_ranges=[]
+  for left,right in ranges:
+   if upper < left or lower > right:
+    next_ranges.append((left,right));continue
+   if left < lower: next_ranges.append((left,lower-1))
+   if upper < right: next_ranges.append((upper+1,right))
+  ranges=next_ranges
+ return ranges
+
+def add_date_window(data,condition,root,segments):
+ if not segments: return
+ if len(segments)==1:
+  condition(root,'BAR_BETWEEN','world.calendar',f'{segments[0][0]},{segments[0][1]}')
+  return
+ existing=[row for row in data['Condition'] if row['ownerType']=='event' and row['ownerId']==root]
+ existing_ids={id(row) for row in existing}
+ data['Condition']=[row for row in data['Condition'] if id(row) not in existing_ids]
+ for group,(start,end) in enumerate(segments,1):
+  for index,row in enumerate(existing,1):
+   copied=dict(row);copied['groupIndex']=group
+   copied['conditionId']=f'{root}.event.window.{group}.cond.{index}'
+   data['Condition'].append(copied)
+  condition(root,'BAR_BETWEEN','world.calendar',f'{start},{end}',group=group)
+
 def root_id(code:str):return 'daily.'+code.lower().replace('-','.')
 def read_doc(p):
  with ZipFile(p) as z: xml=ET.fromstring(z.read('word/document.xml'))
@@ -33,7 +79,7 @@ def read_doc(p):
  return [''.join((n.text or '') if n.tag==ns+'t' else '\n' if n.tag in [ns+'br',ns+'cr'] else '' for n in e.iter()).strip() for e in xml.iter(ns+'p') if ''.join(e.itertext()).strip()]
 
 def build(project_root:Path):
- data=defaultdict(list); seen=set(); audit={'source':'策划文件/文案/b-地图事件-日常/日常对话_270组.xlsx','groups':[],'presets':['normal growth <10:2 tenths, otherwise1 tenth; authoring draft rule','character/route/weather gates fail closed until truthful producers exist'],'art_pending':['city hall/court/garden/academy use registered general street artwork pending dedicated backgrounds']}
+ data=defaultdict(list); seen=set(); audit={'source':SOURCE_PATH,'groups':[],'presets':['normal growth <10:2 tenths, otherwise1 tenth; authoring draft rule','character/route/weather gates fail closed until truthful producers exist'],'art_pending':['city hall/court/garden/academy use registered general street artwork pending dedicated backgrounds']}
  def add(sheet,**row):data[sheet].append(row);return row
  def text(key,value,comment=''):
   if key not in seen:add('Text',key=key,text=value,comment=comment);seen.add(key)
@@ -53,14 +99,16 @@ def build(project_root:Path):
  def line(root,pid,i,speaker,body,guard=None,text_key=None):
   if speaker and speaker not in SPEAKERS:raise ValueError(f'Unmapped daily speaker {speaker!r} in {root}')
   sid=SPEAKERS.get(speaker);key=text(text_key or root+f'.text.{i:03}',body)
+  if sid=='daily.actor.church_helper' and not any(row['objId']==sid for row in data['Object']):
+   add('Object',objId=sid,objType='npc',nameText=text(sid+'.name','教会帮工'))
   add('ConversationLine',lineId=root+f'.line.{i:03}',pageId=pid,seq=i,speakerKey=sid,side='left' if sid=='player'else'right' if sid else'none',textKey=key,speakerNameKey=text(root+'.speaker.'+str(i),speaker)if speaker and speaker not in ['玩家选择','入场','动作']else None)
  def training(root,attr):
   for amount,op in [(2,'lt'),(1,'ge')]:
    r=result(root,'TRAIN_ATTRIBUTE','player.'+attr,amount,'training.'+op)
    condition(r['resultId'],'BOOL_EQ',f'bar:player.{attr}:{op}:10',True,owner_type='result')
- # A source-named generic actor is not a portrait-bearing named cast member.
- add('Object',objId='daily.actor.church_helper',objType='npc',nameText=text('daily.actor.church_helper.name','教会帮工'))
- source=project_root/audit['source'];wb=openpyxl.load_workbook(source,read_only=True,data_only=True)
+ source=project_root/audit['source'];digest=sha256(source.read_bytes()).hexdigest()
+ if digest!=SOURCE_SHA256:raise ValueError(f'Daily source changed; re-audit IDs and triggers: {audit["source"]}; sha256={digest}')
+ wb=openpyxl.load_workbook(source,read_only=True,data_only=True)
  groups=[]
  for sheet in wb:
   cur=None
@@ -69,7 +117,7 @@ def build(project_root:Path):
    if NODE.fullmatch(row[0]):
     cur={'code':row[0],'kind':row[1],'title':row[2],'sheet':sheet.title,'rows':[]};groups.append(cur)
    elif cur:cur['rows'].append(row)
- wb.close();audit['sha256']=sha256(source.read_bytes()).hexdigest()
+ wb.close();audit['sha256']=digest
  assert len(groups)==270,len(groups)
  public_notices={}
  for g in groups:
@@ -84,10 +132,12 @@ def build(project_root:Path):
   loc=category
   if category=='首次到访':loc=g['title']
   if category=='新闻反应':loc=next((l for l in LOCATION if l in g['title']),None)
+  if loc=='圣卷大教堂':loc='圣地大教堂'  # Source rename; keep the existing map location/provider.
   if loc not in LOCATION:raise ValueError((code,loc))
   pos,attr,bg,actiontitle=LOCATION[loc];pool='daily.action.'+pos
   is_visit=category=='首次到访';is_news=category=='新闻反应';has_choices=kind=='选择事件'
   pkind='visit'if is_visit else'news'if is_news else'ordinary'
+  date_windows,excluded_dates,earliest_date=date_rules(constraint)
   root(rid,g['title'],is_visit or is_news or has_choices,'Conversation',f'dailyPool={pool};dailyKind={pkind}')
   condition(rid,'BOOL_EQ','world.map.active',True)
   condition(rid,'BOOL_EQ','church.detention.active',False)
@@ -95,17 +145,19 @@ def build(project_root:Path):
   for prior in re.findall(r'([A-Z]+-(?:R)?\d{2})后',constraint):
    if prior.startswith('VISIT-'):continue # Pool guarantees intro precedes the ordinary root in one action.
    condition(rid,'BOOL_EQ','story.'+root_id(prior)+'.completed',True)
-  dates=re.findall(r'(10|11)月(\d{1,2})日',constraint)
-  if dates:
-   first=max(day(int(m),int(d))for m,d in dates);condition(rid,'BAR_GTE','world.calendar',first)
   if is_news:
+   if len(date_windows)!=1:raise ValueError(f'News root must have one explicit source window: {code}: {constraint}')
    m=re.search(r'(10|11)月(\d{1,2})日',g['title']);assert m,g
-   when=day(int(m[1]),int(m[2]));condition(rid,'BAR_BETWEEN','world.calendar',f'{when},{when}')
-   if '仪式' in g['title']:public='story.church.1009.s2.completed'
+   when=day(int(m[1]),int(m[2]))
+   if '仪式' in g['title']:
+    condition(rid,'BOOL_EQ','story.church.1009.s2.completed',False)
    else:
     headline=g['title'].split('｜')[1];public='news.public.'+str(when)+'.'+sha256(headline.encode()).hexdigest()[:8]
     public_notices[(when,headline)]=public
-   condition(rid,'BOOL_EQ',public,True)
+    condition(rid,'BOOL_EQ',public,True)
+   issue=re.search(r'第([一二三四五六])期报纸已展示',constraint)
+   if issue:condition(rid,'BOOL_EQ','story.newspaper.'+ISSUE_DAYS[issue.group(1)]+'.completed',True)
+   if code=='NEWS-11':condition(rid,'BOOL_EQ','story.daily.old.02.completed',True)
   # First-visit source dependencies apply to all variants, even if omitted in shorthand rows.
   base_known={'旧城区':['sparrow'],'圣徒街':['pascal'],'圣西尔万郊区':['sparrow','eugene'],'大堂区':['colette'],'圣地大教堂':['sade'],'灰墙学院':['sylvain'],'市政厅':['adele'],'首都法院':['eugene'],'花园区':['sorel']}[loc]
   for known in base_known:condition(rid,'BOOL_EQ','known.'+known,True)
@@ -120,6 +172,16 @@ def build(project_root:Path):
   # Explicit character availability is separate from having met the character.
   if any(r[1]=='西尔万'for r in rows)or'西尔万可出场'in constraint:condition(rid,'BOOL_EQ','availability.sylvain',True)
   if any(r[1]=='阿黛尔'for r in rows):condition(rid,'BOOL_EQ','availability.adele',True)
+  if is_news:
+   segments=available_date_ranges(*date_windows[0],excluded_dates)
+   if not segments:raise ValueError(f'News root has no dates after exclusions: {code}: {constraint}')
+   add_date_window(data,condition,rid,segments)
+  elif excluded_dates:
+   segments=available_date_ranges(max(2,earliest_date or 2),day(11,22),excluded_dates)
+   if not segments:raise ValueError(f'Daily root has no dates after exclusions: {code}: {constraint}')
+   add_date_window(data,condition,rid,segments)
+  elif earliest_date:
+   condition(rid,'BAR_GTE','world.calendar',earliest_date)
   if not is_visit:training(rid,attr)
   if has_choices:
    pg=rid+'.opening';group=rid+'.choices';add('ConversationPage',pageId=pg,presentationKey=rid+'.presentation',seq=1,bgOverride=bg,optionGroupKey=group)
@@ -146,7 +208,7 @@ def build(project_root:Path):
     if not body:continue
     speaker=''if r[0]in ['入场','动作']else r[1]
     line(rid,pid,i,speaker,body,text_key=rid+'.text.'+str(i))
-  audit['groups'].append({'code':code,'root':rid,'location':loc,'kind':pkind,'constraints':constraint})
+  audit['groups'].append({'code':code,'root':rid,'location':loc,'kind':pkind,'constraints':constraint,'availabilityWindows':segments if is_news or excluded_dates else []})
  # Mount one existing Repeat action per location, not 24 competing map buttons.
  for loc,(pos,attr,bg,title)in LOCATION.items():
   aid='daily.action.'+pos;targets=[r['eventId']for r in data['Event']if f'dailyPool={aid};'in r['eventProperty']]
@@ -166,7 +228,7 @@ def build(project_root:Path):
   result(rid,'SET_FLAG',public,True,'public');flag(public)
  # Six complete newspaper texts, faithfully sourced and date-triggered in the existing reader.
  papers=[]
- for source in sorted((project_root/'策划文件/文案/b-报纸事件-换皮').glob('*.docx')):
+ for source in sorted((project_root/'策划文件/文案6点/文案/b-报纸事件-换皮').glob('*.docx')):
   pars=[p for p in read_doc(source)if p];joined='\n'.join(pars);m=re.search(r'670年\s*(10|11)月\s*(\d{1,2})日',joined);assert m,source
   when=day(int(m[1]),int(m[2]));rid=f'newspaper.{m[1]}{int(m[2]):02d}';root(rid,pars[0],True,'Reading')
   data['Event'][-1]['eventProperty']='entry=MorningBeforeMap;blocksSave=true'

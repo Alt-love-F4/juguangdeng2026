@@ -243,6 +243,14 @@ namespace Spotlight.GameFlow.Tests
             Assert.That(result.CurrentEndingId, Is.EqualTo(ending.endingId));
             Assert.That(result.DisplayedTitle, Is.Not.Null.And.Not.Empty);
             Assert.That(result.DisplayedMessage, Is.Not.Null.And.Not.Empty);
+            for (int guard=0;guard<100;guard++)
+            {
+                yield return null;
+                if (!result.EndingDialogue.IsSettlementTyping && result.EndingDialogue.IsSettlementLastPage) break;
+                result.ConfirmResult();
+                Assert.That(guard,Is.LessThan(99),"Ending text should reach the final page.");
+            }
+            yield return null;
             result.ConfirmResult(); result.ConfirmResult();
             yield return FinishAndRelease();
             Assert.That(Time.timeScale, Is.Zero);

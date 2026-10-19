@@ -10,7 +10,7 @@ from typing import Any
 from zipfile import ZipFile
 import xml.etree.ElementTree as ET
 
-SOURCE_DIR = Path("策划文件/文案/a-中立（共通+支线）")
+SOURCE_DIR = Path("策划文件/文案6点/文案/a-中立（共通+支线）")
 # Current repository snapshots, NOT old desktop/source-map paragraph numbering.
 BASELINES = {
  "1007.s1": (48, "323d0c6bf2efdccbad65ccc303e2237e7f87e5e4112d521bab9e7bd289b3fbac"),

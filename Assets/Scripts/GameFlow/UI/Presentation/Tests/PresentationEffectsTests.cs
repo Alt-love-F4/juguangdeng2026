@@ -155,11 +155,143 @@ namespace Spotlight.GameFlow.Tests
             panel.Advance(); yield return null; panel.Advance();
             Assert.That(panel.IsReady, Is.False);
             yield return new WaitForSecondsRealtime(.85f);
-            Assert.That(panel.RightCharacter, Is.SameAs(replacement));
-            Assert.That(panel.RightPortrait.sprite, Is.SameAs(replacement.Portrait));
+            Assert.That(panel.CenterCharacter, Is.SameAs(replacement));
+            Assert.That(panel.CenterPortrait.sprite, Is.SameAs(replacement.Portrait));
             Assert.That(panel.LineIndex, Is.EqualTo(1));
             Assert.That(panel.IsReady, Is.True);
         }
+
+        [UnityTest]
+        public IEnumerator NewSpeakersFillEmptyPortraitSlotsAndKeepTheirAssignedPosition()
+        {
+            var visuals = Resources.Load<DialogueVisualsAsset>("Dialogue/DialoguePreview");
+            var player = NarrativeCharacterResolver.CreatePreviewCharacter("player", visuals.LeftPortrait);
+            var firstVisitor = NarrativeCharacterResolver.CreatePreviewCharacter("adele", visuals.RightPortrait);
+            var secondVisitor = NarrativeCharacterResolver.CreatePreviewCharacter("sylvain", visuals.CenterPortrait);
+            var fourthVisitor = NarrativeCharacterResolver.CreatePreviewCharacter("colette", visuals.CenterPortrait);
+            panel.Play(new DialogueScript(new[]
+            {
+                new DialogueLine(DialogueSpeaker.Left, "我在这里。", replaceLeft: true, leftCharacter: player),
+                new DialogueLine(DialogueSpeaker.Right, "第一位来客。", replaceRight: true, rightCharacter: firstVisitor),
+                new DialogueLine(DialogueSpeaker.Right, "第二位来客。", replaceRight: true, rightCharacter: secondVisitor),
+                new DialogueLine(DialogueSpeaker.Right, "第二位来客继续说话。", replaceRight: true,
+                    rightCharacter: new DialogueCharacter(secondVisitor.CharacterKey, secondVisitor.DisplayName, null, false)),
+                new DialogueLine(DialogueSpeaker.Right, "三人都在场后按原侧替换。", replaceRight: true, rightCharacter: fourthVisitor)
+            }, new DialogueCharacter("", null), new DialogueCharacter("", null), isPreview: true));
+            panel.SetPreviewReading(0f, typewriter: false);
+            yield return Ready();
+            Assert.That(panel.LeftCharacter, Is.SameAs(player));
+            Assert.That(panel.LeftPortrait.enabled, Is.True);
+
+            yield return AdvanceToLine(1);
+            Assert.That(panel.RightCharacter, Is.SameAs(firstVisitor));
+            Assert.That(panel.RightPortrait.enabled, Is.True);
+
+            yield return AdvanceToLine(2);
+            Assert.That(panel.CenterCharacter, Is.SameAs(secondVisitor));
+            Assert.That(panel.RightCharacter, Is.SameAs(firstVisitor));
+            Assert.That(panel.CenterPortrait.enabled, Is.True);
+            Assert.That(panel.CenterPortrait.sprite, Is.SameAs(secondVisitor.Portrait));
+
+            yield return AdvanceToLine(3);
+            Assert.That(panel.CenterCharacter.CharacterKey, Is.EqualTo(secondVisitor.CharacterKey));
+            Assert.That(panel.RightCharacter, Is.SameAs(firstVisitor));
+
+            yield return AdvanceToLine(4);
+            Assert.That(panel.RightCharacter, Is.SameAs(fourthVisitor));
+            Assert.That(panel.CenterCharacter.CharacterKey, Is.EqualTo(secondVisitor.CharacterKey));
+            Assert.That(panel.LeftCharacter, Is.SameAs(player));
+        }
+
+        [UnityTest]
+        public IEnumerator DuplicateInitialCharactersKeepTheSpeakingSlotOnly()
+        {
+            var visuals = Resources.Load<DialogueVisualsAsset>("Dialogue/DialoguePreview");
+            var leftCopy = NarrativeCharacterResolver.CreatePreviewCharacter("adele", visuals.LeftPortrait);
+            var rightCopy = NarrativeCharacterResolver.CreatePreviewCharacter("adele", visuals.RightPortrait);
+            panel.Play(new DialogueScript(new[] { new DialogueLine(DialogueSpeaker.Right, "阿黛尔发言。") },
+                leftCopy, rightCopy, isPreview: true));
+            panel.SetPreviewReading(0f, typewriter: false);
+            yield return Ready();
+
+            Assert.That(panel.LeftPortrait.enabled, Is.False);
+            Assert.That(panel.RightPortrait.enabled, Is.True);
+            Assert.That(panel.RightPortrait.sprite, Is.SameAs(rightCopy.Portrait));
+            Assert.That(panel.LeftCharacter, Is.Null);
+            Assert.That(panel.RightCharacter.CharacterKey, Is.EqualTo("adele"));
+        }
+
+        [UnityTest]
+        public IEnumerator DuplicateGuestInThreePortraitStageLeavesPlayerAndOneGuest()
+        {
+            var visuals = Resources.Load<DialogueVisualsAsset>("Dialogue/DialoguePreview");
+            var player = NarrativeCharacterResolver.CreatePreviewCharacter("player", visuals.LeftPortrait);
+            var rightGuest = NarrativeCharacterResolver.CreatePreviewCharacter("adele", visuals.RightPortrait);
+            var centerGuest = NarrativeCharacterResolver.CreatePreviewCharacter("adele", visuals.CenterPortrait);
+            panel.Play(new DialogueScript(new[] { new DialogueLine(DialogueSpeaker.Narrator, "三人在场。") },
+                player, rightGuest, centerCharacter: centerGuest, isPreview: true));
+            panel.SetPreviewReading(0f, typewriter: false);
+            yield return Ready();
+
+            Assert.That(panel.LeftCharacter, Is.SameAs(player));
+            Assert.That(panel.RightCharacter.CharacterKey, Is.EqualTo("adele"));
+            Assert.That(panel.CenterCharacter, Is.Null);
+            Assert.That(panel.LeftPortrait.enabled, Is.True);
+            Assert.That(panel.RightPortrait.enabled, Is.True);
+            Assert.That(panel.CenterPortrait.enabled, Is.False);
+        }
+
+        [UnityTest]
+        public IEnumerator DuplicateCharactersReplacedOnTwoSlotsKeepTheSpeakingSlot()
+        {
+            var visuals = Resources.Load<DialogueVisualsAsset>("Dialogue/DialoguePreview");
+            var player = NarrativeCharacterResolver.CreatePreviewCharacter("player", visuals.LeftPortrait);
+            var rightGuest = NarrativeCharacterResolver.CreatePreviewCharacter("adele", visuals.RightPortrait);
+            var centerGuest = NarrativeCharacterResolver.CreatePreviewCharacter("adele", visuals.CenterPortrait);
+            panel.Play(new DialogueScript(new[]
+            {
+                new DialogueLine(DialogueSpeaker.Center, "阿黛尔来到中间。", replaceRight: true,
+                    rightCharacter: rightGuest, replaceCenter: true, centerCharacter: centerGuest)
+            }, player, new DialogueCharacter("", null), isPreview: true));
+            panel.SetPreviewReading(0f, typewriter: false);
+            yield return Ready();
+
+            Assert.That(panel.LeftPortrait.enabled, Is.True);
+            Assert.That(panel.RightPortrait.enabled, Is.False);
+            Assert.That(panel.CenterPortrait.enabled, Is.True);
+            Assert.That(panel.CenterCharacter.CharacterKey, Is.EqualTo("adele"));
+            Assert.That(panel.CenterPortrait.sprite, Is.SameAs(centerGuest.Portrait));
+        }
+
+        [UnityTest]
+        public IEnumerator DifferentCharacterKeysWithSameDisplayNameRemainSeparate()
+        {
+            var visuals = Resources.Load<DialogueVisualsAsset>("Dialogue/DialoguePreview");
+            var first = new DialogueCharacter("adele", "阿黛尔", visuals.LeftPortrait);
+            var second = new DialogueCharacter("guest_alias", "阿黛尔", visuals.RightPortrait);
+            panel.Play(new DialogueScript(new[] { new DialogueLine(DialogueSpeaker.Narrator, "同名角色。") },
+                first, second, isPreview: true));
+            panel.SetPreviewReading(0f, typewriter: false);
+            yield return Ready();
+
+            Assert.That(panel.LeftPortrait.enabled, Is.True);
+            Assert.That(panel.RightPortrait.enabled, Is.True);
+            Assert.That(panel.LeftCharacter.CharacterKey, Is.EqualTo("adele"));
+            Assert.That(panel.RightCharacter.CharacterKey, Is.EqualTo("guest_alias"));
+        }
+
+        private IEnumerator AdvanceToLine(int targetLine)
+        {
+            float deadline = Time.realtimeSinceStartup + 5f;
+            while (panel.LineIndex < targetLine)
+            {
+                Assert.That(Time.realtimeSinceStartup, Is.LessThan(deadline));
+                if (panel.IsReady) panel.Advance();
+                yield return null;
+            }
+            yield return Ready();
+        }
+
         [UnityTest]
         public IEnumerator LineAccentUsesNcsTargetKeyAndDoesNotDependOnSpeakerSlot()
         {

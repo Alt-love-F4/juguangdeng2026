@@ -13,7 +13,7 @@ from xml.etree import ElementTree as ET
 from zipfile import ZipFile
 
 W = {'w': 'http://schemas.openxmlformats.org/wordprocessingml/2006/main'}
-SOURCE_DIR = Path('策划文件/文案/a-新玫瑰（共通+支线）')
+SOURCE_DIR = Path('策划文件/文案6点/文案/a-新玫瑰（共通+支线）')
 ROSE1011_WISDOM = 3  # existing user-confirmed configure_rose_1011_full.py
 ROSE1011_ORDER = 'blackcoffee'  # 2026-10-19 integration actual-product preset
 QUALITY = {'normal': 60, 'excellent': 90}  # tunable CONTRACT presets, not author numbers

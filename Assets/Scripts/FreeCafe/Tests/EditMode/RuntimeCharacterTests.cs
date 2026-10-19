@@ -132,11 +132,20 @@ namespace Spotlight.FreeCafe.Tests
             Assert.That(a.characterId, Is.EqualTo(b.characterId), "Generic art may be reused");
             Assert.That(a.characterId, Does.StartWith("guest_"));
             Assert.That(a.narrativeCharacterId, Is.Null.Or.Empty);
+            var repeat=source.CreateIdentity("order_1",0);
+            Assert.That(repeat.portraitVariantPath,Is.EqualTo(a.portraitVariantPath));
+            Assert.That(repeat.avatarVariantPath,Is.EqualTo(a.avatarVariantPath));
             var next=source.CreateIdentity("order_3",0,new System.Collections.Generic.HashSet<string>{a.personId});
             Assert.That(next.personId, Is.Not.EqualTo(a.personId));
             var data=JsonUtility.FromJson<CafeCatalog>(Resources.Load<TextAsset>("FreeCafe/catalog").text);
             var world=new CafeWorld(data,source);
             world.StartDay();
+            var savedVariants=new System.Collections.Generic.Dictionary<string,string[]>();
+            foreach(var request in world.State.requests)
+            {
+                var person=world.Find(request.customerId).person;
+                savedVariants[person.personId]=new[]{person.portraitVariantPath,person.avatarVariantPath};
+            }
             var saved=JsonUtility.FromJson<CafeSnapshot>(JsonUtility.ToJson(world.State));
             Assert.That(world.Restore(saved).success,Is.True);
             foreach(var request in world.State.requests)
@@ -148,7 +157,49 @@ namespace Spotlight.FreeCafe.Tests
                 Assert.That(profile,Is.Not.Null);
                 Assert.That(profile.worldSprite,Is.Not.Null);
                 Assert.That(profile.portrait,Is.Not.Null);
+                var paths=savedVariants[person.personId];
+                Assert.That(person.portraitVariantPath ?? string.Empty,Is.EqualTo(paths[0] ?? string.Empty));
+                Assert.That(person.avatarVariantPath ?? string.Empty,Is.EqualTo(paths[1] ?? string.Empty));
             }
+        }
+
+        [Test]
+        public void VariantChoiceUsesStableVisitHashAndCanVaryAcrossVisits()
+        {
+            int[] candidates={1,2,3,4};
+            var selected=new System.Collections.Generic.HashSet<int>();
+            for(int i=0;i<64;i++)
+            {
+                string visitId="visit_"+i;
+                int variant=CafeCustomerVisualVariants.SelectVariantIndex(visitId,candidates);
+                Assert.That(variant,Is.EqualTo(CafeCustomerVisualVariants.SelectVariantIndex(visitId,candidates)));
+                selected.Add(variant);
+            }
+            Assert.That(selected.Count,Is.GreaterThan(1));
+            Assert.That(CafeCustomerVisualVariants.PortraitVariantPath("guest_c",3),
+                Is.EqualTo("Characters/guest_c/variants/portrait_03"));
+            Assert.That(CafeCustomerVisualVariants.AvatarVariantPath("guest_c",3),
+                Is.EqualTo("Characters/guest_c/variants/avatar_03"));
+        }
+
+        [Test]
+        public void MissingOrLegacyVariantPathsFallBackToObjectPortraitAndAvatar()
+        {
+            var catalog=CharacterCatalog.LoadFromTables();
+            try
+            {
+                var profile=catalog.Find("guest_a");
+                var legacy=new CafePersonIdentity { characterId="guest_a" };
+                Assert.That(CafeCustomerVisualVariants.ResolvePortrait(legacy,profile),Is.SameAs(profile.portrait));
+                Assert.That(CafeCustomerVisualVariants.ResolveAvatar(legacy,profile),Is.SameAs(profile.avatar));
+
+                var missing=new CafePersonIdentity { characterId="guest_a",
+                    portraitVariantPath="Characters/guest_a/variants/portrait_99",
+                    avatarVariantPath="Characters/guest_a/variants/avatar_99" };
+                Assert.That(CafeCustomerVisualVariants.ResolvePortrait(missing,profile),Is.SameAs(profile.portrait));
+                Assert.That(CafeCustomerVisualVariants.ResolveAvatar(missing,profile),Is.SameAs(profile.avatar));
+            }
+            finally { Object.DestroyImmediate(catalog); }
         }
     }
 }
