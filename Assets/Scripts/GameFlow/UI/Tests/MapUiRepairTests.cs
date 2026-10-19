@@ -163,6 +163,43 @@ namespace Spotlight.GameFlow.Tests
         }
 
         [Test]
+        public void CachedMapBadgesRefreshWhileHiddenAndRecoverOnReopen()
+        {
+            var config = new NarrativeConfiguration();
+            config.events.Add(new NarrativeEventDefinition { eventId = "important-story" });
+            config.actions.Add(new NarrativeActionDefinition { actionKey = "important", mustExecute = true,
+                type = NarrativeActionType.Once,
+                resultEvents = new System.Collections.Generic.List<string> { "important-story" } });
+            runtime.Initialize(config, new ImmediatePresenter());
+            runtime.Actions.RefreshForDay(2);
+            runtime.Actions.Mount("cafe", "important");
+            var mapRoot = Create("CachedMap", root.transform);
+            var mapType = UiType("Spotlight.GameFlow.MapSceneController");
+            var map = mapRoot.AddComponent(mapType);
+            var location = Create("Location:cafe", mapRoot.transform);
+            var button = location.AddComponent(UiType("UnityEngine.UI.Button"));
+            var buttons = (System.Collections.IDictionary)mapType.GetField("locationButtons", PrivateInstance).GetValue(map);
+            buttons.Add("cafe", button);
+            Invoke(map, "BindNewContentDot", button, "cafe");
+            Invoke(map, "SubscribePositionEffects");
+            var dotRoot = location.transform.Find("NewActionDot").gameObject;
+            Assert.That(mapRoot.activeInHierarchy, Is.False, "Cached maps remain hidden between visits.");
+            Assert.That(dotRoot.activeSelf, Is.True, "A hidden ancestor must not erase unread badge state.");
+
+            runtime.Actions.ConfirmActionDisplayed("cafe", runtime.Actions.GetActionInstanceKey("cafe", "important"));
+            Assert.That(dotRoot.activeSelf, Is.False);
+            runtime.Actions.Mount("cafe", "important", "next-instance");
+            Assert.That(dotRoot.activeSelf, Is.True, "Content notifications must update the cached map while hidden.");
+
+            dotRoot.SetActive(false); // A stale presentation must recover without a new content signature.
+            Invoke(map, "OnEnable");
+            Assert.That(dotRoot.activeSelf, Is.True);
+            location.SetActive(false);
+            Invoke(map, "OnEnable");
+            Assert.That(dotRoot.activeSelf, Is.False, "Explicitly hidden locations do not have badges.");
+        }
+
+        [Test]
         public void NewActionDotSurvivesMaskClippingAndCanvasRebuildAfterVisibilityChanges()
         {
             root.AddComponent<Canvas>(); // Isolated test host only; production uses its existing map Canvas.

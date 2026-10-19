@@ -35,6 +35,8 @@ namespace Spotlight.FreeCafe
         private FreeCafeDeliveryBell deliveryBell;
         private Collider2D entryHitbox;
         private bool showingWorkstationEntry;
+        private const float HeatingGestureLeftOffset = 120f;
+        private const float DeliverCupGestureLeftOffset = 100f;
         public bool IsRunning { get; private set; }
         public Stage CurrentStage => stage;
         public string TodoInstruction => showingWorkstationEntry
@@ -507,6 +509,12 @@ namespace Spotlight.FreeCafe
             if (stage == Stage.Complete && Mouse.current != null) start = Mouse.current.position.ReadValue();
             float scale = canvas.scaleFactor;
             Vector2 badge = start + new Vector2(0, -panel.gestureOffset * scale);
+            // Hard-coded tutorial-only offsets keep the mouse badge clear of the heating
+            // progress bar and the moving cursor trail when delivering the cup.
+            if (stage == Stage.Heat || stage == Stage.Heating)
+                badge.x -= HeatingGestureLeftOffset * scale;
+            else if (stage == Stage.DeliverCup)
+                badge.x -= DeliverCupGestureLeftOffset * scale;
             float halfWidth = gesture.rect.width * .5f + 12;
             float halfHeight = gesture.rect.height * .5f + 12;
             badge.x = Mathf.Clamp(badge.x, halfWidth * scale, Mathf.Max(halfWidth * scale, Screen.width - halfWidth * scale));

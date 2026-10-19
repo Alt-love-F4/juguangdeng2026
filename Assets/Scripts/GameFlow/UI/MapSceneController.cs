@@ -778,10 +778,21 @@ namespace Spotlight.GameFlow
             OnMapContentChanged(positionKey);
         }
 
+        private void OnEnable()
+        {
+            // The map overlay is cached between visits. Re-evaluate its presentation even
+            // when the content signature has not changed since it was last hidden.
+            foreach (string key in locationDots.Keys) OnMapContentChanged(key);
+        }
+
         private void OnMapContentChanged(string positionKey)
         {
             if (locationDots.TryGetValue(positionKey, out var dot) && dot != null)
-                dot.gameObject.SetActive(AllowsTodoPosition(positionKey)
+                // Unlike todo navigation, badge state must remain valid while the map's
+                // parent is hidden. activeInHierarchy would cache every badge as off.
+                dot.gameObject.SetActive(locationButtons.TryGetValue(positionKey, out var button)
+                    && button != null && button.gameObject.activeSelf
+                    && (!IsFirstDay || MapActionDetailsView.IsCafeEntryPosition(positionKey))
                     && (NarrativeRuntime.Instance?.Actions?.HasUnseenImportantActions(positionKey) ?? false));
         }
 
