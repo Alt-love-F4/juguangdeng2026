@@ -236,8 +236,8 @@ namespace Spotlight.FreeCafe
     public sealed class CafeCatalog
     {
         public int startingMoney = 500;      // 启动资金
-        public float daySeconds = 300;       // 每天营业时长（秒）
-        public float customerPatience = 180; // 顾客耐心（秒）
+        public float daySeconds = 900;       // 每天营业时长（秒）
+        public float customerPatience = 540; // 顾客耐心（秒）
         public float customerInterval = 18;  // 顾客到店间隔（秒）
         public EntitySpec[] entities;        // 全部实体规格
         public OperationSpec[] operations;   // 全部工序规格

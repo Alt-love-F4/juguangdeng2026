@@ -644,6 +644,7 @@ namespace Spotlight.Narrative
                         string.IsNullOrWhiteSpace(speaker?.portraitPath) ? speaker?.iconPath : speaker.portraitPath);
                     readingLines.Add(new NarrativeReadingLinePresentationData
                     {
+                        lineId = line.lineId, pageId = line.pageId, seq = line.seq,
                         text = resolve(line.textKey), textKey = line.textKey, speakerKey = line.speakerKey,
                         speakerName = character?.name ?? resolve(speaker?.nameText), portrait = character?.portrait,
                         portraitPath = character?.portraitPath ?? (string.IsNullOrWhiteSpace(speaker?.portraitPath) ? speaker?.iconPath : speaker.portraitPath), mode = line.mode, voiceKey = line.voiceKey

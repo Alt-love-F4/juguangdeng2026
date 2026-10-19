@@ -46,16 +46,23 @@
 菜单 `Tools > Narrative > Bind Local Art Requirement Placeholders` 仅在Editor绑定：
 
 1. 所有需求卡登记 `art.requirement.<编号>`，供明确引用/预览。
-2. 已有的 `rose.club.knight_guidance` 由无贴图黑色占位换成CG03需求卡，仍 `placeholder=true`，不是美术完成。
+2. `rose.club.knight_guidance` 初次接入时使用CG03需求卡；2026-10-19已替换为 `Assets/Art/NarrativeCG/CG03_knight_guidance.jpg`，运行时key现为正式资源。
 3. 提议的CG key注册为新占位，但已有真实贴图、scene.cafe、故意黑幕一律不覆盖。
 4. CG04：源表通过编译器在 rose.1012.s1.outside.sampling 显示 cg.adele_sampling，现稿P019–P024；P018为图意指令，P025明确恢复 cafe.exterior.day。
 5. CG05：church.1020.s1 每条真实成功分支，在当前P142焚信对应页显示 cg.burning_letter（P143是美术指令，不做玩家台词）；P144恢复 scene.cafe。失败拘押支路不显示焚信。
 6. CG07：当前C29 P012标记，在P013–P020使用cg.marie_moonlit，P021恢复原stage。CG09：RE11/23 P228标记，在P229–P231使用cg.rainy_triad，P232恢复原stage。不按日期/文件名给整事件套一张CG。
-7. CG02、暂定CG06、补充CG08/CG10/CG11/P12及道具、差分等卡片已登记，但没有确认具体演出挂点/层通道的项目不自动塞成全屏背景或冒充角色立绘。通过美术需求窗口浏览，接线状态另外记录。
+7. CG02仍无正式图；CG06图片已登记到独立key `cg.duke_blessing`，但 `church.1009.s2` 仍使用 `cathedral.day`，没有新增剧情挂点。补充CG08/CG10/CG11/P12及道具、差分等卡片没有确认具体演出挂点/层通道时，不自动塞成全屏背景或冒充角色立绘。
+
+### 编号CG图片交付（2026-10-19）
+
+- 原件保留在 `策划文件/CG/`，Unity副本位于 `Assets/Art/NarrativeCG/`；CG03–CG06均使用原始JPG，不修改源文件。
+- CG03–CG05替换既有运行时占位key；CG04/CG05沿用已接好的源表挂点及背景恢复页，不改剧情表。
+- CG06只替换未被剧情引用的独立素材key，不映射到共享 `cathedral.day`，也不代表 `church.1009.s2` 已获批准使用特写。
+- CG01继续复用 `street.day` / `oct07.street.day` 的圣徒街正式背景；目录中未提供CG01、CG02文件，不新增替代图。
 
 绑定报表：Docs/NarrativeArtPlaceholderBindings.json。该报表和源需求清单分别说明注册与原始需求，不把注册当作剧情已接。
 
-`Tools > Narrative > Art Requirement Placeholders` 可以搜索并预览37张卡及合并后的99项处置，点击选中文件。
+`Tools > Narrative > Art Requirement Placeholders` 可以搜索并预览37张卡及合并后的99项处置；当前注册素材会显示实际key、占位/正式状态和图片路径，点击可选中文件。
 
 普通咖啡馆对白仍用scene.cafe；特殊CG后明确恢复，不注册经营原始楼层底图作对话图。正式角色已有立绘不被带文字的竖版需求卡替换。原有咖啡馆交互保持原CafeWorld/工作台所有者。
 

@@ -45,7 +45,7 @@ namespace Spotlight.GameFlow.Tests
                 yield return null;
                 Assert.That(panel, Is.Not.Null, id);
                 Assert.That(panel.Tag, Is.EqualTo(PresentationDebugSceneController.DebugTag));
-                Assert.That(panel, Is.InstanceOf<ReadingPanel>(), id);
+                Assert.That(panel, Is.InstanceOf<DialoguePanel>(), id);
                 Assert.That(NarrativeRuntime.Instance, Is.Null);
             }
             UIKit.ClosePanelsByTag(PresentationDebugSceneController.DebugTag);

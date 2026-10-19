@@ -453,7 +453,7 @@ namespace Spotlight.GameFlow
         {
             Texture background = Resources.Load<Texture2D>("Art/Gameplay/DayFlow/phase_business_transition");
             var character = NarrativeCharacterResolver.CreateDialogueCharacter("adele");
-            var pages = new[]
+            var readingPages = new[]
             {
                 new ReadingPage("清晨的街道", new[]
                 {
@@ -465,9 +465,26 @@ namespace Spotlight.GameFlow
                     new ReadingLine("请在午后之前，去旧城区找我。", character.DisplayName,
                         portrait: character.Portrait, kind: ReadingLineKind.Dialogue),
                     new ReadingLine("落款只有一个熟悉的字母。", "旁白")
-                }, pageId: "debug-reading-02", seq: 2)
+                }, background, pageId: "debug-reading-02", seq: 2)
             };
-            Open<ReadingPanel>().Play(new ReadingScript(pages, "阅读演出测试"), () => Complete(version), () => Cancelled(version));
+            var lines = new List<DialogueLine>();
+            foreach (ReadingPage page in readingPages)
+                foreach (ReadingLine line in page.Lines)
+                {
+                    if (line.Kind == ReadingLineKind.Dialogue)
+                    {
+                        var speaker = new DialogueCharacter("reading.speaker." + line.Speaker, line.Speaker, line.Portrait);
+                        lines.Add(new DialogueLine(DialogueSpeaker.Right, line.Text, replaceLeft: true,
+                            leftCharacter: null, replaceRight: true, rightCharacter: speaker,
+                            replaceCenter: true, centerCharacter: null, voiceKey: line.voiceKey));
+                    }
+                    else lines.Add(new DialogueLine(DialogueSpeaker.Narrator, line.Text,
+                        replaceLeft: true, leftCharacter: null, replaceRight: true, rightCharacter: null,
+                        replaceCenter: true, centerCharacter: null, voiceKey: line.voiceKey));
+                }
+            DialoguePanel panel = Open<DialoguePanel>();
+            panel.Play(new DialogueScript(lines, new DialogueCharacter("", null), new DialogueCharacter("", null),
+                "阅读演出测试", background), () => Complete(version), () => Cancelled(version));
         }
 
         private void PlayNoticeSample(int version)

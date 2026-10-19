@@ -148,6 +148,11 @@ namespace Spotlight.GameFlow
                 string id = character.Id;
                 button.onClick.AddListener(() => panel.ShowCharacter(id));
                 if (character.Unlocked) Label(cell.transform, "Name", character.Name, new Vector2(.02f, 0), new Vector2(.98f, .16f), 16, TextAlignmentOptions.Center);
+                var hover = cell.GetComponent<DetailsHoverTarget>();
+                if (hover == default) hover = cell.gameObject.AddComponent<DetailsHoverTarget>();
+                hover.Bind(panel, character.Unlocked ? character.Name : "尚未结识",
+                    character.Unlocked ? CharacterHoverDescription(character)
+                        : "推进相关剧情后，这里会显示人物介绍与当前存档中记录的关系数值。未解锁信息不会提前展示。");
             }
             previous.interactable = RelationshipPageIndex > 0;
             next.interactable = RelationshipPageIndex < PageCount - 1;
@@ -164,7 +169,8 @@ namespace Spotlight.GameFlow
             DetailsViewUI.Clear(introductionContent);
             portrait.sprite = character != null && character.Avatar != default ? character.Avatar : characterSilhouette;
             characterName.text = character != null ? character.Name : "人物姓名";
-            string introduction = character != null ? character.Introduction : data.Characters.Count > 0 ? "尚未结识此人物，无法获得相关信息" : data.Relationships.Heading + "\n" + data.Relationships.Description;
+            string introduction = character != null ? character.Introduction
+                : data.Relationships.Heading + " · " + data.Relationships.Description;
             var text = Label(introductionContent, "Introduction", introduction, Vector2.zero, Vector2.one, 22);
             text.overflowMode = TextOverflowModes.Overflow;
             text.rectTransform.pivot = new Vector2(.5f, 1);
@@ -182,20 +188,44 @@ namespace Spotlight.GameFlow
                     if (i == 0)
                     {
                         familiarityFill.fillAmount = Ratio(bar);
-                        familiarityValue.text = bar.Value.ToString("0.##") + " / " + bar.Max.ToString("0.##");
+                        familiarityValue.text = bar.Min < 0
+                            ? bar.Name + " " + bar.Value.ToString("+0;-0;0") + "（" + bar.Min + " 至 " + bar.Max + "）"
+                            : bar.Value.ToString("0.##") + " / " + bar.Max.ToString("0.##");
                     }
                     if (info.Length > 0) info.Append('\n');
                     info.Append(bar.Name).Append("：").Append(bar.Value.ToString("0.##"));
                     if (!string.IsNullOrEmpty(bar.Description)) info.Append("  ").Append(bar.Description);
                 }
+            if (character != null && !string.IsNullOrWhiteSpace(character.RelationshipSummary))
+            {
+                if (info.Length > 0) info.Insert(0, character.RelationshipSummary + System.Environment.NewLine);
+                else info.Append(character.RelationshipSummary);
+            }
             specialInformation.text = info.Length > 0 ? info.ToString() : character == null ? "尚未结识此人物，无法获得相关信息" : "暂无特殊信息";
             var hover = specialInformation.GetComponent<DetailsHoverTarget>();
             if (hover != default) hover.Bind(panel, characterName.text, info.ToString());
 
         }
+        private static string CharacterHoverDescription(DetailsCharacterData character)
+        {
+            var text = new System.Text.StringBuilder();
+            if (!string.IsNullOrWhiteSpace(character.RelationshipSummary)) text.AppendLine(character.RelationshipSummary);
+            if (!string.IsNullOrWhiteSpace(character.Introduction)) text.Append(character.Introduction);
+            return text.Length == 0 ? "暂无人物介绍。" : text.ToString().Trim();
+        }
         private void RenderWorldSelectors()
         {
             DetailsViewUI.Clear(selectorContent); selectors.Clear();
+            var overview = DetailsViewUI.Box(selectorContent, "WorldOverview", Vector2.zero, Vector2.one, Color.white);
+            overview.sprite = worldIdleButton;
+            overview.raycastTarget = false;
+            overview.rectTransform.sizeDelta = new Vector2(255, 166);
+            overview.gameObject.AddComponent<LayoutElement>().preferredHeight = 166;
+            Label(overview.transform, "Heading", data.World.Heading,
+                new Vector2(.07f, .72f), new Vector2(.93f, .94f), 23, TextAlignmentOptions.Center);
+            var overviewText = Label(overview.transform, "Summary", data.World.Description,
+                new Vector2(.08f, .08f), new Vector2(.92f, .68f), 16);
+            overviewText.overflowMode = TextOverflowModes.Overflow;
             bool valid = false;
             foreach (var bar in data.WorldBars) if (bar.Key == worldKey) valid = true;
             if (!valid) worldKey = data.WorldBars.Count > 0 ? data.WorldBars[0].Key : null;
@@ -213,6 +243,9 @@ namespace Spotlight.GameFlow
                 string key = bar.Key;
                 button.onClick.AddListener(() => panel.SelectWorldProgress(key));
                 Label(image.transform, "Name", bar.Name, new Vector2(.08f, .08f), new Vector2(.92f, .92f), 31, TextAlignmentOptions.Center);
+                var hover = image.GetComponent<DetailsHoverTarget>();
+                if (hover == default) hover = image.gameObject.AddComponent<DetailsHoverTarget>();
+                hover.Bind(panel, bar.Name, bar.Description);
             }
             selectorContent.parent.GetComponent<ScrollRect>().verticalNormalizedPosition = 1;
             RenderWorldProgress();

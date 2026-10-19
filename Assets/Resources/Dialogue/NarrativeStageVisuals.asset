@@ -286,10 +286,10 @@ MonoBehaviour:
     useSceneBackground: 0
     fadeSeconds: 0.3
   - key: rose.club.knight_guidance
-    texture: {fileID: 2800000, guid: c25e935169b0b4a4f9db618274d675af, type: 3}
+    texture: {fileID: 2800000, guid: a14c9425bf295c445b795ab3555f496c, type: 3}
     tint: {r: 1, g: 1, b: 1, a: 1}
-    placeholderColor: {r: 1, g: 1, b: 1, a: 1}
-    placeholder: 1
+    placeholderColor: {r: 0.23, g: 0.25, b: 0.28, a: 1}
+    placeholder: 0
     solidColor: 0
     useSceneBackground: 0
     fadeSeconds: 0.3
@@ -326,10 +326,10 @@ MonoBehaviour:
     useSceneBackground: 0
     fadeSeconds: 0.3
   - key: cg.adele_sampling
-    texture: {fileID: 2800000, guid: c39a9d8bc94b32f43a567b066a10fb27, type: 3}
+    texture: {fileID: 2800000, guid: ffccad17ad759bb4cbfe2925f4796f6b, type: 3}
     tint: {r: 1, g: 1, b: 1, a: 1}
-    placeholderColor: {r: 1, g: 1, b: 1, a: 1}
-    placeholder: 1
+    placeholderColor: {r: 0.23, g: 0.25, b: 0.28, a: 1}
+    placeholder: 0
     solidColor: 0
     useSceneBackground: 0
     fadeSeconds: 0.3
@@ -342,10 +342,10 @@ MonoBehaviour:
     useSceneBackground: 0
     fadeSeconds: 0.3
   - key: cg.burning_letter
-    texture: {fileID: 2800000, guid: 41ae6a51b233c244bbaded95edeb928c, type: 3}
+    texture: {fileID: 2800000, guid: 34def671efaf0464ab593eba30bad0b0, type: 3}
     tint: {r: 1, g: 1, b: 1, a: 1}
-    placeholderColor: {r: 1, g: 1, b: 1, a: 1}
-    placeholder: 1
+    placeholderColor: {r: 0.23, g: 0.25, b: 0.28, a: 1}
+    placeholder: 0
     solidColor: 0
     useSceneBackground: 0
     fadeSeconds: 0.3
@@ -358,10 +358,10 @@ MonoBehaviour:
     useSceneBackground: 0
     fadeSeconds: 0.3
   - key: cg.duke_blessing
-    texture: {fileID: 2800000, guid: adf26a1199dabe048a00cad3f7ea1269, type: 3}
+    texture: {fileID: 2800000, guid: 60c0ea283c16d2743beae1033a4a49fd, type: 3}
     tint: {r: 1, g: 1, b: 1, a: 1}
-    placeholderColor: {r: 1, g: 1, b: 1, a: 1}
-    placeholder: 1
+    placeholderColor: {r: 0.23, g: 0.25, b: 0.28, a: 1}
+    placeholder: 0
     solidColor: 0
     useSceneBackground: 0
     fadeSeconds: 0.3

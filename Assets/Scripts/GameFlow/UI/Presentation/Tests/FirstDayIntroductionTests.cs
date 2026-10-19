@@ -1,8 +1,10 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Linq;
 using System.Reflection;
 using NUnit.Framework;
+using Spotlight.Narrative;
 using UnityEngine;
 using UnityEngine.TestTools;
 using UnityEngine.UI;
@@ -156,6 +158,33 @@ namespace Spotlight.GameFlow.Tests
             Assert.That(flow.IsCafeTutorialActive, Is.False);
             Assert.That(flow.CanSave, Is.True);
             Assert.That(endpoint.starts, Is.EqualTo(1));
+        }
+
+        [UnityTest]
+        public IEnumerator FirstSessionGuideTemporarilyShowsAdeleWithoutCreatingAMetFact()
+        {
+            CreateFlow(new ShortSource());
+            Assert.That(session.Submit(null), Is.True);
+            flow.BeginNewSession(playLetter: false);
+            Assert.That(flow.IsFirstSessionGuideActive, Is.True);
+            var config = session.Narrative.Configuration;
+            config.objects.Add(new NarrativeObjectDefinition
+            {
+                objId = "adele", objType = NarrativeObjectType.Npc,
+                nameText = "character.adele.name", descText = "character.adele.desc",
+                avtarPath = "Characters/adele/avatar"
+            });
+            config.texts.Add(new NarrativeTextDefinition { key = "character.adele.name", content = "阿黛尔" });
+            config.texts.Add(new NarrativeTextDefinition { key = "character.adele.desc", content = "咖啡馆的店员。" });
+
+            var snapshot = DetailsGameDataAdapter.Create();
+            var adele = snapshot.Characters.Single(character => character.Id == "adele");
+            Assert.That(adele.Unlocked, Is.True);
+            StringAssert.Contains("新手引导人物", adele.RelationshipSummary);
+            StringAssert.Contains("正式相识记录尚未写入", adele.RelationshipSummary);
+            Assert.That(session.Narrative.Controller.State.TryGetCondition("known.adele", out _), Is.False,
+                "Showing the tutorial character is display-only and must not set a persistent meet fact.");
+            yield return null;
         }
 
         [UnityTest]

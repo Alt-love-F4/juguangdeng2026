@@ -97,3 +97,9 @@ job fd21b2b6d52542b89f53a5b1982933d7：选择制作、输入所有权、器皿�
 - EditMode状态/关系图/构建器41/41通过；最终新增PlayMode9/9通过（1 GM集成、8试播隔离，job 08a6f00a64e74765bbac44e1aff80651，JSON/fullNames/XML均已核对）。
 - 真实Cafe会话额外验证daily.st.01单页与daily.old.08选项A仅到response.a，源配置/runtime/逐字段订单不变并恢复暂停owner。该会话无正式NCS，不能冒充正式存档状态验收；有正式状态的复制/隔离由独立runtime fixture回归覆盖。
 - 详见 `Docs/NarrativeGMAtlas.md` 和 `output/narrative-gm-atlas/`。早期取消/其他HUD测试覆盖job不计入通过数字；最终截图gm-shell.png/gm-atlas.png已目视核对。
+
+## 日常分段/重复扣点补审（2026-10-19）
+
+- 市政厅源稿24组为独立/不同日期造访，同名不等于一个24步任务。九地源配置每地1个Repeat池；首访+正文单次Execute/AP，选项回应和真实QUEUE_EVENT不另收费，未复现一次执行多次扣点。
+- 修复地图/待办误导：做完一次标本次完成、按钮再次行动且明确另计费用；非必做Repeat日常不阻止休息。保留日期、条件、剧情、成本、存档和咖啡交互，没有改Excel/JSON。
+- EditMode101/101（DailyContent/Action/BatchContinuity/MapUiRepair）；最终PlayMode4/4（九地首访+正文、九地取消、CIV08选择回应、营业地图行动只执行一次）；详情见 `Docs/NarrativeDailyActionCosts.md`，证据 output/narrative-daily-action-audit/。

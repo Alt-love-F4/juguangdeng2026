@@ -375,17 +375,15 @@ namespace Spotlight.GameFlow.Tests
         {
             controller.PlayReading();
             yield return new WaitForSecondsRealtime(.65f);
-            ReadingPanel reading = controller.CurrentPanel as ReadingPanel;
+            DialoguePanel reading = controller.CurrentPanel as DialoguePanel;
             Assert.That(reading, Is.Not.Null);
             Assert.That(reading.GetComponent<CanvasGroup>().alpha, Is.EqualTo(1f).Within(.01f));
             yield return new WaitForEndOfFrame();
             CaptureScreenshot("output/presentation-reading-smoke.png");
             if (reading.IsTyping) { reading.Advance(); yield return null; }
+            int firstLine = reading.LineIndex;
             reading.Advance();
-            Assert.That(reading.LineIndex, Is.EqualTo(1));
-            yield return null;
-            reading.Back();
-            Assert.That(reading.LineIndex, Is.EqualTo(0));
+            Assert.That(reading.LineIndex, Is.GreaterThan(firstLine));
             yield return null;
             reading.Cancel();
             yield return null;

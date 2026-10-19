@@ -93,9 +93,10 @@ namespace Spotlight.GameFlow
         public Sprite Avatar { get; }
         public bool Unlocked { get; }
         public IReadOnlyList<DetailsProgressData> Bars { get; }
+        public string RelationshipSummary { get; }
 
         public DetailsCharacterData(string id, string name, string introduction = null, Sprite avatar = null,
-            bool unlocked = false, IEnumerable<DetailsProgressData> bars = null)
+            bool unlocked = false, IEnumerable<DetailsProgressData> bars = null, string relationshipSummary = null)
         {
             Id = id ?? string.Empty;
             Name = name ?? string.Empty;
@@ -103,6 +104,7 @@ namespace Spotlight.GameFlow
             Avatar = avatar;
             Unlocked = unlocked;
             Bars = DetailsPanelData.CopyItems(bars, nameof(bars));
+            RelationshipSummary = relationshipSummary ?? string.Empty;
         }
     }
 

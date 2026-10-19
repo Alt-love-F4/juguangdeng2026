@@ -74,26 +74,44 @@ namespace Spotlight.Narrative.Editor
     public sealed class NarrativeArtRequirementWindow:EditorWindow
     {
         private NarrativeArtPlaceholderBuilder.Manifest manifest;
+        private NarrativeStageVisuals registry;
         private Vector2 scroll;private string query="",error;private int selection;private bool placeholdersOnly=true;
         [MenuItem("Tools/Narrative/Art Requirement Placeholders")]
         public static void Open(){var w=GetWindow<NarrativeArtRequirementWindow>("美术需求占位");w.minSize=new Vector2(900,600);w.Reload();w.Show();}
-        private void Reload(){try{manifest=NarrativeArtPlaceholderBuilder.ReadManifest();error=null;}catch(Exception ex){error=ex.Message;manifest=null;}}
+        private void Reload(){try{manifest=NarrativeArtPlaceholderBuilder.ReadManifest();registry=AssetDatabase.LoadAssetAtPath<NarrativeStageVisuals>(NarrativeArtPlaceholderBuilder.RegistryPath);error=registry==null?"缺少叙事美术注册表":null;}catch(Exception ex){error=ex.Message;manifest=null;registry=null;}}
+        private bool TryGetRegisteredArt(NarrativeArtPlaceholderBuilder.Requirement item,out string key,out NarrativeStageVisuals.Entry entry)
+        {
+            var keys=(item.suggestedRegistryKeys??Array.Empty<string>()).Concat(item.proposedUnregisteredKeys??Array.Empty<string>())
+                .Concat(new[]{"art.requirement."+item.id});
+            foreach(var candidate in keys.Distinct(StringComparer.Ordinal))
+            {
+                var found=registry.Find(candidate);
+                if(found?.texture==null)continue;
+                key=candidate;entry=found;return true;
+            }
+            key=null;entry=null;return false;
+        }
         private void OnGUI()
         {
-            GUILayout.Label("美术需求占位 / 不调用API / 不覆盖正式资源",EditorStyles.boldLabel);
+            GUILayout.Label("美术需求与当前资源 / 不调用API",EditorStyles.boldLabel);
             EditorGUILayout.BeginHorizontal();query=EditorGUILayout.TextField("搜索",query);placeholdersOnly=GUILayout.Toggle(placeholdersOnly,"仅需求卡",GUILayout.Width(100));if(GUILayout.Button("重读",GUILayout.Width(60)))Reload();EditorGUILayout.EndHorizontal();
             if(manifest==null){EditorGUILayout.HelpBox(error??"没有清单",MessageType.Error);return;}
+            if(registry==null){EditorGUILayout.HelpBox(error??"没有叙事美术注册表",MessageType.Error);return;}
             EditorGUILayout.BeginHorizontal();EditorGUILayout.BeginVertical(GUILayout.Width(265));scroll=EditorGUILayout.BeginScrollView(scroll);
             var items=manifest.requirements.Where(r=>(!placeholdersOnly||r.disposition=="placeholder")&&(r.id+r.name+r.requirement).IndexOf(query,StringComparison.OrdinalIgnoreCase)>=0).ToArray();
             foreach(var item in items)if(GUILayout.Button(item.id+"  "+item.name,GUILayout.Height(30)))selection=Array.IndexOf(manifest.requirements,item);
             EditorGUILayout.EndScrollView();EditorGUILayout.EndVertical();EditorGUILayout.BeginVertical();
             var selected=manifest.requirements[Mathf.Clamp(selection,0,manifest.requirements.Length-1)];
             GUILayout.Label(selected.id+" · "+selected.name,EditorStyles.boldLabel);EditorGUILayout.HelpBox("原标记："+selected.status+"\n处理："+selected.disposition+"\n"+selected.requirement+"\n来源（历史锚点，非当前运行顺序）："+selected.sourceEvidence,MessageType.Info);
-            var texture=AssetDatabase.LoadAssetAtPath<Texture>(selected.assetPath);
+            string boundKey;NarrativeStageVisuals.Entry boundEntry;
+            bool hasBinding=TryGetRegisteredArt(selected,out boundKey,out boundEntry);
+            var texture=hasBinding?boundEntry.texture:AssetDatabase.LoadAssetAtPath<Texture>(selected.assetPath);
+            string assetPath=hasBinding?AssetDatabase.GetAssetPath(boundEntry.texture):selected.assetPath;
+            if(hasBinding)EditorGUILayout.HelpBox("当前注册："+boundKey+"\n状态："+(boundEntry.placeholder?"需求占位图":"正式资源"),boundEntry.placeholder?MessageType.Warning:MessageType.Info);
             Rect area=GUILayoutUtility.GetRect(300,300,GUILayout.ExpandWidth(true),GUILayout.ExpandHeight(true));if(texture!=null)EditorGUI.DrawPreviewTexture(area,texture,null,ScaleMode.ScaleToFit);else GUI.Label(area,"无独立图片／复用或程序演出项目");
-            EditorGUILayout.SelectableLabel(selected.assetPath??"",GUILayout.Height(22));
+            EditorGUILayout.SelectableLabel(assetPath??"",GUILayout.Height(22));
             if(texture!=null&&GUILayout.Button("选中图片文件")){Selection.activeObject=texture;EditorGUIUtility.PingObject(texture);}
-            GUILayout.Label("需求卡不是制作完成；暂定条目仍需确认。替换时保留稳定key，图案完成后才移除placeholder标记。",EditorStyles.wordWrappedMiniLabel);
+            GUILayout.Label("需求卡仅作需求记录；正式资源状态读取自 NarrativeStageVisuals。剧情挂点是否启用仍以当前源表为准。",EditorStyles.wordWrappedMiniLabel);
             EditorGUILayout.EndVertical();EditorGUILayout.EndHorizontal();
         }
     }

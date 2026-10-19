@@ -79,5 +79,11 @@ namespace Spotlight.GameFlow
             panel.Stop();
             UIKit.ClosePanel(panel);
         }
+
+        public static void CaptureLastRevealedLines(int count = 2)
+        {
+            var entries = DialogueHistoryService.Formal.Entries;
+            NarrativeEndingEcho.Capture(entries, count);
+        }
     }
 }

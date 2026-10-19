@@ -42,10 +42,9 @@ namespace Spotlight.GameFlow
             if (node.Disabled) return "此节点已在配置中禁用。";
             if (runtime != null && runtime.IsReady && (runtime.Controller.IsBusy || runtime.Controller.PendingEventIds.Count > 0))
                 return "正式剧情正在播放或排队；请先结束正式演出。";
-            var reading = UIKit.GetPanel<ReadingPanel>();
             var notice = UIKit.GetPanel<NoticePanel>();
             var letter = UIKit.GetPanel<FirstDayLetterPanel>();
-            if (DialoguePanel.IsAnyPlaying || reading != null && reading.IsPlaying
+            if (DialoguePanel.IsAnyPlaying
                 || notice != null && notice.IsPlaying || letter != null && (letter.IsPlaying || letter.IsGenericLetter))
                 return "其他演出正在占用舞台；请先结束或停止该演出。";
             var result = UIKit.GetPanel<ResultPanel>();
@@ -145,7 +144,7 @@ namespace Spotlight.GameFlow
             {
                 string textKey = request.ReadingLines?.FirstOrDefault()?.textKey;
                 CurrentPageId = copy.presentations.readingLines.Find(l => l.textKey == textKey)?.pageId ?? root.presentationKey;
-                return ReadingEventPlayback.Play(request, title, pages, image, dialogue, speaker, portrait, done, PanelTag, PanelCachePolicy.Transient);
+                return ReadingEventPlayback.Play(request, title, pages, image, dialogue, speaker, portrait, done, PanelTag, PanelCachePolicy.Transient, true);
             };
             presenter.NoticePlayback = (request, data, done) =>
             {

@@ -324,8 +324,10 @@ namespace Spotlight.GameFlow.Tests
             runtime.Actions.Mount("market", action.actionKey);
             CreateDetails(null); details.Show("market", "市场");
             var card = details.transform.Find("Viewport/ActionList/Action_" + action.actionKey);
-            Assert.That(Get<string>(Widget(card.Find("Execute/Label"), "TMPro.TextMeshProUGUI"), "text"), Is.EqualTo("暂无可用事件"));
+            Assert.That(Get<string>(Widget(card.Find("Execute/Label"), "TMPro.TextMeshProUGUI"), "text"), Is.EqualTo("没有事务"));
             Assert.That(Get<Color>(Widget(card.Find("Requirement/Label"), "TMPro.TextMeshProUGUI"), "color"), Is.EqualTo(MapVisualTheme.Ink));
+            Assert.That(GameplayTodoProjection.Build(runtime), Is.Empty,
+                "An action with no currently available event must not become a todo.");
         }
 
         [Test]
@@ -346,11 +348,13 @@ namespace Spotlight.GameFlow.Tests
             CreateDetails(null); details.Show("market", "市场");
             var card = details.transform.Find("Viewport/ActionList/Action_" + action.actionKey);
             var caption = Widget(card.Find("Execute/Label"), "TMPro.TextMeshProUGUI");
-            Assert.That(Get<string>(caption, "text"), Is.EqualTo("暂无可用事件"));
+            Assert.That(Get<string>(caption, "text"), Is.EqualTo("没有事务"));
+            Assert.That(GameplayTodoProjection.Build(runtime), Is.Empty);
             runtime.Controller.State.SetCondition("pool.ready", true);
             Invoke(details, "Update");
             Assert.That(details.transform.Find("Viewport/ActionList/Action_" + action.actionKey), Is.SameAs(card));
             Assert.That(Get<string>(caption, "text"), Is.EqualTo("执行"));
+            Assert.That(GameplayTodoProjection.Build(runtime).Single().actionKey, Is.EqualTo(action.actionKey));
             Assert.That(runtime.Actions.ActionPoints.Current, Is.EqualTo(5));
         }
 
@@ -628,6 +632,41 @@ namespace Spotlight.GameFlow.Tests
             var items = new System.Collections.Generic.List<MapTaskItem>();
             GameplayTodoProjection.AppendRestGuidance(items, runtime, true);
             Assert.That(items, Is.Empty, "Do not infer idle from only the visible scene's utility list.");
+        }
+
+        [Test]
+        public void RepeatDailyPoolIsOptionalVisitNotAnUnfinishedMultiStepTask()
+        {
+            var config = new NarrativeConfiguration();
+            config.events.Add(new NarrativeEventDefinition { eventId = "ordinary", entry = NarrativeEntryPoint.MapAction,
+                eventProperties = new System.Collections.Generic.List<NarrativeEventProperty> {
+                    new NarrativeEventProperty { property = "dailyPool", value = "market" },
+                    new NarrativeEventProperty { property = "dailyKind", value = "ordinary" } } });
+            config.actions.Add(new NarrativeActionDefinition { actionKey = "activity", nameText = "办咖啡馆手续",
+                descText = "前往市政厅。", type = NarrativeActionType.Repeat, requirements = "ActionPoint(1)",
+                resultEvents = new System.Collections.Generic.List<string> { "ordinary" } });
+            config.mapPositions.Add(new NarrativeMapPositionDefinition { positionKey = "market", enabled = true, defaultAction = "activity" });
+            runtime.Initialize(config, new ImmediatePresenter());
+            CreateDetails(null); details.Show("market", "市政厅");
+            var first = GameplayTodoProjection.Build(runtime).Single();
+            Assert.That(first.status, Does.Contain("自选日常"));
+            Assert.That(first.currentTask, Does.Contain("不是未完成任务的分段"));
+            Assert.That(first.preventsRest, Is.False);
+            Assert.That(GameplayTodoProjection.HasActionableContent(runtime), Is.False);
+            var items = GameplayTodoProjection.Build(runtime);
+            GameplayTodoProjection.AppendRestGuidance(items, runtime, true);
+            Assert.That(items.Any(i => i.id == GameplayTodoProjection.RestTodoId), Is.True);
+
+            Assert.That(runtime.Actions.Execute("activity"), Is.True);
+            Invoke(details, "Update");
+            var done = GameplayTodoProjection.Build(runtime).Single();
+            Assert.That(done.completed, Is.True, "The purchase is complete even if another optional visit can be bought.");
+            Assert.That(done.status, Does.Contain("再次行动另计消耗"));
+            Assert.That(runtime.Actions.ActionPoints.Current, Is.EqualTo(4));
+            Assert.That(runtime.Actions.IsAvailable("activity", out _), Is.True);
+            var card = details.transform.Find("Viewport/ActionList/Action_activity");
+            var caption = Widget(card.Find("Execute/Label"), "TMPro.TextMeshProUGUI");
+            Assert.That(Get<string>(caption, "text"), Is.EqualTo("再次行动"));
         }
 
         [Test]

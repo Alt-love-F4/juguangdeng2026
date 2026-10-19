@@ -565,6 +565,9 @@ namespace Spotlight.GameFlow
                 ?? root.GetComponentInChildren<Button>(true);
             card.button = execute;
             if (description != null) description.text = Text(action.descText, string.IsNullOrEmpty(action.descText) ? "暂无行动描述" : action.descText);
+            if (description != null && NarrativeRuntime.Instance?.Actions?.IsDailyPoolAction(action.actionKey) == true)
+                description.text += "\n每次行动播放一则日常；首次到访会自动接上本次正文。"
+                    + "\n首访、翻页、选项回应不另扣点；再次行动才重新计费。";
             if (execute != null)
             {
                 execute.onClick.RemoveAllListeners();
@@ -622,6 +625,7 @@ namespace Spotlight.GameFlow
             if (card.action == null) return;
             var action = card.action;
             bool available = actions.IsAvailable(action.actionKey, out var checks);
+            bool dailyPool = actions.IsDailyPoolAction(action.actionKey);
             string type = action.type switch
             {
                 NarrativeActionType.Daily => "每天行动", NarrativeActionType.Once => "一次性行动",
@@ -634,6 +638,10 @@ namespace Spotlight.GameFlow
             if (action.IsProgress) type += " · 进度 " + actions.GetProgress(action.actionKey) + " / " + action.progressTarget;
             if (action.IsDelivery) type += actions.IsCompleted(action.actionKey) ? " · 已完成" : actions.HasSubmittedToday(action.actionKey) ? " · 今日已交付" : " · 今日未交付";
             if (action.mustExecute) type += " · 今日必做";
+            if (dailyPool)
+            {
+                type = actions.HasExecutedToday(action.actionKey) ? "日常活动 · 今日已进行，可自选再做" : "日常活动 · 每次独立结算";
+            }
             if (card.type != null)
             {
                 card.type.text = type;
@@ -652,6 +660,7 @@ namespace Spotlight.GameFlow
                 if (card.requirementIcon != null) card.requirementIcon.color = card.requirements[0].color;
             }
             string caption = available ? (action.endDay ? "结束一天" : "执行") : UnavailableCaption(action, actions, checks);
+            if (available && dailyPool && actions.HasExecutedToday(action.actionKey)) caption = "再次行动";
             if (card.button != null)
             {
                 var buttonLabel = card.button.GetComponentInChildren<TextMeshProUGUI>(true);
@@ -674,7 +683,7 @@ namespace Spotlight.GameFlow
             if (actions.IsExecuting || (narrative != null && narrative.IsBusy)) return "请稍候";
             if (checks.Any(c => !c.satisfied && c.requirement.StartsWith("ActionPoint("))) return "行动点不足";
             if (checks.Any(c => !c.satisfied && c.requirement.StartsWith("Item("))) return "物品不足";
-            if (checks.Any(c => !c.satisfied && c.requirement == "DailyPool")) return "暂无可用事件";
+            if (checks.Any(c => !c.satisfied && c.requirement == "DailyPool")) return "没有事务";
             return "前置条件未满足";
         }
 
@@ -810,6 +819,8 @@ namespace Spotlight.GameFlow
             {
                 if (this == null || epoch != executionEpoch || !isActiveAndEnabled) return;
                 if (success) Spotlight.Audio.GameAudio.Play(Spotlight.Audio.AudioKeys.MapComplete);
+                if (success && NarrativeRuntime.Instance.Actions.IsDailyPoolAction(card.action.actionKey))
+                    Notice("本次日常已完成。再次行动是另一回造访，会重新消耗行动点；不必连续做完。");
                 finished = true;
                 if (success && (controls?.Invoke() ?? true) && card.action.endDay) { busy = false; endDay?.Invoke(); }
                 if (!success) Notice("行动事件未能执行");

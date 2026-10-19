@@ -99,8 +99,8 @@ namespace Spotlight.GameFlow
             };
             presenter.ReadingPlayback = (request, title, pages, image, dialogue, speaker, portrait, done) =>
             {
-                bool handled = ReadingEventPlayback.Play(request, title, pages, image, dialogue, speaker, portrait, done, tag, PanelCachePolicy.Transient);
-                if (handled) panelChanged?.Invoke(UIKit.GetPanel<ReadingPanel>());
+                bool handled = ReadingEventPlayback.Play(request, title, pages, image, dialogue, speaker, portrait, done, tag, PanelCachePolicy.Transient, true);
+                if (handled) panelChanged?.Invoke(UIKit.GetPanel<DialoguePanel>());
                 return handled;
             };
             presenter.NoticePlayback = (request, data, done) =>

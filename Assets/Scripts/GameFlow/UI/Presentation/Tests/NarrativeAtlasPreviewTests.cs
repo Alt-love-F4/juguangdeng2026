@@ -193,15 +193,15 @@ namespace Spotlight.GameFlow.Tests
             Assert.That(newspaper.presentationClass, Is.EqualTo("Reading").IgnoreCase);
             preview = new NarrativeAtlasPreview(config);
             preview.Play(Node(config, newspaper.eventId));
-            yield return WaitFor(() => UIKit.GetPanel<ReadingPanel>()?.IsPlaying == true, "Newspaper ReadingPanel");
-            var reading = UIKit.GetPanel<ReadingPanel>();
+            Assert.That(DialoguePanel.IsAnyPlaying, Is.False);
+            yield return WaitFor(() => DialoguePanel.Active?.IsPlaying == true, "Newspaper DialoguePanel");
+            var reading = DialoguePanel.Active;
             Assert.That(reading.Tag, Is.EqualTo(NarrativeAtlasPreview.PanelTag));
             DialoguePanel.ExternalInputBlocked = () => true;
-            int page = reading.PageIndex, line = reading.LineIndex;
+            int line = reading.LineIndex;
             reading.Advance(); reading.Cancel();
             yield return null;
             Assert.That(reading.IsPlaying, Is.True);
-            Assert.That(reading.PageIndex, Is.EqualTo(page));
             Assert.That(reading.LineIndex, Is.EqualTo(line));
             DialoguePanel.ExternalInputBlocked = () => false;
             reading.Cancel();
@@ -275,13 +275,13 @@ namespace Spotlight.GameFlow.Tests
             Assert.That(Json(controller.State.Capture()), Is.EqualTo(before));
             formal.Presenter.DebugStopPresentation();
             debug.PlayReading();
-            yield return WaitFor(() => debug.CurrentPanel is ReadingPanel panel && panel.IsPlaying, "Existing presentation");
+            yield return WaitFor(() => debug.CurrentPanel is DialoguePanel panel && panel.IsPlaying, "Existing presentation");
             var existing = debug.CurrentPanel;
             owners = PresentationPauseRegistry.OwnerCount;
             Assert.That(NarrativeAtlasPreview.BlockReason(node), Is.Not.Null.And.Not.Empty);
             Assert.Throws<InvalidOperationException>(() => preview.Play(node));
             Assert.That(debug.CurrentPanel, Is.SameAs(existing));
-            Assert.That(((ReadingPanel)existing).IsPlaying, Is.True);
+            Assert.That(((DialoguePanel)existing).IsPlaying, Is.True);
             Assert.That(PresentationPauseRegistry.OwnerCount, Is.EqualTo(owners));
         }
 

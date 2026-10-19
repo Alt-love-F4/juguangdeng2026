@@ -13,8 +13,9 @@ namespace Spotlight.Narrative.Editor
         private Vector2 scroll;
         private string query="",error;
         [MenuItem("Tools/Narrative/Ending Panels and Trigger Review")]
-        public static void Open(){var w=GetWindow<NarrativeEndingReviewWindow>("结局与面板核对");w.minSize=new Vector2(650,480);w.Reload();w.Show();}
+        public static void Open(){var w=GetWindow<NarrativeEndingReviewWindow>("结局与面板核对");w.minSize=new Vector2(760,520);w.Reload();w.Show();}
         private void Reload(){try{config=LubanNarrativeLoader.Load();error=null;}catch(Exception ex){error=ex.Message;config=null;}}
+        private NarrativeEndingArtworkCatalog ArtworkCatalog => NarrativeEndingArtworkCatalog.Load();
         private void OnGUI()
         {
             GUILayout.Label("明确结局 / 已配置触发 / 面板预览",EditorStyles.boldLabel);
@@ -28,9 +29,19 @@ namespace Spotlight.Narrative.Editor
             foreach(var ending in config.endings.Where(e=>e.enabled).OrderByDescending(e=>e.priority).ThenBy(e=>e.endingId,StringComparer.Ordinal))
             {
                 string title=Text(ending.titleText);if(!string.IsNullOrWhiteSpace(query)&&(ending.endingId+title).IndexOf(query,StringComparison.OrdinalIgnoreCase)<0)continue;
+                var artwork = NarrativeEndingEcho.ResolveArtwork(ending.endingId);
                 EditorGUILayout.BeginVertical(EditorStyles.helpBox);
                 GUILayout.Label(title,EditorStyles.boldLabel);EditorGUILayout.SelectableLabel(ending.endingId,GUILayout.Height(18));
                 GUILayout.Label(Text(ending.messageText),EditorStyles.wordWrappedLabel);
+                using (new EditorGUILayout.HorizontalScope())
+                {
+                    if (artwork.Sprite != null)
+                    {
+                        Rect previewRect = GUILayoutUtility.GetRect(150, 90, GUILayout.Width(150), GUILayout.Height(90));
+                        EditorGUI.DrawPreviewTexture(previewRect, artwork.Sprite.texture, null, ScaleMode.ScaleToFit);
+                    }
+                    EditorGUILayout.HelpBox(artwork.StatusLabel, artwork.Sprite == null ? MessageType.Warning : MessageType.Info);
+                }
                 foreach(var group in config.conditions.Where(c=>c.ownerType=="ending"&&c.ownerId==ending.endingId).GroupBy(c=>c.groupIndex))
                 {
                     GUILayout.Label("条件组 "+group.Key+"（组内AND／组间OR）",EditorStyles.miniBoldLabel);
@@ -41,10 +52,26 @@ namespace Spotlight.Narrative.Editor
                 }
                 EditorGUILayout.BeginHorizontal();if(GUILayout.Button("复制ID"))GUIUtility.systemCopyBuffer=ending.endingId;
                 using(new EditorGUI.DisabledScope(debug==null))if(GUILayout.Button("预览真实 ResultPanel"))debug.PlayEnding(ending.endingId,config);
+                using (new EditorGUI.DisabledScope(ArtworkCatalog == null))
+                {
+                    if (GUILayout.Button("标记需补插画", GUILayout.Width(130))) MarkArtStatus(ending.endingId, NarrativeEndingArtworkCatalog.ArtStatus.RequiredMissing);
+                    if (GUILayout.Button("标记可选/无需", GUILayout.Width(130))) MarkArtStatus(ending.endingId, NarrativeEndingArtworkCatalog.ArtStatus.OptionalMissing);
+                }
                 EditorGUILayout.EndHorizontal();EditorGUILayout.EndVertical();
             }
             EditorGUILayout.EndScrollView();
         }
+        private void MarkArtStatus(string endingId, NarrativeEndingArtworkCatalog.ArtStatus status)
+        {
+            var catalog = ArtworkCatalog;
+            if (catalog == null) { error = "资源不存在：Assets/Resources/Dialogue/NarrativeEndingArtworkCatalog.asset"; return; }
+            var entry = catalog.Find(endingId);
+            if (entry == null) { error = "未登记该结局ID。请先在Ending图片目录Inspector里手动同步结局记录。"; return; }
+            entry.status = status;
+            EditorUtility.SetDirty(catalog);
+            AssetDatabase.SaveAssetIfDirty(catalog);
+        }
+
         private string Text(string key)=>config.texts.Find(t=>t.key==key)?.content??key??"";
         private static PresentationDebugSceneController FindDebug()
         {

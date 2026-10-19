@@ -1,0 +1,111 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 29184295ad165c741a43030bfde51b9c, type: 3}
+  m_Name: NarrativeEndingArtworkCatalog
+  m_EditorClassIdentifier: Spotlight.GameFlow.UI::Spotlight.GameFlow.NarrativeEndingArtworkCatalog
+  entries:
+  - endingId: neutral.ending.a
+    status: 0
+    artwork: {fileID: 0}
+    artworkIsPlaceholder: 0
+    artRequirementId: 
+    notes: "NCS\u7ED3\u5C40\u5DF2\u542F\u7528\uFF0C\u4F46\u5C1A\u672A\u767B\u8BB0\u4E13\u5C5E\u7ED3\u5C40\u56FE\u3002\u8BF7\u5148\u786E\u8BA4\u753B\u9762\u9700\u6C42\uFF1B\u6B64\u8BB0\u5F55\u4E0D\u662F\u5DF2\u6279\u51C6\u7684\u7F8E\u672F\u8BA2\u5355\u3002"
+  - endingId: neutral.ending.b
+    status: 0
+    artwork: {fileID: 0}
+    artworkIsPlaceholder: 0
+    artRequirementId: 
+    notes: "NCS\u7ED3\u5C40\u5DF2\u542F\u7528\uFF0C\u4F46\u5C1A\u672A\u767B\u8BB0\u4E13\u5C5E\u7ED3\u5C40\u56FE\u3002\u8BF7\u5148\u786E\u8BA4\u753B\u9762\u9700\u6C42\uFF1B\u6B64\u8BB0\u5F55\u4E0D\u662F\u5DF2\u6279\u51C6\u7684\u7F8E\u672F\u8BA2\u5355\u3002"
+  - endingId: neutral.ending.d
+    status: 0
+    artwork: {fileID: 0}
+    artworkIsPlaceholder: 0
+    artRequirementId: 
+    notes: "NCS\u7ED3\u5C40\u5DF2\u542F\u7528\uFF0C\u4F46\u5C1A\u672A\u767B\u8BB0\u4E13\u5C5E\u7ED3\u5C40\u56FE\u3002\u8BF7\u5148\u786E\u8BA4\u753B\u9762\u9700\u6C42\uFF1B\u6B64\u8BB0\u5F55\u4E0D\u662F\u5DF2\u6279\u51C6\u7684\u7F8E\u672F\u8BA2\u5355\u3002"
+  - endingId: neutral.ending.c
+    status: 0
+    artwork: {fileID: 0}
+    artworkIsPlaceholder: 0
+    artRequirementId: 
+    notes: "NCS\u7ED3\u5C40\u5DF2\u542F\u7528\uFF0C\u4F46\u5C1A\u672A\u767B\u8BB0\u4E13\u5C5E\u7ED3\u5C40\u56FE\u3002\u8BF7\u5148\u786E\u8BA4\u753B\u9762\u9700\u6C42\uFF1B\u6B64\u8BB0\u5F55\u4E0D\u662F\u5DF2\u6279\u51C6\u7684\u7F8E\u672F\u8BA2\u5355\u3002"
+  - endingId: rose.ending.trust_limit.ending
+    status: 0
+    artwork: {fileID: 0}
+    artworkIsPlaceholder: 0
+    artRequirementId: 
+    notes: "NCS\u7ED3\u5C40\u5DF2\u542F\u7528\uFF0C\u4F46\u5C1A\u672A\u767B\u8BB0\u4E13\u5C5E\u7ED3\u5C40\u56FE\u3002\u8BF7\u5148\u786E\u8BA4\u753B\u9762\u9700\u6C42\uFF1B\u6B64\u8BB0\u5F55\u4E0D\u662F\u5DF2\u6279\u51C6\u7684\u7F8E\u672F\u8BA2\u5355\u3002"
+  - endingId: rose.ending.job_requirements.ending
+    status: 0
+    artwork: {fileID: 0}
+    artworkIsPlaceholder: 0
+    artRequirementId: 
+    notes: "NCS\u7ED3\u5C40\u5DF2\u542F\u7528\uFF0C\u4F46\u5C1A\u672A\u767B\u8BB0\u4E13\u5C5E\u7ED3\u5C40\u56FE\u3002\u8BF7\u5148\u786E\u8BA4\u753B\u9762\u9700\u6C42\uFF1B\u6B64\u8BB0\u5F55\u4E0D\u662F\u5DF2\u6279\u51C6\u7684\u7F8E\u672F\u8BA2\u5355\u3002"
+  - endingId: rose.route.1115.s1.ending.ideal_world
+    status: 0
+    artwork: {fileID: 0}
+    artworkIsPlaceholder: 0
+    artRequirementId: 
+    notes: "NCS\u7ED3\u5C40\u5DF2\u542F\u7528\uFF0C\u4F46\u5C1A\u672A\u767B\u8BB0\u4E13\u5C5E\u7ED3\u5C40\u56FE\u3002\u8BF7\u5148\u786E\u8BA4\u753B\u9762\u9700\u6C42\uFF1B\u6B64\u8BB0\u5F55\u4E0D\u662F\u5DF2\u6279\u51C6\u7684\u7F8E\u672F\u8BA2\u5355\u3002"
+  - endingId: rose.route.ending.unforgiven.ending
+    status: 0
+    artwork: {fileID: 0}
+    artworkIsPlaceholder: 0
+    artRequirementId: 
+    notes: "NCS\u7ED3\u5C40\u5DF2\u542F\u7528\uFF0C\u4F46\u5C1A\u672A\u767B\u8BB0\u4E13\u5C5E\u7ED3\u5C40\u56FE\u3002\u8BF7\u5148\u786E\u8BA4\u753B\u9762\u9700\u6C42\uFF1B\u6B64\u8BB0\u5F55\u4E0D\u662F\u5DF2\u6279\u51C6\u7684\u7F8E\u672F\u8BA2\u5355\u3002"
+  - endingId: rose.route.ending.bloom.ending
+    status: 0
+    artwork: {fileID: 0}
+    artworkIsPlaceholder: 0
+    artRequirementId: 
+    notes: "NCS\u7ED3\u5C40\u5DF2\u542F\u7528\uFF0C\u4F46\u5C1A\u672A\u767B\u8BB0\u4E13\u5C5E\u7ED3\u5C40\u56FE\u3002\u8BF7\u5148\u786E\u8BA4\u753B\u9762\u9700\u6C42\uFF1B\u6B64\u8BB0\u5F55\u4E0D\u662F\u5DF2\u6279\u51C6\u7684\u7F8E\u672F\u8BA2\u5355\u3002"
+  - endingId: church.ending.if2
+    status: 0
+    artwork: {fileID: 0}
+    artworkIsPlaceholder: 0
+    artRequirementId: 
+    notes: "NCS\u7ED3\u5C40\u5DF2\u542F\u7528\uFF0C\u4F46\u5C1A\u672A\u767B\u8BB0\u4E13\u5C5E\u7ED3\u5C40\u56FE\u3002\u8BF7\u5148\u786E\u8BA4\u753B\u9762\u9700\u6C42\uFF1B\u6B64\u8BB0\u5F55\u4E0D\u662F\u5DF2\u6279\u51C6\u7684\u7F8E\u672F\u8BA2\u5355\u3002"
+  - endingId: church.ending.if4
+    status: 0
+    artwork: {fileID: 0}
+    artworkIsPlaceholder: 0
+    artRequirementId: 
+    notes: "NCS\u7ED3\u5C40\u5DF2\u542F\u7528\uFF0C\u4F46\u5C1A\u672A\u767B\u8BB0\u4E13\u5C5E\u7ED3\u5C40\u56FE\u3002\u8BF7\u5148\u786E\u8BA4\u753B\u9762\u9700\u6C42\uFF1B\u6B64\u8BB0\u5F55\u4E0D\u662F\u5DF2\u6279\u51C6\u7684\u7F8E\u672F\u8BA2\u5355\u3002"
+  - endingId: church.ending.ry1
+    status: 0
+    artwork: {fileID: 0}
+    artworkIsPlaceholder: 0
+    artRequirementId: 
+    notes: "NCS\u7ED3\u5C40\u5DF2\u542F\u7528\uFF0C\u4F46\u5C1A\u672A\u767B\u8BB0\u4E13\u5C5E\u7ED3\u5C40\u56FE\u3002\u8BF7\u5148\u786E\u8BA4\u753B\u9762\u9700\u6C42\uFF1B\u6B64\u8BB0\u5F55\u4E0D\u662F\u5DF2\u6279\u51C6\u7684\u7F8E\u672F\u8BA2\u5355\u3002"
+  - endingId: church.ending.ry2
+    status: 0
+    artwork: {fileID: 0}
+    artworkIsPlaceholder: 0
+    artRequirementId: 
+    notes: "NCS\u7ED3\u5C40\u5DF2\u542F\u7528\uFF0C\u4F46\u5C1A\u672A\u767B\u8BB0\u4E13\u5C5E\u7ED3\u5C40\u56FE\u3002\u8BF7\u5148\u786E\u8BA4\u753B\u9762\u9700\u6C42\uFF1B\u6B64\u8BB0\u5F55\u4E0D\u662F\u5DF2\u6279\u51C6\u7684\u7F8E\u672F\u8BA2\u5355\u3002"
+  - endingId: revolution.end01
+    status: 0
+    artwork: {fileID: 0}
+    artworkIsPlaceholder: 0
+    artRequirementId: 
+    notes: "NCS\u7ED3\u5C40\u5DF2\u542F\u7528\uFF0C\u4F46\u5C1A\u672A\u767B\u8BB0\u4E13\u5C5E\u7ED3\u5C40\u56FE\u3002\u8BF7\u5148\u786E\u8BA4\u753B\u9762\u9700\u6C42\uFF1B\u6B64\u8BB0\u5F55\u4E0D\u662F\u5DF2\u6279\u51C6\u7684\u7F8E\u672F\u8BA2\u5355\u3002"
+  - endingId: revolution.end02
+    status: 0
+    artwork: {fileID: 0}
+    artworkIsPlaceholder: 0
+    artRequirementId: 
+    notes: "NCS\u7ED3\u5C40\u5DF2\u542F\u7528\uFF0C\u4F46\u5C1A\u672A\u767B\u8BB0\u4E13\u5C5E\u7ED3\u5C40\u56FE\u3002\u8BF7\u5148\u786E\u8BA4\u753B\u9762\u9700\u6C42\uFF1B\u6B64\u8BB0\u5F55\u4E0D\u662F\u5DF2\u6279\u51C6\u7684\u7F8E\u672F\u8BA2\u5355\u3002"
+  - endingId: arrival.ending.if0
+    status: 0
+    artwork: {fileID: 0}
+    artworkIsPlaceholder: 0
+    artRequirementId: 
+    notes: "NCS\u7ED3\u5C40\u5DF2\u542F\u7528\uFF0C\u4F46\u5C1A\u672A\u767B\u8BB0\u4E13\u5C5E\u7ED3\u5C40\u56FE\u3002\u8BF7\u5148\u786E\u8BA4\u753B\u9762\u9700\u6C42\uFF1B\u6B64\u8BB0\u5F55\u4E0D\u662F\u5DF2\u6279\u51C6\u7684\u7F8E\u672F\u8BA2\u5355\u3002"

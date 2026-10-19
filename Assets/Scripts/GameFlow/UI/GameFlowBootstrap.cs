@@ -776,6 +776,7 @@ namespace Spotlight.GameFlow
             selectedEnding = null;
             GameSaveParticipantRegistry.PendingRestore = null;
             DialoguePlayback.Stop();
+            NarrativeEndingEcho.Clear();
             DialogueHistoryService.ClearFormal();
             playtime = 0f;
             autoSaveTimer = 0f;
@@ -1225,6 +1226,7 @@ namespace Spotlight.GameFlow
             dayFlow?.HideForMainMenu();
             narrativeIntegration?.Runtime?.Presenter?.InterruptForHost();
             DialogueHistoryService.ClearFormal();
+            NarrativeEndingEcho.Clear();
             Spotlight.Audio.GameAudio.Music(Spotlight.Audio.AudioKeys.MenuMusic);
             openingProloguePanel?.Stop();
             if (openingProloguePanel != null) UIKit.ClosePanel(openingProloguePanel);
@@ -1364,9 +1366,14 @@ namespace Spotlight.GameFlow
             NarrativeRuntime runtime = narrativeIntegration?.Runtime;
             // A real accepted ending and the restored-ending path share exactly the same panel snapshot.
             // Do not show raw text keys or manufacture completion facts to produce this screen.
+            NarrativeEndingEcho.Clear();
+            DialoguePlayback.CaptureLastRevealedLines(1);
+            var endingEcho = NarrativeEndingEcho.Text;
             var accepted = selectedEnding ?? new NarrativeEndingDefinition { endingId = runtime?.Controller?.SelectedEndingId ?? "ending.unknown" };
             var data = NarrativeEndingPresentation.Create(this, accepted,
-                key => runtime?.ResolveText(key) ?? key, ReturnFromGameOver);
+                key => runtime?.ResolveText(key) ?? key, ReturnFromGameOver,
+                artwork: NarrativeEndingEcho.ResolveArtwork(accepted.endingId), endingEcho: endingEcho);
+            NarrativeEndingEcho.Clear();
             ResultPanel panel = UIKit.OpenPanel<ResultPanel>(UILevel.Pop, data, cachePolicy: PanelCachePolicy.Reusable);
             StartCoroutine(PushPanelWhenReady(panel, true, rootNavigationVersion));
         }

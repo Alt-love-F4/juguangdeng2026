@@ -3,6 +3,7 @@ using System.Linq;
 using NUnit.Framework;
 using UnityEditor;
 using UnityEngine;
+using Spotlight.GameFlow;
 
 namespace Spotlight.Narrative.Editor.Tests
 {
@@ -33,6 +34,30 @@ namespace Spotlight.Narrative.Editor.Tests
                 if(key=="scene.cafe"){Assert.That(entry.FindPropertyRelative("useSceneBackground").boolValue,Is.True);Assert.That(entry.FindPropertyRelative("texture").objectReferenceValue,Is.Null);}
                 else{var path=AssetDatabase.GetAssetPath(entry.FindPropertyRelative("texture").objectReferenceValue);Assert.That(path,Does.Not.StartWith("Assets/Art/NarrativePlaceholders/"));}
             }
+        }
+        [Test]public void DeliveredCgArtUsesStableKeysWithoutActivatingPendingStoryHooks()
+        {
+            var visuals=AssetDatabase.LoadAssetAtPath<NarrativeStageVisuals>(NarrativeArtPlaceholderBuilder.RegistryPath);
+            foreach(var binding in new[]
+            {
+                new[]{"rose.club.knight_guidance","Assets/Art/NarrativeCG/CG03_knight_guidance.jpg"},
+                new[]{"cg.adele_sampling","Assets/Art/NarrativeCG/CG04_adele_sampling.jpg"},
+                new[]{"cg.burning_letter","Assets/Art/NarrativeCG/CG05_burning_letter.jpg"},
+                new[]{"cg.duke_blessing","Assets/Art/NarrativeCG/CG06_duke_blessing.jpg"}
+            })
+            {
+                var entry=visuals.Find(binding[0]);Assert.That(entry,Is.Not.Null,binding[0]);
+                Assert.That(entry.placeholder,Is.False,binding[0]);
+                Assert.That(AssetDatabase.GetAssetPath(entry.texture),Is.EqualTo(binding[1]),binding[0]);
+                Assert.That(AssetDatabase.LoadAssetAtPath<Texture>(binding[1]),Is.Not.Null,binding[1]);
+            }
+
+            Assert.That(AssetDatabase.GetAssetPath(visuals.Find("street.day").texture),Is.EqualTo("Assets/Art/Background/game/SCE_圣徒街场景1.png"));
+            Assert.That(AssetDatabase.GetAssetPath(visuals.Find("oct07.street.day").texture),Is.EqualTo("Assets/Art/Background/game/SCE_圣徒街场景1.png"));
+            Assert.That(visuals.Find("cg.protagonist_turn").placeholder,Is.True);
+            var config=LubanNarrativeLoader.Load();
+            Assert.That(config.presentations.conversationPages.Any(p=>p.bgOverride=="cg.duke_blessing"),Is.False);
+            Assert.That(AssetDatabase.GetAssetPath(visuals.Find("cathedral.day").texture),Is.EqualTo("Assets/Art/Background/game/SCE_圣卷大教堂场景日景.png"));
         }
         [Test]public void OnlyAuthoredSpecialCompositionsSwitchToCardsAndRestoreTheNormalScene()
         {

@@ -1,7 +1,7 @@
 {
   "startingMoney": 500,
-  "daySeconds": 300,
-  "customerPatience": 180,
+  "daySeconds": 900,
+  "customerPatience": 540,
   "customerInterval": 18,
   "entities": [
     {

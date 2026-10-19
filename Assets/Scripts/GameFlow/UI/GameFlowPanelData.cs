@@ -1,4 +1,5 @@
 ﻿using System;
+using UnityEngine;
 using YokiFrame;
 
 namespace Spotlight.GameFlow
@@ -46,7 +47,8 @@ namespace Spotlight.GameFlow
 
     public sealed class ResultPanelData : IGameFlowPanelData
     {
-        public ResultPanelData(GameFlowBootstrap flow, string title, string message, Action closed, string closeLabel = "关闭", string endingId = null)
+        public ResultPanelData(GameFlowBootstrap flow, string title, string message, Action closed, string closeLabel = "关闭", string endingId = null,
+            Sprite endingArtwork = null, bool endingArtworkIsPlaceholder = false, string endingArtworkStatus = null, string endingEcho = null)
         {
             Flow = flow;
             Title = title;
@@ -54,6 +56,10 @@ namespace Spotlight.GameFlow
             Closed = closed;
             CloseLabel = closeLabel;
             EndingId = endingId;
+            EndingArtwork = endingArtwork;
+            EndingArtworkIsPlaceholder = endingArtworkIsPlaceholder;
+            EndingArtworkStatus = endingArtworkStatus ?? string.Empty;
+            EndingEcho = endingEcho ?? string.Empty;
         }
 
         public GameFlowBootstrap Flow { get; }
@@ -63,5 +69,9 @@ namespace Spotlight.GameFlow
         public string EndingId { get; }
         public bool IsEnding => !string.IsNullOrWhiteSpace(EndingId);
         public string CloseLabel { get; }
+        public Sprite EndingArtwork { get; }
+        public bool EndingArtworkIsPlaceholder { get; }
+        public string EndingArtworkStatus { get; }
+        public string EndingEcho { get; }
     }
 }

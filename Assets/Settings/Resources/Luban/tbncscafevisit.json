@@ -5,7 +5,7 @@
     "preferredSeatId": "customer_0",
     "seatedVisualPath": "",
     "arrivalDelaySeconds": "",
-    "patienceSeconds": "180",
+    "patienceSeconds": "540",
     "leaveAfterServed": "false"
   },
   {
@@ -14,7 +14,7 @@
     "preferredSeatId": "customer_0",
     "seatedVisualPath": "",
     "arrivalDelaySeconds": "30",
-    "patienceSeconds": "180",
+    "patienceSeconds": "540",
     "leaveAfterServed": "true"
   }
 ]

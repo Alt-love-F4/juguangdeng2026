@@ -234,6 +234,9 @@ namespace Spotlight.Narrative
         public bool IsMounted(string position, string actionKey) => mounts.Any(m => m.position == position && m.action == actionKey);
         public bool HasExecutedToday(string actionKey) => dailyExecution.TryGetValue(actionKey, out int day) && day == CurrentDay;
 
+        /// <summary>The existing daily pool is repeatable activity content, not a multi-step task.</summary>
+        public bool IsDailyPoolAction(string actionKey) => narrative.UsesDailyPool(Get(actionKey));
+
         public IEnumerable<NarrativeActionDefinition> GetMountedActions(string position)
             => mounts.Where(m => m.position == position).Select(m => Get(m.action)).Where(a => a != null && IsVisible(a.actionKey));
         public bool IsVisible(string key)

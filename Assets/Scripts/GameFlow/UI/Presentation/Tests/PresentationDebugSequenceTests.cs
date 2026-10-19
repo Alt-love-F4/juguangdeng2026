@@ -162,7 +162,7 @@ namespace Spotlight.GameFlow.Tests
             while (!complete && failure == null)
             {
                 Assert.That(Time.realtimeSinceStartup, Is.LessThan(deadline), session.CurrentEventId);
-                if (panels.LastOrDefault() is ReadingPanel reading && reading != null && reading.IsPlaying) reading.Advance();
+                if (panels.LastOrDefault() is DialoguePanel dialogue && dialogue != null && dialogue.IsPlaying) dialogue.Advance();
                 else if (panels.Count == 2) { observedDrain = true; Assert.That(session.IsPresenting, Is.True); }
                 yield return null;
             }

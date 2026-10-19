@@ -6,7 +6,7 @@ using YokiFrame;
 
 namespace Spotlight.GameFlow
 {
-    /// <summary>Bridges NCS reading events to the reusable ReadingPanel prefab.</summary>
+    /// <summary>Bridges NCS reading events to the shared DialoguePanel presentation system.</summary>
     public static class ReadingEventPlayback
     {
         public static bool Play(NarrativeEventRequest request, string title, IReadOnlyList<string> pages,
@@ -14,46 +14,22 @@ namespace Spotlight.GameFlow
             => Play(request, title, pages, imageResourcePath, dialogue, speaker, portraitResourcePath, completed,
                 "narrative-reading", PanelCachePolicy.Reusable);
 
-        public static bool Play(NarrativeEventRequest request, string title, IReadOnlyList<string> pages,
-            string imageResourcePath, bool dialogue, string speaker, string portraitResourcePath, Action completed,
-            string panelTag, PanelCachePolicy cachePolicy)
+        public static bool Play(NarrativeEventRequest request, string title, IReadOnlyList<string> pages, string imageResourcePath, bool dialogue, string speaker, string portraitResourcePath, Action completed,
+            string panelTag, PanelCachePolicy cachePolicy, bool isPreview = false)
         {
             if (pages == null || pages.Count == 0) return false;
-            ReadingPanel existing = UIKit.GetPanel<ReadingPanel>();
-            if (existing != null && existing.State != PanelState.Close && existing.State != PanelState.Cached
-                && existing.State != PanelState.Preloaded
-                && !string.Equals(existing.Tag, panelTag, StringComparison.Ordinal))
-                throw new InvalidOperationException("A reading panel is already open in another scope.");
-            ReadingPanel panel = UIKit.OpenPanel<ReadingPanel>(UILevel.Pop, tag: panelTag,
-                cachePolicy: cachePolicy);
-            Texture image = string.IsNullOrWhiteSpace(imageResourcePath) ? null : Resources.Load<Texture>(imageResourcePath);
-            Sprite portrait = string.IsNullOrWhiteSpace(portraitResourcePath) ? null : Resources.Load<Sprite>(portraitResourcePath);
-            var readingPages = new List<ReadingPage>(pages.Count);
-            if (request.ReadingLines != null && request.ReadingLines.Count > 0)
-            {
-                var lines = new List<ReadingLine>();
-                foreach (NarrativeReadingLinePresentationData item in request.ReadingLines)
-                    lines.Add(new ReadingLine(item.text, item.speakerName, item.textKey, item.speakerKey, item.voiceKey,
-                        item.portrait != null ? item.portrait : string.IsNullOrWhiteSpace(item.portraitPath) ? null : Resources.Load<Sprite>(item.portraitPath),
-                        item.mode == "dialogue" ? ReadingLineKind.Dialogue : ReadingLineKind.Narration));
-                readingPages.Add(new ReadingPage(string.Empty, lines, image));
-            }
-            else for (int i = 0; i < pages.Count; i++)
-            {
-                ReadingLine line = new ReadingLine(pages[i], dialogue ? speaker : string.Empty,
-                    portrait: dialogue ? portrait : null,
-                    kind: dialogue ? ReadingLineKind.Dialogue : ReadingLineKind.Narration);
-                readingPages.Add(new ReadingPage(string.Empty, new[] { line }, image, seq: i + 1));
-            }
             bool notified = false;
-            // Stop precedes the panel's finish/cancel callback; it must not advance the next event itself.
-            void Stopped() => panel.PlaybackStopped -= Stopped;
+            DialoguePanel panel = null;
+            void Detach()
+            {
+                if (panel == null) return;
+                panel.PlaybackInterrupted -= Interrupted;
+            }
             void Complete()
             {
                 if (notified) return;
                 notified = true;
-                panel.PlaybackStopped -= Stopped;
-                UIKit.ClosePanel(panel);
+                Detach();
                 completed?.Invoke();
             }
             void Cancel()
@@ -61,22 +37,107 @@ namespace Spotlight.GameFlow
                 if (notified) return;
                 if (request.PresentationCancelled == null) { Complete(); return; } // Legacy external callback contract.
                 notified = true;
-                panel.PlaybackStopped -= Stopped;
-                UIKit.ClosePanel(panel);
+                Detach();
                 request.PresentationCancelled();
             }
+            void Interrupted()
+            {
+                // A forced Stop is not a successful read. Formal NCS requests provide an explicit
+                // cancellation hook; legacy callers still rely on the panel's Cancel callback.
+                if (notified) return;
+                if (request.PresentationCancelled == null) { Detach(); return; }
+                notified = true;
+                Detach();
+                request.PresentationCancelled();
+            }
+
             try
             {
-                panel.Play(new ReadingScript(readingPages, title), Complete, Cancel);
-                if (!notified) panel.PlaybackStopped += Stopped;
+                DialogueScript script = CreateDialogueScript(request, title, pages, imageResourcePath,
+                    dialogue, speaker, portraitResourcePath);
+                if (isPreview) script = script.WithPreviewContext();
+                panel = DialoguePlayback.Play(script, Complete, Cancel, panelTag, cachePolicy);
+                if (!notified) panel.PlaybackInterrupted += Interrupted;
                 return true;
             }
             catch
             {
-                panel.PlaybackStopped -= Stopped;
-                UIKit.ClosePanel(panel);
+                Detach();
                 throw;
             }
         }
+
+        private static DialogueScript CreateDialogueScript(NarrativeEventRequest request, string title,
+            IReadOnlyList<string> pages, string imageResourcePath, bool dialogue, string speaker, string portraitResourcePath)
+        {
+            Texture background = string.IsNullOrWhiteSpace(imageResourcePath)
+                ? null : Resources.Load<Texture>(imageResourcePath);
+            var lines = new List<DialogueLine>();
+            IReadOnlyList<NarrativeReadingLinePresentationData> readingLines = request.ReadingLines;
+            if (readingLines != null && readingLines.Count > 0)
+            {
+                for (int i = 0; i < readingLines.Count; i++)
+                {
+                    NarrativeReadingLinePresentationData item = readingLines[i];
+                    if (string.Equals(item.mode, "dialogue", StringComparison.OrdinalIgnoreCase))
+                    {
+                        string speakerName = string.IsNullOrWhiteSpace(item.speakerName) ? "旁白" : item.speakerName;
+                        Sprite linePortrait = item.portrait != null ? item.portrait
+                            : string.IsNullOrWhiteSpace(item.portraitPath) ? null : Resources.Load<Sprite>(item.portraitPath);
+                        string characterKey = string.IsNullOrWhiteSpace(item.speakerKey)
+                            ? "reading.speaker." + speakerName : item.speakerKey;
+                        var character = new DialogueCharacter(characterKey, speakerName, linePortrait);
+                        lines.Add(new DialogueLine(DialogueSpeaker.Right, item.text, speakerNameOverride: speakerName,
+                            replaceLeft: true, leftCharacter: null, replaceRight: true, rightCharacter: character,
+                            replaceCenter: true, centerCharacter: null, voiceKey: item.voiceKey,
+                            passiveHint: i == 0 ? "滚轮向上：查看已读内容" : null,
+                            source: ReadingSource(request, item)));
+                    }
+                    else
+                    {
+                        lines.Add(new DialogueLine(DialogueSpeaker.Narrator, item.text,
+                            replaceLeft: true, leftCharacter: null, replaceRight: true, rightCharacter: null,
+                            replaceCenter: true, centerCharacter: null, voiceKey: item.voiceKey,
+                            passiveHint: i == 0 ? "滚轮向上：查看已读内容" : null,
+                            source: ReadingSource(request, item)));
+                    }
+                }
+            }
+            else
+            {
+                Sprite portrait = dialogue && !string.IsNullOrWhiteSpace(portraitResourcePath)
+                    ? Resources.Load<Sprite>(portraitResourcePath) : null;
+                for (int i = 0; i < pages.Count; i++)
+                {
+                    if (dialogue)
+                    {
+                        string name = string.IsNullOrWhiteSpace(speaker) ? "旁白" : speaker;
+                        var character = new DialogueCharacter("reading.speaker." + name, name, portrait);
+                        lines.Add(new DialogueLine(DialogueSpeaker.Right, pages[i], speakerNameOverride: name, replaceLeft: true,
+                            leftCharacter: null, replaceRight: true, rightCharacter: character,
+                            replaceCenter: true, centerCharacter: null,
+                            passiveHint: i == 0 ? "滚轮向上：查看已读内容" : null,
+                            source: ReadingSource(request, null, i)));
+                    }
+                    else
+                    {
+                        lines.Add(new DialogueLine(DialogueSpeaker.Narrator, pages[i],
+                            replaceLeft: true, leftCharacter: null, replaceRight: true, rightCharacter: null,
+                            replaceCenter: true, centerCharacter: null,
+                            passiveHint: i == 0 ? "滚轮向上：查看已读内容" : null,
+                            source: ReadingSource(request, null, i)));
+                    }
+                }
+            }
+
+            if (lines.Count == 0) lines.Add(new DialogueLine(DialogueSpeaker.Narrator, string.Empty));
+            return new DialogueScript(lines, new DialogueCharacter("", null), new DialogueCharacter("", null),
+                title, background);
+        }
+
+        private static DialogueSourceLocation ReadingSource(NarrativeEventRequest request, NarrativeReadingLinePresentationData item, int fallbackIndex = 0)
+            => new DialogueSourceLocation("Reading", request.Event?.eventId, request.Event?.presentationKey,
+                item != null ? (string.IsNullOrWhiteSpace(item.lineId) ? item.textKey : item.lineId) : "reading." + fallbackIndex,
+                item != null ? (item.seq > 0 ? item.seq : 1) : fallbackIndex + 1, item != null ? item.pageId : null);
     }
 }

@@ -27,7 +27,9 @@ namespace Spotlight.GameFlow
         {
             var actions = runtime?.Actions;
             return actions != null && (actions.HasBlockingActions() || actions.GetMapPositions()
-                .SelectMany(actions.GetDisplayableActions).Any(a => actions.IsAvailable(a.actionKey, out _)));
+                .SelectMany(actions.GetDisplayableActions).Any(a =>
+                    !(a.type == NarrativeActionType.Repeat && !a.mustExecute && actions.IsDailyPoolAction(a.actionKey))
+                    && actions.IsAvailable(a.actionKey, out _)));
         }
 
         public static List<MapTaskItem> Build(NarrativeRuntime runtime, Func<string, bool> allowsPosition = null)
@@ -44,27 +46,40 @@ namespace Spotlight.GameFlow
                 foreach (var action in actions.GetDisplayableActions(position))
                 {
                     if (!seen.Add(action.actionKey)) continue;
+                    bool optionalPool = action.type == NarrativeActionType.Repeat && !action.mustExecute
+                        && actions.IsDailyPoolAction(action.actionKey);
                     bool done = actions.IsCompleted(action.actionKey) || actions.HasExecutedToday(action.actionKey)
-                        && (action.type == NarrativeActionType.Daily || action.IsDelivery);
+                        && (action.type == NarrativeActionType.Daily || action.IsDelivery || optionalPool);
                     string name = runtime.ResolveText(action.nameText);
                     string status;
-                    if (done) status = actions.IsCompleted(action.actionKey) ? "已完成" : "今日已完成，明天可继续";
+                    List<NarrativeActionCheck> checks = null;
+                    bool available = false;
+                    if (!done && action.type != NarrativeActionType.Future)
+                        available = actions.IsAvailable(action.actionKey, out checks);
+                    // An empty daily event pool is a map-card state, not a task. Do not pollute
+                    // the todo list with a location that currently has nothing the player can do.
+                    if (!done && action.type != NarrativeActionType.Future && !available
+                        && checks != null && checks.Any(c => !c.satisfied && c.requirement == "DailyPool")) continue;
+                    if (done) status = optionalPool ? "本次已完成 · 自选再次行动另计消耗"
+                        : actions.IsCompleted(action.actionKey) ? "已完成" : "今日已完成，明天可继续";
                     else if (action.type == NarrativeActionType.Future) status = "等待 " + actions.GetRemainingDays(action.actionKey) + " 天后开放";
-                    else if (actions.IsAvailable(action.actionKey, out var checks)) status = "可进行";
-                    else if (checks.Any(c => !c.satisfied && c.requirement.StartsWith("ActionPoint("))) status = "行动点不足，查看详情确认消耗";
-                    else if (checks.Any(c => !c.satisfied && c.requirement.StartsWith("Item("))) status = "所需物品不足，查看详情确认需求";
+                    else if (available) status = optionalPool ? "自选日常 · 每次独立行动" : "可进行";
+                    else if (checks != null && checks.Any(c => !c.satisfied && c.requirement.StartsWith("ActionPoint("))) status = "行动点不足，查看详情确认消耗";
+                    else if (checks != null && checks.Any(c => !c.satisfied && c.requirement.StartsWith("Item("))) status = "所需物品不足，查看详情确认需求";
                     else status = "暂不可进行，请先处理当前事项";
                     if (action.IsProgress) status += " · 进度 " + actions.GetProgress(action.actionKey) + "/" + action.progressTarget;
                     result.Add(new MapTaskItem {
                         id = action.actionKey, actionKey = action.actionKey, name = name,
                         description = runtime.ResolveText(action.descText), completed = done,
-                        currentTask = "前往「" + locationName + "」，在行动详情中选择「" + name + "」。",
+                        currentTask = optionalPool
+                            ? "这是可重复日常，不是未完成任务的分段。每次造访播放一则内容；再次行动会重新计费，可自行选择是否进行。"
+                            : "前往「" + locationName + "」，在行动详情中选择「" + name + "」。",
                         location = locationName, positionKey = position, status = status,
                         navigationLabel = "查看地点与行动", priority = action.mustExecute && !done ? 0 : 10,
                         important = action.mustExecute && !done && action.type != NarrativeActionType.Future
                             && !actions.HasExecutedToday(action.actionKey),
                         remainingDays = actions.GetRemainingDays(action.actionKey),
-                        preventsRest = !done && (action.mustExecute || actions.IsAvailable(action.actionKey, out _))
+                        preventsRest = !done && !optionalPool && (action.mustExecute || available)
                     });
                 }
                 // Completed one-time actions no longer belong to the displayable map projection.

@@ -43,6 +43,8 @@ namespace Spotlight.GameFlow.Tests
                 Assert.That(panel.IsEndingPresentation,Is.True);Assert.That(panel.CurrentEndingId,Is.EqualTo(e.endingId));
                 Assert.That(panel.DisplayedTitle,Is.EqualTo(config.texts.Find(t=>t.key==e.titleText).content));
                 Assert.That(panel.DisplayedMessage,Is.Not.Empty);Assert.That(panel.GetComponent<CanvasGroup>(),Is.Not.Null);
+                Assert.That(panel.DisplayedEndingArtwork,Is.Null);
+                Assert.That(panel.DisplayedEndingArtworkStatus,Does.Contain("需求待确认"));
                 Assert.That(panel.GetComponentsInChildren<TMPro.TMP_Text>(true).Any(t=>t.text.Contains("ENDING  /  "+e.endingId)&&t.gameObject.activeSelf),Is.True,"Prefab must bind ending badge.");
                 debug.StopCurrent();yield return null;
             }
@@ -60,6 +62,8 @@ namespace Spotlight.GameFlow.Tests
             Assert.That(closed,Is.EqualTo(1));
             var ordinary=UIKit.OpenPanel<ResultPanel>(UILevel.Pop,new ResultPanelData(null,"操作提示","普通消息",null),tag:"ending-panel-test",cachePolicy:PanelCachePolicy.Reusable);yield return null;
             Assert.That(ordinary.IsEndingPresentation,Is.False);Assert.That(ordinary.CurrentEndingId,Is.Null);
+            Assert.That(ordinary.DisplayedEndingArtwork,Is.Null);
+            Assert.That(ordinary.DisplayedEndingEcho,Is.Empty);
             Assert.That(ordinary.GetComponentsInChildren<TMPro.TMP_Text>(true).Any(t=>t.gameObject.activeSelf&&t.text.StartsWith("ENDING  /")),Is.False);
         }
         [UnityTest]public IEnumerator ActualAuthoredRootCompletesThroughPresenterThenOpensTheRealEndingPanel()

@@ -220,6 +220,91 @@ namespace Spotlight.GameFlow.Tests
             Assert.That(failures.Count, Is.EqualTo(Locations.Length));
         }
 
+        [UnityTest]
+        public IEnumerator NineFirstVisitsAutomaticallyContinueToTheirDailyBodyForOnePoint()
+        {
+            // Undo only this fixture's seeded visit history. No formal save/runtime is touched.
+            var history = controller.State.Capture();
+            var visits = config.events.Where(e => Property(e, "dailyKind") == "visit").Select(e => e.eventId).ToArray();
+            history.happenedEvents.RemoveAll(id => visits.Contains(id));
+            controller.State.Restore(history);
+            foreach (string location in Locations)
+            {
+                actions.ActionPoints.Set(1);
+                string key = "daily.action." + location;
+                Assert.That(controller.TrySelectActionEvents(actions.Get(key), out var expected), Is.True, key);
+                Assert.That(expected.Count, Is.EqualTo(2), key);
+                int callbacks = 0; bool? success = null;
+                int completedBefore = completedEvents.Count;
+                var seen = new HashSet<string>();
+                Assert.That(actions.Execute(key, value => { callbacks++; success = value; }), Is.True, key);
+                Assert.That(actions.Execute(key), Is.False, "Repeated click cannot buy a second action while presenting.");
+                float deadline = Time.realtimeSinceStartup + 15f;
+                while (actions.IsExecuting && Time.realtimeSinceStartup < deadline)
+                {
+                    Assert.That(actions.ActionPoints.Current, Is.Zero, "No extra charge/refund between first visit and body: " + key);
+                    Assert.That(callbacks, Is.Zero, "The map callback must wait for BOTH roots: " + key);
+                    var panel = DialoguePanel.Active;
+                    if (panel != null && panel.IsPlaying && panel.Tag == Tag && panel.IsReady)
+                    {
+                        if (panel.CurrentSource != null) seen.Add(panel.CurrentSource.EventId);
+                        Assert.That(panel.IsChoosing, Is.False, "First eligible ordinary fixture is not a choice: " + key);
+                        panel.Advance();
+                    }
+                    yield return null;
+                }
+                Assert.That(actions.IsExecuting, Is.False, "Full visit/body sequence timed out: " + key);
+                Assert.That(success, Is.True, key); Assert.That(callbacks, Is.EqualTo(1), key);
+                Assert.That(actions.ActionPoints.Current, Is.Zero, key);
+                CollectionAssert.AreEquivalent(expected, seen, key);
+                CollectionAssert.AreEqual(expected, completedEvents.Skip(completedBefore).ToArray(), key);
+                Assert.That(actions.HasExecutedToday(key), Is.True);
+                Assert.That(failures, Is.Empty);
+            }
+        }
+
+        [UnityTest]
+        public IEnumerator CityHallChoiceAndItsResponseFinishInOnePurchase()
+        {
+            controller.State.SetCondition("story.daily.civ.05.completed", true);
+            var city = actions.Get("daily.action.市政厅");
+            // All ordinary variants except CIV-08 have been seen, so the real least-played
+            // selector chooses the authored choice root. Explicit test history, not natural progress.
+            foreach (string id in city.resultEvents.Where(id => id != "daily.civ.08"))
+                controller.State.SetCounter("daily.playcount." + id, 1);
+            Assert.That(controller.TrySelectActionEvents(city, out var selected), Is.True);
+            Assert.That(selected, Is.EqualTo(new[] { "daily.civ.08" }));
+            actions.ActionPoints.Set(1);
+            int callbacks = 0; bool? success = null;
+            Assert.That(actions.Execute(city.actionKey, value => { callbacks++; success = value; }), Is.True);
+            var seen = new HashSet<string>(); bool chosen = false;
+            float deadline = Time.realtimeSinceStartup + 15f;
+            while (actions.IsExecuting && Time.realtimeSinceStartup < deadline)
+            {
+                Assert.That(actions.ActionPoints.Current, Is.Zero);
+                var panel = DialoguePanel.Active;
+                if (panel != null && panel.IsPlaying && panel.Tag == Tag && panel.IsReady)
+                {
+                    if (panel.CurrentSource != null) seen.Add(panel.CurrentSource.PageId);
+                    if (panel.IsChoosing)
+                    {
+                        Assert.That(chosen, Is.False);
+                        Assert.That(panel.SelectOption("daily.civ.08.choice.a"), Is.True);
+                        chosen = true;
+                    }
+                    else panel.Advance();
+                }
+                yield return null;
+            }
+            Assert.That(chosen, Is.True);
+            Assert.That(success, Is.True); Assert.That(callbacks, Is.EqualTo(1));
+            CollectionAssert.AreEquivalent(new[] { "daily.civ.08.opening", "daily.civ.08.response.a" }, seen);
+            Assert.That(controller.State.GetCounter("daily.playcount.daily.civ.08"), Is.EqualTo(1));
+            Assert.That(controller.State.HasHappenedEvent("daily.civ.08"), Is.True);
+            Assert.That(actions.ActionPoints.Current, Is.Zero);
+            Assert.That(failures, Is.Empty);
+        }
+
         private string Resolve(string key) => config.texts.Find(t => t.key == key)?.content ?? key;
         private int ReadBar(string key)
         {

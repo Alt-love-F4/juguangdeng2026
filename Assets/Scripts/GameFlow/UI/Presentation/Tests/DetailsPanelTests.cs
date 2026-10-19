@@ -3,6 +3,7 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using NUnit.Framework;
 using TMPro;
 using UnityEditor.SceneManagement;
@@ -370,6 +371,59 @@ namespace Spotlight.GameFlow.Tests
             Assert.That(panel.SelectedWorldProgressKey, Is.Null);
             Assert.That(view.Find("Fill").GetComponent<Image>().fillAmount, Is.Zero);
             Assert.That(view.Find("Value").GetComponent<TMP_Text>().text, Is.Empty);
+        }
+
+        [UnityTest]
+        public IEnumerator RelationshipCardsAndWorldOverviewShowTheirOwnHoverDetails()
+        {
+            DetailsPanel panel = (DetailsPanel)controller.CurrentPanel;
+            var relationship = new DetailsCharacterData("adele", "阿黛尔", "咖啡馆的店员。", unlocked: true,
+                bars: new[] { new DetailsProgressData("adele.affection", "好感记录", 4, -20, 20,
+                    description: "存档中的关系数值，不推断角色态度。") },
+                relationshipSummary: "新手引导人物：本次教程中显示；正式相识记录尚未写入。好感记录：+4（范围 -20 至 20）");
+            var world = new DetailsSectionData("世界概况", "670年10月6日 · 第1日",
+                "世界稳定度 5 / 10 · 未被拘押 · 当前倾向：尚未形成明确路线");
+            panel.Refresh(new DetailsPanelData(relationships: new DetailsSectionData("人物关系", "已解锁 1 人", "悬停人物卡片查看关系资料。"),
+                world: world, characters: new[] { relationship }, worldBars: new[]
+                {
+                    new DetailsProgressData("world.stability", "世界稳定度", 5, 0, 10,
+                        description: "世界稳定度来自当前存档。"),
+                    new DetailsProgressData("faction.neutral", "中立 / 经营倾向", 2, -20, 20,
+                        description: "当前存档记录的势力倾向。")
+                }));
+            panel.ShowRelationships();
+            yield return null;
+            Transform relationshipView = panel.transform.Find("Window/Relationships/RelationshipsView");
+            Transform card = relationshipView.Find("CharacterGrid/Character_adele");
+            var characterHover = card.GetComponent<DetailsHoverTarget>();
+            Assert.That(characterHover, Is.Not.Null);
+            characterHover.OnPointerEnter(new PointerEventData(eventSystem) { position = ScreenPoint(card) });
+            Assert.That(panel.TooltipVisible, Is.True);
+            Assert.That(panel.transform.Find("Window/Tooltip/Title").GetComponent<TMP_Text>().text, Is.EqualTo("阿黛尔"));
+            StringAssert.Contains("正式相识记录尚未写入", panel.transform.Find("Window/Tooltip/Body").GetComponent<TMP_Text>().text);
+            StringAssert.Contains("+4", panel.transform.Find("Window/Tooltip/Body").GetComponent<TMP_Text>().text);
+            yield return new WaitForSecondsRealtime(.2f);
+            yield return new WaitForEndOfFrame();
+            Capture("details-relationship-live");
+
+            panel.ShowWorld();
+            yield return null;
+            Transform worldView = panel.transform.Find("Window/World/WorldView");
+            Transform overview = worldView.GetComponentsInChildren<RectTransform>(true)
+                .Single(rect => rect.name == "WorldOverview");
+            Assert.That(overview, Is.Not.Null);
+            StringAssert.Contains("670年10月6日", overview.Find("Heading").GetComponent<TMP_Text>().text);
+            StringAssert.Contains("世界稳定度 5 / 10", overview.Find("Summary").GetComponent<TMP_Text>().text);
+            StringAssert.Contains("尚未形成明确路线", overview.Find("Summary").GetComponent<TMP_Text>().text);
+            var factionHover = worldView.GetComponentsInChildren<DetailsHoverTarget>(true)
+                .Single(target => target.name == "Selector_faction.neutral");
+            Assert.That(factionHover, Is.Not.Null);
+            factionHover.OnPointerEnter(new PointerEventData(eventSystem) { position = ScreenPoint(factionHover.transform) });
+            Assert.That(panel.transform.Find("Window/Tooltip/Title").GetComponent<TMP_Text>().text, Is.EqualTo("中立 / 经营倾向"));
+            StringAssert.Contains("当前存档记录", panel.transform.Find("Window/Tooltip/Body").GetComponent<TMP_Text>().text);
+            yield return new WaitForSecondsRealtime(.2f);
+            yield return new WaitForEndOfFrame();
+            Capture("details-world-overview-live");
         }
 
         [UnityTest]

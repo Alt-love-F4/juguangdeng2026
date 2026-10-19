@@ -347,7 +347,10 @@ class RoseContentTests(unittest.TestCase):
             self.assertEqual(sum(l['lineId']==f'rose.1009.s1.p{number:03}' for l in lines),1)
         registry=(PROJECT/'Assets/Resources/Dialogue/NarrativeStageVisuals.asset').read_text(encoding='utf-8')
         block=registry.split('  - key: rose.club.knight_guidance',1)[1].split('  - key:',1)[0]
-        self.assertIn('placeholder: 1',block)
+        self.assertIn('placeholder: 0',block)
+        meta=(PROJECT/'Assets/Art/NarrativeCG/CG03_knight_guidance.jpg.meta').read_text(encoding='utf-8')
+        guid=meta.split('guid: ',1)[1].splitlines()[0].strip()
+        self.assertIn('guid: '+guid,block)
         self.assertEqual(self.b['_audit']['presets']['rose1009Perception']['value'],5)
         self.assertNotIn('legacyUnityAssertionConflict',self.b['_audit']['presets']['rose1009Perception'])
 

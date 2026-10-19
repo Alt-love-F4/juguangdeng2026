@@ -95,6 +95,39 @@ namespace Spotlight.GameFlow.Tests
         }
 
         [UnityTest]
+        public IEnumerator DetailsAdapterProjectsKnownRelationshipsAndWorldMetricsFromNcsState()
+        {
+            yield return SceneManager.LoadSceneAsync("Map", LoadSceneMode.Single);
+            yield return WaitFor(() => GameplayHudPanel.Instance != null && NarrativeRuntime.Instance != null
+                && NarrativeRuntime.Instance.IsReady && PlayerRuntime.Current?.CreationSubmitted == true,
+                "Standalone map narrative/player session");
+            var runtime = NarrativeRuntime.Instance;
+            var state = runtime.Controller.State;
+            var before = state.Capture();
+            try
+            {
+                state.SetCondition("known.adele", true);
+                state.TrySetBar("adele.affection", 6, out _, out _);
+                var data = DetailsGameDataAdapter.Create();
+                var adele = data.Characters.Single(character => character.Id == "adele");
+                Assert.That(adele.Unlocked, Is.True, "The narrative known.<id> fact must unlock a real cast member.");
+                Assert.That(adele.Bars.Any(bar => bar.Key == "adele.affection" && bar.Value == 6), Is.True);
+                StringAssert.Contains("已相识", adele.RelationshipSummary);
+                StringAssert.Contains("+6", adele.RelationshipSummary);
+                foreach (string key in new[] { "world.stability", "faction.neutral", "faction.rose", "faction.church", "faction.revolution" })
+                    Assert.That(data.WorldBars.Any(bar => bar.Key == key), Is.True, key);
+                Assert.That(data.WorldBars.Any(bar => bar.Key == "world.calendar" || bar.Key == "cafe.money"
+                    || bar.Key.StartsWith("training.", StringComparison.Ordinal)), Is.False,
+                    "Calendar, cafe funds and player training are not world overview indicators.");
+                StringAssert.Contains("第 " + runtime.Actions.CurrentDay + " 日", data.World.Description);
+                StringAssert.Contains("世界稳定度", data.World.Description);
+                StringAssert.Contains("拘押", data.World.Description);
+                StringAssert.Contains("当前倾向", data.World.Description);
+            }
+            finally { state.Restore(before); }
+        }
+
+        [UnityTest]
         public IEnumerator MapToCafeKeepsOneHudAndSamePlayerActionAndTaskOwners()
         {
             yield return SceneManager.LoadSceneAsync("Map", LoadSceneMode.Single);

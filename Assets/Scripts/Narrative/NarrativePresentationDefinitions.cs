@@ -88,6 +88,8 @@ namespace Spotlight.Narrative
 
     public sealed class NarrativeReadingLinePresentationData
     {
+        public string lineId, pageId;
+        public int seq;
         public string text, textKey, speakerKey, speakerName, portraitPath, mode, voiceKey;
         public UnityEngine.Sprite portrait;
     }
