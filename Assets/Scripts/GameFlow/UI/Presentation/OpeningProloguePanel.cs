@@ -28,7 +28,7 @@ namespace Spotlight.GameFlow
             [Min(0f)] public float artDelaySeconds;
             [Tooltip("正文区域的纵向锚点 (minY, maxY)，0~1。")]
             public Vector2 textArea = new Vector2(.22f, .78f);
-            [Min(0f)] public float fontSize = 34f;
+            [Min(0f)] public float fontSize = 40f;
         }
 
         [Header("Prefab bindings")]

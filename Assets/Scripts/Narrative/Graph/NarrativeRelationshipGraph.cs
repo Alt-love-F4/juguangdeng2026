@@ -12,7 +12,7 @@ namespace Spotlight.Narrative
     public sealed class StoryGraphNode
     {
         public string Id, Key, Title, Group, Lane, Entry, Snippet, Blocker, SearchText, DateSource;
-        public int Day;
+        public int Day, Priority;
         public bool Sample, Disabled;
         public StoryNodeKind Kind;
         public bool Blocked => !string.IsNullOrWhiteSpace(Blocker);
@@ -195,7 +195,7 @@ namespace Spotlight.Narrative
                     Group = group, Lane = GroupLabel(group), Title = Text(o.titleKey), Day = group == "ambient" ? 0 : 1, Entry = "代码 / 教程入口", DateSource = "分组排布", Snippet = body.FirstOrDefault() ?? "", SearchText = string.Join("\n", body) };
             }
             foreach (var e in config.endings.Where(e => e != null)) nodes["ending:" + e.endingId] = new StoryGraphNode { Id = "ending:" + e.endingId, Key = e.endingId, Kind = StoryNodeKind.Ending,
-                Group = "ending", Lane = "结局", Title = Text(e.titleText), Entry = "安全边界检查", Snippet = Text(e.messageText), Sample = !e.enabled, Disabled = !e.enabled };
+                Group = "ending", Lane = "结局", Title = Text(e.titleText), Entry = "安全边界检查", Snippet = Text(e.messageText), Priority = e.priority, Sample = !e.enabled, Disabled = !e.enabled };
             foreach (var e in config.events.Where(e => e != null))
             {
                 var node = nodes[EventId(e.eventId)]; var keys = new HashSet<string>(); var pageIds = new List<string>();

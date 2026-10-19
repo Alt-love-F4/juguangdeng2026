@@ -67,8 +67,11 @@ namespace Spotlight.GameFlow
 
         private Sequence transition;
         private Tween hintPulse;
+        private Tween signaturePulse;
         private Action finished;
         private bool capturedPose;
+        private bool coffeeCupExitStarted;
+        private Vector3 signatureButtonScale;
         private Vector2 paperPosition;
         private Vector3 paperScale;
         private Vector3 envelopeScale;
@@ -77,8 +80,23 @@ namespace Spotlight.GameFlow
 
         public bool IsPlaying { get; private set; }
         public LetterStage Stage { get; private set; }
+        public bool UseCoffeeCupExit { get; set; }
         public int VisibleCharacterCount => letterBody == null ? 0 : letterBody.maxVisibleCharacters;
-        private bool NeedsScroll => letterBody.preferredHeight > letterScroll.viewport.rect.height + .5f;
+
+        /// <summary>滚动文案只在正文确实超出可视区时出现；重建布局后再判断，避免旧尺寸误判。</summary>
+        private bool HasLetterOverflow()
+        {
+            if (letterBody == null || letterScroll == null || letterScroll.viewport == null) return false;
+            float content = Mathf.Max(letterBody.preferredHeight, letterScroll.content != null ? letterScroll.content.rect.height : 0f);
+            return content > letterScroll.viewport.rect.height + 1f;
+        }
+
+        private bool LetterAtBottom()
+        {
+            if (letterScroll == null) return true;
+            return letterScroll.verticalNormalizedPosition <= .01f;
+        }
+
 
         protected override void OnInit(IUIData data = null)
         {
@@ -87,6 +105,7 @@ namespace Spotlight.GameFlow
             Spotlight.Audio.UIButtonAudio.Configure(signatureButton, string.Empty);
             Spotlight.Audio.UIButtonAudio.Configure(nameCancelButton, Spotlight.Audio.AudioKeys.Cancel);
             CapturePose();
+            signatureButtonScale = signatureButton.transform.localScale;
             envelopeButton.onClick.AddListener(OpenEnvelope);
             signatureButton.onClick.AddListener(ConfirmSignature);
             skipButton.onClick.AddListener(SkipLetter);
@@ -98,6 +117,7 @@ namespace Spotlight.GameFlow
         protected override void OnOpen(IUIData data = null)
         {
             Stop();
+            UseCoffeeCupExit = false;
             UIKit.SetPanelModal(this, true);
         }
 
@@ -134,10 +154,11 @@ namespace Spotlight.GameFlow
             draft = content == null ? pendingDraft ?? new FirstDayLetterDraft() : null;
             pendingDraft = null;
             hoveredLink = null;
+            coffeeCupExitStarted = false;
             CancelPlayerName();
             FirstDayLetterContent resolved = content ?? new FirstDayLetterContent(draft.BuildBody(), FirstDayLetterDraft.Signature);
             letterBody.richText = InteractiveLetter;
-            signatureText.richText = InteractiveLetter;
+            signatureText.richText = true;
             finished = onFinished;
             IsPlaying = true;
             Stage = LetterStage.Envelope;
@@ -153,10 +174,14 @@ namespace Spotlight.GameFlow
             signatureButton.interactable = false;
             skipButton.gameObject.SetActive(true);
             skipButton.interactable = true;
-            signatureText.text = InteractiveLetter ? "—— 永远惦念你的<size=116.667%>叔叔</size>" : resolved.Signature;
+            signatureText.text = EmphasizeSignature(InteractiveLetter
+                ? "—— 永远惦念你的<size=116.667%>叔叔</size>"
+                : resolved.Signature);
             readingHint.text = "";
             letterBody.text = resolved.Body;
             letterBody.maxVisibleCharacters = 0;
+            letterScroll.onValueChanged.RemoveListener(InteractiveScrolled);
+            letterScroll.onValueChanged.AddListener(InteractiveScrolled);
             hintGroup.alpha = 1f;
             hintPulse = DOTween.To(() => hintGroup.alpha, value => hintGroup.alpha = value, .45f, .9f)
                 .SetEase(Ease.InOutSine).SetLoops(-1, LoopType.Yoyo).SetUpdate(true)
@@ -181,6 +206,7 @@ namespace Spotlight.GameFlow
             characterCount = letterBody.textInfo.characterCount;
             letterBody.maxVisibleCharacters = 0;
             Canvas.ForceUpdateCanvases();
+            LayoutRebuilder.ForceRebuildLayoutImmediate(letterScroll.content);
             letterScroll.verticalNormalizedPosition = 1f;
             transition = DOTween.Sequence().SetUpdate(true).SetLink(gameObject, LinkBehaviour.KillOnDestroy);
             transition.Append(DOTween.To(() => paper.anchoredPosition,
@@ -196,14 +222,33 @@ namespace Spotlight.GameFlow
                 envelopeGroup.gameObject.SetActive(false);
                 Stage = LetterStage.Reading;
                 typeTimer = 0f;
-                readingHint.text = NeedsScroll ? "信中的文字正在慢慢浮现…  ·  可用滚轮阅读" : "信中的文字正在慢慢浮现…";
+                Canvas.ForceUpdateCanvases();
+                LayoutRebuilder.ForceRebuildLayoutImmediate(letterScroll.content);
+                readingHint.text = HasLetterOverflow()
+                    ? "信中的文字正在慢慢浮现…  ·  滚轮 / 拖动阅读"
+                    : "信中的文字正在慢慢浮现…";
             });
         }
 
         private void Update()
         {
             if (genericLetterMode) { UpdateGenericLetter(); return; }
-            if (!IsPlaying || Stage != LetterStage.Reading) return;
+            if (!IsPlaying) return;
+            if (Stage == LetterStage.AwaitingSignature)
+            {
+                if (signatureButton.interactable)
+                {
+                    StartSignatureEmphasis();
+                    if (string.IsNullOrEmpty(hoveredLink))
+                    {
+                        if (!HasLetterOverflow() || LetterAtBottom())
+                            readingHint.text = "\u003e \u8bfb\u5b8c\u540e\uff0c\u70b9\u51fb\u4e0a\u65b9\u300c\u53d4\u53d4\u300d\u7f72\u540d\u7ee7\u7eed";
+                    }
+                }
+                else StopSignatureEmphasis();
+                return;
+            }
+            if (Stage != LetterStage.Reading) return;
             typeTimer += Time.unscaledDeltaTime;
             int visible = Mathf.Min(characterCount,
                 Mathf.FloorToInt(typeTimer / Mathf.Max(.005f, characterInterval)));
@@ -231,8 +276,10 @@ namespace Spotlight.GameFlow
             signatureButton.interactable = false;
             readingHint.text = "";
             transition = DOTween.Sequence().SetUpdate(true).SetLink(gameObject, LinkBehaviour.KillOnDestroy);
+            if (UseCoffeeCupExit) transition.AppendCallback(BeginCoffeeCupExit);
             transition.Append(DOTween.To(() => rootGroup.alpha, value => rootGroup.alpha = value, 0f, closeSeconds));
             transition.Join(paper.DOScale(paperScale * .97f, closeSeconds));
+            if (UseCoffeeCupExit) transition.AppendInterval(Mathf.Max(0f, .45f - closeSeconds));
             transition.OnComplete(() =>
             {
                 transition = null;
@@ -250,6 +297,23 @@ namespace Spotlight.GameFlow
             transition?.Kill(false);
             transition = null;
             CancelPlayerName();
+            if (UseCoffeeCupExit)
+            {
+                Stage = LetterStage.Closing;
+                rootGroup.interactable = rootGroup.blocksRaycasts = false;
+                envelopeButton.interactable = false;
+                signatureButton.interactable = false;
+                skipButton.interactable = false;
+                BeginCoffeeCupExit();
+                transition = DOTween.Sequence().SetUpdate(true).SetLink(gameObject, LinkBehaviour.KillOnDestroy);
+                transition.AppendInterval(.45f);
+                transition.OnComplete(() =>
+                {
+                    transition = null;
+                    if (IsPlaying && Stage == LetterStage.Closing) FinishLetter();
+                });
+                return;
+            }
             FinishLetter();
         }
 
@@ -322,18 +386,59 @@ namespace Spotlight.GameFlow
             UpdateReadingHint();
         }
 
+        private void InteractiveScrolled(Vector2 _) => UpdateReadingHint();
+
         private void UpdateReadingHint()
         {
             string effect = InteractiveLetter ? draft.HoverEffect(hoveredLink) : "";
+            bool scrollable = HasLetterOverflow();
             if (Stage == LetterStage.Reading)
             {
-                readingHint.text = effect.Length > 0 ? effect : "信中的文字正在慢慢浮现…";
+                if (effect.Length > 0) { readingHint.text = effect; return; }
+                readingHint.text = scrollable ? "信中的文字正在慢慢浮现…  ·  滚轮 / 拖动阅读" : "信中的文字正在慢慢浮现…";
                 return;
             }
             if (Stage != LetterStage.AwaitingSignature) return;
             bool complete = !InteractiveLetter || draft.IsComplete;
             signatureButton.interactable = complete;
-            readingHint.text = effect.Length > 0 ? effect : complete ? "> 读完后，点击署名继续" : "> 请填写姓名并完成五组选项，再点击署名继续";
+            if (effect.Length > 0) { readingHint.text = effect; return; }
+            if (!complete) { readingHint.text = "> 请填写姓名并完成五组选项，再点击署名继续"; return; }
+            // 正文放不下时先把玩家引到信尾，避免只看半封信就点了署名。
+            readingHint.text = scrollable && !LetterAtBottom()
+                ? "滚轮 / 拖动往下读 · 读到底后点击署名"
+                : "> 读完后，点击署名继续";
+        }
+
+        private static string EmphasizeSignature(string value)
+        {
+            if (string.IsNullOrWhiteSpace(value)) return value;
+            const string uncle = "\u53d4\u53d4";
+            const string start = "<color=#9B3B32><b><u>";
+            const string end = "</u></b></color>";
+            return value.Contains(uncle) ? value.Replace(uncle, start + uncle + end) : start + value + end;
+        }
+
+        private void StartSignatureEmphasis()
+        {
+            if (signaturePulse != null && signaturePulse.IsActive()) return;
+            signatureButton.transform.localScale = signatureButtonScale;
+            signaturePulse = signatureButton.transform.DOScale(signatureButtonScale * 1.045f, .85f)
+                .SetEase(Ease.InOutSine).SetLoops(-1, LoopType.Yoyo).SetUpdate(true)
+                .SetLink(gameObject, LinkBehaviour.KillOnDestroy);
+        }
+
+        private void StopSignatureEmphasis()
+        {
+            signaturePulse?.Kill(false);
+            signaturePulse = null;
+            if (signatureButton != null) signatureButton.transform.localScale = signatureButtonScale;
+        }
+
+        private void BeginCoffeeCupExit()
+        {
+            if (!UseCoffeeCupExit || coffeeCupExitStarted) return;
+            coffeeCupExitStarted = true;
+            CoffeeCupScreenTransition.BeginClose(.45f);
         }
 
         // Commit completion before invoking external code: callbacks may close or reuse the panel.
@@ -341,6 +446,7 @@ namespace Spotlight.GameFlow
         {
             if (!IsPlaying) return;
             StopHint();
+            StopSignatureEmphasis();
             typeTimer = 0f;
             letterScroll.StopMovement();
             readingHint.text = "";
@@ -351,6 +457,8 @@ namespace Spotlight.GameFlow
             envelopeButton.interactable = false;
             signatureButton.interactable = false;
             skipButton.interactable = false;
+            UseCoffeeCupExit = false;
+            coffeeCupExitStarted = false;
             Action callback = finished;
             finished = null;
             callback?.Invoke();
@@ -362,14 +470,21 @@ namespace Spotlight.GameFlow
             Spotlight.Audio.GameAudio.StopOwner(this);
             finished = null;
             pendingContent = null;
+            if (UseCoffeeCupExit && coffeeCupExitStarted) CoffeeCupScreenTransition.Clear();
+            coffeeCupExitStarted = false;
             IsPlaying = false;
             Stage = LetterStage.Stopped;
             transition?.Kill(false);
             transition = null;
             StopHint();
+            StopSignatureEmphasis();
             CancelPlayerName();
             typeTimer = 0f;
-            if (letterScroll != null) letterScroll.StopMovement();
+            if (letterScroll != null)
+            {
+                letterScroll.StopMovement();
+                letterScroll.onValueChanged.RemoveListener(InteractiveScrolled);
+            }
             if (rootGroup != null) rootGroup.interactable = rootGroup.blocksRaycasts = false;
             if (envelopeButton != null) envelopeButton.interactable = false;
             if (signatureButton != null) signatureButton.interactable = false;

@@ -287,6 +287,7 @@ namespace Spotlight.GameFlow
                 ShowPresentation<DateChangePanel>(CompleteFirstArrivalDateTransition, panel =>
                 {
                     panel.SetDates(previousDate, CurrentDate);
+                    panel.UseCoffeeCupEntrance = CoffeeCupScreenTransition.IsPending;
                     panel.UseCoffeeCupExit = true;
                 });
                 return;
@@ -530,6 +531,7 @@ namespace Spotlight.GameFlow
 
         private void ConfigureFirstDayLetter(FirstDayLetterPanel panel)
         {
+            panel.UseCoffeeCupExit = true;
             panel.SetContent(null);
             if (PlayerRuntime.Current != null) panel.SetDraft(PlayerRuntime.Current.RestoreDraft());
             panel.DraftChanged = draft => PlayerRuntime.Current?.SaveDraft(draft);

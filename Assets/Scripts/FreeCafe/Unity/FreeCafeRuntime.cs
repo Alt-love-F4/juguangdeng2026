@@ -177,7 +177,7 @@ namespace Spotlight.FreeCafe
             if(extractionConfig!=null) extractionConfig.Apply(catalog.production);
             catalog.layout = FreeCafeSceneLayout.Capture(this, authored);
             FreeCafeSceneLayout.FitAuthoredBounds(this, catalog, authored);
-            characterCatalog=Spotlight.Narrative.CharacterCatalog.LoadFromTables();
+            characterCatalog=Spotlight.Narrative.CharacterCatalog.LoadFromTables(ResolveNarrativeConfiguration());
             // Resolve the entry before any scene-owned narrative fallback is created.
             IsSandboxMode = FindFirstObjectByType<GameFlowBootstrap>() == null;
             var identities = customerIdentitySource as ICafeCustomerIdentitySource;
@@ -197,11 +197,25 @@ namespace Spotlight.FreeCafe
             audioPresenter.Bind(this);
             PlayerCafeOwner.Bind(World, CaptureJson, RestoreJson);
         }
+
+        /// <summary>
+        /// 复用已初始化的 NCS 配置快照。进入咖啡馆时（Awake 角色目录 + Start 教程配置）
+        /// 原本会各做一次完整的 41 张 Luban 表解析，属于转场遮罩内最大的单帧开销之一。
+        /// 只有沙盒/隔离场景没有 NarrativeRuntime 时才回退到独立加载。
+        /// </summary>
+        private static NarrativeConfiguration ResolveNarrativeConfiguration()
+        {
+            var runtime = NarrativeRuntime.Instance;
+            return runtime != null && runtime.Configuration != null
+                ? runtime.Configuration
+                : LubanNarrativeLoader.Load();
+        }
+
         private void Start()
         {
             WorkstationTutorial = gameObject.AddComponent<FreeCafeWorkstationTutorial>();
             WorkstationTutorial.Initialize(this);
-            tutorialConfiguration = LubanNarrativeLoader.Load();
+            tutorialConfiguration = ResolveNarrativeConfiguration();
             dayFlow = FindFirstObjectByType<DayFlowController>();
             gameFlow = FindFirstObjectByType<GameFlowBootstrap>();
             playerHud=FindFirstObjectByType<FreeCafeHud>(); productionHud=GetComponent<FreeCafeProductionHud>();
@@ -1226,7 +1240,7 @@ namespace Spotlight.FreeCafe
         {
             definition = null;
             if (string.IsNullOrEmpty(tutorialId) || string.IsNullOrEmpty(stepId)) return false;
-            if (tutorialConfiguration == null) tutorialConfiguration = LubanNarrativeLoader.Load();
+            if (tutorialConfiguration == null) tutorialConfiguration = ResolveNarrativeConfiguration();
             return tutorialConfiguration.TryGetCafeTutorialStep(tutorialId, stepId, out definition);
         }
 

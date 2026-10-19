@@ -137,3 +137,12 @@ Assets/InitTestScene*.unity.meta
 # Autonomous runner scratch logs (too large for git)
 .autonomous/*.log
 .autonomous/**/*.log
+
+# Large local renders / marketing video (GitHub blocks >100MB single file)
+outputs/trailer/
+outputs/privacy-policy/
+outputs/*.docx
+
+# WorkBuddy session scratch
+.workbuddy/
+.wbapp_*.genie

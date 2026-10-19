@@ -1,4 +1,4 @@
-﻿using TMPro;
+using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -29,14 +29,25 @@ namespace Spotlight.GameFlow
         private RectState titleRectState, messageRectState, endingIdRectState, dividerRectState;
         private Image dividerImage;
         private bool dividerWasActive;
-        private bool rectStatesCaptured;
+        private RectState panelRectState, buttonRectState;
+        private Color originalTitleColor;
+private bool rectStatesCaptured;
         public string CurrentEndingId => current?.EndingId;
         public string DisplayedTitle => titleText != null ? titleText.text : string.Empty;
         public string DisplayedMessage => current?.IsEnding == true && endingDialoguePanel != null ? endingDialoguePanel.SettlementText : messageText != null ? messageText.text : string.Empty;
+        public string DisplayedCloseLabel
+        {
+            get
+            {
+                TMP_Text label = closeButton != null ? closeButton.GetComponentInChildren<TMP_Text>(true) : null;
+                return label != null ? label.text : string.Empty;
+            }
+        }
         public string DisplayedEndingEcho => endingEchoText != null ? endingEchoText.text : string.Empty;
         public string DisplayedEndingArtworkStatus => endingArtworkStatus != null ? endingArtworkStatus.text : string.Empty;
         public Sprite DisplayedEndingArtwork => endingArtwork != null ? endingArtwork.sprite : null;
         public bool IsEndingPresentation => current?.IsEnding == true;
+        public bool IsSaveSuccessPresentation => current?.IsSaveSuccess == true;
         public void ConfirmResult() => CloseResult();
 
         protected override void Awake()
@@ -52,7 +63,7 @@ namespace Spotlight.GameFlow
         {
             base.OnOpen(data);
             current = data as ResultPanelData;
-            ApplyLayout(current?.IsEnding == true);
+            ApplyLayout(current?.IsEnding == true, current?.IsSaveSuccess == true);
             if (endingIdText != null)
             {
                 endingIdText.text = current?.IsEnding == true ? "ENDING  /  " + (string.IsNullOrWhiteSpace(current.EndingDisplayCode) ? current.EndingId : current.EndingDisplayCode) : string.Empty;
@@ -104,6 +115,8 @@ namespace Spotlight.GameFlow
         private void CaptureRectStates()
         {
             if (rectStatesCaptured) return;
+            panelRectState = RectState.Capture(transform.Find("Panel") as RectTransform);
+            buttonRectState = RectState.Capture(closeButton != null ? closeButton.transform as RectTransform : null);
             titleRectState = RectState.Capture(titleText != null ? titleText.rectTransform : null);
             messageRectState = RectState.Capture(messageText != null ? messageText.rectTransform : null);
             if(messageText != null) messageColor = messageText.color;
@@ -119,27 +132,54 @@ namespace Spotlight.GameFlow
             var surface = titleText != null ? titleText.transform.parent.Find("Panel") : null;
             surfaceImage = surface != null ? surface.GetComponent<Image>() : null;
             if (surfaceImage != null) surfaceWasActive = surfaceImage.gameObject.activeSelf;
+            originalTitleColor = titleText != null ? titleText.color : Color.white;
             rectStatesCaptured = true;
         }
 
-        private void ApplyLayout(bool ending)
+        private void ApplyLayout(bool ending, bool saveSuccess)
         {
             if (!rectStatesCaptured) CaptureRectStates();
+            RectTransform panel = transform.Find("Panel") as RectTransform;
             RectTransform title = titleText != null ? titleText.rectTransform : null;
             RectTransform message = messageText != null ? messageText.rectTransform : null;
             RectTransform id = endingIdText != null ? endingIdText.rectTransform : null;
             RectTransform divider = transform.Find("EndingDivider") as RectTransform;
+            RectTransform button = closeButton != null ? closeButton.transform as RectTransform : null;
+
+            panelRectState.Restore(panel);
+            buttonRectState.Restore(button);
+            titleRectState.Restore(title);
+            messageRectState.Restore(message);
+            endingIdRectState.Restore(id);
+            dividerRectState.Restore(divider);
+            if (dividerImage != null) dividerImage.gameObject.SetActive(dividerWasActive);
+            if (titleText != null) titleText.color = originalTitleColor;
+
+            if (saveSuccess)
+            {
+                // 保存成功：居中卡片式提示，同时把结局态的暗色背景/隐藏衬底还原回来
+                SetAnchors(panel, new Vector2(.28f, .30f), new Vector2(.72f, .70f));
+                SetAnchors(title, new Vector2(.32f, .60f), new Vector2(.68f, .69f));
+                SetAnchors(message, new Vector2(.32f, .47f), new Vector2(.68f, .56f));
+                SetAnchors(button, new Vector2(.36f, .34f), new Vector2(.64f, .43f));
+                SetAnchors(divider, new Vector2(.40f, .575f), new Vector2(.60f, .579f));
+                if (dividerImage != null) dividerImage.gameObject.SetActive(true);
+                if (titleText != null) titleText.color = new Color(1f, .82f, .42f, 1f);
+                if (backgroundImage != null) { backgroundImage.color = backgroundColor; backgroundImage.sprite = backgroundSprite; backgroundImage.type = backgroundType; }
+                if (surfaceImage != null) surfaceImage.gameObject.SetActive(surfaceWasActive);
+                if (messageText != null) { messageText.alignment = TextAlignmentOptions.Center; messageText.color = messageColor; }
+                return;
+            }
+
             if (!ending)
             {
-                titleRectState.Restore(title); messageRectState.Restore(message);
-                endingIdRectState.Restore(id); dividerRectState.Restore(divider);
-                if (dividerImage != null) dividerImage.gameObject.SetActive(dividerWasActive);
                 closeRectState.Restore(closeButton != null ? closeButton.transform as RectTransform : null);
                 if (backgroundImage != null) { backgroundImage.color = backgroundColor; backgroundImage.sprite = backgroundSprite; backgroundImage.type = backgroundType; }
                 if (surfaceImage != null) surfaceImage.gameObject.SetActive(surfaceWasActive);
                 if (messageText != null) { messageText.alignment = TextAlignmentOptions.Center; messageText.color = messageColor; }
                 return;
             }
+
             SetAnchors(title, new Vector2(.12f, .89f), new Vector2(.88f, .96f));
             SetAnchors(id, new Vector2(.13f, .84f), new Vector2(.87f, .88f));
             SetAnchors(divider, new Vector2(.35f, .835f), new Vector2(.65f, .837f));
@@ -163,7 +203,7 @@ namespace Spotlight.GameFlow
             base.OnClose();
             current = null;
             if(endingDialoguePanel!=null)endingDialoguePanel.gameObject.SetActive(false);
-            ApplyLayout(false);
+            ApplyLayout(false, false);
         }
 
         public void CloseFromFlow() => CloseResult();
