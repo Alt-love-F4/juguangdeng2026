@@ -45,7 +45,8 @@ namespace Spotlight.FreeCafe
             }
             if (lines.Count == 0) lines.Add(new DialogueLine(DialogueSpeaker.Right, "请看看我的订单。",
                 replaceRight: true, rightCharacter: customer));
-            return new DialogueScript(lines, rightCharacter: customer, title: "沸点咖啡馆");
+            return new DialogueScript(lines, leftCharacter: new DialogueCharacter(string.Empty, string.Empty, null),
+                rightCharacter: customer, title: "沸点咖啡馆");
         }
     }
 }

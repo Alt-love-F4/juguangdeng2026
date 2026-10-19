@@ -98,7 +98,19 @@ namespace Spotlight.FreeCafe.Tests
             float patience = request.patience;
             yield return new WaitForSecondsRealtime(.2f);
             Assert.That(request.patience, Is.EqualTo(patience));
-            DialoguePanel.Active.Stop();
+            var panel = DialoguePanel.Active;
+            float deadline = Time.realtimeSinceStartup + 5;
+            while (panel.LineIndex == 0 && Time.realtimeSinceStartup < deadline)
+            {
+                panel.Advance();
+                yield return new WaitForSecondsRealtime(.15f);
+            }
+            yield return new WaitForSecondsRealtime(.6f);
+            Assert.That(panel.LineIndex, Is.EqualTo(1));
+            Assert.That(panel.LeftCharacter.CharacterKey, Is.EqualTo("adele"));
+            Assert.That(panel.LeftCharacter.Portrait, Is.SameAs(Resources.Load<Sprite>("Characters/adele/neutral")));
+            Assert.That(panel.CenterCharacter, Is.Null, "No prefab-default character should force Adele into a third slot.");
+            panel.Stop();
             yield return null;
             Assert.That(app.BusinessSimulationPaused, Is.False);
         }
