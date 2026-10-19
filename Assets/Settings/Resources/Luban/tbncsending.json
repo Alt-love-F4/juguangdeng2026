@@ -17,106 +17,106 @@
     "endingId": "neutral.ending.a",
     "enabled": true,
     "priority": 100,
-    "titleText": "neutral.ending.a.title",
-    "messageText": "neutral.ending.a.message"
+    "titleText": "ending.presentation.neutral.ending.a.titleText",
+    "messageText": "ending.presentation.neutral.ending.a.messageText"
   },
   {
     "endingId": "neutral.ending.b",
     "enabled": true,
     "priority": 100,
-    "titleText": "neutral.ending.b.title",
-    "messageText": "neutral.ending.b.message"
+    "titleText": "ending.presentation.neutral.ending.b.titleText",
+    "messageText": "ending.presentation.neutral.ending.b.messageText"
   },
   {
     "endingId": "neutral.ending.d",
     "enabled": true,
     "priority": 100,
-    "titleText": "neutral.ending.d.title",
-    "messageText": "neutral.ending.d.message"
+    "titleText": "ending.presentation.neutral.ending.d.titleText",
+    "messageText": "ending.presentation.neutral.ending.d.messageText"
   },
   {
     "endingId": "neutral.ending.c",
     "enabled": true,
     "priority": 100,
-    "titleText": "neutral.ending.c.title",
-    "messageText": "neutral.ending.c.message"
+    "titleText": "ending.presentation.neutral.ending.c.titleText",
+    "messageText": "ending.presentation.neutral.ending.c.messageText"
   },
   {
     "endingId": "rose.ending.trust_limit.ending",
     "enabled": true,
     "priority": 20,
-    "titleText": "rose.ending.trust_limit.ending.title",
-    "messageText": "rose.ending.trust_limit.ending.message"
+    "titleText": "ending.presentation.rose.ending.trust_limit.ending.titleText",
+    "messageText": "ending.presentation.rose.ending.trust_limit.ending.messageText"
   },
   {
     "endingId": "rose.ending.job_requirements.ending",
     "enabled": true,
     "priority": 20,
-    "titleText": "rose.ending.job_requirements.ending.title",
-    "messageText": "rose.ending.job_requirements.ending.message"
+    "titleText": "ending.presentation.rose.ending.job_requirements.ending.titleText",
+    "messageText": "ending.presentation.rose.ending.job_requirements.ending.messageText"
   },
   {
     "endingId": "rose.route.1115.s1.ending.ideal_world",
     "enabled": true,
     "priority": 20,
-    "titleText": "rose.route.1115.s1.ending.ideal_world.title",
-    "messageText": "rose.route.1115.s1.ending.ideal_world.message"
+    "titleText": "ending.presentation.rose.route.1115.s1.ending.ideal_world.titleText",
+    "messageText": "ending.presentation.rose.route.1115.s1.ending.ideal_world.messageText"
   },
   {
     "endingId": "rose.route.ending.unforgiven.ending",
     "enabled": true,
     "priority": 20,
-    "titleText": "rose.route.ending.unforgiven.ending.title",
-    "messageText": "rose.route.ending.unforgiven.ending.message"
+    "titleText": "ending.presentation.rose.route.ending.unforgiven.ending.titleText",
+    "messageText": "ending.presentation.rose.route.ending.unforgiven.ending.messageText"
   },
   {
     "endingId": "rose.route.ending.bloom.ending",
     "enabled": true,
     "priority": 20,
-    "titleText": "rose.route.ending.bloom.ending.title",
-    "messageText": "rose.route.ending.bloom.ending.message"
+    "titleText": "ending.presentation.rose.route.ending.bloom.ending.titleText",
+    "messageText": "ending.presentation.rose.route.ending.bloom.ending.messageText"
   },
   {
     "endingId": "church.ending.if2",
     "enabled": true,
     "priority": 20,
-    "titleText": "church.ending.if2.title",
-    "messageText": "church.ending.if2.title"
+    "titleText": "ending.presentation.church.ending.if2.titleText",
+    "messageText": "ending.presentation.church.ending.if2.messageText"
   },
   {
     "endingId": "church.ending.if4",
     "enabled": true,
     "priority": 20,
-    "titleText": "church.ending.if4.title",
-    "messageText": "church.ending.if4.title"
+    "titleText": "ending.presentation.church.ending.if4.titleText",
+    "messageText": "ending.presentation.church.ending.if4.messageText"
   },
   {
     "endingId": "church.ending.ry1",
     "enabled": true,
     "priority": 20,
-    "titleText": "church.ending.ry1.title",
-    "messageText": "church.ending.ry1.title"
+    "titleText": "ending.presentation.church.ending.ry1.titleText",
+    "messageText": "ending.presentation.church.ending.ry1.messageText"
   },
   {
     "endingId": "church.ending.ry2",
     "enabled": true,
     "priority": 20,
-    "titleText": "church.ending.ry2.title",
-    "messageText": "church.ending.ry2.title"
+    "titleText": "ending.presentation.church.ending.ry2.titleText",
+    "messageText": "ending.presentation.church.ending.ry2.messageText"
   },
   {
     "endingId": "revolution.end01",
     "enabled": true,
     "priority": 101,
-    "titleText": "revolution.end01.title",
-    "messageText": "revolution.end01.message"
+    "titleText": "ending.presentation.revolution.end01.titleText",
+    "messageText": "ending.presentation.revolution.end01.messageText"
   },
   {
     "endingId": "revolution.end02",
     "enabled": true,
     "priority": 102,
-    "titleText": "revolution.end02.title",
-    "messageText": "revolution.end02.message"
+    "titleText": "ending.presentation.revolution.end02.titleText",
+    "messageText": "ending.presentation.revolution.end02.messageText"
   },
   {
     "endingId": "arrival.ending.if0",

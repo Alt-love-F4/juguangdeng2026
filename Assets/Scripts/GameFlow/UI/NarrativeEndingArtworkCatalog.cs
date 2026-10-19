@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Collections.Generic;
 using UnityEngine;
 
@@ -25,6 +25,7 @@ namespace Spotlight.GameFlow
             public Sprite artwork;
             public bool artworkIsPlaceholder;
             public string artRequirementId;
+            public string displayCode;
             [TextArea(2, 5)] public string notes;
         }
 

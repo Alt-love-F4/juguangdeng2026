@@ -39,13 +39,46 @@ namespace Spotlight.GameFlow.Tests
             foreach(var e in endings)
             {
                 debug.PlayEnding(e.endingId,config);yield return null;
+                if(debug.HelpVisible)debug.ToggleHelp();
                 var panel=debug.CurrentPanel as ResultPanel;Assert.That(panel,Is.Not.Null,e.endingId);
                 Assert.That(panel.IsEndingPresentation,Is.True);Assert.That(panel.CurrentEndingId,Is.EqualTo(e.endingId));
                 Assert.That(panel.DisplayedTitle,Is.EqualTo(config.texts.Find(t=>t.key==e.titleText).content));
                 Assert.That(panel.DisplayedMessage,Is.Not.Empty);Assert.That(panel.GetComponent<CanvasGroup>(),Is.Not.Null);
-                Assert.That(panel.DisplayedEndingArtwork,Is.Null);
-                Assert.That(panel.DisplayedEndingArtworkStatus,Does.Contain("需求待确认"));
-                Assert.That(panel.GetComponentsInChildren<TMPro.TMP_Text>(true).Any(t=>t.text.Contains("ENDING  /  "+e.endingId)&&t.gameObject.activeSelf),Is.True,"Prefab must bind ending badge.");
+                var art=NarrativeEndingArtworkCatalog.Load().Find(e.endingId);
+                Assert.That(panel.DisplayedEndingArtwork,Is.EqualTo(art.artwork));
+                Assert.That(panel.IsEndingDialogueVisible,Is.True);
+                Assert.That(panel.DisplayedEndingEcho,Is.Empty);
+                Assert.That(panel.GetComponentsInChildren<TMPro.TMP_Text>(true).Any(t=>t.text.Contains("ENDING  /  "+art.displayCode)&&t.gameObject.activeSelf),Is.True,"Prefab must bind authored display code.");
+                for(int frame=0;frame<20;frame++)yield return null;
+                var texts=panel.GetComponentsInChildren<TMPro.TMP_Text>(true);
+                var title=texts.First(t=>t.gameObject.name=="TitleText");
+                var message=texts.First(t=>t.gameObject.name=="MessageText");
+                var image=panel.DisplayedEndingArtwork;
+                Assert.That(panel.EndingDialogue,Is.Not.Null);
+                Assert.That(panel.EndingDialogue.IsEndingSettlement,Is.True);
+                Assert.That(panel.EndingDialogue.SettlementPageCount,Is.GreaterThanOrEqualTo(1));
+                Assert.That(panel.EndingDialogue.SettlementText,Is.EqualTo(NarrativeTextSubstitution.PlayerName(config.texts.Find(t=>t.key==e.messageText).content,"预览店长")));
+                Assert.That(DialoguePanel.IsAnyPlaying,Is.False,"Embedded settlement must not own formal dialogue playback.");
+                int pageCount=panel.EndingDialogue.SettlementPageCount;
+                if(pageCount>1)
+                {
+                    int first=panel.EndingDialogue.PageNumber;
+                    panel.EndingDialogue.AdvanceEndingSettlement();
+                    Assert.That(panel.EndingDialogue.PageNumber,Is.EqualTo(first+1));
+                    for(int p=first+1;p<pageCount;p++){yield return null;panel.EndingDialogue.AdvanceEndingSettlement();}
+                    yield return null;panel.EndingDialogue.AdvanceEndingSettlement();
+                    Assert.That(panel.EndingDialogue.PageNumber,Is.EqualTo(pageCount),"Final page stays visible until the ending return button.");
+                    Assert.That(panel.CurrentEndingId,Is.EqualTo(e.endingId));
+                }
+                Assert.That(title.rectTransform.anchorMin.y,Is.GreaterThan(.85f));
+                Assert.That(message.rectTransform.anchorMax.y,Is.LessThan(.35f));
+                if(e.endingId=="neutral.ending.a"||e.endingId=="church.ending.if2"||e.endingId=="rose.route.ending.bloom.ending")
+                {
+                    System.IO.Directory.CreateDirectory("output/narrative-endings");
+                    yield return new WaitForEndOfFrame();
+                    SaveScreenshot("output/narrative-endings/revised-"+e.endingId+".png");
+                    yield return null;yield return null;
+                }
                 debug.StopCurrent();yield return null;
             }
             Assert.That(NarrativeRuntime.Instance,Is.SameAs(runtime));
@@ -64,6 +97,7 @@ namespace Spotlight.GameFlow.Tests
             Assert.That(ordinary.IsEndingPresentation,Is.False);Assert.That(ordinary.CurrentEndingId,Is.Null);
             Assert.That(ordinary.DisplayedEndingArtwork,Is.Null);
             Assert.That(ordinary.DisplayedEndingEcho,Is.Empty);
+            Assert.That(ordinary.IsEndingDialogueVisible,Is.False);
             Assert.That(ordinary.GetComponentsInChildren<TMPro.TMP_Text>(true).Any(t=>t.gameObject.activeSelf&&t.text.StartsWith("ENDING  /")),Is.False);
         }
         [UnityTest]public IEnumerator ActualAuthoredRootCompletesThroughPresenterThenOpensTheRealEndingPanel()
@@ -94,10 +128,17 @@ namespace Spotlight.GameFlow.Tests
                 for(int i=0;i<20;i++)yield return null;
                 Assert.That(result.State,Is.EqualTo(PanelState.Open));
                 if(!System.IO.Directory.Exists("output/narrative-endings"))System.IO.Directory.CreateDirectory("output/narrative-endings");
-                UnityEngine.ScreenCapture.CaptureScreenshot(System.IO.Path.GetFullPath(System.IO.Path.Combine(Application.dataPath,"../output/narrative-endings/accepted-ending-panel.png")));
+                yield return new WaitForEndOfFrame();
+                SaveScreenshot("output/narrative-endings/accepted-ending-panel.png");
                 yield return null;yield return null;
                 core.UnbindValueProviders();
             }
+        }
+        private static void SaveScreenshot(string path)
+        {
+            var texture=ScreenCapture.CaptureScreenshotAsTexture();
+            try{System.IO.File.WriteAllBytes(System.IO.Path.GetFullPath(path),texture.EncodeToPNG());}
+            finally{UnityEngine.Object.DestroyImmediate(texture);}
         }
         [Test]public void UnresolvedTextKeysNeverLeakIntoEndingPanel()
         {

@@ -256,7 +256,7 @@ namespace Spotlight.GameFlow
                             var endingConfig = endingPreviewConfiguration ?? LubanNarrativeLoader.Load();
                             var ending = endingConfig.endings.Find(e => e.endingId == selectedEndingPreviewId && e.enabled);
                             resultData = NarrativeEndingPresentation.Create(null, ending,
-                                key => endingConfig.texts.Find(t => t.key == key)?.content ?? key,
+                                key => NarrativeTextSubstitution.PlayerName(endingConfig.texts.Find(t => t.key == key)?.content ?? key, "预览店长"),
                                 () => Complete(version), "关闭结局预览");
                         }
                         else resultData = new ResultPanelData(null, "游戏结束", "每日交付已完成。你的选择让这段旅程迎来了结局。", () => Complete(version), "返回主菜单");

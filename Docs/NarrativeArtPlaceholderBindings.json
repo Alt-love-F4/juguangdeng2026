@@ -1,5 +1,5 @@
 {
-    "policy": "Local labelled placeholders. Not final art. No image API.",
+    "policy": "Historical requirement cards remain local placeholders. Current resource bindings may use existing art or explicitly requested PackyAPI images; generated images are not human art approval. See NarrativeGeneratedArtDelivery-2026-10-19.json.",
     "bindings": [
         {
             "key": "art.requirement.CG02",
@@ -22,8 +22,8 @@
         {
             "key": "rose.club.knight_guidance",
             "id": "CG03",
-            "assetPath": "Assets/Art/NarrativePlaceholders/CG03_knight_guidance.png",
-            "status": "labelled-placeholder-not-final-art"
+            "assetPath": "Assets/Art/NarrativeCG/CG03_knight_guidance.jpg",
+            "status": "preserved-existing"
         },
         {
             "key": "art.requirement.CG04",
@@ -34,8 +34,8 @@
         {
             "key": "cg.adele_sampling",
             "id": "CG04",
-            "assetPath": "Assets/Art/NarrativePlaceholders/CG04_adele_sampling.png",
-            "status": "labelled-placeholder-not-final-art"
+            "assetPath": "Assets/Art/NarrativeCG/CG04_adele_sampling.jpg",
+            "status": "preserved-existing"
         },
         {
             "key": "art.requirement.CG05",
@@ -46,8 +46,8 @@
         {
             "key": "cg.burning_letter",
             "id": "CG05",
-            "assetPath": "Assets/Art/NarrativePlaceholders/CG05_burning_letter.png",
-            "status": "labelled-placeholder-not-final-art"
+            "assetPath": "Assets/Art/NarrativeCG/CG05_burning_letter.jpg",
+            "status": "preserved-existing"
         },
         {
             "key": "art.requirement.CG06",
@@ -58,8 +58,8 @@
         {
             "key": "cg.duke_blessing",
             "id": "CG06",
-            "assetPath": "Assets/Art/NarrativePlaceholders/CG06_duke_blessing_PENDING.png",
-            "status": "labelled-placeholder-not-final-art"
+            "assetPath": "Assets/Art/NarrativeCG/CG06_duke_blessing.jpg",
+            "status": "preserved-existing"
         },
         {
             "key": "art.requirement.P02",
@@ -94,8 +94,8 @@
         {
             "key": "prop.king_coins",
             "id": "P04",
-            "assetPath": "Assets/Art/NarrativePlaceholders/P04_king_coins.png",
-            "status": "labelled-placeholder-not-final-art"
+            "assetPath": "Assets/Art/NarrativeGenerated/Props/P04_king_coins.png",
+            "status": "api-generated-art-registered-no-active-story-hook"
         },
         {
             "key": "art.requirement.P06",
@@ -298,8 +298,8 @@
         {
             "key": "character.tutorial_elderly_woman",
             "id": "CH35",
-            "assetPath": "Assets/Art/NarrativePlaceholders/CH35_tutorial_elderly_woman.png",
-            "status": "labelled-placeholder-not-final-art"
+            "assetPath": "Assets/Art/NarrativeGenerated/Characters/CH35_tutorial_elderly_woman.png",
+            "status": "api-generated-portrait-registered-tutorial-uses-derived-silhouette"
         },
         {
             "key": "art.requirement.CG07",
@@ -310,8 +310,8 @@
         {
             "key": "cg.marie_moonlit",
             "id": "CG07",
-            "assetPath": "Assets/Art/NarrativePlaceholders/Additional/CG07_marie_moonlit.png",
-            "status": "labelled-placeholder-not-final-art"
+            "assetPath": "Assets/Art/NarrativeGenerated/CG/CG07_marie_moonlit.png",
+            "status": "api-generated-art-registered-existing-story-hook"
         },
         {
             "key": "art.requirement.CG08",
@@ -371,6 +371,90 @@
             "key": "cg.cafe_tunnel_diagram",
             "id": "P12",
             "assetPath": "Assets/Art/NarrativePlaceholders/Additional/P12_cafe_tunnel_diagram.png",
+            "status": "labelled-placeholder-not-final-art"
+        },
+        {
+            "key": "art.requirement.END-N-A",
+            "id": "END-N-A",
+            "assetPath": "Assets/Art/NarrativePlaceholders/Endings/END-N-A.png",
+            "status": "labelled-placeholder-not-final-art"
+        },
+        {
+            "key": "art.requirement.END-N-B",
+            "id": "END-N-B",
+            "assetPath": "Assets/Art/NarrativePlaceholders/Endings/END-N-B.png",
+            "status": "labelled-placeholder-not-final-art"
+        },
+        {
+            "key": "art.requirement.END-N-C",
+            "id": "END-N-C",
+            "assetPath": "Assets/Art/NarrativePlaceholders/Endings/END-N-C.png",
+            "status": "labelled-placeholder-not-final-art"
+        },
+        {
+            "key": "art.requirement.END-N-D",
+            "id": "END-N-D",
+            "assetPath": "Assets/Art/NarrativePlaceholders/Endings/END-N-D.png",
+            "status": "labelled-placeholder-not-final-art"
+        },
+        {
+            "key": "art.requirement.END-R-IF1",
+            "id": "END-R-IF1",
+            "assetPath": "Assets/Art/NarrativePlaceholders/Endings/END-R-IF1.png",
+            "status": "labelled-placeholder-not-final-art"
+        },
+        {
+            "key": "art.requirement.END-R-IF2",
+            "id": "END-R-IF2",
+            "assetPath": "Assets/Art/NarrativePlaceholders/Endings/END-R-IF2.png",
+            "status": "labelled-placeholder-not-final-art"
+        },
+        {
+            "key": "art.requirement.END-R-NORMAL",
+            "id": "END-R-NORMAL",
+            "assetPath": "Assets/Art/NarrativePlaceholders/Endings/END-R-NORMAL.png",
+            "status": "labelled-placeholder-not-final-art"
+        },
+        {
+            "key": "art.requirement.END-R-BAD",
+            "id": "END-R-BAD",
+            "assetPath": "Assets/Art/NarrativePlaceholders/Endings/END-R-BAD.png",
+            "status": "labelled-placeholder-not-final-art"
+        },
+        {
+            "key": "art.requirement.END-C-IF3",
+            "id": "END-C-IF3",
+            "assetPath": "Assets/Art/NarrativePlaceholders/Endings/END-C-IF3.png",
+            "status": "labelled-placeholder-not-final-art"
+        },
+        {
+            "key": "art.requirement.END-C-IF4",
+            "id": "END-C-IF4",
+            "assetPath": "Assets/Art/NarrativePlaceholders/Endings/END-C-IF4.png",
+            "status": "labelled-placeholder-not-final-art"
+        },
+        {
+            "key": "art.requirement.END-C-RY1",
+            "id": "END-C-RY1",
+            "assetPath": "Assets/Art/NarrativePlaceholders/Endings/END-C-RY1.png",
+            "status": "labelled-placeholder-not-final-art"
+        },
+        {
+            "key": "art.requirement.END-C-RY2",
+            "id": "END-C-RY2",
+            "assetPath": "Assets/Art/NarrativePlaceholders/Endings/END-C-RY2.png",
+            "status": "labelled-placeholder-not-final-art"
+        },
+        {
+            "key": "art.requirement.END-RE-01",
+            "id": "END-RE-01",
+            "assetPath": "Assets/Art/NarrativePlaceholders/Endings/END-RE-01.png",
+            "status": "labelled-placeholder-not-final-art"
+        },
+        {
+            "key": "art.requirement.END-RE-02",
+            "id": "END-RE-02",
+            "assetPath": "Assets/Art/NarrativePlaceholders/Endings/END-RE-02.png",
             "status": "labelled-placeholder-not-final-art"
         }
     ]

@@ -19,8 +19,10 @@ namespace Spotlight.GameFlow
             if (message == title) message = "这段旅程已抵达终点。\n感谢你在沸点咖啡馆留下的每一个选择。";
             var art = artwork ?? NarrativeEndingEcho.ResolveArtwork(ending.endingId);
             string artStatus = art != null ? art.StatusLabel : NarrativeEndingArtworkCatalog.StatusLabel(NarrativeEndingArtworkCatalog.ArtStatus.NeedsReview);
+            var catalog = NarrativeEndingArtworkCatalog.Load();
+            var entry = catalog != null ? catalog.Find(ending.endingId) : null;
             return new ResultPanelData(flow, title, message, returned, returnLabel, ending.endingId,
-                art?.Sprite, art?.IsPlaceholder ?? false, artStatus, endingEcho ?? NarrativeEndingEcho.Text);
+                art?.Sprite, art?.IsPlaceholder ?? false, artStatus, endingEcho ?? string.Empty, entry != null ? entry.displayCode : null);
         }
         private static string Resolve(Func<string,string> resolver,string key,string fallback)
         {

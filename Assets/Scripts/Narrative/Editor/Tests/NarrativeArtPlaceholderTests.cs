@@ -11,8 +11,8 @@ namespace Spotlight.Narrative.Editor.Tests
     {
         [Test]public void MarkedRequirementsHaveLocalCardsWithoutReplacingExistingArtwork()
         {
-            var manifest=NarrativeArtPlaceholderBuilder.ReadManifest();Assert.That(manifest.requirements.Length,Is.EqualTo(99));
-            var cards=manifest.requirements.Where(r=>r.disposition=="placeholder").ToArray();Assert.That(cards.Length,Is.EqualTo(37));
+            var manifest=NarrativeArtPlaceholderBuilder.ReadManifest();Assert.That(manifest.requirements.Length,Is.EqualTo(115));
+            var cards=manifest.requirements.Where(r=>r.disposition=="placeholder").ToArray();Assert.That(cards.Length,Is.EqualTo(51));
             var registry=new SerializedObject(AssetDatabase.LoadMainAssetAtPath(NarrativeArtPlaceholderBuilder.RegistryPath));var entries=registry.FindProperty("entries");
             foreach(var item in cards)
             {

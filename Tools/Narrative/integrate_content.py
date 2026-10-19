@@ -1,4 +1,4 @@
-﻿"""Single writer for whole-story NCS integration.
+"""Single writer for whole-story NCS integration.
 Read XLSX with bundled Python; emit merge plan, then use artifact-tool to edit source
 XLSX. Official GenerateAll.bat remains the only production JSON/C# generator.
 """
@@ -132,6 +132,9 @@ def merge(modules):
  events={r['eventId']for r in sheets['Event']['rows']};errors=[]
  for r in sheets['Result']['rows']:
   if r['resultType']=='QUEUE_EVENT'and str(r.get('target','')).removeprefix('event:')not in events:errors.append('Unknown continuation '+str(r))
+ # Apply approved presentation on the existing NCS source sheets.
+ from ending_revision import apply as apply_ending_revision
+ apply_ending_revision(sheets)
  # Emit a completely rectangular value matrix including untouched metadata.
  workbooks=[]
  for path,own in books.items():

@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using DG.Tweening;
 using TMPro;
 using UnityEngine;
@@ -411,6 +411,7 @@ namespace Spotlight.GameFlow
 
         private void Update()
         {
+            if(endingSettlementMode){UpdateEndingSettlement();return;}
             CaptureHistory();
             ReadingInput();
             UpdateControlSkip();
@@ -546,6 +547,7 @@ namespace Spotlight.GameFlow
 
         private void Stop(bool completed)
         {
+            endingSettlementMode=false;
             // Exiting alone is not completion: an external Stop/Cancel can kill its tween.
             bool interrupted = !completed && (IsPlaying || SeamlessChoicePending);
             Action interruption = interrupted ? PlaybackInterrupted : null;

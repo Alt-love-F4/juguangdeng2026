@@ -1,0 +1,138 @@
+{
+  "date": "2026-10-19",
+  "provider": "PackyAPI",
+  "model": "gpt-image-2.5-sunburst",
+  "apiRequestCount": 4,
+  "endingsExcluded": true,
+  "humanArtApproval": false,
+  "items": [
+    {
+      "id": "CG07",
+      "key": "cg.marie_moonlit",
+      "asset": {
+        "path": "Assets/Art/NarrativeGenerated/CG/CG07_marie_moonlit.png",
+        "width": 1536,
+        "height": 864,
+        "sha256": "eef0410f69690fb95ad3b2ffc0e0e962250641f89f323b4b49d71c857feeee45"
+      },
+      "status": "integrated-ai-generated-art-pending-human-review",
+      "sourceAnchor": "MA70.10.29-S1.docx P012-P015",
+      "existingStoryHook": true,
+      "rawPath": "output/art-fill-2026-10-19/raw/CG07_marie_moonlit.png",
+      "rawSha256": "5f9a9e0414e402e3a90bfe82a0aba634f216e067dad6d28ba13ed08e3d0b1290",
+      "references": [
+        {
+          "path": "Assets/Resources/Characters/marie/neutral.png",
+          "sha256": "1c3ad9496807bc5d6277d5735b35343cb0bacac0a1f915c5f58eb3828b4be6ce"
+        },
+        {
+          "path": "Assets/Art/NarrativeCG/CG04_adele_sampling.jpg",
+          "sha256": "e166502cd74a3bde877bb38419c7ac1ab9fe4078fef39d9e56490ad3f3018d72"
+        },
+        {
+          "path": "Assets/Art/Background/game/SCE_一楼大厅对话场景日景.png",
+          "sha256": "135693e12fdae649b810059ea1ed88cfca97e161db3030d6e38c36edbdab705f"
+        },
+        {
+          "path": "Assets/Art/NarrativeCG/CG03_knight_guidance.jpg",
+          "sha256": "200a4c55f6c84e63e86e925b0587de6b89888c3f1f0aeae784396b7167a7faef"
+        }
+      ]
+    },
+    {
+      "id": "CG09",
+      "key": "cg.rainy_triad",
+      "status": "candidate-rejected-for-runtime-binding",
+      "reason": "Protagonist firearm points down instead of aiming at Marie as the source requires. No automatic API retry.",
+      "existingStoryHook": true,
+      "bindingChanged": false,
+      "rawPath": "output/art-fill-2026-10-19/raw/CG09_rainy_triad.png",
+      "rawSha256": "0a9bcb8a978e1ff5497a596f17f946f3adb05e49a38cb0bc9680257d206dadd3",
+      "references": [
+        {
+          "path": "Assets/Resources/Characters/marie/neutral.png",
+          "sha256": "1c3ad9496807bc5d6277d5735b35343cb0bacac0a1f915c5f58eb3828b4be6ce"
+        },
+        {
+          "path": "Assets/Resources/Characters/lesou/neutral.png",
+          "sha256": "305132d0898fdea3b87e22fab3c4075ebd18c3cf0f86f5f86b88a839eed93de7"
+        },
+        {
+          "path": "Assets/Art/NarrativeCG/CG04_adele_sampling.jpg",
+          "sha256": "e166502cd74a3bde877bb38419c7ac1ab9fe4078fef39d9e56490ad3f3018d72"
+        },
+        {
+          "path": "Assets/Art/NarrativeCG/CG03_knight_guidance.jpg",
+          "sha256": "200a4c55f6c84e63e86e925b0587de6b89888c3f1f0aeae784396b7167a7faef"
+        }
+      ]
+    },
+    {
+      "id": "CH35",
+      "key": "character.tutorial_elderly_woman",
+      "asset": {
+        "path": "Assets/Art/NarrativeGenerated/Characters/CH35_tutorial_elderly_woman.png",
+        "width": 1024,
+        "height": 1536,
+        "sha256": "65dac347cbc32744c077695c205ff436f6c8adb738b0540e9dcebf7992ab534b"
+      },
+      "derivedSilhouette": {
+        "path": "Assets/Art/NarrativeGenerated/Characters/CH35_tutorial_elderly_woman_silhouette.png",
+        "width": 1024,
+        "height": 1536,
+        "sha256": "5e0a62abfaa14e7cd4ded3eaecd0eed2059e46d97c750b78309c5699b87186b7"
+      },
+      "status": "tutorial-center-silhouette-integrated-ai-art-pending-human-review",
+      "sourceAnchor": "文案-新手教程.docx P013-P015",
+      "rawPath": "output/art-fill-2026-10-19/raw/CH35_tutorial_elderly_woman.png",
+      "note": "Uses existing CafeTutorialVisuals centerPortrait; retains existing silhouette presentation. No new reveal timing.",
+      "rawSha256": "e1974888b344bd1d396225099c55016f2f057296c54c7cd22a83bcc2d4c6ee66",
+      "references": [
+        {
+          "path": "Assets/Resources/Characters/colette/neutral.png",
+          "sha256": "c7ad9de7592ce4be26934f43271214991b8a17985220381c4793425284b1667e"
+        },
+        {
+          "path": "Assets/Resources/Characters/adele/neutral.png",
+          "sha256": "f76a4165dda755c839352d23ab60fd47e491f6a1bf3bc39197bd4822d68a7459"
+        },
+        {
+          "path": "Assets/Resources/Characters/thibaut/neutral.png",
+          "sha256": "55d8e43ca15af4d546abca938e621f428f8e47f1feb6872c9dbd18e3337f850c"
+        }
+      ]
+    },
+    {
+      "id": "P04",
+      "key": "prop.king_coins",
+      "asset": {
+        "path": "Assets/Art/NarrativeGenerated/Props/P04_king_coins.png",
+        "width": 1536,
+        "height": 864,
+        "sha256": "ab05dab5b6f0b9ce7843b6e3b0e983a4b9ebf36a6d35eb1a6298443ef5d08f5a"
+      },
+      "singleCoin": {
+        "path": "Assets/Art/NarrativeGenerated/Props/P04_king_coin.png",
+        "width": 1024,
+        "height": 1024,
+        "sha256": "8ccc52ce2d32ac7899f860c763c9bc0f8f8583bd18dfbbd6fcb8c8fa8a7187f4"
+      },
+      "status": "registered-art-no-active-story-hook",
+      "existingStoryHook": false,
+      "sourceAnchor": "MA70.11.04-S1.docx P061-P063",
+      "rawPath": "output/art-fill-2026-10-19/raw/P04_king_coin.png",
+      "note": "14 visual copies are not a reward amount. Coin relief is a generated art proposal, not approved currency lore.",
+      "rawSha256": "07f6124a00d28b07aa36fb1ca20ae3eb55ba9025e3680fb22506f98fb43d4af5",
+      "references": [
+        {
+          "path": "Assets/Art/NarrativeCG/CG05_burning_letter.jpg",
+          "sha256": "15d09963e9d9d7ec102112bcc15b5034d1cf932f46a5e1f5da42de50c2579f01"
+        },
+        {
+          "path": "Assets/Resources/Characters/clovis/neutral.png",
+          "sha256": "cac1e47d226afb3e39f4d9a90f60256bcea16dbee939243b1b67e789927e2c94"
+        }
+      ]
+    }
+  ]
+}

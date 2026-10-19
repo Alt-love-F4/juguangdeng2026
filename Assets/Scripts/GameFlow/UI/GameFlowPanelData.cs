@@ -48,7 +48,7 @@ namespace Spotlight.GameFlow
     public sealed class ResultPanelData : IGameFlowPanelData
     {
         public ResultPanelData(GameFlowBootstrap flow, string title, string message, Action closed, string closeLabel = "关闭", string endingId = null,
-            Sprite endingArtwork = null, bool endingArtworkIsPlaceholder = false, string endingArtworkStatus = null, string endingEcho = null)
+            Sprite endingArtwork = null, bool endingArtworkIsPlaceholder = false, string endingArtworkStatus = null, string endingEcho = null, string endingDisplayCode = null)
         {
             Flow = flow;
             Title = title;
@@ -60,6 +60,7 @@ namespace Spotlight.GameFlow
             EndingArtworkIsPlaceholder = endingArtworkIsPlaceholder;
             EndingArtworkStatus = endingArtworkStatus ?? string.Empty;
             EndingEcho = endingEcho ?? string.Empty;
+            EndingDisplayCode = endingDisplayCode ?? string.Empty;
         }
 
         public GameFlowBootstrap Flow { get; }
@@ -73,5 +74,6 @@ namespace Spotlight.GameFlow
         public bool EndingArtworkIsPlaceholder { get; }
         public string EndingArtworkStatus { get; }
         public string EndingEcho { get; }
+        public string EndingDisplayCode { get; }
     }
 }

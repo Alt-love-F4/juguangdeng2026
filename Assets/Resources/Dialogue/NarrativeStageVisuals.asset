@@ -406,10 +406,10 @@ MonoBehaviour:
     useSceneBackground: 0
     fadeSeconds: 0.3
   - key: prop.king_coins
-    texture: {fileID: 2800000, guid: f4e122146062d4b40a36de7d1fa0037c, type: 3}
+    texture: {fileID: 2800000, guid: e192ae3a125140e438d445204e020927, type: 3}
     tint: {r: 1, g: 1, b: 1, a: 1}
-    placeholderColor: {r: 1, g: 1, b: 1, a: 1}
-    placeholder: 1
+    placeholderColor: {r: 0.23, g: 0.25, b: 0.28, a: 1}
+    placeholder: 0
     solidColor: 0
     useSceneBackground: 0
     fadeSeconds: 0.3
@@ -678,10 +678,10 @@ MonoBehaviour:
     useSceneBackground: 0
     fadeSeconds: 0.3
   - key: character.tutorial_elderly_woman
-    texture: {fileID: 2800000, guid: b96df40bd5c79f94ebbff51c7b1affa5, type: 3}
+    texture: {fileID: 2800000, guid: 6e4594a1596181e4c91b1f4c1cd9aa25, type: 3}
     tint: {r: 1, g: 1, b: 1, a: 1}
-    placeholderColor: {r: 1, g: 1, b: 1, a: 1}
-    placeholder: 1
+    placeholderColor: {r: 0.23, g: 0.25, b: 0.28, a: 1}
+    placeholder: 0
     solidColor: 0
     useSceneBackground: 0
     fadeSeconds: 0.3
@@ -694,10 +694,10 @@ MonoBehaviour:
     useSceneBackground: 0
     fadeSeconds: 0.3
   - key: cg.marie_moonlit
-    texture: {fileID: 2800000, guid: f322bcd019d8d684c9496630d8b035be, type: 3}
+    texture: {fileID: 2800000, guid: fc1a1ad72b7efb941b104a1b866cdc83, type: 3}
     tint: {r: 1, g: 1, b: 1, a: 1}
-    placeholderColor: {r: 1, g: 1, b: 1, a: 1}
-    placeholder: 1
+    placeholderColor: {r: 0.23, g: 0.25, b: 0.28, a: 1}
+    placeholder: 0
     solidColor: 0
     useSceneBackground: 0
     fadeSeconds: 0.3
@@ -775,6 +775,118 @@ MonoBehaviour:
     fadeSeconds: 0.3
   - key: cg.cafe_tunnel_diagram
     texture: {fileID: 2800000, guid: a1d2f6ea81ad5814384dbc2d442e5ff4, type: 3}
+    tint: {r: 1, g: 1, b: 1, a: 1}
+    placeholderColor: {r: 1, g: 1, b: 1, a: 1}
+    placeholder: 1
+    solidColor: 0
+    useSceneBackground: 0
+    fadeSeconds: 0.3
+  - key: art.requirement.END-N-A
+    texture: {fileID: 2800000, guid: 8bdc8d74aae75934f9c978e3ae0a85d2, type: 3}
+    tint: {r: 1, g: 1, b: 1, a: 1}
+    placeholderColor: {r: 1, g: 1, b: 1, a: 1}
+    placeholder: 1
+    solidColor: 0
+    useSceneBackground: 0
+    fadeSeconds: 0.3
+  - key: art.requirement.END-N-B
+    texture: {fileID: 2800000, guid: 8fa3035bf65706e45ab7e36380fd8980, type: 3}
+    tint: {r: 1, g: 1, b: 1, a: 1}
+    placeholderColor: {r: 1, g: 1, b: 1, a: 1}
+    placeholder: 1
+    solidColor: 0
+    useSceneBackground: 0
+    fadeSeconds: 0.3
+  - key: art.requirement.END-N-C
+    texture: {fileID: 2800000, guid: 8fe539333813d9646b3eb621c0a18245, type: 3}
+    tint: {r: 1, g: 1, b: 1, a: 1}
+    placeholderColor: {r: 1, g: 1, b: 1, a: 1}
+    placeholder: 1
+    solidColor: 0
+    useSceneBackground: 0
+    fadeSeconds: 0.3
+  - key: art.requirement.END-N-D
+    texture: {fileID: 2800000, guid: 95ccdbac0fc084d4a9a62705fa52551a, type: 3}
+    tint: {r: 1, g: 1, b: 1, a: 1}
+    placeholderColor: {r: 1, g: 1, b: 1, a: 1}
+    placeholder: 1
+    solidColor: 0
+    useSceneBackground: 0
+    fadeSeconds: 0.3
+  - key: art.requirement.END-R-IF1
+    texture: {fileID: 2800000, guid: ffa7cc28849b376438099b1e0388b864, type: 3}
+    tint: {r: 1, g: 1, b: 1, a: 1}
+    placeholderColor: {r: 1, g: 1, b: 1, a: 1}
+    placeholder: 1
+    solidColor: 0
+    useSceneBackground: 0
+    fadeSeconds: 0.3
+  - key: art.requirement.END-R-IF2
+    texture: {fileID: 2800000, guid: e201c03b571487b408c5088f82a60e0c, type: 3}
+    tint: {r: 1, g: 1, b: 1, a: 1}
+    placeholderColor: {r: 1, g: 1, b: 1, a: 1}
+    placeholder: 1
+    solidColor: 0
+    useSceneBackground: 0
+    fadeSeconds: 0.3
+  - key: art.requirement.END-R-NORMAL
+    texture: {fileID: 2800000, guid: 94f87b22725fddf4bb8650c16ae65c22, type: 3}
+    tint: {r: 1, g: 1, b: 1, a: 1}
+    placeholderColor: {r: 1, g: 1, b: 1, a: 1}
+    placeholder: 1
+    solidColor: 0
+    useSceneBackground: 0
+    fadeSeconds: 0.3
+  - key: art.requirement.END-R-BAD
+    texture: {fileID: 2800000, guid: b27ab90283758034daae658de7aaa57f, type: 3}
+    tint: {r: 1, g: 1, b: 1, a: 1}
+    placeholderColor: {r: 1, g: 1, b: 1, a: 1}
+    placeholder: 1
+    solidColor: 0
+    useSceneBackground: 0
+    fadeSeconds: 0.3
+  - key: art.requirement.END-C-IF3
+    texture: {fileID: 2800000, guid: 3bde070fc48d77f4e916b8351b31d21c, type: 3}
+    tint: {r: 1, g: 1, b: 1, a: 1}
+    placeholderColor: {r: 1, g: 1, b: 1, a: 1}
+    placeholder: 1
+    solidColor: 0
+    useSceneBackground: 0
+    fadeSeconds: 0.3
+  - key: art.requirement.END-C-IF4
+    texture: {fileID: 2800000, guid: 0b7d47ff1fefb1a4e95fdfc4cad7fd1e, type: 3}
+    tint: {r: 1, g: 1, b: 1, a: 1}
+    placeholderColor: {r: 1, g: 1, b: 1, a: 1}
+    placeholder: 1
+    solidColor: 0
+    useSceneBackground: 0
+    fadeSeconds: 0.3
+  - key: art.requirement.END-C-RY1
+    texture: {fileID: 2800000, guid: aa6e393d3d24a3e4e918345d85e05768, type: 3}
+    tint: {r: 1, g: 1, b: 1, a: 1}
+    placeholderColor: {r: 1, g: 1, b: 1, a: 1}
+    placeholder: 1
+    solidColor: 0
+    useSceneBackground: 0
+    fadeSeconds: 0.3
+  - key: art.requirement.END-C-RY2
+    texture: {fileID: 2800000, guid: 5f3655f913743b145bfef185ad98038e, type: 3}
+    tint: {r: 1, g: 1, b: 1, a: 1}
+    placeholderColor: {r: 1, g: 1, b: 1, a: 1}
+    placeholder: 1
+    solidColor: 0
+    useSceneBackground: 0
+    fadeSeconds: 0.3
+  - key: art.requirement.END-RE-01
+    texture: {fileID: 2800000, guid: b1ff21be2c3ad704eb67ca3ef45e5315, type: 3}
+    tint: {r: 1, g: 1, b: 1, a: 1}
+    placeholderColor: {r: 1, g: 1, b: 1, a: 1}
+    placeholder: 1
+    solidColor: 0
+    useSceneBackground: 0
+    fadeSeconds: 0.3
+  - key: art.requirement.END-RE-02
+    texture: {fileID: 2800000, guid: 0302b0cb7b13b4740be0b14aff1c6559, type: 3}
     tint: {r: 1, g: 1, b: 1, a: 1}
     placeholderColor: {r: 1, g: 1, b: 1, a: 1}
     placeholder: 1
