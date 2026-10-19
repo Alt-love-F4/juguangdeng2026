@@ -15,7 +15,7 @@ namespace Spotlight.Narrative.Editor.Tests
             Assert.That(manifest.requirements.Length,Is.EqualTo(NarrativeArtPlaceholderBuilder.ExpectedRequirementCount));
             Assert.That(manifest.requirements.Select(r=>r.id).Distinct(System.StringComparer.Ordinal).Count(),Is.EqualTo(115));
             var cards=manifest.requirements.Where(NarrativeArtPlaceholderBuilder.HasHistoricalCard).ToArray();
-            Assert.That(cards.Length,Is.EqualTo(51));
+            Assert.That(cards.Length,Is.EqualTo(52));
             foreach(var item in cards)
             {
                 Assert.That(item.assetPath,Does.StartWith("Assets/Art/NarrativePlaceholders/"));Assert.That(File.Exists(item.assetPath),Is.True);
@@ -53,10 +53,32 @@ namespace Spotlight.Narrative.Editor.Tests
 
             var summary=NarrativeArtPlaceholderBuilder.Summarize(requirements,registry,characters,config,endings);
             Assert.That(summary.Total,Is.EqualTo(115));
-            Assert.That(summary.HistoricalCards,Is.EqualTo(51));
-            Assert.That(summary.EndingNewImages,Is.EqualTo(14));
+            Assert.That(summary.HistoricalCards,Is.EqualTo(52));
+            Assert.That(summary.EndingNewImages,Is.EqualTo(15));
             Assert.That(summary.EndingReuses,Is.EqualTo(1));
-            Assert.That(summary.EndingNoNewArtwork,Is.EqualTo(1));
+            Assert.That(summary.EndingNoNewArtwork,Is.EqualTo(0));
+        }
+
+        [Test]public void RefusingCafeEndingHasAnExplicitRequirementCardInsteadOfNoArtwork()
+        {
+            var item=NarrativeArtPlaceholderBuilder.ReadManifest().requirements.Single(r=>r.id=="END-IF0");
+            var catalog=NarrativeEndingArtworkCatalog.Load();
+            var entry=catalog.Find("arrival.ending.if0");
+            Assert.That(item.disposition,Is.EqualTo("placeholder"));
+            Assert.That(item.assetPath,Is.EqualTo("Assets/Art/NarrativePlaceholders/Endings/END-IF0.png"));
+            Assert.That(entry,Is.Not.Null);
+            Assert.That(entry.artwork,Is.Not.Null);
+            Assert.That(entry.artworkIsPlaceholder,Is.True);
+            Assert.That(entry.status,Is.EqualTo(NarrativeEndingArtworkCatalog.ArtStatus.RequiredMissing));
+            Assert.That(AssetDatabase.GetAssetPath(entry.artwork),Is.EqualTo(item.assetPath));
+            var snapshot=NarrativeEndingEcho.ResolveArtwork(entry.endingId);
+            Assert.That(snapshot.Sprite,Is.EqualTo(entry.artwork));
+            Assert.That(snapshot.IsPlaceholder,Is.True);
+            Assert.That(snapshot.StatusLabel,Does.Contain("非最终插画"));
+            var current=NarrativeArtPlaceholderBuilder.InspectCurrentArt(item,null,null,null,catalog);
+            Assert.That(current.RequirementCard,Is.True);
+            Assert.That(current.Connected,Is.False);
+            Assert.That(current.NoNewArtwork,Is.False);
         }
 
         [Test]public void ProposedKeysAndRequirementCardRegistryEntriesDoNotCountAsProductionHooks()

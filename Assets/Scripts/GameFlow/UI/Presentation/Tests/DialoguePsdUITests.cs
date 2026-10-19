@@ -158,6 +158,72 @@ namespace Spotlight.GameFlow.Tests
         }
 
         [UnityTest]
+        public IEnumerator GeneratedPortraitMeshesKeepArtworkBottomAcrossLayoutsAndSwap()
+        {
+            Sprite wide = Resources.Load<Sprite>("Characters/mamion/neutral");
+            Sprite padded = Resources.Load<Sprite>("Characters/colette/neutral");
+            Sprite otherPadded = Resources.Load<Sprite>("Characters/duval/neutral");
+            Assert.That(wide, Is.Not.Null);
+            Assert.That(padded, Is.Not.Null);
+            Assert.That(otherPadded, Is.Not.Null);
+            var first = new DialogueCharacter("mamion", "Mamion", wide);
+            var second = new DialogueCharacter("colette", "Colette", padded);
+            var third = new DialogueCharacter("duval", "Duval", otherPadded);
+            var scripts = new[]
+            {
+                new DialogueScript(new[] { new DialogueLine(DialogueSpeaker.Center, "Three portraits") },
+                    first, second, centerCharacter: third),
+                new DialogueScript(new[] { new DialogueLine(DialogueSpeaker.Left, "One portrait",
+                    replaceRight: true, replaceCenter: true) }, first),
+                new DialogueScript(new[] { new DialogueLine(DialogueSpeaker.Right, "Two portraits") },
+                    second, third)
+            };
+            int[] expectedCounts = { 3, 1, 2 };
+            for (int i = 0; i < scripts.Length; i++)
+            {
+                panel.Play(scripts[i]);
+                yield return Ready(); // Intentional entrance offsets are not a resting-pose invariant.
+                AssertPortraitMeshesAtArtworkBottom(expectedCounts[i]);
+            }
+            Sprite beforeLeft = panel.LeftPortrait.sprite;
+            Sprite beforeRight = panel.RightPortrait.sprite;
+            panel.SwapPortraits();
+            yield return Ready();
+            Assert.That(panel.LeftPortrait.sprite, Is.SameAs(beforeRight));
+            Assert.That(panel.RightPortrait.sprite, Is.SameAs(beforeLeft));
+            AssertPortraitMeshesAtArtworkBottom(2);
+        }
+
+        private void AssertPortraitMeshesAtArtworkBottom(int expectedCount)
+        {
+            RectTransform artwork = panel.transform.Find("EffectStage/Artwork") as RectTransform;
+            Assert.That(artwork, Is.Not.Null);
+            Canvas.ForceUpdateCanvases();
+            int enabledCount = 0;
+            foreach (Image portrait in new[] { panel.LeftPortrait, panel.CenterPortrait, panel.RightPortrait })
+            {
+                Assert.That(portrait.GetComponent<DialoguePortraitBottomAlignment>(), Is.Not.Null,
+                    portrait.name + " must receive bottom alignment during panel initialization.");
+                if (!portrait.enabled) continue;
+                enabledCount++;
+                portrait.SetVerticesDirty();
+                portrait.Rebuild(CanvasUpdate.PreRender);
+                Mesh mesh = portrait.canvasRenderer.GetMesh();
+                Assert.That(mesh, Is.Not.Null);
+                Assert.That(mesh.vertexCount, Is.GreaterThan(0), portrait.name + " must generate portrait geometry.");
+                float bottom = float.PositiveInfinity;
+                foreach (Vector3 vertex in mesh.vertices)
+                {
+                    Vector3 artworkVertex = artwork.InverseTransformPoint(portrait.rectTransform.TransformPoint(vertex));
+                    bottom = Mathf.Min(bottom, artworkVertex.y);
+                }
+                Assert.That(bottom, Is.EqualTo(artwork.rect.yMin).Within(.1f),
+                    portrait.name + " generated geometry must share the artwork's resting bottom edge.");
+            }
+            Assert.That(enabledCount, Is.EqualTo(expectedCount));
+        }
+
+        [UnityTest]
         public IEnumerator TwoCharacterLayoutSeparatesPortraitSlotsAndKeepsBackgroundOptional()
         {
             panel.Play(TwoCharacterScript("两位角色应分别位于左右区域。"));

@@ -60,6 +60,7 @@ namespace Spotlight.GameFlow
             if (canvasGroup != null) { canvasGroup.alpha = 1f; canvasGroup.blocksRaycasts = canvasGroup.interactable = true; }
             if (speakerText != null) speakerText.text = "终章";
             if (skipButton != null) skipButton.gameObject.SetActive(false);
+            if (historyButton != null) historyButton.gameObject.SetActive(false);
             if (cancelButton != null) cancelButton.gameObject.SetActive(false);
             if (passiveHintText != null) passiveHintText.gameObject.SetActive(false);
             if (hintText != null) hintText.gameObject.SetActive(false);

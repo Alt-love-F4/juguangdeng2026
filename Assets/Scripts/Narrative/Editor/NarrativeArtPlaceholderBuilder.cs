@@ -360,7 +360,7 @@ namespace Spotlight.Narrative.Editor
                 + "　当前已接入素材：" + summary.Connected
                 + "　无需新增图片：" + summary.NoNewArtwork, MessageType.Info);
             GUILayout.Label("结局画面需求：新图 " + summary.EndingNewImages + "　复用 " + summary.EndingReuses
-                + "　IF0 不新增图 " + summary.EndingNoNewArtwork, EditorStyles.boldLabel);
+                + "　无需新增图 " + summary.EndingNoNewArtwork, EditorStyles.boldLabel);
             DrawGuestVariantPools(NarrativeCharacterArtAudit.CountGuestVariants());
             EditorGUILayout.BeginHorizontal();
             query = EditorGUILayout.TextField("搜索（编号／角色 ID／名称）", query);

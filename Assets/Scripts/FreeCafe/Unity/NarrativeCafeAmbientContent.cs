@@ -4,9 +4,17 @@ using Spotlight.Narrative;
 
 namespace Spotlight.FreeCafe
 {
-    /// <summary>Source-authored ambient snapshots on the existing hint UI, never a modal narrative event.</summary>
+    /// <summary>Source-authored order dialogue, shared by tutorial and regular business.</summary>
     public static class NarrativeCafeAmbientContent
     {
+        public static bool TryCreateOrderDialogue(CafeWorld world, WorldEntity customer, out Spotlight.GameFlow.DialogueScript script)
+        {
+            script = null;
+            if (!TryOrder(world, customer, out string text)) return false;
+            script = CafeDialoguePlayback.CreateCustomerScript(customer.person, text);
+            return script != null;
+        }
+
         public static bool TryOrder(CafeWorld world, WorldEntity customer, out string text)
         {
             text = null;

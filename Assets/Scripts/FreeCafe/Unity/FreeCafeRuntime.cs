@@ -542,11 +542,8 @@ namespace Spotlight.FreeCafe
                     Report(result);
                     if(result.success)
                     {
-                        if (!CafeTutorialActive && NarrativeCafeAmbientContent.TryOrder(World, entity, out string orderText))
-                        {
-                            // Order talk is nonmodal: keep production and customer patience alive.
-                            ShowHint(orderText); OperationToastPanel.ShowMessage(orderText);
-                        }
+                        if (NarrativeCafeAmbientContent.TryCreateOrderDialogue(World, entity, out var orderDialogue))
+                            DialoguePlayback.Play(orderDialogue);
                         else CafeDialoguePlayback.PlayCustomer(entity.person, result.message);
                         BusinessTutorial?.CustomerInspected(entity.id);
                     }

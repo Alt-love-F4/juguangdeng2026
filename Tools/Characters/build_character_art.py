@@ -57,22 +57,24 @@ def copy_image(src, dest):
  if not dest.exists() or dest.read_bytes() != data:
   dest.write_bytes(data)
 
+def silhouette(source, size):
+ # Reuse approved silhouette shapes without labels, frames or invented character art.
+ art = Image.open(ROOT / source).convert('RGBA')
+ art = art.crop(art.getchannel('A').getbbox())
+ art = ImageOps.contain(art, (size[0] - 40, size[1] - 40), Image.Resampling.LANCZOS)
+ black = Image.new('RGBA', art.size, (0, 0, 0, 0))
+ black.putalpha(art.getchannel('A'))
+ canvas = Image.new('RGBA', size)
+ canvas.alpha_composite(black, ((size[0] - art.width) // 2, size[1] - art.height - 20))
+ return canvas
+
 def placeholder(cid, name):
- im=Image.new('RGBA',(768,1536)); d=ImageDraw.Draw(im)
- d.rounded_rectangle((70,20,698,1516),radius=48,fill='#393e4b',outline='#eeae44',width=12)
- for y in range(50,1500,64):
-  d.line((80,y,120,y+40), fill='#73716d',width=8)
-  d.line((648,y,688,y+40), fill='#73716d',width=8)
- d.ellipse((240,200,528,488),fill='#89909c',outline='#e6c281',width=10)
- d.rounded_rectangle((190,520,578,1190),radius=100,fill='#687181',outline='#e6c281',width=10)
- label(d,(384,110),'立绘待补',64)
- label(d,(384,700),'ART TBD',58)
- label(d,(384,830),name,32)
- label(d,(384,940),cid,32)
- label(d,(384,1390),'PLACEHOLDER',44)
- return im
+ return silhouette('Assets/Art/NarrativeGenerated/Characters/CH35_tutorial_elderly_woman_silhouette.png', (768,1536))
 
 def avatar(im,cid):
+ if cid not in SOURCES:
+  shape = im.crop(im.getchannel('A').getbbox())
+  return ImageOps.fit(shape.crop((0,0,shape.width,max(1,int(shape.height*.40)))), (512,512), Image.Resampling.LANCZOS)
  if cid in SOURCES:
   w,h=im.size
   x,y,s=CROPS.get(cid,(0.0,0.0,1.0))
@@ -83,28 +85,26 @@ def avatar(im,cid):
  crop=crop.resize((512,512),Image.Resampling.LANCZOS)
  bg=Image.new('RGBA',(512,512),'#e3d4bb'); bg.alpha_composite(crop)
  d=ImageDraw.Draw(bg); d.rounded_rectangle((5,5,506,506),radius=18,outline='#806c50',width=8)
- if cid not in SOURCES:
-  d.rectangle((0,402,512,512),fill='#393e4b'); label(d,(256,453),'头像待补',46)
  return bg
 
 def seated(cid,name,av):
- # A diagram, not invented final character art: head badge + seated mannequin + chair.
- im=Image.new('RGBA',(768,1024));d=ImageDraw.Draw(im)
- d.ellipse((90,925,680,1010), fill=(15,20,27,95))
- d.rounded_rectangle((122,380,646,790),radius=28,fill='#505665',outline='#efb445',width=12)
- d.line((160,750,140,965),fill='#80694d',width=26);d.line((606,750,626,965),fill='#80694d',width=26)
- d.rounded_rectangle((217,355,551,702),radius=82,fill='#778394',outline='#e4d4b4',width=10)
- d.line((255,640,218,764,315,895),fill='#d5be96',width=56,joint='curve')
- d.line((513,640,551,764,454,895),fill='#d5be96',width=56,joint='curve')
- d.line((315,895,285,941),fill='#778394',width=66);d.line((454,895,484,941),fill='#778394',width=66)
- d.line((238,470,178,633,290,654),fill='#d5be96',width=43,joint='curve')
- d.line((530,470,590,633,478,654),fill='#d5be96',width=43,joint='curve')
- head=av.resize((268,268),Image.Resampling.LANCZOS);im.alpha_composite(head,(250,90));d=ImageDraw.Draw(im)
- d.rounded_rectangle((100,0,668,86),radius=18,fill='#edb64d',outline='#543b21',width=6)
- label(d,(384,43),'坐姿占位 · ART TBD',40,fill='#33291e')
- d.rounded_rectangle((146,700,622,815),radius=15,fill='#343c49',outline='#edb64d',width=7)
- label(d,(384,734),name,29);label(d,(384,782),cid,28)
- return im
+ return silhouette('Assets/Art/FreeCafe/Seating/Characters/silhouette_seated.png', (768,1024))
+
+def rebuild_placeholders():
+ # Preserve formal art, variant art, GUIDs and all existing importer settings.
+ manifest = json.loads((ROOT/'Tools/Characters/character-art-manifest.json').read_text(encoding='utf-8'))
+ count = 0
+ for record in manifest:
+  folder = OUT / record['id']
+  if record['portraitPlaceholder']:
+   im = placeholder(record['id'], record['name'])
+   save_image(im, folder/'neutral.png')
+   save_image(avatar(im,record['id']), folder/'avatar.png')
+   count += 2
+  if record['seatedPlaceholder']:
+   save_image(seated(record['id'],record['name'],None), folder/'seated_placeholder.png')
+   count += 1
+ print(f'Rebuilt {count} NPC placeholder images as black silhouettes; formal/variant art and .meta files untouched.')
 
 def contact_sources():
  SCRATCH.mkdir(parents=True,exist_ok=True)
@@ -146,6 +146,7 @@ def build():
 
 if __name__=='__main__':
  import argparse
- parser=argparse.ArgumentParser();parser.add_argument('--contact-sources',action='store_true');args=parser.parse_args()
+ parser=argparse.ArgumentParser();parser.add_argument('--contact-sources',action='store_true');parser.add_argument('--placeholders-only',action='store_true');args=parser.parse_args()
  if args.contact_sources: contact_sources()
+ elif args.placeholders_only: rebuild_placeholders()
  else: build()

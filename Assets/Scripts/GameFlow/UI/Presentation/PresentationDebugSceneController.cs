@@ -14,7 +14,7 @@ namespace Spotlight.GameFlow
     {
         public const string DebugTag = "presentation-debug";
         public const string ScenePath = "Assets/Scenes/PresentationDebugScene.unity";
-        public const string DefaultHint = "D 人物巡览 · F1 10/7 S1 · F2/F3 S2知觉1/2 · F4知觉节点 · F5信纸。Esc 关闭 · Backspace 重播 · H 收起说明 · F9 暂停。";
+        public const string DefaultHint = "D 全人物立绘（直接巡览） · F1 10/7 S1 · F2/F3 S2知觉1/2 · F4知觉节点 · F5信纸。Esc 关闭 · Backspace 重播 · H 收起说明 · F9 暂停。";
 
         public enum Preview { DateChange, Letter, Dialogue, PreBusiness, CafeOpening, BusinessEnd, CityMap, PreNight, HomeNight, DayEnd, Introduction, Effects, Reading, Notice, CutScene, HardcodedDialogue, HardcodedLetter, HardcodedOptions, Details, LongLoading, ShortLoading, GameOver, OpeningPrologue }
 
@@ -103,7 +103,7 @@ namespace Spotlight.GameFlow
             if (keyboard.qKey.wasPressedThisFrame) PlayDateChange();
             else if (keyboard.wKey.wasPressedThisFrame) { if (draftPreview) PlayHardcodedLetter(); else PlayLetter(); }
             else if (keyboard.eKey.wasPressedThisFrame) { if (draftPreview) PlayHardcodedDialogue(); else PlayDialogue(); }
-            else if (keyboard.dKey.wasPressedThisFrame) ShowCharacterGalleryMenu();
+            else if (keyboard.dKey.wasPressedThisFrame) PlayDialogueCharacterGallery();
             else if (keyboard.cKey.wasPressedThisFrame) PlayDialogueOptions();
             else if (keyboard.vKey.wasPressedThisFrame) PlayReading();
             else if (keyboard.bKey.wasPressedThisFrame) PlayNotice();
@@ -191,7 +191,34 @@ namespace Spotlight.GameFlow
         public void PlayDayEnd() => PlayPreview(Preview.DayEnd);
         public void PlayIntroduction() => PlayPreview(Preview.Introduction);
         public void PlayEffects() => PlayPreview(Preview.Effects);
-        public void PlayDialogueCharacterGallery() => ShowCharacterGalleryMenu();
+        /// <summary>Direct all-character art check; no dialogue picker or story-table scan.</summary>
+        public void PlayDialogueCharacterGallery()
+        {
+            StopCurrent();
+            selectedDialogueId = PresentationDebugCharacterGallery.Id;
+            selectedDialogueGallery = true;
+            lastPreview = Preview.Dialogue;
+            hasLastPreview = true;
+            int version = ++requestVersion;
+            startedFrame = Time.frameCount;
+            try
+            {
+                DialogueScript script = PresentationDebugCharacterGallery.Create();
+                if (hideHelpDuringPlayback && HelpVisible)
+                {
+                    restoreHelpAfterPlayback = true;
+                    ToggleHelp();
+                }
+                DialoguePanel panel = DialoguePlayback.Play(script, () => Complete(version), () => Cancelled(version),
+                    DebugTag, PanelCachePolicy.Transient);
+                currentPanel = panel;
+                // This is an art browser, not a reading sample: every settled click advances one actor.
+                panel.SetPreviewReading(0f, typewriter: false);
+                SetStatus("全人物立绘巡览", script.Count + " 位角色");
+                SetHint("无需选择剧情。点击对话框切换下一位；左侧对话立绘，右侧独立场景形象。Esc 关闭，Backspace 从头重播。");
+            }
+            catch (Exception error) { ReportDialogueError(error); }
+        }
         public void PreviewEnter() => PreviewEffectCue(1);
         public void PreviewStartle() => PreviewEffectCue(2);
         public void PreviewShakeLight() => PreviewEffectCue(3);
@@ -629,7 +656,8 @@ namespace Spotlight.GameFlow
             {
                 if (!string.IsNullOrEmpty(selectedDialogueId))
                 {
-                    if (selectedDialogueGallery) PlayConfiguredCharacterGallery(selectedDialogueId);
+                    if (selectedDialogueId == PresentationDebugCharacterGallery.Id) PlayDialogueCharacterGallery();
+                    else if (selectedDialogueGallery) PlayConfiguredCharacterGallery(selectedDialogueId);
                     else PlayConfiguredDialogue(selectedDialogueId);
                 }
                 else PlayPreview(lastPreview);

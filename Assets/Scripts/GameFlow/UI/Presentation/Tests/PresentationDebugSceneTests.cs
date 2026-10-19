@@ -69,6 +69,9 @@ namespace Spotlight.GameFlow.Tests
         [UnityTest]
         public IEnumerator CharacterGalleryButtonSelectsDialogueAndAdvancesOnePersonPerClick()
         {
+            const string galleryId = PresentationDebugCharacterGallery.Id;
+            Assert.That(galleryId, Is.EqualTo("characters:all"));
+
             Button launcher = null;
             foreach (GameObject root in debugScene.GetRootGameObjects())
                 foreach (Button button in root.GetComponentsInChildren<Button>(true))
@@ -78,38 +81,96 @@ namespace Spotlight.GameFlow.Tests
             Assert.That(launcher.onClick.GetPersistentMethodName(0), Is.EqualTo("PlayDialogueCharacterGallery"));
 
             launcher.onClick.Invoke();
-            Assert.That(controller.IsDialogueMenuOpen, Is.True);
-            Transform menu = controller.transform.Find("PresentationDebugDialogueMenu");
-            TMP_InputField search = menu.GetComponentInChildren<TMP_InputField>();
-            search.text = "conversation:oct07.s1.conversation";
-            Button selection = menu.GetComponentsInChildren<Button>()
-                .First(button => button.transform.Find("Id") != null
-                    && button.transform.Find("Id").GetComponent<TMP_Text>().text == "conversation:oct07.s1.conversation");
-            selection.onClick.Invoke();
-
+            Assert.That(controller.IsDialogueMenuOpen, Is.False);
+            Assert.That(controller.transform.Find("PresentationDebugDialogueMenu"), Is.Null);
             Assert.That(NarrativeRuntime.Instance, Is.Null);
-            Assert.That(controller.SelectedDialogueId, Is.EqualTo("conversation:oct07.s1.conversation"));
+            Assert.That(controller.SelectedDialogueId, Is.EqualTo(galleryId));
+
+            DialogueScript gallery = PresentationDebugCharacterGallery.Create();
+            Assert.That(gallery.Count, Is.GreaterThan(4));
             var panel = controller.CurrentPanel as DialoguePanel;
             Assert.That(panel, Is.Not.Null);
-            DialogueScript gallery = PresentationDebugDialogueSource.CreateCharacterGallery(
-                LubanNarrativeLoader.Load(), controller.SelectedDialogueId);
-            Assert.That(gallery.Count, Is.GreaterThan(1));
+            yield return WaitForDialogueReady(panel);
+            Assert.That(panel.IsTyping, Is.False);
+            Assert.That(panel.LineIndex, Is.Zero);
+            Assert.That(panel.LeftCharacter.CharacterKey, Is.EqualTo(gallery[0].LeftCharacter.CharacterKey));
 
+            Button dialogueBox = panel.transform.Find("EffectStage/Artwork/DialogueBox").GetComponent<Button>();
+            var seenKeys = new System.Collections.Generic.HashSet<string>(StringComparer.Ordinal);
+            seenKeys.Add(panel.LeftCharacter.CharacterKey);
+            dialogueBox.onClick.Invoke();
+            yield return null;
+            yield return WaitForDialogueReady(panel);
+            Assert.That(panel.LineIndex, Is.EqualTo(1));
+            Assert.That(panel.LeftCharacter.CharacterKey, Is.EqualTo(gallery[1].LeftCharacter.CharacterKey));
+            Assert.That(seenKeys.Add(panel.LeftCharacter.CharacterKey), Is.True);
+
+            for (int expectedIndex = 2; expectedIndex <= 4; expectedIndex++)
+            {
+                dialogueBox.onClick.Invoke();
+                yield return null;
+                yield return WaitForDialogueReady(panel);
+                Assert.That(panel.LineIndex, Is.EqualTo(expectedIndex));
+                Assert.That(panel.LeftCharacter.CharacterKey, Is.EqualTo(gallery[expectedIndex].LeftCharacter.CharacterKey));
+                Assert.That(seenKeys.Add(panel.LeftCharacter.CharacterKey), Is.True,
+                    "Gallery auto-assigned a duplicate character key at line " + expectedIndex);
+            }
+
+            controller.ReplayLast();
+            Assert.That(controller.IsDialogueMenuOpen, Is.False);
+            Assert.That(controller.transform.Find("PresentationDebugDialogueMenu"), Is.Null);
+            Assert.That(controller.SelectedDialogueId, Is.EqualTo(galleryId));
+            panel = controller.CurrentPanel as DialoguePanel;
+            Assert.That(panel, Is.Not.Null);
+            yield return WaitForDialogueReady(panel);
+            Assert.That(panel.LineIndex, Is.Zero);
+            Assert.That(panel.LeftCharacter.CharacterKey, Is.EqualTo(gallery[0].LeftCharacter.CharacterKey));
+            Assert.That(NarrativeRuntime.Instance, Is.Null);
+
+            controller.StopCurrent();
+            yield return null;
+            Assert.That(controller.CurrentPanel, Is.Null);
+            Assert.That(controller.IsDialogueMenuOpen, Is.False);
+            Assert.That(controller.transform.Find("PresentationDebugDialogueMenu"), Is.Null);
+        }
+
+        [UnityTest]
+        public IEnumerator CharacterGalleryKeyboardDLaunchesDirectly()
+        {
+            Keyboard keyboard = InputSystem.AddDevice<Keyboard>("PresentationDebugGalleryKeyboard");
+            try
+            {
+                InputSystem.QueueStateEvent(keyboard, new KeyboardState(Key.D));
+                yield return null;
+                InputSystem.QueueStateEvent(keyboard, new KeyboardState());
+                yield return null;
+
+                Assert.That(controller.IsDialogueMenuOpen, Is.False);
+                Assert.That(controller.transform.Find("PresentationDebugDialogueMenu"), Is.Null);
+                Assert.That(controller.SelectedDialogueId, Is.EqualTo(PresentationDebugCharacterGallery.Id));
+                Assert.That(NarrativeRuntime.Instance, Is.Null);
+                var panel = controller.CurrentPanel as DialoguePanel;
+                Assert.That(panel, Is.Not.Null);
+                yield return WaitForDialogueReady(panel);
+                Assert.That(panel.IsTyping, Is.False);
+                Assert.That(panel.LineIndex, Is.Zero);
+                DialogueScript gallery = PresentationDebugCharacterGallery.Create();
+                Assert.That(panel.LeftCharacter.CharacterKey, Is.EqualTo(gallery[0].LeftCharacter.CharacterKey));
+            }
+            finally
+            {
+                if (keyboard != null) InputSystem.RemoveDevice(keyboard);
+            }
+        }
+
+        private static IEnumerator WaitForDialogueReady(DialoguePanel panel)
+        {
             float deadline = Time.realtimeSinceStartup + 12f;
             while (!panel.IsReady)
             {
                 Assert.That(Time.realtimeSinceStartup, Is.LessThan(deadline));
                 yield return null;
             }
-            panel.SetPreviewReading(0f, typewriter: false);
-            Assert.That(panel.LeftCharacter.CharacterKey, Is.EqualTo(gallery[0].LeftCharacter.CharacterKey));
-            panel.Advance();
-            while (!panel.IsReady)
-            {
-                Assert.That(Time.realtimeSinceStartup, Is.LessThan(deadline));
-                yield return null;
-            }
-            Assert.That(panel.LeftCharacter.CharacterKey, Is.EqualTo(gallery[1].LeftCharacter.CharacterKey));
         }
 
         [UnityTest]

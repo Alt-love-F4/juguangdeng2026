@@ -55,7 +55,7 @@ namespace Spotlight.GameFlow
                 }
             }
             EditorUtility.SetDirty(catalog);AssetDatabase.SaveAssetIfDirty(catalog);
-            Debug.Log("[NarrativeEnding] Applied 14 ending cards, one reuse composition and IF0 registration; authored gates unchanged.");
+            Debug.Log("[NarrativeEnding] Applied ending art requirement plan, including IF0 placeholder; existing delivered artwork and authored gates unchanged.");
         }
     }
 }

@@ -330,21 +330,30 @@ namespace Spotlight.GameFlow.Tests
         [UnityTest]
         public IEnumerator AccentTargetsOtherCharacterAndComposesWithScreenFlashAndShake()
         {
+            panel.Effects.Tick(1f); // Settle entrance/focus before capturing the resting baseline.
             RectTransform left = panel.LeftPortrait.transform.parent as RectTransform;
             RectTransform right = panel.RightPortrait.transform.parent as RectTransform;
             Vector2 leftBase = left.anchoredPosition, rightBase = right.anchoredPosition;
+            float leftBottom = leftBase.y + left.rect.yMin * left.localScale.y;
+            float rightBottom = rightBase.y + right.rect.yMin * right.localScale.y;
             var accent = panel.PlayEffect(PresentationEffectIds.AccentShakeStartle, "adele");
             var shake = panel.PlayEffect(PresentationEffectIds.ShakeHeavy);
             var flash = panel.PlayEffect(PresentationEffectIds.FlashWhite);
             panel.Effects.Tick(.025f);
-            Assert.That(left.anchoredPosition, Is.EqualTo(leftBase));
-            Assert.That(Vector2.Distance(right.anchoredPosition, rightBase), Is.GreaterThan(.1f));
+            Assert.That(left.anchoredPosition.x, Is.EqualTo(leftBase.x).Within(.001f));
+            Assert.That(left.anchoredPosition.y + left.rect.yMin * left.localScale.y,
+                Is.EqualTo(leftBottom).Within(.001f));
+            Assert.That(Mathf.Abs(right.anchoredPosition.x - rightBase.x), Is.GreaterThan(.1f));
+            Assert.That(right.anchoredPosition.y + right.rect.yMin * right.localScale.y,
+                Is.EqualTo(rightBottom).Within(.001f));
             Assert.That(panel.EffectStage.anchoredPosition.magnitude, Is.GreaterThan(.1f));
             Assert.That(panel.Effects.OverlayAlpha, Is.GreaterThan(.1f));
             Assert.That(accent.IsDone || shake.IsDone || flash.IsDone, Is.False);
             panel.Effects.Tick(1f);
             Assert.That(accent.IsCompleted && shake.IsCompleted && flash.IsCompleted, Is.True);
-            Assert.That(right.anchoredPosition, Is.EqualTo(rightBase));
+            Assert.That(right.anchoredPosition.x, Is.EqualTo(rightBase.x).Within(.001f));
+            Assert.That(right.anchoredPosition.y + right.rect.yMin * right.localScale.y,
+                Is.EqualTo(rightBottom).Within(.001f));
             Assert.That(panel.EffectStage.anchoredPosition, Is.EqualTo(Vector2.zero));
             yield return null;
         }

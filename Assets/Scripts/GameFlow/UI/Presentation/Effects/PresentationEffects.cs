@@ -28,6 +28,7 @@ namespace Spotlight.GameFlow
             public Color frameColor;
             public float alpha = 1f, size = 1f, focus = 1f, focusTarget = 1f, shadow;
             public float enterDirection;
+            public bool bottomAligned;
         }
         private readonly PresentationEffectLibrary library;
         private readonly RectTransform stage, dialogueBox;
@@ -110,7 +111,8 @@ namespace Spotlight.GameFlow
             RectTransform rect = frame != null ? frame.rectTransform : image.rectTransform;
             return new Portrait { image = image, frame = frame, rect = rect, position = rect.anchoredPosition,
                 scale = UnmirroredScale(rect.localScale), imageScale = UnmirroredScale(image.transform.localScale),
-                frameColor = frame != null ? frame.color : Color.clear, enterDirection = enterDirection };
+                frameColor = frame != null ? frame.color : Color.clear, enterDirection = enterDirection,
+                bottomAligned = image.GetComponent<DialoguePortraitBottomAlignment>() != null };
         }
 
         private static Vector3 UnmirroredScale(Vector3 scale)
@@ -229,7 +231,9 @@ namespace Spotlight.GameFlow
                 p.alpha = enter ? Mathf.Clamp01(t * 4f) : Mathf.Lerp(startAlpha, exit ? 0f : 1f, ease);
                 p.shadow = enter ? 1f - Mathf.InverseLerp(.65f, 1f, t) : 0f;
                 p.size = enter ? Mathf.Lerp(.84f, 1f, ease) : 1f;
-                p.offset = enter ? new Vector2(p.enterDirection * d.strength * (1f-ease), 16f * (1f-ease)) : Vector2.zero;
+                // Bottom-anchored busts enter from below rather than exposing their cut edge above the baseline.
+                float enterY = p.bottomAligned ? -16f : 16f;
+                p.offset = enter ? new Vector2(p.enterDirection * d.strength * (1f-ease), enterY * (1f-ease)) : Vector2.zero;
             }, () => { p.alpha = 1f; p.shadow = 0f; p.size = 1f; p.offset = Vector2.zero; },
             () => { p.alpha = exit ? 0f : 1f; p.shadow = 0f; p.size = 1f; p.offset = Vector2.zero; complete?.Invoke(); });
         }
@@ -436,8 +440,12 @@ namespace Spotlight.GameFlow
             {
                 Portrait p = portraits[i];
                 if (p.image == null || p.rect == null) continue;
-                p.rect.anchoredPosition = p.position + p.offset + p.accent;
-                p.rect.localScale = p.scale * p.size * Mathf.Lerp(1f, 1.025f, p.focus);
+                float scale = p.size * Mathf.Lerp(1f, 1.025f, p.focus);
+                // Scale around the authored bottom without changing pivots or cancelling
+                // intentional movement/nods. The child mesh handles aspect-fit letterboxing.
+                float bottomOffset = p.bottomAligned ? p.rect.rect.yMin * p.scale.y * (1f - scale) : 0f;
+                p.rect.anchoredPosition = p.position + p.offset + p.accent + new Vector2(0f, bottomOffset);
+                p.rect.localScale = p.scale * scale;
                 // Every slot keeps the source sprite orientation, including after swaps/replacements.
                 p.image.transform.localScale = p.frame == null
                     ? p.imageScale * p.size * Mathf.Lerp(1f, 1.025f, p.focus) : p.imageScale;

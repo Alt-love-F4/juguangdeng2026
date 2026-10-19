@@ -119,6 +119,9 @@ namespace Spotlight.GameFlow
             // 台词作为纯文本，避免外部剧本中的 <...> 被当成 TMP 标签。
             dialogueText.richText = false;
             EnsureCenterPortrait();
+            InstallPortraitBottomAlignment(leftPortrait);
+            InstallPortraitBottomAlignment(rightPortrait);
+            InstallPortraitBottomAlignment(centerPortrait);
             leftFrameLayout = new PortraitLayout(leftPortraitFrame?.rectTransform);
             rightFrameLayout = new PortraitLayout(rightPortraitFrame?.rectTransform);
             leftImageLayout = new PortraitLayout(leftPortrait.rectTransform);
@@ -393,6 +396,12 @@ namespace Spotlight.GameFlow
             ApplyPortrait(centerPortrait, centerPortraitFrame, null);
         }
 
+        private static void InstallPortraitBottomAlignment(Image image)
+        {
+            if (image != null && image.GetComponent<DialoguePortraitBottomAlignment>() == null)
+                image.gameObject.AddComponent<DialoguePortraitBottomAlignment>();
+        }
+
         private readonly struct PortraitLayout
         {
             private readonly RectTransform rect;
@@ -496,7 +505,9 @@ namespace Spotlight.GameFlow
                 pageStart = range.firstCharacterIndex;
                 pageEnd = Math.Min(info.characterCount, range.lastCharacterIndex + 1);
             }
-            revealed = IsSkipping || charactersPerSecond <= 0f && ready ? pageEnd : pageStart;
+            // Instant preview pages must already be fully revealed when a replacement
+            // finishes, otherwise the next click is consumed by a one-frame typing state.
+            revealed = IsSkipping || charactersPerSecond <= 0f && (ready || script.IsPreview) ? pageEnd : pageStart;
             skipElapsed = 0f;
             hold = 0f;
             dialogueText.maxVisibleCharacters = (int)revealed;
@@ -711,6 +722,7 @@ namespace Spotlight.GameFlow
             if (cancelButton != null) cancelButton.onClick.RemoveListener(Cancel);
             if (dialogueBodyButton != null) dialogueBodyButton.onClick.RemoveListener(Advance);
             if (skipButton != null) skipButton.onClick.RemoveListener(Skip);
+            if (historyButton != null) historyButton.onClick.RemoveListener(OpenHistory);
             base.OnBeforeDestroy();
         }
         private readonly object voiceOwner = new object();

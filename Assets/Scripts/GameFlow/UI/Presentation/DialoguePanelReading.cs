@@ -11,6 +11,7 @@ namespace Spotlight.GameFlow
 {
     public sealed partial class DialoguePanel
     {
+        [SerializeField] private Button historyButton;
         [SerializeField, Min(.01f)] private float scrollThreshold = 100f;
         [SerializeField, Min(.05f)] private float scrollGestureGap = .22f;
         private readonly HashSet<object> readingPauses = new HashSet<object>();
@@ -128,7 +129,9 @@ namespace Spotlight.GameFlow
 
         private void CreateHistoryView()
         {
-            Button entry = ReadingButton(transform, "HistoryButton", "历史", new Vector2(.84f, .27f), new Vector2(.94f, .33f), OpenHistory);
+            if (historyButton == null && dialogueBox != null)
+                historyButton = dialogueBox.Find("history")?.GetComponent<Button>();
+            if (historyButton != null) historyButton.onClick.AddListener(OpenHistory);
             historyRoot = OptionObject(transform, "DialogueHistory", typeof(Image));
             OptionRect((RectTransform)historyRoot.transform, Vector2.zero, Vector2.one);
             historyRoot.GetComponent<Image>().color = new Color(.035f, .03f, .025f, .98f);
