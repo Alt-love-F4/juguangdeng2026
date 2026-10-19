@@ -332,6 +332,41 @@ namespace Spotlight.FreeCafe.Tests
             AssertUnchanged();
         }
 
+        [Test]
+        public void HiddenAtlasSkipsStatusPollingEvenIfOpenFlagIsStale()
+        {
+            Assert.That(shell.IsVisible, Is.False);
+            var openField = typeof(NarrativeAtlasGM).GetField("open", BindingFlags.Instance | BindingFlags.NonPublic);
+            var nextRefreshField = typeof(NarrativeAtlasGM).GetField("nextRefresh", BindingFlags.Instance | BindingFlags.NonPublic);
+            Assert.That(openField, Is.Not.Null);
+            Assert.That(nextRefreshField, Is.Not.Null);
+            openField.SetValue(atlas, true);
+            nextRefreshField.SetValue(atlas, -1f);
+
+            InvokePrivate(atlas, "Update");
+
+            Assert.That(nextRefreshField.GetValue(atlas), Is.EqualTo(-1f), "A hidden atlas must not poll or refresh NCS status.");
+            openField.SetValue(atlas, false);
+        }
+
+        [Test]
+        public void OpenAtlasWiresReadOnlyEndingForecastAndConfiguredEndingDirectory()
+        {
+            atlas.Open();
+
+            Assert.That(atlas.IsOpen, Is.True);
+            Assert.That(atlas.View, Is.Not.Null);
+            Assert.That(atlas.View.EndingNodes, Is.Not.Empty);
+            Assert.That(atlas.View.EndingForecastText, Is.Not.Null);
+            var configurationField = typeof(NarrativeAtlasGM).GetFields(BindingFlags.Instance | BindingFlags.NonPublic)
+                .Single(field => field.FieldType == typeof(NarrativeConfiguration));
+            configuration = (NarrativeConfiguration)configurationField.GetValue(atlas);
+            Assert.That(configuration, Is.Not.Null);
+            originalConfiguration = Fingerprint(configuration);
+            Assert.That(atlas.View.EndingForecastText(), Is.Not.Null.And.Not.Empty);
+            AssertUnchanged();
+        }
+
         [UnityTest]
         public IEnumerator ResponsiveCanvasUsesNativeDesktopPixelsAndMinimumLogicalSize()
         {

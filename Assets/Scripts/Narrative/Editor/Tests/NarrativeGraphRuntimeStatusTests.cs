@@ -215,6 +215,64 @@ namespace Spotlight.Narrative.Editor.Tests
         }
 
         [Test]
+        public void EndingForecastUsesPriorityAndGroupedOrConditionsThenRefreshesItsSnapshot()
+        {
+            var c = Config();
+            c.endings[0].priority = 100;
+            c.conditionKeys.Add(new NarrativeConditionKeyDefinition { key = "late", initialValue = false });
+            c.endings.Add(new NarrativeEndingDefinition { endingId = "early", enabled = true, priority = 200 });
+            c.conditions.Add(Condition("ending", "early", "late", "true"));
+            c.endings.Add(new NarrativeEndingDefinition { endingId = "later", enabled = true, priority = 50 });
+            c.conditions.Add(Condition("ending", "later", "ready", "false", 0));
+            c.conditions.Add(Condition("ending", "later", "ready", "true", 1));
+
+            var controller = Controller(c);
+            var reader = Reader(c, controller);
+            string first = reader.EndingForecast;
+            Assert.That(first, Does.Contain("[end]").And.Contain("优先级 100"));
+            Assert.That(first, Does.Not.Contain("[early]").And.Not.Contain("[later]"));
+            Assert.That(controller.SelectedEndingId, Is.Null);
+
+            controller.State.SetCondition("ready", false);
+            Assert.That(reader.EndingForecast, Is.EqualTo(first), "The snapshot stays stable until the owner refreshes it.");
+            reader.Refresh(controller);
+            Assert.That(reader.EndingForecast, Does.Contain("[later]").And.Contain("只读推演"));
+            Assert.That(controller.SelectedEndingId, Is.Null);
+        }
+
+        [Test]
+        public void UnknownHigherPriorityEndingBlocksLowerPriorityPrediction()
+        {
+            var c = Config();
+            c.endings[0].priority = 10;
+            c.endings.Add(new NarrativeEndingDefinition { endingId = "unknown.high", enabled = true, priority = 100 });
+            c.conditions.Add(Condition("ending", "unknown.high", "not.registered", "true"));
+            c.endings.Add(new NarrativeEndingDefinition { endingId = "known.low", enabled = true, priority = -10 });
+            c.conditions.Add(Condition("ending", "known.low", "ready", "true"));
+
+            var controller = Controller(c);
+            string forecast = Reader(c, controller).EndingForecast;
+            Assert.That(forecast, Does.Contain("无法确定").And.Contain("unknown.high").And.Contain("不能跳过"));
+            Assert.That(forecast, Does.Not.Contain("预测首个满足的结局"));
+            Assert.That(controller.SelectedEndingId, Is.Null);
+        }
+
+        [Test]
+        public void EndingForecastReportsSelectedOutcomeAsFactInsteadOfRecomputingIt()
+        {
+            var c = Config();
+            var controller = Controller(c);
+            var snapshot = controller.State.Capture();
+            snapshot.selectedEndingId = "end";
+            controller.RestoreSnapshot(snapshot);
+
+            string forecast = Reader(c, controller).EndingForecast;
+            Assert.That(forecast, Does.Contain("实际结果").And.Contain("end"));
+            Assert.That(forecast, Does.Not.Contain("预测首个满足的结局"));
+        }
+
+
+        [Test]
         public void RootCompletionNeverMarksMutuallyExclusivePagesAsSeenOrCurrent()
         {
             var c = Config(); var controller = Controller(c);
@@ -347,6 +405,8 @@ namespace Spotlight.Narrative.Editor.Tests
             var reader = Reader(c, controller);
             for (int pass = 0; pass < 2; pass++)
             {
+                Assert.That(reader.EndingForecast, Is.Not.Null);
+
                 foreach (var node in graph.Nodes) { reader.Label(node); reader.Details(node); }
                 reader.Label(Node("ready", StoryNodeKind.Fact));
                 reader.Details(Node("unknown", StoryNodeKind.Fact));

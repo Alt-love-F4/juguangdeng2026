@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using UnityEngine;
 using YokiFrame;
 
@@ -48,7 +48,8 @@ namespace Spotlight.GameFlow
     public sealed class ResultPanelData : IGameFlowPanelData
     {
         public ResultPanelData(GameFlowBootstrap flow, string title, string message, Action closed, string closeLabel = "关闭", string endingId = null,
-            Sprite endingArtwork = null, bool endingArtworkIsPlaceholder = false, string endingArtworkStatus = null, string endingEcho = null, string endingDisplayCode = null)
+            Sprite endingArtwork = null, bool endingArtworkIsPlaceholder = false, string endingArtworkStatus = null, string endingEcho = null,
+            string endingDisplayCode = null, bool isSaveSuccess = false)
         {
             Flow = flow;
             Title = title;
@@ -61,6 +62,7 @@ namespace Spotlight.GameFlow
             EndingArtworkStatus = endingArtworkStatus ?? string.Empty;
             EndingEcho = endingEcho ?? string.Empty;
             EndingDisplayCode = endingDisplayCode ?? string.Empty;
+            IsSaveSuccess = isSaveSuccess;
         }
 
         public GameFlowBootstrap Flow { get; }
@@ -75,5 +77,6 @@ namespace Spotlight.GameFlow
         public string EndingArtworkStatus { get; }
         public string EndingEcho { get; }
         public string EndingDisplayCode { get; }
+        public bool IsSaveSuccess { get; }
     }
 }

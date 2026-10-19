@@ -44,6 +44,7 @@ namespace Spotlight.GameFlow
         protected float EnterSeconds => enterSeconds;
         protected virtual bool CompletesAutomatically => false;
         protected virtual bool UsesCoffeeCupExit => false;
+        protected virtual bool UsesCoffeeCupEntrance => false;
 
         protected override void OnInit(IUIData data = null)
         {
@@ -89,6 +90,8 @@ namespace Spotlight.GameFlow
             continueButton.interactable = false;
             animation = DOTween.Sequence().SetUpdate(true).SetLink(gameObject, LinkBehaviour.KillOnDestroy);
             BuildEntrance(animation);
+            if (UsesCoffeeCupEntrance)
+                animation.InsertCallback(enterSeconds, () => CoffeeCupScreenTransition.TryBeginReveal(.65f));
             if (CompletesAutomatically)
             {
                 animation.AppendInterval(automaticHoldSeconds);

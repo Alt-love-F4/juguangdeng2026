@@ -989,12 +989,12 @@ MonoBehaviour:
   m_faceColor:
     serializedVersion: 2
     rgba: 4294967295
-  m_fontSize: 34
-  m_fontSizeBase: 34
+  m_fontSize: 40
+  m_fontSizeBase: 40
   m_fontWeight: 400
   m_enableAutoSizing: 1
-  m_fontSizeMin: 22
-  m_fontSizeMax: 34
+  m_fontSizeMin: 26
+  m_fontSizeMax: 40
   m_fontStyle: 0
   m_HorizontalAlignment: 2
   m_VerticalAlignment: 512
@@ -1235,56 +1235,56 @@ MonoBehaviour:
     art: {fileID: 7180935372943198837}
     artDelaySeconds: 0
     textArea: {x: 0.06, y: 0.375}
-    fontSize: 32
+    fontSize: 38
   - text: "\u795E\u4F51\u8005\u7684\u8840\u8109\u5E87\u4F51\u7740\u8FD9\u4E2A\u4F1F\u5927\u7684\u56FD\u5EA6\n\n\u795E\u4F51\u8005\u7684\u8363\u5149\u66FE\u6B32\u4E07\u53E4\u957F\u5B58"
     fadeInSeconds: 0.8
     fadeOutSeconds: 0.8
     art: {fileID: 4881862103101485892}
     artDelaySeconds: 0
     textArea: {x: 0.06, y: 0.47}
-    fontSize: 32
+    fontSize: 38
   - text: "\u7136\u666E\u7167\u4E07\u7269\u7684\u5149\u65E5\u6E10\u6D88\u9690\n\n\u65E0\u540D\u4E4B\u4EBA\u7684\u6124\u6012\u5728\u8857\u5DF7\u95F4\u6D8C\u52A8\n\n\u91CE\u5FC3\u5BB6\u7684\u6B32\u671B\u5728\u9634\u5F71\u4E2D\u751F\u957F"
     fadeInSeconds: 0.8
     fadeOutSeconds: 0.8
     art: {fileID: 8577095851237548477}
     artDelaySeconds: 0
     textArea: {x: 0.06, y: 0.375}
-    fontSize: 32
+    fontSize: 38
   - text: "\u795E\u5B89\u80FD\u5E87\u4F51\u5965\u5C14\u72C4\u4E9A\u4EBA\u53C8\u4E00\u4E2A\u767E\u5E74\uFF1F\n\n\u6291\u6216\uFF0C\u6211\u4EEC\u5C06\u6DF9\u6CA1\u5728\u6CB8\u817E\u7684\u4EBA\u6C11\u4E4B\u58F0\u4E2D\uFF1F"
     fadeInSeconds: 0.8
     fadeOutSeconds: 0.8
     art: {fileID: 6227738914875862284}
     artDelaySeconds: 0
     textArea: {x: 0.06, y: 0.375}
-    fontSize: 32
+    fontSize: 38
   - text: "\u5723\u8BFA\u7279\uFF0C\u90A3\u5343\u4E07\u751F\u7075\u7559\u604B\u7684\u5730\u65B9\n\n\u6211\u66FE\u4F5C\u4E3A\u82B8\u82B8\u4F17\u751F\u4E2D\u4E00\u5458\u751F\u6D3B\u5728\u8FD9\u5EA7\u5927\u90FD\u5E02\n\n\u7ECF\u8425\u7740\u4E00\u5EA7\u5E73\u51E1\u7684\u5496\u5561\u9986"
     fadeInSeconds: 0.8
     fadeOutSeconds: 0.8
     art: {fileID: 6634888208572144701}
     artDelaySeconds: 0
     textArea: {x: 0.06, y: 0.401}
-    fontSize: 32
+    fontSize: 38
   - text: "\u987E\u5BA2\u6765\u6765\u5F80\u5F80\uFF0C\u8F66\u6C34\u9A6C\u9F99\n\n\u6211\u66FE\u60F3\u5B89\u7136\u5EA6\u65E5\n\n\u5728\u5496\u5561\u548C\u8336\u70B9\u7684\u82B3\u9999\u4E2D\u5C31\u6B64\u4E86\u89E3\u4F59\u751F"
     fadeInSeconds: 0.8
     fadeOutSeconds: 0.8
     art: {fileID: 4760100409814768393}
     artDelaySeconds: 0
     textArea: {x: 0.06, y: 0.43400002}
-    fontSize: 32
+    fontSize: 38
   - text: "\u7136\u800C\u90A3\u6FC0\u60C5\u7684\u5C81\u6708\u4E2D\uFF0C\u65E0\u4EBA\u53EF\u4EE5\u4F5C\u58C1\u4E0A\u89C2\n\n\u6211\u4EA6\u662F\u5982\u6B64"
     fadeInSeconds: 0.8
     fadeOutSeconds: 0.8
     art: {fileID: 7529133472331557908}
     artDelaySeconds: 0
     textArea: {x: 0.06, y: 0.428}
-    fontSize: 32
+    fontSize: 38
   - text: "\u5B69\u5B50\u4EEC\uFF0C\u73B0\u5728\uFF0C\u6211\u5C06\u4E3A\u4F60\u8BB2\u8FF0\u90A3\u6BB5\u6545\u4E8B\u2014\u2014"
     fadeInSeconds: 0.8
     fadeOutSeconds: 0.8
     art: {fileID: 0}
     artDelaySeconds: 0
     textArea: {x: 0.3, y: 0.7}
-    fontSize: 38
+    fontSize: 44
   defaultFadeInSeconds: 0.8
   defaultFadeOutSeconds: 0.8
   finalBlackHoldSeconds: 0.05

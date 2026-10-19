@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.IO;
@@ -516,6 +516,9 @@ namespace Spotlight.GameFlow
             }
             while (shortLoadingPanel != null && !shortLoadingPanel.IsCovered) yield return null;
             if (version != loadingVersion) yield break;
+#if UNITY_EDITOR || DEVELOPMENT_BUILD
+            var transferWatch = System.Diagnostics.Stopwatch.StartNew();
+#endif
 
             if (sceneName != MapSceneName) HideResidentMap();
 
@@ -608,11 +611,47 @@ namespace Spotlight.GameFlow
             }
             if (sceneName != MapSceneName)
                 yield return UnloadGameplaySceneExcept(MapSceneName, sceneName);
+
+#if UNITY_EDITOR || DEVELOPMENT_BUILD
+            long sceneReadyMs = transferWatch.ElapsedMilliseconds;
+#endif
+            // 目标场景的 Awake/Start（Luban 全量解析、角色立绘、经营实体视图）和紧接着的
+            // 玩法面板/演出预载是整次转场里最重的几帧。必须让它们全部落在遮罩仍然全不透明时，
+            // 否则淡出动画会从一帧卡顿上起跑，玩家看到的就是"进店后卡一下"。
+            // 卸载旧场景没有内容可卸时上面不会 yield，这里补一帧，保证 Start 已经执行完。
+            yield return null;
+
             SetSessionState(GameSessionState.Playing);
             narrativeIntegration?.SetGameplayVisible(true);
-            FinishGameplaySceneTransition(version, shortLoadingPanel);
+            // 后续演出（开店、地图）也在遮罩下打开：它的 Prefab 加载和贴图上传属于隐藏段，
+            // 不属于淡出后的第一帧可见画面。
             try { completed?.Invoke(); }
             catch (Exception error) { Debug.LogException(error, this); }
+            // 让演出刚打开的 UI 完成第一次 Awake/OnInit 布局与首帧渲染，再开始淡出。
+            yield return null;
+#if UNITY_EDITOR || DEVELOPMENT_BUILD
+            long preFadeMs = transferWatch.ElapsedMilliseconds;
+#endif
+            // 引擎在进场后会自己跑一次 Resources.UnloadUnusedAssets（实测释放 0.92GB / 3908 个资源，
+            // 约 380ms）。它原本落在淡出第一帧上，把淡出冻住再跳一下，这正是"进店卡一下"的最后一环。
+            // 这段回收本身不可省，但趁遮罩还全不透明时主动做掉，就等于把它移进隐藏段。
+            yield return Resources.UnloadUnusedAssets();
+            yield return null;
+            FinishGameplaySceneTransition(version, shortLoadingPanel);
+#if UNITY_EDITOR || DEVELOPMENT_BUILD
+            float worstMs = 0f;
+            int worstAt = -1;
+            for (int frame = 0; frame < 45; frame++)
+            {
+                yield return null;
+                float ms = Time.unscaledDeltaTime * 1000f;
+                if (ms > worstMs) { worstMs = ms; worstAt = frame; }
+            }
+            Debug.Log("[GameFlow] " + sceneName + " 转场：就绪 " + sceneReadyMs
+                + "ms / 预热 " + (preFadeMs - sceneReadyMs)
+                + "ms / 遮罩内资源回收 " + (transferWatch.ElapsedMilliseconds - preFadeMs)
+                + "ms；淡出后 45 帧最差 " + worstMs.ToString("F1") + "ms（第 " + worstAt + " 帧）", this);
+#endif
         }
 
         private static MapSceneController FindMapPanel(Scene scene)
@@ -1437,6 +1476,15 @@ namespace Spotlight.GameFlow
             StartCoroutine(PushPanelWhenReady(panel, true));
         }
 
+        private void ShowSaveSuccess(int index, Action closed)
+        {
+            var data = new ResultPanelData(this, "保存成功", "已保存到槽 " + (index + 1), closed,
+                "继续游戏", isSaveSuccess: true);
+            ResultPanel panel = UIKit.OpenPanel<ResultPanel>(UILevel.Pop, data, cachePolicy: PanelCachePolicy.Reusable);
+            StartCoroutine(PushPanelWhenReady(panel, true));
+        }
+
+
         private void LoadThen(Action completed, string sceneName, bool preserveDayFlow = false, bool forceReload = false)
         {
             SetSessionState(GameSessionState.Loading);
@@ -1604,7 +1652,7 @@ namespace Spotlight.GameFlow
                 yield return new WaitForSecondsRealtime(.25f);
                 if (gameplay && version == sessionVersion) completed();
             }
-            else ShowResult("保存成功", "已保存到槽 " + (index + 1), RefreshSavePanel);
+            else ShowSaveSuccess(index, RefreshSavePanel);
         }
 
         private void CaptureGameplayThumbnail()

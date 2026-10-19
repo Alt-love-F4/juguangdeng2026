@@ -219,6 +219,8 @@ namespace Spotlight.Narrative
         }
 
         public NarrativeState State => state;
+        public bool EndingChecksEnabled => endingChecksEnabled;
+        public bool EndingEvaluationPending => endingDirty;
         public bool IsBusy => processing || activePresentation || draining || queue.Count > 0 || turnEnding;
         public event Action<NarrativeEventRequest> EventQueued;
         public event Action<string, int, int> BarChanged;

@@ -118,12 +118,12 @@ namespace Spotlight.GameFlow.Editor
 
                 Button advance = Button(root.transform, "AdvanceArea", new Color(0, 0, 0, 0), true);
                 Stretch(advance.GetComponent<RectTransform>());
-                TMP_Text narration = Text(root.transform, "Narration", font, 34f, Color.white);
+                TMP_Text narration = Text(root.transform, "Narration", font, 40f, Color.white);
                 narration.alignment = TextAlignmentOptions.Center;
                 narration.textWrappingMode = TextWrappingModes.Normal;
                 narration.enableAutoSizing = true;
-                narration.fontSizeMin = 22f;
-                narration.fontSizeMax = 34f;
+                narration.fontSizeMin = 26f;
+                narration.fontSizeMax = 40f;
                 narration.lineSpacing = -8f;
                 narration.characterSpacing = 4f;
                 narration.rectTransform.anchorMin = new Vector2(.12f, .22f);
@@ -164,7 +164,7 @@ namespace Spotlight.GameFlow.Editor
                     beat.FindPropertyRelative("textArea").vector2Value = hasArt
                         ? new Vector2(.06f, specs[i].artBottom - .035f)
                         : new Vector2(.30f, .70f);
-                    beat.FindPropertyRelative("fontSize").floatValue = hasArt ? 32f : 38f;
+                    beat.FindPropertyRelative("fontSize").floatValue = hasArt ? 38f : 44f;
                 }
                 serialized.ApplyModifiedPropertiesWithoutUndo();
                 PrefabUtility.SaveAsPrefabAsset(root, PrefabPath);
