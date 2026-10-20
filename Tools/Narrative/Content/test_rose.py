@@ -178,6 +178,19 @@ class RoseContentTests(unittest.TestCase):
             self.assertEqual(self.b,rose.build(PROJECT))
         self.assertEqual(self.b['_replace_roots'],['rose.1009.s1','rose.1011.s1','rose.1016.s1','rose.1103.s1'])
 
+    def test_spoken_npcs_get_portraits_without_staging_player_or_narration(self):
+        lines = self.b['ConversationLine']
+        for line in lines:
+            speaker = line.get('speakerKey')
+            expected = 'right' if speaker and speaker != 'player' else 'none'
+            self.assertEqual(expected, line['side'], line['lineId'])
+        for root, speakers in {
+            'rose.1009.s1': {'rose.butake', 'rose.envoy'},
+            'rose.1011.s1': {'adele', 'sparrow', 'sylvain'},
+        }.items():
+            staged = {l.get('speakerKey') for l in lines if l['pageId'].startswith(root+'.') and l['side']=='right'}
+            self.assertEqual(speakers, staged, root)
+
     def test_row_keys_unique_and_references_real(self):
         pk = {'Text':'key','ConditionKey':'key','Object':'objId','Event':'eventId','SetupParams':'setupKey',
             'PresentationIndex':'presentationKey','Condition':'conditionId','Result':'resultId','EventDate':'eventId',

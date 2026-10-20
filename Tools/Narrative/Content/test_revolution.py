@@ -379,7 +379,10 @@ class RevolutionCompilerTests(unittest.TestCase):
             if speaker=="marie":self.assertIn(texts[line["speakerNameKey"]],("玛丽","玛丽（？）","？？？"))
         self.assertTrue(any(l.get("speakerKey")=="sorel" for l in self.data["ConversationLine"]))
         self.assertFalse(any(l.get("speakerKey") in ("emmanuel","mary","lesoudup") for l in self.data["ConversationLine"]))
-        self.assertFalse(any(l.get("speakerKey")=="duval" and l["lineId"].startswith("revolution.route.1124") for l in self.data["ConversationLine"]))
+        epilogue = [l for l in self.data["ConversationLine"] if l.get("speakerKey")=="duval" and l["lineId"].startswith("revolution.route.1124")]
+        self.assertEqual(64, len(epilogue))
+        self.assertTrue(all(l["side"] == "none" for l in epilogue))
+        self.assertTrue(all(texts[l["speakerNameKey"]] == "杜瓦尔" for l in epilogue))
 
     def test_only_verified_resource_keys_and_no_operating_floor_art(self):
         valid=set(re.findall(r"  - key: (\S+)",(PROJECT/"Assets/Resources/Dialogue/NarrativeStageVisuals.asset").read_text("utf-8")))

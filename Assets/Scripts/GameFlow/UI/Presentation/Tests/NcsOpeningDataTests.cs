@@ -49,8 +49,8 @@ namespace Spotlight.GameFlow.Tests
             Assert.That(script.Title, Is.EqualTo("指定演出"));
             Assert.That(script.LeftCharacter.CharacterKey, Is.EqualTo("player"));
             Assert.That(script.RightCharacter.CharacterKey, Is.EqualTo("adele"));
-            Assert.That(script.LeftCharacter.DisplayName, Is.EqualTo(NarrativeCharacterResolver.Find("player").displayName));
-            Assert.That(script.RightCharacter.DisplayName, Is.EqualTo(NarrativeCharacterResolver.Find("adele").displayName));
+            Assert.That(script.LeftCharacter.DisplayName, Is.EqualTo("左侧"));
+            Assert.That(script.RightCharacter.DisplayName, Is.EqualTo("右侧"));
             Assert.That(script.LeftCharacter.Portrait, Is.SameAs(NarrativeCharacterResolver.Find("player").PortraitFor(null)));
             Assert.That(script.RightCharacter.Portrait, Is.SameAs(NarrativeCharacterResolver.Find("adele").PortraitFor(null)));
             Assert.That(script[0].Text, Is.EqualTo("第一句"));
@@ -115,7 +115,7 @@ namespace Spotlight.GameFlow.Tests
         }
 
         [Test]
-        public void OpeningStillValidatesLegacyNameKeysBeforeUsingTableCharacters()
+        public void OpeningRequiresAuthoredNameKeysUsedForDisplay()
         {
             NarrativeConfiguration config = LubanNarrativeLoader.Load();
             string key = config.openingPresentations.First(item => item.presentationId == "first_day_cafe").leftNameKey;
@@ -203,7 +203,7 @@ namespace Spotlight.GameFlow.Tests
             Assert.That(script.Count, Is.EqualTo(8), "Empty generated text rows are separators and are omitted consistently in game and debug playback.");
             Assert.That(script.LeftCharacter.CharacterKey, Is.EqualTo("player"));
             Assert.That(script.RightCharacter.CharacterKey, Is.EqualTo("adele"));
-            Assert.That(script.RightCharacter.DisplayName, Is.EqualTo("阿黛尔·米尼耶"));
+            Assert.That(script.RightCharacter.DisplayName, Is.EqualTo("阿黛尔"));
             Assert.That(script.RightCharacter.Portrait, Is.Not.Null,
                 "The formal opening must load Adele's existing portrait from the Object table.");
             Assert.That(script.RightCharacter.Portrait,

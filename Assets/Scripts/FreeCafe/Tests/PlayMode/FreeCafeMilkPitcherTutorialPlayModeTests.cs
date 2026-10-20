@@ -45,6 +45,16 @@ namespace Spotlight.FreeCafe.Tests
             Assert.That(tutorial.IsRunning, Is.True);
             Assert.That(tutorial.CurrentStage, Is.EqualTo(FreeCafeMilkPitcherTutorial.Stage.FillPitcher));
             Assert.That(app.World.ServingCup, Is.Not.Null);
+            yield return null;
+            var panel = Object.FindFirstObjectByType<FreeCafeTutorialPanel>();
+            var card = (RectTransform)panel.instruction.transform.parent;
+            Assert.That(card.anchorMin, Is.EqualTo(Vector2.zero));
+            Assert.That(card.pivot, Is.EqualTo(Vector2.zero));
+            Assert.That(card.anchoredPosition.x, Is.EqualTo(24));
+            var dragLine = panel.transform.Find("MilkTutorialDragLine").GetComponent<UnityEngine.UI.Image>();
+            Assert.That(dragLine.enabled, Is.True);
+            Assert.That(dragLine.raycastTarget, Is.False);
+            Assert.That(dragLine.rectTransform.sizeDelta.x, Is.GreaterThan(0));
             Assert.That(app.World.LiquidVolume(app.World.ServingCup), Is.EqualTo(100f).Within(.01f));
             tutorial.Stop();
             Assert.That(app.World.State.entities.Count, Is.EqualTo(before.Count));
@@ -71,6 +81,19 @@ namespace Spotlight.FreeCafe.Tests
             yield return null;
             Assert.That(app.World.State.production.miniGameToken, Is.Not.Null.And.Not.Empty);
             Assert.That(tutorial.CurrentStage, Is.EqualTo(FreeCafeMilkPitcherTutorial.Stage.DrawLatte));
+            yield return new WaitForSecondsRealtime(.5f);
+            var overlay = GameObject.Find("LatteArtPresetOverlay");
+            Assert.That(overlay, Is.Not.Null);
+            var guide = overlay.transform.Find("Content/MilkPracticeGuide");
+            Assert.That(guide, Is.Not.Null);
+            var copy = guide.Find("Instruction").GetComponent<TMPro.TMP_Text>();
+            var next = guide.Find("Next").GetComponent<UnityEngine.UI.Button>();
+            StringAssert.Contains("左侧是参考图案", copy.text);
+            next.onClick.Invoke();
+            StringAssert.Contains("描线参考", copy.text);
+            next.onClick.Invoke();
+            StringAssert.Contains("拟合", copy.text);
+            Assert.That(next.interactable, Is.False, "绘制前应停留在操作教学");
             tutorial.Stop();
         }
     }

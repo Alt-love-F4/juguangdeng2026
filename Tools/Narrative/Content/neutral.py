@@ -39,6 +39,8 @@ GENERIC_SERVICE = "serve:any:60:1"
 GENERIC_GRADE = "taste:any:60:1"
 NORMAL_SCORE_PRESET, EXCELLENT_SCORE_PRESET = 60, 90
 BLACK_STAGE = "church.execution.black"  # Existing registered solid black, not execution artwork.
+# User-approved wallet (NOT revenue) target, assessed on day 55 before business.
+BUSINESS_TYCOON_MONEY = 25_000
 SPEAKERS = {
  "{playername}": "player", "店长": "player", "阿黛尔·米尼耶": "adele", "阿黛尔": "adele",
  "柯莱特·布吕内": "colette", "柯莱特": "colette", "安托万·马尚": "antoine", "安托万": "antoine",
@@ -576,10 +578,17 @@ def _compile_route(r: _Root):
         r.issue("Bribery variant staged/guarded but unavailable until 1118 payment rules exist; event readiness currently requires actual shelter.",(38,))
     elif sid == "1129.s1":
         r.start(prerequisites=(completed("neutral.route.1122.s1"),"neutral.stayed","neutral.association.member"))
-        r.block("neutral_revenue_threshold","Source revenue standard has no amount/period/provider. Never guess threshold or use wallet money as cafe revenue.",(2,))
-        r.span(3,181)
-        r.effect("committee","SET_FLAG","neutral.association.committee",anchor=101)
+        r.c.cond("event",r.id,"cafe.money",kind="BAR_BETWEEN",raw="0,2147483647")
+        enough = f"bar:cafe.money:ge:{BUSINESS_TYCOON_MONEY}"
+        short = f"bar:cafe.money:le:{BUSINESS_TYCOON_MONEY - 1}"
+        r.c.flag("neutral.revenue.below_standard")  # Stable legacy fact ID; now an actual wallet assessment.
+        r.end("money_below_target",short)
+        r.span(3,181,enough)
+        r.effect("committee","SET_FLAG","neutral.association.committee",guard=enough,anchor=101)
+        r.effect("money_below_target","SET_FLAG","neutral.revenue.below_standard",guard=short)
         r.finish()
+        r.audit["economyDecision"] = dict(metric="cafe.money",threshold=BUSINESS_TYCOON_MONEY,
+            day=55,phase="MorningBeforeMap",authorization="User approved held coins, not revenue; no payment.")
     elif sid == "1130.s1":
         r.start(prerequisites=(completed("neutral.route.1129.s1"),"neutral.association.committee","neutral.stayed"))
         r.span(3,58,bg=BLACK_STAGE)
@@ -599,7 +608,7 @@ def _compile_route(r: _Root):
         r.effect("failure_continuation","QUEUE_EVENT","neutral.route.1130.s2",guard=failed,anchor=107)
         r.ending("d","商业大亨",guard=passed,anchor=225)
         r.finish()
-        r.issue("Complete graph dormant behind 1129 revenue blocker. Failure Ends root and queues C; never reaches D epilogue.")
+        r.issue("1129 now assesses the user-approved wallet target. D still needs real committee history and successful language>=5 negotiation; failure queues C.")
     elif sid == "1130.s2":
         r.start(prerequisites=(completed("neutral.route.1122.s1"),"neutral.stayed"))
         # Group1 non-member, group2 actual negotiation failure; duplicate ALL common gates.
@@ -607,6 +616,11 @@ def _compile_route(r: _Root):
         for flag,value in [(completed(r.id),False),("route.neutral",True),("route.rose",False),("route.church",False),("route.revolution",False),(completed("neutral.route.1122.s1"),True),
                            ("neutral.stayed",True),("neutral.negotiation.failed",True)]:
             r.c.cond("event",r.id,flag,value,group=2)
+        # Third OR group requires an actual completed low-wallet assessment, never absence of history.
+        for flag,value in [(completed(r.id),False),("route.neutral",True),("route.rose",False),("route.church",False),("route.revolution",False),
+                           (completed("neutral.route.1122.s1"),True),("neutral.stayed",True),("neutral.association.member",True),
+                           (completed("neutral.route.1129.s1"),True),("neutral.revenue.below_standard",True),("neutral.association.committee",False)]:
+            r.c.cond("event",r.id,flag,value,group=3)
         r.span(3,48,bg=BLACK_STAGE)
         r.span(50,52,"not:neutral.association.member")
         r.c.flag("neutral.revenue.below_standard")
@@ -615,7 +629,7 @@ def _compile_route(r: _Root):
         r.span(63,130)
         r.ending("c","沸点依旧",anchor=131)
         r.finish()
-        r.issue("Member-but-revenue-low alternative blocked until metric/threshold is authorized. Missing 1129 content is NOT failed revenue. Nonmembers/actual failed negotiation remain correct.",(53,))
+        r.issue("Member low-wallet C requires the actual 1129 assessment (<25000). Stable legacy below_standard fact is not inferred from missing history or a later purchase.",(53,))
     else:
         raise ValueError("Unrecognized route source: "+sid)
 

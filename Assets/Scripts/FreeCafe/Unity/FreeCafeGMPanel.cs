@@ -60,6 +60,8 @@ namespace Spotlight.FreeCafe
         public Transform ContentRoot => body != null ? body.transform : null;
         public TMP_FontAsset UIFont => font;
 
+#if UNITY_EDITOR || DEVELOPMENT_BUILD
+        // Release players must not create the GM shell or its debug/test components.
         [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.SubsystemRegistration)]
         private static void ResetStatics() => Instance = null;
 
@@ -68,6 +70,7 @@ namespace Spotlight.FreeCafe
         {
             if (Instance == null) new GameObject("GlobalGM").AddComponent<FreeCafeGMPanel>();
         }
+#endif
 
         private void Awake()
         {

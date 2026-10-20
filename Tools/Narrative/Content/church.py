@@ -160,7 +160,6 @@ class _Root:
         if not cleaned: return None
         p=page if page is not None else self.page(f"p{n:03}{suffix}",when,bg=bg)
         key=f"{self.root}.text.p{n:03}"
-        self.c.text(key,cleaned,f"{self.path.name} nonempty paragraph {n}; original in _audit")
         speaker=_speaker(cleaned)
         if speaker is None and re.match(r"^(?:客人|顾客|男人|女人|摊主|看守|监察官|监察员|疑似领头的人|众监察员|平民[A-Z]?|老妇人|小孩|神父|工人|教民|？？？)[：:]",cleaned):
             label=re.split(r"[：:]",cleaned,maxsplit=1)[0].strip()
@@ -168,6 +167,8 @@ class _Root:
             if not any(o["objId"]==speaker for o in self.c.rows["Object"]):
                 self.c.add("Object",objId=speaker,objType="npc",nameText=self.c.text(speaker+".name",label,"Generic source actor; portrait pending"))
                 self.audit["decisions"].append(dict(kind="art-pending",actor=label,objId=speaker))
+        self.c.text(key, speech_body(cleaned) if speaker else cleaned,
+            f"{self.path.name} nonempty paragraph {n}; original in _audit" + (" [speaker-label-stripped]" if speaker else ""))
         lid=p["pageId"]+".line"
         self.c.add("ConversationLine",lineId=lid,pageId=p["pageId"],seq=1,speakerKey=speaker,side="left" if speaker=="player" else "right" if speaker else "none",textKey=key)
         self.mark(n,"line",lid)
@@ -244,12 +245,27 @@ class _Root:
         self.audit["emittedPages"]=len(self.page_rows)
         return self
 
+def speech_label(text):
+    match = re.match(r"^([^：:；\n]{1,30})[：:；]", text)
+    return match.group(1).strip() if match else None
+
+
+def speech_body(text):
+    return re.split(r"[：:；]", text, maxsplit=1)[1].lstrip() if speech_label(text) else text
+
+
 def _speaker(text):
-    head=re.split(r"[：:；]",text,maxsplit=1)[0]
-    if head.startswith(("{playername}","{playname}","{playernanem}","{playernmae}")): return "player"
-    for token,key in (("阿黛尔","adele"),("埃莉诺","alienor"),("阿莉耶诺尔","alienor"),("王女","alienor"),("埃利昂","elion"),("西尔万","sylvain"),("萨德","sade"),("吕西安","lucien"),("勒费弗尔","lefebvre"),("军人A","soldier_a"),("军人C","soldier_c"),("客人C","guest_c")):
-        if head.startswith(token) and len(head)<30: return key
-    return None
+    # A name at the start of prose (e.g. '阿黛尔离开之后') is not a speaker.
+    # Match an explicit source label followed by a dialogue delimiter instead.
+    head = speech_label(text)
+    if head in ("{playername}", "{playname}", "{playernanem}", "{playernmae}"):
+        return "player"
+    names = {"阿黛尔":"adele", "阿黛尔·米尼耶":"adele", "阿黛尔`米尼耶":"adele",
+        "埃莉诺":"alienor", "阿莉耶诺尔":"alienor", "王女":"alienor",
+        "埃利昂":"elion", "埃利昂公爵":"elion", "西尔万":"sylvain", "萨德":"sade",
+        "萨德神父":"sade", "吕西安":"lucien", "勒费弗尔":"lefebvre",
+        "军人A":"soldier_a", "军人C":"soldier_c", "客人C":"guest_c"}
+    return names.get(head)
 
 
 def _church1009(c):

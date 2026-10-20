@@ -30,6 +30,7 @@ namespace Spotlight.FreeCafe
         private Image shade;
         private TMP_Text instruction, heading, errorText, gestureText;
         private RectTransform gesture;
+        private Image dragLine;
         private readonly List<Image> trail = new List<Image>();
         private string original;
         private string cupId;
@@ -202,6 +203,24 @@ namespace Spotlight.FreeCafe
                 trail.AddRange(panel.trail);
                 panel.exitButton.onClick.AddListener(Stop);
                 panel.retryButton.onClick.AddListener(Restart);
+
+                // This is a private panel instance: leave the shared workstation prefab unchanged.
+                var card = (RectTransform)instruction.transform.parent;
+                card.anchorMin = card.anchorMax = new Vector2(0, 0);
+                card.pivot = new Vector2(0, 0);
+                card.anchoredPosition = new Vector2(24, 18);
+                card.sizeDelta = new Vector2(820, 236);
+                instruction.enableAutoSizing = true;
+                instruction.fontSizeMin = 18;
+                instruction.fontSizeMax = 26;
+
+                var lineObject = new GameObject("MilkTutorialDragLine", typeof(RectTransform), typeof(Image));
+                lineObject.transform.SetParent(canvas.transform, false);
+                lineObject.transform.SetSiblingIndex(1);
+                dragLine = lineObject.GetComponent<Image>();
+                dragLine.raycastTarget = false;
+                dragLine.color = panel.trailColor;
+                dragLine.rectTransform.pivot = new Vector2(0, .5f);
             }
         }
 
@@ -267,15 +286,33 @@ namespace Spotlight.FreeCafe
             panel.SetMouseMode(false, false);
             gestureText.text = GestureDescription();
 
+            bool draggingStep = stage == Stage.FillPitcher || stage == Stage.Transfer;
             Vector2 target = ScreenPoint(TargetId());
-            if (Mouse.current != null && app.IsDragging) target = Mouse.current.position.ReadValue();
+            if (draggingStep)
+            {
+                Vector2 from = ScreenPoint(stage == Stage.FillPitcher ? milkSourceId : pitcherId);
+                Vector2 to = ScreenPoint(stage == Stage.FillPitcher ? pitcherId : cupId);
+                var root = (RectTransform)canvas.transform;
+                RectTransformUtility.ScreenPointToLocalPointInRectangle(root, from, null, out var localFrom);
+                RectTransformUtility.ScreenPointToLocalPointInRectangle(root, to, null, out var localTo);
+                Vector2 delta = localTo - localFrom;
+                var rect = dragLine.rectTransform;
+                rect.anchorMin = rect.anchorMax = new Vector2(.5f, .5f);
+                rect.anchoredPosition = localFrom;
+                rect.sizeDelta = new Vector2(delta.magnitude, 4);
+                rect.localRotation = Quaternion.Euler(0, 0, Mathf.Atan2(delta.y, delta.x) * Mathf.Rad2Deg);
+                target = Vector2.Lerp(from, to, Mathf.Clamp01(Mathf.Repeat(Time.unscaledTime * .45f, 1.3f)));
+            }
+            dragLine.enabled = draggingStep;
             gesture.position = ClampBadge(target + Vector2.up * 90f);
             for (int i = 0; i < trail.Count; i++)
             {
                 var dot = trail[i];
                 dot.enabled = stage != Stage.Complete;
-                float t = Mathf.Repeat(Time.unscaledTime * .65f - i * .035f, 1);
-                dot.rectTransform.position = target + new Vector2(Mathf.Cos(i * .6f), Mathf.Sin(i * .6f)) * (24 + t * 30);
+                dot.rectTransform.position = draggingStep
+                    ? Vector2.Lerp(ScreenPoint(stage == Stage.FillPitcher ? milkSourceId : pitcherId),
+                        ScreenPoint(stage == Stage.FillPitcher ? pitcherId : cupId), i / (float)(trail.Count - 1))
+                    : target + new Vector2(Mathf.Cos(i * .6f), Mathf.Sin(i * .6f)) * 28;
                 dot.color = panel.trailColor;
             }
         }

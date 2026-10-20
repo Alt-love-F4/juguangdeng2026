@@ -256,9 +256,9 @@ class _Root:
             namekey = self.c.text(self.root + ".speaker." + hashlib.sha256(name.encode()).hexdigest()[:10], name, "Source display name, not Object identity")
         lid = self.root + f".line.p{p:03}" + suffix
         side = "left" if speaker == "player" else "right"
-        # No Duval portrait in epilogue: original explicitly keeps him behind door.
+        # Preserve Duval's identity/name while keeping the authored behind-door voice offstage.
         if self.mmdd == "11.24" and speaker == "duval":
-            speaker = ""
+            side = "none"
         self.c.add("ConversationLine", lineId=lid, pageId=page, seq=1, speakerKey=speaker or None,
                    side=side, textKey=tk, emote=emote or None, speakerNameKey=namekey)
         self.mark(p, "dialogue", lid, tk)

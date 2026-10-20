@@ -80,7 +80,15 @@ namespace Spotlight.FreeCafe
             var runtime = entityView.Runtime;
             bool closedToday = !open && runtime != null && runtime.IsClosedForToday;
             // Clicking the closed sign opens the city map (FreeCafeRuntime.Click).
-            entityView.label.text = open ? "结束营业" : closedToday ? "已打烊\n进入地图" : "开始营业";
+            entityView.label.text = open ? "结束营业" : closedToday ? "已打烊，进入地图" : "开始营业";
+            if (closedToday)
+            {
+                // The sign's authored label may otherwise truncate the map-entry hint.
+                entityView.label.enableAutoSizing = true;
+                entityView.label.fontSizeMin = 1.5f;
+                entityView.label.fontSizeMax = 6f;
+                entityView.label.overflowMode = TMPro.TextOverflowModes.Overflow;
+            }
         }
         private void ResetPose()
         {

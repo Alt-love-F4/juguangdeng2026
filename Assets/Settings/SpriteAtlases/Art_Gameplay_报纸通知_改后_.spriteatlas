@@ -1,0 +1,98 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!687078895 &4343727234628468602
+SpriteAtlas:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_Name: "Art_Gameplay_\u62A5\u7EB8\u901A\u77E5_\u6539\u540E_"
+  m_EditorData:
+    serializedVersion: 2
+    textureSettings:
+      serializedVersion: 2
+      anisoLevel: 1
+      compressionQuality: 50
+      maxTextureSize: 2048
+      textureCompression: 0
+      filterMode: 1
+      generateMipMaps: 0
+      readable: 0
+      crunchedCompression: 0
+      sRGB: 1
+    platformSettings:
+    - serializedVersion: 4
+      m_BuildTarget: Standalone
+      m_MaxTextureSize: 4096
+      m_ResizeAlgorithm: 0
+      m_TextureFormat: 25
+      m_TextureCompression: 2
+      m_CompressionQuality: 100
+      m_CrunchedCompression: 0
+      m_AllowsAlphaSplitting: 0
+      m_Overridden: 1
+      m_IgnorePlatformSupport: 0
+      m_AndroidETC2FallbackOverride: 0
+      m_ForceMaximumCompressionQuality_BC6H_BC7: 0
+    packingSettings:
+      serializedVersion: 2
+      padding: 4
+      blockOffset: 1
+      allowAlphaSplitting: 0
+      enableRotation: 0
+      enableTightPacking: 0
+      enableAlphaDilation: 0
+    secondaryTextureSettings: {}
+    variantMultiplier: 1
+    packables:
+    - {fileID: 2800000, guid: 17bfe9417192f1c4295c7b5f40a55867, type: 3}
+    - {fileID: 2800000, guid: 29604b36544f9dc418dcb5e98e1200a4, type: 3}
+    - {fileID: 2800000, guid: 48cbe81443061ce4e8c9e9af862907da, type: 3}
+    - {fileID: 2800000, guid: 616fd5a015441c64ab25154b450bb842, type: 3}
+    - {fileID: 2800000, guid: 7cbb220fd9161ea44a3cc2a44280fe28, type: 3}
+    - {fileID: 2800000, guid: 9e9f21491a70bd64d86be480f19a3e6c, type: 3}
+    - {fileID: 2800000, guid: a0dc8b6c1302d824ca0277d91b588a51, type: 3}
+    - {fileID: 2800000, guid: cb87e2574b92a72429fb933f2a25f047, type: 3}
+    - {fileID: 2800000, guid: d57a5bf25de0fbd44b8bbcc9f13d027c, type: 3}
+    - {fileID: 2800000, guid: e45275bd42b59234b8bd2827ad02440c, type: 3}
+    bindAsDefault: 1
+    isAtlasV2: 0
+    cachedData: {fileID: 0}
+    packedSpriteRenderDataKeys:
+    - 616fd5a015441c64ab25154b450bb842: 21300000
+    - 17bfe9417192f1c4295c7b5f40a55867: 21300000
+    - d57a5bf25de0fbd44b8bbcc9f13d027c: 21300000
+    - 48cbe81443061ce4e8c9e9af862907da: 21300000
+    - 29604b36544f9dc418dcb5e98e1200a4: 21300000
+    - cb87e2574b92a72429fb933f2a25f047: 21300000
+    - 9e9f21491a70bd64d86be480f19a3e6c: 21300000
+    - a0dc8b6c1302d824ca0277d91b588a51: 21300000
+    - e45275bd42b59234b8bd2827ad02440c: 21300000
+    - 7cbb220fd9161ea44a3cc2a44280fe28: 21300000
+  m_MasterAtlas: {fileID: 0}
+  m_PackedSprites:
+  - {fileID: 21300000, guid: 616fd5a015441c64ab25154b450bb842, type: 3}
+  - {fileID: 21300000, guid: 17bfe9417192f1c4295c7b5f40a55867, type: 3}
+  - {fileID: 21300000, guid: d57a5bf25de0fbd44b8bbcc9f13d027c, type: 3}
+  - {fileID: 21300000, guid: 48cbe81443061ce4e8c9e9af862907da, type: 3}
+  - {fileID: 21300000, guid: 29604b36544f9dc418dcb5e98e1200a4, type: 3}
+  - {fileID: 21300000, guid: cb87e2574b92a72429fb933f2a25f047, type: 3}
+  - {fileID: 21300000, guid: 9e9f21491a70bd64d86be480f19a3e6c, type: 3}
+  - {fileID: 21300000, guid: a0dc8b6c1302d824ca0277d91b588a51, type: 3}
+  - {fileID: 21300000, guid: e45275bd42b59234b8bd2827ad02440c, type: 3}
+  - {fileID: 21300000, guid: 7cbb220fd9161ea44a3cc2a44280fe28, type: 3}
+  m_PackedSpriteNamesToIndex:
+  - "\u56FE\u5C42 1 \u526F\u672C 3"
+  - "\u90FD\u6765\u559D\u62FF\u94C1\uFF0C\u6CB8\u70B9\u5496\u5561\u9986\u5F00\u59CB\u8425
+    \u4E1A\u4E86\uFF01\u5B57\u53F7\uFF1A60\u5B57\u8272\uFF1A634336"
+  - "\u56FE\u5C42 1"
+  - "\u90FD\u6765\u559D\u62FF\u94C1\uFF0C\u6CB8\u70B9\u5496\u5561\u9986\u5F00\u59CB"
+  - "\u90FD\u6765\u559D\u62FF\u94C1\uFF0C\u6CB8\u70B9\u5496\u5561\u9986 \u5F00\u59CB\u8425\u4E1A\u4E86\uFF01\u5B57\u53F7\uFF1A60"
+  - "\u5927\u6807\u9898 \u526F\u672C 2"
+  - "\u5F00\u59CB\u4E00\u5929 (\u5E38\u6001)"
+  - "\u661F\u671F\u4E09\uFF0Cxxxx\u5E74x\u6708x\u65E5 \u526F\u672C"
+  - "\u5F00\u59CB\u4E00\u5929\uFF08\u9AD8\u4EAE\uFF09"
+  - "\u56FE\u5C42 5 \u526F\u672C 3"
+  m_RenderDataMap: {}
+  m_Tag: "Art_Gameplay_\u62A5\u7EB8\u901A\u77E5_\u6539\u540E_"
+  m_IsVariant: 0

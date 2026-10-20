@@ -40,23 +40,23 @@ namespace Spotlight.Narrative.Editor.Tests
                 .Where(l => l.speakerKey == "sparrow").ToArray();
             Assert.That(sparrow.ConversationLines, Is.EqualTo(lines.Length));
             Assert.That(sparrow.OnstageConversationLines, Is.GreaterThan(0));
-            Assert.That(sparrow.OffstageConversationLines, Is.GreaterThan(0));
+            Assert.That(sparrow.OffstageConversationLines, Is.Zero);
             Assert.That(sparrow.OnstageConversationLines + sparrow.OffstageConversationLines, Is.EqualTo(sparrow.ConversationLines));
             Assert.That(lines.Count(l => l.side == "right"), Is.EqualTo(sparrow.OnstageConversationLines));
             Assert.That(lines.Count(l => l.side == "none"), Is.EqualTo(sparrow.OffstageConversationLines));
 
-            // This root intentionally hides the portrait. A wired base sprite does not override side=none.
+            // The Rose importer must stage spoken NPCs, not silently mark them as offstage.
             var roseArrivalLines = lines.Where(l => l.pageId.StartsWith("rose.1011.s1.", StringComparison.Ordinal)).ToArray();
             Assert.That(roseArrivalLines.Length, Is.EqualTo(17));
-            Assert.That(roseArrivalLines.All(l => l.side == "none"), Is.True);
+            Assert.That(roseArrivalLines.All(l => l.side == "right"), Is.True);
             var roseArrivalConfig = new NarrativeConfiguration();
             roseArrivalConfig.objects.Add(config.objects.Single(o => o.objId == "sparrow"));
             roseArrivalConfig.presentations.conversationLines.AddRange(roseArrivalLines);
             var roseArrival = new NarrativeCharacterArtAudit(roseArrivalConfig).Inspect("sparrow");
-            Assert.That(roseArrival.OnstageConversationLines, Is.Zero);
-            Assert.That(roseArrival.OffstageConversationLines, Is.EqualTo(17));
+            Assert.That(roseArrival.OnstageConversationLines, Is.EqualTo(17));
+            Assert.That(roseArrival.OffstageConversationLines, Is.Zero);
             Assert.That(roseArrival.Portrait.Available, Is.True);
-            Assert.That(roseArrival.FallbackEmotes, Does.Contain("开心"), "The audit inventories offstage emotes too; the presenter still respects side=none.");
+            Assert.That(roseArrival.FallbackEmotes, Does.Contain("开心"), "Missing expressions still use the configured base portrait.");
             Assert.That(sparrow.ConversationLines, Is.EqualTo(lines.Length));
             Assert.That(sparrow.UsageExamples.Any(e => e.StartsWith("Conversation / ", StringComparison.Ordinal)), Is.True);
             foreach (var emote in new[] { "开心", "生气", "迷惑" })

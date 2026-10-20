@@ -7,9 +7,10 @@ const modules=process.env.OAI_WORKSPACE_NODE_MODULES || path.join(os.homedir(),'
 const {FileBlob,SpreadsheetFile}=await import(pathToFileURL(path.join(modules,'@oai/artifact-tool/dist/artifact_tool.mjs')).href);
 
 const root=path.resolve(import.meta.dirname,'../..');
-const plan=JSON.parse(await fs.readFile(path.join(root,'output/narrative-integration/merge-plan.json'),'utf8'));
+const planPath=process.argv[2] ? path.resolve(process.argv[2]) : path.join(root,'output/narrative-integration/merge-plan.json');
+const plan=JSON.parse(await fs.readFile(planPath,'utf8'));
 if(plan.errors.length) throw new Error('Content plan has unresolved references; refuse source edits.');
-const backup=path.join(root,'output/narrative-integration/source-backup');
+const backup=process.argv[2] ? path.join(path.dirname(planPath),'source-backup') : path.join(root,'output/narrative-integration/source-backup');
 await fs.mkdir(backup,{recursive:true});
 for(const target of plan.workbooks){
   const before=await fs.readFile(target.path);
@@ -28,7 +29,7 @@ for(const target of plan.workbooks){
   await fs.rename(temp,target.path);
   // artifact-tool emits a sidecar during export; diagnostics belong outside Unity Assets.
   const sidecar=temp+'.inspect.ndjson';
-  try{await fs.rename(sidecar,path.join(root,'output/narrative-integration',path.basename(target.path)+'.inspect.ndjson'));}catch(e){if(e.code!=='ENOENT')throw e;}
+  try{await fs.rename(sidecar,path.join(backup,path.basename(target.path)+'.inspect.ndjson'));}catch(e){if(e.code!=='ENOENT')throw e;}
   console.log(`Updated source ${target.path}`);
 }
 console.log('Source Excel updated. Run official Assets/ConfigTables/GenerateAll.bat next.');

@@ -968,7 +968,7 @@
     "ownerId": "rose.route.1115.s1.result.002",
     "groupIndex": 1,
     "condType": "BOOL_EQ",
-    "target": "integration.rose.route.1115.candor.low",
+    "target": "choice:rose.route.1115.s1.choice.p093",
     "value": "true"
   },
   {
@@ -995,7 +995,7 @@
     "ownerId": "rose.route.1115.s1.result.003",
     "groupIndex": 1,
     "condType": "BOOL_EQ",
-    "target": "integration.rose.route.1115.candor.high",
+    "target": "choice:rose.route.1115.s1.choice.p094",
     "value": "true"
   },
   {
@@ -1004,7 +1004,7 @@
     "ownerId": "rose.route.1115.s1.result.003",
     "groupIndex": 1,
     "condType": "BOOL_EQ",
-    "target": "not:integration.rose.route.1115.candor.low",
+    "target": "choice:rose.route.1115.s1.choice.p093",
     "value": "true"
   },
   {
@@ -2238,87 +2238,6 @@
     "groupIndex": 1,
     "condType": "BOOL_EQ",
     "target": "choice:neutral.route.1122.s1.choice.future.b",
-    "value": "true"
-  },
-  {
-    "conditionId": "neutral.route.1129.s1.c0099",
-    "ownerType": "event",
-    "ownerId": "neutral.route.1129.s1",
-    "groupIndex": 1,
-    "condType": "BOOL_EQ",
-    "target": "story.neutral.route.1129.s1.completed",
-    "value": "false"
-  },
-  {
-    "conditionId": "neutral.route.1129.s1.c0100",
-    "ownerType": "event",
-    "ownerId": "neutral.route.1129.s1",
-    "groupIndex": 1,
-    "condType": "BOOL_EQ",
-    "target": "story.neutral.route.1122.s1.completed",
-    "value": "true"
-  },
-  {
-    "conditionId": "neutral.route.1129.s1.c0101",
-    "ownerType": "event",
-    "ownerId": "neutral.route.1129.s1",
-    "groupIndex": 1,
-    "condType": "BOOL_EQ",
-    "target": "neutral.stayed",
-    "value": "true"
-  },
-  {
-    "conditionId": "neutral.route.1129.s1.c0102",
-    "ownerType": "event",
-    "ownerId": "neutral.route.1129.s1",
-    "groupIndex": 1,
-    "condType": "BOOL_EQ",
-    "target": "neutral.association.member",
-    "value": "true"
-  },
-  {
-    "conditionId": "neutral.route.1129.s1.c0103",
-    "ownerType": "event",
-    "ownerId": "neutral.route.1129.s1",
-    "groupIndex": 1,
-    "condType": "BOOL_EQ",
-    "target": "route.neutral",
-    "value": "true"
-  },
-  {
-    "conditionId": "neutral.route.1129.s1.c0104",
-    "ownerType": "event",
-    "ownerId": "neutral.route.1129.s1",
-    "groupIndex": 1,
-    "condType": "BOOL_EQ",
-    "target": "route.rose",
-    "value": "false"
-  },
-  {
-    "conditionId": "neutral.route.1129.s1.c0105",
-    "ownerType": "event",
-    "ownerId": "neutral.route.1129.s1",
-    "groupIndex": 1,
-    "condType": "BOOL_EQ",
-    "target": "route.church",
-    "value": "false"
-  },
-  {
-    "conditionId": "neutral.route.1129.s1.c0106",
-    "ownerType": "event",
-    "ownerId": "neutral.route.1129.s1",
-    "groupIndex": 1,
-    "condType": "BOOL_EQ",
-    "target": "route.revolution",
-    "value": "false"
-  },
-  {
-    "conditionId": "neutral.route.1129.s1.c0107",
-    "ownerType": "event",
-    "ownerId": "neutral.route.1129.s1",
-    "groupIndex": 1,
-    "condType": "BOOL_EQ",
-    "target": "blocked.neutral.route.1129.s1.neutral_revenue_threshold",
     "value": "true"
   },
   {
@@ -28357,5 +28276,203 @@
     "condType": "BOOL_EQ",
     "target": "not:bar:world.calendar:eq:16",
     "value": "true"
+  },
+  {
+    "conditionId": "neutral.wallet.assessment.000",
+    "ownerType": "event",
+    "ownerId": "neutral.route.1129.s1",
+    "groupIndex": 1,
+    "condType": "BOOL_EQ",
+    "target": "story.neutral.route.1129.s1.completed",
+    "value": "false"
+  },
+  {
+    "conditionId": "neutral.wallet.assessment.001",
+    "ownerType": "event",
+    "ownerId": "neutral.route.1129.s1",
+    "groupIndex": 1,
+    "condType": "BOOL_EQ",
+    "target": "story.neutral.route.1122.s1.completed",
+    "value": "true"
+  },
+  {
+    "conditionId": "neutral.wallet.assessment.002",
+    "ownerType": "event",
+    "ownerId": "neutral.route.1129.s1",
+    "groupIndex": 1,
+    "condType": "BOOL_EQ",
+    "target": "neutral.stayed",
+    "value": "true"
+  },
+  {
+    "conditionId": "neutral.wallet.assessment.003",
+    "ownerType": "event",
+    "ownerId": "neutral.route.1129.s1",
+    "groupIndex": 1,
+    "condType": "BOOL_EQ",
+    "target": "neutral.association.member",
+    "value": "true"
+  },
+  {
+    "conditionId": "neutral.wallet.assessment.004",
+    "ownerType": "event",
+    "ownerId": "neutral.route.1129.s1",
+    "groupIndex": 1,
+    "condType": "BOOL_EQ",
+    "target": "route.neutral",
+    "value": "true"
+  },
+  {
+    "conditionId": "neutral.wallet.assessment.005",
+    "ownerType": "event",
+    "ownerId": "neutral.route.1129.s1",
+    "groupIndex": 1,
+    "condType": "BOOL_EQ",
+    "target": "route.rose",
+    "value": "false"
+  },
+  {
+    "conditionId": "neutral.wallet.assessment.006",
+    "ownerType": "event",
+    "ownerId": "neutral.route.1129.s1",
+    "groupIndex": 1,
+    "condType": "BOOL_EQ",
+    "target": "route.church",
+    "value": "false"
+  },
+  {
+    "conditionId": "neutral.wallet.assessment.007",
+    "ownerType": "event",
+    "ownerId": "neutral.route.1129.s1",
+    "groupIndex": 1,
+    "condType": "BOOL_EQ",
+    "target": "route.revolution",
+    "value": "false"
+  },
+  {
+    "conditionId": "neutral.wallet.assessment.008",
+    "ownerType": "event",
+    "ownerId": "neutral.route.1129.s1",
+    "groupIndex": 1,
+    "condType": "BAR_BETWEEN",
+    "target": "cafe.money",
+    "value": "0,2147483647"
+  },
+  {
+    "conditionId": "neutral.wallet.assessment.009",
+    "ownerType": "result",
+    "ownerId": "neutral.route.1129.s1.result.committee",
+    "groupIndex": 1,
+    "condType": "BOOL_EQ",
+    "target": "bar:cafe.money:ge:25000",
+    "value": "true"
+  },
+  {
+    "conditionId": "neutral.wallet.assessment.010",
+    "ownerType": "result",
+    "ownerId": "neutral.route.1129.s1.result.money_below_target",
+    "groupIndex": 1,
+    "condType": "BOOL_EQ",
+    "target": "bar:cafe.money:le:24999",
+    "value": "true"
+  },
+  {
+    "conditionId": "neutral.wallet.assessment.011",
+    "ownerType": "event",
+    "ownerId": "neutral.route.1130.s2",
+    "groupIndex": 3,
+    "condType": "BOOL_EQ",
+    "target": "story.neutral.route.1130.s2.completed",
+    "value": "false"
+  },
+  {
+    "conditionId": "neutral.wallet.assessment.012",
+    "ownerType": "event",
+    "ownerId": "neutral.route.1130.s2",
+    "groupIndex": 3,
+    "condType": "BOOL_EQ",
+    "target": "route.neutral",
+    "value": "true"
+  },
+  {
+    "conditionId": "neutral.wallet.assessment.013",
+    "ownerType": "event",
+    "ownerId": "neutral.route.1130.s2",
+    "groupIndex": 3,
+    "condType": "BOOL_EQ",
+    "target": "route.rose",
+    "value": "false"
+  },
+  {
+    "conditionId": "neutral.wallet.assessment.014",
+    "ownerType": "event",
+    "ownerId": "neutral.route.1130.s2",
+    "groupIndex": 3,
+    "condType": "BOOL_EQ",
+    "target": "route.church",
+    "value": "false"
+  },
+  {
+    "conditionId": "neutral.wallet.assessment.015",
+    "ownerType": "event",
+    "ownerId": "neutral.route.1130.s2",
+    "groupIndex": 3,
+    "condType": "BOOL_EQ",
+    "target": "route.revolution",
+    "value": "false"
+  },
+  {
+    "conditionId": "neutral.wallet.assessment.016",
+    "ownerType": "event",
+    "ownerId": "neutral.route.1130.s2",
+    "groupIndex": 3,
+    "condType": "BOOL_EQ",
+    "target": "story.neutral.route.1122.s1.completed",
+    "value": "true"
+  },
+  {
+    "conditionId": "neutral.wallet.assessment.017",
+    "ownerType": "event",
+    "ownerId": "neutral.route.1130.s2",
+    "groupIndex": 3,
+    "condType": "BOOL_EQ",
+    "target": "neutral.stayed",
+    "value": "true"
+  },
+  {
+    "conditionId": "neutral.wallet.assessment.018",
+    "ownerType": "event",
+    "ownerId": "neutral.route.1130.s2",
+    "groupIndex": 3,
+    "condType": "BOOL_EQ",
+    "target": "neutral.association.member",
+    "value": "true"
+  },
+  {
+    "conditionId": "neutral.wallet.assessment.019",
+    "ownerType": "event",
+    "ownerId": "neutral.route.1130.s2",
+    "groupIndex": 3,
+    "condType": "BOOL_EQ",
+    "target": "story.neutral.route.1129.s1.completed",
+    "value": "true"
+  },
+  {
+    "conditionId": "neutral.wallet.assessment.020",
+    "ownerType": "event",
+    "ownerId": "neutral.route.1130.s2",
+    "groupIndex": 3,
+    "condType": "BOOL_EQ",
+    "target": "neutral.revenue.below_standard",
+    "value": "true"
+  },
+  {
+    "conditionId": "neutral.wallet.assessment.021",
+    "ownerType": "event",
+    "ownerId": "neutral.route.1130.s2",
+    "groupIndex": 3,
+    "condType": "BOOL_EQ",
+    "target": "neutral.association.committee",
+    "value": "false"
   }
 ]

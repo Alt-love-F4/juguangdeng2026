@@ -25,7 +25,7 @@ namespace Spotlight.Narrative.Tests
         }
 
         // Explicit historical fixtures, NOT a claim these histories are naturally obtainable.
-        // In particular D seeds 1129.completed (the revenue authoring gate remains unresolved),
+        // D's terminal-root fixture seeds 1129.completed; the wallet assessment itself is tested below.
         // and bloom/unforgiven seed their upstream pending facts (1115 remains author-blocked).
         private static readonly EndingCase[] Cases =
         {
@@ -153,6 +153,7 @@ namespace Spotlight.Narrative.Tests
             public readonly EndingCase Case;
             public readonly List<string> Selected = new List<string>();
             public int Day;
+            public int Money = 10000;
             public Fixture(EndingCase item, int? language = null)
             {
                 Case = item; Day = item.Day; Config = LubanNarrativeLoader.Load();
@@ -161,7 +162,7 @@ namespace Spotlight.Narrative.Tests
                 Controller = new NarrativeController(Config, Owner);
                 Owner.Controller = Controller;
                 Controller.BindValueProvider(new DelegateNarrativeValueProvider("dayflow", key => key == "day" ? Day : (int?)null));
-                Controller.BindValueProvider(new DelegateNarrativeValueProvider("cafe", key => key == "money" ? 10000 : (int?)null));
+                Controller.BindValueProvider(new DelegateNarrativeValueProvider("cafe", key => key == "money" ? Money : (int?)null));
                 Controller.BindValueProvider(new DelegateNarrativeValueProvider("actions", key => key == "current" || key == "max" ? 6 : (int?)null));
                 Controller.BeginValueRestore();
                 // Known numerical branch inputs; no ready/terminal/choice/check facts are invented.
@@ -418,6 +419,45 @@ namespace Spotlight.Narrative.Tests
                 Assert.That(restored.Controller.QueueEvent(source.Case.Root), Is.False);
                 Assert.That(restored.Controller.ProcessEntry(NarrativeEntryPoint.MorningBeforeMap), Is.False);
                 Assert.That(restored.Controller.SetBar("player.language", 1), Is.False);
+            }
+        }
+
+        [TestCase(24999, false)]
+        [TestCase(25000, true)]
+        [TestCase(25001, true)]
+        public void WalletAssessmentUsesRealProviderThenReachesDOrC(int money, bool enough)
+        {
+            var history = new[] { "route.neutral", "story.neutral.route.1122.s1.completed",
+                "neutral.stayed", "neutral.association.member" };
+            using (var f = new Fixture(new EndingCase("wallet-assessment", "neutral.route.1129.s1", 55, history)))
+            {
+                f.Money = money;
+                f.Start(); f.Owner.WalkToEnd();
+                Assert.That(f.Controller.State.GetCondition("neutral.association.committee"), Is.False, "No early rewards");
+                f.Owner.Completion();
+                Assert.That(f.Controller.State.GetCondition("story.neutral.route.1129.s1.completed"), Is.True);
+                Assert.That(f.Controller.State.GetCondition("neutral.association.committee"), Is.EqualTo(enough));
+                Assert.That(f.Controller.State.GetCondition("neutral.revenue.below_standard"), Is.EqualTo(!enough));
+                Assert.That(f.Money, Is.EqualTo(money), "Assessment is not a payment");
+                f.Day = 56; f.Controller.SetOfficialDay(56);
+                Assert.That(f.Controller.ProcessEntry(NarrativeEntryPoint.MorningBeforeMap), Is.True);
+                Assert.That(f.Controller.CurrentEventId, Is.EqualTo(enough ? "neutral.route.1130.s1" : "neutral.route.1130.s2"));
+                f.Owner.WalkToEnd(); f.Owner.Completion();
+                Assert.That(f.Controller.SelectedEndingId, Is.EqualTo(enough ? "neutral.ending.d" : "neutral.ending.c"));
+            }
+        }
+
+        [Test]
+        public void CancelledWalletAssessmentDoesNotGrantEitherOutcome()
+        {
+            var history = new[] { "route.neutral", "story.neutral.route.1122.s1.completed",
+                "neutral.stayed", "neutral.association.member" };
+            using (var f = new Fixture(new EndingCase("wallet-assessment", "neutral.route.1129.s1", 55, history)))
+            {
+                f.Money = 25000; f.Start(); f.Owner.WalkToEnd(); f.Owner.Cancel();
+                Assert.That(f.Controller.State.GetCondition("story.neutral.route.1129.s1.completed"), Is.False);
+                Assert.That(f.Controller.State.GetCondition("neutral.association.committee"), Is.False);
+                Assert.That(f.Controller.State.GetCondition("neutral.revenue.below_standard"), Is.False);
             }
         }
 

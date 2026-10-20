@@ -32,7 +32,7 @@ namespace Spotlight.GameFlow.Tests
             Assert.That(mode, Is.Not.Null);
             Assert.That(resolution, Is.Not.Null);
             Assert.That(mode.template, Is.Not.SameAs(resolution.template));
-            Assert.That(mode.options.ConvertAll(option => option.text), Is.EqualTo(new[] { "全屏", "窗口", "无边框" }));
+            Assert.That(mode.options.ConvertAll(option => option.text), Is.EqualTo(new[] { "无边框全屏", "窗口" }));
             foreach (TMP_Dropdown dropdown in new[] { mode, resolution })
             {
                 Assert.That(dropdown.template.gameObject.activeSelf, Is.False);
@@ -66,7 +66,7 @@ namespace Spotlight.GameFlow.Tests
                 .GetField("WindowModes", BindingFlags.Static | BindingFlags.NonPublic).GetValue(null);
             Assert.That(modes, Is.EqualTo(new[]
             {
-                FullScreenMode.ExclusiveFullScreen, FullScreenMode.Windowed, FullScreenMode.FullScreenWindow
+                FullScreenMode.FullScreenWindow, FullScreenMode.Windowed
             }));
         }
     }

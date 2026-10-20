@@ -21,7 +21,11 @@ namespace Spotlight.GameFlow
                     item.lineId, item.seq, item.pageId);
                 if (string.IsNullOrWhiteSpace(item.speakerKey))
                 {
-                    lines.Add(new DialogueLine(DialogueSpeaker.Narrator, item.text, passiveHint: lines.Count == 0 ? passiveHint : null,
+                    // Legacy imports may carry an explicit voice name without an Object ID.
+                    // Keep it offstage instead of silently turning that voice into narration.
+                    bool namedVoice = !string.IsNullOrWhiteSpace(item.speakerName);
+                    lines.Add(new DialogueLine(namedVoice ? DialogueSpeaker.Offstage : DialogueSpeaker.Narrator, item.text,
+                        speakerNameOverride: namedVoice ? item.speakerName : null, passiveHint: lines.Count == 0 ? passiveHint : null,
                         accentFxKey: item.accentFxKey, accentTargetKey: item.accentTargetKey,
                         sfxKey: item.sfxKey, voiceKey: item.voiceKey, source: source));
                     continue;
@@ -37,7 +41,7 @@ namespace Spotlight.GameFlow
                 }
                 Sprite portrait = ResolvePortrait(item, profile);
                 var character = new DialogueCharacter(item.speakerKey, speakerName, portrait,
-                    portraitSpecified: !string.IsNullOrWhiteSpace(item.emote));
+                    portraitSpecified: !string.IsNullOrWhiteSpace(item.emote) || item.speakerKey == "alienor");
                 bool isLeft = string.Equals(item.side, "left", StringComparison.OrdinalIgnoreCase);
                 bool isCenter = string.Equals(item.side, "center", StringComparison.OrdinalIgnoreCase);
                 lines.Add(new DialogueLine(isLeft ? DialogueSpeaker.Left : isCenter ? DialogueSpeaker.Center : DialogueSpeaker.Right, item.text,
@@ -76,6 +80,18 @@ namespace Spotlight.GameFlow
         private static readonly HashSet<string> warnedPortraits = new HashSet<string>(StringComparer.Ordinal);
         private static Sprite ResolvePortrait(NarrativeConversationPresentationLine item, CharacterProfile profile)
         {
+            // A costume is not an emotion. This event explicitly changes Alienor into
+            // Adele's pink clothes after P040; rain/P020-P026 still uses the royal outfit.
+            // Source: MA70.11.03—S1.docx P027, P039-P041, P083/P097-P104.
+            // Every Alienor line specifies its resolved appearance so a retained batch
+            // cannot carry the indoor outfit into a different event or replay's rain.
+            if (UsesIndoorCostume(item))
+            {
+                Sprite costume = Resources.Load<Sprite>("Characters/alienor/indoor");
+                if (costume != null) return costume;
+                if (warnedPortraits.Add("alienor/costume.indoor"))
+                    Debug.LogWarning("[NCS][PortraitFallback] Missing Alienor indoor costume; using base portrait.");
+            }
             Sprite portrait = profile != null ? profile.PortraitFor(item.emote)
                 : item.portrait != null ? item.portrait : string.IsNullOrWhiteSpace(item.portraitPath) ? null : Resources.Load<Sprite>(item.portraitPath);
             bool requested = !string.IsNullOrWhiteSpace(item.emote) && !string.Equals(item.emote, "neutral", StringComparison.OrdinalIgnoreCase);
@@ -86,6 +102,23 @@ namespace Spotlight.GameFlow
                 Debug.LogWarning("[NCS][PortraitFallback] character=" + item.speakerKey + " emote=" + item.emote
                     + " line=" + item.lineId + "; using configured base portrait (expression resource missing).");
             return portrait;
+        }
+
+        private static bool UsesIndoorCostume(NarrativeConversationPresentationLine item)
+        {
+            if (item.speakerKey != "alienor") return false;
+            switch (item.pageId)
+            {
+                case "rose.1103.s1.drink.special":
+                case "rose.1103.s1.shelter.request":
+                case "rose.1103.s1.shelter.refused":
+                case "rose.1103.s1.shelter.accepted":
+                case "rose.1103.s1.identity":
+                case "rose.1103.s1.comfort":
+                case "rose.1103.s1.question":
+                    return true;
+                default: return false;
+            }
         }
 
         public static bool Play(NarrativeEventRequest request, NarrativeConversationPresentationData data, Action completed)

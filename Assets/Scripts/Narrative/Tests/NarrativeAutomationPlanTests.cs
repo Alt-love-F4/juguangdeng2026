@@ -93,7 +93,10 @@ namespace Spotlight.Narrative.Tests
             var neutralD = NarrativeAutomationPlan.ForEnding(c, "neutral.ending.d");
             Assert.That(neutralD.ChoiceOverrides.Values, Does.Contain("neutral.route.1112.s1.choice.membership.a"));
             Assert.That(c.events.Single(e => e.eventId == "neutral.route.1129.s1").eventProperties
-                .Any(p => p.property == "blockedBy" && !string.IsNullOrWhiteSpace(p.value)), Is.True, "The plan must preserve author blocking.");
+                .Any(p => p.property == "blockedBy" && !string.IsNullOrWhiteSpace(p.value)), Is.False, "Wallet rule is user-approved, not an author blocker.");
+            Assert.That(c.conditions.Any(g => g.ownerType == "event" && g.ownerId == "neutral.route.1129.s1"
+                && g.target == "cafe.money" && g.condType == "BAR_BETWEEN" && g.value == "0,2147483647"), Is.True,
+                "Unavailable wallet provider must fail closed.");
         }
     }
 }

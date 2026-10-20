@@ -193,7 +193,51 @@ def character_visual_plan():
  print(json.dumps({'changedObjects':len(changes),'changedCells':len(edits),'sheets':['Object']},ensure_ascii=False))
  return plan
 
+def dialogue_portrait_plan():
+ # Repair the historical Rose import's blanket side=none, without regenerating
+ # story content or changing genuine offstage lines in other narrative routes.
+ sheets=read_book(NARRATIVE)
+ sheet=sheets['ConversationLine'];h=sheet['header'];edits=[]
+ for i,row in enumerate(sheet['rows'],start=4):
+  speaker=row.get('speakerKey')
+  if str(row.get('pageId')or'').startswith('rose.') and speaker and speaker!='player' and row.get('side')=='none':
+   edits.append({'row':i,'column':h.index('side'),'before':'none','after':'right','lineId':row['lineId']})
+   row['side']='right'
+ matrix=[(row+[None]*len(h))[:len(h)] for row in sheet['meta']]
+ matrix += [[None]+[row.get(key) for key in h[1:]] for row in sheet['rows']]
+ plan={'workbooks':[{'path':str(NARRATIVE),'beforeSha256':hashlib.sha256(NARRATIVE.read_bytes()).hexdigest(),
+       'sheets':[{'name':'ConversationLine','matrix':matrix,'originalRows':sheet['originalRows'],'width':len(h)}]}],
+       'errors':[],'dialoguePortraitCellEdits':edits}
+ out=ROOT/'Library/Locus/tmp/dialogue-portraits';out.mkdir(parents=True,exist_ok=True)
+ (out/'merge-plan.json').write_text(json.dumps(plan,ensure_ascii=False,indent=2),encoding='utf-8')
+ print(json.dumps({'changedCells':len(edits),'plan':str(out/'merge-plan.json')},ensure_ascii=False))
+ return plan
+
+
+def dialogue_presentation_plan():
+ # Update only presentation semantics in the saved books. Do not rebuild routes:
+ # current source hash gates and user-authored story edits remain authoritative.
+ from dialogue_presentation_revision import apply
+ books={str(NARRATIVE):read_book(NARRATIVE),str(TEXT):read_book(TEXT)}
+ sheets={**books[str(NARRATIVE)],**books[str(TEXT)]}
+ changes=apply(sheets)
+ workbooks=[]
+ for path,names in [(NARRATIVE,['ConversationLine']),(TEXT,['Text'])]:
+  exported=[]
+  for name in names:
+   s=sheets[name];h=s['header']
+   matrix=[(r+[None]*len(h))[:len(h)] for r in s['meta']]
+   matrix += [[None]+[r.get(k) for k in h[1:]] for r in s['rows']]
+   exported.append({'name':name,'matrix':matrix,'originalRows':s['originalRows'],'width':len(h)})
+  workbooks.append({'path':str(path),'beforeSha256':hashlib.sha256(path.read_bytes()).hexdigest(),'sheets':exported})
+ plan={'workbooks':workbooks,'errors':[],'presentationChanges':changes}
+ out=ROOT/'Library/Locus/tmp/dialogue-presentation';out.mkdir(parents=True,exist_ok=True)
+ (out/'merge-plan.json').write_text(json.dumps(plan,ensure_ascii=False,indent=2),encoding='utf-8')
+ print(json.dumps({'changedLines':len(changes),'plan':str(out/'merge-plan.json')},ensure_ascii=False))
+ return plan
+
+
 if __name__=='__main__':
- p=argparse.ArgumentParser();p.add_argument('--modules',nargs='+',default=['neutral','rose','church','revolution','daily']);p.add_argument('--allow-unresolved',action='store_true');p.add_argument('--character-visuals-only',action='store_true');args=p.parse_args()
- plan=character_visual_plan() if args.character_visuals_only else merge(args.modules)
+ p=argparse.ArgumentParser();p.add_argument('--modules',nargs='+',default=['neutral','rose','church','revolution','daily']);p.add_argument('--allow-unresolved',action='store_true');p.add_argument('--character-visuals-only',action='store_true');p.add_argument('--dialogue-portraits-only',action='store_true');p.add_argument('--dialogue-presentation-only',action='store_true');args=p.parse_args()
+ plan=dialogue_presentation_plan() if args.dialogue_presentation_only else dialogue_portrait_plan() if args.dialogue_portraits_only else character_visual_plan() if args.character_visuals_only else merge(args.modules)
  if plan['errors']and not args.allow_unresolved:raise SystemExit('Unresolved cross-content references: see output/narrative-integration/merge-plan.json')

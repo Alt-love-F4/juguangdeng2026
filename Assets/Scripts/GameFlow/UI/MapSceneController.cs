@@ -210,6 +210,7 @@ namespace Spotlight.GameFlow
             flow = owner;
             SetFlow(owner);
             gameObject.SetActive(true);
+            HideFocus();
             Canvas canvas = GetComponent<Canvas>();
             if (canvas != null) canvas.sortingOrder = sceneSortingOrder;
             Transform close = transform.Find(CloseMapButtonName);
@@ -784,6 +785,7 @@ namespace Spotlight.GameFlow
 
         private void OnEnable()
         {
+            HideFocus();
             // The map overlay is cached between visits. Re-evaluate its presentation even
             // when the content signature has not changed since it was last hidden.
             foreach (string key in locationDots.Keys) OnMapContentChanged(key);
@@ -949,7 +951,7 @@ namespace Spotlight.GameFlow
                 if (!firstDayGuideApplied && runtimePositions.TryGetValue("cafe", out var cafe))
                 {
                     firstDayGuideApplied = true;
-                    FocusPosition(cafe);
+                    // Opening the map can guide the camera, never open a location card.
                     BeginFocusMovement(cafe.position);
                 }
                 if (status != null)
@@ -1376,7 +1378,7 @@ namespace Spotlight.GameFlow
             focusedPosition = null;
             actionDetails?.Dismiss();
             RebuildActionList();
-            if (focusPanel != null) focusPanel.SetActive(false);
+            if (focusPanel != null && focusPanel != actionDetails?.gameObject) focusPanel.SetActive(false);
             if (status != null) status.text = "滚轮缩放，WASD移动；点击地点聚焦，右键退出聚焦";
         }
 

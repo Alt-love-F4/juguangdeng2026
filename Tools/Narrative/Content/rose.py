@@ -249,7 +249,8 @@ class Root:
                 suffix = '' if len(segments)==1 else f'.{part}'
                 key = f'{self.id}.text.p{n:03}{suffix}'
                 self.b.text(key,display,f"{self.source['path']}#P{n:03}; sha256={self.source['sha256']}")
-                values = dict(lineId=f"{row['pageId']}.p{n:03}{suffix}",pageId=row['pageId'],seq=seq,side='none',textKey=key)
+                values = dict(lineId=f"{row['pageId']}.p{n:03}{suffix}",pageId=row['pageId'],seq=seq,
+                    side='right' if speaker and speaker != 'player' else 'none',textKey=key)
                 if speaker:
                     values['speakerKey'] = speaker
                 if emote:
@@ -380,7 +381,8 @@ def _1009(r):
                 suffix='.'+chr(ord('a')+part) if n in mixed else ''
                 key=f'{r.id}.text.p{n:03}{suffix}'
                 r.b.text(key,text,f"{r.source['path']}#P{n:03}; sha256={r.source['sha256']}")
-                row=dict(lineId=f'{r.id}.p{n:03}{suffix}',pageId=page['pageId'],seq=seq,side='none',textKey=key)
+                row=dict(lineId=f'{r.id}.p{n:03}{suffix}',pageId=page['pageId'],seq=seq,
+                    side='right' if speaker and speaker != 'player' else 'none',textKey=key)
                 if speaker:
                     row['speakerKey']=speaker
                 r.b.add('ConversationLine','lineId',**row)

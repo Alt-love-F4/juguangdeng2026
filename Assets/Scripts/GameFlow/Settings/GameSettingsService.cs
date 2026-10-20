@@ -12,6 +12,8 @@ namespace Spotlight.GameFlow
         public static float MusicGain { get; private set; } = 1f;
         public static float SfxGain { get; private set; } = 1f;
         private const string PreferencesKey = "Spotlight.GameFlow.GameSettings";
+        private const int DefaultResolutionWidth = 1920;
+        private const int DefaultResolutionHeight = 1080;
 
         [Serializable]
         private sealed class StoredSettings
@@ -27,6 +29,9 @@ namespace Spotlight.GameFlow
 
         private GameSettings settings;
         private readonly List<ResolutionOption> resolutionOptions;
+        private int lastAppliedWidth;
+        private int lastAppliedHeight;
+        private FullScreenMode lastAppliedWindowMode;
 
         public GameSettings Current => settings;
         public IReadOnlyList<ResolutionOption> ResolutionOptions => resolutionOptions;
@@ -148,6 +153,26 @@ namespace Spotlight.GameFlow
             if (settings.ResolutionWidth <= 0 || settings.ResolutionHeight <= 0)
                 return;
 
+            // Unity may apply a display transition asynchronously. Track the last request so
+            // repeated UI events cannot enqueue the same expensive transition multiple times.
+            if (lastAppliedWidth == settings.ResolutionWidth
+                && lastAppliedHeight == settings.ResolutionHeight
+                && lastAppliedWindowMode == settings.WindowMode)
+                return;
+
+            if (Screen.width == settings.ResolutionWidth
+                && Screen.height == settings.ResolutionHeight
+                && Screen.fullScreenMode == settings.WindowMode)
+            {
+                lastAppliedWidth = settings.ResolutionWidth;
+                lastAppliedHeight = settings.ResolutionHeight;
+                lastAppliedWindowMode = settings.WindowMode;
+                return;
+            }
+
+            lastAppliedWidth = settings.ResolutionWidth;
+            lastAppliedHeight = settings.ResolutionHeight;
+            lastAppliedWindowMode = settings.WindowMode;
             Screen.SetResolution(settings.ResolutionWidth, settings.ResolutionHeight, settings.WindowMode);
         }
 
@@ -201,8 +226,10 @@ namespace Spotlight.GameFlow
             {
                 if (options.Count > 0)
                 {
-                    value.ResolutionWidth = options[0].Width;
-                    value.ResolutionHeight = options[0].Height;
+                    int preferredIndex = FindResolutionIndex(options, DefaultResolutionWidth, DefaultResolutionHeight);
+                    ResolutionOption fallback = options[preferredIndex >= 0 ? preferredIndex : 0];
+                    value.ResolutionWidth = fallback.Width;
+                    value.ResolutionHeight = fallback.Height;
                 }
             }
             return value;
@@ -215,7 +242,9 @@ namespace Spotlight.GameFlow
             {
                 foreach (ResolutionOption option in options)
                 {
-                    if (option.Width <= 0 || option.Height <= 0 || ContainsDimensions(result, option))
+                    if (option.Width <= 0 || option.Height <= 0
+                        || !IsSixteenByNine(option.Width, option.Height)
+                        || ContainsDimensions(result, option))
                         continue;
                     result.Add(option);
                 }
@@ -238,6 +267,14 @@ namespace Spotlight.GameFlow
             return false;
         }
 
+        private static int FindResolutionIndex(IReadOnlyList<ResolutionOption> options, int width, int height)
+        {
+            for (int i = 0; i < options.Count; i++)
+                if (options[i].Width == width && options[i].Height == height)
+                    return i;
+            return -1;
+        }
+
         private static List<ResolutionOption> LoadResolutionOptions()
         {
             Resolution[] supported = Screen.resolutions;
@@ -245,24 +282,35 @@ namespace Spotlight.GameFlow
             for (int i = 0; i < supported.Length; i++)
             {
                 Resolution resolution = supported[i];
-                RefreshRate refreshRate = resolution.refreshRateRatio;
-                result.Add(new ResolutionOption(
-                    resolution.width,
-                    resolution.height,
-                    refreshRate.numerator,
-                    refreshRate.denominator));
+                if (IsSixteenByNine(resolution.width, resolution.height))
+                {
+                    RefreshRate refreshRate = resolution.refreshRateRatio;
+                    result.Add(new ResolutionOption(
+                        resolution.width,
+                        resolution.height,
+                        refreshRate.numerator,
+                        refreshRate.denominator));
+                }
             }
 
             if (result.Count == 0)
             {
                 Resolution current = Screen.currentResolution;
-                result.Add(new ResolutionOption(
-                    current.width,
-                    current.height,
-                    current.refreshRateRatio.numerator,
-                    current.refreshRateRatio.denominator));
+                if (IsSixteenByNine(current.width, current.height))
+                    result.Add(new ResolutionOption(
+                        current.width,
+                        current.height,
+                        current.refreshRateRatio.numerator,
+                        current.refreshRateRatio.denominator));
+                else
+                    result.Add(new ResolutionOption(1280, 720));
             }
             return result;
+        }
+
+        private static bool IsSixteenByNine(int width, int height)
+        {
+            return height > 0 && (long)width * 9 == (long)height * 16;
         }
 
         private static float NormalizeVolume(float volume)
@@ -274,8 +322,9 @@ namespace Spotlight.GameFlow
 
         private static bool IsSupportedWindowMode(FullScreenMode mode)
         {
+            // ExclusiveFullScreen can change the operating-system display mode.
+            // Only borderless fullscreen and windowed mode are safe for the desktop.
             return mode == FullScreenMode.FullScreenWindow
-                || mode == FullScreenMode.ExclusiveFullScreen
                 || mode == FullScreenMode.Windowed;
         }
     }

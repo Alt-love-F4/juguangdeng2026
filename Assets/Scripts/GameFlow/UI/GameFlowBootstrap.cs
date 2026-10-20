@@ -116,12 +116,9 @@ namespace Spotlight.GameFlow
             && !(narrativeIntegration?.Runtime?.BlocksGameplayInput ?? false)
             && (!gameplay || CanUseGameplayControls());
         public IReadOnlyList<ResolutionOption> ResolutionOptions => settings.ResolutionOptions;
-        public string WindowModeLabel => settings.Current.WindowMode switch
-        {
-            FullScreenMode.ExclusiveFullScreen => "全屏",
-            FullScreenMode.Windowed => "窗口",
-            _ => "无边框"
-        };
+        public string WindowModeLabel => settings.Current.WindowMode == FullScreenMode.Windowed
+            ? "窗口"
+            : "无边框全屏";
         public string ResolutionLabel => settings.Current.ResolutionWidth + " x " + settings.Current.ResolutionHeight;
 
         private static GameFlowBootstrap instance;
@@ -1144,7 +1141,13 @@ namespace Spotlight.GameFlow
         public void SetWindowMode(FullScreenMode mode) => settings.SetWindowMode(mode);
         public void SetResolution(ResolutionOption option)
         {
-            if (awaitingResolutionConfirmation) RevertResolution();
+            if (awaitingResolutionConfirmation)
+            {
+                // The pending display mode is already active. Replace its confirmation
+                // instead of restoring it first, which would enqueue two transitions.
+                awaitingResolutionConfirmation = false;
+                UIKit.GetPanel<ConfirmationPanel>()?.DismissFromFlow();
+            }
             previousResolutionWidth = settings.Current.ResolutionWidth;
             previousResolutionHeight = settings.Current.ResolutionHeight;
             settings.SetResolution(option, false);

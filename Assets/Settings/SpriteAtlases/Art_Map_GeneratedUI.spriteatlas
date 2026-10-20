@@ -1,0 +1,191 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!687078895 &4343727234628468602
+SpriteAtlas:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_Name: Art_Map_GeneratedUI
+  m_EditorData:
+    serializedVersion: 2
+    textureSettings:
+      serializedVersion: 2
+      anisoLevel: 1
+      compressionQuality: 50
+      maxTextureSize: 2048
+      textureCompression: 0
+      filterMode: 1
+      generateMipMaps: 0
+      readable: 0
+      crunchedCompression: 0
+      sRGB: 1
+    platformSettings:
+    - serializedVersion: 4
+      m_BuildTarget: Standalone
+      m_MaxTextureSize: 4096
+      m_ResizeAlgorithm: 0
+      m_TextureFormat: 25
+      m_TextureCompression: 2
+      m_CompressionQuality: 100
+      m_CrunchedCompression: 0
+      m_AllowsAlphaSplitting: 0
+      m_Overridden: 1
+      m_IgnorePlatformSupport: 0
+      m_AndroidETC2FallbackOverride: 0
+      m_ForceMaximumCompressionQuality_BC6H_BC7: 0
+    packingSettings:
+      serializedVersion: 2
+      padding: 4
+      blockOffset: 1
+      allowAlphaSplitting: 0
+      enableRotation: 0
+      enableTightPacking: 0
+      enableAlphaDilation: 0
+    secondaryTextureSettings: {}
+    variantMultiplier: 1
+    packables:
+    - {fileID: 2800000, guid: 01717c3c5fc22d54499281b307ce5da6, type: 3}
+    - {fileID: 2800000, guid: 0a527c93e60514547b0d3adbc71f78db, type: 3}
+    - {fileID: 2800000, guid: 110de4822ac908a46a13e3cd29fe24db, type: 3}
+    - {fileID: 2800000, guid: 18ce0c1a2367651458eb7a89c036ae2d, type: 3}
+    - {fileID: 2800000, guid: 23b26d82041dd0e48aa2c9dff43414e3, type: 3}
+    - {fileID: 2800000, guid: 258fbdd06a7d0f343af9193dfd33b0a0, type: 3}
+    - {fileID: 2800000, guid: 2af0ac50d3a892445aaf584afd161e22, type: 3}
+    - {fileID: 2800000, guid: 34e95a0ba68d4714fbcead80b4628bd0, type: 3}
+    - {fileID: 2800000, guid: 34f645fb3d650024fb06dc8f0204843c, type: 3}
+    - {fileID: 2800000, guid: 3c95e75a0ca1ef844864f7f58e1de697, type: 3}
+    - {fileID: 2800000, guid: 56bbaf39d5336e14aadb98c2768efd38, type: 3}
+    - {fileID: 2800000, guid: 57c8077f3ad74a24bade13989ebe2f48, type: 3}
+    - {fileID: 2800000, guid: 5a6daefa4b58e5b478ce1a337eb4b742, type: 3}
+    - {fileID: 2800000, guid: 5f9f2158138c61942a6205705424c69f, type: 3}
+    - {fileID: 2800000, guid: 6446c661516ae5d4c8a219be366482d8, type: 3}
+    - {fileID: 2800000, guid: 66d79c8e0780e0845a9d9e1dafb227e6, type: 3}
+    - {fileID: 2800000, guid: 77fed213aa09dab47bb58d0e4910e612, type: 3}
+    - {fileID: 2800000, guid: 7f169b555cc689e46ac16353114debcb, type: 3}
+    - {fileID: 2800000, guid: 7fe97d38a3847dc40a2a5ff7a5e65e00, type: 3}
+    - {fileID: 2800000, guid: 8048ec9408e26894aa2cceae43045c7e, type: 3}
+    - {fileID: 2800000, guid: 881baf4df536a054ab71a1f31391052e, type: 3}
+    - {fileID: 2800000, guid: 996928b14add3c447a3561c8c7dcf024, type: 3}
+    - {fileID: 2800000, guid: b04106a9ce7e30b4ea104152d94d1de7, type: 3}
+    - {fileID: 2800000, guid: bbd402c287300414d99fc3537973bf2f, type: 3}
+    - {fileID: 2800000, guid: bd6c9ec3a58229b4db833f83178cbb48, type: 3}
+    - {fileID: 2800000, guid: c4c5cc84f2d05ff4f8e8fe769c57c3b9, type: 3}
+    - {fileID: 2800000, guid: d765b42928a44f441b1aa49154602faa, type: 3}
+    - {fileID: 2800000, guid: da4193317b487944bb89fd09f79a64dd, type: 3}
+    - {fileID: 2800000, guid: e09128e8de4e56f47b3e2ad90923a6fb, type: 3}
+    - {fileID: 2800000, guid: e0e7634f2c7681e47955c95a03b22180, type: 3}
+    - {fileID: 2800000, guid: ebade4b630f6e81499a80caf68ad1cd9, type: 3}
+    - {fileID: 2800000, guid: f5852f26201e4db4d92ea22838b7ae41, type: 3}
+    bindAsDefault: 1
+    isAtlasV2: 0
+    cachedData: {fileID: 0}
+    packedSpriteRenderDataKeys:
+    - 2af0ac50d3a892445aaf584afd161e22: 21300000
+    - 258fbdd06a7d0f343af9193dfd33b0a0: 21300000
+    - da4193317b487944bb89fd09f79a64dd: 21300000
+    - 6446c661516ae5d4c8a219be366482d8: 21300000
+    - 996928b14add3c447a3561c8c7dcf024: 21300000
+    - 110de4822ac908a46a13e3cd29fe24db: 21300000
+    - 23b26d82041dd0e48aa2c9dff43414e3: 21300000
+    - bbd402c287300414d99fc3537973bf2f: 21300000
+    - 77fed213aa09dab47bb58d0e4910e612: 21300000
+    - 0a527c93e60514547b0d3adbc71f78db: 21300000
+    - bd6c9ec3a58229b4db833f83178cbb48: 3083052799298564346
+    - bd6c9ec3a58229b4db833f83178cbb48: -5301670333790659089
+    - bd6c9ec3a58229b4db833f83178cbb48: 5114765780468181870
+    - c4c5cc84f2d05ff4f8e8fe769c57c3b9: 21300000
+    - 8048ec9408e26894aa2cceae43045c7e: 21300000
+    - 7f169b555cc689e46ac16353114debcb: 21300000
+    - f5852f26201e4db4d92ea22838b7ae41: 21300000
+    - ebade4b630f6e81499a80caf68ad1cd9: 21300000
+    - 7fe97d38a3847dc40a2a5ff7a5e65e00: 21300000
+    - 5f9f2158138c61942a6205705424c69f: 21300000
+    - e09128e8de4e56f47b3e2ad90923a6fb: 21300000
+    - d765b42928a44f441b1aa49154602faa: 21300000
+    - 56bbaf39d5336e14aadb98c2768efd38: 21300000
+    - b04106a9ce7e30b4ea104152d94d1de7: 21300000
+    - 18ce0c1a2367651458eb7a89c036ae2d: 21300000
+    - 3c95e75a0ca1ef844864f7f58e1de697: 21300000
+    - 5a6daefa4b58e5b478ce1a337eb4b742: 21300000
+    - 34e95a0ba68d4714fbcead80b4628bd0: 21300000
+    - 34f645fb3d650024fb06dc8f0204843c: 21300000
+    - 01717c3c5fc22d54499281b307ce5da6: 21300000
+    - 881baf4df536a054ab71a1f31391052e: 21300000
+    - 66d79c8e0780e0845a9d9e1dafb227e6: 21300000
+    - e0e7634f2c7681e47955c95a03b22180: 21300000
+    - 57c8077f3ad74a24bade13989ebe2f48: 21300000
+  m_MasterAtlas: {fileID: 0}
+  m_PackedSprites:
+  - {fileID: 21300000, guid: 2af0ac50d3a892445aaf584afd161e22, type: 3}
+  - {fileID: 21300000, guid: 258fbdd06a7d0f343af9193dfd33b0a0, type: 3}
+  - {fileID: 21300000, guid: da4193317b487944bb89fd09f79a64dd, type: 3}
+  - {fileID: 21300000, guid: 6446c661516ae5d4c8a219be366482d8, type: 3}
+  - {fileID: 21300000, guid: 996928b14add3c447a3561c8c7dcf024, type: 3}
+  - {fileID: 21300000, guid: 110de4822ac908a46a13e3cd29fe24db, type: 3}
+  - {fileID: 21300000, guid: 23b26d82041dd0e48aa2c9dff43414e3, type: 3}
+  - {fileID: 21300000, guid: bbd402c287300414d99fc3537973bf2f, type: 3}
+  - {fileID: 21300000, guid: 77fed213aa09dab47bb58d0e4910e612, type: 3}
+  - {fileID: 21300000, guid: 0a527c93e60514547b0d3adbc71f78db, type: 3}
+  - {fileID: 3083052799298564346, guid: bd6c9ec3a58229b4db833f83178cbb48, type: 3}
+  - {fileID: -5301670333790659089, guid: bd6c9ec3a58229b4db833f83178cbb48, type: 3}
+  - {fileID: 5114765780468181870, guid: bd6c9ec3a58229b4db833f83178cbb48, type: 3}
+  - {fileID: 21300000, guid: c4c5cc84f2d05ff4f8e8fe769c57c3b9, type: 3}
+  - {fileID: 21300000, guid: 8048ec9408e26894aa2cceae43045c7e, type: 3}
+  - {fileID: 21300000, guid: 7f169b555cc689e46ac16353114debcb, type: 3}
+  - {fileID: 21300000, guid: f5852f26201e4db4d92ea22838b7ae41, type: 3}
+  - {fileID: 21300000, guid: ebade4b630f6e81499a80caf68ad1cd9, type: 3}
+  - {fileID: 21300000, guid: 7fe97d38a3847dc40a2a5ff7a5e65e00, type: 3}
+  - {fileID: 21300000, guid: 5f9f2158138c61942a6205705424c69f, type: 3}
+  - {fileID: 21300000, guid: e09128e8de4e56f47b3e2ad90923a6fb, type: 3}
+  - {fileID: 21300000, guid: d765b42928a44f441b1aa49154602faa, type: 3}
+  - {fileID: 21300000, guid: 56bbaf39d5336e14aadb98c2768efd38, type: 3}
+  - {fileID: 21300000, guid: b04106a9ce7e30b4ea104152d94d1de7, type: 3}
+  - {fileID: 21300000, guid: 18ce0c1a2367651458eb7a89c036ae2d, type: 3}
+  - {fileID: 21300000, guid: 3c95e75a0ca1ef844864f7f58e1de697, type: 3}
+  - {fileID: 21300000, guid: 5a6daefa4b58e5b478ce1a337eb4b742, type: 3}
+  - {fileID: 21300000, guid: 34e95a0ba68d4714fbcead80b4628bd0, type: 3}
+  - {fileID: 21300000, guid: 34f645fb3d650024fb06dc8f0204843c, type: 3}
+  - {fileID: 21300000, guid: 01717c3c5fc22d54499281b307ce5da6, type: 3}
+  - {fileID: 21300000, guid: 881baf4df536a054ab71a1f31391052e, type: 3}
+  - {fileID: 21300000, guid: 66d79c8e0780e0845a9d9e1dafb227e6, type: 3}
+  - {fileID: 21300000, guid: e0e7634f2c7681e47955c95a03b22180, type: 3}
+  - {fileID: 21300000, guid: 57c8077f3ad74a24bade13989ebe2f48, type: 3}
+  m_PackedSpriteNamesToIndex:
+  - taskTitle
+  - pointSegment4
+  - tasks
+  - locationSignsSprite
+  - zoomBar
+  - location0
+  - pointSegment3
+  - pointSegment1
+  - pointsBase
+  - actionCard
+  - shortcuts_1
+  - shortcuts_0
+  - shortcuts_2
+  - location2
+  - bag
+  - location5
+  - locationHighlight
+  - location9
+  - tracking
+  - compassSprite
+  - dateFrame
+  - location4
+  - panel
+  - location8
+  - locationNamesSprite
+  - pointsOutline
+  - pointSegment0
+  - pointSegment2
+  - cityTitleSprite
+  - location1
+  - taskCard
+  - inventoryTitle
+  - location3
+  - details
+  m_RenderDataMap: {}
+  m_Tag: Art_Map_GeneratedUI
+  m_IsVariant: 0

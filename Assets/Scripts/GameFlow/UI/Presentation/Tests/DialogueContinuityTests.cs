@@ -72,6 +72,24 @@ namespace Spotlight.GameFlow.Tests
         }
 
         [Test]
+        public void OffstageActorAndLegacyNamedVoiceKeepNameWithoutIntroducingPortrait()
+        {
+            var data = new NarrativeConversationPresentationData();
+            data.lines.Add(new NarrativeConversationPresentationLine { speakerKey = "duval", speakerName = "杜瓦尔", side = "none", text = "进来吧。" });
+            data.lines.Add(new NarrativeConversationPresentationLine { speakerName = "门后的声音", text = "请等一下。" });
+            data.lines.Add(new NarrativeConversationPresentationLine { text = "我在门外停下。" });
+            var script = NarrativeConversationEventPlayback.CreateScript(data);
+            for (int i = 0; i < 2; i++)
+            {
+                Assert.That(script[i].Speaker, Is.EqualTo(DialogueSpeaker.Offstage));
+                Assert.That(script[i].ReplaceLeft || script[i].ReplaceRight || script[i].ReplaceCenter, Is.False);
+            }
+            Assert.That(script[0].SpeakerNameOverride, Is.EqualTo("杜瓦尔"));
+            Assert.That(script[1].SpeakerNameOverride, Is.EqualTo("门后的声音"));
+            Assert.That(script[2].Speaker, Is.EqualTo(DialogueSpeaker.Narrator));
+        }
+
+        [Test]
         public void ConversationStartsEmptySupportsCenterAndPreservesNarratorEffects()
         {
             var data = new NarrativeConversationPresentationData { eventId = "event", presentationKey = "talk", continuityOwner = new object() };

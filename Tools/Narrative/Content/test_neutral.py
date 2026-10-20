@@ -224,7 +224,7 @@ class NeutralCompilerTests(unittest.TestCase):
             self.assertNotIn(107,r["anchors"])
 
     def test_construction_blockers_are_real_false_conditions_not_only_notes(self):
-        blocked={"neutral.route.1129.s1"}
+        blocked=set()  # 1129's wallet rule is now explicitly authorized.
         actual={r["eventId"] for r in self.data["Event"] if "blockedBy=" in r["eventProperty"]}
         self.assertEqual(blocked,actual)
         for root in blocked:
@@ -435,7 +435,8 @@ class NeutralCompilerTests(unittest.TestCase):
                 self.assertTrue(model.eligible("ending",ending))
                 self.assertFalse(model.flags["neutral.investigation.bribed"])
                 self.assertFalse(model.flags["neutral.association.committee"])
-                self.assertFalse(model.trace("neutral.route.1129.s1")["settled"])
+                # GraphModel.trace deliberately bypasses event eligibility; test the actual gate here.
+                self.assertFalse(model.eligible("event","neutral.route.1129.s1"))
 
     def test_1122_staying_ends_before_retreat_epilogue_and_b_only_after_retreat(self):
         facts={"neutral.investigation.shelter":True,"route.neutral":True}
@@ -455,6 +456,33 @@ class NeutralCompilerTests(unittest.TestCase):
         model=self.model();success=model.trace(root,attributes={"language":5},facts={"route.neutral":True})
         self.assertTrue({61,81,116}.issubset(success["anchors"]));self.assertNotIn(91,success["anchors"])
         self.assertFalse(success["queued"]);self.assertTrue(model.eligible("ending","neutral.ending.d"))
+
+    def test_wallet_assessment_boundaries_cancellation_and_both_endings(self):
+        root="neutral.route.1129.s1"
+        history={"route.neutral":True,neutral.completed("neutral.route.1122.s1"):True,
+                 "neutral.stayed":True,"neutral.association.member":True}
+        for money in [0,24999,25000,25001]:
+            model=self.model();model.flags.update(history);model.bars={"cafe.money":money}
+            self.assertTrue(model.eligible("event",root))
+            result=model.trace(root,facts=history,bars=model.bars)
+            self.assertTrue(result["settled"])
+            self.assertEqual(money>=25000,model.flags["neutral.association.committee"])
+            self.assertEqual(money<25000,model.flags["neutral.revenue.below_standard"])
+            self.assertEqual(money>=25000, bool(result["anchors"]))
+            self.assertEqual(money<25000,model.eligible("event","neutral.route.1130.s2"))
+            if money>=25000:
+                self.assertTrue(model.eligible("event","neutral.route.1130.s1"))
+                model.trace("neutral.route.1130.s1",attributes={"language":5},bars=model.bars)
+                self.assertTrue(model.eligible("ending","neutral.ending.d"))
+            else:
+                model.trace("neutral.route.1130.s2")
+                self.assertTrue(model.eligible("ending","neutral.ending.c"))
+        model=self.model();model.flags.update(history)
+        self.assertFalse(model.eligible("event",root),"Missing wallet provider must fail closed")
+        model.trace(root,facts=history,bars={"cafe.money":25000},cancel=True)
+        self.assertFalse(model.flags[neutral.completed(root)])
+        self.assertFalse(model.flags["neutral.association.committee"])
+        self.assertFalse(model.flags["neutral.revenue.below_standard"])
 
     def test_c_entry_or_groups_never_turn_missing_revenue_content_into_failure(self):
         root="neutral.route.1130.s2"

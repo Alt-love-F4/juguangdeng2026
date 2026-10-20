@@ -56,15 +56,49 @@ namespace Spotlight.GameFlow
             }
             if (entry.Kind != "Conversation") throw new InvalidOperationException("请选择关联的 Opening / Conversation 演出段落；此入口不能直接重建为对话。");
             var page = Configuration.presentations.conversationPages.First(p => p.pageId == entry.PageId);
-            var data = new NarrativeConversationPresentationData { title = entry.Key, presentationKey = entry.Key, backgroundPath = page.bgOverride, bgmOverride = page.bgmOverride };
+            var data = new NarrativeConversationPresentationData { title = entry.Key, presentationKey = entry.Key, backgroundPath = InheritedBackground(page), bgmOverride = page.bgmOverride };
             foreach (var line in Configuration.presentations.conversationLines.Where(l => l.pageId == page.pageId).OrderBy(l => l.seq))
-                data.lines.Add(new NarrativeConversationPresentationLine { lineId = line.lineId, pageId = line.pageId, seq = line.seq, speakerKey = line.speakerKey, speakerName = resolve(Configuration.objects.FirstOrDefault(o => o.objId == line.speakerKey)?.nameText), side = line.side,
+                data.lines.Add(new NarrativeConversationPresentationLine { lineId = line.lineId, pageId = line.pageId, seq = line.seq, speakerKey = line.speakerKey, speakerName = SpeakerName(line), side = line.side,
                     text = resolve(line.textKey), emote = line.emote, accentFxKey = line.accentFxKey, accentTargetKey = line.accentTargetKey, sfxKey = line.sfxKey, voiceKey = line.voiceKey });
             foreach (var choice in Configuration.choices.Where(c => c.groupKey == page.optionGroupKey).OrderBy(c => c.seq))
                 data.options.Add(new NarrativeConversationPresentationOption { id = choice.choiceId, text = resolve(choice.textKey), enabled = false, requirement = "仅展示选项；条件、检定及后续分支请使用分支测试" });
             if (data.lines.Count == 0) throw new InvalidOperationException("演出段落无台词：" + page.pageId);
             return NarrativeConversationEventPlayback.CreateScript(data);
         }
+        private string SpeakerName(NarrativeConversationLineDefinition line)
+        {
+            // Match the formal Presenter: a local alias (including pre-reveal ???) wins,
+            // while speakerKey remains the real actor ID used for portraits and continuity.
+            if (!string.IsNullOrWhiteSpace(line.speakerNameKey)) return resolve(line.speakerNameKey);
+            if (string.IsNullOrWhiteSpace(line.speakerKey)) return null;
+            var speaker = Configuration.objects.FirstOrDefault(o => o.objId == line.speakerKey);
+            return NarrativeCharacterResolver.Resolve(line.speakerKey, resolve(speaker?.nameText), speaker?.portraitPath)?.name
+                ?? resolve(speaker?.nameText);
+        }
+
+        private string InheritedBackground(NarrativeConversationPageDefinition page)
+        {
+            if (!string.IsNullOrWhiteSpace(page.bgOverride)) return page.bgOverride;
+            // A standalone page preview has no runtime traversal/previous batch. Reconstruct
+            // only the statically authored, unconditional bed within this presentation.
+            string previous = Configuration.presentations.conversationPages
+                .Where(p => p.presentationKey == page.presentationKey && p.seq < page.seq
+                    && string.IsNullOrWhiteSpace(p.pageCondKeys) && string.IsNullOrWhiteSpace(p.pageBarConds)
+                    && !string.IsNullOrWhiteSpace(p.bgOverride))
+                .OrderByDescending(p => p.seq).Select(p => p.bgOverride).FirstOrDefault();
+            if (previous != null) return previous;
+            var backgrounds = Configuration.events.Where(e => e.presentationKey == page.presentationKey).Select(e =>
+            {
+                var setup = Configuration.setups.FirstOrDefault(s => s.setupKey == e.setupKey);
+                var slots = PresentationSlots.Parse(setup);
+                PresentationSlots.ApplyEventProperties(slots, e);
+                return slots.TryGetValue("bg", out string background) ? background : string.Empty;
+            }).Distinct(StringComparer.Ordinal).ToArray();
+            // Shared presentations may have different event-specific stages. Do not choose
+            // an arbitrary event or invent a background when the source is ambiguous.
+            return backgrounds.Length == 1 ? backgrounds[0] : null;
+        }
+
         public string SourceAt(Entry entry, int index)
         {
             if (entry == null) return "无选择";

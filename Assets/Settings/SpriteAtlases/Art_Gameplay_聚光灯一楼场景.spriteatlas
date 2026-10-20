@@ -1,0 +1,105 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!687078895 &4343727234628468602
+SpriteAtlas:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_Name: "Art_Gameplay_\u805A\u5149\u706F\u4E00\u697C\u573A\u666F"
+  m_EditorData:
+    serializedVersion: 2
+    textureSettings:
+      serializedVersion: 2
+      anisoLevel: 1
+      compressionQuality: 50
+      maxTextureSize: 2048
+      textureCompression: 0
+      filterMode: 1
+      generateMipMaps: 0
+      readable: 0
+      crunchedCompression: 0
+      sRGB: 1
+    platformSettings:
+    - serializedVersion: 4
+      m_BuildTarget: Standalone
+      m_MaxTextureSize: 4096
+      m_ResizeAlgorithm: 0
+      m_TextureFormat: 25
+      m_TextureCompression: 2
+      m_CompressionQuality: 100
+      m_CrunchedCompression: 0
+      m_AllowsAlphaSplitting: 0
+      m_Overridden: 1
+      m_IgnorePlatformSupport: 0
+      m_AndroidETC2FallbackOverride: 0
+      m_ForceMaximumCompressionQuality_BC6H_BC7: 0
+    packingSettings:
+      serializedVersion: 2
+      padding: 4
+      blockOffset: 1
+      allowAlphaSplitting: 0
+      enableRotation: 0
+      enableTightPacking: 0
+      enableAlphaDilation: 0
+    secondaryTextureSettings: {}
+    variantMultiplier: 1
+    packables:
+    - {fileID: 2800000, guid: 000cf1fe7c601eb4e89e978bcc1b332b, type: 3}
+    - {fileID: 2800000, guid: 01d820c32817b2440985168d55f6d2f7, type: 3}
+    - {fileID: 2800000, guid: 1638c928e028e6344a9c145fe1eb5daa, type: 3}
+    - {fileID: 2800000, guid: 3324c58739eff2b47b5f96e40aa4b7d1, type: 3}
+    - {fileID: 2800000, guid: 37e6c7a39ad31ae4588c5d807b391831, type: 3}
+    - {fileID: 2800000, guid: 3a73b312166e1ee448b5ecabedd2d5cd, type: 3}
+    - {fileID: 2800000, guid: 661eed7fb4b6c0640a9d692c92b0054c, type: 3}
+    - {fileID: 2800000, guid: 82730f91f5138934988afe004ef4efdf, type: 3}
+    - {fileID: 2800000, guid: 84002634986ce0040a85aa1e83dc9156, type: 3}
+    - {fileID: 2800000, guid: 9810563fa0a07fe42946dad54cb43d5f, type: 3}
+    - {fileID: 2800000, guid: e332d5eb9f25db142a8b77681fd9b696, type: 3}
+    - {fileID: 2800000, guid: faf03043c22fb214fa0b77b3e937bcd0, type: 3}
+    bindAsDefault: 1
+    isAtlasV2: 0
+    cachedData: {fileID: 0}
+    packedSpriteRenderDataKeys:
+    - 82730f91f5138934988afe004ef4efdf: 21300000
+    - 3a73b312166e1ee448b5ecabedd2d5cd: 21300000
+    - faf03043c22fb214fa0b77b3e937bcd0: 21300000
+    - 37e6c7a39ad31ae4588c5d807b391831: 21300000
+    - 01d820c32817b2440985168d55f6d2f7: 21300000
+    - 84002634986ce0040a85aa1e83dc9156: 21300000
+    - 3324c58739eff2b47b5f96e40aa4b7d1: 21300000
+    - 1638c928e028e6344a9c145fe1eb5daa: 21300000
+    - e332d5eb9f25db142a8b77681fd9b696: 21300000
+    - 000cf1fe7c601eb4e89e978bcc1b332b: 21300000
+    - 9810563fa0a07fe42946dad54cb43d5f: 21300000
+    - 661eed7fb4b6c0640a9d692c92b0054c: 21300000
+  m_MasterAtlas: {fileID: 0}
+  m_PackedSprites:
+  - {fileID: 21300000, guid: 82730f91f5138934988afe004ef4efdf, type: 3}
+  - {fileID: 21300000, guid: 3a73b312166e1ee448b5ecabedd2d5cd, type: 3}
+  - {fileID: 21300000, guid: faf03043c22fb214fa0b77b3e937bcd0, type: 3}
+  - {fileID: 21300000, guid: 37e6c7a39ad31ae4588c5d807b391831, type: 3}
+  - {fileID: 21300000, guid: 01d820c32817b2440985168d55f6d2f7, type: 3}
+  - {fileID: 21300000, guid: 84002634986ce0040a85aa1e83dc9156, type: 3}
+  - {fileID: 21300000, guid: 3324c58739eff2b47b5f96e40aa4b7d1, type: 3}
+  - {fileID: 21300000, guid: 1638c928e028e6344a9c145fe1eb5daa, type: 3}
+  - {fileID: 21300000, guid: e332d5eb9f25db142a8b77681fd9b696, type: 3}
+  - {fileID: 21300000, guid: 000cf1fe7c601eb4e89e978bcc1b332b, type: 3}
+  - {fileID: 21300000, guid: 9810563fa0a07fe42946dad54cb43d5f, type: 3}
+  - {fileID: 21300000, guid: 661eed7fb4b6c0640a9d692c92b0054c, type: 3}
+  m_PackedSpriteNamesToIndex:
+  - "\u56FE\u5C42 4"
+  - "\u56FE\u5C42 5"
+  - "\u56FE\u5C42 10"
+  - "\u56FE\u5C42 11"
+  - "\u5BF9\u79F0\u5C3A 1"
+  - CafeTable_0
+  - CafeTable_1
+  - "\u5FAE\u4FE1\u56FE\u7247_20261007222313_2072_40 \u526F\u672C"
+  - "\u56FE\u5C42 6"
+  - "\u5FAE\u4FE1\u56FE\u7247_20261007220441_2066_40 \u526F\u672C"
+  - "\u56FE\u5C42 8"
+  - CafeTable_3
+  m_RenderDataMap: {}
+  m_Tag: "Art_Gameplay_\u805A\u5149\u706F\u4E00\u697C\u573A\u666F"
+  m_IsVariant: 0

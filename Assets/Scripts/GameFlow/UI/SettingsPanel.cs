@@ -18,9 +18,8 @@ namespace Spotlight.GameFlow
         [SerializeField] private TMP_Dropdown windowModeDropdown;
         private static readonly FullScreenMode[] WindowModes =
         {
-            FullScreenMode.ExclusiveFullScreen,
-            FullScreenMode.Windowed,
-            FullScreenMode.FullScreenWindow
+            FullScreenMode.FullScreenWindow,
+            FullScreenMode.Windowed
         };
         [SerializeField] private TMP_Text masterValue;
         [SerializeField] private TMP_Text musicValue;
@@ -61,7 +60,7 @@ namespace Spotlight.GameFlow
             {
                 windowModeDropdown.ClearOptions();
                 windowModeDropdown.AddOptions(new System.Collections.Generic.List<string>
-                    { "全屏", "窗口", "无边框" });
+                    { "无边框全屏", "窗口" });
             }
             if (Flow == null) return;
             GameSettings current = Flow.CurrentSettings;
@@ -72,7 +71,7 @@ namespace Spotlight.GameFlow
             {
                 resolutionDropdown.ClearOptions();
                 var labels = new System.Collections.Generic.List<string>();
-                foreach (var option in Flow.ResolutionOptions) labels.Add(option.Width + "X" + option.Height);
+                foreach (var option in Flow.ResolutionOptions) labels.Add(option.Width + "x" + option.Height);
                 resolutionDropdown.AddOptions(labels);
             }
             UpdateVolumeLabels();
@@ -125,7 +124,7 @@ namespace Spotlight.GameFlow
         private void CycleWindowMode()
         {
             if (Flow == null) return;
-            FullScreenMode[] modes = { FullScreenMode.ExclusiveFullScreen, FullScreenMode.FullScreenWindow, FullScreenMode.Windowed };
+            FullScreenMode[] modes = { FullScreenMode.FullScreenWindow, FullScreenMode.Windowed };
             int current = System.Array.IndexOf(modes, Flow.CurrentSettings.WindowMode);
             Flow.SetWindowMode(modes[(current + 1 + modes.Length) % modes.Length]);
             RefreshDisplaySettings();
@@ -151,7 +150,7 @@ namespace Spotlight.GameFlow
             if (windowModeDropdown != null)
             {
                 int index = System.Array.IndexOf(WindowModes, Flow.CurrentSettings.WindowMode);
-                windowModeDropdown.SetValueWithoutNotify(index >= 0 ? index : 2);
+                windowModeDropdown.SetValueWithoutNotify(index >= 0 ? index : 0);
             }
             if (resolutionText != null) resolutionText.text = Flow.ResolutionLabel;
             if (resolutionDropdown != null)

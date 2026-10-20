@@ -30,18 +30,20 @@ namespace Spotlight.GameFlow
             ResolutionHeight = resolutionHeight;
         }
 
+        private const int DefaultResolutionWidth = 1920;
+        private const int DefaultResolutionHeight = 1080;
+
         public static GameSettings Defaults
         {
             get
             {
-                Resolution resolution = Screen.currentResolution;
                 return new GameSettings(
                     1f,
                     1f,
                     1f,
-                    Screen.fullScreenMode,
-                    resolution.width,
-                    resolution.height);
+                    FullScreenMode.Windowed,
+                    DefaultResolutionWidth,
+                    DefaultResolutionHeight);
             }
         }
     }

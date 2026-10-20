@@ -854,6 +854,49 @@ namespace Spotlight.GameFlow.Tests
         }
 
         [Test]
+        public void MapEnableAndSceneOpenAlwaysDismissPreviousPopup()
+        {
+            CreateDetails(null);
+            var map = Create("Map", root.transform).AddComponent(UiType("Spotlight.GameFlow.MapSceneController"));
+            map.GetType().GetField("actionDetails", PrivateInstance).SetValue(map, details);
+            map.GetType().GetField("focusPanel", PrivateInstance).SetValue(map, details.gameObject);
+            for (int i = 0; i < 2; i++)
+            {
+                details.Show("cafe", "咖啡馆");
+                Assert.That(details.gameObject.activeSelf, Is.True);
+                Invoke(map, "OnEnable");
+                Assert.That(details.gameObject.activeSelf, Is.False, "Every map activation must clear the previous popup.");
+            }
+            details.Show("cafe", "咖啡馆");
+            Invoke(map, "OpenPanel", new object[] { null });
+            Assert.That(details.gameObject.activeSelf, Is.False, "Scene panel opening also starts without details.");
+        }
+
+        [Test]
+        public void FirstDayMapGuideMovesCameraWithoutOpeningCafePopup()
+        {
+            CreateDetails(null);
+            var host = Create("Host", root.transform);
+            var flow = host.AddComponent(UiType("Spotlight.GameFlow.GameFlowBootstrap"));
+            var dayFlow = host.AddComponent(UiType("Spotlight.GameFlow.DayFlowController"));
+            var dayType = dayFlow.GetType();
+            dayType.GetField("running", PrivateInstance).SetValue(dayFlow, true);
+            dayType.GetField("day", PrivateInstance).SetValue(dayFlow, 1);
+            var state = dayType.GetProperty("State");
+            state.GetSetMethod(true).Invoke(dayFlow, new[] { Enum.Parse(state.PropertyType, "CityMapLeisure") });
+            var map = Create("Map", root.transform).AddComponent(UiType("Spotlight.GameFlow.MapSceneController"));
+            map.GetType().GetField("flow", PrivateInstance).SetValue(map, flow);
+            map.GetType().GetField("feelConfig", PrivateInstance).SetValue(map, Resources.Load("MapFeelConfig"));
+            map.GetType().GetField("actionDetails", PrivateInstance).SetValue(map, details);
+            var positions = (System.Collections.IDictionary)map.GetType().GetField("runtimePositions", PrivateInstance).GetValue(map);
+            positions.Add("cafe", new NarrativeMapPositionDefinition { positionKey = "cafe", position = new Vector2(10, 20) });
+            details.Dismiss();
+            Invoke(map, "ApplyFirstDayGuide");
+            Assert.That(details.gameObject.activeSelf, Is.False, "The guide must wait for the player's location click.");
+            Assert.That((bool)map.GetType().GetField("firstDayGuideApplied", PrivateInstance).GetValue(map), Is.True);
+        }
+
+        [Test]
         public void OtherLocationsDoNotExposeEnterCafe()
         {
             CreateDetails(null);

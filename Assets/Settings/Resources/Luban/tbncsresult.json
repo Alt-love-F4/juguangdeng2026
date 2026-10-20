@@ -1053,15 +1053,6 @@
     "note": "Root-tail settlement; 策划文件/文案6点/文案/a-中立（共通+支线）/入线MA70.11.22-S1包含中立结局B.docx"
   },
   {
-    "resultId": "neutral.route.1129.s1.result.committee",
-    "eventId": "neutral.route.1129.s1",
-    "seq": 45,
-    "resultType": "SET_FLAG",
-    "target": "neutral.association.committee",
-    "value": "true",
-    "note": "Root-tail settlement; 策划文件/文案6点/文案/a-中立（共通+支线）/入线MA70.11.29-S1.docx#P101"
-  },
-  {
     "resultId": "neutral.route.1129.s1.result.complete",
     "eventId": "neutral.route.1129.s1",
     "seq": 46,
@@ -9736,5 +9727,23 @@
     "target": "story.newspaper.1007.completed",
     "value": "true",
     "note": ""
+  },
+  {
+    "resultId": "neutral.route.1129.s1.result.committee",
+    "eventId": "neutral.route.1129.s1",
+    "seq": 45,
+    "resultType": "SET_FLAG",
+    "target": "neutral.association.committee",
+    "value": "true",
+    "note": "Root-tail settlement; 策划文件/文案6点/文案/a-中立（共通+支线）/入线MA70.11.29-S1.docx#P101"
+  },
+  {
+    "resultId": "neutral.route.1129.s1.result.money_below_target",
+    "eventId": "neutral.route.1129.s1",
+    "seq": 46,
+    "resultType": "SET_FLAG",
+    "target": "neutral.revenue.below_standard",
+    "value": "true",
+    "note": "Root-tail settlement; 策划文件/文案6点/文案/a-中立（共通+支线）/入线MA70.11.29-S1.docx"
   }
 ]

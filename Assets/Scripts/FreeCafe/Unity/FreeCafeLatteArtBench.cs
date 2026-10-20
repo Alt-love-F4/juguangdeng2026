@@ -69,6 +69,13 @@ namespace Spotlight.FreeCafe
         private LatteArtRecognitionResult latestRecognition;
         private Button submitButton;
         private TMP_Text authoredCaption;
+        private TMP_Text tutorialCopy, tutorialNextLabel;
+        private Button tutorialNext;
+        private RectTransform tutorialCard;
+        private Image tutorialPointer;
+        private int tutorialStep;
+        private bool IsMilkPractice => runtime != null
+            && runtime.TryGetComponent<FreeCafeMilkPitcherTutorial>(out var practice) && practice.IsRunning;
         private bool captionWasEnabled;
 
         private string activeToken;
@@ -170,6 +177,7 @@ namespace Spotlight.FreeCafe
                 || !Mathf.Approximately(viewAspect, camera.aspect) || viewPosition != camera.transform.position))
                 FitBackgroundToView();
             UpdateGuide(camera);
+            UpdatePracticeGuide();
         }
 
         private void CaptureSurface()
@@ -519,7 +527,82 @@ namespace Spotlight.FreeCafe
             // Hover card sits last so it renders above both columns.
             hintRect.SetAsLastSibling();
             SelectReference(FirstUnlockedId());
+            if (IsMilkPractice) BuildPracticeGuide(content.transform);
             curtain = MakeImage(overlayRoot.transform, "TransitionCurtain", new Color(.15f, .075f, .045f, 0)); Stretch(curtain.rectTransform);
+        }
+
+        private void BuildPracticeGuide(Transform content)
+        {
+            tutorialStep = 0;
+            tutorialPointer = MakeImage(content, "TutorialReferenceLine", Caramel);
+            tutorialPointer.raycastTarget = false;
+            tutorialPointer.rectTransform.pivot = new Vector2(0, .5f);
+            var shared = Resources.Load<FreeCafeTutorialPanel>("UI/FreeCafeTutorialPanel");
+            var sourceCard = (RectTransform)shared.instruction.transform.parent;
+            tutorialCard = Instantiate(sourceCard, content, false);
+            tutorialCard.name = "MilkPracticeGuide";
+            SetRect(tutorialCard, new Vector2(.28f, .77f), new Vector2(.756f, .945f));
+            var title = tutorialCard.Find(shared.heading.name).GetComponent<TMP_Text>();
+            title.text = "拉花 · 新手引导";
+            SetRect(title.rectTransform, new Vector2(.06f, .76f), new Vector2(.94f, .96f));
+            tutorialCopy = tutorialCard.Find(shared.instruction.name).GetComponent<TMP_Text>();
+            tutorialCopy.name = "Instruction";
+            SetRect(tutorialCopy.rectTransform, new Vector2(.06f, .27f), new Vector2(.94f, .76f));
+            tutorialCopy.enableAutoSizing = true;
+            tutorialCopy.fontSizeMin = 22;
+            tutorialCopy.fontSizeMax = 26;
+            tutorialCard.Find(shared.errorText.name).gameObject.SetActive(false);
+            tutorialNext = Instantiate(shared.retryButton, tutorialCard, false);
+            tutorialNext.name = "Next";
+            SetRect((RectTransform)tutorialNext.transform, new Vector2(.65f, .035f), new Vector2(.94f, .26f));
+            tutorialNext.onClick = new Button.ButtonClickedEvent();
+            tutorialNext.onClick.AddListener(() => { tutorialStep = Mathf.Min(3, tutorialStep + 1); UpdatePracticeGuide(); });
+            tutorialNextLabel = tutorialNext.GetComponentInChildren<TMP_Text>();
+            tutorialNextLabel.fontSize = 18;
+            UpdatePracticeGuide();
+        }
+
+        private void UpdatePracticeGuide()
+        {
+            if (tutorialCard == null) return;
+            tutorialCard.gameObject.SetActive(IsMilkPractice);
+            tutorialPointer.gameObject.SetActive(IsMilkPractice);
+            if (!IsMilkPractice) return;
+            string target;
+            switch (tutorialStep)
+            {
+                case 0:
+                    tutorialCopy.text = "1 / 4  左侧是参考图案\n点击切换参考，悬停查看含义与画法。持续拉出某些具有特殊含义的图案，可能会影响世界局势。";
+                    target = "PresetPanel/PresetList";
+                    break;
+                case 1:
+                    tutorialCopy.text = "2 / 4  杯面上的描线参考\n右侧“描线参考”可开关辅助轮廓。可以照着画，也可以关闭后自由创作。";
+                    target = "GuideToggle";
+                    break;
+                case 2:
+                    tutorialCopy.text = "3 / 4  沿参考绘制，观察拟合\n按住左键连续拖画，松手可分笔。左侧拟合百分比表示与各图案的相似程度，“最佳”标出当前最接近的图案。";
+                    target = "PresetPanel/StatusCard";
+                    break;
+                default:
+                    tutorialCopy.text = "4 / 4  完成后提交拉花\n满意后点击右侧“提交拉花”完成练习。不必达到 100% 拟合；想重画可按 R 或点“删除拉花”，但已用奶泡不会退回。";
+                    target = "Submit";
+                    break;
+            }
+            tutorialNext.gameObject.SetActive(tutorialStep < 3);
+            tutorialNext.interactable = tutorialStep != 2 || effect != null && effect.StrokePointCount >= 5;
+            tutorialNextLabel.text = tutorialStep == 2 ? tutorialNext.interactable ? "画好了，下一步" : "先在杯面拖画" : "下一步";
+            var destination = contentRect.Find(target) as RectTransform;
+            if (destination == null) return;
+            Vector3 start = tutorialCard.TransformPoint(new Vector3(tutorialCard.rect.center.x, tutorialCard.rect.yMin, 0));
+            Vector3 end = destination.TransformPoint(destination.rect.center);
+            Vector2 localStart = contentRect.InverseTransformPoint(start);
+            Vector2 localEnd = contentRect.InverseTransformPoint(end);
+            Vector2 delta = localEnd - localStart;
+            var line = tutorialPointer.rectTransform;
+            line.anchorMin = line.anchorMax = new Vector2(.5f, .5f);
+            line.anchoredPosition = localStart;
+            line.sizeDelta = new Vector2(delta.magnitude, 2);
+            line.localRotation = Quaternion.Euler(0, 0, Mathf.Atan2(delta.y, delta.x) * Mathf.Rad2Deg);
         }
 
         private void BuildPatternPanel(Transform content, out RectTransform hintRect, out TMP_Text hintTitle, out TMP_Text hintBody,
@@ -785,6 +868,7 @@ namespace Spotlight.FreeCafe
             foreach (var entry in entries) { entry.button = null; entry.fit = null; entry.fitBar = null; }
             overlayRoot = null; overlay = null; status = null; foamUsage = null; cupFill = null; contentGroup = null; curtain = null; submitButton = null;
             guide = null; guideLabel = null; contentRect = null;
+            tutorialCard = null; tutorialCopy = null; tutorialPointer = null; tutorialNext = null; tutorialNextLabel = null;
         }
         public void OnPointerClick(PointerEventData eventData) { /* 背景点击不再取消，玩家可自由在 Plane 上绘制。 */ }
         private static Image MakeImage(Transform parent, string name, Color color) { var go = new GameObject(name, typeof(RectTransform), typeof(Image)); go.transform.SetParent(parent, false); var image = go.GetComponent<Image>(); image.color = color; return image; }
