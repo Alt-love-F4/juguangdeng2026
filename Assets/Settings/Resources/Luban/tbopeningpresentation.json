@@ -438,5 +438,197 @@
     "rightNameKey": "character.guest_a.name",
     "visualsResource": "Dialogue/CafeSceneVisuals",
     "centerNameKey": ""
+  },
+  {
+    "presentationId": "cafe.ambient.order.extra-01",
+    "titleKey": "cafe.ambient.order.extra-01.title",
+    "leftNameKey": "player.name",
+    "rightNameKey": "character.guest_a.name",
+    "visualsResource": "Dialogue/CafeSceneVisuals",
+    "centerNameKey": ""
+  },
+  {
+    "presentationId": "cafe.ambient.order.extra-02",
+    "titleKey": "cafe.ambient.order.extra-02.title",
+    "leftNameKey": "player.name",
+    "rightNameKey": "character.guest_a.name",
+    "visualsResource": "Dialogue/CafeSceneVisuals",
+    "centerNameKey": ""
+  },
+  {
+    "presentationId": "cafe.ambient.order.extra-03",
+    "titleKey": "cafe.ambient.order.extra-03.title",
+    "leftNameKey": "player.name",
+    "rightNameKey": "character.guest_a.name",
+    "visualsResource": "Dialogue/CafeSceneVisuals",
+    "centerNameKey": ""
+  },
+  {
+    "presentationId": "cafe.ambient.order.extra-04",
+    "titleKey": "cafe.ambient.order.extra-04.title",
+    "leftNameKey": "player.name",
+    "rightNameKey": "character.guest_a.name",
+    "visualsResource": "Dialogue/CafeSceneVisuals",
+    "centerNameKey": ""
+  },
+  {
+    "presentationId": "cafe.ambient.order.extra-05",
+    "titleKey": "cafe.ambient.order.extra-05.title",
+    "leftNameKey": "player.name",
+    "rightNameKey": "character.guest_a.name",
+    "visualsResource": "Dialogue/CafeSceneVisuals",
+    "centerNameKey": ""
+  },
+  {
+    "presentationId": "cafe.ambient.order.extra-06",
+    "titleKey": "cafe.ambient.order.extra-06.title",
+    "leftNameKey": "player.name",
+    "rightNameKey": "character.guest_a.name",
+    "visualsResource": "Dialogue/CafeSceneVisuals",
+    "centerNameKey": ""
+  },
+  {
+    "presentationId": "cafe.ambient.order.extra-07",
+    "titleKey": "cafe.ambient.order.extra-07.title",
+    "leftNameKey": "player.name",
+    "rightNameKey": "character.guest_a.name",
+    "visualsResource": "Dialogue/CafeSceneVisuals",
+    "centerNameKey": ""
+  },
+  {
+    "presentationId": "cafe.ambient.order.extra-08",
+    "titleKey": "cafe.ambient.order.extra-08.title",
+    "leftNameKey": "player.name",
+    "rightNameKey": "character.guest_a.name",
+    "visualsResource": "Dialogue/CafeSceneVisuals",
+    "centerNameKey": ""
+  },
+  {
+    "presentationId": "cafe.ambient.order.extra-09",
+    "titleKey": "cafe.ambient.order.extra-09.title",
+    "leftNameKey": "player.name",
+    "rightNameKey": "character.guest_a.name",
+    "visualsResource": "Dialogue/CafeSceneVisuals",
+    "centerNameKey": ""
+  },
+  {
+    "presentationId": "cafe.ambient.order.extra-10",
+    "titleKey": "cafe.ambient.order.extra-10.title",
+    "leftNameKey": "player.name",
+    "rightNameKey": "character.guest_a.name",
+    "visualsResource": "Dialogue/CafeSceneVisuals",
+    "centerNameKey": ""
+  },
+  {
+    "presentationId": "cafe.ambient.order.extra-11",
+    "titleKey": "cafe.ambient.order.extra-11.title",
+    "leftNameKey": "player.name",
+    "rightNameKey": "character.guest_a.name",
+    "visualsResource": "Dialogue/CafeSceneVisuals",
+    "centerNameKey": ""
+  },
+  {
+    "presentationId": "cafe.ambient.order.extra-12",
+    "titleKey": "cafe.ambient.order.extra-12.title",
+    "leftNameKey": "player.name",
+    "rightNameKey": "character.guest_a.name",
+    "visualsResource": "Dialogue/CafeSceneVisuals",
+    "centerNameKey": ""
+  },
+  {
+    "presentationId": "cafe.ambient.order.solo-01",
+    "titleKey": "cafe.ambient.order.solo-01.title",
+    "leftNameKey": "player.name",
+    "rightNameKey": "character.guest_a.name",
+    "visualsResource": "Dialogue/CafeSceneVisuals",
+    "centerNameKey": ""
+  },
+  {
+    "presentationId": "cafe.ambient.order.solo-02",
+    "titleKey": "cafe.ambient.order.solo-02.title",
+    "leftNameKey": "player.name",
+    "rightNameKey": "character.guest_a.name",
+    "visualsResource": "Dialogue/CafeSceneVisuals",
+    "centerNameKey": ""
+  },
+  {
+    "presentationId": "cafe.ambient.order.solo-03",
+    "titleKey": "cafe.ambient.order.solo-03.title",
+    "leftNameKey": "player.name",
+    "rightNameKey": "character.guest_a.name",
+    "visualsResource": "Dialogue/CafeSceneVisuals",
+    "centerNameKey": ""
+  },
+  {
+    "presentationId": "cafe.ambient.order.solo-04",
+    "titleKey": "cafe.ambient.order.solo-04.title",
+    "leftNameKey": "player.name",
+    "rightNameKey": "character.guest_a.name",
+    "visualsResource": "Dialogue/CafeSceneVisuals",
+    "centerNameKey": ""
+  },
+  {
+    "presentationId": "cafe.ambient.order.solo-05",
+    "titleKey": "cafe.ambient.order.solo-05.title",
+    "leftNameKey": "player.name",
+    "rightNameKey": "character.guest_a.name",
+    "visualsResource": "Dialogue/CafeSceneVisuals",
+    "centerNameKey": ""
+  },
+  {
+    "presentationId": "cafe.ambient.order.solo-06",
+    "titleKey": "cafe.ambient.order.solo-06.title",
+    "leftNameKey": "player.name",
+    "rightNameKey": "character.guest_a.name",
+    "visualsResource": "Dialogue/CafeSceneVisuals",
+    "centerNameKey": ""
+  },
+  {
+    "presentationId": "cafe.ambient.order.solo-07",
+    "titleKey": "cafe.ambient.order.solo-07.title",
+    "leftNameKey": "player.name",
+    "rightNameKey": "character.guest_a.name",
+    "visualsResource": "Dialogue/CafeSceneVisuals",
+    "centerNameKey": ""
+  },
+  {
+    "presentationId": "cafe.ambient.order.solo-08",
+    "titleKey": "cafe.ambient.order.solo-08.title",
+    "leftNameKey": "player.name",
+    "rightNameKey": "character.guest_a.name",
+    "visualsResource": "Dialogue/CafeSceneVisuals",
+    "centerNameKey": ""
+  },
+  {
+    "presentationId": "cafe.ambient.order.solo-09",
+    "titleKey": "cafe.ambient.order.solo-09.title",
+    "leftNameKey": "player.name",
+    "rightNameKey": "character.guest_a.name",
+    "visualsResource": "Dialogue/CafeSceneVisuals",
+    "centerNameKey": ""
+  },
+  {
+    "presentationId": "cafe.ambient.order.solo-10",
+    "titleKey": "cafe.ambient.order.solo-10.title",
+    "leftNameKey": "player.name",
+    "rightNameKey": "character.guest_a.name",
+    "visualsResource": "Dialogue/CafeSceneVisuals",
+    "centerNameKey": ""
+  },
+  {
+    "presentationId": "cafe.ambient.order.solo-11",
+    "titleKey": "cafe.ambient.order.solo-11.title",
+    "leftNameKey": "player.name",
+    "rightNameKey": "character.guest_a.name",
+    "visualsResource": "Dialogue/CafeSceneVisuals",
+    "centerNameKey": ""
+  },
+  {
+    "presentationId": "cafe.ambient.order.solo-12",
+    "titleKey": "cafe.ambient.order.solo-12.title",
+    "leftNameKey": "player.name",
+    "rightNameKey": "character.guest_a.name",
+    "visualsResource": "Dialogue/CafeSceneVisuals",
+    "centerNameKey": ""
   }
 ]

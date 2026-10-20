@@ -10,6 +10,7 @@ namespace Spotlight.FreeCafe
         public float minScore;
         public int count = 1;
         public bool requirePass = true;
+        public CafePersonIdentity customer;
     }
 
     /// <summary>Immutable receipt emitted only by the authoritative physical-cup delivery transaction.</summary>
@@ -33,6 +34,11 @@ namespace Spotlight.FreeCafe
             => product == "blackcoffee.sweet" || product == "blackcoffee.unsweetened" ? "blackcoffee" : product;
         private NarrativeService narrativeService;
         public bool HasNarrativeService => narrativeService != null && !narrativeService.Disposed;
+        public bool IsNarrativeServiceOrder(CustomerRequest request)
+            => request != null && HasNarrativeService && narrativeService.Owns(request.id);
+        public bool IsNarrativeTastingOrder(CustomerRequest request)
+            => request != null && HasNarrativeService && narrativeService.OrderOnly && narrativeService.Owns(request.id) && request.customerId == null;
+        private bool HasOrderOnlyNarrativeService => HasNarrativeService && narrativeService.OrderOnly;
 
         /// <summary>
         /// Authorize real, owner-scoped orders even before opening. Does not open business, create
@@ -40,7 +46,7 @@ namespace Spotlight.FreeCafe
         /// through DeliverProductionCup can satisfy a quota. Caller must dispose the returned lease.
         /// </summary>
         public bool TryBeginNarrativeService(string ownerKey, IReadOnlyList<CafeNarrativeOrderSpec> orders,
-            Action<CafeNarrativeDeliveryReceipt> onDelivery, out IDisposable lease, out string error)
+            Action<CafeNarrativeDeliveryReceipt> onDelivery, out IDisposable lease, out string error, bool orderOnly = false)
         {
             lease = null; error = null;
             if (string.IsNullOrWhiteSpace(ownerKey) || onDelivery == null || orders == null || orders.Count == 0)
@@ -53,13 +59,14 @@ namespace Spotlight.FreeCafe
                 if (row == null || !IsNarrativeWildcard(row.productId) && Product(NarrativeBaseProduct(row.productId)) == null || !Finite(row.minScore) || row.minScore < 0 || row.minScore > 100 || row.count <= 0 || row.count > 32 || total > 32 - row.count)
                 { error = "剧情点单的餐品、评级或数量无效。"; return false; }
                 total += row.count;
-                quota.Add(new CafeNarrativeOrderSpec { productId = row.productId, minScore = row.minScore, count = row.count, requirePass = row.requirePass });
+                quota.Add(new CafeNarrativeOrderSpec { productId = row.productId, minScore = row.minScore, count = row.count, requirePass = row.requirePass, customer = row.customer });
             }
-            int slot = AvailableSeat();
-            if (slot < 0) { error = "当前没有空座，剧情不能覆盖已有顾客或订单。"; return false; }
-            var session = new NarrativeService(this, ownerKey, quota, slot, onDelivery);
+            int slot = orderOnly ? -1 : AvailableSeat();
+            if (!orderOnly && slot < 0) { error = "当前没有空座，剧情不能覆盖已有顾客或订单。"; return false; }
+            var session = new NarrativeService(this, ownerKey, quota, slot, onDelivery, orderOnly);
             narrativeService = session;
             try { session.Create(); lease = session; Notify(); return true; }
+            catch (InvalidOperationException exception) { session.Dispose(); error = exception.Message; return false; }
             catch { session.Dispose(); throw; }
         }
 
@@ -79,28 +86,68 @@ namespace Spotlight.FreeCafe
             private readonly List<CafeNarrativeOrderSpec> orders;
             private Action<CafeNarrativeDeliveryReceipt> completed;
             private string requestId;
+            private readonly Dictionary<string, WorldEntity> namedCustomers = new Dictionary<string, WorldEntity>();
+            private readonly List<WorldEntity> createdCustomers = new List<WorldEntity>();
+            private readonly List<WorldEntity> pausedCustomers = new List<WorldEntity>();
+            private readonly List<CustomerRequest> pausedOrders = new List<CustomerRequest>();
             private WorldEntity customer;
             private int index, fulfilled;
             private bool allPassed = true;
+            public bool OrderOnly { get; }
             public bool Disposed { get; private set; }
-            public NarrativeService(CafeWorld world, string owner, List<CafeNarrativeOrderSpec> orders, int slot, Action<CafeNarrativeDeliveryReceipt> completed)
+            public NarrativeService(CafeWorld world, string owner, List<CafeNarrativeOrderSpec> orders, int slot, Action<CafeNarrativeDeliveryReceipt> completed, bool orderOnly)
             {
                 this.world = world; snapshot = world.State; this.owner = owner; this.orders = orders; this.completed = completed;
-                customerId = "customer_" + slot; previousFocus = snapshot.focusedRequestId;
+                OrderOnly = orderOnly;
+                customerId = orderOnly ? null : "customer_" + slot; previousFocus = snapshot.focusedRequestId;
             }
             public bool Owns(string id) => !Disposed && id == requestId && ReferenceEquals(world.State, snapshot);
             public void Create()
             {
-                customer = new WorldEntity { id = customerId, specId = "customer", area = AreaId.Cafe,
-                    person = world.CreateCustomerIdentity("story." + owner + "." + snapshot.requestSequence, 0) };
-                snapshot.entities.Add(customer); CreateOrder();
+                foreach (var row in orders)
+                {
+                    if (row.customer == null || namedCustomers.ContainsKey(row.customer.characterId)) continue;
+                    if (!ValidCustomerIdentity(row.customer)) throw new InvalidOperationException("剧情顾客身份无效。");
+                    var existing = snapshot.entities.Find(e => e.person != null && e.person.characterId == row.customer.characterId);
+                    if (existing != null) { namedCustomers.Add(row.customer.characterId, existing); continue; }
+                    int seat = world.AvailableSeat();
+                    if (seat < 0)
+                    {
+                        seat = world.AvailableSeat(replaceOrdinaryCustomers: true);
+                        if (seat >= 0)
+                        {
+                            foreach (var occupant in snapshot.entities.ToArray())
+                            {
+                                if (!world.SameCustomerTable(occupant.id, "customer_" + seat) || !world.CanReplaceOrdinaryCustomer(occupant)) continue;
+                                pausedCustomers.Add(occupant); snapshot.entities.Remove(occupant);
+                                foreach (var order in snapshot.requests.ToArray())
+                                    if (order.customerId == occupant.id) { pausedOrders.Add(order); snapshot.requests.Remove(order); }
+                            }
+                        }
+                    }
+                    if (seat < 0) throw new InvalidOperationException("剧情人物没有可用座位，请先处理店内订单。");
+                    var person = row.customer;
+                    var entity = new WorldEntity { id = "customer_" + seat, specId = "customer", area = AreaId.Cafe,
+                        person = new CafePersonIdentity { personId = person.personId, characterId = person.characterId,
+                            narrativeCharacterId = person.characterId, displayName = person.displayName,
+                            visualId = person.characterId, role = CafePersonRole.Customer } };
+                    world.PlaceCustomerAtSeat(entity, seat, false);
+                    snapshot.entities.Add(entity); createdCustomers.Add(entity); namedCustomers.Add(person.characterId, entity);
+                }
+                if (!OrderOnly && namedCustomers.Count == 0)
+                {
+                    customer = new WorldEntity { id = customerId, specId = "customer", area = AreaId.Cafe,
+                        person = world.CreateCustomerIdentity("story." + owner + "." + snapshot.requestSequence, 0) };
+                    snapshot.entities.Add(customer);
+                }
+                CreateOrder();
             }
             private void CreateOrder()
             {
                 var row = orders[index]; var product = IsNarrativeWildcard(row.productId) ? Array.Find(world.Catalog.products, p => world.State.unlockedProducts.Contains(p.id) && world.CanOfferProduct(p)) : world.Product(NarrativeBaseProduct(row.productId));
                 if (product == null) throw new InvalidOperationException("没有可制作的餐品。 ");
                 requestId = "narrative_order_" + (++snapshot.requestSequence);
-                snapshot.requests.Add(new CustomerRequest { id = requestId, customerId = customerId,
+                snapshot.requests.Add(new CustomerRequest { id = requestId, customerId = row.customer != null ? namedCustomers[row.customer.characterId].id : customerId,
                     productId = product.id, cupSpecId = product.cupSpecId, patience = float.MaxValue });
                 snapshot.focusedRequestId = requestId;
             }
@@ -131,6 +178,10 @@ namespace Spotlight.FreeCafe
                 string usedRequest = requestId, cupId = cup.id;
                 request.lastProductionScore = score.total;
                 world.ConsumeDeliveredContainer(cup);
+                // Every physically accepted story cup grants one reputation, even a remake.
+                if (passed) snapshot.successfulOrders++;
+                snapshot.reputation++;
+                world.UnlockContent();
                 bool advances = passed || !row.requirePass;
                 bool done = false;
                 if (advances)
@@ -161,8 +212,11 @@ namespace Spotlight.FreeCafe
                 if (ReferenceEquals(world.narrativeService, this)) world.narrativeService = null;
                 if (!ReferenceEquals(world.State, snapshot)) return;
                 bool ownsFocus = snapshot.focusedRequestId == requestId;
-                snapshot.requests.RemoveAll(r => r.id == requestId && r.customerId == customerId);
+                snapshot.requests.RemoveAll(r => r.id == requestId);
                 snapshot.entities.Remove(customer);
+                foreach (var entity in createdCustomers) snapshot.entities.Remove(entity);
+                snapshot.entities.AddRange(pausedCustomers);
+                snapshot.requests.AddRange(pausedOrders);
                 if (ownsFocus)
                     snapshot.focusedRequestId = snapshot.requests.Exists(r => r.id == previousFocus) ? previousFocus
                         : snapshot.requests.Count > 0 ? snapshot.requests[0].id : null;

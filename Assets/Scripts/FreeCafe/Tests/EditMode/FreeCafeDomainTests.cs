@@ -104,7 +104,7 @@ namespace Spotlight.FreeCafe.Tests
             Assert.That(world.Evaluate(cup,product),Is.EqualTo(1));
         }
         [Test] public void WrongDrinkCanBeDeliveredWithConsequences()
-        { world.StartDay();var cup=Take("s.cups.small");world.Interact(Take("s.milk").id,cup.id);Assert.That(world.Move(cup.id,AreaId.Cafe,0,-1).success,Is.True);int rep=world.State.reputation;Assert.That(world.Interact(cup.id,"customer_0").success,Is.True);Assert.That(world.Find(cup.id),Is.Null);Assert.That(world.State.served,Is.EqualTo(1));Assert.That(world.State.reputation,Is.EqualTo(rep-1)); }
+        { world.StartDay();var cup=Take("s.cups.small");world.Interact(Take("s.milk").id,cup.id);Assert.That(world.Move(cup.id,AreaId.Cafe,0,-1).success,Is.True);int rep=world.State.reputation;Assert.That(world.Interact(cup.id,"customer_0").success,Is.True);Assert.That(world.Find(cup.id),Is.Null);Assert.That(world.State.served,Is.EqualTo(1));Assert.That(world.State.reputation,Is.EqualTo(rep+1)); }
         [Test] public void CoffeeMadeBeforeOpeningCanFulfilNewCustomer()
         { var coffee=MakeCoffee();var cup=Take("s.cups.small");world.Interact(coffee.id,cup.id);world.StartDay();int balance=world.State.money;Assert.That(world.Interact(cup.id,"service").success,Is.True);Assert.That(world.State.money,Is.EqualTo(balance+world.Product("espresso").price)); }
         [Test] public void MovingToAnotherAreaDoesNotPauseMachineSimulation()

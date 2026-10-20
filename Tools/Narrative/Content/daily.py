@@ -78,6 +78,21 @@ def read_doc(p):
  ns='{http://schemas.openxmlformats.org/wordprocessingml/2006/main}'
  return [''.join((n.text or '') if n.tag==ns+'t' else '\n' if n.tag in [ns+'br',ns+'cr'] else '' for n in e.iter()).strip() for e in xml.iter(ns+'p') if ''.join(e.itertext()).strip()]
 
+# Explicit public article ranges: preserve authored reporting, never substitute reaction dialogue.
+BULLETIN_ARTICLES = {
+ '边境消息': ('1007', 5, 7), '感谢节采买': ('1007', 10, 12),
+ '停职与头衔': ('1014', 13, 16), '节后收拾': ('1014', 19, 22), '赈济之后': ('1014', 6, 10),
+ '商票': ('1021', 21, 24), '商铺排查': ('1021', 6, 11), '借法典': ('1021', 14, 18),
+ '临时税与小份菜': ('1028', 6, 12), '路通了': ('1028', 15, 18),
+ '宫廷传闻': ('1104', 6, 11), '过冬的柴': ('1104', 20, 23),
+ '跨区核验': ('1111', 6, 12), '提早收店': ('1111', 21, 24),
+}
+
+def bulletin_body(headline, articles):
+ issue, first, last = BULLETIN_ARTICLES[headline]
+ paragraphs = articles[issue]
+ return '\n\n'.join(paragraphs[first - 1:last])
+
 def build(project_root:Path):
  data=defaultdict(list); seen=set(); audit={'source':SOURCE_PATH,'groups':[],'presets':['normal growth <10:2 tenths, otherwise1 tenth; authoring draft rule','character/route/weather gates fail closed until truthful producers exist'],'art_pending':['city hall/court/garden/academy use registered general street artwork pending dedicated backgrounds']}
  def add(sheet,**row):data[sheet].append(row);return row
@@ -209,6 +224,11 @@ def build(project_root:Path):
     speaker=''if r[0]in ['入场','动作']else r[1]
     line(rid,pid,i,speaker,body,text_key=rid+'.text.'+str(i))
   audit['groups'].append({'code':code,'root':rid,'location':loc,'kind':pkind,'constraints':constraint,'availabilityWindows':segments if is_news or excluded_dates else []})
+ import importlib.util
+ extension_path=Path(__file__).with_name('cafe_orders.py')
+ extension_spec=importlib.util.spec_from_file_location('daily_cafe_orders',extension_path)
+ extension=importlib.util.module_from_spec(extension_spec);extension_spec.loader.exec_module(extension)
+ for sheet,extension_rows in extension.build(project_root).items():data[sheet].extend(extension_rows)
  # Mount one existing Repeat action per location, not 24 competing map buttons.
  for loc,(pos,attr,bg,title)in LOCATION.items():
   aid='daily.action.'+pos;targets=[r['eventId']for r in data['Event']if f'dailyPool={aid};'in r['eventProperty']]
@@ -219,18 +239,27 @@ def build(project_root:Path):
   # Day10/21 public lockdown: only the saint street daily action is available.
   if loc!='圣徒街':
    condition(aid,'BOOL_EQ',f'not:bar:world.calendar:eq:{day(10,21)}',True,owner_type='action')
- # Public notices are generated from source news headings, never secret political facts.
+ # Load source articles once for both bulletins and complete newspaper readings.
+ newspaper_sources = []
+ articles = {}
+ for source in sorted((project_root/'策划文件/文案6点/文案/b-报纸事件-换皮').glob('*.docx')):
+  pars = [p for p in read_doc(source) if p]
+  m = re.search(r'670年\s*(10|11)月\s*(\d{1,2})日', '\n'.join(pars))
+  assert m, source
+  issue = f'{m[1]}{int(m[2]):02d}'
+  articles[issue] = pars
+  newspaper_sources.append((source, pars, int(m[1]), int(m[2])))
+ # Public notices use the matching public newspaper article, never secret political facts.
  for (when,headline),public in public_notices.items():
   rid='news.bulletin.'+public.rsplit('.',1)[-1];root(rid,headline,True,'Notice')
   data['Event'][-1]['eventProperty']='entry=MorningBeforeMap;blocksSave=true'
   add('EventDate',eventId=rid,day=when,timeSlot='morning',repeatRule='once',priority=100)
-  add('Notice',presentationKey=rid+'.presentation',titleKey=rid+'.title',timeKey=text(rid+'.date','670年'+str((date(2000,10,6).fromordinal(date(2000,10,6).toordinal()+when-1)).month)+'月'+str(date.fromordinal(date(2000,10,6).toordinal()+when-1).day)+'日'),textKey=text(rid+'.body',headline))
+  add('Notice',presentationKey=rid+'.presentation',titleKey=rid+'.title',timeKey=text(rid+'.date','670年'+str((date(2000,10,6).fromordinal(date(2000,10,6).toordinal()+when-1)).month)+'月'+str(date.fromordinal(date(2000,10,6).toordinal()+when-1).day)+'日'),textKey=text(rid+'.body',bulletin_body(headline, articles)))
   result(rid,'SET_FLAG',public,True,'public');flag(public)
  # Six complete newspaper texts, faithfully sourced and date-triggered in the existing reader.
  papers=[]
- for source in sorted((project_root/'策划文件/文案6点/文案/b-报纸事件-换皮').glob('*.docx')):
-  pars=[p for p in read_doc(source)if p];joined='\n'.join(pars);m=re.search(r'670年\s*(10|11)月\s*(\d{1,2})日',joined);assert m,source
-  when=day(int(m[1]),int(m[2]));rid=f'newspaper.{m[1]}{int(m[2]):02d}';root(rid,pars[0],True,'Reading')
+ for source, pars, month, issue_day in newspaper_sources:
+  when=day(month,issue_day);rid=f'newspaper.{month}{issue_day:02d}';root(rid,pars[0],True,'Reading')
   data['Event'][-1]['eventProperty']='entry=MorningBeforeMap;blocksSave=true'
   add('EventDate',eventId=rid,day=when,timeSlot='morning',repeatRule='once',priority=200)
   pid=rid+'.reading';add('ReadingPage',pageId=pid,presentationKey=rid+'.presentation',seq=1,titleKey=rid+'.title')

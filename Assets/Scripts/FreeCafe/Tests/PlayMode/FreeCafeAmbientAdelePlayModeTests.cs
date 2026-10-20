@@ -59,6 +59,20 @@ namespace Spotlight.FreeCafe.Tests
             Assert.That(NarrativeCafeAmbientContent.TryCreateAdeleChat(new NarrativeConfiguration(), 0, out _), Is.False);
         }
 
+        [Test]
+        public void CompanionAndOrdersShareAwayAndDetentionAvailability()
+        {
+            var controller = new NarrativeController(LubanNarrativeLoader.Load());
+            var state = controller.State;
+            Assert.That(NarrativeCafeAmbientContent.IsAdeleAvailable(controller), Is.True);
+            state.SetCondition("story.adele.away", true);
+            Assert.That(NarrativeCafeAmbientContent.IsAdeleAvailable(controller), Is.False);
+            state.SetCondition("story.adele.away", false);
+            Assert.That(NarrativeCafeAmbientContent.IsAdeleAvailable(controller), Is.True);
+            state.SetCondition("church.detention.active", true);
+            Assert.That(NarrativeCafeAmbientContent.IsAdeleAvailable(controller), Is.False);
+        }
+
         [UnityTest]
         public IEnumerator ClosedShopCompanionFadesAndChatsWithoutChangingDomainOrCreatingOrders()
         {

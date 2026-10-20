@@ -313,7 +313,7 @@ namespace Spotlight.FreeCafe
             if (source.stock <= 0)
             {
                 return ActionResult.No(spec.id == "source.beans"
-                    ? "咖啡豆库存不足，请前往咖啡铺补货"
+                    ? "在咖啡谱的补货处补货"
                     : "库存不足；点击补货或从经营菜单购买原料");
             }
 

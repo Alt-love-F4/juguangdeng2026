@@ -5,7 +5,7 @@ namespace Spotlight.FreeCafe.Tests
 {
     public sealed class FreeCafeBeanStockMessageTests
     {
-        private const string BeanStockMessage = "咖啡豆库存不足，请前往咖啡铺补货";
+        private const string BeanStockMessage = "在咖啡谱的补货处补货";
         private const string OtherStockMessage = "库存不足；点击补货或从经营菜单购买原料";
         private CafeWorld world;
 
@@ -14,7 +14,7 @@ namespace Spotlight.FreeCafe.Tests
             Resources.Load<TextAsset>("FreeCafe/catalog").text));
 
         [Test]
-        public void EmptyBeanSourceReportsCoffeeShopWithoutSideEffects(
+        public void EmptyBeanSourceReportsCompendiumWithoutSideEffects(
             [Values(false, true)] bool production, [Values(0, -1)] int stock)
         {
             if (production) world.EnableProduction();

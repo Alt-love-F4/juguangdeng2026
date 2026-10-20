@@ -50,6 +50,25 @@ namespace Spotlight.FreeCafe.Tests
             Directory.CreateDirectory(directory); File.WriteAllBytes(Path.Combine(directory, name + ".png"), texture.EncodeToPNG());
             Object.Destroy(texture);
         }
+        [UnityTest] public IEnumerator EmptyBeanBagReportsRefillOnPressWithoutWaitingForClickOrDrag()
+        {
+            var source = app.World.Find("s.beans"); source.stock = 0;
+            var view = app.View(source.id);
+            var pointer = new PointerEventData(EventSystem.current) { button = PointerEventData.InputButton.Left,
+                position = app.worldCamera.WorldToScreenPoint(view.transform.position) };
+            string before = JsonUtility.ToJson(app.World.State);
+            app.ShowHint("before press");
+            ExecuteEvents.Execute(view.gameObject, pointer, ExecuteEvents.pointerDownHandler);
+            Assert.That(app.Hint, Is.EqualTo("在咖啡谱的补货处补货"));
+            yield return new WaitForSecondsRealtime(.6f);
+            Assert.That(app.Hint, Is.EqualTo("在咖啡谱的补货处补货"));
+            Assert.That(app.IsDragging, Is.False);
+            Assert.That(GameObject.Find("UncommittedPickup"), Is.Null);
+            Assert.That(JsonUtility.ToJson(app.World.State), Is.EqualTo(before));
+            view.OnBeginDrag(pointer);
+            Assert.That(app.Hint, Is.EqualTo("在咖啡谱的补货处补货"));
+            Assert.That(app.IsDragging, Is.False);
+        }
         [UnityTest] public IEnumerator WaterUsesItsOwnContainerAndWasteAcceptsTheEnlargedLowerLeftTarget()
         {
             var world = app.World;

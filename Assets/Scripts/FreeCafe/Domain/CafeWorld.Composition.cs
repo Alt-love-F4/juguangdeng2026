@@ -20,6 +20,7 @@ namespace Spotlight.FreeCafe
         public string IngredientLabel(Portion portion)
         {
             if(portion==null)return "未知成分";
+            if(portion.specId=="beans")return "未研磨的咖啡豆（无法溶解）";
             string kind=CoffeeKind(portion);
             if(kind!=null)
             {

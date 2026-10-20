@@ -36,6 +36,11 @@ namespace Spotlight.GameFlow
         private FirstDayLetterDraft draft;
         private string hoveredLink;
         private bool InteractiveLetter => draft != null;
+#if UNITY_EDITOR || DEVELOPMENT_BUILD
+        private const bool CanSkipOpeningLetter = true;
+#else
+        private const bool CanSkipOpeningLetter = false;
+#endif
         public FirstDayLetterDraft Draft => draft;
         private FirstDayLetterDraft pendingDraft;
         public Func<FirstDayLetterDraft, bool> SubmitDraft { get; set; }
@@ -172,8 +177,8 @@ namespace Spotlight.GameFlow
             paperGroup.alpha = 0f;
             signatureButton.gameObject.SetActive(false);
             signatureButton.interactable = false;
-            skipButton.gameObject.SetActive(true);
-            skipButton.interactable = true;
+            skipButton.gameObject.SetActive(CanSkipOpeningLetter);
+            skipButton.interactable = CanSkipOpeningLetter;
             signatureText.text = EmphasizeSignature(InteractiveLetter
                 ? "—— 永远惦念你的<size=116.667%>叔叔</size>"
                 : resolved.Signature);
@@ -291,7 +296,7 @@ namespace Spotlight.GameFlow
         /// <summary>跳过整段信件演出，立即调用完成回调并进入第一天流程。</summary>
         public void SkipLetter()
         {
-            if (genericLetterMode) return; // No skip-as-completion path for narrative letters.
+            if (genericLetterMode || !CanSkipOpeningLetter) return; // Only editor/development opening letters may be skipped.
             if (!IsPlaying) return;
             if (InteractiveLetter && SubmitDefault != null && !SubmitDefault()) return;
             transition?.Kill(false);

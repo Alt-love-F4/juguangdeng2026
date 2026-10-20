@@ -135,7 +135,7 @@ class DailyContentTests(unittest.TestCase):
   for row in self.data['ConversationLine']:
    self.assertFalse(displayed[row['textKey']].startswith(('【结果','【最早','【触发条件')))
  def test_order_templates_are_nonmodal_snapshots(self):
-  self.assertEqual(30,len(self.data['OpeningPresentation']))
+  self.assertEqual(54,len(self.data['OpeningPresentation']))  # 30 original + 24 additive orders
   self.assertFalse(any('ambient' in e['eventId'] for e in self.data['Event']))
  def test_growth_is_conditional_integer_tenths(self):
   rs=[r for r in self.data['Result']if r['resultType']=='TRAIN_ATTRIBUTE']
@@ -313,7 +313,13 @@ class DailyContentTests(unittest.TestCase):
     self.assertEqual(['Notice'], [p['presentationClass'] for p in self.data['PresentationIndex'] if p['presentationKey'] == key])
     notices = [n for n in self.data['Notice'] if n['presentationKey'] == key]
     self.assertEqual(1, len(notices))
-    self.assertEqual(self.texts[event['titleText']], self.texts[notices[0]['textKey']])
+    headline = self.texts[event['titleText']]
+    body = self.texts[notices[0]['textKey']]
+    self.assertNotEqual(headline, body)
+    issue, first, last = daily.BULLETIN_ARTICLES[headline]
+    expected = '\n\n'.join(self.texts[f'newspaper.{issue}.text.{i:03d}'] for i in range(first, last + 1))
+    self.assertEqual(expected, body)
+    self.assertGreater(len(body), 80)
     self.assertTrue(self.texts[notices[0]['timeKey']])
     self.assertFalse(self.pages_by_presentation[key])
     self.assertFalse(any(p['presentationKey'] == key for p in self.data['ReadingPage']))
@@ -322,7 +328,7 @@ class DailyContentTests(unittest.TestCase):
   groups = [g for g in self.source_groups if g['sheet'].startswith('咖啡馆')]
   self.assertEqual(30, len(groups))
   snapshots = {p['presentationId']: p for p in self.data['OpeningPresentation']}
-  self.assertEqual(30, len(snapshots))
+  self.assertEqual(54, len(snapshots))  # Original source snapshots remain checked below.
   for group in groups:
    kind = 'order' if group['sheet'] == '咖啡馆点单' else 'chat'
    key = 'cafe.ambient.' + kind + '.' + group['code'].lower()

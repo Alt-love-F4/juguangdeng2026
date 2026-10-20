@@ -64,16 +64,22 @@ namespace Spotlight.GameFlow
             => TryStart(world, "narrative-cafe:" + Guid.NewGuid().ToString("N"), gameplayKey, completed, out bridge, out error);
 
         public static bool TryStart(CafeWorld world, string ownerKey, string gameplayKey,
-            Action<NarrativeGameplayResult> completed, out NarrativeCafeGameplayBridge bridge, out string error)
+            Action<NarrativeGameplayResult> completed, out NarrativeCafeGameplayBridge bridge, out string error,
+            IReadOnlyList<CafePersonIdentity> customers = null)
         {
             bridge = null;
             if (completed == null) { error = "Gameplay completion callback is missing."; return false; }
             if (string.IsNullOrWhiteSpace(ownerKey)) { error = "Narrative cafe service owner is missing."; return false; }
             if (!TryParse(world, gameplayKey, out var orders, out bool requiresPassing, out error)) return false;
+            if (customers != null)
+            {
+                if (customers.Count != orders.Count) { error = "剧情人物与饮品要求数量不匹配。"; return false; }
+                for (int i = 0; i < orders.Count; i++) orders[i].customer = customers[i];
+            }
             if (!world.ProductionEnabled) { error = "The real cafe production world is not ready."; return false; }
             if (world.HasTutorialCustomer) { error = "Narrative service cannot consume the first-day tutorial order."; return false; }
             var pending = new NarrativeCafeGameplayBridge(world, ownerKey, orders, requiresPassing, completed);
-            if (!world.TryBeginNarrativeService(ownerKey, orders, pending.OnDelivered, out var lease, out error))
+            if (!world.TryBeginNarrativeService(ownerKey, orders, pending.OnDelivered, out var lease, out error, orderOnly: true))
             {
                 pending.Dispose();
                 return false;

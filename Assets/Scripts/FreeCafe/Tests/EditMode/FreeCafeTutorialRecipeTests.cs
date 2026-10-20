@@ -66,7 +66,7 @@ namespace Spotlight.FreeCafe.Tests
             Assert.That(world.State.open, Is.False);
             Assert.That(world.State.businessPhase, Is.EqualTo(BusinessPhase.Preparation));
             Assert.That(world.State.money, Is.EqualTo(money));
-            Assert.That(world.State.reputation, Is.EqualTo(reputation));
+            Assert.That(world.State.reputation, Is.EqualTo(reputation + 1));
             Assert.That(world.State.served, Is.EqualTo(served));
             Assert.That(world.State.todayServed, Is.Zero);
             Assert.That(world.State.todayRevenue, Is.Zero);

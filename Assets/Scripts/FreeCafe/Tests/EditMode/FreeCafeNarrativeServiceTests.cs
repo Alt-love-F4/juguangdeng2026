@@ -35,8 +35,42 @@ namespace Spotlight.FreeCafe.Tests
             Assert.That(receipts, Has.Count.EqualTo(1)); Assert.That(receipts[0].Completed, Is.True);
             Assert.That(receipts[0].CupId, Is.EqualTo(cup)); Assert.That(world.Find(cup), Is.Null);
             Assert.That(world.State.money, Is.EqualTo(money)); Assert.That(world.State.todayRevenue, Is.EqualTo(revenue));
-            Assert.That(world.State.successfulOrders, Is.Zero); Assert.That(world.HasNarrativeService, Is.False);
+            Assert.That(world.State.successfulOrders, Is.EqualTo(1)); Assert.That(world.HasNarrativeService, Is.False);
             lease.Dispose(); Assert.That(receipts, Has.Count.EqualTo(1));
+        }
+        [Test] public void PassingStoryCupsUnlockRecipesOnceEachWithoutBusinessStatistics([Values(false, true)] bool orderOnly)
+        {
+            var product = world.Product("blackcoffee");
+            product.unlockSuccessfulOrders = world.State.successfulOrders + 2;
+            product.unlockReputation = world.State.reputation + 2;
+            world.State.unlockedProducts.Remove(product.id);
+            int reputation = world.State.reputation, served = world.State.todayServed, orders = world.State.successfulOrders;
+            Assert.That(world.TryBeginNarrativeService("progress", new[] { new CafeNarrativeOrderSpec { productId = product.id, minScore = 0, count = 2 } },
+                _ => { }, out var lease, out var error, orderOnly), Is.True, error);
+            Cup(); Assert.That(world.DeliverProductionCup().success, Is.True);
+            Assert.That(world.State.successfulOrders, Is.EqualTo(orders + 1));
+            Assert.That(world.State.unlockedProducts, Does.Not.Contain(product.id));
+            Cup(); Assert.That(world.DeliverProductionCup().success, Is.True);
+            Assert.That(world.State.successfulOrders, Is.EqualTo(orders + 2));
+            Assert.That(world.State.reputation, Is.EqualTo(reputation + 2));
+            Assert.That(world.State.unlockedProducts, Does.Contain(product.id));
+            Assert.That(world.State.todayServed, Is.EqualTo(served));
+            Assert.That(world.DeliverProductionCup().success, Is.False);
+            lease.Dispose();
+            Assert.That(world.State.successfulOrders, Is.EqualTo(orders + 2));
+        }
+        [Test] public void BelowStoryScoreGrantsReputationButNotSuccessfulOrder([Values(false, true)] bool requirePass)
+        {
+            int orders = world.State.successfulOrders, reputation = world.State.reputation;
+            Assert.That(world.TryBeginNarrativeService("failed-progress", new[] { new CafeNarrativeOrderSpec { productId = "blackcoffee", minScore = 100, requirePass = requirePass } },
+                _ => { }, out var lease, out var error, orderOnly: true), Is.True, error);
+            Cup();
+            // A correctly classified but deliberately underfilled cup cannot meet the score requirement.
+            world.ServingCup.contents[0].milliliters = 1;
+            Assert.That(world.DeliverProductionCup().success, Is.True);
+            Assert.That(world.State.successfulOrders, Is.EqualTo(orders));
+            Assert.That(world.State.reputation, Is.EqualTo(reputation + 1));
+            lease.Dispose();
         }
         [Test] public void CancelOnlyRemovesOwnedRequestAndNeverRefundsAlreadyConsumedIngredients()
         {

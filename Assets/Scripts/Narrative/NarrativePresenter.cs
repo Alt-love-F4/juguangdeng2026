@@ -738,18 +738,7 @@ namespace Spotlight.Narrative
 
         private string ChoiceRequirement(string choiceId)
         {
-            List<NarrativeConditionDefinition> requirements = configuration?.conditions?.FindAll(c => c != null && c.ownerType == "choice" && c.ownerId == choiceId) ?? new List<NarrativeConditionDefinition>();
-            if (requirements.Count == 0) return "条件未满足";
-            List<string> descriptions = new List<string>();
-            foreach (NarrativeConditionDefinition condition in requirements)
-            {
-                NarrativeBarDefinition bar = configuration.bars.Find(b => b != null && b.barKey == condition.target);
-                string label = bar != null ? resolve(bar.nameText) : condition.target;
-                descriptions.Add(condition.condType == "BAR_GTE"
-                    ? "需要 " + label + " 到达 " + condition.value
-                    : label + " " + condition.op + " " + condition.value);
-            }
-            return string.Join(" / ", descriptions);
+            return NarrativeChoiceRequirementText.Format(configuration, choiceId, resolve);
         }
 
         private bool HasChoicesAfterCurrent()

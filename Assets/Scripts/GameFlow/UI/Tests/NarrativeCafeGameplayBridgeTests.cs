@@ -109,6 +109,102 @@ namespace Spotlight.GameFlow.Tests
         }
 
         [Test]
+        public void EveryGeneratedDrinkGameplayUsesItsExplicitCustomerOrAnonymousTasting()
+        {
+            var config = LubanNarrativeLoader.Load();
+            int checkedPages = 0;
+            foreach (var page in config.presentations.conversationPages)
+            {
+                string key = page.gameplayKey;
+                if (string.IsNullOrEmpty(key) || !(key.StartsWith("serve:", StringComparison.Ordinal) || key.StartsWith("taste:", StringComparison.Ordinal))) continue;
+                int entityCount = world.State.entities.Count;
+                var customers = NarrativeCafeCustomers.Resolve(page.pageId, config);
+                world.State.seats = customers == null ? 0 : 4;
+                Assert.That(NarrativeCafeGameplayBridge.TryStart(world, "audit:" + page.pageId, key,
+                    _ => Assert.Fail("Starting/cancelling must not complete " + page.pageId), out var handle, out string error, customers), Is.True, page.pageId + ": " + error);
+                try
+                {
+                    var order = world.Request(world.State.focusedRequestId);
+                    Assert.That(order, Is.Not.Null, page.pageId);
+                    Assert.That(world.IsNarrativeServiceOrder(order), Is.True);
+                    Assert.That(world.IsNarrativeTastingOrder(order), Is.EqualTo(customers == null), page.pageId);
+                    if (customers == null) Assert.That(world.State.entities.Count, Is.EqualTo(entityCount));
+                    else foreach (var person in customers)
+                        Assert.That(world.State.entities.Exists(e => e.person?.characterId == person.characterId), Is.True, page.pageId);
+                }
+                finally { handle?.Dispose(); }
+                Assert.That(world.State.requests, Is.Empty, page.pageId);
+                Assert.That(world.State.entities.Count, Is.EqualTo(entityCount), "Cancelled actors must be removed");
+                checkedPages++;
+            }
+            Assert.That(checkedPages, Is.GreaterThanOrEqualTo(16), "Audit all shipped drink gameplay, not only one date.");
+        }
+
+        [Test]
+        public void NamedTwoCupServiceRestoresFullLobbyAndTargetsCorrectPeople()
+        {
+            world.StartDay();
+            var ordinary = world.State.requests.ToArray();
+            var customers = NarrativeCafeCustomers.Resolve("rose.1016.s1.brew_gate", LubanNarrativeLoader.Load());
+            Assert.That(NarrativeCafeGameplayBridge.TryStart(world, "named", "serve:blackcoffee:0:1+milkcoffee:0:1",
+                value => { callbacks++; result = value; }, out bridge, out string error, customers), Is.True, error);
+            Assert.That(world.Find(world.Request(world.State.focusedRequestId).customerId).person.characterId, Is.EqualTo("alienor"));
+            Assert.That(world.State.entities.Exists(e => e.person?.characterId == "sade"), Is.True);
+            Prepare("blackcoffee"); Deliver();
+            Assert.That(callbacks, Is.Zero);
+            Assert.That(world.Find(world.Request(world.State.focusedRequestId).customerId).person.characterId, Is.EqualTo("sade"));
+            Prepare("milkcoffee"); Deliver();
+            Assert.That(result.passed, Is.True);
+            Assert.That(world.State.entities.Exists(e => e.person?.characterId == "sade"), Is.False);
+            foreach (var order in ordinary) Assert.That(world.Request(order.id), Is.SameAs(order));
+        }
+
+        [Test]
+        public void TastingOrdersNeedNoSeatOrCustomerAndStillRequireBothRealCups()
+        {
+            world.State.seats = 0;
+            int entities = world.State.entities.Count;
+            int money = world.State.money;
+            Begin("serve:espresso:60:1+milkcoffee:60:1");
+            Assert.That(world.State.entities.Count, Is.EqualTo(entities), "A tasting order must not create a lobby customer.");
+            var first = world.Request(world.State.focusedRequestId);
+            Assert.That(first.customerId, Is.Null);
+            Assert.That(world.IsNarrativeTastingOrder(first), Is.True);
+            Prepare("espresso");
+            Deliver();
+            Assert.That(callbacks, Is.Zero);
+            Assert.That(world.IsNarrativeTastingOrder(world.Request(world.State.focusedRequestId)), Is.True);
+            Prepare("milkcoffee");
+            Deliver();
+            Assert.That(result.passed, Is.True);
+            Assert.That(callbacks, Is.EqualTo(1));
+            Assert.That(world.HasNarrativeService, Is.False);
+            Assert.That(world.State.requests, Is.Empty);
+            Assert.That(world.State.money, Is.EqualTo(money));
+            Assert.That(world.IsNarrativeTastingOrder(first), Is.False);
+        }
+
+        [Test]
+        public void TastingPausesNewOrdinaryArrivalsWithoutRemovingExistingCustomers()
+        {
+            Assert.That(world.StartDay().success, Is.True);
+            var customers = world.State.entities.FindAll(e => e.specId == "customer");
+            var ordinary = world.State.requests.ToArray();
+            int arrivals = world.State.todayArrivals;
+            world.State.todayCustomerBudget = arrivals + 2;
+            world.State.seats += 2; // Keep real free seats so resumed arrival is not rejected by capacity.
+            world.State.arrivalRemaining = 0;
+            Begin("serve:espresso:60:1");
+            world.Tick(.1f);
+            Assert.That(world.State.todayArrivals, Is.EqualTo(arrivals));
+            foreach (var customer in customers) Assert.That(world.Find(customer.id), Is.SameAs(customer));
+            foreach (var request in ordinary) Assert.That(world.Request(request.id), Is.SameAs(request));
+            bridge.Dispose();
+            world.Tick(.1f);
+            Assert.That(world.State.todayArrivals, Is.GreaterThan(arrivals), "Normal arrivals resume after the tasting lease ends.");
+        }
+
+        [Test]
         public void OnlyActualValidDeliveryPassesAndDoesNotRunOrdinaryEconomy()
         {
             bool open = world.State.open;

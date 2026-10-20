@@ -248,16 +248,19 @@ namespace Spotlight.FreeCafe
             bool blocked=runtime.InputBlocked;
             bool guided=runtime.WorkstationTutorial!=null && runtime.WorkstationTutorial.IsFirstCafeTutorial;
             var request=world.Request(state.focusedRequestId);
+            bool storyOrder=world.IsNarrativeServiceOrder(request);
+            bool tastingOrder=world.IsNarrativeTastingOrder(request);
             bool tutorialOrder=request!=null && request.id==CafeWorld.TutorialOrderId;
             var product=request==null ? null : world.Product(request.productId);
             int requestNumber=request==null ? 0 : state.requests.IndexOf(request)+1;
             bool splitTicket=orderProduct!=null;
-            if(orderTitle!=null) orderTitle.text=splitTicket ? (tutorialOrder ? "教程订单" : "当前订单") : "交付此订单  ·  "+(request==null ? "暂无订单" : requestNumber+" / "+state.requests.Count);
+            if(orderTitle!=null) orderTitle.text=splitTicket ? (tastingOrder ? "试喝订单" : storyOrder ? "剧情订单" : tutorialOrder ? "教程订单" : "当前订单") : "交付此订单  ·  "+(request==null ? "暂无订单" : requestNumber+" / "+state.requests.Count);
             if(orderIndex!=null) orderIndex.text=request==null ? "0 / 0" : requestNumber+" / "+state.requests.Count;
             var customer=request==null ? null : world.Find(request.customerId);
             string name=request==null ? "暂无客人" : "等待顾客";
             if(customer!=null) name=world.PersonName(customer);
-            if(customerName!=null) customerName.text=splitTicket ? name : name+(tutorialOrder ? "  ·  教程客人 · 尚未营业" : request==null ? "" : "  ·  耐心 "+request.patience.ToString("0")+"s");
+            if(tastingOrder) name="试喝饮品";
+            if(customerName!=null) customerName.text=splitTicket ? name : name+(storyOrder ? "  ·  剧情饮品 · 不限时" : tutorialOrder ? "  ·  教程客人 · 尚未营业" : request==null ? "" : "  ·  耐心 "+request.patience.ToString("0")+"s");
             string customerArt=customer==null ? "customer" : world.Spec(customer.specId).artId;
             if(customer!=null && customer.person!=null && !string.IsNullOrEmpty(customer.person.visualId) && runtime.artLibrary.Find(customer.person.visualId)!=null)
                 customerArt=customer.person.visualId;
@@ -268,6 +271,7 @@ namespace Spotlight.FreeCafe
                 customerAvatar.sprite=CafeCustomerVisualVariants.ResolveAvatar(identity,character);
                 if(customerAvatar.sprite==null) customerAvatar.sprite=runtime.artLibrary.Resolve(customerArt);
                 if(customerAvatar.sprite==null) customerAvatar.sprite=customerAvatarFallback;
+                if(tastingOrder) customerAvatar.sprite=null;
                 customerAvatar.gameObject.SetActive(request!=null && customerAvatar.sprite!=null);
                 FrameAvatar(customerAvatar);
             }
@@ -276,9 +280,9 @@ namespace Spotlight.FreeCafe
             if(splitTicket)
             {
                 orderProduct.text=orderLabel;
-                if(orderDescription!=null) orderDescription.text=product==null ? "可以先准备原料" : tutorialOrder ? "教程首杯 · 完成后放入出餐口" : "满意 ≥ "+product.minimumScore.ToString("0")+" 分"+(request.remakes>0 ? " · 重做中" : "");
+                if(orderDescription!=null) orderDescription.text=product==null ? "可以先准备原料" : storyOrder ? "剧情饮品 · 放上交付盘并按铃"+(request.remakes>0 ? " · 重做中" : "") : tutorialOrder ? "教程首杯 · 完成后放入出餐口" : "满意 ≥ "+product.minimumScore.ToString("0")+" 分"+(request.remakes>0 ? " · 重做中" : "");
             }
-            else if(orderDescription!=null) orderDescription.text=product==null ? "尚无订单，可先准备原料。" : orderLabel+"\n"+(tutorialOrder ? "教程首杯 · 完成后放入出餐口" : "满意要求 ≥ "+product.minimumScore.ToString("0")+" 分"+(request.remakes>0 ? " · 正在重做" : ""));
+            else if(orderDescription!=null) orderDescription.text=product==null ? "尚无订单，可先准备原料。" : orderLabel+"\n"+(storyOrder ? "剧情饮品 · 放上交付盘并按铃"+(request.remakes>0 ? " · 重做中" : "") : tutorialOrder ? "教程首杯 · 完成后放入出餐口" : "满意要求 ≥ "+product.minimumScore.ToString("0")+" 分"+(request.remakes>0 ? " · 正在重做" : ""));
             RefreshPatience(request,tutorialOrder);
             if(moneyText!=null) moneyText.text=state.money.ToString();
             if(reputationText!=null) reputationText.text=state.reputation.ToString();
@@ -329,7 +333,8 @@ namespace Spotlight.FreeCafe
         {
             if(patienceFill==null && patienceText==null) return;
             float fraction=1; string caption="—";
-            if(request!=null && !tutorialOrder)
+            if(request!=null && runtime.World.IsNarrativeServiceOrder(request)) caption="剧情 · 不限时";
+            else if(request!=null && !tutorialOrder)
             {
                 if(!patienceMax.TryGetValue(request.id,out float max) || request.patience>max)
                     patienceMax[request.id]=max=Mathf.Max(request.patience,runtime.World.Catalog.customerPatience);

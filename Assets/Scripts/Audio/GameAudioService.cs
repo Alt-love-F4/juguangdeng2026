@@ -44,6 +44,8 @@ namespace Spotlight.Audio
         private AudioVoiceHandle music;
         private string musicPath;
         private float musicVolume;
+        private bool cityMusicActive;
+        private string cityMusicKey;
         private bool cafeMusicActive;
         private string cafeMusicKey;
         private int? cafeMusicDay;
@@ -155,15 +157,19 @@ namespace Spotlight.Audio
 
         private string ChooseCafeMusic()
         {
-            AudioCue sunshine = catalog != null ? catalog.Find(AudioKeys.CafeSunshineMusic) : null;
-            AudioCue progress = catalog != null ? catalog.Find(AudioKeys.CafeProgressMusic) : null;
-            bool hasSunshine = HasMusicMaterial(sunshine), hasProgress = HasMusicMaterial(progress);
-            if (hasSunshine && hasProgress)
-                return UnityEngine.Random.Range(0, 2) == 0 ? AudioKeys.CafeSunshineMusic : AudioKeys.CafeProgressMusic;
-            if (hasSunshine) return AudioKeys.CafeSunshineMusic;
-            if (hasProgress) return AudioKeys.CafeProgressMusic;
-            // Retain compatibility with small preview/test catalogs that only provide the legacy cue.
-            return AudioKeys.CafeMusic;
+            return ChooseMusic(AudioKeys.CafeLeisureMusic, AudioKeys.CafeProgressMusic, AudioKeys.CafeMusic);
+        }
+
+        private string ChooseMusic(string first, string second, string fallback)
+        {
+            bool hasFirst = HasMusicMaterial(catalog != null ? catalog.Find(first) : null);
+            bool hasSecond = HasMusicMaterial(catalog != null ? catalog.Find(second) : null);
+            if (hasFirst && hasSecond)
+                return UnityEngine.Random.Range(0, 2) == 0 ? first : second;
+            if (hasFirst) return first;
+            if (hasSecond) return second;
+            // Retain compatibility with preview/test catalogs that only provide the legacy cue.
+            return fallback;
         }
 
         private static bool HasMusicMaterial(AudioCue cue)
@@ -176,6 +182,14 @@ namespace Spotlight.Audio
             if (owner == null)
             {
                 bool cafe = key == AudioKeys.CafeMusic;
+                bool city = key == AudioKeys.CityMusic;
+                if (city)
+                {
+                    if (!cityMusicActive || cityMusicKey == null)
+                        cityMusicKey = ChooseMusic(AudioKeys.CityMusic, AudioKeys.CityBaroqueMusic, AudioKeys.CityMusic);
+                    key = cityMusicKey;
+                }
+                cityMusicActive = city;
                 if (cafe)
                 {
                     if (!cafeMusicActive || cafeMusicKey == null) cafeMusicKey = ChooseCafeMusic();

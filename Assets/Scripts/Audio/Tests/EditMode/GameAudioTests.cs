@@ -359,7 +359,7 @@ namespace Spotlight.Audio.Tests
             Object.DestroyImmediate(catalog);
             catalog = ScriptableObject.CreateInstance<AudioCatalog>();
             catalog.warnMissing = false;
-            catalog.entries.Add(new AudioCue { key = AudioKeys.CafeSunshineMusic, clip = clip, category = AudioCategory.Music, loop = true });
+            catalog.entries.Add(new AudioCue { key = AudioKeys.CafeLeisureMusic, clip = clip, category = AudioCategory.Music, loop = true });
             catalog.entries.Add(new AudioCue { key = AudioKeys.CafeProgressMusic, enabled = false, clip = secondClip });
             GameAudio.Initialize(catalog);
             GameAudio.CafeDayMusic(2);
@@ -369,8 +369,40 @@ namespace Spotlight.Audio.Tests
         private void AddCafeMusicCandidates()
         {
             // Add entries before any Find call builds the catalog's lazy index.
-            catalog.entries.Add(new AudioCue { key = AudioKeys.CafeSunshineMusic, clip = clip, category = AudioCategory.Music, loop = true });
+            catalog.entries.Add(new AudioCue { key = AudioKeys.CafeLeisureMusic, clip = clip, category = AudioCategory.Music, loop = true });
             catalog.entries.Add(new AudioCue { key = AudioKeys.CafeProgressMusic, clip = secondClip, category = AudioCategory.Music, loop = true });
+        }
+
+        [Test]
+        public void CityMusicChoosesMapOrBaroqueOncePerVisitAndResumesAfterStory()
+        {
+            catalog.entries.Add(new AudioCue { key = AudioKeys.CityMusic, clip = clip, category = AudioCategory.Music, loop = true });
+            catalog.entries.Add(new AudioCue { key = AudioKeys.CityBaroqueMusic, clip = secondClip, category = AudioCategory.Music, loop = true });
+            Random.State previous = Random.state;
+            try
+            {
+                for (int seed = 0; seed < 8; seed++)
+                {
+                    GameAudio.Music(AudioKeys.MenuMusic);
+                    Random.InitState(seed);
+                    int choice = Random.Range(0, 2);
+                    float expectedNextRandom = Random.value;
+                    Random.InitState(seed);
+                    GameAudio.Music(AudioKeys.CityMusic);
+                    AudioClip expected = choice == 0 ? clip : secondClip;
+                    Assert.That(backend.LoadedClip, Is.SameAs(expected));
+                    int plays = backend.PlayCount;
+                    GameAudio.Music(AudioKeys.CityMusic);
+                    Assert.That(backend.PlayCount, Is.EqualTo(plays));
+                    var owner = new object();
+                    GameAudio.OverrideMusic(owner, AudioKeys.MenuMusic);
+                    GameAudio.Music(AudioKeys.CityMusic);
+                    GameAudio.StopOwner(owner);
+                    Assert.That(backend.LoadedClip, Is.SameAs(expected));
+                    Assert.That(Random.value, Is.EqualTo(expectedNextRandom));
+                }
+            }
+            finally { Random.state = previous; }
         }
 
         [Test]

@@ -24,11 +24,11 @@ namespace Spotlight.GameFlow
             this.ownerKey = string.IsNullOrWhiteSpace(ownerKey) ? "narrative-cafe:" + Guid.NewGuid().ToString("N") : ownerKey;
         }
 
-        public bool Attach(CafeWorld world, string key, out string error)
+        public bool Attach(CafeWorld world, string key, out string error, System.Collections.Generic.IReadOnlyList<CafePersonIdentity> customers = null)
         {
             if (IsDisposed) { error = "Narrative cafe request was cancelled before scene arrival."; return false; }
             if (observation != null) { error = "Narrative cafe request already owns a world observation."; return false; }
-            if (!NarrativeCafeGameplayBridge.TryStart(world, ownerKey, key, Complete, out var handle, out error)) return false;
+            if (!NarrativeCafeGameplayBridge.TryStart(world, ownerKey, key, Complete, out var handle, out error, customers)) return false;
             if (IsDisposed)
             {
                 handle.Dispose();

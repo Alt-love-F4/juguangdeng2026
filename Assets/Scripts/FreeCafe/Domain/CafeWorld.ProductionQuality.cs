@@ -113,6 +113,8 @@ namespace Spotlight.FreeCafe
                 if (!tutorialCoffee.known || tutorialCoffee.productId != "blackcoffee" || cup.specId != RequiredCupSpecId(request))
                     return ActionResult.No("请使用大杯制作一杯黑咖啡再交付；当前杯子和教程订单已保留");
                 ConsumeDeliveredContainer(cup);
+                State.reputation++;
+                UnlockContent();
                 CompleteCustomerOrder(request, true);
                 State.production.lastDelivery = "首位客人的黑咖啡已交付，接下来学习查咖啡谱和正式营业";
                 Notify();
@@ -131,6 +133,8 @@ namespace Spotlight.FreeCafe
                 + " / 甜度 " + score.sweetness.ToString("0") + " / 浓度 " + score.concentration.ToString("0"));
             int price = satisfied ? SalePrice(cup, product) : 0;
             ConsumeDeliveredContainer(cup);
+            State.reputation++;
+            UnlockContent();
             if (!satisfied && request.remakes < product.maxRemakes)
             {
                 request.remakes++; State.production.lastDelivery = "顾客要求重做（" + request.remakes + "/" + product.maxRemakes + "）· " + detail;
@@ -140,12 +144,13 @@ namespace Spotlight.FreeCafe
             if (satisfied)
             {
                 State.money += price; State.todayRevenue += price;
-                State.todayServed++; State.successfulOrders++; State.reputation += 2;
+                State.todayServed++; State.successfulOrders++;
+                UnlockContent();
                 State.production.lastDelivery = "订单完成 +" + price + " 金币 · " + detail;
             }
             else
             {
-                State.todayFailed++; State.reputation--; Charge(Catalog.economy.wrongOrderPenalty);
+                State.todayFailed++; Charge(Catalog.economy.wrongOrderPenalty);
                 State.production.lastDelivery = "顾客不满意离开 · " + detail;
             }
             CompleteCustomerOrder(request, satisfied);

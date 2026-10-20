@@ -1,3 +1,4 @@
+using System.Linq;
 using System.Collections;
 using NUnit.Framework;
 using Spotlight.GameFlow;
@@ -45,7 +46,7 @@ namespace Spotlight.FreeCafe.Tests
         }
 
         [Test]
-        public void EveryAuthoredOrderSeparatesCustomerAndAdeleWithHerPortrait()
+        public void EveryAuthoredOrderSeparatesCustomerAndStaffWithPortraits()
         {
             var config = narrative.Configuration;
             var person = new CafePersonIdentity { personId = "test", characterId = "guest_a", displayName = "普通客人" };
@@ -57,16 +58,52 @@ namespace Spotlight.FreeCafe.Tests
                 rows.Sort((a, b) => a.seq.CompareTo(b.seq));
                 string text = string.Join("\n", rows.ConvertAll(l => narrative.ResolveText(l.textKey)));
                 var script = CafeDialoguePlayback.CreateCustomerScript(person, text);
-                Assert.That(script.Count, Is.EqualTo(2), presentation.presentationId);
+                bool solo = presentation.presentationId.StartsWith("cafe.ambient.order.solo-");
+                Assert.That(script.Count, Is.GreaterThanOrEqualTo(2), presentation.presentationId);
                 Assert.That(script[0].Speaker, Is.EqualTo(DialogueSpeaker.Right));
                 Assert.That(script[0].Text, Does.Not.StartWith("顾客："));
                 Assert.That(script[1].Speaker, Is.EqualTo(DialogueSpeaker.Left));
-                Assert.That(script[1].LeftCharacter.CharacterKey, Is.EqualTo("adele"));
-                Assert.That(script[1].LeftCharacter.Portrait, Is.SameAs(Resources.Load<Sprite>("Characters/adele/neutral")));
+                if (solo) Assert.That(script[1].LeftCharacter.CharacterKey, Is.EqualTo("player"));
+                bool hasAdele = false;
+                for (int i = 0; i < script.Count; i++)
+                {
+                    if (script[i].LeftCharacter?.CharacterKey != "adele") continue;
+                    hasAdele = true;
+                    Assert.That(script[i].LeftCharacter.Portrait, Is.SameAs(Resources.Load<Sprite>("Characters/adele/neutral")));
+                }
+                Assert.That(hasAdele, Is.EqualTo(!solo));
                 Assert.That(script[1].Text, Does.Not.StartWith("阿黛尔："));
                 templates++;
             }
-            Assert.That(templates, Is.EqualTo(10));
+            Assert.That(templates, Is.GreaterThanOrEqualTo(34));
+        }
+
+        [Test]
+        public void AwayOrdersNeverShowAdeleAndReturnRestoresHerPool()
+        {
+            app.World.State.day = 2;
+            Assert.That(app.World.StartDay().success, Is.True);
+            var state = narrative.Controller.State;
+            state.TryGetCondition("story.adele.away", out bool previous);
+            try
+            {
+                foreach (bool away in new[] { true, false })
+                {
+                    state.SetCondition("story.adele.away", away);
+                    foreach (var request in app.World.State.requests)
+                    {
+                        var customer = app.World.Find(request.customerId);
+                        Assert.That(NarrativeCafeAmbientContent.TryCreateOrderDialogue(app.World, customer, out var script), Is.True);
+                        Assert.That(Enumerable.Range(0, script.Count).Any(i => script[i].LeftCharacter?.CharacterKey == "adele"), Is.EqualTo(!away));
+                        for (int i = 0; i < script.Count; i++)
+                        {
+                            Assert.That(script[i].Text, Does.Not.Contain("{饮品名}"));
+                            if (away) Assert.That(script[i].LeftCharacter?.CharacterKey, Is.Not.EqualTo("adele"));
+                        }
+                    }
+                }
+            }
+            finally { state.SetCondition("story.adele.away", previous); }
         }
 
         [Test]
@@ -107,8 +144,8 @@ namespace Spotlight.FreeCafe.Tests
             }
             yield return new WaitForSecondsRealtime(.6f);
             Assert.That(panel.LineIndex, Is.EqualTo(1));
-            Assert.That(panel.LeftCharacter.CharacterKey, Is.EqualTo("adele"));
-            Assert.That(panel.LeftCharacter.Portrait, Is.SameAs(Resources.Load<Sprite>("Characters/adele/neutral")));
+            Assert.That(panel.LeftCharacter.CharacterKey, Is.EqualTo(script[1].LeftCharacter.CharacterKey));
+            Assert.That(panel.LeftCharacter.Portrait, Is.SameAs(script[1].LeftCharacter.Portrait));
             Assert.That(panel.CenterCharacter, Is.Null, "No prefab-default character should force Adele into a third slot.");
             panel.Stop();
             yield return null;

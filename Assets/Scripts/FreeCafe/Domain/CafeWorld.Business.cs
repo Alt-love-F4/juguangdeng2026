@@ -136,7 +136,7 @@ namespace Spotlight.FreeCafe
             return (int)Math.Round(price * (State.betterProducts.Contains(product.id) ? Catalog.economy.priceUpgradeMultiplier : 1));
         }
 
-        /// <summary>上餐结算：正确则加钱加声望；错误则扣款扣声望，顾客与杯子都消失。</summary>
+        /// <summary>上餐结算：每杯加一点声望；正确加钱，错误扣款，顾客与杯子都消失。</summary>
         private ActionResult Serve(WorldEntity cup, WorldEntity target)
         {
             var request = RequestForTarget(target);
@@ -145,21 +145,21 @@ namespace Spotlight.FreeCafe
             bool correct = MatchesOrder(cup, request);
             int price = correct ? SalePrice(cup, product) : 0;
             State.served++;
+            State.reputation++;
             if (correct)
             {
                 State.money += price;
                 State.todayRevenue += price;
                 State.todayServed++;
                 State.successfulOrders++;
-                State.reputation += 2;
             }
             else
             {
                 Charge(Catalog.economy.wrongOrderPenalty);
                 State.todayFailed++;
-                State.reputation--;
             }
 
+            UnlockContent();
             CompleteCustomerOrder(request, correct);
             RemoveCupAndRefundStock(cup);
             UpdateFocusedRequest();
@@ -512,8 +512,8 @@ namespace Spotlight.FreeCafe
                 changed |= State.todayArrivals != arrivalsBeforeVisits;
 
                 // 到店节奏：一帧内可能补多位顾客，但始终受当日客流上限约束
-                State.arrivalRemaining -= seconds;
-                while (State.arrivalRemaining <= 0 && State.todayArrivals < State.todayCustomerBudget)
+                if (!HasOrderOnlyNarrativeService) State.arrivalRemaining -= seconds;
+                while (!HasOrderOnlyNarrativeService && State.arrivalRemaining <= 0 && State.todayArrivals < State.todayCustomerBudget)
                 {
                     State.arrivalRemaining += Catalog.customerInterval;
                     SpawnCustomer();

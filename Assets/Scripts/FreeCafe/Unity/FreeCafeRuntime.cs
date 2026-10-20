@@ -441,7 +441,7 @@ namespace Spotlight.FreeCafe
             var quality = cup != null && product != null ? World.EvaluateProduction(cup, product, World.RequiredCupSpecId(request)) : default;
             string productName = product == null ? "咖啡" : FreeCafeProductionText.Recipe(product.label);
             var customer = request == null ? null : World.Find(request.customerId);
-            string customerName = customer == null ? "顾客" : World.PersonName(customer);
+            string customerName = World.IsNarrativeTastingOrder(request) ? "试喝饮品" : customer == null ? "顾客" : World.PersonName(customer);
             int moneyBefore = World.State.money, reputationBefore = World.State.reputation;
             var result=World.DeliverProductionCup();
             var receipt = new CafeDeliveryReceipt(productName, customerName, quality,
@@ -624,6 +624,15 @@ namespace Spotlight.FreeCafe
             if(!dragPlane.Raycast(ray,out var distance)) return false;
             point=ray.GetPoint(distance);return true;
         }
+        // Report on press, not release/drag threshold, so a stationary hold also explains the empty bag.
+        public void Press(FreeEntityView view)
+        {
+            if(World==null || view==null || !view.CanInteract || InputBlocked || IsDragging) return;
+            var entity=World.Find(view.EntityId);
+            if(entity==null || entity.area!=World.State.currentArea) return;
+            if(entity.specId=="source.beans" && entity.stock<=0)
+                ShowHint("在咖啡谱的补货处补货");
+        }
         public void BeginDrag(FreeEntityView view,PointerEventData e)
         {
             if(World==null || InputBlocked || IsDragging || committingDrag || clearingDrag || view==null || !view.CanInteract || e==null) return;
@@ -648,7 +657,7 @@ namespace Spotlight.FreeCafe
             { World.SuspendContainerHeating(entity.id); draggingVessel=true; dragItemId=entity.id; draggedView=view; SelectedId=entity.id; }
             else if(spec.Has(Capability.Source))
             {
-                if(entity.stock<=0) { ShowHint(spec.id=="source.beans" ? "咖啡豆库存不足，请前往咖啡铺补货" : "来源库存不足"); return; }
+                if(entity.stock<=0) { ShowHint(spec.id=="source.beans" ? "在咖啡谱的补货处补货" : "来源库存不足"); return; }
                 dragPreview=true; dragSourceId=entity.id;
                 draggedView=CreateEntityView(spec.sourceItemId,World.State.currentArea); draggedView.name="UncommittedPickup";
                 draggedView.Bind(this,new WorldEntity { specId=spec.sourceItemId,area=entity.area,x=entity.x,y=entity.y },true);

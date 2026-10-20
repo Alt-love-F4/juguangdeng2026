@@ -31,12 +31,12 @@ namespace Spotlight.FreeCafe.Tests
         {
             Add("beans");Add("water");Assert.That(cup.contents.Exists(p=>p.specId=="coffee"),Is.False);
             Assert.That(w.CompositionName(cup),Is.EqualTo("迷之饮品"));
-            Assert.That(w.ContainerInspection(cup),Does.Contain("咖啡豆"));Assert.That(w.ContainerInspection(cup),Does.Contain("清水"));
+            Assert.That(w.ContainerInspection(cup),Does.Contain("未研磨的咖啡豆（无法溶解）"));Assert.That(w.ContainerInspection(cup),Does.Contain("清水"));
         }
         [Test] public void CreamBlackCoffeeUsesExplicitNameWithoutBeingForcedIntoLatte()
         {
             Add("grounds");Add("hotwater");Add("cream");Assert.That(w.CompositionName(cup),Is.EqualTo("奶油黑咖啡"));
-            Add("beans");Assert.That(w.CompositionName(cup),Is.EqualTo("迷之饮品"));Assert.That(w.ContainerInspection(cup),Does.Contain("咖啡豆"));
+            Add("beans");Assert.That(w.CompositionName(cup),Is.EqualTo("迷之饮品"));Assert.That(w.ContainerInspection(cup),Does.Contain("未研磨的咖啡豆（无法溶解）"));
         }
         [Test] public void DifferentCoffeeKindsSurvivePourAndRestore()
         {

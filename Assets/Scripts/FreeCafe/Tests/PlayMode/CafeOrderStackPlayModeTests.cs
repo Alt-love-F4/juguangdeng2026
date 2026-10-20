@@ -48,6 +48,61 @@ namespace Spotlight.FreeCafe.Tests
             yield return null;
         }
 
+        [UnityTest] public IEnumerator NamedStoryCustomerUsesConfiguredSeatedArtAndOrderIdentity()
+        {
+            StartOrders();
+            var identity = new CafePersonIdentity { personId = "story:elion", characterId = "elion", narrativeCharacterId = "elion", displayName = "埃利昂", role = CafePersonRole.Customer };
+            Assert.That(app.World.TryBeginNarrativeService("named-ui", new[] { new CafeNarrativeOrderSpec { productId = "blackcoffee", customer = identity } },
+                _ => { }, out var lease, out string error, orderOnly: true), Is.True, error);
+            try
+            {
+                var order = app.World.Request(app.World.State.focusedRequestId);
+                var entity = app.World.Find(order.customerId);
+                var art = System.Array.Find(app.seating.characterArt, x => x.characterId == "elion");
+                Assert.That(art, Is.Not.Null);
+                Assert.That(app.seating.Artwork(entity), Is.SameAs(art.sprite));
+                stack.Show(app.World.State.requests.IndexOf(order));
+                Assert.That(stack.front.heading.text, Is.EqualTo("剧情订单"));
+                Assert.That(stack.front.label.text, Does.Contain("埃利昂"));
+                Assert.That(stack.front.avatar.gameObject.activeSelf, Is.True);
+                Assert.That(stack.front.patience.text, Does.Contain("不限时"));
+                yield return Settle();
+                app.enabled = true;
+                app.DebugRefreshViews();
+                Assert.That(app.View(entity.id), Is.Not.Null);
+                Assert.That(app.View(entity.id).body.sprite, Is.SameAs(art.sprite));
+                app.enabled = false;
+            }
+            finally { lease.Dispose(); }
+        }
+
+        [UnityTest] public IEnumerator NarrativeTastingShowsNoCustomerAvatarAndRestoresOrdinaryTicket()
+        {
+            StartOrders();
+            var original = app.World.State.requests[0];
+            int customers = app.World.State.entities.FindAll(e => e.specId == "customer").Count;
+            System.IDisposable lease;
+            Assert.That(app.World.TryBeginNarrativeService("ui-tasting", new[] { new CafeNarrativeOrderSpec { productId = "blackcoffee" } },
+                _ => { }, out lease, out string error, orderOnly: true), Is.True, error);
+            try
+            {
+                int index = app.World.State.requests.FindIndex(r => app.World.IsNarrativeTastingOrder(r));
+                stack.Show(index);
+                Assert.That(stack.front.heading.text, Is.EqualTo("试喝订单"));
+                Assert.That(stack.front.label.text, Does.Contain("试喝饮品"));
+                Assert.That(stack.front.patience.text, Does.Contain("不限时"));
+                Assert.That(stack.front.details.text, Does.Contain("不计营收"));
+                Assert.That(stack.front.avatar.gameObject.activeSelf, Is.False);
+                Assert.That(app.World.State.entities.FindAll(e => e.specId == "customer").Count, Is.EqualTo(customers));
+                yield return Settle();
+            }
+            finally { lease.Dispose(); }
+            stack.Show(app.World.State.requests.IndexOf(original));
+            Assert.That(stack.front.heading.text, Is.EqualTo("来客订单"));
+            Assert.That(stack.front.label.text, Does.Not.Contain("试喝饮品"));
+            Assert.That(stack.front.avatar.gameObject.activeSelf, Is.True);
+        }
+
         [UnityTest] public IEnumerator RealOrdersShowWaitingSheetsAndUseCharacterAndCompendiumSprites()
         {
             StartOrders();

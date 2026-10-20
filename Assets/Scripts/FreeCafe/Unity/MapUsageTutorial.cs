@@ -29,7 +29,8 @@ namespace Spotlight.FreeCafe
                 var world = PlayerCafeOwner.Current;
                 return world != null && !world.State.open && world.State.businessPhase == BusinessPhase.Night
                     && (todoHintWorld != world || todoHintDay != world.State.day)
-                    && days != null && !days.IsFirstSessionGuideActive && !map.IsCafeArrivalGuide;
+                    && days != null && !days.TodoGuidanceAcknowledged
+                    && !days.IsFirstSessionGuideActive && !map.IsCafeArrivalGuide;
             }
         }
 
@@ -108,6 +109,7 @@ namespace Spotlight.FreeCafe
                 case Stage.Overview: CurrentStage = Stage.SelectLocation; break;
                 case Stage.ReadLocation: CurrentStage = Stage.Finish; break;
                 case Stage.TodoGuidance:
+                    days?.AcknowledgeTodoGuidance();
                     Stop();
                     return;
                 case Stage.Finish:
@@ -146,6 +148,7 @@ namespace Spotlight.FreeCafe
             }
             if (CurrentStage == Stage.TodoGuidance && GameplayHudPanel.Instance?.Tasks?.IsVisible == true)
             {
+                days?.AcknowledgeTodoGuidance();
                 Stop();
                 return;
             }

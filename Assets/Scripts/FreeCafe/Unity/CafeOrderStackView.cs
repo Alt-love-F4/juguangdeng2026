@@ -101,19 +101,21 @@ namespace Spotlight.FreeCafe
             var product = world.Product(request.productId);
             var customer = world.Find(request.customerId);
             var character = customer?.person == null ? null : hud.runtime.Character(customer.person.characterId);
-            var avatar = CafeCustomerVisualVariants.ResolveAvatar(customer?.person, character);
+            bool story = world.IsNarrativeServiceOrder(request);
+            bool tasting = world.IsNarrativeTastingOrder(request);
+            var avatar = tasting ? null : CafeCustomerVisualVariants.ResolveAvatar(customer?.person, character);
             bool tutorial = request.id == CafeWorld.TutorialOrderId;
-            float fraction = tutorial ? 1 : Mathf.Clamp01(request.patience / Mathf.Max(1, world.Catalog.customerPatience));
+            float fraction = tutorial || story ? 1 : Mathf.Clamp01(request.patience / Mathf.Max(1, world.Catalog.customerPatience));
             Sprite icon = null;
             if (iconSource != null)
                 foreach (var recipe in iconSource.recipes)
                     if (recipe.productId == request.productId) { icon = recipe.icon; break; }
             return new CardData {
-                id = request.id, heading = tutorial ? "练习订单" : "来客订单",
-                label = (customer == null ? "顾客" : world.PersonName(customer)) + "\n<b>" + FreeCafeProductionText.Recipe(product.label) + "</b>",
-                details = world.Spec(world.RequiredCupSpecId(request)).label + "   ·   " + product.price + " 王国币" + (request.remakes > 0 ? "  ·  重做" : ""),
+                id = request.id, heading = tasting ? "试喝订单" : story ? "剧情订单" : tutorial ? "练习订单" : "来客订单",
+                label = (tasting ? "试喝饮品" : customer == null ? "顾客" : world.PersonName(customer)) + "\n<b>" + FreeCafeProductionText.Recipe(product.label) + "</b>",
+                details = world.Spec(world.RequiredCupSpecId(request)).label + (story ? "   ·   剧情饮品 · 不计营收" : "   ·   " + product.price + " 王国币") + (request.remakes > 0 ? "  ·  重做" : ""),
                 number = (index + 1).ToString("00"), avatar = avatar, drink = icon,
-                patience = tutorial ? "教程 · 不限时" : "等候  " + Mathf.CeilToInt(Mathf.Max(0, request.patience)) + " 秒",
+                patience = story ? "剧情 · 不限时" : tutorial ? "教程 · 不限时" : "等候  " + Mathf.CeilToInt(Mathf.Max(0, request.patience)) + " 秒",
                 fraction = fraction, patienceColor = fraction > .5f ? new Color(.34f,.43f,.23f) : fraction > .25f ? new Color(.72f,.45f,.16f) : new Color(.67f,.22f,.14f)
             };
         }

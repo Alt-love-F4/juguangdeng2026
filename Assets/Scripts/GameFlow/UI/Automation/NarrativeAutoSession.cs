@@ -375,7 +375,7 @@ namespace Spotlight.GameFlow
                 Log("宿主命令：真实营业关闭"); request.Complete(new NarrativeGameplayResult { passed = true }); return;
             }
             if (!NarrativeCafeGameplayBridge.TryStart(World, "auto:" + Preset.id + ":" + Result.steps, request.Data.gameplayKey,
-                result => { Log("咖啡交付回执 passed=" + result.passed + " cancelled=" + result.cancelled); request.Complete(result); }, out service, out string error))
+                result => { Log("咖啡交付回执 passed=" + result.passed + " cancelled=" + result.cancelled); request.Complete(result); }, out service, out string error, NarrativeCafeCustomers.Resolve(request.Data.pageId, LubanNarrativeLoader.Load())))
                 throw new InvalidOperationException("后台咖啡宿主拒绝 " + request.Data.gameplayKey + ": " + error);
         }
         private bool PumpVisits()

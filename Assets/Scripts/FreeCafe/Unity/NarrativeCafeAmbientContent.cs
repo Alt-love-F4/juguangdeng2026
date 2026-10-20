@@ -57,6 +57,15 @@ namespace Spotlight.FreeCafe
             return script != null;
         }
 
+        public static bool IsAdeleAvailable(NarrativeController controller)
+        {
+            if (controller == null) return true;
+            var state = controller.State;
+            return !controller.IsEnded
+                && !(state.TryGetCondition("story.adele.away", out bool away) && away)
+                && !(state.TryGetCondition("church.detention.active", out bool detained) && detained);
+        }
+
         public static bool TryOrder(CafeWorld world, WorldEntity customer, out string text)
         {
             text = null;
@@ -65,7 +74,9 @@ namespace Spotlight.FreeCafe
             if (world == null || customer == null || configuration == null) return false;
             var request = world.State.requests.FirstOrDefault(r => r.customerId == customer.id);
             if (request == null) return false;
-            var templates = configuration.openingPresentations.Where(p => p.presentationId.StartsWith("cafe.ambient.order.", StringComparison.Ordinal))
+            bool adeleAvailable = IsAdeleAvailable(runtime.Controller);
+            var templates = configuration.openingPresentations.Where(p => p.presentationId.StartsWith("cafe.ambient.order.", StringComparison.Ordinal)
+                    && p.presentationId.StartsWith("cafe.ambient.order.solo-", StringComparison.Ordinal) != adeleAvailable)
                 .OrderBy(p => p.presentationId, StringComparer.Ordinal).ToArray();
             if (templates.Length == 0) return false;
             uint hash = 2166136261;

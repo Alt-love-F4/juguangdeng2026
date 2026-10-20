@@ -63,12 +63,7 @@ namespace Spotlight.FreeCafe
             if (app == null || !app.isActiveAndEnabled || app.World == null || app.World.State.open || app.CafeTutorialActive) return false;
             var runtime = NarrativeRuntime.Instance;
             var controller = runtime != null ? runtime.Controller : null;
-            if (controller != null)
-            {
-                var state = controller.State;
-                if (controller.IsEnded || state.TryGetCondition("story.adele.away", out bool away) && away
-                    || state.TryGetCondition("church.detention.active", out bool detained) && detained) return false;
-            }
+            if (!NarrativeCafeAmbientContent.IsAdeleAvailable(controller)) return false;
             // A story-authored Adele owns her appearance, even when the shop is closed.
             foreach (var visit in app.World.State.cafeVisits)
                 if (visit.characterId == "adele" && visit.status != CafeVisitStatus.Ended) return false;

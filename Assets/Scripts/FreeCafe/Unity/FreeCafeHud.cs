@@ -427,6 +427,7 @@ namespace Spotlight.FreeCafe
                 {
                     var person = runtime.World.Find(request.customerId);
                     var product = runtime.World.Product(request.productId);
+                    bool tasting = runtime.World.IsNarrativeTastingOrder(request);
                     string name = person == null ? "顾客" : runtime.World.PersonName(person);
                     string cupName = runtime.World.Spec(runtime.World.RequiredCupSpecId(request))?.label ?? "订单指定杯型";
                     var recipe = runtime.World.RecipeFor(product);
@@ -437,9 +438,9 @@ namespace Spotlight.FreeCafe
                         : !string.IsNullOrEmpty(state.production?.miniGameToken) ? "② 完成当前制作小游戏，再继续配制。"
                         : cup == null ? "② 取出「" + cupName + "」，按下方配方制作。"
                         : "③ 对照订单检查杯型和饮品，将成品拖到交付盘，再点击右下角按铃。只有真实交付成功才完成此事项。";
-                    items.Add(new MapTaskItem { id = "guide.cafe.order." + request.id, name = "为" + name + "准备" + (product?.label ?? "饮品"),
+                    items.Add(new MapTaskItem { id = "guide.cafe.order." + request.id, name = tasting ? "制作试喝饮品：" + (product?.label ?? "饮品") : "为" + name + "准备" + (product?.label ?? "饮品"),
                         location = "咖啡馆制作台", description = "订单杯型：" + cupName + "。参考流程：" + steps,
-                        currentTask = instruction, status = "营业订单 · 留意顾客耐心", priority = 10, preventsRest = true,
+                        currentTask = instruction, status = runtime.World.IsNarrativeServiceOrder(request) ? "剧情饮品 · 不限时 · 不计营收" : "营业订单 · 留意顾客耐心", priority = 10, preventsRest = true,
                         navigationLabel = runtime.CanEnterArea(AreaId.Counter) && state.currentArea != AreaId.Counter ? "前往制作台" : null });
                 }
                 if (runtime.CanEndBusiness)
@@ -586,12 +587,14 @@ namespace Spotlight.FreeCafe
                     continue;
                 }
                 var request=state.requests[requestIndex]; requestIds[index]=request.id; var product=runtime.World.Product(request.productId);
-                var customer=runtime.World.Find(request.customerId);string name="顾客";
+                bool story=runtime.World.IsNarrativeServiceOrder(request);
+                bool tasting=runtime.World.IsNarrativeTastingOrder(request);
+                var customer=runtime.World.Find(request.customerId);string name=tasting ? "试喝饮品" : "顾客";
                 if(customer!=null) name=runtime.World.PersonName(customer);
                 var character=customer!=null && customer.person!=null ? runtime.Character(customer.person.characterId) : null;
-                SetOrderAvatar(index,CafeCustomerVisualVariants.ResolveAvatar(customer?.person,character));
-                string status=request.id==CafeWorld.TutorialOrderId ? "教程订单 · 尚未营业" : name+"  ·  "+request.patience.ToString("0")+" 秒";
-                string recipe=(request.id==state.focusedRequestId ? "● " : "")+status+"\n"+FreeCafeProductionText.Recipe(product.label)+" · "+runtime.World.Spec(runtime.World.RequiredCupSpecId(request)).label+"  /  "+product.price+" 王国币";
+                SetOrderAvatar(index,tasting ? null : CafeCustomerVisualVariants.ResolveAvatar(customer?.person,character));
+                string status=story ? name+" · 不限时" : request.id==CafeWorld.TutorialOrderId ? "教程订单 · 尚未营业" : name+"  ·  "+request.patience.ToString("0")+" 秒";
+                string recipe=(request.id==state.focusedRequestId ? "● " : "")+status+"\n"+FreeCafeProductionText.Recipe(product.label)+" · "+runtime.World.Spec(runtime.World.RequiredCupSpecId(request)).label+(story ? "  /  剧情饮品 · 不计营收" : "  /  "+product.price+" 王国币");
                 if(label!=null) label.text=recipe;
                 if(button!=null) { button.interactable=!runtime.InputBlocked; SetTicket(button,request.id==state.focusedRequestId); }
             }

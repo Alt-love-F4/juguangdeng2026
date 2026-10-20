@@ -56,6 +56,9 @@ namespace Spotlight.GameFlow
         private bool firstDayCafeTutorialCompleted;
         private bool mapUsageTutorialPending;
         private bool mapUsageTutorialCompleted;
+        private bool todoGuidanceAcknowledged;
+        public bool TodoGuidanceAcknowledged => todoGuidanceAcknowledged;
+        public void AcknowledgeTodoGuidance() => todoGuidanceAcknowledged = true;
         private bool tutorialTestSkipSubmitted;
         private bool awaitingNarrativeEntry;
         private int narrativeEntryVersion;
@@ -286,6 +289,7 @@ namespace Spotlight.GameFlow
             firstDayCafeTutorialCompleted = false;
             mapUsageTutorialPending = false;
             mapUsageTutorialCompleted = false;
+            todoGuidanceAcknowledged = false;
             tutorialTestSkipSubmitted = false;
             UnsubscribeFirstDayPerceptionEvents();
             firstDayIntroductionCompleted = !playIntroduction;
@@ -313,6 +317,7 @@ namespace Spotlight.GameFlow
             firstDayCafeTutorialCompleted = false;
             mapUsageTutorialPending = false;
             mapUsageTutorialCompleted = false;
+            todoGuidanceAcknowledged = false;
             tutorialTestSkipSubmitted = false;
             running = true;
             FindGameplayEndpoint();
@@ -497,6 +502,9 @@ namespace Spotlight.GameFlow
         private void EnterPreBusiness()
         {
             if (IsDetained) { TryCompleteDetainedDay(); return; }
+            // Waking up in the cafe should keep the current visit, not force a map round-trip.
+            // Calendar synchronization already prepared the new day; opening remains explicit.
+            if (day > 1 && CafeSceneActive) { ResumeCafeVisit(); return; }
             EnterCityMap();
         }
 
@@ -1413,7 +1421,8 @@ namespace Spotlight.GameFlow
                 }
                 if (IsDetained) { Reject("Cafe service is unavailable during church.detention.active."); return; }
                 if (FindGameplayEndpoint() == null) { Reject("CoffeeShop has no live cafe gameplay endpoint."); return; }
-                if (!pending.Attach(PlayerCafeOwner.Current, data.gameplayKey, out string error))
+                if (!pending.Attach(PlayerCafeOwner.Current, data.gameplayKey, out string error,
+                    NarrativeCafeCustomers.Resolve(data.pageId, LubanNarrativeLoader.Load())))
                 { Reject(error); return; }
                 // Retain NarrativeEntry and its continuation; only the cafe input gate is opened.
                 // The runtime releases its OWN narrative pause. No global Resume/Clear is allowed.
@@ -1722,6 +1731,7 @@ namespace Spotlight.GameFlow
             public bool firstDayCafeTutorialCompleted;
             public bool mapUsageTutorialPending;
             public bool mapUsageTutorialCompleted;
+            public bool todoGuidanceAcknowledged;
             public int lastCafeEntryDay;
         }
 
@@ -1733,6 +1743,7 @@ namespace Spotlight.GameFlow
             firstDayCafeTutorialCompleted = firstDayCafeTutorialCompleted,
             mapUsageTutorialPending = mapUsageTutorialPending,
             mapUsageTutorialCompleted = mapUsageTutorialCompleted,
+            todoGuidanceAcknowledged = todoGuidanceAcknowledged,
             lastCafeEntryDay = lastCafeEntryDay
         });
 
@@ -1749,6 +1760,7 @@ namespace Spotlight.GameFlow
             firstDayCafeTutorialCompleted = saved.firstDayCafeTutorialCompleted;
             mapUsageTutorialPending = saved.mapUsageTutorialPending;
             mapUsageTutorialCompleted = saved.mapUsageTutorialCompleted;
+            todoGuidanceAcknowledged = saved.todoGuidanceAcknowledged;
             lastCafeEntryDay = Mathf.Clamp(saved.lastCafeEntryDay, 0, day);
             // Legacy saves in/after business have already entered the cafe that day.
             if (State == DayFlowState.FreeCafeBusiness || State == DayFlowState.PreLeisure
@@ -1783,6 +1795,7 @@ namespace Spotlight.GameFlow
                 firstDayCafeTutorialCompleted = false;
                 mapUsageTutorialPending = false;
                 mapUsageTutorialCompleted = false;
+                todoGuidanceAcknowledged = false;
                 IDayFlowGameplayEndpoint endpoint = FindGameplayEndpoint();
                 State = endpoint != null && endpoint.DayFlowBusinessActive
                     ? DayFlowState.FreeCafeBusiness : DayFlowState.PreBusiness;

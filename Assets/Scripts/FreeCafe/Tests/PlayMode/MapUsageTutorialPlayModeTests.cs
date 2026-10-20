@@ -124,7 +124,7 @@ namespace Spotlight.FreeCafe.Tests
         }
 
         [UnityTest]
-        public IEnumerator ClosedBusinessMapHintsTodoOncePerDayAndStopsWhenTasksOpen()
+        public IEnumerator ClosedBusinessMapHintsTodoOnceAndStopsWhenTasksOpen()
         {
             var current = typeof(PlayerCafeOwner).GetProperty(nameof(PlayerCafeOwner.Current));
             var previousWorld = PlayerCafeOwner.Current;
@@ -170,12 +170,58 @@ namespace Spotlight.FreeCafe.Tests
                 runtime.Actions.RefreshForDay(3);
                 nextCheck.SetValue(tutorial, 0f);
                 yield return null;
-                Assert.That(tutorial.CurrentStage, Is.EqualTo(MapUsageTutorial.Stage.TodoGuidance));
-                Assert.That(tutorial.IsRunning, Is.True, "A later closed business day can remind the player again.");
-                tutorial.Advance();
-                Assert.That(tutorial.IsRunning, Is.False, "The player can dismiss without opening tasks.");
+                Assert.That(tutorial.IsRunning, Is.False, "Opening tasks must also suppress reminders on later days.");
+                Assert.That(days.TodoGuidanceAcknowledged, Is.True);
+                string saved = days.CaptureJson();
+                days.RestoreJson(saved);
+                Assert.That(days.TodoGuidanceAcknowledged, Is.True, "Acknowledgement must survive save/load.");
                 Assert.That(started, Is.Zero);
                 Assert.That(settled, Is.Zero);
+            }
+            finally
+            {
+                tutorial.Stop();
+                current.GetSetMethod(true).Invoke(null, new object[] { previousWorld });
+            }
+        }
+
+        [UnityTest]
+        public IEnumerator ConfirmedTodoHintSurvivesMapRecreationAndSaveLoad()
+        {
+            var current = typeof(PlayerCafeOwner).GetProperty(nameof(PlayerCafeOwner.Current));
+            var previousWorld = PlayerCafeOwner.Current;
+            var world = new CafeWorld(JsonUtility.FromJson<CafeCatalog>(Resources.Load<TextAsset>("FreeCafe/catalog").text));
+            current.GetSetMethod(true).Invoke(null, new object[] { world });
+            try
+            {
+                SetDayField("day", 2);
+                runtime.Actions.RefreshForDay(2);
+                world.State.day = 2;
+                world.State.open = false;
+                world.State.businessPhase = BusinessPhase.Night;
+                var nextCheck = typeof(MapUsageTutorial).GetField("nextCheck", BindingFlags.Instance | BindingFlags.NonPublic);
+                nextCheck.SetValue(tutorial, 0f);
+                yield return null;
+                Assert.That(tutorial.IsRunning, Is.True);
+                Assert.That(tutorial.CurrentStage, Is.EqualTo(MapUsageTutorial.Stage.TodoGuidance));
+                var panel = Array.Find(Object.FindObjectsByType<FreeCafeTutorialPanel>(FindObjectsSortMode.None),
+                    candidate => candidate.name == "MapTodoGuidancePanel");
+                Assert.That(panel, Is.Not.Null);
+                panel.retryButton.onClick.Invoke();
+                Assert.That(tutorial.IsRunning, Is.False);
+                Assert.That(days.TodoGuidanceAcknowledged, Is.True);
+                string saved = days.CaptureJson();
+                days.RestoreJson(saved);
+                Assert.That(days.TodoGuidanceAcknowledged, Is.True);
+                SetDayField("running", true);
+                Object.Destroy(tutorial);
+                yield return null;
+                tutorial = map.AddComponent<MapUsageTutorial>();
+                world.State.day = 3;
+                SetDayField("day", 3);
+                runtime.Actions.RefreshForDay(3);
+                yield return null;
+                Assert.That(tutorial.IsRunning, Is.False, "Confirmation must survive a new map component and later days.");
             }
             finally
             {
