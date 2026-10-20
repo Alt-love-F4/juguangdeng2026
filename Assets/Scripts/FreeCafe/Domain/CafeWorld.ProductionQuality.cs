@@ -83,7 +83,25 @@ namespace Spotlight.FreeCafe
             if(Request(State.focusedRequestId)==null) return ActionResult.No("当前没有可交付的订单");
             return ServeProduction(cup, Request(State.focusedRequestId));
         }
+        /// <summary>
+        /// A production cup was handed to a customer and kept (satisfied or not; remakes excluded). Raised for
+        /// every route — bell, drag and staff — with the cup's latte art read before it was consumed.
+        /// </summary>
+        public event Action<bool, string> ProductionCupHandedOver;
+
         private ActionResult ServeProduction(WorldEntity cup, CustomerRequest request)
+        {
+            bool latteArt = cup != null && cup.latteArt;
+            string pattern = cup?.latteArtPattern;
+            bool tutorial = request != null && request.id == TutorialOrderId;
+            var result = ServeProductionCore(cup, request);
+            if (result.success && !tutorial
+                && (result.feedback == CafeFeedbackKind.DeliverySatisfied || result.feedback == CafeFeedbackKind.DeliveryFailed))
+                ProductionCupHandedOver?.Invoke(latteArt, pattern);
+            return result;
+        }
+
+        private ActionResult ServeProductionCore(WorldEntity cup, CustomerRequest request)
         {
             if (!ProductionEnabled || cup == null || request == null || !Spec(cup.specId).Has(Capability.Container))
                 return ActionResult.No("需要出餐杯和当前显示的订单");

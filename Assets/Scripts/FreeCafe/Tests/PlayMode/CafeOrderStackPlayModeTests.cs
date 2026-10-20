@@ -119,6 +119,8 @@ namespace Spotlight.FreeCafe.Tests
             hud.orderButtons[0].onClick.Invoke();
             Assert.That(app.World.State.focusedRequestId, Is.EqualTo(app.World.State.requests[latest].id),
                 "Clicking the front order, unlike lobby paging, explicitly focuses it.");
+            AssertOrderRecipe(book, latest);
+            book.CloseImmediate();
             app.Enter(AreaId.Counter);
             yield return null;
             Assert.That(app.World.State.currentArea, Is.EqualTo(AreaId.Counter));
@@ -137,6 +139,58 @@ namespace Spotlight.FreeCafe.Tests
             yield return Settle();
             AssertResting();
             AssertPage(latest);
+        }
+
+        [UnityTest] public IEnumerator OrderClicksOpenTheSelectedProductAcrossPagesAndAreas()
+        {
+            StartOrders();
+            Assert.That(app.World.Catalog.products.Length, Is.GreaterThanOrEqualTo(2));
+            // Distinct products ensure reopening cannot accidentally pass with a stale recipe page.
+            app.World.State.requests[0].productId = app.World.Catalog.products[0].id;
+            app.World.State.requests[1].productId = app.World.Catalog.products[1].id;
+            app.DebugRefreshViews();
+            var productionBook = app.GetComponent<FreeCafeProductionHud>().bookPanel.GetComponent<CoffeeCompendiumPanel>();
+            Assert.That(productionBook, Is.Not.Null);
+
+            hud.orderButtons[0].onClick.Invoke();
+            AssertOrderRecipe(book, 0);
+            if (productionBook != book) Assert.That(productionBook.IsOpen, Is.False);
+            book.CloseImmediate();
+            Assert.That(app.InputBlocked, Is.False);
+
+            hud.nextOrder.onClick.Invoke();
+            AssertPage(1);
+            hud.orderButtons[0].onClick.Invoke();
+            AssertOrderRecipe(book, 1);
+            book.CloseImmediate();
+            Assert.That(app.InputBlocked, Is.False);
+
+            app.Enter(AreaId.Counter);
+            Assert.That(app.World.State.currentArea, Is.EqualTo(AreaId.Counter));
+            hud.orderButtons[0].onClick.Invoke();
+            AssertOrderRecipe(productionBook, 1);
+            if (productionBook != book) Assert.That(book.IsOpen, Is.False);
+            productionBook.CloseImmediate();
+            Assert.That(app.InputBlocked, Is.False);
+
+            hud.previousOrder.onClick.Invoke();
+            AssertPage(0);
+            hud.orderButtons[0].onClick.Invoke();
+            AssertOrderRecipe(productionBook, 0);
+            productionBook.CloseImmediate();
+            Assert.That(app.InputBlocked, Is.False);
+            yield return null;
+        }
+
+        private void AssertOrderRecipe(CoffeeCompendiumPanel panel, int requestIndex)
+        {
+            var request = app.World.State.requests[requestIndex];
+            Assert.That(app.World.State.focusedRequestId, Is.EqualTo(request.id));
+            Assert.That(panel.IsOpen, Is.True, "Order clicks must open the recipe immediately, without a frame wait.");
+            Assert.That(panel.CurrentTab, Is.EqualTo(CoffeeCompendiumPanel.Tab.Recipes));
+            Assert.That(panel.RecipeIndex, Is.InRange(0, panel.ProductOrder.Count - 1));
+            Assert.That(panel.ProductOrder[panel.RecipeIndex], Is.EqualTo(request.productId));
+            Assert.That(app.InputBlocked, Is.True);
         }
 
         [UnityTest] public IEnumerator ClearingOrdersHidesEverySheetAndHudRebindingDoesNotDuplicateNodes()
@@ -269,6 +323,13 @@ namespace Spotlight.FreeCafe.Tests
             Assert.That(hud.previousOrder.interactable, Is.False);
             foreach (var button in hud.orderButtons) Assert.That(button.interactable, Is.False);
             Assert.That(hud.orderPage.text, Is.EqualTo("暂无订单"));
+            // Invoke bypasses Button.interactable, so the handler must also reject stale/empty rows.
+            string focused = app.World.State.focusedRequestId;
+            foreach (var button in hud.orderButtons) button.onClick.Invoke();
+            Assert.That(app.World.State.focusedRequestId, Is.EqualTo(focused));
+            Assert.That(book.IsOpen, Is.False);
+            Assert.That(app.GetComponent<FreeCafeProductionHud>().IsModalOpen, Is.False);
+            Assert.That(app.InputBlocked, Is.False);
         }
     }
 }

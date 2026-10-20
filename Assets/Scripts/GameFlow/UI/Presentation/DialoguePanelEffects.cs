@@ -168,6 +168,12 @@ namespace Spotlight.GameFlow
         }
         private void PrepareNextLine(int index)
         {
+            if (script.InstantPortraitPreview)
+            {
+                ShowLine(index);
+                effects.Tick(0f);
+                return;
+            }
             DialogueLine line = activeLines[index];
             if (!ChangesIdentity(line.ReplaceLeft, left, line.LeftCharacter)
                 && !ChangesIdentity(line.ReplaceRight, right, line.RightCharacter)

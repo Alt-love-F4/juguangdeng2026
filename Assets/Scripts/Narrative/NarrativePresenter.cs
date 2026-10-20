@@ -745,7 +745,9 @@ namespace Spotlight.Narrative
             {
                 NarrativeBarDefinition bar = configuration.bars.Find(b => b != null && b.barKey == condition.target);
                 string label = bar != null ? resolve(bar.nameText) : condition.target;
-                descriptions.Add(label + " " + condition.op + " " + condition.value);
+                descriptions.Add(condition.condType == "BAR_GTE"
+                    ? "需要 " + label + " 到达 " + condition.value
+                    : label + " " + condition.op + " " + condition.value);
             }
             return string.Join(" / ", descriptions);
         }

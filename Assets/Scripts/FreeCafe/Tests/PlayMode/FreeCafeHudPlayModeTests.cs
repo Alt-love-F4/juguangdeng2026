@@ -76,9 +76,13 @@ namespace Spotlight.FreeCafe.Tests
             Assert.That(hud.orderPage.text,Does.StartWith("02 /"));
             ClickHudButton(hud.orderButtons[0]);
             Assert.That(app.World.State.focusedRequestId,Is.EqualTo(app.World.State.requests[1].id));
+            AssertOrderRecipe(Compendium(hud.recipePanel),app.World.State.requests[1].productId);
+            yield return CloseBook(Compendium(hud.recipePanel));
             ClickHudButton(hud.previousOrder);
             ClickHudButton(hud.orderButtons[0]);
             Assert.That(app.World.State.focusedRequestId,Is.EqualTo(app.World.State.requests[0].id));
+            AssertOrderRecipe(Compendium(hud.recipePanel),app.World.State.requests[0].productId);
+            yield return CloseBook(Compendium(hud.recipePanel));
             yield return new WaitForEndOfFrame();
             var screenshot=ScreenCapture.CaptureScreenshotAsTexture();
             var directory=System.IO.Path.Combine(Application.dataPath,"../Logs/GameplayHud");
@@ -122,6 +126,8 @@ namespace Spotlight.FreeCafe.Tests
             ClickHudButton(hud.nextOrder);
             ClickHudButton(order);
             string focused=app.World.State.focusedRequestId;
+            AssertOrderRecipe(Compendium(hud.recipePanel),app.World.Request(focused).productId);
+            yield return CloseBook(Compendium(hud.recipePanel));
             ClickWorkstationPortal();
             yield return null;yield return null;
             var production=app.GetComponent<FreeCafeProductionHud>();
@@ -267,6 +273,8 @@ namespace Spotlight.FreeCafe.Tests
             app.DebugRefreshViews();
             orderButton.onClick.Invoke();
             Assert.That(app.World.State.focusedRequestId,Is.EqualTo(expected));
+            AssertOrderRecipe(Compendium(hud.recipePanel),app.World.Request(expected).productId);
+            yield return CloseBook(Compendium(hud.recipePanel));
             hud.enabled=false;
             hud.areaButtons=null;hud.orderButtons=null;hud.orderLabels=null;
             hud.enabled=true;
@@ -371,6 +379,14 @@ namespace Spotlight.FreeCafe.Tests
             Assert.That(production.startBusiness==null || !production.startBusiness.gameObject.activeInHierarchy,Is.True);
             Assert.That(production.saveButton==null || !production.saveButton.gameObject.activeInHierarchy,Is.True);
             Assert.That(production.productionRoot.GetComponentsInChildren<Canvas>().Length,Is.EqualTo(0));
+        }
+        private static void AssertOrderRecipe(CoffeeCompendiumPanel book,string productId)
+        {
+            Assert.That(book,Is.Not.Null);
+            Assert.That(book.IsOpen,Is.True,"Clicking an order must immediately open its recipe.");
+            Assert.That(book.CurrentTab,Is.EqualTo(CoffeeCompendiumPanel.Tab.Recipes));
+            Assert.That(book.RecipeIndex,Is.InRange(0,book.ProductOrder.Count-1));
+            Assert.That(book.ProductOrder[book.RecipeIndex],Is.EqualTo(productId));
         }
         private static CoffeeCompendiumPanel Compendium(GameObject panel) => panel == null ? null : panel.GetComponent<CoffeeCompendiumPanel>();
         private static IEnumerator WaitForBook(CoffeeCompendiumPanel book)

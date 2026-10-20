@@ -125,7 +125,7 @@ namespace Spotlight.GameFlow
             Func<string, string> resolve = resolver ?? session.ResolveText;
             presenter = new NarrativePresenter(copy, resolve)
             {
-                PageCondition = session.Controller.ReadPresentationCondition,
+                PageCondition = session.Controller.ReadPageCondition,
                 ChoiceUnlocked = (id, context) => session.Controller.EvaluateConditions("choice", id, context),
                 AbilityCheck = session.EvaluateAbilityCheck,
                 InlineAbilityCheck = session.EvaluateInlineAbilityCheck,

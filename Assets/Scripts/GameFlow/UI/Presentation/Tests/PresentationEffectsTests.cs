@@ -4,6 +4,8 @@ using System.Collections;
 using NUnit.Framework;
 using UnityEditor.SceneManagement;
 using UnityEngine;
+using UnityEngine.InputSystem;
+using UnityEngine.InputSystem.LowLevel;
 using UnityEngine.SceneManagement;
 using UnityEngine.TestTools;
 using UnityEngine.UI;
@@ -48,6 +50,75 @@ namespace Spotlight.GameFlow.Tests
             while (!panel.IsReady)
             { Assert.That(Time.realtimeSinceStartup, Is.LessThan(deadline)); yield return null; }
         }
+        [UnityTest]
+        public IEnumerator PrefabHistoryButtonsPauseRevealAndEscapeClosesHistoryBeforeCancellingDialogue()
+        {
+            Keyboard keyboard = InputSystem.AddDevice<Keyboard>("PresentationEffectsHistoryKeyboard");
+            try
+            {
+                panel.Play(new DialogueScript(new[] { new DialogueLine(DialogueSpeaker.Narrator, new string('字', 300)) }));
+                yield return Ready();
+                Button historyButton = panel.transform.Find("EffectStage/Artwork/DialogueBox/history")?.GetComponent<Button>();
+                var dialogue = panel.transform.Find("EffectStage/Artwork/DialogueBox/Dialogue")?.GetComponent<TMPro.TMP_Text>();
+                Button closeButton = panel.transform.Find("DialogueHistory/Close")?.GetComponent<Button>();
+                var historyText = panel.transform.Find("DialogueHistory/Viewport/Text")?.GetComponent<TMPro.TMP_Text>();
+                Assert.That(historyButton, Is.Not.Null, "Use the history Button on the actual dialogue prefab.");
+                Assert.That(closeButton, Is.Not.Null, "History must provide its generated Close Button.");
+                Assert.That(dialogue, Is.Not.Null);
+                Assert.That(historyText, Is.Not.Null);
+                Assert.That(historyButton.IsInteractable(), Is.True);
+                yield return new WaitForSecondsRealtime(.1f);
+                Assert.That(panel.IsTyping, Is.True, "Open history while the controlled long line is still revealing text.");
+
+                historyButton.onClick.Invoke();
+                Assert.That(panel.IsHistoryOpen, Is.True);
+                Assert.That(panel.ReadingPaused, Is.True);
+                int revealedCharacters = dialogue.maxVisibleCharacters;
+                Assert.That(revealedCharacters, Is.GreaterThan(0));
+                string frozenHistory = historyText.text;
+                int entryIndex = DialogueHistoryService.Formal.Entries.Count - 1;
+                Assert.That(entryIndex, Is.GreaterThanOrEqualTo(0));
+                string frozenEntry = DialogueHistoryService.Formal.Entries[entryIndex].Text;
+                yield return new WaitForSecondsRealtime(.2f);
+                Assert.That(panel.ReadingPaused, Is.True);
+                Assert.That(dialogue.maxVisibleCharacters, Is.EqualTo(revealedCharacters), "History pauses the actual typewriter.");
+                Assert.That(historyText.text, Is.EqualTo(frozenHistory));
+                Assert.That(DialogueHistoryService.Formal.Entries[entryIndex].Text, Is.EqualTo(frozenEntry));
+
+                closeButton.onClick.Invoke();
+                Assert.That(panel.IsHistoryOpen, Is.False);
+                Assert.That(panel.ReadingPaused, Is.False);
+                yield return new WaitForSecondsRealtime(.2f);
+                Assert.That(dialogue.maxVisibleCharacters, Is.GreaterThan(revealedCharacters), "The Close Button resumes revealing text.");
+                Assert.That(panel.IsPlaying, Is.True);
+
+                historyButton.onClick.Invoke();
+                Assert.That(panel.IsHistoryOpen, Is.True);
+                Assert.That(panel.ReadingPaused, Is.True);
+                yield return null; // Do not send Escape on history's opening/input-blocked frame.
+                InputSystem.QueueStateEvent(keyboard, new KeyboardState(Key.Escape));
+                yield return null;
+                yield return null;
+                Assert.That(panel.IsHistoryOpen, Is.False, "First Escape closes only history.");
+                Assert.That(panel.ReadingPaused, Is.False);
+                Assert.That(panel.IsPlaying, Is.True, "The debug controller must not also cancel dialogue on that Escape.");
+                Assert.That(controller.CurrentPanel, Is.SameAs(panel));
+
+                InputSystem.QueueStateEvent(keyboard, new KeyboardState());
+                yield return null;
+                yield return null;
+                InputSystem.QueueStateEvent(keyboard, new KeyboardState(Key.Escape));
+                yield return null;
+                yield return null;
+                Assert.That(DialoguePanel.IsAnyPlaying, Is.False, "Second Escape cancels dialogue after history is closed.");
+                Assert.That(controller.CurrentPanel, Is.Null);
+            }
+            finally
+            {
+                if (keyboard != null) InputSystem.RemoveDevice(keyboard);
+            }
+        }
+
         [UnityTest]
         public IEnumerator HistoryPausesPartialRevealAndNestedPauseSurvivesClose()
         {

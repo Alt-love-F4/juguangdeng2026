@@ -1,0 +1,1644 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 2ff659cf14012374a8e012bf6aff6a0f, type: 3}
+  m_Name: DialoguePortraitSizing
+  m_EditorClassIdentifier: Spotlight.GameFlow.UI::Spotlight.GameFlow.DialoguePortraitSizing
+  heightRatio: 0.88
+  entries:
+  - characterId: adele
+    displayName: "\u963F\u9EDB\u5C14\xB7\u7C73\u5C3C\u8036"
+    sprite: {fileID: 21300000, guid: 38cb4f464bfc57b4ab5053a676aacdca, type: 3}
+    visibleRect:
+      serializedVersion: 2
+      x: 0
+      y: 0
+      width: 1
+      height: 1
+    heightScale: 1
+    offset: {x: 0, y: 0}
+  - characterId: adele:indoor
+    displayName: "\u963F\u9EDB\u5C14\xB7\u7C73\u5C3C\u8036 / \u5BA4\u5185"
+    sprite: {fileID: 21300000, guid: 65b9914a2c803fe44a27c5026c99c923, type: 3}
+    visibleRect:
+      serializedVersion: 2
+      x: 0.08015267
+      y: 0
+      width: 0.83587784
+      height: 1
+    heightScale: 1
+    offset: {x: 0, y: 0}
+  - characterId: oct07.passerby.a
+    displayName: "\u8DEF\u4EBAA"
+    sprite: {fileID: 21300000, guid: fee3b8fd0023432a8180fb993a5cd3ac, type: 3}
+    visibleRect:
+      serializedVersion: 2
+      x: 0.026041666
+      y: 0.013020833
+      width: 0.9479167
+      height: 0.92903644
+    heightScale: 1
+    offset: {x: 0, y: 0}
+  - characterId: oct07.passerby.a:indoor
+    displayName: "\u8DEF\u4EBAA / \u5BA4\u5185"
+    sprite: {fileID: 21300000, guid: 920d4bad03724be3b59eb3cd33ca29f4, type: 3}
+    visibleRect:
+      serializedVersion: 2
+      x: 0.061068702
+      y: 0
+      width: 0.8778626
+      height: 1
+    heightScale: 1
+    offset: {x: 0, y: 0}
+  - characterId: rose.envoy
+    displayName: "\u8001\u7237"
+    sprite: {fileID: 21300000, guid: fee3b8fd0023432a8180fb993a5cd3ac, type: 3}
+    visibleRect:
+      serializedVersion: 2
+      x: 0.026041666
+      y: 0.013020833
+      width: 0.9479167
+      height: 0.92903644
+    heightScale: 1
+    offset: {x: 0, y: 0}
+  - characterId: rose.envoy:indoor
+    displayName: "\u8001\u7237 / \u5BA4\u5185"
+    sprite: {fileID: 21300000, guid: 920d4bad03724be3b59eb3cd33ca29f4, type: 3}
+    visibleRect:
+      serializedVersion: 2
+      x: 0.061068702
+      y: 0
+      width: 0.8778626
+      height: 1
+    heightScale: 1
+    offset: {x: 0, y: 0}
+  - characterId: rose.butake
+    displayName: "\u7537\u4EBA"
+    sprite: {fileID: 21300000, guid: fee3b8fd0023432a8180fb993a5cd3ac, type: 3}
+    visibleRect:
+      serializedVersion: 2
+      x: 0.026041666
+      y: 0.013020833
+      width: 0.9479167
+      height: 0.92903644
+    heightScale: 1
+    offset: {x: 0, y: 0}
+  - characterId: rose.butake:indoor
+    displayName: "\u7537\u4EBA / \u5BA4\u5185"
+    sprite: {fileID: 21300000, guid: 920d4bad03724be3b59eb3cd33ca29f4, type: 3}
+    visibleRect:
+      serializedVersion: 2
+      x: 0.061068702
+      y: 0
+      width: 0.8778626
+      height: 1
+    heightScale: 1
+    offset: {x: 0, y: 0}
+  - characterId: sorel
+    displayName: "\u7D22\u96F7\u5C14"
+    sprite: {fileID: 21300000, guid: 6d2bcac72a5bfd84c8ba23040099763e, type: 3}
+    visibleRect:
+      serializedVersion: 2
+      x: 0
+      y: 0
+      width: 1
+      height: 1
+    heightScale: 1
+    offset: {x: 0, y: 0}
+  - characterId: sorel:indoor
+    displayName: "\u7D22\u96F7\u5C14 / \u5BA4\u5185"
+    sprite: {fileID: 21300000, guid: 64ce3892ccf103941b9fe59ffa2bafa7, type: 3}
+    visibleRect:
+      serializedVersion: 2
+      x: 0.061068702
+      y: 0
+      width: 0.8778626
+      height: 1
+    heightScale: 1
+    offset: {x: 0, y: 0}
+  - characterId: church.broadcast
+    displayName: "\u5E7F\u64AD"
+    sprite: {fileID: 21300000, guid: fee3b8fd0023432a8180fb993a5cd3ac, type: 3}
+    visibleRect:
+      serializedVersion: 2
+      x: 0.026041666
+      y: 0.013020833
+      width: 0.9479167
+      height: 0.92903644
+    heightScale: 1
+    offset: {x: 0, y: 0}
+  - characterId: church.broadcast:indoor
+    displayName: "\u5E7F\u64AD / \u5BA4\u5185"
+    sprite: {fileID: 21300000, guid: 920d4bad03724be3b59eb3cd33ca29f4, type: 3}
+    visibleRect:
+      serializedVersion: 2
+      x: 0.061068702
+      y: 0
+      width: 0.8778626
+      height: 1
+    heightScale: 1
+    offset: {x: 0, y: 0}
+  - characterId: church.crowd
+    displayName: "\u4EBA\u7FA4"
+    sprite: {fileID: 21300000, guid: fee3b8fd0023432a8180fb993a5cd3ac, type: 3}
+    visibleRect:
+      serializedVersion: 2
+      x: 0.026041666
+      y: 0.013020833
+      width: 0.9479167
+      height: 0.92903644
+    heightScale: 1
+    offset: {x: 0, y: 0}
+  - characterId: church.crowd:indoor
+    displayName: "\u4EBA\u7FA4 / \u5BA4\u5185"
+    sprite: {fileID: 21300000, guid: 920d4bad03724be3b59eb3cd33ca29f4, type: 3}
+    visibleRect:
+      serializedVersion: 2
+      x: 0.061068702
+      y: 0
+      width: 0.8778626
+      height: 1
+    heightScale: 1
+    offset: {x: 0, y: 0}
+  - characterId: church.duke
+    displayName: "\u57C3\u5229\u6602\u516C\u7235"
+    sprite: {fileID: 21300000, guid: 31ac4a73250545e4aa9dec0c6b85a7e9, type: 3}
+    visibleRect:
+      serializedVersion: 2
+      x: 0
+      y: 0
+      width: 1
+      height: 1
+    heightScale: 1
+    offset: {x: 0, y: 0}
+  - characterId: church.duke:indoor
+    displayName: "\u57C3\u5229\u6602\u516C\u7235 / \u5BA4\u5185"
+    sprite: {fileID: 21300000, guid: 1fac8b8821dc39c4994f23bfe49a3de2, type: 3}
+    visibleRect:
+      serializedVersion: 2
+      x: 0.061068702
+      y: 0
+      width: 0.8778626
+      height: 1
+    heightScale: 1
+    offset: {x: 0, y: 0}
+  - characterId: church.man
+    displayName: "\u7537\u4EBA"
+    sprite: {fileID: 21300000, guid: fee3b8fd0023432a8180fb993a5cd3ac, type: 3}
+    visibleRect:
+      serializedVersion: 2
+      x: 0.026041666
+      y: 0.013020833
+      width: 0.9479167
+      height: 0.92903644
+    heightScale: 1
+    offset: {x: 0, y: 0}
+  - characterId: church.man:indoor
+    displayName: "\u7537\u4EBA / \u5BA4\u5185"
+    sprite: {fileID: 21300000, guid: 920d4bad03724be3b59eb3cd33ca29f4, type: 3}
+    visibleRect:
+      serializedVersion: 2
+      x: 0.061068702
+      y: 0
+      width: 0.8778626
+      height: 1
+    heightScale: 1
+    offset: {x: 0, y: 0}
+  - characterId: laurent
+    displayName: "\u6D1B\u6717\xB7\u8FEA\u8499"
+    sprite: {fileID: 21300000, guid: 5d903c510a6e63a4daf6d14b58adc188, type: 3}
+    visibleRect:
+      serializedVersion: 2
+      x: 0
+      y: 0
+      width: 1
+      height: 1
+    heightScale: 1
+    offset: {x: 0, y: 0}
+  - characterId: laurent:indoor
+    displayName: "\u6D1B\u6717\xB7\u8FEA\u8499 / \u5BA4\u5185"
+    sprite: {fileID: 21300000, guid: 3258e14350d20c8489fa10e8004afa2c, type: 3}
+    visibleRect:
+      serializedVersion: 2
+      x: 0.061068702
+      y: 0
+      width: 0.8778626
+      height: 1
+    heightScale: 1
+    offset: {x: 0, y: 0}
+  - characterId: clovis
+    displayName: "\u514B\u6D1B\u7EF4\xB7\u5EB7\u591A\u5C14"
+    sprite: {fileID: 21300000, guid: 9f6dcb319da10c640bb24d57d6d4fe06, type: 3}
+    visibleRect:
+      serializedVersion: 2
+      x: 0
+      y: 0
+      width: 1
+      height: 1
+    heightScale: 1
+    offset: {x: 0, y: 0}
+  - characterId: clovis:indoor
+    displayName: "\u514B\u6D1B\u7EF4\xB7\u5EB7\u591A\u5C14 / \u5BA4\u5185"
+    sprite: {fileID: 21300000, guid: b3764dd3563461f4483defd9d71f7ce9, type: 3}
+    visibleRect:
+      serializedVersion: 2
+      x: 0.061068702
+      y: 0
+      width: 0.8778626
+      height: 1
+    heightScale: 1
+    offset: {x: 0, y: 0}
+  - characterId: renaud
+    displayName: "\u96F7\u8BFA\xB7\u5EB7\u591A\u5C14"
+    sprite: {fileID: 21300000, guid: 3dde72c66b6210c468954cefcde276b6, type: 3}
+    visibleRect:
+      serializedVersion: 2
+      x: 0.026041666
+      y: 0.013020833
+      width: 0.9479167
+      height: 0.92903644
+    heightScale: 1
+    offset: {x: 0, y: 0}
+  - characterId: renaud:indoor
+    displayName: "\u96F7\u8BFA\xB7\u5EB7\u591A\u5C14 / \u5BA4\u5185"
+    sprite: {fileID: 21300000, guid: 864aa2374441aa74d8fae7190e982fe0, type: 3}
+    visibleRect:
+      serializedVersion: 2
+      x: 0.061068702
+      y: 0
+      width: 0.8778626
+      height: 1
+    heightScale: 1
+    offset: {x: 0, y: 0}
+  - characterId: elion
+    displayName: "\u57C3\u5229\u6602\xB7\u5EB7\u591A\u5C14"
+    sprite: {fileID: 21300000, guid: 31ac4a73250545e4aa9dec0c6b85a7e9, type: 3}
+    visibleRect:
+      serializedVersion: 2
+      x: 0
+      y: 0
+      width: 1
+      height: 1
+    heightScale: 1
+    offset: {x: 0, y: 0}
+  - characterId: elion:indoor
+    displayName: "\u57C3\u5229\u6602\xB7\u5EB7\u591A\u5C14 / \u5BA4\u5185"
+    sprite: {fileID: 21300000, guid: 1fac8b8821dc39c4994f23bfe49a3de2, type: 3}
+    visibleRect:
+      serializedVersion: 2
+      x: 0.061068702
+      y: 0
+      width: 0.8778626
+      height: 1
+    heightScale: 1
+    offset: {x: 0, y: 0}
+  - characterId: alienor
+    displayName: "\u963F\u8389\u8036\u8BFA\u5C14\xB7\u5EB7\u591A\u5C14"
+    sprite: {fileID: 21300000, guid: c0646430da3c7a342830fade34fb46fd, type: 3}
+    visibleRect:
+      serializedVersion: 2
+      x: 0
+      y: 0
+      width: 1
+      height: 1
+    heightScale: 1
+    offset: {x: 0, y: 0}
+  - characterId: alienor:indoor
+    displayName: "\u963F\u8389\u8036\u8BFA\u5C14\xB7\u5EB7\u591A\u5C14 / \u5BA4\u5185"
+    sprite: {fileID: 21300000, guid: 60c4f4a05ebc9ef42a4d5201da144f11, type: 3}
+    visibleRect:
+      serializedVersion: 2
+      x: 0.08015267
+      y: 0
+      width: 0.83587784
+      height: 1
+    heightScale: 1
+    offset: {x: 0, y: 0}
+  - characterId: queen
+    displayName: "\u738B\u540E"
+    sprite: {fileID: 21300000, guid: e4dfc41a0a5b48540ae32f57df2e15bb, type: 3}
+    visibleRect:
+      serializedVersion: 2
+      x: 0.036458332
+      y: 0.013020833
+      width: 0.7317708
+      height: 0.890625
+    heightScale: 1
+    offset: {x: 0, y: 0}
+  - characterId: queen:indoor
+    displayName: "\u738B\u540E / \u5BA4\u5185"
+    sprite: {fileID: 21300000, guid: e07d201b1477b6f41bcaa05e3937c7d5, type: 3}
+    visibleRect:
+      serializedVersion: 2
+      x: 0.08015267
+      y: 0
+      width: 0.83587784
+      height: 1
+    heightScale: 1
+    offset: {x: 0, y: 0}
+  - characterId: bertrand
+    displayName: "\u8D1D\u7279\u6717\xB7\u5EB7\u591A\u5C14"
+    sprite: {fileID: 21300000, guid: 80fbb0f1d556832458e4256e53c7d571, type: 3}
+    visibleRect:
+      serializedVersion: 2
+      x: 0
+      y: 0
+      width: 1
+      height: 1
+    heightScale: 1
+    offset: {x: 0, y: 0}
+  - characterId: bertrand:indoor
+    displayName: "\u8D1D\u7279\u6717\xB7\u5EB7\u591A\u5C14 / \u5BA4\u5185"
+    sprite: {fileID: 21300000, guid: b3fe31c6681be7444adc1c452c7d7510, type: 3}
+    visibleRect:
+      serializedVersion: 2
+      x: 0.061068702
+      y: 0
+      width: 0.8778626
+      height: 1
+    heightScale: 1
+    offset: {x: 0, y: 0}
+  - characterId: sade
+    displayName: "\u8428\u5FB7"
+    sprite: {fileID: 21300000, guid: a82447f7ecde70f41874e7951f34cf69, type: 3}
+    visibleRect:
+      serializedVersion: 2
+      x: 0
+      y: 0
+      width: 1
+      height: 1
+    heightScale: 1
+    offset: {x: 0, y: 0}
+  - characterId: sade:indoor
+    displayName: "\u8428\u5FB7 / \u5BA4\u5185"
+    sprite: {fileID: 21300000, guid: 1f4863ca2d7c21c4694d5dcab37704f7, type: 3}
+    visibleRect:
+      serializedVersion: 2
+      x: 0.061068702
+      y: 0
+      width: 0.8778626
+      height: 1
+    heightScale: 1
+    offset: {x: 0, y: 0}
+  - characterId: mamion
+    displayName: "\u9A6C\u7C73\u7FC1"
+    sprite: {fileID: 21300000, guid: 5c98a8ebd9afdb44e9a1a66fbd251ce6, type: 3}
+    visibleRect:
+      serializedVersion: 2
+      x: 0
+      y: 0
+      width: 1
+      height: 1
+    heightScale: 1
+    offset: {x: 0, y: 0}
+  - characterId: mamion:indoor
+    displayName: "\u9A6C\u7C73\u7FC1 / \u5BA4\u5185"
+    sprite: {fileID: 21300000, guid: 0a61d12ce90514842a4e337bdc5f1ecd, type: 3}
+    visibleRect:
+      serializedVersion: 2
+      x: 0.061068702
+      y: 0
+      width: 0.8778626
+      height: 1
+    heightScale: 1
+    offset: {x: 0, y: 0}
+  - characterId: lucien
+    displayName: "\u5415\u897F\u5B89"
+    sprite: {fileID: 21300000, guid: 3e520b89ea2d95b4f95c23b7e20657ae, type: 3}
+    visibleRect:
+      serializedVersion: 2
+      x: 0
+      y: 0
+      width: 1
+      height: 1
+    heightScale: 1
+    offset: {x: 0, y: 0}
+  - characterId: lucien:indoor
+    displayName: "\u5415\u897F\u5B89 / \u5BA4\u5185"
+    sprite: {fileID: 21300000, guid: b0acda8974ee05740b9514b3d9742b80, type: 3}
+    visibleRect:
+      serializedVersion: 2
+      x: 0.061068702
+      y: 0
+      width: 0.8778626
+      height: 1
+    heightScale: 1
+    offset: {x: 0, y: 0}
+  - characterId: lesou
+    displayName: "\u52D2\u82CF"
+    sprite: {fileID: 21300000, guid: 16aebbb394bab03408446817c9f1e33c, type: 3}
+    visibleRect:
+      serializedVersion: 2
+      x: 0
+      y: 0
+      width: 1
+      height: 1
+    heightScale: 1
+    offset: {x: 0, y: 0}
+  - characterId: lesou:indoor
+    displayName: "\u52D2\u82CF / \u5BA4\u5185"
+    sprite: {fileID: 21300000, guid: 69e84447b26611d478daa079cff9c222, type: 3}
+    visibleRect:
+      serializedVersion: 2
+      x: 0.061068702
+      y: 0
+      width: 0.8778626
+      height: 1
+    heightScale: 1
+    offset: {x: 0, y: 0}
+  - characterId: sylvain
+    displayName: "\u897F\u5C14\u4E07\xB7\u74E6\u9686"
+    sprite: {fileID: 21300000, guid: 3eccad9589eae5a4eb0616ba3c575583, type: 3}
+    visibleRect:
+      serializedVersion: 2
+      x: 0
+      y: 0
+      width: 1
+      height: 1
+    heightScale: 1
+    offset: {x: 0, y: 0}
+  - characterId: sylvain:indoor
+    displayName: "\u897F\u5C14\u4E07\xB7\u74E6\u9686 / \u5BA4\u5185"
+    sprite: {fileID: 21300000, guid: d4ca1e4423ce984449b4e8863dff0bad, type: 3}
+    visibleRect:
+      serializedVersion: 2
+      x: 0.061068702
+      y: 0
+      width: 0.8778626
+      height: 1
+    heightScale: 1
+    offset: {x: 0, y: 0}
+  - characterId: antoine
+    displayName: "\u5B89\u6258\u4E07\xB7\u9A6C\u5C1A"
+    sprite: {fileID: 21300000, guid: 10eb2e2f664b6a149aeaf29f2d13c064, type: 3}
+    visibleRect:
+      serializedVersion: 2
+      x: 0
+      y: 0
+      width: 1
+      height: 1
+    heightScale: 1
+    offset: {x: 0, y: 0}
+  - characterId: antoine:indoor
+    displayName: "\u5B89\u6258\u4E07\xB7\u9A6C\u5C1A / \u5BA4\u5185"
+    sprite: {fileID: 21300000, guid: 88bc32beb2662c448b5aba6faad94ff5, type: 3}
+    visibleRect:
+      serializedVersion: 2
+      x: 0.061068702
+      y: 0
+      width: 0.8778626
+      height: 1
+    heightScale: 1
+    offset: {x: 0, y: 0}
+  - characterId: lefebvre
+    displayName: "\u52D2\u8D39\u5F17\u5C14"
+    sprite: {fileID: 21300000, guid: ad5f537c6049d8644b6b76511ca7931d, type: 3}
+    visibleRect:
+      serializedVersion: 2
+      x: 0
+      y: 0
+      width: 1
+      height: 1
+    heightScale: 1
+    offset: {x: 0, y: 0}
+  - characterId: lefebvre:indoor
+    displayName: "\u52D2\u8D39\u5F17\u5C14 / \u5BA4\u5185"
+    sprite: {fileID: 21300000, guid: 0e6a035110ef6984fae397e2be17c4bf, type: 3}
+    visibleRect:
+      serializedVersion: 2
+      x: 0.061068702
+      y: 0
+      width: 0.8778626
+      height: 1
+    heightScale: 1
+    offset: {x: 0, y: 0}
+  - characterId: duval
+    displayName: "\u675C\u74E6\u5C14\xB7\u7C73\u5C3C\u8036"
+    sprite: {fileID: 21300000, guid: 8b549e090247da04899f2d3ee22ece54, type: 3}
+    visibleRect:
+      serializedVersion: 2
+      x: 0.026041666
+      y: 0.013020833
+      width: 0.9479167
+      height: 0.92903644
+    heightScale: 1
+    offset: {x: 0, y: 0}
+  - characterId: duval:indoor
+    displayName: "\u675C\u74E6\u5C14\xB7\u7C73\u5C3C\u8036 / \u5BA4\u5185"
+    sprite: {fileID: 21300000, guid: fda346b753606aa4e9422ad969d1d5be, type: 3}
+    visibleRect:
+      serializedVersion: 2
+      x: 0.061068702
+      y: 0
+      width: 0.8778626
+      height: 1
+    heightScale: 1
+    offset: {x: 0, y: 0}
+  - characterId: emmanuel
+    displayName: "\u57C3\u9A6C\u7EBD\u57C3\u5C14\xB7\u7D22\u96F7\u5C14"
+    sprite: {fileID: 21300000, guid: 6d2bcac72a5bfd84c8ba23040099763e, type: 3}
+    visibleRect:
+      serializedVersion: 2
+      x: 0
+      y: 0
+      width: 1
+      height: 1
+    heightScale: 1
+    offset: {x: 0, y: 0}
+  - characterId: emmanuel:indoor
+    displayName: "\u57C3\u9A6C\u7EBD\u57C3\u5C14\xB7\u7D22\u96F7\u5C14 / \u5BA4\u5185"
+    sprite: {fileID: 21300000, guid: 64ce3892ccf103941b9fe59ffa2bafa7, type: 3}
+    visibleRect:
+      serializedVersion: 2
+      x: 0.061068702
+      y: 0
+      width: 0.8778626
+      height: 1
+    heightScale: 1
+    offset: {x: 0, y: 0}
+  - characterId: sparrow
+    displayName: "\u9EBB\u96C0"
+    sprite: {fileID: 21300000, guid: c7394a60563d2eb43930d055daea2489, type: 3}
+    visibleRect:
+      serializedVersion: 2
+      x: 0
+      y: 0
+      width: 1
+      height: 1
+    heightScale: 1
+    offset: {x: 0, y: 0}
+  - characterId: sparrow:indoor
+    displayName: "\u9EBB\u96C0 / \u5BA4\u5185"
+    sprite: {fileID: 21300000, guid: 880aff98536e1444abec83b5b7ccc089, type: 3}
+    visibleRect:
+      serializedVersion: 2
+      x: 0.061068702
+      y: 0
+      width: 0.8778626
+      height: 1
+    heightScale: 1
+    offset: {x: 0, y: 0}
+  - characterId: thibaut
+    displayName: "\u8482\u535A\xB7\u5361\u9686"
+    sprite: {fileID: 21300000, guid: a2bee1f147e51db4fa2becdde2d9aa9f, type: 3}
+    visibleRect:
+      serializedVersion: 2
+      x: 0
+      y: 0
+      width: 1
+      height: 1
+    heightScale: 1
+    offset: {x: 0, y: 0}
+  - characterId: thibaut:indoor
+    displayName: "\u8482\u535A\xB7\u5361\u9686 / \u5BA4\u5185"
+    sprite: {fileID: 21300000, guid: 73aa16f8d5930b2479ac402747c251a1, type: 3}
+    visibleRect:
+      serializedVersion: 2
+      x: 0.061068702
+      y: 0
+      width: 0.8778626
+      height: 1
+    heightScale: 1
+    offset: {x: 0, y: 0}
+  - characterId: octave
+    displayName: "\u5965\u514B\u5854\u592B\xB7\u97E6\u5C14\u5185"
+    sprite: {fileID: 21300000, guid: 3031b6d50daca0c4288e07ce752c11de, type: 3}
+    visibleRect:
+      serializedVersion: 2
+      x: 0.026041666
+      y: 0.013020833
+      width: 0.9479167
+      height: 0.92903644
+    heightScale: 1
+    offset: {x: 0, y: 0}
+  - characterId: octave:indoor
+    displayName: "\u5965\u514B\u5854\u592B\xB7\u97E6\u5C14\u5185 / \u5BA4\u5185"
+    sprite: {fileID: 21300000, guid: 350ce8b7617e98f40acf840f4d9d576d, type: 3}
+    visibleRect:
+      serializedVersion: 2
+      x: 0.061068702
+      y: 0
+      width: 0.8778626
+      height: 1
+    heightScale: 1
+    offset: {x: 0, y: 0}
+  - characterId: eugene
+    displayName: "\u6B27\u4EC1\xB7\u8FEA\u5E03\u74E6"
+    sprite: {fileID: 21300000, guid: f6d5eb1bc6bd50448b114fb67f58c162, type: 3}
+    visibleRect:
+      serializedVersion: 2
+      x: 0
+      y: 0
+      width: 1
+      height: 1
+    heightScale: 1
+    offset: {x: 0, y: 0}
+  - characterId: eugene:indoor
+    displayName: "\u6B27\u4EC1\xB7\u8FEA\u5E03\u74E6 / \u5BA4\u5185"
+    sprite: {fileID: 21300000, guid: bfeac7fcc1903e044af8b8b55d5fd231, type: 3}
+    visibleRect:
+      serializedVersion: 2
+      x: 0.061068702
+      y: 0
+      width: 0.8778626
+      height: 1
+    heightScale: 1
+    offset: {x: 0, y: 0}
+  - characterId: colette
+    displayName: "\u67EF\u83B1\u7279\xB7\u5E03\u5415\u5185"
+    sprite: {fileID: 21300000, guid: 671e7b9cd690d054f865ba5b57cda65c, type: 3}
+    visibleRect:
+      serializedVersion: 2
+      x: 0
+      y: 0
+      width: 1
+      height: 1
+    heightScale: 1
+    offset: {x: 0, y: 0}
+  - characterId: colette:indoor
+    displayName: "\u67EF\u83B1\u7279\xB7\u5E03\u5415\u5185 / \u5BA4\u5185"
+    sprite: {fileID: 21300000, guid: d1eacccc4e07bb94b907a72c382cc413, type: 3}
+    visibleRect:
+      serializedVersion: 2
+      x: 0.08015267
+      y: 0
+      width: 0.83587784
+      height: 1
+    heightScale: 1
+    offset: {x: 0, y: 0}
+  - characterId: pascal
+    displayName: "\u5E15\u65AF\u5361\u5C14\xB7\u52D2\u9C81"
+    sprite: {fileID: 21300000, guid: 651544fa960eac548a263244f3d0be43, type: 3}
+    visibleRect:
+      serializedVersion: 2
+      x: 0
+      y: 0
+      width: 1
+      height: 1
+    heightScale: 1
+    offset: {x: 0, y: 0}
+  - characterId: pascal:indoor
+    displayName: "\u5E15\u65AF\u5361\u5C14\xB7\u52D2\u9C81 / \u5BA4\u5185"
+    sprite: {fileID: 21300000, guid: aed55c95dd9cae842a63bc552c018488, type: 3}
+    visibleRect:
+      serializedVersion: 2
+      x: 0.061068702
+      y: 0
+      width: 0.8778626
+      height: 1
+    heightScale: 1
+    offset: {x: 0, y: 0}
+  - characterId: marie
+    displayName: "\u96C5\u514B\xB7\u9A6C\u5C1A"
+    sprite: {fileID: 21300000, guid: 9b6b1953b5b2fdd43b84254ae713ad69, type: 3}
+    visibleRect:
+      serializedVersion: 2
+      x: 0
+      y: 0
+      width: 1
+      height: 1
+    heightScale: 1
+    offset: {x: 0, y: 0}
+  - characterId: marie:indoor
+    displayName: "\u96C5\u514B\xB7\u9A6C\u5C1A / \u5BA4\u5185"
+    sprite: {fileID: 21300000, guid: 5fa06db74d8c04148a93bb3c37f0ebdc, type: 3}
+    visibleRect:
+      serializedVersion: 2
+      x: 0.061068702
+      y: 0
+      width: 0.8778626
+      height: 1
+    heightScale: 1
+    offset: {x: 0, y: 0}
+  - characterId: guest_a
+    displayName: "\u5BA2\u4EBAA"
+    sprite: {fileID: 21300000, guid: 8e51d05762b1cd246a010f79b43d374c, type: 3}
+    visibleRect:
+      serializedVersion: 2
+      x: 0.026041666
+      y: 0.013020833
+      width: 0.9479167
+      height: 0.92903644
+    heightScale: 1
+    offset: {x: 0, y: 0}
+  - characterId: guest_a:indoor
+    displayName: "\u5BA2\u4EBAA / \u5BA4\u5185"
+    sprite: {fileID: 21300000, guid: 4ecdcf182ec1c8246b962d9f790f6982, type: 3}
+    visibleRect:
+      serializedVersion: 2
+      x: 0.061068702
+      y: 0
+      width: 0.8778626
+      height: 1
+    heightScale: 1
+    offset: {x: 0, y: 0}
+  - characterId: guest_b
+    displayName: "\u5BA2\u4EBAB"
+    sprite: {fileID: 21300000, guid: 50de1c8be97dc724e810390a30949d57, type: 3}
+    visibleRect:
+      serializedVersion: 2
+      x: 0.036458332
+      y: 0.013020833
+      width: 0.7317708
+      height: 0.890625
+    heightScale: 1
+    offset: {x: 0, y: 0}
+  - characterId: guest_b:indoor
+    displayName: "\u5BA2\u4EBAB / \u5BA4\u5185"
+    sprite: {fileID: 21300000, guid: 166def092477a5548ac311d9f235bf56, type: 3}
+    visibleRect:
+      serializedVersion: 2
+      x: 0.08015267
+      y: 0
+      width: 0.83587784
+      height: 1
+    heightScale: 1
+    offset: {x: 0, y: 0}
+  - characterId: guest_c
+    displayName: "\u5BA2\u4EBAC"
+    sprite: {fileID: 21300000, guid: 6c5c37c1b820c924fbc2af65dc24fb0e, type: 3}
+    visibleRect:
+      serializedVersion: 2
+      x: 0.026041666
+      y: 0.013020833
+      width: 0.9479167
+      height: 0.92903644
+    heightScale: 1
+    offset: {x: 0, y: 0}
+  - characterId: guest_c:indoor
+    displayName: "\u5BA2\u4EBAC / \u5BA4\u5185"
+    sprite: {fileID: 21300000, guid: 9e8a2c449f56dad4787c70b31c5c7a81, type: 3}
+    visibleRect:
+      serializedVersion: 2
+      x: 0.061068702
+      y: 0
+      width: 0.8778626
+      height: 1
+    heightScale: 1
+    offset: {x: 0, y: 0}
+  - characterId: guest_d
+    displayName: "\u5BA2\u4EBAD"
+    sprite: {fileID: 21300000, guid: 57a2b2e0621bd174695f5771da4bbabe, type: 3}
+    visibleRect:
+      serializedVersion: 2
+      x: 0.036458332
+      y: 0.013020833
+      width: 0.7317708
+      height: 0.890625
+    heightScale: 1
+    offset: {x: 0, y: 0}
+  - characterId: guest_d:indoor
+    displayName: "\u5BA2\u4EBAD / \u5BA4\u5185"
+    sprite: {fileID: 21300000, guid: 897455b701ada12479dd059d1acace62, type: 3}
+    visibleRect:
+      serializedVersion: 2
+      x: 0.08015267
+      y: 0
+      width: 0.83587784
+      height: 1
+    heightScale: 1
+    offset: {x: 0, y: 0}
+  - characterId: soldier_a
+    displayName: "\u519B\u4EBAA"
+    sprite: {fileID: 21300000, guid: 76a0873d17f80ed429808d90668451e3, type: 3}
+    visibleRect:
+      serializedVersion: 2
+      x: 0.026041666
+      y: 0.013020833
+      width: 0.9479167
+      height: 0.92903644
+    heightScale: 1
+    offset: {x: 0, y: 0}
+  - characterId: soldier_a:indoor
+    displayName: "\u519B\u4EBAA / \u5BA4\u5185"
+    sprite: {fileID: 21300000, guid: 5be9f515a5e6f4348840ccf44bd13d72, type: 3}
+    visibleRect:
+      serializedVersion: 2
+      x: 0.061068702
+      y: 0
+      width: 0.8778626
+      height: 1
+    heightScale: 1
+    offset: {x: 0, y: 0}
+  - characterId: soldier_b
+    displayName: "\u519B\u4EBAB"
+    sprite: {fileID: 21300000, guid: 561f93addc0f3f245bb09781ea5f0739, type: 3}
+    visibleRect:
+      serializedVersion: 2
+      x: 0.026041666
+      y: 0.013020833
+      width: 0.9479167
+      height: 0.92903644
+    heightScale: 1
+    offset: {x: 0, y: 0}
+  - characterId: soldier_b:indoor
+    displayName: "\u519B\u4EBAB / \u5BA4\u5185"
+    sprite: {fileID: 21300000, guid: d32224f9d78220e4f907e947ae3a9db0, type: 3}
+    visibleRect:
+      serializedVersion: 2
+      x: 0.061068702
+      y: 0
+      width: 0.8778626
+      height: 1
+    heightScale: 1
+    offset: {x: 0, y: 0}
+  - characterId: soldier_c
+    displayName: "\u519B\u4EBAC"
+    sprite: {fileID: 21300000, guid: 48935492bc84360479c6726e36543409, type: 3}
+    visibleRect:
+      serializedVersion: 2
+      x: 0.026041666
+      y: 0.013020833
+      width: 0.9479167
+      height: 0.92903644
+    heightScale: 1
+    offset: {x: 0, y: 0}
+  - characterId: soldier_c:indoor
+    displayName: "\u519B\u4EBAC / \u5BA4\u5185"
+    sprite: {fileID: 21300000, guid: 1c3dfa23071ca2f4ead37a0e20d88584, type: 3}
+    visibleRect:
+      serializedVersion: 2
+      x: 0.061068702
+      y: 0
+      width: 0.8778626
+      height: 1
+    heightScale: 1
+    offset: {x: 0, y: 0}
+  - characterId: soldier_d
+    displayName: "\u519B\u4EBAD"
+    sprite: {fileID: 21300000, guid: 0b0340a994600da4f988d2bac67c1b81, type: 3}
+    visibleRect:
+      serializedVersion: 2
+      x: 0.026041666
+      y: 0.013020833
+      width: 0.9479167
+      height: 0.92903644
+    heightScale: 1
+    offset: {x: 0, y: 0}
+  - characterId: soldier_d:indoor
+    displayName: "\u519B\u4EBAD / \u5BA4\u5185"
+    sprite: {fileID: 21300000, guid: a5816f79ebf2fd64e9ecc7c662e837d4, type: 3}
+    visibleRect:
+      serializedVersion: 2
+      x: 0.061068702
+      y: 0
+      width: 0.8778626
+      height: 1
+    heightScale: 1
+    offset: {x: 0, y: 0}
+  - characterId: neutral.1008.shopkeeper
+    displayName: "\u5E97\u4E3B"
+    sprite: {fileID: 21300000, guid: fee3b8fd0023432a8180fb993a5cd3ac, type: 3}
+    visibleRect:
+      serializedVersion: 2
+      x: 0.026041666
+      y: 0.013020833
+      width: 0.9479167
+      height: 0.92903644
+    heightScale: 1
+    offset: {x: 0, y: 0}
+  - characterId: neutral.1008.shopkeeper:indoor
+    displayName: "\u5E97\u4E3B / \u5BA4\u5185"
+    sprite: {fileID: 21300000, guid: 920d4bad03724be3b59eb3cd33ca29f4, type: 3}
+    visibleRect:
+      serializedVersion: 2
+      x: 0.061068702
+      y: 0
+      width: 0.8778626
+      height: 1
+    heightScale: 1
+    offset: {x: 0, y: 0}
+  - characterId: neutral.1008.unknown
+    displayName: "\uFF1F\uFF1F\uFF1F"
+    sprite: {fileID: 21300000, guid: fee3b8fd0023432a8180fb993a5cd3ac, type: 3}
+    visibleRect:
+      serializedVersion: 2
+      x: 0.026041666
+      y: 0.013020833
+      width: 0.9479167
+      height: 0.92903644
+    heightScale: 1
+    offset: {x: 0, y: 0}
+  - characterId: neutral.1008.unknown:indoor
+    displayName: "\uFF1F\uFF1F\uFF1F / \u5BA4\u5185"
+    sprite: {fileID: 21300000, guid: 920d4bad03724be3b59eb3cd33ca29f4, type: 3}
+    visibleRect:
+      serializedVersion: 2
+      x: 0.061068702
+      y: 0
+      width: 0.8778626
+      height: 1
+    heightScale: 1
+    offset: {x: 0, y: 0}
+  - characterId: neutral.voice.unknown
+    displayName: "\uFF1F\uFF1F\uFF1F"
+    sprite: {fileID: 21300000, guid: fee3b8fd0023432a8180fb993a5cd3ac, type: 3}
+    visibleRect:
+      serializedVersion: 2
+      x: 0.026041666
+      y: 0.013020833
+      width: 0.9479167
+      height: 0.92903644
+    heightScale: 1
+    offset: {x: 0, y: 0}
+  - characterId: neutral.voice.unknown:indoor
+    displayName: "\uFF1F\uFF1F\uFF1F / \u5BA4\u5185"
+    sprite: {fileID: 21300000, guid: 920d4bad03724be3b59eb3cd33ca29f4, type: 3}
+    visibleRect:
+      serializedVersion: 2
+      x: 0.061068702
+      y: 0
+      width: 0.8778626
+      height: 1
+    heightScale: 1
+    offset: {x: 0, y: 0}
+  - characterId: neutral.reporter
+    displayName: "\u8BB0\u8005"
+    sprite: {fileID: 21300000, guid: fee3b8fd0023432a8180fb993a5cd3ac, type: 3}
+    visibleRect:
+      serializedVersion: 2
+      x: 0.026041666
+      y: 0.013020833
+      width: 0.9479167
+      height: 0.92903644
+    heightScale: 1
+    offset: {x: 0, y: 0}
+  - characterId: neutral.reporter:indoor
+    displayName: "\u8BB0\u8005 / \u5BA4\u5185"
+    sprite: {fileID: 21300000, guid: 920d4bad03724be3b59eb3cd33ca29f4, type: 3}
+    visibleRect:
+      serializedVersion: 2
+      x: 0.061068702
+      y: 0
+      width: 0.8778626
+      height: 1
+    heightScale: 1
+    offset: {x: 0, y: 0}
+  - characterId: neutral.inspector
+    displayName: "\u76D1\u5BDF\u53F8\u5B98\u5458"
+    sprite: {fileID: 21300000, guid: fee3b8fd0023432a8180fb993a5cd3ac, type: 3}
+    visibleRect:
+      serializedVersion: 2
+      x: 0.026041666
+      y: 0.013020833
+      width: 0.9479167
+      height: 0.92903644
+    heightScale: 1
+    offset: {x: 0, y: 0}
+  - characterId: neutral.inspector:indoor
+    displayName: "\u76D1\u5BDF\u53F8\u5B98\u5458 / \u5BA4\u5185"
+    sprite: {fileID: 21300000, guid: 920d4bad03724be3b59eb3cd33ca29f4, type: 3}
+    visibleRect:
+      serializedVersion: 2
+      x: 0.061068702
+      y: 0
+      width: 0.8778626
+      height: 1
+    heightScale: 1
+    offset: {x: 0, y: 0}
+  - characterId: neutral.delivery
+    displayName: "\u9001\u8D27\u4F19\u8BA1"
+    sprite: {fileID: 21300000, guid: fee3b8fd0023432a8180fb993a5cd3ac, type: 3}
+    visibleRect:
+      serializedVersion: 2
+      x: 0.026041666
+      y: 0.013020833
+      width: 0.9479167
+      height: 0.92903644
+    heightScale: 1
+    offset: {x: 0, y: 0}
+  - characterId: neutral.delivery:indoor
+    displayName: "\u9001\u8D27\u4F19\u8BA1 / \u5BA4\u5185"
+    sprite: {fileID: 21300000, guid: 920d4bad03724be3b59eb3cd33ca29f4, type: 3}
+    visibleRect:
+      serializedVersion: 2
+      x: 0.061068702
+      y: 0
+      width: 0.8778626
+      height: 1
+    heightScale: 1
+    offset: {x: 0, y: 0}
+  - characterId: neutral.official
+    displayName: "\u5B98\u65B9\u4EE3\u8868"
+    sprite: {fileID: 21300000, guid: fee3b8fd0023432a8180fb993a5cd3ac, type: 3}
+    visibleRect:
+      serializedVersion: 2
+      x: 0.026041666
+      y: 0.013020833
+      width: 0.9479167
+      height: 0.92903644
+    heightScale: 1
+    offset: {x: 0, y: 0}
+  - characterId: neutral.official:indoor
+    displayName: "\u5B98\u65B9\u4EE3\u8868 / \u5BA4\u5185"
+    sprite: {fileID: 21300000, guid: 920d4bad03724be3b59eb3cd33ca29f4, type: 3}
+    visibleRect:
+      serializedVersion: 2
+      x: 0.061068702
+      y: 0
+      width: 0.8778626
+      height: 1
+    heightScale: 1
+    offset: {x: 0, y: 0}
+  - characterId: rose.elma
+    displayName: "\u57C3\u5C14\u739B"
+    sprite: {fileID: 21300000, guid: fee3b8fd0023432a8180fb993a5cd3ac, type: 3}
+    visibleRect:
+      serializedVersion: 2
+      x: 0.026041666
+      y: 0.013020833
+      width: 0.9479167
+      height: 0.92903644
+    heightScale: 1
+    offset: {x: 0, y: 0}
+  - characterId: rose.elma:indoor
+    displayName: "\u57C3\u5C14\u739B / \u5BA4\u5185"
+    sprite: {fileID: 21300000, guid: 920d4bad03724be3b59eb3cd33ca29f4, type: 3}
+    visibleRect:
+      serializedVersion: 2
+      x: 0.061068702
+      y: 0
+      width: 0.8778626
+      height: 1
+    heightScale: 1
+    offset: {x: 0, y: 0}
+  - characterId: rose.giaconi
+    displayName: "\u8D3E\u79D1\u5C3C"
+    sprite: {fileID: 21300000, guid: fee3b8fd0023432a8180fb993a5cd3ac, type: 3}
+    visibleRect:
+      serializedVersion: 2
+      x: 0.026041666
+      y: 0.013020833
+      width: 0.9479167
+      height: 0.92903644
+    heightScale: 1
+    offset: {x: 0, y: 0}
+  - characterId: rose.giaconi:indoor
+    displayName: "\u8D3E\u79D1\u5C3C / \u5BA4\u5185"
+    sprite: {fileID: 21300000, guid: 920d4bad03724be3b59eb3cd33ca29f4, type: 3}
+    visibleRect:
+      serializedVersion: 2
+      x: 0.061068702
+      y: 0
+      width: 0.8778626
+      height: 1
+    heightScale: 1
+    offset: {x: 0, y: 0}
+  - characterId: rose.kai
+    displayName: "\u51EF"
+    sprite: {fileID: 21300000, guid: fee3b8fd0023432a8180fb993a5cd3ac, type: 3}
+    visibleRect:
+      serializedVersion: 2
+      x: 0.026041666
+      y: 0.013020833
+      width: 0.9479167
+      height: 0.92903644
+    heightScale: 1
+    offset: {x: 0, y: 0}
+  - characterId: rose.kai:indoor
+    displayName: "\u51EF / \u5BA4\u5185"
+    sprite: {fileID: 21300000, guid: 920d4bad03724be3b59eb3cd33ca29f4, type: 3}
+    visibleRect:
+      serializedVersion: 2
+      x: 0.061068702
+      y: 0
+      width: 0.8778626
+      height: 1
+    heightScale: 1
+    offset: {x: 0, y: 0}
+  - characterId: church.generic.a68402d404
+    displayName: "\u7537\u4EBA"
+    sprite: {fileID: 21300000, guid: fee3b8fd0023432a8180fb993a5cd3ac, type: 3}
+    visibleRect:
+      serializedVersion: 2
+      x: 0.026041666
+      y: 0.013020833
+      width: 0.9479167
+      height: 0.92903644
+    heightScale: 1
+    offset: {x: 0, y: 0}
+  - characterId: church.generic.a68402d404:indoor
+    displayName: "\u7537\u4EBA / \u5BA4\u5185"
+    sprite: {fileID: 21300000, guid: 920d4bad03724be3b59eb3cd33ca29f4, type: 3}
+    visibleRect:
+      serializedVersion: 2
+      x: 0.061068702
+      y: 0
+      width: 0.8778626
+      height: 1
+    heightScale: 1
+    offset: {x: 0, y: 0}
+  - characterId: church.generic.8dd49b2272
+    displayName: "\u5BA2\u4EBA"
+    sprite: {fileID: 21300000, guid: fee3b8fd0023432a8180fb993a5cd3ac, type: 3}
+    visibleRect:
+      serializedVersion: 2
+      x: 0.026041666
+      y: 0.013020833
+      width: 0.9479167
+      height: 0.92903644
+    heightScale: 1
+    offset: {x: 0, y: 0}
+  - characterId: church.generic.8dd49b2272:indoor
+    displayName: "\u5BA2\u4EBA / \u5BA4\u5185"
+    sprite: {fileID: 21300000, guid: 920d4bad03724be3b59eb3cd33ca29f4, type: 3}
+    visibleRect:
+      serializedVersion: 2
+      x: 0.061068702
+      y: 0
+      width: 0.8778626
+      height: 1
+    heightScale: 1
+    offset: {x: 0, y: 0}
+  - characterId: church.generic.be2481a1fd
+    displayName: "\u7591\u4F3C\u9886\u5934\u7684\u4EBA"
+    sprite: {fileID: 21300000, guid: fee3b8fd0023432a8180fb993a5cd3ac, type: 3}
+    visibleRect:
+      serializedVersion: 2
+      x: 0.026041666
+      y: 0.013020833
+      width: 0.9479167
+      height: 0.92903644
+    heightScale: 1
+    offset: {x: 0, y: 0}
+  - characterId: church.generic.be2481a1fd:indoor
+    displayName: "\u7591\u4F3C\u9886\u5934\u7684\u4EBA / \u5BA4\u5185"
+    sprite: {fileID: 21300000, guid: 920d4bad03724be3b59eb3cd33ca29f4, type: 3}
+    visibleRect:
+      serializedVersion: 2
+      x: 0.061068702
+      y: 0
+      width: 0.8778626
+      height: 1
+    heightScale: 1
+    offset: {x: 0, y: 0}
+  - characterId: church.generic.35518ef256
+    displayName: "\u76D1\u5BDF\u5B98"
+    sprite: {fileID: 21300000, guid: fee3b8fd0023432a8180fb993a5cd3ac, type: 3}
+    visibleRect:
+      serializedVersion: 2
+      x: 0.026041666
+      y: 0.013020833
+      width: 0.9479167
+      height: 0.92903644
+    heightScale: 1
+    offset: {x: 0, y: 0}
+  - characterId: church.generic.35518ef256:indoor
+    displayName: "\u76D1\u5BDF\u5B98 / \u5BA4\u5185"
+    sprite: {fileID: 21300000, guid: 920d4bad03724be3b59eb3cd33ca29f4, type: 3}
+    visibleRect:
+      serializedVersion: 2
+      x: 0.061068702
+      y: 0
+      width: 0.8778626
+      height: 1
+    heightScale: 1
+    offset: {x: 0, y: 0}
+  - characterId: church.generic.75ad55d561
+    displayName: "\u4F17\u76D1\u5BDF\u5458"
+    sprite: {fileID: 21300000, guid: fee3b8fd0023432a8180fb993a5cd3ac, type: 3}
+    visibleRect:
+      serializedVersion: 2
+      x: 0.026041666
+      y: 0.013020833
+      width: 0.9479167
+      height: 0.92903644
+    heightScale: 1
+    offset: {x: 0, y: 0}
+  - characterId: church.generic.75ad55d561:indoor
+    displayName: "\u4F17\u76D1\u5BDF\u5458 / \u5BA4\u5185"
+    sprite: {fileID: 21300000, guid: 920d4bad03724be3b59eb3cd33ca29f4, type: 3}
+    visibleRect:
+      serializedVersion: 2
+      x: 0.061068702
+      y: 0
+      width: 0.8778626
+      height: 1
+    heightScale: 1
+    offset: {x: 0, y: 0}
+  - characterId: church.generic.85688335fc
+    displayName: "\u770B\u5B88"
+    sprite: {fileID: 21300000, guid: fee3b8fd0023432a8180fb993a5cd3ac, type: 3}
+    visibleRect:
+      serializedVersion: 2
+      x: 0.026041666
+      y: 0.013020833
+      width: 0.9479167
+      height: 0.92903644
+    heightScale: 1
+    offset: {x: 0, y: 0}
+  - characterId: church.generic.85688335fc:indoor
+    displayName: "\u770B\u5B88 / \u5BA4\u5185"
+    sprite: {fileID: 21300000, guid: 920d4bad03724be3b59eb3cd33ca29f4, type: 3}
+    visibleRect:
+      serializedVersion: 2
+      x: 0.061068702
+      y: 0
+      width: 0.8778626
+      height: 1
+    heightScale: 1
+    offset: {x: 0, y: 0}
+  - characterId: church.generic.7148666b21
+    displayName: "\u5973\u4EBA"
+    sprite: {fileID: 21300000, guid: 633ff67ca71442aa88dbea46962bec38, type: 3}
+    visibleRect:
+      serializedVersion: 2
+      x: 0.036458332
+      y: 0.013020833
+      width: 0.7317708
+      height: 0.890625
+    heightScale: 1
+    offset: {x: 0, y: 0}
+  - characterId: church.generic.7148666b21:indoor
+    displayName: "\u5973\u4EBA / \u5BA4\u5185"
+    sprite: {fileID: 21300000, guid: 1bfa238947234b21843296532829a254, type: 3}
+    visibleRect:
+      serializedVersion: 2
+      x: 0.08015267
+      y: 0
+      width: 0.83587784
+      height: 1
+    heightScale: 1
+    offset: {x: 0, y: 0}
+  - characterId: church.generic.fae30e83db
+    displayName: "\u644A\u4E3B"
+    sprite: {fileID: 21300000, guid: fee3b8fd0023432a8180fb993a5cd3ac, type: 3}
+    visibleRect:
+      serializedVersion: 2
+      x: 0.026041666
+      y: 0.013020833
+      width: 0.9479167
+      height: 0.92903644
+    heightScale: 1
+    offset: {x: 0, y: 0}
+  - characterId: church.generic.fae30e83db:indoor
+    displayName: "\u644A\u4E3B / \u5BA4\u5185"
+    sprite: {fileID: 21300000, guid: 920d4bad03724be3b59eb3cd33ca29f4, type: 3}
+    visibleRect:
+      serializedVersion: 2
+      x: 0.061068702
+      y: 0
+      width: 0.8778626
+      height: 1
+    heightScale: 1
+    offset: {x: 0, y: 0}
+  - characterId: church.generic.d03f6dd9b5
+    displayName: "\u5E73\u6C11A"
+    sprite: {fileID: 21300000, guid: fee3b8fd0023432a8180fb993a5cd3ac, type: 3}
+    visibleRect:
+      serializedVersion: 2
+      x: 0.026041666
+      y: 0.013020833
+      width: 0.9479167
+      height: 0.92903644
+    heightScale: 1
+    offset: {x: 0, y: 0}
+  - characterId: church.generic.d03f6dd9b5:indoor
+    displayName: "\u5E73\u6C11A / \u5BA4\u5185"
+    sprite: {fileID: 21300000, guid: 920d4bad03724be3b59eb3cd33ca29f4, type: 3}
+    visibleRect:
+      serializedVersion: 2
+      x: 0.061068702
+      y: 0
+      width: 0.8778626
+      height: 1
+    heightScale: 1
+    offset: {x: 0, y: 0}
+  - characterId: church.generic.577d875f77
+    displayName: "\u5E73\u6C11B"
+    sprite: {fileID: 21300000, guid: fee3b8fd0023432a8180fb993a5cd3ac, type: 3}
+    visibleRect:
+      serializedVersion: 2
+      x: 0.026041666
+      y: 0.013020833
+      width: 0.9479167
+      height: 0.92903644
+    heightScale: 1
+    offset: {x: 0, y: 0}
+  - characterId: church.generic.577d875f77:indoor
+    displayName: "\u5E73\u6C11B / \u5BA4\u5185"
+    sprite: {fileID: 21300000, guid: 920d4bad03724be3b59eb3cd33ca29f4, type: 3}
+    visibleRect:
+      serializedVersion: 2
+      x: 0.061068702
+      y: 0
+      width: 0.8778626
+      height: 1
+    heightScale: 1
+    offset: {x: 0, y: 0}
+  - characterId: church.generic.5d7522a804
+    displayName: "\u8001\u5987\u4EBA"
+    sprite: {fileID: 21300000, guid: 633ff67ca71442aa88dbea46962bec38, type: 3}
+    visibleRect:
+      serializedVersion: 2
+      x: 0.036458332
+      y: 0.013020833
+      width: 0.7317708
+      height: 0.890625
+    heightScale: 1
+    offset: {x: 0, y: 0}
+  - characterId: church.generic.5d7522a804:indoor
+    displayName: "\u8001\u5987\u4EBA / \u5BA4\u5185"
+    sprite: {fileID: 21300000, guid: 1bfa238947234b21843296532829a254, type: 3}
+    visibleRect:
+      serializedVersion: 2
+      x: 0.08015267
+      y: 0
+      width: 0.83587784
+      height: 1
+    heightScale: 1
+    offset: {x: 0, y: 0}
+  - characterId: church.generic.3fe3a9d5ff
+    displayName: "\uFF1F\uFF1F\uFF1F"
+    sprite: {fileID: 21300000, guid: fee3b8fd0023432a8180fb993a5cd3ac, type: 3}
+    visibleRect:
+      serializedVersion: 2
+      x: 0.026041666
+      y: 0.013020833
+      width: 0.9479167
+      height: 0.92903644
+    heightScale: 1
+    offset: {x: 0, y: 0}
+  - characterId: church.generic.3fe3a9d5ff:indoor
+    displayName: "\uFF1F\uFF1F\uFF1F / \u5BA4\u5185"
+    sprite: {fileID: 21300000, guid: 920d4bad03724be3b59eb3cd33ca29f4, type: 3}
+    visibleRect:
+      serializedVersion: 2
+      x: 0.061068702
+      y: 0
+      width: 0.8778626
+      height: 1
+    heightScale: 1
+    offset: {x: 0, y: 0}
+  - characterId: revolution.actor.young_worker
+    displayName: "\u9752\u5E74\u5DE5\u4EBA"
+    sprite: {fileID: 21300000, guid: fee3b8fd0023432a8180fb993a5cd3ac, type: 3}
+    visibleRect:
+      serializedVersion: 2
+      x: 0.026041666
+      y: 0.013020833
+      width: 0.9479167
+      height: 0.92903644
+    heightScale: 1
+    offset: {x: 0, y: 0}
+  - characterId: revolution.actor.young_worker:indoor
+    displayName: "\u9752\u5E74\u5DE5\u4EBA / \u5BA4\u5185"
+    sprite: {fileID: 21300000, guid: 920d4bad03724be3b59eb3cd33ca29f4, type: 3}
+    visibleRect:
+      serializedVersion: 2
+      x: 0.061068702
+      y: 0
+      width: 0.8778626
+      height: 1
+    heightScale: 1
+    offset: {x: 0, y: 0}
+  - characterId: revolution.actor.worker
+    displayName: "\u5DE5\u4EBA"
+    sprite: {fileID: 21300000, guid: fee3b8fd0023432a8180fb993a5cd3ac, type: 3}
+    visibleRect:
+      serializedVersion: 2
+      x: 0.026041666
+      y: 0.013020833
+      width: 0.9479167
+      height: 0.92903644
+    heightScale: 1
+    offset: {x: 0, y: 0}
+  - characterId: revolution.actor.worker:indoor
+    displayName: "\u5DE5\u4EBA / \u5BA4\u5185"
+    sprite: {fileID: 21300000, guid: 920d4bad03724be3b59eb3cd33ca29f4, type: 3}
+    visibleRect:
+      serializedVersion: 2
+      x: 0.061068702
+      y: 0
+      width: 0.8778626
+      height: 1
+    heightScale: 1
+    offset: {x: 0, y: 0}
+  - characterId: revolution.actor.district_delegate
+    displayName: "\u8857\u533A\u4EE3\u8868"
+    sprite: {fileID: 21300000, guid: fee3b8fd0023432a8180fb993a5cd3ac, type: 3}
+    visibleRect:
+      serializedVersion: 2
+      x: 0.026041666
+      y: 0.013020833
+      width: 0.9479167
+      height: 0.92903644
+    heightScale: 1
+    offset: {x: 0, y: 0}
+  - characterId: revolution.actor.district_delegate:indoor
+    displayName: "\u8857\u533A\u4EE3\u8868 / \u5BA4\u5185"
+    sprite: {fileID: 21300000, guid: 920d4bad03724be3b59eb3cd33ca29f4, type: 3}
+    visibleRect:
+      serializedVersion: 2
+      x: 0.061068702
+      y: 0
+      width: 0.8778626
+      height: 1
+    heightScale: 1
+    offset: {x: 0, y: 0}
+  - characterId: revolution.actor.workshop_delegate
+    displayName: "\u5DE5\u574A\u4EE3\u8868"
+    sprite: {fileID: 21300000, guid: fee3b8fd0023432a8180fb993a5cd3ac, type: 3}
+    visibleRect:
+      serializedVersion: 2
+      x: 0.026041666
+      y: 0.013020833
+      width: 0.9479167
+      height: 0.92903644
+    heightScale: 1
+    offset: {x: 0, y: 0}
+  - characterId: revolution.actor.workshop_delegate:indoor
+    displayName: "\u5DE5\u574A\u4EE3\u8868 / \u5BA4\u5185"
+    sprite: {fileID: 21300000, guid: 920d4bad03724be3b59eb3cd33ca29f4, type: 3}
+    visibleRect:
+      serializedVersion: 2
+      x: 0.061068702
+      y: 0
+      width: 0.8778626
+      height: 1
+    heightScale: 1
+    offset: {x: 0, y: 0}
+  - characterId: revolution.actor.action_leader
+    displayName: "\u884C\u52A8\u8D1F\u8D23\u4EBA"
+    sprite: {fileID: 21300000, guid: fee3b8fd0023432a8180fb993a5cd3ac, type: 3}
+    visibleRect:
+      serializedVersion: 2
+      x: 0.026041666
+      y: 0.013020833
+      width: 0.9479167
+      height: 0.92903644
+    heightScale: 1
+    offset: {x: 0, y: 0}
+  - characterId: revolution.actor.action_leader:indoor
+    displayName: "\u884C\u52A8\u8D1F\u8D23\u4EBA / \u5BA4\u5185"
+    sprite: {fileID: 21300000, guid: 920d4bad03724be3b59eb3cd33ca29f4, type: 3}
+    visibleRect:
+      serializedVersion: 2
+      x: 0.061068702
+      y: 0
+      width: 0.8778626
+      height: 1
+    heightScale: 1
+    offset: {x: 0, y: 0}
+  - characterId: revolution.actor.rally_speaker
+    displayName: "\u6F14\u8BB2\u8005"
+    sprite: {fileID: 21300000, guid: fee3b8fd0023432a8180fb993a5cd3ac, type: 3}
+    visibleRect:
+      serializedVersion: 2
+      x: 0.026041666
+      y: 0.013020833
+      width: 0.9479167
+      height: 0.92903644
+    heightScale: 1
+    offset: {x: 0, y: 0}
+  - characterId: revolution.actor.rally_speaker:indoor
+    displayName: "\u6F14\u8BB2\u8005 / \u5BA4\u5185"
+    sprite: {fileID: 21300000, guid: 920d4bad03724be3b59eb3cd33ca29f4, type: 3}
+    visibleRect:
+      serializedVersion: 2
+      x: 0.061068702
+      y: 0
+      width: 0.8778626
+      height: 1
+    heightScale: 1
+    offset: {x: 0, y: 0}
+  - characterId: revolution.actor.worker_other
+    displayName: "\u53E6\u4E00\u540D\u5DE5\u4EBA"
+    sprite: {fileID: 21300000, guid: fee3b8fd0023432a8180fb993a5cd3ac, type: 3}
+    visibleRect:
+      serializedVersion: 2
+      x: 0.026041666
+      y: 0.013020833
+      width: 0.9479167
+      height: 0.92903644
+    heightScale: 1
+    offset: {x: 0, y: 0}
+  - characterId: revolution.actor.worker_other:indoor
+    displayName: "\u53E6\u4E00\u540D\u5DE5\u4EBA / \u5BA4\u5185"
+    sprite: {fileID: 21300000, guid: 920d4bad03724be3b59eb3cd33ca29f4, type: 3}
+    visibleRect:
+      serializedVersion: 2
+      x: 0.061068702
+      y: 0
+      width: 0.8778626
+      height: 1
+    heightScale: 1
+    offset: {x: 0, y: 0}
+  - characterId: revolution.actor.citizen
+    displayName: "\u5E02\u6C11"
+    sprite: {fileID: 21300000, guid: fee3b8fd0023432a8180fb993a5cd3ac, type: 3}
+    visibleRect:
+      serializedVersion: 2
+      x: 0.026041666
+      y: 0.013020833
+      width: 0.9479167
+      height: 0.92903644
+    heightScale: 1
+    offset: {x: 0, y: 0}
+  - characterId: revolution.actor.citizen:indoor
+    displayName: "\u5E02\u6C11 / \u5BA4\u5185"
+    sprite: {fileID: 21300000, guid: 920d4bad03724be3b59eb3cd33ca29f4, type: 3}
+    visibleRect:
+      serializedVersion: 2
+      x: 0.061068702
+      y: 0
+      width: 0.8778626
+      height: 1
+    heightScale: 1
+    offset: {x: 0, y: 0}
+  - characterId: revolution.actor.rally_staff
+    displayName: "\u5DE5\u4F5C\u4EBA\u5458"
+    sprite: {fileID: 21300000, guid: fee3b8fd0023432a8180fb993a5cd3ac, type: 3}
+    visibleRect:
+      serializedVersion: 2
+      x: 0.026041666
+      y: 0.013020833
+      width: 0.9479167
+      height: 0.92903644
+    heightScale: 1
+    offset: {x: 0, y: 0}
+  - characterId: revolution.actor.rally_staff:indoor
+    displayName: "\u5DE5\u4F5C\u4EBA\u5458 / \u5BA4\u5185"
+    sprite: {fileID: 21300000, guid: 920d4bad03724be3b59eb3cd33ca29f4, type: 3}
+    visibleRect:
+      serializedVersion: 2
+      x: 0.061068702
+      y: 0
+      width: 0.8778626
+      height: 1
+    heightScale: 1
+    offset: {x: 0, y: 0}
+  - characterId: revolution.actor.squad_member
+    displayName: "\uFF1F\uFF1F\uFF1F"
+    sprite: {fileID: 21300000, guid: fee3b8fd0023432a8180fb993a5cd3ac, type: 3}
+    visibleRect:
+      serializedVersion: 2
+      x: 0.026041666
+      y: 0.013020833
+      width: 0.9479167
+      height: 0.92903644
+    heightScale: 1
+    offset: {x: 0, y: 0}
+  - characterId: revolution.actor.squad_member:indoor
+    displayName: "\uFF1F\uFF1F\uFF1F / \u5BA4\u5185"
+    sprite: {fileID: 21300000, guid: 920d4bad03724be3b59eb3cd33ca29f4, type: 3}
+    visibleRect:
+      serializedVersion: 2
+      x: 0.061068702
+      y: 0
+      width: 0.8778626
+      height: 1
+    heightScale: 1
+    offset: {x: 0, y: 0}
+  - characterId: revolution.actor.member
+    displayName: "\u9769\u547D\u8054\u5408\u6210\u5458"
+    sprite: {fileID: 21300000, guid: fee3b8fd0023432a8180fb993a5cd3ac, type: 3}
+    visibleRect:
+      serializedVersion: 2
+      x: 0.026041666
+      y: 0.013020833
+      width: 0.9479167
+      height: 0.92903644
+    heightScale: 1
+    offset: {x: 0, y: 0}
+  - characterId: revolution.actor.member:indoor
+    displayName: "\u9769\u547D\u8054\u5408\u6210\u5458 / \u5BA4\u5185"
+    sprite: {fileID: 21300000, guid: 920d4bad03724be3b59eb3cd33ca29f4, type: 3}
+    visibleRect:
+      serializedVersion: 2
+      x: 0.061068702
+      y: 0
+      width: 0.8778626
+      height: 1
+    heightScale: 1
+    offset: {x: 0, y: 0}
+  - characterId: daily.actor.church_helper
+    displayName: "\u6559\u4F1A\u5E2E\u5DE5"
+    sprite: {fileID: 21300000, guid: fee3b8fd0023432a8180fb993a5cd3ac, type: 3}
+    visibleRect:
+      serializedVersion: 2
+      x: 0.026041666
+      y: 0.013020833
+      width: 0.9479167
+      height: 0.92903644
+    heightScale: 1
+    offset: {x: 0, y: 0}
+  - characterId: daily.actor.church_helper:indoor
+    displayName: "\u6559\u4F1A\u5E2E\u5DE5 / \u5BA4\u5185"
+    sprite: {fileID: 21300000, guid: 920d4bad03724be3b59eb3cd33ca29f4, type: 3}
+    visibleRect:
+      serializedVersion: 2
+      x: 0.061068702
+      y: 0
+      width: 0.8778626
+      height: 1
+    heightScale: 1
+    offset: {x: 0, y: 0}

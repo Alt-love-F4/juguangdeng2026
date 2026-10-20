@@ -314,7 +314,12 @@ namespace Spotlight.Narrative
                         if (string.Equals(condition.ownerType, "action", StringComparison.OrdinalIgnoreCase)
                             && !NarrativePresentationGuards.IsReadOnlyWorldGuard(condition.target)) throw Invalid();
                         if (!bool.TryParse(condition.value, out bool guardExpected)) throw Invalid();
-                        return TryReadPresentationCondition(condition.target, out bool guardValue) && guardValue == guardExpected;
+                        // Root-local settlement: a check whose conditional page never ran is "not passed",
+                        // not a fault that would abort the whole root at its tail.
+                        bool guardRead = string.Equals(condition.ownerType, "result", StringComparison.OrdinalIgnoreCase)
+                            ? TryReadRootGuard(condition.target, out bool guardValue)
+                            : TryReadPresentationCondition(condition.target, out guardValue);
+                        return guardRead && guardValue == guardExpected;
                     }
                     if (!state.TryGetCondition(condition.target, out bool fact) || !bool.TryParse(condition.value, out bool expected)) throw Invalid();
                     return fact == expected;
@@ -357,8 +362,9 @@ namespace Spotlight.Narrative
             var groups = new Dictionary<int, bool>();
             foreach (NarrativeConditionDefinition condition in conditions)
             {
-                bool value = EvaluateCondition(condition, context);
-                groups[condition.groupIndex] = groups.TryGetValue(condition.groupIndex, out bool previous) ? previous && value : value;
+                // AND within a group: once false, later rows cannot change it, so do not evaluate them.
+                if (groups.TryGetValue(condition.groupIndex, out bool previous) && !previous) continue;
+                groups[condition.groupIndex] = EvaluateCondition(condition, context);
             }
             return groups.Values.Any(value => value);
         }
@@ -905,6 +911,7 @@ namespace Spotlight.Narrative
             settling = true;
             int entryOperationDepth = operationDepth;
             bool transactionSucceeded = false;
+            var trainingRewards = new List<(string attribute, int experience, int increase)>();
             transactionDepth = request.Depth + 1;
             var batch = new List<NarrativeResultDefinition>();
             if (resultsByEvent.TryGetValue(request.Event.eventId, out var eventResults)) batch.AddRange(eventResults);
@@ -935,7 +942,7 @@ namespace Spotlight.Narrative
                 // Freeze all guards against the completed presentation, before any result changes
                 // bools/bars or clears the choice/check/gameplay evidence.
                 batch = batch.Where(r => EvaluateConditions("result", r.resultId, request.Context)).ToList();
-                batch = ExpandTrainingResults(batch);
+                batch = ExpandTrainingResults(batch, out trainingRewards);
                 PreflightResults(batch, out var boolValues, out var itemCounts, out int? moneyBefore, out int? moneyAfter);
                 BeginOperation();
                 if (moneyBefore.HasValue && !MoneyAccount.TryCommit(moneyBefore.Value, moneyAfter.Value, out string moneyError))
@@ -989,6 +996,11 @@ namespace Spotlight.Narrative
             try
             {
                 CompleteCafeHook(request.Event.eventId);
+                foreach (var reward in trainingRewards)
+                {
+                    try { TrainingCompleted?.Invoke(reward.attribute, reward.experience, reward.increase); }
+                    catch (Exception error) { Debug.LogException(error); }
+                }
                 try { EventCompleted?.Invoke(request.Event.eventId); }
                 catch (Exception error) { Debug.LogException(error); }
             }

@@ -102,6 +102,30 @@ namespace Spotlight.Narrative.Tests
             Assert.That(restored.ReadPresentationCondition("gameplay:brew:passed"));
             restoredPresenter.Complete(); Assert.That(restored.CaptureSnapshot().gameplayResults, Is.Empty);
         }
+        [TestCase(0, 3, 2, 0)]
+        [TestCase(9, 3, 2, 1)]
+        [TestCase(9, 19, 1, 1)]
+        [TestCase(0, 20, 0, 0)]
+        public void TrainingNotifiesOnlyCommittedActualReward(int remainder, int current, int earned, int increase)
+        {
+            var config = Config(); config.bars[0].initValue = current; config.bars[1].initValue = remainder;
+            config.results.Add(Train("2"));
+            var p = new Presenter(); var c = new NarrativeController(config, p);
+            var rewards = new List<(string attribute, int experience, int increase)>();
+            c.TrainingCompleted += (a, xp, points) => rewards.Add((a, xp, points));
+            Assert.That(c.QueueEvent("root")); Assert.That(rewards, Is.Empty);
+            p.Complete();
+            if (earned == 0) Assert.That(rewards, Is.Empty);
+            else Assert.That(rewards, Is.EqualTo(new[] { ("language", earned, increase) }));
+        }
+        [Test] public void CancelledTrainingDoesNotNotify()
+        {
+            var config = Config(); config.results.Add(Train("2"));
+            var p = new Presenter(); var c = new NarrativeController(config, p);
+            int notifications = 0; c.TrainingCompleted += (_, __, ___) => notifications++;
+            Assert.That(c.QueueEvent("root")); p.Cancel();
+            Assert.That(notifications, Is.Zero); Assert.That(Bar(c, "training.language"), Is.Zero);
+        }
         [Test] public void TrainingAccumulatesTenthsInOneCentralAttributeAndPersists()
         {
             var config = Config(); config.results.Add(Train("7"));
@@ -135,7 +159,9 @@ namespace Spotlight.Narrative.Tests
             config.results.Add(new NarrativeResultDefinition { resultId = "bad", eventId = "root", resultType = NarrativeResultType.TrainAttribute, target = "language", value = reward, seq = 1 });
             config.results.Add(new NarrativeResultDefinition { resultId = "flag", eventId = "root", resultType = NarrativeResultType.SetFlag, target = "earned", value = "true", seq = 2 });
             var p = new Presenter(); var c = new NarrativeController(config, p); Assert.That(c.QueueEvent("root"));
+            int notifications = 0; c.TrainingCompleted += (_, __, ___) => notifications++;
             LogAssert.Expect(LogType.Error, new Regex("result transaction failed: .*positive integer XP")); p.Complete();
+            Assert.That(notifications, Is.Zero);
             Assert.That(Bar(c, "player.language"), Is.EqualTo(3)); Assert.That(Bar(c, "training.language"), Is.Zero);
             Assert.That(c.State.GetCondition("earned"), Is.False); Assert.That(c.State.HasHappenedEvent("root"), Is.False);
         }

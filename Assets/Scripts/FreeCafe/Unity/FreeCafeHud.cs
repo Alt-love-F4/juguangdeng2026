@@ -259,8 +259,23 @@ namespace Spotlight.FreeCafe
 
         private void Focus(int index)
         {
-            if(runtime!=null && runtime.World!=null && !runtime.InputBlocked && index>=0 && index<requestIds.Length && !string.IsNullOrEmpty(requestIds[index]))
-                runtime.World.Focus(requestIds[index]);
+            if(runtime==null || runtime.World==null || runtime.InputBlocked || index<0 || index>=requestIds.Length || string.IsNullOrEmpty(requestIds[index])) return;
+            var request=runtime.World.Request(requestIds[index]);
+            if(request==null) return;
+            runtime.World.Focus(request.id);
+            // The shared order ticket opens the same targeted recipe as “当前配方”.
+            if(IsWorkstation && runtime.TryGetComponent<FreeCafeProductionHud>(out var production))
+            {
+                production.OpenOrderRecipe();
+                return;
+            }
+            if(recipePanel==null) return;
+            var compendium=recipePanel.GetComponent<CoffeeCompendiumPanel>();
+            if(compendium!=null) { compendium.Open(runtime,request.productId); return; }
+            recipeIndex=Mathf.Max(0,runtime.World.State.unlockedProducts.IndexOf(request.productId));
+            runtime.CancelDrag();
+            recipePanel.SetActive(true);
+            RefreshRecipeTips();
         }
         public void OpenFromFlow(GameFlowBootstrap flow)
         {

@@ -238,6 +238,8 @@ namespace Spotlight.GameFlow
             () => { p.alpha = exit ? 0f : 1f; p.shadow = 0f; p.size = 1f; p.offset = Vector2.zero; complete?.Invoke(); });
         }
 
+        public bool StaticPortraitPreview { get; set; }
+
         public void SetFocus(DialogueSpeaker speaker, bool immediate = false)
         {
             for (int i = 0; i < portraits.Length; i++)
@@ -440,7 +442,7 @@ namespace Spotlight.GameFlow
             {
                 Portrait p = portraits[i];
                 if (p.image == null || p.rect == null) continue;
-                float scale = p.size * Mathf.Lerp(1f, 1.025f, p.focus);
+                float scale = p.size * Mathf.Lerp(1f, StaticPortraitPreview ? 1f : 1.025f, p.focus);
                 // Scale around the authored bottom without changing pivots or cancelling
                 // intentional movement/nods. The child mesh handles aspect-fit letterboxing.
                 float bottomOffset = p.bottomAligned ? p.rect.rect.yMin * p.scale.y * (1f - scale) : 0f;
@@ -448,8 +450,8 @@ namespace Spotlight.GameFlow
                 p.rect.localScale = p.scale * scale;
                 // Every slot keeps the source sprite orientation, including after swaps/replacements.
                 p.image.transform.localScale = p.frame == null
-                    ? p.imageScale * p.size * Mathf.Lerp(1f, 1.025f, p.focus) : p.imageScale;
-                Color tint = Color.Lerp(inactiveTint, Color.white, p.focus);
+                    ? p.imageScale * p.size * Mathf.Lerp(1f, StaticPortraitPreview ? 1f : 1.025f, p.focus) : p.imageScale;
+                Color tint = StaticPortraitPreview ? Color.white : Color.Lerp(inactiveTint, Color.white, p.focus);
                 tint = Color.Lerp(tint, new Color(.025f, .02f, .03f, tint.a), p.shadow);
                 tint.a *= p.alpha;
                 p.image.color = tint;

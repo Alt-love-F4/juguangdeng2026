@@ -56,7 +56,7 @@ namespace Spotlight.Narrative.Tests
             Assert.That(first.passed, Is.EqualTo(passed)); Assert.That(first.values.Single().currentValue, Is.EqualTo(perception));
             Assert.That(first.values.Single().displayName, Is.EqualTo("知觉"));
             string hint = PassiveCheckPresentationConfig.Hint(first);
-            if (passed) Assert.That(hint, Is.EqualTo("知觉 ≥ 2 · 已察觉")); else Assert.That(hint, Is.Null);
+            if (passed) Assert.That(hint, Is.EqualTo("需要 知觉 到达 2 · 已察觉")); else Assert.That(hint, Is.Null);
             first.values[0].currentValue = -100; first.passed = !passed;
             perception = passed ? 1 : 2;
             var second = c.EvaluateAbilityCheckForPresentation("oct07.s2.perception");

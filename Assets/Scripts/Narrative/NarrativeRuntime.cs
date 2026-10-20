@@ -126,7 +126,7 @@ namespace Spotlight.Narrative
                 runtimePresenter.CharacterResolver = ResolveCharacterForPresentation;
             }
             controller = new NarrativeController(configuration, injectedPresenter ?? runtimePresenter);
-            if (runtimePresenter != null) runtimePresenter.PageCondition = controller.ReadPresentationCondition;
+            if (runtimePresenter != null) runtimePresenter.PageCondition = controller.ReadPageCondition;
             controller.CafeVisitsCommitted += snapshot => CafeVisitsCommitted?.Invoke(snapshot);
             controller.AbilityReader = AbilityReader;
             controller.TextResolver = ResolveText;

@@ -29,7 +29,7 @@ namespace Spotlight.Narrative.Tests
             var snapshot = controller.EvaluateAbilityCheckForPresentation("arrival.perception");
             Assert.That(snapshot.passed, Is.EqualTo(insight));
             presenter.done();
-            if (insight) { Assert.That(presenter.request.PassiveHint, Does.StartWith("知觉 ≥ 3 · ")); presenter.done(); }
+            if (insight) { Assert.That(presenter.request.PassiveHint, Does.StartWith("需要 知觉 到达 3 · ")); presenter.done(); }
             Assert.That(presenter.request.Event.eventId, Is.EqualTo("arrival.request"));
             presenter.done();
             for (int i = 0; i < 2; i++)

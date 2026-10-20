@@ -43,9 +43,18 @@ namespace Spotlight.GameFlow
             PlayerRuntime.Current.BindQueries(ReadBar, ReadCondition, ReadItem);
             target.AbilityReader = ReadAttribute;
             controller.AbilityNameResolver = ResolveAttributeName;
+            controller.TrainingCompleted += OnTrainingCompleted;
         }
 
         public void NotifyDayChanged() => calendar?.NotifyChanged();
+        private void OnTrainingCompleted(string attributeId, int experience, int increase)
+        {
+            if (!UnityEngine.Application.isPlaying) return;
+            string name = ResolveAttributeName(attributeId);
+            string message = name + "经验 +" + experience;
+            if (increase > 0) message += "\n" + name + " +" + increase;
+            OperationToastPanel.ShowMessage(message, string.Empty);
+        }
         private void OnBarChanged(string key, int before, int after) => NotifyPlayer();
         private void NotifyPlayer() => PlayerRuntime.Current?.NotifyOwnersChanged();
         private string ResolveAttributeName(string attributeId)
@@ -140,6 +149,7 @@ namespace Spotlight.GameFlow
                 runtime.BarChanged -= OnBarChanged;
                 runtime.Controller.State.ConditionsChanged -= NotifyPlayer;
                 runtime.MapInventory.Changed -= NotifyPlayer;
+                runtime.Controller.TrainingCompleted -= OnTrainingCompleted;
                 runtime.Controller.UnbindValueProviders();
                 runtime.AbilityReader = null;
                 runtime.Controller.AbilityReader = null;

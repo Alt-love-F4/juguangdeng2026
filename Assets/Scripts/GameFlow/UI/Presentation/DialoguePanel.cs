@@ -163,6 +163,8 @@ namespace Spotlight.GameFlow
             try
             {
             script = value;
+            effects.StaticPortraitPreview = value.InstantPortraitPreview;
+            if (value.InstantPortraitPreview) charactersPerSecond = 0f;
             BeginHistory(value, seamless);
             if (!value.IsPreview) charactersPerSecond = configuredCharactersPerSecond;
             activeLines.Clear();
@@ -204,6 +206,15 @@ namespace Spotlight.GameFlow
                 return;
             }
             ShowLine(0);
+            if (value.InstantPortraitPreview)
+            {
+                canvasGroup.alpha = 1f;
+                dialogueBox.anchoredPosition = boxPosition;
+                entranceComplete = ready = true;
+                continueButton.interactable = true;
+                effects.Tick(0f);
+                return;
+            }
             dialogueBox.anchoredPosition = boxPosition + new Vector2(0f, -32f);
             EnterVisiblePortraits();
             transition = Sequence();
@@ -483,6 +494,8 @@ namespace Spotlight.GameFlow
         private static void ApplyPortrait(Image image, Image frame, DialogueCharacter character)
         {
             image.sprite = character == null ? null : character.Portrait;
+            var alignment = image.GetComponent<DialoguePortraitBottomAlignment>();
+            if (alignment != null) alignment.Configure(character?.CharacterKey);
             image.enabled = image.sprite != null;
             if (frame != null) frame.enabled = image.enabled;
         }
@@ -519,6 +532,7 @@ namespace Spotlight.GameFlow
 
         private void AnimateFocus()
         {
+            if (script.InstantPortraitPreview) return;
             effects.SetFocus(activeLines[LineIndex].Speaker);
             PlayLineAccent(activeLines[LineIndex]);
         }

@@ -80,6 +80,7 @@ namespace Spotlight.GameFlow
         private NarrativeController subscribedNarrativeController;
         private NarrativeActionController subscribedActions;
         private bool firstDayGuideApplied;
+        private MapCafeGuideRing cafeGuideRing;
         private int sceneSortingOrder;
         private const string CloseMapButtonName = "CloseMapOverlay";
 
@@ -158,7 +159,9 @@ namespace Spotlight.GameFlow
         }
 
         public bool ControlsAvailable => !standaloneLoading && !GameplayHudPanel.BlocksWorldInput && (flow == null || flow.MapControlsAvailable);
-        public bool UsageTutorialAvailable => ControlsAvailable && !GuideLocked && isActiveAndEnabled
+        public bool IsCafeArrivalGuide => IsFirstDay && flow != null
+            && flow.GetComponent<DayFlowController>()?.IsFirstDayMapGuideActive == true;
+        public bool UsageTutorialAvailable => ControlsAvailable && (!GuideLocked || IsCafeArrivalGuide) && isActiveAndEnabled
             && !DialoguePanel.IsAnyPlaying && Time.timeScale > 0
             && !(NarrativeRuntime.Instance?.Controller?.IsBusy ?? false)
             && !(NarrativeRuntime.Instance?.Actions?.IsExecuting ?? false);
@@ -472,8 +475,8 @@ namespace Spotlight.GameFlow
             if (endDayButton != null) endDayButton.gameObject.SetActive(false);
             ApplyFirstDayGuide();
             TryFocusCompletedAction();
-            if (zoomSlider != null) zoomSlider.interactable = ViewAvailable && !GuideLocked;
-            if (GuideLocked)
+            if (zoomSlider != null) zoomSlider.interactable = ViewAvailable && (!GuideLocked || IsCafeArrivalGuide);
+            if (GuideLocked && !IsCafeArrivalGuide)
             {
                 UpdateZoom();
                 UpdateFocusMovement();
@@ -623,6 +626,7 @@ namespace Spotlight.GameFlow
             panVelocity = Vector2.zero;
             pointerDragging = dragging = false;
             CancelFocusMovement();
+            if (cafeGuideRing != null) cafeGuideRing.gameObject.SetActive(false);
         }
 
         private void UpdatePanInertia(float deltaTime)
@@ -952,7 +956,12 @@ namespace Spotlight.GameFlow
                 {
                     firstDayGuideApplied = true;
                     // Opening the map can guide the camera, never open a location card.
-                    BeginFocusMovement(cafe.position);
+                    // Use the authored building, whose position can differ from the narrative table.
+                    Vector2 cafeCenter = cafe.position;
+                    if (mapContent != null && locationButtons.TryGetValue("cafe", out Button cafeButton)
+                        && cafeButton != null && cafeButton.transform is RectTransform cafeRect)
+                        cafeCenter = mapContent.InverseTransformPoint(cafeRect.TransformPoint(cafeRect.rect.center));
+                    BeginFocusMovement(cafeCenter);
                 }
                 if (status != null)
                 {
@@ -968,6 +977,30 @@ namespace Spotlight.GameFlow
             }
             if (wasApplied != firstDayGuideApplied)
                 foreach (string key in locationButtons.Keys) OnMapContentChanged(key);
+            UpdateCafeGuideRing(active);
+        }
+
+        private void UpdateCafeGuideRing(bool guideActive)
+        {
+            bool visible = guideActive && ControlsAvailable && !IsLocationPopupVisible
+                && !DialoguePanel.IsAnyPlaying && Time.timeScale > 0f
+                && !(NarrativeRuntime.Instance?.Controller?.IsBusy ?? false);
+            if (visible && cafeGuideRing == null && locationButtons.TryGetValue("cafe", out Button cafe) && cafe != null)
+            {
+                var root = new GameObject("CafeTutorialGlow", typeof(RectTransform), typeof(CanvasRenderer), typeof(MapCafeGuideRing));
+                var rect = (RectTransform)root.transform;
+                rect.SetParent(cafe.transform, false);
+                rect.anchorMin = rect.anchorMax = new Vector2(.5f, .5f);
+                rect.anchoredPosition = Vector2.zero;
+                Rect cafeRect = ((RectTransform)cafe.transform).rect;
+                float diameter = Mathf.Max(cafeRect.width, cafeRect.height) + 68f;
+                rect.sizeDelta = Vector2.one * diameter;
+                cafeGuideRing = root.GetComponent<MapCafeGuideRing>();
+                cafeGuideRing.color = new Color(1f, .84f, .38f, 1f);
+                cafeGuideRing.raycastTarget = false;
+            }
+            if (cafeGuideRing != null && cafeGuideRing.gameObject.activeSelf != visible)
+                cafeGuideRing.gameObject.SetActive(visible);
         }
 
         private void FocusPosition(NarrativeMapPositionDefinition position)

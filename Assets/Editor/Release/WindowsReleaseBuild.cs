@@ -23,7 +23,8 @@ namespace Spotlight.FreeCafe.Editor
                     "Create a new release folder:\n" + destination +
                     "\n\nBuild/ keeps the original output, including debug backups.\n" +
                     "Distribution/ contains the shippable copy. Existing folders will not be overwritten.\n\n" +
-                    "Uses the current Windows x64 IL2CPP settings and enabled scenes, with Development disabled and LZ4HC compression.",
+                    "Uses the current Windows x64 scripting backend (" + PlayerSettings.GetScriptingBackend(NamedBuildTarget.Standalone) +
+                    ") and enabled scenes, with Development disabled and LZ4HC compression.",
                     "Build", "Cancel"))
                 return;
 
@@ -50,8 +51,9 @@ namespace Spotlight.FreeCafe.Editor
                 throw new InvalidOperationException("Exit Play Mode and wait for compilation/building to finish first.");
             if (EditorUserBuildSettings.activeBuildTarget != BuildTarget.StandaloneWindows64)
                 throw new InvalidOperationException("Select the Windows x64 build target first. This utility does not switch targets.");
-            if (PlayerSettings.GetScriptingBackend(NamedBuildTarget.Standalone) != ScriptingImplementation.IL2CPP)
-                throw new InvalidOperationException("The current Windows scripting backend must be IL2CPP. Existing backend/API settings are preserved.");
+            ScriptingImplementation backend = PlayerSettings.GetScriptingBackend(NamedBuildTarget.Standalone);
+            if (backend != ScriptingImplementation.Mono2x && backend != ScriptingImplementation.IL2CPP)
+                throw new InvalidOperationException("Select Mono or IL2CPP as the Windows scripting backend. Existing backend/API settings are preserved.");
             if (!BuildPipeline.IsBuildTargetSupported(BuildTargetGroup.Standalone, BuildTarget.StandaloneWindows64))
                 throw new InvalidOperationException("Windows build support is not installed for this Editor.");
 
@@ -67,7 +69,7 @@ namespace Spotlight.FreeCafe.Editor
             // Do not inherit Development, AllowDebugging, AutoRunPlayer, or profiler options from the Editor UI.
             const BuildOptions options = BuildOptions.None | BuildOptions.CompressWithLz4HC;
             Debug.Log("[Windows Release] Building " + executable + "\nScenes (unchanged): " + string.Join(", ", scenes) +
-                      "\nBackend: IL2CPP; API (unchanged): " + PlayerSettings.GetApiCompatibilityLevel(NamedBuildTarget.Standalone) +
+                      "\nBackend (unchanged): " + backend + "; API (unchanged): " + PlayerSettings.GetApiCompatibilityLevel(NamedBuildTarget.Standalone) +
                       "; options: " + options);
 
             BuildReport report;

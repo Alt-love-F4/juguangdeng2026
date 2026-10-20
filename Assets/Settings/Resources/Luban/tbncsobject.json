@@ -80,12 +80,12 @@
     "objId": "sorel",
     "objType": "npc",
     "nameText": "character.sorel.name",
-    "iconPath": "",
-    "portraitPath": "Characters/silhouettes/male/neutral_placeholder",
-    "portraitIndoorPath": "Characters/silhouettes/male/seated_placeholder",
-    "avtarPath": "Characters/silhouettes/male/avatar_placeholder",
+    "iconPath": "Characters/emmanuel/avatar",
+    "portraitPath": "Characters/emmanuel/neutral",
+    "portraitIndoorPath": "Characters/emmanuel/seated_placeholder",
+    "avtarPath": "Characters/emmanuel/avatar",
     "descText": "",
-    "tags": "revolution,portrait_placeholder"
+    "tags": "revolution"
   },
   {
     "objId": "church.broadcast",
@@ -113,12 +113,12 @@
     "objId": "church.duke",
     "objType": "npc",
     "nameText": "church.duke.name",
-    "iconPath": "",
-    "portraitPath": "Characters/silhouettes/male/neutral_placeholder",
-    "portraitIndoorPath": "Characters/silhouettes/male/seated_placeholder",
-    "avtarPath": "Characters/silhouettes/male/avatar_placeholder",
+    "iconPath": "Characters/elion/avatar",
+    "portraitPath": "Characters/elion/neutral",
+    "portraitIndoorPath": "Characters/elion/seated_placeholder",
+    "avtarPath": "Characters/elion/avatar",
     "descText": "",
-    "tags": "portrait_placeholder"
+    "tags": ""
   },
   {
     "objId": "church.man",

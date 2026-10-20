@@ -60,6 +60,14 @@ namespace Spotlight.FreeCafe.Tests
             Assert.That(app.World.State.focusedRequestId,Is.EqualTo(focused),"Cafe paging must not change selection.");
             hud.orderButtons[0].onClick.Invoke();
             Assert.That(app.World.State.focusedRequestId,Is.EqualTo(app.World.State.requests[1].id));
+            var book=hud.recipePanel.GetComponent<CoffeeCompendiumPanel>();
+            Assert.That(book,Is.Not.Null);
+            Assert.That(book.IsOpen,Is.True);
+            Assert.That(book.CurrentTab,Is.EqualTo(CoffeeCompendiumPanel.Tab.Recipes));
+            Assert.That(book.RecipeIndex,Is.InRange(0,book.ProductOrder.Count-1));
+            Assert.That(book.ProductOrder[book.RecipeIndex],Is.EqualTo(app.World.State.requests[1].productId));
+            book.CloseImmediate();
+            Assert.That(app.InputBlocked,Is.False);
             app.Enter(AreaId.Counter);
             yield return null;
             Assert.That(app.World.State.currentArea,Is.EqualTo(AreaId.Counter));
@@ -77,6 +85,8 @@ namespace Spotlight.FreeCafe.Tests
             Assert.That(label.offsetMin,Is.EqualTo(originalMin));
             Assert.That(label.offsetMax,Is.EqualTo(originalMax));
             Assert.That(hud.orderPage.text,Is.EqualTo("暂无订单"));
+            Assert.That(hud.orderButtons[0].interactable,Is.False);
+            Assert.That(book.IsOpen,Is.False);
             app.Enter(AreaId.Cafe);
             app.DebugRefreshViews();
             Assert.That(avatar.gameObject.activeSelf,Is.False);

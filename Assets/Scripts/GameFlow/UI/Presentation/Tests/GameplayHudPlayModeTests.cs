@@ -844,16 +844,48 @@ namespace Spotlight.GameFlow.Tests
             => ClosingAndMapTutorial(false);
 
         [UnityTest]
-        public IEnumerator FirstBusinessClosingOffersMapTutorialAndSupportsReplay()
+        public IEnumerator FirstDayMapOffersUsageTutorialBeforeBusinessAndSupportsReplay()
             => ClosingAndMapTutorial(true);
 
         [UnityTest]
-        public IEnumerator InstantDomainClosingOffersMapTutorialAndSupportsReplay()
+        public IEnumerator FirstDayMapTutorialDoesNotRepeatAfterInstantDomainClosing()
             => ClosingAndMapTutorial(true, true);
 
         [UnityTest]
-        public IEnumerator BedClosingOffersMapTutorialWithoutAdvancingDayAndSupportsReplay()
+        public IEnumerator FirstDayMapTutorialDoesNotRepeatAfterBedClosingOrAdvanceDay()
             => ClosingAndMapTutorial(true, false, true);
+
+        [UnityTest]
+        public IEnumerator EnteringFirstCafeCompletesPendingMapUsageTutorialBeforeCafeGuideStarts()
+        {
+            yield return SceneManager.LoadSceneAsync("启动场景", LoadSceneMode.Single);
+            var flow = Object.FindFirstObjectByType<GameFlowBootstrap>();
+            Assert.That(flow, Is.Not.Null);
+            yield return null;
+            flow.StartGame();
+            yield return WaitFor(() => SceneManager.GetActiveScene().name == "Map"
+                && UIKit.GetPanel<OpeningProloguePanel>() != null && !LoadingVisible(), "New game entry");
+            yield return WaitFor(() => flow.DebugSkipTutorialToMap(out _), "Skip arrival to first map");
+            var days = flow.GetComponent<DayFlowController>();
+            Assert.That(days.IsFirstDayMapGuideActive, Is.True);
+            Assert.That(days.ShouldShowMapUsageTutorial, Is.True);
+            StringAssert.Contains("\"mapUsageTutorialPending\":true", days.CaptureJson());
+            StringAssert.Contains("\"mapUsageTutorialCompleted\":false", days.CaptureJson());
+
+            // Enter without confirming the map tutorial: completion must happen before
+            // firstDayCafeTutorialStarted makes ShouldShowMapUsageTutorial false.
+            days.StartCafeFromMap();
+            Assert.That(days.IsFirstDayMapGuideActive, Is.False);
+            Assert.That(days.IsCafeTutorialActive, Is.True);
+            Assert.That(days.ShouldShowMapUsageTutorial, Is.False);
+            string enteredRecord = days.CaptureJson();
+            StringAssert.Contains("\"firstDayCafeTutorialStarted\":true", enteredRecord);
+            StringAssert.Contains("\"mapUsageTutorialPending\":false", enteredRecord);
+            StringAssert.Contains("\"mapUsageTutorialCompleted\":true", enteredRecord);
+            yield return WaitFor(() => SceneManager.GetActiveScene().name == "CoffeeShop" && !LoadingVisible(), "First cafe entry consumes pending map tutorial");
+            Assert.That(days.ShouldShowMapUsageTutorial, Is.False);
+            Assert.That(days.CurrentDay, Is.EqualTo(1));
+        }
 
         private IEnumerator ClosingAndMapTutorial(bool mapOnly, bool instantDomainClose = false, bool bedClose = false)
         {
@@ -865,51 +897,9 @@ namespace Spotlight.GameFlow.Tests
                 && UIKit.GetPanel<OpeningProloguePanel>() != null && !LoadingVisible(), "New game entry");
             bool skipped = false;
             yield return WaitFor(() => skipped = flow.DebugSkipTutorialToMap(out _), "Skip arrival to map");
-            bool arrived = false;
-            flow.TransitionToGameplayScene("CoffeeShop", () => arrived = true);
-            yield return WaitFor(() => arrived && !LoadingVisible(), "First cafe entry");
             var days = flow.GetComponent<DayFlowController>();
-            Assert.That(days.ShouldShowMapUsageTutorial, Is.False, "The map usage tutorial must not precede day-one business.");
-            Assert.That(days.DebugSkipTutorialToCafe(out string error), Is.True, error);
-            Assert.That(days.ShouldShowMapUsageTutorial, Is.False, "Finishing the cafe introduction must not start the map usage tutorial.");
+            Assert.That(days.IsFirstDayMapGuideActive, Is.True, "The map usage tutorial belongs to the first cafe-only map phase.");
             var world = PlayerCafeOwner.Current;
-            var endpoint = Object.FindObjectsByType<MonoBehaviour>(FindObjectsSortMode.None)
-                .First(item => item is IDayFlowGameplayEndpoint);
-            var requestStart = endpoint.GetType().GetMethod("RequestBusinessStart");
-            requestStart.Invoke(endpoint, null);
-            if (instantDomainClose)
-            {
-                // Do not yield between opening and closing: DayFlow.Update must not observe an open frame.
-                // Settlement must also be driven by the binding to world.Changed.
-                Assert.That(world.State.open, Is.True, "The instant-close regression requires synchronous business opening.");
-                Assert.That(world.EndDay().success, Is.True);
-            }
-            else
-            {
-                yield return WaitFor(() => world.State.open, "Formal business start through narrative bridge");
-                yield return null;
-                if (bedClose) days.EndDayFromDormitory();
-                else
-                {
-                    var requestEnd = endpoint.GetType().GetMethod("RequestBusinessEnd");
-                    Assert.That(requestEnd, Is.Not.Null);
-                    requestEnd.Invoke(endpoint, null);
-                }
-            }
-            yield return WaitFor(() => days.CurrentPresentation is BusinessEndPanel, "Business closing settlement");
-            Assert.That(days.CurrentDay, Is.EqualTo(1));
-            Assert.That(world.State.day, Is.EqualTo(1));
-            Assert.That(world.StartDay(advanceFromNight: false).success, Is.False);
-            var settlement = (DayFlowPresentationPanel)days.CurrentPresentation;
-            Assert.That(settlement, Is.TypeOf<BusinessEndPanel>());
-            Assert.That(days.ShouldShowMapUsageTutorial, Is.False, "Settlement must block the pending map usage tutorial.");
-            var submit = settlement.GetComponentInChildren<Button>(true);
-            yield return WaitFor(() => submit.interactable, "Settlement entrance");
-            Assert.That(days.ShouldShowMapUsageTutorial, Is.False, "The tutorial must remain blocked while settlement is visible.");
-            submit.onClick.Invoke();
-            yield return WaitFor(() => days.State == DayFlowState.CityMapLeisure
-                && SceneManager.GetActiveScene().name == "Map" && !LoadingVisible(), "After-business map");
-            Assert.That(days.CurrentDay, Is.EqualTo(1), "Closing must not end the calendar day.");
             var actions = NarrativeRuntime.Instance.Actions;
             int tutorialPoints = actions.ActionPoints.Current;
             int tutorialMoney = world.State.money;
@@ -927,7 +917,7 @@ namespace Spotlight.GameFlow.Tests
             MapSceneController map = null;
             yield return WaitFor(() => (map = Object.FindObjectsByType<MapSceneController>(FindObjectsSortMode.None)
                 .FirstOrDefault(candidate => candidate.isActiveAndEnabled && candidate.transform is RectTransform
-                    && candidate.UsageTutorialAvailable)) != null, "After-business map controls ready");
+                    && candidate.UsageTutorialAvailable)) != null, "First-day cafe-only map controls ready");
             var mapHud = GameplayHudPanel.Instance;
             Assert.That(mapHud, Is.Not.Null);
             Assert.That(mapHud.EndDayButton, Is.Null, "The map HUD must not expose an end-day shortcut.");
@@ -1040,6 +1030,58 @@ namespace Spotlight.GameFlow.Tests
             Assert.That(days.CaptureJson(), Is.EqualTo(completedRecord), "Stopping GM replay must leave the completion record intact.");
             AssertTutorialResourcesUnchanged();
             yield return null;
+
+            days.StartCafeFromMap();
+            Assert.That(days.IsFirstDayMapGuideActive, Is.False);
+            Assert.That(days.ShouldShowMapUsageTutorial, Is.False, "Entering the cafe must end the first-map tutorial phase.");
+            yield return WaitFor(() => SceneManager.GetActiveScene().name == "CoffeeShop" && !LoadingVisible(), "First cafe entry");
+            Assert.That(days.DebugSkipTutorialToCafe(out string error), Is.True, error);
+            Assert.That(days.ShouldShowMapUsageTutorial, Is.False, "Finishing the cafe introduction must not start the map usage tutorial.");
+            world = PlayerCafeOwner.Current;
+            var endpoint = Object.FindObjectsByType<MonoBehaviour>(FindObjectsSortMode.None)
+                .First(item => item is IDayFlowGameplayEndpoint);
+            var requestStart = endpoint.GetType().GetMethod("RequestBusinessStart");
+            requestStart.Invoke(endpoint, null);
+            if (instantDomainClose)
+            {
+                // Do not yield between opening and closing: DayFlow.Update must not observe an open frame.
+                // Settlement must also be driven by the binding to world.Changed.
+                Assert.That(world.State.open, Is.True, "The instant-close regression requires synchronous business opening.");
+                Assert.That(world.EndDay().success, Is.True);
+            }
+            else
+            {
+                yield return WaitFor(() => world.State.open, "Formal business start through narrative bridge");
+                yield return null;
+                if (bedClose) days.EndDayFromDormitory();
+                else
+                {
+                    var requestEnd = endpoint.GetType().GetMethod("RequestBusinessEnd");
+                    Assert.That(requestEnd, Is.Not.Null);
+                    requestEnd.Invoke(endpoint, null);
+                }
+            }
+            yield return WaitFor(() => days.CurrentPresentation is BusinessEndPanel, "Business closing settlement");
+            Assert.That(days.CurrentDay, Is.EqualTo(1));
+            Assert.That(world.State.day, Is.EqualTo(1));
+            Assert.That(world.StartDay(advanceFromNight: false).success, Is.False);
+            var settlement = (DayFlowPresentationPanel)days.CurrentPresentation;
+            Assert.That(settlement, Is.TypeOf<BusinessEndPanel>());
+            Assert.That(days.ShouldShowMapUsageTutorial, Is.False, "Settlement must not offer the first-map tutorial again.");
+            StringAssert.Contains("\"mapUsageTutorialPending\":false", days.CaptureJson());
+            var submit = settlement.GetComponentInChildren<Button>(true);
+            yield return WaitFor(() => submit.interactable, "Settlement entrance");
+            Assert.That(days.ShouldShowMapUsageTutorial, Is.False, "The tutorial must remain unavailable while settlement is visible.");
+            submit.onClick.Invoke();
+            yield return WaitFor(() => days.State == DayFlowState.CityMapLeisure
+                && SceneManager.GetActiveScene().name == "Map" && !LoadingVisible(), "After-business map");
+            Assert.That(days.CurrentDay, Is.EqualTo(1), "Closing must not end the calendar day.");
+            Assert.That(days.IsFirstDayMapGuideActive, Is.False);
+            Assert.That(days.ShouldShowMapUsageTutorial, Is.False, "Returning after first business must not restart the map usage tutorial.");
+            StringAssert.Contains("\"mapUsageTutorialPending\":false", days.CaptureJson());
+            StringAssert.Contains("\"mapUsageTutorialCompleted\":true", days.CaptureJson());
+            yield return new WaitForSecondsRealtime(.6f);
+            Assert.That((bool)isRunning.GetValue(tutorial), Is.False, "The resident map must not automatically replay the completed tutorial after closing.");
             if (mapOnly) yield break;
             days.StartCafeFromMap();
             yield return WaitFor(() => days.State == DayFlowState.FreeCafeBusiness && !LoadingVisible(), "Resident cafe return without an opening page");

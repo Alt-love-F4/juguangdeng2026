@@ -193,6 +193,7 @@ namespace Spotlight.FreeCafe
             if(productionMode) World.EnableProduction();
             AdoptAuthoredEntities(authored);
             World.Changed+=SyncViews;
+            World.ProductionCupHandedOver+=OnProductionCupHandedOver;
             var audioPresenter = GetComponent<FreeCafeAudioPresenter>();
             if (audioPresenter == null) audioPresenter = gameObject.AddComponent<FreeCafeAudioPresenter>();
             audioPresenter.Bind(this);
@@ -260,8 +261,15 @@ namespace Spotlight.FreeCafe
         {
             cafeVisits?.Dispose();
             cafeVisits = null;
-            if(World!=null) World.Changed-=SyncViews;
+            if(World!=null) { World.Changed-=SyncViews; World.ProductionCupHandedOver-=OnProductionCupHandedOver; }
             PlayerCafeOwner.Unbind(World);
+        }
+        // Story sessions only: the sandbox has no NCS faction tendencies to change.
+        private void OnProductionCupHandedOver(bool latteArt, string pattern)
+        {
+            if (IsSandboxMode) return;
+            string factionBar = LatteArtFactionStreak.Record(World.State, latteArt, pattern);
+            if (factionBar != null) LatteArtFactionStreak.Award(this, factionBar, pattern);
         }
         private void Update()
         {
@@ -628,7 +636,7 @@ namespace Spotlight.FreeCafe
             { World.SuspendContainerHeating(entity.id); draggingVessel=true; dragItemId=entity.id; draggedView=view; SelectedId=entity.id; }
             else if(spec.Has(Capability.Source))
             {
-                if(entity.stock<=0) { ShowHint("来源库存不足"); return; }
+                if(entity.stock<=0) { ShowHint(spec.id=="source.beans" ? "咖啡豆库存不足，请前往咖啡铺补货" : "来源库存不足"); return; }
                 dragPreview=true; dragSourceId=entity.id;
                 draggedView=CreateEntityView(spec.sourceItemId,World.State.currentArea); draggedView.name="UncommittedPickup";
                 draggedView.Bind(this,new WorldEntity { specId=spec.sourceItemId,area=entity.area,x=entity.x,y=entity.y },true);

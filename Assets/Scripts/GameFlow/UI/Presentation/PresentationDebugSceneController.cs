@@ -85,6 +85,8 @@ namespace Spotlight.GameFlow
             // Single owner for launch/stop; each actual panel continues to handle its own dialogue/letter input.
             if (keyboard.escapeKey.wasPressedThisFrame)
             {
+                // Dialogue owns Escape, including closing history and consuming that frame.
+                if (DialoguePanel.BlocksEscapeThisFrame) return;
                 if (currentPanel is OpeningProloguePanel && ((OpeningProloguePanel)currentPanel).IsPlaying) return;
                 StopCurrent();
                 return;

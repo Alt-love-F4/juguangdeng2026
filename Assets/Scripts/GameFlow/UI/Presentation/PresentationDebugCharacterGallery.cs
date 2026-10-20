@@ -36,8 +36,7 @@ namespace Spotlight.GameFlow
 
             var roster = objects.DataList
                 .Where(item => item != null && !string.IsNullOrWhiteSpace(item.ObjId)
-                    && !string.Equals(item.ObjType, "world", StringComparison.OrdinalIgnoreCase)
-                    && HasVisualPath(item))
+                    && !string.Equals(item.ObjType, "world", StringComparison.OrdinalIgnoreCase))
                 .GroupBy(item => item.ObjId, StringComparer.Ordinal)
                 .Select(group => group.First())
                 .OrderBy(item => item.ObjId, StringComparer.Ordinal)
@@ -73,12 +72,8 @@ namespace Spotlight.GameFlow
                     replaceCenter: true, centerCharacter: null));
             }
 
-            return new DialogueScript(lines, blank, blank, title: Title, isPreview: true);
+            return new DialogueScript(lines, blank, blank, title: Title, isPreview: true, instantPortraitPreview: true);
         }
-
-        private static bool HasVisualPath(cfg.NcsObjectEntry item) => item != null
-            && (!string.IsNullOrWhiteSpace(item.PortraitPath) || !string.IsNullOrWhiteSpace(item.IconPath)
-                || !string.IsNullOrWhiteSpace(item.AvtarPath) || !string.IsNullOrWhiteSpace(item.PortraitIndoorPath));
 
         private static void LoadFirst(Dictionary<string, Sprite> cache, string first, string second, string third,
             out Sprite sprite, out string lastTriedPath)

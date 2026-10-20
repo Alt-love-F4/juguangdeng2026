@@ -49,7 +49,7 @@ namespace Spotlight.GameFlow
                 presenter = new NarrativePresenter(config, session.ResolveText)
                 {
                     PreviewStartPageId = startPageId,
-                    PageCondition = session.Controller.ReadPresentationCondition,
+                    PageCondition = session.Controller.ReadPageCondition,
                     ChoiceUnlocked = (id, context) => session.Controller.EvaluateConditions("choice", id, context),
                     InlineAbilityCheck = session.EvaluateInlineAbilityCheck,
                     AbilityCheck = session.EvaluateAbilityCheck,

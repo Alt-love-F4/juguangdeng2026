@@ -29,6 +29,19 @@ namespace Spotlight.Narrative.Tests
         }
 
         [Test]
+        public void PageGatedOnSkippedCheckIsHiddenInsteadOfAbortingTheRoot()
+        {
+            var config = new NarrativeConfiguration();
+            config.bars.Add(new NarrativeBarDefinition { barKey = "world.calendar", min = 1, max = 9999, initValue = 1, advanceMode = NarrativeAdvanceMode.Monotonic });
+            var narrative = new NarrativeController(config, new Presenter());
+            // revolution.1014.s1: the language check page is itself conditional, so it may never run.
+            Assert.That(narrative.ReadPageCondition("check:skipped"), Is.False);
+            Assert.That(narrative.ReadPageCondition("not:check:skipped"), Is.False);
+            Assert.Throws<System.InvalidOperationException>(() => narrative.ReadPresentationCondition("check:skipped"),
+                "Diagnostics keep reporting the missing evaluation.");
+        }
+
+        [Test]
         public void MapGuardedMandatoryActionStillBlocksNightWhileMapIsClosed()
         {
             var config = new NarrativeConfiguration();

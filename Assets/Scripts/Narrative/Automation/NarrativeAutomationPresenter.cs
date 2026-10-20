@@ -281,7 +281,7 @@ namespace Spotlight.Narrative
             // Production rejects this legacy field; numeric conditions are bar:x:ge:n guards in pageCondKeys.
             if (!string.IsNullOrWhiteSpace(bars)) throw new InvalidOperationException("Unsupported presentation page bar conditions: " + id);
             if (!string.IsNullOrWhiteSpace(keys)) foreach (string key in keys.Split(new[] { '|', ',' }, StringSplitOptions.RemoveEmptyEntries))
-                if (!controller.ReadPresentationCondition(key.Trim())) return false;
+                if (!controller.ReadPageCondition(key.Trim())) return false;
             return true;
         }
         private void PublishPage(string presentation, string id, string kind, bool visible, string group, IReadOnlyList<string> keys)

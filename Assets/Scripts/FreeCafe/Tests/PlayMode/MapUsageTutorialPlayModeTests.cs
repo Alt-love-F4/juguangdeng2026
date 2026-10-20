@@ -88,7 +88,8 @@ namespace Spotlight.FreeCafe.Tests
             SetDayField("mapUsageTutorialPending", true);
             typeof(DayFlowController).GetProperty(nameof(DayFlowController.State)).GetSetMethod(true)
                 .Invoke(days, new object[] { DayFlowState.CityMapLeisure });
-            Assert.That(days.ShouldShowMapUsageTutorial, Is.True);
+            Assert.That(days.ShouldShowMapUsageTutorial, Is.False,
+                "Finishing the cafe tutorial must not queue the map tour anymore.");
             tutorial = map.GetComponent<MapUsageTutorial>() ?? map.AddComponent<MapUsageTutorial>();
             started = settled = 0;
             selectedKey = null;
@@ -123,7 +124,7 @@ namespace Spotlight.FreeCafe.Tests
         }
 
         [UnityTest]
-        public IEnumerator MarketSelectionExplainsUnavailableActionsAndReplayLeavesCompletionRecordUnchanged()
+        public IEnumerator CafeReplayLeavesCompletionRecordUnchangedAndFirstDayMarketStaysLocked()
         {
             var before = new ResourceSnapshot(runtime, days);
             string recordBefore = days.CaptureJson();
@@ -137,15 +138,15 @@ namespace Spotlight.FreeCafe.Tests
             tutorial.Advance();
             Assert.That(tutorial.CurrentStage, Is.EqualTo(MapUsageTutorial.Stage.SelectLocation),
                 "Next cannot bypass selecting a real authored location.");
-            LocationButton("market").onClick.Invoke();
+            LocationButton("cafe").onClick.Invoke();
             yield return null;
 
-            Assert.That(selectedKey, Is.EqualTo("market"));
-            Assert.That(selectedPopup, Is.False, "The real selection event must report no action popup for market.");
-            Assert.That(controller.IsLocationPopupVisible, Is.False);
+            Assert.That(selectedKey, Is.EqualTo("cafe"));
+            Assert.That(selectedPopup, Is.True);
+            Assert.That(controller.IsLocationPopupVisible, Is.True);
             Assert.That(tutorial.CurrentStage, Is.EqualTo(MapUsageTutorial.Stage.ReadLocation));
             var panel = TutorialPanel();
-            StringAssert.Contains("暂无开放", panel.gestureText.text);
+            StringAssert.Contains("需求", panel.gestureText.text);
             StringAssert.Contains("需求", panel.instruction.text);
             AssertNoActionOrResourceChanges(before);
             Assert.That(days.CaptureJson(), Is.EqualTo(recordBefore));
@@ -155,11 +156,14 @@ namespace Spotlight.FreeCafe.Tests
             StringAssert.Contains("T", panel.instruction.text);
             StringAssert.Contains("B", panel.instruction.text);
             StringAssert.Contains("点击床睡觉", panel.instruction.text);
+            var market = map.transform.Find("MapViewport/MapContent/Entities/Location:market").GetComponent<Button>();
+            Assert.That(market.interactable, Is.False, "The tour must preserve first-day location restrictions.");
             Assert.That(tutorial.IsRunning, Is.True, "The final page still needs confirmation.");
             tutorial.Advance();
             Assert.That(tutorial.IsRunning, Is.False);
             Assert.That(days.CaptureJson(), Is.EqualTo(recordBefore), "Begin(map, false) must not record formal completion.");
-            Assert.That(days.ShouldShowMapUsageTutorial, Is.True);
+            Assert.That(days.ShouldShowMapUsageTutorial, Is.False,
+                "Finishing the cafe tutorial must not queue the map tour anymore.");
             AssertNoActionOrResourceChanges(before);
             yield return null; // Destroy the previous authored panel before replaying.
 
@@ -167,14 +171,15 @@ namespace Spotlight.FreeCafe.Tests
             Assert.That(tutorial.IsRunning, Is.True, "The GM entry must reuse the strongly typed map tutorial.");
             Assert.That(tutorial.CurrentStage, Is.EqualTo(MapUsageTutorial.Stage.Overview));
             tutorial.Advance();
-            LocationButton("market").onClick.Invoke();
+            LocationButton("cafe").onClick.Invoke();
             yield return null;
             Assert.That(tutorial.CurrentStage, Is.EqualTo(MapUsageTutorial.Stage.ReadLocation));
             tutorial.Advance();
             tutorial.Advance();
             Assert.That(tutorial.IsRunning, Is.False);
             Assert.That(days.CaptureJson(), Is.EqualTo(recordBefore), "Completing GM replay must not clear the pending record.");
-            Assert.That(days.ShouldShowMapUsageTutorial, Is.True);
+            Assert.That(days.ShouldShowMapUsageTutorial, Is.False,
+                "Finishing the cafe tutorial must not queue the map tour anymore.");
             AssertNoActionOrResourceChanges(before);
         }
 
@@ -231,6 +236,75 @@ namespace Spotlight.FreeCafe.Tests
             Assert.That(tutorial.CurrentStage, Is.EqualTo(MapUsageTutorial.Stage.ReadLocation));
             Assert.That(days.CaptureJson(), Is.EqualTo(recordBefore));
             AssertNoActionOrResourceChanges(before);
+        }
+
+        [UnityTest]
+        public IEnumerator FirstCafeGuideRingBreathesWithoutBlockingClicksAndHidesAfterTutorial()
+        {
+            tutorial.Stop();
+            Assert.That(map.GetComponentInChildren<MapCafeGuideRing>(true), Is.Null,
+                "The ring must not appear on an ordinary map visit.");
+            var owner = new GameObject("FirstCafeGuideTestFlow");
+            owner.SetActive(false); // Supply guide state without booting a second game session.
+            owner.transform.SetParent(host.transform, false);
+            var flow = owner.AddComponent<GameFlowBootstrap>();
+            var guideDays = owner.AddComponent<DayFlowController>();
+            typeof(GameFlowBootstrap).GetField("dayFlow", BindingFlags.Instance | BindingFlags.NonPublic).SetValue(flow, guideDays);
+            typeof(GameFlowBootstrap).GetMethod("SetSessionState", BindingFlags.Instance | BindingFlags.NonPublic)
+                .Invoke(flow, new object[] { GameSessionState.Playing });
+            typeof(DayFlowController).GetField("running", BindingFlags.Instance | BindingFlags.NonPublic).SetValue(guideDays, true);
+            typeof(DayFlowController).GetProperty(nameof(DayFlowController.State)).GetSetMethod(true)
+                .Invoke(guideDays, new object[] { DayFlowState.CityMapLeisure });
+            var flowField = typeof(MapSceneController).GetField("flow", BindingFlags.Instance | BindingFlags.NonPublic);
+            flowField.SetValue(controller, flow);
+            yield return null;
+            yield return null;
+
+            var ring = map.GetComponentInChildren<MapCafeGuideRing>();
+            Assert.That(ring, Is.Not.Null, "The first cafe-only map must highlight the cafe.");
+            var cafe = LocationButton("cafe");
+            Assert.That(ring.transform.parent, Is.EqualTo(cafe.transform));
+            Assert.That(ring.raycastTarget, Is.False);
+            Canvas.ForceUpdateCanvases();
+            var cafeRect = (RectTransform)cafe.transform;
+            var cafeScreen = RectTransformUtility.WorldToScreenPoint(null, cafeRect.TransformPoint(cafeRect.rect.center));
+            var hits = new List<UnityEngine.EventSystems.RaycastResult>();
+            UnityEngine.EventSystems.EventSystem.current.RaycastAll(
+                new UnityEngine.EventSystems.PointerEventData(UnityEngine.EventSystems.EventSystem.current) { position = cafeScreen }, hits);
+            Assert.That(hits.Exists(hit => hit.gameObject == ring.gameObject), Is.False,
+                "The glow must never intercept a real pointer raycast.");
+            if (!Application.isBatchMode)
+            {
+                yield return new WaitForSecondsRealtime(1.5f);
+                yield return new WaitForEndOfFrame();
+                var screenshot = ScreenCapture.CaptureScreenshotAsTexture();
+                try
+                {
+                    string path = Path.Combine(Application.dataPath, "../Library/Locus/tmp/first-cafe-map-guide.png");
+                    Directory.CreateDirectory(Path.GetDirectoryName(path));
+                    File.WriteAllBytes(path, screenshot.EncodeToPNG());
+                }
+                finally { Object.Destroy(screenshot); }
+            }
+            float initialAlpha = ring.canvasRenderer.GetAlpha();
+            yield return new WaitForSecondsRealtime(.4f);
+            Assert.That(Mathf.Abs(ring.canvasRenderer.GetAlpha() - initialAlpha), Is.GreaterThan(.05f),
+                "The glow should breathe rather than remain static.");
+
+            cafe.onClick.Invoke();
+            yield return null;
+            Assert.That(controller.IsLocationPopupVisible, Is.True, "The glow must not replace cafe selection.");
+            Assert.That(ring.gameObject.activeSelf, Is.False, "The hint is done while the cafe card is open.");
+            typeof(MapSceneController).GetMethod("HideFocus", BindingFlags.Instance | BindingFlags.NonPublic).Invoke(controller, null);
+            yield return null;
+            Assert.That(ring.gameObject.activeSelf, Is.True);
+            Assert.That(map.GetComponentsInChildren<MapCafeGuideRing>(true).Length, Is.EqualTo(1));
+
+            typeof(DayFlowController).GetField("firstDayCafeTutorialCompleted", BindingFlags.Instance | BindingFlags.NonPublic)
+                .SetValue(guideDays, true);
+            yield return null;
+            Assert.That(ring.gameObject.activeSelf, Is.False, "Completed tutorials must not highlight later map visits.");
+            flowField.SetValue(controller, null);
         }
 
         private void SetDayField(string name, object value)

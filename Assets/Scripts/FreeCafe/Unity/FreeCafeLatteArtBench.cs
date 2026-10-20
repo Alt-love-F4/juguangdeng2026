@@ -572,7 +572,7 @@ namespace Spotlight.FreeCafe
             switch (tutorialStep)
             {
                 case 0:
-                    tutorialCopy.text = "1 / 4  左侧是参考图案\n点击切换参考，悬停查看含义与画法。持续拉出某些具有特殊含义的图案，可能会影响世界局势。";
+                    tutorialCopy.text = "1 / 4  左侧是参考图案\n点击切换参考，悬停查看含义与画法。部分图案是阵营徽记：长时间把同一个有象征意义的图案端给客人，会影响你当前在不同阵营的名望。";
                     target = "PresetPanel/PresetList";
                     break;
                 case 1:

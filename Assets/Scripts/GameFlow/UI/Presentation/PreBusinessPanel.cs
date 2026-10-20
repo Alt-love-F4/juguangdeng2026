@@ -11,12 +11,51 @@ namespace Spotlight.GameFlow
     {
         private Button testSkipButton;
         private Func<bool> skipTutorial;
+        private Button entrySkipButton;
+        private Action skipEntry;
 
         protected override void OnOpen(IUIData data = null)
         {
             base.OnOpen(data);
             skipTutorial = null;
+            skipEntry = null;
             if (testSkipButton != null) testSkipButton.gameObject.SetActive(false);
+            if (entrySkipButton != null) entrySkipButton.gameObject.SetActive(false);
+        }
+
+        /// <summary>
+        /// Escape for a story entry that keeps failing (content/resource error): the player continues the
+        /// day instead of retrying forever. The failed root stays uncompleted and its results discarded.
+        /// </summary>
+        public void OfferEntrySkip(Action onSkip)
+        {
+            SetDetail("这段剧情连续出错，已记录错误。可以点击继续再试一次，或跳过这段剧情继续今天的流程（这段剧情的结果不会生效）。");
+            skipEntry = onSkip;
+            if (entrySkipButton == null)
+            {
+                var source = GetComponentInChildren<Button>(true);
+                if (source == null) return;
+                entrySkipButton = Instantiate(source, source.transform.parent);
+                entrySkipButton.name = "SkipFailedNarrativeEntry";
+                entrySkipButton.onClick = new Button.ButtonClickedEvent();
+                entrySkipButton.onClick.AddListener(SkipEntry);
+                var rect = (RectTransform)entrySkipButton.transform;
+                rect.anchoredPosition += Vector2.up * (rect.rect.height + 18f);
+                rect.SetSizeWithCurrentAnchors(RectTransform.Axis.Horizontal, Mathf.Max(360f, rect.rect.width));
+                var label = entrySkipButton.GetComponentInChildren<TMP_Text>(true);
+                if (label != null) label.text = "跳过这段剧情";
+            }
+            entrySkipButton.interactable = true;
+            entrySkipButton.gameObject.SetActive(true);
+        }
+
+        private void SkipEntry()
+        {
+            if (!IsPlaying || skipEntry == null || entrySkipButton == null || !entrySkipButton.interactable) return;
+            entrySkipButton.interactable = false;
+            Action skip = skipEntry;
+            skipEntry = null;
+            skip();
         }
 
         public void ShowTutorialHandoff(Func<bool> onSkip)
@@ -53,6 +92,7 @@ namespace Spotlight.GameFlow
         protected override void OnClose()
         {
             skipTutorial = null;
+            skipEntry = null;
             base.OnClose();
         }
 

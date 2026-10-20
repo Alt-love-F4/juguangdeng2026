@@ -17,7 +17,7 @@ namespace Spotlight.FreeCafe
         private MapSceneController map;
         private FreeCafeTutorialPanel panel;
         private DayFlowController days;
-        private bool recordCompletion, selectedPopup, autoDismissed;
+        private bool recordCompletion, selectedPopup, autoDismissed, cafeArrival;
         private float nextCheck;
 
         [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.SubsystemRegistration)]
@@ -43,6 +43,7 @@ namespace Spotlight.FreeCafe
             map = owner;
             days = FindFirstObjectByType<DayFlowController>();
             recordCompletion = saveCompletion;
+            cafeArrival = owner.IsCafeArrivalGuide;
             panel = Instantiate(prefab);
             panel.name = "MapUsageTutorialPanel";
             panel.instruction.fontSizeMax = 30;
@@ -93,7 +94,7 @@ namespace Spotlight.FreeCafe
 
         private void LocationSelected(string positionKey, bool popupVisible)
         {
-            if (!IsRunning || CurrentStage != Stage.SelectLocation || !CanShow) return;
+            if (!IsRunning || (CurrentStage != Stage.SelectLocation && CurrentStage != Stage.Overview) || !CanShow) return;
             selectedPopup = popupVisible;
             CurrentStage = Stage.ReadLocation;
             Draw();
@@ -125,19 +126,25 @@ namespace Spotlight.FreeCafe
             switch (CurrentStage)
             {
                 case Stage.Overview:
-                    description = recordCompletion
-                        ? "营业结束，接下来可以在城市地图中安排行动。\n在地图空白处按住鼠标左键拖动；滚动鼠标滚轮缩放，也可以拖动缩放条。"
+                    description = cafeArrival
+                        ? "欢迎来到城市地图！先了解如何移动地图和查看地点。\n在地图空白处按住鼠标左键拖动；滚动鼠标滚轮缩放，也可以拖动缩放条。目前先前往咖啡馆，完成新手教程。"
                         : "城市地图可以查看地点、安排行动。\n在地图空白处按住鼠标左键拖动；滚动鼠标滚轮缩放，也可以拖动缩放条。";
                     hint = "地图空白处：按住左键拖动\n鼠标滚轮：放大 / 缩小\n点「下一步」学习查看点位";
                     button = "下一步：查看点位";
                     break;
                 case Stage.SelectLocation:
-                    description = "试着用鼠标左键点击一个地图点位，地图会移向该地点。\n有开放内容时会弹出行动卡；没有开放内容的地点只会聚焦。查看点位不扣资源。营业中执行其他地图行动时，咖啡店会自动打烊；只查看或返回咖啡馆不会打烊。";
-                    hint = "鼠标左键点击地图点位\n查看该地点的行动与需求\n只查看不会消耗资源";
-                    button = "请先点击地图点位";
+                    description = cafeArrival
+                        ? "请用鼠标左键点击金色光圈中的「咖啡馆」，查看地点详情。\n目前只能进入咖啡馆，其他地点暂未开放。查看地点和进入咖啡馆都不会消耗行动点。"
+                        : "试着用鼠标左键点击一个可用的地图点位，查看该地点的行动卡与需求。\n查看点位不扣资源。营业中执行其他地图行动时，咖啡店会自动打烊；只查看或返回咖啡馆不会打烊。";
+                    hint = cafeArrival
+                        ? "鼠标左键点击发光的咖啡馆\n其他地点暂未开放\n查看地点不消耗行动点"
+                        : "鼠标左键点击地图点位\n查看该地点的行动与需求\n只查看不会消耗资源";
+                    button = cafeArrival ? "请先点击咖啡馆" : "请先点击地图点位";
                     break;
                 case Stage.ReadLocation:
-                    description = selectedPopup
+                    description = cafeArrival
+                        ? "这里是咖啡馆的地点详情，点击「进入咖啡馆」即可前往，不消耗行动点。\n以后探索其他地点时，先查看行动介绍和需求：行动点、物品、属性或前置条件，以实际卡片为准；确认执行后才会结算。"
+                        : selectedPopup
                         ? "点位行动卡会显示介绍和需求：行动点、物品、属性或前置条件，以实际卡片为准；多张卡可翻页查看。\n满足需求且确认要做时才点行动按钮；需求不足先按 B 核对物品。本教程无需执行，咖啡馆入口也不扣行动点。"
                         : "这个点位目前没有开放的行动，所以只移动地图，不弹出行动卡。不是每个地点都有事情可做。\n有可用内容时会显示行动介绍及行动点、物品、属性或前置条件等需求；先看需求，再决定是否执行。咖啡馆入口只负责导航。";
                     hint = selectedPopup
@@ -146,9 +153,13 @@ namespace Spotlight.FreeCafe
                     button = "明白了，下一步";
                     break;
                 default:
-                    description = "不知道接下来做什么时，按 T 打开「待办事项」查看目标；按 B 打开「物品栏」核对物品，上方 HUD 可查看行动点。\n点位详情可用右键点击地图空白处或按 Esc 收起。有必须完成的行动时，先处理它；安排好后，回咖啡馆三楼宿舍点击床睡觉，才会进入下一天。";
-                    hint = "不知道做什么：按 T 看待办\n核对物品：按 B 打开物品栏\n右键地图 / Esc：收起行动卡";
-                    button = "明白了，开始探索";
+                    description = cafeArrival
+                        ? "地图上方可查看行动点。以后可以按 T 查看待办、按 B 核对物品；自由探索时可用右键或 Esc 收起地点详情。\n现在请点击「进入咖啡馆」，继续咖啡馆新手教程。其他地点的行动可在后续探索时了解。"
+                        : "不知道接下来做什么时，按 T 打开「待办事项」查看目标；按 B 打开「物品栏」核对物品，上方 HUD 可查看行动点。\n点位详情可用右键点击地图空白处或按 Esc 收起。有必须完成的行动时，先处理它；安排好后，回咖啡馆三楼宿舍点击床睡觉，才会进入下一天。";
+                    hint = cafeArrival
+                        ? "先进入咖啡馆继续新手教程\n进入咖啡馆不消耗行动点\n其他地图操作之后再体验"
+                        : "不知道做什么：按 T 看待办\n核对物品：按 B 打开物品栏\n右键地图 / Esc：收起行动卡";
+                    button = cafeArrival ? "明白了，前往咖啡馆" : "明白了，开始探索";
                     break;
             }
             panel.heading.text = "城市地图 · 使用教程";

@@ -154,10 +154,11 @@ namespace Spotlight.GameFlow
         private readonly DialogueLine[] lines;
         public object ContinuityOwner { get; }
         public bool IsPreview { get; }
+        public bool InstantPortraitPreview { get; }
         public bool Continues { get; }
         public string MusicKey { get; }
         public DialogueScript WithPreviewContext() => new DialogueScript(lines, LeftCharacter, RightCharacter,
-            Title, Background, Options, OptionPrompt, CenterCharacter, ContinuityOwner, true, Continues, MusicKey, BackgroundVisual);
+            Title, Background, Options, OptionPrompt, CenterCharacter, ContinuityOwner, true, Continues, MusicKey, BackgroundVisual, InstantPortraitPreview);
         public string Title { get; }
         public DialogueCharacter LeftCharacter { get; }
         public DialogueCharacter RightCharacter { get; }
@@ -184,7 +185,7 @@ namespace Spotlight.GameFlow
             var remaining = new DialogueLine[Count - index];
             Array.Copy(lines, index, remaining, 0, remaining.Length);
             return new DialogueScript(remaining, left, right, Title, Background, Options, OptionPrompt, center,
-                isPreview: true, musicKey: MusicKey, backgroundVisual: BackgroundVisual);
+                isPreview: true, musicKey: MusicKey, backgroundVisual: BackgroundVisual, instantPortraitPreview: InstantPortraitPreview);
         }
 
         public DialogueScript WithFirstPageHint(string hint)
@@ -194,20 +195,20 @@ namespace Spotlight.GameFlow
             copy[0] = new DialogueLine(first.Speaker, first.Text, first.SpeakerNameOverride, first.Gesture,
                 first.AutoAdvanceSeconds, first.ReplaceLeft, first.LeftCharacter, first.ReplaceRight, first.RightCharacter,
                 first.AccentFxKey, first.AccentTargetKey, first.ReplaceCenter, first.CenterCharacter, hint, first.SfxKey, first.VoiceKey, first.Source);
-            return new DialogueScript(copy, LeftCharacter, RightCharacter, Title, Background, Options, OptionPrompt, CenterCharacter, ContinuityOwner, IsPreview, Continues, MusicKey, BackgroundVisual);
+            return new DialogueScript(copy, LeftCharacter, RightCharacter, Title, Background, Options, OptionPrompt, CenterCharacter, ContinuityOwner, IsPreview, Continues, MusicKey, BackgroundVisual, InstantPortraitPreview);
         }
 
         public DialogueScript WithContinuity(object owner, bool continues)
         {
             if (owner == null) throw new ArgumentNullException(nameof(owner));
             return new DialogueScript(lines, LeftCharacter, RightCharacter, Title, Background, Options, OptionPrompt,
-                CenterCharacter, owner, IsPreview, continues, MusicKey, BackgroundVisual);
+                CenterCharacter, owner, IsPreview, continues, MusicKey, BackgroundVisual, InstantPortraitPreview);
         }
 
         public DialogueScript(IReadOnlyList<DialogueLine> lines, DialogueCharacter leftCharacter = null,
             DialogueCharacter rightCharacter = null, string title = null, Texture background = null,
             IReadOnlyList<DialogueOption> options = null, string optionPrompt = null,
-            DialogueCharacter centerCharacter = null, object continuityOwner = null, bool isPreview = false, bool continues = false, string musicKey = null, NarrativeStageVisuals.Entry backgroundVisual = null)
+            DialogueCharacter centerCharacter = null, object continuityOwner = null, bool isPreview = false, bool continues = false, string musicKey = null, NarrativeStageVisuals.Entry backgroundVisual = null, bool instantPortraitPreview = false)
         {
             if (lines == null) throw new ArgumentNullException(nameof(lines));
             if (lines.Count == 0) throw new ArgumentException("A dialogue script requires at least one line.", nameof(lines));
@@ -216,6 +217,7 @@ namespace Spotlight.GameFlow
                 this.lines[i] = lines[i] ?? throw new ArgumentException("Dialogue line " + i + " is null.", nameof(lines));
             ContinuityOwner = continuityOwner;
             IsPreview = isPreview;
+            InstantPortraitPreview = isPreview && instantPortraitPreview;
             Continues = continues;
             MusicKey = musicKey;
             LeftCharacter = leftCharacter;

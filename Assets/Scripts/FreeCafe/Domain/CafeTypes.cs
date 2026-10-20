@@ -328,6 +328,8 @@ namespace Spotlight.FreeCafe
         public string cupStockDayKey; // 最后一次刷新杯库存的外部日历键；同日重入/读档不重复补杯
         public int served;      // 累计完成订单数
         public int successfulOrders; // 累计成功订单，用于设备成长（不含教程与失败单）
+        public string latteFactionStreakKey; // 连续交付的阵营徽记拉花对应的 NCS 倾向键（如 faction.rose）
+        public int latteFactionStreakCount;  // 该徽记的连续交付杯数；日常图案拉花清零，无拉花饮品不影响
         public bool equipmentProgressionConfigured;
         public bool equipmentProgressionEnabled;
         public bool sandboxEquipment;

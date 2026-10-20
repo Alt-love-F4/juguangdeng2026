@@ -15,9 +15,7 @@ namespace Spotlight.GameFlow.Tests
             var texts = new cfg.TbText(JArray.Parse(Resources.Load<TextAsset>("Luban/tbtext").text));
             var script = PresentationDebugCharacterGallery.Create(objects, texts);
             var roster = objects.DataList.Where(item => item != null && !string.IsNullOrWhiteSpace(item.ObjId)
-                && !string.Equals(item.ObjType, "world", StringComparison.OrdinalIgnoreCase)
-                && new[] { item.PortraitPath, item.IconPath, item.AvtarPath, item.PortraitIndoorPath }
-                    .Any(path => !string.IsNullOrWhiteSpace(path)))
+                && !string.Equals(item.ObjType, "world", StringComparison.OrdinalIgnoreCase))
                 .Select(item => item.ObjId).Distinct(StringComparer.Ordinal).OrderBy(id => id, StringComparer.Ordinal).ToArray();
 
             Assert.That(script.Count, Is.EqualTo(roster.Length));
@@ -27,6 +25,9 @@ namespace Spotlight.GameFlow.Tests
             Assert.That(PresentationDebugCharacterGallery.Id, Is.EqualTo("characters:all"));
             Assert.That(script.Title, Is.EqualTo("全人物立绘巡览"));
             Assert.That(script.IsPreview, Is.True);
+            Assert.That(script.InstantPortraitPreview, Is.True);
+            Assert.That(script.WithPreviewContext().InstantPortraitPreview, Is.True);
+            Assert.That(script.RebuildAt(0).InstantPortraitPreview, Is.True);
             Assert.That(script.Options, Is.Empty);
         }
 
@@ -66,13 +67,15 @@ namespace Spotlight.GameFlow.Tests
                 new JObject { ["key"] = "b.name", ["text"] = "B" }));
 
             var script = PresentationDebugCharacterGallery.Create(objects, texts);
-            Assert.That(script.Count, Is.EqualTo(2));
+            Assert.That(script.Count, Is.EqualTo(3));
             Assert.That(script[0].LeftCharacter.Portrait, Is.Null);
             Assert.That(script[0].Text, Does.Contain("立绘缺失"));
             Assert.That(script[0].Text, Does.Contain("室内立绘缺失"));
             Assert.That(script[1].LeftCharacter.Portrait, Is.Not.Null);
             Assert.That(script[1].Text, Does.Not.Contain("立绘缺失"));
             Assert.That(script[1].LeftCharacter.CharacterKey, Is.EqualTo("b"));
+            Assert.That(script[2].LeftCharacter.CharacterKey, Is.EqualTo("empty"));
+            Assert.That(script[2].Text, Does.Contain("未配置资源路径"));
         }
 
         [Test]

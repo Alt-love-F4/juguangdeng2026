@@ -100,6 +100,22 @@ namespace Spotlight.Narrative
         /// <summary>Read-only guards for the active root; never exports transient choices as world facts.</summary>
         public bool ReadPresentationCondition(string key) => TryReadPresentationCondition(key, out bool value) && value;
 
+        /// <summary>
+        /// Page visibility for the runtime presenter. A check whose own PassiveCheck page was skipped by its
+        /// conditions never ran, so pages gated on it are hidden instead of aborting the whole root (which
+        /// would discard every result and replay the same failing story forever).
+        /// </summary>
+        public bool ReadPageCondition(string key) => TryReadRootGuard(key, out bool value) && value;
+
+        private bool TryReadRootGuard(string key, out bool value)
+        {
+            bool previous = readingPageCondition;
+            readingPageCondition = true;
+            try { return TryReadPresentationCondition(key, out value); }
+            finally { readingPageCondition = previous; }
+        }
+        private bool readingPageCondition;
+
         private string assumedGuardKey;
         private bool assumedGuardValue;
 
@@ -145,7 +161,10 @@ namespace Spotlight.Narrative
                 string checkId = key.Substring(6);
                 if (string.IsNullOrWhiteSpace(checkId)) throw new InvalidOperationException("Empty presentation ability check condition.");
                 if (!inlineAbilityChecks.TryGetValue(checkId, out NarrativeAbilityCheckSnapshot snapshot))
+                {
+                    if (readingPageCondition) return UnavailablePresentationGuard(key);
                     throw new InvalidOperationException("Presentation ability check has not been evaluated: " + checkId);
+                }
                 value = snapshot.passed; return true;
             }
             if (key.StartsWith("dependency:", StringComparison.Ordinal))

@@ -39,7 +39,7 @@ namespace Spotlight.Narrative
                 if (config == null) Debug.LogWarning("[NCS] Missing passive check presentation config.");
                 snapshot.presentationWord = config != null ? config.Choose(snapshot.checkId, value.attributeId) : "有所领会";
             }
-            return value.displayName + " ≥ " + value.threshold + " · " + snapshot.presentationWord;
+            return "需要 " + value.displayName + " 到达 " + value.threshold + " · " + snapshot.presentationWord;
         }
     }
 }

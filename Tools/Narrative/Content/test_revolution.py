@@ -83,6 +83,23 @@ class RevolutionCompilerTests(unittest.TestCase):
     def root_conditions(self,root):return [r for r in self.data["Condition"] if r["ownerType"]=="event" and r["ownerId"]==root]
     def paragraph_numbers(self,lines):return {int(re.search(r"\.line\.p(\d+)",l["lineId"])[1]) for l in lines}
 
+    def test_check_guards_follow_the_route_that_runs_the_check(self):
+        """A conditional PassiveCheck may never run; its route must be tested before check:<id>
+        (10.14 language3 aborted the whole morning root and looped the retry page)."""
+        split=lambda s:[a for a in (s or "").split("|") if a]
+        checks=defaultdict(list)
+        for p in self.data["ConversationPage"]:
+            if p.get("stepType")=="PassiveCheck" and p.get("checkId"):
+                checks[(p["presentationKey"],p["checkId"])].append(set(split(p.get("pageCondKeys"))))
+        for p in self.data["ConversationPage"]:
+            atoms=split(p.get("pageCondKeys"))
+            for i,atom in enumerate(atoms):
+                bare=atom
+                while bare.startswith("not:"):bare=bare[4:]
+                routes=checks.get((p["presentationKey"],bare[6:])) if bare.startswith("check:") else None
+                if routes:
+                    self.assertTrue(any(r<=set(atoms[:i]) for r in routes),p["pageId"]+": "+p["pageCondKeys"])
+
     def test_twelve_current_documents_all_2905_anchors(self):
         self.assertEqual(12,len(self.data["_audit"]["sources"]))
         self.assertEqual(2905,sum(s["nonempty_paragraphs"] for s in self.data["_audit"]["sources"]))

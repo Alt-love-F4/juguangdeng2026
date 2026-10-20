@@ -105,8 +105,8 @@ namespace Spotlight.GameFlow
             && !firstDayCafeTutorialCompleted
             && (State == DayFlowState.CityMapLeisure || IsCafeTutorialActive);
         public bool IsFirstSessionGuideActive => running && day == 1 && !firstDayCafeTutorialCompleted;
-        public bool ShouldShowMapUsageTutorial => running && day == 1 && mapUsageTutorialPending
-            && !mapUsageTutorialCompleted && State == DayFlowState.CityMapLeisure && !BlocksGameplayInput;
+        public bool ShouldShowMapUsageTutorial => IsFirstDayMapGuideActive && mapUsageTutorialPending
+            && !mapUsageTutorialCompleted && !BlocksGameplayInput;
         public bool CanSave => !IsFirstSessionGuideActive && !awaitingNarrativeEntry && cafeGameplaySession == null
             && deferredNarrativeEntry == null
             // An open business must be owned by the business phase, or loading would restore it on the map.
@@ -232,6 +232,7 @@ namespace Spotlight.GameFlow
             businessWasActive = false;
             awaitingNarrativeEntry = false;
             deferredNarrativeEntry = null;
+            failedEntryCount = 0;
             ++narrativeEntryVersion;
             SetMapAvailability(false);
             UnsubscribeFirstArrival();
@@ -1044,7 +1045,6 @@ namespace Spotlight.GameFlow
 
         private void ShowBusinessEndThen(Action next)
         {
-            if (day == 1 && !mapUsageTutorialCompleted) mapUsageTutorialPending = true;
             SetState(DayFlowState.PreLeisure);
             ShowPresentation<BusinessEndPanel>(() => RunNarrativeEntry(NarrativeEntryPoint.AfterBusiness, next));
         }
@@ -1095,6 +1095,7 @@ namespace Spotlight.GameFlow
                 return;
             }
             SetState(DayFlowState.CityMapLeisure);
+            if (IsFirstDayMapGuideActive && !mapUsageTutorialCompleted) mapUsageTutorialPending = true;
             ClosePresentation();
             if (flow != null && UnityEngine.SceneManagement.SceneManager.GetActiveScene().name != "Map")
             {
@@ -1131,7 +1132,11 @@ namespace Spotlight.GameFlow
         {
             if (!SessionAllowsPlay || IsDetained) return;
             if (State == DayFlowState.CityMapLeisure && day == 1 && !firstDayCafeTutorialStarted && !firstDayCafeTutorialCompleted)
+            {
+                // Entering the cafe also dismisses/skips the map tour; never replay it after closing.
+                CompleteMapUsageTutorial();
                 firstDayCafeTutorialStarted = true;
+            }
             if (UnityEngine.SceneManagement.SceneManager.GetActiveScene().name == "CoffeeShop") return;
             if (!running)
             {
@@ -1237,6 +1242,11 @@ namespace Spotlight.GameFlow
                     && !(NarrativeRuntime.Instance?.Controller?.IsBusy ?? false)) EnterCityMap();
                 return;
             }
+            if (ShouldSkipFailedEntry(NarrativeEntryPoint.BeforeNight))
+            {
+                SkipFailedNarrativeEntry(NarrativeEntryPoint.BeforeNight, CompleteDay);
+                return;
+            }
             RunNarrativeEntry(NarrativeEntryPoint.BeforeNight, CompleteDay);
         }
 
@@ -1301,6 +1311,7 @@ namespace Spotlight.GameFlow
             awaitingNarrativeEntry = false;
             if (success)
             {
+                if (failedEntry == entry) failedEntryCount = 0;
                 if (entry == NarrativeEntryPoint.MorningBeforeMap) morningCompletedDay = day;
                 if (IsDetained) { TryCompleteDetainedDay(); return; }
                 next();
@@ -1383,15 +1394,47 @@ namespace Spotlight.GameFlow
         {
             // A cancelled/failed entry may be retried, but must not replay an old map intent.
             pendingMapAction = null;
+            // A deterministic content/resource error fails identically on every retry. After the
+            // second consecutive failure of the same entry today, let the player continue the day.
+            failedEntryCount = failedEntryDay == day && failedEntry == entry ? failedEntryCount + 1 : 1;
+            failedEntryDay = day;
+            failedEntry = entry;
+            bool offerSkip = failedEntryCount >= 2;
+            Debug.LogWarning("[DayFlow] Narrative entry " + entry + " did not complete on day " + day
+                + " (attempt " + failedEntryCount + (offerSkip ? "; skip offered" : "") + ").", this);
             if (entry == NarrativeEntryPoint.BeforeNight)
             {
                 EnterCityMap();
-                FindFirstObjectByType<MapSceneController>()?.ShowBlockingActionHint("请回咖啡馆三楼宿舍，再次点击床休息以重试。");
+                FindFirstObjectByType<MapSceneController>()?.ShowBlockingActionHint(offerSkip
+                    ? "夜间剧情连续出错，已记录错误。再次点击床休息将跳过这段剧情并进入下一天。"
+                    : "请回咖啡馆三楼宿舍，再次点击床休息以重试。");
                 return;
             }
             SetState(DayFlowState.PreBusiness);
-            ShowPresentation<PreBusinessPanel>(() => RunNarrativeEntry(entry, next),
-                panel => panel.ShowNarrativeEntryUnavailable());
+            ShowPresentation<PreBusinessPanel>(() => RunNarrativeEntry(entry, next), panel =>
+            {
+                panel.ShowNarrativeEntryUnavailable();
+                if (offerSkip) panel.OfferEntrySkip(() => SkipFailedNarrativeEntry(entry, next));
+            });
+        }
+
+        private NarrativeEntryPoint failedEntry;
+        private int failedEntryDay, failedEntryCount;
+
+        private bool ShouldSkipFailedEntry(NarrativeEntryPoint entry)
+            => failedEntryDay == day && failedEntry == entry && failedEntryCount >= 2;
+
+        /// <summary>Continue the day without the failing root. Its results stay discarded; the error is logged.</summary>
+        private void SkipFailedNarrativeEntry(NarrativeEntryPoint entry, Action next)
+        {
+            if (!SessionAllowsPlay || !running || awaitingNarrativeEntry) return;
+            Debug.LogError("[DayFlow] Skipping narrative entry " + entry + " on day " + day + " after "
+                + failedEntryCount + " consecutive failures; the failed story was not completed.", this);
+            failedEntryCount = 0;
+            ClosePresentation();
+            if (entry == NarrativeEntryPoint.MorningBeforeMap) morningCompletedDay = day;
+            if (IsDetained) { TryCompleteDetainedDay(); return; }
+            next();
         }
 
         public void RefreshMapAvailability()

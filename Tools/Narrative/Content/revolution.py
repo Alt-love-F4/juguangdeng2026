@@ -383,11 +383,13 @@ def _plan(r):
         r.check(115,"perception6",(("perception",6,1),),(116,116),outer=C("c4",3))
         r.choice(145,"c5",(146,147,148),((1,150,157),(2,159,164),(3,166,172)))
         r.check(174,"wisdom5",(("wisdom",5,1),),(175,190))
-        r.check(191,"language3",(("language",3,1),),(192,201))
         # Same-root deltas are staged; test projected value, not the stale live bar.
         projected=[_and(C("c4",a),C("c5",b),f"bar:faction.revolution:ge:{2-(1 if a==3 else 0)-delta}")
                    for a in range(1,5) for b,delta in ((1,2),(2,1),(3,-1))]
+        # Guard BEFORE the check: P191 itself is conditional, so check:language3 may never run.
+        # Pages/results must test the choice/bar route first (guards are AND-ed left to right).
         r.guard(191,201,*projected)
+        r.check(191,"language3",(("language",3,1),),(192,201))
         for opt,target,anchor in ((1,"neutral",101),(2,"rose",111),(3,"revolution",123),(4,"church",131)):
             r.effect("BAR_ADD","faction."+target,1,[C("c4",opt)],anchor, r.root+f".c4.{opt}.results")
         for opt,delta,anchor in ((1,2,157),(2,1,164),(3,-1,172)):

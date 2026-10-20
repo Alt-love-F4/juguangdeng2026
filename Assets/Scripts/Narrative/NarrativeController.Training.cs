@@ -8,8 +8,12 @@ namespace Spotlight.Narrative
     {
         // These dictionaries are transaction-local simulations, never a second attribute store.
         // Expand before ordinary preflight, so an invalid later reward cannot partially train anyone.
-        private List<NarrativeResultDefinition> ExpandTrainingResults(List<NarrativeResultDefinition> batch)
+        public event Action<string, int, int> TrainingCompleted;
+
+        private List<NarrativeResultDefinition> ExpandTrainingResults(List<NarrativeResultDefinition> batch,
+            out List<(string attribute, int experience, int increase)> rewards)
         {
+            rewards = new List<(string attribute, int experience, int increase)>();
             if (!batch.Exists(r => r != null && r.resultType == NarrativeResultType.TrainAttribute)) return batch;
             var expanded = new List<NarrativeResultDefinition>();
             var simulated = new Dictionary<string, int>(StringComparer.Ordinal);
@@ -47,6 +51,8 @@ namespace Spotlight.Narrative
                 int next = (int)Math.Min(20, current + total / 10);
                 int rest = next >= 20 ? 0 : (int)(total % 10);
                 simulated[playerKey] = next; simulated[trainingKey] = rest;
+                int earned = (next - current) * 10 + rest - remainder;
+                if (earned > 0) rewards.Add((attribute, earned, next - current));
                 expanded.Add(TrainingWrite(result, playerKey, next));
                 expanded.Add(TrainingWrite(result, trainingKey, rest));
             }
