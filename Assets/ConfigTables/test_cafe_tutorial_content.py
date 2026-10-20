@@ -62,7 +62,7 @@ class CafeTutorialContentTests(unittest.TestCase):
                 continue
             text = texts[row['textKey']]
             self.assertFalse(row['textKey'].startswith('cafe.tutorial.source.'))
-            for marker in ['演出说明', '配料表', '太太', '→']:
+            for marker in ['演出说明', '配料表', '→', '先生']:
                 self.assertNotIn(marker, text, row['textKey'])
             if row['speaker'] == 'right':
                 for marker in ['[', ']', '#', '鼠标', '左键', '右键', '高亮']:
@@ -73,7 +73,9 @@ class CafeTutorialContentTests(unittest.TestCase):
         self.assertIn('吧台', entry)
         self.assertNotIn('挂牌', entry)
         self.assertIn('箭头或吧台', entry)
-        self.assertIn('男人', texts['cafe.tutorial.customer_arrives.01'])
+        # 顾客B 按《文案-新手教程.docx》P014/P019/P025 为女性：老太太／她／B太太。
+        self.assertIn('老太太', texts['cafe.tutorial.customer_arrives.01'])
+        self.assertNotIn('男人', texts['cafe.tutorial.customer_arrives.01'])
         self.assertIn('大杯', texts['cafe.tutorial.order_confirmed.02'])
         self.assertIn('不加糖', texts['cafe.tutorial.order_confirmed.02'])
 

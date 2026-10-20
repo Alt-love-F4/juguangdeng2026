@@ -97,6 +97,9 @@ namespace Spotlight.GameFlow
 
         public void SetWindowMode(FullScreenMode mode)
         {
+            if (!SupportsDisplaySettings(Application.platform))
+                return;
+
             if (!IsSupportedWindowMode(mode))
                 throw new ArgumentOutOfRangeException(nameof(mode), mode, "Unsupported window mode.");
 
@@ -112,6 +115,9 @@ namespace Spotlight.GameFlow
 
         public void SetResolution(ResolutionOption option, bool persist = true)
         {
+            if (!SupportsDisplaySettings(Application.platform))
+                return;
+
             if (!ContainsResolution(option))
                 throw new ArgumentException("The resolution is not in ResolutionOptions.", nameof(option));
 
@@ -123,6 +129,9 @@ namespace Spotlight.GameFlow
 
         public void RestoreResolution(int width, int height)
         {
+            if (!SupportsDisplaySettings(Application.platform))
+                return;
+
             if (!ContainsResolution(new ResolutionOption(width, height)))
                 throw new ArgumentException("The resolution is not in ResolutionOptions.");
 
@@ -133,6 +142,11 @@ namespace Spotlight.GameFlow
         }
 
         public void CommitCurrentDisplaySettings() => Save();
+
+        public static bool SupportsDisplaySettings(RuntimePlatform platform)
+        {
+            return platform != RuntimePlatform.Android;
+        }
 
         private void ApplyAudio()
         {
@@ -150,6 +164,11 @@ namespace Spotlight.GameFlow
 
         private void ApplyDisplay()
         {
+            // Android owns its native display size and fullscreen mode; persisted desktop
+            // settings must not resize or window the mobile player during startup.
+            if (!SupportsDisplaySettings(Application.platform))
+                return;
+
             if (settings.ResolutionWidth <= 0 || settings.ResolutionHeight <= 0)
                 return;
 

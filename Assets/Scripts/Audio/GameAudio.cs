@@ -10,6 +10,10 @@ namespace Spotlight.Audio
         public static float VideoGain => (Catalog != null ? Catalog.videoVolume : 1f) * (AudioKit.IsMuted() ? 0f :
             AudioKit.GetGlobalVolume() * AudioKit.GetBusVolume(GameAudioService.Bus(Catalog != null ? Catalog.videoCategory : AudioCategory.Sfx)));
 
+        /// <summary>Settings gain of a bus, for self-timed cues played through a private AudioSource.</summary>
+        public static float CategoryGain(AudioCategory category) => AudioKit.IsMuted() ? 0f
+            : AudioKit.GetGlobalVolume() * AudioKit.GetBusVolume(GameAudioService.Bus(category));
+
         public static void Initialize(AudioCatalog catalog)
         {
             if (Service != null && Service.Catalog == catalog) return;

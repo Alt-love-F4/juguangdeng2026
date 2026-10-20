@@ -69,6 +69,18 @@ namespace Spotlight.GameFlow.Tests
                 FullScreenMode.FullScreenWindow, FullScreenMode.Windowed
             }));
         }
+
+        [TestCase(RuntimePlatform.Android, false)]
+        [TestCase(RuntimePlatform.WindowsPlayer, true)]
+        [TestCase(RuntimePlatform.WindowsEditor, true)]
+        public void DisplaySettingsAreAvailableOnlyOutsideAndroid(RuntimePlatform platform, bool expected)
+        {
+            var policy = typeof(GameSettingsService).GetMethod("SupportsDisplaySettings",
+                BindingFlags.Static | BindingFlags.Public);
+
+            Assert.That(policy, Is.Not.Null);
+            Assert.That(policy.Invoke(null, new object[] { platform }), Is.EqualTo(expected));
+        }
     }
 
     public sealed class SettingsDisplaySelectorPlayModeTests
