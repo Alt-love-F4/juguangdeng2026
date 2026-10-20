@@ -1,10 +1,13 @@
 fileFormatVersion: 2
-guid: de21adeac2904e82a6cc0d53f67496c4
+guid: 07898f3a2e1d8a547af28b57419c826f
 TextureImporter:
   internalIDToNameTable:
   - first:
-      213: -5867131126800163137
-    second: seated_placeholder_0
+      213: 5844680783865090842
+    second: "\u91CD\u53E0_0"
+  - first:
+      213: -6075588656529368384
+    second: "\u91CD\u53E0_1"
   externalObjects: {}
   serializedVersion: 13
   mipmaps:
@@ -75,7 +78,7 @@ TextureImporter:
     maxTextureSize: 2048
     resizeAlgorithm: 0
     textureFormat: -1
-    textureCompression: 0
+    textureCompression: 1
     compressionQuality: 50
     crunchedCompression: 0
     allowsAlphaSplitting: 0
@@ -100,13 +103,13 @@ TextureImporter:
     serializedVersion: 2
     sprites:
     - serializedVersion: 2
-      name: seated_placeholder_0
+      name: "\u91CD\u53E0_0"
       rect:
         serializedVersion: 2
-        x: 261
-        y: 19
-        width: 502
-        height: 1497
+        x: 0
+        y: 4
+        width: 429
+        height: 332
       alignment: 0
       pivot: {x: 0, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
@@ -115,8 +118,30 @@ TextureImporter:
       physicsShape: []
       tessellationDetail: -1
       bones: []
-      spriteID: fbe50785353c39ea0800000000000000
-      internalID: -5867131126800163137
+      spriteID: a1394dbd43a7c1150800000000000000
+      internalID: 5844680783865090842
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: "\u91CD\u53E0_1"
+      rect:
+        serializedVersion: 2
+        x: 461
+        y: 0
+        width: 354
+        height: 234
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 0ca9c268e4c2faba0800000000000000
+      internalID: -6075588656529368384
       vertices: []
       indices: 
       edges: []
@@ -135,7 +160,8 @@ TextureImporter:
     spriteCustomMetadata:
       entries: []
     nameFileIdTable:
-      seated_placeholder_0: -5867131126800163137
+      "\u91CD\u53E0_0": 5844680783865090842
+      "\u91CD\u53E0_1": -6075588656529368384
   mipmapLimitGroupName: 
   pSDRemoveMatte: 0
   userData: 

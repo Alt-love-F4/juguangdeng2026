@@ -111,6 +111,8 @@ namespace Spotlight.Narrative
             Spotlight.Audio.GameAudio.PlayNarrative(path, this, volume);
         }
 
+        public void SetMusic(string key) => Spotlight.Audio.GameAudio.OverrideMusic(this, key);
+
         public IEnumerator Bgm(string path, float volume, float fadeIn, float fadeOut, Func<bool> skipped)
         {
             Spotlight.Audio.GameAudio.OverrideMusic(this, path, volume, fadeIn, fadeOut);

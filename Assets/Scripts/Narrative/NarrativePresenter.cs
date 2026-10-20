@@ -489,6 +489,10 @@ namespace Spotlight.Narrative
                 dialoguePages?.Sort((a, b) => a.seq.CompareTo(b.seq));
                 if (dialoguePages != null && dialoguePages.Count > 0)
                 {
+                    // One event-owned bed spans dialogue pages, choices and embedded letters.
+                    // PresentationResources releases it on completion, cancellation or host teardown.
+                    string music = Spotlight.Audio.NarrativeMusic.Conversation(definition.presentationKey);
+                    if (!string.IsNullOrWhiteSpace(music)) resources.SetMusic(music);
                     int startPage = string.IsNullOrWhiteSpace(PreviewStartPageId) ? 0 : dialoguePages.FindIndex(p => p.pageId == PreviewStartPageId);
                     if (startPage < 0) throw new InvalidOperationException("Unknown preview start page: " + PreviewStartPageId);
                     bool batched = batchActive;

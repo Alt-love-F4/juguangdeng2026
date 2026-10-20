@@ -14,6 +14,16 @@ class CharacterVisualRevisionTests(unittest.TestCase):
         self.assertNotIn('cafe_customer',row['tags'])
         self.assertEqual([],apply(sheets))
 
+    def test_legacy_shared_art_is_replaced_using_explicit_female_evidence(self):
+        from character_visual_revision import resource_path, LEGACY
+        for cid in ['queen','guest_b','guest_d','church.generic.7148666b21','church.generic.5d7522a804']:
+            row=dict(objId=cid,objType='npc',**LEGACY)
+            apply({'Object': {'rows':[row]}})
+            for field in LEGACY:
+                self.assertEqual(resource_path(cid,field),row[field])
+                self.assertIn('/female/',row[field])
+            self.assertEqual([],apply({'Object': {'rows':[row]}}))
+
     def test_authored_portraits_avatars_and_seated_art_survive_content_regeneration(self):
         authored=dict(objId='named',objType='npc',portraitPath='Characters/named/neutral',avtarPath='Characters/named/avatar',portraitIndoorPath='Characters/named/indoor',tags='cafe_customer')
         before=dict(authored)

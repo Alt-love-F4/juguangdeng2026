@@ -135,6 +135,9 @@ namespace Spotlight.FreeCafe.Tests
             Assert.That(seating.suppliedCustomer,Is.Not.Null,"Acceptance preview keeps its authored supplied guest.");
 
             var originalArt=seating.characterArt;
+            var originalCatalog=runtime.characterCatalog;
+            var testCatalog=Spotlight.Narrative.CharacterCatalog.LoadFromTables();
+            runtime.characterCatalog=testCatalog;
             var texture=new Texture2D(2,2);
             var bodySprite=Sprite.Create(texture,new Rect(0,0,2,2),new Vector2(.5f,.5f));
             var storyOverride=Sprite.Create(texture,new Rect(0,0,2,2),new Vector2(.5f,.5f));
@@ -143,7 +146,10 @@ namespace Spotlight.FreeCafe.Tests
                 seating.characterArt=new[] { new CafeSeatedArtwork { characterId="guest_a", sprite=bodySprite } };
                 var ordinary=new WorldEntity { specId="customer", person=new CafePersonIdentity {
                     personId="visitor_order_1", characterId="guest_a", visualId="guest_a", role=CafePersonRole.Customer } };
-                Assert.That(seating.Artwork(ordinary),Is.SameAs(seating.silhouetteCustomer));
+                Assert.That(seating.Artwork(ordinary),Is.SameAs(runtime.Character("guest_a").worldSprite));
+                ordinary.person.characterId="guest_b";
+                Assert.That(seating.Artwork(ordinary),Is.SameAs(runtime.Character("guest_b").worldSprite));
+                Assert.That(seating.Artwork(ordinary),Is.Not.SameAs(runtime.Character("guest_a").worldSprite));
 
                 seating.characterArt=originalArt;
                 var storyEntry=Array.Find(originalArt,entry=>entry!=null && entry.sprite!=null);
@@ -163,11 +169,13 @@ namespace Spotlight.FreeCafe.Tests
 
                 var tutorial=new WorldEntity { specId="customer", person=new CafePersonIdentity {
                     personId="tutorial_customer", displayName="B太太", role=CafePersonRole.Customer } };
-                Assert.That(seating.Artwork(tutorial),Is.SameAs(seating.silhouetteCustomer));
+                Assert.That(seating.Artwork(tutorial),Is.SameAs(Resources.Load<Sprite>("Characters/silhouettes/female/seated_placeholder")));
             }
             finally
             {
                 seating.characterArt=originalArt;
+                runtime.characterCatalog=originalCatalog;
+                UnityEngine.Object.DestroyImmediate(testCatalog);
                 UnityEngine.Object.DestroyImmediate(bodySprite);
                 UnityEngine.Object.DestroyImmediate(storyOverride);
                 UnityEngine.Object.DestroyImmediate(texture);

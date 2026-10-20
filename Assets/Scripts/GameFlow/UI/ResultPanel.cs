@@ -103,7 +103,35 @@ private bool rectStatesCaptured;
             if (endingEchoText != null) endingEchoText.text = string.Empty;
             if (endingEchoSection != null) endingEchoSection.SetActive(false);
             RefreshContinueLabel();
+            Spotlight.Audio.GameAudio.StopOwner(this);
+            if (current?.IsEnding == true) StartEndingMusic();
         }
+
+        private void StartEndingMusic()
+        {
+            if (current?.IsEnding == true)
+                Spotlight.Audio.GameAudio.OverrideMusic(this, Spotlight.Audio.NarrativeMusic.Ending(current.EndingId));
+        }
+
+        protected override void OnShow()
+        {
+            base.OnShow();
+            StartEndingMusic();
+        }
+
+        protected override void OnWillHide()
+        {
+            Spotlight.Audio.GameAudio.StopOwner(this);
+            base.OnWillHide();
+        }
+
+        protected override void OnBeforeDestroy()
+        {
+            Spotlight.Audio.GameAudio.StopOwner(this);
+            base.OnBeforeDestroy();
+        }
+
+        private void OnDisable() => Spotlight.Audio.GameAudio.StopOwner(this);
 
         private void RefreshContinueLabel()
         {
@@ -215,6 +243,7 @@ private bool rectStatesCaptured;
 
         protected override void OnClose()
         {
+            Spotlight.Audio.GameAudio.StopOwner(this);
             base.OnClose();
             current = null;
             if(endingDialoguePanel!=null)endingDialoguePanel.gameObject.SetActive(false);

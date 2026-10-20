@@ -50,6 +50,8 @@ namespace Spotlight.Audio
         public const string Area = "cafe.area_transition";
         public const string MenuMusic = "music.menu";
         public const string CafeMusic = "music.cafe_day";
+        public const string CafeSunshineMusic = "music.track.阳光的音乐";
+        public const string CafeProgressMusic = "music.track.日常推进";
         public const string CityMusic = "music.city";
         public const string NightMusic = "music.home_night";
         public const string CafeAmbience = "ambience.cafe";

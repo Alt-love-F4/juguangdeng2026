@@ -4680,6 +4680,1237 @@ MonoBehaviour:
     provisional: 0
     materialNote: "\u7B56\u5212\u6587\u4EF6/\u65B0\u97F3\u9891/\u5496\u5561\u7ED3\u679C-\u97F3\u6548perfect.mp3\uFF1B\u6309\u51FA\u54C1\u5C0F\u7968\u73B0\u6709\u56DB\u6863\u8BC4\u5206\u64AD\u653E\uFF0840/60/80
       \u5206\u754C\uFF09\u3002"
+  - key: "music.track.avemaria\u5F25\u6492"
+    description: "\u5F25\u6492 / \u4EEA\u5F0F\u4E0E\u633D\u6B4C"
+    enabled: 1
+    clip: {fileID: 8300000, guid: 9650128d7c9e3b3439909514df8e3954, type: 3}
+    resourcePath: 
+    category: 2
+    loop: 1
+    volume: 0.187
+    pitch: 1
+    fadeIn: 1.2
+    fadeOut: 1.2
+    cooldown: 0
+    maxVoices: 1
+    provisional: 0
+    materialNote: "\u6309\u5267\u60C5\u6587\u672C\u4E0E\u7D20\u6750\u547D\u540D\u521D\u914D\uFF1B\u5DF2\u6D4B\u91CF\u65F6\u957F\u548C\u5E73\u5747/\u5CF0\u503C\u7535\u5E73\uFF0C\u5C1A\u9700\u5B9E\u9645\u8BD5\u542C\u786E\u8BA4\u60C5\u7EEA\u3001\u5BF9\u767D\u4E0B\u97F3\u91CF\u548C\u5FAA\u73AF\u63A5\u7F1D\u3002"
+  - key: music.ending.neutral.ending.a
+    description: "\u7ED3\u5C40 / \u5E73\u51E1\u4E4B\u65E5\uFF1A\u9057\u61BE\u4E2D\u7684\u65E5\u5E38\u56DE\u671B"
+    enabled: 1
+    clip: {fileID: 8300000, guid: cdb097e24f912ca4ca83b8261b7c81cb, type: 3}
+    resourcePath: 
+    category: 2
+    loop: 1
+    volume: 0.38
+    pitch: 1
+    fadeIn: 1.5
+    fadeOut: 1.2
+    cooldown: 0
+    maxVoices: 1
+    provisional: 0
+    materialNote: "\u6309\u5267\u60C5\u6587\u672C\u4E0E\u7D20\u6750\u547D\u540D\u521D\u914D\uFF1B\u5DF2\u6D4B\u91CF\u65F6\u957F\u548C\u5E73\u5747/\u5CF0\u503C\u7535\u5E73\uFF0C\u5C1A\u9700\u5B9E\u9645\u8BD5\u542C\u786E\u8BA4\u60C5\u7EEA\u3001\u5BF9\u767D\u4E0B\u97F3\u91CF\u548C\u5FAA\u73AF\u63A5\u7F1D\u3002"
+  - key: music.ending.neutral.ending.b
+    description: "\u7ED3\u5C40 / \u8FDC\u65B9\u7684\u5496\u5561\u9986\uFF1A\u91CD\u65B0\u5B89\u987F\u7684\u6E29\u6696"
+    enabled: 1
+    clip: {fileID: 8300000, guid: 8d80afc944927d54190d6a1b588d8b63, type: 3}
+    resourcePath: 
+    category: 2
+    loop: 1
+    volume: 0.27
+    pitch: 1
+    fadeIn: 1.5
+    fadeOut: 1.2
+    cooldown: 0
+    maxVoices: 1
+    provisional: 0
+    materialNote: "\u6309\u5267\u60C5\u6587\u672C\u4E0E\u7D20\u6750\u547D\u540D\u521D\u914D\uFF1B\u5DF2\u6D4B\u91CF\u65F6\u957F\u548C\u5E73\u5747/\u5CF0\u503C\u7535\u5E73\uFF0C\u5C1A\u9700\u5B9E\u9645\u8BD5\u542C\u786E\u8BA4\u60C5\u7EEA\u3001\u5BF9\u767D\u4E0B\u97F3\u91CF\u548C\u5FAA\u73AF\u63A5\u7F1D\u3002"
+  - key: music.ending.neutral.ending.c
+    description: "\u7ED3\u5C40 / \u6CB8\u70B9\u4F9D\u65E7\uFF1A\u5E73\u51E1\u751F\u6D3B\u7EE7\u7EED"
+    enabled: 1
+    clip: {fileID: 8300000, guid: 8c74739d1c0ffde4f9042bb2c3897eb7, type: 3}
+    resourcePath: 
+    category: 2
+    loop: 1
+    volume: 0.22
+    pitch: 1
+    fadeIn: 1.5
+    fadeOut: 1.2
+    cooldown: 0
+    maxVoices: 1
+    provisional: 0
+    materialNote: "\u6309\u5267\u60C5\u6587\u672C\u4E0E\u7D20\u6750\u547D\u540D\u521D\u914D\uFF1B\u5DF2\u6D4B\u91CF\u65F6\u957F\u548C\u5E73\u5747/\u5CF0\u503C\u7535\u5E73\uFF0C\u5C1A\u9700\u5B9E\u9645\u8BD5\u542C\u786E\u8BA4\u60C5\u7EEA\u3001\u5BF9\u767D\u4E0B\u97F3\u91CF\u548C\u5FAA\u73AF\u63A5\u7F1D\u3002"
+  - key: music.ending.neutral.ending.d
+    description: "\u7ED3\u5C40 / \u5546\u4E1A\u5927\u4EA8\uFF1A\u7E41\u8363\u4E0E\u65E7\u65E5\u4F59\u97F5"
+    enabled: 1
+    clip: {fileID: 8300000, guid: 292727eca48265f468420815b6e38f0c, type: 3}
+    resourcePath: 
+    category: 2
+    loop: 1
+    volume: 0.32
+    pitch: 1
+    fadeIn: 1.5
+    fadeOut: 1.2
+    cooldown: 0
+    maxVoices: 1
+    provisional: 0
+    materialNote: "\u6309\u5267\u60C5\u6587\u672C\u4E0E\u7D20\u6750\u547D\u540D\u521D\u914D\uFF1B\u5DF2\u6D4B\u91CF\u65F6\u957F\u548C\u5E73\u5747/\u5CF0\u503C\u7535\u5E73\uFF0C\u5C1A\u9700\u5B9E\u9645\u8BD5\u542C\u786E\u8BA4\u60C5\u7EEA\u3001\u5BF9\u767D\u4E0B\u97F3\u91CF\u548C\u5FAA\u73AF\u63A5\u7F1D\u3002"
+  - key: music.ending.rose.ending.trust_limit.ending
+    description: "\u7ED3\u5C40 / \u4FE1\u4EFB\u7684\u754C\u9650\uFF1A\u6B7B\u4EA1\u540E\u7684\u56DE\u671B"
+    enabled: 1
+    clip: {fileID: 8300000, guid: 6d6684716574f9e4d9e18bfd9dc6d383, type: 3}
+    resourcePath: 
+    category: 2
+    loop: 1
+    volume: 0.22
+    pitch: 1
+    fadeIn: 1.5
+    fadeOut: 1.2
+    cooldown: 0
+    maxVoices: 1
+    provisional: 0
+    materialNote: "\u6309\u5267\u60C5\u6587\u672C\u4E0E\u7D20\u6750\u547D\u540D\u521D\u914D\uFF1B\u5DF2\u6D4B\u91CF\u65F6\u957F\u548C\u5E73\u5747/\u5CF0\u503C\u7535\u5E73\uFF0C\u5C1A\u9700\u5B9E\u9645\u8BD5\u542C\u786E\u8BA4\u60C5\u7EEA\u3001\u5BF9\u767D\u4E0B\u97F3\u91CF\u548C\u5FAA\u73AF\u63A5\u7F1D\u3002"
+  - key: music.ending.rose.ending.job_requirements.ending
+    description: "\u7ED3\u5C40 / \u5DE5\u4F5C\u9700\u6C42\u8981\u770B\u6E05\uFF1A\u68CB\u5B50\u7684\u60B2\u5267"
+    enabled: 1
+    clip: {fileID: 8300000, guid: 6d6684716574f9e4d9e18bfd9dc6d383, type: 3}
+    resourcePath: 
+    category: 2
+    loop: 1
+    volume: 0.22
+    pitch: 1
+    fadeIn: 1.5
+    fadeOut: 1.2
+    cooldown: 0
+    maxVoices: 1
+    provisional: 0
+    materialNote: "\u6309\u5267\u60C5\u6587\u672C\u4E0E\u7D20\u6750\u547D\u540D\u521D\u914D\uFF1B\u5DF2\u6D4B\u91CF\u65F6\u957F\u548C\u5E73\u5747/\u5CF0\u503C\u7535\u5E73\uFF0C\u5C1A\u9700\u5B9E\u9645\u8BD5\u542C\u786E\u8BA4\u60C5\u7EEA\u3001\u5BF9\u767D\u4E0B\u97F3\u91CF\u548C\u5FAA\u73AF\u63A5\u7F1D\u3002"
+  - key: music.ending.rose.route.1115.s1.ending.ideal_world
+    description: "\u7ED3\u5C40 / \u7406\u60F3\u65B0\u4E16\u754C\uFF1A\u6E05\u6D17\u4E0E\u670D\u4ECE\uFF0C\u975E\u80DC\u5229\u5E86\u5178"
+    enabled: 1
+    clip: {fileID: 8300000, guid: acc7de91496ec8649b97bea74d8d3705, type: 3}
+    resourcePath: 
+    category: 2
+    loop: 1
+    volume: 0.27
+    pitch: 1
+    fadeIn: 1.5
+    fadeOut: 1.2
+    cooldown: 0
+    maxVoices: 1
+    provisional: 0
+    materialNote: "\u6309\u5267\u60C5\u6587\u672C\u4E0E\u7D20\u6750\u547D\u540D\u521D\u914D\uFF1B\u5DF2\u6D4B\u91CF\u65F6\u957F\u548C\u5E73\u5747/\u5CF0\u503C\u7535\u5E73\uFF0C\u5C1A\u9700\u5B9E\u9645\u8BD5\u542C\u786E\u8BA4\u60C5\u7EEA\u3001\u5BF9\u767D\u4E0B\u97F3\u91CF\u548C\u5FAA\u73AF\u63A5\u7F1D\u3002"
+  - key: music.ending.rose.route.ending.unforgiven.ending
+    description: "\u7ED3\u5C40 / \u65E0\u6CD5\u539F\u8C05\uFF1A\u544A\u522B\u4E0E\u7F6A\u759A"
+    enabled: 1
+    clip: {fileID: 8300000, guid: 6d6684716574f9e4d9e18bfd9dc6d383, type: 3}
+    resourcePath: 
+    category: 2
+    loop: 1
+    volume: 0.22
+    pitch: 1
+    fadeIn: 1.5
+    fadeOut: 1.2
+    cooldown: 0
+    maxVoices: 1
+    provisional: 0
+    materialNote: "\u6309\u5267\u60C5\u6587\u672C\u4E0E\u7D20\u6750\u547D\u540D\u521D\u914D\uFF1B\u5DF2\u6D4B\u91CF\u65F6\u957F\u548C\u5E73\u5747/\u5CF0\u503C\u7535\u5E73\uFF0C\u5C1A\u9700\u5B9E\u9645\u8BD5\u542C\u786E\u8BA4\u60C5\u7EEA\u3001\u5BF9\u767D\u4E0B\u97F3\u91CF\u548C\u5FAA\u73AF\u63A5\u7F1D\u3002"
+  - key: music.ending.rose.route.ending.bloom.ending
+    description: "\u7ED3\u5C40 / \u53E6\u4E00\u79CD\u7EFD\u653E\uFF1A\u4FDD\u5168\u751F\u547D\u540E\u7684\u65B0\u53EF\u80FD"
+    enabled: 1
+    clip: {fileID: 8300000, guid: d73650a2702926a4a9cae3af058c3609, type: 3}
+    resourcePath: 
+    category: 2
+    loop: 1
+    volume: 0.32
+    pitch: 1
+    fadeIn: 1.5
+    fadeOut: 1.2
+    cooldown: 0
+    maxVoices: 1
+    provisional: 0
+    materialNote: "\u6309\u5267\u60C5\u6587\u672C\u4E0E\u7D20\u6750\u547D\u540D\u521D\u914D\uFF1B\u5DF2\u6D4B\u91CF\u65F6\u957F\u548C\u5E73\u5747/\u5CF0\u503C\u7535\u5E73\uFF0C\u5C1A\u9700\u5B9E\u9645\u8BD5\u542C\u786E\u8BA4\u60C5\u7EEA\u3001\u5BF9\u767D\u4E0B\u97F3\u91CF\u548C\u5FAA\u73AF\u63A5\u7F1D\u3002"
+  - key: music.ending.church.ending.if2
+    description: "\u7ED3\u5C40 / \u832B\u7136\u7684\u5386\u53F2\u53C2\u4E0E\u8005\uFF1A\u8FF7\u5931\u4E0E\u6B7B\u4EA1"
+    enabled: 1
+    clip: {fileID: 8300000, guid: acc7de91496ec8649b97bea74d8d3705, type: 3}
+    resourcePath: 
+    category: 2
+    loop: 1
+    volume: 0.27
+    pitch: 1
+    fadeIn: 1.5
+    fadeOut: 1.2
+    cooldown: 0
+    maxVoices: 1
+    provisional: 0
+    materialNote: "\u6309\u5267\u60C5\u6587\u672C\u4E0E\u7D20\u6750\u547D\u540D\u521D\u914D\uFF1B\u5DF2\u6D4B\u91CF\u65F6\u957F\u548C\u5E73\u5747/\u5CF0\u503C\u7535\u5E73\uFF0C\u5C1A\u9700\u5B9E\u9645\u8BD5\u542C\u786E\u8BA4\u60C5\u7EEA\u3001\u5BF9\u767D\u4E0B\u97F3\u91CF\u548C\u5FAA\u73AF\u63A5\u7F1D\u3002"
+  - key: music.ending.church.ending.if4
+    description: "\u7ED3\u5C40 / \u518D\u89C1\uFF0C\u4E9A\u62FF\u5C3C\u4E9A\uFF1A\u5931\u53BB\u610F\u8BC6\u524D\u7684\u544A\u522B"
+    enabled: 1
+    clip: {fileID: 8300000, guid: 6d6684716574f9e4d9e18bfd9dc6d383, type: 3}
+    resourcePath: 
+    category: 2
+    loop: 1
+    volume: 0.22
+    pitch: 1
+    fadeIn: 1.5
+    fadeOut: 1.2
+    cooldown: 0
+    maxVoices: 1
+    provisional: 0
+    materialNote: "\u6309\u5267\u60C5\u6587\u672C\u4E0E\u7D20\u6750\u547D\u540D\u521D\u914D\uFF1B\u5DF2\u6D4B\u91CF\u65F6\u957F\u548C\u5E73\u5747/\u5CF0\u503C\u7535\u5E73\uFF0C\u5C1A\u9700\u5B9E\u9645\u8BD5\u542C\u786E\u8BA4\u60C5\u7EEA\u3001\u5BF9\u767D\u4E0B\u97F3\u91CF\u548C\u5FAA\u73AF\u63A5\u7F1D\u3002"
+  - key: music.ending.church.ending.ry1
+    description: "\u7ED3\u5C40 / \u7F8E\u4E3D\u65B0\u4E16\u754C\uFF1A\u671F\u5F85\u4E0D\u540C\u7684\u672A\u6765"
+    enabled: 1
+    clip: {fileID: 8300000, guid: d73650a2702926a4a9cae3af058c3609, type: 3}
+    resourcePath: 
+    category: 2
+    loop: 1
+    volume: 0.32
+    pitch: 1
+    fadeIn: 1.5
+    fadeOut: 1.2
+    cooldown: 0
+    maxVoices: 1
+    provisional: 0
+    materialNote: "\u6309\u5267\u60C5\u6587\u672C\u4E0E\u7D20\u6750\u547D\u540D\u521D\u914D\uFF1B\u5DF2\u6D4B\u91CF\u65F6\u957F\u548C\u5E73\u5747/\u5CF0\u503C\u7535\u5E73\uFF0C\u5C1A\u9700\u5B9E\u9645\u8BD5\u542C\u786E\u8BA4\u60C5\u7EEA\u3001\u5BF9\u767D\u4E0B\u97F3\u91CF\u548C\u5FAA\u73AF\u63A5\u7F1D\u3002"
+  - key: music.ending.church.ending.ry2
+    description: "\u7ED3\u5C40 / \u5386\u53F2\u7684\u5206\u53C9\u8DEF\uFF1A\u4E0D\u7518\u4E0E\u8FFD\u95EE"
+    enabled: 1
+    clip: {fileID: 8300000, guid: 6d6684716574f9e4d9e18bfd9dc6d383, type: 3}
+    resourcePath: 
+    category: 2
+    loop: 1
+    volume: 0.22
+    pitch: 1
+    fadeIn: 1.5
+    fadeOut: 1.2
+    cooldown: 0
+    maxVoices: 1
+    provisional: 0
+    materialNote: "\u6309\u5267\u60C5\u6587\u672C\u4E0E\u7D20\u6750\u547D\u540D\u521D\u914D\uFF1B\u5DF2\u6D4B\u91CF\u65F6\u957F\u548C\u5E73\u5747/\u5CF0\u503C\u7535\u5E73\uFF0C\u5C1A\u9700\u5B9E\u9645\u8BD5\u542C\u786E\u8BA4\u60C5\u7EEA\u3001\u5BF9\u767D\u4E0B\u97F3\u91CF\u548C\u5FAA\u73AF\u63A5\u7F1D\u3002"
+  - key: music.ending.revolution.end01
+    description: "\u7ED3\u5C40 / \u5386\u53F2\u4F1A\u5224\u6211\u65E0\u7F6A\uFF1A\u8840\u4E0E\u4FE1\u5FF5\u7684\u6C89\u91CD\u633D\u6B4C"
+    enabled: 1
+    clip: {fileID: 8300000, guid: 9650128d7c9e3b3439909514df8e3954, type: 3}
+    resourcePath: 
+    category: 2
+    loop: 1
+    volume: 0.22
+    pitch: 1
+    fadeIn: 1.5
+    fadeOut: 1.2
+    cooldown: 0
+    maxVoices: 1
+    provisional: 0
+    materialNote: "\u6309\u5267\u60C5\u6587\u672C\u4E0E\u7D20\u6750\u547D\u540D\u521D\u914D\uFF1B\u5DF2\u6D4B\u91CF\u65F6\u957F\u548C\u5E73\u5747/\u5CF0\u503C\u7535\u5E73\uFF0C\u5C1A\u9700\u5B9E\u9645\u8BD5\u542C\u786E\u8BA4\u60C5\u7EEA\u3001\u5BF9\u767D\u4E0B\u97F3\u91CF\u548C\u5FAA\u73AF\u63A5\u7F1D\u3002"
+  - key: music.ending.revolution.end02
+    description: "\u7ED3\u5C40 / \u5386\u53F2\u5C1A\u672A\u7ED3\u675F\uFF1A\u7EE7\u7EED\u8D70\u5411\u660E\u5929"
+    enabled: 1
+    clip: {fileID: 8300000, guid: d73650a2702926a4a9cae3af058c3609, type: 3}
+    resourcePath: 
+    category: 2
+    loop: 1
+    volume: 0.32
+    pitch: 1
+    fadeIn: 1.5
+    fadeOut: 1.2
+    cooldown: 0
+    maxVoices: 1
+    provisional: 0
+    materialNote: "\u6309\u5267\u60C5\u6587\u672C\u4E0E\u7D20\u6750\u547D\u540D\u521D\u914D\uFF1B\u5DF2\u6D4B\u91CF\u65F6\u957F\u548C\u5E73\u5747/\u5CF0\u503C\u7535\u5E73\uFF0C\u5C1A\u9700\u5B9E\u9645\u8BD5\u542C\u786E\u8BA4\u60C5\u7EEA\u3001\u5BF9\u767D\u4E0B\u97F3\u91CF\u548C\u5FAA\u73AF\u63A5\u7F1D\u3002"
+  - key: music.ending.arrival.ending.if0
+    description: "\u7ED3\u5C40 / \u672A\u5F00\u59CB\u5C31\u5DF2\u7ED3\u675F\uFF1A\u5F52\u4E61\u4E0E\u56DE\u671B"
+    enabled: 1
+    clip: {fileID: 8300000, guid: cdb097e24f912ca4ca83b8261b7c81cb, type: 3}
+    resourcePath: 
+    category: 2
+    loop: 1
+    volume: 0.38
+    pitch: 1
+    fadeIn: 1.5
+    fadeOut: 1.2
+    cooldown: 0
+    maxVoices: 1
+    provisional: 0
+    materialNote: "\u6309\u5267\u60C5\u6587\u672C\u4E0E\u7D20\u6750\u547D\u540D\u521D\u914D\uFF1B\u5DF2\u6D4B\u91CF\u65F6\u957F\u548C\u5E73\u5747/\u5CF0\u503C\u7535\u5E73\uFF0C\u5C1A\u9700\u5B9E\u9645\u8BD5\u542C\u786E\u8BA4\u60C5\u7EEA\u3001\u5BF9\u767D\u4E0B\u97F3\u91CF\u548C\u5FAA\u73AF\u63A5\u7F1D\u3002"
+  - key: music.conversation.oct07.s1.conversation
+    description: "\u957F\u5267\u60C5 / \u5F00\u4E1A\u3001\u4EB2\u53CB\u548C\u8857\u5E02\u7684\u6696\u610F
+      / oct07.s1.conversation"
+    enabled: 1
+    clip: {fileID: 8300000, guid: 8d80afc944927d54190d6a1b588d8b63, type: 3}
+    resourcePath: 
+    category: 2
+    loop: 1
+    volume: 0.22950001
+    pitch: 1
+    fadeIn: 1.2
+    fadeOut: 1.2
+    cooldown: 0
+    maxVoices: 1
+    provisional: 0
+    materialNote: "\u6309\u5267\u60C5\u6587\u672C\u4E0E\u7D20\u6750\u547D\u540D\u521D\u914D\uFF1B\u5DF2\u6D4B\u91CF\u65F6\u957F\u548C\u5E73\u5747/\u5CF0\u503C\u7535\u5E73\uFF0C\u5C1A\u9700\u5B9E\u9645\u8BD5\u542C\u786E\u8BA4\u60C5\u7EEA\u3001\u5BF9\u767D\u4E0B\u97F3\u91CF\u548C\u5FAA\u73AF\u63A5\u7F1D\u3002"
+  - key: music.conversation.rose.1012.s1.conversation
+    description: "\u957F\u5267\u60C5 / \u5F00\u4E1A\u3001\u4EB2\u53CB\u548C\u8857\u5E02\u7684\u6696\u610F
+      / rose.1012.s1.conversation"
+    enabled: 1
+    clip: {fileID: 8300000, guid: 8d80afc944927d54190d6a1b588d8b63, type: 3}
+    resourcePath: 
+    category: 2
+    loop: 1
+    volume: 0.22950001
+    pitch: 1
+    fadeIn: 1.2
+    fadeOut: 1.2
+    cooldown: 0
+    maxVoices: 1
+    provisional: 0
+    materialNote: "\u6309\u5267\u60C5\u6587\u672C\u4E0E\u7D20\u6750\u547D\u540D\u521D\u914D\uFF1B\u5DF2\u6D4B\u91CF\u65F6\u957F\u548C\u5E73\u5747/\u5CF0\u503C\u7535\u5E73\uFF0C\u5C1A\u9700\u5B9E\u9645\u8BD5\u542C\u786E\u8BA4\u60C5\u7EEA\u3001\u5BF9\u767D\u4E0B\u97F3\u91CF\u548C\u5FAA\u73AF\u63A5\u7F1D\u3002"
+  - key: music.conversation.rose.1019.s1.conversation
+    description: "\u957F\u5267\u60C5 / \u5F00\u4E1A\u3001\u4EB2\u53CB\u548C\u8857\u5E02\u7684\u6696\u610F
+      / rose.1019.s1.conversation"
+    enabled: 1
+    clip: {fileID: 8300000, guid: 8d80afc944927d54190d6a1b588d8b63, type: 3}
+    resourcePath: 
+    category: 2
+    loop: 1
+    volume: 0.22950001
+    pitch: 1
+    fadeIn: 1.2
+    fadeOut: 1.2
+    cooldown: 0
+    maxVoices: 1
+    provisional: 0
+    materialNote: "\u6309\u5267\u60C5\u6587\u672C\u4E0E\u7D20\u6750\u547D\u540D\u521D\u914D\uFF1B\u5DF2\u6D4B\u91CF\u65F6\u957F\u548C\u5E73\u5747/\u5CF0\u503C\u7535\u5E73\uFF0C\u5C1A\u9700\u5B9E\u9645\u8BD5\u542C\u786E\u8BA4\u60C5\u7EEA\u3001\u5BF9\u767D\u4E0B\u97F3\u91CF\u548C\u5FAA\u73AF\u63A5\u7F1D\u3002"
+  - key: music.conversation.neutral.1010.s1
+    description: "\u957F\u5267\u60C5 / \u5F00\u4E1A\u3001\u4EB2\u53CB\u548C\u8857\u5E02\u7684\u6696\u610F
+      / neutral.1010.s1"
+    enabled: 1
+    clip: {fileID: 8300000, guid: 8d80afc944927d54190d6a1b588d8b63, type: 3}
+    resourcePath: 
+    category: 2
+    loop: 1
+    volume: 0.22950001
+    pitch: 1
+    fadeIn: 1.2
+    fadeOut: 1.2
+    cooldown: 0
+    maxVoices: 1
+    provisional: 0
+    materialNote: "\u6309\u5267\u60C5\u6587\u672C\u4E0E\u7D20\u6750\u547D\u540D\u521D\u914D\uFF1B\u5DF2\u6D4B\u91CF\u65F6\u957F\u548C\u5E73\u5747/\u5CF0\u503C\u7535\u5E73\uFF0C\u5C1A\u9700\u5B9E\u9645\u8BD5\u542C\u786E\u8BA4\u60C5\u7EEA\u3001\u5BF9\u767D\u4E0B\u97F3\u91CF\u548C\u5FAA\u73AF\u63A5\u7F1D\u3002"
+  - key: music.conversation.neutral.1013.s2
+    description: "\u957F\u5267\u60C5 / \u5F00\u4E1A\u3001\u4EB2\u53CB\u548C\u8857\u5E02\u7684\u6696\u610F
+      / neutral.1013.s2"
+    enabled: 1
+    clip: {fileID: 8300000, guid: 8d80afc944927d54190d6a1b588d8b63, type: 3}
+    resourcePath: 
+    category: 2
+    loop: 1
+    volume: 0.22950001
+    pitch: 1
+    fadeIn: 1.2
+    fadeOut: 1.2
+    cooldown: 0
+    maxVoices: 1
+    provisional: 0
+    materialNote: "\u6309\u5267\u60C5\u6587\u672C\u4E0E\u7D20\u6750\u547D\u540D\u521D\u914D\uFF1B\u5DF2\u6D4B\u91CF\u65F6\u957F\u548C\u5E73\u5747/\u5CF0\u503C\u7535\u5E73\uFF0C\u5C1A\u9700\u5B9E\u9645\u8BD5\u542C\u786E\u8BA4\u60C5\u7EEA\u3001\u5BF9\u767D\u4E0B\u97F3\u91CF\u548C\u5FAA\u73AF\u63A5\u7F1D\u3002"
+  - key: music.conversation.neutral.1030.s1
+    description: "\u957F\u5267\u60C5 / \u5F00\u4E1A\u3001\u4EB2\u53CB\u548C\u8857\u5E02\u7684\u6696\u610F
+      / neutral.1030.s1"
+    enabled: 1
+    clip: {fileID: 8300000, guid: 8d80afc944927d54190d6a1b588d8b63, type: 3}
+    resourcePath: 
+    category: 2
+    loop: 1
+    volume: 0.22950001
+    pitch: 1
+    fadeIn: 1.2
+    fadeOut: 1.2
+    cooldown: 0
+    maxVoices: 1
+    provisional: 0
+    materialNote: "\u6309\u5267\u60C5\u6587\u672C\u4E0E\u7D20\u6750\u547D\u540D\u521D\u914D\uFF1B\u5DF2\u6D4B\u91CF\u65F6\u957F\u548C\u5E73\u5747/\u5CF0\u503C\u7535\u5E73\uFF0C\u5C1A\u9700\u5B9E\u9645\u8BD5\u542C\u786E\u8BA4\u60C5\u7EEA\u3001\u5BF9\u767D\u4E0B\u97F3\u91CF\u548C\u5FAA\u73AF\u63A5\u7F1D\u3002"
+  - key: music.conversation.church.1104.s1.conversation
+    description: "\u957F\u5267\u60C5 / \u5F00\u4E1A\u3001\u4EB2\u53CB\u548C\u8857\u5E02\u7684\u6696\u610F
+      / church.1104.s1.conversation"
+    enabled: 1
+    clip: {fileID: 8300000, guid: 8d80afc944927d54190d6a1b588d8b63, type: 3}
+    resourcePath: 
+    category: 2
+    loop: 1
+    volume: 0.22950001
+    pitch: 1
+    fadeIn: 1.2
+    fadeOut: 1.2
+    cooldown: 0
+    maxVoices: 1
+    provisional: 0
+    materialNote: "\u6309\u5267\u60C5\u6587\u672C\u4E0E\u7D20\u6750\u547D\u540D\u521D\u914D\uFF1B\u5DF2\u6D4B\u91CF\u65F6\u957F\u548C\u5E73\u5747/\u5CF0\u503C\u7535\u5E73\uFF0C\u5C1A\u9700\u5B9E\u9645\u8BD5\u542C\u786E\u8BA4\u60C5\u7EEA\u3001\u5BF9\u767D\u4E0B\u97F3\u91CF\u548C\u5FAA\u73AF\u63A5\u7F1D\u3002"
+  - key: music.conversation.neutral.1018.s1
+    description: "\u957F\u5267\u60C5 / \u7ECF\u8425\u3001\u5546\u8C08\u4E0E\u9010\u6E10\u6062\u590D\u7684\u751F\u6D3B
+      / neutral.1018.s1"
+    enabled: 1
+    clip: {fileID: 8300000, guid: 2a1a4379bdccd7742a66694b4812d528, type: 3}
+    resourcePath: 
+    category: 2
+    loop: 1
+    volume: 0.22950001
+    pitch: 1
+    fadeIn: 1.2
+    fadeOut: 1.2
+    cooldown: 0
+    maxVoices: 1
+    provisional: 0
+    materialNote: "\u6309\u5267\u60C5\u6587\u672C\u4E0E\u7D20\u6750\u547D\u540D\u521D\u914D\uFF1B\u5DF2\u6D4B\u91CF\u65F6\u957F\u548C\u5E73\u5747/\u5CF0\u503C\u7535\u5E73\uFF0C\u5C1A\u9700\u5B9E\u9645\u8BD5\u542C\u786E\u8BA4\u60C5\u7EEA\u3001\u5BF9\u767D\u4E0B\u97F3\u91CF\u548C\u5FAA\u73AF\u63A5\u7F1D\u3002"
+  - key: music.conversation.neutral.route.1112.s1
+    description: "\u957F\u5267\u60C5 / \u7ECF\u8425\u3001\u5546\u8C08\u4E0E\u9010\u6E10\u6062\u590D\u7684\u751F\u6D3B
+      / neutral.route.1112.s1"
+    enabled: 1
+    clip: {fileID: 8300000, guid: 2a1a4379bdccd7742a66694b4812d528, type: 3}
+    resourcePath: 
+    category: 2
+    loop: 1
+    volume: 0.22950001
+    pitch: 1
+    fadeIn: 1.2
+    fadeOut: 1.2
+    cooldown: 0
+    maxVoices: 1
+    provisional: 0
+    materialNote: "\u6309\u5267\u60C5\u6587\u672C\u4E0E\u7D20\u6750\u547D\u540D\u521D\u914D\uFF1B\u5DF2\u6D4B\u91CF\u65F6\u957F\u548C\u5E73\u5747/\u5CF0\u503C\u7535\u5E73\uFF0C\u5C1A\u9700\u5B9E\u9645\u8BD5\u542C\u786E\u8BA4\u60C5\u7EEA\u3001\u5BF9\u767D\u4E0B\u97F3\u91CF\u548C\u5FAA\u73AF\u63A5\u7F1D\u3002"
+  - key: music.conversation.neutral.route.1129.s1
+    description: "\u957F\u5267\u60C5 / \u7ECF\u8425\u3001\u5546\u8C08\u4E0E\u9010\u6E10\u6062\u590D\u7684\u751F\u6D3B
+      / neutral.route.1129.s1"
+    enabled: 1
+    clip: {fileID: 8300000, guid: 2a1a4379bdccd7742a66694b4812d528, type: 3}
+    resourcePath: 
+    category: 2
+    loop: 1
+    volume: 0.22950001
+    pitch: 1
+    fadeIn: 1.2
+    fadeOut: 1.2
+    cooldown: 0
+    maxVoices: 1
+    provisional: 0
+    materialNote: "\u6309\u5267\u60C5\u6587\u672C\u4E0E\u7D20\u6750\u547D\u540D\u521D\u914D\uFF1B\u5DF2\u6D4B\u91CF\u65F6\u957F\u548C\u5E73\u5747/\u5CF0\u503C\u7535\u5E73\uFF0C\u5C1A\u9700\u5B9E\u9645\u8BD5\u542C\u786E\u8BA4\u60C5\u7EEA\u3001\u5BF9\u767D\u4E0B\u97F3\u91CF\u548C\u5FAA\u73AF\u63A5\u7F1D\u3002"
+  - key: music.conversation.neutral.route.1130.s1
+    description: "\u957F\u5267\u60C5 / \u7ECF\u8425\u3001\u5546\u8C08\u4E0E\u9010\u6E10\u6062\u590D\u7684\u751F\u6D3B
+      / neutral.route.1130.s1"
+    enabled: 1
+    clip: {fileID: 8300000, guid: 2a1a4379bdccd7742a66694b4812d528, type: 3}
+    resourcePath: 
+    category: 2
+    loop: 1
+    volume: 0.22950001
+    pitch: 1
+    fadeIn: 1.2
+    fadeOut: 1.2
+    cooldown: 0
+    maxVoices: 1
+    provisional: 0
+    materialNote: "\u6309\u5267\u60C5\u6587\u672C\u4E0E\u7D20\u6750\u547D\u540D\u521D\u914D\uFF1B\u5DF2\u6D4B\u91CF\u65F6\u957F\u548C\u5E73\u5747/\u5CF0\u503C\u7535\u5E73\uFF0C\u5C1A\u9700\u5B9E\u9645\u8BD5\u542C\u786E\u8BA4\u60C5\u7EEA\u3001\u5BF9\u767D\u4E0B\u97F3\u91CF\u548C\u5FAA\u73AF\u63A5\u7F1D\u3002"
+  - key: music.conversation.neutral.1008.s1
+    description: "\u957F\u5267\u60C5 / \u521D\u8BBF\u5E02\u573A\u4E0E\u8857\u533A
+      / neutral.1008.s1"
+    enabled: 1
+    clip: {fileID: 8300000, guid: 754ed0e7c4ea12649858a4b6375891ff, type: 3}
+    resourcePath: 
+    category: 2
+    loop: 1
+    volume: 0.1105
+    pitch: 1
+    fadeIn: 1.2
+    fadeOut: 1.2
+    cooldown: 0
+    maxVoices: 1
+    provisional: 0
+    materialNote: "\u6309\u5267\u60C5\u6587\u672C\u4E0E\u7D20\u6750\u547D\u540D\u521D\u914D\uFF1B\u5DF2\u6D4B\u91CF\u65F6\u957F\u548C\u5E73\u5747/\u5CF0\u503C\u7535\u5E73\uFF0C\u5C1A\u9700\u5B9E\u9645\u8BD5\u542C\u786E\u8BA4\u60C5\u7EEA\u3001\u5BF9\u767D\u4E0B\u97F3\u91CF\u548C\u5FAA\u73AF\u63A5\u7F1D\u3002"
+  - key: music.conversation.neutral.1027.s1
+    description: "\u957F\u5267\u60C5 / \u5348\u540E\u4E0B\u68CB\u4E0E\u8F7B\u677E\u4EA4\u8C08
+      / neutral.1027.s1"
+    enabled: 1
+    clip: {fileID: 8300000, guid: 8c74739d1c0ffde4f9042bb2c3897eb7, type: 3}
+    resourcePath: 
+    category: 2
+    loop: 1
+    volume: 0.187
+    pitch: 1
+    fadeIn: 1.2
+    fadeOut: 1.2
+    cooldown: 0
+    maxVoices: 1
+    provisional: 0
+    materialNote: "\u6309\u5267\u60C5\u6587\u672C\u4E0E\u7D20\u6750\u547D\u540D\u521D\u914D\uFF1B\u5DF2\u6D4B\u91CF\u65F6\u957F\u548C\u5E73\u5747/\u5CF0\u503C\u7535\u5E73\uFF0C\u5C1A\u9700\u5B9E\u9645\u8BD5\u542C\u786E\u8BA4\u60C5\u7EEA\u3001\u5BF9\u767D\u4E0B\u97F3\u91CF\u548C\u5FAA\u73AF\u63A5\u7F1D\u3002"
+  - key: music.conversation.revolution.1013.s2.conversation
+    description: "\u957F\u5267\u60C5 / \u4EB2\u60C5\u3001\u65E7\u8D26\u4E0E\u81EA\u7701
+      / revolution.1013.s2.conversation"
+    enabled: 1
+    clip: {fileID: 8300000, guid: cdb097e24f912ca4ca83b8261b7c81cb, type: 3}
+    resourcePath: 
+    category: 2
+    loop: 1
+    volume: 0.323
+    pitch: 1
+    fadeIn: 1.2
+    fadeOut: 1.2
+    cooldown: 0
+    maxVoices: 1
+    provisional: 0
+    materialNote: "\u6309\u5267\u60C5\u6587\u672C\u4E0E\u7D20\u6750\u547D\u540D\u521D\u914D\uFF1B\u5DF2\u6D4B\u91CF\u65F6\u957F\u548C\u5E73\u5747/\u5CF0\u503C\u7535\u5E73\uFF0C\u5C1A\u9700\u5B9E\u9645\u8BD5\u542C\u786E\u8BA4\u60C5\u7EEA\u3001\u5BF9\u767D\u4E0B\u97F3\u91CF\u548C\u5FAA\u73AF\u63A5\u7F1D\u3002"
+  - key: music.conversation.revolution.1028.s1.conversation
+    description: "\u957F\u5267\u60C5 / \u4EB2\u60C5\u3001\u65E7\u8D26\u4E0E\u81EA\u7701
+      / revolution.1028.s1.conversation"
+    enabled: 1
+    clip: {fileID: 8300000, guid: cdb097e24f912ca4ca83b8261b7c81cb, type: 3}
+    resourcePath: 
+    category: 2
+    loop: 1
+    volume: 0.323
+    pitch: 1
+    fadeIn: 1.2
+    fadeOut: 1.2
+    cooldown: 0
+    maxVoices: 1
+    provisional: 0
+    materialNote: "\u6309\u5267\u60C5\u6587\u672C\u4E0E\u7D20\u6750\u547D\u540D\u521D\u914D\uFF1B\u5DF2\u6D4B\u91CF\u65F6\u957F\u548C\u5E73\u5747/\u5CF0\u503C\u7535\u5E73\uFF0C\u5C1A\u9700\u5B9E\u9645\u8BD5\u542C\u786E\u8BA4\u60C5\u7EEA\u3001\u5BF9\u767D\u4E0B\u97F3\u91CF\u548C\u5FAA\u73AF\u63A5\u7F1D\u3002"
+  - key: music.conversation.rose.route.1111.s2.conversation
+    description: "\u957F\u5267\u60C5 / \u4EB2\u60C5\u3001\u65E7\u8D26\u4E0E\u81EA\u7701
+      / rose.route.1111.s2.conversation"
+    enabled: 1
+    clip: {fileID: 8300000, guid: cdb097e24f912ca4ca83b8261b7c81cb, type: 3}
+    resourcePath: 
+    category: 2
+    loop: 1
+    volume: 0.323
+    pitch: 1
+    fadeIn: 1.2
+    fadeOut: 1.2
+    cooldown: 0
+    maxVoices: 1
+    provisional: 0
+    materialNote: "\u6309\u5267\u60C5\u6587\u672C\u4E0E\u7D20\u6750\u547D\u540D\u521D\u914D\uFF1B\u5DF2\u6D4B\u91CF\u65F6\u957F\u548C\u5E73\u5747/\u5CF0\u503C\u7535\u5E73\uFF0C\u5C1A\u9700\u5B9E\u9645\u8BD5\u542C\u786E\u8BA4\u60C5\u7EEA\u3001\u5BF9\u767D\u4E0B\u97F3\u91CF\u548C\u5FAA\u73AF\u63A5\u7F1D\u3002"
+  - key: music.conversation.neutral.route.1111.s2
+    description: "\u957F\u5267\u60C5 / \u4EB2\u60C5\u3001\u65E7\u8D26\u4E0E\u81EA\u7701
+      / neutral.route.1111.s2"
+    enabled: 1
+    clip: {fileID: 8300000, guid: cdb097e24f912ca4ca83b8261b7c81cb, type: 3}
+    resourcePath: 
+    category: 2
+    loop: 1
+    volume: 0.323
+    pitch: 1
+    fadeIn: 1.2
+    fadeOut: 1.2
+    cooldown: 0
+    maxVoices: 1
+    provisional: 0
+    materialNote: "\u6309\u5267\u60C5\u6587\u672C\u4E0E\u7D20\u6750\u547D\u540D\u521D\u914D\uFF1B\u5DF2\u6D4B\u91CF\u65F6\u957F\u548C\u5E73\u5747/\u5CF0\u503C\u7535\u5E73\uFF0C\u5C1A\u9700\u5B9E\u9645\u8BD5\u542C\u786E\u8BA4\u60C5\u7EEA\u3001\u5BF9\u767D\u4E0B\u97F3\u91CF\u548C\u5FAA\u73AF\u63A5\u7F1D\u3002"
+  - key: music.conversation.neutral.route.1118.s1
+    description: "\u957F\u5267\u60C5 / \u4EB2\u60C5\u3001\u65E7\u8D26\u4E0E\u81EA\u7701
+      / neutral.route.1118.s1"
+    enabled: 1
+    clip: {fileID: 8300000, guid: cdb097e24f912ca4ca83b8261b7c81cb, type: 3}
+    resourcePath: 
+    category: 2
+    loop: 1
+    volume: 0.323
+    pitch: 1
+    fadeIn: 1.2
+    fadeOut: 1.2
+    cooldown: 0
+    maxVoices: 1
+    provisional: 0
+    materialNote: "\u6309\u5267\u60C5\u6587\u672C\u4E0E\u7D20\u6750\u547D\u540D\u521D\u914D\uFF1B\u5DF2\u6D4B\u91CF\u65F6\u957F\u548C\u5E73\u5747/\u5CF0\u503C\u7535\u5E73\uFF0C\u5C1A\u9700\u5B9E\u9645\u8BD5\u542C\u786E\u8BA4\u60C5\u7EEA\u3001\u5BF9\u767D\u4E0B\u97F3\u91CF\u548C\u5FAA\u73AF\u63A5\u7F1D\u3002"
+  - key: music.conversation.neutral.route.1130.s2
+    description: "\u957F\u5267\u60C5 / \u7B49\u5F85\u4E0E\u6536\u62FE\u6B8B\u5C40
+      / neutral.route.1130.s2"
+    enabled: 1
+    clip: {fileID: 8300000, guid: fa3f391d17ea22c4aa370a9120ef8168, type: 3}
+    resourcePath: 
+    category: 2
+    loop: 1
+    volume: 0.22950001
+    pitch: 1
+    fadeIn: 1.2
+    fadeOut: 1.2
+    cooldown: 0
+    maxVoices: 1
+    provisional: 0
+    materialNote: "\u6309\u5267\u60C5\u6587\u672C\u4E0E\u7D20\u6750\u547D\u540D\u521D\u914D\uFF1B\u5DF2\u6D4B\u91CF\u65F6\u957F\u548C\u5E73\u5747/\u5CF0\u503C\u7535\u5E73\uFF0C\u5C1A\u9700\u5B9E\u9645\u8BD5\u542C\u786E\u8BA4\u60C5\u7EEA\u3001\u5BF9\u767D\u4E0B\u97F3\u91CF\u548C\u5FAA\u73AF\u63A5\u7F1D\u3002"
+  - key: music.conversation.neutral.1010.s2
+    description: "\u957F\u5267\u60C5 / \u793C\u8282\u3001\u4E0A\u6D41\u793E\u4F1A\u4E0E\u653F\u6CBB\u8BD5\u63A2
+      / neutral.1010.s2"
+    enabled: 1
+    clip: {fileID: 8300000, guid: 292727eca48265f468420815b6e38f0c, type: 3}
+    resourcePath: 
+    category: 2
+    loop: 1
+    volume: 0.272
+    pitch: 1
+    fadeIn: 1.2
+    fadeOut: 1.2
+    cooldown: 0
+    maxVoices: 1
+    provisional: 0
+    materialNote: "\u6309\u5267\u60C5\u6587\u672C\u4E0E\u7D20\u6750\u547D\u540D\u521D\u914D\uFF1B\u5DF2\u6D4B\u91CF\u65F6\u957F\u548C\u5E73\u5747/\u5CF0\u503C\u7535\u5E73\uFF0C\u5C1A\u9700\u5B9E\u9645\u8BD5\u542C\u786E\u8BA4\u60C5\u7EEA\u3001\u5BF9\u767D\u4E0B\u97F3\u91CF\u548C\u5FAA\u73AF\u63A5\u7F1D\u3002"
+  - key: music.conversation.rose.1016.s1.conversation
+    description: "\u957F\u5267\u60C5 / \u793C\u8282\u3001\u4E0A\u6D41\u793E\u4F1A\u4E0E\u653F\u6CBB\u8BD5\u63A2
+      / rose.1016.s1.conversation"
+    enabled: 1
+    clip: {fileID: 8300000, guid: 292727eca48265f468420815b6e38f0c, type: 3}
+    resourcePath: 
+    category: 2
+    loop: 1
+    volume: 0.272
+    pitch: 1
+    fadeIn: 1.2
+    fadeOut: 1.2
+    cooldown: 0
+    maxVoices: 1
+    provisional: 0
+    materialNote: "\u6309\u5267\u60C5\u6587\u672C\u4E0E\u7D20\u6750\u547D\u540D\u521D\u914D\uFF1B\u5DF2\u6D4B\u91CF\u65F6\u957F\u548C\u5E73\u5747/\u5CF0\u503C\u7535\u5E73\uFF0C\u5C1A\u9700\u5B9E\u9645\u8BD5\u542C\u786E\u8BA4\u60C5\u7EEA\u3001\u5BF9\u767D\u4E0B\u97F3\u91CF\u548C\u5FAA\u73AF\u63A5\u7F1D\u3002"
+  - key: music.conversation.rose.1025.s2.conversation
+    description: "\u957F\u5267\u60C5 / \u793C\u8282\u3001\u4E0A\u6D41\u793E\u4F1A\u4E0E\u653F\u6CBB\u8BD5\u63A2
+      / rose.1025.s2.conversation"
+    enabled: 1
+    clip: {fileID: 8300000, guid: 292727eca48265f468420815b6e38f0c, type: 3}
+    resourcePath: 
+    category: 2
+    loop: 1
+    volume: 0.272
+    pitch: 1
+    fadeIn: 1.2
+    fadeOut: 1.2
+    cooldown: 0
+    maxVoices: 1
+    provisional: 0
+    materialNote: "\u6309\u5267\u60C5\u6587\u672C\u4E0E\u7D20\u6750\u547D\u540D\u521D\u914D\uFF1B\u5DF2\u6D4B\u91CF\u65F6\u957F\u548C\u5E73\u5747/\u5CF0\u503C\u7535\u5E73\uFF0C\u5C1A\u9700\u5B9E\u9645\u8BD5\u542C\u786E\u8BA4\u60C5\u7EEA\u3001\u5BF9\u767D\u4E0B\u97F3\u91CF\u548C\u5FAA\u73AF\u63A5\u7F1D\u3002"
+  - key: music.conversation.rose.1026.s2.conversation
+    description: "\u957F\u5267\u60C5 / \u793C\u8282\u3001\u4E0A\u6D41\u793E\u4F1A\u4E0E\u653F\u6CBB\u8BD5\u63A2
+      / rose.1026.s2.conversation"
+    enabled: 1
+    clip: {fileID: 8300000, guid: 292727eca48265f468420815b6e38f0c, type: 3}
+    resourcePath: 
+    category: 2
+    loop: 1
+    volume: 0.272
+    pitch: 1
+    fadeIn: 1.2
+    fadeOut: 1.2
+    cooldown: 0
+    maxVoices: 1
+    provisional: 0
+    materialNote: "\u6309\u5267\u60C5\u6587\u672C\u4E0E\u7D20\u6750\u547D\u540D\u521D\u914D\uFF1B\u5DF2\u6D4B\u91CF\u65F6\u957F\u548C\u5E73\u5747/\u5CF0\u503C\u7535\u5E73\uFF0C\u5C1A\u9700\u5B9E\u9645\u8BD5\u542C\u786E\u8BA4\u60C5\u7EEA\u3001\u5BF9\u767D\u4E0B\u97F3\u91CF\u548C\u5FAA\u73AF\u63A5\u7F1D\u3002"
+  - key: music.conversation.church.1014.s2.conversation
+    description: "\u957F\u5267\u60C5 / \u793C\u8282\u3001\u4E0A\u6D41\u793E\u4F1A\u4E0E\u653F\u6CBB\u8BD5\u63A2
+      / church.1014.s2.conversation"
+    enabled: 1
+    clip: {fileID: 8300000, guid: 292727eca48265f468420815b6e38f0c, type: 3}
+    resourcePath: 
+    category: 2
+    loop: 1
+    volume: 0.272
+    pitch: 1
+    fadeIn: 1.2
+    fadeOut: 1.2
+    cooldown: 0
+    maxVoices: 1
+    provisional: 0
+    materialNote: "\u6309\u5267\u60C5\u6587\u672C\u4E0E\u7D20\u6750\u547D\u540D\u521D\u914D\uFF1B\u5DF2\u6D4B\u91CF\u65F6\u957F\u548C\u5E73\u5747/\u5CF0\u503C\u7535\u5E73\uFF0C\u5C1A\u9700\u5B9E\u9645\u8BD5\u542C\u786E\u8BA4\u60C5\u7EEA\u3001\u5BF9\u767D\u4E0B\u97F3\u91CF\u548C\u5FAA\u73AF\u63A5\u7F1D\u3002"
+  - key: music.conversation.church.1105.s1.conversation
+    description: "\u957F\u5267\u60C5 / \u793C\u8282\u3001\u4E0A\u6D41\u793E\u4F1A\u4E0E\u653F\u6CBB\u8BD5\u63A2
+      / church.1105.s1.conversation"
+    enabled: 1
+    clip: {fileID: 8300000, guid: 292727eca48265f468420815b6e38f0c, type: 3}
+    resourcePath: 
+    category: 2
+    loop: 1
+    volume: 0.272
+    pitch: 1
+    fadeIn: 1.2
+    fadeOut: 1.2
+    cooldown: 0
+    maxVoices: 1
+    provisional: 0
+    materialNote: "\u6309\u5267\u60C5\u6587\u672C\u4E0E\u7D20\u6750\u547D\u540D\u521D\u914D\uFF1B\u5DF2\u6D4B\u91CF\u65F6\u957F\u548C\u5E73\u5747/\u5CF0\u503C\u7535\u5E73\uFF0C\u5C1A\u9700\u5B9E\u9645\u8BD5\u542C\u786E\u8BA4\u60C5\u7EEA\u3001\u5BF9\u767D\u4E0B\u97F3\u91CF\u548C\u5FAA\u73AF\u63A5\u7F1D\u3002"
+  - key: music.conversation.church.1105.s2.conversation
+    description: "\u957F\u5267\u60C5 / \u793C\u8282\u3001\u4E0A\u6D41\u793E\u4F1A\u4E0E\u653F\u6CBB\u8BD5\u63A2
+      / church.1105.s2.conversation"
+    enabled: 1
+    clip: {fileID: 8300000, guid: 292727eca48265f468420815b6e38f0c, type: 3}
+    resourcePath: 
+    category: 2
+    loop: 1
+    volume: 0.272
+    pitch: 1
+    fadeIn: 1.2
+    fadeOut: 1.2
+    cooldown: 0
+    maxVoices: 1
+    provisional: 0
+    materialNote: "\u6309\u5267\u60C5\u6587\u672C\u4E0E\u7D20\u6750\u547D\u540D\u521D\u914D\uFF1B\u5DF2\u6D4B\u91CF\u65F6\u957F\u548C\u5E73\u5747/\u5CF0\u503C\u7535\u5E73\uFF0C\u5C1A\u9700\u5B9E\u9645\u8BD5\u542C\u786E\u8BA4\u60C5\u7EEA\u3001\u5BF9\u767D\u4E0B\u97F3\u91CF\u548C\u5FAA\u73AF\u63A5\u7F1D\u3002"
+  - key: music.conversation.church.route.1113.s1.conversation
+    description: "\u957F\u5267\u60C5 / \u793C\u8282\u3001\u4E0A\u6D41\u793E\u4F1A\u4E0E\u653F\u6CBB\u8BD5\u63A2
+      / church.route.1113.s1.conversation"
+    enabled: 1
+    clip: {fileID: 8300000, guid: 292727eca48265f468420815b6e38f0c, type: 3}
+    resourcePath: 
+    category: 2
+    loop: 1
+    volume: 0.272
+    pitch: 1
+    fadeIn: 1.2
+    fadeOut: 1.2
+    cooldown: 0
+    maxVoices: 1
+    provisional: 0
+    materialNote: "\u6309\u5267\u60C5\u6587\u672C\u4E0E\u7D20\u6750\u547D\u540D\u521D\u914D\uFF1B\u5DF2\u6D4B\u91CF\u65F6\u957F\u548C\u5E73\u5747/\u5CF0\u503C\u7535\u5E73\uFF0C\u5C1A\u9700\u5B9E\u9645\u8BD5\u542C\u786E\u8BA4\u60C5\u7EEA\u3001\u5BF9\u767D\u4E0B\u97F3\u91CF\u548C\u5FAA\u73AF\u63A5\u7F1D\u3002"
+  - key: music.conversation.oct07.s2.conversation
+    description: "\u957F\u5267\u60C5 / \u591C\u95F4\u5BC6\u4FE1\u3001\u79D8\u5BC6\u4E0E\u4E0D\u7965
+      / oct07.s2.conversation"
+    enabled: 1
+    clip: {fileID: 8300000, guid: acc7de91496ec8649b97bea74d8d3705, type: 3}
+    resourcePath: 
+    category: 2
+    loop: 1
+    volume: 0.22950001
+    pitch: 1
+    fadeIn: 1.2
+    fadeOut: 1.2
+    cooldown: 0
+    maxVoices: 1
+    provisional: 0
+    materialNote: "\u6309\u5267\u60C5\u6587\u672C\u4E0E\u7D20\u6750\u547D\u540D\u521D\u914D\uFF1B\u5DF2\u6D4B\u91CF\u65F6\u957F\u548C\u5E73\u5747/\u5CF0\u503C\u7535\u5E73\uFF0C\u5C1A\u9700\u5B9E\u9645\u8BD5\u542C\u786E\u8BA4\u60C5\u7EEA\u3001\u5BF9\u767D\u4E0B\u97F3\u91CF\u548C\u5FAA\u73AF\u63A5\u7F1D\u3002"
+  - key: music.conversation.rose.ending.trust_limit.conversation
+    description: "\u957F\u5267\u60C5 / \u591C\u95F4\u5BC6\u4FE1\u3001\u79D8\u5BC6\u4E0E\u4E0D\u7965
+      / rose.ending.trust_limit.conversation"
+    enabled: 1
+    clip: {fileID: 8300000, guid: acc7de91496ec8649b97bea74d8d3705, type: 3}
+    resourcePath: 
+    category: 2
+    loop: 1
+    volume: 0.22950001
+    pitch: 1
+    fadeIn: 1.2
+    fadeOut: 1.2
+    cooldown: 0
+    maxVoices: 1
+    provisional: 0
+    materialNote: "\u6309\u5267\u60C5\u6587\u672C\u4E0E\u7D20\u6750\u547D\u540D\u521D\u914D\uFF1B\u5DF2\u6D4B\u91CF\u65F6\u957F\u548C\u5E73\u5747/\u5CF0\u503C\u7535\u5E73\uFF0C\u5C1A\u9700\u5B9E\u9645\u8BD5\u542C\u786E\u8BA4\u60C5\u7EEA\u3001\u5BF9\u767D\u4E0B\u97F3\u91CF\u548C\u5FAA\u73AF\u63A5\u7F1D\u3002"
+  - key: music.conversation.church.1023.s2.conversation
+    description: "\u957F\u5267\u60C5 / \u591C\u95F4\u5BC6\u4FE1\u3001\u79D8\u5BC6\u4E0E\u4E0D\u7965
+      / church.1023.s2.conversation"
+    enabled: 1
+    clip: {fileID: 8300000, guid: acc7de91496ec8649b97bea74d8d3705, type: 3}
+    resourcePath: 
+    category: 2
+    loop: 1
+    volume: 0.22950001
+    pitch: 1
+    fadeIn: 1.2
+    fadeOut: 1.2
+    cooldown: 0
+    maxVoices: 1
+    provisional: 0
+    materialNote: "\u6309\u5267\u60C5\u6587\u672C\u4E0E\u7D20\u6750\u547D\u540D\u521D\u914D\uFF1B\u5DF2\u6D4B\u91CF\u65F6\u957F\u548C\u5E73\u5747/\u5CF0\u503C\u7535\u5E73\uFF0C\u5C1A\u9700\u5B9E\u9645\u8BD5\u542C\u786E\u8BA4\u60C5\u7EEA\u3001\u5BF9\u767D\u4E0B\u97F3\u91CF\u548C\u5FAA\u73AF\u63A5\u7F1D\u3002"
+  - key: music.conversation.rose.1009.s1.conversation
+    description: "\u957F\u5267\u60C5 / \u8C08\u5224\u3001\u76D8\u95EE\u4E0E\u4FE1\u4EFB\u7684\u8BD5\u63A2
+      / rose.1009.s1.conversation"
+    enabled: 1
+    clip: {fileID: 8300000, guid: 07f438d5edaf6654a9183bee1b64dd7a, type: 3}
+    resourcePath: 
+    category: 2
+    loop: 1
+    volume: 0.22950001
+    pitch: 1
+    fadeIn: 1.2
+    fadeOut: 1.2
+    cooldown: 0
+    maxVoices: 1
+    provisional: 0
+    materialNote: "\u6309\u5267\u60C5\u6587\u672C\u4E0E\u7D20\u6750\u547D\u540D\u521D\u914D\uFF1B\u5DF2\u6D4B\u91CF\u65F6\u957F\u548C\u5E73\u5747/\u5CF0\u503C\u7535\u5E73\uFF0C\u5C1A\u9700\u5B9E\u9645\u8BD5\u542C\u786E\u8BA4\u60C5\u7EEA\u3001\u5BF9\u767D\u4E0B\u97F3\u91CF\u548C\u5FAA\u73AF\u63A5\u7F1D\u3002"
+  - key: music.conversation.rose.1011.s1.conversation
+    description: "\u957F\u5267\u60C5 / \u8C08\u5224\u3001\u76D8\u95EE\u4E0E\u4FE1\u4EFB\u7684\u8BD5\u63A2
+      / rose.1011.s1.conversation"
+    enabled: 1
+    clip: {fileID: 8300000, guid: 07f438d5edaf6654a9183bee1b64dd7a, type: 3}
+    resourcePath: 
+    category: 2
+    loop: 1
+    volume: 0.22950001
+    pitch: 1
+    fadeIn: 1.2
+    fadeOut: 1.2
+    cooldown: 0
+    maxVoices: 1
+    provisional: 0
+    materialNote: "\u6309\u5267\u60C5\u6587\u672C\u4E0E\u7D20\u6750\u547D\u540D\u521D\u914D\uFF1B\u5DF2\u6D4B\u91CF\u65F6\u957F\u548C\u5E73\u5747/\u5CF0\u503C\u7535\u5E73\uFF0C\u5C1A\u9700\u5B9E\u9645\u8BD5\u542C\u786E\u8BA4\u60C5\u7EEA\u3001\u5BF9\u767D\u4E0B\u97F3\u91CF\u548C\u5FAA\u73AF\u63A5\u7F1D\u3002"
+  - key: music.conversation.rose.1101.s1.conversation
+    description: "\u957F\u5267\u60C5 / \u8C08\u5224\u3001\u76D8\u95EE\u4E0E\u4FE1\u4EFB\u7684\u8BD5\u63A2
+      / rose.1101.s1.conversation"
+    enabled: 1
+    clip: {fileID: 8300000, guid: 07f438d5edaf6654a9183bee1b64dd7a, type: 3}
+    resourcePath: 
+    category: 2
+    loop: 1
+    volume: 0.22950001
+    pitch: 1
+    fadeIn: 1.2
+    fadeOut: 1.2
+    cooldown: 0
+    maxVoices: 1
+    provisional: 0
+    materialNote: "\u6309\u5267\u60C5\u6587\u672C\u4E0E\u7D20\u6750\u547D\u540D\u521D\u914D\uFF1B\u5DF2\u6D4B\u91CF\u65F6\u957F\u548C\u5E73\u5747/\u5CF0\u503C\u7535\u5E73\uFF0C\u5C1A\u9700\u5B9E\u9645\u8BD5\u542C\u786E\u8BA4\u60C5\u7EEA\u3001\u5BF9\u767D\u4E0B\u97F3\u91CF\u548C\u5FAA\u73AF\u63A5\u7F1D\u3002"
+  - key: music.conversation.rose.ending.job_requirements.conversation
+    description: "\u957F\u5267\u60C5 / \u8C08\u5224\u3001\u76D8\u95EE\u4E0E\u4FE1\u4EFB\u7684\u8BD5\u63A2
+      / rose.ending.job_requirements.conversation"
+    enabled: 1
+    clip: {fileID: 8300000, guid: 07f438d5edaf6654a9183bee1b64dd7a, type: 3}
+    resourcePath: 
+    category: 2
+    loop: 1
+    volume: 0.22950001
+    pitch: 1
+    fadeIn: 1.2
+    fadeOut: 1.2
+    cooldown: 0
+    maxVoices: 1
+    provisional: 0
+    materialNote: "\u6309\u5267\u60C5\u6587\u672C\u4E0E\u7D20\u6750\u547D\u540D\u521D\u914D\uFF1B\u5DF2\u6D4B\u91CF\u65F6\u957F\u548C\u5E73\u5747/\u5CF0\u503C\u7535\u5E73\uFF0C\u5C1A\u9700\u5B9E\u9645\u8BD5\u542C\u786E\u8BA4\u60C5\u7EEA\u3001\u5BF9\u767D\u4E0B\u97F3\u91CF\u548C\u5FAA\u73AF\u63A5\u7F1D\u3002"
+  - key: music.conversation.rose.route.1115.s1.conversation
+    description: "\u957F\u5267\u60C5 / \u8C08\u5224\u3001\u76D8\u95EE\u4E0E\u4FE1\u4EFB\u7684\u8BD5\u63A2
+      / rose.route.1115.s1.conversation"
+    enabled: 1
+    clip: {fileID: 8300000, guid: 07f438d5edaf6654a9183bee1b64dd7a, type: 3}
+    resourcePath: 
+    category: 2
+    loop: 1
+    volume: 0.22950001
+    pitch: 1
+    fadeIn: 1.2
+    fadeOut: 1.2
+    cooldown: 0
+    maxVoices: 1
+    provisional: 0
+    materialNote: "\u6309\u5267\u60C5\u6587\u672C\u4E0E\u7D20\u6750\u547D\u540D\u521D\u914D\uFF1B\u5DF2\u6D4B\u91CF\u65F6\u957F\u548C\u5E73\u5747/\u5CF0\u503C\u7535\u5E73\uFF0C\u5C1A\u9700\u5B9E\u9645\u8BD5\u542C\u786E\u8BA4\u60C5\u7EEA\u3001\u5BF9\u767D\u4E0B\u97F3\u91CF\u548C\u5FAA\u73AF\u63A5\u7F1D\u3002"
+  - key: music.conversation.neutral.route.1111.s1
+    description: "\u957F\u5267\u60C5 / \u8C08\u5224\u3001\u76D8\u95EE\u4E0E\u4FE1\u4EFB\u7684\u8BD5\u63A2
+      / neutral.route.1111.s1"
+    enabled: 1
+    clip: {fileID: 8300000, guid: 07f438d5edaf6654a9183bee1b64dd7a, type: 3}
+    resourcePath: 
+    category: 2
+    loop: 1
+    volume: 0.22950001
+    pitch: 1
+    fadeIn: 1.2
+    fadeOut: 1.2
+    cooldown: 0
+    maxVoices: 1
+    provisional: 0
+    materialNote: "\u6309\u5267\u60C5\u6587\u672C\u4E0E\u7D20\u6750\u547D\u540D\u521D\u914D\uFF1B\u5DF2\u6D4B\u91CF\u65F6\u957F\u548C\u5E73\u5747/\u5CF0\u503C\u7535\u5E73\uFF0C\u5C1A\u9700\u5B9E\u9645\u8BD5\u542C\u786E\u8BA4\u60C5\u7EEA\u3001\u5BF9\u767D\u4E0B\u97F3\u91CF\u548C\u5FAA\u73AF\u63A5\u7F1D\u3002"
+  - key: music.conversation.church.1020.s1.conversation
+    description: "\u957F\u5267\u60C5 / \u8C08\u5224\u3001\u76D8\u95EE\u4E0E\u4FE1\u4EFB\u7684\u8BD5\u63A2
+      / church.1020.s1.conversation"
+    enabled: 1
+    clip: {fileID: 8300000, guid: 07f438d5edaf6654a9183bee1b64dd7a, type: 3}
+    resourcePath: 
+    category: 2
+    loop: 1
+    volume: 0.22950001
+    pitch: 1
+    fadeIn: 1.2
+    fadeOut: 1.2
+    cooldown: 0
+    maxVoices: 1
+    provisional: 0
+    materialNote: "\u6309\u5267\u60C5\u6587\u672C\u4E0E\u7D20\u6750\u547D\u540D\u521D\u914D\uFF1B\u5DF2\u6D4B\u91CF\u65F6\u957F\u548C\u5E73\u5747/\u5CF0\u503C\u7535\u5E73\uFF0C\u5C1A\u9700\u5B9E\u9645\u8BD5\u542C\u786E\u8BA4\u60C5\u7EEA\u3001\u5BF9\u767D\u4E0B\u97F3\u91CF\u548C\u5FAA\u73AF\u63A5\u7F1D\u3002"
+  - key: music.conversation.church.1023.s1.conversation
+    description: "\u957F\u5267\u60C5 / \u8C08\u5224\u3001\u76D8\u95EE\u4E0E\u4FE1\u4EFB\u7684\u8BD5\u63A2
+      / church.1023.s1.conversation"
+    enabled: 1
+    clip: {fileID: 8300000, guid: 07f438d5edaf6654a9183bee1b64dd7a, type: 3}
+    resourcePath: 
+    category: 2
+    loop: 1
+    volume: 0.22950001
+    pitch: 1
+    fadeIn: 1.2
+    fadeOut: 1.2
+    cooldown: 0
+    maxVoices: 1
+    provisional: 0
+    materialNote: "\u6309\u5267\u60C5\u6587\u672C\u4E0E\u7D20\u6750\u547D\u540D\u521D\u914D\uFF1B\u5DF2\u6D4B\u91CF\u65F6\u957F\u548C\u5E73\u5747/\u5CF0\u503C\u7535\u5E73\uFF0C\u5C1A\u9700\u5B9E\u9645\u8BD5\u542C\u786E\u8BA4\u60C5\u7EEA\u3001\u5BF9\u767D\u4E0B\u97F3\u91CF\u548C\u5FAA\u73AF\u63A5\u7F1D\u3002"
+  - key: music.conversation.church.1111.s1.conversation
+    description: "\u957F\u5267\u60C5 / \u8C08\u5224\u3001\u76D8\u95EE\u4E0E\u4FE1\u4EFB\u7684\u8BD5\u63A2
+      / church.1111.s1.conversation"
+    enabled: 1
+    clip: {fileID: 8300000, guid: 07f438d5edaf6654a9183bee1b64dd7a, type: 3}
+    resourcePath: 
+    category: 2
+    loop: 1
+    volume: 0.22950001
+    pitch: 1
+    fadeIn: 1.2
+    fadeOut: 1.2
+    cooldown: 0
+    maxVoices: 1
+    provisional: 0
+    materialNote: "\u6309\u5267\u60C5\u6587\u672C\u4E0E\u7D20\u6750\u547D\u540D\u521D\u914D\uFF1B\u5DF2\u6D4B\u91CF\u65F6\u957F\u548C\u5E73\u5747/\u5CF0\u503C\u7535\u5E73\uFF0C\u5C1A\u9700\u5B9E\u9645\u8BD5\u542C\u786E\u8BA4\u60C5\u7EEA\u3001\u5BF9\u767D\u4E0B\u97F3\u91CF\u548C\u5FAA\u73AF\u63A5\u7F1D\u3002"
+  - key: music.conversation.church.route.1112.s1.conversation
+    description: "\u957F\u5267\u60C5 / \u8C08\u5224\u3001\u76D8\u95EE\u4E0E\u4FE1\u4EFB\u7684\u8BD5\u63A2
+      / church.route.1112.s1.conversation"
+    enabled: 1
+    clip: {fileID: 8300000, guid: 07f438d5edaf6654a9183bee1b64dd7a, type: 3}
+    resourcePath: 
+    category: 2
+    loop: 1
+    volume: 0.22950001
+    pitch: 1
+    fadeIn: 1.2
+    fadeOut: 1.2
+    cooldown: 0
+    maxVoices: 1
+    provisional: 0
+    materialNote: "\u6309\u5267\u60C5\u6587\u672C\u4E0E\u7D20\u6750\u547D\u540D\u521D\u914D\uFF1B\u5DF2\u6D4B\u91CF\u65F6\u957F\u548C\u5E73\u5747/\u5CF0\u503C\u7535\u5E73\uFF0C\u5C1A\u9700\u5B9E\u9645\u8BD5\u542C\u786E\u8BA4\u60C5\u7EEA\u3001\u5BF9\u767D\u4E0B\u97F3\u91CF\u548C\u5FAA\u73AF\u63A5\u7F1D\u3002"
+  - key: music.conversation.church.route.1116.s1.conversation
+    description: "\u957F\u5267\u60C5 / \u8C08\u5224\u3001\u76D8\u95EE\u4E0E\u4FE1\u4EFB\u7684\u8BD5\u63A2
+      / church.route.1116.s1.conversation"
+    enabled: 1
+    clip: {fileID: 8300000, guid: 07f438d5edaf6654a9183bee1b64dd7a, type: 3}
+    resourcePath: 
+    category: 2
+    loop: 1
+    volume: 0.22950001
+    pitch: 1
+    fadeIn: 1.2
+    fadeOut: 1.2
+    cooldown: 0
+    maxVoices: 1
+    provisional: 0
+    materialNote: "\u6309\u5267\u60C5\u6587\u672C\u4E0E\u7D20\u6750\u547D\u540D\u521D\u914D\uFF1B\u5DF2\u6D4B\u91CF\u65F6\u957F\u548C\u5E73\u5747/\u5CF0\u503C\u7535\u5E73\uFF0C\u5C1A\u9700\u5B9E\u9645\u8BD5\u542C\u786E\u8BA4\u60C5\u7EEA\u3001\u5BF9\u767D\u4E0B\u97F3\u91CF\u548C\u5FAA\u73AF\u63A5\u7F1D\u3002"
+  - key: music.conversation.revolution.1014.s1.conversation
+    description: "\u957F\u5267\u60C5 / \u8C08\u5224\u3001\u76D8\u95EE\u4E0E\u4FE1\u4EFB\u7684\u8BD5\u63A2
+      / revolution.1014.s1.conversation"
+    enabled: 1
+    clip: {fileID: 8300000, guid: 07f438d5edaf6654a9183bee1b64dd7a, type: 3}
+    resourcePath: 
+    category: 2
+    loop: 1
+    volume: 0.22950001
+    pitch: 1
+    fadeIn: 1.2
+    fadeOut: 1.2
+    cooldown: 0
+    maxVoices: 1
+    provisional: 0
+    materialNote: "\u6309\u5267\u60C5\u6587\u672C\u4E0E\u7D20\u6750\u547D\u540D\u521D\u914D\uFF1B\u5DF2\u6D4B\u91CF\u65F6\u957F\u548C\u5E73\u5747/\u5CF0\u503C\u7535\u5E73\uFF0C\u5C1A\u9700\u5B9E\u9645\u8BD5\u542C\u786E\u8BA4\u60C5\u7EEA\u3001\u5BF9\u767D\u4E0B\u97F3\u91CF\u548C\u5FAA\u73AF\u63A5\u7F1D\u3002"
+  - key: music.conversation.revolution.1029.s1.conversation
+    description: "\u957F\u5267\u60C5 / \u8C08\u5224\u3001\u76D8\u95EE\u4E0E\u4FE1\u4EFB\u7684\u8BD5\u63A2
+      / revolution.1029.s1.conversation"
+    enabled: 1
+    clip: {fileID: 8300000, guid: 07f438d5edaf6654a9183bee1b64dd7a, type: 3}
+    resourcePath: 
+    category: 2
+    loop: 1
+    volume: 0.22950001
+    pitch: 1
+    fadeIn: 1.2
+    fadeOut: 1.2
+    cooldown: 0
+    maxVoices: 1
+    provisional: 0
+    materialNote: "\u6309\u5267\u60C5\u6587\u672C\u4E0E\u7D20\u6750\u547D\u540D\u521D\u914D\uFF1B\u5DF2\u6D4B\u91CF\u65F6\u957F\u548C\u5E73\u5747/\u5CF0\u503C\u7535\u5E73\uFF0C\u5C1A\u9700\u5B9E\u9645\u8BD5\u542C\u786E\u8BA4\u60C5\u7EEA\u3001\u5BF9\u767D\u4E0B\u97F3\u91CF\u548C\u5FAA\u73AF\u63A5\u7F1D\u3002"
+  - key: music.conversation.revolution.route.1112.s1.conversation
+    description: "\u957F\u5267\u60C5 / \u8C08\u5224\u3001\u76D8\u95EE\u4E0E\u4FE1\u4EFB\u7684\u8BD5\u63A2
+      / revolution.route.1112.s1.conversation"
+    enabled: 1
+    clip: {fileID: 8300000, guid: 07f438d5edaf6654a9183bee1b64dd7a, type: 3}
+    resourcePath: 
+    category: 2
+    loop: 1
+    volume: 0.22950001
+    pitch: 1
+    fadeIn: 1.2
+    fadeOut: 1.2
+    cooldown: 0
+    maxVoices: 1
+    provisional: 0
+    materialNote: "\u6309\u5267\u60C5\u6587\u672C\u4E0E\u7D20\u6750\u547D\u540D\u521D\u914D\uFF1B\u5DF2\u6D4B\u91CF\u65F6\u957F\u548C\u5E73\u5747/\u5CF0\u503C\u7535\u5E73\uFF0C\u5C1A\u9700\u5B9E\u9645\u8BD5\u542C\u786E\u8BA4\u60C5\u7EEA\u3001\u5BF9\u767D\u4E0B\u97F3\u91CF\u548C\u5FAA\u73AF\u63A5\u7F1D\u3002"
+  - key: music.conversation.rose.1024.s1.conversation
+    description: "\u957F\u5267\u60C5 / \u5C01\u9501\u3001\u5931\u8E2A\u4E0E\u98CE\u66B4\u524D\u5915
+      / rose.1024.s1.conversation"
+    enabled: 1
+    clip: {fileID: 8300000, guid: 44507b7a5f4c6254181a510c730a0a4e, type: 3}
+    resourcePath: 
+    category: 2
+    loop: 1
+    volume: 0.22950001
+    pitch: 1
+    fadeIn: 1.2
+    fadeOut: 1.2
+    cooldown: 0
+    maxVoices: 1
+    provisional: 0
+    materialNote: "\u6309\u5267\u60C5\u6587\u672C\u4E0E\u7D20\u6750\u547D\u540D\u521D\u914D\uFF1B\u5DF2\u6D4B\u91CF\u65F6\u957F\u548C\u5E73\u5747/\u5CF0\u503C\u7535\u5E73\uFF0C\u5C1A\u9700\u5B9E\u9645\u8BD5\u542C\u786E\u8BA4\u60C5\u7EEA\u3001\u5BF9\u767D\u4E0B\u97F3\u91CF\u548C\u5FAA\u73AF\u63A5\u7F1D\u3002"
+  - key: music.conversation.rose.1024.s2.conversation
+    description: "\u957F\u5267\u60C5 / \u5C01\u9501\u3001\u5931\u8E2A\u4E0E\u98CE\u66B4\u524D\u5915
+      / rose.1024.s2.conversation"
+    enabled: 1
+    clip: {fileID: 8300000, guid: 44507b7a5f4c6254181a510c730a0a4e, type: 3}
+    resourcePath: 
+    category: 2
+    loop: 1
+    volume: 0.22950001
+    pitch: 1
+    fadeIn: 1.2
+    fadeOut: 1.2
+    cooldown: 0
+    maxVoices: 1
+    provisional: 0
+    materialNote: "\u6309\u5267\u60C5\u6587\u672C\u4E0E\u7D20\u6750\u547D\u540D\u521D\u914D\uFF1B\u5DF2\u6D4B\u91CF\u65F6\u957F\u548C\u5E73\u5747/\u5CF0\u503C\u7535\u5E73\uFF0C\u5C1A\u9700\u5B9E\u9645\u8BD5\u542C\u786E\u8BA4\u60C5\u7EEA\u3001\u5BF9\u767D\u4E0B\u97F3\u91CF\u548C\u5FAA\u73AF\u63A5\u7F1D\u3002"
+  - key: music.conversation.rose.1103.s1.conversation
+    description: "\u957F\u5267\u60C5 / \u5C01\u9501\u3001\u5931\u8E2A\u4E0E\u98CE\u66B4\u524D\u5915
+      / rose.1103.s1.conversation"
+    enabled: 1
+    clip: {fileID: 8300000, guid: 44507b7a5f4c6254181a510c730a0a4e, type: 3}
+    resourcePath: 
+    category: 2
+    loop: 1
+    volume: 0.22950001
+    pitch: 1
+    fadeIn: 1.2
+    fadeOut: 1.2
+    cooldown: 0
+    maxVoices: 1
+    provisional: 0
+    materialNote: "\u6309\u5267\u60C5\u6587\u672C\u4E0E\u7D20\u6750\u547D\u540D\u521D\u914D\uFF1B\u5DF2\u6D4B\u91CF\u65F6\u957F\u548C\u5E73\u5747/\u5CF0\u503C\u7535\u5E73\uFF0C\u5C1A\u9700\u5B9E\u9645\u8BD5\u542C\u786E\u8BA4\u60C5\u7EEA\u3001\u5BF9\u767D\u4E0B\u97F3\u91CF\u548C\u5FAA\u73AF\u63A5\u7F1D\u3002"
+  - key: music.conversation.rose.route.1122.s1.conversation
+    description: "\u957F\u5267\u60C5 / \u5C01\u9501\u3001\u5931\u8E2A\u4E0E\u98CE\u66B4\u524D\u5915
+      / rose.route.1122.s1.conversation"
+    enabled: 1
+    clip: {fileID: 8300000, guid: 44507b7a5f4c6254181a510c730a0a4e, type: 3}
+    resourcePath: 
+    category: 2
+    loop: 1
+    volume: 0.22950001
+    pitch: 1
+    fadeIn: 1.2
+    fadeOut: 1.2
+    cooldown: 0
+    maxVoices: 1
+    provisional: 0
+    materialNote: "\u6309\u5267\u60C5\u6587\u672C\u4E0E\u7D20\u6750\u547D\u540D\u521D\u914D\uFF1B\u5DF2\u6D4B\u91CF\u65F6\u957F\u548C\u5E73\u5747/\u5CF0\u503C\u7535\u5E73\uFF0C\u5C1A\u9700\u5B9E\u9645\u8BD5\u542C\u786E\u8BA4\u60C5\u7EEA\u3001\u5BF9\u767D\u4E0B\u97F3\u91CF\u548C\u5FAA\u73AF\u63A5\u7F1D\u3002"
+  - key: music.conversation.neutral.route.1122.s1
+    description: "\u957F\u5267\u60C5 / \u5C01\u9501\u3001\u5931\u8E2A\u4E0E\u98CE\u66B4\u524D\u5915
+      / neutral.route.1122.s1"
+    enabled: 1
+    clip: {fileID: 8300000, guid: 44507b7a5f4c6254181a510c730a0a4e, type: 3}
+    resourcePath: 
+    category: 2
+    loop: 1
+    volume: 0.22950001
+    pitch: 1
+    fadeIn: 1.2
+    fadeOut: 1.2
+    cooldown: 0
+    maxVoices: 1
+    provisional: 0
+    materialNote: "\u6309\u5267\u60C5\u6587\u672C\u4E0E\u7D20\u6750\u547D\u540D\u521D\u914D\uFF1B\u5DF2\u6D4B\u91CF\u65F6\u957F\u548C\u5E73\u5747/\u5CF0\u503C\u7535\u5E73\uFF0C\u5C1A\u9700\u5B9E\u9645\u8BD5\u542C\u786E\u8BA4\u60C5\u7EEA\u3001\u5BF9\u767D\u4E0B\u97F3\u91CF\u548C\u5FAA\u73AF\u63A5\u7F1D\u3002"
+  - key: music.conversation.church.route.1115.s1.conversation
+    description: "\u957F\u5267\u60C5 / \u5C01\u9501\u3001\u5931\u8E2A\u4E0E\u98CE\u66B4\u524D\u5915
+      / church.route.1115.s1.conversation"
+    enabled: 1
+    clip: {fileID: 8300000, guid: 44507b7a5f4c6254181a510c730a0a4e, type: 3}
+    resourcePath: 
+    category: 2
+    loop: 1
+    volume: 0.22950001
+    pitch: 1
+    fadeIn: 1.2
+    fadeOut: 1.2
+    cooldown: 0
+    maxVoices: 1
+    provisional: 0
+    materialNote: "\u6309\u5267\u60C5\u6587\u672C\u4E0E\u7D20\u6750\u547D\u540D\u521D\u914D\uFF1B\u5DF2\u6D4B\u91CF\u65F6\u957F\u548C\u5E73\u5747/\u5CF0\u503C\u7535\u5E73\uFF0C\u5C1A\u9700\u5B9E\u9645\u8BD5\u542C\u786E\u8BA4\u60C5\u7EEA\u3001\u5BF9\u767D\u4E0B\u97F3\u91CF\u548C\u5FAA\u73AF\u63A5\u7F1D\u3002"
+  - key: music.conversation.revolution.1107.s1.conversation
+    description: "\u957F\u5267\u60C5 / \u5C01\u9501\u3001\u5931\u8E2A\u4E0E\u98CE\u66B4\u524D\u5915
+      / revolution.1107.s1.conversation"
+    enabled: 1
+    clip: {fileID: 8300000, guid: 44507b7a5f4c6254181a510c730a0a4e, type: 3}
+    resourcePath: 
+    category: 2
+    loop: 1
+    volume: 0.22950001
+    pitch: 1
+    fadeIn: 1.2
+    fadeOut: 1.2
+    cooldown: 0
+    maxVoices: 1
+    provisional: 0
+    materialNote: "\u6309\u5267\u60C5\u6587\u672C\u4E0E\u7D20\u6750\u547D\u540D\u521D\u914D\uFF1B\u5DF2\u6D4B\u91CF\u65F6\u957F\u548C\u5E73\u5747/\u5CF0\u503C\u7535\u5E73\uFF0C\u5C1A\u9700\u5B9E\u9645\u8BD5\u542C\u786E\u8BA4\u60C5\u7EEA\u3001\u5BF9\u767D\u4E0B\u97F3\u91CF\u548C\u5FAA\u73AF\u63A5\u7F1D\u3002"
+  - key: music.conversation.revolution.route.1115.s1.conversation
+    description: "\u957F\u5267\u60C5 / \u5C01\u9501\u3001\u5931\u8E2A\u4E0E\u98CE\u66B4\u524D\u5915
+      / revolution.route.1115.s1.conversation"
+    enabled: 1
+    clip: {fileID: 8300000, guid: 44507b7a5f4c6254181a510c730a0a4e, type: 3}
+    resourcePath: 
+    category: 2
+    loop: 1
+    volume: 0.22950001
+    pitch: 1
+    fadeIn: 1.2
+    fadeOut: 1.2
+    cooldown: 0
+    maxVoices: 1
+    provisional: 0
+    materialNote: "\u6309\u5267\u60C5\u6587\u672C\u4E0E\u7D20\u6750\u547D\u540D\u521D\u914D\uFF1B\u5DF2\u6D4B\u91CF\u65F6\u957F\u548C\u5E73\u5747/\u5CF0\u503C\u7535\u5E73\uFF0C\u5C1A\u9700\u5B9E\u9645\u8BD5\u542C\u786E\u8BA4\u60C5\u7EEA\u3001\u5BF9\u767D\u4E0B\u97F3\u91CF\u548C\u5FAA\u73AF\u63A5\u7F1D\u3002"
+  - key: music.conversation.revolution.route.1122.s1.conversation
+    description: "\u957F\u5267\u60C5 / \u5C01\u9501\u3001\u5931\u8E2A\u4E0E\u98CE\u66B4\u524D\u5915
+      / revolution.route.1122.s1.conversation"
+    enabled: 1
+    clip: {fileID: 8300000, guid: 44507b7a5f4c6254181a510c730a0a4e, type: 3}
+    resourcePath: 
+    category: 2
+    loop: 1
+    volume: 0.22950001
+    pitch: 1
+    fadeIn: 1.2
+    fadeOut: 1.2
+    cooldown: 0
+    maxVoices: 1
+    provisional: 0
+    materialNote: "\u6309\u5267\u60C5\u6587\u672C\u4E0E\u7D20\u6750\u547D\u540D\u521D\u914D\uFF1B\u5DF2\u6D4B\u91CF\u65F6\u957F\u548C\u5E73\u5747/\u5CF0\u503C\u7535\u5E73\uFF0C\u5C1A\u9700\u5B9E\u9645\u8BD5\u542C\u786E\u8BA4\u60C5\u7EEA\u3001\u5BF9\u767D\u4E0B\u97F3\u91CF\u548C\u5FAA\u73AF\u63A5\u7F1D\u3002"
+  - key: music.conversation.rose.route.ending.unforgiven.conversation
+    description: "\u957F\u5267\u60C5 / \u8BC0\u522B\u3001\u7F6A\u759A\u4E0E\u9769\u547D\u7684\u4EE3\u4EF7
+      / rose.route.ending.unforgiven.conversation"
+    enabled: 1
+    clip: {fileID: 8300000, guid: 6d6684716574f9e4d9e18bfd9dc6d383, type: 3}
+    resourcePath: 
+    category: 2
+    loop: 1
+    volume: 0.187
+    pitch: 1
+    fadeIn: 1.2
+    fadeOut: 1.2
+    cooldown: 0
+    maxVoices: 1
+    provisional: 0
+    materialNote: "\u6309\u5267\u60C5\u6587\u672C\u4E0E\u7D20\u6750\u547D\u540D\u521D\u914D\uFF1B\u5DF2\u6D4B\u91CF\u65F6\u957F\u548C\u5E73\u5747/\u5CF0\u503C\u7535\u5E73\uFF0C\u5C1A\u9700\u5B9E\u9645\u8BD5\u542C\u786E\u8BA4\u60C5\u7EEA\u3001\u5BF9\u767D\u4E0B\u97F3\u91CF\u548C\u5FAA\u73AF\u63A5\u7F1D\u3002"
+  - key: music.conversation.revolution.route.1124.s1.conversation
+    description: "\u957F\u5267\u60C5 / \u8BC0\u522B\u3001\u7F6A\u759A\u4E0E\u9769\u547D\u7684\u4EE3\u4EF7
+      / revolution.route.1124.s1.conversation"
+    enabled: 1
+    clip: {fileID: 8300000, guid: 6d6684716574f9e4d9e18bfd9dc6d383, type: 3}
+    resourcePath: 
+    category: 2
+    loop: 1
+    volume: 0.187
+    pitch: 1
+    fadeIn: 1.2
+    fadeOut: 1.2
+    cooldown: 0
+    maxVoices: 1
+    provisional: 0
+    materialNote: "\u6309\u5267\u60C5\u6587\u672C\u4E0E\u7D20\u6750\u547D\u540D\u521D\u914D\uFF1B\u5DF2\u6D4B\u91CF\u65F6\u957F\u548C\u5E73\u5747/\u5CF0\u503C\u7535\u5E73\uFF0C\u5C1A\u9700\u5B9E\u9645\u8BD5\u542C\u786E\u8BA4\u60C5\u7EEA\u3001\u5BF9\u767D\u4E0B\u97F3\u91CF\u548C\u5FAA\u73AF\u63A5\u7F1D\u3002"
+  - key: music.conversation.rose.route.ending.bloom.conversation
+    description: "\u957F\u5267\u60C5 / \u9009\u62E9\u672A\u6765\u4E0E\u4FDD\u5168\u751F\u547D
+      / rose.route.ending.bloom.conversation"
+    enabled: 1
+    clip: {fileID: 8300000, guid: d73650a2702926a4a9cae3af058c3609, type: 3}
+    resourcePath: 
+    category: 2
+    loop: 1
+    volume: 0.272
+    pitch: 1
+    fadeIn: 1.2
+    fadeOut: 1.2
+    cooldown: 0
+    maxVoices: 1
+    provisional: 0
+    materialNote: "\u6309\u5267\u60C5\u6587\u672C\u4E0E\u7D20\u6750\u547D\u540D\u521D\u914D\uFF1B\u5DF2\u6D4B\u91CF\u65F6\u957F\u548C\u5E73\u5747/\u5CF0\u503C\u7535\u5E73\uFF0C\u5C1A\u9700\u5B9E\u9645\u8BD5\u542C\u786E\u8BA4\u60C5\u7EEA\u3001\u5BF9\u767D\u4E0B\u97F3\u91CF\u548C\u5FAA\u73AF\u63A5\u7F1D\u3002"
+  - key: music.conversation.church.route.1111.s1.conversation
+    description: "\u957F\u5267\u60C5 / \u9009\u62E9\u672A\u6765\u4E0E\u4FDD\u5168\u751F\u547D
+      / church.route.1111.s1.conversation"
+    enabled: 1
+    clip: {fileID: 8300000, guid: d73650a2702926a4a9cae3af058c3609, type: 3}
+    resourcePath: 
+    category: 2
+    loop: 1
+    volume: 0.272
+    pitch: 1
+    fadeIn: 1.2
+    fadeOut: 1.2
+    cooldown: 0
+    maxVoices: 1
+    provisional: 0
+    materialNote: "\u6309\u5267\u60C5\u6587\u672C\u4E0E\u7D20\u6750\u547D\u540D\u521D\u914D\uFF1B\u5DF2\u6D4B\u91CF\u65F6\u957F\u548C\u5E73\u5747/\u5CF0\u503C\u7535\u5E73\uFF0C\u5C1A\u9700\u5B9E\u9645\u8BD5\u542C\u786E\u8BA4\u60C5\u7EEA\u3001\u5BF9\u767D\u4E0B\u97F3\u91CF\u548C\u5FAA\u73AF\u63A5\u7F1D\u3002"
+  - key: music.conversation.church.route.1123.s1.conversation
+    description: "\u957F\u5267\u60C5 / \u9009\u62E9\u672A\u6765\u4E0E\u4FDD\u5168\u751F\u547D
+      / church.route.1123.s1.conversation"
+    enabled: 1
+    clip: {fileID: 8300000, guid: d73650a2702926a4a9cae3af058c3609, type: 3}
+    resourcePath: 
+    category: 2
+    loop: 1
+    volume: 0.272
+    pitch: 1
+    fadeIn: 1.2
+    fadeOut: 1.2
+    cooldown: 0
+    maxVoices: 1
+    provisional: 0
+    materialNote: "\u6309\u5267\u60C5\u6587\u672C\u4E0E\u7D20\u6750\u547D\u540D\u521D\u914D\uFF1B\u5DF2\u6D4B\u91CF\u65F6\u957F\u548C\u5E73\u5747/\u5CF0\u503C\u7535\u5E73\uFF0C\u5C1A\u9700\u5B9E\u9645\u8BD5\u542C\u786E\u8BA4\u60C5\u7EEA\u3001\u5BF9\u767D\u4E0B\u97F3\u91CF\u548C\u5FAA\u73AF\u63A5\u7F1D\u3002"
+  - key: music.conversation.church.route.1118.s1.conversation
+    description: "\u957F\u5267\u60C5 / \u884C\u52A8\u4E4B\u591C\u4E0E\u9769\u547D\u7206\u53D1
+      / church.route.1118.s1.conversation"
+    enabled: 1
+    clip: {fileID: 8300000, guid: 2b6dd95bfa198fa419a8beea6f600a6c, type: 3}
+    resourcePath: 
+    category: 2
+    loop: 1
+    volume: 0.15300001
+    pitch: 1
+    fadeIn: 1.2
+    fadeOut: 1.2
+    cooldown: 0
+    maxVoices: 1
+    provisional: 0
+    materialNote: "\u6309\u5267\u60C5\u6587\u672C\u4E0E\u7D20\u6750\u547D\u540D\u521D\u914D\uFF1B\u5DF2\u6D4B\u91CF\u65F6\u957F\u548C\u5E73\u5747/\u5CF0\u503C\u7535\u5E73\uFF0C\u5C1A\u9700\u5B9E\u9645\u8BD5\u542C\u786E\u8BA4\u60C5\u7EEA\u3001\u5BF9\u767D\u4E0B\u97F3\u91CF\u548C\u5FAA\u73AF\u63A5\u7F1D\u3002"
+  - key: music.conversation.revolution.route.1123.s1.conversation
+    description: "\u957F\u5267\u60C5 / \u884C\u52A8\u4E4B\u591C\u4E0E\u9769\u547D\u7206\u53D1
+      / revolution.route.1123.s1.conversation"
+    enabled: 1
+    clip: {fileID: 8300000, guid: 2b6dd95bfa198fa419a8beea6f600a6c, type: 3}
+    resourcePath: 
+    category: 2
+    loop: 1
+    volume: 0.15300001
+    pitch: 1
+    fadeIn: 1.2
+    fadeOut: 1.2
+    cooldown: 0
+    maxVoices: 1
+    provisional: 0
+    materialNote: "\u6309\u5267\u60C5\u6587\u672C\u4E0E\u7D20\u6750\u547D\u540D\u521D\u914D\uFF1B\u5DF2\u6D4B\u91CF\u65F6\u957F\u548C\u5E73\u5747/\u5CF0\u503C\u7535\u5E73\uFF0C\u5C1A\u9700\u5B9E\u9645\u8BD5\u542C\u786E\u8BA4\u60C5\u7EEA\u3001\u5BF9\u767D\u4E0B\u97F3\u91CF\u548C\u5FAA\u73AF\u63A5\u7F1D\u3002"
+  - key: music.conversation.church.1009.s2.conversation
+    description: "\u957F\u5267\u60C5 / \u795E\u4F51\u8005\u4EEA\u5F0F\u4E0E\u5B97\u6559\u6743\u5A01
+      / church.1009.s2.conversation"
+    enabled: 1
+    clip: {fileID: 8300000, guid: 9650128d7c9e3b3439909514df8e3954, type: 3}
+    resourcePath: 
+    category: 2
+    loop: 1
+    volume: 0.187
+    pitch: 1
+    fadeIn: 1.2
+    fadeOut: 1.2
+    cooldown: 0
+    maxVoices: 1
+    provisional: 0
+    materialNote: "\u6309\u5267\u60C5\u6587\u672C\u4E0E\u7D20\u6750\u547D\u540D\u521D\u914D\uFF1B\u5DF2\u6D4B\u91CF\u65F6\u957F\u548C\u5E73\u5747/\u5CF0\u503C\u7535\u5E73\uFF0C\u5C1A\u9700\u5B9E\u9645\u8BD5\u542C\u786E\u8BA4\u60C5\u7EEA\u3001\u5BF9\u767D\u4E0B\u97F3\u91CF\u548C\u5FAA\u73AF\u63A5\u7F1D\u3002"
   cafeDynamics:
     pourVolume: {x: 0.32, y: 1}
     pourPitch: {x: 0.88, y: 1.12}

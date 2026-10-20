@@ -1,10 +1,19 @@
 fileFormatVersion: 2
-guid: 77ff712c2e6343ed87d27fdd23541900
+guid: 6123b08e7e15a2a4b959ae468e9d2ab0
 TextureImporter:
   internalIDToNameTable:
   - first:
-      213: -5867131126800163137
-    second: avatar_placeholder_0
+      213: -1316587977721620106
+    second: "\u9634\u5F71_0"
+  - first:
+      213: 2993665581388304854
+    second: "\u9634\u5F71_1"
+  - first:
+      213: -6382095946758519039
+    second: "\u9634\u5F71_2"
+  - first:
+      213: -4996711089423768755
+    second: "\u9634\u5F71_3"
   externalObjects: {}
   serializedVersion: 13
   mipmaps:
@@ -75,7 +84,7 @@ TextureImporter:
     maxTextureSize: 2048
     resizeAlgorithm: 0
     textureFormat: -1
-    textureCompression: 0
+    textureCompression: 1
     compressionQuality: 50
     crunchedCompression: 0
     allowsAlphaSplitting: 0
@@ -100,13 +109,13 @@ TextureImporter:
     serializedVersion: 2
     sprites:
     - serializedVersion: 2
-      name: avatar_placeholder_0
+      name: "\u9634\u5F71_0"
       rect:
         serializedVersion: 2
-        x: 261
-        y: 19
-        width: 502
-        height: 1497
+        x: 6
+        y: 946
+        width: 816
+        height: 356
       alignment: 0
       pivot: {x: 0, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
@@ -115,8 +124,74 @@ TextureImporter:
       physicsShape: []
       tessellationDetail: -1
       bones: []
-      spriteID: fbe50785353c39ea0800000000000000
-      internalID: -5867131126800163137
+      spriteID: 6795a58b53a8abde0800000000000000
+      internalID: -1316587977721620106
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: "\u9634\u5F71_1"
+      rect:
+        serializedVersion: 2
+        x: 1012
+        y: 971
+        width: 298
+        height: 297
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 6d196f23cf2ab8920800000000000000
+      internalID: 2993665581388304854
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: "\u9634\u5F71_2"
+      rect:
+        serializedVersion: 2
+        x: 1372
+        y: 975
+        width: 615
+        height: 339
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 1078ffadc8d3e67a0800000000000000
+      internalID: -6382095946758519039
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: "\u9634\u5F71_3"
+      rect:
+        serializedVersion: 2
+        x: 1845
+        y: 0
+        width: 413
+        height: 427
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: d4324a5ecbd18aab0800000000000000
+      internalID: -4996711089423768755
       vertices: []
       indices: 
       edges: []
@@ -135,7 +210,10 @@ TextureImporter:
     spriteCustomMetadata:
       entries: []
     nameFileIdTable:
-      avatar_placeholder_0: -5867131126800163137
+      "\u9634\u5F71_0": -1316587977721620106
+      "\u9634\u5F71_1": 2993665581388304854
+      "\u9634\u5F71_2": -6382095946758519039
+      "\u9634\u5F71_3": -4996711089423768755
   mipmapLimitGroupName: 
   pSDRemoveMatte: 0
   userData: 

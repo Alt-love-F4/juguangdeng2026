@@ -11,6 +11,7 @@ GameObject:
   - component: {fileID: 5661503351515898278}
   - component: {fileID: 7102349185315103382}
   - component: {fileID: 447328261972635422}
+  - component: {fileID: 6943030477735783554}
   m_Layer: 0
   m_Name: FreeEntity_source_honey
   m_TagString: Untagged
@@ -56,10 +57,15 @@ MonoBehaviour:
   m_EditorClassIdentifier: Spotlight.FreeCafe.Unity::Spotlight.FreeCafe.FreeEntityView
   prefabSpecId: source.honey
   authoringEntityId: 
+  preserveAuthoredPosition: 0
   effectsRoot: {fileID: 2734783887578708786}
   liquidRoot: {fileID: 5472349514436856836}
   pourOrigin: {fileID: 9099974313176421325}
   liquidPresenter: {fileID: 0}
+  liquidContainerMask: {fileID: 0}
+  liquidMaskIsDistanceField: 0
+  liquidMaskDistanceRange: 0.125
+  liquidWallThickness: 0.018
   body: {fileID: 8477944345378278243}
   label: {fileID: 4796906034803160624}
   workspaceCaption: {fileID: 879377846141378778}
@@ -115,6 +121,20 @@ BoxCollider2D:
   m_AutoTiling: 0
   m_Size: {x: 2.02361, y: 2.09358}
   m_EdgeRadius: 0
+--- !u!114 &6943030477735783554
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 144162743296915592}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 413fe6ab8cfaaa9469ad8e3f7b5f55cd, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Spotlight.FreeCafe.Unity::Spotlight.FreeCafe.FreeCafeSourceJarVisual
+  closedSprite: {fileID: 21300000, guid: 971855bececa33c4e9791c6f6a74efed, type: 3}
+  openSprite: {fileID: 21300000, guid: 06e464c231a887042bb52aacedbc8c3d, type: 3}
 --- !u!1 &1820644869721636412
 GameObject:
   m_ObjectHideFlags: 0
@@ -771,7 +791,7 @@ SpriteRenderer:
   m_SortingLayer: 0
   m_SortingOrder: 100
   m_MaskInteraction: 0
-  m_Sprite: {fileID: 21300000, guid: 5c446d0a76339f2438b7b25565db54ce, type: 3}
+  m_Sprite: {fileID: 21300000, guid: 971855bececa33c4e9791c6f6a74efed, type: 3}
   m_Color: {r: 1, g: 1, b: 1, a: 1}
   m_FlipX: 0
   m_FlipY: 0

@@ -294,6 +294,86 @@ namespace Spotlight.Audio.Tests
         }
 
         [Test]
+        public void CafeDayMusicSelectsOnlyRequestedCandidatesAndDoesNotRerollDuringTheDay()
+        {
+            AddCafeMusicCandidates();
+            Random.State previous = Random.state;
+            try
+            {
+                for (int seed = 0; seed < 8; seed++)
+                {
+                    // Leaving the cafe baseline starts a fresh visit even on the same calendar day.
+                    GameAudio.Music(AudioKeys.MenuMusic);
+                    Random.InitState(seed);
+                    int choice = Random.Range(0, 2);
+                    float expectedNextRandom = Random.value;
+                    Random.InitState(seed);
+                    GameAudio.CafeDayMusic(1);
+                    Assert.That(backend.LoadedClip, Is.SameAs(choice == 0 ? clip : secondClip));
+                    int plays = backend.PlayCount;
+                    GameAudio.CafeDayMusic(1);
+                    GameAudio.Music(AudioKeys.CafeMusic); // SceneLoaded/Start must share the same choice.
+                    Assert.That(backend.PlayCount, Is.EqualTo(plays));
+                    Assert.That(Random.value, Is.EqualTo(expectedNextRandom), "Repeated observations must not consume random choices.");
+                }
+            }
+            finally { Random.state = previous; }
+        }
+
+        [Test]
+        public void NewCafeDayRerollsOnceWhileOwnedMusicKeepsPriorityAndRestoresTheSelectedBaseline()
+        {
+            AddCafeMusicCandidates();
+            Random.State previous = Random.state;
+            try
+            {
+                GameAudio.CafeDayMusic(1);
+                var first = new object();
+                var story = new object();
+                GameAudio.OverrideMusic(first, AudioKeys.CafeMusic);
+                GameAudio.OverrideMusic(story, AudioKeys.MenuMusic);
+                int plays = backend.PlayCount;
+                Random.InitState(42);
+                int choice = Random.Range(0, 2);
+                float expectedNextRandom = Random.value;
+                Random.InitState(42);
+                GameAudio.CafeDayMusic(2);
+                GameAudio.CafeDayMusic(2);
+                Assert.That(backend.PlayCount, Is.EqualTo(plays), "Daily changes cannot displace an owned story override.");
+                Assert.That(Random.value, Is.EqualTo(expectedNextRandom), "A new business day chooses exactly once.");
+                GameAudio.StopOwner(story);
+                Assert.That(backend.LoadedClip, Is.SameAs(secondClip), "The previous owner still resumes before the baseline.");
+                GameAudio.StopOwner(first);
+                Assert.That(backend.LoadedClip, Is.SameAs(choice == 0 ? clip : secondClip));
+            }
+            finally { Random.state = previous; }
+        }
+
+        [Test]
+        public void CafeDayMusicUsesAvailableCandidateAndFallsBackToLegacyCatalog()
+        {
+            GameAudio.CafeDayMusic(1);
+            Assert.That(backend.LoadedClip, Is.SameAs(secondClip));
+            GameAudio.Music(AudioKeys.MenuMusic);
+            GameAudio.Shutdown();
+            Object.DestroyImmediate(catalog);
+            catalog = ScriptableObject.CreateInstance<AudioCatalog>();
+            catalog.warnMissing = false;
+            catalog.entries.Add(new AudioCue { key = AudioKeys.CafeSunshineMusic, clip = clip, category = AudioCategory.Music, loop = true });
+            catalog.entries.Add(new AudioCue { key = AudioKeys.CafeProgressMusic, enabled = false, clip = secondClip });
+            GameAudio.Initialize(catalog);
+            GameAudio.CafeDayMusic(2);
+            Assert.That(backend.LoadedClip, Is.SameAs(clip));
+        }
+
+        private void AddCafeMusicCandidates()
+        {
+            // Add entries before any Find call builds the catalog's lazy index.
+            catalog.entries.Add(new AudioCue { key = AudioKeys.CafeSunshineMusic, clip = clip, category = AudioCategory.Music, loop = true });
+            catalog.entries.Add(new AudioCue { key = AudioKeys.CafeProgressMusic, clip = secondClip, category = AudioCategory.Music, loop = true });
+        }
+
+        [Test]
         public void EmptyNarrativeMusicIsAnOwnedSilenceRatherThanDeletingBaseline()
         {
             var owner = new object();

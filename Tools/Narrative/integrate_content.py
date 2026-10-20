@@ -102,6 +102,9 @@ def merge(modules):
     if merged.get('text')!=row.get('text'):
      placeholder_preservations.append({'key':k,'sourcePlaceholder':row.get('text'),'preservedText':merged.get('text')})
     row=merged
+   # Character art added in source Excel survives content-only row regeneration.
+   if name=='Object'and k in index:
+    row={**index[k],**row}
    # New declared facts never erase current creation/specialization flags. Route policy
    # is intentionally mutable so session restore/branch transactions can clear them.
    if name=='ConditionKey'and k in index:
@@ -185,7 +188,8 @@ def character_visual_plan():
        'errors':[],'characterVisualChanges':changes,'characterVisualCellEdits':edits}
  OUT.mkdir(parents=True,exist_ok=True)
  (OUT/'merge-plan.json').write_text(json.dumps(plan,ensure_ascii=False,indent=2),encoding='utf-8')
- (ROOT/'output/npc-art-2026-10-20/character-visual-plan.json').write_text(json.dumps(plan,ensure_ascii=False,indent=2),encoding='utf-8')
+ visual_out=ROOT/'Library/Locus/tmp/npc-silhouette-replacement';visual_out.mkdir(parents=True,exist_ok=True)
+ (visual_out/'character-visual-plan.json').write_text(json.dumps(plan,ensure_ascii=False,indent=2),encoding='utf-8')
  print(json.dumps({'changedObjects':len(changes),'changedCells':len(edits),'sheets':['Object']},ensure_ascii=False))
  return plan
 

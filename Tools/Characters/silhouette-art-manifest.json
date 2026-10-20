@@ -1,0 +1,33 @@
+{
+  "sourceDirectory": "Assets/Art/Gameplay/剪影",
+  "cropFraction": 0.6666666666666666,
+  "defaultAppearance": "male",
+  "defaultIsGenderClaim": false,
+  "femaleIds": [
+    "adele",
+    "alienor",
+    "queen",
+    "colette",
+    "guest_b",
+    "guest_d",
+    "church.generic.7148666b21",
+    "church.generic.5d7522a804"
+  ],
+  "evidence": {
+    "queen": "人物.xlsx 王后",
+    "guest_b": "人物.xlsx 人物 sheet 客人B 性别=女",
+    "guest_d": "人物.xlsx 人物 sheet 客人D 性别=女",
+    "adele": "人物.xlsx 阿黛尔 叔叔的养女",
+    "alienor": "人物.xlsx 阿莉耶诺尔 国王的女儿",
+    "colette": "人物.xlsx 柯莱特 前侍女",
+    "church.generic.7148666b21": "Object/Text 女童",
+    "church.generic.5d7522a804": "Object/Text 老妇人"
+  },
+  "notes": [
+    "Only placeholder art is replaced. Existing authored character portraits and seven authored cafe seated images remain untouched.",
+    "Unspecified source gender is not inferred from names; male is only the default fallback appearance.",
+    "Marie keeps her existing authored disguise artwork; no silhouette replacement.",
+    "The 2/3 crop applies only to standing dialogue portraits. Seated cafe silhouettes retain the entire source figure."
+  ],
+  "seatedCropFraction": 1
+}

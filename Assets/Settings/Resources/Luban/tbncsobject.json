@@ -48,88 +48,88 @@
     "objType": "npc",
     "nameText": "oct07.passerby.a.name",
     "iconPath": "",
-    "portraitPath": "",
-    "portraitIndoorPath": "",
-    "avtarPath": "",
+    "portraitPath": "Characters/silhouettes/male/neutral_placeholder",
+    "portraitIndoorPath": "Characters/silhouettes/male/seated_placeholder",
+    "avtarPath": "Characters/silhouettes/male/avatar_placeholder",
     "descText": "",
-    "tags": "oct07,passerby,offstage"
+    "tags": "oct07,passerby,offstage,portrait_placeholder"
   },
   {
     "objId": "rose.envoy",
     "objType": "npc",
     "nameText": "rose.envoy.name",
     "iconPath": "",
-    "portraitPath": "",
-    "portraitIndoorPath": "",
-    "avtarPath": "",
+    "portraitPath": "Characters/silhouettes/male/neutral_placeholder",
+    "portraitIndoorPath": "Characters/silhouettes/male/seated_placeholder",
+    "avtarPath": "Characters/silhouettes/male/avatar_placeholder",
     "descText": "",
-    "tags": ""
+    "tags": "portrait_placeholder"
   },
   {
     "objId": "rose.butake",
     "objType": "npc",
     "nameText": "rose.butake.name",
     "iconPath": "",
-    "portraitPath": "",
-    "portraitIndoorPath": "",
-    "avtarPath": "",
+    "portraitPath": "Characters/silhouettes/male/neutral_placeholder",
+    "portraitIndoorPath": "Characters/silhouettes/male/seated_placeholder",
+    "avtarPath": "Characters/silhouettes/male/avatar_placeholder",
     "descText": "",
-    "tags": ""
+    "tags": "portrait_placeholder"
   },
   {
     "objId": "sorel",
     "objType": "npc",
     "nameText": "character.sorel.name",
     "iconPath": "",
-    "portraitPath": "",
-    "portraitIndoorPath": "",
-    "avtarPath": "",
+    "portraitPath": "Characters/silhouettes/male/neutral_placeholder",
+    "portraitIndoorPath": "Characters/silhouettes/male/seated_placeholder",
+    "avtarPath": "Characters/silhouettes/male/avatar_placeholder",
     "descText": "",
-    "tags": "revolution,C-R04-missing-portrait"
+    "tags": "revolution,portrait_placeholder"
   },
   {
     "objId": "church.broadcast",
     "objType": "npc",
     "nameText": "church.broadcast.name",
     "iconPath": "",
-    "portraitPath": "",
-    "portraitIndoorPath": "",
-    "avtarPath": "",
+    "portraitPath": "Characters/silhouettes/male/neutral_placeholder",
+    "portraitIndoorPath": "Characters/silhouettes/male/seated_placeholder",
+    "avtarPath": "Characters/silhouettes/male/avatar_placeholder",
     "descText": "",
-    "tags": ""
+    "tags": "portrait_placeholder"
   },
   {
     "objId": "church.crowd",
     "objType": "npc",
     "nameText": "church.crowd.name",
     "iconPath": "",
-    "portraitPath": "",
-    "portraitIndoorPath": "",
-    "avtarPath": "",
+    "portraitPath": "Characters/silhouettes/male/neutral_placeholder",
+    "portraitIndoorPath": "Characters/silhouettes/male/seated_placeholder",
+    "avtarPath": "Characters/silhouettes/male/avatar_placeholder",
     "descText": "",
-    "tags": ""
+    "tags": "portrait_placeholder"
   },
   {
     "objId": "church.duke",
     "objType": "npc",
     "nameText": "church.duke.name",
     "iconPath": "",
-    "portraitPath": "",
-    "portraitIndoorPath": "",
-    "avtarPath": "",
+    "portraitPath": "Characters/silhouettes/male/neutral_placeholder",
+    "portraitIndoorPath": "Characters/silhouettes/male/seated_placeholder",
+    "avtarPath": "Characters/silhouettes/male/avatar_placeholder",
     "descText": "",
-    "tags": ""
+    "tags": "portrait_placeholder"
   },
   {
     "objId": "church.man",
     "objType": "npc",
     "nameText": "church.man.name",
     "iconPath": "",
-    "portraitPath": "",
-    "portraitIndoorPath": "",
-    "avtarPath": "",
+    "portraitPath": "Characters/silhouettes/male/neutral_placeholder",
+    "portraitIndoorPath": "Characters/silhouettes/male/seated_placeholder",
+    "avtarPath": "Characters/silhouettes/male/avatar_placeholder",
     "descText": "",
-    "tags": ""
+    "tags": "portrait_placeholder"
   },
   {
     "objId": "laurent",
@@ -477,363 +477,363 @@
     "objType": "npc",
     "nameText": "character.market.shopkeeper.name",
     "iconPath": "",
-    "portraitPath": "",
-    "portraitIndoorPath": "",
-    "avtarPath": "",
+    "portraitPath": "Characters/silhouettes/male/neutral_placeholder",
+    "portraitIndoorPath": "Characters/silhouettes/male/seated_placeholder",
+    "avtarPath": "Characters/silhouettes/male/avatar_placeholder",
     "descText": "character.market.shopkeeper.desc",
-    "tags": "neutral,a01,shopkeeper"
+    "tags": "neutral,a01,shopkeeper,portrait_placeholder"
   },
   {
     "objId": "neutral.1008.unknown",
     "objType": "npc",
     "nameText": "character.neutral.1008.unknown.name",
     "iconPath": "",
-    "portraitPath": "",
-    "portraitIndoorPath": "",
-    "avtarPath": "",
+    "portraitPath": "Characters/silhouettes/male/neutral_placeholder",
+    "portraitIndoorPath": "Characters/silhouettes/male/seated_placeholder",
+    "avtarPath": "Characters/silhouettes/male/avatar_placeholder",
     "descText": "character.neutral.1008.unknown.desc",
-    "tags": "neutral,a01,anonymous"
+    "tags": "neutral,a01,anonymous,portrait_placeholder"
   },
   {
     "objId": "neutral.voice.unknown",
     "objType": "npc",
     "nameText": "neutral.voice.unknown.name",
     "iconPath": "",
-    "portraitPath": "",
-    "portraitIndoorPath": "",
-    "avtarPath": "",
+    "portraitPath": "Characters/silhouettes/male/neutral_placeholder",
+    "portraitIndoorPath": "Characters/silhouettes/male/seated_placeholder",
+    "avtarPath": "Characters/silhouettes/male/avatar_placeholder",
     "descText": "",
-    "tags": "neutral,narrative,generic,portrait_pending"
+    "tags": "neutral,narrative,generic,portrait_placeholder"
   },
   {
     "objId": "neutral.reporter",
     "objType": "npc",
     "nameText": "neutral.reporter.name",
     "iconPath": "",
-    "portraitPath": "",
-    "portraitIndoorPath": "",
-    "avtarPath": "",
+    "portraitPath": "Characters/silhouettes/male/neutral_placeholder",
+    "portraitIndoorPath": "Characters/silhouettes/male/seated_placeholder",
+    "avtarPath": "Characters/silhouettes/male/avatar_placeholder",
     "descText": "",
-    "tags": "neutral,narrative,generic,portrait_pending"
+    "tags": "neutral,narrative,generic,portrait_placeholder"
   },
   {
     "objId": "neutral.inspector",
     "objType": "npc",
     "nameText": "neutral.inspector.name",
     "iconPath": "",
-    "portraitPath": "",
-    "portraitIndoorPath": "",
-    "avtarPath": "",
+    "portraitPath": "Characters/silhouettes/male/neutral_placeholder",
+    "portraitIndoorPath": "Characters/silhouettes/male/seated_placeholder",
+    "avtarPath": "Characters/silhouettes/male/avatar_placeholder",
     "descText": "",
-    "tags": "neutral,narrative,generic,portrait_pending"
+    "tags": "neutral,narrative,generic,portrait_placeholder"
   },
   {
     "objId": "neutral.delivery",
     "objType": "npc",
     "nameText": "neutral.delivery.name",
     "iconPath": "",
-    "portraitPath": "",
-    "portraitIndoorPath": "",
-    "avtarPath": "",
+    "portraitPath": "Characters/silhouettes/male/neutral_placeholder",
+    "portraitIndoorPath": "Characters/silhouettes/male/seated_placeholder",
+    "avtarPath": "Characters/silhouettes/male/avatar_placeholder",
     "descText": "",
-    "tags": "neutral,narrative,generic,portrait_pending"
+    "tags": "neutral,narrative,generic,portrait_placeholder"
   },
   {
     "objId": "neutral.official",
     "objType": "npc",
     "nameText": "neutral.official.name",
     "iconPath": "",
-    "portraitPath": "",
-    "portraitIndoorPath": "",
-    "avtarPath": "",
+    "portraitPath": "Characters/silhouettes/male/neutral_placeholder",
+    "portraitIndoorPath": "Characters/silhouettes/male/seated_placeholder",
+    "avtarPath": "Characters/silhouettes/male/avatar_placeholder",
     "descText": "",
-    "tags": "neutral,narrative,generic,portrait_pending"
+    "tags": "neutral,narrative,generic,portrait_placeholder"
   },
   {
     "objId": "rose.elma",
     "objType": "npc",
     "nameText": "rose.elma.name",
     "iconPath": "",
-    "portraitPath": "",
-    "portraitIndoorPath": "",
-    "avtarPath": "",
+    "portraitPath": "Characters/silhouettes/male/neutral_placeholder",
+    "portraitIndoorPath": "Characters/silhouettes/male/seated_placeholder",
+    "avtarPath": "Characters/silhouettes/male/avatar_placeholder",
     "descText": "",
-    "tags": "rose,source-named,portrait-pending"
+    "tags": "rose,source-named,portrait_placeholder"
   },
   {
     "objId": "rose.giaconi",
     "objType": "npc",
     "nameText": "rose.giaconi.name",
     "iconPath": "",
-    "portraitPath": "",
-    "portraitIndoorPath": "",
-    "avtarPath": "",
+    "portraitPath": "Characters/silhouettes/male/neutral_placeholder",
+    "portraitIndoorPath": "Characters/silhouettes/male/seated_placeholder",
+    "avtarPath": "Characters/silhouettes/male/avatar_placeholder",
     "descText": "",
-    "tags": "rose,source-named,portrait-pending"
+    "tags": "rose,source-named,portrait_placeholder"
   },
   {
     "objId": "rose.kai",
     "objType": "npc",
     "nameText": "rose.kai.name",
     "iconPath": "",
-    "portraitPath": "",
-    "portraitIndoorPath": "",
-    "avtarPath": "",
+    "portraitPath": "Characters/silhouettes/male/neutral_placeholder",
+    "portraitIndoorPath": "Characters/silhouettes/male/seated_placeholder",
+    "avtarPath": "Characters/silhouettes/male/avatar_placeholder",
     "descText": "",
-    "tags": "rose,source-named,portrait-pending"
+    "tags": "rose,source-named,portrait_placeholder"
   },
   {
     "objId": "church.generic.a68402d404",
     "objType": "npc",
     "nameText": "church.generic.a68402d404.name",
     "iconPath": "",
-    "portraitPath": "",
-    "portraitIndoorPath": "",
-    "avtarPath": "",
+    "portraitPath": "Characters/silhouettes/male/neutral_placeholder",
+    "portraitIndoorPath": "Characters/silhouettes/male/seated_placeholder",
+    "avtarPath": "Characters/silhouettes/male/avatar_placeholder",
     "descText": "",
-    "tags": ""
+    "tags": "portrait_placeholder"
   },
   {
     "objId": "church.generic.8dd49b2272",
     "objType": "npc",
     "nameText": "church.generic.8dd49b2272.name",
     "iconPath": "",
-    "portraitPath": "",
-    "portraitIndoorPath": "",
-    "avtarPath": "",
+    "portraitPath": "Characters/silhouettes/male/neutral_placeholder",
+    "portraitIndoorPath": "Characters/silhouettes/male/seated_placeholder",
+    "avtarPath": "Characters/silhouettes/male/avatar_placeholder",
     "descText": "",
-    "tags": ""
+    "tags": "portrait_placeholder"
   },
   {
     "objId": "church.generic.be2481a1fd",
     "objType": "npc",
     "nameText": "church.generic.be2481a1fd.name",
     "iconPath": "",
-    "portraitPath": "",
-    "portraitIndoorPath": "",
-    "avtarPath": "",
+    "portraitPath": "Characters/silhouettes/male/neutral_placeholder",
+    "portraitIndoorPath": "Characters/silhouettes/male/seated_placeholder",
+    "avtarPath": "Characters/silhouettes/male/avatar_placeholder",
     "descText": "",
-    "tags": ""
+    "tags": "portrait_placeholder"
   },
   {
     "objId": "church.generic.35518ef256",
     "objType": "npc",
     "nameText": "church.generic.35518ef256.name",
     "iconPath": "",
-    "portraitPath": "",
-    "portraitIndoorPath": "",
-    "avtarPath": "",
+    "portraitPath": "Characters/silhouettes/male/neutral_placeholder",
+    "portraitIndoorPath": "Characters/silhouettes/male/seated_placeholder",
+    "avtarPath": "Characters/silhouettes/male/avatar_placeholder",
     "descText": "",
-    "tags": ""
+    "tags": "portrait_placeholder"
   },
   {
     "objId": "church.generic.75ad55d561",
     "objType": "npc",
     "nameText": "church.generic.75ad55d561.name",
     "iconPath": "",
-    "portraitPath": "",
-    "portraitIndoorPath": "",
-    "avtarPath": "",
+    "portraitPath": "Characters/silhouettes/male/neutral_placeholder",
+    "portraitIndoorPath": "Characters/silhouettes/male/seated_placeholder",
+    "avtarPath": "Characters/silhouettes/male/avatar_placeholder",
     "descText": "",
-    "tags": ""
+    "tags": "portrait_placeholder"
   },
   {
     "objId": "church.generic.85688335fc",
     "objType": "npc",
     "nameText": "church.generic.85688335fc.name",
     "iconPath": "",
-    "portraitPath": "",
-    "portraitIndoorPath": "",
-    "avtarPath": "",
+    "portraitPath": "Characters/silhouettes/male/neutral_placeholder",
+    "portraitIndoorPath": "Characters/silhouettes/male/seated_placeholder",
+    "avtarPath": "Characters/silhouettes/male/avatar_placeholder",
     "descText": "",
-    "tags": ""
+    "tags": "portrait_placeholder"
   },
   {
     "objId": "church.generic.7148666b21",
     "objType": "npc",
     "nameText": "church.generic.7148666b21.name",
     "iconPath": "",
-    "portraitPath": "",
-    "portraitIndoorPath": "",
-    "avtarPath": "",
+    "portraitPath": "Characters/silhouettes/female/neutral_placeholder",
+    "portraitIndoorPath": "Characters/silhouettes/female/seated_placeholder",
+    "avtarPath": "Characters/silhouettes/female/avatar_placeholder",
     "descText": "",
-    "tags": ""
+    "tags": "portrait_placeholder"
   },
   {
     "objId": "church.generic.fae30e83db",
     "objType": "npc",
     "nameText": "church.generic.fae30e83db.name",
     "iconPath": "",
-    "portraitPath": "",
-    "portraitIndoorPath": "",
-    "avtarPath": "",
+    "portraitPath": "Characters/silhouettes/male/neutral_placeholder",
+    "portraitIndoorPath": "Characters/silhouettes/male/seated_placeholder",
+    "avtarPath": "Characters/silhouettes/male/avatar_placeholder",
     "descText": "",
-    "tags": ""
+    "tags": "portrait_placeholder"
   },
   {
     "objId": "church.generic.d03f6dd9b5",
     "objType": "npc",
     "nameText": "church.generic.d03f6dd9b5.name",
     "iconPath": "",
-    "portraitPath": "",
-    "portraitIndoorPath": "",
-    "avtarPath": "",
+    "portraitPath": "Characters/silhouettes/male/neutral_placeholder",
+    "portraitIndoorPath": "Characters/silhouettes/male/seated_placeholder",
+    "avtarPath": "Characters/silhouettes/male/avatar_placeholder",
     "descText": "",
-    "tags": ""
+    "tags": "portrait_placeholder"
   },
   {
     "objId": "church.generic.577d875f77",
     "objType": "npc",
     "nameText": "church.generic.577d875f77.name",
     "iconPath": "",
-    "portraitPath": "",
-    "portraitIndoorPath": "",
-    "avtarPath": "",
+    "portraitPath": "Characters/silhouettes/male/neutral_placeholder",
+    "portraitIndoorPath": "Characters/silhouettes/male/seated_placeholder",
+    "avtarPath": "Characters/silhouettes/male/avatar_placeholder",
     "descText": "",
-    "tags": ""
+    "tags": "portrait_placeholder"
   },
   {
     "objId": "church.generic.5d7522a804",
     "objType": "npc",
     "nameText": "church.generic.5d7522a804.name",
     "iconPath": "",
-    "portraitPath": "",
-    "portraitIndoorPath": "",
-    "avtarPath": "",
+    "portraitPath": "Characters/silhouettes/female/neutral_placeholder",
+    "portraitIndoorPath": "Characters/silhouettes/female/seated_placeholder",
+    "avtarPath": "Characters/silhouettes/female/avatar_placeholder",
     "descText": "",
-    "tags": ""
+    "tags": "portrait_placeholder"
   },
   {
     "objId": "church.generic.3fe3a9d5ff",
     "objType": "npc",
     "nameText": "church.generic.3fe3a9d5ff.name",
     "iconPath": "",
-    "portraitPath": "",
-    "portraitIndoorPath": "",
-    "avtarPath": "",
+    "portraitPath": "Characters/silhouettes/male/neutral_placeholder",
+    "portraitIndoorPath": "Characters/silhouettes/male/seated_placeholder",
+    "avtarPath": "Characters/silhouettes/male/avatar_placeholder",
     "descText": "",
-    "tags": ""
+    "tags": "portrait_placeholder"
   },
   {
     "objId": "revolution.actor.young_worker",
     "objType": "npc",
     "nameText": "character.revolution.actor.young_worker.name",
     "iconPath": "",
-    "portraitPath": "",
-    "portraitIndoorPath": "",
-    "avtarPath": "",
+    "portraitPath": "Characters/silhouettes/male/neutral_placeholder",
+    "portraitIndoorPath": "Characters/silhouettes/male/seated_placeholder",
+    "avtarPath": "Characters/silhouettes/male/avatar_placeholder",
     "descText": "",
-    "tags": "revolution,generic,no_portrait"
+    "tags": "revolution,generic,portrait_placeholder"
   },
   {
     "objId": "revolution.actor.worker",
     "objType": "npc",
     "nameText": "character.revolution.actor.worker.name",
     "iconPath": "",
-    "portraitPath": "",
-    "portraitIndoorPath": "",
-    "avtarPath": "",
+    "portraitPath": "Characters/silhouettes/male/neutral_placeholder",
+    "portraitIndoorPath": "Characters/silhouettes/male/seated_placeholder",
+    "avtarPath": "Characters/silhouettes/male/avatar_placeholder",
     "descText": "",
-    "tags": "revolution,generic,no_portrait"
+    "tags": "revolution,generic,portrait_placeholder"
   },
   {
     "objId": "revolution.actor.district_delegate",
     "objType": "npc",
     "nameText": "character.revolution.actor.district_delegate.name",
     "iconPath": "",
-    "portraitPath": "",
-    "portraitIndoorPath": "",
-    "avtarPath": "",
+    "portraitPath": "Characters/silhouettes/male/neutral_placeholder",
+    "portraitIndoorPath": "Characters/silhouettes/male/seated_placeholder",
+    "avtarPath": "Characters/silhouettes/male/avatar_placeholder",
     "descText": "",
-    "tags": "revolution,generic,no_portrait"
+    "tags": "revolution,generic,portrait_placeholder"
   },
   {
     "objId": "revolution.actor.workshop_delegate",
     "objType": "npc",
     "nameText": "character.revolution.actor.workshop_delegate.name",
     "iconPath": "",
-    "portraitPath": "",
-    "portraitIndoorPath": "",
-    "avtarPath": "",
+    "portraitPath": "Characters/silhouettes/male/neutral_placeholder",
+    "portraitIndoorPath": "Characters/silhouettes/male/seated_placeholder",
+    "avtarPath": "Characters/silhouettes/male/avatar_placeholder",
     "descText": "",
-    "tags": "revolution,generic,no_portrait"
+    "tags": "revolution,generic,portrait_placeholder"
   },
   {
     "objId": "revolution.actor.action_leader",
     "objType": "npc",
     "nameText": "character.revolution.actor.action_leader.name",
     "iconPath": "",
-    "portraitPath": "",
-    "portraitIndoorPath": "",
-    "avtarPath": "",
+    "portraitPath": "Characters/silhouettes/male/neutral_placeholder",
+    "portraitIndoorPath": "Characters/silhouettes/male/seated_placeholder",
+    "avtarPath": "Characters/silhouettes/male/avatar_placeholder",
     "descText": "",
-    "tags": "revolution,generic,no_portrait"
+    "tags": "revolution,generic,portrait_placeholder"
   },
   {
     "objId": "revolution.actor.rally_speaker",
     "objType": "npc",
     "nameText": "character.revolution.actor.rally_speaker.name",
     "iconPath": "",
-    "portraitPath": "",
-    "portraitIndoorPath": "",
-    "avtarPath": "",
+    "portraitPath": "Characters/silhouettes/male/neutral_placeholder",
+    "portraitIndoorPath": "Characters/silhouettes/male/seated_placeholder",
+    "avtarPath": "Characters/silhouettes/male/avatar_placeholder",
     "descText": "",
-    "tags": "revolution,generic,no_portrait"
+    "tags": "revolution,generic,portrait_placeholder"
   },
   {
     "objId": "revolution.actor.worker_other",
     "objType": "npc",
     "nameText": "character.revolution.actor.worker_other.name",
     "iconPath": "",
-    "portraitPath": "",
-    "portraitIndoorPath": "",
-    "avtarPath": "",
+    "portraitPath": "Characters/silhouettes/male/neutral_placeholder",
+    "portraitIndoorPath": "Characters/silhouettes/male/seated_placeholder",
+    "avtarPath": "Characters/silhouettes/male/avatar_placeholder",
     "descText": "",
-    "tags": "revolution,generic,no_portrait"
+    "tags": "revolution,generic,portrait_placeholder"
   },
   {
     "objId": "revolution.actor.citizen",
     "objType": "npc",
     "nameText": "character.revolution.actor.citizen.name",
     "iconPath": "",
-    "portraitPath": "",
-    "portraitIndoorPath": "",
-    "avtarPath": "",
+    "portraitPath": "Characters/silhouettes/male/neutral_placeholder",
+    "portraitIndoorPath": "Characters/silhouettes/male/seated_placeholder",
+    "avtarPath": "Characters/silhouettes/male/avatar_placeholder",
     "descText": "",
-    "tags": "revolution,generic,no_portrait"
+    "tags": "revolution,generic,portrait_placeholder"
   },
   {
     "objId": "revolution.actor.rally_staff",
     "objType": "npc",
     "nameText": "character.revolution.actor.rally_staff.name",
     "iconPath": "",
-    "portraitPath": "",
-    "portraitIndoorPath": "",
-    "avtarPath": "",
+    "portraitPath": "Characters/silhouettes/male/neutral_placeholder",
+    "portraitIndoorPath": "Characters/silhouettes/male/seated_placeholder",
+    "avtarPath": "Characters/silhouettes/male/avatar_placeholder",
     "descText": "",
-    "tags": "revolution,generic,no_portrait"
+    "tags": "revolution,generic,portrait_placeholder"
   },
   {
     "objId": "revolution.actor.squad_member",
     "objType": "npc",
     "nameText": "character.revolution.actor.squad_member.name",
     "iconPath": "",
-    "portraitPath": "",
-    "portraitIndoorPath": "",
-    "avtarPath": "",
+    "portraitPath": "Characters/silhouettes/male/neutral_placeholder",
+    "portraitIndoorPath": "Characters/silhouettes/male/seated_placeholder",
+    "avtarPath": "Characters/silhouettes/male/avatar_placeholder",
     "descText": "",
-    "tags": "revolution,generic,no_portrait"
+    "tags": "revolution,generic,portrait_placeholder"
   },
   {
     "objId": "revolution.actor.member",
     "objType": "npc",
     "nameText": "character.revolution.actor.member.name",
     "iconPath": "",
-    "portraitPath": "",
-    "portraitIndoorPath": "",
-    "avtarPath": "",
+    "portraitPath": "Characters/silhouettes/male/neutral_placeholder",
+    "portraitIndoorPath": "Characters/silhouettes/male/seated_placeholder",
+    "avtarPath": "Characters/silhouettes/male/avatar_placeholder",
     "descText": "",
-    "tags": "revolution,generic,no_portrait"
+    "tags": "revolution,generic,portrait_placeholder"
   },
   {
     "objId": "faction",
@@ -862,10 +862,10 @@
     "objType": "npc",
     "nameText": "daily.actor.church_helper.name",
     "iconPath": "",
-    "portraitPath": "",
-    "portraitIndoorPath": "",
-    "avtarPath": "",
+    "portraitPath": "Characters/silhouettes/male/neutral_placeholder",
+    "portraitIndoorPath": "Characters/silhouettes/male/seated_placeholder",
+    "avtarPath": "Characters/silhouettes/male/avatar_placeholder",
     "descText": "",
-    "tags": ""
+    "tags": "portrait_placeholder"
   }
 ]

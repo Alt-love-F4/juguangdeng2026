@@ -36,7 +36,7 @@ namespace Spotlight.GameFlow
         private NarrativeController boundController;
         private NarrativeEndingDefinition selectedEnding;
         public GameSessionState SessionState => session?.CurEnum ?? GameSessionState.Menu;
-        public bool CanSaveCurrentSession => dayFlow == null || dayFlow.CanSave;
+        public bool CanSaveCurrentSession => !NarrativeAutoRunner.IsActive && (dayFlow == null || dayFlow.CanSave);
         private bool gameplay => SessionState == GameSessionState.Playing;
 
         private sealed class SessionPhase : AbstractState<GameSessionState, GameFlowBootstrap>
@@ -249,6 +249,9 @@ namespace Spotlight.GameFlow
 
         private void Update()
         {
+            // The background verifier owns no formal state. Freeze host commands and all periodic
+            // save/flush work until it releases its own lease, including already-open menus.
+            if (NarrativeAutoRunner.IsActive) return;
             Keyboard keyboard = Keyboard.current;
             if (keyboard != null && keyboard.escapeKey.wasPressedThisFrame)
                 HandleEscape();

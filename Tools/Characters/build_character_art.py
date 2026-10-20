@@ -9,6 +9,7 @@ import zipfile
 import xml.etree.ElementTree as ET
 from PIL import Image, ImageDraw, ImageFont, ImageOps
 from openpyxl import load_workbook
+from prepare_authored_silhouettes import appearance, standing as authored_standing, avatar as authored_avatar, seated as authored_seated, build as build_authored_silhouettes
 
 ROOT = Path(__file__).resolve().parents[2]
 OUT = ROOT / 'Assets/Resources/Characters'
@@ -69,11 +70,11 @@ def silhouette(source, size):
  return canvas
 
 def placeholder(cid, name):
- return Image.open(ROOT/'Assets/Resources/Characters/generic/neutral_placeholder.png').convert('RGBA').copy()
+ return authored_standing(appearance(cid))
 
 def avatar(im,cid):
  if cid not in SOURCES:
-  return Image.open(ROOT/'Assets/Resources/Characters/generic/avatar_placeholder.png').convert('RGBA').copy()
+  return authored_avatar(appearance(cid))
  if cid in SOURCES:
   w,h=im.size
   x,y,s=CROPS.get(cid,(0.0,0.0,1.0))
@@ -87,23 +88,10 @@ def avatar(im,cid):
  return bg
 
 def seated(cid,name,av):
- return silhouette('Assets/Art/FreeCafe/Seating/Characters/silhouette_seated.png', (768,1024))
+ return authored_seated(appearance(cid))
 
 def rebuild_placeholders():
- # Preserve formal art, variant art, GUIDs and all existing importer settings.
- manifest = json.loads((ROOT/'Tools/Characters/character-art-manifest.json').read_text(encoding='utf-8'))
- count = 0
- for record in manifest:
-  folder = OUT / record['id']
-  if record['portraitPlaceholder']:
-   im = placeholder(record['id'], record['name'])
-   save_image(im, folder/'neutral.png')
-   save_image(avatar(im,record['id']), folder/'avatar.png')
-   count += 2
-  if record['seatedPlaceholder']:
-   save_image(seated(record['id'],record['name'],None), folder/'seated_placeholder.png')
-   count += 1
- print(f'Rebuilt {count} NPC placeholder images as black silhouettes; formal/variant art and .meta files untouched.')
+ build_authored_silhouettes()
 
 def contact_sources():
  SCRATCH.mkdir(parents=True,exist_ok=True)

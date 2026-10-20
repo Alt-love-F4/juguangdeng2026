@@ -44,6 +44,9 @@ namespace Spotlight.Audio
         private AudioVoiceHandle music;
         private string musicPath;
         private float musicVolume;
+        private bool cafeMusicActive;
+        private string cafeMusicKey;
+        private int? cafeMusicDay;
         private bool disposed;
         public AudioCatalog Catalog => catalog;
         public event Action<string> CuePlayed;
@@ -143,10 +146,43 @@ namespace Spotlight.Audio
             return handle;
         }
 
+        public void SetCafeDayMusic(int day)
+        {
+            if (cafeMusicDay.HasValue && cafeMusicDay.Value != day) cafeMusicKey = null;
+            cafeMusicDay = day;
+            SetMusic(AudioKeys.CafeMusic);
+        }
+
+        private string ChooseCafeMusic()
+        {
+            AudioCue sunshine = catalog != null ? catalog.Find(AudioKeys.CafeSunshineMusic) : null;
+            AudioCue progress = catalog != null ? catalog.Find(AudioKeys.CafeProgressMusic) : null;
+            bool hasSunshine = HasMusicMaterial(sunshine), hasProgress = HasMusicMaterial(progress);
+            if (hasSunshine && hasProgress)
+                return UnityEngine.Random.Range(0, 2) == 0 ? AudioKeys.CafeSunshineMusic : AudioKeys.CafeProgressMusic;
+            if (hasSunshine) return AudioKeys.CafeSunshineMusic;
+            if (hasProgress) return AudioKeys.CafeProgressMusic;
+            // Retain compatibility with small preview/test catalogs that only provide the legacy cue.
+            return AudioKeys.CafeMusic;
+        }
+
+        private static bool HasMusicMaterial(AudioCue cue)
+            => cue != null && cue.enabled && (cue.clip != null || !string.IsNullOrWhiteSpace(cue.resourcePath));
+
         public void SetMusic(string key, object owner = null, float volume = 1f, float fadeIn = -1f, float fadeOut = -1f, bool resource = false)
         {
             if (disposed) return;
             MusicRequest request = baseline;
+            if (owner == null)
+            {
+                bool cafe = key == AudioKeys.CafeMusic;
+                if (cafe)
+                {
+                    if (!cafeMusicActive || cafeMusicKey == null) cafeMusicKey = ChooseCafeMusic();
+                    key = cafeMusicKey;
+                }
+                cafeMusicActive = cafe;
+            }
             if (owner != null)
             {
                 request = musicRequests.Find(item => ReferenceEquals(item.owner, owner));

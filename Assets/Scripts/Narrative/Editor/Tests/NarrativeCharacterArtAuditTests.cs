@@ -90,9 +90,10 @@ namespace Spotlight.Narrative.Editor.Tests
             var emmanuel = characters.Single(c => c.Id == "emmanuel");
             Assert.That(sorel, Is.Not.SameAs(emmanuel));
             Assert.That(sorel.ObjectExists, Is.True);
-            Assert.That(sorel.Portrait.Path, Is.Empty);
-            Assert.That(sorel.Portrait.Available, Is.False);
-            Assert.That(sorel.Portrait.Error, Is.Not.Null.And.Not.Empty);
+            Assert.That(sorel.Portrait.Path, Is.EqualTo("Characters/silhouettes/male/neutral_placeholder"));
+            Assert.That(sorel.Portrait.Available, Is.True);
+            Assert.That(sorel.Portrait.Placeholder, Is.True);
+            Assert.That(sorel.Portrait.Error, Is.Null.Or.Empty);
             Assert.That(sorel.OnstageConversationLines, Is.GreaterThan(0), "The shared placeholder covers this onstage identity until authored art is available.");
             Assert.That(emmanuel.Portrait.Available, Is.True);
             Assert.That(emmanuel.Portrait.Path, Is.EqualTo("Characters/emmanuel/neutral"));
@@ -107,9 +108,10 @@ namespace Spotlight.Narrative.Editor.Tests
             var duke = characters.Single(c => c.Id == "church.duke");
             var elion = characters.Single(c => c.Id == "elion");
             Assert.That(duke.ObjectExists, Is.True);
-            Assert.That(duke.Portrait.Available, Is.False);
-            Assert.That(duke.Portrait.Path, Is.Empty);
-            Assert.That(duke.Portrait.Error, Is.Not.Null.And.Not.Empty);
+            Assert.That(duke.Portrait.Available, Is.True);
+            Assert.That(duke.Portrait.Placeholder, Is.True);
+            Assert.That(duke.Portrait.Path, Is.EqualTo("Characters/silhouettes/male/neutral_placeholder"));
+            Assert.That(duke.Portrait.Error, Is.Null.Or.Empty);
             Assert.That(duke.OnstageConversationLines, Is.Zero);
             Assert.That(elion.Portrait.Available, Is.True);
             Assert.That(elion.OnstageConversationLines, Is.GreaterThan(0));
@@ -256,15 +258,16 @@ namespace Spotlight.Narrative.Editor.Tests
             Assert.That(sorel.ObjectExists, Is.True);
             Assert.That(sorel.NoPortrait, Is.False);
             Assert.That(sorel.CanAppearOnstage, Is.True);
-            Assert.That(sorel.Portrait.Available, Is.False);
-            Assert.That(audit.MissingOnstageNpcPortraitIds(), Does.Contain("sorel"));
+            Assert.That(sorel.Portrait.Available, Is.True);
+            Assert.That(sorel.Portrait.Placeholder, Is.True);
+            Assert.That(audit.MissingOnstageNpcPortraitIds(), Is.Empty);
 
             var genericWorker = audit.Inspect("revolution.actor.young_worker");
             Assert.That(genericWorker.NoPortrait, Is.False);
             Assert.That(genericWorker.CanAppearOnstage, Is.True);
             Assert.That(genericWorker.Portrait.Available, Is.True);
             Assert.That(genericWorker.Portrait.Placeholder, Is.True);
-            Assert.That(genericWorker.Indoor.Path, Is.EqualTo("Characters/generic/seated_placeholder"));
+            Assert.That(genericWorker.Indoor.Path, Is.EqualTo("Characters/silhouettes/male/seated_placeholder"));
             Assert.That(genericWorker.Indoor.Available, Is.True);
             Assert.That(audit.MissingOnstageNpcPortraitIds(), Does.Not.Contain(genericWorker.Id));
             Assert.That(NarrativeCharacterArtAudit.Summary(new[] { genericWorker }), Is.EqualTo("基础占位已配置"));

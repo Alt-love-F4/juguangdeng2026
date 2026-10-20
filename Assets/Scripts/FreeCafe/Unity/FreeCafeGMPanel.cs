@@ -86,6 +86,7 @@ namespace Spotlight.FreeCafe
             BuildShell();
             SetVisible(false);
             gameObject.AddComponent<Spotlight.GameFlow.NarrativeDebugGM>();
+            gameObject.AddComponent<NarrativeAutoGM>();
             UnityEngine.SceneManagement.SceneManager.sceneLoaded += OnSceneLoaded;
             UnityEngine.SceneManagement.SceneManager.sceneUnloaded += OnSceneUnloaded;
         }

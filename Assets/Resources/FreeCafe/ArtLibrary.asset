@@ -421,7 +421,11 @@ MonoBehaviour:
     whitebox: {fileID: 21300000, guid: f6aa383aa4c9d794286634a09a94068f, type: 3}
     variants:
     - state: default
-      sprite: {fileID: 21300000, guid: 5c446d0a76339f2438b7b25565db54ce, type: 3}
+      sprite: {fileID: 21300000, guid: 971855bececa33c4e9791c6f6a74efed, type: 3}
+    - state: closed
+      sprite: {fileID: 21300000, guid: 971855bececa33c4e9791c6f6a74efed, type: 3}
+    - state: open
+      sprite: {fileID: 21300000, guid: 06e464c231a887042bb52aacedbc8c3d, type: 3}
   - brief:
       id: machine.grinder
       label: "\u7814\u78E8\u5668"
@@ -1101,10 +1105,10 @@ MonoBehaviour:
       id: waste.pail
       label: "\u5E9F\u5F03\u6876"
       category: entity
-      pivot:
+      pivot: 
       outputFolder: Assets/Art/FreeCafe/Entities/waste.pail
-      prompt:
-      negativePrompt:
+      prompt: 
+      negativePrompt: 
       width: 0
       height: 0
       transparent: 1
@@ -1120,10 +1124,10 @@ MonoBehaviour:
       id: container.water
       label: "\u6E05\u6C34\u58F6"
       category: entity
-      pivot:
+      pivot: 
       outputFolder: Assets/Art/FreeCafe/Entities/container.water
-      prompt:
-      negativePrompt:
+      prompt: 
+      negativePrompt: 
       width: 0
       height: 0
       transparent: 1

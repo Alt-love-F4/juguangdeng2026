@@ -134,10 +134,21 @@ namespace Spotlight.FreeCafe
             if (entity.specId != "customer") return null;
             if (entity.person == null) return visitSprite != null ? visitSprite : silhouetteCustomer;
             if (entity.person.personId == AcceptancePersonId || entity.person.visualId == "supplied.seated.guest") return suppliedCustomer;
-            if (IsOrdinaryRandomGuest(entity.person)) return silhouetteCustomer;
+            if (IsOrdinaryRandomGuest(entity.person)) return CatalogSilhouette(entity.person);
             foreach (var entry in characterArt)
                 if (entry != null && entry.characterId == entity.person.characterId && entry.sprite != null) return entry.sprite;
-            return visitSprite != null ? visitSprite : silhouetteCustomer;
+            return visitSprite != null ? visitSprite : CatalogSilhouette(entity.person);
+        }
+
+        private Sprite CatalogSilhouette(CafePersonIdentity person)
+        {
+            // The tutorial guest has no Object ID; her identity is explicitly female in the source.
+            if (person != null && person.personId == "tutorial_customer")
+                return Resources.Load<Sprite>("Characters/silhouettes/female/seated_placeholder") ?? silhouetteCustomer;
+            var character = person != null && runtime != null ? runtime.Character(person.characterId) : null;
+            // Object indoor art carries the chosen source appearance; do not infer sex from display names.
+            return character != null && character.worldSprite != character.portrait && character.worldSprite != null
+                ? character.worldSprite : silhouetteCustomer;
         }
 
         private static bool IsOrdinaryRandomGuest(CafePersonIdentity person)
@@ -177,6 +188,7 @@ namespace Spotlight.FreeCafe
                 mirrored = chair.flipX != (chair.transform.lossyScale.x < 0);
             }
             bool seatedArtwork = sprite == suppliedCustomer || sprite == silhouetteCustomer
+                || (entity.person != null && sprite == CatalogSilhouette(entity.person))
                 || Array.Exists(characterArt, entry => entry != null && entry.sprite == sprite);
             float fit = seatedArtwork
                 ? 1f : 5.68f / Mathf.Max(.01f, sprite.bounds.size.y);

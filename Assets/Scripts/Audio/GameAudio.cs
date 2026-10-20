@@ -29,6 +29,8 @@ namespace Spotlight.Audio
         public static void SetLoop(object owner, string slot, string key, bool active, float volume = 1f, float pitch = 1f)
             => Service?.SetLoop(owner, slot, key, active, volume, pitch);
         public static void Music(string key) => Service?.SetMusic(key);
+        /// <summary>Daily cafe baseline: choose once on entry or a new business day, beneath owned overrides.</summary>
+        public static void CafeDayMusic(int day) => Service?.SetCafeDayMusic(day);
         public static void OverrideMusic(object owner, string key, float volume = 1f, float fadeIn = -1f, float fadeOut = -1f)
             => Service?.SetMusic(key, owner, volume, fadeIn, fadeOut, true);
         public static void StopOwner(object owner) => Service?.StopOwner(owner);

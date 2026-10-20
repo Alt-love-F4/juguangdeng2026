@@ -41,6 +41,7 @@ namespace Spotlight.FreeCafe
         public bool IsDragging => draggedView!=null;
         public FreeEntityView DraggedView => draggedView;
         public bool IsDraggingOutputFrom(string entityId) => draggedView != null && dragMachineId == entityId;
+        public bool IsTakingFromSource(string entityId) => draggedView != null && dragSourceId == entityId;
         public FreeCafeWorkstationTutorial WorkstationTutorial { get; private set; }
         public FreeCafeMilkPitcherTutorial MilkPitcherTutorial { get; private set; }
         private FreeCafeEquipmentTutorialPrompt equipmentTutorialPrompt;
