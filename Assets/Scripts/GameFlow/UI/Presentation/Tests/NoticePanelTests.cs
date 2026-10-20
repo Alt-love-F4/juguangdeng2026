@@ -62,7 +62,7 @@ namespace Spotlight.GameFlow.Tests
         }
 
         [UnityTest]
-        public IEnumerator LongCopyPaginatesAndConfirmationButtonIsRaycastable()
+        public IEnumerator LongCopyScrollsAndReopeningResetsToTop()
         {
             string body = string.Empty;
             for (int i = 0; i < 35; i++) body += "沸点咖啡馆今日开门营业，欢迎来喝一杯拿铁。\n";
@@ -70,20 +70,28 @@ namespace Spotlight.GameFlow.Tests
             Open().Play(new NoticeData(body, "长新闻", hasProgress: true, progressValue: .62f), () => finished++);
             yield return new WaitForSecondsRealtime(.4f);
             var content = panel.transform.Find("NewspaperLayout/DynamicContent");
-            TMP_Text text = content.Find("Body").GetComponent<TMP_Text>();
-            Assert.That(text.textInfo.pageCount, Is.GreaterThan(1));
-            Assert.That(content.Find("ArticleSurface").GetSiblingIndex(), Is.LessThan(text.transform.GetSiblingIndex()));
+            var scroll = content.Find("ArticleSurface").GetComponent<ScrollRect>();
+            TMP_Text text = scroll.content.GetComponent<TMP_Text>();
+            Assert.That(text.text, Is.EqualTo(body));
+            Assert.That(content.Find("Title").GetComponent<TMP_Text>().text, Is.EqualTo("长新闻"));
+            Assert.That(text.overflowMode, Is.EqualTo(TextOverflowModes.Overflow));
+            Assert.That(scroll.content.rect.height, Is.GreaterThan(scroll.viewport.rect.height));
+            Assert.That(scroll.verticalNormalizedPosition, Is.EqualTo(1f).Within(.01f));
+            Assert.That(scroll.viewport.GetComponent<RectMask2D>(), Is.Not.Null);
+            foreach (var image in panel.transform.Find("NewspaperLayout/NewspaperArtwork").GetComponentsInChildren<Image>(true))
+                if (image.name.StartsWith("都来喝拿铁")) Assert.That(image.gameObject.activeSelf, Is.False);
             Assert.That(content.Find("DateSurface").GetSiblingIndex(), Is.LessThan(content.Find("Time").GetSiblingIndex()));
             var confirm = content.Find("Confirm").GetComponent<Button>();
             Assert.That(confirm.interactable, Is.True);
             Assert.That(confirm.GetComponent<Image>().raycastTarget, Is.True);
             Assert.That(content.Find("ProgressBar").GetComponent<Slider>().fillRect, Is.Not.Null);
-            panel.Confirm();
-            Assert.That(text.pageToDisplay, Is.EqualTo(2));
-            Assert.That(finished, Is.Zero);
-            Assert.That(panel.IsPlaying, Is.True);
-            for (int i = 2; i < text.textInfo.pageCount; i++) { yield return null; panel.Confirm(); }
+            scroll.verticalNormalizedPosition = 0f;
             yield return null;
+            Assert.That(scroll.content.anchoredPosition.y, Is.GreaterThan(0f));
+            panel.Cancel();
+            Open().Play(new NoticeData(body, "再次阅读"), () => finished++);
+            yield return new WaitForSecondsRealtime(.4f);
+            Assert.That(scroll.verticalNormalizedPosition, Is.EqualTo(1f).Within(.01f));
             panel.Confirm();
             yield return new WaitForSecondsRealtime(.25f);
             Assert.That(finished, Is.EqualTo(1));

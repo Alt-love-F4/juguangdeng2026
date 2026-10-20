@@ -29,6 +29,25 @@ namespace Spotlight.Narrative.Tests
         }
 
         [Test]
+        public void PendingDateEventsListsOnlyTodaysStartablePhaseEventsWithoutQueueing()
+        {
+            var config = new NarrativeConfiguration();
+            config.bars.Add(new NarrativeBarDefinition { barKey = "world.calendar", min = 1, max = 9999, initValue = 1, advanceMode = NarrativeAdvanceMode.Monotonic });
+            config.conditionKeys.Add(new NarrativeConditionKeyDefinition { key = "gate" });
+            config.events.Add(new NarrativeEventDefinition { eventId = "noon", entry = NarrativeEntryPoint.AfterBusiness });
+            config.events.Add(new NarrativeEventDefinition { eventId = "gated", entry = NarrativeEntryPoint.AfterBusiness });
+            config.events.Add(new NarrativeEventDefinition { eventId = "later", entry = NarrativeEntryPoint.AfterBusiness });
+            config.conditions.Add(new NarrativeConditionDefinition { conditionId = "g", ownerType = "event", ownerId = "gated", condType = "BOOL_EQ", target = "gate", value = "true" });
+            config.eventDates.Add(new NarrativeEventDateDefinition { eventId = "noon", day = 1, timeSlot = NarrativeTimeSlot.Noon, repeatRule = NarrativeRepeatRule.Once });
+            config.eventDates.Add(new NarrativeEventDateDefinition { eventId = "gated", day = 1, timeSlot = NarrativeTimeSlot.Noon, repeatRule = NarrativeRepeatRule.Once });
+            config.eventDates.Add(new NarrativeEventDateDefinition { eventId = "later", day = 2, timeSlot = NarrativeTimeSlot.Noon, repeatRule = NarrativeRepeatRule.Once });
+            var narrative = new NarrativeController(config, new Presenter());
+            Assert.That(narrative.PendingDateEvents(NarrativeEntryPoint.AfterBusiness), Is.EqualTo(new[] { "noon" }));
+            Assert.That(narrative.PendingDateEvents(NarrativeEntryPoint.BeforeNight), Is.Empty);
+            Assert.That(narrative.IsBusy, Is.False, "The query must not queue the events.");
+        }
+
+        [Test]
         public void PageGatedOnSkippedCheckIsHiddenInsteadOfAbortingTheRoot()
         {
             var config = new NarrativeConfiguration();

@@ -1483,6 +1483,10 @@ namespace Spotlight.GameFlow
                 UIKit.PushPanel(panel, MainStack, hidePrevious);
         }
 
+        /// <summary>Gameplay prompt using the existing confirmation dialog (e.g. resting would skip today's story).</summary>
+        public void ShowGameplayConfirmation(string title, string message, string accept, Action accepted, string cancel, Action cancelled)
+            => ShowConfirmation(title, message, accept, accepted, cancel, cancelled);
+
         private void ShowConfirmation(string title, string message, string accept, Action accepted, string cancel, Action cancelled)
         {
             var data = new ConfirmationPanelData(this, title, message, accept, accepted, cancel, cancelled);

@@ -45,6 +45,28 @@ namespace Spotlight.Narrative
             return true;
         }
 
+        /// <summary>
+        /// Read-only: dated events of today's <paramref name="entry"/> phase that would start now (not yet
+        /// played, conditions met). Lets the day flow warn before a phase is skipped; never queues anything.
+        /// </summary>
+        public List<string> PendingDateEvents(NarrativeEntryPoint entry)
+        {
+            var result = new List<string>();
+            if (IsEnded || entry == NarrativeEntryPoint.MapAction || entry == NarrativeEntryPoint.Immediate
+                || !state.TryGetBar("world.calendar", out int day)) return result;
+            foreach (NarrativeEventDateDefinition date in configuration.eventDates)
+            {
+                if (date == null || DateEntry(date.timeSlot) != entry || !DateMatches(date, day)) continue;
+                if (date.repeatRule == NarrativeRepeatRule.Once && state.IsFlagSet("date.once." + date.eventId + "." + date.day + "." + date.timeSlot)) continue;
+                if (!events.TryGetValue(date.eventId ?? string.Empty, out NarrativeEventDefinition definition)) continue;
+                bool startable;
+                try { startable = EventCanStart(definition); }
+                catch (InvalidOperationException) { startable = false; } // a broken row must not block the bed
+                if (startable && !result.Contains(date.eventId)) result.Add(date.eventId);
+            }
+            return result;
+        }
+
         public bool QueueMapActionEvent(string eventId) => QueueManualEvent(eventId, true);
         public NarrativeEventDiagnostic ExplainMapActionEvent(string eventId) => ExplainMapActionEvent(eventId, ignoreTransientBusy: false);
         internal NarrativeEventDiagnostic ExplainMapActionEvent(string eventId, bool ignoreTransientBusy)

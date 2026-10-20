@@ -88,7 +88,7 @@ namespace Spotlight.GameFlow.Editor
                         image.transform.SetSiblingIndex(order++);
                         image.gameObject.SetActive(sr.gameObject.activeSelf && sr.enabled);
                         // These source layers are design overlays, not runtime content.
-                        if (sr.name == "图层 2" || sr.name.StartsWith("开始一天") || sr.name.Contains("字色"))
+                        if (sr.name == "图层 2" || sr.name.StartsWith("开始一天") || sr.name.StartsWith("都来喝拿铁"))
                             image.gameObject.SetActive(false);
                         if (sr.name == "图层 1 副本 2") { image.sprite = null; image.color = Paper; }
                     }
@@ -112,8 +112,10 @@ namespace Spotlight.GameFlow.Editor
                     articleSurface.raycastTarget = false;
                     Position(articleSurface.rectTransform, new Vector2(995, 249), new Vector2(430, 204));
                     articleSurface.transform.SetAsFirstSibling();
+                    var existingBody = content.Find("ArticleSurface/Viewport/Body");
+                    if (existingBody != null) existingBody.SetParent(content, false);
                     TMP_Text body = MakeText(content, "Body", "", new Vector2(995, 249), new Vector2(410, 184), font, 30, TextAlignmentOptions.TopLeft);
-                    body.overflowMode = TextOverflowModes.Page;
+                    body.overflowMode = TextOverflowModes.Overflow;
                     body.lineSpacing = 6f;
                     TMP_Text progressLabel = MakeText(content, "ProgressLabel", "", new Vector2(995, 128), new Vector2(410, 32), font, 22, TextAlignmentOptions.Left);
                     TMP_Text hint = MakeText(content, "Hint", "空格 / 回车：继续   Esc：关闭", new Vector2(995, 60), new Vector2(430, 28), font, 20, TextAlignmentOptions.Left);
@@ -167,6 +169,7 @@ namespace Spotlight.GameFlow.Editor
                     root.GetComponent<CanvasGroup>().alpha = 0f;
                     root.GetComponent<CanvasGroup>().blocksRaycasts = false;
                     root.GetComponent<CanvasGroup>().interactable = false;
+                    ConfigureScrollableArticle(root);
                     PrefabUtility.SaveAsPrefabAsset(root, PrefabPath);
                     Debug.Log("[GameFlow] Rebuilt NoticePanel as newspaper UGUI/TMP layout.");
                 }
@@ -179,6 +182,54 @@ namespace Spotlight.GameFlow.Editor
             finally { PrefabUtility.UnloadPrefabContents(reference); }
             AssetDatabase.SaveAssets();
             AssetDatabase.Refresh();
+        }
+
+        // Update the existing prefab without regenerating unrelated artwork or fonts.
+        public static void ConfigureScrollableArticle(GameObject root)
+        {
+            var layout = root.transform.Find("NewspaperLayout");
+            var content = layout.Find("DynamicContent");
+            foreach (var image in layout.Find("NewspaperArtwork").GetComponentsInChildren<Image>(true))
+                if (image.name.StartsWith("都来喝拿铁")) image.gameObject.SetActive(false);
+
+            var surface = (RectTransform)content.Find("ArticleSurface");
+            Position(surface, new Vector2(995, 417), new Vector2(430, 540));
+            surface.SetAsLastSibling();
+            surface.GetComponent<Image>().raycastTarget = true;
+            var scroll = surface.GetComponent<ScrollRect>() ?? surface.gameObject.AddComponent<ScrollRect>();
+            var viewport = (RectTransform)Child(surface, "Viewport");
+            Stretch(viewport);
+            viewport.offsetMin = new Vector2(10, 10);
+            viewport.offsetMax = new Vector2(-10, -10);
+            if (viewport.GetComponent<RectMask2D>() == null) viewport.gameObject.AddComponent<RectMask2D>();
+            var body = content.Find("Body") ?? viewport.Find("Body");
+            body.SetParent(viewport, false);
+            var rect = (RectTransform)body;
+            rect.anchorMin = new Vector2(0, 1);
+            rect.anchorMax = Vector2.one;
+            rect.pivot = new Vector2(.5f, 1);
+            rect.anchoredPosition = Vector2.zero;
+            rect.sizeDelta = Vector2.zero;
+            var text = body.GetComponent<TMP_Text>();
+            text.overflowMode = TextOverflowModes.Overflow;
+            text.raycastTarget = true;
+            var fitter = body.GetComponent<ContentSizeFitter>() ?? body.gameObject.AddComponent<ContentSizeFitter>();
+            fitter.horizontalFit = ContentSizeFitter.FitMode.Unconstrained;
+            fitter.verticalFit = ContentSizeFitter.FitMode.PreferredSize;
+            scroll.viewport = viewport;
+            scroll.content = rect;
+            scroll.horizontal = false;
+            scroll.vertical = true;
+            scroll.movementType = ScrollRect.MovementType.Clamped;
+            scroll.scrollSensitivity = 35f;
+            var hint = content.Find("Hint").GetComponent<TMP_Text>();
+            hint.text = "滚轮 / 拖动：阅读   空格 / 回车：继续   Esc：关闭";
+            hint.enableAutoSizing = true;
+            hint.fontSizeMin = 14;
+            hint.fontSizeMax = 20;
+            var serialized = new SerializedObject(root.GetComponent<NoticePanel>());
+            Set(serialized, "bodyScroll", scroll);
+            serialized.ApplyModifiedPropertiesWithoutUndo();
         }
 
         private static TMP_FontAsset EnsureFont()

@@ -124,6 +124,67 @@ namespace Spotlight.FreeCafe.Tests
         }
 
         [UnityTest]
+        public IEnumerator ClosedBusinessMapHintsTodoOncePerDayAndStopsWhenTasksOpen()
+        {
+            var current = typeof(PlayerCafeOwner).GetProperty(nameof(PlayerCafeOwner.Current));
+            var previousWorld = PlayerCafeOwner.Current;
+            var world = new CafeWorld(JsonUtility.FromJson<CafeCatalog>(Resources.Load<TextAsset>("FreeCafe/catalog").text));
+            current.GetSetMethod(true).Invoke(null, new object[] { world });
+            try
+            {
+                SetDayField("day", 2);
+                runtime.Actions.RefreshForDay(2);
+                world.State.day = 2;
+                world.State.open = true;
+                var nextCheck = typeof(MapUsageTutorial).GetField("nextCheck", BindingFlags.Instance | BindingFlags.NonPublic);
+                nextCheck.SetValue(tutorial, 0f);
+                yield return null;
+                Assert.That(tutorial.IsRunning, Is.False, "Browsing the map while open must not claim business has closed.");
+                world.State.open = false;
+                world.State.businessPhase = BusinessPhase.Night;
+                nextCheck.SetValue(tutorial, 0f);
+                yield return null;
+                Assert.That(tutorial.IsRunning, Is.True);
+                Assert.That(tutorial.CurrentStage, Is.EqualTo(MapUsageTutorial.Stage.TodoGuidance));
+                FreeCafeTutorialPanel panel = null;
+                foreach (var candidate in Object.FindObjectsByType<FreeCafeTutorialPanel>(FindObjectsSortMode.None))
+                    if (candidate.name == "MapTodoGuidancePanel") panel = candidate;
+                Assert.That(panel, Is.Not.Null);
+                StringAssert.Contains("不知道接下来做什么", panel.instruction.text);
+                StringAssert.Contains("待办事项", panel.gestureText.text);
+                StringAssert.Contains("T", panel.gestureText.text);
+                Assert.That(panel.shade.enabled, Is.False);
+                Assert.That(controller.IsLocationPopupVisible, Is.False);
+                var before = new ResourceSnapshot(runtime, days);
+                GameplayHudPanel.Instance.ToggleTasks();
+                yield return null;
+                Assert.That(GameplayHudPanel.Instance.Tasks.IsVisible, Is.True);
+                Assert.That(tutorial.IsRunning, Is.False, "Opening the real task list acknowledges the hint.");
+                GameplayHudPanel.Instance.CloseSidebars();
+                nextCheck.SetValue(tutorial, 0f);
+                yield return null;
+                Assert.That(tutorial.IsRunning, Is.False, "Do not repeat the hint on the same business day.");
+                before.AssertUnchanged(runtime, days);
+                world.State.day = 3;
+                SetDayField("day", 3);
+                runtime.Actions.RefreshForDay(3);
+                nextCheck.SetValue(tutorial, 0f);
+                yield return null;
+                Assert.That(tutorial.CurrentStage, Is.EqualTo(MapUsageTutorial.Stage.TodoGuidance));
+                Assert.That(tutorial.IsRunning, Is.True, "A later closed business day can remind the player again.");
+                tutorial.Advance();
+                Assert.That(tutorial.IsRunning, Is.False, "The player can dismiss without opening tasks.");
+                Assert.That(started, Is.Zero);
+                Assert.That(settled, Is.Zero);
+            }
+            finally
+            {
+                tutorial.Stop();
+                current.GetSetMethod(true).Invoke(null, new object[] { previousWorld });
+            }
+        }
+
+        [UnityTest]
         public IEnumerator CafeReplayLeavesCompletionRecordUnchangedAndFirstDayMarketStaysLocked()
         {
             var before = new ResourceSnapshot(runtime, days);

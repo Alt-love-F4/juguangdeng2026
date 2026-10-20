@@ -1394,6 +1394,8 @@ namespace Spotlight.FreeCafe
             if (World.State.open) RequestBusinessEnd();
             else RequestBusinessStart();
         }
+        /// <summary>Explain a refused click (bed, HUD buttons) with the same message as other cafe input.</summary>
+        public void ReportBlockedOperation() => NotifyBlockedOperation();
         private void NotifyBlockedOperation()
         {
             string message = CafeTutorialActive || PracticeTutorialActive

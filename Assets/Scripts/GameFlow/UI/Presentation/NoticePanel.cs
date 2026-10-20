@@ -28,8 +28,8 @@ namespace Spotlight.GameFlow
         [SerializeField] private RectTransform articleSurface;
         [SerializeField] private TMP_Text confirmLabel;
 
-        private int textPage;
-        private int textPageCount;
+        [SerializeField] private ScrollRect bodyScroll;
+
         private Vector2 layoutSize;
 
         private DG.Tweening.Sequence transition;
@@ -122,10 +122,8 @@ namespace Spotlight.GameFlow
             }
             if (bodyText != null)
             {
-                // Newspaper artwork supplies a default illustration. Copy stays in its own column.
+                bodyText.overflowMode = TextOverflowModes.Overflow;
                 bodyText.text = value.Body;
-                bodyText.overflowMode = TextOverflowModes.Page;
-                bodyText.pageToDisplay = 1;
                 bodyText.maxVisibleCharacters = int.MaxValue;
                 bodyText.gameObject.SetActive(!string.IsNullOrWhiteSpace(value.Body));
             }
@@ -141,13 +139,24 @@ namespace Spotlight.GameFlow
                 progressLabel.text = value.ProgressLabel;
                 progressLabel.gameObject.SetActive(value.HasProgress && !string.IsNullOrEmpty(value.ProgressLabel));
             }
-            if (articleSurface != null) articleSurface.gameObject.SetActive(!string.IsNullOrWhiteSpace(value.Body));
+            if (articleSurface != null)
+            {
+                articleSurface.gameObject.SetActive(!string.IsNullOrWhiteSpace(value.Body));
+                // Without a supplied photograph the article uses the whole space below the headline.
+                articleSurface.anchoredPosition = new Vector2(35f, value.Image != null ? -291f : -123f);
+                articleSurface.sizeDelta = new Vector2(430f, value.Image != null ? 204f : 540f);
+            }
             Canvas.ForceUpdateCanvases();
             FitLayout();
             if (bodyText != null && bodyText.gameObject.activeInHierarchy) bodyText.ForceMeshUpdate();
-            textPage = 1;
-            textPageCount = bodyText != null && bodyText.gameObject.activeInHierarchy ? Mathf.Max(1, bodyText.textInfo.pageCount) : 1;
-            UpdatePageHint();
+            if (bodyScroll != null)
+            {
+                if (bodyScroll.content != null) LayoutRebuilder.ForceRebuildLayoutImmediate(bodyScroll.content);
+                bodyScroll.StopMovement();
+                bodyScroll.verticalNormalizedPosition = 1f;
+            }
+            if (hintText != null) hintText.text = "滚轮 / 拖动：阅读   空格 / 回车：继续   Esc：关闭";
+            if (confirmLabel != null) confirmLabel.text = "开始一天";
             canvasGroup.alpha = 0f;
             canvasGroup.blocksRaycasts = canvasGroup.interactable = true;
             if (confirmButton != null) confirmButton.interactable = false;
@@ -167,12 +176,6 @@ namespace Spotlight.GameFlow
         {
             if (!IsPlaying || !ready || exiting || DialoguePanel.IsExternalInputBlocked || lastConfirmFrame == Time.frameCount) return;
             lastConfirmFrame = Time.frameCount;
-            if (textPage < textPageCount)
-            {
-                bodyText.pageToDisplay = ++textPage;
-                UpdatePageHint();
-                return;
-            }
             exiting = true;
             if (confirmButton != null) confirmButton.interactable = false;
             transition?.Kill(false);
@@ -206,12 +209,6 @@ namespace Spotlight.GameFlow
                 canvasGroup.blocksRaycasts = canvasGroup.interactable = false;
             }
             stopped?.Invoke();
-        }
-
-        private void UpdatePageHint()
-        {
-            if (hintText != null) hintText.text = (textPageCount > 1 ? $"{textPage} / {textPageCount}  ·  " : string.Empty) + "空格 / 回车：继续   Esc：关闭";
-            if (confirmLabel != null) confirmLabel.text = textPage < textPageCount ? "继续阅读" : "开始一天";
         }
 
         private void Update()

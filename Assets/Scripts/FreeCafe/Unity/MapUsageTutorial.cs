@@ -11,7 +11,7 @@ namespace Spotlight.FreeCafe
     /// <summary>A read-only tour of the real map controls. Never executes an action for the player.</summary>
     public sealed class MapUsageTutorial : MonoBehaviour
     {
-        public enum Stage { Overview, SelectLocation, ReadLocation, Finish }
+        public enum Stage { Overview, SelectLocation, ReadLocation, Finish, TodoGuidance }
         public Stage CurrentStage { get; private set; }
         public bool IsRunning => panel != null;
         private MapSceneController map;
@@ -19,6 +19,19 @@ namespace Spotlight.FreeCafe
         private DayFlowController days;
         private bool recordCompletion, selectedPopup, autoDismissed, cafeArrival;
         private float nextCheck;
+        private CafeWorld todoHintWorld;
+        private int todoHintDay = -1;
+
+        private bool ShouldShowTodoHint
+        {
+            get
+            {
+                var world = PlayerCafeOwner.Current;
+                return world != null && !world.State.open && world.State.businessPhase == BusinessPhase.Night
+                    && (todoHintWorld != world || todoHintDay != world.State.day)
+                    && days != null && !days.IsFirstSessionGuideActive && !map.IsCafeArrivalGuide;
+            }
+        }
 
         [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.SubsystemRegistration)]
         private static void ResetStatics() => SceneManager.sceneLoaded -= SceneLoaded;
@@ -64,6 +77,17 @@ namespace Spotlight.FreeCafe
             return true;
         }
 
+        private bool BeginTodoGuidance()
+        {
+            if (!Begin(map)) return false;
+            CurrentStage = Stage.TodoGuidance;
+            todoHintWorld = PlayerCafeOwner.Current;
+            todoHintDay = todoHintWorld.State.day;
+            panel.name = "MapTodoGuidancePanel";
+            Draw();
+            return true;
+        }
+
         public void Stop()
         {
             if (map != null) map.LocationSelected -= LocationSelected;
@@ -83,6 +107,9 @@ namespace Spotlight.FreeCafe
             {
                 case Stage.Overview: CurrentStage = Stage.SelectLocation; break;
                 case Stage.ReadLocation: CurrentStage = Stage.Finish; break;
+                case Stage.TodoGuidance:
+                    Stop();
+                    return;
                 case Stage.Finish:
                     if (recordCompletion && days != null) days.CompleteMapUsageTutorial();
                     Stop();
@@ -109,11 +136,17 @@ namespace Spotlight.FreeCafe
         {
             if (!IsRunning)
             {
-                if (autoDismissed || Time.unscaledTime < nextCheck) return;
+                if (Time.unscaledTime < nextCheck) return;
                 nextCheck = Time.unscaledTime + .5f;
                 map = GetComponent<MapSceneController>();
                 days = FindFirstObjectByType<DayFlowController>();
-                if (days != null && days.ShouldShowMapUsageTutorial && CanShow) Begin(map, true);
+                if (CanShow && ShouldShowTodoHint && BeginTodoGuidance()) return;
+                if (!autoDismissed && days != null && days.ShouldShowMapUsageTutorial && CanShow) Begin(map, true);
+                return;
+            }
+            if (CurrentStage == Stage.TodoGuidance && GameplayHudPanel.Instance?.Tasks?.IsVisible == true)
+            {
+                Stop();
                 return;
             }
             panel.canvas.gameObject.SetActive(CanShow);
@@ -125,6 +158,11 @@ namespace Spotlight.FreeCafe
             string description, hint, button;
             switch (CurrentStage)
             {
+                case Stage.TodoGuidance:
+                    description = "今天已经打烊，可以在地图上安排接下来的事务。\n如果不知道接下来做什么，用鼠标左键点击上方「待办事项」，或按下 T，查看当前可以进行的事务。";
+                    hint = "不知道接下来做什么？\n左键点击上方「待办事项」\n或按 T 查看可进行的事务";
+                    button = "知道了";
+                    break;
                 case Stage.Overview:
                     description = cafeArrival
                         ? "欢迎来到城市地图！先了解如何移动地图和查看地点。\n在地图空白处按住鼠标左键拖动；滚动鼠标滚轮缩放，也可以拖动缩放条。目前先前往咖啡馆，完成新手教程。"
@@ -183,9 +221,11 @@ namespace Spotlight.FreeCafe
                 }
             }
 
-            panel.heading.text = "城市地图 · 使用教程";
+            panel.heading.text = CurrentStage == Stage.TodoGuidance ? "打烊后 · 下一步指引" : "城市地图 · 使用教程";
             panel.instruction.text = description;
-            panel.errorText.text = "教程只介绍操作，不自动执行行动、不扣资源、不推进日期";
+            panel.errorText.text = CurrentStage == Stage.TodoGuidance
+                ? "按 T 或点击待办查看事务 · 此提示可随时关闭，不消耗资源、不推进日期"
+                : "教程只介绍操作，不自动执行行动、不扣资源、不推进日期";
             panel.gestureText.text = hint;
             panel.SetMouseMode(false, false);
             panel.gesture.gameObject.SetActive(!MobileTouchInput.IsAndroidPlayer);
@@ -200,12 +240,12 @@ namespace Spotlight.FreeCafe
             badge.x = Mathf.Clamp(badge.x, half.x * scale, Mathf.Max(half.x * scale, Screen.width - half.x * scale));
             badge.y = Mathf.Clamp(badge.y, half.y * scale, Mathf.Max(half.y * scale, Screen.height - half.y * scale));
             panel.gesture.position = badge;
-            var location = map.TutorialLocationButton;
+            var location = CurrentStage == Stage.TodoGuidance ? GameplayHudPanel.Instance?.TasksButton : map.TutorialLocationButton;
             Vector2 target = location != null ? RectTransformUtility.WorldToScreenPoint(null, location.transform.position) : pointer;
             for (int i = 0; i < panel.trail.Length; i++)
             {
                 var dot = panel.trail[i];
-                dot.enabled = CurrentStage == Stage.SelectLocation;
+                dot.enabled = CurrentStage == Stage.SelectLocation || CurrentStage == Stage.TodoGuidance;
                 float t = Mathf.Repeat(Time.unscaledTime * .65f - i * .035f, 1);
                 dot.rectTransform.position = Vector2.Lerp(pointer, target, t);
                 dot.color = panel.trailColor;

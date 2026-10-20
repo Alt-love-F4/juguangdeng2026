@@ -1180,7 +1180,11 @@ namespace Spotlight.GameFlow
         public void EndDayFromDormitory()
         {
             if (State != DayFlowState.FreeCafeBusiness && State != DayFlowState.CityMapLeisure
-                && State != DayFlowState.PreLeisure) return;
+                && State != DayFlowState.PreLeisure)
+            {
+                if (running && Application.isPlaying) OperationToastPanel.ShowBlocked("请先完成当前剧情或演出，再休息。");
+                return;
+            }
             // A visible settlement page must be confirmed, not replaced by a second bed click.
             if (State == DayFlowState.PreLeisure && currentPanel != null) return;
             if (!CanRequestDayEnd()) return;
@@ -1217,20 +1221,47 @@ namespace Spotlight.GameFlow
 
         private bool CanRequestDayEnd()
         {
-            if (!SessionAllowsPlay || !running || IsDetained || IsFirstSessionGuideActive
-                || awaitingNarrativeEntry || cafeGameplaySession != null
-                || (NarrativeRuntime.Instance?.Controller?.IsBusy ?? false)) return false;
+            if (!SessionAllowsPlay || !running || IsDetained) return false;
             var actions = NarrativeRuntime.Instance?.Actions;
-            if (actions != null && actions.IsExecuting) return false;
+            // Every refusal tells the player why; a silent bed reads as a broken game.
+            string busy = IsFirstSessionGuideActive ? "请先按照新手教程完成当前步骤，再休息。"
+                : cafeGameplaySession != null ? cafeGameplaySession.GameplayHint ?? "请先完成当前剧情要求的咖啡制作与交付，再休息。"
+                : awaitingNarrativeEntry || (NarrativeRuntime.Instance?.Controller?.IsBusy ?? false)
+                    || actions != null && actions.IsExecuting ? "当前剧情或行动尚未结束，请完成后再休息。" : null;
+            if (busy != null)
+            {
+                if (Application.isPlaying) OperationToastPanel.ShowBlocked(busy);
+                return false;
+            }
             if (actions != null && actions.HasBlockingActions())
             {
-                var map = FindFirstObjectByType<MapSceneController>();
+                // The Map scene stays loaded (hidden) while the player is in the cafe, so a found
+                // MapSceneController is not proof the player can see its hint. Use it only when the
+                // map is actually on screen; the cafe bed always gets the toast.
+                bool mapVisible = UnityEngine.SceneManagement.SceneManager.GetActiveScene().name == "Map"
+                    || flow != null && flow.IsMapOpen;
+                var map = mapVisible ? FindFirstObjectByType<MapSceneController>() : null;
                 map?.FocusFirstBlockingAction();
-                if (map != null) map.ShowBlockingActionHint();
-                else if (Application.isPlaying) OperationToastPanel.ShowMessage("还有事情需要先处理，请打开地图查看必须完成的行动。");
+                string message = BlockingActionsMessage(NarrativeRuntime.Instance);
+                if (map != null) map.ShowBlockingActionHint(message);
+                else if (Application.isPlaying) OperationToastPanel.ShowMessage(message);
                 return false;
             }
             return true;
+        }
+
+        /// <summary>Names the mandatory map actions that keep the night locked, so the player knows where to go.</summary>
+        private static string BlockingActionsMessage(NarrativeRuntime runtime)
+        {
+            var names = new System.Collections.Generic.List<string>();
+            var actions = runtime?.Actions;
+            if (actions != null)
+                foreach (var item in GameplayTodoProjection.Build(runtime))
+                    if (item != null && item.important && !item.completed && !string.IsNullOrWhiteSpace(item.name)
+                        && !names.Contains(item.name)) names.Add(item.name);
+            return names.Count == 0
+                ? "还有必须完成的事项，请先打开地图或待办事项完成后再休息。"
+                : "还有必须完成的事项：" + string.Join("、", names) + "\n请先在地图上完成，再回来休息。";
         }
 
         private void RunBeforeNightAndCompleteDay()
@@ -1240,6 +1271,14 @@ namespace Spotlight.GameFlow
             {
                 if (SessionAllowsPlay && running && !awaitingNarrativeEntry
                     && !(NarrativeRuntime.Instance?.Controller?.IsBusy ?? false)) EnterCityMap();
+                return;
+            }
+            // Resting without business would silently skip today's AfterBusiness stories, and most of the
+            // later main line depends on them. Warn first; if the player still rests, play them before night.
+            if (afterBusinessDoneDay != day
+                && (NarrativeRuntime.Instance?.Controller?.PendingDateEvents(NarrativeEntryPoint.AfterBusiness).Count ?? 0) > 0)
+            {
+                PromptMissedAfterBusiness();
                 return;
             }
             if (ShouldSkipFailedEntry(NarrativeEntryPoint.BeforeNight))
@@ -1312,6 +1351,7 @@ namespace Spotlight.GameFlow
             if (success)
             {
                 if (failedEntry == entry) failedEntryCount = 0;
+                if (entry == NarrativeEntryPoint.AfterBusiness) afterBusinessDoneDay = day;
                 if (entry == NarrativeEntryPoint.MorningBeforeMap) morningCompletedDay = day;
                 if (IsDetained) { TryCompleteDetainedDay(); return; }
                 next();
@@ -1404,10 +1444,13 @@ namespace Spotlight.GameFlow
                 + " (attempt " + failedEntryCount + (offerSkip ? "; skip offered" : "") + ").", this);
             if (entry == NarrativeEntryPoint.BeforeNight)
             {
-                EnterCityMap();
-                FindFirstObjectByType<MapSceneController>()?.ShowBlockingActionHint(offerSkip
+                string hint = offerSkip
                     ? "夜间剧情连续出错，已记录错误。再次点击床休息将跳过这段剧情并进入下一天。"
-                    : "请回咖啡馆三楼宿舍，再次点击床休息以重试。");
+                    : "请回咖啡馆三楼宿舍，再次点击床休息以重试。";
+                // EnterCityMap may first load the Map scene; show the hint once that map is on screen
+                // (pendingMapAction runs on arrival), never on the hidden resident map.
+                pendingMapAction = () => FindFirstObjectByType<MapSceneController>()?.ShowBlockingActionHint(hint);
+                EnterCityMap();
                 return;
             }
             SetState(DayFlowState.PreBusiness);
@@ -1433,8 +1476,29 @@ namespace Spotlight.GameFlow
             failedEntryCount = 0;
             ClosePresentation();
             if (entry == NarrativeEntryPoint.MorningBeforeMap) morningCompletedDay = day;
+            if (entry == NarrativeEntryPoint.AfterBusiness) afterBusinessDoneDay = day;
             if (IsDetained) { TryCompleteDetainedDay(); return; }
             next();
+        }
+
+        private int afterBusinessDoneDay;
+
+        private void PromptMissedAfterBusiness()
+        {
+            var open = UIKit.GetPanel<ConfirmationPanel>();
+            if (open != null && open.gameObject.activeInHierarchy) return; // already asking
+            if (flow == null) { PlayMissedAfterBusiness(); return; }
+            flow.ShowGameplayConfirmation("今天还有重要的事",
+                "今天营业结束后会发生重要的事情，错过可能影响之后的剧情。\n建议先回一楼点击「开始营业」挂牌；如果仍然休息，这段剧情会在睡前先播放。",
+                "仍然休息", PlayMissedAfterBusiness,
+                "先去营业", () => OperationToastPanel.ShowMessage("请到一楼大厅点击「开始营业」挂牌，打烊后再回来休息。", string.Empty));
+        }
+
+        /// <summary>The player chose to rest anyway: play today's AfterBusiness stories, then the normal night.</summary>
+        private void PlayMissedAfterBusiness()
+        {
+            if (!SessionAllowsPlay || !running || awaitingNarrativeEntry || !CanRequestDayEnd()) return;
+            RunNarrativeEntry(NarrativeEntryPoint.AfterBusiness, RunBeforeNightAndCompleteDay);
         }
 
         public void RefreshMapAvailability()

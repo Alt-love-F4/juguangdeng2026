@@ -228,7 +228,8 @@ namespace Spotlight.FreeCafe
         private void ThirdFloor()=>runtime.Enter(AreaId.Basement);
         private void EndDayFromDormitory()
         {
-            if (runtime == null || runtime.World == null || runtime.InputBlocked) return;
+            if (runtime == null || runtime.World == null) return;
+            if (runtime.InputBlocked) { runtime.ReportBlockedOperation(); return; }
             if (runtime.World.State.currentArea != AreaId.Basement) return;
             if (dayFlow == null) dayFlow = FindFirstObjectByType<DayFlowController>();
             dayFlow?.EndDayFromDormitory();
