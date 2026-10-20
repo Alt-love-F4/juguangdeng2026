@@ -197,64 +197,11 @@ namespace Spotlight.GameFlow
                 return string.Join("\n", lines);
             }
             var world = new DetailsSectionData("世界概况", "世界概况", WorldOverview());
-            var stories = new List<DetailsStoryData>();
-            if (configuration != null)
-            {
-                try
-                {
-                    var graph = NarrativeRelationshipGraph.Build(configuration);
-                    bool sessionReady = runtime != null && runtime.IsReady && state != null;
-                    var controller = sessionReady ? runtime.Controller : null;
-                    var eventsById = configuration.events.Where(item => item != null)
-                        .ToDictionary(item => item.eventId, StringComparer.Ordinal);
-                    foreach (var node in graph.Nodes.Where(item => item.Kind == StoryNodeKind.Event
-                        && NarrativeRelationshipGraph.IsStory(item.Key)))
-                    {
-                        if (!eventsById.TryGetValue(node.Key, out var definition)) continue;
-                        bool available = sessionReady && !node.Blocked && !state.IsEventLocked(definition.eventId);
-                        bool happened = available && state.HasHappenedEvent(definition.eventId);
-                        bool active = available && (controller.CurrentEventId == definition.eventId
-                            || controller.PendingEventIds.Contains(definition.eventId));
-                        bool unlocked = available && (happened || active);
-                        if (available && !unlocked)
-                        {
-                            try
-                            {
-                                var diagnostic = definition.entry == NarrativeEntryPoint.MapAction
-                                    ? controller.ExplainMapActionEvent(definition.eventId)
-                                    : definition.entry == NarrativeEntryPoint.Immediate
-                                        ? controller.ExplainEvent(definition.eventId) : null;
-                                unlocked = diagnostic != null && diagnostic.CanRequest;
-                            }
-                            catch { unlocked = false; }
-                        }
-
-                        var blocks = new List<DetailsStoryBlockData>();
-                        string title = string.Empty;
-                        string group = string.Empty;
-                        if (unlocked)
-                        {
-                            title = node.Title;
-                            group = NarrativeRelationshipGraph.GroupLabel(node.Group);
-                            foreach (var block in graph.Content(node.Id))
-                                if (block != null && !string.IsNullOrWhiteSpace(block.BodyText))
-                                    blocks.Add(new DetailsStoryBlockData(block.Caption, block.BodyText));
-                        }
-                        stories.Add(new DetailsStoryData(definition.eventId,
-                            unlocked ? title : "尚未解锁", unlocked ? group : string.Empty, unlocked, blocks));
-                    }
-                }
-                catch (Exception exception)
-                {
-                    Debug.LogWarning("剧情档案读取失败，已保持锁定：" + exception.Message);
-                    stories.Clear();
-                }
-            }
             return new DetailsPanelData(new DetailsProfileData(playerName, background,
                 "你接手叔叔留下的咖啡馆，以咖啡与倾听接待来客。", avatar), attributes, badges,
                 new DetailsSectionData("人物关系", "当前可查看 " + characters.Count(item => item.Unlocked) + " 人",
                     "相识状态由剧情记录驱动。悬停人物卡片查看介绍与实际关系数值，尚未解锁的人物不会泄露关系值。"),
-                world, characters: characters, worldBars: worldProgress, stories: stories);
+                world, characters: characters, worldBars: worldProgress);
         }
 
         private static string FormatWorldDate(int day)
