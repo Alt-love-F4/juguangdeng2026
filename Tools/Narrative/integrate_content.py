@@ -148,6 +148,8 @@ def merge(modules):
  # Apply approved presentation on the existing NCS source sheets.
  from ending_revision import apply as apply_ending_revision
  apply_ending_revision(sheets)
+ from character_visual_revision import apply as apply_character_visual_revision
+ apply_character_visual_revision(sheets)
  # Emit a completely rectangular value matrix including untouched metadata.
  workbooks=[]
  for path,own in books.items():
@@ -164,8 +166,30 @@ def merge(modules):
  print(json.dumps({'counts':plan['counts'],'errors':errors},ensure_ascii=False))
  return plan
 
-if __name__=='__main__':
- p=argparse.ArgumentParser();p.add_argument('--modules',nargs='+',default=['neutral','rose','church','revolution','daily']);p.add_argument('--allow-unresolved',action='store_true');args=p.parse_args()
- plan=merge(args.modules)
- if plan['errors']and not args.allow_unresolved:raise SystemExit('Unresolved cross-content references: see output/narrative-integration/merge-plan.json')
+def character_visual_plan():
+ # Narrow art-only revision through the same single-writer/merge-workbooks pipeline.
+ # Content, triggers, dialogue text and every other source sheet remain untouched.
+ from character_visual_revision import apply
+ sheets=read_book(NARRATIVE)
+ original=[dict(row) for row in sheets['Object']['rows']]
+ changes=apply(sheets)
+ sheet=sheets['Object'];h=sheet['header']
+ matrix=[(row+[None]*len(h))[:len(h)] for row in sheet['meta']]
+ matrix += [[None]+[row.get(key) for key in h[1:]] for row in sheet['rows']]
+ edits=[]
+ for i,(before,after) in enumerate(zip(original,sheet['rows']),start=4):
+  for col,key in enumerate(h[1:],start=1):
+   if before.get(key)!=after.get(key):edits.append({'row':i,'column':col,'before':before.get(key),'after':after.get(key)})
+ plan={'workbooks':[{'path':str(NARRATIVE),'beforeSha256':hashlib.sha256(NARRATIVE.read_bytes()).hexdigest(),
+        'sheets':[{'name':'Object','matrix':matrix,'originalRows':sheet['originalRows'],'width':len(h)}]}],
+       'errors':[],'characterVisualChanges':changes,'characterVisualCellEdits':edits}
+ OUT.mkdir(parents=True,exist_ok=True)
+ (OUT/'merge-plan.json').write_text(json.dumps(plan,ensure_ascii=False,indent=2),encoding='utf-8')
+ (ROOT/'output/npc-art-2026-10-20/character-visual-plan.json').write_text(json.dumps(plan,ensure_ascii=False,indent=2),encoding='utf-8')
+ print(json.dumps({'changedObjects':len(changes),'changedCells':len(edits),'sheets':['Object']},ensure_ascii=False))
+ return plan
 
+if __name__=='__main__':
+ p=argparse.ArgumentParser();p.add_argument('--modules',nargs='+',default=['neutral','rose','church','revolution','daily']);p.add_argument('--allow-unresolved',action='store_true');p.add_argument('--character-visuals-only',action='store_true');args=p.parse_args()
+ plan=character_visual_plan() if args.character_visuals_only else merge(args.modules)
+ if plan['errors']and not args.allow_unresolved:raise SystemExit('Unresolved cross-content references: see output/narrative-integration/merge-plan.json')

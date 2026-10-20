@@ -236,6 +236,9 @@ namespace Spotlight.FreeCafe
                 ShowHint("点击杯具选择出餐杯；原料拖到设备，点击启动。左键拖动壶，按住右键并上下移动鼠标双向倾倒，松开右键停止。");
             else
                 ShowHint("点击来源取出物品，拖拽到任意位置；拖到容器或设备会尝试组合。Shift 拖拽仅摆放。");
+            var ambientAdele = new GameObject("AmbientAdele").AddComponent<FreeCafeAmbientAdele>();
+            ambientAdele.transform.SetParent(areaRoots[(int)AreaId.Cafe], false);
+            ambientAdele.Initialize(this, tutorialConfiguration);
             Debug.Log("[FreeCafe] 自由操作世界已启动：无工作台插槽、无订单步骤门禁。",this);
         }
         private void OnEnable()

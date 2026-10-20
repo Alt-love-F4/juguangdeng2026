@@ -118,6 +118,29 @@ namespace Spotlight.GameFlow.Tests
         }
 
         [UnityTest]
+        public IEnumerator ReadingOmitsOnlyLeadingLineThatDuplicatesDisplayedPageTitle()
+        {
+            var config = Configuration();
+            AddPage(config, "paper", 1);
+            config.presentations.readingLines[0].textKey = "paper-title";
+            config.presentations.readingLines.Add(new NarrativeReadingLineDefinition
+            {
+                pageId = "paper", seq = 2, textKey = "article-body", mode = "narration"
+            });
+            var calls = new List<PageCall>();
+            using (var presenter = new NarrativePresenter(config, key => "resolved:" + key))
+            {
+                Capture(presenter, calls);
+                presenter.Play(Request(), () => { });
+                yield return null;
+                Assert.That(calls.Count, Is.EqualTo(1));
+                Assert.That(calls[0].title, Is.EqualTo("resolved:paper-title"));
+                Assert.That(calls[0].text, Is.EqualTo(new[] { "resolved:article-body" }));
+                Assert.That(calls[0].request.ReadingLines.Count, Is.EqualTo(2));
+            }
+        }
+
+        [UnityTest]
         public IEnumerator DisposeInvalidatesLatePageCallbackAndNeverStartsNextPage()
         {
             var config = Configuration();

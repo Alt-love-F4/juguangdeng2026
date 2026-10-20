@@ -69,12 +69,11 @@ def silhouette(source, size):
  return canvas
 
 def placeholder(cid, name):
- return silhouette('Assets/Art/NarrativeGenerated/Characters/CH35_tutorial_elderly_woman_silhouette.png', (768,1536))
+ return Image.open(ROOT/'Assets/Resources/Characters/generic/neutral_placeholder.png').convert('RGBA').copy()
 
 def avatar(im,cid):
  if cid not in SOURCES:
-  shape = im.crop(im.getchannel('A').getbbox())
-  return ImageOps.fit(shape.crop((0,0,shape.width,max(1,int(shape.height*.40)))), (512,512), Image.Resampling.LANCZOS)
+  return Image.open(ROOT/'Assets/Resources/Characters/generic/avatar_placeholder.png').convert('RGBA').copy()
  if cid in SOURCES:
   w,h=im.size
   x,y,s=CROPS.get(cid,(0.0,0.0,1.0))

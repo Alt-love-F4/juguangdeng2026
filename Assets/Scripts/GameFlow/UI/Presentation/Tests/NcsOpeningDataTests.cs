@@ -79,7 +79,7 @@ namespace Spotlight.GameFlow.Tests
         }
 
         [Test]
-        public void TutorialCustomerUsesItsOwnElderlySilhouetteWithoutChangingSharedVisuals()
+        public void TutorialCustomerUsesNeutralTwoThirdsSilhouetteWithoutChangingSharedVisuals()
         {
             var config = LubanNarrativeLoader.Load();
             foreach (var presentation in config.openingPresentations.Where(item => item.presentationId.StartsWith("cafe_tutorial.")))
@@ -88,7 +88,7 @@ namespace Spotlight.GameFlow.Tests
             Assert.That(visuals, Is.Not.Null);
             Assert.That(visuals.BackgroundKey, Is.EqualTo(NarrativeBackgroundKeys.CafeScene));
             Assert.That(visuals.CenterPortrait, Is.Not.Null);
-            Assert.That(visuals.CenterPortrait.name, Is.EqualTo("CH35_tutorial_elderly_woman_silhouette"));
+            Assert.That(visuals.CenterPortrait.name, Is.EqualTo("neutral_placeholder"));
             Assert.That(Resources.Load<DialogueVisualsAsset>("Dialogue/CafeSceneVisuals").CenterPortrait, Is.Null,
                 "The generic cafe resource must not acquire a tutorial-only guest.");
             Assert.That(NarrativePresentationDataAdapter.TryCreateOpeningDialogue(config, "cafe_tutorial.customer_arrives",

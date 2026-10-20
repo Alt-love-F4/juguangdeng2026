@@ -7,6 +7,48 @@ namespace Spotlight.FreeCafe
     /// <summary>Source-authored order dialogue, shared by tutorial and regular business.</summary>
     public static class NarrativeCafeAmbientContent
     {
+        // These two source-authored chats only involve Adele and the player. Other chat
+        // entries require guests, weather, newspapers or date gates not owned by this cameo.
+        private static readonly string[] adeleChats = { "cafe.ambient.chat.chat-01", "cafe.ambient.chat.chat-16" };
+
+        public static bool TryCreateAdeleChat(NarrativeConfiguration configuration, int rotation,
+            out Spotlight.GameFlow.DialogueScript script, Func<string, string> resolver = null)
+        {
+            script = null;
+            if (configuration == null) return false;
+            var adele = Spotlight.GameFlow.NarrativeCharacterResolver.CreateDialogueCharacter("adele");
+            var player = Spotlight.GameFlow.NarrativeCharacterResolver.CreateDialogueCharacter("player");
+            for (int attempt = 0; attempt < adeleChats.Length; attempt++)
+            {
+                string key = adeleChats[(int)((uint)rotation + (uint)attempt) % adeleChats.Length];
+                if (!configuration.openingPresentations.Any(p => p.presentationId == key)) continue;
+                var lines = new System.Collections.Generic.List<Spotlight.GameFlow.DialogueLine>();
+                bool valid = true;
+                foreach (var row in configuration.openingLines.Where(l => l.presentationId == key).OrderBy(l => l.seq))
+                {
+                    string source = configuration.texts.FirstOrDefault(t => t.key == row.textKey)?.content;
+                    if (string.IsNullOrWhiteSpace(source)) continue;
+                    int separator = source.IndexOf('：');
+                    string name = separator < 0 ? string.Empty : source.Substring(0, separator).Trim();
+                    bool isAdele = name == "阿黛尔" || name == "艾黛尔";
+                    if (!isAdele && name != "{playername}") { valid = false; break; }
+                    string text = resolver?.Invoke(row.textKey) ?? source;
+                    text = NarrativeTextSubstitution.PlayerName(text, player.DisplayName);
+                    separator = text.IndexOf('：');
+                    if (separator >= 0) text = text.Substring(separator + 1).TrimStart();
+                    lines.Add(new Spotlight.GameFlow.DialogueLine(isAdele ? Spotlight.GameFlow.DialogueSpeaker.Right
+                        : Spotlight.GameFlow.DialogueSpeaker.Left, text,
+                        replaceLeft: !isAdele, leftCharacter: !isAdele ? player : null,
+                        replaceRight: isAdele, rightCharacter: isAdele ? adele : null,
+                        source: new Spotlight.GameFlow.DialogueSourceLocation("OpeningPresentation", null, key, row.lineId, row.seq)));
+                }
+                if (!valid || lines.Count == 0) continue;
+                script = new Spotlight.GameFlow.DialogueScript(lines, player, adele, "闲谈");
+                return true;
+            }
+            return false;
+        }
+
         public static bool TryCreateOrderDialogue(CafeWorld world, WorldEntity customer, out Spotlight.GameFlow.DialogueScript script)
         {
             script = null;

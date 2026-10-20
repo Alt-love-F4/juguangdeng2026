@@ -20,7 +20,17 @@ namespace Spotlight.FreeCafe
             {
                 var hit = results[i];
                 var view = hit.gameObject != null ? hit.gameObject.GetComponentInParent<FreeEntityView>() : null;
-                if (view == null) continue;
+                if (view == null)
+                {
+                    var companion = hit.gameObject != null ? hit.gameObject.GetComponent<FreeCafeAmbientAdele>() : null;
+                    if (companion != null && companion.Visual != null)
+                    {
+                        hit.sortingLayer = companion.Visual.sortingLayerID;
+                        hit.sortingOrder = companion.Visual.sortingOrder;
+                        results[i] = hit;
+                    }
+                    continue;
+                }
                 var bell = hit.gameObject.GetComponentInParent<FreeCafeDeliveryBell>();
                 if (!view.CanInteract || bell != null && !bell.CanInteract)
                 {

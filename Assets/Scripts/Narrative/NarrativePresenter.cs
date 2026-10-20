@@ -661,7 +661,13 @@ namespace Spotlight.Narrative
                     });
                 bool done = false;
                 string title = string.IsNullOrWhiteSpace(page.titleKey) ? resolvedTitle : resolve(page.titleKey);
-                string body = string.Join("\n", readingLines.ConvertAll(line => line.text));
+                // Newspaper entries commonly repeat the page headline as the first reading line.
+                // The title is already rendered separately by the reading panel, so omit only
+                // that leading duplicate while preserving any later identical lines.
+                int firstBodyLine = readingLines.Count > 0
+                    && string.Equals(readingLines[0].text?.Trim(), title?.Trim(), StringComparison.Ordinal) ? 1 : 0;
+                string body = string.Join("\n", readingLines.GetRange(firstBodyLine, readingLines.Count - firstBodyLine)
+                    .ConvertAll(line => line.text));
                 var dialogueLine = readingLines.Find(line => string.Equals(line.mode, "dialogue", StringComparison.OrdinalIgnoreCase));
                 // Finish advances this page; cancellation uses the optional request callback
                 // and aborts the root without settling growth/news/choice results.

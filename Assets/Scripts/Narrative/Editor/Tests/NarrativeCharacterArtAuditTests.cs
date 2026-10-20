@@ -82,7 +82,7 @@ namespace Spotlight.Narrative.Editor.Tests
         }
 
         [Test]
-        public void Ch17KeepsSorelAndEmmanuelSeparateSoLoadedArtCannotHideMissingStoryArt()
+        public void Ch17KeepsSorelPlaceholderSeparateFromEmmanuelAuthoredArt()
         {
             var characters = NarrativeCharacterArtAudit.Load().Inspect(Requirement("CH17"));
             Assert.That(characters.Select(c => c.Id), Is.EquivalentTo(new[] { "sorel", "emmanuel" }));
@@ -93,14 +93,14 @@ namespace Spotlight.Narrative.Editor.Tests
             Assert.That(sorel.Portrait.Path, Is.Empty);
             Assert.That(sorel.Portrait.Available, Is.False);
             Assert.That(sorel.Portrait.Error, Is.Not.Null.And.Not.Empty);
-            Assert.That(sorel.OnstageConversationLines, Is.GreaterThan(0), "CH17 is missing art actually needed onstage.");
+            Assert.That(sorel.OnstageConversationLines, Is.GreaterThan(0), "The shared placeholder covers this onstage identity until authored art is available.");
             Assert.That(emmanuel.Portrait.Available, Is.True);
             Assert.That(emmanuel.Portrait.Path, Is.EqualTo("Characters/emmanuel/neutral"));
-            Assert.That(NarrativeCharacterArtAudit.Summary(characters), Is.EqualTo("部分剧情 ID 缺图"));
+            Assert.That(NarrativeCharacterArtAudit.Summary(characters), Is.EqualTo("基础占位已配置"));
         }
 
         [Test]
-        public void Ch04DistinguishesAnUnusedObjectIdFromMissingOnstageStoryArt()
+        public void Ch04DistinguishesUnusedPlaceholderFromOnstageAuthoredArt()
         {
             var characters = NarrativeCharacterArtAudit.Load().Inspect(Requirement("CH04"));
             Assert.That(characters.Select(c => c.Id), Is.EquivalentTo(new[] { "church.duke", "elion" }));
@@ -113,7 +113,7 @@ namespace Spotlight.Narrative.Editor.Tests
             Assert.That(duke.OnstageConversationLines, Is.Zero);
             Assert.That(elion.Portrait.Available, Is.True);
             Assert.That(elion.OnstageConversationLines, Is.GreaterThan(0));
-            Assert.That(NarrativeCharacterArtAudit.Summary(characters), Is.EqualTo("部分 ID 未配置（未登场）"));
+            Assert.That(NarrativeCharacterArtAudit.Summary(characters), Is.EqualTo("基础占位已配置"));
         }
 
         [Test]
@@ -244,7 +244,7 @@ namespace Spotlight.Narrative.Editor.Tests
         }
 
         [Test]
-        public void AllObjectsSeparateRequiredOnstageGapsFromNoPortraitActors()
+        public void AllNpcObjectsHaveResourcesAndGenericArtRemainsMarkedAsPlaceholder()
         {
             var audit = NarrativeCharacterArtAudit.Load();
             var configuration = LubanNarrativeLoader.Load();
@@ -260,11 +260,15 @@ namespace Spotlight.Narrative.Editor.Tests
             Assert.That(audit.MissingOnstageNpcPortraitIds(), Does.Contain("sorel"));
 
             var genericWorker = audit.Inspect("revolution.actor.young_worker");
-            Assert.That(genericWorker.NoPortrait, Is.True);
+            Assert.That(genericWorker.NoPortrait, Is.False);
             Assert.That(genericWorker.CanAppearOnstage, Is.True);
-            Assert.That(genericWorker.Portrait.Available, Is.False);
+            Assert.That(genericWorker.Portrait.Available, Is.True);
+            Assert.That(genericWorker.Portrait.Placeholder, Is.True);
+            Assert.That(genericWorker.Indoor.Path, Is.EqualTo("Characters/generic/seated_placeholder"));
+            Assert.That(genericWorker.Indoor.Available, Is.True);
             Assert.That(audit.MissingOnstageNpcPortraitIds(), Does.Not.Contain(genericWorker.Id));
-            Assert.That(NarrativeCharacterArtAudit.Summary(new[] { genericWorker }), Is.EqualTo("全部标记 no_portrait"));
+            Assert.That(NarrativeCharacterArtAudit.Summary(new[] { genericWorker }), Is.EqualTo("基础占位已配置"));
+            Assert.That(objects.Where(c => c.ObjectType == NarrativeObjectType.Npc).All(c => c.Portrait.Available && c.Indoor.Available), Is.True);
         }
 
         [Test]
