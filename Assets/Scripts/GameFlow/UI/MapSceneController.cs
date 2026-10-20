@@ -144,7 +144,11 @@ namespace Spotlight.GameFlow
         private void OnDestroy()
         {
             if (subscribedNarrativeController != null) subscribedNarrativeController.EffectRequested -= OnNarrativeEffect;
-            if (subscribedActions != null) subscribedActions.MapContentChanged -= OnMapContentChanged;
+            if (subscribedActions != null)
+            {
+                subscribedActions.MapContentChanged -= OnMapContentChanged;
+                subscribedActions.ActionStarted -= OnMapActionStarted;
+            }
             if (GameplayPanelHooks.OpenPanel == OpenPanel)
             {
                 GameplayPanelHooks.OpenPanel = null;
@@ -161,7 +165,7 @@ namespace Spotlight.GameFlow
         public event Action<string, bool> LocationSelected;
         public Button TutorialLocationButton => locationButtons.Values.FirstOrDefault(button => button != null
             && button.isActiveAndEnabled && button.interactable);
-        public bool IsLocationPopupVisible => actionDetails != null && actionDetails.gameObject.activeInHierarchy;
+        public bool IsLocationPopupVisible => actionDetails != null && actionDetails.IsVisible;
         private bool ViewAvailable => !standaloneLoading && !GameplayHudPanel.BlocksWorldInput && isActiveAndEnabled;
         private bool GuideLocked => IsFirstDay && flow != null && flow.GetComponent<DayFlowController>()?.IsFirstSessionGuideActive == true;
         private bool IsFirstDay => (NarrativeRuntime.Instance?.Actions?.CurrentDay ?? 1) == 1;
@@ -453,6 +457,7 @@ namespace Spotlight.GameFlow
         {
             if (!isActiveAndEnabled) return;
             SubscribePositionEffects();
+            if (DialoguePanel.IsAnyPlaying && (focusedPosition != null || IsLocationPopupVisible)) HideFocus();
             Keyboard key = Keyboard.current;
             if (zoomSlider != null)
             {
@@ -733,12 +738,11 @@ namespace Spotlight.GameFlow
                 if (position == null || string.IsNullOrWhiteSpace(position.positionKey)) continue;
                 runtimePositions[position.positionKey] = position;
                 bool visible = position.isImportant || position.enabled;
-                bool cafeGuide = IsFirstDay && flow != null && flow.GetComponent<DayFlowController>()?.IsFirstDayCafeMapGuideActive == true;
                 BindAuthoredLocation(position);
                 if (locationButtons.TryGetValue(position.positionKey, out Button authoredButton))
                 {
                     authoredButton.gameObject.SetActive(visible);
-                    authoredButton.interactable = !cafeGuide || position.positionKey == "cafe";
+                    OnMapContentChanged(position.positionKey);
                 }
             }
             SubscribePositionEffects();
@@ -787,13 +791,21 @@ namespace Spotlight.GameFlow
 
         private void OnMapContentChanged(string positionKey)
         {
+            if (!locationButtons.TryGetValue(positionKey, out var button) || button == null) return;
+            var actions = NarrativeRuntime.Instance?.Actions;
+            bool hasContent = actions?.HasMapActions(positionKey) ?? false;
+            bool cafeEntry = MapActionDetailsView.IsCafeEntryPosition(positionKey);
+            bool allowed = !IsFirstDay || cafeEntry;
+            button.interactable = button.gameObject.activeSelf && allowed && (hasContent || cafeEntry);
             if (locationDots.TryGetValue(positionKey, out var dot) && dot != null)
-                // Unlike todo navigation, badge state must remain valid while the map's
-                // parent is hidden. activeInHierarchy would cache every badge as off.
-                dot.gameObject.SetActive(locationButtons.TryGetValue(positionKey, out var button)
-                    && button != null && button.gameObject.activeSelf
-                    && (!IsFirstDay || MapActionDetailsView.IsCafeEntryPosition(positionKey))
-                    && (NarrativeRuntime.Instance?.Actions?.HasUnseenImportantActions(positionKey) ?? false));
+            {
+                dot.color = (actions?.HasImportantMapActions(positionKey) ?? false)
+                    ? MapActionNewContentDot.ImportantColor : MapActionNewContentDot.OrdinaryColor;
+                // activeSelf keeps the cached map correct while its parent is hidden.
+                dot.gameObject.SetActive(button.gameObject.activeSelf && allowed && hasContent);
+            }
+            if (!hasContent && !cafeEntry && focusedPosition?.positionKey == positionKey
+                && actionDetails != null && !actionDetails.IsBusy) HideFocus();
         }
 
         private void EnsureNarrativeRuntime()
@@ -817,16 +829,23 @@ namespace Spotlight.GameFlow
             var actions = runtime != null ? runtime.Actions : null;
             if (controller == subscribedNarrativeController && actions == subscribedActions) return;
             if (subscribedNarrativeController != null) subscribedNarrativeController.EffectRequested -= OnNarrativeEffect;
-            if (subscribedActions != null) subscribedActions.MapContentChanged -= OnMapContentChanged;
+            if (subscribedActions != null)
+            {
+                subscribedActions.MapContentChanged -= OnMapContentChanged;
+                subscribedActions.ActionStarted -= OnMapActionStarted;
+            }
             subscribedNarrativeController = controller; subscribedActions = actions;
             if (controller != null) controller.EffectRequested += OnNarrativeEffect;
             if (actions != null)
             {
                 actions.MapContentChanged += OnMapContentChanged;
+                actions.ActionStarted += OnMapActionStarted;
                 actions.RefreshMapContent();
             }
             foreach (string key in locationDots.Keys) OnMapContentChanged(key);
         }
+
+        private void OnMapActionStarted(NarrativeActionDefinition action) => HideFocus();
 
         private void OnNarrativeEffect(NarrativeEffectNotification notification)
         {
@@ -856,6 +875,7 @@ namespace Spotlight.GameFlow
             position.enabled = visible;
             if (locationButtons.TryGetValue(position.positionKey, out Button existing) && existing != null)
                 existing.gameObject.SetActive(visible);
+            OnMapContentChanged(position.positionKey);
             if (!visible)
             {
                 if (focusedPosition == position) HideFocus();
@@ -908,18 +928,9 @@ namespace Spotlight.GameFlow
                 OperationToastPanel.ShowBlocked("请先进入咖啡馆完成新手教程，再探索其他地点。");
                 return;
             }
-            bool hasConfiguredContent = NarrativeRuntime.Instance?.Actions?.GetDisplayableActions(position.positionKey).Any() ?? false;
-            if (MapActionDetailsView.IsCafeEntryPosition(position.positionKey) || (!IsFirstDay && hasConfiguredContent))
-            {
-                FocusPosition(position);
-            }
-            else
-            {
-                // Locations without an enabled feature still move the camera, but they must not
-                // open the action popup or run their configured NCS actions yet.
-                focusedPosition = position;
-                if (focusPanel != null) focusPanel.SetActive(false);
-            }
+            bool hasConfiguredContent = NarrativeRuntime.Instance?.Actions?.HasMapActions(position.positionKey) ?? false;
+            if (!MapActionDetailsView.IsCafeEntryPosition(position.positionKey) && (IsFirstDay || !hasConfiguredContent)) return;
+            FocusPosition(position);
             BeginFocusMovement(position.position);
             // Ordinary map locations remain visible while their action details are open.
             // Only explicitly dismissible temporary markers should disappear on click.
@@ -931,10 +942,9 @@ namespace Spotlight.GameFlow
         {
             DayFlowController dayFlow = flow != null ? flow.GetComponent<DayFlowController>() : null;
             bool active = IsFirstDay && dayFlow != null && dayFlow.IsFirstDayCafeMapGuideActive;
+            bool wasApplied = firstDayGuideApplied;
             if (active)
             {
-                foreach (var pair in locationButtons)
-                    if (pair.Value != null) pair.Value.interactable = pair.Key == "cafe";
                 if (endDayButton != null) endDayButton.interactable = false;
                 if (!firstDayGuideApplied && runtimePositions.TryGetValue("cafe", out var cafe))
                 {
@@ -951,15 +961,21 @@ namespace Spotlight.GameFlow
             else
             {
                 firstDayGuideApplied = false;
-                foreach (var pair in locationButtons)
-                    if (pair.Value != null) pair.Value.interactable = true;
                 if (endDayButton != null) endDayButton.interactable = true;
                 if (status != null && status.text == "第一天：新手教程期间只能进入咖啡馆") status.gameObject.SetActive(false);
             }
+            if (wasApplied != firstDayGuideApplied)
+                foreach (string key in locationButtons.Keys) OnMapContentChanged(key);
         }
 
         private void FocusPosition(NarrativeMapPositionDefinition position)
         {
+            if (!MapActionDetailsView.IsCafeEntryPosition(position.positionKey)
+                && !(NarrativeRuntime.Instance?.Actions?.HasMapActions(position.positionKey) ?? false))
+            {
+                HideFocus();
+                return;
+            }
             focusedPosition = position;
             if (actionDetails != null) actionDetails.Show(position.positionKey, ResolveText(position.nameText, position.positionKey));
         }
@@ -1150,7 +1166,9 @@ namespace Spotlight.GameFlow
         {
             if (scenePanelInstance != null) return scenePanelInstance.AllowsTodoPosition(positionKey);
             return locationButtons.TryGetValue(positionKey, out var button) && button != null && button.gameObject.activeInHierarchy
-                && button.interactable && (!IsFirstDay || MapActionDetailsView.IsCafeEntryPosition(positionKey));
+                && button.interactable && (!IsFirstDay || MapActionDetailsView.IsCafeEntryPosition(positionKey))
+                && (MapActionDetailsView.IsCafeEntryPosition(positionKey)
+                    || (NarrativeRuntime.Instance?.Actions?.HasMapActions(positionKey) ?? false));
         }
 
         public bool NavigateTodo(MapTaskItem item) => FocusTodo(item.positionKey, item.actionKey);
@@ -1223,7 +1241,9 @@ namespace Spotlight.GameFlow
             // Consume at the actual visible handoff. User pan/dismiss afterwards must not
             // reschedule a focus callback or steal focus on the next map entry.
             if (!actions.ConsumePendingFocus(key)) return;
-            FocusPosition(position);
+            // Completion may guide the camera, but reopening details requires a new click.
+            focusedPosition = null;
+            actionDetails?.Dismiss();
             BeginFocusMovement(position.position);
         }
 
@@ -1354,6 +1374,7 @@ namespace Spotlight.GameFlow
             panVelocity = Vector2.zero;
             CancelFocusMovement();
             focusedPosition = null;
+            actionDetails?.Dismiss();
             RebuildActionList();
             if (focusPanel != null) focusPanel.SetActive(false);
             if (status != null) status.text = "滚轮缩放，WASD移动；点击地点聚焦，右键退出聚焦";

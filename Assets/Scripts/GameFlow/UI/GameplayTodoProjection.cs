@@ -83,7 +83,7 @@ namespace Spotlight.GameFlow
                     bool optionalPool = action.type == NarrativeActionType.Repeat && !action.mustExecute
                         && actions.IsDailyPoolAction(action.actionKey);
                     bool done = actions.IsCompleted(action.actionKey) || actions.HasExecutedToday(action.actionKey)
-                        && (action.type == NarrativeActionType.Daily || action.IsDelivery || optionalPool);
+                        && (action.type == NarrativeActionType.Daily || action.IsDelivery || actions.IsDailyPoolAction(action.actionKey));
                     string name = runtime.ResolveText(action.nameText);
                     string status;
                     List<NarrativeActionCheck> checks = null;
@@ -94,10 +94,9 @@ namespace Spotlight.GameFlow
                     // the todo list with a location that currently has nothing the player can do.
                     if (!done && action.type != NarrativeActionType.Future && !available
                         && checks != null && checks.Any(c => !c.satisfied && c.requirement == "DailyPool")) continue;
-                    if (done) status = optionalPool ? "本次已完成 · 自选再次行动另计消耗"
-                        : actions.IsCompleted(action.actionKey) ? "已完成" : "今日已完成，明天可继续";
+                    if (done) status = actions.IsCompleted(action.actionKey) ? "已完成" : "今日已完成，明天可继续";
                     else if (action.type == NarrativeActionType.Future) status = "等待 " + actions.GetRemainingDays(action.actionKey) + " 天后开放";
-                    else if (available) status = optionalPool ? "自选日常 · 每次独立行动" : "可进行";
+                    else if (available) status = optionalPool ? "自选日常 · 每天一次" : "可进行";
                     else if (checks != null && checks.Any(c => !c.satisfied && c.requirement.StartsWith("ActionPoint("))) status = "行动点不足，查看详情确认消耗";
                     else if (checks != null && checks.Any(c => !c.satisfied && c.requirement.StartsWith("Item("))) status = "所需物品不足，查看详情确认需求";
                     else status = "暂不可进行，请先处理当前事项";
@@ -108,7 +107,7 @@ namespace Spotlight.GameFlow
                         description = runtime.ResolveText(action.descText), completed = done,
                         available = !done && available, optional = optionalPool, blockedReason = blockers,
                         currentTask = optionalPool
-                            ? "这是可重复日常，不是未完成任务的分段。每次造访播放一则内容；再次行动会重新计费，可自行选择是否进行。"
+                            ? "这是自选日常，不是未完成任务的分段。每项每天可完成一次，明天可再进行。"
                             : !available ? (action.type == NarrativeActionType.Future ? "开放后前往「" + locationName + "」。" : blockers)
                             : "点击下方「查看地点与行动」，前往「" + locationName + "」，选择「" + name + "」并确认执行。"
                                 + (action.IsProgress ? " 每次执行后查看进度，达到 " + action.progressTarget + " 次后完成。" : "")
@@ -143,7 +142,7 @@ namespace Spotlight.GameFlow
             if (actions == null || action == null || !runtime.Controller.ValuesReady || runtime.Controller.IsBusy
                 || runtime.Controller.IsEnded || actions.IsExecuting || actions.IsCompleted(action.actionKey)
                 || action.type == NarrativeActionType.Future
-                || ((action.type == NarrativeActionType.Daily || action.IsDelivery) && actions.HasExecutedToday(action.actionKey))
+                || ((action.type == NarrativeActionType.Daily || action.IsDelivery || actions.IsDailyPoolAction(action.actionKey)) && actions.HasExecutedToday(action.actionKey))
                 || checks.Any(check => !check.satisfied && (check.requirement.StartsWith("ActionPoint(") || check.requirement.StartsWith("Item(")))) return false;
             bool storyBlocked = action.endDay && actions.HasBlockingActions()
                 || checks.Any(check => !check.satisfied && check.messageKey == "action.condition.missing");

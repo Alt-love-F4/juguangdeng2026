@@ -35,11 +35,37 @@ namespace Spotlight.Narrative.Tests
             Assert.That(presenter.Played, Is.EqualTo(new[] { "visit" }));
             presenter.Complete(); Assert.That(presenter.Played, Is.EqualTo(new[] { "visit", "first" }));
             presenter.Complete(); Assert.That(core.State.GetCounter("daily.playcount.first"), Is.EqualTo(1));
+            Assert.That(actions.Execute(action.actionKey), Is.False, "A completed daily cannot be purchased again on the same day.");
+            Assert.That(actions.ActionPoints.Current, Is.EqualTo(4));
+            actions.BeginDay(2);
             Assert.That(actions.Execute(action.actionKey), Is.True);
             Assert.That(presenter.Played[presenter.Played.Count - 1], Is.EqualTo("second")); presenter.Complete();
             var snapshot = core.State.Capture(); core.State.SetCounter("daily.playcount.first", 0); core.State.Restore(snapshot);
             Assert.That(core.State.GetCounter("daily.playcount.first"), Is.EqualTo(1));
         }
+        [Test] public void DailyCompletionSurvivesRestoreAndNextDayReopensMapContent()
+        {
+            var config = new NarrativeConfiguration(); config.events.Add(Event("ordinary", "ordinary"));
+            var presenter = new Presenter(); var core = new NarrativeController(config, presenter);
+            var action = Action("ordinary"); var actions = new NarrativeActionController(core, new[] { action });
+            actions.Mount("market", action.actionKey);
+            string firstToken = actions.GetActionInstanceKey("market", action.actionKey);
+            Assert.That(actions.Execute(action.actionKey), Is.True);
+            presenter.Complete();
+            string saved = actions.CaptureJson();
+            actions.RestoreJson(saved);
+            Assert.That(actions.HasExecutedToday(action.actionKey), Is.True);
+            Assert.That(actions.HasMapActions("market"), Is.False);
+            Assert.That(actions.Execute(action.actionKey), Is.False);
+            Assert.That(actions.ActionPoints.Current, Is.EqualTo(4));
+            actions.BeginDay(2);
+            Assert.That(actions.HasMapActions("market"), Is.True);
+            Assert.That(actions.GetActionInstanceKey("market", action.actionKey), Is.Not.EqualTo(firstToken));
+            Assert.That(actions.Execute(action.actionKey), Is.True);
+            presenter.Complete();
+            Assert.That(actions.Execute(action.actionKey), Is.False);
+        }
+
         [Test] public void NewsReplacesRatherThanAppendsOrdinaryAndNoPreviewMutation()
         {
             var config = new NarrativeConfiguration(); config.events.Add(Event("ordinary", "ordinary")); config.events.Add(Event("news", "news", true));
@@ -167,6 +193,10 @@ namespace Spotlight.Narrative.Tests
             Assert.That(actions.Execute(action.actionKey), Is.True); Assert.That(actions.ActionPoints.Current, Is.EqualTo(4));
             presenter.Cancel(); Assert.That(actions.ActionPoints.Current, Is.EqualTo(5));
             Assert.That(core.State.GetCounter("daily.playcount.ordinary"), Is.Zero);
+            Assert.That(actions.HasExecutedToday(action.actionKey), Is.False);
+            Assert.That(actions.Execute(action.actionKey), Is.True, "Cancellation must not spend the daily completion slot.");
+            presenter.Complete();
+            Assert.That(actions.Execute(action.actionKey), Is.False);
         }
 
         [TestCase("旧城区")]

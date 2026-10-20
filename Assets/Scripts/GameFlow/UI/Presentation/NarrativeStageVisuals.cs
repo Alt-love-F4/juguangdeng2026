@@ -110,7 +110,12 @@ namespace Spotlight.GameFlow
         private static readonly System.Collections.Generic.HashSet<string> warnedPlaceholders = new System.Collections.Generic.HashSet<string>(StringComparer.Ordinal);
         private sealed class BackgroundResources
         {
-            public readonly NarrativeStageVisuals library = Resources.Load<NarrativeStageVisuals>("Dialogue/NarrativeStageVisuals");
+            private NarrativeStageVisuals library;
+            // The cache outlives scene transitions, and Resources.UnloadUnusedAssets does not see this
+            // weak-table reference: a cafe page loaded mid-conversation would otherwise destroy the
+            // registry and make every later page's key "missing". Reload a destroyed instance.
+            public NarrativeStageVisuals Library
+                => library != null ? library : library = Resources.Load<NarrativeStageVisuals>("Dialogue/NarrativeStageVisuals");
             public readonly System.Collections.Generic.Dictionary<string, Texture> textures = new System.Collections.Generic.Dictionary<string, Texture>(StringComparer.Ordinal);
         }
         // Owner lifetime is the narrative batch, not the entire game session. Context overrides
@@ -121,7 +126,7 @@ namespace Spotlight.GameFlow
         {
             if (string.IsNullOrWhiteSpace(key)) return null;
             var scope = continuityOwner == null ? null : resourcesByOwner.GetValue(continuityOwner, _ => new BackgroundResources());
-            var library = scope != null ? scope.library : Resources.Load<NarrativeStageVisuals>("Dialogue/NarrativeStageVisuals");
+            var library = scope != null ? scope.Library : Resources.Load<NarrativeStageVisuals>("Dialogue/NarrativeStageVisuals");
             var resolved = library != null ? library.Find(key, contextKey) : null;
             if (resolved != null)
             {

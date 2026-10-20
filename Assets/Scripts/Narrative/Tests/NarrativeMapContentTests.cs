@@ -29,6 +29,23 @@ namespace Spotlight.Narrative.Tests
         }
 
         [Test]
+        public void MapGuardedMandatoryActionStillBlocksNightWhileMapIsClosed()
+        {
+            var config = new NarrativeConfiguration();
+            config.bars.Add(new NarrativeBarDefinition { barKey = "world.calendar", min = 1, max = 9999, initValue = 1, advanceMode = NarrativeAdvanceMode.Monotonic });
+            config.conditionKeys.Add(new NarrativeConditionKeyDefinition { key = "world.map.active" });
+            config.conditions.Add(new NarrativeConditionDefinition { conditionId = "map", ownerType = "action", ownerId = "visit",
+                condType = "BOOL_EQ", target = "world.map.active", value = "true" });
+            var narrative = new NarrativeController(config, new Presenter());
+            var actions = new NarrativeActionController(narrative, new[] { new NarrativeActionDefinition { actionKey = "visit", mustExecute = true } });
+            actions.Mount("cafe", "visit");
+            narrative.State.SetCondition("world.map.active", false);
+            Assert.That(actions.GetDisplayableActions("cafe"), Is.Empty, "Closed map still hides the card.");
+            Assert.That(actions.HasBlockingActions(), Is.True, "The cafe bed must not skip an outstanding map task.");
+            Assert.That(narrative.State.TryGetCondition("world.map.active", out bool map) && !map, Is.True, "Evaluation must not write state.");
+        }
+
+        [Test]
         public void SeenInstanceSurvivesRefreshDisappearanceAndSaveWithoutCompletingAction()
         {
             var presenter = new Presenter(); var narrative = Controller(presenter, true);

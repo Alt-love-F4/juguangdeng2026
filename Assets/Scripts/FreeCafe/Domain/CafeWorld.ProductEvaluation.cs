@@ -15,6 +15,7 @@ namespace Spotlight.FreeCafe
 
             double amountSum = 0, standardSum = 0, concentrationSum = 0, concentrationVolume = 0;
             bool needsCoffee = false;
+            float portionScale = ProductEvaluationPortionScale(cup, product, requiredCupSpecId);
             foreach (var need in evaluation.amounts)
             {
                 double actual = 0, coffeeVolume = 0, coffeeQuality = 0, groundsGrams = 0, waterMl = 0;
@@ -39,7 +40,7 @@ namespace Spotlight.FreeCafe
                     }
                 }
 
-                double ideal = (need.idealMl > 0 ? need.idealMl : need.idealGrams) * ProductPortionScale(product, requiredCupSpecId);
+                double ideal = (need.idealMl > 0 ? need.idealMl : need.idealGrams) * portionScale;
                 // The tolerance band is free; outside it, equal excess/shortage has equal cost.
                 // Normalize by the remaining distance to an empty serving, so missing is always zero.
                 float amount = ProductAmountScore(actual, ideal, need.tolerance);

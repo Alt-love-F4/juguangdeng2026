@@ -187,7 +187,8 @@ namespace Spotlight.GameFlow.Tests
             Assert.That(dotRoot.activeSelf, Is.True, "A hidden ancestor must not erase unread badge state.");
 
             runtime.Actions.ConfirmActionDisplayed("cafe", runtime.Actions.GetActionInstanceKey("cafe", "important"));
-            Assert.That(dotRoot.activeSelf, Is.False);
+            Assert.That(dotRoot.activeSelf, Is.True, "Reading a task must not clear its content marker.");
+            Assert.That(Get<bool>(button, "interactable"), Is.True);
             runtime.Actions.Mount("cafe", "important", "next-instance");
             Assert.That(dotRoot.activeSelf, Is.True, "Content notifications must update the cached map while hidden.");
 
@@ -197,6 +198,85 @@ namespace Spotlight.GameFlow.Tests
             location.SetActive(false);
             Invoke(map, "OnEnable");
             Assert.That(dotRoot.activeSelf, Is.False, "Explicitly hidden locations do not have badges.");
+        }
+
+        [TestCase(false)]
+        [TestCase(true)]
+        public void MapContentMarkerUsesPriorityNotUnreadOrAffordability(bool important)
+        {
+            var config = new NarrativeConfiguration();
+            config.events.Add(new NarrativeEventDefinition { eventId = "story" });
+            config.actions.Add(new NarrativeActionDefinition { actionKey = "task", type = NarrativeActionType.Once,
+                mustExecute = important, requirements = "ActionPoint(1)",
+                resultEvents = new System.Collections.Generic.List<string> { "story" } });
+            runtime.Initialize(config, new ImmediatePresenter());
+            runtime.Actions.RefreshForDay(2);
+            runtime.Actions.Mount("market", "task");
+            runtime.Actions.ActionPoints.Set(0);
+            var map = Create("Map", root.transform).AddComponent(UiType("Spotlight.GameFlow.MapSceneController"));
+            var location = Create("Location:market", map.transform);
+            var button = location.AddComponent(UiType("UnityEngine.UI.Button"));
+            ((System.Collections.IDictionary)map.GetType().GetField("locationButtons", PrivateInstance).GetValue(map)).Add("market", button);
+            Invoke(map, "BindNewContentDot", button, "market");
+            Invoke(map, "SubscribePositionEffects");
+            var dot = location.GetComponentInChildren<MapActionNewContentDot>(true);
+            Assert.That(Get<bool>(button, "interactable"), Is.True, "Resource costs must not hide real content.");
+            Assert.That(dot.gameObject.activeSelf, Is.True);
+            Assert.That(dot.color, Is.EqualTo(important ? MapActionNewContentDot.ImportantColor : MapActionNewContentDot.OrdinaryColor));
+            runtime.Actions.ConfirmActionDisplayed("market", runtime.Actions.GetActionInstanceKey("market", "task"));
+            Assert.That(dot.gameObject.activeSelf, Is.True);
+            runtime.Actions.ActionPoints.Set(5);
+            Assert.That(runtime.Actions.Execute("task"), Is.True);
+            Assert.That(Get<bool>(button, "interactable"), Is.False);
+            Assert.That(dot.gameObject.activeSelf, Is.False);
+            Invoke(map, "ApplyFirstDayGuide");
+            Assert.That(Get<bool>(button, "interactable"), Is.False, "The frame guide must not re-enable empty locations.");
+        }
+
+        [Test]
+        public void EmptyPoolDisablesMapEntryAndUnlockRestoresYellowMarker()
+        {
+            var config = new NarrativeConfiguration();
+            config.conditionKeys.Add(new NarrativeConditionKeyDefinition { key = "ready" });
+            config.conditions.Add(new NarrativeConditionDefinition { conditionId = "ready", ownerType = "event", ownerId = "ordinary",
+                groupIndex = 1, condType = "BOOL_EQ", target = "ready", value = "true" });
+            config.events.Add(new NarrativeEventDefinition { eventId = "ordinary", entry = NarrativeEntryPoint.MapAction,
+                eventProperties = new System.Collections.Generic.List<NarrativeEventProperty> {
+                    new NarrativeEventProperty { property = "dailyPool", value = "market" },
+                    new NarrativeEventProperty { property = "dailyKind", value = "ordinary" } } });
+            config.actions.Add(new NarrativeActionDefinition { actionKey = "task", requirements = "ActionPoint(1)",
+                resultEvents = new System.Collections.Generic.List<string> { "ordinary" } });
+            runtime.Initialize(config, new ImmediatePresenter()); runtime.Actions.RefreshForDay(2);
+            runtime.Actions.Mount("market", "task");
+            var map = Create("Map", root.transform).AddComponent(UiType("Spotlight.GameFlow.MapSceneController"));
+            var location = Create("Location:market", map.transform);
+            var button = location.AddComponent(UiType("UnityEngine.UI.Button"));
+            ((System.Collections.IDictionary)map.GetType().GetField("locationButtons", PrivateInstance).GetValue(map)).Add("market", button);
+            Invoke(map, "BindNewContentDot", button, "market");
+            Invoke(map, "SubscribePositionEffects");
+            var dot = location.GetComponentInChildren<MapActionNewContentDot>(true);
+            Assert.That(Get<bool>(button, "interactable"), Is.False);
+            Assert.That(dot.gameObject.activeSelf, Is.False);
+            runtime.Controller.State.SetCondition("ready", true);
+            Assert.That(Get<bool>(button, "interactable"), Is.True);
+            Assert.That(dot.gameObject.activeSelf, Is.True);
+            Assert.That(dot.color, Is.EqualTo(MapActionNewContentDot.OrdinaryColor));
+            runtime.Controller.State.SetCondition("ready", false);
+            Assert.That(Get<bool>(button, "interactable"), Is.False);
+            Assert.That(dot.gameObject.activeSelf, Is.False);
+        }
+
+        [Test]
+        public void EmptyCafeKeepsNavigationButHasNoTaskMarker()
+        {
+            runtime.Actions.RefreshForDay(2);
+            var map = Create("Map", root.transform).AddComponent(UiType("Spotlight.GameFlow.MapSceneController"));
+            var location = Create("Location:cafe", map.transform);
+            var button = location.AddComponent(UiType("UnityEngine.UI.Button"));
+            ((System.Collections.IDictionary)map.GetType().GetField("locationButtons", PrivateInstance).GetValue(map)).Add("cafe", button);
+            Invoke(map, "BindNewContentDot", button, "cafe");
+            Assert.That(Get<bool>(button, "interactable"), Is.True);
+            Assert.That(location.GetComponentInChildren<MapActionNewContentDot>(true).gameObject.activeSelf, Is.False);
         }
 
         [Test]
@@ -350,7 +430,7 @@ namespace Spotlight.GameFlow.Tests
         [Test]
         public void UnavailableStoryDoesNotMislabelAffordableActionPoints()
         {
-            var action = new NarrativeActionDefinition { actionKey = "daily_pool", requirements = "ActionPoint(1)", resultEvents = new System.Collections.Generic.List<string> { "unavailable" } };
+            var action = new NarrativeActionDefinition { actionKey = "daily_pool", nameText = "帮欧仁整理申诉", descText = "整理今天的申诉材料。", requirements = "ActionPoint(1)", resultEvents = new System.Collections.Generic.List<string> { "unavailable" } };
             var config = new NarrativeConfiguration(); config.actions.Add(action);
             config.events.Add(new NarrativeEventDefinition { eventId = "unavailable", onceOnly = true, entry = NarrativeEntryPoint.MapAction,
                 eventProperties = new System.Collections.Generic.List<NarrativeEventProperty> {
@@ -361,14 +441,14 @@ namespace Spotlight.GameFlow.Tests
             runtime.Actions.Mount("market", action.actionKey);
             CreateDetails(null); details.Show("market", "市场");
             var card = details.transform.Find("Viewport/ActionList/Action_" + action.actionKey);
-            Assert.That(Get<string>(Widget(card.Find("Execute/Label"), "TMPro.TextMeshProUGUI"), "text"), Is.EqualTo("没有事务"));
-            Assert.That(Get<Color>(Widget(card.Find("Requirement/Label"), "TMPro.TextMeshProUGUI"), "color"), Is.EqualTo(MapVisualTheme.Ink));
+            Assert.That(card, Is.Null, "An empty event pool must not advertise its configured task title.");
+            Assert.That(runtime.Actions.HasMapActions("market"), Is.False);
             Assert.That(GameplayTodoProjection.Build(runtime), Is.Empty,
                 "An action with no currently available event must not become a todo.");
         }
 
         [Test]
-        public void PoolConditionUnlockRefreshesExistingDetailButtonWithoutReopening()
+        public void PoolConditionUnlockRefreshesMapEntryAndDetailWithoutReopening()
         {
             var config = new NarrativeConfiguration();
             config.conditionKeys.Add(new NarrativeConditionKeyDefinition { key = "pool.ready" });
@@ -378,20 +458,38 @@ namespace Spotlight.GameFlow.Tests
                 eventProperties = new System.Collections.Generic.List<NarrativeEventProperty> {
                     new NarrativeEventProperty { property = "dailyPool", value = "market" },
                     new NarrativeEventProperty { property = "dailyKind", value = "ordinary" } } });
-            var action = new NarrativeActionDefinition { actionKey = "daily_pool", requirements = "ActionPoint(1)",
+            var action = new NarrativeActionDefinition { actionKey = "daily_pool", nameText = "task.name", descText = "整理今天的申诉材料。", requirements = "ActionPoint(1)",
                 resultEvents = new System.Collections.Generic.List<string> { "ordinary" } };
-            config.actions.Add(action); runtime.Initialize(config, new ImmediatePresenter());
+            config.actions.Add(action);
+            config.texts.Add(new NarrativeTextDefinition { key = action.nameText, content = "帮欧仁整理申诉" });
+            runtime.Initialize(config, new ImmediatePresenter(), key => key == "task.name" ? "帮欧仁整理申诉" : key);
             runtime.Actions.Mount("market", action.actionKey);
             CreateDetails(null); details.Show("market", "市场");
             var card = details.transform.Find("Viewport/ActionList/Action_" + action.actionKey);
-            var caption = Widget(card.Find("Execute/Label"), "TMPro.TextMeshProUGUI");
-            Assert.That(Get<string>(caption, "text"), Is.EqualTo("没有事务"));
+            Assert.That(card, Is.Null);
+            Assert.That(runtime.Actions.HasMapActions("market"), Is.False);
             Assert.That(GameplayTodoProjection.Build(runtime), Is.Empty);
             runtime.Controller.State.SetCondition("pool.ready", true);
             Invoke(details, "Update");
-            Assert.That(details.transform.Find("Viewport/ActionList/Action_" + action.actionKey), Is.SameAs(card));
+            card = details.transform.Find("Viewport/ActionList/Action_" + action.actionKey);
+            Assert.That(card, Is.Not.Null);
+            var caption = Widget(card.Find("Execute/Label"), "TMPro.TextMeshProUGUI");
+            Assert.That(runtime.Actions.HasMapActions("market"), Is.True);
             Assert.That(Get<string>(caption, "text"), Is.EqualTo("执行"));
+            Assert.That(Get<string>(Widget(card.Find("Name"), "TMPro.TextMeshProUGUI"), "text"), Is.EqualTo("帮欧仁整理申诉"));
+            Assert.That(Get<string>(Widget(card.Find("Description"), "TMPro.TextMeshProUGUI"), "text"), Is.EqualTo(action.descText),
+                "Unlocking the pool restores authored copy without appending internal flow or billing instructions.");
             Assert.That(GameplayTodoProjection.Build(runtime).Single().actionKey, Is.EqualTo(action.actionKey));
+            runtime.Actions.ActionPoints.Set(0);
+            Invoke(details, "Update");
+            Assert.That(Get<string>(caption, "text"), Is.EqualTo("行动点不足"));
+            Assert.That(Get<string>(Widget(card.Find("Name"), "TMPro.TextMeshProUGUI"), "text"), Is.EqualTo("帮欧仁整理申诉"),
+                "Insufficient resources must not hide a real task.");
+            runtime.Controller.State.SetCondition("pool.ready", false);
+            Invoke(details, "Update");
+            Assert.That(details.transform.Find("Viewport/ActionList/Action_" + action.actionKey), Is.Null,
+                "Empty-pool cards must be removed even when resources are also insufficient.");
+            runtime.Actions.ActionPoints.Set(5);
             Assert.That(runtime.Actions.ActionPoints.Current, Is.EqualTo(5));
         }
 
@@ -552,8 +650,8 @@ namespace Spotlight.GameFlow.Tests
             Assert.That(items.First().important, Is.True);
             Assert.That(GameplayTodoProjection.ShouldGuideToImportantTodo(runtime, optional, checks), Is.True);
             CreateDetails(null); details.Show("market", "市场");
-            var caption = Widget(details.transform.Find("Viewport/ActionList/Action_optional/Execute/Label"), "TMPro.TextMeshProUGUI");
-            Assert.That(Get<string>(caption, "text"), Is.EqualTo("查看详情"));
+            Assert.That(details.transform.Find("Viewport/ActionList/Action_optional"), Is.Null,
+                "A pool without content is not a map destination, even when another important task could unlock it.");
             runtime.Actions.ActionPoints.Set(0);
             runtime.Actions.IsAvailable(optional.actionKey, out var costChecks);
             Assert.That(GameplayTodoProjection.ShouldGuideToImportantTodo(runtime, optional, costChecks), Is.False,
@@ -697,13 +795,62 @@ namespace Spotlight.GameFlow.Tests
             Assert.That(runtime.Actions.Execute("activity"), Is.True);
             Invoke(details, "Update");
             var done = GameplayTodoProjection.Build(runtime).Single();
-            Assert.That(done.completed, Is.True, "The purchase is complete even if another optional visit can be bought.");
-            Assert.That(done.status, Does.Contain("再次行动另计消耗"));
+            Assert.That(done.completed, Is.True, "A completed daily waits for tomorrow.");
+            Assert.That(done.status, Does.Contain("今日已完成，明天可继续"));
             Assert.That(runtime.Actions.ActionPoints.Current, Is.EqualTo(4));
+            Assert.That(runtime.Actions.IsAvailable("activity", out _), Is.False);
+            Assert.That(runtime.Actions.Execute("activity"), Is.False);
+            Assert.That(details.transform.Find("Viewport/ActionList/Action_activity"), Is.Null);
+            runtime.Actions.BeginDay(2);
+            Invoke(details, "Update");
             Assert.That(runtime.Actions.IsAvailable("activity", out _), Is.True);
-            var card = details.transform.Find("Viewport/ActionList/Action_activity");
-            var caption = Widget(card.Find("Execute/Label"), "TMPro.TextMeshProUGUI");
-            Assert.That(Get<string>(caption, "text"), Is.EqualTo("再次行动"));
+            Assert.That(details.transform.Find("Viewport/ActionList/Action_activity"), Is.Not.Null);
+        }
+
+        [Test]
+        public void MapActionHandoffDismissesPopupAndDoesNotReopenAfterNarrative()
+        {
+            var config = new NarrativeConfiguration();
+            config.events.Add(new NarrativeEventDefinition { eventId = "story" });
+            config.actions.Add(new NarrativeActionDefinition { actionKey = "task", type = NarrativeActionType.Repeat,
+                resultEvents = new System.Collections.Generic.List<string> { "story" } });
+            var presenter = new PendingPresenter();
+            runtime.Initialize(config, presenter); runtime.Actions.RefreshForDay(2);
+            runtime.Actions.Mount("market", "task");
+            var map = Create("Map", root.transform).AddComponent(UiType("Spotlight.GameFlow.MapSceneController"));
+            CreateDetails(null); details.Show("market", "市场");
+            map.GetType().GetField("actionDetails", PrivateInstance).SetValue(map, details);
+            Invoke(map, "SubscribePositionEffects");
+            Assert.That(details.gameObject.activeSelf, Is.True);
+            Assert.That(runtime.Actions.Execute("task"), Is.True);
+            Assert.That(details.gameObject.activeSelf, Is.False, "Entering action presentation must dismiss the popup.");
+            presenter.Complete();
+            Assert.That(runtime.Actions.HasMapActions("market"), Is.True, "Repeat content still exists to catch accidental rebuilding.");
+            Assert.That(details.gameObject.activeSelf, Is.False, "Finishing dialogue must not restore the old popup.");
+            details.Show("market", "市场");
+            Assert.That(details.gameObject.activeSelf, Is.True, "An explicit new click can reopen it.");
+        }
+
+        [Test]
+        public void BusyPopupDismissHidesGraphicsAndInputWithoutStoppingExecution()
+        {
+            CreateDetails(null); details.Show("market", "市场");
+            typeof(MapActionDetailsView).GetField("busy", PrivateInstance).SetValue(details, true);
+            details.Dismiss();
+            var group = details.GetComponent<CanvasGroup>();
+            Assert.That(details.gameObject.activeSelf, Is.True, "The owner must survive until its execution callback completes.");
+            Assert.That(details.IsBusy, Is.True);
+            Assert.That(group.alpha, Is.Zero);
+            Assert.That(group.interactable, Is.False);
+            Assert.That(group.blocksRaycasts, Is.False);
+            Invoke(details, "LateUpdate");
+            Assert.That(group.alpha, Is.Zero, "The reveal animation must not make a dismissed popup visible again.");
+            typeof(MapActionDetailsView).GetField("busy", PrivateInstance).SetValue(details, false);
+            details.Dismiss();
+            Assert.That(details.gameObject.activeSelf, Is.False);
+            details.Show("market", "市场");
+            Assert.That(group.interactable, Is.True);
+            Assert.That(group.blocksRaycasts, Is.True);
         }
 
         [Test]

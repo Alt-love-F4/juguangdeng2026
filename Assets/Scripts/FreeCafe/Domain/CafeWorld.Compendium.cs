@@ -17,7 +17,7 @@ namespace Spotlight.FreeCafe
             if (product.requiresLatteArt) return true;
             if (product.ingredients == null) return false;
             foreach (var ingredient in product.ingredients)
-                if (ingredient.specId == "milkfoam") return true;
+                if (ingredient.specId == "milkfoam" || ingredient.specId == "matcha.drink" || ingredient.specId == "cocoa.drink") return true;
             return false;
         }
 
@@ -25,14 +25,14 @@ namespace Spotlight.FreeCafe
         public string ProductLockReason(ProductSpec product)
         {
             if (product == null) return "未知餐品";
-            if (State.unlockedProducts.Contains(product.id)) return null;
             if (State.equipmentProgressionEnabled && !State.sandboxEquipment)
             {
-                if (State.successfulOrders < 2 && product.id != "blackcoffee" && product.id != "cold_brew")
-                    return "累计成功出品 2 单后学会（" + State.successfulOrders + " / 2）";
+                if (State.successfulOrders < product.unlockSuccessfulOrders)
+                    return "累计成功出品 " + product.unlockSuccessfulOrders + " 单后学会（" + State.successfulOrders + " / " + product.unlockSuccessfulOrders + "）";
                 if (ProductNeedsPrecision(product) && !PrecisionEquipmentAvailable) return "需订购「精粹萃取组」";
-                if (ProductNeedsLatte(product) && !LatteEquipmentAvailable) return "需订购「拉花套装」";
+                if (ProductNeedsLatte(product) && !LatteEquipmentAvailable) return "需订购「拉花套装」（含搅拌设备）";
             }
+            if (State.unlockedProducts.Contains(product.id)) return null;
             if (State.reputation < product.unlockReputation) return "声望达到 " + product.unlockReputation + " 后学会";
             return "下次开店时学会";
         }

@@ -97,7 +97,7 @@ namespace Spotlight.FreeCafe
             }
             private void CreateOrder()
             {
-                var row = orders[index]; var product = IsNarrativeWildcard(row.productId) ? Array.Find(world.Catalog.products, p => world.State.unlockedProducts.Contains(p.id)) : world.Product(NarrativeBaseProduct(row.productId));
+                var row = orders[index]; var product = IsNarrativeWildcard(row.productId) ? Array.Find(world.Catalog.products, p => world.State.unlockedProducts.Contains(p.id) && world.CanOfferProduct(p)) : world.Product(NarrativeBaseProduct(row.productId));
                 if (product == null) throw new InvalidOperationException("没有可制作的餐品。 ");
                 requestId = "narrative_order_" + (++snapshot.requestSequence);
                 snapshot.requests.Add(new CustomerRequest { id = requestId, customerId = customerId,
@@ -118,7 +118,7 @@ namespace Spotlight.FreeCafe
                 var product = IsNarrativeWildcard(row.productId) && classification.known ? world.Product(classification.productId) : world.Product(NarrativeBaseProduct(row.productId));
                 if (product == null) return ActionResult.No("请完成一杯真实饮品后交付；当前杯子保留。 ");
                 string requiredCup = IsNarrativeWildcard(row.productId) ? product.cupSpecId : world.RequiredCupSpecId(request);
-                if (!classification.known || classification.productId != product.id || cup.specId != requiredCup)
+                if (!classification.known || classification.productId != product.id || !world.AcceptsServingCup(cup, requiredCup))
                     return ActionResult.No("请按当前剧情订单制作" + product.label + "，并使用正确杯型；杯子和订单均已保留。");
                 bool hasSugar = cup.contents.Exists(p => p.specId == "sugar" && (p.units > 0 || p.grams > 0 || p.milliliters > 0));
                 if (row.productId.EndsWith(".sweet", StringComparison.Ordinal) && !hasSugar

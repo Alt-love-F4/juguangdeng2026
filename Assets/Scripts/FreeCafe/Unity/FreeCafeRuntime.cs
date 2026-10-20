@@ -482,6 +482,8 @@ namespace Spotlight.FreeCafe
                     if (sign != null && CanEndBusiness) sign.CloseAfterFlip(RequestBusinessEnd);
                     else RequestBusinessEnd();
                 }
+                // A settled day cannot reopen; the closed sign is the way back out to the city map.
+                else if (IsClosedForToday) OpenMapFromClosedSign();
                 else StartBusiness();
                 return;
             }
@@ -1322,6 +1324,16 @@ namespace Spotlight.FreeCafe
             SyncViews();
         }
 
+        /// <summary>Story business already closed today (Night). Sandbox keeps its reopenable sign.</summary>
+        public bool IsClosedForToday => !IsSandboxMode && World != null && !World.State.open
+            && World.State.businessPhase == BusinessPhase.Night;
+        private void OpenMapFromClosedSign()
+        {
+            CancelDrag();
+            if (gameFlow == null) gameFlow = FindFirstObjectByType<GameFlowBootstrap>();
+            // OpenMap reports its own blocked reason (story, pause, tutorial...) as a toast.
+            if (gameFlow != null) gameFlow.OpenMap();
+        }
         public void StartBusiness()
         {
             if (World == null || InputBlocked || TutorialBusinessStartBlocked) return;
@@ -1342,6 +1354,13 @@ namespace Spotlight.FreeCafe
         public void RequestBusinessStart()
         {
             if (GameplayBlocked || TutorialBusinessStartBlocked || PracticeTutorialActive) { NotifyBlockedOperation(); return; }
+            string dayFlowReason = DayFlowBusinessOpeningBlockReason();
+            if (dayFlowReason != null)
+            {
+                ShowHint(dayFlowReason);
+                OperationToastPanel.ShowMessage(dayFlowReason);
+                return;
+            }
             pendingBusinessStart = true;
             TryStartBusiness();
         }
@@ -1349,6 +1368,8 @@ namespace Spotlight.FreeCafe
         {
             if (World == null || World.State.open) { pendingBusinessStart = false; return; }
             if (GameplayBlocked || TutorialBusinessStartBlocked || PracticeTutorialActive) return;
+            // A deferred start re-checks the phase: it may have changed while visits were pumped.
+            if (DayFlowBusinessOpeningBlockReason() != null) { pendingBusinessStart = false; return; }
             if (!IsSandboxMode || NarrativeRuntime.Instance != null)
             {
                 if (cafeVisits == null) cafeVisits = new CafeVisitBridge(this);
@@ -1356,8 +1377,16 @@ namespace Spotlight.FreeCafe
                 if (ncs != null && (!cafeVisits.Pump() || !ncs.Controller.CanCaptureSnapshot || ncs.Controller.IsBusy || cafeVisits.HasStageHandoff)) return;
             }
             pendingBusinessStart = false;
+            // Every entry route (opening page, resumed/rest visit) gets today's cup stock; idempotent per day.
+            if (!IsSandboxMode && dayFlow != null) RefreshDailyCups();
             Report(World.StartDay(IsSandboxMode));
             if (!IsSandboxMode || NarrativeRuntime.Instance != null) cafeVisits?.Pump();
+        }
+        private string DayFlowBusinessOpeningBlockReason()
+        {
+            if (IsSandboxMode) return null;
+            if (dayFlow == null) dayFlow = FindFirstObjectByType<DayFlowController>();
+            return dayFlow != null ? dayFlow.BusinessOpeningBlockReason : null;
         }
         public string BusinessClosingBlockReason
         {

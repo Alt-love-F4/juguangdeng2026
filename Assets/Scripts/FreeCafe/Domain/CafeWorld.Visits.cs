@@ -252,6 +252,7 @@ namespace Spotlight.FreeCafe
         // All final order paths use this after their one economic settlement. Remakes never call it.
         private void CompleteCustomerOrder(CustomerRequest request, bool served)
         {
+            if (served) UnlockContent();
             State.requests.Remove(request);
             State.spokenCustomers.Remove(request.customerId);
             var v = VisitForCustomer(request.customerId);

@@ -100,6 +100,21 @@ namespace Spotlight.Narrative
         /// <summary>Read-only guards for the active root; never exports transient choices as world facts.</summary>
         public bool ReadPresentationCondition(string key) => TryReadPresentationCondition(key, out bool value) && value;
 
+        private string assumedGuardKey;
+        private bool assumedGuardValue;
+
+        /// <summary>
+        /// Read-only evaluation as if one world guard had another value, e.g. "is this map task still
+        /// outstanding" while the player stands in the cafe and world.map.active is false. No state is written.
+        /// </summary>
+        public T EvaluateAssumingGuard<T>(string key, bool value, Func<T> evaluate)
+        {
+            string previousKey = assumedGuardKey; bool previousValue = assumedGuardValue;
+            assumedGuardKey = key; assumedGuardValue = value;
+            try { return evaluate(); }
+            finally { assumedGuardKey = previousKey; assumedGuardValue = previousValue; }
+        }
+
         private bool TryReadPresentationCondition(string key, out bool value, int depth = 0)
         {
             value = false;
@@ -142,6 +157,8 @@ namespace Spotlight.Narrative
                 // Preserve the existing explicitly declared construction-dependency fallback.
                 UnavailablePresentationGuard(key); value = false; return true;
             }
+            if (assumedGuardKey != null && string.Equals(key, assumedGuardKey, StringComparison.Ordinal))
+            { value = assumedGuardValue; return true; }
             if (!state.TryGetCondition(key, out value)) throw new InvalidOperationException("Unknown presentation condition: " + key);
             return true;
         }

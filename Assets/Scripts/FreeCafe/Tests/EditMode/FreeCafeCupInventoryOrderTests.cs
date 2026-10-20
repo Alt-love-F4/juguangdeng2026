@@ -209,8 +209,12 @@ namespace Spotlight.FreeCafe.Tests
             }
         }
 
-        [Test]
-        public void CorrectDrinkInWrongCupRequiresRemakeAndKeepsOriginalCupRequirement()
+        [TestCase(40, false)]
+        [TestCase(80, false)]
+        [TestCase(240, true)]
+        [TestCase(320, true)]
+        [TestCase(400, true)]
+        public void SmallOrderAcceptsFreeLargerCupUnlessServingIsTooSmall(float ml, bool accepted)
         {
             world.EnableProduction(); world.StartDay();
             var request = world.State.requests[0];
@@ -218,14 +222,47 @@ namespace Spotlight.FreeCafe.Tests
             world.SelectServingCup("s.cups.large");
             var cup = world.ServingCup;
             cup.contents.Add(new Portion { specId = "coffee", coffeeKind = "black", units = 1,
-                milliliters = 240, temperatureCelsius = 95, productionScore = 100 });
+                milliliters = ml, temperatureCelsius = 95, productionScore = 100,
+                composition = new List<ConstituentAmount> {
+                    new ConstituentAmount { ingredientId = "grounds", grams = ml * .06f },
+                    new ConstituentAmount { ingredientId = "water", milliliters = ml } } });
             Assert.That(world.ClassifyCoffee(cup).productId, Is.EqualTo("blackcoffee"));
-            Assert.That(world.MatchesOrder(cup, request), Is.False);
+            Assert.That(world.MatchesOrder(cup, request), Is.EqualTo(accepted));
             var delivery = world.DeliverProductionCup();
-            Assert.That(delivery.feedback, Is.EqualTo(CafeFeedbackKind.DeliveryRemake), delivery.message);
+            Assert.That(delivery.feedback, Is.EqualTo(accepted ? CafeFeedbackKind.DeliverySatisfied : CafeFeedbackKind.DeliveryRemake), delivery.message);
             Assert.That(request.cupSpecId, Is.EqualTo("cup.small"));
-            Assert.That(world.State.successfulOrders, Is.Zero);
+            Assert.That(world.State.successfulOrders, Is.EqualTo(accepted ? 1 : 0));
             Assert.That(world.Find("s.cups.large").stock, Is.EqualTo(world.Spec("source.cups.large").initialStock));
+        }
+
+        [Test]
+        public void LargeOrderStillRejectsSmallerCup()
+        {
+            world.EnableProduction(); world.StartDay();
+            var request = world.State.requests[0];
+            request.productId = "blackcoffee"; request.cupSpecId = "cup.large";
+            world.SelectServingCup("s.cups.small");
+            world.ServingCup.contents.Add(new Portion { specId = "coffee", coffeeKind = "black", units = 1,
+                milliliters = 240, temperatureCelsius = 95, productionScore = 100 });
+            Assert.That(world.MatchesOrder(world.ServingCup, request), Is.False);
+            Assert.That(world.DeliverProductionCup().feedback, Is.EqualTo(CafeFeedbackKind.DeliveryRemake));
+        }
+
+        [Test]
+        public void FreeCupUpgradeDoesNotExcuseWrongDrinkOrPoorExtraction()
+        {
+            world.EnableProduction(); world.StartDay();
+            var request = world.State.requests[0];
+            request.productId = "blackcoffee"; request.cupSpecId = "cup.small";
+            world.SelectServingCup("s.cups.large");
+            var cup = world.ServingCup;
+            cup.contents.Add(new Portion { specId = "coffee", coffeeKind = "cold_brew", units = 1,
+                milliliters = 320, temperatureCelsius = 22 });
+            Assert.That(world.MatchesOrder(cup, request), Is.False);
+            cup.contents[0].coffeeKind = "black";
+            cup.contents[0].temperatureCelsius = 95;
+            cup.contents[0].productionScore = 0;
+            Assert.That(world.MatchesOrder(cup, request), Is.False);
         }
 
         [Test]

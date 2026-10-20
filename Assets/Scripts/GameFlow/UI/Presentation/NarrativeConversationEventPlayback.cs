@@ -55,9 +55,22 @@ namespace Spotlight.GameFlow
             // Only the first line introduces its speaker. Later characters must not appear early.
             return new DialogueScript(lines, new DialogueCharacter("", null), new DialogueCharacter("", null), data.title,
                 options: options, continuityOwner: data.continuityOwner, continues: data.continues, musicKey: data.bgmOverride,
-                backgroundVisual: NarrativeStageVisuals.Resolve(data.backgroundPath,
-                    data.lines.Count > 0 && !string.IsNullOrWhiteSpace(data.lines[0].pageId)
-                        ? data.lines[0].pageId : data.presentationKey, data.continuityOwner));
+                backgroundVisual: ResolveBackground(data));
+        }
+
+        // Missing art is a content error, not a story failure: a thrown lookup would fail the event,
+        // leave a mandatory Once action uncompleted and skip every result. Report it, keep the stage.
+        private static NarrativeStageVisuals.Entry ResolveBackground(NarrativeConversationPresentationData data)
+        {
+            string context = data.lines.Count > 0 && !string.IsNullOrWhiteSpace(data.lines[0].pageId)
+                ? data.lines[0].pageId : data.presentationKey;
+            try { return NarrativeStageVisuals.Resolve(data.backgroundPath, context, data.continuityOwner); }
+            catch (InvalidOperationException error)
+            {
+                Debug.LogError("[NCS][BackgroundMissing] event=" + data.eventId + " page=" + context
+                    + ": " + error.Message + "; keeping the previous background so the story can finish.");
+                return null;
+            }
         }
 
         private static readonly HashSet<string> warnedPortraits = new HashSet<string>(StringComparer.Ordinal);

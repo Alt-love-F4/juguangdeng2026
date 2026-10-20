@@ -29,7 +29,7 @@ namespace Spotlight.FreeCafe.Tests
                 events.Add(latte);
                 Assert.That(changes, Is.EqualTo(events.Count), "Changed should precede EquipmentAcquired.");
                 Assert.That(latte ? world.State.latteEquipmentActive : world.State.precisionEquipmentActive, Is.True);
-                Assert.That(world.State.unlockedProducts, Does.Contain(latte ? "latte" : "espresso"));
+                Assert.That(world.State.unlockedProducts, Does.Contain(latte ? "cocoa" : "espresso"));
                 Assert.That(world.State.money, Is.EqualTo(latte ? 450 : 800));
             };
 

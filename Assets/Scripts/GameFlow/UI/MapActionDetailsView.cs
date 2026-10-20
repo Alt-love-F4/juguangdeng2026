@@ -32,6 +32,24 @@ namespace Spotlight.GameFlow
         private Action endDay, enterCafe;
         private bool busy;
         public bool IsBusy => busy;
+        public bool IsVisible => gameObject.activeInHierarchy && !dismissAfterExecution;
+        private bool dismissAfterExecution;
+        public void Dismiss()
+        {
+            // The execution coroutine belongs to this view. Keep it alive but invisible
+            // until the action callback finishes; disabling now would strand its cleanup.
+            if (busy)
+            {
+                dismissAfterExecution = true;
+                revealGroup = GetComponent<CanvasGroup>();
+                if (revealGroup == null) revealGroup = gameObject.AddComponent<CanvasGroup>();
+                revealGroup.alpha = 0;
+                revealGroup.interactable = false;
+                revealGroup.blocksRaycasts = false;
+                return;
+            }
+            gameObject.SetActive(false);
+        }
         private string signature;
         private NarrativeActionController subscribedActions;
         private bool contentDirty = true;
@@ -183,7 +201,10 @@ namespace Spotlight.GameFlow
             gameObject.SetActive(true); Rebuild();
             revealGroup = GetComponent<CanvasGroup>();
             if (revealGroup == null) revealGroup = gameObject.AddComponent<CanvasGroup>();
+            dismissAfterExecution = false;
             revealGroup.alpha = 1;
+            revealGroup.interactable = true;
+            revealGroup.blocksRaycasts = true;
             if (opening)
             {
                 revealStarted = Time.unscaledTime;
@@ -195,6 +216,7 @@ namespace Spotlight.GameFlow
         public void Refresh() { if (!busy && isActiveAndEnabled) Rebuild(); }
         private void LateUpdate()
         {
+            if (dismissAfterExecution) return;
             var parent = transform.parent as RectTransform;
             if (parent == null) return;
             float t = Mathf.Clamp01((Time.unscaledTime - revealStarted) / .26f);
@@ -239,7 +261,7 @@ namespace Spotlight.GameFlow
         private void OnMapContentChanged(string key) { if (key == position) contentDirty = true; }
         private void OnActionStateChanged() => cardsDirty = true;
         private string ContentSignature(NarrativeActionController actions)
-            => string.Join(";", actions.GetDisplayableActions(position).Select(a => actions.GetActionInstanceKey(position, a.actionKey)))
+            => string.Join(";", actions.GetMapActions(position).Select(a => actions.GetActionInstanceKey(position, a.actionKey)))
                 + "/replace:" + actions.ReplacesLocationActions(position);
 
         private void Update()
@@ -337,7 +359,7 @@ namespace Spotlight.GameFlow
             }
             cards.Clear();
             var actions = NarrativeRuntime.Instance?.Actions;
-            var values = actions?.GetDisplayableActions(position).ToList() ?? new List<NarrativeActionDefinition>();
+            var values = actions?.GetMapActions(position).ToList() ?? new List<NarrativeActionDefinition>();
             signature = actions != null ? ContentSignature(actions) : string.Empty;
             contentDirty = cardsDirty = false;
             float y = 0;
@@ -565,9 +587,7 @@ namespace Spotlight.GameFlow
                 ?? root.GetComponentInChildren<Button>(true);
             card.button = execute;
             if (description != null) description.text = Text(action.descText, string.IsNullOrEmpty(action.descText) ? "暂无行动描述" : action.descText);
-            if (description != null && NarrativeRuntime.Instance?.Actions?.IsDailyPoolAction(action.actionKey) == true)
-                description.text += "\n每次行动播放一则日常；首次到访会自动接上本次正文。"
-                    + "\n首访、翻页、选项回应不另扣点；再次行动才重新计费。";
+
             if (execute != null)
             {
                 execute.onClick.RemoveAllListeners();
@@ -614,6 +634,7 @@ namespace Spotlight.GameFlow
             executionEpoch++;
             UnbindActionNotifications();
             StopAllCoroutines(); busy = false;
+            dismissAfterExecution = false;
             foreach (Transform child in transform.root)
                 if (child.name == "ConsumptionEffect") Destroy(child.gameObject);
         }
@@ -640,7 +661,7 @@ namespace Spotlight.GameFlow
             if (action.mustExecute) type += " · 今日必做";
             if (dailyPool)
             {
-                type = actions.HasExecutedToday(action.actionKey) ? "日常活动 · 今日已进行，可自选再做" : "日常活动 · 每次独立结算";
+                type = "日常活动 · 每天一次";
             }
             if (card.type != null)
             {
@@ -660,7 +681,6 @@ namespace Spotlight.GameFlow
                 if (card.requirementIcon != null) card.requirementIcon.color = card.requirements[0].color;
             }
             string caption = available ? (action.endDay ? "结束一天" : "执行") : UnavailableCaption(action, actions, checks);
-            if (available && dailyPool && actions.HasExecutedToday(action.actionKey)) caption = "再次行动";
             if (card.button != null)
             {
                 var buttonLabel = card.button.GetComponentInChildren<TextMeshProUGUI>(true);
@@ -673,7 +693,7 @@ namespace Spotlight.GameFlow
         {
             if (actions.IsCompleted(action.actionKey)) return "已完成";
             if (action.IsDelivery && actions.HasSubmittedToday(action.actionKey)) return "今日已交付";
-            if (action.type == NarrativeActionType.Daily && actions.HasExecutedToday(action.actionKey)) return "今日已执行";
+            if ((action.type == NarrativeActionType.Daily || actions.IsDailyPoolAction(action.actionKey)) && actions.HasExecutedToday(action.actionKey)) return "今日已执行";
             if (GameplayTodoProjection.ShouldGuideToImportantTodo(NarrativeRuntime.Instance, action, checks)) return "查看详情";
             if (action.endDay && actions.HasBlockingActions()) return "有需要进行的行动";
             if (action.type == NarrativeActionType.Future) return "等待开放";
@@ -820,14 +840,17 @@ namespace Spotlight.GameFlow
                 if (this == null || epoch != executionEpoch || !isActiveAndEnabled) return;
                 if (success) Spotlight.Audio.GameAudio.Play(Spotlight.Audio.AudioKeys.MapComplete);
                 if (success && NarrativeRuntime.Instance.Actions.IsDailyPoolAction(card.action.actionKey))
-                    Notice("本次日常已完成。再次行动是另一回造访，会重新消耗行动点；不必连续做完。");
+                    Notice("今日日常已完成，明天可再进行。");
                 finished = true;
                 if (success && (controls?.Invoke() ?? true) && card.action.endDay) { busy = false; endDay?.Invoke(); }
                 if (!success) Notice("行动事件未能执行");
             });
+            if (accepted) Dismiss();
             if (!accepted && !finished) { Notice("要求不满足"); finished = true; }
             while (!finished) yield return null;
-            busy = false; inventory?.Refresh(); Rebuild();
+            busy = false; inventory?.Refresh();
+            if (dismissAfterExecution) { gameObject.SetActive(false); yield break; }
+            Rebuild();
         }
         private IEnumerator Fly(RectTransform source, RectTransform target, string text)
         {

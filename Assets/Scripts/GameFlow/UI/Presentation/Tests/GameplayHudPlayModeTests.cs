@@ -692,6 +692,96 @@ namespace Spotlight.GameFlow.Tests
             Assert.That(PlayerRuntime.Current, Is.SameAs(player));
         }
 
+        /// <summary>Regression: the per-conversation registry cache must survive the transition's asset unload.</summary>
+        [UnityTest]
+        public IEnumerator BackgroundRegistryCacheSurvivesUnloadUnusedAssets()
+        {
+            var owner = new object();
+            Assert.That(NarrativeStageVisuals.Resolve("scene.cafe", "oct07.s1.cafe", owner)?.useSceneBackground, Is.True);
+            yield return Resources.UnloadUnusedAssets();
+            var street = NarrativeStageVisuals.Resolve("oct07.street.day", "oct07.s1.street", owner);
+            Assert.That(street?.texture, Is.Not.Null, "A later page of the same conversation must still find its registered art.");
+        }
+
+        /// <summary>
+        /// Regression: an NCS scene.cafe page started from a map action loads CoffeeShop without
+        /// DayFlow. DayFlow must adopt that visit (normal opening page) so the business can close.
+        /// </summary>
+        [UnityTest]
+        public IEnumerator StoryLoadedCafeIsAdoptedSoDayTwoBusinessCanClose()
+        {
+            GameFlowBootstrap flow = null;
+            yield return EnterDayTwoMap(value => flow = value);
+            var days = flow.GetComponent<DayFlowController>();
+            var world = PlayerCafeOwner.Current;
+            var endpoint = Object.FindObjectsByType<MonoBehaviour>(FindObjectsSortMode.None)
+                .First(item => item is IDayFlowGameplayEndpoint);
+            var requestStart = endpoint.GetType().GetMethod("RequestBusinessStart");
+
+            // Same call NarrativeConversationEventPlayback uses for a scene.cafe page.
+            bool arrived = false;
+            flow.TransitionToGameplayScene("CoffeeShop", () => arrived = true);
+            yield return WaitFor(() => arrived && !LoadingVisible(), "Story page loads the cafe outside DayFlow");
+            yield return WaitFor(() => days.CurrentPresentation is CafeOpeningPanel, "DayFlow adopts the cafe with its opening page");
+            var submit = ((DayFlowPresentationPanel)days.CurrentPresentation).GetComponentInChildren<Button>(true);
+            yield return WaitFor(() => submit.interactable, "Opening confirmation");
+            submit.onClick.Invoke();
+            yield return WaitFor(() => days.State == DayFlowState.FreeCafeBusiness, "Adopted cafe enters free business");
+            requestStart.Invoke(endpoint, null);
+            yield return WaitFor(() => world.State.open && days.CanFinishBusiness, "Adopted business can be settled");
+            endpoint.GetType().GetMethod("RequestBusinessEnd").Invoke(endpoint, null);
+            yield return WaitFor(() => days.CurrentPresentation is BusinessEndPanel, "Adopted business closes into settlement");
+            Assert.That(world.State.open, Is.False);
+            Assert.That(days.CurrentDay, Is.EqualTo(2));
+        }
+
+        /// <summary>A business already opened while DayFlow lagged (old saves/routes) is settled, never stranded.</summary>
+        [UnityTest]
+        public IEnumerator BusinessOpenedBeforeAdoptionIsStillSettleable()
+        {
+            GameFlowBootstrap flow = null;
+            yield return EnterDayTwoMap(value => flow = value);
+            var days = flow.GetComponent<DayFlowController>();
+            var world = PlayerCafeOwner.Current;
+            var endpoint = Object.FindObjectsByType<MonoBehaviour>(FindObjectsSortMode.None)
+                .First(item => item is IDayFlowGameplayEndpoint);
+            bool arrived = false;
+            // Open the domain in the arrival callback, before DayFlow's next Update can adopt.
+            flow.TransitionToGameplayScene("CoffeeShop", () => { arrived = true; Assert.That(world.StartDay(false).success, Is.True); });
+            yield return WaitFor(() => arrived && !LoadingVisible(), "Cafe opened outside DayFlow");
+            yield return WaitFor(() => days.State == DayFlowState.FreeCafeBusiness && days.CanFinishBusiness,
+                "Open business is adopted as the current session");
+            Assert.That(days.CurrentPresentation, Is.Null, "Adopting an open business must not replay the opening page.");
+            endpoint.GetType().GetMethod("RequestBusinessEnd").Invoke(endpoint, null);
+            yield return WaitFor(() => days.CurrentPresentation is BusinessEndPanel, "Adopted open business closes into settlement");
+            Assert.That(world.State.open, Is.False);
+        }
+
+        private IEnumerator EnterDayTwoMap(Action<GameFlowBootstrap> ready)
+        {
+            GameFlowBootstrap owner = null;
+            yield return OpenDayOneCafeBusiness(value => owner = value);
+            var days = owner.GetComponent<DayFlowController>();
+            var world = PlayerCafeOwner.Current;
+            Assert.That(world.EndDay().success, Is.True);
+            yield return WaitFor(() => days.CurrentPresentation is BusinessEndPanel, "Day-one setup settlement");
+            var confirm = ((DayFlowPresentationPanel)days.CurrentPresentation).GetComponentInChildren<Button>(true);
+            yield return WaitFor(() => confirm.interactable, "Day-one setup settlement confirmation");
+            confirm.onClick.Invoke();
+            yield return WaitFor(() => days.State == DayFlowState.CityMapLeisure
+                && SceneManager.GetActiveScene().name == "Map" && !LoadingVisible(), "Day-one setup returns to map");
+            // CityMapLeisure is save enum value 5; day two has not entered the cafe yet.
+            days.RestoreJson("{\"day\":2,\"state\":5,\"firstDayIntroductionCompleted\":true,"
+                + "\"firstDayCafeTutorialStarted\":true,\"firstDayCafeTutorialCompleted\":true,"
+                + "\"mapUsageTutorialCompleted\":true,\"lastCafeEntryDay\":1}");
+            world.SynchronizeCalendarDay(2);
+            days.ResumeSavedPhase();
+            yield return WaitFor(() => days.State == DayFlowState.CityMapLeisure
+                && SceneManager.GetActiveScene().name == "Map" && !LoadingVisible(), "Day-two map");
+            Assert.That(world.State.open, Is.False);
+            ready(owner);
+        }
+
         private IEnumerator OpenDayOneCafeBusiness(Action<GameFlowBootstrap> ready)
         {
             yield return SceneManager.LoadSceneAsync("启动场景", LoadSceneMode.Single);

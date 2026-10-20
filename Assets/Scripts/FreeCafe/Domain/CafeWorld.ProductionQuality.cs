@@ -12,7 +12,7 @@ namespace Spotlight.FreeCafe
                 var evaluated=EvaluateProductComposition(cup,product,requiredCupSpecId);
                 return new ProductionQuality(evaluated.total,evaluated.total,evaluated.total,evaluated.total,evaluated.total);
             }
-            float portionScale = ProductPortionScale(product, requiredCupSpecId);
+            float portionScale = ProductEvaluationPortionScale(cup, product, requiredCupSpecId);
             float totalMl = LiquidVolume(cup), coffeeMl = 0, extractionSum = 0, liquidScore = 0, coverage = 0;
             int liquidCount = 0, coffeeOrder = 0, firstLiquid = int.MaxValue, firstTopping = int.MaxValue;
             float sweetness = 0;
@@ -57,7 +57,7 @@ namespace Spotlight.FreeCafe
             float strength = grounds > 0 && coffeeMl > 0 ? Clamp(100 - Math.Abs(grounds / coffeeMl - .06f) / .06f * 100) : 100;
             float concentration = Clamp(100 - Math.Abs(ratio - product.idealCoffeeRatio) * 150) * strength / 100;
             // 杯型、配方完整度和多余原料是独立惩罚，空杯/半成品允许出品但不会获得虚假高分。
-            float penalty = cup.specId == (requiredCupSpecId ?? product.cupSpecId) ? 1 : .75f;
+            float penalty = AcceptsServingCup(cup, requiredCupSpecId ?? product.cupSpecId) ? 1 : .75f;
             foreach (var p in cup.contents)
             {
                 bool expected = p.specId == "sugar" || p.specId == "grounds" && needsCoffee
@@ -104,10 +104,11 @@ namespace Spotlight.FreeCafe
             var product = Product(request.productId); var score = EvaluateProduction(cup, product, requiredCup);
             var classification=ClassifyCoffee(cup);
             bool correctType=product.evaluation==null || classification.known && classification.productId==product.id;
-            bool satisfied = cup.specId == requiredCup && correctType && score.total >= product.minimumScore
+            bool acceptedCup = AcceptsServingCup(cup, requiredCup);
+            bool satisfied = acceptedCup && correctType && score.total >= product.minimumScore
                 && (!Prep.requireLatteArt || !product.requiresLatteArt || cup.latteArt || State.automaticLatteArt);
             request.lastProductionScore = score.total;
-            string detail = "杯型：" + Spec(requiredCup).label + (cup.specId == requiredCup ? "（符合）" : "（不符）") + " · 种类："+classification.label+" · "+(product.evaluation!=null ? EvaluateProductComposition(cup,product,requiredCup).description : score.grade + " " + score.total.ToString("0.0") + "分 · 萃取 " + score.extraction.ToString("0")
+            string detail = "杯型：" + Spec(requiredCup).label + (cup.specId == requiredCup ? "（符合）" : acceptedCup ? "（免费升大杯，接受）" : IsCupUpsize(cup, requiredCup) ? "（大杯含量不足 " + MinimumUpsizedServingMl.ToString("0") + " ml）" : "（不符）") + " · 种类："+classification.label+" · "+(product.evaluation!=null ? EvaluateProductComposition(cup,product,requiredCup).description : score.grade + " " + score.total.ToString("0.0") + "分 · 萃取 " + score.extraction.ToString("0")
                 + " / 液体 " + score.liquid.ToString("0") + " / 顺序 " + score.order.ToString("0")
                 + " / 甜度 " + score.sweetness.ToString("0") + " / 浓度 " + score.concentration.ToString("0"));
             int price = satisfied ? SalePrice(cup, product) : 0;

@@ -78,9 +78,9 @@ namespace Spotlight.FreeCafe
         private void SetCaption(bool open)
         {
             var runtime = entityView.Runtime;
-            bool closedToday = !open && runtime != null && !runtime.IsSandboxMode
-                && runtime.World.State.businessPhase == BusinessPhase.Night;
-            entityView.label.text = open ? "结束营业" : closedToday ? "今日已打烊" : "开始营业";
+            bool closedToday = !open && runtime != null && runtime.IsClosedForToday;
+            // Clicking the closed sign opens the city map (FreeCafeRuntime.Click).
+            entityView.label.text = open ? "结束营业" : closedToday ? "已打烊\n进入地图" : "开始营业";
         }
         private void ResetPose()
         {

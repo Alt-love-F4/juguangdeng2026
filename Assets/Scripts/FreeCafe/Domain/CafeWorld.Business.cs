@@ -27,11 +27,37 @@ namespace Spotlight.FreeCafe
                 ? requested.capacityMl / original.capacityMl : 1;
         }
 
+        public const float MinimumUpsizedServingMl = 100f;
+
+        private static bool IsCupUpsize(WorldEntity cup, string requiredCupSpecId) =>
+            cup?.specId == "cup.large" && requiredCupSpecId == "cup.small";
+
+        private bool AcceptsServingCup(WorldEntity cup, string requiredCupSpecId) => cup != null
+            && (cup.specId == requiredCupSpecId || ProductionEnabled && IsCupUpsize(cup, requiredCupSpecId)
+                && LiquidVolume(cup) >= MinimumUpsizedServingMl);
+
+        // A free cup upgrade may contain the ordered amount or a proportional larger serving.
+        // Never normalize a short serving upward or hide a wrong ingredient ratio/strength.
+        private float ProductEvaluationPortionScale(WorldEntity cup, ProductSpec product, string requiredCupSpecId)
+        {
+            float scale = ProductPortionScale(product, requiredCupSpecId);
+            if (!IsCupUpsize(cup, requiredCupSpecId ?? product.cupSpecId)) return scale;
+            float idealMl = 0;
+            if (product.evaluation != null)
+            {
+                foreach (var need in product.evaluation.amounts) idealMl += need.idealMl;
+            }
+            else
+                foreach (var need in product.ingredients)
+                    if (IsLiquid(need.specId)) idealMl += need.milliliters > 0 ? need.milliliters : need.units * Prep.portionMl;
+            return idealMl > 0 ? Clamp(LiquidVolume(cup) / idealMl, scale, ProductPortionScale(product, cup.specId)) : scale;
+        }
+
         public bool MatchesOrder(WorldEntity cup, CustomerRequest request)
         {
             var product = request == null ? null : Product(request.productId);
             string requiredCup = RequiredCupSpecId(request);
-            if (cup == null || product == null || cup.specId != requiredCup) return false;
+            if (cup == null || product == null || !AcceptsServingCup(cup, requiredCup)) return false;
             return ProductionEnabled
                 ? cup == ServingCup && (product.evaluation == null || ClassifyCoffee(cup).productId == product.id)
                     && EvaluateProduction(cup, product, requiredCup).total >= product.minimumScore
@@ -41,7 +67,7 @@ namespace Spotlight.FreeCafe
         }
         /// <summary>判断杯子是否符合餐品配方：杯型、配比、拉花要求都满足才算匹配。</summary>
         public bool Matches(WorldEntity cup, ProductSpec product) => ProductionEnabled
-            ? cup != null && product != null && cup == ServingCup && (product.evaluation==null || ClassifyCoffee(cup).productId==product.id) && EvaluateProduction(cup, product).total >= product.minimumScore
+            ? cup != null && product != null && AcceptsServingCup(cup, product.cupSpecId) && cup == ServingCup && (product.evaluation==null || ClassifyCoffee(cup).productId==product.id) && EvaluateProduction(cup, product).total >= product.minimumScore
                 && (!Prep.requireLatteArt || !product.requiresLatteArt || cup.latteArt || State.automaticLatteArt)
             : cup != null && product != null
             && cup.specId == product.cupSpecId && Evaluate(cup, product) >= .999f
@@ -157,6 +183,8 @@ namespace Spotlight.FreeCafe
         /// <summary>按当前声望解锁达到门槛的餐品和 NPC。</summary>
         private void UnlockContent()
         {
+            if (State.equipmentProgressionEnabled && !State.sandboxEquipment)
+                State.unlockedProducts.RemoveAll(id => !CanOfferProduct(Product(id)));
             foreach (var product in Catalog.products)
             {
                 if (State.reputation >= product.unlockReputation && CanOfferProduct(product) && !State.unlockedProducts.Contains(product.id))

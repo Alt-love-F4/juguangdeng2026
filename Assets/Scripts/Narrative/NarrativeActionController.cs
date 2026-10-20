@@ -170,6 +170,15 @@ namespace Spotlight.Narrative
                 ? values.Where(a => a.replacesLocationActions && !IsCompleted(a.actionKey)) : values;
         }
 
+        /// <summary>Real map content, independent of costs, playback locks and whether its card was read.</summary>
+        public IEnumerable<NarrativeActionDefinition> GetMapActions(string position)
+            => GetDisplayableActions(position).Where(action => IsAvailable(action.actionKey, out _, ignoreTransientBusy: true, ignoreCosts: true));
+
+        public bool HasMapActions(string position) => GetMapActions(position).Any();
+
+        public bool HasImportantMapActions(string position)
+            => GetMapActions(position).Any(action => action.mustExecute && !IsDailyPoolAction(action.actionKey));
+
         public bool ReplacesLocationActions(string position)
             => GetDisplayableActions(position).Any(a => a.replacesLocationActions && !IsCompleted(a.actionKey));
 
@@ -179,7 +188,7 @@ namespace Spotlight.Narrative
             if (mount == null) return null;
             var action = Get(actionKey);
             string version = string.IsNullOrEmpty(mount.instanceVersion) ? "mount:" + mount.day : mount.instanceVersion;
-            if (action.type == NarrativeActionType.Daily || action.IsDelivery) version += "/day:" + CurrentDay;
+            if (action.type == NarrativeActionType.Daily || action.IsDelivery || narrative.UsesDailyPool(action)) version += "/day:" + CurrentDay;
             return Uri.EscapeDataString(position) + "|" + Uri.EscapeDataString(actionKey) + "|" + Uri.EscapeDataString(version);
         }
 
@@ -226,19 +235,44 @@ namespace Spotlight.Narrative
             {
                 string signature = string.Join(";", GetDisplayableActions(position).Select(a => GetActionInstanceKey(position, a.actionKey)
                     + ":" + IsUnseenCandidate(a) + ":" + seenActionInstances.Contains(GetActionInstanceKey(position, a.actionKey))
-                    + ":" + IsAvailable(a.actionKey, out _, ignoreTransientBusy: true)));
+                    + ":" + IsAvailable(a.actionKey, out _, ignoreTransientBusy: true)
+                    + ":content:" + IsAvailableForMapBadge(a.actionKey)));
                 if (mapContentSignatures.TryGetValue(position, out string previous) && previous == signature) continue;
                 mapContentSignatures[position] = signature;
                 MapContentChanged?.Invoke(position);
             }
         }
 
+        // Map tasks are hidden while the map is closed (world.map.active guard), but they are still
+        // outstanding: the cafe bed must not skip them. Evaluate as if the map were open.
+        private const string MapActiveGuard = "world.map.active";
         public IEnumerable<string> GetBlockingPositions()
-            => mounts.Select(m => m.position).Distinct().Where(position => GetDisplayableActions(position).Any(IsBlockingAction));
+            => narrative.EvaluateAssumingGuard(MapActiveGuard, true, () => mounts.Select(m => m.position).Distinct()
+                .Where(position => GetDisplayableActions(position).Any(IsBlockingAction)).ToList());
 
+        // A mandatory action blocks the night only while today's action points can still pay for it.
+        // Ordinary actions cannot spend those reserved points (see IsAvailable), so this fallback only
+        // applies when the action unlocked after the points were gone; it then waits for tomorrow.
         private bool IsBlockingAction(NarrativeActionDefinition action)
             => action.mustExecute && !IsCompleted(action.actionKey) && action.type != NarrativeActionType.Future
-                && (!dailyExecution.TryGetValue(action.actionKey, out int day) || day != CurrentDay);
+                && (!dailyExecution.TryGetValue(action.actionKey, out int day) || day != CurrentDay)
+                && RequiredActionPoints(action) <= ActionPoints.Current;
+
+        private static long RequiredActionPoints(NarrativeActionDefinition action)
+            => (action.parsedRequirements ?? NarrativeActionRequirementParser.Parse(action.requirements))
+                .Where(r => r.type == NarrativeActionRequirementType.ActionPoint).Sum(r => (long)r.value);
+
+        /// <summary>Points still needed by outstanding mandatory actions other than <paramref name="except"/>.</summary>
+        private long ReservedActionPoints(NarrativeActionDefinition except)
+        {
+            long reserved = 0;
+            var seen = new HashSet<string>(StringComparer.Ordinal);
+            foreach (string position in mounts.Select(m => m.position).Distinct())
+                foreach (NarrativeActionDefinition candidate in GetDisplayableActions(position))
+                    if (candidate != except && seen.Add(candidate.actionKey) && IsBlockingAction(candidate))
+                        reserved += RequiredActionPoints(candidate);
+            return reserved;
+        }
 
         public string PendingFocusPosition => pendingFocusPositions.Count > 0 ? pendingFocusPositions[0] : null;
         public bool ConsumePendingFocus(string position) => pendingFocusPositions.Remove(position);
@@ -247,7 +281,7 @@ namespace Spotlight.Narrative
         public bool IsMounted(string position, string actionKey) => mounts.Any(m => m.position == position && m.action == actionKey);
         public bool HasExecutedToday(string actionKey) => dailyExecution.TryGetValue(actionKey, out int day) && day == CurrentDay;
 
-        /// <summary>The existing daily pool is repeatable activity content, not a multi-step task.</summary>
+        /// <summary>Daily event pools allow one completed activity per action per day.</summary>
         public bool IsDailyPoolAction(string actionKey) => narrative.UsesDailyPool(Get(actionKey));
 
         public IEnumerable<NarrativeActionDefinition> GetMountedActions(string position)
@@ -288,7 +322,7 @@ namespace Spotlight.Narrative
                 && IsVisible(actionKey) && !IsCompleted(actionKey) && action.type != NarrativeActionType.Future;
             if (action.IsDelivery && HasSubmittedToday(actionKey)) eligible = false;
             if (action.endDay && HasBlockingActions()) eligible = false;
-            if (action.type == NarrativeActionType.Daily && dailyExecution.TryGetValue(actionKey, out int day) && day == CurrentDay) eligible = false;
+            if ((action.type == NarrativeActionType.Daily || narrative.UsesDailyPool(action)) && HasExecutedToday(actionKey)) eligible = false;
             if (!ignoreCosts)
             {
                 foreach (NarrativeActionRequirement requirement in action.parsedRequirements ?? NarrativeActionRequirementParser.Parse(action.requirements))
@@ -301,9 +335,15 @@ namespace Spotlight.Narrative
                     if (group.Sum(r => (long)r.value) > inventory.GetCount(group.Key))
                         for (int i = 0; i < action.parsedRequirements.Count; i++)
                             if (action.parsedRequirements[i].type == NarrativeActionRequirementType.Item && action.parsedRequirements[i].key == group.Key) checks[i].satisfied = false;
-                if (action.parsedRequirements.Where(r => r.type == NarrativeActionRequirementType.ActionPoint).Sum(r => (long)r.value) > ActionPoints.Current)
+                long points = action.parsedRequirements.Where(r => r.type == NarrativeActionRequirementType.ActionPoint).Sum(r => (long)r.value);
+                // Optional actions may not spend the points an outstanding mandatory action needs today.
+                if (points > ActionPoints.Current)
+                {
                     for (int i = 0; i < action.parsedRequirements.Count; i++)
                         if (action.parsedRequirements[i].type == NarrativeActionRequirementType.ActionPoint) checks[i].satisfied = false;
+                }
+                else if (points > 0 && !action.mustExecute && points + ReservedActionPoints(action) > ActionPoints.Current)
+                    checks.Add(new NarrativeActionCheck { satisfied = false, requirement = "MustExecute", messageKey = "action.condition.missing" });
             }
             bool conditionsMet = narrative.EvaluateConditions("action", actionKey);
             if (!conditionsMet) checks.Add(new NarrativeActionCheck { satisfied = false, requirement = "Condition(action," + actionKey + ")", messageKey = "action.condition.missing" });

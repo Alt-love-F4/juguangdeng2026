@@ -139,6 +139,7 @@ namespace Spotlight.FreeCafe
         public int maxRemakes = 1;
         public int price;        // 基础售价
         public int unlockReputation; // 解锁所需声望
+        public int unlockSuccessfulOrders; // 正式经营中累计成功出品门槛；自由模式忽略
         public int qualityPriceStep = 50; // 咖啡品质每高一级的加价
         public bool requiresLatteArt;     // 是否必须完成拉花
         public string preferredLatteArtPattern; // 可选：顾客/餐品偏好的图案 ID

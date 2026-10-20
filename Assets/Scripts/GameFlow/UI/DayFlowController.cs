@@ -108,6 +108,9 @@ namespace Spotlight.GameFlow
         public bool ShouldShowMapUsageTutorial => running && day == 1 && mapUsageTutorialPending
             && !mapUsageTutorialCompleted && State == DayFlowState.CityMapLeisure && !BlocksGameplayInput;
         public bool CanSave => !IsFirstSessionGuideActive && !awaitingNarrativeEntry && cafeGameplaySession == null
+            && deferredNarrativeEntry == null
+            // An open business must be owned by the business phase, or loading would restore it on the map.
+            && !(PlayerCafeOwner.Current?.State.open == true && State != DayFlowState.FreeCafeBusiness)
             && !(NarrativeRuntime.Instance?.Controller?.BlocksSave ?? false);
         // Phase pages remain blocking while they wait for a player confirmation.
         public bool BlocksGameplayInput => running && (IsDetained || (cafeGameplaySession != null
@@ -126,10 +129,41 @@ namespace Spotlight.GameFlow
                 if (IsCafeTutorialActive) return "请先完成咖啡馆新手教程。";
                 if (cafeGameplaySession != null) return cafeGameplaySession.GameplayHint ?? "请先完成当前剧情要求的咖啡制作与交付。";
                 if (NarrativeRuntime.Instance?.Controller?.IsBusy == true) return "当前剧情尚未结束，请先完成对话或事件后再打烊。";
-                if (State != DayFlowState.FreeCafeBusiness) return "当前不在自由营业阶段，请先完成日程演出。";
+                if (State != DayFlowState.FreeCafeBusiness)
+                {
+                    // An open cafe is always settleable: FinishBusiness adopts it, never a dead end.
+                    if (State == DayFlowState.CityMapLeisure && CafeSceneActive
+                        && FindGameplayEndpoint()?.DayFlowBusinessActive == true)
+                        return CafeSceneAdoptionBlocker();
+                    return "营业流程正在切换，请稍候再试。";
+                }
                 if (FindGameplayEndpoint() == null) return "咖啡馆营业系统尚未就绪，请稍后再试。";
                 if (!CanFinishBusiness) return "当前没有可结算的营业。";
                 return null;
+            }
+        }
+
+        /// <summary>
+        /// Opening uses the same phase as closing, so a business can only start where it can also be
+        /// settled. Every reason is transient: a cafe reached by a story page is adopted by Update.
+        /// </summary>
+        public string BusinessOpeningBlockReason
+        {
+            get
+            {
+                if (!running || !SessionAllowsPlay) return "游戏日程尚未就绪，请稍后再试。";
+                if (IsDetained) return "当前剧情限制营业操作，请先完成剧情。";
+                // The first-day tutorial keeps its own step gate inside the cafe runtime.
+                if (IsCafeTutorialActive || State == DayFlowState.FreeCafeBusiness) return null;
+                if (State == DayFlowState.CityMapLeisure && CafeSceneActive)
+                {
+                    // A story's cafe gameplay may run beside ordinary business; adopted afterwards.
+                    if (IsNarrativeCafeGameplayActive) return null;
+                    return CafeSceneAdoptionBlocker() ?? "正在进入咖啡馆营业流程，请稍候。";
+                }
+                if (cafeGameplaySession != null)
+                    return cafeGameplaySession.GameplayHint ?? "请先完成当前剧情要求的咖啡制作与交付，再开始营业。";
+                return "当前日程阶段不能开始营业，请先完成当前剧情或演出。";
             }
         }
 
@@ -197,6 +231,7 @@ namespace Spotlight.GameFlow
             detentionAdvanceError = null;
             businessWasActive = false;
             awaitingNarrativeEntry = false;
+            deferredNarrativeEntry = null;
             ++narrativeEntryVersion;
             SetMapAvailability(false);
             UnsubscribeFirstArrival();
@@ -423,6 +458,7 @@ namespace Spotlight.GameFlow
         {
             if (initialized && running) EnsureNarrativeCafeGameplayBinding();
             EnsureBusinessWorldBinding();
+            ResumeDeferredNarrativeEntry();
             if (SessionAllowsPlay && running)
             {
                 if (IsDetained)
@@ -445,6 +481,8 @@ namespace Spotlight.GameFlow
                 Debug.LogWarning("[DayFlow] Narrative cafe world was replaced; cancelling pending service.", this);
                 gameplay.Cancel();
             }
+            // Cheap scene check first: endpoint lookup only happens inside CoffeeShop.
+            if (State == DayFlowState.CityMapLeisure && CafeSceneActive) TryAdoptCafeScene(false);
             if (!SessionAllowsPlay || Time.timeScale == 0f || !running || State != DayFlowState.FreeCafeBusiness) return;
             // Do not let an endpoint's old state bypass an unfinished presentation.
             if (endpointOwner == null) FindGameplayEndpoint();
@@ -543,6 +581,63 @@ namespace Spotlight.GameFlow
             FindGameplayEndpoint();
             SetState(DayFlowState.FreeCafeBusiness);
             ShowGameplayPanel();
+        }
+
+        private static bool CafeSceneActive
+            => UnityEngine.SceneManagement.SceneManager.GetActiveScene().name == "CoffeeShop";
+
+        /// <summary>
+        /// Why a CoffeeShop scene reached outside DayFlow (NCS scene.cafe pages, narrative gameplay,
+        /// HUD/GM transitions) cannot be adopted yet. Every reason is transient; null means adoptable.
+        /// </summary>
+        private string CafeSceneAdoptionBlocker()
+        {
+            if (!SessionAllowsPlay || !running) return "游戏日程尚未就绪，请稍后再试。";
+            if (State != DayFlowState.CityMapLeisure || !CafeSceneActive) return "当前不在可进入咖啡馆的阶段。";
+            if (IsDetained) return "当前剧情限制营业操作，请先完成剧情。";
+            if (IsFirstSessionGuideActive) return "请先完成咖啡馆新手教程。";
+            if (awaitingNarrativeEntry || cafeGameplaySession != null)
+                return "当前剧情尚未结束，请先完成对话或事件。";
+            var runtime = NarrativeRuntime.Instance;
+            if ((runtime?.Controller?.IsBusy ?? false) || (runtime?.Actions?.IsExecuting ?? false)
+                || DialoguePanel.IsAnyPlaying)
+                return "当前剧情尚未结束，请先完成对话或事件。";
+            if (currentPanel != null) return "请先完成当前演出。";
+            if (flow != null && flow.IsMapOpen) return "请先关闭地图返回咖啡馆。";
+            if (Time.timeScale == 0f || PresentationPauseRegistry.IsPaused) return "游戏已暂停。";
+            if (FindGameplayEndpoint() == null) return "咖啡馆营业系统尚未就绪，请稍后再试。";
+            return null;
+        }
+
+        /// <summary>
+        /// Bring DayFlow back in line with the scene the player is actually in. A cafe entered by a
+        /// story page runs the normal entry (opening page / resume) once the story has finished; a
+        /// business already opened there is taken over as the current session so it can be settled.
+        /// </summary>
+        private bool TryAdoptCafeScene(bool openBusinessOnly)
+        {
+            if (State != DayFlowState.CityMapLeisure || !CafeSceneActive) return false;
+            // Remember a business opened while adoption waits (e.g. beside story cafe gameplay):
+            // if its timer ends first, it must still reach the settlement page.
+            if (endpointOwner != null && gameplayEndpoint.DayFlowBusinessActive) businessWasActive = true;
+            if (CafeSceneAdoptionBlocker() != null) return false;
+            bool open = gameplayEndpoint.DayFlowBusinessActive;
+            bool unsettled = open || businessWasActive && gameplayEndpoint.DayFlowBusinessFinished;
+            if (openBusinessOnly && !unsettled) return false;
+            Debug.Log("[DayFlow] CoffeeShop was reached outside DayFlow; adopting it as the cafe visit (business open="
+                + open + ", unsettled=" + unsettled + ").", this);
+            if (!unsettled)
+            {
+                EnterBusinessTransition();
+                return true;
+            }
+            // Take over the existing session; Update/FinishBusiness then settle it normally.
+            lastCafeEntryDay = day;
+            ClosePresentation();
+            SetState(DayFlowState.FreeCafeBusiness);
+            ShowGameplayPanel();
+            businessWasActive = true;
+            return true;
         }
 
         private void EnterFirstDayIntroductionOrBusiness()
@@ -931,6 +1026,7 @@ namespace Spotlight.GameFlow
 
         private bool FinishBusiness(Action onMapReady)
         {
+            TryAdoptCafeScene(openBusinessOnly: true);
             IDayFlowGameplayEndpoint endpoint = FindGameplayEndpoint();
             if (!SessionAllowsPlay || endpoint == null || !CanFinishBusiness) return false;
             endpoint.EndDayFlowBusiness();
@@ -1083,6 +1179,13 @@ namespace Spotlight.GameFlow
             // A visible settlement page must be confirmed, not replaced by a second bed click.
             if (State == DayFlowState.PreLeisure && currentPanel != null) return;
             if (!CanRequestDayEnd()) return;
+            // An open business must be settled before night, whatever phase DayFlow believed it was in.
+            if (State == DayFlowState.CityMapLeisure && PlayerCafeOwner.Current?.State.open == true
+                && !TryAdoptCafeScene(openBusinessOnly: true))
+            {
+                OperationToastPanel.ShowMessage(CafeSceneAdoptionBlocker() ?? "请先结束营业，再休息。");
+                return;
+            }
             if (State == DayFlowState.CityMapLeisure)
             {
                 RunBeforeNightAndCompleteDay();
@@ -1149,24 +1252,60 @@ namespace Spotlight.GameFlow
             SetState(DayFlowState.NarrativeEntry);
             controller.RunAtSafeBoundary(() =>
             {
-                if (!SessionAllowsPlay || !running || token != narrativeEntryVersion) return;
+                if (!running || token != narrativeEntryVersion) return;
+                // Paused/loading is not cancellation: resume this same entry once play continues,
+                // otherwise awaitingNarrativeEntry would gate input, saving and sleep forever.
+                if (!SessionAllowsPlay)
+                {
+                    DeferNarrativeEntry(token, () => { awaitingNarrativeEntry = false; RunNarrativeEntry(entry, next); });
+                    return;
+                }
                 if (!controller.ProcessEntry(entry, success =>
                 {
-                    if (!SessionAllowsPlay || !running || token != narrativeEntryVersion) return;
-                    awaitingNarrativeEntry = false;
-                    if (success)
+                    if (!running || token != narrativeEntryVersion) return;
+                    if (!SessionAllowsPlay)
                     {
-                        if (entry == NarrativeEntryPoint.MorningBeforeMap) morningCompletedDay = day;
-                        if (IsDetained) { TryCompleteDetainedDay(); return; }
-                        next();
+                        // The root already committed; only its DayFlow continuation waits.
+                        DeferNarrativeEntry(token, () => CompleteNarrativeEntry(token, entry, next, success));
+                        return;
                     }
-                    else RetryNarrativeEntry(entry, next);
+                    CompleteNarrativeEntry(token, entry, next, success);
                 }))
                 {
                     awaitingNarrativeEntry = false;
                     RetryNarrativeEntry(entry, next);
                 }
             });
+        }
+
+        private int deferredNarrativeEntryToken;
+        private Action deferredNarrativeEntry;
+
+        private void DeferNarrativeEntry(int token, Action resume)
+        {
+            deferredNarrativeEntryToken = token;
+            deferredNarrativeEntry = resume;
+        }
+
+        private void ResumeDeferredNarrativeEntry()
+        {
+            if (deferredNarrativeEntry == null || !SessionAllowsPlay || !running) return;
+            Action resume = deferredNarrativeEntry;
+            deferredNarrativeEntry = null;
+            if (deferredNarrativeEntryToken == narrativeEntryVersion) resume();
+        }
+
+        private void CompleteNarrativeEntry(int token, NarrativeEntryPoint entry, Action next, bool success)
+        {
+            if (!SessionAllowsPlay || !running || token != narrativeEntryVersion) return;
+            awaitingNarrativeEntry = false;
+            if (success)
+            {
+                if (entry == NarrativeEntryPoint.MorningBeforeMap) morningCompletedDay = day;
+                if (IsDetained) { TryCompleteDetainedDay(); return; }
+                next();
+            }
+            else RetryNarrativeEntry(entry, next);
         }
 
         private void EnsureNarrativeCafeGameplayBinding()
@@ -1278,7 +1417,10 @@ namespace Spotlight.GameFlow
             if (!SessionAllowsPlay || !running) return;
             pendingMapAction = null;
             SetState(DayFlowState.DateTransition);
-            FindGameplayEndpoint()?.EndDayFlowBusiness();
+            var closing = FindGameplayEndpoint();
+            if (closing != null && closing.DayFlowBusinessActive)
+                Debug.LogWarning("[DayFlow] Day ended while cafe business was still open; closing it without the settlement page.", this);
+            closing?.EndDayFlowBusiness();
             previousDate = CurrentDate;
             day++;
             PlayerCafeOwner.Current?.SynchronizeCalendarDay(day);

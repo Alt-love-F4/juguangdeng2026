@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using NUnit.Framework;
 
 namespace Spotlight.Narrative.Tests
@@ -118,6 +119,35 @@ namespace Spotlight.Narrative.Tests
             Assert.That(presenter.Played.Count, Is.EqualTo(1));
             presenter.Complete(); restored.BeginDay(6);
             Assert.That(presenter.Played.Count, Is.EqualTo(1));
+        }
+
+        [Test]
+        public void OptionalActionsCannotSpendPointsReservedForMandatoryAction()
+        {
+            var presenter = new Presenter();
+            var crucial = new NarrativeActionDefinition { actionKey = "crucial", mustExecute = true, requirements = "ActionPoint(1)" };
+            var daily = new NarrativeActionDefinition { actionKey = "daily", type = NarrativeActionType.Repeat, requirements = "ActionPoint(1)" };
+            var actions = new NarrativeActionController(Controller(presenter), new[] { crucial, daily }, 5, new Inventory());
+            actions.Mount("rose", "crucial"); actions.Mount("rose", "daily");
+            actions.ActionPoints.Set(1);
+            Assert.That(actions.IsAvailable("daily", out var checks), Is.False, "The last point belongs to the mandatory action.");
+            Assert.That(checks.Any(c => !c.satisfied && c.requirement == "MustExecute"), Is.True);
+            Assert.That(actions.IsAvailable("crucial", out _), Is.True);
+            Assert.That(actions.HasBlockingActions(), Is.True);
+        }
+
+        [Test]
+        public void MandatoryActionUnlockedWithoutPointsDoesNotLockTheNight()
+        {
+            var presenter = new Presenter();
+            var crucial = new NarrativeActionDefinition { actionKey = "crucial", mustExecute = true, requirements = "ActionPoint(1)" };
+            var actions = new NarrativeActionController(Controller(presenter), new[] { crucial }, 5, new Inventory());
+            actions.Mount("rose", "crucial");
+            actions.ActionPoints.Set(0);
+            Assert.That(actions.HasBlockingActions(), Is.False, "Points cannot be regained today; the action waits for tomorrow.");
+            Assert.That(actions.IsCompleted("crucial"), Is.False);
+            actions.ActionPoints.Set(1);
+            Assert.That(actions.HasBlockingActions(), Is.True);
         }
 
         [Test]

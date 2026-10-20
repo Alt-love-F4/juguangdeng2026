@@ -3,18 +3,20 @@ using UnityEngine.UI;
 
 namespace Spotlight.GameFlow
 {
-    /// <summary>Temporary new-content artwork hosted by an existing location button, not a separate Canvas.</summary>
+    /// <summary>Persistent activity/important-task marker hosted by an existing location button.</summary>
     // Graphic/MaskableGraphic do not declare this dependency in the installed uGUI package.
     // Require it here, just as Image does, before any OnEnable/masking callback can run.
     [RequireComponent(typeof(CanvasRenderer))]
     [DisallowMultipleComponent]
     public sealed class MapActionNewContentDot : MaskableGraphic
     {
+        public static readonly Color OrdinaryColor = new Color(1f, .76f, .12f, 1f);
+        public static readonly Color ImportantColor = new Color(.86f, .12f, .15f, 1f);
+
         protected override void Awake()
         {
             base.Awake();
             raycastTarget = false;
-            color = new Color(.86f, .12f, .15f, 1f);
         }
 
         protected override void OnPopulateMesh(VertexHelper vh)

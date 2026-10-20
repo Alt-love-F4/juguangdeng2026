@@ -9,7 +9,7 @@ namespace Spotlight.FreeCafe
         public event Action<bool> EquipmentAcquired;
 
         public const int PrecisionOrdersRequired = 5;
-        public const int LatteOrdersRequired = 12;
+        public const int LatteOrdersRequired = 6;
         public const int PrecisionActivationCost = 200;
         public const int LatteActivationCost = 350;
         public bool PrecisionEquipmentAvailable => !State.equipmentProgressionEnabled || State.sandboxEquipment || State.precisionEquipmentActive;
@@ -37,15 +37,9 @@ namespace Spotlight.FreeCafe
         {
             if (product == null) return false;
             if (!State.equipmentProgressionEnabled || State.sandboxEquipment) return true;
-            bool needsPrecision = false, needsLatte = product.requiresLatteArt;
-            foreach (var ingredient in product.ingredients)
-            {
-                needsPrecision |= ingredient.coffeeKind == "essence";
-                needsLatte |= ingredient.specId == "milkfoam";
-            }
-            // First learn plain coffee, then milk/cream mixtures, then precision and latte art.
-            if (State.successfulOrders < 2 && product.id != "blackcoffee" && product.id != "cold_brew") return false;
-            return (!needsPrecision || PrecisionEquipmentAvailable) && (!needsLatte || LatteEquipmentAvailable);
+            return State.successfulOrders >= product.unlockSuccessfulOrders
+                && (!ProductNeedsPrecision(product) || PrecisionEquipmentAvailable)
+                && (!ProductNeedsLatte(product) || LatteEquipmentAvailable);
         }
 
         public bool IsEquipmentAvailable(WorldEntity entity)
