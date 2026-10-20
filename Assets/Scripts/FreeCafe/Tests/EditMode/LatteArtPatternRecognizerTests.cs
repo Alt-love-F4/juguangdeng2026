@@ -12,6 +12,11 @@ namespace Spotlight.FreeCafe.Tests
         [TestCase(LatteArtTemplateKind.X, "x")]
         [TestCase(LatteArtTemplateKind.A, "a")]
         [TestCase(LatteArtTemplateKind.Tulip, "tulip")]
+        [TestCase(LatteArtTemplateKind.Bean, "bean")]
+        [TestCase(LatteArtTemplateKind.SwordCrown, "swordcrown")]
+        [TestCase(LatteArtTemplateKind.ConcordRing, "concordring")]
+        [TestCase(LatteArtTemplateKind.NewRose, "newrose")]
+        [TestCase(LatteArtTemplateKind.BrokenChain, "brokenchain")]
         public void TemplatesRecognizeWithUnevenSamplingAndReverseDirection(LatteArtTemplateKind kind, string id)
         {
             var points = Densify(LatteArtPatternRecognizer.PreviewPath(kind));
@@ -155,6 +160,47 @@ namespace Spotlight.FreeCafe.Tests
                 Assert.That(results[i].patternId, Is.EqualTo(presets[i].id));
                 Assert.That(results[i].confidence, Is.InRange(0f, results[0].confidence));
             }
+        }
+
+        [TestCase(LatteArtTemplateKind.Bean)]
+        [TestCase(LatteArtTemplateKind.SwordCrown)]
+        [TestCase(LatteArtTemplateKind.ConcordRing)]
+        [TestCase(LatteArtTemplateKind.NewRose)]
+        [TestCase(LatteArtTemplateKind.BrokenChain)]
+        public void BenchPatternsSurviveSmoothHandTremorAndStayDistinct(LatteArtTemplateKind kind)
+        {
+            var presets = new List<LatteArtPatternPreset>(FreeCafeLatteArtBench.BuiltinPresets());
+            string expected = presets.Find(item => item.template == kind).id;
+            var points = Densify(LatteArtPatternRecognizer.PreviewPath(kind));
+            float c = Mathf.Cos(8f * Mathf.Deg2Rad), s = Mathf.Sin(8f * Mathf.Deg2Rad);
+            for (int i = 0; i < points.Count; i++)
+            {
+                if (float.IsNaN(points[i].x)) continue;
+                Vector2 p = points[i] - Vector2.one * .5f;
+                points[i] = new Vector2(c * p.x - s * p.y + .014f * Mathf.Sin(i * .09f), s * p.x + c * p.y + .014f * Mathf.Cos(i * .06f));
+            }
+            var result = LatteArtPatternRecognizer.Recognize(points, presets);
+            Assert.That(result.patternId, Is.EqualTo(expected));
+            Assert.That(result.confidence, Is.GreaterThan(.7f));
+            var fits = new List<LatteArtRecognitionResult>();
+            LatteArtPatternRecognizer.GetPatternFits(points, presets, null, fits);
+            foreach (var fit in fits)
+                if (fit.patternId != expected) Assert.That(fit.confidence, Is.LessThan(result.confidence - .15f), fit.patternId);
+        }
+
+        [Test]
+        public void EveryFactionPatternNamesAKnownFaction()
+        {
+            int factions = 0;
+            foreach (var preset in FreeCafeLatteArtBench.BuiltinPresets())
+            {
+                Assert.That(FreeCafeProductionText.Pattern(preset.id), Is.EqualTo(preset.displayName), preset.id);
+                Assert.That(preset.meaning, Is.Not.Empty.And.Not.Contain("占位"), preset.id);
+                if (string.IsNullOrEmpty(preset.factionId)) continue;
+                factions++;
+                Assert.That(Spotlight.GameFlow.WorldFactionCatalog.Find(preset.factionId), Is.Not.Null, preset.id);
+            }
+            Assert.That(factions, Is.EqualTo(4));
         }
 
         private static List<Vector2> Densify(IList<Vector2> vertices)

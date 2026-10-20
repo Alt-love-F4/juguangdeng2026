@@ -123,6 +123,6 @@
     "enabled": true,
     "priority": 100,
     "titleText": "arrival.refuse.01.08",
-    "messageText": "arrival.refuse.01.04"
+    "messageText": "ending.presentation.arrival.ending.if0.messageText"
   }
 ]

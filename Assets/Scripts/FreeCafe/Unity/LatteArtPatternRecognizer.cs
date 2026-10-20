@@ -4,7 +4,8 @@ using UnityEngine;
 
 namespace Spotlight.FreeCafe
 {
-    public enum LatteArtTemplateKind { None, Heart, Rosetta, X, A, Tulip, Crown }
+    // Append only: values are serialized in scenes. X/A/Crown stay for saved cups and older presets.
+    public enum LatteArtTemplateKind { None, Heart, Rosetta, X, A, Tulip, Crown, Bean, SwordCrown, ConcordRing, NewRose, BrokenChain }
 
     public readonly struct LatteArtRecognitionResult
     {
@@ -27,6 +28,10 @@ namespace Spotlight.FreeCafe
         public LatteArtTemplateKind template = LatteArtTemplateKind.Heart;
         public Texture2D preview;
         [TextArea] public string meaning;
+        [Tooltip("可选：WorldFactionCatalog 的势力 ID。填写后，玩家遇到该势力前图案保持未解锁。")]
+        public string factionId;
+        [Tooltip("悬停卡片中的笔顺提示。")]
+        public string drawingTip;
     }
 
     public interface ILatteArtFeedbackSurface
@@ -49,7 +54,18 @@ namespace Spotlight.FreeCafe
             { LatteArtTemplateKind.Rosetta, new[] { new Vector2(.5f,.18f), new Vector2(.5f,.82f), new Vector2(.25f,.48f), new Vector2(.75f,.42f), new Vector2(.28f,.35f), new Vector2(.72f,.29f), new Vector2(.4f,.22f), new Vector2(.6f,.18f) } },
             { LatteArtTemplateKind.X, new[] { new Vector2(.2f,.2f), new Vector2(.8f,.8f), Break, new Vector2(.8f,.2f), new Vector2(.2f,.8f) } },
             { LatteArtTemplateKind.A, new[] { new Vector2(.2f,.18f), new Vector2(.5f,.82f), new Vector2(.8f,.18f), Break, new Vector2(.33f,.46f), new Vector2(.67f,.46f) } },
-            { LatteArtTemplateKind.Tulip, new[] { new Vector2(.5f,.16f), new Vector2(.5f,.4f), new Vector2(.25f,.62f), new Vector2(.32f,.8f), new Vector2(.5f,.62f), new Vector2(.68f,.8f), new Vector2(.75f,.62f), new Vector2(.5f,.4f) } }
+            { LatteArtTemplateKind.Tulip, new[] { new Vector2(.5f,.16f), new Vector2(.5f,.4f), new Vector2(.25f,.62f), new Vector2(.32f,.8f), new Vector2(.5f,.62f), new Vector2(.68f,.8f), new Vector2(.75f,.62f), new Vector2(.5f,.4f) } },
+            // Bean: closed oval plus the centre crease.
+            { LatteArtTemplateKind.Bean, Join(Ellipse(new Vector2(.5f,.5f), .27f, .38f, 0, 360, 32), new[] { new Vector2(.5f,.86f), new Vector2(.43f,.66f), new Vector2(.57f,.34f), new Vector2(.5f,.14f) }) },
+            // Court: crown outline pierced by a single sword blade (two strokes).
+            { LatteArtTemplateKind.SwordCrown, Join(new[] { new Vector2(.24f,.40f), new Vector2(.18f,.70f), new Vector2(.36f,.55f), new Vector2(.5f,.78f), new Vector2(.64f,.55f), new Vector2(.82f,.70f), new Vector2(.76f,.40f), new Vector2(.24f,.40f) },
+                new[] { new Vector2(.5f,.95f), new Vector2(.5f,.05f) }) },
+            // Church: the concord ring with its central diamond.
+            { LatteArtTemplateKind.ConcordRing, Join(Ellipse(new Vector2(.5f,.5f), .42f, .42f, 90, 450, 40), new[] { new Vector2(.5f,.72f), new Vector2(.63f,.5f), new Vector2(.5f,.28f), new Vector2(.37f,.5f), new Vector2(.5f,.72f) }) },
+            // New rose: five-petal outline and a stem.
+            { LatteArtTemplateKind.NewRose, Join(Petals(new Vector2(.5f,.64f), .21f, .09f, 5, 60), new[] { new Vector2(.5f,.40f), new Vector2(.5f,.05f) }) },
+            // Revolution: two chain links with the break facing each other.
+            { LatteArtTemplateKind.BrokenChain, Join(Rotate(Ellipse(new Vector2(.31f,.5f), .2f, .13f, 35, 325, 28), 22), Rotate(Ellipse(new Vector2(.69f,.5f), .2f, .13f, 215, 505, 28), 22)) }
         };
         private static readonly Dictionary<LatteArtTemplateKind, Shape> Shapes = BuildTemplates();
 
@@ -117,6 +133,50 @@ namespace Spotlight.FreeCafe
             var copy = new Vector2[source.Length];
             for (int i = 0; i < source.Length; i++) copy[i] = IsFinite(source[i]) ? (source[i] - center) / scale + Vector2.one * .5f : Break;
             return copy;
+        }
+
+        private static Vector2[] Ellipse(Vector2 center, float rx, float ry, float fromDegrees, float toDegrees, int segments)
+        {
+            var points = new Vector2[segments + 1];
+            for (int i = 0; i <= segments; i++)
+            {
+                float angle = Mathf.Lerp(fromDegrees, toDegrees, i / (float)segments) * Mathf.Deg2Rad;
+                points[i] = center + new Vector2(Mathf.Cos(angle) * rx, Mathf.Sin(angle) * ry);
+            }
+            return points;
+        }
+        private static Vector2[] Petals(Vector2 center, float radius, float depth, int petals, int segments)
+        {
+            var points = new Vector2[segments + 1];
+            for (int i = 0; i <= segments; i++)
+            {
+                float angle = Mathf.PI * .5f + i * Mathf.PI * 2 / segments;
+                // |cos| gives rounded petals that meet in shallow notches, matching the emblem silhouette.
+                float r = radius - depth + depth * Mathf.Abs(Mathf.Cos((angle - Mathf.PI * .5f) * petals * .5f));
+                points[i] = center + new Vector2(Mathf.Cos(angle), Mathf.Sin(angle)) * r;
+            }
+            return points;
+        }
+        private static Vector2[] Rotate(Vector2[] points, float degrees)
+        {
+            float c = Mathf.Cos(degrees * Mathf.Deg2Rad), s = Mathf.Sin(degrees * Mathf.Deg2Rad);
+            var result = new Vector2[points.Length];
+            for (int i = 0; i < points.Length; i++)
+            {
+                Vector2 p = points[i] - Vector2.one * .5f;
+                result[i] = new Vector2(c * p.x - s * p.y, s * p.x + c * p.y) + Vector2.one * .5f;
+            }
+            return result;
+        }
+        private static Vector2[] Join(params Vector2[][] strokes)
+        {
+            var result = new List<Vector2>();
+            foreach (var stroke in strokes)
+            {
+                if (result.Count > 0) result.Add(Break);
+                result.AddRange(stroke);
+            }
+            return result.ToArray();
         }
 
         private sealed class Shape

@@ -5,7 +5,8 @@
     "Spotlight.FreeCafe.Domain",
     "Spotlight.FreeCafe.Unity",
     "Spotlight.Narrative",
-    "Spotlight.Audio"
+    "Spotlight.Audio",
+    "Spotlight.GameFlow.UI"
   ],
   "autoReferenced": false,
   "includePlatforms": [

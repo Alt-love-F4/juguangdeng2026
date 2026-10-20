@@ -59,7 +59,7 @@ namespace Spotlight.Narrative.Editor.Tests
             Assert.That(summary.EndingNoNewArtwork,Is.EqualTo(0));
         }
 
-        [Test]public void RefusingCafeEndingHasAnExplicitRequirementCardInsteadOfNoArtwork()
+        [Test]public void RefusingCafeEndingUsesIllustrationAndPreservesHistoricalRequirementCard()
         {
             var item=NarrativeArtPlaceholderBuilder.ReadManifest().requirements.Single(r=>r.id=="END-IF0");
             var catalog=NarrativeEndingArtworkCatalog.Load();
@@ -68,17 +68,18 @@ namespace Spotlight.Narrative.Editor.Tests
             Assert.That(item.assetPath,Is.EqualTo("Assets/Art/NarrativePlaceholders/Endings/END-IF0.png"));
             Assert.That(entry,Is.Not.Null);
             Assert.That(entry.artwork,Is.Not.Null);
-            Assert.That(entry.artworkIsPlaceholder,Is.True);
-            Assert.That(entry.status,Is.EqualTo(NarrativeEndingArtworkCatalog.ArtStatus.RequiredMissing));
-            Assert.That(AssetDatabase.GetAssetPath(entry.artwork),Is.EqualTo(item.assetPath));
+            Assert.That(entry.artworkIsPlaceholder,Is.False);
+            Assert.That(entry.status,Is.EqualTo(NarrativeEndingArtworkCatalog.ArtStatus.NeedsReview));
+            Assert.That(AssetDatabase.GetAssetPath(entry.artwork),Is.EqualTo("Assets/Art/NarrativeGenerated/Endings/END-IF0_departure.png"));
             var snapshot=NarrativeEndingEcho.ResolveArtwork(entry.endingId);
             Assert.That(snapshot.Sprite,Is.EqualTo(entry.artwork));
-            Assert.That(snapshot.IsPlaceholder,Is.True);
-            Assert.That(snapshot.StatusLabel,Does.Contain("非最终插画"));
+            Assert.That(snapshot.IsPlaceholder,Is.False);
+            Assert.That(snapshot.StatusLabel,Is.Empty);
             var current=NarrativeArtPlaceholderBuilder.InspectCurrentArt(item,null,null,null,catalog);
-            Assert.That(current.RequirementCard,Is.True);
-            Assert.That(current.Connected,Is.False);
+            Assert.That(current.RequirementCard,Is.False);
+            Assert.That(current.Connected,Is.True);
             Assert.That(current.NoNewArtwork,Is.False);
+            Assert.That(current.NeedsManualAcceptance,Is.True);
         }
 
         [Test]public void ProposedKeysAndRequirementCardRegistryEntriesDoNotCountAsProductionHooks()

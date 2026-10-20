@@ -36,7 +36,7 @@ namespace Spotlight.GameFlow
         private NarrativeController boundController;
         private NarrativeEndingDefinition selectedEnding;
         public GameSessionState SessionState => session?.CurEnum ?? GameSessionState.Menu;
-        public bool CanSaveCurrentSession => !NarrativeAutoRunner.IsActive && (dayFlow == null || dayFlow.CanSave);
+        public bool CanSaveCurrentSession => !NarrativeAutoRunner.IsActive && !NarrativeAutoRunner.IsWalkthroughActive && (dayFlow == null || dayFlow.CanSave);
         private bool gameplay => SessionState == GameSessionState.Playing;
 
         private sealed class SessionPhase : AbstractState<GameSessionState, GameFlowBootstrap>
@@ -265,7 +265,10 @@ namespace Spotlight.GameFlow
                 narrativeIntegration?.Runtime?.Controller?.FlushValueChanges();
                 float deltaTime = Time.unscaledDeltaTime;
                 playtime += deltaTime;
-                if (!loadingSavedSession)
+                // Test time is not ordinary play time for autosave scheduling. Without this reset,
+                // stopping a walkthrough can immediately save the assisted test session.
+                if (NarrativeAutoRunner.IsWalkthroughActive) autoSaveTimer = 0f;
+                if (!loadingSavedSession && !NarrativeAutoRunner.IsWalkthroughActive)
                 {
                     autoSaveTimer += deltaTime;
                     if (config.AutoSaveIntervalSeconds > 0f && autoSaveTimer >= config.AutoSaveIntervalSeconds)
@@ -800,8 +803,12 @@ namespace Spotlight.GameFlow
             return dayFlow.DebugSkipTutorialToMap(out message);
         }
 
-        public void StartGame()
+        private bool fastTestStartup;
+        public void StartGame() => StartGameInternal(false);
+        public void StartFastTestGame() => StartGameInternal(true);
+        private void StartGameInternal(bool fastStartup)
         {
+            fastTestStartup = fastStartup;
             if (openingProloguePanel != null)
             {
                 openingProloguePanel.Stop();
@@ -851,6 +858,14 @@ namespace Spotlight.GameFlow
         {
             try
             {
+                if (fastTestStartup)
+                {
+                    fastTestStartup = false;
+                    OpenGameplayPlaceholder();
+                    dayFlow.BeginFastTestSession();
+                    CompleteNarrativeRestore(false);
+                    return;
+                }
                 // New games alone get the standalone prologue. Gameplay/DayFlow are not opened until it completes.
                 if (openingProloguePanel == null)
                 {

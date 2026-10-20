@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using Spotlight.Audio;
 using Spotlight.GameFlow;
@@ -1234,6 +1234,8 @@ namespace Spotlight.FreeCafe
         }
         public void Save()
         {
+            if (NarrativeAutoRunner.IsActive || NarrativeAutoRunner.IsWalkthroughActive)
+            { ShowHint("自动测试期间禁止保存；停止测试后才能保存当前现场。"); return; }
             CancelDrag(); var data=new GameSaveData { SceneName="CoffeeShop",CheckpointId="freecafe",Participants=GameSaveParticipantRegistry.CaptureAll() };
             var saves=new GameSaveService();
             Report(saves.TryQuickSave(data,out var slot,out var error) ? ActionResult.Yes("已保存到空槽位 "+slot) : ActionResult.No("保存失败："+error));

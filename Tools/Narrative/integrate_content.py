@@ -38,10 +38,10 @@ def add_defaults(data):
  def text(key,value):add('Text',key=key,text=value,comment='Whole-story centralized authoring preset; see Docs/NarrativeIntegrationHandoff.md');return key
  def flag(key,initial=False,only=False):add('ConditionKey',key=key,nameText=text('condition.'+key,key),initialValue=initial,onlySetTrue=only)
  # Authored opening IF0: the player explicitly confirms leaving AFTER the refusal text.
- # Reuse existing source text, never select an ending merely for opening the decision page.
+ # Keep the authored refusal dialogue intact; the ending page has its own closing text.
  flag('story.arrival.leave.completed',only=True)
  add('Result',resultId='arrival.leave.complete',eventId='arrival.leave',seq=1,resultType='SET_FLAG',target='story.arrival.leave.completed',value='true',note='Opening IF0; only explicit leave root completion, retry/accept never set this fact.')
- add('Ending',endingId='arrival.ending.if0',enabled=True,priority=100,titleText='arrival.refuse.01.08',messageText='arrival.refuse.01.04')
+ add('Ending',endingId='arrival.ending.if0',enabled=True,priority=100,titleText='arrival.refuse.01.08',messageText=text('ending.presentation.arrival.ending.if0.messageText','我用剩下的盘缠离开王都，回到了熟悉的家乡。\n日子重新变得安稳，沸点咖啡馆也渐渐成了一个很少提起的名字。\n偶尔闻见街边飘来的咖啡香，我仍会想起阿黛尔，想起她问我是否愿意留下的那个下午。\n我不知道，倘若当时点了头，后来的一切会有什么不同。\n只知道，那间咖啡馆的门曾为我打开过。\n而我没有走进去。'))
  add('Condition',conditionId='arrival.ending.if0.completed',ownerType='ending',ownerId='arrival.ending.if0',groupIndex=1,condType='BOOL_EQ',target='story.arrival.leave.completed',value='true')
  add('Condition',conditionId='arrival.ending.if0.happened',ownerType='ending',ownerId='arrival.ending.if0',groupIndex=1,condType='EVENT_HAPPENED',target='arrival.leave',value='')
  for key in ['route.neutral','route.rose','route.church','route.revolution','story.detained','story.adele.away','story.sylvain.unavailable','weather.rain','availability.adele','availability.sylvain']:

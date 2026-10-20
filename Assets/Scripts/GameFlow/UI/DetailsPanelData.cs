@@ -43,8 +43,8 @@ namespace Spotlight.GameFlow
             var badges = specializations == null ? new List<DetailsSpecializationData>() : new List<DetailsSpecializationData>(specializations);
             if (badges.Exists(item => item == null)) throw new ArgumentException("Specializations must not contain null.", nameof(specializations));
             Specializations = badges.AsReadOnly();
-            Relationships = relationships ?? new DetailsSectionData("人物关系", "暂无人物关系", "尚未提供人物关系展示数据。");
-            World = world ?? new DetailsSectionData("世界情况", "暂无世界情况", "尚未提供世界情况展示数据。");
+            Relationships = relationships ?? new DetailsSectionData("人物关系", "暂无人物关系", "你还没有结识什么人。");
+            World = world ?? new DetailsSectionData("世界情况", "暂无世界情况", "暂时还没有关于王都的消息。");
             IsPlaceholder = isPlaceholder;
             Characters = CopyItems(characters, nameof(characters));
             WorldBars = CopyItems(worldBars, nameof(worldBars));
@@ -118,10 +118,23 @@ namespace Spotlight.GameFlow
         public string LowerDescription { get; }
         public string UpperDescription { get; }
         public string Description { get; }
+        /// <summary>Optional emblem shown on the world selector (faction profiles).</summary>
+        public Sprite Icon { get; }
+        /// <summary>Optional short line under the name, e.g. a faction's leader.</summary>
+        public string Subtitle { get; }
+        /// <summary>Label for the value bar; defaults to <see cref="Name"/>.</summary>
+        public string ValueName { get; }
+        /// <summary>False for profiles without a recorded value; the bar is then left empty.</summary>
+        public bool HasValue { get; }
 
         public DetailsProgressData(string key, string name, float value, float min = 0f, float max = 100f,
-            string lowerDescription = null, string upperDescription = null, string description = null)
+            string lowerDescription = null, string upperDescription = null, string description = null,
+            Sprite icon = null, string subtitle = null, string valueName = null, bool hasValue = true)
         {
+            Icon = icon;
+            Subtitle = subtitle ?? string.Empty;
+            ValueName = string.IsNullOrEmpty(valueName) ? name ?? string.Empty : valueName;
+            HasValue = hasValue;
             if (float.IsNaN(min) || float.IsInfinity(min)) throw new ArgumentOutOfRangeException(nameof(min));
             if (float.IsNaN(max) || float.IsInfinity(max) || max < min) throw new ArgumentOutOfRangeException(nameof(max));
             if (float.IsNaN(value) || float.IsInfinity(value)) throw new ArgumentOutOfRangeException(nameof(value));

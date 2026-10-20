@@ -277,6 +277,7 @@ namespace Spotlight.GameFlow
         private Tween optionFeedback;
         private bool optionsVisible;
         public bool IsChoosing => IsPlaying && optionsVisible;
+        public IReadOnlyList<DialogueOption> DisplayedOptions => script?.Options ?? Array.Empty<DialogueOption>();
         public string SelectedOptionId { get; private set; } = string.Empty;
 
         private void CreateOptionOverlay()

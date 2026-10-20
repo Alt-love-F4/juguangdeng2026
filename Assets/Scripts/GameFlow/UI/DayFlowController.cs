@@ -205,6 +205,39 @@ namespace Spotlight.GameFlow
             UnsubscribeGameplayEndpoint();
         }
 
+        /// <summary>Explicit assisted startup: no prologue, creation letter, arrival or tutorials; no fabricated story results.</summary>
+        public void BeginFastTestSession()
+        {
+            if (!SessionAllowsPlay) throw new InvalidOperationException("快速测试需要已就绪的游戏会话。");
+            HideForMainMenu();
+            day = 1;
+            lastCafeEntryDay = 0;
+            previousDate = InitialDate;
+            newSessionFirstDay = false;
+            firstDayIntroductionCompleted = true;
+            firstDayCafeTutorialStarted = firstDayCafeTutorialCompleted = true;
+            mapUsageTutorialPending = false;
+            mapUsageTutorialCompleted = true;
+            tutorialTestSkipSubmitted = true;
+            if (flow == null || !flow.TrySubmitPlayerCreation(null))
+                throw new InvalidOperationException("快速测试的默认角色初始化失败。");
+            PlayerRuntime.Current?.SelectAvatar(PlayerRuntime.Current.Catalog.DefaultAvatar);
+            running = true;
+            EnsureNarrativeCafeGameplayBinding();
+            PlayerCafeOwner.Current?.SynchronizeCalendarDay(day);
+            var controller = NarrativeRuntime.Instance?.Controller;
+            controller?.SetOfficialDay(day);
+            if (controller == null) { EnterCityMap(); return; }
+            controller.RunAtSafeBoundary(() => {
+                if (!SessionAllowsPlay || !running) return;
+                controller.ProcessOfficialDay(day);
+                controller.RunAtSafeBoundary(() => {
+                    if (SessionAllowsPlay && running)
+                        RunNarrativeEntry(NarrativeEntryPoint.MorningBeforeMap, EnterCityMap);
+                });
+            });
+        }
+
         public void BeginNewSession(bool playLetter = true, bool playIntroduction = true)
         {
             if (!SessionAllowsPlay) return;
@@ -836,6 +869,8 @@ namespace Spotlight.GameFlow
             FindGameplayEndpoint();
             cafeTutorialEndpoint?.FinishCafeTutorial();
             tutorialTestSkipSubmitted = true;
+            mapUsageTutorialPending = false;
+            mapUsageTutorialCompleted = true;
             newSessionFirstDay = false;
             firstDayIntroductionCompleted = true;
             firstDayCafeTutorialStarted = true;

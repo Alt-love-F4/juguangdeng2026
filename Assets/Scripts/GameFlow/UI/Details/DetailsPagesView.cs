@@ -152,7 +152,7 @@ namespace Spotlight.GameFlow
                 if (hover == default) hover = cell.gameObject.AddComponent<DetailsHoverTarget>();
                 hover.Bind(panel, character.Unlocked ? character.Name : "尚未结识",
                     character.Unlocked ? CharacterHoverDescription(character)
-                        : "推进相关剧情后，这里会显示人物介绍与当前存档中记录的关系数值。未解锁信息不会提前展示。");
+                        : "你还不认识这个人。也许在王都的某个角落，你们终会相遇。");
             }
             previous.interactable = RelationshipPageIndex > 0;
             next.interactable = RelationshipPageIndex < PageCount - 1;
@@ -242,7 +242,16 @@ namespace Spotlight.GameFlow
                 button.transition = Selectable.Transition.None; button.navigation = new Navigation { mode = Navigation.Mode.None };
                 string key = bar.Key;
                 button.onClick.AddListener(() => panel.SelectWorldProgress(key));
-                Label(image.transform, "Name", bar.Name, new Vector2(.08f, .08f), new Vector2(.92f, .92f), 31, TextAlignmentOptions.Center);
+                if (bar.Icon != default)
+                {
+                    var emblem = DetailsViewUI.Box(image.transform, "Emblem", new Vector2(.06f, .14f), new Vector2(.32f, .86f), Color.white);
+                    emblem.sprite = bar.Icon; emblem.preserveAspect = true; emblem.raycastTarget = false;
+                    var factionName = Label(image.transform, "Name", bar.Name, new Vector2(.34f, .42f), new Vector2(.97f, .9f), 25, TextAlignmentOptions.BottomLeft);
+                    factionName.enableAutoSizing = true; factionName.fontSizeMin = 16; factionName.fontSizeMax = 25;
+                    var epithet = Label(image.transform, "Subtitle", FirstSegment(bar.Subtitle), new Vector2(.34f, .1f), new Vector2(.97f, .42f), 15, TextAlignmentOptions.TopLeft);
+                    epithet.color = new Color(.52f, .32f, .13f);
+                }
+                else Label(image.transform, "Name", bar.Name, new Vector2(.08f, .08f), new Vector2(.92f, .92f), 31, TextAlignmentOptions.Center);
                 var hover = image.GetComponent<DetailsHoverTarget>();
                 if (hover == default) hover = image.gameObject.AddComponent<DetailsHoverTarget>();
                 hover.Bind(panel, bar.Name, bar.Description);
@@ -269,14 +278,78 @@ namespace Spotlight.GameFlow
                 selectors[i].sprite = active ? worldSelectedButton : worldIdleButton;
                 if (active) selected = data.WorldBars[i];
             }
-            worldDescription.text = selected != null ? selected.Description : data.World.Heading;
-            worldValue.text = selected != null ? selected.Name + "：" + selected.Value.ToString("0.##") + " / " + selected.Max.ToString("0.##") : "";
-            worldFill.fillAmount = selected != null ? Ratio(selected) : 0;
-            lower.text = selected != null ? selected.Min.ToString("0.##") : "";
-            upper.text = selected != null ? selected.Max.ToString("0.##") : "";
+            bool profile = selected != null && selected.Icon != default;
+            RenderFactionProfile(profile ? selected : null);
+            worldDescription.text = selected == null ? data.World.Heading
+                : profile ? (selected.HasValue ? "你的立场会让这股力量更信任你，或更加警惕你。" : "你还没有与这股力量真正打过交道。")
+                : selected.Description;
+            worldValue.text = selected == null || !selected.HasValue ? ""
+                : selected.Min < 0 ? selected.ValueName + "：" + selected.Value.ToString("+0;-0;0") + "（" + selected.Min.ToString("0.##") + " ~ " + selected.Max.ToString("0.##") + "）"
+                : selected.ValueName + "：" + selected.Value.ToString("0.##") + " / " + selected.Max.ToString("0.##");
+            worldFill.fillAmount = selected != null && selected.HasValue ? Ratio(selected) : 0;
+            lower.text = selected != null && selected.HasValue ? selected.Min.ToString("0.##") : "";
+            upper.text = selected != null && selected.HasValue ? selected.Max.ToString("0.##") : "";
             lowerDescription.text = selected != null ? selected.LowerDescription : data.World.Description;
             upperDescription.text = selected != null ? selected.UpperDescription : "";
             BindHover(lower, selected, true); BindHover(upper, selected, false);
+        }
+        private RectTransform factionProfile;
+        private Image factionEmblem;
+        private TMP_Text factionName, factionSubtitle, factionSummary;
+
+        /// <summary>Faction card in the free area above the world description line (PSD info region).</summary>
+        private void RenderFactionProfile(DetailsProgressData faction)
+        {
+            if (faction == null) { if (factionProfile != null) factionProfile.gameObject.SetActive(false); return; }
+            if (factionProfile == null)
+            {
+                factionProfile = DetailsViewUI.Root(worldDescription.transform.parent, "FactionProfile", new Vector2(0, 1), new Vector2(0, 1));
+                factionProfile.pivot = new Vector2(0, 1);
+                factionProfile.sizeDelta = new Vector2(836, 182);
+                factionProfile.anchoredPosition = new Vector2(768, -216);
+                factionEmblem = DetailsViewUI.Box(factionProfile, "Emblem", new Vector2(0, 0), new Vector2(0, 1), Color.white);
+                factionEmblem.rectTransform.offsetMax = new Vector2(160, 0);
+                factionEmblem.preserveAspect = true; factionEmblem.raycastTarget = false;
+                factionName = Label(factionProfile, "Name", "", new Vector2(0, 1), new Vector2(1, 1), 32, TextAlignmentOptions.BottomLeft);
+                Place(factionName.rectTransform, 180, 0, 44);
+                factionSubtitle = Label(factionProfile, "Subtitle", "", new Vector2(0, 1), new Vector2(1, 1), 18, TextAlignmentOptions.TopLeft);
+                factionSubtitle.color = new Color(.52f, .32f, .13f);
+                Place(factionSubtitle.rectTransform, 180, 48, 26);
+                var viewport = DetailsViewUI.Box(factionProfile, "Summary", new Vector2(0, 0), new Vector2(1, 1), Color.clear);
+                viewport.rectTransform.offsetMin = new Vector2(180, 0); viewport.rectTransform.offsetMax = new Vector2(0, -78);
+                viewport.gameObject.AddComponent<RectMask2D>();
+                var scroll = viewport.gameObject.AddComponent<ScrollRect>();
+                var content = DetailsViewUI.Root(viewport.transform, "Content", new Vector2(0, 1), Vector2.one);
+                content.pivot = new Vector2(.5f, 1);
+                content.gameObject.AddComponent<ContentSizeFitter>().verticalFit = ContentSizeFitter.FitMode.PreferredSize;
+                scroll.viewport = viewport.rectTransform; scroll.content = content;
+                scroll.horizontal = false; scroll.movementType = ScrollRect.MovementType.Clamped; scroll.scrollSensitivity = 32;
+                factionSummary = Label(content, "Text", "", Vector2.zero, Vector2.one, 18);
+                factionSummary.overflowMode = TextOverflowModes.Overflow; factionSummary.lineSpacing = 4;
+                content.gameObject.AddComponent<VerticalLayoutGroup>().childControlHeight = true;
+            }
+            factionProfile.gameObject.SetActive(true);
+            factionEmblem.sprite = faction.Icon;
+            factionName.text = faction.Name;
+            factionSubtitle.text = faction.Subtitle;
+            factionSummary.text = faction.Description;
+            var summaryScroll = factionSummary.transform.parent.parent.GetComponent<ScrollRect>();
+            LayoutRebuilder.ForceRebuildLayoutImmediate((RectTransform)factionSummary.transform.parent);
+            summaryScroll.verticalNormalizedPosition = 1;
+            var hover = factionSummary.transform.parent.parent.GetComponent<DetailsHoverTarget>();
+            if (hover == default) hover = factionSummary.transform.parent.parent.gameObject.AddComponent<DetailsHoverTarget>();
+            hover.Bind(panel, faction.Name, faction.Description);
+        }
+        private static void Place(RectTransform rect, float left, float top, float height)
+        {
+            rect.pivot = new Vector2(.5f, 1);
+            rect.offsetMin = new Vector2(left, -top - height); rect.offsetMax = new Vector2(0, -top);
+        }
+        private static string FirstSegment(string subtitle)
+        {
+            if (string.IsNullOrEmpty(subtitle)) return string.Empty;
+            int split = subtitle.IndexOf('·');
+            return (split > 0 ? subtitle.Substring(0, split) : subtitle).Trim();
         }
         private void BindHover(TMP_Text label, DetailsProgressData bar, bool isLower)
         {
@@ -303,6 +376,7 @@ namespace Spotlight.GameFlow
             specialInformation.text = string.Empty;
             familiarityFill.fillAmount = 0; familiarityValue.text = string.Empty;
             worldFill.fillAmount = 0;
+            RenderFactionProfile(null);
             worldDescription.text = worldValue.text = lower.text = upper.text = lowerDescription.text = upperDescription.text = string.Empty;
         }
         private void OnDestroy()

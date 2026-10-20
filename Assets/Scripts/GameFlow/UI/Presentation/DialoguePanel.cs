@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using DG.Tweening;
 using TMPro;
 using UnityEngine;
@@ -628,6 +628,52 @@ namespace Spotlight.GameFlow
                 : script.Options.Count > 0 && string.IsNullOrEmpty(SelectedOptionId) ? "即将显示选项"
                 : string.IsNullOrEmpty(SelectedOptionId) ? "空格 / 回车 / 点击 · 结束对话"
                 : "已选择回应 · 空格 / 回车 / 点击结束";
+        }
+
+        /// <summary>Finish this UI segment without frame-by-frame skipping. Choices and NCS callbacks remain authoritative.</summary>
+        public bool FastForwardToChoiceOrComplete()
+        {
+            if (ReadingInputBlocked || !IsPlaying || script == null || exiting || IsEndingSettlement) return false;
+            if (IsChoosing) return true;
+            transition?.Kill(false); transition = null;
+            CancelEffectWork();
+            entranceComplete = ready = true;
+            canvasGroup.alpha = 1f;
+            CoffeeCupScreenTransition.TryBeginReveal(0f);
+            dialogueBox.anchoredPosition = boxPosition;
+            controlSkipping = false;
+            IsSkipping = true; // Suppress skipped-line sound, never replay per-line animations.
+            Spotlight.Audio.GameAudio.StopOwner(voiceOwner);
+            for (int i = Math.Max(0, LineIndex + 1); i < activeLines.Count - 1; i++)
+            {
+                var line = activeLines[i];
+                if (line.ReplaceLeft) left = DialogueCharacter.Resolve(left, line.LeftCharacter);
+                if (line.ReplaceRight) right = DialogueCharacter.Resolve(right, line.RightCharacter);
+                if (line.ReplaceCenter) center = DialogueCharacter.Resolve(center, line.CenterCharacter);
+            }
+            if (activeLines.Count > 0)
+            {
+                ShowLine(activeLines.Count - 1);
+                StopEffects();
+                ShowPage(Math.Max(1, dialogueText.textInfo.pageCount));
+                revealed = pageEnd;
+                dialogueText.maxVisibleCharacters = int.MaxValue;
+            }
+            IsSkipping = false;
+            if (TryShowOptions()) return true;
+            // Never auto-complete an unresolved or already-submitted choice.
+            if (script.Options.Count > 0 && string.IsNullOrEmpty(SelectedOptionId)) return false;
+            CaptureHistory();
+            Action callback = finished;
+            finished = null;
+            if (script.Continues)
+            {
+                SeamlessChoicePending = true;
+                IsPlaying = ready = false;
+            }
+            else Stop(completed: true);
+            callback?.Invoke();
+            return true;
         }
 
         /// <summary>Reveal each page briefly in unscaled time, stopping at choices without selecting them.</summary>

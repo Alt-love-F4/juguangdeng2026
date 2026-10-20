@@ -29,6 +29,7 @@ namespace Spotlight.GameFlow
         private int capturedHistoryCharacters = -1;
         private int capturedHistoryLine = -1;
         public static DialoguePanel Active => active;
+        public string CurrentLineText => script != null && LineIndex >= 0 && LineIndex < activeLines.Count ? activeLines[LineIndex].Text : string.Empty;
         public DialogueSourceLocation CurrentSource => script != null && LineIndex >= 0 && LineIndex < activeLines.Count ? activeLines[LineIndex].Source : null;
         public static Func<bool> ExternalInputBlocked { get; set; }
         public static bool IsExternalInputBlocked => ExternalInputBlocked?.Invoke() == true;

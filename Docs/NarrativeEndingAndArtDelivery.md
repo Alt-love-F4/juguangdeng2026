@@ -109,3 +109,12 @@
 ## 2026-10-19 用户请求的非结局 API 补图
 
 本轮用户明确授权调用PackyAPI，已生成CG07月光玛丽、CG09雨中三人候选、CH35教程老太太、P04国王币四项。CG07接原有正文key，CH35接现有教程中心剪影，P04仅登记图片；CG09因主角枪口方向不符原稿保留候选、未接线。所有结局、旧正式素材及原始需求卡保留。逐项状态、来源和验证见 [非结局需求 API 美术补充](NarrativeGeneratedArtDelivery-2026-10-19.md)。本段仅记录用户本轮授权，不追认此前“本地占位、不调用API”批次为生成图。
+
+
+## 2026-10-20 END-IF0 离城插画替换
+
+用户要求生成并替换 Art Requirement Placeholders 中的 END-IF。对应需求为 `END-IF0 / arrival.ending.if0 / 未开始就已结束`。本次调用 PackyAPI 默认 `gpt-image-2.5-sunburst` 生成新图失败，未收到图片，服务端可能已接收请求，因此没有自动重试，不记为本次生成成功。提示词保存在 `outputs/packy-image/end-if0-20261020/prompt.txt`。
+
+替换使用工作区已有 `Assets/Art/NarrativeGenerated/Endings/END-IF0_departure.png`（1672×941，近16:9）：携行囊的主角背影、王都城门和乡间道路。仅修改现有 `NarrativeEndingArtworkCatalog.asset` 的 IF0 引用，设置 `artworkIsPlaceholder=false`，状态为 `NeedsReview`。需求窗口当前生产资源将显示“已接入 · 待人工验收”；历史需求卡与原清单保留。已有 IF0 测试同步核对插画引用、非占位快照及历史卡保留。
+
+验证范围：PNG 解码、尺寸、Sprite 导入设置、GUID 引用和定向 diff 静态核对；未执行 Unity EditMode 测试或共享场景实机预览，不代表自然通关验收。没有修改剧情表、结局文案、事实或触发条件。

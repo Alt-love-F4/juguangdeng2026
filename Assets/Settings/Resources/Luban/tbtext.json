@@ -58953,5 +58953,10 @@
     "key": "news.bulletin.614a28cd.body",
     "text": "提早收店",
     "comment": ""
+  },
+  {
+    "key": "ending.presentation.arrival.ending.if0.messageText",
+    "text": "我用剩下的盘缠离开王都，回到了熟悉的家乡。\n日子重新变得安稳，沸点咖啡馆也渐渐成了一个很少提起的名字。\n偶尔闻见街边飘来的咖啡香，我仍会想起阿黛尔，想起她问我是否愿意留下的那个下午。\n我不知道，倘若当时点了头，后来的一切会有什么不同。\n只知道，那间咖啡馆的门曾为我打开过。\n而我没有走进去。",
+    "comment": "User-requested original closing text for opening IF0; centralized in Tools/Narrative/integrate_content.py."
   }
 ]

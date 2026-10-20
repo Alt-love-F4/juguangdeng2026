@@ -40,6 +40,11 @@ namespace Spotlight.FreeCafe
                 case "tulip": return "郁金香";
                 case "x": return "X 形";
                 case "a": return "A 形";
+                case "bean": return "咖啡豆";
+                case "sword_crown": return "剑与王冠";
+                case "concord_ring": return "圣谐之环";
+                case "new_rose": return "五瓣玫瑰";
+                case "broken_chain": return "断链";
                 case null: case "": case "unknown": return "未识别";
                 default: return id;
             }

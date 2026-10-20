@@ -110,6 +110,7 @@ namespace Spotlight.GameFlow
                 var dayFlow = UnityEngine.Object.FindFirstObjectByType<DayFlowController>();
                 panel.AllowCancel = isPreview || request.Event?.blocksSave != true && (dayFlow == null || !dayFlow.IsFirstSessionGuideActive);
                 panel.OptionSelectionRequested = data.selectChoice;
+                if (data.fastForwardText) panel.FastForwardToChoiceOrComplete();
             }
             data.releaseStage = () => { notified = true; Detach(); DialoguePlayback.ReleaseStage(data.continuityOwner); };
             var flow = !isPreview && script.BackgroundVisual?.useSceneBackground == true

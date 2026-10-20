@@ -180,8 +180,7 @@ namespace Spotlight.GameFlow.Tests
             var snapshot = DetailsGameDataAdapter.Create();
             var adele = snapshot.Characters.Single(character => character.Id == "adele");
             Assert.That(adele.Unlocked, Is.True);
-            StringAssert.Contains("新手引导人物", adele.RelationshipSummary);
-            StringAssert.Contains("正式相识记录尚未写入", adele.RelationshipSummary);
+            StringAssert.Contains("初来乍到", adele.RelationshipSummary);
             Assert.That(session.Narrative.Controller.State.TryGetCondition("known.adele", out _), Is.False,
                 "Showing the tutorial character is display-only and must not set a persistent meet fact.");
             yield return null;

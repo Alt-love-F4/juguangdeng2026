@@ -272,7 +272,7 @@ namespace Spotlight.FreeCafe.Tests
             Assert.That(stack.body.color.g, Is.GreaterThan(.5f), "Rejection highlight must clear after its feedback interval");
         }
 
-        [UnityTest] public IEnumerator LatteOverlayHasSixPreviewsResetClearsDrawingAndSubmitRequiresAStroke()
+        [UnityTest] public IEnumerator LatteOverlayHasEightPreviewsResetClearsDrawingAndSubmitRequiresAStroke()
         {
             Assert.That(app.World.SelectServingCup("s.cups.small").success, Is.True);
             var cup = app.World.ServingCup;
@@ -282,7 +282,7 @@ namespace Spotlight.FreeCafe.Tests
             Assert.That(overlay, Is.Not.Null);
             var panel = overlay.transform.Find("Content/PresetPanel");
             var list = panel.Find("PresetList");
-            Assert.That(list.childCount, Is.EqualTo(6));
+            Assert.That(list.childCount, Is.EqualTo(8), "Direct CoffeeShop runs unlock four everyday and four faction patterns");
             foreach (Transform preset in list)
             {
                 Assert.That(preset.GetComponent<Button>(), Is.Not.Null);

@@ -287,20 +287,34 @@ namespace Spotlight.GameFlow
             return started;
         }
 
-        private void NavigateTodo(MapTaskItem item)
+        public bool TryNavigateToTodo(string id)
         {
-            if (!CanInteract) return;
-            if (item.id == GameplayTodoProjection.RestTodoId) { TryNavigateToCafeForRest(); return; }
-            if (item.id == "guide.travel.cafe") { TryNavigateToCafe(); return; }
+            if (!CanInteract) return false;
+            RefreshTodos();
+            var item = System.Linq.Enumerable.FirstOrDefault(tasks.Items, i => i.id == id && !i.completed);
+            if (item == null) return false;
+            tasks.SetTracked(id);
+            return NavigateTodoCore(item);
+        }
+
+        private void NavigateTodo(MapTaskItem item) => NavigateTodoCore(item);
+
+        private bool NavigateTodoCore(MapTaskItem item)
+        {
+            if (!CanInteract) return false;
+            if (item.id == GameplayTodoProjection.RestTodoId) return TryNavigateToCafeForRest();
+            if (item.id == "guide.travel.cafe") return TryNavigateToCafe();
             CloseSidebars();
             foreach (var source in todoSources)
-                if (source.NavigateTodo(item)) return;
+                if (source.NavigateTodo(item)) return true;
             if (!string.IsNullOrEmpty(item.positionKey) && flow != null && flow.CanOpenMap)
             {
                 pendingTodo = item;
                 pendingTodoDeadline = Time.unscaledTime + 15f;
                 flow.OpenMap();
+                return true;
             }
+            return false;
         }
 
         public void ToggleInventory()

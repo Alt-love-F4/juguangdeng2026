@@ -477,7 +477,7 @@ namespace Spotlight.FreeCafe.Tests
             var overlay = GameObject.Find("LatteArtPresetOverlay");
             var panel = overlay.transform.Find("Content/PresetPanel");
             var list = panel.Find("PresetList");
-            Assert.That(list.childCount, Is.EqualTo(6));
+            Assert.That(list.childCount, Is.EqualTo(8), "Direct CoffeeShop runs unlock four everyday and four faction patterns");
             Assert.That(list.Find("heartButton/Selected").gameObject.activeSelf, Is.True);
             Assert.That(caption.enabled, Is.False, "Old placeholder caption must not cover the cup");
             list.Find("tulipButton").GetComponent<Button>().onClick.Invoke();

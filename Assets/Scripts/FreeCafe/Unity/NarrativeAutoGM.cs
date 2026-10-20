@@ -10,16 +10,31 @@ namespace Spotlight.FreeCafe
     {
         private FreeCafeGMPanel shell;
         private NarrativeAutoRunner runner;
+        private NarrativeWalkthroughRunner walkthrough;
         private bool waitForReview = true, scenarios = true;
         private void Awake()
         {
             shell = GetComponent<FreeCafeGMPanel>();
             runner = GetComponent<NarrativeAutoRunner>();
             if (runner == null) runner = gameObject.AddComponent<NarrativeAutoRunner>();
+            walkthrough = GetComponent<NarrativeWalkthroughRunner>();
+            if (walkthrough == null) walkthrough = gameObject.AddComponent<NarrativeWalkthroughRunner>();
             shell.RegisterCategory("剧情自动测试", Build);
         }
         private void Build(FreeCafeGMPanel panel)
         {
+            panel.AddAction("快速现场测试（跳开场/教程，直达选项）", () => BeginWalkthrough(),
+                "默认角色直接进入地图，不播放开场和教程；对话整段跳到选项并立即选择，侧栏记录真实数值变化。期间禁止保存。IF0目标保留开场。", false);
+            panel.AddAction("完整开场现场测试（保留教程）", () => BeginWalkthrough(null, false),
+                "保留原新游戏开场；可手动完成教程。对话仍直接跳到选项。", false);
+            panel.AddAction("现场：暂停 / 继续", () => walkthrough.TogglePause(), "暂停自动操作后可由你手动体验，再继续跟随。", false);
+            panel.AddAction("现场：只执行下一步", () => walkthrough.StepOnce(), "适合逐项检查待办引导。", false);
+            panel.AddAction("现场：停止跟随", () => walkthrough.Stop(), "保留当前游戏场景与进度供检查。", false);
+            panel.AddAction("打开现场测试记录", () => {
+                if (!string.IsNullOrEmpty(walkthrough.OutputPath))
+                    Application.OpenURL(new Uri(System.IO.Path.GetDirectoryName(walkthrough.OutputPath)).AbsoluteUri);
+            }, walkthrough.OutputPath ?? "尚无现场测试记录", false);
+            panel.AddAction("现场：显示 / 隐藏操作记录", () => walkthrough.ShowOverlay = !walkthrough.ShowOverlay, "记录包含日期、实际场景、地点、对话、选项和待办操作。", false);
             panel.AddAction("开始全结局后台测试（3种属性策略）", () => BeginBatch(3),
                 "逐个结局倾向预设；后台经营、制作交付、阶段和选项结算。每轮到实际结局记录JSON/CSV/日志与真实结局面板截图。不改正式存档。", false);
             panel.AddAction("快速回归（每结局1种策略）", () => BeginBatch(1), "适合先检查管线与阻塞。", false);
@@ -44,11 +59,24 @@ namespace Spotlight.FreeCafe
                     if (!ending.enabled) continue;
                     string id = ending.endingId;
                     string title = config.texts.Find(t => t.key == ending.titleText)?.content ?? id;
+                    panel.AddAction("现场目标：" + title, () => BeginWalkthrough(id), "按真实待办推进，对话选择倾向此结局；不保证内容闸门已具备通关条件。", false);
                     panel.AddAction("只测：" + title, () => BeginBatch(3, id), id, false);
                 }
             }
             catch (Exception error) { panel.SetExternalStatus("配置加载失败：" + error.Message); }
             panel.SetExternalStatus(runner.Status);
+        }
+        private void BeginWalkthrough(string ending = null, bool skipStartup = true)
+        {
+            try
+            {
+                if (walkthrough.Running) throw new InvalidOperationException("请先停止当前现场测试。");
+                walkthrough.SkipOpeningAndTutorials = skipStartup;
+                walkthrough.FastDialogue = true;
+                walkthrough.Begin(ending);
+                shell.SetVisible(false);
+            }
+            catch (Exception error) { shell.SetExternalStatus(error.Message); Debug.LogWarning("[NarrativeWalkthrough] " + error.Message); }
         }
         private void BeginBatch(int variants, string ending = null)
         {

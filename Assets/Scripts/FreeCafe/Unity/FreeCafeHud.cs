@@ -394,7 +394,7 @@ namespace Spotlight.FreeCafe
                 else if (tutorial != null && tutorial.IsRunning) step = tutorial.TodoInstruction;
                 else if (runtime.CafeTutorialWaitingForWorkstation) step = "点击大厅右侧吧台处的箭头，进入工作台制作首杯黑咖啡。";
                 items.Add(new MapTaskItem { id = "guide.cafe.tutorial", name = "完成当前咖啡馆教程", location = "咖啡馆",
-                    description = step, currentTask = step, status = "当前必做", priority = 0, preventsRest = true });
+                    description = step, currentTask = step, status = "当前必做", priority = 0, important = true, preventsRest = true });
                 return;
             }
             if (state.businessPhase == BusinessPhase.Preparation)
@@ -412,9 +412,18 @@ namespace Spotlight.FreeCafe
                     var person = runtime.World.Find(request.customerId);
                     var product = runtime.World.Product(request.productId);
                     string name = person == null ? "顾客" : runtime.World.PersonName(person);
+                    string cupName = runtime.World.Spec(runtime.World.RequiredCupSpecId(request))?.label ?? "订单指定杯型";
+                    var recipe = runtime.World.RecipeFor(product);
+                    string steps = recipe?.steps == null ? "打开咖啡谱确认用量与做法。"
+                        : string.Join(" → ", Array.ConvertAll(recipe.steps, step => step.label));
+                    var cup = runtime.World.ServingCup;
+                    string instruction = state.currentArea != AreaId.Counter ? "① 点击「前往制作台」，准备「" + cupName + "」。"
+                        : !string.IsNullOrEmpty(state.production?.miniGameToken) ? "② 完成当前制作小游戏，再继续配制。"
+                        : cup == null ? "② 取出「" + cupName + "」，按下方配方制作。"
+                        : "③ 对照订单检查杯型和饮品，将成品拖到交付盘，再点击右下角按铃。只有真实交付成功才完成此事项。";
                     items.Add(new MapTaskItem { id = "guide.cafe.order." + request.id, name = "为" + name + "准备" + (product?.label ?? "饮品"),
-                        location = "咖啡馆制作台", description = "查看左上角订单，确认饮品和杯型；忘记做法时打开「咖啡谱」。",
-                        currentTask = "进入制作台，按订单制作饮品，放到交付盘后按铃交付。", status = "营业订单 · 留意顾客耐心", priority = 10, preventsRest = true,
+                        location = "咖啡馆制作台", description = "订单杯型：" + cupName + "。参考流程：" + steps,
+                        currentTask = instruction, status = "营业订单 · 留意顾客耐心", priority = 10, preventsRest = true,
                         navigationLabel = runtime.CanEnterArea(AreaId.Counter) && state.currentArea != AreaId.Counter ? "前往制作台" : null });
                 }
                 if (runtime.CanEndBusiness)
@@ -425,12 +434,14 @@ namespace Spotlight.FreeCafe
             if (state.businessPhase == BusinessPhase.Night && dayFlow != null)
                 items.Add(new MapTaskItem { id = "guide.cafe.rest", name = "休息并进入下一天", location = "咖啡馆三楼宿舍",
                     description = "今日已打烊；也可以先打开地图处理其他事项。", currentTask = "确认今天的事项后，前往三楼宿舍，点击「结束这一天」或上床休息。",
-                    status = "可选择 · 将推进日期", priority = 100, navigationLabel = state.currentArea != AreaId.Basement ? "前往三楼宿舍" : null });
+                    status = "可选择 · 将推进日期", priority = 100,
+                    available = !GameplayTodoProjection.HasActionableContent(Spotlight.Narrative.NarrativeRuntime.Instance),
+                    blockedReason = GameplayTodoProjection.HasActionableContent(Spotlight.Narrative.NarrativeRuntime.Instance) ? "请先打开地图处理尚可进行的剧情事项。" : null, navigationLabel = state.currentArea != AreaId.Basement ? "前往三楼宿舍" : null });
             var bookButton = IsWorkstation ? runtime.GetComponent<FreeCafeProductionHud>()?.bookButton : recipeButton;
             if (bookButton != null && bookButton.gameObject.activeInHierarchy && bookButton.interactable)
                 items.Add(new MapTaskItem { id = "guide.cafe.recipes", name = "查看咖啡谱", location = "咖啡馆",
                     description = "查看已解锁饮品的配方、用量与制作说明。", currentTask = "点击上方「咖啡谱」，选择要制作的饮品查看做法。",
-                    status = "可查看", priority = 60, navigationLabel = "查看咖啡谱" });
+                    status = "可查看", optional = true, priority = 60, navigationLabel = "查看咖啡谱" });
             if (areaButtons != null)
                 for (int i = 0; i < areaButtons.Length; i++)
                 {
@@ -439,12 +450,12 @@ namespace Spotlight.FreeCafe
                     string areaLabel = runtime.World.Area(area)?.label;
                     items.Add(new MapTaskItem { id = "guide.cafe.area." + i, name = "前往" + areaLabel, location = areaLabel,
                         description = "使用楼层或区域切换入口前往该区域。", currentTask = "点击区域切换入口「" + areaLabel + "」。",
-                        status = "可前往", priority = 70, navigationLabel = "前往该区域" });
+                        status = "可前往", optional = true, priority = 70, navigationLabel = "前往该区域" });
                 }
             if (Flow != null && Flow.CanOpenMap)
                 items.Add(new MapTaskItem { id = "guide.cafe.map", name = "查看城区中的其他事项", location = "城区地图",
                     description = "打开地图查看目前可进行的剧情与行动。", currentTask = "点击地图按钮或按 M 打开地图，再选择地点查看行动详情。",
-                    status = "可查看", priority = 50, navigationLabel = "打开城区地图" });
+                    status = "可查看", optional = true, priority = 50, navigationLabel = "打开城区地图" });
         }
 
         public bool NavigateTodo(MapTaskItem item)
@@ -457,7 +468,7 @@ namespace Spotlight.FreeCafe
                 if (button == null || !button.isActiveAndEnabled || !button.interactable) return false;
                 button.onClick.Invoke(); return true;
             }
-            AreaId destination = item.id == GameplayTodoProjection.RestTodoId ? AreaId.Basement
+            AreaId destination = item.id == GameplayTodoProjection.RestTodoId || item.id == "guide.cafe.rest" ? AreaId.Basement
                 : item.id.StartsWith("guide.cafe.order.", StringComparison.Ordinal) ? AreaId.Counter : AreaId.Cafe;
             if (item.id.StartsWith("guide.cafe.area.", StringComparison.Ordinal)
                 && int.TryParse(item.id.Substring("guide.cafe.area.".Length), out int index)) destination = (AreaId)index;

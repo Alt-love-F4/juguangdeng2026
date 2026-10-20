@@ -1105,10 +1105,10 @@ MonoBehaviour:
       id: waste.pail
       label: "\u5E9F\u5F03\u6876"
       category: entity
-      pivot: 
+      pivot:
       outputFolder: Assets/Art/FreeCafe/Entities/waste.pail
-      prompt: 
-      negativePrompt: 
+      prompt:
+      negativePrompt:
       width: 0
       height: 0
       transparent: 1
@@ -1124,10 +1124,10 @@ MonoBehaviour:
       id: container.water
       label: "\u6E05\u6C34\u58F6"
       category: entity
-      pivot: 
+      pivot:
       outputFolder: Assets/Art/FreeCafe/Entities/container.water
-      prompt: 
-      negativePrompt: 
+      prompt:
+      negativePrompt:
       width: 0
       height: 0
       transparent: 1

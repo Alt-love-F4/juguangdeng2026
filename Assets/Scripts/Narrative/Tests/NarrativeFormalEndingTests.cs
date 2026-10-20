@@ -245,7 +245,7 @@ namespace Spotlight.Narrative.Tests
         {
             var ending = c.endings.Single(e => e.endingId == OpeningRefusalEndingId);
             Assert.That(ending.titleText, Is.EqualTo("arrival.refuse.01.08"), "Reuse authored opening title");
-            Assert.That(ending.messageText, Is.EqualTo("arrival.refuse.01.04"), "Reuse authored opening message");
+            Assert.That(ending.messageText, Is.EqualTo("ending.presentation.arrival.ending.if0.messageText"), "Use the dedicated opening ending settlement text without replacing refusal dialogue");
             Assert.That(c.texts.Any(t => t.key == ending.titleText && !string.IsNullOrWhiteSpace(t.content)), Is.True);
             Assert.That(c.texts.Any(t => t.key == ending.messageText && !string.IsNullOrWhiteSpace(t.content)), Is.True);
             var gates = Gates(c, OpeningRefusalEndingId).ToArray();

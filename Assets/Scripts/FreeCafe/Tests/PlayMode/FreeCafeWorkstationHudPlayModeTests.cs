@@ -147,12 +147,12 @@ namespace Spotlight.FreeCafe.Tests
             while(bench.IsTransitioning && Time.realtimeSinceStartup<deadline) yield return null;
             Assert.That(bench.IsTransitioning,Is.False);
             var overlay=GameObject.Find("LatteArtPresetOverlay").transform;
-            var crown=overlay.Find("Content/PresetPanel/PresetList/crownButton");
+            var crown=overlay.Find("Content/PresetPanel/PresetList/sword_crownButton");
             var data=new PointerEventData(EventSystem.current){position=new Vector2(Screen.width*.2f,Screen.height*.4f)};
             ExecuteEvents.Execute(crown.gameObject,data,ExecuteEvents.pointerEnterHandler);
             var hint=overlay.Find("Content/PatternMeaning");
             Assert.That(hint.gameObject.activeInHierarchy,Is.True);
-            Assert.That(hint.Find("Meaning").GetComponent<TMP_Text>().text,Does.Contain("保皇派").And.Contain("占位"));
+            Assert.That(hint.Find("Meaning").GetComponent<TMP_Text>().text,Does.Contain("王庭").And.Not.Contain("占位"));
             foreach(var graphic in hint.GetComponentsInChildren<Graphic>()) Assert.That(graphic.raycastTarget,Is.False);
             ExecuteEvents.Execute(crown.gameObject,data,ExecuteEvents.pointerExitHandler);
             Assert.That(hint.gameObject.activeSelf,Is.False);

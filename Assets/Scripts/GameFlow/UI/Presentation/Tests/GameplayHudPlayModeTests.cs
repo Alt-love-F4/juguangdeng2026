@@ -114,8 +114,24 @@ namespace Spotlight.GameFlow.Tests
                 Assert.That(adele.Bars.Any(bar => bar.Key == "adele.affection" && bar.Value == 6), Is.True);
                 StringAssert.Contains("已相识", adele.RelationshipSummary);
                 StringAssert.Contains("+6", adele.RelationshipSummary);
-                foreach (string key in new[] { "world.stability", "faction.neutral", "faction.rose", "faction.church", "faction.revolution" })
-                    Assert.That(data.WorldBars.Any(bar => bar.Key == key), Is.True, key);
+                Assert.That(data.WorldBars.Any(bar => bar.Key == "world.stability"), Is.True);
+                Assert.That(data.WorldBars.Any(bar => bar.Key == "faction.profile.cafe" && bar.Icon != null), Is.True,
+                    "The player's own cafe is always listed with its emblem.");
+                foreach (string id in new[] { "court", "church", "rose", "revolution" })
+                    Assert.That(data.WorldBars.Any(bar => bar.Key == "faction.profile." + id), Is.False,
+                        id + " must stay hidden until the story introduces it.");
+                state.SetCondition("story.rose.1011.s1.completed", true);
+                state.SetCondition("known.lesou", true);
+                data = DetailsGameDataAdapter.Create();
+                var rose = data.WorldBars.Single(bar => bar.Key == "faction.profile.rose");
+                Assert.That(rose.Name, Is.EqualTo("新玫瑰会"));
+                Assert.That(rose.HasValue && rose.ValueName == "新玫瑰倾向", Is.True, "Profiles read the existing faction.rose bar.");
+                Assert.That(data.WorldBars.Any(bar => bar.Key == "faction.profile.revolution"), Is.True);
+                Assert.That(data.WorldBars.Any(bar => bar.Key == "faction.profile.court"), Is.False);
+                Assert.That(data.WorldBars.Any(bar => bar.Key.StartsWith("faction.", StringComparison.Ordinal)
+                    && !bar.Key.StartsWith("faction.profile.", StringComparison.Ordinal)), Is.False, "Raw tendency bars are shown through profiles.");
+                foreach (var bar in data.WorldBars)
+                    Assert.That(bar.Description + bar.LowerDescription + bar.UpperDescription, Does.Not.Contain("NCS").And.Not.Contain("存档"), bar.Key);
                 Assert.That(data.WorldBars.Any(bar => bar.Key == "world.calendar" || bar.Key == "cafe.money"
                     || bar.Key.StartsWith("training.", StringComparison.Ordinal)), Is.False,
                     "Calendar, cafe funds and player training are not world overview indicators.");

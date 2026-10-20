@@ -54,6 +54,49 @@ namespace Spotlight.GameFlow.Tests
         }
 
         [UnityTest]
+        public IEnumerator InstantSkipJumpsToChoiceAndCompletesOnlyAfterExplicitSelection()
+        {
+            controller.StopCurrent();
+            int submitted = 0, completed = 0, interrupted = 0;
+            var lines = Enumerable.Range(0, 100).Select(i => new DialogueLine(DialogueSpeaker.Narrator, "长段台词" + i)).ToArray();
+            var panel = DialoguePlayback.Play(new DialogueScript(lines,
+                options: new[] { new DialogueOption("yes", "接受"), new DialogueOption("locked", "锁定", enabled: false) },
+                continuityOwner: new object()), () => completed++, null,
+                PresentationDebugSceneController.DebugTag, PanelCachePolicy.Transient);
+            panel.PlaybackInterrupted += () => interrupted++;
+            panel.OptionSelectionRequested = id => { submitted++; return true; };
+            yield return null;
+            Assert.That(panel.FastForwardToChoiceOrComplete(), Is.True);
+            Assert.That(panel.LineIndex, Is.EqualTo(99));
+            Assert.That(panel.IsChoosing, Is.True);
+            Assert.That(panel.IsSkipping, Is.False);
+            Assert.That(submitted, Is.Zero);
+            Assert.That(completed, Is.Zero);
+            Assert.That(panel.SelectOption("locked"), Is.False);
+            Assert.That(panel.SelectOption("yes"), Is.True);
+            Assert.That(submitted, Is.EqualTo(1));
+            Assert.That(completed, Is.EqualTo(1));
+            Assert.That(interrupted, Is.Zero);
+            Assert.That(panel.SelectOption("yes"), Is.False);
+        }
+
+        [UnityTest]
+        public IEnumerator InstantSkipWithoutChoicesCompletesOnceAndDoesNotCancel()
+        {
+            controller.StopCurrent();
+            int completed = 0, cancelled = 0;
+            var panel = DialoguePlayback.Play(new DialogueScript(new[] {
+                new DialogueLine(DialogueSpeaker.Narrator, "第一句"),
+                new DialogueLine(DialogueSpeaker.Narrator, "最后一句") }),
+                () => completed++, () => cancelled++, PresentationDebugSceneController.DebugTag, PanelCachePolicy.Transient);
+            yield return null;
+            Assert.That(panel.FastForwardToChoiceOrComplete(), Is.True);
+            Assert.That(panel.FastForwardToChoiceOrComplete(), Is.False);
+            Assert.That(completed, Is.EqualTo(1));
+            Assert.That(cancelled, Is.Zero);
+        }
+
+        [UnityTest]
         public IEnumerator OpeningProloguePreviewUsesSharedSceneAndRemainsIndependent()
         {
             controller.PlayOpeningPrologue();

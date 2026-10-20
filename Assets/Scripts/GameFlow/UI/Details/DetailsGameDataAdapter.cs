@@ -36,9 +36,9 @@ namespace Spotlight.GameFlow
                 switch (bar.barKey)
                 {
                     case "world.stability": return "世界稳定度";
-                    case "faction.neutral": return "中立 / 经营倾向";
+                    case "faction.neutral": return "经营与中立倾向";
                     case "faction.rose": return "新玫瑰倾向";
-                    case "faction.church": return "王庭教会倾向";
+                    case "faction.church": return "王庭与教会倾向";
                     case "faction.revolution": return "革命联合倾向";
                     default:
                         if (bar.barType == NarrativeBarType.Relation)
@@ -61,8 +61,8 @@ namespace Spotlight.GameFlow
                 string description = DisplayText(extra?.description);
                 if (string.IsNullOrWhiteSpace(description)) description = fallbackDescription
                     ?? (bar.barType == NarrativeBarType.Relation
-                        ? "这是当前存档中记录的人物关系数值。"
-                        : "这是当前世界存档中记录的进度数值。");
+                        ? "你与对方之间的关系。"
+                        : "王都局势正在发生的变化。");
                 string lowerDescription = DisplayText(extra?.lowerDescription);
                 string upperDescription = DisplayText(extra?.upperDescription);
                 return new DetailsProgressData(bar.barKey, BarName(bar), value, bar.min, bar.max,
@@ -79,7 +79,7 @@ namespace Spotlight.GameFlow
                         && (item.ownerId == characterId && item.targetId == playerId || item.ownerId == playerId && item.targetId == characterId) ? 0 : 1))
                 {
                     var progress = Progress(bar, bar.barType == NarrativeBarType.Relation
-                        ? "与你的关系数值范围为 " + bar.min + " 至 " + bar.max + "；这里只显示已记录数值，不推断人物态度。"
+                        ? "对方对你的好感，会随你的言行与选择而改变。"
                         : null);
                     if (progress != null) list.Add(progress);
                 }
@@ -101,23 +101,20 @@ namespace Spotlight.GameFlow
                 if (!unlocked && relationshipDefinitions.Count == 0) continue;
                 var characterBars = CharacterBars(obj.objId);
                 string relationshipSummary;
+                // Tutorial display only: it never writes known.adele.
                 if (tutorialAdele && !known)
-                    relationshipSummary = "新手引导人物：阿黛尔正在教程中与你互动；正式相识记录尚未写入。";
-                else if (known)
-                    relationshipSummary = "剧情记录：已相识。以下只显示存档中实际记录的关系数值。";
-                else if (unlocked)
-                    relationshipSummary = "人物档案已解锁。以下只显示存档中实际记录的关系数值。";
-                else relationshipSummary = "尚未结识；关系数值在剧情解锁后显示。";
+                    relationshipSummary = "初来乍到：阿黛尔正带你熟悉店里的工作。";
+                else if (known || unlocked)
+                    relationshipSummary = "已相识。";
+                else relationshipSummary = "尚未结识。";
                 if (unlocked && state != null)
                 {
                     foreach (var relation in relationshipDefinitions)
                     {
                         if (!state.TryGetBar(relation.barKey, out int value)) continue;
-                        relationshipSummary += "\n与你的好感记录：" + value.ToString("+0;-0;0")
-                            + "（范围 " + relation.min + " 至 " + relation.max + "）";
+                        relationshipSummary += "\n好感：" + value.ToString("+0;-0;0")
+                            + "（" + relation.min + " ~ " + relation.max + "）";
                     }
-                    if (relationshipDefinitions.Count == 0)
-                        relationshipSummary += "\n当前没有单独配置数值关系；人物介绍仍按剧情资料显示。";
                 }
                 characters.Add(new DetailsCharacterData(obj.objId, Text(obj.nameText), Text(obj.descText), Avatar(obj),
                     unlocked, characterBars, relationshipSummary));
@@ -155,44 +152,55 @@ namespace Spotlight.GameFlow
             string playerName = playerRuntime.PlayerName;
             if (string.IsNullOrWhiteSpace(playerName)) playerName = player == null ? "咖啡馆馆长" : Text(player.nameText);
             var worldProgress = new List<DetailsProgressData>();
-            var worldMetrics = configuration.bars.Where(bar => bar.barKey == "world.stability"
-                    || bar.barKey.StartsWith("faction.", StringComparison.Ordinal))
-                .OrderBy(bar => bar.barKey == "world.stability" ? 0 : 1)
-                .ThenBy(bar => bar.barKey, StringComparer.Ordinal);
-            foreach (var bar in worldMetrics)
+            var stabilityBar = configuration.bars.Find(bar => bar.barKey == "world.stability");
+            if (stabilityBar != null)
             {
-                string fallback = bar.barKey == "world.stability"
-                    ? "世界稳定度：数值来自当前 NCS 存档，范围 " + bar.min + " 至 " + bar.max + "。"
-                    : "势力倾向：数值来自当前 NCS 存档，范围 " + bar.min + " 至 " + bar.max + "；正负值按表内方向读取，不替代剧情判断。";
-                var progress = Progress(bar, fallback);
+                var progress = Progress(stabilityBar,
+                    "王都局势的安稳程度。数值越低，街头越动荡，各方势力也越可能铤而走险。");
                 if (progress != null) worldProgress.Add(progress);
+            }
+            // Faction profiles appear only after the story has introduced them; nothing here writes facts.
+            int knownFactions = 0;
+            foreach (var faction in WorldFactionCatalog.All)
+            {
+                if (!WorldFactionCatalog.IsEncountered(faction, state)) continue;
+                knownFactions++;
+                var bar = configuration.bars.Find(item => item.barKey == faction.TendencyBarKey);
+                int value = 0;
+                bool hasValue = bar != null && state != null && state.TryGetBar(bar.barKey, out value);
+                worldProgress.Add(new DetailsProgressData("faction.profile." + faction.Id, faction.Name, hasValue ? value : 0,
+                    hasValue ? bar.min : 0, hasValue ? bar.max : 0,
+                    hasValue ? bar.min + " · 疏远" : "", hasValue ? bar.max + " · 亲近" : "", faction.Summary,
+                    WorldFactionCatalog.Emblem(faction), faction.Epithet + "　·　" + faction.Leader, faction.TendencyName, hasValue));
             }
             string WorldOverview()
             {
-                if (state == null) return "正式世界状态尚不可用；请在游戏会话建立后查看。";
+                if (state == null) return "暂时还没有关于王都的消息。";
                 int day = state.TryGetBar("world.calendar", out int currentDay) ? currentDay : runtime?.Actions?.CurrentDay ?? 0;
-                string date = FormatWorldDate(day);
-                string stability = state.TryGetBar("world.stability", out int stable) ? stable + " / 10" : "不可用";
-                string detention = state.TryGetCondition("church.detention.active", out bool detained)
-                    ? detained ? "当前被拘押" : "未被拘押" : "拘押状态不可用";
+                var lines = new List<string>();
+                if (day > 0) lines.Add(FormatWorldDate(day) + " · 第 " + day + " 日");
+                var status = new List<string>();
+                if (state.TryGetBar("world.stability", out int stable)) status.Add("世界稳定度 " + stable + " / 10");
+                if (state.TryGetCondition("church.detention.active", out bool detained)) status.Add(detained ? "你正被拘押" : "未被拘押");
+                if (status.Count > 0) lines.Add(string.Join(" · ", status));
                 var routes = new List<string>();
                 foreach (var route in new[]
                 {
                     new KeyValuePair<string, string>("route.neutral", "中立 / 经营"),
                     new KeyValuePair<string, string>("route.rose", "新玫瑰"),
-                    new KeyValuePair<string, string>("route.church", "王庭教会"),
+                    new KeyValuePair<string, string>("route.church", "王庭与教会"),
                     new KeyValuePair<string, string>("route.revolution", "革命联合")
                 })
                     if (state.TryGetCondition(route.Key, out bool active) && active) routes.Add(route.Value);
-                string routeText = routes.Count == 0 ? "尚未形成明确路线" : string.Join("、", routes);
-                string dateText = day > 0 ? date + " · 第 " + day + " 日" : "日期不可用";
-                return dateText + "\n世界稳定度 " + stability + " · " + detention + "\n当前倾向：" + routeText;
+                lines.Add("当前倾向：" + (routes.Count == 0 ? "尚未表明立场" : string.Join("、", routes)));
+                lines.Add("已知势力 " + knownFactions + " 个");
+                return string.Join("\n", lines);
             }
             var world = new DetailsSectionData("世界概况", "世界概况", WorldOverview());
             return new DetailsPanelData(new DetailsProfileData(playerName, background,
                 "你接手叔叔留下的咖啡馆，以咖啡与倾听接待来客。", avatar), attributes, badges,
-                new DetailsSectionData("人物关系", "当前可查看 " + characters.Count(item => item.Unlocked) + " 人",
-                    "相识状态由剧情记录驱动。悬停人物卡片查看介绍与实际关系数值，尚未解锁的人物不会泄露关系值。"),
+                new DetailsSectionData("人物关系", "已结识 " + characters.Count(item => item.Unlocked) + " 人",
+                    "将鼠标停在人物卡片上，可以查看人物介绍与你们之间的关系。"),
                 world, characters: characters, worldBars: worldProgress);
         }
 

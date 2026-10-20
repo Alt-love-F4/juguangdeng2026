@@ -24,3 +24,7 @@ Map 的详情按钮通过 GameFlowBootstrap.OpenDetails 打开真实数据窗口
 - 世界页概况从当前存档读取日期、稳定度、拘押状态及 route flags；指标只展示 world.stability 与四条 faction.*，日期单独呈现，不将训练、日历原始值或咖啡馆资金混作世界指标。
 - 世界概况卡置于原世界指标选择滚动区顶部；人物卡片和势力指标可 hover 查看详细描述。UI 复用现有 DetailsPanel、PSD 页面和 tooltip，不增新场景或存档字段。
 - 验证：Unity PlayMode 3/3 通过，覆盖正式 NCS 相识/好感与世界指标投影、首日教程阿黛尔临时可见且不写相识事实、详情面板人物/势力悬停与世界概况卡。UI截图位于 output/details-panel/details-relationship-live.png 和 details-world-overview-live.png。
+
+## 势力档案与拉花徽记（2026-10-20）
+
+- 世界页的势力倾向不再以原始 `faction.*` 进度条列出，而是按 `WorldFactionCatalog` 显示已遇到的势力档案（`faction.profile.<id>`），未遇到不显示；王庭与教会共用 `faction.church`。详见 `Docs/LatteArtFactionPatterns.md`。

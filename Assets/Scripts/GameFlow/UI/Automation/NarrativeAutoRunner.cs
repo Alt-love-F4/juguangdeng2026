@@ -17,8 +17,20 @@ namespace Spotlight.GameFlow
     {
         public const string PanelTag = "narrative-auto-ending-review";
         public static bool IsActive { get; private set; }
+        public static bool IsWalkthroughActive { get; private set; }
+        public static IDisposable AcquireWalkthrough()
+        {
+            if (IsActive || IsWalkthroughActive) throw new InvalidOperationException("请先停止当前自动测试。");
+            IsWalkthroughActive = true;
+            return new WalkthroughLease();
+        }
+        private sealed class WalkthroughLease : IDisposable
+        {
+            private bool disposed;
+            public void Dispose() { if (disposed) return; disposed = true; IsWalkthroughActive = false; }
+        }
         [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.SubsystemRegistration)]
-        private static void ResetStatics() => IsActive = false;
+        private static void ResetStatics() { IsActive = false; IsWalkthroughActive = false; }
         public bool Running { get; private set; }
         public bool Paused { get; private set; }
         public bool WaitForReview { get; set; } = true;
@@ -55,7 +67,7 @@ namespace Spotlight.GameFlow
 
         public void StartBatch(int variants = 3, bool historicalScenarios = true, string onlyEnding = null)
         {
-            if (IsActive || Running || IsCapturing) throw new InvalidOperationException("请先停止或完成当前自动测试。");
+            if (IsActive || IsWalkthroughActive || Running || IsCapturing) throw new InvalidOperationException("请先停止或完成当前自动测试。");
             // Never steal an active formal presentation or a ResultPanel owned by another workflow.
             var formal = NarrativeRuntime.Instance;
             if (formal?.Controller?.IsBusy == true || DialoguePanel.IsAnyPlaying || UIKit.GetPanel<ResultPanel>() != null)

@@ -10,6 +10,40 @@ namespace Spotlight.GameFlow
     {
         public const string RestTodoId = "guide.cafe.sleep";
 
+        public static IOrderedEnumerable<MapTaskItem> Order(IEnumerable<MapTaskItem> items)
+            => (items ?? Enumerable.Empty<MapTaskItem>()).Where(i => i != null).OrderBy(i => i.completed)
+                .ThenBy(i => !i.available).ThenBy(i => i.optional).ThenByDescending(i => i.important)
+                .ThenBy(i => i.remainingDays > 0 ? i.remainingDays : int.MaxValue)
+                .ThenBy(i => i.priority).ThenBy(i => i.id, StringComparer.Ordinal);
+
+        /// <summary>One recommendation for both the player and the visible walkthrough; no copied task state.</summary>
+        public static MapTaskItem SelectNext(IEnumerable<MapTaskItem> items, string trackedId = null)
+        {
+            var pending = Order(items).Where(i => !i.completed).ToList();
+            // A tracked optional/locked item must not conceal a mandatory playable step.
+            return pending.Find(i => i.available && !i.optional && i.important)
+                ?? pending.Find(i => i.available && !i.optional && i.id == trackedId)
+                ?? pending.Find(i => i.available && !i.optional)
+                ?? pending.Find(i => !i.optional && i.preventsRest)
+                ?? pending.Find(i => i.available && i.id == trackedId)
+                ?? pending.FirstOrDefault();
+        }
+
+        private static string DescribeBlockers(List<NarrativeActionCheck> checks, Func<string, string> resolve)
+        {
+            if (checks == null) return "";
+            return string.Join("；", checks.Where(c => !c.satisfied).Select(c => {
+                string requirement = c.requirement ?? "";
+                string label = requirement.StartsWith("ActionPoint(") ? "行动点不足，先查看其他可进行事项；无必做事项时可回宿舍休息"
+                    : requirement.StartsWith("Item(") ? "缺少所需物品，请查看行动详情中的物品需求"
+                    : requirement == "MustExecute" ? "请先完成标为必做的事项"
+                    : string.IsNullOrWhiteSpace(c.messageKey) ? null : resolve(c.messageKey);
+                if (string.IsNullOrWhiteSpace(label) || label == c.messageKey)
+                    label = "请查看行动详情中的解锁条件";
+                return label + (string.IsNullOrEmpty(c.requiredValue) ? "" : "（当前 " + c.currentValue + " / 需要 " + c.requiredValue + "）");
+            }).Distinct());
+        }
+
         public static void AppendRestGuidance(List<MapTaskItem> items, NarrativeRuntime runtime, bool available)
         {
             if (!available || runtime?.Actions == null || runtime.Controller.IsEnded || runtime.Controller.IsBusy
@@ -67,13 +101,18 @@ namespace Spotlight.GameFlow
                     else if (checks != null && checks.Any(c => !c.satisfied && c.requirement.StartsWith("ActionPoint("))) status = "行动点不足，查看详情确认消耗";
                     else if (checks != null && checks.Any(c => !c.satisfied && c.requirement.StartsWith("Item("))) status = "所需物品不足，查看详情确认需求";
                     else status = "暂不可进行，请先处理当前事项";
+                    string blockers = !done && !available ? DescribeBlockers(checks, runtime.ResolveText) : "";
                     if (action.IsProgress) status += " · 进度 " + actions.GetProgress(action.actionKey) + "/" + action.progressTarget;
                     result.Add(new MapTaskItem {
                         id = action.actionKey, actionKey = action.actionKey, name = name,
                         description = runtime.ResolveText(action.descText), completed = done,
+                        available = !done && available, optional = optionalPool, blockedReason = blockers,
                         currentTask = optionalPool
                             ? "这是可重复日常，不是未完成任务的分段。每次造访播放一则内容；再次行动会重新计费，可自行选择是否进行。"
-                            : "前往「" + locationName + "」，在行动详情中选择「" + name + "」。",
+                            : !available ? (action.type == NarrativeActionType.Future ? "开放后前往「" + locationName + "」。" : blockers)
+                            : "点击下方「查看地点与行动」，前往「" + locationName + "」，选择「" + name + "」并确认执行。"
+                                + (action.IsProgress ? " 每次执行后查看进度，达到 " + action.progressTarget + " 次后完成。" : "")
+                                + " 对话中的选项由你决定；完成后查看下一条待办。",
                         location = locationName, positionKey = position, status = status,
                         navigationLabel = "查看地点与行动", priority = action.mustExecute && !done ? 0 : 10,
                         important = action.mustExecute && !done && action.type != NarrativeActionType.Future
@@ -93,8 +132,7 @@ namespace Spotlight.GameFlow
                         completed = true, location = locationName, status = "已完成" });
                 }
             }
-            return result.OrderBy(item => item.completed).ThenByDescending(item => item.important)
-                .ThenBy(item => item.priority).ThenBy(item => item.remainingDays > 0 ? item.remainingDays : int.MaxValue).ToList();
+            return Order(result).ToList();
         }
 
         /// <summary>Guide only to a real, currently visible mandatory action, never invent a future prerequisite.</summary>

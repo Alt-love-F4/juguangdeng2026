@@ -62,6 +62,7 @@ namespace Spotlight.Narrative
     {
         public object continuityOwner;
         public bool continues;
+        public bool fastForwardText;
         public string eventId, presentationKey;
         public string title;
         public string backgroundPath;

@@ -29,6 +29,8 @@ namespace Spotlight.Narrative
         private readonly List<string> pages = new List<string>();
         private readonly HashSet<string> presentedChoiceGroups = new HashSet<string>(StringComparer.Ordinal);
 
+        /// <summary>Host-owned testing/read preference; skips dialogue text only, never checks, choices or gameplay.</summary>
+        public bool SkipDialogueText { get; set; }
         public static Func<bool> ExternalInputBlocked { get; set; }
         private bool externallySuspended;
         private bool hostSuspended;
@@ -538,7 +540,11 @@ namespace Spotlight.Narrative
                             stepHint = PassiveCheckPresentationConfig.Hint(check);
                         }
                         if (!string.IsNullOrWhiteSpace(page.bgOverride)) stage.Background = inheritedBackground = page.bgOverride;
-                        var conversationData = new NarrativeConversationPresentationData { title = resolvedTitle, backgroundPath = inheritedBackground, bgmOverride = page.bgmOverride,
+                        // Traverse every authored guard/edge/check, but do not materialize text-only
+                        // panels in fast mode. Letter/Gameplay/End were handled above.
+                        if (SkipDialogueText && string.IsNullOrWhiteSpace(page.optionGroupKey)) continue;
+                        var conversationData = new NarrativeConversationPresentationData { fastForwardText = SkipDialogueText,
+                            title = resolvedTitle, backgroundPath = inheritedBackground, bgmOverride = page.bgmOverride,
                             eventId = definition.eventId, presentationKey = definition.presentationKey, continuityOwner = stageOwner,
                             continues = batched || dialoguePages.IndexOf(page) < dialoguePages.Count - 1 };
                         List<NarrativeConversationLineDefinition> lines = configuration.presentations.conversationLines.FindAll(item => item != null && item.pageId == page.pageId);
