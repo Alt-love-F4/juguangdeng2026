@@ -188,8 +188,16 @@ namespace Spotlight.GameFlow
 
         private IEnumerator StartupRoutine()
         {
+            // Studio logo plays once per run, only when launched from the first build scene
+            // (bootstraps created by tests in their own scenes go straight to the menu).
+            int navigation = rootNavigationVersion;
+            StudioLogoSplash splash = gameObject.scene.buildIndex == 0 ? StudioLogoSplash.Play() : null;
+            while (splash != null && splash.IsPlaying) yield return null;
+            // StartGame during the splash dismisses it and owns navigation from then on.
+            if (navigation != rootNavigationVersion) yield break;
+
             // The startup scene already contains the title entry point. Do not run
-            // the splash or the timed loading transition just to open its menu.
+            // the timed loading transition just to open its menu.
             int buildIndex = FindBuildIndex(config.MainMenuScene);
             if (buildIndex >= 0 && buildIndex != SceneManager.GetActiveScene().buildIndex)
             {
@@ -203,6 +211,8 @@ namespace Spotlight.GameFlow
 
             loadingTransitioning = false;
             OpenMainMenu();
+            // The menu opens beneath the splash's opaque end cover, which then fades away.
+            if (splash != null) splash.Reveal();
         }
 
         private void OnDestroy()
@@ -806,6 +816,7 @@ namespace Spotlight.GameFlow
         private void StartGameInternal(bool fastStartup)
         {
             fastTestStartup = fastStartup;
+            StudioLogoSplash.DismissActive();
             if (openingProloguePanel != null)
             {
                 openingProloguePanel.Stop();

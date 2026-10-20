@@ -15,16 +15,21 @@ NS = {'w': 'http://schemas.openxmlformats.org/wordprocessingml/2006/main'}
 def apply_player_facing_content(narrative, text):
     """Idempotent source-table corrections, also applied after a manuscript re-import."""
     corrections = {
-        'customer.name': '顾客',
-        'customer_arrives.01': '进来的是一位衣着普通的男人，看起来是附近的居民。',
-        'customer_arrives.06': '他看了我一眼，我回以微笑。',
-        'perception_success.06': '阿黛尔，你和这位先生说说这两天你做了什么。',
-        'perception_failure.01': '不知怎么，总感觉他身上的气息突然变了。',
+        # 顾客B 已按《文案-新手教程.docx》P014/P019/P025 统一为女性（老太太／她／这位太太）；
+        # 旧修订表里的男性版本会把这些行冲回去，不要恢复。
+        'customer.name': 'B太太',
+        'customer_arrives.01': '进来的是一个衣着普通的老太太，记不住脸。',
+        'customer_arrives.06': '她看了我一眼，我回以微笑。',
+        'perception_success.01': '老太太说这家店是乱套，而不用「落魄」做形容。',
+        'perception_success.02': '我想她可能是叔叔的「老客人」，或者说他为数不多的朋友。',
+        'perception_success.03': '我听过许多他朋友的故事，结果无一例外。没想到还有活着的人。',
+        'perception_success.06': '阿黛尔，你和这位太太说说这两天你做了什么。',
+        'perception_failure.01': '不知怎么，总感觉她身上的气息突然变了。',
         'perception_failure.02': '我没心思琢磨这位客人在想些什么。',
-        'perception_failure.03': '还好他把视线收了回去。',
-        'order_confirmed.01': '看出这位先生想点餐，阿黛尔递给他一张亲手绘制的餐单。',
+        'perception_failure.03': '还好她把视线收了回去。',
+        'order_confirmed.01': '可能是看出老太太想点餐，阿黛尔递来一张自己无聊时手绘的餐单。',
         'order_confirmed.02': '大杯黑咖啡，不加糖，就这样。',
-        'order_confirmed.03': '这位先生是重新开张的沸点咖啡馆的第一位客人。',
+        'order_confirmed.03': 'B太太是新沸点咖啡的第一位客人。',
         'workstation_open.01': '接下来去工作台制作客人的咖啡。点击大厅右侧吧台处的箭头或吧台，进入工作台。',
         'make_coffee_base.01': '别紧张，店长，我会陪着你的。客人要的是大杯无糖黑咖啡，我们就从磨豆开始吧。',
         'make_coffee_base.02': '制作目标：研磨咖啡豆，用热水煮成黑咖啡，再装入杯中。不需要加糖。',
@@ -105,7 +110,10 @@ def configure():
             elif raw.startswith('顾客B：'): speaker, raw = 'center', raw.split('：', 1)[1]
             # Stage directions remain in the source text registry, not spoken dialogue.
             spoken = re.sub(r'^（#?[^）]+）', '', raw)
-            parts = re.findall('「([^」]*)」', spoken)
+            # Only real speaker paragraphs use 「」 as quotation marks. In narration the
+            # corner brackets are emphasis, so splitting would reduce the line to a bare
+            # word (e.g. 落魄 / 老客人) and drop the rest of the sentence.
+            parts = re.findall('「([^」]*)」', spoken) if speaker != 'narrator' else []
             if not parts: parts = [spoken]
             for part in parts:
                 seq += 1

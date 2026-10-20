@@ -56,6 +56,7 @@ namespace Spotlight.GameFlow
         protected override void OnOpen(YokiFrame.IUIData data = null)
         {
             base.OnOpen(data);
+            SetDisplayRowsVisible(GameSettingsService.SupportsDisplaySettings(Application.platform));
             if (windowModeDropdown != null)
             {
                 windowModeDropdown.ClearOptions();
@@ -76,6 +77,19 @@ namespace Spotlight.GameFlow
             }
             UpdateVolumeLabels();
             RefreshDisplaySettings();
+        }
+
+        private void SetDisplayRowsVisible(bool visible)
+        {
+            SetRowVisible(windowModeDropdown, visible);
+            SetRowVisible(resolutionDropdown, visible);
+        }
+
+        private static void SetRowVisible(TMP_Dropdown dropdown, bool visible)
+        {
+            Transform row = dropdown != null ? dropdown.transform.parent : null;
+            if (row != null)
+                row.gameObject.SetActive(visible);
         }
 
         protected override void OnBlur()

@@ -1041,18 +1041,18 @@
   },
   {
     "key": "cafe.tutorial.perception_success.01",
-    "text": "落魄",
-    "comment": "原稿段落 22"
+    "text": "老太太说这家店是乱套，而不用「落魄」做形容。",
+    "comment": "原稿段落 22；整句旁白（「落魄」是强调，不是引语）；首日知觉≥3 成功分支"
   },
   {
     "key": "cafe.tutorial.perception_success.02",
-    "text": "老客人",
-    "comment": "原稿段落 23"
+    "text": "我想她可能是叔叔的「老客人」，或者说他为数不多的朋友。",
+    "comment": "原稿段落 23；整句旁白（「老客人」是强调，不是引语）；首日知觉≥3 成功分支"
   },
   {
     "key": "cafe.tutorial.perception_success.03",
-    "text": "我听过许多他朋友的故事，结果无一例外。没想到还有活着的人",
-    "comment": "原稿段落 25"
+    "text": "我听过许多他朋友的故事，结果无一例外。没想到还有活着的人。",
+    "comment": "原稿段落 25；补齐句末句号"
   },
   {
     "key": "cafe.tutorial.perception_success.04",

@@ -152,3 +152,9 @@ outputs/*.docx
 
 # 本地占位图产物（营销图，按需单独上传）
 outputs/jam-placeholder/
+
+# Codex 本地备份
+.codex/backups/
+
+# Unity Performance Testing 本地产物
+Assets/Resources/PerformanceTestRun*
