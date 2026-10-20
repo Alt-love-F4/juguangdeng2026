@@ -146,3 +146,9 @@ outputs/*.docx
 # WorkBuddy session scratch
 .workbuddy/
 .wbapp_*.genie
+
+# Unity 本地临时目录
+.utmp/
+
+# 本地占位图产物（营销图，按需单独上传）
+outputs/jam-placeholder/

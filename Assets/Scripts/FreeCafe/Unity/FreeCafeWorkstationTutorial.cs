@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using Spotlight.GameFlow;
 using TMPro;
 using UnityEngine;
 using UnityEngine.InputSystem;
@@ -216,7 +217,9 @@ namespace Spotlight.FreeCafe
             if (!IsRunning || restoring) return true;
             bool valid = PourStep && source == Source && IsPourTarget(target);
             if (valid) rightStarted = true;
-            if (!valid) ReportError("还没有对准" + TargetLabel + "。请先松开右键，再按住左键把" + SourceLabel + "移到" + TargetLabel + "上方。");
+            if (!valid) ReportError(MobileTouchInput.IsAndroidPlayer
+                ? "还没有对准" + TargetLabel + "。抬起手指后重新拖动" + SourceLabel + "到目标上方。"
+                : "还没有对准" + TargetLabel + "。请先松开右键，再按住左键把" + SourceLabel + "移到" + TargetLabel + "上方。");
             return valid;
         }
         private bool IsPourTarget(string target) => target != null && (target == Target || stage == Stage.Extract && target == extractor);
@@ -249,7 +252,7 @@ namespace Spotlight.FreeCafe
                 if (stage == Stage.DeliverCup && W.ServingCup?.id == cup && !app.IsDragging)
                     SetStage(Stage.SubmitCup);
                 var mouse = Mouse.current;
-                if (PourStep && rightStarted && mouse != null && !mouse.rightButton.isPressed)
+                if (PourStep && rightStarted && (MobileTouchInput.IsAndroidPlayer ? !app.IsVesselTiltMode : mouse != null && !mouse.rightButton.isPressed))
                 {
                     FinishPourAttempt();
                 }
@@ -258,7 +261,9 @@ namespace Spotlight.FreeCafe
                     if (PourStep) FinishPourAttempt();
                     else
                     {
-                        string reason = Time.unscaledTime < errorUntil ? error : "未投入目标，已恢复本步骤，请按住左键完整拖到终点。";
+                        string reason = Time.unscaledTime < errorUntil ? error : MobileTouchInput.IsAndroidPlayer
+                            ? "未放入目标，已恢复本步骤。请按住物品拖到目标上方，再抬起手指。"
+                            : "未投入目标，已恢复本步骤，请按住左键完整拖到终点。";
                         Restore(checkpoint); ReportError(reason);
                     }
                 }
@@ -293,6 +298,7 @@ namespace Spotlight.FreeCafe
         private string TargetLabel => stage == Stage.Beans ? "研磨机" : stage == Stage.Grounds && essence || stage == Stage.Extract ? "精粹炉上层滤杯" : stage == Stage.Pour ? "空杯" : stage == Stage.TakeCup ? "桌面空处" : stage == Stage.DeliverCup ? "案板上的盘子" : "通用加热炉";
         private string Description()
         {
+            if (MobileTouchInput.IsAndroidPlayer) return MobileDescription();
             switch (stage)
             {
                 case Stage.Beans: return "先把咖啡豆磨成粉，才能制作咖啡。\n按住鼠标左键从咖啡豆袋取豆，拖到研磨机后松开左键，放入豆子。";
@@ -319,9 +325,42 @@ namespace Spotlight.FreeCafe
                 default: return "制作完成！是否要再来一次？退出后恢复练习前的工作台。";
             }
         }
+        private string MobileDescription()
+        {
+            switch (stage)
+            {
+                case Stage.Beans: return "先把咖啡豆磨成粉。按住咖啡豆袋并拖到研磨机，抬起手指放入豆子。";
+                case Stage.Grind: return "豆子已放入研磨机。点击研磨机启动研磨。";
+                case Stage.Grinding: return "研磨机正在工作，等待完成即可；点击可加速。";
+                case Stage.Grounds: return "按住研磨机抽屉并拖到" + TargetLabel + "，抬起手指放入咖啡粉。";
+                case Stage.Water: return ReadyToPour
+                    ? "将清水壶拖到加热炉上方并停留，再上下滑动控制水流；抬起手指停止。\n注水 " + W.LiquidVolume(W.Find(heater)).ToString("0") + "/" + WaterTargetMl.ToString("0") + " ml。"
+                    : "将右上角清水壶拖到通用加热炉上方，先不要抬起手指。";
+                case Stage.Heat: return "点击通用加热炉启动加热，等待自动完成。";
+                case Stage.Heating: return "正在自动加热，等待完成即可。";
+                case Stage.Extract:
+                {
+                    if (!ReadyToPour) return "按住热水壶拖到上层滤杯上方，先不要抬起手指；观察两侧进度条。";
+                    var snapshot = W.ExtractionSnapshot(extractor);
+                    return "将热水壶对准滤杯并停留，再上下滑动控制流速；抬起手指停止。\n让两侧进度进入绿色，尽量达到金色；中途抬手会重来。\n时间 "
+                        + snapshot.elapsedSeconds.ToString("0.0") + "/" + snapshot.idealSeconds.ToString("0.0") + " s · 热水 "
+                        + snapshot.injectedHotWaterMl.ToString("0") + "/" + snapshot.idealMl.ToString("0") + " ml。";
+                }
+                case Stage.Drain: return "等待上层滤杯滴完；滴滤结束后拿下层咖啡壶。";
+                case Stage.TakeCup: return "点击杯堆取出空杯，再拖到桌面空处并抬起手指。";
+                case Stage.Pour: return ReadyToPour
+                    ? "将器皿对准空杯并停留，再上下滑动倾倒；抬起手指停止。"
+                    : "按住" + (essence ? "下层咖啡壶" : "通用加热炉") + "拖到空杯上方，先不要抬起手指。";
+                case Stage.DeliverCup: return "拖动咖啡杯到案板上的出餐盘，抬起手指放下；然后点击按铃。";
+                case Stage.SubmitCup: return "点击工作台右下角的按铃，交付咖啡并继续教程。";
+                default: return "制作完成。可重新开始或退出练习。";
+            }
+        }
+
         // Keep each step's purpose, action and main caution next to the player's focus.
         private string GestureDescription(bool readyToPour)
         {
+            if (MobileTouchInput.IsAndroidPlayer) return MobileGestureDescription(readyToPour);
             switch (stage)
             {
                 case Stage.Beans: return "准备磨粉\n左键取豆，拖到研磨机松开";
@@ -355,6 +394,27 @@ namespace Spotlight.FreeCafe
                 default: return "跟随提示完成咖啡制作";
             }
         }
+        private string MobileGestureDescription(bool readyToPour)
+        {
+            switch (stage)
+            {
+                case Stage.Beans: return "按住豆袋并拖到研磨机\n抬起手指放下";
+                case Stage.Grind: return "点击研磨机启动";
+                case Stage.Grinding: return "等待研磨完成\n点击可加速";
+                case Stage.Grounds: return "拖动咖啡粉到" + TargetLabel + "\n抬起手指放下";
+                case Stage.Water: return readyToPour ? "停留后上下滑动倾倒\n抬起手指停止" : "拖水壶到加热炉\n先不要抬手";
+                case Stage.Heat: return "点击加热炉";
+                case Stage.Heating: return "等待加热完成";
+                case Stage.Extract: return readyToPour ? "停留后上下滑动控制流速\n抬手停止" : "拖热水壶到滤杯上方\n先不要抬手";
+                case Stage.Drain: return "等待咖啡滴入下壶";
+                case Stage.TakeCup: return "点击杯堆取杯\n拖到桌面空处";
+                case Stage.Pour: return readyToPour ? "停留后上下滑动倾倒\n抬起手指停止" : "拖动器皿到空杯\n先不要抬手";
+                case Stage.DeliverCup: return "拖咖啡杯到出餐盘\n抬手放下，再点击按铃";
+                case Stage.SubmitCup: return "点击按铃交付";
+                default: return "制作完成\n可重来或退出";
+            }
+        }
+
         private void BuildUI()
         {
             panel = Instantiate(Resources.Load<FreeCafeTutorialPanel>("UI/FreeCafeTutorialPanel"));
@@ -493,20 +553,28 @@ namespace Spotlight.FreeCafe
             shade.enabled = DragStep && !app.IsDragging;
             bool readyToPour = ReadyToPour;
             heading.text = (firstCafeTutorial ? "无糖黑咖啡 · 新手教程" : essence ? "精粹咖啡 · 操作练习" : "黑咖啡 · 操作练习") + (PourStep ? readyToPour ? "    |    第 2 步 · 右键倾倒" : "    |    第 1 步 · 左键拿起" : "    |    " + StageTitle());
+            if (MobileTouchInput.IsAndroidPlayer && PourStep)
+                heading.text = (firstCafeTutorial ? "无糖黑咖啡 · 新手教程" : essence ? "精粹咖啡 · 操作练习" : "黑咖啡 · 操作练习")
+                    + (readyToPour ? "    |    第 2 步 · 触屏倾倒" : "    |    第 1 步 · 拖动器皿");
             instruction.text = Description();
             errorText.text = Time.unscaledTime < errorUntil ? error : firstCafeTutorial
                 ? "交付首杯后继续学习咖啡谱与营业 · 随时点上方重来" : "练习不结算订单 · 废弃桶在左下角 · 随时点上方重来，恢复初始练习";
             gesture.gameObject.SetActive(true);
             panel.SetMouseMode(readyToPour, readyToPour);
+            if (MobileTouchInput.IsAndroidPlayer) gesture.gameObject.SetActive(false);
             gestureText.text = GestureDescription(readyToPour);
             if (Time.unscaledTime < errorUntil && !string.IsNullOrEmpty(error))
                 gestureText.text += "\n<color=#A52C16>" + error + "</color>";
             Vector2 start = ScreenPoint(Source), end = ScreenPoint(Target);
             if (PourStep) end += Vector2.up * (55 * canvas.scaleFactor);
             if (app.IsDragging && Mouse.current != null) start = Mouse.current.position.ReadValue();
+            if (app.IsDragging && MobileTouchInput.TryGetPrimaryTouch(out Vector2 touchPosition, out bool touchPressed) && touchPressed)
+                start = touchPosition;
             if (stage == Stage.TakeCup) end = new Vector2(Screen.width * .5f, Screen.height * .48f);
             if (stage == Stage.Drain) start = ScreenPoint(extractor);
             if (stage == Stage.Complete && Mouse.current != null) start = Mouse.current.position.ReadValue();
+            if (stage == Stage.Complete && MobileTouchInput.TryGetPrimaryTouch(out Vector2 completeTouch, out bool completeTouchPressed) && completeTouchPressed)
+                start = completeTouch;
             float scale = canvas.scaleFactor;
             Vector2 badge = start + new Vector2(0, -panel.gestureOffset * scale);
             // Hard-coded tutorial-only offsets keep the mouse badge clear of the heating

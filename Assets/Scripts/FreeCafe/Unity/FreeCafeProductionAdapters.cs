@@ -25,6 +25,10 @@ namespace Spotlight.FreeCafe
         void ResetLatte();
         LatteArtRecognitionResult Recognize(System.Collections.Generic.IList<LatteArtPatternPreset> presets = null);
     }
+    public interface ILatteArtBrushSurface
+    {
+        float BrushRadius { get; set; }
+    }
     /// <summary>Display-only terminology; never rename physical foam inventory or its consumption hints.</summary>
     public static class FreeCafeProductionText
     {

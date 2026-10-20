@@ -203,6 +203,11 @@ namespace Spotlight.FreeCafe
                     break;
             }
             if (ui != null) target = RectTransformUtility.WorldToScreenPoint(null, ui.TransformPoint(ui.rect.center));
+            if (MobileTouchInput.IsAndroidPlayer)
+            {
+                description = ToAndroidInstructions(description);
+                summary = ToAndroidInstructions(summary);
+            }
             bool readingDetails = CurrentStage == Stage.CloseDetails;
             panel.canvas.sortingOrder = readingDetails ? short.MaxValue : defaultSortingOrder;
             // The full-size instruction card would cover the details pages; keep only the
@@ -216,12 +221,14 @@ namespace Spotlight.FreeCafe
             panel.gesture.gameObject.SetActive(true);
             panel.gestureText.text = summary;
             panel.SetMouseMode(false, false);
+            if (MobileTouchInput.IsAndroidPlayer) panel.gesture.gameObject.SetActive(false);
             bool confirm = CurrentStage == Stage.ReadOrder || CurrentStage == Stage.ReadTodo;
             panel.retry.SetActive(confirm);
             panel.retryButton.GetComponentInChildren<TMPro.TMP_Text>().text = CurrentStage == Stage.ReadTodo ? "完成教程" : "明白了，下一步";
             float scale = panel.canvas.scaleFactor;
             Vector2 half = panel.gesture.rect.size * .5f + Vector2.one * 12;
-            Vector2 pointer = Mouse.current != null ? Mouse.current.position.ReadValue() : target;
+            Vector2 pointer = MobileTouchInput.IsAndroidPlayer || Mouse.current == null
+                ? target : Mouse.current.position.ReadValue();
             var badge = HudGuidance
                 ? pointer + Vector2.down * Mathf.Max(panel.gestureOffset, half.y + 35) * scale
                 : target + Vector2.down * (half.y + 65) * scale;
@@ -244,6 +251,29 @@ namespace Spotlight.FreeCafe
                     : target + new Vector2(Mathf.Cos(angle), Mathf.Sin(angle)) * radius;
                 dot.color = panel.trailColor;
             }
+        }
+
+        private static string ToAndroidInstructions(string text)
+        {
+            return text.Replace("按住鼠标左键拖动", "按住并拖动")
+                .Replace("鼠标左键点击", "点击")
+                .Replace("鼠标左键拖动", "按住并拖动")
+                .Replace("鼠标左键", "触屏")
+                .Replace("把鼠标移到", "点击")
+                .Replace("鼠标移到", "点击")
+                .Replace("鼠标", "触屏")
+                .Replace("左键点击", "点击")
+                .Replace("左键拖动", "按住并拖动")
+                .Replace("左键", "触屏")
+                .Replace("按 Tab / Esc", "点击关闭按钮")
+                .Replace("按 T 打开「待办事项」", "点击上方「待办事项」")
+                .Replace("按 B 打开「物品栏」", "点击上方「物品栏」")
+                .Replace("按下 Tab", "点击上方详情入口")
+                .Replace("按 Tab", "点击上方详情入口")
+                .Replace("按下 T", "点击上方「待办事项」")
+                .Replace("按 T", "点击上方「待办事项」")
+                .Replace("按 B", "点击上方「物品栏」")
+                .Replace("右键点击地图空白处或按 Esc", "点击地图空白处");
         }
         private string DetailsSummary()
         {

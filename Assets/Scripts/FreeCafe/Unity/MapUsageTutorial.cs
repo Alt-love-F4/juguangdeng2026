@@ -162,15 +162,38 @@ namespace Spotlight.FreeCafe
                     button = cafeArrival ? "明白了，前往咖啡馆" : "明白了，开始探索";
                     break;
             }
+            if (MobileTouchInput.IsAndroidPlayer)
+            {
+                switch (CurrentStage)
+                {
+                    case Stage.Overview:
+                        description = recordCompletion
+                            ? "营业结束，接下来可以在城市地图中安排行动。单指拖动地图平移；双指捏合缩放，也可以拖动缩放条。"
+                            : "城市地图可以查看地点、安排行动。单指拖动地图平移；双指捏合缩放，也可以拖动缩放条。";
+                        hint = "单指拖动：平移地图\n双指捏合：放大 / 缩小\n点「下一步」学习查看点位";
+                        break;
+                    case Stage.SelectLocation:
+                        description = "轻触一个地图点位，地图会移向该地点。有开放内容时会弹出行动卡；没有开放内容的地点只会聚焦。查看点位不扣资源。营业中执行其他地图行动时，咖啡店会自动打烊；只查看或返回咖啡馆不会打烊。";
+                        hint = "轻触地图点位\n查看该地点的行动与需求\n只查看不会消耗资源";
+                        break;
+                    case Stage.Finish:
+                        description = "不知道接下来做什么时，点击上方「待办事项」查看目标；点击「物品栏」核对物品，上方 HUD 可查看行动点。点击地图空白处可收起点位详情。有必须完成的行动时，先处理它；安排好后，回咖啡馆三楼宿舍点击床睡觉，才会进入下一天。";
+                        hint = "点击上方入口查看待办 / 物品\n点击地图空白处收起行动卡\n安排好后回宿舍点击床";
+                        break;
+                }
+            }
+
             panel.heading.text = "城市地图 · 使用教程";
             panel.instruction.text = description;
             panel.errorText.text = "教程只介绍操作，不自动执行行动、不扣资源、不推进日期";
             panel.gestureText.text = hint;
             panel.SetMouseMode(false, false);
-            panel.gesture.gameObject.SetActive(true);
+            panel.gesture.gameObject.SetActive(!MobileTouchInput.IsAndroidPlayer);
             panel.retry.SetActive(CurrentStage != Stage.SelectLocation);
             panel.retryButton.GetComponentInChildren<TMPro.TMP_Text>().text = button;
-            Vector2 pointer = Mouse.current != null ? Mouse.current.position.ReadValue() : new Vector2(Screen.width * .5f, Screen.height * .65f);
+            Vector2 pointer = MobileTouchInput.IsAndroidPlayer || Mouse.current == null
+                ? new Vector2(Screen.width * .5f, Screen.height * .65f)
+                : Mouse.current.position.ReadValue();
             float scale = panel.canvas.scaleFactor;
             Vector2 half = panel.gesture.rect.size * .5f + Vector2.one * 12;
             Vector2 badge = pointer + Vector2.down * Mathf.Max(panel.gestureOffset, half.y + 30) * scale;

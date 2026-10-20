@@ -6,12 +6,13 @@ using UnityEngine.UI;
 using UnityEngine.EventSystems;
 using UnityEngine.Rendering;
 using Spotlight.FreeCafe;
+using Spotlight.GameFlow;
 using UIEventSystem = UnityEngine.EventSystems.EventSystem;
 
 namespace OnePersonCompany
 {
     /// <summary>GPU 拉花流体与玩家轨迹采集。轨迹仅用于识别，库存和订单仍由 FreeCafe 域层管理。</summary>
-    public sealed class LatteArtPrototype : MonoBehaviour, ILatteArtSurface, ILatteArtFoamSurface, ILatteArtFeedbackSurface
+    public sealed class LatteArtPrototype : MonoBehaviour, ILatteArtSurface, ILatteArtBrushSurface, ILatteArtFoamSurface, ILatteArtFeedbackSurface
     {
         [Header("Single multi-pass NS Shader")]
         [SerializeField] private Shader simulationShader;
@@ -55,6 +56,17 @@ namespace OnePersonCompany
         private Func<float, float> foamConsumer;
         private float foamMlPerSecond = 6;
         private Action resetHandler;
+
+        private bool TryGetPointerSample(out Vector2 position, out bool pressed)
+        {
+            if (MobileTouchInput.IsAndroidPlayer)
+                return MobileTouchInput.TryGetPrimaryTouch(out position, out pressed);
+            var mouse = Mouse.current;
+            if (mouse == null) { position = Vector2.zero; pressed = false; return false; }
+            position = mouse.position.ReadValue();
+            pressed = mouse.leftButton.isPressed;
+            return true;
+        }
 
         public void SetResetHandler(Action handler) => resetHandler = handler;
         public void GetPatternFits(IList<LatteArtPatternPreset> presets, IList<LatteArtRecognitionResult> results)
@@ -148,8 +160,8 @@ namespace OnePersonCompany
         private bool TryGetPointerUV(out Vector2 uv)
         {
             uv = Vector2.one * .5f;
-            return interactionEnabled && Mouse.current != null &&
-                   TryGetSurfaceUV(Mouse.current.position.ReadValue(), out uv);
+            return interactionEnabled && TryGetPointerSample(out Vector2 position, out _) &&
+                   TryGetSurfaceUV(position, out uv);
         }
 
         /// <summary>屏幕点映射到渲染使用的真实 UV；不依赖 Collider 朝向或固定 Plane 尺寸。</summary>
@@ -216,20 +228,35 @@ namespace OnePersonCompany
         }
         private void UpdateBrushPointer()
         {
-            if (surfaceMaterial == null) return; bool hit = TryGetPointerUV(out Vector2 uv) && !IsPointerOverUI();
-            if (hit && Mouse.current != null) { float wheel = Mouse.current.scroll.ReadValue().y; if (Mathf.Abs(wheel) > 8f) wheel /= 120f; if (Mathf.Abs(wheel) > .001f) BrushRadius += Mathf.Clamp(wheel, -8f, 8f) * wheelRadiusStep; }
-            surfaceMaterial.SetFloat("_BrushPreviewActive", showBrushPreview && hit ? 1f : 0f); surfaceMaterial.SetFloat("_BrushPreviewRadius", BrushRadius); surfaceMaterial.SetVector("_BrushPreviewUV", new Vector4(uv.x, uv.y, 0, 0)); surfaceMaterial.SetFloat("_BrushPreviewPressed", hit && Mouse.current != null && Mouse.current.leftButton.isPressed ? 1f : 0f);
+            if (surfaceMaterial == null) return;
+            bool hasPointer = TryGetPointerSample(out Vector2 position, out bool pressed);
+            Vector2 uv = Vector2.one * .5f;
+            bool hit = hasPointer && interactionEnabled && TryGetSurfaceUV(position, out uv) && !IsPointerOverUI(position);
+            if (hit && !MobileTouchInput.IsAndroidPlayer && Mouse.current != null)
+            {
+                float wheel = Mouse.current.scroll.ReadValue().y;
+                if (Mathf.Abs(wheel) > 8f) wheel /= 120f;
+                if (Mathf.Abs(wheel) > .001f) BrushRadius += Mathf.Clamp(wheel, -8f, 8f) * wheelRadiusStep;
+            }
+            Vector2 previewUv = hit ? uv : Vector2.one * .5f;
+            surfaceMaterial.SetFloat("_BrushPreviewActive", showBrushPreview && hit ? 1f : 0f);
+            surfaceMaterial.SetFloat("_BrushPreviewRadius", BrushRadius);
+            surfaceMaterial.SetVector("_BrushPreviewUV", new Vector4(previewUv.x, previewUv.y, 0, 0));
+            surfaceMaterial.SetFloat("_BrushPreviewPressed", hit && pressed ? 1f : 0f);
         }
         private void SimulateInput(float dt)
         {
-            if (interactionEnabled && !IsPointerOverUI() && Keyboard.current != null && Keyboard.current.rKey.wasPressedThisFrame)
+            bool hasPointer = TryGetPointerSample(out Vector2 pointerPosition, out bool pointerPressed);
+            bool overUI = hasPointer && IsPointerOverUI(pointerPosition);
+            if (interactionEnabled && !overUI && Keyboard.current != null && Keyboard.current.rKey.wasPressedThisFrame)
             {
                 if (resetHandler != null) resetHandler();
                 else ResetLatte();
             }
-            bool inside = TryGetPointerUV(out Vector2 uv);
+            Vector2 uv = Vector2.one * .5f;
+            bool inside = hasPointer && interactionEnabled && TryGetSurfaceUV(pointerPosition, out uv);
             bool audible = dt > 0 && !float.IsNaN(dt) && !float.IsInfinity(dt) && !Spotlight.GameFlow.PresentationPauseRegistry.IsPaused;
-            bool pouring = audible && inside && !IsPointerOverUI() && (!requireLeftButton || Mouse.current != null && Mouse.current.leftButton.isPressed);
+            bool pouring = audible && inside && !overUI && (!requireLeftButton || pointerPressed);
             float depositFraction = 1;
             if (pouring && foamConsumer != null)
             {
@@ -256,7 +283,7 @@ namespace OnePersonCompany
             {
                 // Uniform screen units preserve the player's visible shape even when mesh UVs
                 // are mirrored/rotated; render/deposition continue to use the mesh UV above.
-                Vector2 point = Mouse.current != null ? Mouse.current.position.ReadValue() / Mathf.Max(1, Screen.height) : uv;
+                Vector2 point = pointerPosition / Mathf.Max(1, Screen.height);
                 int startIndex = strokeStarts[strokeStarts.Count - 1];
                 if (strokePoints.Count == startIndex || (strokePoints[strokePoints.Count - 1] - point).sqrMagnitude > .00000225f)
                     strokePoints.Add(point);
@@ -266,9 +293,14 @@ namespace OnePersonCompany
         }
         private bool IsPointerOverUI()
         {
-            if (!worldSurface || Mouse.current == null || UIEventSystem.current == null) return false;
+            return TryGetPointerSample(out Vector2 position, out _) && IsPointerOverUI(position);
+        }
+
+        private bool IsPointerOverUI(Vector2 position)
+        {
+            if (!worldSurface || UIEventSystem.current == null) return false;
             if (uiPointer == null || cachedUIEventSystem != UIEventSystem.current) { cachedUIEventSystem = UIEventSystem.current; uiPointer = new PointerEventData(cachedUIEventSystem); }
-            uiPointer.position = Mouse.current.position.ReadValue(); uiHits.Clear(); cachedUIEventSystem.RaycastAll(uiPointer, uiHits);
+            uiPointer.position = position; uiHits.Clear(); cachedUIEventSystem.RaycastAll(uiPointer, uiHits);
             // CoffeeShop has a full-screen 2D background collider. It is an interaction target for
             // the cafe, but it must not make the latte surface think the pointer is over UI.
             // Only the high-priority latte/GM canvases should block drawing.

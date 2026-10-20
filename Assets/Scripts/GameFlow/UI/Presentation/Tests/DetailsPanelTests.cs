@@ -108,6 +108,39 @@ namespace Spotlight.GameFlow.Tests
         }
 
         [UnityTest]
+        public IEnumerator StoryArchiveHidesLockedContentAndShowsUnlockedProse()
+        {
+            DetailsPanel panel = (DetailsPanel)controller.CurrentPanel;
+            panel.Refresh(new DetailsPanelData(stories: new[]
+            {
+                new DetailsStoryData("locked-secret-id", "锁定剧情的真实标题", "王廷教会", false,
+                    new[] { new DetailsStoryBlockData("秘密章节", "锁定剧情的秘密正文") }),
+                new DetailsStoryData("unlocked-story-id", "已经解锁的剧情", "中立 / 经营", true,
+                    new[] { new DetailsStoryBlockData("咖啡馆", "已经公开给玩家阅读的故事正文。") })
+            }));
+            panel.ShowStory();
+            yield return null;
+
+            Transform storyView = panel.transform.Find("Window/Story/StoryView");
+            Transform list = storyView.Find("StoryList/Content");
+            Assert.That(list.childCount, Is.EqualTo(2));
+            var lockedButton = list.GetChild(0).GetComponent<Button>();
+            Assert.That(lockedButton.interactable, Is.False);
+            var lockedLabel = list.GetChild(0).GetComponentInChildren<TMP_Text>();
+            Assert.That(lockedLabel.text, Is.EqualTo("剧情尚未解锁"));
+            StringAssert.DoesNotContain("锁定剧情的真实标题", lockedLabel.text);
+            StringAssert.DoesNotContain("锁定剧情的秘密正文", lockedLabel.text);
+
+            list.GetChild(1).GetComponent<Button>().onClick.Invoke();
+            Assert.That(storyView.Find("Reader/StoryTitle").GetComponent<TMP_Text>().text, Is.EqualTo("已经解锁的剧情"));
+            string body = storyView.Find("Reader/BodyScroll/Content/StoryBody").GetComponent<TMP_Text>().text;
+            StringAssert.Contains("已经公开给玩家阅读的故事正文", body);
+            StringAssert.DoesNotContain("锁定剧情的秘密正文", body);
+            yield return new WaitForEndOfFrame();
+            Capture("details-story-archive");
+        }
+
+        [UnityTest]
         public IEnumerator HoverDescriptionsHideOnExitTabSwitchAndClose()
         {
             DetailsPanel panel = (DetailsPanel)controller.CurrentPanel;

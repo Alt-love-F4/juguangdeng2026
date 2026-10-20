@@ -18,12 +18,14 @@ namespace Spotlight.GameFlow
         public bool IsPlaceholder { get; }
         public IReadOnlyList<DetailsCharacterData> Characters { get; }
         public IReadOnlyList<DetailsProgressData> WorldBars { get; }
+        public IReadOnlyList<DetailsStoryData> Stories { get; }
 
         public DetailsPanelData(DetailsProfileData profile = null,
             IEnumerable<DetailsAttributeData> attributes = null,
             IEnumerable<DetailsSpecializationData> specializations = null,
             DetailsSectionData relationships = null, DetailsSectionData world = null, bool isPlaceholder = false,
-            IEnumerable<DetailsCharacterData> characters = null, IEnumerable<DetailsProgressData> worldBars = null)
+            IEnumerable<DetailsCharacterData> characters = null, IEnumerable<DetailsProgressData> worldBars = null,
+            IEnumerable<DetailsStoryData> stories = null)
         {
             Profile = profile ?? new DetailsProfileData();
             var ordered = new DetailsAttributeData[4];
@@ -48,6 +50,7 @@ namespace Spotlight.GameFlow
             IsPlaceholder = isPlaceholder;
             Characters = CopyItems(characters, nameof(characters));
             WorldBars = CopyItems(worldBars, nameof(worldBars));
+            Stories = CopyItems(stories, nameof(stories));
         }
 
         internal static IReadOnlyList<T> CopyItems<T>(IEnumerable<T> source, string parameter) where T : class
@@ -82,6 +85,36 @@ namespace Spotlight.GameFlow
                 },
                 new DetailsSectionData("人物关系 / 占位页", "关系网络尚未接入", "今后将在这里展示人物档案、关系变化与交往记录。\n当前仅为页面占位，不读取角色或关系数据。"),
                 new DetailsSectionData("世界情况 / 占位页", "世界信息尚未接入", "今后将在这里展示地区情况、势力动向与世界事件。\n当前仅为页面占位，不读取世界状态。"), true);
+        }
+    }
+
+    public sealed class DetailsStoryData
+    {
+        public string Id { get; }
+        public string Title { get; }
+        public string Group { get; }
+        public bool Unlocked { get; }
+        public IReadOnlyList<DetailsStoryBlockData> Blocks { get; }
+
+        public DetailsStoryData(string id, string title, string group, bool unlocked,
+            IEnumerable<DetailsStoryBlockData> blocks = null)
+        {
+            Id = id ?? string.Empty;
+            Title = title ?? string.Empty;
+            Group = group ?? string.Empty;
+            Unlocked = unlocked;
+            Blocks = DetailsPanelData.CopyItems(blocks, nameof(blocks));
+        }
+    }
+
+    public sealed class DetailsStoryBlockData
+    {
+        public string Caption { get; }
+        public string BodyText { get; }
+        public DetailsStoryBlockData(string caption, string bodyText)
+        {
+            Caption = caption ?? string.Empty;
+            BodyText = bodyText ?? string.Empty;
         }
     }
 

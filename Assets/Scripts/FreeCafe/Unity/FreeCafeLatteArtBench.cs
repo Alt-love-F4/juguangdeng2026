@@ -87,6 +87,9 @@ namespace Spotlight.FreeCafe
         private TMP_Text status;
         private TMP_Text foamUsage;
         private TMP_Text cupFill;
+        private TMP_Text mobileBrushValue;
+        private Slider mobileBrushSlider;
+        private GameObject mobileBrushControl;
         private RawImage guide;
         private TMP_Text guideLabel;
         private bool guideVisible = true;
@@ -235,7 +238,9 @@ namespace Spotlight.FreeCafe
             var recognition = latestRecognition;
             string display = "自由绘制";
             foreach (var preset in activePresets) if (preset.id == recognition.patternId) { display = preset.displayName; break; }
-            status.text = recognition.HasPattern ? "最像「" + display + "」\n相似度 " + (recognition.confidence * 100f).ToString("0") + "%" : effect.StrokePointCount >= 5 ? "自由创作中 · 尚未匹配参考\n可以继续绘制，也可以直接提交" : "按住左键，慢慢画出图案\n松手可分笔继续";
+            status.text = recognition.HasPattern ? "最像「" + display + "」\n相似度 " + (recognition.confidence * 100f).ToString("0") + "%" : effect.StrokePointCount >= 5 ? "自由创作中 · 尚未匹配参考\n可以继续绘制，也可以直接提交" : MobileTouchInput.IsAndroidPlayer
+                ? "单指按住杯面慢慢绘制\n抬起手指可分笔继续"
+                : "按住左键，慢慢画出图案\n松手可分笔继续";
             LastPatternId = recognition.HasPattern ? recognition.patternId : null;
             if (submitButton != null) submitButton.interactable = effect.StrokePointCount >= 5;
         }
@@ -509,6 +514,7 @@ namespace Spotlight.FreeCafe
             var content = new GameObject("Content", typeof(RectTransform), typeof(CanvasGroup));
             content.transform.SetParent(overlayRoot.transform, false); contentRect = content.GetComponent<RectTransform>(); Stretch(contentRect);
             contentGroup = content.GetComponent<CanvasGroup>(); contentGroup.alpha = 0;
+            if (MobileTouchInput.IsAndroidPlayer) content.gameObject.AddComponent<AndroidSafeAreaFitter>();
 
             // Faint tracing guide drawn over the liquid; never a raycast target so it cannot block pouring.
             var guideObject = new GameObject("ReferenceGuide", typeof(RectTransform), typeof(RawImage));
@@ -521,14 +527,60 @@ namespace Spotlight.FreeCafe
                 out TMP_Text hintSubtitle, out TMP_Text hintTip, out Image hintEmblem);
             BuildRightColumn(content.transform);
 
-            var help = MakeText(content.transform, "DrawingHint", "按住左键注奶   ·   松手可分笔   ·   滚轮调整线宽   ·   R 重画", 17, new Color(.96f, .89f, .80f, .85f));
-            SetRect(help.rectTransform, new Vector2(LeftColumnMax + .01f, .018f), new Vector2(RightColumnMin - .01f, .062f)); help.alignment = TextAlignmentOptions.Center;
+            string helpText = MobileTouchInput.IsAndroidPlayer
+                ? "单指按住杯面绘制 · 抬起手指可分笔 · 使用下方笔触滑杆调整粗细"
+                : "按住左键注奶   ·   松手可分笔   ·   滚轮调整线宽   ·   R 重画";
+            var help = MakeText(content.transform, "DrawingHint", helpText, 17, new Color(.96f, .89f, .80f, .85f));
+            bool android = MobileTouchInput.IsAndroidPlayer;
+            SetRect(help.rectTransform,
+                new Vector2(LeftColumnMax + .01f, android ? .106f : .018f),
+                new Vector2(RightColumnMin - .01f, android ? .153f : .062f));
+            help.alignment = TextAlignmentOptions.Center;
+            BuildMobileBrushControl(content.transform);
 
             // Hover card sits last so it renders above both columns.
             hintRect.SetAsLastSibling();
             SelectReference(FirstUnlockedId());
             if (IsMilkPractice) BuildPracticeGuide(content.transform);
             curtain = MakeImage(overlayRoot.transform, "TransitionCurtain", new Color(.15f, .075f, .045f, 0)); Stretch(curtain.rectTransform);
+        }
+
+        private void BuildMobileBrushControl(Transform content)
+        {
+            var card = MakeCard(content, "MobileBrushControl", Espresso);
+            SetRect(card.rectTransform, new Vector2(.34f, .018f), new Vector2(.66f, .098f));
+            mobileBrushControl = card.gameObject;
+            mobileBrushControl.SetActive(MobileTouchInput.IsAndroidPlayer);
+
+            var label = MakeText(card.transform, "BrushLabel", "笔触", 18, Cream);
+            SetRect(label.rectTransform, new Vector2(.04f, .1f), new Vector2(.20f, .90f));
+            label.alignment = TextAlignmentOptions.Center;
+
+            var track = MakeImage(card.transform, "BrushSlider", new Color(.50f, .34f, .22f));
+            SetRect(track.rectTransform, new Vector2(.23f, .30f), new Vector2(.80f, .70f));
+            var handle = MakeImage(track.transform, "Handle", Caramel);
+            handle.rectTransform.anchorMin = handle.rectTransform.anchorMax = new Vector2(0, .5f);
+            handle.rectTransform.sizeDelta = new Vector2(34, 44);
+            mobileBrushSlider = track.gameObject.AddComponent<Slider>();
+            mobileBrushSlider.minValue = .005f;
+            mobileBrushSlider.maxValue = .08f;
+            mobileBrushSlider.handleRect = handle.rectTransform;
+            mobileBrushSlider.targetGraphic = handle;
+            mobileBrushSlider.transition = Selectable.Transition.None;
+            float initialRadius = effect is ILatteArtBrushSurface brushSurface ? brushSurface.BrushRadius : .02f;
+            mobileBrushSlider.SetValueWithoutNotify(Mathf.Clamp(initialRadius, mobileBrushSlider.minValue, mobileBrushSlider.maxValue));
+            mobileBrushSlider.onValueChanged.AddListener(SetMobileBrushRadius);
+
+            mobileBrushValue = MakeText(card.transform, "BrushValue", "2.0%", 16, Cream);
+            SetRect(mobileBrushValue.rectTransform, new Vector2(.82f, .1f), new Vector2(.98f, .90f));
+            mobileBrushValue.alignment = TextAlignmentOptions.Center;
+            SetMobileBrushRadius(mobileBrushSlider.value);
+        }
+
+        private void SetMobileBrushRadius(float value)
+        {
+            if (effect is ILatteArtBrushSurface brushSurface) brushSurface.BrushRadius = value;
+            if (mobileBrushValue != null) mobileBrushValue.text = (value * 100f).ToString("0.0") + "%";
         }
 
         private void BuildPracticeGuide(Transform content)
@@ -572,7 +624,9 @@ namespace Spotlight.FreeCafe
             switch (tutorialStep)
             {
                 case 0:
-                    tutorialCopy.text = "1 / 4  左侧是参考图案\n点击切换参考，悬停查看含义与画法。部分图案是阵营徽记：长时间把同一个有象征意义的图案端给客人，会影响你当前在不同阵营的名望。";
+                    tutorialCopy.text = MobileTouchInput.IsAndroidPlayer
+                        ? "1 / 4  左侧是参考图案\n轻触切换参考并查看含义与画法。部分图案是阵营徽记：长时间把同一个有象征意义的图案端给客人，会影响你当前在不同阵营的名望。"
+                        : "1 / 4  左侧是参考图案\n点击切换参考，悬停查看含义与画法。部分图案是阵营徽记：长时间把同一个有象征意义的图案端给客人，会影响你当前在不同阵营的名望。";
                     target = "PresetPanel/PresetList";
                     break;
                 case 1:
@@ -580,17 +634,21 @@ namespace Spotlight.FreeCafe
                     target = "GuideToggle";
                     break;
                 case 2:
-                    tutorialCopy.text = "3 / 4  沿参考绘制，观察拟合\n按住左键连续拖画，松手可分笔。左侧拟合百分比表示与各图案的相似程度，“最佳”标出当前最接近的图案。";
+                    tutorialCopy.text = MobileTouchInput.IsAndroidPlayer
+                        ? "3 / 4  沿参考绘制，观察拟合\n单指按住杯面绘制，抬起手指可分笔。使用下方笔触滑杆调整粗细。左侧拟合百分比表示与各图案的相似程度。"
+                        : "3 / 4  沿参考绘制，观察拟合\n按住左键连续拖画，松手可分笔。左侧拟合百分比表示与各图案的相似程度，“最佳”标出当前最接近的图案。";
                     target = "PresetPanel/StatusCard";
                     break;
                 default:
-                    tutorialCopy.text = "4 / 4  完成后提交拉花\n满意后点击右侧“提交拉花”完成练习。不必达到 100% 拟合；想重画可按 R 或点“删除拉花”，但已用奶泡不会退回。";
+                    tutorialCopy.text = MobileTouchInput.IsAndroidPlayer
+                        ? "4 / 4  完成后提交拉花\n满意后点击右侧“提交拉花”完成练习。不必达到 100% 拟合；想重画可点“删除拉花”，但已用奶泡不会退回。"
+                        : "4 / 4  完成后提交拉花\n满意后点击右侧“提交拉花”完成练习。不必达到 100% 拟合；想重画可按 R 或点“删除拉花”，但已用奶泡不会退回。";
                     target = "Submit";
                     break;
             }
             tutorialNext.gameObject.SetActive(tutorialStep < 3);
             tutorialNext.interactable = tutorialStep != 2 || effect != null && effect.StrokePointCount >= 5;
-            tutorialNextLabel.text = tutorialStep == 2 ? tutorialNext.interactable ? "画好了，下一步" : "先在杯面拖画" : "下一步";
+            tutorialNextLabel.text = tutorialStep == 2 ? tutorialNext.interactable ? "画好了，下一步" : "先在杯面绘制" : "下一步";
             var destination = contentRect.Find(target) as RectTransform;
             if (destination == null) return;
             Vector3 start = tutorialCard.TransformPoint(new Vector3(tutorialCard.rect.center.x, tutorialCard.rect.yMin, 0));
@@ -617,7 +675,10 @@ namespace Spotlight.FreeCafe
             var title = MakeText(panel.transform, "Title", "在杯面上作画", 30, Cream);
             SetRect(title.rectTransform, new Vector2(.08f, .868f), new Vector2(.92f, .93f)); title.alignment = TextAlignmentOptions.Left;
             title.fontStyle = FontStyles.Bold;
-            var subtitle = MakeText(panel.transform, "Subtitle", "选一个图案作参考，按住左键慢慢注奶", 15, Muted);
+            var subtitleText = MobileTouchInput.IsAndroidPlayer
+                ? "选一个图案作参考，单指按住杯面绘制"
+                : "选一个图案作参考，按住左键慢慢注奶";
+            var subtitle = MakeText(panel.transform, "Subtitle", subtitleText, 15, Muted);
             SetRect(subtitle.rectTransform, new Vector2(.08f, .832f), new Vector2(.92f, .868f)); subtitle.alignment = TextAlignmentOptions.Left;
             var divider = MakeImage(panel.transform, "Divider", new Color(Caramel.r, Caramel.g, Caramel.b, .35f)); divider.raycastTarget = false;
             SetRect(divider.rectTransform, new Vector2(.08f, .818f), new Vector2(.92f, .82f));
@@ -867,6 +928,7 @@ namespace Spotlight.FreeCafe
             patternFits.Clear();
             foreach (var entry in entries) { entry.button = null; entry.fit = null; entry.fitBar = null; }
             overlayRoot = null; overlay = null; status = null; foamUsage = null; cupFill = null; contentGroup = null; curtain = null; submitButton = null;
+            mobileBrushControl = null; mobileBrushSlider = null; mobileBrushValue = null;
             guide = null; guideLabel = null; contentRect = null;
             tutorialCard = null; tutorialCopy = null; tutorialPointer = null; tutorialNext = null; tutorialNextLabel = null;
         }

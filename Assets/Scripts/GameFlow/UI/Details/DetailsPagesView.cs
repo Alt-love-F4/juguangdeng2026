@@ -31,12 +31,20 @@ namespace Spotlight.GameFlow
         [SerializeField] private Sprite characterSilhouette;
         [SerializeField] private Sprite worldSelectedButton;
         [SerializeField] private Sprite worldIdleButton;
+        [Header("Story archive")]
+        [SerializeField] private RectTransform storyList;
+        [SerializeField] private ScrollRect storyScroll;
+        [SerializeField] private TMP_Text storyTitle;
+        [SerializeField] private TMP_Text storyMeta;
+        [SerializeField] private TMP_Text storyBody;
+        [SerializeField] private GameObject storyReader;
         private DetailsPanel panel;
         private TMP_FontAsset font;
         private Sprite unknownAvatar;
         private DetailsPanelData data;
         private string characterId;
         private string worldKey;
+        private DetailsStoryData selectedStory;
         private readonly List<Image> selectors = new List<Image>();
         private readonly List<Button> characterButtons = new List<Button>();
         public int RelationshipPageIndex { get; private set; }
@@ -68,6 +76,47 @@ namespace Spotlight.GameFlow
             RenderRelationships();
             RenderCharacter(FindCharacter(characterId));
             RenderWorldSelectors();
+            RenderStories();
+        }
+
+        private void RenderStories()
+        {
+            if (storyList == null || storyTitle == null || storyBody == null) return;
+            for (int i = storyList.childCount - 1; i >= 0; i--) Destroy(storyList.GetChild(i).gameObject);
+            selectedStory = null;
+            storyTitle.text = "选择一段已解锁的剧情";
+            storyMeta.text = string.Empty;
+            storyBody.text = data == null || data.Stories.Count == 0 ? "暂无可查看的剧情记录。" : "点击左侧条目查看已解锁内容。";
+            if (storyReader != null) storyReader.SetActive(true);
+            if (data == null) return;
+            foreach (var story in data.Stories)
+            {
+                var item = new GameObject("StoryItem", typeof(RectTransform), typeof(Image), typeof(Button));
+                item.transform.SetParent(storyList, false);
+                var rect = (RectTransform)item.transform; rect.sizeDelta = new Vector2(420f, 62f);
+                var image = item.GetComponent<Image>(); image.color = story.Unlocked ? new Color(.24f, .12f, .05f, .12f) : new Color(.1f, .1f, .1f, .08f);
+                var label = new GameObject("Label", typeof(RectTransform), typeof(TextMeshProUGUI)); label.transform.SetParent(item.transform, false);
+                var labelRect = (RectTransform)label.transform; labelRect.anchorMin = Vector2.zero; labelRect.anchorMax = Vector2.one; labelRect.offsetMin = new Vector2(18, 6); labelRect.offsetMax = new Vector2(-18, -6);
+                var text = label.GetComponent<TMP_Text>(); text.font = font; text.fontSize = 23; text.color = story.Unlocked ? new Color(.25f, .12f, .04f) : new Color(.25f, .25f, .25f); text.alignment = TextAlignmentOptions.MidlineLeft; text.text = story.Unlocked ? story.Title : "剧情尚未解锁";
+                var button = item.GetComponent<Button>(); button.interactable = story.Unlocked;
+                if (story.Unlocked) button.onClick.AddListener(() => ShowStory(story));
+            }
+            LayoutRebuilder.ForceRebuildLayoutImmediate(storyList);
+            if (storyScroll != null) storyScroll.verticalNormalizedPosition = 1f;
+        }
+
+        private void ShowStory(DetailsStoryData story)
+        {
+            selectedStory = story;
+            storyTitle.text = story.Title;
+            storyMeta.text = story.Group;
+            var builder = new System.Text.StringBuilder();
+            foreach (var block in story.Blocks)
+            {
+                if (!string.IsNullOrWhiteSpace(block.Caption)) builder.AppendLine(block.Caption);
+                builder.AppendLine(block.BodyText).AppendLine();
+            }
+            storyBody.text = builder.Length == 0 ? "这段剧情暂时没有可展示的正文。" : builder.ToString().TrimEnd();
         }
         private DetailsCharacterData FindCharacter(string id)
         {

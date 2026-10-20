@@ -1,4 +1,5 @@
 using TMPro;
+using Spotlight.GameFlow;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -28,6 +29,16 @@ namespace Spotlight.FreeCafe
 
         private void Awake()
         {
+            if (MobileTouchInput.IsAndroidPlayer && instruction != null)
+            {
+                var card = instruction.transform.parent as RectTransform;
+                if (card != null && card.GetComponent<AndroidSafeAreaFitter>() == null)
+                    card.gameObject.AddComponent<AndroidSafeAreaFitter>();
+                if (leftButton != null) leftButton.gameObject.SetActive(false);
+                if (rightButton != null) rightButton.gameObject.SetActive(false);
+                if (rotationArrow != null) rotationArrow.SetActive(false);
+            }
+
             // Every tutorial shares this prefab. Do not rely on one controller to
             // replace the authored 100x100 placeholder sizes before displaying it.
             for (int i = 0; i < trail.Length; i++)

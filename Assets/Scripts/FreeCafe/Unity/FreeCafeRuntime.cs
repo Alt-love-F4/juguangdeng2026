@@ -122,6 +122,7 @@ namespace Spotlight.FreeCafe
         private bool vesselWasTilted;
         private Vector2 vesselTiltPointerOrigin;
         private float vesselTilt;
+        private readonly TouchPourGestureRecognizer touchPourGesture = new TouchPourGestureRecognizer();
         private const float VesselTiltPixels = 90f;
         private const float VesselTiltResponseSeconds = .045f;
         private const float VesselPourThreshold = .18f;
@@ -129,11 +130,14 @@ namespace Spotlight.FreeCafe
         private string lastPourTarget;
         private string lockedPourTargetId, lastPourError;
         private FreeEntityView receivingView;
+        public bool IsVesselTiltMode => vesselTiltMode;
         public string LockedPourTargetId => lockedPourTargetId;
         public string CurrentPourTargetId => !IsDragging || !draggingVessel ? null
             : vesselTiltMode ? lockedPourTargetId : ResolvePourTarget()?.id;
         private void Awake()
         {
+            if (Application.isMobilePlatform)
+                Hint = "按住器皿拖动；对准目标后停留，再上下滑动倾倒，抬起手指停止。";
             // A session owner may already have a save entry before this scene loads.
             // Only another initialized scene adapter is a duplicate runtime.
             foreach(var other in FindObjectsByType<FreeCafeRuntime>(FindObjectsSortMode.None))
@@ -248,6 +252,14 @@ namespace Spotlight.FreeCafe
             if (World != null) SyncViews();
         }
         private void OnApplicationQuit() => quitting = true;
+        private void OnApplicationPause(bool paused)
+        {
+            if (paused && Application.isMobilePlatform)
+            {
+                touchPourGesture.Reset();
+                CancelDrag();
+            }
+        }
         private void OnDisable()
         {
             GameAudio.StopOwner(this);
@@ -942,6 +954,7 @@ namespace Spotlight.FreeCafe
             GameAudio.SetLoop(this, "spill", AudioKeys.Spill, false);
             dragCompanion=null; reservedCupStack=null; dragPreview=false;
             draggingVessel=false; draggingCupPickupPreview=false; vesselTiltMode=false; vesselWasTilted=false; vesselTilt=0;
+            touchPourGesture.Reset();
             dragFinishedFrame=Time.frameCount;
             try
             {
@@ -1034,25 +1047,58 @@ namespace Spotlight.FreeCafe
         }
         private void UpdateVesselInput()
         {
+            if (MobileTouchInput.TryGetPrimaryTouch(out Vector2 touchPosition, out bool touchHeld))
+            {
+                pointerScreen = touchPosition;
+                if (touchHeld && !vesselTiltMode && !World.IsMilkPitcher(World.Find(dragItemId)))
+                {
+                    if (vesselPointer == null && EventSystem.current != null)
+                        vesselPointer = new PointerEventData(EventSystem.current);
+                    if (vesselPointer != null)
+                    {
+                        vesselPointer.position = touchPosition;
+                        FindReceiver(vesselPointer);
+                        WorldEntity target = overUI ? null : ResolvePourTarget();
+                        if (touchPourGesture.Update(target != null ? target.id : null, touchPosition,
+                            Time.unscaledTime, out Vector2 pourOrigin))
+                        {
+                            BeginVesselTilt();
+                            if (vesselTiltMode) vesselTiltPointerOrigin = pourOrigin;
+                            touchPourGesture.Reset();
+                        }
+                        else if (target != null && touchPourGesture.IsArmed)
+                            ShowHint("目标已对准；上下滑动倾倒，抬起手指停止。牛奶壶请拖到杯上拉花，不要倾倒。");
+                    }
+                }
+                else if (!touchHeld) touchPourGesture.Reset();
+
+                UpdateVesselInputState(touchPosition, touchHeld, touchHeld);
+                return;
+            }
+
             var mouse=Mouse.current;
             if(mouse==null) return;
             bool rightHeld=mouse.rightButton.isPressed && !World.IsMilkPitcher(World.Find(dragItemId));
             if(rightHeld && !vesselTiltMode) BeginVesselTilt();
-            pointerScreen=mouse.position.ReadValue();
-            if(!rightHeld && !vesselTiltMode && !mouse.leftButton.isPressed)
+            UpdateVesselInputState(mouse.position.ReadValue(), mouse.leftButton.isPressed, rightHeld);
+        }
+        private void UpdateVesselInputState(Vector2 position, bool leftHeld, bool tiltHeld)
+        {
+            pointerScreen=position;
+            if(!tiltHeld && !vesselTiltMode && !leftHeld)
             {
                 if(vesselPointer==null) vesselPointer=new PointerEventData(EventSystem.current);
                 vesselPointer.position=pointerScreen;
                 EndDrag(vesselPointer); return;
             }
-            if(vesselTiltMode && !rightHeld)
+            if(vesselTiltMode && !tiltHeld)
             {
                 StopVesselPour();
                 ReleasePourTarget();
                 vesselTiltMode=false;
                 vesselTilt=0;
                 draggedView.PresentPour(0,false);
-                if(!mouse.leftButton.isPressed)
+                if(!leftHeld)
                 {
                     if(draggingCupPickupPreview)
                     {
@@ -1081,7 +1127,7 @@ namespace Spotlight.FreeCafe
             }
             if(vesselTiltMode)
             {
-                // Right owns tilt mode even when left is released; receiver remains locked.
+                // The active pour input owns tilt mode; the receiver remains locked.
                 UpdateVesselPour();
             }
         }

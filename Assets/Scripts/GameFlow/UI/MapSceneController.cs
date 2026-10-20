@@ -65,6 +65,8 @@ namespace Spotlight.GameFlow
         private PointerEventData mapPointerEvent;
         private Vector2 lastPointerPosition;
         private bool pointerDragging;
+        private bool pinchDragging;
+        private float lastPinchDistance;
         private GameFlowBootstrap flow;
         [SerializeField] private TextMeshProUGUI status;
         [SerializeField] private GameObject focusPanel;
@@ -260,6 +262,8 @@ namespace Spotlight.GameFlow
             if (zoomSlider != null) zoomSlider.onValueChanged.AddListener(value => { targetZoom = value; focusZooming = false; });
             if (endDayButton != null) endDayButton.gameObject.SetActive(false);
             BindConfiguredLocations();
+            if (MobileTouchInput.IsAndroidPlayer && widgets != null && widgets.GetComponent<AndroidSafeAreaFitter>() == null)
+                widgets.gameObject.AddComponent<AndroidSafeAreaFitter>();
         }
 
         private void BuildUi()
@@ -478,6 +482,7 @@ namespace Spotlight.GameFlow
             if (zoomSlider != null) zoomSlider.interactable = ViewAvailable && (!GuideLocked || IsCafeArrivalGuide);
             if (GuideLocked && !IsCafeArrivalGuide)
             {
+                pinchDragging = false;
                 UpdateZoom();
                 UpdateFocusMovement();
                 ApplyMapView();
@@ -486,6 +491,7 @@ namespace Spotlight.GameFlow
             if (!ViewAvailable)
             {
                 pointerDragging = dragging = false;
+                pinchDragging = false;
                 panVelocity = Vector2.zero;
                 keyboardPanVelocity = Vector2.zero;
                 return;
@@ -494,7 +500,9 @@ namespace Spotlight.GameFlow
             Vector2 move = Vector2.zero;
             if (key != null) { if (key.wKey.isPressed) move.y += 1; if (key.sKey.isPressed) move.y -= 1; if (key.aKey.isPressed) move.x -= 1; if (key.dKey.isPressed) move.x += 1; }
             bool keyboardMoving = UpdateKeyboardPan(move, Time.unscaledDeltaTime);
-            if (Mouse.current != null)
+            if (MobileTouchInput.IsAndroidPlayer)
+                UpdateTouchMapInput();
+            else if (Mouse.current != null)
             {
                 float wheel = Mouse.current.scroll.ReadValue().y;
                 if (Mathf.Abs(wheel) > .01f && IsMapZoomPointerTarget()) AddScrollZoom(wheel);
@@ -512,7 +520,7 @@ namespace Spotlight.GameFlow
                 GameplayHudPanel.Instance?.CloseSidebars();
                 HideFocus();
             }
-            if (!firstDayGuideActive && !creationPending && Mouse.current != null && Mouse.current.rightButton.wasPressedThisFrame
+            if (!MobileTouchInput.IsAndroidPlayer && !firstDayGuideActive && !creationPending && Mouse.current != null && Mouse.current.rightButton.wasPressedThisFrame
                 && (actionDetails == null || !actionDetails.IsBusy) && IsMapPointerTarget()) HideFocus();
         }
 
@@ -543,15 +551,23 @@ namespace Spotlight.GameFlow
 
         private void UpdatePointerPan(Mouse mouse)
         {
-            Vector2 pointer = mouse.position.ReadValue();
-            bool pressed = mouse.leftButton.isPressed;
+            UpdatePointerPan(mouse.position.ReadValue(), mouse.leftButton.isPressed, false);
+        }
+
+        private void UpdatePointerPan(Vector2 pointer, bool pressed, bool touch)
+        {
             if (!pressed)
             {
                 pointerDragging = false;
+                if (touch) dragging = false;
                 return;
             }
-            if (!RectTransformUtility.RectangleContainsScreenPoint(mapRoot, pointer, UiCamera)) return;
-            if (!IsMapPointerTarget()) return;
+            if (!RectTransformUtility.RectangleContainsScreenPoint(mapRoot, pointer, UiCamera)
+                || !IsMapPointerTarget(pointer, touch))
+            {
+                if (touch) pointerDragging = dragging = false;
+                return;
+            }
             if (!pointerDragging)
             {
                 pointerDragging = true;
@@ -576,15 +592,91 @@ namespace Spotlight.GameFlow
             }
         }
 
+        private void UpdateTouchMapInput()
+        {
+            int touchCount = MobileTouchInput.GetPressedTouches(out Vector2 first, out Vector2 second);
+            if (touchCount == 0)
+            {
+                pinchDragging = false;
+                UpdatePointerPan(Vector2.zero, false, true);
+                return;
+            }
+
+            if (touchCount == 1)
+            {
+                pinchDragging = false;
+                UpdatePointerPan(first, true, true);
+                return;
+            }
+
+            pointerDragging = dragging = false;
+            keyboardPanVelocity = Vector2.zero;
+            panVelocity = Vector2.zero;
+            if (!IsTouchMapTarget(first) || !IsTouchMapTarget(second))
+            {
+                pinchDragging = false;
+                return;
+            }
+
+            float distance = Vector2.Distance(first, second);
+            if (distance < 24f) { pinchDragging = false; return; }
+            if (!pinchDragging)
+            {
+                pinchDragging = true;
+                lastPinchDistance = distance;
+                CancelFocusMovement();
+                return;
+            }
+
+            float factor = distance / Mathf.Max(1f, lastPinchDistance);
+            if (Mathf.Abs(factor - 1f) > .001f)
+                AddPinchZoom(factor, (first + second) * .5f);
+            lastPinchDistance = distance;
+        }
+
+        private bool IsTouchMapTarget(Vector2 position)
+        {
+            return mapRoot != null
+                && RectTransformUtility.RectangleContainsScreenPoint(mapRoot, position, UiCamera)
+                && IsMapPointerTarget(position, true);
+        }
+
+        private void AddPinchZoom(float factor, Vector2 screenCenter)
+        {
+            if (!RectTransformUtility.ScreenPointToLocalPointInRectangle(mapRoot, screenCenter, UiCamera, out Vector2 localCenter)) return;
+            Vector2 mapAnchor = mapCenter + localCenter / Mathf.Max(.01f, zoom);
+            targetZoom = Mathf.Clamp(targetZoom * factor, MinimumZoom, MaximumZoom);
+            focusZooming = false;
+            CancelFocusMovement();
+            mapCenter = ClampMapCenter(mapAnchor - localCenter / Mathf.Max(.01f, targetZoom));
+        }
+
         private bool IsMapPointerTarget()
         {
+            return Mouse.current != null && IsMapPointerTarget(Mouse.current.position.ReadValue(), false);
+        }
+
+        private bool IsMapPointerTarget(Vector2 position, bool touch)
+        {
+            if (mapRoot == null || !RectTransformUtility.RectangleContainsScreenPoint(mapRoot, position, UiCamera)) return false;
             if (EventSystem.current == null) return true;
             if (mapPointerEvent == null) mapPointerEvent = new PointerEventData(EventSystem.current);
             mapPointerEvent.Reset();
-            mapPointerEvent.position = Mouse.current.position.ReadValue();
+            mapPointerEvent.position = position;
             pointerHits.Clear();
             EventSystem.current.RaycastAll(mapPointerEvent, pointerHits);
             if (pointerHits.Count == 0) return true;
+            if (touch)
+            {
+                bool mapHit = false;
+                foreach (RaycastResult raycastHit in pointerHits)
+                {
+                    Transform target = raycastHit.gameObject.transform;
+                    if (target.GetComponentInParent<Selectable>() != null) return false;
+                    if (target == mapRoot || target.IsChildOf(mapRoot)) mapHit = true;
+                }
+                return mapHit;
+            }
             Transform hit = pointerHits[0].gameObject.transform;
             return hit == mapRoot || hit.IsChildOf(mapRoot);
         }
@@ -625,6 +717,7 @@ namespace Spotlight.GameFlow
             keyboardPanVelocity = Vector2.zero;
             panVelocity = Vector2.zero;
             pointerDragging = dragging = false;
+            pinchDragging = false;
             CancelFocusMovement();
             if (cafeGuideRing != null) cafeGuideRing.gameObject.SetActive(false);
         }

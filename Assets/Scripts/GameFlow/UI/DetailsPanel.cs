@@ -12,7 +12,7 @@ namespace Spotlight.GameFlow
     /// <summary>Display-only details window. No tables, game state, narrative settlement or save writes.</summary>
     public sealed class DetailsPanel : GameFlowPanel, IDetailsPanel
     {
-        public enum Page { MyInfo, Relationships, World }
+        public enum Page { MyInfo, Relationships, World, Story }
 
         [Header("Window")]
         [SerializeField] private Button closeButton;
@@ -40,6 +40,7 @@ namespace Spotlight.GameFlow
         [SerializeField] private DetailsAttributeBinding[] attributeBindings;
         [SerializeField] private DetailsSectionBinding relationshipsBinding;
         [SerializeField] private DetailsSectionBinding worldBinding;
+        [SerializeField] private DetailsSectionBinding storyBinding;
         [Header("Specialization component references")]
         [SerializeField] private DetailsSpecializationItem[] specializationItems;
         [SerializeField] private RectTransform specializationContent;
@@ -100,15 +101,15 @@ namespace Spotlight.GameFlow
                 || avatarImage == default || avatarPlaceholder == default || avatarPlaceholderLabel == default
                 || subtitleText == default || footerText == default || closeButton == default || outsideButton == default
                 || window == default || tooltip == default || tooltipTitle == default || tooltipBody == default
-                || tabButtons == null || tabButtons.Length != 3 || pages == null || pages.Length != 3
+                || tabButtons == null || tabButtons.Length < 3 || pages == null || pages.Length != tabButtons.Length
                 || attributeBindings == null || attributeBindings.Length != 4
-                || relationshipsBinding == null || worldBinding == null
+                || relationshipsBinding == null || worldBinding == null || storyBinding == null
                 || specializationItems == null || specializationItems.Length == 0
                 || specializationContent == default || specializationViewport == default || specializationGrid == default
                 || specializationScroll == default || emptySpecializationsText == default || specializationsHintText == default
-                || paperSurface == default || paperStyles == null || paperStyles.Length != 3
-                || selectedTabArtwork == default || selectedTabPositions == null || selectedTabPositions.Length != 3
-                || idleTabArtwork == null || idleTabArtwork.Length != 3 || pageHint == default || pageHints == null || pageHints.Length != 3)
+                || paperSurface == default || paperStyles == null || paperStyles.Length != 4
+                || selectedTabArtwork == default || selectedTabPositions == null || selectedTabPositions.Length != tabButtons.Length
+                || idleTabArtwork == null || idleTabArtwork.Length != tabButtons.Length || pageHint == default || pageHints == null || pageHints.Length != tabButtons.Length)
                 throw new InvalidOperationException("DetailsPanel component bindings are incomplete. Run Tools/Game Flow/Bind Details Panel Components.");
             for (int i = 0; i < 3; i++)
                 if (tabButtons[i] == default || pages[i] == default || idleTabArtwork[i] == default || paperStyles[i] == null)
@@ -116,7 +117,7 @@ namespace Spotlight.GameFlow
             for (int i = 0; i < attributeBindings.Length; i++)
                 if (attributeBindings[i] == null || !attributeBindings[i].IsValid)
                     throw new InvalidOperationException("DetailsPanel attribute binding is incomplete at index " + i);
-            if (!relationshipsBinding.IsValid || !worldBinding.IsValid)
+            if (!relationshipsBinding.IsValid || !worldBinding.IsValid || tabButtons.Length > 3 && (storyBinding == null || !storyBinding.IsValid))
                 throw new InvalidOperationException("DetailsPanel section binding is incomplete.");
             for (int i = 0; i < specializationItems.Length; i++)
             {
@@ -140,6 +141,7 @@ namespace Spotlight.GameFlow
             tabButtons[0].onClick.AddListener(ShowMyInfo);
             tabButtons[1].onClick.AddListener(ShowRelationships);
             tabButtons[2].onClick.AddListener(ShowWorld);
+            if (tabButtons.Length > 3) tabButtons[3].onClick.AddListener(ShowStory);
             EnsureDetailsPages();
         }
 
@@ -195,6 +197,7 @@ namespace Spotlight.GameFlow
             for (int i = 0; i < attributeBindings.Length; i++) attributeBindings[i].Render(this, data.Attributes[i]);
             relationshipsBinding.Render(data.Relationships);
             worldBinding.Render(data.World);
+            storyBinding?.Render(new DetailsSectionData("剧情", "剧情档案", data.Stories.Count == 0 ? "暂无可查看的剧情记录" : "已记录剧情可在此回顾"));
             RenderSpecializations(data);
             EnsureDetailsPages();
             detailsPages.Refresh(data);
@@ -326,10 +329,11 @@ namespace Spotlight.GameFlow
         public void ShowMyInfo() => SelectPage(Page.MyInfo);
         public void ShowRelationships() => SelectPage(Page.Relationships);
         public void ShowWorld() => SelectPage(Page.World);
+        public void ShowStory() => SelectPage(Page.Story);
 
         public void SelectPage(Page page)
         {
-            if (closing || (int)page < 0 || (int)page > 2) return;
+            if (closing || (int)page < 0 || (int)page >= pages.Length) return;
             bool changed = CurrentPage != page;
             if (changed) Spotlight.Audio.GameAudio.Play(Spotlight.Audio.AudioKeys.Tab);
             StopPageTransition();
@@ -535,11 +539,12 @@ namespace Spotlight.GameFlow
             badgeViews.Clear();
             if (closeButton != default) closeButton.onClick.RemoveListener(RequestClose);
             if (outsideButton != default) outsideButton.onClick.RemoveListener(RequestClose);
-            if (tabButtons != null && tabButtons.Length == 3)
+            if (tabButtons != null && tabButtons.Length >= 3)
             {
                 tabButtons[0].onClick.RemoveListener(ShowMyInfo);
                 tabButtons[1].onClick.RemoveListener(ShowRelationships);
                 tabButtons[2].onClick.RemoveListener(ShowWorld);
+                if (tabButtons.Length > 3) tabButtons[3].onClick.RemoveListener(ShowStory);
             }
             base.OnBeforeDestroy();
         }

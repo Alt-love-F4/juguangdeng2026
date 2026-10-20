@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using Spotlight.GameFlow;
 using TMPro;
 using UnityEngine;
 using UnityEngine.InputSystem;
@@ -284,6 +285,7 @@ namespace Spotlight.FreeCafe
             errorText.text = Time.unscaledTime < errorUntil ? error : "本练习不结算订单；重来或退出会恢复练习前工作台。";
             gesture.gameObject.SetActive(true);
             panel.SetMouseMode(false, false);
+            if (MobileTouchInput.IsAndroidPlayer) gesture.gameObject.SetActive(false);
             gestureText.text = GestureDescription();
 
             bool draggingStep = stage == Stage.FillPitcher || stage == Stage.Transfer;
@@ -350,6 +352,20 @@ namespace Spotlight.FreeCafe
 
         private string Description()
         {
+            if (MobileTouchInput.IsAndroidPlayer)
+            {
+                switch (stage)
+                {
+                    case Stage.PrepareCup: return "先准备练习饮品杯。点击杯堆取杯，再按真实制作流程加入饮品液体；本次练习结束会恢复杯堆和内容物。";
+                    case Stage.PrepareDrink: return "练习饮品杯已准备好。确认杯中有饮品液体，再处理牛奶。";
+                    case Stage.FillPitcher: return "按住牛奶来源并拖到拉花杯上方，抬起手指注入。拉花杯不是普通倾倒容器，不要用倾倒手势。";
+                    case Stage.Froth: return "牛奶已进入拉花杯。点击拉花杯打奶，直到变成奶泡。";
+                    case Stage.Transfer: return "按住拉花杯并拖到饮品杯上，抬起手指后进入真实拉花界面。这里不会使用普通倾倒手势。";
+                    case Stage.DrawLatte: return "在实际拉花界面中单指按住杯面绘制，抬指可分笔；完成后点击「提交拉花」。返回后继续显示完成结果。";
+                    default: return "拉花练习完成！点击「重来」再次练习，或「退出」恢复练习前所有工作台实体和状态。";
+                }
+            }
+
             switch (stage)
             {
                 case Stage.PrepareCup: return "先准备练习饮品杯。点击杯堆取杯，再按真实制作流程加入饮品液体；本次练习结束会恢复杯堆和内容物。";
@@ -364,6 +380,20 @@ namespace Spotlight.FreeCafe
 
         private string GestureDescription()
         {
+            if (MobileTouchInput.IsAndroidPlayer)
+            {
+                switch (stage)
+                {
+                    case Stage.PrepareCup: return "点击杯堆取杯";
+                    case Stage.PrepareDrink: return "按真实制作流程加入饮品";
+                    case Stage.FillPitcher: return "拖牛奶到拉花杯\n抬起手指注入";
+                    case Stage.Froth: return "点击拉花杯\n打成奶泡";
+                    case Stage.Transfer: return "拖奶泡杯到饮品杯\n抬起手指";
+                    case Stage.DrawLatte: return "单指按住杯面画图\n抬指可分笔";
+                    default: return "完成\n可重来或退出";
+                }
+            }
+
             switch (stage)
             {
                 case Stage.PrepareCup: return "准备练习杯\n点击杯堆取杯";
