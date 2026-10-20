@@ -1,7 +1,7 @@
 # Android 手机适配设计
 
 日期：2026-10-21
-状态：待用户审核
+状态：设计已确认
 
 ## 目标
 
@@ -15,7 +15,7 @@ Android 适配必须与 PC 输入和显示行为隔离。PC 保持现有鼠标/�
 - 主 UI 按 1920x1080 横屏构图，部分 HUD 使用 2400x1350 CanvasScaler 参考分辨率；PlayerSettings 当前允许自动旋转至横竖屏。
 - 普通 UGUI 点击和拖拽已有触摸兼容基础；咖啡馆 `FreeCafeRuntime` 的容器倾倒依赖 `Mouse.current.rightButton`，工作台教程也要求右键。`LatteArtPrototype`、地图缩放/平移部分逻辑直接读取 Mouse。
 - 工作区已有 Android PlayerSettings 和纹理 `.meta` 未提交修改，必须在原值上审阅合并，不得重置或批量覆盖。
-- 本机 Unity Editor 当前未安装 Android Build Support / SDK / NDK / OpenJDK，PATH 中也没有 ADB。因此代码与 Editor 测试可先完成；APK 构建和真机回归需要工具链可用。
+- 本机 Unity Editor 已识别 AndroidPlayer 模块；Android Studio 工具链安装在 `D:\Android\Sdk`、`D:\Android\Sdk\ndk\27.2.12479018` 和 `D:\Android\OpenJDK17`。Unity 当前日志仍提示找不到 Android SDK Tools，实施前需核对 Preferences > External Tools 指向这些路径，并在必要时重启 Editor。ADB 位于 SDK 的 `platform-tools`，但未加入 PATH。
 
 ## 平台隔离
 
@@ -45,7 +45,7 @@ Android 适配必须与 PC 输入和显示行为隔离。PC 保持现有鼠标/�
 - Android 包名设置为稳定的反向域名 `com.altlovef4.juguangdeng2026`；使用 ARM64、IL2CPP 和 APK 输出，保留现有 Android SDK 版本及已配置的其他平台选项，除非 Unity 构建验证明确要求调整。
 - 只包含当前正式 Build Settings 中的启动、咖啡馆、地图场景；不添加调试/叙事关系场景，不改变 PC 构建场景。
 - 输出路径建议为 `Builds/Android/Spotlight-Android-Test.apk`，作为本地产物，不纳入功能源文件的提交。
-- 先运行脚本编译与相关 EditMode/PlayMode 测试；Android Build Support 可用后构建 APK。若无连接设备/ADB，只能报告 APK 构建结果，不能宣称真机验收通过。
+- 先确认 Unity Editor 使用上述外部工具链，再运行脚本编译与相关 EditMode/PlayMode 测试并构建 APK。若没有连接设备，只报告 APK 构建结果，不宣称真机验收通过。
 
 ## 测试与验收
 
@@ -65,7 +65,7 @@ Android 适配必须与 PC 输入和显示行为隔离。PC 保持现有鼠标/�
 
 ## 已知风险与依赖
 
-- Unity Android Build Support 未安装；Unity Hub/模块安装完成前无法在当前 Editor 生成 APK。
-- 当前 PATH 中未发现 ADB，尚无法确认 Android 设备连接状态；构建后需确认 ADB/USB 调试环境和设备可用，再完成最终操作验收。
+- Unity AndroidPlayer 模块已安装，但 Editor 日志曾提示找不到 Android SDK Tools；需确认 Unity 外部工具路径并重新验证构建能力。
+- ADB 已安装在 `D:\Android\Sdk\platform-tools\adb.exe`，但不在 PATH；设备连接状态尚未确认。
 - 当前项目存在未提交工作区改动，尤其是 `ProjectSettings/ProjectSettings.asset` 和 Android 纹理导入 `.meta`；实施时必须逐项合并，不覆盖用户改动。
 - 触屏倒液涉及现有拖放生命周期，必须先用小型输入策略/状态测试固定边界，再接入实时咖啡运行时，避免影响现有 PC 倾倒交易。
