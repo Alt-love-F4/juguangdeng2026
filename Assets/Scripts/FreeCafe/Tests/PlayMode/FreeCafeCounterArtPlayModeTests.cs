@@ -123,6 +123,39 @@ namespace Spotlight.FreeCafe.Tests
             Assert.That(app.World.AttachExtractionFilter(filter.id, jug.id).success, Is.True);
             Assert.That(app.World.ExtractionFilter(jug), Is.SameAs(filter));
         }
+        [UnityTest] public IEnumerator UsedExtractorPartsCanBeDroppedTogetherInBothDirections()
+        {
+            var world = app.World;
+            var jug = world.Find("v.extractor"); var filter = world.Find("v.extractor.filter");
+            foreach (bool lowerOntoUpper in new[] { false, true })
+            {
+                Assert.That(world.PrepareExtractionDrag(jug.id).success, Is.True);
+                Assert.That(world.ReturnVesselHome(filter.id).success, Is.True);
+                jug.contents.Clear(); filter.contents.Clear();
+                jug.contents.Add(new Portion { specId = "water", milliliters = 80, units = 1 });
+                filter.contents.Add(new Portion { specId = "sugar", grams = 5, units = 1 });
+                filter.production.filterSpent = true;
+                jug.production.brewStarted = jug.production.brewCompleted = true;
+                app.DebugRefreshViews(); yield return new WaitForSecondsRealtime(1.5f);
+                var source = app.View(lowerOntoUpper ? jug.id : filter.id);
+                var target = app.View(lowerOntoUpper ? filter.id : jug.id);
+                Physics2D.SyncTransforms();
+                var pointer = Pointer(source); app.BeginDrag(source, pointer);
+                Assert.That(app.IsDragging, Is.True);
+                pointer.position = app.worldCamera.WorldToScreenPoint(target.transform.position);
+                app.MoveDrag(pointer);
+                Assert.That(target.IsDropTarget, Is.True);
+                app.EndDrag(pointer);
+                Assert.That(app.IsDragging, Is.False);
+                world.Tick(1);
+                yield return new WaitForSecondsRealtime(1.5f);
+                Assert.That(world.ExtractionFilter(jug), Is.SameAs(filter));
+                Assert.That(world.ExtractionJug(filter), Is.SameAs(jug));
+                Assert.That(world.LiquidVolume(jug), Is.EqualTo(80));
+                Assert.That(world.SolidMass(filter), Is.EqualTo(5));
+            }
+        }
+
         [UnityTest] public IEnumerator HigherDisplayLimitAllowsOneTopAndEveryRemainingLowerCup()
         {
             foreach (string id in new[] { "s.cups.small", "s.cups.large" })

@@ -102,7 +102,7 @@ namespace Spotlight.FreeCafe
                 text.AppendLine().AppendLine(forOrder ? "<b>当前订单用量</b>（已按需求杯型换算）\n" : "<b>参考用量</b>（自由操作，不锁步骤）\n");
                 if(product.ingredients != null)
                     foreach(var portion in product.ingredients)
-                        text.Append(FreeCafeProductionText.Recipe(world.Spec(portion.specId).label)).Append("  ")
+                        text.Append(FreeCafeProductionText.RecipeIngredient(portion, world.Spec(portion.specId).label)).Append("  ")
                             .Append(portion.milliliters > 0 ? (portion.milliliters * scale).ToString("0") + " ml" : portion.grams > 0 ? (portion.grams * scale).ToString("0.#") + " g" : (portion.units * scale).ToString("0.#") + " 份").AppendLine();
                 body.text = text.ToString();
             }
@@ -115,7 +115,7 @@ namespace Spotlight.FreeCafe
         public void ShowPreview()
         {
             title.text = "精粹咖啡";
-            body.text = "<b>参考目标</b>\n\n小杯 · 精粹咖啡 200 ml\n咖啡水准至少 70。\n\n研磨咖啡豆后，将咖啡粉装入精密萃取滤杯，以热水计时注入。\n\n参考 7.5 秒、200 ml，并保持均匀。\n停止注水结算后才得到精粹咖啡。\n加热普通冷萃只能得到黑咖啡，不能代替精粹。\n\n倒入杯中交付；按最终成分与含量评价。\n\n<b>杯型 / 温度</b>\n\n小杯 / 沸腾\n\n<b>参考用量</b>\n\n咖啡液 200 ml";
+            body.text = "<b>参考目标</b>\n\n小杯 · 精粹咖啡 200 ml\n咖啡水准至少 70。\n\n研磨咖啡豆后，将咖啡粉装入精密萃取滤杯，以热水计时注入。\n\n参考 7.5 秒、200 ml，并保持均匀。\n停止注水结算后才得到精粹咖啡。\n加热普通冷萃只能得到黑咖啡，不能代替精粹。\n\n倒入杯中交付；按最终成分与含量评价。\n\n<b>杯型 / 温度</b>\n\n小杯 / 沸腾\n\n<b>参考用量</b>\n\n精粹咖啡液 200 ml";
             note.text = "<align=center><b>注意</b></align>\n\n计时注水完成的精粹咖啡，品质由时间、水量和均匀性决定。\n\n任何容器都能自由加料；咖啡粉与水混合是冷萃，放到炉台并点击炉台加热完成萃取。\n\n空杯、半成品也能出品，但顾客会按实际质量评价。";
             page.text = "01 / 02";
             for(int index = 0; index < entries.Length; index++)

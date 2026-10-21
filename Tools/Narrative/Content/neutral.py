@@ -1,4 +1,5 @@
-"""Read-only CURRENT neutral/common and route content compiler. See MD handoff.
+"""Read-only CURRENT neutral/common and route content compiler.
+Authorized completion design is recorded in _audit; no source workbook writes.
 No workbook, generated-data, runtime, schema, global-bar or attribute writes.
 """
 from __future__ import annotations
@@ -41,6 +42,10 @@ NORMAL_SCORE_PRESET, EXCELLENT_SCORE_PRESET = 60, 90
 BLACK_STAGE = "church.execution.black"  # Existing registered solid black, not execution artwork.
 # User-approved wallet (NOT revenue) target, assessed on day 55 before business.
 BUSINESS_TYCOON_MONEY = 25_000
+# Authorized completion presets, not prices found in the source DOCX. The actual
+# catalog prices a coffee at 50-120: a short ad costs a few cups; a bribe several days.
+REPORTER_ADVERT_PRICE = 300
+INVESTIGATION_BRIBE_PRICE = 1_500
 SPEAKERS = {
  "{playername}": "player", "店长": "player", "阿黛尔·米尼耶": "adele", "阿黛尔": "adele",
  "柯莱特·布吕内": "colette", "柯莱特": "colette", "安托万·马尚": "antoine", "安托万": "antoine",
@@ -251,6 +256,17 @@ class _Root:
                        textKey=self.key(anchor), emote=emotion)
             self.mark(anchor, "line", lineId=line_id, guard=guard)
 
+    def authored(self, suffix: str, text: str, guard: str = "", speaker: str | None = None):
+        """Explicitly audited completion prose; never masquerades as a source anchor."""
+        page = self.page("completion."+suffix, guard, bgOverride="scene.cafe", stepType="Dialogue")
+        key = self.c.text(self.id+".text.completion."+suffix, text, "User-authorized narrative completion; not source prose")
+        self.c.add("ConversationLine", lineId=self.id+".line.completion."+suffix, pageId=page["pageId"], seq=1,
+                   speakerKey=speaker, side="none" if speaker in (None,"player") else "right", textKey=key)
+        self.audit.setdefault("completionDesign", []).append(dict(textKey=key, text=text, guard=guard))
+
+    def choice_label(self, cid: str, label: str):
+        self.choice_rows[cid]["textKey"] = self.c.text(cid+".label", label, "User-authorized visible price/clarification")
+
     def check(self, name: str, attribute: str, threshold: int) -> str:
         cid = self.id+".check."+name
         self.c.add("AbilityCheck", checkId=cid, mode="Inline", comment=self.source)
@@ -425,19 +441,19 @@ def _compile_common(r: _Root):
         r.span(75,81,done)
         extra = both(done,r.c.flag("neutral.antoine.appreciation"))
         r.span(87,98,extra)
-        q2 = r.choices("q2",(100,101,102),{"a":("language",3)},guard=extra)
-        r.unavailable(q2["b"],"promotion_wisdom_conflict","P101 wisdom>=3 contradicts P112 wisdom>=2. No guessed check threshold.",(101,112))
+        q2 = r.choices("q2",(100,101,102),{"a":("language",3),"b":("wisdom",3)},guard=extra)
+        r.audit["promotionWisdomDecision"] = dict(threshold=3, sourceAnchors=["P101","P112"],
+            reason="Authorized conflict resolution: use the visible option's wisdom>=3; success still grants source +2 affection.")
         r.span(105,107,both(extra,_choice(q2["a"]),_check(r,"q2a")))
         r.span(110,111,both(extra,_choice(q2["a"]),_check(r,"q2a",False)))
-        conflict = "blocked.neutral.promotion_wisdom_conflict"
-        r.span(114,116,both(extra,_choice(q2["b"]),conflict))
-        r.span(119,120,both(extra,_choice(q2["b"]),"not:"+conflict))
+        r.span(114,116,both(extra,_choice(q2["b"]),_check(r,"q2b")))
+        r.span(119,120,both(extra,_choice(q2["b"]),_check(r,"q2b",False)))
         r.span(122,124,both(extra,_choice(q2["c"])))
         r.span(126,136,extra)
         r.span(139,152,done)
         r.affection("cooperation","adele",1,q["a"],45,done)
         r.affection("long_term","antoine",2,q2["a"],108,both(extra,_check(r,"q2a")))
-        r.mark(117,"blocked-directive",reason="Conflicting threshold P101/P112, no fake reward")
+        r.affection("accounting","antoine",2,q2["b"],117,both(extra,_check(r,"q2b")))
         r.effect("observed","SET_FLAG","neutral.antoine.observation",guard=extra)
         for name,cid,check,anchor in [("organized",q["b"],"q1b",53),("recommended",q["c"],"q1c",66)]:
             r.effect(name,"SET_FLAG","neutral.promotion."+name,choice=cid,guard=both(done,_check(r,check)),anchor=anchor)
@@ -457,14 +473,19 @@ def _compile_common(r: _Root):
         r.span(23,39)
         r.span(42,54,grade)
         r.span(58,67,"not:"+grade)
+        r.authored("advert_quote",f"商业版的一则简短店铺介绍，费用是{REPORTER_ADVERT_PRICE}金币；不另收排版费。您也可以暂时不刊登。","not:"+grade,speaker="neutral.reporter")
         q = r.choices("advert",(69,78),guard="not:"+grade)
-        r.unavailable(q["a"],"reporter_advert_price","No ad price/real-money debit specified; paid option disabled, never free advertising.",(65,66,68,77))
+        r.choice_label(q["a"],f"刊登简短广告（支付{REPORTER_ADVERT_PRICE}金币）")
+        r.c.cond("choice",q["a"],"cafe.money",kind="BAR_GTE",raw=str(REPORTER_ADVERT_PRICE))
         r.span(70,76,both("not:"+grade,_choice(q["a"])))
         r.span(79,85,both("not:"+grade,_choice(q["b"])))
         r.span(87,97)
         r.effect("newspaper_recommendation","SET_FLAG","neutral.newspaper.recommendation",guard=grade,anchor=55)
-        r.mark(77,"blocked-directive",reason="No posted ad without authorized cost/debit")
-        r.issue("News importer consumes recommendation/ad state for next issue; no invented circulation bonus.",(55,77))
+        r.effect("advert_payment","MONEY_REMOVE","cafe",str(REPORTER_ADVERT_PRICE),choice=q["a"],guard="not:"+grade)
+        r.effect("newspaper_advertisement","SET_FLAG","neutral.newspaper.advertisement",choice=q["a"],guard="not:"+grade,anchor=77)
+        r.audit["advertPriceDecision"] = dict(amount=REPORTER_ADVERT_PRICE, currency="cafe.money", sourceAnchors=["P065","P066","P077"],
+            reason="Authorized modest short-ad preset; actual wallet debit at root tail, no invented circulation/revenue bonus.")
+        r.issue("News importer must consume neutral.newspaper.recommendation / neutral.newspaper.advertisement for next issue; publication rendering is outside this compiler.",(55,77))
         r.finish()
     elif sid == "1027.s1":
         r.start(slot="noon",prerequisites=(completed("rose.1016.s1"),))
@@ -530,42 +551,51 @@ def _compile_route(r: _Root):
         r.finish()
     elif sid == "1118.s1":
         r.start(prerequisites=(completed("neutral.route.1111.s2"),))
-        # Only the source-supported royal-protection choice is currently executable.
-        # Gate the EVENT as well as the choice: never open an all-disabled menu for
-        # low/missing affection, and never pretend missing terminal/payment rules work.
-        r.c.cond("event",r.id,"alienor.affection",kind="BAR_GTE",raw="3")
-        r.audit["resolvedNormalPath"] = dict(
-            choiceId=r.id+".choice.investigation.b", fact="neutral.investigation.shelter",
-            sourceAnchors=["P066","P081","P107"],
-            eventRequirement=dict(condType="BAR_GTE",target="alienor.affection",value="3"),
-            explanation="Normal royal-protection branch is open. Low or unavailable Alienor affection cannot enter because refusal end_if4 and paid bribery remain separately disabled.")
-        r.issue("Main-authorized bounded entry requires alienor.affection>=3, matching the only available source choice P066/P081. This event-level restriction prevents an all-disabled menu; it is an integration safety decision, not an invented whole-event source prerequisite.",(66,81))
+        # Cooperation is always available, even with no money or royal friendship.
+        # Existing missing end_if4 becomes a bounded inquiry, not a new ending.
+        r.audit["investigationDecision"] = dict(bribePrice=INVESTIGATION_BRIBE_PRICE, royalAffection=3,
+            fallback="Formal inquiry, same-day return, documentary clearance by 11/22; no new terminal ending.",
+            sourceAnchors=["P065","P066","P067","P079","P125","P136","P144"])
         r.span(3,63)
+        r.authored("investigation_options",f"我还可以带着账本去正式说明情况；若想托人疏通，对方暗示至少要准备{INVESTIGATION_BRIBE_PRICE}金币。这条路并非非走不可。")
         q = r.choices("investigation",(65,66,67))
+        r.choice_label(q["a"],"随你们去说明情况，让账目作证（无需金钱或人脉）")
+        r.choice_label(q["c"],f"试着疏通关系（需{INVESTIGATION_BRIBE_PRICE}金币；不足则转正式核查）")
         r.c.cond("choice",q["b"],"alienor.affection",kind="BAR_GTE",raw="3")
-        r.unavailable(q["a"],"missing_end_if4","Refusal targets missing end if4; not silently replaced by A/C or ordinary continuation.",(79,))
-        r.unavailable(q["c"],"investigation_bribe","Large-money requirement/debit and failure terminal outcome unset.",(67,109,125,136,144))
         r.span(69,78,_choice(q["a"]))
-        r.end("refusal_end",_choice(q["a"]))
+        r.mark(79,"authorized-continuation",reason="Missing end_if4 replaced with formal inquiry and same-day release, not a seventeenth ending")
         sheltered = both(_choice(q["b"]),"bar:alienor.affection:ge:3")
         r.span(82,106,sheltered)
-        bribe = both(_choice(q["c"]),"blocked.neutral.investigation_bribe")
+        bribe = both(_choice(q["c"]),f"bar:cafe.money:ge:{INVESTIGATION_BRIBE_PRICE}")
+        failed = both(_choice(q["c"]),f"not:bar:cafe.money:ge:{INVESTIGATION_BRIBE_PRICE}")
         r.span(110,124,_choice(q["c"]))
         r.span(127,135,bribe)
-        r.span(139,143,both(_choice(q["c"]),"not:blocked.neutral.investigation_bribe"))
-        r.end("bribe_failure_end",both(_choice(q["c"]),"not:blocked.neutral.investigation_bribe"))
-        r.span(147,175,sheltered)
+        r.span(139,143,failed)
+        r.authored("bribe_withdrawn","我收回了试探，没有交出钱袋。官员警告我不要再提私下交易，随后命我带齐账目，到监察司正式说明。",failed)
+        r.mark(144,"authorized-continuation",reason="Failed or unaffordable bribe transfers to formal inquiry; no debit and no missing ending")
+        # The refusal branch must also work for rich players: the fallback is not a
+        # money gate. Separate identical prose pages keep guards in supported AND syntax.
+        inquiry_paths = [("cooperate",_choice(q["a"])),("failed_bribe",failed)]
+        for suffix,guard in inquiry_paths:
+            r.authored(suffix,"傍晚，我带着核对过的账目回到了咖啡馆。监察司没有找到新的证据，准我回店等候书面复核；我留下了账册副本，并承诺随传随到。没有谁替我担保，这件事只能靠记录和耐心说明。",guard)
+            r.effect("inquiry."+suffix,"SET_FLAG","neutral.investigation.reviewed",guard=guard)
+        r.effect("bribe_payment","MONEY_REMOVE","cafe",str(INVESTIGATION_BRIBE_PRICE),choice=q["c"],guard=bribe,anchor=125)
+        r.effect("bribed","SET_FLAG","neutral.investigation.bribed",choice=q["c"],guard=bribe,anchor=136)
+        r.mark(146,"authorized-continuation",reason="Common evening return also follows formal inquiry; new bridge prose establishes same-day release")
+        r.span(147,175)
         r.effect("shelter","SET_FLAG","neutral.investigation.shelter",choice=q["b"],guard=sheltered,anchor=107)
-        r.c.flag("neutral.investigation.bribed")  # Never produced without real payment.
-        r.finish(sheltered)
+        r.finish("anyChoice:"+";".join(q.values()))
     elif sid == "1122.s1":
         r.start(prerequisites=(completed("neutral.route.1118.s1"),))
-        r.c.cond("event",r.id,"neutral.investigation.shelter")
+        # Completion is produced only after one of the three handled resolutions.
+        # Do not require royal shelter: reviewed and paid paths continue equally.
         r.span(3,20)
         r.span(24,36,"neutral.investigation.shelter")
         r.issue("P29-P31 letter content currently remains authored narration, not LetterReveal/LetterRead animation; source anchors preserved.",(28,29,30,31))
         r.span(40,53,both("neutral.investigation.bribed","neutral.association.member"))
         r.span(56,60,both("neutral.investigation.bribed","not:neutral.association.member"))
+        r.authored("review_notice","监察司的复核通知终于送到了：账册与供货记录彼此吻合，现有材料不足以继续追查。以后若有新证据，仍须配合询问。我收好通知，知道这不是谁许下的保护，只是暂时拿回了正常经营的余地。","neutral.investigation.reviewed")
+        r.authored("review_warning","送信人临走时提醒我，近来城门盘查更严，货车也常被耽搁。我把该备的货记进账本，心里却开始盘算：这样的日子，还该不该继续留在王都？","neutral.investigation.reviewed")
         r.span(64,90)
         q = r.choices("future",(92,93))
         r.span(95,109,_choice(q["a"]))
@@ -575,7 +605,7 @@ def _compile_route(r: _Root):
         r.effect("stayed","SET_FLAG","neutral.stayed",choice=q["a"],anchor=110)
         r.ending("b","远方的咖啡馆",guard=_choice(q["b"]),anchor=219)
         r.finish()
-        r.issue("Bribery variant staged/guarded but unavailable until 1118 payment rules exist; event readiness currently requires actual shelter.",(38,))
+        r.audit["continuationDecision"] = "Royal letter / paid member-or-delivery warning / formal-review notice are exclusive; all reach the same stay-or-leave choice."
     elif sid == "1129.s1":
         r.start(prerequisites=(completed("neutral.route.1122.s1"),"neutral.stayed","neutral.association.member"))
         r.c.cond("event",r.id,"cafe.money",kind="BAR_BETWEEN",raw="0,2147483647")

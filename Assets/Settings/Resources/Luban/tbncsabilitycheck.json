@@ -286,5 +286,13 @@
     "successResultOwnerId": "",
     "failureResultOwnerId": "",
     "mode": "Inline"
+  },
+  {
+    "checkId": "neutral.1013.s2.check.q2b",
+    "successEventId": "",
+    "failureEventId": "",
+    "successResultOwnerId": "",
+    "failureResultOwnerId": "",
+    "mode": "Inline"
   }
 ]

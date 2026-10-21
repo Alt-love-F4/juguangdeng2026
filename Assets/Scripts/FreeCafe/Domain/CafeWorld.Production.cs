@@ -195,6 +195,8 @@ namespace Spotlight.FreeCafe
             { result = ActionResult.No("请先结束或取消小游戏"); return true; }
             if (IsExtractionFilter(item) && IsPrecisionExtractor(target))
             { result = PreviewExtractionAssembly(item, target); return true; }
+            if (IsPrecisionExtractor(item) && IsExtractionFilter(target))
+            { result = PreviewExtractionAssembly(target, item); return true; }
             if (target.specId == "machine.stove")
             { result = IsContainer(item) ? ActionResult.Yes("放到炉台，点击炉台加热") : ActionResult.No("炉台需要容器"); return true; }
             if (IsContainer(target)) { result = PreviewContainer(item, target); return true; }
@@ -230,6 +232,7 @@ namespace Spotlight.FreeCafe
                 Notify(); return ActionResult.Yes("杯子已放到交付区；按铃交付当前订单");
             }
             if (IsExtractionFilter(item) && IsPrecisionExtractor(target)) return AttachExtractionFilter(item.id, target.id);
+            if (IsPrecisionExtractor(item) && IsExtractionFilter(target)) return AttachExtractionFilter(target.id, item.id);
             if (target.specId == "machine.stove") return DockOnStove(item, target);
             if (IsContainer(target)) return AddToContainer(item, target);
             target.contents.Add(IngredientPortion(item));

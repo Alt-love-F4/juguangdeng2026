@@ -562,14 +562,14 @@
     "eventId": "rose.route.1115.s1",
     "seq": 3,
     "resultType": "SET_FLAG",
-    "target": "story.rose.route.1115.s1.plan_known",
+    "target": "story.rose.route.1115.s1.followup_invited",
     "value": "true",
     "note": "Source-mapped; settle at root completion, never on click"
   },
   {
     "resultId": "rose.route.1115.s1.result.availability.0",
     "eventId": "rose.route.1115.s1",
-    "seq": 4,
+    "seq": 6,
     "resultType": "SET_FLAG",
     "target": "story.adele.away",
     "value": "false",
@@ -803,7 +803,7 @@
   {
     "resultId": "neutral.1013.s2.result.observed",
     "eventId": "neutral.1013.s2",
-    "seq": 17,
+    "seq": 18,
     "resultType": "SET_FLAG",
     "target": "neutral.antoine.observation",
     "value": "true",
@@ -812,7 +812,7 @@
   {
     "resultId": "neutral.1013.s2.result.organized",
     "eventId": "neutral.1013.s2.choice.q1.b.result",
-    "seq": 18,
+    "seq": 19,
     "resultType": "SET_FLAG",
     "target": "neutral.promotion.organized",
     "value": "true",
@@ -821,7 +821,7 @@
   {
     "resultId": "neutral.1013.s2.result.recommended",
     "eventId": "neutral.1013.s2.choice.q1.c.result",
-    "seq": 19,
+    "seq": 20,
     "resultType": "SET_FLAG",
     "target": "neutral.promotion.recommended",
     "value": "true",
@@ -830,7 +830,7 @@
   {
     "resultId": "neutral.1013.s2.result.complete",
     "eventId": "neutral.1013.s2",
-    "seq": 20,
+    "seq": 21,
     "resultType": "SET_FLAG",
     "target": "story.neutral.1013.s2.completed",
     "value": "true",
@@ -839,7 +839,7 @@
   {
     "resultId": "neutral.1013.s2.result.c13_continuation",
     "eventId": "neutral.1013.s2",
-    "seq": 21,
+    "seq": 22,
     "resultType": "QUEUE_EVENT",
     "target": "revolution.1013.s2",
     "value": "true",
@@ -848,7 +848,7 @@
   {
     "resultId": "neutral.1018.s1.result.newspaper_recommendation",
     "eventId": "neutral.1018.s1",
-    "seq": 22,
+    "seq": 23,
     "resultType": "SET_FLAG",
     "target": "neutral.newspaper.recommendation",
     "value": "true",
@@ -857,7 +857,7 @@
   {
     "resultId": "neutral.1018.s1.result.complete",
     "eventId": "neutral.1018.s1",
-    "seq": 23,
+    "seq": 26,
     "resultType": "SET_FLAG",
     "target": "story.neutral.1018.s1.completed",
     "value": "true",
@@ -866,7 +866,7 @@
   {
     "resultId": "neutral.1027.s1.result.chess_success",
     "eventId": "neutral.1027.s1.choice.q1.a.result",
-    "seq": 24,
+    "seq": 27,
     "resultType": "BAR_ADD",
     "target": "alienor.affection",
     "value": "2",
@@ -875,7 +875,7 @@
   {
     "resultId": "neutral.1027.s1.result.chess_learning",
     "eventId": "neutral.1027.s1.choice.q1.b.result",
-    "seq": 25,
+    "seq": 28,
     "resultType": "BAR_ADD",
     "target": "alienor.affection",
     "value": "1",
@@ -884,7 +884,7 @@
   {
     "resultId": "neutral.1027.s1.result.chess_resignation",
     "eventId": "neutral.1027.s1.choice.q1.b.result",
-    "seq": 26,
+    "seq": 29,
     "resultType": "BAR_ADD",
     "target": "alienor.affection",
     "value": "-1",
@@ -893,7 +893,7 @@
   {
     "resultId": "neutral.1027.s1.result.alienor_dialogue",
     "eventId": "neutral.1027.s1",
-    "seq": 27,
+    "seq": 30,
     "resultType": "SET_FLAG",
     "target": "neutral.alienor.dialogue",
     "value": "true",
@@ -902,7 +902,7 @@
   {
     "resultId": "neutral.1027.s1.result.complete",
     "eventId": "neutral.1027.s1",
-    "seq": 28,
+    "seq": 31,
     "resultType": "SET_FLAG",
     "target": "story.neutral.1027.s1.completed",
     "value": "true",
@@ -911,7 +911,7 @@
   {
     "resultId": "neutral.1030.s1.result.admire",
     "eventId": "neutral.1030.s1.choice.q1.a.result",
-    "seq": 29,
+    "seq": 32,
     "resultType": "BAR_ADD",
     "target": "adele.affection",
     "value": "1",
@@ -920,7 +920,7 @@
   {
     "resultId": "neutral.1030.s1.result.arrange",
     "eventId": "neutral.1030.s1.choice.q1.b.result",
-    "seq": 30,
+    "seq": 33,
     "resultType": "BAR_ADD",
     "target": "adele.affection",
     "value": "2",
@@ -929,7 +929,7 @@
   {
     "resultId": "neutral.1030.s1.result.rest",
     "eventId": "neutral.1030.s1.choice.q1.c.result",
-    "seq": 31,
+    "seq": 34,
     "resultType": "BAR_ADD",
     "target": "adele.affection",
     "value": "-1",
@@ -938,7 +938,7 @@
   {
     "resultId": "neutral.1030.s1.result.adele_dreams",
     "eventId": "neutral.1030.s1",
-    "seq": 32,
+    "seq": 35,
     "resultType": "SET_FLAG",
     "target": "neutral.adele.dreams_unlocked",
     "value": "true",
@@ -947,7 +947,7 @@
   {
     "resultId": "neutral.1030.s1.result.adele_city_talk_closed",
     "eventId": "neutral.1030.s1",
-    "seq": 33,
+    "seq": 36,
     "resultType": "SET_FLAG",
     "target": "neutral.adele.city_talk_closed",
     "value": "true",
@@ -956,7 +956,7 @@
   {
     "resultId": "neutral.1030.s1.result.complete",
     "eventId": "neutral.1030.s1",
-    "seq": 34,
+    "seq": 37,
     "resultType": "SET_FLAG",
     "target": "story.neutral.1030.s1.completed",
     "value": "true",
@@ -965,7 +965,7 @@
   {
     "resultId": "neutral.route.1111.s1.result.ending.a",
     "eventId": "neutral.route.1111.s1",
-    "seq": 35,
+    "seq": 38,
     "resultType": "SET_FLAG",
     "target": "story.neutral.route.1111.s1.ending.a",
     "value": "true",
@@ -974,7 +974,7 @@
   {
     "resultId": "neutral.route.1111.s1.result.complete",
     "eventId": "neutral.route.1111.s1",
-    "seq": 36,
+    "seq": 39,
     "resultType": "SET_FLAG",
     "target": "story.neutral.route.1111.s1.completed",
     "value": "true",
@@ -983,7 +983,7 @@
   {
     "resultId": "neutral.route.1111.s2.result.complete",
     "eventId": "neutral.route.1111.s2",
-    "seq": 37,
+    "seq": 40,
     "resultType": "SET_FLAG",
     "target": "story.neutral.route.1111.s2.completed",
     "value": "true",
@@ -992,7 +992,7 @@
   {
     "resultId": "neutral.route.1112.s1.result.association_member",
     "eventId": "neutral.route.1112.s1.choice.membership.a.result",
-    "seq": 38,
+    "seq": 41,
     "resultType": "SET_FLAG",
     "target": "neutral.association.member",
     "value": "true",
@@ -1001,7 +1001,7 @@
   {
     "resultId": "neutral.route.1112.s1.result.complete",
     "eventId": "neutral.route.1112.s1",
-    "seq": 39,
+    "seq": 42,
     "resultType": "SET_FLAG",
     "target": "story.neutral.route.1112.s1.completed",
     "value": "true",
@@ -1010,7 +1010,7 @@
   {
     "resultId": "neutral.route.1118.s1.result.shelter",
     "eventId": "neutral.route.1118.s1.choice.investigation.b.result",
-    "seq": 40,
+    "seq": 47,
     "resultType": "SET_FLAG",
     "target": "neutral.investigation.shelter",
     "value": "true",
@@ -1019,7 +1019,7 @@
   {
     "resultId": "neutral.route.1118.s1.result.complete",
     "eventId": "neutral.route.1118.s1",
-    "seq": 41,
+    "seq": 48,
     "resultType": "SET_FLAG",
     "target": "story.neutral.route.1118.s1.completed",
     "value": "true",
@@ -1028,7 +1028,7 @@
   {
     "resultId": "neutral.route.1122.s1.result.stayed",
     "eventId": "neutral.route.1122.s1.choice.future.a.result",
-    "seq": 42,
+    "seq": 49,
     "resultType": "SET_FLAG",
     "target": "neutral.stayed",
     "value": "true",
@@ -1037,7 +1037,7 @@
   {
     "resultId": "neutral.route.1122.s1.result.ending.b",
     "eventId": "neutral.route.1122.s1",
-    "seq": 43,
+    "seq": 50,
     "resultType": "SET_FLAG",
     "target": "story.neutral.route.1122.s1.ending.b",
     "value": "true",
@@ -1046,7 +1046,7 @@
   {
     "resultId": "neutral.route.1122.s1.result.complete",
     "eventId": "neutral.route.1122.s1",
-    "seq": 44,
+    "seq": 51,
     "resultType": "SET_FLAG",
     "target": "story.neutral.route.1122.s1.completed",
     "value": "true",
@@ -1055,7 +1055,7 @@
   {
     "resultId": "neutral.route.1129.s1.result.complete",
     "eventId": "neutral.route.1129.s1",
-    "seq": 46,
+    "seq": 54,
     "resultType": "SET_FLAG",
     "target": "story.neutral.route.1129.s1.completed",
     "value": "true",
@@ -1064,7 +1064,7 @@
   {
     "resultId": "neutral.route.1130.s1.result.negotiation_success",
     "eventId": "neutral.route.1130.s1",
-    "seq": 47,
+    "seq": 55,
     "resultType": "SET_FLAG",
     "target": "neutral.negotiation.success",
     "value": "true",
@@ -1073,7 +1073,7 @@
   {
     "resultId": "neutral.route.1130.s1.result.negotiation_failure",
     "eventId": "neutral.route.1130.s1",
-    "seq": 48,
+    "seq": 56,
     "resultType": "SET_FLAG",
     "target": "neutral.negotiation.failed",
     "value": "true",
@@ -1082,7 +1082,7 @@
   {
     "resultId": "neutral.route.1130.s1.result.failure_continuation",
     "eventId": "neutral.route.1130.s1",
-    "seq": 49,
+    "seq": 57,
     "resultType": "QUEUE_EVENT",
     "target": "neutral.route.1130.s2",
     "value": "true",
@@ -1091,7 +1091,7 @@
   {
     "resultId": "neutral.route.1130.s1.result.ending.d",
     "eventId": "neutral.route.1130.s1",
-    "seq": 50,
+    "seq": 58,
     "resultType": "SET_FLAG",
     "target": "story.neutral.route.1130.s1.ending.d",
     "value": "true",
@@ -1100,7 +1100,7 @@
   {
     "resultId": "neutral.route.1130.s1.result.complete",
     "eventId": "neutral.route.1130.s1",
-    "seq": 51,
+    "seq": 59,
     "resultType": "SET_FLAG",
     "target": "story.neutral.route.1130.s1.completed",
     "value": "true",
@@ -1109,7 +1109,7 @@
   {
     "resultId": "neutral.route.1130.s2.result.ending.c",
     "eventId": "neutral.route.1130.s2",
-    "seq": 52,
+    "seq": 60,
     "resultType": "SET_FLAG",
     "target": "story.neutral.route.1130.s2.ending.c",
     "value": "true",
@@ -1118,7 +1118,7 @@
   {
     "resultId": "neutral.route.1130.s2.result.complete",
     "eventId": "neutral.route.1130.s2",
-    "seq": 53,
+    "seq": 61,
     "resultType": "SET_FLAG",
     "target": "story.neutral.route.1130.s2.completed",
     "value": "true",
@@ -1217,7 +1217,7 @@
   {
     "resultId": "rose.1016.s1.result.known.sade",
     "eventId": "rose.1016.s1",
-    "seq": 4,
+    "seq": 5,
     "resultType": "SET_FLAG",
     "target": "known.sade",
     "value": "true",
@@ -1226,7 +1226,7 @@
   {
     "resultId": "rose.1016.s1.result.known.alienor",
     "eventId": "rose.1016.s1",
-    "seq": 5,
+    "seq": 6,
     "resultType": "SET_FLAG",
     "target": "known.alienor",
     "value": "true",
@@ -1235,7 +1235,7 @@
   {
     "resultId": "rose.1016.s1.result.availability.0",
     "eventId": "rose.1016.s1",
-    "seq": 6,
+    "seq": 7,
     "resultType": "SET_FLAG",
     "target": "story.adele.away",
     "value": "true",
@@ -1244,7 +1244,7 @@
   {
     "resultId": "rose.1016.s1.result.availability.1",
     "eventId": "rose.1016.s1",
-    "seq": 7,
+    "seq": 8,
     "resultType": "SET_FLAG",
     "target": "story.sylvain.unavailable",
     "value": "true",
@@ -1504,12 +1504,12 @@
   },
   {
     "resultId": "church.1023.s1.result.002",
-    "eventId": "church.1023.s1",
+    "eventId": "church.1023.s1.choice.bribe_price.1.result",
     "seq": 2,
-    "resultType": "SET_FLAG",
-    "target": "church.release.records_anomalous",
-    "value": "true",
-    "note": ""
+    "resultType": "MONEY_REMOVE",
+    "target": "cafe",
+    "value": "3000",
+    "note": "Source P046 final demand; actual cafe balance debit settles the bribe"
   },
   {
     "resultId": "church.1023.s1.result.003",
@@ -1525,7 +1525,7 @@
     "eventId": "church.1023.s1",
     "seq": 4,
     "resultType": "SET_FLAG",
-    "target": "church.revolution.intervened",
+    "target": "church.release.records_anomalous",
     "value": "true",
     "note": ""
   },
@@ -1534,7 +1534,7 @@
     "eventId": "church.1023.s1",
     "seq": 5,
     "resultType": "SET_FLAG",
-    "target": "church.detention.release_failed",
+    "target": "church.revolution.intervened",
     "value": "true",
     "note": ""
   },
@@ -1542,19 +1542,19 @@
     "resultId": "church.1023.s1.result.006",
     "eventId": "church.1023.s1",
     "seq": 6,
-    "resultType": "QUEUE_EVENT",
-    "target": "church.1023.s2",
-    "value": "",
-    "note": "Only actual failed escape and revolution inclination<0; no date changes"
+    "resultType": "SET_FLAG",
+    "target": "church.detention.release_failed",
+    "value": "true",
+    "note": ""
   },
   {
     "resultId": "church.1023.s1.result.007",
     "eventId": "church.1023.s1",
     "seq": 7,
-    "resultType": "SET_FLAG",
-    "target": "church.release.records_anomalous",
-    "value": "true",
-    "note": ""
+    "resultType": "QUEUE_EVENT",
+    "target": "church.1023.s2",
+    "value": "",
+    "note": "Only actual failed escape and revolution inclination<0; no date changes"
   },
   {
     "resultId": "church.1023.s1.result.008",
@@ -1570,7 +1570,7 @@
     "eventId": "church.1023.s1",
     "seq": 9,
     "resultType": "SET_FLAG",
-    "target": "church.revolution.intervened",
+    "target": "church.release.records_anomalous",
     "value": "true",
     "note": ""
   },
@@ -1579,7 +1579,7 @@
     "eventId": "church.1023.s1",
     "seq": 10,
     "resultType": "SET_FLAG",
-    "target": "church.detention.release_failed",
+    "target": "church.revolution.intervened",
     "value": "true",
     "note": ""
   },
@@ -1587,19 +1587,19 @@
     "resultId": "church.1023.s1.result.011",
     "eventId": "church.1023.s1",
     "seq": 11,
-    "resultType": "QUEUE_EVENT",
-    "target": "church.1023.s2",
-    "value": "",
-    "note": "Only actual failed escape and revolution inclination<0; no date changes"
+    "resultType": "SET_FLAG",
+    "target": "church.detention.release_failed",
+    "value": "true",
+    "note": ""
   },
   {
     "resultId": "church.1023.s1.result.012",
     "eventId": "church.1023.s1",
     "seq": 12,
-    "resultType": "SET_FLAG",
-    "target": "church.release.records_anomalous",
-    "value": "true",
-    "note": ""
+    "resultType": "QUEUE_EVENT",
+    "target": "church.1023.s2",
+    "value": "",
+    "note": "Only actual failed escape and revolution inclination<0; no date changes"
   },
   {
     "resultId": "church.1023.s1.result.013",
@@ -1615,7 +1615,7 @@
     "eventId": "church.1023.s1",
     "seq": 14,
     "resultType": "SET_FLAG",
-    "target": "church.revolution.intervened",
+    "target": "church.release.records_anomalous",
     "value": "true",
     "note": ""
   },
@@ -1624,7 +1624,7 @@
     "eventId": "church.1023.s1",
     "seq": 15,
     "resultType": "SET_FLAG",
-    "target": "church.detention.release_failed",
+    "target": "church.revolution.intervened",
     "value": "true",
     "note": ""
   },
@@ -1632,26 +1632,26 @@
     "resultId": "church.1023.s1.result.016",
     "eventId": "church.1023.s1",
     "seq": 16,
+    "resultType": "SET_FLAG",
+    "target": "church.detention.release_failed",
+    "value": "true",
+    "note": ""
+  },
+  {
+    "resultId": "church.1023.s1.result.017",
+    "eventId": "church.1023.s1",
+    "seq": 17,
     "resultType": "QUEUE_EVENT",
     "target": "church.1023.s2",
     "value": "",
     "note": "Only actual failed escape and revolution inclination<0; no date changes"
   },
   {
-    "resultId": "church.1023.s1.result.017",
-    "eventId": "church.1023.s1",
-    "seq": 17,
-    "resultType": "SET_FLAG",
-    "target": "church.release.records_anomalous",
-    "value": "true",
-    "note": ""
-  },
-  {
     "resultId": "church.1023.s1.result.018",
     "eventId": "church.1023.s1",
     "seq": 18,
     "resultType": "SET_FLAG",
-    "target": "church.release.records_anomalous",
+    "target": "church.release.persuasion",
     "value": "true",
     "note": ""
   },
@@ -1660,7 +1660,7 @@
     "eventId": "church.1023.s1",
     "seq": 19,
     "resultType": "SET_FLAG",
-    "target": "church.revolution.intervened",
+    "target": "story.church.1023.s1.release.persuasion",
     "value": "true",
     "note": ""
   },
@@ -1669,25 +1669,25 @@
     "eventId": "church.1023.s1",
     "seq": 20,
     "resultType": "SET_FLAG",
-    "target": "church.detention.release_failed",
-    "value": "true",
-    "note": ""
+    "target": "church.detention.active",
+    "value": "false",
+    "note": "Canonical state cleared only by actual successful release root-tail; host owns real daily transitions/map/business"
   },
   {
     "resultId": "church.1023.s1.result.021",
     "eventId": "church.1023.s1",
     "seq": 21,
-    "resultType": "QUEUE_EVENT",
-    "target": "church.1023.s2",
-    "value": "",
-    "note": "Only actual failed escape and revolution inclination<0; no date changes"
+    "resultType": "SET_FLAG",
+    "target": "church.release.bribery",
+    "value": "true",
+    "note": ""
   },
   {
     "resultId": "church.1023.s1.result.022",
     "eventId": "church.1023.s1",
     "seq": 22,
     "resultType": "SET_FLAG",
-    "target": "church.release.records_anomalous",
+    "target": "story.church.1023.s1.release.bribery",
     "value": "true",
     "note": ""
   },
@@ -1696,25 +1696,25 @@
     "eventId": "church.1023.s1",
     "seq": 23,
     "resultType": "SET_FLAG",
-    "target": "church.release.records_anomalous",
+    "target": "story.church.1023.s1.release.bribe",
     "value": "true",
-    "note": ""
+    "note": "Legacy Rose alias"
   },
   {
     "resultId": "church.1023.s1.result.024",
     "eventId": "church.1023.s1",
     "seq": 24,
     "resultType": "SET_FLAG",
-    "target": "church.revolution.intervened",
-    "value": "true",
-    "note": ""
+    "target": "church.detention.active",
+    "value": "false",
+    "note": "Canonical state cleared only by actual successful release root-tail; host owns real daily transitions/map/business"
   },
   {
     "resultId": "church.1023.s1.result.025",
     "eventId": "church.1023.s1",
     "seq": 25,
     "resultType": "SET_FLAG",
-    "target": "church.detention.release_failed",
+    "target": "church.release.rescue",
     "value": "true",
     "note": ""
   },
@@ -1722,26 +1722,26 @@
     "resultId": "church.1023.s1.result.026",
     "eventId": "church.1023.s1",
     "seq": 26,
-    "resultType": "QUEUE_EVENT",
-    "target": "church.1023.s2",
-    "value": "",
-    "note": "Only actual failed escape and revolution inclination<0; no date changes"
+    "resultType": "SET_FLAG",
+    "target": "story.church.1023.s1.release.rescue",
+    "value": "true",
+    "note": ""
   },
   {
     "resultId": "church.1023.s1.result.027",
     "eventId": "church.1023.s1",
     "seq": 27,
     "resultType": "SET_FLAG",
-    "target": "church.release.persuasion",
-    "value": "true",
-    "note": ""
+    "target": "church.detention.active",
+    "value": "false",
+    "note": "Canonical state cleared only by actual successful release root-tail; host owns real daily transitions/map/business"
   },
   {
     "resultId": "church.1023.s1.result.028",
     "eventId": "church.1023.s1",
     "seq": 28,
     "resultType": "SET_FLAG",
-    "target": "story.church.1023.s1.release.persuasion",
+    "target": "church.release.rescue",
     "value": "true",
     "note": ""
   },
@@ -1750,25 +1750,25 @@
     "eventId": "church.1023.s1",
     "seq": 29,
     "resultType": "SET_FLAG",
-    "target": "church.detention.active",
-    "value": "false",
-    "note": "Canonical state cleared only by actual successful release root-tail; host owns real daily transitions/map/business"
+    "target": "story.church.1023.s1.release.rescue",
+    "value": "true",
+    "note": ""
   },
   {
     "resultId": "church.1023.s1.result.030",
     "eventId": "church.1023.s1",
     "seq": 30,
     "resultType": "SET_FLAG",
-    "target": "church.release.bribery",
-    "value": "true",
-    "note": ""
+    "target": "church.detention.active",
+    "value": "false",
+    "note": "Canonical state cleared only by actual successful release root-tail; host owns real daily transitions/map/business"
   },
   {
     "resultId": "church.1023.s1.result.031",
     "eventId": "church.1023.s1",
     "seq": 31,
     "resultType": "SET_FLAG",
-    "target": "story.church.1023.s1.release.bribery",
+    "target": "church.release.rescue",
     "value": "true",
     "note": ""
   },
@@ -1777,149 +1777,14 @@
     "eventId": "church.1023.s1",
     "seq": 32,
     "resultType": "SET_FLAG",
-    "target": "story.church.1023.s1.release.bribe",
+    "target": "story.church.1023.s1.release.rescue",
     "value": "true",
-    "note": "Legacy Rose alias"
+    "note": ""
   },
   {
     "resultId": "church.1023.s1.result.033",
     "eventId": "church.1023.s1",
     "seq": 33,
-    "resultType": "SET_FLAG",
-    "target": "church.detention.active",
-    "value": "false",
-    "note": "Canonical state cleared only by actual successful release root-tail; host owns real daily transitions/map/business"
-  },
-  {
-    "resultId": "church.1023.s1.result.034",
-    "eventId": "church.1023.s1",
-    "seq": 34,
-    "resultType": "SET_FLAG",
-    "target": "church.release.rescue",
-    "value": "true",
-    "note": ""
-  },
-  {
-    "resultId": "church.1023.s1.result.035",
-    "eventId": "church.1023.s1",
-    "seq": 35,
-    "resultType": "SET_FLAG",
-    "target": "story.church.1023.s1.release.rescue",
-    "value": "true",
-    "note": ""
-  },
-  {
-    "resultId": "church.1023.s1.result.036",
-    "eventId": "church.1023.s1",
-    "seq": 36,
-    "resultType": "SET_FLAG",
-    "target": "church.detention.active",
-    "value": "false",
-    "note": "Canonical state cleared only by actual successful release root-tail; host owns real daily transitions/map/business"
-  },
-  {
-    "resultId": "church.1023.s1.result.037",
-    "eventId": "church.1023.s1",
-    "seq": 37,
-    "resultType": "SET_FLAG",
-    "target": "church.release.rescue",
-    "value": "true",
-    "note": ""
-  },
-  {
-    "resultId": "church.1023.s1.result.038",
-    "eventId": "church.1023.s1",
-    "seq": 38,
-    "resultType": "SET_FLAG",
-    "target": "story.church.1023.s1.release.rescue",
-    "value": "true",
-    "note": ""
-  },
-  {
-    "resultId": "church.1023.s1.result.039",
-    "eventId": "church.1023.s1",
-    "seq": 39,
-    "resultType": "SET_FLAG",
-    "target": "church.detention.active",
-    "value": "false",
-    "note": "Canonical state cleared only by actual successful release root-tail; host owns real daily transitions/map/business"
-  },
-  {
-    "resultId": "church.1023.s1.result.040",
-    "eventId": "church.1023.s1",
-    "seq": 40,
-    "resultType": "SET_FLAG",
-    "target": "church.release.rescue",
-    "value": "true",
-    "note": ""
-  },
-  {
-    "resultId": "church.1023.s1.result.041",
-    "eventId": "church.1023.s1",
-    "seq": 41,
-    "resultType": "SET_FLAG",
-    "target": "story.church.1023.s1.release.rescue",
-    "value": "true",
-    "note": ""
-  },
-  {
-    "resultId": "church.1023.s1.result.042",
-    "eventId": "church.1023.s1",
-    "seq": 42,
-    "resultType": "SET_FLAG",
-    "target": "church.detention.active",
-    "value": "false",
-    "note": "Canonical state cleared only by actual successful release root-tail; host owns real daily transitions/map/business"
-  },
-  {
-    "resultId": "church.1023.s1.result.043",
-    "eventId": "church.1023.s1",
-    "seq": 43,
-    "resultType": "SET_FLAG",
-    "target": "church.release.rescue",
-    "value": "true",
-    "note": ""
-  },
-  {
-    "resultId": "church.1023.s1.result.044",
-    "eventId": "church.1023.s1",
-    "seq": 44,
-    "resultType": "SET_FLAG",
-    "target": "story.church.1023.s1.release.rescue",
-    "value": "true",
-    "note": ""
-  },
-  {
-    "resultId": "church.1023.s1.result.045",
-    "eventId": "church.1023.s1",
-    "seq": 45,
-    "resultType": "SET_FLAG",
-    "target": "church.detention.active",
-    "value": "false",
-    "note": "Canonical state cleared only by actual successful release root-tail; host owns real daily transitions/map/business"
-  },
-  {
-    "resultId": "church.1023.s1.result.046",
-    "eventId": "church.1023.s1",
-    "seq": 46,
-    "resultType": "SET_FLAG",
-    "target": "church.release.rescue",
-    "value": "true",
-    "note": ""
-  },
-  {
-    "resultId": "church.1023.s1.result.047",
-    "eventId": "church.1023.s1",
-    "seq": 47,
-    "resultType": "SET_FLAG",
-    "target": "story.church.1023.s1.release.rescue",
-    "value": "true",
-    "note": ""
-  },
-  {
-    "resultId": "church.1023.s1.result.048",
-    "eventId": "church.1023.s1",
-    "seq": 48,
     "resultType": "SET_FLAG",
     "target": "church.detention.active",
     "value": "false",
@@ -9731,7 +9596,7 @@
   {
     "resultId": "neutral.route.1129.s1.result.committee",
     "eventId": "neutral.route.1129.s1",
-    "seq": 45,
+    "seq": 52,
     "resultType": "SET_FLAG",
     "target": "neutral.association.committee",
     "value": "true",
@@ -9740,10 +9605,100 @@
   {
     "resultId": "neutral.route.1129.s1.result.money_below_target",
     "eventId": "neutral.route.1129.s1",
-    "seq": 46,
+    "seq": 53,
     "resultType": "SET_FLAG",
     "target": "neutral.revenue.below_standard",
     "value": "true",
     "note": "Root-tail settlement; 策划文件/文案6点/文案/a-中立（共通+支线）/入线MA70.11.29-S1.docx"
+  },
+  {
+    "resultId": "rose.1016.s1.result.004",
+    "eventId": "rose.1016.s1.choice.p093.result",
+    "seq": 4,
+    "resultType": "BAR_ADD",
+    "target": "faction.neutral",
+    "value": "1",
+    "note": "Source-mapped; settle at root completion, never on click"
+  },
+  {
+    "resultId": "rose.route.1115.s1.result.004",
+    "eventId": "rose.route.1115.s1",
+    "seq": 4,
+    "resultType": "SET_FLAG",
+    "target": "story.rose.route.1115.s1.plan_known",
+    "value": "true",
+    "note": "Source-mapped; settle at root completion, never on click"
+  },
+  {
+    "resultId": "rose.route.1115.s1.result.005",
+    "eventId": "rose.route.1115.s1",
+    "seq": 5,
+    "resultType": "SET_FLAG",
+    "target": "story.rose.route.1115.s1.followup_invited",
+    "value": "true",
+    "note": "Source-mapped; settle at root completion, never on click"
+  },
+  {
+    "resultId": "neutral.1013.s2.result.accounting",
+    "eventId": "neutral.1013.s2.choice.q2.b.result",
+    "seq": 17,
+    "resultType": "BAR_ADD",
+    "target": "antoine.affection",
+    "value": "2",
+    "note": "Root-tail settlement; 策划文件/文案6点/文案/a-中立（共通+支线）/MA70.10.13-S1.docx#P117"
+  },
+  {
+    "resultId": "neutral.1018.s1.result.advert_payment",
+    "eventId": "neutral.1018.s1.choice.advert.a.result",
+    "seq": 24,
+    "resultType": "MONEY_REMOVE",
+    "target": "cafe",
+    "value": "300",
+    "note": "Root-tail settlement; 策划文件/文案6点/文案/a-中立（共通+支线）/MA70.10.18-S1.docx"
+  },
+  {
+    "resultId": "neutral.1018.s1.result.newspaper_advertisement",
+    "eventId": "neutral.1018.s1.choice.advert.a.result",
+    "seq": 25,
+    "resultType": "SET_FLAG",
+    "target": "neutral.newspaper.advertisement",
+    "value": "true",
+    "note": "Root-tail settlement; 策划文件/文案6点/文案/a-中立（共通+支线）/MA70.10.18-S1.docx#P077"
+  },
+  {
+    "resultId": "neutral.route.1118.s1.result.inquiry.cooperate",
+    "eventId": "neutral.route.1118.s1",
+    "seq": 43,
+    "resultType": "SET_FLAG",
+    "target": "neutral.investigation.reviewed",
+    "value": "true",
+    "note": "Root-tail settlement; 策划文件/文案6点/文案/a-中立（共通+支线）/入线MA70.11.18-S1.docx"
+  },
+  {
+    "resultId": "neutral.route.1118.s1.result.inquiry.failed_bribe",
+    "eventId": "neutral.route.1118.s1",
+    "seq": 44,
+    "resultType": "SET_FLAG",
+    "target": "neutral.investigation.reviewed",
+    "value": "true",
+    "note": "Root-tail settlement; 策划文件/文案6点/文案/a-中立（共通+支线）/入线MA70.11.18-S1.docx"
+  },
+  {
+    "resultId": "neutral.route.1118.s1.result.bribe_payment",
+    "eventId": "neutral.route.1118.s1.choice.investigation.c.result",
+    "seq": 45,
+    "resultType": "MONEY_REMOVE",
+    "target": "cafe",
+    "value": "1500",
+    "note": "Root-tail settlement; 策划文件/文案6点/文案/a-中立（共通+支线）/入线MA70.11.18-S1.docx#P125"
+  },
+  {
+    "resultId": "neutral.route.1118.s1.result.bribed",
+    "eventId": "neutral.route.1118.s1.choice.investigation.c.result",
+    "seq": 46,
+    "resultType": "SET_FLAG",
+    "target": "neutral.investigation.bribed",
+    "value": "true",
+    "note": "Root-tail settlement; 策划文件/文案6点/文案/a-中立（共通+支线）/入线MA70.11.18-S1.docx#P136"
   }
 ]

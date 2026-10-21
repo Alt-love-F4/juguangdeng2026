@@ -93,7 +93,7 @@ namespace Spotlight.GameFlow
                 if (!neutral) c.Add(ending.StartsWith("rose.", StringComparison.Ordinal) ? "church.1111.s1.choice.s4.2"
                     : ending.StartsWith("revolution.", StringComparison.Ordinal) ? "church.1111.s1.choice.s4.3" : "church.1111.s1.choice.s4.1");
             }
-            c.AddRange(new[] { "neutral.route.1118.s1.choice.investigation.b",
+            c.AddRange(new[] { ending == "rose.route.1115.s1.ending.ideal_world" ? "rose.route.1115.s1.choice.p093" : "rose.route.1115.s1.choice.p094", "neutral.route.1118.s1.choice.investigation.b",
                 ending == "neutral.ending.d" ? "neutral.route.1112.s1.choice.membership.a" : "neutral.route.1112.s1.choice.membership.b",
                 ending == "neutral.ending.b" ? "neutral.route.1122.s1.choice.future.b" : "neutral.route.1122.s1.choice.future.a",
                 ending == "rose.route.ending.unforgiven.ending" ? "rose.route.1122.s1.choice.p063" : "rose.route.1122.s1.choice.p064",

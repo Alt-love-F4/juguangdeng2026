@@ -381,7 +381,7 @@
     "textKey": "neutral.1013.s2.text.p101",
     "resultOwnerId": "neutral.1013.s2.choice.q2.b.result",
     "seq": 2,
-    "checkId": ""
+    "checkId": "neutral.1013.s2.check.q2b"
   },
   {
     "choiceId": "neutral.1013.s2.choice.q2.c",
@@ -394,7 +394,7 @@
   {
     "choiceId": "neutral.1018.s1.choice.advert.a",
     "groupKey": "neutral.1018.s1.advert",
-    "textKey": "neutral.1018.s1.text.p069",
+    "textKey": "neutral.1018.s1.choice.advert.a.label",
     "resultOwnerId": "neutral.1018.s1.choice.advert.a.result",
     "seq": 1,
     "checkId": ""
@@ -474,7 +474,7 @@
   {
     "choiceId": "neutral.route.1118.s1.choice.investigation.a",
     "groupKey": "neutral.route.1118.s1.investigation",
-    "textKey": "neutral.route.1118.s1.text.p065",
+    "textKey": "neutral.route.1118.s1.choice.investigation.a.label",
     "resultOwnerId": "neutral.route.1118.s1.choice.investigation.a.result",
     "seq": 1,
     "checkId": ""
@@ -490,7 +490,7 @@
   {
     "choiceId": "neutral.route.1118.s1.choice.investigation.c",
     "groupKey": "neutral.route.1118.s1.investigation",
-    "textKey": "neutral.route.1118.s1.text.p067",
+    "textKey": "neutral.route.1118.s1.choice.investigation.c.label",
     "resultOwnerId": "neutral.route.1118.s1.choice.investigation.c.result",
     "seq": 3,
     "checkId": ""

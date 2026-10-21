@@ -342,12 +342,6 @@
     "onlySetTrue": true
   },
   {
-    "key": "blocked.neutral.promotion_wisdom_conflict",
-    "nameText": "condition.blocked.neutral.promotion_wisdom_conflict",
-    "initialValue": false,
-    "onlySetTrue": true
-  },
-  {
     "key": "neutral.promotion.organized",
     "nameText": "condition.neutral.promotion.organized",
     "initialValue": false,
@@ -374,12 +368,6 @@
   {
     "key": "blocked.neutral.1018.s1.cafe_reporter_daytime_entry",
     "nameText": "condition.blocked.neutral.1018.s1.cafe_reporter_daytime_entry",
-    "initialValue": false,
-    "onlySetTrue": true
-  },
-  {
-    "key": "blocked.neutral.reporter_advert_price",
-    "nameText": "condition.blocked.neutral.reporter_advert_price",
     "initialValue": false,
     "onlySetTrue": true
   },
@@ -458,18 +446,6 @@
   {
     "key": "blocked.neutral.route.1118.s1.neutral_end_if4_and_bribe",
     "nameText": "condition.blocked.neutral.route.1118.s1.neutral_end_if4_and_bribe",
-    "initialValue": false,
-    "onlySetTrue": true
-  },
-  {
-    "key": "blocked.neutral.missing_end_if4",
-    "nameText": "condition.blocked.neutral.missing_end_if4",
-    "initialValue": false,
-    "onlySetTrue": true
-  },
-  {
-    "key": "blocked.neutral.investigation_bribe",
-    "nameText": "condition.blocked.neutral.investigation_bribe",
     "initialValue": false,
     "onlySetTrue": true
   },
@@ -690,12 +666,6 @@
     "onlySetTrue": true
   },
   {
-    "key": "integration.rose.1016.stance3.resolved",
-    "nameText": "condition.integration.rose.1016.stance3.resolved",
-    "initialValue": false,
-    "onlySetTrue": true
-  },
-  {
     "key": "integration.rose.1016.s1.ready",
     "nameText": "condition.integration.rose.1016.s1.ready",
     "initialValue": false,
@@ -744,12 +714,6 @@
     "onlySetTrue": true
   },
   {
-    "key": "integration.rose.1103.cocoa_milk.served",
-    "nameText": "condition.integration.rose.1103.cocoa_milk.served",
-    "initialValue": false,
-    "onlySetTrue": true
-  },
-  {
     "key": "story.rose.1103.s1.sheltered",
     "nameText": "condition.story.rose.1103.s1.sheltered",
     "initialValue": false,
@@ -780,18 +744,6 @@
     "onlySetTrue": true
   },
   {
-    "key": "integration.rose.route.1115.candor.low",
-    "nameText": "condition.integration.rose.route.1115.candor.low",
-    "initialValue": false,
-    "onlySetTrue": true
-  },
-  {
-    "key": "integration.rose.route.1115.candor.high",
-    "nameText": "condition.integration.rose.route.1115.candor.high",
-    "initialValue": false,
-    "onlySetTrue": true
-  },
-  {
     "key": "story.rose.route.1115.s1.terminal.ideal_world",
     "nameText": "condition.story.rose.route.1115.s1.terminal.ideal_world",
     "initialValue": false,
@@ -800,12 +752,6 @@
   {
     "key": "story.rose.route.1115.s1.plan_known",
     "nameText": "condition.story.rose.route.1115.s1.plan_known",
-    "initialValue": false,
-    "onlySetTrue": true
-  },
-  {
-    "key": "integration.rose.route.1115.s1.ready",
-    "nameText": "condition.integration.rose.route.1115.s1.ready",
     "initialValue": false,
     "onlySetTrue": true
   },
@@ -850,24 +796,6 @@
     "nameText": "condition.construction.church.1023.s1.ready",
     "initialValue": false,
     "onlySetTrue": false
-  },
-  {
-    "key": "church.detention.bribe_quote_ready",
-    "nameText": "condition.church.detention.bribe_quote_ready",
-    "initialValue": false,
-    "onlySetTrue": true
-  },
-  {
-    "key": "church.detention.bribe_affordable",
-    "nameText": "condition.church.detention.bribe_affordable",
-    "initialValue": false,
-    "onlySetTrue": false
-  },
-  {
-    "key": "church.detention.bribery_payment_confirmed",
-    "nameText": "condition.church.detention.bribery_payment_confirmed",
-    "initialValue": false,
-    "onlySetTrue": true
   },
   {
     "key": "church.release.records_anomalous",
@@ -1078,12 +1006,6 @@
     "nameText": "condition.story.church.route.1123.s1.completed",
     "initialValue": false,
     "onlySetTrue": true
-  },
-  {
-    "key": "construction.church.route.1123.s1.ready",
-    "nameText": "condition.construction.church.route.1123.s1.ready",
-    "initialValue": false,
-    "onlySetTrue": false
   },
   {
     "key": "terminal.church.ending.ry1",
@@ -3138,18 +3060,6 @@
     "onlySetTrue": true
   },
   {
-    "key": "integration.rose.1103.revenue_transfer.ready",
-    "nameText": "condition.integration.rose.1103.revenue_transfer.ready",
-    "initialValue": false,
-    "onlySetTrue": true
-  },
-  {
-    "key": "construction.church.1023.s1.bribery_ready",
-    "nameText": "condition.construction.church.1023.s1.bribery_ready",
-    "initialValue": false,
-    "onlySetTrue": false
-  },
-  {
     "key": "construction.church.1104.s1.fee_amount_ready",
     "nameText": "condition.construction.church.1104.s1.fee_amount_ready",
     "initialValue": false,
@@ -3326,6 +3236,24 @@
   {
     "key": "story.news.bulletin.614a28cd.completed",
     "nameText": "condition.story.news.bulletin.614a28cd.completed",
+    "initialValue": false,
+    "onlySetTrue": true
+  },
+  {
+    "key": "story.rose.route.1115.s1.followup_invited",
+    "nameText": "condition.story.rose.route.1115.s1.followup_invited",
+    "initialValue": false,
+    "onlySetTrue": true
+  },
+  {
+    "key": "neutral.newspaper.advertisement",
+    "nameText": "condition.neutral.newspaper.advertisement",
+    "initialValue": false,
+    "onlySetTrue": true
+  },
+  {
+    "key": "neutral.investigation.reviewed",
+    "nameText": "condition.neutral.investigation.reviewed",
     "initialValue": false,
     "onlySetTrue": true
   }

@@ -153,7 +153,7 @@ class RoseContentTests(unittest.TestCase):
             self.assertNotIn('D:/',src['path'])
         self.assertEqual(next(s['paragraphCount'] for s in audit['sources'] if s['root']=='rose.1016.s1'),96)
 
-    def test_oct19_rose_revisions_compile_without_unlocking_author_gates(self):
+    def test_oct19_rose_revisions_compile_with_resolved_author_gaps(self):
         texts = {row['key']: row['text'] for row in self.b['Text']}
         sources = {row['root']: row for row in self.b['_audit']['sources']}
         for root, anchors in {
@@ -168,15 +168,16 @@ class RoseContentTests(unittest.TestCase):
         self.assertIn('十五年都未发生过叛乱', ideal)
         self.assertNotIn('十五年都发生过叛乱', ideal)
         event = next(row for row in self.b['Event'] if row['eventId'] == 'rose.route.1115.s1')
-        self.assertIn('blockedBy=', event['eventProperty'])
-        self.assertTrue(any(row['code'] == 'candor_baseline_and_gap'
-            for row in sources['rose.route.1115.s1']['blockedBy']))
+        self.assertNotIn('blockedBy=', event['eventProperty'])
+        self.assertEqual(sources['rose.route.1115.s1']['blockedBy'],[])
 
     def test_build_is_deterministic_and_no_writes(self):
         with patch.object(Path,'write_text',side_effect=AssertionError('compiler wrote text')), \
              patch.object(Path,'write_bytes',side_effect=AssertionError('compiler wrote bytes')):
             self.assertEqual(self.b,rose.build(PROJECT))
-        self.assertEqual(self.b['_replace_roots'],['rose.1009.s1','rose.1011.s1','rose.1016.s1','rose.1103.s1'])
+        self.assertEqual(self.b['_replace_roots'],[e['eventId'] for e in self.b['Event']])
+        self.assertTrue(all(root.startswith('rose.') for root in self.b['_replace_roots']))
+        self.assertIn('rose.1025.s2',self.b['_replace_roots'])
 
     def test_spoken_npcs_get_portraits_without_staging_player_or_narration(self):
         lines = self.b['ConversationLine']
@@ -286,10 +287,11 @@ class RoseContentTests(unittest.TestCase):
         self.assertEqual(len(x.menus),1)
         self.assertTrue(x.flags['known.sade'])
 
-    def test_1024_both_release_histories_and_question_effects(self):
-        for release in (rose.BRIBE,rose.RESCUE):
+    def test_1024_all_release_histories_and_question_effects(self):
+        for release in rose.RELEASES:
             for question in range(1,6):
                 x = self.walk('rose.1024.s2',flags={release:True},bars={'perception':9},picks=[question,2])
+                self.assertEqual('rose.1024.s2.mind.persuaded' in x.seen,release==rose.PERSUASION)
                 self.assertEqual('rose.1024.s2.mind.bribed' in x.seen,release==rose.BRIBE)
                 self.assertEqual('rose.1024.s2.mind.rescued' in x.seen,release==rose.RESCUE)
                 self.assertEqual(x.flags[rose.SAFE_REFUSAL],question==4)
@@ -322,21 +324,24 @@ class RoseContentTests(unittest.TestCase):
             queues = [r['target'] for r in x.effects if r['resultType']=='QUEUE_EVENT']
             self.assertEqual(len(queues),1)
 
-    def test_blocked_roots_have_real_gates_in_every_group(self):
-        blocked = self.b['_audit']['constructionBlockedEvents']
-        self.assertEqual(set(blocked),{'rose.route.1115.s1'})
-        for root in blocked:
-            conditions = [c for c in self.b['Condition'] if c['ownerType']=='event' and c['ownerId']==root]
-            groups = {c['groupIndex'] for c in conditions}
-            for g in groups:
-                self.assertTrue(any(c['groupIndex']==g and c['target']=='integration.'+root+'.ready' and c['value']=='true' for c in conditions))
-            self.assertFalse(Walk(self.b,root).allowed('event',root))
-            self.assertFalse(any(r['resultType']=='SET_FLAG' and r['target']=='integration.'+root+'.ready' for r in self.b['Result']))
+    def test_late_roots_keep_real_predecessor_and_exclusive_route_gates(self):
+        self.assertEqual(self.b['_audit']['constructionBlockedEvents'],[])
+        root='rose.route.1115.s1'
+        for predecessor,rose_route,other_route in itertools.product((False,True),repeat=3):
+            flags={'story.rose.route.1111.s2.completed':predecessor,
+                'route.rose':rose_route,'route.church':other_route}
+            self.assertEqual(Walk(self.b,root,flags=flags).allowed('event',root),
+                predecessor and rose_route and not other_route)
+        flags={'story.rose.route.1111.s2.completed':True,'route.rose':True,
+            'story.rose.route.1115.s1.completed':True}
+        self.assertFalse(Walk(self.b,root,flags=flags).allowed('event',root))
 
     def test_availability_flags_are_mutable_and_source_produced(self):
-        for flag in ('story.adele.away','story.sylvain.unavailable'):
+        for flag in ('story.adele.away','story.sylvain.unavailable','church.detention.active'):
             definition = next(r for r in self.b['ConditionKey'] if r['key']==flag)
             self.assertFalse(definition['onlySetTrue'])
+            if flag=='church.detention.active':
+                continue  # Church owns release/detention mutations.
             values = {r['value'] for r in self.b['Result'] if r['target']==flag}
             self.assertEqual(values,{'true','false'})
         x = self.walk('rose.route.1122.s1',picks=[2])
@@ -405,17 +410,22 @@ class RoseContentTests(unittest.TestCase):
             queues=[r for r in x.effects if r['resultType']=='QUEUE_EVENT']
             self.assertEqual(len(queues),0 if cooperation else 1)
 
-    def test_1115_low_end_and_unresolved_high_perception_tail(self):
-        low='integration.rose.route.1115.candor.low'
-        high='integration.rose.route.1115.candor.high'
-        x=self.walk('rose.route.1115.s1',flags={low:True,high:True},bars={'perception':10},picks=[1])
+    def test_1115_motive_partition_preserves_perception_revelation(self):
+        x=self.walk('rose.route.1115.s1',bars={'perception':10},picks=[1])
         self.assertTrue(x.flags['story.rose.route.1115.s1.terminal.ideal_world'])
         self.assertFalse(x.flags['story.rose.route.1115.s1.plan_known'])
+        self.assertFalse(x.flags[rose.FOLLOWUP])
         self.assertNotIn('rose.route.1115.s1.candor.high',x.seen)
-        for perception in (9,10):
-            y=self.walk('rose.route.1115.s1',flags={high:True},bars={'perception':perception},picks=[2])
-            self.assertEqual('rose.route.1115.s1.plan' in y.seen,perception==10)
-            self.assertEqual(y.flags['story.rose.route.1115.s1.plan_known'],perception==10)
+        for perception in (0,9,10,12):
+            y=self.walk('rose.route.1115.s1',bars={'perception':perception},picks=[2])
+            self.assertEqual('rose.route.1115.s1.plan' in y.seen,perception>9)
+            self.assertEqual(y.flags['story.rose.route.1115.s1.plan_known'],perception>9)
+            self.assertEqual('rose.route.1115.s1.quiet.farewell' in y.seen,perception<=9)
+            self.assertTrue(y.flags[rose.FOLLOWUP])
+            self.assertFalse(y.flags['story.rose.route.1115.s1.terminal.ideal_world'])
+            for anchor in range(139,179):
+                self.assertEqual(any(l['textKey'].startswith(f'rose.route.1115.s1.text.p{anchor:03}') for l in y.lines),
+                    perception>9 and anchor not in (161,162,163))
 
     def test_split_1025_invitation_and_1026_meeting_have_real_dates(self):
         dates={r['eventId']:r for r in self.b['EventDate']}
@@ -442,6 +452,12 @@ class RoseContentTests(unittest.TestCase):
         audit=next(s for s in result['_audit']['sources'] if s['root']=='rose.1009.s1')
         self.assertEqual(audit['rootStatus'],'construction-blocked')
         self.assertIn('source_anchor_drift',{b['code'] for b in audit['blockedBy']})
+        for root in result['_audit']['constructionBlockedEvents']:
+            conditions=[c for c in result['Condition'] if c['ownerType']=='event' and c['ownerId']==root]
+            for group in {c['groupIndex'] for c in conditions}:
+                self.assertTrue(any(c['groupIndex']==group and c['target']=='integration.'+root+'.ready'
+                    and c['value']=='true' for c in conditions))
+            self.assertFalse(any(r['resultType']=='SET_FLAG' and r['target']=='integration.'+root+'.ready' for r in result['Result']))
 
     def test_numeric_guards_use_real_registered_player_bar_ids(self):
         for p in self.b['ConversationPage']:
@@ -472,7 +488,7 @@ class RoseContentTests(unittest.TestCase):
         self.assertTrue(any(b['code']=='light_bitter_threshold_unspecified' and b['scope']=='node' for b in blockers))
         self.assertFalse(any(b['scope']=='root' for b in blockers))
 
-    def test_1103_real_hot_wait_acceptance_and_pending_special_are_separate(self):
+    def test_1103_real_hot_wait_and_response_require_delivery(self):
         facts={'story.rose.1101.s1.completed':True,rose.ALLEGIANCE:True}
         pending=Walk(self.b,'rose.1103.s1',flags=facts,picks=[2,1])
         self.assertTrue(pending.allowed('event','rose.1103.s1'))
@@ -486,19 +502,27 @@ class RoseContentTests(unittest.TestCase):
             self.assertTrue(x.flags['story.rose.1103.s1.completed'])
             self.assertTrue(x.flags['church.alienor.sheltered'])
             self.assertTrue(x.flags['known.alienor'])
-            self.assertNotIn('rose.1103.s1.drink.special',x.seen)
-        marker='integration.rose.1103.cocoa_milk.served'
-        self.assertFalse(any(r['resultType']=='SET_FLAG' and r['target']==marker for r in self.b['Result']))
-        self.assertTrue(any(b['root']=='rose.1103.s1' and b['code']=='special_drink_identity_pending' and b['scope']=='node' for b in self.b['_audit']['blockedBy']))
+            self.assertIn('rose.1103.s1.drink.special',x.seen)
+        self.assertNotIn('rose.1103.s1.drink.special',pending.seen)
+        self.assertFalse(any(r['key'].startswith('integration.') for r in self.b['ConditionKey']))
+        self.assertTrue(any(r['code']=='hot_drink_response' for r in self.b['_audit']['designResolutions']))
 
-    def test_1103_unfunded_refusal_is_locked_not_a_fake_transfer(self):
-        x=Walk(self.b,'rose.1103.s1')
-        refusal=next(c for c in self.b['Choice'] if c['choiceId']=='rose.1103.s1.choice.p050')
-        acceptance=next(c for c in self.b['Choice'] if c['choiceId']=='rose.1103.s1.choice.p051')
-        self.assertFalse(x.allowed('choice',refusal['choiceId']))
-        self.assertTrue(x.allowed('choice',acceptance['choiceId']))
-        with self.assertRaisesRegex(AssertionError,'locked source choice'):
-            self.walk('rose.1103.s1',picks=[1])
+    def test_1103_refusal_is_playable_without_fake_revenue_transfer(self):
+        x=self.walk('rose.1103.s1',picks=[1],bars={'cafe.money':0})
+        self.assertTrue(x.flags['church.alienor.refused_shelter'])
+        self.assertFalse(x.flags['church.alienor.sheltered'])
+        self.assertFalse(x.flags['story.rose.1103.s1.identity_known'])
+        self.assertEqual(x.bars['cafe.money'],0)
+        self.assertIn('rose.1103.s1.end.refused',x.seen)
+        self.assertNotIn('rose.1103.s1.shelter.accepted',x.seen)
+        self.assertFalse(any(r['resultType'] in ('MONEY_ADD','MONEY_REMOVE') for r in x.effects))
+        texts={r['key']:r['text'] for r in self.b['Text']}
+        shown=''.join(texts[l['textKey']] for l in x.lines)
+        self.assertNotIn('营业额',shown)
+        self.assertIn('伞和衣服您先带着',shown)
+        revisions={r['anchor']:r for r in self.b['_audit']['textRevisions'] if r['root']=='rose.1103.s1'}
+        self.assertIn('营业额',revisions['P058']['original'])
+        self.assertEqual(revisions['P058']['compiled'],texts['rose.1103.s1.text.p058'])
 
     def test_gameplay_selectors_document_real_predicates_not_fake_catalog_ids(self):
         selectors=self.b['_audit']['gameplaySelectors']
@@ -511,6 +535,101 @@ class RoseContentTests(unittest.TestCase):
                 self.assertIn('distinct real delivered cup',s['predicate'])
         self.assertNotIn('hotmilk',rose.Bundle(PROJECT).products)
 
+
+    def test_1016_third_stance_is_neutral_not_church_or_locked(self):
+        for stance,target in ((91,'faction.rose'),(92,'faction.revolution'),(93,'faction.neutral')):
+            x=self.walk('rose.1016.s1',picks=[47,64,65,66,stance])
+            self.assertEqual(x.bars,{target:1})
+            self.assertTrue(x.flags['story.rose.1016.s1.completed'])
+
+    def test_1024_exclusive_origins_require_real_release_and_no_detention(self):
+        completed={'story.church.1020.s1.completed':True,'story.church.1023.s1.completed':True}
+        for cleared,detained,*released in itertools.product((False,True),repeat=5):
+            facts={**completed,rose.CLEARED:cleared,'church.detention.active':detained,
+                **dict(zip(rose.RELEASES,released))}
+            s1=Walk(self.b,'rose.1024.s1',flags=facts)
+            s2=Walk(self.b,'rose.1024.s2',flags=facts)
+            self.assertEqual(s1.allowed('event',s1.root),cleared and not detained and not any(released))
+            self.assertEqual(s2.allowed('event',s2.root),not cleared and not detained and sum(released)==1)
+        for release in rose.RELEASES:
+            facts={release:True}
+            self.assertFalse(Walk(self.b,'rose.1024.s2',flags=facts).allowed('event','rose.1024.s2'))
+            facts['story.church.1023.s1.completed']=True
+            x=Walk(self.b,'rose.1024.s2',flags=facts,bars={'perception':9},picks=[121,150])
+            self.assertTrue(x.allowed('event',x.root))
+            x.run()
+            self.assertTrue(x.flags[rose.ALLEGIANCE])
+            self.assertEqual(x.flags[rose.PERSUASION],release==rose.PERSUASION)
+            self.assertEqual(x.flags[rose.BRIBE],release==rose.BRIBE)
+            self.assertEqual(x.flags[rose.RESCUE],release==rose.RESCUE)
+
+    def test_rose_chain_reaches_three_late_endings_without_construction_facts(self):
+        # External boundary facts are supplied only by their named owning roots.
+        # This is a compiler/contract walk, not a claim of Unity natural-play proof.
+        for origin,perception,motive in itertools.product((rose.CLEARED,*rose.RELEASES),(9,10),(93,94)):
+            with self.subTest(origin=origin,perception=perception,motive=motive):
+                facts={origin:True,'story.church.1020.s1.completed':True,
+                    'story.church.1023.s1.completed':origin!=rose.CLEARED}
+                bars={'player.perception':perception,'player.wisdom':7}
+                def run(root,picks=()):
+                    nonlocal facts,bars
+                    x=Walk(self.b,root,flags=facts,bars=bars,picks=picks)
+                    self.assertTrue(x.allowed('event',root),(root,origin))
+                    x.run()
+                    facts,bars=x.flags,x.bars
+                    return x
+                if origin==rose.CLEARED:
+                    run('rose.1024.s1',[99,127])
+                else:
+                    run('rose.1024.s2',[121,138] if perception>9 else [121,150])
+                run('rose.1025.s2')
+                run('rose.1026.s2',[29])
+                facts.update({rose.COOPERATED:True,'story.revolution.1029.s1.completed':True})
+                run('rose.1101.s1')
+                run('rose.1103.s1',[51,108])
+                facts.update({'story.church.1111.s1.completed':True,'route.rose':True})
+                run('rose.route.1111.s2')
+                meeting=run('rose.route.1115.s1',[motive])
+                ideal='rose.route.1115.s1.ending.ideal_world'
+                self.assertEqual(meeting.allowed('ending',ideal),motive==93)
+                if motive==93:
+                    self.assertFalse(Walk(self.b,'rose.route.1122.s1',flags=facts).allowed('event','rose.route.1122.s1'))
+                    continue
+                saved_facts,saved_bars=dict(facts),dict(bars)
+                for pick,ending in ((63,'unforgiven'),(64,'bloom')):
+                    facts,bars=dict(saved_facts),dict(saved_bars)
+                    branch=run('rose.route.1122.s1',[pick])
+                    root='rose.route.ending.'+ending
+                    self.assertEqual([r['target'] for r in branch.effects if r['resultType']=='QUEUE_EVENT'],[root])
+                    epilogue=run(root)
+                    reached=[e['endingId'] for e in self.b['Ending'] if epilogue.allowed('ending',e['endingId'])]
+                    self.assertEqual(reached,[root+'.ending'])
+                    self.assertFalse(any(key.startswith('integration.') and value for key,value in facts.items()))
+
+    def test_1101_refusal_all_origins_requires_real_mission(self):
+        for origin in (rose.CLEARED,*rose.RELEASES):
+            facts={origin:True,rose.ALLEGIANCE:True,rose.REFUSED:True,
+                'story.revolution.1029.s1.completed':True}
+            root='rose.1101.s1'
+            self.assertFalse(Walk(self.b,root,flags=facts).allowed('event',root))
+            facts['story.rose.1026.s2.completed']=True
+            x=Walk(self.b,root,flags=facts)
+            self.assertTrue(x.allowed('event',root))
+            x.run()
+            self.assertTrue(x.flags[rose.SHORT2])
+            self.assertFalse(Walk(self.b,'rose.1103.s1',flags=x.flags).allowed('event','rose.1103.s1'))
+            end=Walk(self.b,'rose.ending.job_requirements',flags=x.flags)
+            self.assertTrue(end.allowed('event',end.root))
+            end.run()
+            self.assertTrue(end.allowed('ending',end.root+'.ending'))
+
+    def test_no_production_construction_facts_or_uncovered_rose_roots(self):
+        self.assertFalse(any(r['key'].startswith(('integration.','construction.')) for r in self.b['ConditionKey']))
+        self.assertEqual(self.b['_audit']['transitivelyBlockedByRosePrerequisites'],[])
+        replaced=set(self.b['_replace_roots'])
+        for root in ('rose.1024.s1','rose.1024.s2','rose.1101.s1','rose.route.1115.s1','rose.route.1122.s1'):
+            self.assertIn(root,replaced)
+        self.assertEqual({(r['root'],int(r['anchor'][1:])) for r in self.b['_audit']['textRevisions']},set(rose.TEXT_REVISIONS))
 
     def test_unknown_selector_and_entity_are_not_authorized_products(self):
         source=next(s for s in self.b['_audit']['sources'] if s['root']=='rose.1016.s1')

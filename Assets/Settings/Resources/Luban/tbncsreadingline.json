@@ -1618,5 +1618,14 @@
     "speakerKey": "",
     "textKey": "newspaper.1007.text.017",
     "voiceKey": ""
+  },
+  {
+    "lineId": "playable.newspaper.1021.advert.line",
+    "pageId": "playable.newspaper.1021.advert",
+    "seq": 1,
+    "mode": "narration",
+    "speakerKey": "",
+    "textKey": "playable.newspaper.1021.advert.text",
+    "voiceKey": ""
   }
 ]

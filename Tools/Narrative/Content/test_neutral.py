@@ -71,7 +71,7 @@ class GraphModel:
             return dict(blocked=True,settled=False,anchors=[],results=[],deltas={},queued=[])
         self.selected,self.checked,self.played = set(),{},{}
         self.flags.update(facts or {})
-        self.bars = bars or {}
+        self.bars = dict(bars or {})
         selections,attributes,signals = selections or {},attributes or {},signals or {}
         seen = []
         pages = sorted((p for p in self.data["ConversationPage"] if p["presentationKey"]==root),key=lambda p:p["seq"])
@@ -90,7 +90,9 @@ class GraphModel:
                 self.checked[page["checkId"]] = attributes.get(attr,0)>=threshold
                 if not self.checked[page["checkId"]]: continue
             for line in sorted(self.lines[page["pageId"]],key=lambda r:r["seq"]):
-                seen.append(int(re.search(r"\.p(\d+)$",line["textKey"])[1]))
+                anchor = re.search(r"\.p(\d+)$",line["textKey"])
+                if anchor: seen.append(int(anchor[1]))
+                else: seen.append(line["textKey"])  # Authored completion prose, not a fabricated source P-number.
             group = page.get("optionGroupKey")
             if group:
                 short = group.removeprefix(root+".")
@@ -108,10 +110,21 @@ class GraphModel:
         owners = {root}|{self.choices[c]["resultOwnerId"] for c in self.selected}
         # Freeze all guard decisions before committing any bool/bar effects, as NCS does.
         results = [r for r in self.data["Result"] if r["eventId"] in owners and self.eligible("result",r["resultId"])]
+        # Mirror the host's whole-root wallet preflight: no partial flag or debit commits.
+        balance = self.bars.get("cafe.money")
+        for row in results:
+            if row["resultType"] == "MONEY_REMOVE":
+                amount = int(row["value"])
+                if balance is None or amount <= 0 or balance < amount:
+                    return dict(blocked=False,settled=False,anchors=seen,results=[],deltas={},queued=[])
+                balance -= amount
         deltas,queued = defaultdict(int),[]
         for row in results:
             if row["resultType"] == "SET_FLAG": self.flags[row["target"]] = row["value"]=="true"
             elif row["resultType"] == "BAR_ADD": deltas[row["target"]]+=int(row["value"])
+            elif row["resultType"] == "MONEY_REMOVE":
+                self.bars["cafe.money"] -= int(row["value"])
+                deltas["cafe.money"] -= int(row["value"])
             elif row["resultType"] == "QUEUE_EVENT": queued.append(row["target"])
             else: raise AssertionError("Unexpected effect "+row["resultType"])
         return dict(blocked=False,settled=True,anchors=seen,results=results,deltas=dict(deltas),queued=queued)
@@ -209,7 +222,7 @@ class NeutralCompilerTests(unittest.TestCase):
             model=self.model();r=model.trace("neutral.1010.s1",{"q1":letter},{"wisdom":wisdom,"language":language})
             self.assertIn(yes,r["anchors"]);self.assertNotIn(no,r["anchors"])
             self.assertEqual(delta,r["deltas"].get("adele.affection",0));self.assertEqual(["neutral.1010.s2"],r["queued"])
-        self.assertFalse(any(r["resultType"] in ("MONEY_ADD","MONEY_REMOVE","TRAIN_ATTRIBUTE") for r in self.data["Result"]))
+        self.assertFalse(any(r["resultType"] in ("MONEY_ADD","MONEY_REMOVE","TRAIN_ATTRIBUTE") for r in self.data["Result"] if r["resultId"].startswith("neutral.1010.s1.")))
 
     def test_antoine_refusal_never_meets_unlocks_or_awards(self):
         model=self.model();r=model.trace("neutral.1010.s2",{"q1":"c"},{"language":20})
@@ -247,24 +260,13 @@ class NeutralCompilerTests(unittest.TestCase):
         self.assertFalse(r["queued"])
         self.assertEqual({"serve:any:60:1"},{p["gameplayKey"] for p in self.data["ConversationPage"] if p["presentationKey"]==root and p["stepType"]=="Gameplay"})
 
-    def test_reopened_roots_have_only_choice_scoped_blockers(self):
-        for root,disabled_choice in [("neutral.1013.s2","q2.b"),("neutral.1018.s1","advert.a")]:
-            with self.subTest(root=root):
-                model=self.model()
-                event=model.events[root]
-                self.assertNotIn("blockedBy=",event["eventProperty"])
-                prerequisites="neutral.1010.s1" if root=="neutral.1013.s2" else "neutral.1013.s2"
-                model.flags[neutral.completed(prerequisites)]=True
-                self.assertTrue(model.eligible("event",root))
-                self.assertFalse(any(c["target"].startswith("blocked.") for c in model.conditions["event",root]))
-                audit=self.audit(root)
-                self.assertEqual("partial-branches-blocked",audit["status"])
-                self.assertEqual(1,len(audit["blockedBy"]))
-                blocker=audit["blockedBy"][0]
-                self.assertEqual("choice",blocker["scope"])
-                self.assertEqual(root+".choice."+disabled_choice,blocker["choiceId"])
-                self.assertFalse(model.flags[blocker["conditionKey"]])
-                self.assertTrue(blocker["sourceAnchors"])
+    def test_four_authorized_blockers_removed_without_new_ending(self):
+        for root in ("neutral.1013.s2","neutral.1018.s1","neutral.route.1118.s1"):
+            self.assertEqual("compiled",self.audit(root)["status"])
+            self.assertEqual([],self.audit(root)["blockedBy"])
+        self.assertFalse(any(c["target"].startswith("blocked.neutral.") for c in self.data["Condition"]))
+        self.assertFalse(any(c["key"].startswith("blocked.neutral.") for c in self.data["ConditionKey"]))
+        self.assertEqual({"neutral.ending."+c for c in "abcd"},{e["endingId"] for e in self.data["Ending"]})
 
     def test_promotion_normal_roles_and_optional_observation_remain_playable(self):
         root="neutral.1013.s2"
@@ -291,9 +293,16 @@ class NeutralCompilerTests(unittest.TestCase):
                 self.assertEqual(reward,r["deltas"].get("antoine.affection",0))
                 self.assertTrue(model.flags["neutral.antoine.observation"])
                 self.assertEqual(["revolution.1013.s2"],r["queued"])
-        with self.assertRaisesRegex(AssertionError,"unavailable"):
-            self.model().trace(root,{"q1":"a","q2":"b"},{"wisdom":20},
+        for wisdom in (0,2,3,4):
+            model=self.model();r=model.trace(root,{"q1":"a","q2":"b"},{"wisdom":wisdom},
                 facts={"neutral.antoine.appreciation":True},signals=signals)
+            self.assertIn(114 if wisdom>=3 else 119,r["anchors"])
+            self.assertNotIn(119 if wisdom>=3 else 114,r["anchors"])
+            self.assertEqual(2 if wisdom>=3 else 0,r["deltas"].get("antoine.affection",0))
+            self.assertTrue(model.flags["neutral.antoine.observation"])
+        model=self.model();r=model.trace(root,{"q1":"a","q2":"b"},{"wisdom":3},
+            facts={"neutral.antoine.appreciation":True},signals=signals,cancel=True)
+        self.assertFalse(r["deltas"]);self.assertFalse(model.flags["neutral.antoine.observation"])
 
     def test_c13_queue_is_root_owned_guarded_and_resolves_to_current_queue_only_event(self):
         root="neutral.1013.s2";target="revolution.1013.s2"
@@ -312,7 +321,7 @@ class NeutralCompilerTests(unittest.TestCase):
             c["target"]==neutral.completed(root) and c["value"]=="true" for c in self.revolution_data["Condition"]))
         self.assertTrue(next(e for e in self.data["Event"] if e["eventId"]==root)["onceOnly"])
 
-    def test_reporter_quality_routes_are_real_outcome_exclusive_and_paid_ad_blocked(self):
+    def test_reporter_quality_routes_are_real_outcome_exclusive_and_ad_costs_money(self):
         root="neutral.1018.s1";signal=root+".reporter_grade"
         model=self.model();waiting=model.trace(root)
         self.assertFalse(waiting["blocked"]);self.assertEqual(signal,waiting["waiting"])
@@ -330,8 +339,19 @@ class NeutralCompilerTests(unittest.TestCase):
         model=self.model();cancelled=model.trace(root,signals={signal:True},cancel=True)
         self.assertFalse(cancelled["settled"]);self.assertFalse(model.flags[neutral.completed(root)])
         self.assertFalse(model.flags["neutral.newspaper.recommendation"])
-        with self.assertRaisesRegex(AssertionError,"unavailable"):
-            self.model().trace(root,{"advert":"a"},signals={signal:False})
+        for money in (None,0,neutral.REPORTER_ADVERT_PRICE-1):
+            with self.assertRaisesRegex(AssertionError,"unavailable"):
+                self.model().trace(root,{"advert":"a"},signals={signal:False},bars={} if money is None else {"cafe.money":money})
+        for money in (neutral.REPORTER_ADVERT_PRICE,neutral.REPORTER_ADVERT_PRICE+1):
+            model=self.model();ad=model.trace(root,{"advert":"a"},signals={signal:False},bars={"cafe.money":money})
+            self.assertTrue({70,76}.issubset(ad["anchors"]));self.assertTrue({42,79}.isdisjoint(ad["anchors"]))
+            self.assertEqual(-neutral.REPORTER_ADVERT_PRICE,ad["deltas"]["cafe.money"])
+            self.assertTrue(model.flags["neutral.newspaper.advertisement"])
+            self.assertFalse(model.flags["neutral.newspaper.recommendation"])
+            self.assertEqual(money-neutral.REPORTER_ADVERT_PRICE,model.bars["cafe.money"])
+        model=self.model();cancelled=model.trace(root,{"advert":"a"},signals={signal:False},
+            bars={"cafe.money":neutral.REPORTER_ADVERT_PRICE},cancel=True)
+        self.assertFalse(cancelled["deltas"]);self.assertFalse(model.flags["neutral.newspaper.advertisement"])
 
     def test_1027_and_1030_current_affection_deltas(self):
         for letter,attrs,delta in [("a",{"wisdom":4},2),("a",{"wisdom":3},0),("b",{"language":3},1),("b",{"language":2},-1),("c",{},0)]:
@@ -365,18 +385,12 @@ class NeutralCompilerTests(unittest.TestCase):
         self.assertTrue({82,106,149,174}.issubset(r["anchors"]));self.assertTrue({69,110,127,139}.isdisjoint(r["anchors"]))
         self.assertTrue(model.flags["neutral.investigation.shelter"]);self.assertTrue(model.flags[neutral.completed(root)])
         self.assertFalse(model.flags["neutral.investigation.bribed"])
-        for choice,bars in [("a",{}),("b",{"alienor.affection":2}),("c",{})]:
+        for bars in ({},{"alienor.affection":2}):
             with self.assertRaisesRegex(AssertionError,"unavailable"):
-                self.model().trace(root,{"investigation":choice},bars=bars)
+                self.model().trace(root,{"investigation":"b"},bars=bars)
 
-    def test_1118_event_entry_requires_a_real_available_protection_choice(self):
+    def test_1118_event_available_without_affection_but_royal_choice_requires_three(self):
         root="neutral.route.1118.s1";choice=root+".choice.investigation.b"
-        audit=self.audit(root)
-        self.assertEqual("partial-branches-blocked",audit["status"])
-        self.assertEqual(choice,audit["resolvedNormalPath"]["choiceId"])
-        self.assertEqual({root+".choice.investigation.a",root+".choice.investigation.c"},
-                         {b["choiceId"] for b in audit["blockedBy"]})
-        self.assertTrue(all(b["scope"]=="choice" for b in audit["blockedBy"]))
         model=self.model()
         self.assertNotIn("blockedBy=",model.events[root]["eventProperty"])
         self.assertFalse(any(c["target"].startswith("blocked.") for c in model.conditions["event",root]))
@@ -384,11 +398,11 @@ class NeutralCompilerTests(unittest.TestCase):
         for value,expected in [(None,False),(2,False),(3,True),(20,True)]:
             with self.subTest(affection=value):
                 model.bars={} if value is None else {"alienor.affection":value}
-                self.assertEqual(expected,model.eligible("event",root))
+                self.assertTrue(model.eligible("event",root))
                 self.assertEqual(expected,model.eligible("choice",choice))
-                if expected:
-                    available=[c["choiceId"] for c in model.groups[root+".investigation"] if model.eligible("choice",c["choiceId"])]
-                    self.assertEqual([choice],available)
+                available=[c["choiceId"] for c in model.groups[root+".investigation"] if model.eligible("choice",c["choiceId"])]
+                self.assertIn(root+".choice.investigation.a",available)
+                self.assertIn(root+".choice.investigation.c",available)
         model.bars={"alienor.affection":3}
         model.flags["route.neutral"]=False;self.assertFalse(model.eligible("event",root))
         model.flags["route.neutral"]=True;model.flags["route.rose"]=True
@@ -401,7 +415,7 @@ class NeutralCompilerTests(unittest.TestCase):
         completed=next(r for r in self.data["Result"] if r["eventId"]==root and r["target"]==neutral.completed(root))
         shelter=next(r for r in self.data["Result"] if r["target"]=="neutral.investigation.shelter")
         expected={"choice:"+root+".choice.investigation.b","bar:alienor.affection:ge:3"}
-        for result in (completed,shelter):
+        for result in (shelter,):
             conditions=[c for c in self.data["Condition"] if c["ownerType"]=="result" and c["ownerId"]==result["resultId"]]
             self.assertEqual(expected,{c["target"] for c in conditions})
             self.assertTrue(all(c["condType"]=="BOOL_EQ" and c["value"]=="true" for c in conditions))
@@ -414,6 +428,58 @@ class NeutralCompilerTests(unittest.TestCase):
         model=self.model();model.bars={"alienor.affection":3}
         self.assertFalse(model.eligible("result",completed["resultId"]))
         self.assertFalse(model.eligible("result",shelter["resultId"]))
+
+    def test_1118_inquiry_bribe_boundary_and_cancellation(self):
+        root="neutral.route.1118.s1";price=neutral.INVESTIGATION_BRIBE_PRICE
+        for choice,money in product(("a","c"),(None,0,price-1,price,price+1)):
+            with self.subTest(choice=choice,money=money):
+                model=self.model();bars={} if money is None else {"cafe.money":money}
+                r=model.trace(root,{"investigation":choice},bars=bars)
+                paid=choice=="c" and money is not None and money>=price
+                self.assertTrue(r["settled"]);self.assertTrue(model.flags[neutral.completed(root)])
+                self.assertFalse(model.flags["neutral.investigation.shelter"])
+                self.assertEqual(paid,model.flags["neutral.investigation.bribed"])
+                self.assertEqual(not paid,model.flags["neutral.investigation.reviewed"])
+                self.assertEqual(-price if paid else 0,r["deltas"].get("cafe.money",0))
+                self.assertEqual(paid,128 in r["anchors"])
+                self.assertEqual(choice=="c" and not paid,139 in r["anchors"])
+                self.assertIn(149,r["anchors"])
+                model=self.model();r=model.trace(root,{"investigation":choice},bars=bars,cancel=True)
+                self.assertFalse(r["deltas"]);self.assertFalse(model.flags[neutral.completed(root)])
+                self.assertFalse(any(model.flags["neutral.investigation."+s] for s in ("shelter","bribed","reviewed")))
+
+    def test_low_affection_full_b_c_d_chains_and_1122_exclusive_prose(self):
+        investigation="neutral.route.1118.s1";future="neutral.route.1122.s1"
+        for method,affection,member,target in product(("a","c"),(0,2),(False,True),("b","c","d")):
+            if target=="d" and not member: continue
+            for payment in ((0,neutral.INVESTIGATION_BRIBE_PRICE) if method=="c" else (0,)):
+                with self.subTest(method=method,affection=affection,member=member,target=target,payment=payment):
+                    model=self.model();model.flags.update({"route.neutral":True,neutral.completed("neutral.route.1111.s2"):True})
+                    # D membership remains a real prior choice, not a fabricated fallback reward.
+                    if member:
+                        model.flags["neutral.antoine.observation"]=True
+                        self.assertTrue(model.eligible("event","neutral.route.1112.s1"))
+                        model.trace("neutral.route.1112.s1",{"membership":"a"})
+                    model.bars={"alienor.affection":affection,"cafe.money":payment}
+                    self.assertTrue(model.eligible("event",investigation))
+                    model.trace(investigation,{"investigation":method},bars=model.bars)
+                    self.assertTrue(model.eligible("event",future))
+                    seen=model.trace(future,{"future":"b" if target=="b" else "a"})["anchors"]
+                    self.assertNotIn(29,seen)  # No royal letter without actual shelter.
+                    paid=method=="c" and payment>=neutral.INVESTIGATION_BRIBE_PRICE
+                    self.assertEqual(paid and member,41 in seen)
+                    self.assertEqual(paid and not member,56 in seen)
+                    self.assertEqual(not paid,future+".text.completion.review_notice" in seen)
+                    if target!="b":
+                        if member:
+                            model.bars={"cafe.money":25000 if target=="d" else 24999}
+                            self.assertTrue(model.eligible("event","neutral.route.1129.s1"))
+                            model.trace("neutral.route.1129.s1",bars=model.bars)
+                        final="neutral.route.1130.s1" if target=="d" else "neutral.route.1130.s2"
+                        self.assertTrue(model.eligible("event",final))
+                        model.trace(final,attributes={"language":5})
+                    self.assertTrue(model.eligible("ending","neutral.ending."+target))
+                    self.assertEqual(["neutral.ending."+target],[e["endingId"] for e in self.data["Ending"] if model.eligible("ending",e["endingId"])])
 
     def test_royal_protection_chain_can_reach_b_or_nonmember_c_without_revenue_guess(self):
         investigation="neutral.route.1118.s1";future="neutral.route.1122.s1";ordinary="neutral.route.1130.s2"

@@ -11,6 +11,16 @@ namespace Spotlight.FreeCafe.Tests
         public void RecipeReferencesUseLatteArtTerminology(string input, string expected)
             => Assert.That(FreeCafeProductionText.Recipe(input), Is.EqualTo(expected));
 
+        [TestCase("coffee", "essence", "咖啡液", "精粹咖啡液")]
+        [TestCase("coffee", "black", "咖啡液", "普通咖啡液")]
+        [TestCase("coffee", "cold_brew", "咖啡液", "冷萃咖啡液")]
+        [TestCase("coffee", null, "咖啡液", "咖啡液")]
+        [TestCase("milkfoam", null, "奶泡", "拉花")]
+        [TestCase("hotmilk", null, "热牛奶", "热牛奶")]
+        public void RecipeIngredientNamesDescribeRequiredCoffeeSource(string id, string kind, string label, string expected)
+            => Assert.That(FreeCafeProductionText.RecipeIngredient(new Portion { specId = id, coffeeKind = kind }, label),
+                Is.EqualTo(expected));
+
         [TestCase("heart", "爱心")]
         [TestCase("rosetta", "树叶")]
         [TestCase("tulip", "郁金香")]

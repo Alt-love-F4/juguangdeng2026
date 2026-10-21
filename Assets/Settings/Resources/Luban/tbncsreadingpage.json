@@ -124,5 +124,14 @@
     "imageKey": "",
     "pageCondKeys": "",
     "pageBarConds": ""
+  },
+  {
+    "pageId": "playable.newspaper.1021.advert",
+    "presentationKey": "newspaper.1021.presentation",
+    "seq": 2,
+    "titleKey": "playable.newspaper.1021.advert.title",
+    "imageKey": "",
+    "pageCondKeys": "neutral.newspaper.advertisement",
+    "pageBarConds": ""
   }
 ]

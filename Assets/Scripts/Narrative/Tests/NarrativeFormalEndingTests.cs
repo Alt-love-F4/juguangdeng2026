@@ -26,7 +26,7 @@ namespace Spotlight.Narrative.Tests
 
         // Explicit historical fixtures, NOT a claim these histories are naturally obtainable.
         // D's terminal-root fixture seeds 1129.completed; the wallet assessment itself is tested below.
-        // and bloom/unforgiven seed their upstream pending facts (1115 remains author-blocked).
+        // Rose bloom/unforgiven seed their upstream pending facts; ideal_world selects its real motive choice.
         private static readonly EndingCase[] Cases =
         {
             new EndingCase("neutral.ending.a", "neutral.route.1111.s1", 37, new[] { "route.neutral" }),
@@ -42,7 +42,8 @@ namespace Spotlight.Narrative.Tests
             new EndingCase("rose.ending.job_requirements.ending", "rose.ending.job_requirements", 27,
                 new[] { "story.rose.ending.job_requirements.pending" }),
             new EndingCase("rose.route.1115.s1.ending.ideal_world", "rose.route.1115.s1", 41,
-                new[] { "route.rose", "story.rose.route.1111.s2.completed" }, blocked: true),
+                new[] { "route.rose", "story.rose.route.1111.s2.completed" },
+                new[] { "rose.route.1115.s1.choice.p093" }),
             new EndingCase("rose.route.ending.unforgiven.ending", "rose.route.ending.unforgiven", 48,
                 new[] { "route.rose", "story.rose.route.ending.unforgiven.pending" }),
             new EndingCase("rose.route.ending.bloom.ending", "rose.route.ending.bloom", 48,
@@ -53,9 +54,10 @@ namespace Spotlight.Narrative.Tests
                 new[] { "story.revolution.1107.s1.completed" },
                 new[] { "church.1111.s1.choice.s1.2", "church.1111.s1.choice.s2.2" }),
             new EndingCase("church.ending.ry1", "church.route.1123.s1", 49,
-                new[] { "route.church", "story.church.route.1118.s1.completed", "church.thibaut.followed" }, blocked: true),
+                new[] { "route.church", "story.church.route.1118.s1.completed", "church.thibaut.followed" }),
             new EndingCase("church.ending.ry2", "church.route.1123.s1", 49,
-                new[] { "route.church", "story.church.route.1118.s1.completed" }, blocked: true),
+                new[] { "route.church", "story.church.route.1118.s1.completed" },
+                new[] { "church.route.1123.s1.choice.last_reply.1" }),
             new EndingCase("revolution.end01", "revolution.route.1124.s1", 50,
                 new[] { "route.revolution", "story.revolution.route.1123.s1.completed" },
                 new[] { "revolution.route.1124.s1.c0.1" }),
@@ -100,7 +102,14 @@ namespace Spotlight.Narrative.Tests
                     if (page.stepType == NarrativeConversationStepType.End) { ReachedEnd = page.pageId; break; }
                     if (page.stepType == NarrativeConversationStepType.Gameplay)
                     {
-                        // Deliberately fail instead of manufacturing a coffee-host success.
+                        if (Request.Event.eventId == "church.route.1123.s1" && page.gameplayKey == "host:end_business")
+                        {
+                            // RY1123 only needs the real host business-close command. The fixture
+                            // completes that host boundary; it never fabricates a coffee production result.
+                            Controller.RecordGameplayResultForPresentation(page.pageId, true);
+                            continue;
+                        }
+                        // Other route fixtures retain their existing real-host boundary contract.
                         Assert.Fail("This ending fixture unexpectedly requires a real host: " + page.pageId);
                     }
                     if (page.stepType == NarrativeConversationStepType.PassiveCheck)
@@ -328,6 +337,8 @@ namespace Spotlight.Narrative.Tests
         [TestCase("rose.route.ending.bloom.ending")]
         [TestCase("church.ending.if2")]
         [TestCase("church.ending.if4")]
+        [TestCase("church.ending.ry1")]
+        [TestCase("church.ending.ry2")]
         [TestCase("revolution.end01")]
         [TestCase("revolution.end02")]
         public void CancellingAfterTheActualLastPageDoesNotCommitEndingOrChoices(string id)

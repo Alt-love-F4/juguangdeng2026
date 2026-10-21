@@ -34,6 +34,18 @@ namespace Spotlight.FreeCafe
     {
         public static string Recipe(string text) => text?.Replace("奶泡", "拉花").Replace("奶沫", "拉花");
 
+        public static string RecipeIngredient(Portion portion, string label)
+        {
+            if (portion?.specId == "coffee")
+                switch (portion.coffeeKind)
+                {
+                    case "essence": return "精粹咖啡液";
+                    case "black": return "普通咖啡液";
+                    case "cold_brew": return "冷萃咖啡液";
+                }
+            return Recipe(label);
+        }
+
         public static string Pattern(string id)
         {
             switch (id)

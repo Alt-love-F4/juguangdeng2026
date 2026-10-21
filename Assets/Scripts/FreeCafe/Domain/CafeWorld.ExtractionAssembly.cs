@@ -16,16 +16,16 @@ namespace Spotlight.FreeCafe
             var jugs = State.entities.FindAll(IsPrecisionExtractor);
             foreach (var jug in jugs)
             {
-                if (jug.production.brewCompleted) continue;
-                var filter = Find(jug.production.extractionFilterId);
-                if (filter == null || !IsExtractionFilter(filter)
-                    || filter.production.extractionJugId != jug.id || filter.area != jug.area)
-                    filter = Find(jug.id + ".filter");
+                var filter = ExtractionFilter(jug);
+                bool migrateGrounds = !jug.production.extractionAssemblyInitialized;
                 if (filter == null || !IsExtractionFilter(filter)
                     || filter.production.extractionJugId != jug.id || filter.area != jug.area)
                     filter = FindNearbyUnlinkedFilter(jug);
                 if (filter == null)
                 {
+                    // A detached original is still a real vessel, not a missing default.
+                    // Never create a second entity with its ID when it is parked elsewhere.
+                    if (Find(jug.id + ".filter") != null) continue;
                     filter = new WorldEntity { id = jug.id + ".filter", specId = "container.extractor.filter",
                         area = jug.area, x = jug.x + .9f, y = jug.y - .8f };
                     State.entities.Add(filter);
@@ -39,9 +39,10 @@ namespace Spotlight.FreeCafe
                 }
                 jug.production.extractionAssemblyInitialized = true;
                 PositionExtractionFilter(jug);
-                for (int index = jug.contents.Count - 1; index >= 0; index--)
-                    if (jug.contents[index].specId == "grounds")
-                    { filter.contents.Add(jug.contents[index]); jug.contents.RemoveAt(index); }
+                if (migrateGrounds)
+                    for (int index = jug.contents.Count - 1; index >= 0; index--)
+                        if (jug.contents[index].specId == "grounds")
+                        { filter.contents.Add(jug.contents[index]); jug.contents.RemoveAt(index); }
             }
         }
 
@@ -55,7 +56,8 @@ namespace Spotlight.FreeCafe
             foreach (var candidate in State.entities)
             {
                 if (!IsExtractionFilter(candidate) || candidate.area != jug.area
-                    || !string.IsNullOrEmpty(candidate.production.extractionJugId)) continue;
+                    || !string.IsNullOrEmpty(candidate.production.extractionJugId)
+                    || !PreviewExtractionAssembly(candidate, jug).success) continue;
                 float dx = candidate.x - expectedX, dy = candidate.y - expectedY;
                 float distanceSquared = dx * dx + dy * dy;
                 if (distanceSquared <= maxDistance * maxDistance && distanceSquared < best)
@@ -66,11 +68,8 @@ namespace Spotlight.FreeCafe
 
         private bool CanAutoAttachExtractionFilter(WorldEntity filter, WorldEntity jug)
         {
-            if (filter == null || jug == null || !IsExtractionFilter(filter) || !IsPrecisionExtractor(jug)
-                || filter.area != jug.area || !string.IsNullOrEmpty(filter.production.extractionJugId)
-                || filter.production.filterSpent && filter.contents.Count > 0
-                || LiquidVolume(jug) > .001f || jug.production.brewStarted && !jug.production.brewCompleted)
-                return false;
+            if (!PreviewExtractionAssembly(filter, jug).success
+                || !string.IsNullOrEmpty(filter.production.extractionJugId)) return false;
             float dx = filter.x - (jug.x + Prep.extractionFilterOffsetX);
             float dy = filter.y - (jug.y + Prep.extractionFilterOffsetY);
             float maxDistance = Math.Max(0, Prep.extractionAssemblySnapDistance);
@@ -110,6 +109,12 @@ namespace Spotlight.FreeCafe
             var filter = Find(filterId); var jug = Find(jugId);
             var valid = PreviewExtractionAssembly(filter, jug);
             if (!valid.success) return valid;
+            // Dropping an already assembled pair must not complete/reset its current brew.
+            if (ExtractionJug(filter) == jug && ExtractionFilter(jug) == filter)
+            {
+                PositionExtractionFilter(jug);
+                Notify(); return ActionResult.Yes("滤杯已组合，保留现有内容与萃取状态");
+            }
             DetachExtractionFilter(filter);
             jug.production.extractionFilterId = filter.id;
             jug.production.extractionAssemblyInitialized = true;
@@ -122,13 +127,14 @@ namespace Spotlight.FreeCafe
         {
             if (!IsExtractionFilter(filter) || !IsPrecisionExtractor(jug) || filter.area != jug.area)
                 return ActionResult.No("滤杯需要与咖啡萃取下壶组合");
+            if (Locked(filter) || Locked(jug) || MiniGameUses(filter) || MiniGameUses(jug))
+                return ActionResult.No("器皿正在使用");
+            var previousJug = ExtractionJug(filter);
+            if (previousJug != null && (Locked(previousJug) || MiniGameUses(previousJug)))
+                return ActionResult.No("组装器皿正在使用");
             if (ExtractionFilter(jug) != null && ExtractionFilter(jug) != filter)
                 return ActionResult.No("下壶已有滤杯，请先拆下上层");
-            if (filter.production.filterSpent && filter.contents.Count > 0)
-                return ActionResult.No("滤杯里是用过的咖啡粉，请先清空再装入新粉");
-            if (LiquidVolume(jug) > .001f || jug.production.brewStarted && !jug.production.brewCompleted)
-                return ActionResult.No("请先倒空下壶，再组合滤杯开始下一轮萃取");
-            return ActionResult.Yes("把上层滤杯装到下壶上");
+            return ActionResult.Yes("把上层滤杯装到下壶上，保留现有内容物");
         }
 
         private void DetachExtractionFilter(WorldEntity filter)

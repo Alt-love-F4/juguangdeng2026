@@ -10355,11 +10355,6 @@
     "comment": ""
   },
   {
-    "key": "condition.blocked.neutral.promotion_wisdom_conflict",
-    "text": "blocked.neutral.promotion_wisdom_conflict",
-    "comment": ""
-  },
-  {
     "key": "condition.neutral.promotion.organized",
     "text": "neutral.promotion.organized",
     "comment": ""
@@ -10392,11 +10387,6 @@
   {
     "key": "condition.blocked.neutral.1018.s1.cafe_reporter_daytime_entry",
     "text": "blocked.neutral.1018.s1.cafe_reporter_daytime_entry",
-    "comment": ""
-  },
-  {
-    "key": "condition.blocked.neutral.reporter_advert_price",
-    "text": "blocked.neutral.reporter_advert_price",
     "comment": ""
   },
   {
@@ -14200,16 +14190,6 @@
     "comment": "策划文件/文案6点/文案/a-中立（共通+支线）/入线MA70.11.18-S1.docx#P067; choice"
   },
   {
-    "key": "condition.blocked.neutral.missing_end_if4",
-    "text": "blocked.neutral.missing_end_if4",
-    "comment": ""
-  },
-  {
-    "key": "condition.blocked.neutral.investigation_bribe",
-    "text": "blocked.neutral.investigation_bribe",
-    "comment": ""
-  },
-  {
     "key": "neutral.route.1122.s1.text.p006",
     "text": "十一月已近尾声，圣诺特的天空接连几日阴沉，卢米恩河上吹来的寒风掠过屋檐，将街边仅剩的几片枯叶卷入水沟。",
     "comment": "策划文件/文案6点/文案/a-中立（共通+支线）/入线MA70.11.22-S1包含中立结局B.docx#P006; current source"
@@ -17970,11 +17950,6 @@
     "comment": "策划文件/文案6点/文案/a-新玫瑰（共通+支线）/MA70.10.16-S1.docx#P093"
   },
   {
-    "key": "condition.integration.rose.1016.stance3.resolved",
-    "text": "integration.rose.1016.stance3.resolved",
-    "comment": ""
-  },
-  {
     "key": "rose.1016.s1.text.p094",
     "text": "我对此渐渐有了一个构想。",
     "comment": "策划文件/文案6点/文案/a-新玫瑰（共通+支线）/MA70.10.16-S1.docx#P094; sha256=50a60576a409903268e7453c7ea2bff8a0d36841434d4b6dbbfdbfb51775e620"
@@ -18831,7 +18806,7 @@
   },
   {
     "key": "rose.1024.s2.text.p006",
-    "text": "我小心翼翼地拿着手上那份清白的档案应对，却依然被鸽哨们挡了下来，不得不拿出钱袋打点，方才获得「不必调整，正常营业」的口头准许",
+    "text": "我拿着那份证明清白的档案，耐着性子应付了一轮又一轮盘问，终于获得「不必调整，正常营业」的口头准许。",
     "comment": "策划文件/文案6点/文案/a-新玫瑰（共通+支线）/MA70.10.24-S2.docx#P006; sha256=4ee8f403d61752b88e0180764f35328d13f8c7af99aa141b663efce52baad216"
   },
   {
@@ -20520,11 +20495,6 @@
     "comment": "策划文件/文案6点/文案/a-新玫瑰（共通+支线）/MA70.11.03—S1.docx#P028; sha256=30ca5fcf5f0e18b9bd03d7b974c67148137c8b45a6b200e868591ac1f5f52528"
   },
   {
-    "key": "condition.integration.rose.1103.cocoa_milk.served",
-    "text": "integration.rose.1103.cocoa_milk.served",
-    "comment": ""
-  },
-  {
     "key": "rose.1103.s1.text.p032",
     "text": "「没想到店里的热饮……比家里的还要好喝。」",
     "comment": "策划文件/文案6点/文案/a-新玫瑰（共通+支线）/MA70.11.03—S1.docx#P032; sha256=30ca5fcf5f0e18b9bd03d7b974c67148137c8b45a6b200e868591ac1f5f52528"
@@ -20651,12 +20621,12 @@
   },
   {
     "key": "rose.1103.s1.text.p058",
-    "text": "阿黛尔的思维太混乱了。我摇摇头，找到被阿黛尔丢在角落里的伞，再取出今天所有的营业额，全都交到埃莉诺小姐手里。",
+    "text": "阿黛尔的思维太混乱了。我摇摇头，找到被阿黛尔丢在角落里的伞，交到埃莉诺小姐手里，又替她拢好身上的衣服。",
     "comment": "策划文件/文案6点/文案/a-新玫瑰（共通+支线）/MA70.11.03—S1.docx#P058; sha256=30ca5fcf5f0e18b9bd03d7b974c67148137c8b45a6b200e868591ac1f5f52528"
   },
   {
     "key": "rose.1103.s1.text.p059",
-    "text": "「这是一点心意，请埃莉诺小姐务必收下，就当是我歉意的证明……首饰和礼服，我会保管好的，一直等您来取。」",
+    "text": "「伞和衣服您先带着，至少别再淋雨了……首饰和礼服，我会保管好的，一直等您来取。」",
     "comment": "策划文件/文案6点/文案/a-新玫瑰（共通+支线）/MA70.11.03—S1.docx#P059; sha256=30ca5fcf5f0e18b9bd03d7b974c67148137c8b45a6b200e868591ac1f5f52528"
   },
   {
@@ -21725,16 +21695,6 @@
     "comment": "策划文件/文案6点/文案/a-新玫瑰（共通+支线）/NR70.11.15-S1 结局分支-Normal Ending 理想新世界.docx#P103; sha256=5b2947228b339c3a15f33c2ce76f08234d2f979b05f082fe19b5bca0e6fbfe7a"
   },
   {
-    "key": "condition.integration.rose.route.1115.candor.low",
-    "text": "integration.rose.route.1115.candor.low",
-    "comment": ""
-  },
-  {
-    "key": "condition.integration.rose.route.1115.candor.high",
-    "text": "integration.rose.route.1115.candor.high",
-    "comment": ""
-  },
-  {
     "key": "rose.route.1115.s1.text.p105",
     "text": "「我拒绝回答这个问题。」",
     "comment": "策划文件/文案6点/文案/a-新玫瑰（共通+支线）/NR70.11.15-S1 结局分支-Normal Ending 理想新世界.docx#P105; sha256=5b2947228b339c3a15f33c2ce76f08234d2f979b05f082fe19b5bca0e6fbfe7a"
@@ -22187,11 +22147,6 @@
   {
     "key": "condition.story.rose.route.1115.s1.plan_known",
     "text": "story.rose.route.1115.s1.plan_known",
-    "comment": ""
-  },
-  {
-    "key": "condition.integration.rose.route.1115.s1.ready",
-    "text": "integration.rose.route.1115.s1.ready",
     "comment": ""
   },
   {
@@ -24425,16 +24380,6 @@
     "comment": "MA70.10.23-S1.docx nonempty paragraph 37; original in _audit [speaker-label-stripped]"
   },
   {
-    "key": "condition.church.detention.bribe_quote_ready",
-    "text": "church.detention.bribe_quote_ready",
-    "comment": "root-tail fact; initial false"
-  },
-  {
-    "key": "condition.church.detention.bribe_affordable",
-    "text": "church.detention.bribe_affordable",
-    "comment": "root-tail fact; initial false"
-  },
-  {
     "key": "church.1023.s1.text.p040",
     "text": "「继续调查既耽误你们的时间，也耽误我的生意。或许有个对双方都方便的办法？」",
     "comment": "MA70.10.23-S1.docx nonempty paragraph 40; original in _audit [speaker-label-stripped]"
@@ -24508,11 +24453,6 @@
     "key": "church.1023.s1.text.p060",
     "text": "「切，那还搁这闹腾，滚回去！」",
     "comment": "MA70.10.23-S1.docx nonempty paragraph 60; original in _audit [speaker-label-stripped]"
-  },
-  {
-    "key": "condition.church.detention.bribery_payment_confirmed",
-    "text": "church.detention.bribery_payment_confirmed",
-    "comment": "root-tail fact; initial false"
   },
   {
     "key": "church.1023.s1.text.p064",
@@ -24832,7 +24772,7 @@
   {
     "key": "condition.church.release.persuasion",
     "text": "church.release.persuasion",
-    "comment": "root-tail fact; initial false"
+    "comment": ""
   },
   {
     "key": "condition.story.church.1023.s1.release.persuasion",
@@ -30453,11 +30393,6 @@
     "key": "condition.story.church.route.1123.s1.completed",
     "text": "story.church.route.1123.s1.completed",
     "comment": "root-tail fact; initial false"
-  },
-  {
-    "key": "condition.construction.church.route.1123.s1.ready",
-    "text": "construction.church.route.1123.s1.ready",
-    "comment": "Explicit integration barrier; never narrative completion"
   },
   {
     "key": "church.route.1123.s1.text.p003",
@@ -53925,16 +53860,6 @@
     "comment": "Declaration: false until truthful root-tail producer"
   },
   {
-    "key": "condition.integration.rose.1103.revenue_transfer.ready",
-    "text": "integration.rose.1103.revenue_transfer.ready",
-    "comment": ""
-  },
-  {
-    "key": "condition.construction.church.1023.s1.bribery_ready",
-    "text": "construction.church.1023.s1.bribery_ready",
-    "comment": "Only unresolved funding branch; exact amount/payment must be implemented before enabling"
-  },
-  {
     "key": "condition.construction.church.1104.s1.fee_amount_ready",
     "text": "construction.church.1104.s1.fee_amount_ready",
     "comment": "Only the unresolved third fee choice; free and one-coin paths remain available"
@@ -59558,5 +59483,110 @@
     "key": "cafe.ambient.order.solo-12.text.4",
     "text": "我：杯子放在您手边，不用再往前够。",
     "comment": "Ordinary cafe order extension"
+  },
+  {
+    "key": "condition.story.rose.route.1115.s1.followup_invited",
+    "text": "story.rose.route.1115.s1.followup_invited",
+    "comment": ""
+  },
+  {
+    "key": "rose.1024.s2.text.completion.mind.persuaded.1",
+    "text": "我是靠自己的辩解换回这份清白档案的，并没有答应替教会做事。可这个孩子怎么会知道我刚从监狱出来？",
+    "comment": "Authorized gap completion; source context [68, 73, 79]"
+  },
+  {
+    "key": "rose.1024.s2.text.completion.persuaded.1",
+    "text": "「你能说服教会放人，倒不只是会泡咖啡。不过，一份清白档案保不住这家店。」",
+    "comment": "Authorized gap completion; source context [99, 100, 112, 117]"
+  },
+  {
+    "key": "rose.1024.s2.text.completion.persuaded.2",
+    "text": "「放开她。现在，你可以问我一个问题。」",
+    "comment": "Authorized gap completion; source context [99, 100, 112, 117]"
+  },
+  {
+    "key": "rose.1024.s2.text.completion.persuaded.3",
+    "text": "侍从松开阿黛尔，她立刻躲到了我的身后。",
+    "comment": "Authorized gap completion; source context [99, 100, 112, 117]"
+  },
+  {
+    "key": "rose.route.1115.s1.text.completion.quiet.agreement.1",
+    "text": "我没有看清这份许诺背后的用意，只听见西尔万先生长长地呼出一口气。",
+    "comment": "Authorized gap completion; source context [133, 137, 138, 178, 181]"
+  },
+  {
+    "key": "rose.route.1115.s1.text.completion.quiet.agreement.2",
+    "text": "「我会把您的提议转告王女殿下。是否接受，得由她自己决定。」",
+    "comment": "Authorized gap completion; source context [133, 137, 138, 178, 181]"
+  },
+  {
+    "key": "neutral.1018.s1.text.completion.advert_quote",
+    "text": "商业版的一则简短店铺介绍，费用是300金币；不另收排版费。您也可以暂时不刊登。",
+    "comment": "User-authorized narrative completion; not source prose"
+  },
+  {
+    "key": "neutral.1018.s1.choice.advert.a.label",
+    "text": "刊登简短广告（支付300金币）",
+    "comment": "User-authorized visible price/clarification"
+  },
+  {
+    "key": "condition.neutral.newspaper.advertisement",
+    "text": "neutral.newspaper.advertisement",
+    "comment": ""
+  },
+  {
+    "key": "neutral.route.1118.s1.text.completion.investigation_options",
+    "text": "我还可以带着账本去正式说明情况；若想托人疏通，对方暗示至少要准备1500金币。这条路并非非走不可。",
+    "comment": "User-authorized narrative completion; not source prose"
+  },
+  {
+    "key": "neutral.route.1118.s1.choice.investigation.a.label",
+    "text": "随你们去说明情况，让账目作证（无需金钱或人脉）",
+    "comment": "User-authorized visible price/clarification"
+  },
+  {
+    "key": "neutral.route.1118.s1.choice.investigation.c.label",
+    "text": "试着疏通关系（需1500金币；不足则转正式核查）",
+    "comment": "User-authorized visible price/clarification"
+  },
+  {
+    "key": "neutral.route.1118.s1.text.completion.bribe_withdrawn",
+    "text": "我收回了试探，没有交出钱袋。官员警告我不要再提私下交易，随后命我带齐账目，到监察司正式说明。",
+    "comment": "User-authorized narrative completion; not source prose"
+  },
+  {
+    "key": "neutral.route.1118.s1.text.completion.cooperate",
+    "text": "傍晚，我带着核对过的账目回到了咖啡馆。监察司没有找到新的证据，准我回店等候书面复核；我留下了账册副本，并承诺随传随到。没有谁替我担保，这件事只能靠记录和耐心说明。",
+    "comment": "User-authorized narrative completion; not source prose"
+  },
+  {
+    "key": "condition.neutral.investigation.reviewed",
+    "text": "neutral.investigation.reviewed",
+    "comment": ""
+  },
+  {
+    "key": "neutral.route.1118.s1.text.completion.failed_bribe",
+    "text": "傍晚，我带着核对过的账目回到了咖啡馆。监察司没有找到新的证据，准我回店等候书面复核；我留下了账册副本，并承诺随传随到。没有谁替我担保，这件事只能靠记录和耐心说明。",
+    "comment": "User-authorized narrative completion; not source prose"
+  },
+  {
+    "key": "neutral.route.1122.s1.text.completion.review_notice",
+    "text": "监察司的复核通知终于送到了：账册与供货记录彼此吻合，现有材料不足以继续追查。以后若有新证据，仍须配合询问。我收好通知，知道这不是谁许下的保护，只是暂时拿回了正常经营的余地。",
+    "comment": "User-authorized narrative completion; not source prose"
+  },
+  {
+    "key": "neutral.route.1122.s1.text.completion.review_warning",
+    "text": "送信人临走时提醒我，近来城门盘查更严，货车也常被耽搁。我把该备的货记进账本，心里却开始盘算：这样的日子，还该不该继续留在王都？",
+    "comment": "User-authorized narrative completion; not source prose"
+  },
+  {
+    "key": "playable.newspaper.1021.advert.title",
+    "text": "商讯 · 沸点咖啡馆",
+    "comment": "Final playable revision: paid advertisement payoff"
+  },
+  {
+    "key": "playable.newspaper.1021.advert.text",
+    "text": "圣徒街的沸点咖啡馆现已重新营业。香醇咖啡与新鲜点心，欢迎各位街坊前来小坐。\n（店长委托刊登的广告）",
+    "comment": "Final playable revision: paid advertisement payoff"
   }
 ]

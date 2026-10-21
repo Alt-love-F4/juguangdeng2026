@@ -148,6 +148,9 @@ def merge(modules):
  events={r['eventId']for r in sheets['Event']['rows']};errors=[]
  for r in sheets['Result']['rows']:
   if r['resultType']=='QUEUE_EVENT'and str(r.get('target','')).removeprefix('event:')not in events:errors.append('Unknown continuation '+str(r))
+ # Final playable eligibility policy is centralized and regenerated with content.
+ from final_playability import apply as apply_final_playability
+ apply_final_playability(sheets)
  # Apply approved presentation on the existing NCS source sheets.
  from ending_revision import apply as apply_ending_revision
  apply_ending_revision(sheets)

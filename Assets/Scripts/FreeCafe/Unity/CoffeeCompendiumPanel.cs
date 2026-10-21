@@ -530,7 +530,7 @@ namespace Spotlight.FreeCafe
                     var spec = w.Spec(portion.specId);
                     string amount = portion.milliliters > 0 ? (portion.milliliters * scale).ToString("0") + " ml"
                         : portion.grams > 0 ? (portion.grams * scale).ToString("0.#") + " g" : (portion.units * scale).ToString("0.#") + " 份";
-                    y = IngredientRow(rightPage, spec?.artId ?? portion.specId, FreeCafeProductionText.Recipe(spec?.label ?? portion.specId), amount, y);
+                    y = IngredientRow(rightPage, spec?.artId ?? portion.specId, FreeCafeProductionText.RecipeIngredient(portion, spec?.label ?? portion.specId), amount, y);
                 }
             y = Divider(rightPage, y + 8f);
             string[] steps = copy?.steps;

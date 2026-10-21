@@ -221,6 +221,103 @@ namespace Spotlight.FreeCafe.Tests
             Assert.That(restored.SolidMass(filter) + restored.CoffeeGroundsGrams(jug.contents[0]), Is.EqualTo(12).Within(.001f));
         }
 
+        [TestCase(false)]
+        [TestCase(true)]
+        public void UsedPartsWithForeignContentsCanStackInEitherDirection(bool lowerOntoUpper)
+        {
+            Grounds(); Water();
+            world.PourLiquid("m.heater", Jug.id, 200, 7.5f);
+            world.Tick(7.5f); world.FinishPour(Filter.id); world.Tick(.2f);
+            Assert.That(world.ExtractionFilter(Jug), Is.Null);
+            Filter.contents.Add(new Portion { specId = "sugar", grams = 5, units = 1 });
+            string upperBefore = JsonUtility.ToJson(Filter.contents[0]);
+            string lowerBefore = JsonUtility.ToJson(Jug.contents[0]);
+            string stateBefore = JsonUtility.ToJson(world.State);
+            string item = lowerOntoUpper ? Jug.id : Filter.id;
+            string target = lowerOntoUpper ? Filter.id : Jug.id;
+            Assert.That(world.Preview(item, target).success, Is.True);
+            Assert.That(JsonUtility.ToJson(world.State), Is.EqualTo(stateBefore));
+            Assert.That(world.Interact(item, target).success, Is.True);
+            Assert.That(world.ReturnVesselHome(item).success, Is.True);
+            world.Tick(1);
+            Assert.That(world.ExtractionFilter(Jug), Is.SameAs(Filter), "Reassembly must not immediately auto-detach");
+            Assert.That(world.ExtractionJug(Filter), Is.SameAs(Jug));
+            Assert.That(Filter.production.filterSpent, Is.True, "Stacking must not refresh spent powder");
+            Assert.That(JsonUtility.ToJson(Filter.contents[0]), Is.EqualTo(upperBefore));
+            Assert.That(JsonUtility.ToJson(Jug.contents[0]), Is.EqualTo(lowerBefore));
+            Assert.That(world.Restore(JsonUtility.FromJson<CafeSnapshot>(JsonUtility.ToJson(world.State))).success, Is.True);
+            Assert.That(world.ExtractionFilter(Jug), Is.SameAs(Filter));
+        }
+
+        [Test] public void ReattachingSamePairDoesNotResetActiveExtraction()
+        {
+            Grounds(); Water();
+            world.PourLiquid("m.heater", Jug.id, 20, 1); world.Tick(.1f);
+            string before = JsonUtility.ToJson(world.State);
+            Assert.That(world.AttachExtractionFilter(Filter.id, Jug.id).success, Is.True);
+            Assert.That(JsonUtility.ToJson(world.State), Is.EqualTo(before));
+        }
+
+        [TestCase(false)]
+        [TestCase(true)]
+        public void NearbyUsedPartsReassembleWithoutDuplicateIdsOrMovingLowerSolids(bool completed)
+        {
+            Assert.That(world.PrepareExtractionDrag(Jug.id).success, Is.True);
+            Jug.contents.Add(new Portion { specId = "water", milliliters = 50, units = 1 });
+            Jug.contents.Add(new Portion { specId = "grounds", grams = 3, units = 1 });
+            Filter.contents.Add(new Portion { specId = "sugar", grams = 5, units = 1 });
+            Filter.production.filterSpent = true;
+            Jug.production.brewStarted = true;
+            Jug.production.brewCompleted = completed;
+            int count = world.State.entities.Count;
+            Assert.That(world.ReturnVesselHome(Jug.id).success, Is.True);
+            Assert.That(world.ExtractionFilter(Jug), Is.SameAs(Filter));
+            Assert.That(world.State.entities.Count, Is.EqualTo(count));
+            Assert.That(world.SolidMass(Jug), Is.EqualTo(3));
+            Assert.That(world.SolidMass(Filter), Is.EqualTo(5));
+            world.Tick(1);
+            Assert.That(world.ExtractionFilter(Jug), Is.SameAs(Filter));
+        }
+
+        [Test] public void ReturningJugWithDistantFilterNeverCreatesDuplicateEntity()
+        {
+            Assert.That(world.PrepareExtractionDrag(Jug.id).success, Is.True);
+            Assert.That(world.Move(Filter.id, AreaId.Counter, -3, -3).success, Is.True);
+            int count = world.State.entities.Count;
+            for (int i = 0; i < 3; i++) Assert.That(world.ReturnVesselHome(Jug.id).success, Is.True);
+            Assert.That(world.ExtractionFilter(Jug), Is.Null);
+            Assert.That(world.State.entities.Count, Is.EqualTo(count));
+            Assert.That(world.Restore(JsonUtility.FromJson<CafeSnapshot>(JsonUtility.ToJson(world.State))).success, Is.True);
+        }
+
+        [Test] public void ReassembledWetFilterDrainsOnlyAvailableSpaceWithoutLosingContents()
+        {
+            Assert.That(world.PrepareExtractionDrag(Jug.id).success, Is.True);
+            Jug.contents.Add(new Portion { specId = "water", milliliters = 390, units = 1 });
+            Filter.contents.Add(new Portion { specId = "water", milliliters = 50, units = 1 });
+            Filter.contents.Add(new Portion { specId = "sugar", grams = 5, units = 1 });
+            Filter.production.filterSpent = true;
+            Assert.That(world.AttachExtractionFilter(Filter.id, Jug.id).success, Is.True);
+            world.Tick(3);
+            Assert.That(world.LiquidVolume(Jug), Is.EqualTo(400).Within(.001f));
+            Assert.That(world.LiquidVolume(Filter), Is.EqualTo(40).Within(.001f));
+            Assert.That(world.SolidMass(Filter), Is.EqualTo(5));
+            Assert.That(world.ExtractionFilter(Jug), Is.SameAs(Filter));
+        }
+
+        [Test] public void AssemblyStillRejectsOccupiedOrRemoteTargetsWithoutMutation()
+        {
+            var other = new WorldEntity { id = "other.filter", specId = Filter.specId, area = Jug.area };
+            world.State.entities.Add(other);
+            string before = JsonUtility.ToJson(world.State);
+            Assert.That(world.AttachExtractionFilter(other.id, Jug.id).success, Is.False);
+            Assert.That(JsonUtility.ToJson(world.State), Is.EqualTo(before));
+            other.area = AreaId.Cafe;
+            before = JsonUtility.ToJson(world.State);
+            Assert.That(world.AttachExtractionFilter(other.id, Jug.id).success, Is.False);
+            Assert.That(JsonUtility.ToJson(world.State), Is.EqualTo(before));
+        }
+
         [Test] public void InvalidAssemblyReferenceIsRejectedBeforeRestoring()
         {
             var snapshot = JsonUtility.FromJson<CafeSnapshot>(JsonUtility.ToJson(world.State));

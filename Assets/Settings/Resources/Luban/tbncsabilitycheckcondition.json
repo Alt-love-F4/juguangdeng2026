@@ -326,5 +326,13 @@
     "threshold": 10,
     "groupIndex": 3,
     "seq": 3
+  },
+  {
+    "conditionId": "neutral.1013.s2.check.q2b.threshold",
+    "checkId": "neutral.1013.s2.check.q2b",
+    "attributeId": "wisdom",
+    "threshold": 3,
+    "groupIndex": 1,
+    "seq": 1
   }
 ]

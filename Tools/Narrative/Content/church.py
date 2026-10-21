@@ -13,6 +13,7 @@ SOURCE_DIR = Path("策划文件/文案6点/文案/a-王庭教会（共通+支线
 W = "{http://schemas.openxmlformats.org/wordprocessingml/2006/main}"
 ROUTES = ("neutral", "rose", "church", "revolution")
 EXCELLENT_SCORE_PRESET = 90  # Shared host preset, not a source-author numeric grade.
+CHURCH_BRIBE_AMOUNT = 3000  # Source P046 final demand; P056's pending amount resolves to this explicit demand.
 SHEETS = ("Object", "Event", "EventDate", "SetupParams", "PresentationIndex", "ConditionKey", "Condition", "Result", "ConversationPage", "ConversationLine", "Choice", "AbilityCheck", "AbilityCheckCondition", "ReadingPage", "ReadingLine", "Ending", "Text")
 SOURCE_HASHES = {
     "MA70.10.09-S2.docx": "15c3101b85329f082efa98d9c938791089d9ac5e5cb35c50d8788fa4a3d9c58d",
@@ -27,7 +28,7 @@ SOURCE_HASHES = {
     "RY70.11.11-S1.docx": "f3e1ae56f55471b7e4e2f4ba26dc5bfbe79b683082f6f34ce86ec772e8d67a3b",
     "RY70.11.12-S1.docx": "c77bfd4d4a494e19b6624ce08cf976f122bbaff7384ee83c28e253344ac363c0",
     "RY70.11.13-S1.docx": "e5b7eb86b5681eaf81559b3334a381ee0f924ba1037c391493568498a0b654fd",
-    "RY70.11.15-S1.docx": "4bcd445bc3bfab306d8cb95a565a99f32999ed43444ca2fa5d171d814b963313",
+    "RY70.11.15-S1.docx": "e85f90d1b6b2b4b65b0a31b2c2c325d836fda9dbef8ef28339152e5f45d2ee91",
     "RY70.11.16-S1.docx": "d4df86d2b714985110e13b7bbdcf903527fe6bbf5fb54fb68bdd092606727a91",
     "RY70.11.18-S1.docx": "0006e097bbac49b28630f38d988af4ca76dade04f5a410fc5d99387a0fd4686d",
     "RY70.11.23-S1【结局1&2】.docx": "c9af366a682b13fabd3b4f58ba6c4f643d70b290037772a37c285b9b4b4c89a2",
@@ -327,28 +328,23 @@ def _church1023(c):
     persuasion=guard(choice(a[0]),numeric_guard("player.language","ge",7))
     pfail=guard(choice(a[0]),numeric_guard("player.language","lt",7))
     r.span(32,34,persuasion); r.span(37,37,pfail)
-    ready="construction.church.1023.s1.bribery_ready"
-    c.fact(ready,"Only unresolved funding branch; exact amount/payment must be implemented before enabling",only_set_true=False)
-    c.fact("church.detention.bribe_quote_ready",only_set_true=False)
-    c.fact("church.detention.bribe_affordable",only_set_true=False)
-    c.fact("church.detention.bribery_payment_confirmed",only_set_true=False)
-    r.audit["nodeBlockers"]=[dict(node="P022/P056",choiceId=a[1],blockedBy="church.1023.bribe_amount_pending_source_P056",readyKey=ready)]
-    retry_when=guard(pfail,ready,"church.detention.bribe_quote_ready","church.detention.bribe_affordable")
+    money_guard=numeric_guard("cafe.money","ge",CHURCH_BRIBE_AMOUNT)
+    money_short=numeric_guard("cafe.money","lt",CHURCH_BRIBE_AMOUNT)
+    retry_when=guard(pfail,money_guard)
     retry=r.menu("bribe_retry",[22,23],retry_when)
+    # The source's funding condition is a live cafe balance, not a narrative
+    # readiness flag. Keep the initial option gated as well as the retry menu.
     for cid in (a[1],retry[0]):
-        for fact in (ready,"church.detention.bribe_quote_ready","church.detention.bribe_affordable"):
-            c.condition("choice",cid,fact)
+        c.condition("choice",cid,"cafe.money",f"{CHURCH_BRIBE_AMOUNT},2147483647",kind="BAR_BETWEEN")
     bribe=any_choices(a[1],retry[0]); r.span(40,48,bribe)
     price=r.menu("bribe_price",[50,51],bribe)
-    r.span(53,57,choice(price[0])); r.mark(56,"unresolved-money",status="blocked-decision")
+    r.span(53,57,choice(price[0])); r.mark(56,"money-settlement",status="implemented")
     r.span(59,61,choice(price[1]))
-    r.depend(ready,"Offer2000/demand3000 but deduction P056 TBD. Branch stays locked; no guessed/zero payment. Add approved transactional amount before enabling")
-    bribery=guard(choice(price[0]),"church.detention.bribery_payment_confirmed")
+    bribery=guard(choice(price[0]),money_guard)
+    r.result("MONEY_REMOVE","cafe",CHURCH_BRIBE_AMOUNT,bribery,owner=price[0]+".result",note="Source P046 final demand; actual cafe balance debit settles the bribe")
     ck=r.check("altered_release",None,None,[("wisdom",6,1),("perception",6,2)])
     routes=[("direct",choice(a[2])),("decline",any_choices(retry[1],price[1])),
-            ("unconfigured",guard(pfail,"not:"+ready)),
-            ("noquote",guard(pfail,ready,"not:church.detention.bribe_quote_ready")),
-            ("insufficient",guard(pfail,ready,"church.detention.bribe_quote_ready","not:church.detention.bribe_affordable"))]
+            ("insufficient",guard(bribe,money_short))]
     rescues=[]
     for name,attempt in routes:
         rescue=guard(attempt,numeric_guard("faction.revolution","ge",0)); rescues.append((name,rescue))
@@ -372,7 +368,7 @@ def _church1023(c):
         if outcome=="bribery": r.flag("story.church.1023.s1.release.bribe",when,"Legacy Rose alias")
         r.result("SET_FLAG","church.detention.active","false",when,note="Canonical state cleared only by actual successful release root-tail; host owns real daily transitions/map/business")
         r.end("returned."+name,when)
-    r.audit["decisions"].append(dict(kind="unresolved-money",paragraphs=[41,46,56],offer=2000,demand=3000,settledAmount=None,scope="funding-option-only",detail="Normal persuasion/rescue/IF2 remain available; no silently charged3000 or zero"))
+    r.audit["decisions"].append(dict(kind="source-derived-amount",paragraphs=[41,46,56],offer=2000,demand=CHURCH_BRIBE_AMOUNT,settledAmount=CHURCH_BRIBE_AMOUNT,scope="funding-option",detail="P046 states the final demanded amount is 3000; P056's pending deduction is settled as a real MONEY_REMOVE after the live cafe balance guard."))
     r.depend("church.detention.active","Main DayFlow blocks normal map/business while active; actual CompleteDay transitions without income through Oct21/22; release runs Oct23 morning")
     return r.done()
 
@@ -555,7 +551,7 @@ def _route1118(c):
     r.end(); return r.done()
 
 def _route1123(c):
-    r=c.source("RY70.11.23-S1【结局1&2】.docx","church.route.1123.s1",prerequisites=("story.church.route.1118.s1.completed",),route=True,blocked=("source.RY1115_duplicate_choice_reference_needs_author_confirmation",))
+    r=c.source("RY70.11.23-S1【结局1&2】.docx","church.route.1123.s1",prerequisites=("story.church.route.1118.s1.completed",),route=True)
     yes,no="church.thibaut.followed","not:church.thibaut.followed"
     r.span(3,14,bg="scene.cafe"); r.span(16,18,yes); r.span(21,24); r.business_end("business.end",(26,)); r.span(27,36)
     r.span(38,40,yes); r.span(42,45,no); r.span(47,49); r.span(51,56,bg="cathedral.day")
@@ -570,7 +566,7 @@ def _route1123(c):
     r.span(164,201,no)
     for n in range(202,209): r.mark(n,"host-checkpoint-ui" if n<=206 else "directive",status="optional-checkpoint-unresolved" if n<=206 else "mapped-directive")
     r.ending("church.ending.ry2","历史的分叉路，左还是右？",no); r.end("ry2_end",no)
-    r.audit["decisions"].append(dict(kind="provisional-branch-reference",paragraphs=[15,37,57,78,144],fact=yes,detail="Candidate first RY1115 choice; blocked until source author confirms"))
+    r.audit["decisions"].append(dict(kind="source-label-disambiguation",paragraphs=[15,37,57,78,144],fact=yes,detail="Repeated RY1115 source labels are resolved by the existing follow_thibaut choice fact; this route is production-ready and retains the church route predecessor."))
     r.audit["decisions"].append(dict(kind="source-label-correction",paragraphs=[157,159,161],detail="Three repeated① labels mapped to actual ①/②/③ response semantics"))
     return r.done()
 

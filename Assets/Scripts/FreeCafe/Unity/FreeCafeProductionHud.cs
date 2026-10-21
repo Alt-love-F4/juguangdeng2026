@@ -25,6 +25,7 @@ namespace Spotlight.FreeCafe
         public Image timeGreen, timeGold, volumeGreen, volumeGold;
         [Header("Workstation HUD")]
         public Button orderRecipe, confirmReceipt;
+        public Button resetWorkstation;
         public GameObject[] stackedOrderSheets;
         public GameObject receiptPanel;
         public TMP_Text receiptGrade, receiptProduct, receiptDetails, receiptRewards;
@@ -91,6 +92,7 @@ namespace Spotlight.FreeCafe
             SetListener(nextRecipe,NextRecipe,listening); SetListener(cancelMiniGame,CancelMiniGame,listening);
             SetListener(orderRecipe,OpenOrderRecipe,listening); SetListener(confirmReceipt,CloseReceipt,listening);
             SetListener(pauseButton,OpenPlayerMenu,listening); SetListener(clearMachine,ClearMachine,listening);
+            SetListener(resetWorkstation,ResetWorkstation,listening);
         }
         private static void SetListener(Button button,UnityAction action,bool listening)
         {
@@ -129,6 +131,7 @@ namespace Spotlight.FreeCafe
         }
         private void Discard() { if(!runtime.InputBlocked) Execute(runtime.World.DiscardProductionCup()); }
         private void ClearMachine() { if(!runtime.InputBlocked) Execute(runtime.World.EmptyProductionMachine(runtime.SelectedId)); }
+        private void ResetWorkstation() { if(runtime!=null) runtime.ResetWorkstation(); }
         private void CancelMiniGame()
         {
             var session=runtime.World.State.production;
@@ -218,7 +221,7 @@ namespace Spotlight.FreeCafe
             float portionScale=forOrder ? world.OrderPortionScale(focused) : 1f;
             text.Append("杯型：").Append(world.Spec(forOrder ? world.RequiredCupSpecId(focused) : product.cupSpecId).label).Append(" / 温度：").Append(product.requiredTemperature==LiquidTemperature.Boiling ? "沸腾" : product.requiredTemperature==LiquidTemperature.Warm ? "温热" : "常温").AppendLine();
             text.AppendLine(forOrder ? "当前订单用量（按杯型换算）：" : "参考用量（自由操作，不锁步骤）：");
-            foreach(var p in product.ingredients) text.Append("  ").Append(FreeCafeProductionText.Recipe(world.Spec(p.specId).label)).Append("  ").Append(p.milliliters>0 ? (p.milliliters*portionScale).ToString("0")+" ml" : p.grams>0 ? (p.grams*portionScale).ToString("0.#")+" g" : (p.units*portionScale).ToString("0.#")+" 份").AppendLine();
+            foreach(var p in product.ingredients) text.Append("  ").Append(FreeCafeProductionText.RecipeIngredient(p, world.Spec(p.specId).label)).Append("  ").Append(p.milliliters>0 ? (p.milliliters*portionScale).ToString("0")+" ml" : p.grams>0 ? (p.grams*portionScale).ToString("0.#")+" g" : (p.units*portionScale).ToString("0.#")+" 份").AppendLine();
             text.AppendLine().Append("任何容器都能自由加料；咖啡粉与水混合是冷萃，放到炉台并点击炉台加热完成萃取。\n空杯、半成品也能出品，但顾客会按实际质量评价。");
             if(bookBody!=null) bookBody.text=text.ToString();
             if(bookNote!=null) bookNote.text="注意\n\n参考用量不锁定操作步骤，最终按实际质量评价。";
@@ -298,6 +301,7 @@ namespace Spotlight.FreeCafe
             if(deliver!=null) deliver.interactable=!blocked && onTray && request!=null && !runtime.PracticeTutorialActive;
             if(discard!=null) discard.interactable=!blocked && !guided && cup!=null;
             if(returnButton!=null) returnButton.interactable=!blocked && !guided;
+            if(resetWorkstation!=null) resetWorkstation.interactable=!blocked && !runtime.PracticeTutorialActive && !runtime.CafeTutorialActive;
             if(bookButton!=null) bookButton.interactable=!blocked;
             if(orderRecipe!=null) orderRecipe.interactable=!blocked && request!=null;
             if(pauseButton!=null) pauseButton.interactable=string.IsNullOrEmpty(state.production.miniGameToken) && !(FreeCafeGMPanel.Instance!=null && FreeCafeGMPanel.Instance.IsVisible);

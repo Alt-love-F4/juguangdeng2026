@@ -1,6 +1,6 @@
 ﻿"""CURRENT New Rose DOCX -> Narrative/Text rows. Read INTEGRATION_CONTRACT.md.
-Pure stdlib; never writes Excel, generated data, schema or runtime. Blocked roots
-have explicit false construction flags, not merely cosmetic blockedBy notes.
+Pure stdlib; never writes Excel, generated data, schema or runtime. Final-playable
+source gap resolutions are explicit in audit; unexpected source drift fails closed.
 """
 from __future__ import annotations
 from collections import defaultdict
@@ -28,7 +28,10 @@ APPRECIATION = 'story.rose.1011.s1.sylvain_appreciation'
 HAT = 'story.church.1009.s2.hat_helped'
 CLEARED = 'story.church.1020.s1.cleared'
 BRIBE = 'church.release.bribery'
+PERSUASION = 'church.release.persuasion'
 RESCUE = 'church.release.rescue'
+RELEASES = (PERSUASION, BRIBE, RESCUE)
+FOLLOWUP = 'story.rose.route.1115.s1.followup_invited'
 COOPERATED = 'story.revolution.1029.s1.cooperated'
 REFUSED = 'story.revolution.1029.s1.refused'
 ALLEGIANCE = 'story.rose.1024.allegiance'
@@ -121,11 +124,20 @@ def display_segments(text):
     return out
 
 
+# User-authorized minimal gap completion. Original DOCX remains immutable and
+# each replacement is copied into _audit with both original and compiled text.
+TEXT_REVISIONS = {
+    ('rose.1024.s2', 6): '我拿着那份证明清白的档案，耐着性子应付了一轮又一轮盘问，终于获得「不必调整，正常营业」的口头准许。',
+    ('rose.1103.s1', 58): '阿黛尔的思维太混乱了。我摇摇头，找到被阿黛尔丢在角落里的伞，交到埃莉诺小姐手里，又替她拢好身上的衣服。',
+    ('rose.1103.s1', 59): '{playername}：「伞和衣服您先带着，至少别再淋雨了……首饰和礼服，我会保管好的，一直等您来取。」',
+}
+
+
 class Bundle:
     def __init__(self, project):
         self.project, self.rows, self.keys = project, defaultdict(list), {}
         self.audit = dict(compiler='Tools/Narrative/Content/rose.py', contract='2026-10-19',
-            sources=[], events=[], blockedBy=[], externalDependencies=[], knownProducers=[], artPending=[],
+            sources=[], events=[], blockedBy=[], externalDependencies=[], knownProducers=[], artPending=[], designResolutions=[], textRevisions=[],
             presets={'normalScore':60, 'excellentScore':90,
                 'rose1011Wisdom':{'value':3, 'authority':'Existing user-confirmed configure_rose_1011_full.py'},
                 'rose1011Order':{'value':ROSE1011_ORDER, 'authority':'2026-10-19 actual-product integration preset; source leaves {drinkname} open'}},
@@ -144,7 +156,7 @@ class Bundle:
                 raise ValueError('Missing CharacterCatalog ID: '+actor)
         for faction in ('neutral','rose','church','revolution'):
             self.flag('route.'+faction, exclusive=True)
-        for flag in (APPRECIATION,HAT,CLEARED,BRIBE,RESCUE,COOPERATED,REFUSED,ALLEGIANCE,SAFE_REFUSAL,SHORT1,SHORT2,POISON,BLOOM):
+        for flag in (APPRECIATION,HAT,CLEARED,*RELEASES,COOPERATED,REFUSED,ALLEGIANCE,SAFE_REFUSAL,SHORT1,SHORT2,POISON,BLOOM,FOLLOWUP):
             self.flag(flag)
         for actor in ('sparrow','sylvain','alienor','sade'):
             self.flag('known.'+actor)
@@ -168,7 +180,7 @@ class Bundle:
         return key
 
     def flag(self, key, exclusive=False):
-        exclusive = exclusive or key.startswith('route.') or key in ('story.adele.away','story.sylvain.unavailable')
+        exclusive = exclusive or key.startswith('route.') or key in ('story.adele.away','story.sylvain.unavailable','church.detention.active')
         self.add('ConditionKey','key',key=key,nameText=self.text('condition.'+key,key),initialValue=False,onlySetTrue=not exclusive)
 
     def dependency(self, flag, producer):
@@ -234,6 +246,31 @@ class Root:
         self.pages.append(row)
         return row
 
+    def resolve(self, code, anchors, detail):
+        self.b.audit['designResolutions'].append(dict(root=self.id,code=code,anchors=anchors,
+            authority='User-authorized final-playable minimal completion',detail=detail))
+
+    def authored(self, name, texts, guard='', anchors=(), caption=None):
+        """Small missing transitions, distinguished from immutable source anchors."""
+        page = self.page(name,guard)
+        seq = 0
+        for raw in texts:
+            for speaker,display,emote in display_segments(raw):
+                seq += 1
+                key = self.id+'.text.completion.'+name+f'.{seq}'
+                row = dict(lineId=page['pageId']+f'.line.{seq}',pageId=page['pageId'],seq=seq,
+                    side='right' if speaker and speaker!='player' else 'none',
+                    textKey=self.b.text(key,display,'Authorized gap completion; source context '+str(anchors)))
+                if speaker:
+                    row['speakerKey'] = speaker
+                if emote:
+                    row['emote'] = emote
+                if caption and speaker=='bertrand':
+                    row['speakerNameKey'] = self.b.text(self.id+'.caption.'+caption,caption)
+                self.b.add('ConversationLine','lineId',**row)
+        self.resolve(name,anchors,dict(addedText=texts,guard=guard))
+        return page
+
     def dialogue(self, name, anchors, guard='', bg=None, caption=None):
         row = self.page(name,guard,**({'bgOverride':bg} if bg else {}))
         seq = 0
@@ -241,6 +278,13 @@ class Root:
             raw = self.p[n-1]
             if is_directive(raw):
                 continue
+            if (self.id,n) in TEXT_REVISIONS:
+                revised = TEXT_REVISIONS[self.id,n]
+                record = dict(root=self.id,anchor=f'P{n:03}',original=raw,compiled=revised,
+                    authority='User-authorized minimal completion; no unsupported monetary transaction')
+                if record not in self.b.audit['textRevisions']:
+                    self.b.audit['textRevisions'].append(record)
+                raw = revised
             if self.id == 'rose.1011.s1' and n == 46:
                 raw = raw.replace('{drinkname}','黑咖啡')
             segments = display_segments(raw)
@@ -539,10 +583,9 @@ def _1016(r):
     a,b,c = r.menu('stance',[91,92,93],cg(trust))
     for cid,target in ((a,'faction.rose'),(b,'faction.revolution')):
         r.effect('BAR_ADD',target,1,owner=cid+'.result')
-    flag = 'integration.rose.1016.stance3.resolved'
-    r.b.flag(flag)
-    r.condition('choice',c,'BOOL_EQ',flag,'true')
-    r.block(93,'ambiguous_faction_recipient','Source 中立/王庭教会倾向+1 does not identify one or both recipients. Third stance remains locked until content decision.',root=False)
+    r.effect('BAR_ADD','faction.neutral',1,owner=c+'.result')
+    r.resolve('stance3_neutral',[89,93],
+        'Keeping the shop out of politics grants neutral +1 only; no church endorsement or dual-faction reward is implied by the spoken choice.')
     r.dialogue('tail',[94,95],cg(trust))
     r.known('sade','','P010 actual introduction; P049-P053 refusal or P083-P096 long tail')
     r.known('alienor','','P009-P010 actual encounter, not filename inference')
@@ -565,22 +608,35 @@ def _1019(r):
 
 def _1024(r, detained):
     if detained:
-        # Full conjunction in each OR group; persuasion is not falsely bribery.
-        for group,flag in enumerate((BRIBE,RESCUE),1):
-            if group==2:
+        # Three genuinely exclusive release histories, never a synthetic bribe.
+        for group,flag in enumerate(RELEASES,1):
+            if group>1:
                 r.require('story.'+r.id+'.completed',False,group)
             r.require('story.church.1023.s1.completed',True,group)
-            r.require(flag,True,group)
-            r.require(RESCUE if flag==BRIBE else BRIBE,False,group)
+            r.require(CLEARED,False,group)
+            r.require('church.detention.active',False,group)
+            for other in RELEASES:
+                r.require(other,other==flag,group)
         r.b.dependency('story.church.1023.s1.completed','church.1023.s1')
-        r.block(6,'street_tip_unpriced','Source hands over a purse to street guards but gives no amount; no invented MONEY_REMOVE. Economic effect remains pending even though dialogue is mapped.',root=False)
+        for flag in RELEASES:
+            r.b.dependency(flag,'church.1023.s1')
+        r.resolve('persuasion_release',[2,68,73,79,100,112],
+            'Add actual persuasion release with its own explanation, not church-informant/revolution-rescuer claims. Require detention ended and exactly one release fact.')
         r.dialogue('homecoming.street',nums(4,12),bg='street.day')
         r.dialogue('homecoming',nums(15,48),bg='scene.cafe',caption='男孩')
         r.brew('brew_gate',[('blackcoffee',90,1)],49,[51,52])
         r.dialogue('talk',nums(54,72),caption='男孩')
+        r.authored('mind.persuaded',[
+            '我是靠自己的辩解换回这份清白档案的，并没有答应替教会做事。可这个孩子怎么会知道我刚从监狱出来？',
+        ],PERSUASION,anchors=[68,73,79])
         r.dialogue('mind.bribed',nums(74,78),BRIBE)
         r.dialogue('mind.rescued',nums(80,84),RESCUE)
         r.dialogue('threat',nums(86,99),caption='男孩')
+        r.authored('persuaded',[
+            '贝特朗：「你能说服教会放人，倒不只是会泡咖啡。不过，一份清白档案保不住这家店。」',
+            '贝特朗：「放开她。现在，你可以问我一个问题。」',
+            '侍从松开阿黛尔，她立刻躲到了我的身后。',
+        ],PERSUASION,anchors=[99,100,112,117],caption='男孩')
         r.dialogue('bribed',nums(101,111),BRIBE,caption='男孩')
         r.dialogue('rescued',nums(113,115),RESCUE,caption='男孩')
         a,b,c,purpose,d = r.menu('question',nums(118,122))
@@ -601,6 +657,9 @@ def _1024(r, detained):
     else:
         r.prior('church.1020.s1')
         r.require(CLEARED)
+        r.require('church.detention.active',False)
+        for flag in RELEASES:
+            r.require(flag,False)
         r.dialogue('arrival',nums(3,33),bg='scene.cafe',caption='男孩')
         r.brew('brew_gate',[('blackcoffee',90,1)],34,[36,37])
         r.dialogue('talk',nums(39,97),caption='男孩')
@@ -662,8 +721,7 @@ def _ending(r, pending, anchors, title):
 
 
 def _1101(r):
-    # Exact source alternatives: cooperation (either origin), or cleared-origin
-    # refusal. Detained-origin refusal is not silently assigned a made-up fate.
+    # The mission is the same for every origin; refusal cannot leave a silent hole.
     for group,flag in ((1,REFUSED),(2,COOPERATED)):
         if group==2:
             r.require('story.'+r.id+'.completed',False,group)
@@ -671,16 +729,16 @@ def _1101(r):
         r.require(ALLEGIANCE,True,group)
         r.require(flag,True,group)
         r.require(COOPERATED if flag==REFUSED else REFUSED,False,group)
-        if group==1:
-            r.require('story.rose.1024.s1.completed',True,group)
+        r.require('story.rose.1026.s2.completed',True,group)
     r.b.dependency('story.revolution.1029.s1.completed','revolution.1029.s1')
     r.dialogue('arrival',nums(3,38),bg='scene.cafe')
     r.dialogue('success',nums(43,58),COOPERATED)
     r.end('end.success',COOPERATED)
-    fail = AND(REFUSED,'story.rose.1024.s1.completed')
+    fail = REFUSED
     r.effect('SET_FLAG',SHORT2,'true',fail)
     r.effect('QUEUE_EVENT','rose.ending.job_requirements','',fail)
-    r.block(41,'detained_refusal_unspecified','Only non-detained 10/24-S1 plus refusal is authored as failure; other refusal origin excluded by event groups.',root=False)
+    r.resolve('refusal_all_origins',[38,40,41,60],
+        'After actually accepting the 1026 mission, refusing cooperation fails the same mission for every release history. Reuse the existing origin-independent refusal ending; never award success without cooperation.')
 
 
 def _1103(r):
@@ -688,18 +746,15 @@ def _1103(r):
     r.require(ALLEGIANCE)
     r.require(SHORT2,False)
     r.dialogue('rain',nums(3,28),bg='scene.cafe')
-    r.brew('brew_gate',[('any.hot',60,1)],30)
-    r.block(31,'special_drink_identity_pending','Common path waits for one actual hot product >=40C and score>=60. Special cocoa+hotmilk identity/combination data is unavailable in the root-local passed-only receipt; P032-P037 remains disabled behind a false no-producer marker, never inferred from any.hot success.',root=False)
-    special = 'integration.rose.1103.cocoa_milk.served'
-    r.b.flag(special)
-    r.dialogue('drink.special',nums(32,37),special)
+    passed = r.brew('brew_gate',[('any.hot',60,1)],30)
+    r.dialogue('drink.special',nums(32,37),passed)
+    r.resolve('hot_drink_response',[30,31,32,37],
+        'Existing lines praise a hot drink, not cocoa-specific ingredients. Use them after any actually delivered hot drink >=60; no inferred cocoa identity or invented product receipt.')
     r.dialogue('shelter.request',nums(39,48))
     refuse,shelter = r.menu('shelter',[50,51])
-    transfer_ready = 'integration.rose.1103.revenue_transfer.ready'
-    r.b.flag(transfer_ready)
-    r.condition('choice',refuse,'BOOL_EQ',transfer_ready,'true')
     r.dialogue('shelter.refused',nums(53,66),cg(refuse))
-    r.block(58,'today_revenue_transfer_missing','Refusal hands over ALL today revenue, not current money or guessed number. Choice P050 is locked behind integration.rose.1103.revenue_transfer.ready=false until actual transactional transfer is connected; common acceptance paths remain open.',root=False)
+    r.resolve('refusal_material_aid',[57,58,59,61],
+        'Refusal remains playable with zero coins: give the already-present umbrella/clothes and keep jewellery for collection. P058-P059 explicitly revised, not a fake revenue transfer.')
     r.end('end.refused',cg(refuse))
     yes = cg(shelter)
     r.dialogue('shelter.accepted',nums(69,85),yes)
@@ -733,11 +788,9 @@ def _1115(r):
     r.dialogue('cause',[96],cg(cause))
     r.dialogue('family',[98],cg(family))
     r.dialogue('question_of_cost',nums(101,103))
-    low,high = 'integration.rose.route.1115.candor.low','integration.rose.route.1115.candor.high'
-    r.b.flag(low)
-    r.b.flag(high)
-    high = AND(high,'not:'+low)
-    r.block(99,'candor_baseline_and_gap','P099 +2 candor, P104 <1, P115 >2. No initial value, prior producer, contract numeric target or 1..2 outcome. Never map second choice automatically to >2. Draft low/high flags have no producer.')
+    low,high = cg(cause),cg(family)
+    r.resolve('candor_choice_partition',[93,94,98,99,104,115],
+        'Replace the uninitialized numeric candor and uncovered 1..2 interval with the actual local motive choice: public cause leaves Sylvain guarded; candid family motive prompts his disclosure. No persistent or fabricated candor score.')
     r.dialogue('normal_ending',nums(105,113),low)
     terminal = 'story.rose.route.1115.s1.terminal.ideal_world'
     r.effect('SET_FLAG',terminal,'true',low)
@@ -751,17 +804,26 @@ def _1115(r):
     intervention = AND(high,'bar:player.perception:gt:9')
     r.dialogue('interjection',nums(139,144),intervention)
     r.dialogue('plan',nums(145,160),intervention)
-    r.block(138,'perception_failure_tail_unspecified','P138 opens the dialogue through P182 with no alternate tail for perception<=9. Never play the answer when the initiating question was skipped; content must specify that return path.')
+    quiet = AND(high,'bar:player.perception:le:9')
+    r.authored('quiet.agreement',[
+        '我没有看清这份许诺背后的用意，只听见西尔万先生长长地呼出一口气。',
+        '西尔万：「我会把您的提议转告王女殿下。是否接受，得由她自己决定。」',
+    ],quiet,anchors=[133,137,138,178,181])
+    r.dialogue('quiet.farewell',nums(179,182),quiet)
+    r.effect('SET_FLAG',FOLLOWUP,'true',quiet)
     identity = 'story.rose.1103.s1.identity_known'
     r.b.flag(identity)
     r.dialogue('known_identity',[162],AND(intervention,identity))
     r.dialogue('long.tail',nums(164,182),intervention)
     r.effect('SET_FLAG','story.rose.route.1115.s1.plan_known','true',intervention)
+    r.effect('SET_FLAG',FOLLOWUP,'true',intervention)
+    r.resolve('followup_not_revelation',[138,181,182],
+        'Preserve perception >9 for P139-P178 and plan_known. Perception <=9 gets a brief non-revealing agreement and the existing 11/23 appointment. Only actual invitees may enter 1122; its letter supplies the operational request.')
 
 
 def _1122(r):
     r.prior('rose.route.1115.s1')
-    r.require('story.rose.route.1115.s1.plan_known')
+    r.require(FOLLOWUP)
     r.dialogue('missing_adele',nums(3,27),bg='scene.cafe')
     r.dialogue('letter',nums(29,34))
     r.dialogue('night',nums(36,60),bg='scene.cafe')
@@ -837,11 +899,11 @@ def build(project_root: Path) -> dict:
     b.audit.update(sourceDirectory=SOURCE_DIR.as_posix(),sourceCount=len(found),
         supportedEvents=[e['eventId'] for e in b.audit['events'] if e['status']!='construction-blocked'],
         constructionBlockedEvents=[e['eventId'] for e in b.audit['events'] if e['status']=='construction-blocked'],
-        foreignFlags=[HAT,CLEARED,BRIBE,RESCUE,COOPERATED,REFUSED],
+        foreignFlags=[HAT,CLEARED,*RELEASES,COOPERATED,REFUSED],
         notes=[
             'Shelter fact is story.rose.1103.s1.sheltered, not route.rose; central church1111 owns four-way route selection.',
             'File marked BAD Ending is titled Normal Ending inside. Semantic ending ID unforgiven avoids guessing its rating.',
-            'Only authorized {drinkname} -> 黑咖啡 preset substitution changes source display text.',
+            'Display changes are limited to the existing drink-name preset and explicitly audited textRevisions/authorized gap completions.',
             'All scene/directive paragraphs are audit anchors, not spoken dialogue. No operating-floor art is registered.',
             'False integration.<root>.ready flags hard-gate all OR groups of blocked roots. Do not strip these gates.',
         ])
@@ -857,6 +919,8 @@ def build(project_root: Path) -> dict:
         inherited.update(new)
     b.audit['transitivelyBlockedByRosePrerequisites'] = sorted(inherited)
     result = dict(b.rows)
-    result['_replace_roots'] = ['rose.1009.s1','rose.1011.s1','rose.1016.s1','rose.1103.s1']
+    # Merge purges by root prefix, not by incoming row IDs. Replace every owned
+    # event so removed conditions/pages cannot survive as stale production gates.
+    result['_replace_roots'] = [e['eventId'] for e in b.rows['Event']]
     result['_audit'] = b.audit
     return result

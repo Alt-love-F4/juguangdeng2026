@@ -819,6 +819,13 @@ namespace Spotlight.FreeCafe
                 if(receiver!=null)
                 {
                     var target=World.Find(receiver.EntityId);
+                    if (World.IsExtractionFilter(item) && World.IsPrecisionExtractor(target)
+                        || World.IsPrecisionExtractor(item) && World.IsExtractionFilter(target))
+                    {
+                        var assembly = World.Preview(item, target);
+                        receiver.SetDropTarget(true, !assembly.success);
+                        ShowHint(assembly.message); return;
+                    }
                     bool sourceStack = target != null && World.Spec(target.specId).Has(Capability.Source);
                     if (sourceStack)
                     {
@@ -1251,6 +1258,19 @@ namespace Spotlight.FreeCafe
             var result=World.FinishPour(targetId);
             ShowHint(result.message);
         }
+        public void ResetWorkstation()
+        {
+            if (World == null || InputBlocked || World.State.currentArea != AreaId.Counter) return;
+            if (PracticeTutorialActive || CafeTutorialActive)
+            {
+                ShowHint("请先完成或退出教程，再重置工作台");
+                return;
+            }
+            CancelDrag();
+            SelectedId = null;
+            Report(World.ResetWorkstation());
+        }
+
         public void ReturnFromProduction()
         {
             if(InputBlocked || WorkstationTutorial != null && WorkstationTutorial.IsFirstCafeTutorial) return;

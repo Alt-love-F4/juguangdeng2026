@@ -48,6 +48,7 @@ namespace Spotlight.Narrative.Editor
         {
             EditorGUILayout.LabelField("不加载游戏场景 · 真实剧情控制器分支重放",EditorStyles.boldLabel);
             EditorGUILayout.HelpBox("所有发现的可用选项都会产生候选前缀；按目标优先级有界探索。两种数值假设，固定地图/成功咖啡策略；不宣称穷举不可达。",MessageType.Info);
+            EditorGUILayout.HelpBox("记录读法：目标结局 → 实际结局。箭头不是剧情跳转，也不是触发概率。没有到结局时显示中文停止原因。意外触发的结局同样进入全局发现列表。",MessageType.Info);
             perEnding=EditorGUILayout.IntSlider("每结局最多尝试",perEnding,2,64);
             GUI.enabled=!IsRunning;
             if(GUILayout.Button("开始全部15结局演算")){try{StartSearch(perEnding);}catch(Exception e){error=e.Message;}}
@@ -56,7 +57,26 @@ namespace Spotlight.Narrative.Editor
             EditorGUILayout.LabelField("已完成尝试："+CompletedAttempts+"；候选队列："+(search?.Pending??0)+"；当前D"+(search?.CurrentDay??0));
             scroll=EditorGUILayout.BeginScrollView(scroll);
             EditorGUILayout.SelectableLabel(StatusText,EditorStyles.wordWrappedLabel,GUILayout.Height(90));
-            if(search!=null)foreach(var a in search.Attempts)EditorGUILayout.LabelField(a.target+" → "+(a.actual??a.status)+" · D"+a.day,EditorStyles.wordWrappedLabel);
+            if(search!=null)
+            {
+                EditorGUILayout.LabelField("全局已发现结局：" + search.Discoveries.Count + " / " + search.EnabledEndingCount + "（本批次去重）", EditorStyles.boldLabel);
+                if(search.Discoveries.Count==0) EditorGUILayout.LabelField("暂无实际触发的结局；演算中的目标不计入发现。");
+                foreach(var d in search.Discoveries)
+                {
+                    EditorGUILayout.LabelField(d.title + " · 已触发" + d.count + "次",EditorStyles.boldLabel);
+                    EditorGUILayout.LabelField("首次寻找「" + search.EndingTitle(d.firstTarget) + "」时发现 · 第" + d.firstDay + "天",EditorStyles.wordWrappedLabel);
+                    EditorGUILayout.LabelField(d.firstProfile,EditorStyles.wordWrappedLabel);
+                    if(GUILayout.Button("查看首次发现路径：" + d.title)) EditorUtility.OpenWithDefaultApp(Path.Combine(output,d.firstTrace));
+                }
+                EditorGUILayout.Space(); EditorGUILayout.LabelField("逐轮演化记录",EditorStyles.boldLabel);
+                foreach(var a in search.Attempts)
+                {
+                    EditorGUILayout.LabelField((a.newlyDiscovered ? "【首次发现】 " : "") + "目标「" + search.EndingTitle(a.target) + "」 → "
+                        + (string.IsNullOrWhiteSpace(a.actual) ? "未到结局" : "实际「" + search.EndingTitle(a.actual) + "」") + " · 第" + a.day + "天",EditorStyles.wordWrappedLabel);
+                    EditorGUILayout.LabelField(NarrativeTableSearch.OutcomeLabel(a) + "；最后事件：" + a.lastEvent + "；" + a.reason,EditorStyles.wordWrappedLabel);
+                    if(GUILayout.Button("查看此轮选择与数值：" + a.file)) EditorUtility.OpenWithDefaultApp(Path.Combine(output,a.file));
+                }
+            }
             EditorGUILayout.EndScrollView();if(IsRunning)Repaint();
         }
     }

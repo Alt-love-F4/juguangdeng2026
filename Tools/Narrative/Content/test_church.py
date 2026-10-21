@@ -26,7 +26,8 @@ class Graph:
     def __init__(self, rows, root, attrs=None, facts=None):
         self.rows, self.root = rows, root
         self.attrs = {"player.language": 8, "player.courage": 8, "player.wisdom": 8,
-                      "player.perception": 8, "alienor.affection": 4, "faction.revolution": 0}
+                      "player.perception": 8, "alienor.affection": 4, "faction.revolution": 0,
+                      "cafe.money": 3000}
         self.attrs.update(attrs or {})
         self.facts = {r["key"]: r["initialValue"] for r in rows["ConditionKey"]}
         self.facts.update(facts or {})
@@ -169,7 +170,7 @@ class ChurchContentTests(unittest.TestCase):
         checks=[x for x in self.rows["AbilityCheckCondition"] if "search_" in x["checkId"]]
         self.assertEqual([8,8,8,8],[x["threshold"] for x in checks])
 
-    def test_detention_is_authoritative_state_not_calendar_or_fake_payment(self):
+    def test_detention_is_authoritative_state_and_bribe_uses_live_money(self):
         events={x["eventId"]:x for x in self.rows["Event"]}
         for root in ("church.1020.s1","church.1023.s1","church.1023.s2"):
             self.assertNotIn("blockedBy=",events[root]["eventProperty"])
@@ -177,19 +178,31 @@ class ChurchContentTests(unittest.TestCase):
         self.assertFalse(any(r["resultType"]=="BAR_ADD" and r["eventId"].startswith("church.1023") for r in self.rows["Result"]))
         active=next(x for x in self.rows["ConditionKey"] if x["key"]=="church.detention.active")
         self.assertFalse(active["initialValue"]); self.assertFalse(active["onlySetTrue"])
-        audit=next(x for x in self.rows["_audit"] if x["root"]=="church.1023.s1")
-        money=next(x for x in audit["decisions"] if x["kind"]=="unresolved-money")
-        self.assertEqual((2000,3000,None),(money["offer"],money["demand"],money["settledAmount"]))
-        self.assertEqual("funding-option-only",money["scope"])
+        self.assertFalse(any(x["key"].startswith("construction.church.1023") for x in self.rows["ConditionKey"]))
+        money=next(x for x in next(a for a in self.rows["_audit"] if a["root"]=="church.1023.s1")["decisions"] if x["kind"]=="source-derived-amount")
+        self.assertEqual((2000,3000,3000),(money["offer"],money["demand"],money["settledAmount"]))
+        self.assertEqual("funding-option",money["scope"])
         for value in (7,8):
             g=Graph(self.rows,"church.1020.s1",{"player.language":value}).run({"search":0,"explain":0})
             writes=[r for r in g.results() if r["target"]=="church.detention.active"]
             self.assertEqual([] if value>=8 else ["true"],[r["value"] for r in writes])
 
+    def test_bribe_acceptance_debits_3000_and_shortfall_uses_rescue(self):
+        for balance, expected in ((3000,"bribery"),(2999,"rescue")):
+            pick = 1 if expected == "bribery" else 2
+            g=Graph(self.rows,"church.1023.s1",{"player.language":0,"faction.revolution":0,"cafe.money":balance}).run({"release":pick,"bribe_price":0})
+            targets=[r["target"] for r in g.results()]
+            actual={x.rsplit(".",1)[1] for x in targets if x.startswith("church.release.") and x.rsplit(".",1)[1] in ("persuasion","bribery","rescue")}
+            self.assertEqual({expected},actual)
+            payments=[r for r in g.results() if r["resultType"]=="MONEY_REMOVE"]
+            self.assertEqual(["3000"] if expected=="bribery" else [],[r["value"] for r in payments])
+        cond=[c for c in self.rows["Condition"] if c["ownerType"]=="choice" and c["target"]=="cafe.money"]
+        self.assertEqual({"3000,2147483647"},{c["value"] for c in cond})
+
     def test_release_outcomes_and_failure_are_exclusive(self):
-        for language,inclination,release,expected in ((7,0,0,"persuasion"),(6,0,0,"rescue"),(6,-1,2,None)):
+        for language,inclination,release,expected in ((7,0,0,"persuasion"),(6,0,2,"rescue"),(6,-1,2,None)):
             facts={"church.detention.release_acknowledged":True}
-            g=Graph(self.rows,"church.1023.s1",{"player.language":language,"faction.revolution":inclination},facts).run({"release":release,"bribe_retry":1})
+            g=Graph(self.rows,"church.1023.s1",{"player.language":language,"faction.revolution":inclination,"cafe.money":0},facts).run({"release":release,"bribe_retry":1})
             targets=[r["target"] for r in g.results()]
             actual={x.rsplit(".",1)[1] for x in targets if x.startswith("church.release.") and x.rsplit(".",1)[1] in ("persuasion","bribery","rescue")}
             self.assertEqual(set() if expected is None else {expected},actual)
@@ -268,8 +281,12 @@ class ChurchContentTests(unittest.TestCase):
         for root in ("church.1104.s1","church.route.1112.s1","church.route.1118.s1","church.route.1123.s1"):
             pages=[p for p in self.rows["ConversationPage"] if p["presentationKey"]==root+".conversation"]
             self.assertEqual(1,len([p for p in pages if p.get("gameplayKey")=="host:end_business"]))
-        self.assertEqual(["church.route.1123.s1"],[a["root"] for a in self.rows["_audit"] if a["blockedBy"]])
+        self.assertEqual([], [a["root"] for a in self.rows["_audit"] if a["blockedBy"]])
         self.assertFalse(any("release_acknowledged" in c["target"] for c in self.rows["Condition"]))
+        route=next(a for a in self.rows["_audit"] if a["root"]=="church.route.1123.s1")
+        self.assertEqual("compiled",route["status"])
+        decision=next(x for x in route["decisions"] if x["kind"]=="source-label-disambiguation")
+        self.assertEqual("church.thibaut.followed",decision["fact"])
 
     def test_all_authored_fee_options_settle_their_actual_money(self):
         root="church.1104.s1"
@@ -451,7 +468,7 @@ class ChurchContentTests(unittest.TestCase):
                 bar=row["target"].removeprefix("bar:"); self.assertIn(bar,bars,row)
                 self.assertNotEqual("external",bars[bar].get("sourceMode"),row)
                 self.assertNotEqual("derived",bars[bar].get("advanceMode"),row)
-            elif row["resultType"]=="MONEY_ADD": exists("Object",row["target"],row); self.assertEqual("cafe",row["target"]); int(row["value"])
+            elif row["resultType"] in {"MONEY_ADD","MONEY_REMOVE"}: exists("Object",row["target"],row); self.assertEqual("cafe",row["target"]); int(row["value"])
             else: self.fail(("unknown result kind",row))
         for row in self.rows["Ending"]:
             exists("Text",row["titleText"],row); exists("Text",row["messageText"],row)
