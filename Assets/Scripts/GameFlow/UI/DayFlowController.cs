@@ -502,9 +502,6 @@ namespace Spotlight.GameFlow
         private void EnterPreBusiness()
         {
             if (IsDetained) { TryCompleteDetainedDay(); return; }
-            // Waking up in the cafe should keep the current visit, not force a map round-trip.
-            // Calendar synchronization already prepared the new day; opening remains explicit.
-            if (day > 1 && CafeSceneActive) { ResumeCafeVisit(); return; }
             EnterCityMap();
         }
 

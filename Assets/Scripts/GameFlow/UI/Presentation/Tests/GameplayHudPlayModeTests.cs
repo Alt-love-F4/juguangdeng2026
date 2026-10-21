@@ -1116,11 +1116,13 @@ namespace Spotlight.GameFlow.Tests
             Assert.That(world.State.day, Is.EqualTo(2));
             Assert.That(world.State.businessPhase, Is.EqualTo(Spotlight.FreeCafe.BusinessPhase.Preparation));
             Assert.That(world.State.open, Is.False);
-            yield return WaitFor(() => days.State == DayFlowState.FreeCafeBusiness && !LoadingVisible(), "Next morning stays in cafe");
-            Assert.That(SceneManager.GetActiveScene().name, Is.EqualTo("CoffeeShop"));
-            Assert.That(flow.IsMapOpen, Is.False, "Sleeping must not open the map.");
-            Assert.That(days.CurrentPresentation, Is.Null);
-            Assert.That(world.State.open, Is.False, "Waking up must not automatically start business.");
+            yield return WaitFor(() => days.State == DayFlowState.CityMapLeisure && !LoadingVisible(), "Next morning");
+            days.StartCafeFromMap();
+            yield return WaitFor(() => days.CurrentPresentation is CafeOpeningPanel && !LoadingVisible(), "Day-two cafe");
+            submit = ((DayFlowPresentationPanel)days.CurrentPresentation).GetComponentInChildren<Button>(true);
+            yield return WaitFor(() => submit.interactable, "Day-two entrance");
+            submit.onClick.Invoke();
+            yield return WaitFor(() => days.State == DayFlowState.FreeCafeBusiness, "Day-two preparation");
             requestStart.Invoke(endpoint, null);
             yield return WaitFor(() => world.State.open, "Day-two business through narrative bridge");
             Assert.That(world.State.day, Is.EqualTo(2));
