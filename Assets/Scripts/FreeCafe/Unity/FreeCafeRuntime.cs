@@ -624,14 +624,26 @@ namespace Spotlight.FreeCafe
             if(!dragPlane.Raycast(ray,out var distance)) return false;
             point=ray.GetPoint(distance);return true;
         }
-        // Report on press, not release/drag threshold, so a stationary hold also explains the empty bag.
-        public void Press(FreeEntityView view)
+        // Return true when press feedback consumes this gesture, before release or the drag threshold.
+        public bool Press(FreeEntityView view)
         {
-            if(World==null || view==null || !view.CanInteract || InputBlocked || IsDragging) return;
+            if(World==null || view==null || !view.CanInteract || InputBlocked || IsDragging) return false;
             var entity=World.Find(view.EntityId);
-            if(entity==null || entity.area!=World.State.currentArea) return;
-            if(entity.specId=="source.beans" && entity.stock<=0)
-                ShowHint("在咖啡谱的补货处补货");
+            if(entity==null || entity.area!=World.State.currentArea) return false;
+            if(entity.stock>0) return false;
+            switch(entity.specId)
+            {
+                case "source.beans":
+                case "source.cocoa":
+                case "source.milk":
+                case "source.cream":
+                case "source.honey":
+                case "source.sugar":
+                    break;
+                default: return false;
+            }
+            Report(ActionResult.No("在咖啡谱的补货处补货"));
+            return true;
         }
         public void BeginDrag(FreeEntityView view,PointerEventData e)
         {

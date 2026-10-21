@@ -50,24 +50,46 @@ namespace Spotlight.FreeCafe.Tests
             Directory.CreateDirectory(directory); File.WriteAllBytes(Path.Combine(directory, name + ".png"), texture.EncodeToPNG());
             Object.Destroy(texture);
         }
-        [UnityTest] public IEnumerator EmptyBeanBagReportsRefillOnPressWithoutWaitingForClickOrDrag()
+        [UnityTest] public IEnumerator EmptyIngredientSourcesReportRefillOnPressWithoutWaitingForClickOrDrag()
         {
-            var source = app.World.Find("s.beans"); source.stock = 0;
-            var view = app.View(source.id);
-            var pointer = new PointerEventData(EventSystem.current) { button = PointerEventData.InputButton.Left,
-                position = app.worldCamera.WorldToScreenPoint(view.transform.position) };
-            string before = JsonUtility.ToJson(app.World.State);
-            app.ShowHint("before press");
-            ExecuteEvents.Execute(view.gameObject, pointer, ExecuteEvents.pointerDownHandler);
-            Assert.That(app.Hint, Is.EqualTo("在咖啡谱的补货处补货"));
-            yield return new WaitForSecondsRealtime(.6f);
-            Assert.That(app.Hint, Is.EqualTo("在咖啡谱的补货处补货"));
-            Assert.That(app.IsDragging, Is.False);
-            Assert.That(GameObject.Find("UncommittedPickup"), Is.Null);
-            Assert.That(JsonUtility.ToJson(app.World.State), Is.EqualTo(before));
-            view.OnBeginDrag(pointer);
-            Assert.That(app.Hint, Is.EqualTo("在咖啡谱的补货处补货"));
-            Assert.That(app.IsDragging, Is.False);
+            foreach(var sourceId in new[] { "s.beans", "s.cocoa", "s.milk", "s.cream", "s.honey", "s.sugar" })
+            {
+                var source = app.World.Find(sourceId); source.stock = 0;
+                var view = app.View(source.id);
+                var pointer = new PointerEventData(EventSystem.current) { button = PointerEventData.InputButton.Left,
+                    position = app.worldCamera.WorldToScreenPoint(view.transform.position) };
+                string before = JsonUtility.ToJson(app.World.State);
+                app.ShowHint("before press");
+                ExecuteEvents.Execute(view.gameObject, pointer, ExecuteEvents.pointerDownHandler);
+                Assert.That(app.Hint, Is.EqualTo("在咖啡谱的补货处补货"));
+                var toast = Object.FindFirstObjectByType<Spotlight.GameFlow.OperationToastPanel>();
+                Assert.That(toast, Is.Not.Null, "按下空原料罐就应弹出补货提示");
+                Assert.That(toast.Message, Is.EqualTo(app.Hint));
+                Assert.That(toast.GetComponent<CanvasGroup>().blocksRaycasts, Is.False);
+                yield return new WaitForSecondsRealtime(.6f);
+                Assert.That(app.Hint, Is.EqualTo("在咖啡谱的补货处补货"));
+                Assert.That(app.IsDragging, Is.False);
+                Assert.That(GameObject.Find("UncommittedPickup"), Is.Null);
+                Assert.That(JsonUtility.ToJson(app.World.State), Is.EqualTo(before));
+                // A new message makes any duplicate toast on drag/release observable.
+                toast.Play("保持当前提示", string.Empty);
+                view.OnBeginDrag(pointer);
+                view.OnDrag(pointer);
+                view.OnEndDrag(pointer);
+                view.OnPointerClick(pointer);
+                Assert.That(toast.Message, Is.EqualTo("保持当前提示"), "拖动和松开不能重复弹出补货提示");
+                Assert.That(app.IsDragging, Is.False);
+                Assert.That(GameObject.Find("UncommittedPickup"), Is.Null);
+                Assert.That(JsonUtility.ToJson(app.World.State), Is.EqualTo(before));
+                ExecuteEvents.Execute(view.gameObject, pointer, ExecuteEvents.pointerDownHandler);
+                Assert.That(toast.Message, Is.EqualTo("在咖啡谱的补货处补货"), "再次按下仍应提示");
+                // A later press with stock must return to normal pickup behavior.
+                source.stock = 1;
+                ExecuteEvents.Execute(view.gameObject, pointer, ExecuteEvents.pointerDownHandler);
+                view.OnBeginDrag(pointer);
+                Assert.That(app.IsDragging, Is.True);
+                app.CancelDrag();
+            }
         }
         [UnityTest] public IEnumerator WaterUsesItsOwnContainerAndWasteAcceptsTheEnlargedLowerLeftTarget()
         {

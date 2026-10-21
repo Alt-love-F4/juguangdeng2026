@@ -41,6 +41,7 @@ namespace Spotlight.FreeCafe
         private FreeCafeCupStackVisual cupStack;
         private FreeCafeBusinessSignView businessSignView;
         private bool preview, retired;
+        private bool pressHandled;
         public bool CanInteract => !preview && !retired && !destroyOnArrival && isActiveAndEnabled &&
             Runtime != null && Runtime.IsRegisteredView(this);
         private bool hovered, selected, dropTarget, invalidDrop;
@@ -668,16 +669,24 @@ namespace Spotlight.FreeCafe
             if(pourVisual || receivingPour || extractionFilling) { var tint=body.color; tint.a=.22f; body.color=tint; }
             if(glassCup!=null) glassCup.SetTint(Color.white);
         }
-        public void OnPointerDown(PointerEventData e) { if(CanInteract && e.button==PointerEventData.InputButton.Left) Runtime.Press(this); }
+        public void OnPointerDown(PointerEventData e)
+        {
+            if(e.button==PointerEventData.InputButton.Left)
+                pressHandled=CanInteract && Runtime.Press(this);
+        }
         public void OnPointerEnter(PointerEventData e) { if(CanInteract && !Runtime.InputBlocked) { SetHovered(true); Runtime.Inspect(EntityId); } }
         public void OnPointerExit(PointerEventData e) { SetHovered(false); }
         public void OnPointerClick(PointerEventData e)
         {
             if(!CanInteract) return;
-            if(e.button==PointerEventData.InputButton.Left) Runtime.Click(this);
+            if(e.button==PointerEventData.InputButton.Left)
+            {
+                if(pressHandled) { pressHandled=false; return; }
+                Runtime.Click(this);
+            }
             else if(e.button==PointerEventData.InputButton.Right) Runtime.CancelProcessing(this);
         }
-        public void OnBeginDrag(PointerEventData e) { if(CanInteract && e.button==PointerEventData.InputButton.Left) Runtime.BeginDrag(this,e); }
+        public void OnBeginDrag(PointerEventData e) { if(CanInteract && !pressHandled && e.button==PointerEventData.InputButton.Left) Runtime.BeginDrag(this,e); }
         public void OnDrag(PointerEventData e) { if(Runtime!=null) Runtime.MoveDragFrom(this,e); }
         public void OnEndDrag(PointerEventData e) { if(Runtime!=null) Runtime.EndDragFrom(this,e); }
     }
