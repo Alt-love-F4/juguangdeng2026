@@ -62,6 +62,35 @@ namespace Spotlight.GameFlow.Tests
         }
 
         [UnityTest]
+        public IEnumerator GeneratedBulletinsSettleWithoutDuplicatePanelsButStandalonePreviewsStillDisplay()
+        {
+            var config = LubanNarrativeLoader.Load();
+            int completed = 0, notices = 0, readings = 0;
+            using (var presenter = new NarrativePresenter(config))
+            {
+                presenter.NoticePlayback = (request, data, done) => { notices++; done(); return true; };
+                presenter.ReadingPlayback = (request, title, pages, image, dialogue, speaker, portrait, done) =>
+                { readings++; done(); return true; };
+                var bulletins = config.events.FindAll(e => e.eventId.StartsWith("news.bulletin.", StringComparison.Ordinal));
+                Assert.That(bulletins.Count, Is.EqualTo(14));
+                foreach (var bulletin in bulletins)
+                {
+                    presenter.Play(new NarrativeEventRequest(bulletin, null, 0, null), () => completed++);
+                    Assert.That(presenter.IsPresenting, Is.False, bulletin.eventId);
+                }
+                Assert.That(completed, Is.EqualTo(bulletins.Count), "Retain completion callbacks so news flags still settle.");
+                Assert.That(notices, Is.Zero);
+                Assert.That(readings, Is.Zero);
+
+                config.eventDates.Clear(); // Atlas/debug previews explicitly remove the formal schedule.
+                presenter.Play(new NarrativeEventRequest(bulletins[0], null, 0, null), () => completed++);
+                yield return null;
+                Assert.That(notices, Is.EqualTo(1));
+                Assert.That(completed, Is.EqualTo(bulletins.Count + 1));
+            }
+        }
+
+        [UnityTest]
         public IEnumerator ReadingOrdersPagesAndLinesAndWaitsForEachLocalCompletion()
         {
             var config = Configuration();

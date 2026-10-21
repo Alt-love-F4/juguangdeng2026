@@ -13,6 +13,8 @@ namespace Spotlight.GameFlow
     {
         public string id, targetEndingId, route;
         public bool historicalScenario;
+        public bool useTableInitialValues;
+        public int initialMoney = 10000, dailyActionPoints = 6;
         public int startDay = 1, maxDay = 65, attribute = 6, language = 6, courage = 6, variant;
         public string startEvent;
         public string[] history = Array.Empty<string>();
@@ -148,7 +150,7 @@ namespace Spotlight.GameFlow
         private const int MaxSteps = 100000;
         public event Action<string> Logged;
 
-        public NarrativeAutoSession(NarrativeConfiguration configuration, CafeCatalog catalog, NarrativeAutoPreset preset)
+        public NarrativeAutoSession(NarrativeConfiguration configuration, CafeCatalog catalog, NarrativeAutoPreset preset, PlayerCreationPlan creation = null)
         {
             Configuration = configuration ?? throw new ArgumentNullException(nameof(configuration));
             Preset = preset ?? throw new ArgumentNullException(nameof(preset));
@@ -162,7 +164,7 @@ namespace Spotlight.GameFlow
             Presenter = new NarrativeAutomationPresenter(configuration, plan);
             Controller = new NarrativeController(configuration, Presenter); Presenter.Bind(Controller);
             Inventory = new NarrativeMapInventory(); Controller.Inventory = Inventory;
-            Actions = new NarrativeActionController(Controller, configuration.actions, 6, Inventory);
+            Actions = new NarrativeActionController(Controller, configuration.actions, preset.dailyActionPoints, Inventory);
             foreach (var position in configuration.mapPositions.Where(p => p.enabled))
             {
                 if (!string.IsNullOrEmpty(position.defaultAction)) Actions.Mount(position.positionKey, position.defaultAction);
@@ -178,11 +180,23 @@ namespace Spotlight.GameFlow
             Controller.AbilityReader = key => Controller.State.TryGetBar("player." + key, out int n) ? (true, n) : (false, 0);
             Controller.TextResolver = ResolveText;
             Controller.SetOfficialDay(Day);
+            if (!preset.useTableInitialValues)
+            {
             foreach (string key in new[] { "language", "courage", "wisdom", "perception" })
                 if (Controller.State.IsWritableBar("player." + key)) Controller.SetBar("player." + key, key == "language" ? preset.language : key == "courage" ? preset.courage : preset.attribute);
             foreach (var seed in new[] { (key: "alienor.affection", value: 20), (key: "faction.revolution", value: preset.targetEndingId == "church.ending.if2" ? -1 : 0) })
                 if (Controller.State.IsWritableBar(seed.key)) Controller.SetBar(seed.key, seed.value);
-            if (!World.TryInitializeMoney(10000, out string error)) throw new InvalidOperationException(error);
+            }
+            if (creation != null)
+            {
+                foreach (var bonus in creation.AttributeBonuses)
+                {
+                    string key = "player." + bonus.Key;
+                    if (Controller.State.TryGetBar(key, out int before)) Controller.SetBar(key, before + bonus.Value);
+                }
+                if (!string.IsNullOrEmpty(creation.SpecializationConditionKey)) Controller.State.SetCondition(creation.SpecializationConditionKey, true);
+            }
+            if (!World.TryInitializeMoney(creation?.StartingMoney ?? preset.initialMoney, out string error)) throw new InvalidOperationException(error);
             foreach (string key in preset.history)
             {
                 if (key.StartsWith("construction.", StringComparison.Ordinal) || key.StartsWith("blocked.", StringComparison.Ordinal) || key.StartsWith("integration.", StringComparison.Ordinal))
@@ -201,7 +215,7 @@ namespace Spotlight.GameFlow
             Presenter.GameplayRequested += OnGameplay;
             Presenter.LogAdded += Log;
             Presenter.ChoiceSelector = SelectChoice;
-            Log("后台辅助：初始资金10000、属性预设、6AP/日、设备与配方解锁、免费原料、按领域评价交付；不验证手动制作或数值平衡。");
+            Log("后台辅助：初始资金=" + preset.initialMoney + "，属性=" + (preset.useTableInitialValues ? "配表原值" : "乐观测试预设（非合法建角证明）") + "，AP=" + preset.dailyActionPoints + "；设备与配方解锁、免费原料、真实评价交付，不注入历史。");
             if (preset.historicalScenario) Log("历史场景注入（非开局可达证据）：" + string.Join(",", preset.history));
             phase = Stage.Opening;
         }
@@ -332,7 +346,7 @@ namespace Spotlight.GameFlow
                     Next(Stage.Advance); Controller.ProcessEntry(NarrativeEntryPoint.BeforeNight); break;
                 case Stage.Advance:
                     if (Day >= Preset.maxDay) { Stop("no-ending", "已到预设最后一天；未找到目标路线，不等于证明不可达。"); break; }
-                    Day++; calendar.NotifyChanged(); Controller.SetOfficialDay(Day); Actions.BeginDay(Day, 6);
+                    Day++; calendar.NotifyChanged(); Controller.SetOfficialDay(Day); Actions.BeginDay(Day, Preset.dailyActionPoints);
                     actionsToday.Clear(); actionsTaken = businessTicks = 0; Next(Stage.Morning); Log("进入新一天"); break;
             }
         }
@@ -375,7 +389,7 @@ namespace Spotlight.GameFlow
                 Log("宿主命令：真实营业关闭"); request.Complete(new NarrativeGameplayResult { passed = true }); return;
             }
             if (!NarrativeCafeGameplayBridge.TryStart(World, "auto:" + Preset.id + ":" + Result.steps, request.Data.gameplayKey,
-                result => { Log("咖啡交付回执 passed=" + result.passed + " cancelled=" + result.cancelled); request.Complete(result); }, out service, out string error, NarrativeCafeCustomers.Resolve(request.Data.pageId, LubanNarrativeLoader.Load())))
+                result => { Log("咖啡交付回执 passed=" + result.passed + " cancelled=" + result.cancelled); request.Complete(result); }, out service, out string error, NarrativeCafeCustomers.Resolve(request.Data.pageId, Configuration)))
                 throw new InvalidOperationException("后台咖啡宿主拒绝 " + request.Data.gameplayKey + ": " + error);
         }
         private bool PumpVisits()

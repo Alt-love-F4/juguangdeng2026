@@ -101,6 +101,14 @@ namespace Spotlight.FreeCafe
         private void OnDisable() { Stop(); autoDismissed = false; }
         private void OnDestroy() => Stop();
 
+        public void AutomationSkipTutorial()
+        {
+            if (!NarrativeAutoRunner.IsWalkthroughActive) return;
+            days?.CompleteMapUsageTutorial();
+            days?.AcknowledgeTodoGuidance();
+            Stop();
+        }
+
         public void Advance()
         {
             if (!IsRunning || !CanShow) return;

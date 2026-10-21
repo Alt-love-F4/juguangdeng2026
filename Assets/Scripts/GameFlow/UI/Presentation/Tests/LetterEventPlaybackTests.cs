@@ -178,6 +178,139 @@ namespace Spotlight.GameFlow.Tests
         }
 
         [UnityTest]
+        public IEnumerator AutomationRequiresWalkthroughAndDoesNotAdvanceCreationOrReveal()
+        {
+            var panel = Open();
+            var data = Data(new object()); data.lines.Add(Line("01 02 03"));
+            int done = 0;
+            panel.PlayLetter(new LetterReadingSnapshot(data), () => done++);
+            Assert.That(panel.AutomationReadToEnd(), Is.False);
+            Assert.That(panel.Stage, Is.EqualTo(FirstDayLetterPanel.LetterStage.Envelope));
+            Assert.That(done, Is.Zero);
+            using (NarrativeAutoRunner.AcquireWalkthrough())
+            {
+                panel.Stop();
+                data.revealOnly = true;
+                panel.PlayLetter(new LetterReadingSnapshot(data), () => done++);
+                Assert.That(done, Is.EqualTo(1));
+                Assert.That(panel.AutomationReadToEnd(), Is.False);
+                Assert.That(panel.Stage, Is.EqualTo(FirstDayLetterPanel.LetterStage.Envelope));
+                panel.Stop();
+                panel.Play((Action)null);
+                Assert.That(panel.AutomationReadToEnd(), Is.False);
+                Assert.That(panel.Stage, Is.EqualTo(FirstDayLetterPanel.LetterStage.Envelope));
+                Assert.That(panel.Draft, Is.Not.Null);
+                Assert.That(done, Is.EqualTo(1));
+            }
+            yield return null;
+        }
+
+        [UnityTest]
+        public IEnumerator AutomationFromEnvelopeOpeningOrReadingCoversAllHistoryAndCommitsOnce()
+        {
+            var panel = Open();
+            var data = Data(new object());
+            data.title = "AUTOMATION TITLE";
+            data.lines.Add(Line("FIRST 01 02"));
+            data.lines.Add(Line(string.Join("\n", Enumerable.Range(0, 100).Select(i => "ROW " + i + " 03 04 05 06"))));
+            data.lines.Add(Line("LAST 25 26"));
+            using (NarrativeAutoRunner.AcquireWalkthrough())
+            {
+                foreach (var stage in new[] { FirstDayLetterPanel.LetterStage.Envelope,
+                    FirstDayLetterPanel.LetterStage.Opening, FirstDayLetterPanel.LetterStage.Reading })
+                {
+                    DialogueHistoryService.ClearFormal();
+                    int done = 0, cancelled = 0, submitted = 0, completionFrame = -1;
+                    panel.SubmitDefault = () => { submitted++; return true; };
+                    panel.SubmitDraft = _ => { submitted++; return true; };
+                    panel.PlayLetter(new LetterReadingSnapshot(data),
+                        () => { done++; completionFrame = Time.frameCount; }, () => cancelled++);
+                    if (stage != FirstDayLetterPanel.LetterStage.Envelope)
+                    {
+                        yield return null;
+                        panel.OpenEnvelope();
+                        if (stage == FirstDayLetterPanel.LetterStage.Reading)
+                            yield return Wait(() => panel.Stage == stage);
+                    }
+                    Assert.That(panel.Stage, Is.EqualTo(stage));
+                    int frame = Time.frameCount;
+                    Assert.That(panel.AutomationReadToEnd(), Is.True, stage.ToString());
+                    Assert.That(panel.Stage, Is.EqualTo(FirstDayLetterPanel.LetterStage.Closing));
+                    Assert.That(panel.AutomationReadToEnd(), Is.False);
+                    Assert.That(done, Is.Zero, "Completion must retain the fresh-frame boundary.");
+                    var entries = DialogueHistoryService.Formal.Entries;
+                    Assert.That(entries.Count, Is.EqualTo(data.lines.Count + 1));
+                    Assert.That(entries[0].Text, Is.EqualTo(data.title));
+                    for (int i = 0; i < data.lines.Count; i++)
+                        Assert.That(entries[i + 1].Text.TrimEnd(), Is.EqualTo(data.lines[i].text), "History line " + i);
+                    yield return Wait(() => done == 1);
+                    yield return null;
+                    Assert.That(done, Is.EqualTo(1));
+                    Assert.That(completionFrame, Is.GreaterThan(frame));
+                    Assert.That(cancelled, Is.Zero);
+                    Assert.That(submitted, Is.Zero);
+                    Assert.That(panel.Stage, Is.EqualTo(FirstDayLetterPanel.LetterStage.Finished));
+                    Assert.That(panel.AutomationReadToEnd(), Is.False);
+                    Assert.That(PresentationPauseRegistry.OwnerCount, Is.EqualTo(pauseOwners));
+                    Assert.That(DialoguePanel.ExternalInputBlocked, Is.SameAs(previousInputBlocker));
+                }
+            }
+        }
+
+        [UnityTest]
+        public IEnumerator AutomationRespectsSuspensionAndPreviewHistoryIsolation()
+        {
+            var panel = Open();
+            var data = Data(new object()); data.lines.Add(Line("PREVIEW 01 02 03"));
+            int done = 0, historyCount = DialogueHistoryService.Formal.Entries.Count;
+            using (NarrativeAutoRunner.AcquireWalkthrough())
+            {
+                panel.PlayLetter(new LetterReadingSnapshot(data, true), () => done++);
+                panel.SetSuspended(true);
+                Assert.That(panel.AutomationReadToEnd(), Is.False);
+                Assert.That(panel.Stage, Is.EqualTo(FirstDayLetterPanel.LetterStage.Envelope));
+                panel.SetSuspended(false);
+                yield return null;
+                panel.OpenEnvelope();
+                panel.SetSuspended(true);
+                Assert.That(panel.AutomationReadToEnd(), Is.False);
+                Assert.That(panel.Stage, Is.EqualTo(FirstDayLetterPanel.LetterStage.Opening));
+                panel.SetSuspended(false);
+                yield return Wait(() => panel.Stage == FirstDayLetterPanel.LetterStage.Reading);
+                panel.SetSuspended(true);
+                Assert.That(panel.AutomationReadToEnd(), Is.False);
+                Assert.That(panel.Stage, Is.EqualTo(FirstDayLetterPanel.LetterStage.Reading));
+                Assert.That(done, Is.Zero);
+                panel.SetSuspended(false);
+                Assert.That(panel.AutomationReadToEnd(), Is.True);
+                panel.SetSuspended(true);
+                yield return null; yield return null;
+                Assert.That(done, Is.Zero, "Suspension also delays the pending normal commit.");
+                panel.SetSuspended(false);
+                yield return Wait(() => done == 1);
+                Assert.That(DialogueHistoryService.Formal.Entries.Count, Is.EqualTo(historyCount));
+            }
+        }
+
+        [UnityTest]
+        public IEnumerator StopAfterAutomationCancelsPendingCommitWithoutCompleting()
+        {
+            var panel = Open();
+            var data = Data(new object()); data.lines.Add(Line("01 02"));
+            int done = 0, cancelled = 0;
+            using (NarrativeAutoRunner.AcquireWalkthrough())
+            {
+                panel.PlayLetter(new LetterReadingSnapshot(data), () => done++, () => cancelled++);
+                Assert.That(panel.AutomationReadToEnd(), Is.True);
+                panel.Stop(); panel.Stop();
+                yield return null; yield return null;
+                Assert.That(done, Is.Zero);
+                Assert.That(cancelled, Is.EqualTo(1));
+                Assert.That(panel.AutomationReadToEnd(), Is.False);
+            }
+        }
+
+        [UnityTest]
         public IEnumerator StopDuringOpeningCancelsOnceAndKillsDelayedCompletionAndLeases()
         {
             var panel = Open();

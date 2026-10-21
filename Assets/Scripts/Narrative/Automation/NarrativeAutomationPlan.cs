@@ -50,6 +50,8 @@ namespace Spotlight.Narrative
             plan.TargetEndingId = endingId;
             if (endingId == "arrival.ending.if0")
                 plan.AddChoices(configuration, "MA70.10.06-S1-2.1", "MA70.10.06-S1-3.2");
+            else if (endingId == "neutral.ending.a")
+                plan.AddChoices(configuration, "church.1111.s1.choice.s1.1");
             else if (endingId.StartsWith("neutral.ending.", StringComparison.Ordinal))
             {
                 plan.AddChoices(configuration, "neutral.route.1118.s1.choice.investigation.b");

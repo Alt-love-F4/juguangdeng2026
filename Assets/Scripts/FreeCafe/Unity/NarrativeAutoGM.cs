@@ -11,6 +11,7 @@ namespace Spotlight.FreeCafe
         private FreeCafeGMPanel shell;
         private NarrativeAutoRunner runner;
         private NarrativeWalkthroughRunner walkthrough;
+        private NarrativeReachabilityRunner reachability;
         private bool waitForReview = true, scenarios = true;
         private void Awake()
         {
@@ -19,7 +20,27 @@ namespace Spotlight.FreeCafe
             if (runner == null) runner = gameObject.AddComponent<NarrativeAutoRunner>();
             walkthrough = GetComponent<NarrativeWalkthroughRunner>();
             if (walkthrough == null) walkthrough = gameObject.AddComponent<NarrativeWalkthroughRunner>();
+            reachability = GetComponent<NarrativeReachabilityRunner>() ?? gameObject.AddComponent<NarrativeReachabilityRunner>();
+            shell.RegisterCategory("结局可达性（Game现场）", BuildReachability);
             shell.RegisterCategory("剧情自动测试", Build);
+        }
+        private void BuildReachability(FreeCafeGMPanel panel)
+        {
+            panel.AddAction("高速全自动：15结局循环两轮", () =>
+            {
+                try { reachability.BeginFast(2); shell.SetVisible(false); }
+                catch (Exception error) { shell.SetExternalStatus(error.Message); }
+            }, "跳新手教程和开场拒绝结局；Game视图真实推进，自动制作/阅读和数值结算；自动重开，输出测试报告.md与每一步轨迹。", false);
+            panel.AddAction("严格：从新游戏逐结局验证", () => BeginReachability(false),
+                "仅主菜单可启动。Game视图真实推进；保留建角、教程、资金和属性。制作/教程需人工时明确暂停。每轮验收后重开，不保存正式进度。", false);
+            panel.AddAction("辅助：可视化快速筛查全部结局", () => BeginReachability(true),
+                "Game视图真实场景推进，但跳教程并辅助制作；仅作剧情连通性筛查，不冒充严格可达证明。", false);
+            panel.AddAction("停止可达性测试", () => reachability.Stop(), "保留Game现场及报告。", false);
+        }
+        private void BeginReachability(bool assisted)
+        {
+            try { reachability.Begin(assisted); shell.SetVisible(false); }
+            catch (Exception error) { shell.SetExternalStatus(error.Message); }
         }
         private void Build(FreeCafeGMPanel panel)
         {

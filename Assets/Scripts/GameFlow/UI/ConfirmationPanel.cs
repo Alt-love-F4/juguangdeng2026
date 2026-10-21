@@ -83,6 +83,13 @@ namespace Spotlight.GameFlow
             current = null;
         }
 
+        public bool AutomationAcceptDayFlow()
+        {
+            if (!NarrativeAutoRunner.IsWalkthroughActive || current == null
+                || (current.Title != "今天还有重要的事" && current.Title != "结束营业")) return false;
+            ActionOnce(true); return true;
+        }
+
         public void CancelFromFlow() => DismissFromFlow();
 
         public void DismissFromFlow()

@@ -165,7 +165,7 @@ namespace Spotlight.Narrative
             try
             {
                 Started?.Invoke(incoming);
-                if (!RequiresPresentation(incoming.Event, FindSetup(incoming.Event.setupKey)))
+                if (IsBulletinIncludedInNewspaper(incoming.Event) || !RequiresPresentation(incoming.Event, FindSetup(incoming.Event.setupKey)))
                 {
                     Action callback = completion;
                     completion = null;
@@ -177,6 +177,21 @@ namespace Spotlight.Narrative
                 routine = ui.StartCoroutine(Guarded(PlayEvent()));
             }
             catch (Exception error) { if (sessionVersion == version) AbortPresentation(error.Message); throw; }
+        }
+
+        // Keep bulletin transactions (public-news flags and save compatibility), but do not
+        // display their articles twice when a complete newspaper is scheduled for that issue.
+        // Standalone previews have no schedule and can still inspect individual bulletins.
+        private bool IsBulletinIncludedInNewspaper(NarrativeEventDefinition definition)
+        {
+            if (definition?.eventId?.StartsWith("news.bulletin.", StringComparison.Ordinal) != true || configuration == null)
+                return false;
+            return configuration.eventDates.Exists(bulletin => bulletin.eventId == definition.eventId
+                && configuration.eventDates.Exists(paper => paper.day == bulletin.day
+                    && paper.timeSlot == bulletin.timeSlot && paper.repeatRule == bulletin.repeatRule
+                    && paper.eventId.StartsWith("newspaper.", StringComparison.Ordinal)
+                    && configuration.events.Exists(entry => entry.eventId == paper.eventId
+                        && configuration.presentations.readingPages.Exists(page => page.presentationKey == entry.presentationKey))));
         }
 
         private IEnumerator PlayEvent()

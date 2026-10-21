@@ -37,6 +37,17 @@ namespace Spotlight.FreeCafe
         public string Status { get; private set; } = "未开始";
         public string TargetEnding { get; private set; }
         public string OutputPath { get; private set; }
+        public string Outcome { get; private set; }
+        public string ActualEnding { get; private set; }
+        public bool AssistCoffee { get; set; }
+        public bool UsedAssistance { get; private set; }
+        public bool Unattended { get; set; }
+        private StreamWriter readableLog;
+        private float lastSnapshot;
+        public string ReadablePath => string.IsNullOrEmpty(OutputPath) ? null : Path.ChangeExtension(OutputPath, ".md");
+        public string ReportDirectory { get; set; }
+        public int MaximumDay { get; set; } = 60;
+        public int CurrentDay => lastDay;
         public IReadOnlyList<Entry> History => entries.AsReadOnly();
         private readonly List<Entry> entries = new List<Entry>();
         private readonly HashSet<string> observedChoices = new HashSet<string>();
@@ -66,6 +77,7 @@ namespace Spotlight.FreeCafe
             var config = NarrativeRuntime.Instance?.Configuration ?? LubanNarrativeLoader.Load();
             plan = string.IsNullOrEmpty(targetEnding) ? NarrativeAutomationPlan.ForRoute(config, null) : NarrativeAutomationPlan.ForEnding(config, targetEnding);
             saveLease = NarrativeAutoRunner.AcquireWalkthrough();
+            Outcome = null; ActualEnding = null; UsedAssistance = false;
             TargetEnding = targetEnding;
             bool fromMenu = flow.SessionState == GameSessionState.Menu;
             bool skip = SkipOpeningAndTutorials && targetEnding != "arrival.ending.if0";
@@ -77,11 +89,13 @@ namespace Spotlight.FreeCafe
             lastScene = lastArea = lastLine = lastTodo = manualKey = lastProduction = null; lastDay = 0; lastServed = -1;
             Running = true; Paused = false; singleStep = false;
             lastProgress = nextStep = Time.unscaledTime;
-            OutputPath = Path.Combine(Application.persistentDataPath, "NarrativeWalkthroughs", DateTime.UtcNow.ToString("yyyyMMdd-HHmmss-fff") + ".json");
+            OutputPath = Path.Combine(ReportDirectory ?? Path.Combine(Application.persistentDataPath, "NarrativeWalkthroughs"), DateTime.UtcNow.ToString("yyyyMMdd-HHmmss-fff") + ".json");
             try
             {
                 Directory.CreateDirectory(Path.GetDirectoryName(OutputPath));
-                BindRuntime();
+                readableLog = new StreamWriter(ReadablePath, false, new System.Text.UTF8Encoding(false)) { AutoFlush = true };
+                readableLog.WriteLine("# 前台结局测试轨迹\n\n目标：" + targetEnding + "\n\n模式：" + startupMode + "；自动操作=" + Unattended + "\n\n咖啡辅助跳过操作与补料，真实结算评分/收入/声望/剧情回执；不修改历史标记。\n");
+                if (!fromMenu) BindRuntime();
                 Record("开始", "跟随真实待办；保留原始属性、资金、制作、日期与剧情门禁。测试期间禁止保存。停止后保留现场供检查。");
                 if (usedStartupBypass) Record("快速测试", fromMenu
                     ? "跳过开场/建角信件/新手教程；默认角色直接进入游戏。"
@@ -127,7 +141,7 @@ namespace Spotlight.FreeCafe
         private void OnEventFailed(string id, string reason)
         {
             // GameOver disposes the formal presenter after a successfully committed root.
-            if (observedController?.IsEnded == true) return;
+            if (observedController?.IsEnded == true || flow?.SessionState != GameSessionState.Playing) return;
             RequireManual("event:" + id, "剧情未完成：" + id + "；" + reason);
         }
         private void Record(string kind, string text)
@@ -140,12 +154,13 @@ namespace Spotlight.FreeCafe
                     ? cafe.World.Area(cafe.World.State.currentArea)?.label : runtime?.Controller?.Location,
                 kind = kind, text = text });
             Status = text; lastProgress = Time.unscaledTime; scroll.y = float.MaxValue;
-            try { Save("running", ""); }
+            readableLog?.WriteLine("- D" + entries[entries.Count - 1].day + " | " + entries[entries.Count - 1].scene + " / " + entries[entries.Count - 1].location + " | **" + kind + "**：" + text.Replace("\r", "").Replace("\n", " / "));
+            try { if (Time.unscaledTime - lastSnapshot > 2f) { Save("running", ""); lastSnapshot = Time.unscaledTime; } }
             catch (IOException error) { Status = "报告写入失败：" + error.Message; Paused = true; }
         }
         private void Observe()
         {
-            BindRuntime();
+            if (flow.SessionState == GameSessionState.Playing) BindRuntime();
             string scene = SceneManager.GetActiveScene().name + (flow.IsMapOpen ? " / 城区地图" : "");
             if (scene != lastScene) { lastScene = scene; Record("切换场景", scene); }
             int day = FindFirstObjectByType<DayFlowController>()?.CurrentDay ?? 0;
@@ -192,13 +207,15 @@ namespace Spotlight.FreeCafe
                 {
                     string actual = runtime.Controller.SelectedEndingId;
                     Record("到达结局", actual + (string.IsNullOrEmpty(TargetEnding) || actual == TargetEnding ? "" : "（与目标不同）"));
+                    ActualEnding = actual;
                     Finish("ending", actual); return;
                 }
                 if (flow.SessionState == GameSessionState.Menu && Time.unscaledTime - lastProgress > 5)
                 { Finish("cancelled", "已返回主菜单"); return; }
+                if (lastDay > MaximumDay) { Finish("unproven", "超过本轮日期上限，未证明目标可达；不据此认定不可达。"); return; }
                 bool fastPresentation = FastDialogue && DialoguePanel.Active?.IsPlaying == true;
                 if ((Paused && !singleStep) || !fastPresentation && Time.unscaledTime < nextStep) return;
-                nextStep = Time.unscaledTime + Mathf.Clamp(StepSeconds, .3f, 10f);
+                nextStep = Time.unscaledTime + Mathf.Clamp(StepSeconds, Unattended ? .02f : .3f, 10f);
                 singleStep = false;
                 if (Time.timeScale <= 0f || FreeCafeGMPanel.Instance?.IsVisible == true) return;
                 // New-game loading awaits the real prologue's completion callback.
@@ -218,14 +235,15 @@ namespace Spotlight.FreeCafe
                     else if (days != null && days.DebugSkipTutorialToCafe(out string reason))
                     { pendingTutorialSkip = false; Record("跳过教程", reason); return; }
                 }
+                if (AssistCoffee && TryAssistedCoffee()) return;
                 if (AdvancePresentation())
                 {
-                    if (!Paused && Time.unscaledTime - lastProgress > 60f)
+                    if (!Paused && Time.unscaledTime - lastProgress > (Unattended ? 15f : 60f))
                         RequireManual("presentation-stalled", "演出超过60秒没有进展，请检查当前阅读、输入或演出条件，再继续。");
                     return;
                 }
                 FollowTodo();
-                if (!Paused && Time.unscaledTime - lastProgress > 45f)
+                if (!Paused && Time.unscaledTime - lastProgress > (Unattended ? 15f : 45f))
                     RequireManual("stalled", "45秒没有实际进展；请检查当前待办或手动完成当前操作，再继续。");
             }
             catch (Exception error) { Record("异常", error.Message); Finish("error", error.ToString()); Debug.LogException(error, this); }
@@ -233,6 +251,9 @@ namespace Spotlight.FreeCafe
 
         private bool AdvancePresentation()
         {
+            var confirmation = UIKit.GetPanel<ConfirmationPanel>();
+            if (Unattended && confirmation != null && confirmation.gameObject.activeInHierarchy)
+            { if (confirmation.AutomationAcceptDayFlow()) Record("确认", "确认日程弹窗，走原正式回调。"); return true; }
             var dialogue = DialoguePanel.Active;
             if (dialogue != null && dialogue.IsPlaying)
             {
@@ -247,6 +268,13 @@ namespace Spotlight.FreeCafe
                 if (!AutoChoose) { RequireManual("choice", "请选择对话选项；选择后点击继续跟随。"); return true; }
                 var options = dialogue.DisplayedOptions.Where(o => o.Enabled).ToArray();
                 var definitions = runtime?.Configuration.choices.Where(c => options.Any(o => o.OptionId == c.choiceId)).ToArray();
+                if (definitions != null && definitions.Length > 0
+                    && plan.ChoiceOverrides.TryGetValue(definitions[0].groupKey, out string expected)
+                    && !options.Any(o => o.OptionId == expected))
+                {
+                    RequireManual("planned-choice-locked:" + expected, "目标策略选项被锁定或缺失：" + expected + "。未自动改选其他路线；可人工检查后继续。");
+                    return true;
+                }
                 var scores = definitions == null ? null : plan.ScoreChoices(runtime.Configuration, runtime.Controller, definitions);
                 string id = scores?.OrderByDescending(s => s.Score).ThenBy(s => s.ChoiceId, StringComparer.Ordinal).FirstOrDefault()?.ChoiceId;
                 var selected = options.FirstOrDefault(o => o.OptionId == id) ?? options.FirstOrDefault();
@@ -265,7 +293,8 @@ namespace Spotlight.FreeCafe
                 if (letter.Stage == FirstDayLetterPanel.LetterStage.Envelope) letter.OpenEnvelope();
                 else if (letter.IsGenericLetter)
                 {
-                    if (letter.CanFinishLetter) letter.FinishReadingLetter();
+                    if (Unattended) letter.AutomationReadToEnd();
+                    else if (letter.CanFinishLetter) letter.FinishReadingLetter();
                     else if (letter.Stage == FirstDayLetterPanel.LetterStage.Reading)
                         RequireManual("read-letter", "请向下阅读信件，读完后继续跟随。");
                 }
@@ -282,7 +311,8 @@ namespace Spotlight.FreeCafe
             { panel.Continue(); return true; }
             var mapGuide = FindFirstObjectByType<MapUsageTutorial>();
             if (mapGuide?.IsRunning == true)
-            { RequireManual("map-guide", "请跟随地图教程选择地点并完成教学，然后继续跟随待办。"); return true; }
+            { if (Unattended) { mapGuide.AutomationSkipTutorial(); Record("跳过教学", "跳过地图说明，不改剧情标记与行动点。"); }
+                else RequireManual("map-guide", "请跟随地图教程选择地点并完成教学，然后继续跟随待办。"); return true; }
             return false;
         }
 
@@ -290,6 +320,8 @@ namespace Spotlight.FreeCafe
         {
             var hud = GameplayHudPanel.Instance;
             var todo = hud?.Tasks?.CurrentGuidance;
+            if (Unattended && todo?.optional == true)
+                todo = hud.Tasks.Items.FirstOrDefault(i => !i.completed && i.available && !i.optional);
             if (todo == null) return;
             if (runtime?.Controller?.IsBusy == true || runtime?.Actions?.IsExecuting == true
                 || GameplayHudPanel.Instance.IsDetailsOpen) return;
@@ -319,7 +351,21 @@ namespace Spotlight.FreeCafe
             }
             if (todo.id == "guide.map.cafe" || todo.id == "guide.travel.cafe")
             { if (hud.TryNavigateToCafe()) Record("前往咖啡馆", "通过真实地图入口进入咖啡馆。"); return; }
-            if (todo.id == "guide.cafe.wait") return; // Let the real business clock spawn customers.
+            if (todo.id == "guide.cafe.wait")
+            {
+                if (Unattended && cafe != null)
+                {
+                    if (cafe.World.State.todayArrivals < cafe.World.State.todayCustomerBudget)
+                    { cafe.World.Tick(cafe.World.Catalog.customerInterval); Record("加速候客", "推进经营时钟，保留原始耐心与客流结算。"); }
+                    else
+                    {
+                        if (cafe.World.State.currentArea != AreaId.Cafe) cafe.Enter(AreaId.Cafe);
+                        cafe.RequestBusinessEnd();
+                        if (!cafe.World.State.open) Record("打烊", "完成当日客流，通过正式结算入口打烊。");
+                    }
+                }
+                return;
+            }
             if (todo.id == "guide.cafe.open" || todo.id == "guide.cafe.close")
             {
                 if (cafe == null) { hud.TryNavigateToCafe(); return; }
@@ -341,8 +387,34 @@ namespace Spotlight.FreeCafe
             if (!string.IsNullOrEmpty(todo.navigationLabel)) hud.TryNavigateToTodo(todo.id);
             else RequireManual(todo.id, todo.currentTask);
         }
+        private bool TryAssistedCoffee()
+        {
+            var cafe = FindFirstObjectByType<FreeCafeRuntime>();
+            if (cafe?.World == null || cafe.World.HasTutorialCustomer || !cafe.World.ProductionEnabled) return false;
+            var world = cafe.World;
+            if (world.State.requests.Count == 0 || !world.HasNarrativeService && runtime?.Controller?.IsBusy == true) return false;
+            if (flow.IsMapOpen) return false;
+            if (world.State.currentArea != AreaId.Counter)
+            {
+                if (cafe.CanEnterArea(AreaId.Counter)) { cafe.Enter(AreaId.Counter); Record("辅助导航", "进入真实制作台；下一步辅助交付。"); }
+                return true;
+            }
+            UsedAssistance = true;
+            world.AutomationUnlockAndRefill();
+            int beforeMoney = world.State.money, beforeReputation = world.State.reputation, beforeServed = world.State.served;
+            var result = world.AutomationServePendingOrders(2);
+            Record("辅助制作", "交付 " + result.Delivered + " 杯；资金 " + beforeMoney + "→" + world.State.money
+                + "；声望 " + beforeReputation + "→" + world.State.reputation + "；服务数 " + beforeServed + "→" + world.State.served
+                + "；完成经过真实交付回执（制作与补料由工具代办）。");
+            if (!string.IsNullOrEmpty(result.StopReason)) RequireManual("coffee", result.StopReason);
+            return true;
+        }
+
+        public void MarkUnproven(string reason) { if (Running) Finish("unproven", reason); }
+
         private void RequireManual(string key, string reason)
         {
+            if (Unattended) { Record("自动测试阻塞", key + "：" + reason); Finish("blocked", key + "：" + reason); return; }
             if (!Paused || manualKey != key) { manualKey = key; Record("等待操作", reason); }
             Paused = true;
         }
@@ -351,6 +423,7 @@ namespace Spotlight.FreeCafe
         public void Stop() { if (Running) Finish("stopped", "用户停止，保留当前游戏现场。"); }
         private void Finish(string outcome, string reason)
         {
+            Outcome = outcome;
             Running = false; Paused = false;
             saveLease?.Dispose(); saveLease = null;
             if (observedController != null)
@@ -362,13 +435,15 @@ namespace Spotlight.FreeCafe
             if (observedPresenter != null) observedPresenter.SkipDialogueText = previousSkipText;
             observedPresenter = null;
             observedController = null; runtime = null; Status = reason;
-            try { Save(outcome, reason); } catch (IOException error) { Debug.LogWarning("现场报告保存失败：" + error.Message, this); }
+            try { Save(outcome, reason); readableLog?.WriteLine("\n## 本轮结果\n\n" + outcome + "：" + reason); }
+            catch (IOException error) { Debug.LogWarning("现场报告保存失败：" + error.Message, this); }
+            finally { readableLog?.Dispose(); readableLog = null; }
         }
         private void Save(string outcome, string reason)
         {
             if (string.IsNullOrEmpty(OutputPath)) return;
             File.WriteAllText(OutputPath, JsonUtility.ToJson(new Report { target = TargetEnding, outcome = outcome, reason = reason, entries = entries,
-                assisted = usedStartupBypass, startup = startupMode }, true));
+                assisted = usedStartupBypass || UsedAssistance, startup = startupMode }, true));
         }
         private void OnDestroy()
         {
@@ -397,6 +472,8 @@ namespace Spotlight.FreeCafe
             if (!collapsed)
             {
                 GUILayout.Label((Running ? Paused ? "已暂停 / 可手动接管" : "正在跟随" : "已结束") + " · " + lastScene + " · " + lastArea, textStyle);
+                GUILayout.Label("目标：" + (TargetEnding ?? "自由跟随") + " · 第" + lastDay + "天", textStyle);
+                GUILayout.Label(UsedAssistance || usedStartupBypass ? "辅助轨迹：不能证明严格开局可达" : "严格轨迹：不注入属性/资金/剧情标记", textStyle);
                 GUILayout.Label(Status, textStyle);
                 if (Running)
                 {

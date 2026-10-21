@@ -194,15 +194,22 @@ namespace Spotlight.GameFlow.Tests
             preview = new NarrativeAtlasPreview(config);
             preview.Play(Node(config, newspaper.eventId));
             Assert.That(DialoguePanel.IsAnyPlaying, Is.False);
-            yield return WaitFor(() => DialoguePanel.Active?.IsPlaying == true, "Newspaper DialoguePanel");
-            var reading = DialoguePanel.Active;
+            yield return WaitFor(() => UIKit.GetPanel<NoticePanel>()?.IsPlaying == true, "Complete newspaper NoticePanel");
+            var reading = UIKit.GetPanel<NoticePanel>();
+            Assert.That(DialoguePanel.IsAnyPlaying, Is.False, "Newspapers must not open the old dialogue reader.");
             Assert.That(reading.Tag, Is.EqualTo(NarrativeAtlasPreview.PanelTag));
+            var page = config.presentations.readingPages.Single(p => p.presentationKey == newspaper.presentationKey);
+            string title = config.texts.Single(t => t.key == page.titleKey).content;
+            var lines = config.presentations.readingLines.Where(l => l.pageId == page.pageId).OrderBy(l => l.seq)
+                .Select(l => config.texts.Single(t => t.key == l.textKey).content).ToList();
+            if (lines[0].Trim() == title.Trim()) lines.RemoveAt(0);
+            Assert.That(reading.transform.Find("NewspaperLayout/DynamicContent/ArticleSurface")
+                .GetComponent<UnityEngine.UI.ScrollRect>().content.GetComponent<TMPro.TMP_Text>().text,
+                Is.EqualTo(string.Join("\n", lines)), "All articles, including newspaper-only stories, must remain.");
             DialoguePanel.ExternalInputBlocked = () => true;
-            int line = reading.LineIndex;
-            reading.Advance(); reading.Cancel();
+            reading.Confirm(); reading.Cancel();
             yield return null;
             Assert.That(reading.IsPlaying, Is.True);
-            Assert.That(reading.LineIndex, Is.EqualTo(line));
             DialoguePanel.ExternalInputBlocked = () => false;
             reading.Cancel();
             yield return FinishAndRelease();

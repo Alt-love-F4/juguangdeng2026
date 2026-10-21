@@ -6,7 +6,7 @@ using YokiFrame;
 
 namespace Spotlight.GameFlow
 {
-    /// <summary>Bridges NCS reading events to the shared DialoguePanel presentation system.</summary>
+    /// <summary>Shows complete newspapers in NoticePanel; other reading events retain DialoguePanel.</summary>
     public static class ReadingEventPlayback
     {
         public static bool Play(NarrativeEventRequest request, string title, IReadOnlyList<string> pages,
@@ -18,6 +18,15 @@ namespace Spotlight.GameFlow
             string panelTag, PanelCachePolicy cachePolicy, bool isPreview = false)
         {
             if (pages == null || pages.Count == 0) return false;
+            if (request.Event?.eventId?.StartsWith("newspaper.", StringComparison.Ordinal) == true)
+                return NarrativeNoticeEventPlayback.Play(request, new NarrativeNoticePresentationData
+                {
+                    presentationKey = request.Event.presentationKey,
+                    title = title,
+                    body = string.Join("\n\n", pages),
+                    imageKey = imageResourcePath
+                }, completed, panelTag, cachePolicy);
+
             bool notified = false;
             DialoguePanel panel = null;
             void Detach()

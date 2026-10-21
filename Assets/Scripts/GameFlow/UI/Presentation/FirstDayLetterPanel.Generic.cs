@@ -397,6 +397,66 @@ namespace Spotlight.GameFlow
             }
         }
 
+        /// <summary>
+        /// Walkthrough-only UI completion. Returns true when the normal close/commit chain starts;
+        /// its completion callback still runs on a fresh frame, never synchronously here.
+        /// Suspended, reveal-only, non-generic and already-closing letters are not advanced.
+        /// </summary>
+        public bool AutomationReadToEnd()
+        {
+            if (!NarrativeAutoRunner.IsWalkthroughActive || !genericLetterMode || genericLetter == null
+                || genericLetter.RevealOnly || genericSuspended || !IsPlaying
+                || (Stage != LetterStage.Envelope && Stage != LetterStage.Opening && Stage != LetterStage.Reading))
+                return false;
+
+            // Only automation ignores the physical-input debounce. Keep the real opening callback:
+            // it initializes layout, visible-character tracking and the formal history playback.
+            if (Stage == LetterStage.Envelope)
+            {
+                genericInputFrame = -1;
+                OpenGenericEnvelope();
+            }
+            if (Stage == LetterStage.Opening) transition?.Complete(true);
+            if (Stage != LetterStage.Reading || !genericLayoutReady) return false;
+
+            if (transform is RectTransform root && root.rect.size != genericRootSize)
+                FitGenericPaperToSprite();
+            letterScroll.StopMovement();
+            Canvas.ForceUpdateCanvases();
+            LayoutRebuilder.ForceRebuildLayoutImmediate(letterScroll.content);
+            letterBody.ForceMeshUpdate();
+            genericViewportSize = letterScroll.viewport.rect.size;
+            float height = genericViewportSize.y;
+            if (height <= 0) return false;
+
+            // Overlap pages so a glyph straddling a viewport boundary is fully visible on a
+            // subsequent page. Never mark characters seen or inject history without scrolling.
+            float glyphHeight = 0;
+            TMP_TextInfo info = letterBody.textInfo;
+            for (int i = 0; i < info.characterCount; i++)
+            {
+                TMP_CharacterInfo c = info.characterInfo[i];
+                Vector3 span = letterScroll.viewport.InverseTransformVector(
+                    letterBody.transform.TransformVector(Vector3.up * (c.ascender - c.descender)));
+                glyphHeight = Mathf.Max(glyphHeight, Mathf.Abs(span.y));
+            }
+            float step = Mathf.Min(height * .5f, height - glyphHeight);
+            if (step <= 0) return false; // An unreadable viewport must not silently complete a letter.
+            float distance = Mathf.Max(0, letterScroll.content.rect.height - height);
+            int pages = Mathf.CeilToInt(distance / step);
+            for (int page = 0; page <= pages; page++)
+            {
+                letterScroll.verticalNormalizedPosition = pages == 0 ? 1f : 1f - page / (float)pages;
+                RefreshGenericReading();
+            }
+
+            genericInputFrame = -1;
+            FinishReadingLetter();
+            if (Stage != LetterStage.Closing) return false;
+            transition?.Complete(true);
+            return true;
+        }
+
         public void FinishReadingLetter()
         {
             if (!CanFinishLetter || genericInputFrame == Time.frameCount) return;

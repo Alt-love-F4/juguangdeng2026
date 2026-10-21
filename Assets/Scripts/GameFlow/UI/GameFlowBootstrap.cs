@@ -1095,6 +1095,15 @@ namespace Spotlight.GameFlow
             StartCoroutine(SaveRoutine(slot, completed));
         }
 
+        /// <summary>Visible test runner only; never saves or overwrites a slot.</summary>
+        public bool ReturnToTitleForReachabilityTest()
+        {
+            if (!NarrativeAutoRunner.IsWalkthroughActive || SessionState == GameSessionState.Loading) return false;
+            Time.timeScale = 1f;
+            LoadThen(OpenMainMenu, config.MainMenuScene);
+            return true;
+        }
+
         public void ConfirmReturnToTitle()
         {
             if (SessionState == GameSessionState.GameOver) { ReturnFromGameOver(); return; }
